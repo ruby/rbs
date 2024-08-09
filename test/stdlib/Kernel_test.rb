@@ -71,7 +71,6 @@ class KernelSingletonTest < Test::Unit::TestCase
                      Kernel, :Integer, :hello, exception: false
   end
 
-
   def test_String
     with_string do |string|
       assert_send_type "(::string) -> String",
@@ -110,913 +109,413 @@ class KernelSingletonTest < Test::Unit::TestCase
   end
 end
 
-class KernelTest < StdlibTest
-  target Kernel
-  discard_output
+class KernelInstanceTest < Test::Unit::TestCase
+  include TestHelper
 
-  def test_caller
-    caller(1, 2)
-    caller(1)
-    caller(1..2)
-    caller
+  testing '::Kernel'
+
+  class JustKernel < BlankSlate
+    include ::Kernel
   end
 
-  def test_caller_locations
-    caller_locations(1, 2)
-    caller_locations(1)
-    caller_locations(1..2)
-    caller_locations
-  end
+  OBJ = JustKernel.new
 
-  def test_catch_throw
-    catch do |tag|
-      throw tag
-    end
+  def test_op_nmatch
+    obj = JustKernel.new
+    def obj.=~(x) = /a/ =~ x rescue nil
 
-    catch("tag") do |tag|
-      throw tag
+    with_untyped.and "a" do |other|
+      assert_send_type  '(untyped) -> bool',
+                        obj, :!~, other
     end
   end
 
-  def test_class
-    Object.new.class
+  def test_op_cmp
+    obj = JustKernel.new.__with_object_methods(:==) # needed because <=> has an implicit dependency on it.
+
+    with_untyped.and obj do |other|
+      assert_send_type  '(untyped) -> 0?',
+                        obj, :<=>, other
+    end
   end
 
-  def test_eval
-    eval "p"
-    eval "p", binding, "fname", 1
-  end
+  def test_op_eqq
+    obj = JustKernel.new.__with_object_methods(:==) # needed because === has an implicit dependency on it.
 
-  def test_block_given?
-    block_given?
-  end
-
-  def test_local_variables
-    _ = x = 1
-    local_variables
-  end
-
-  def test_srand
-    srand
-    srand(10)
-    srand(10.5)
-  end
-
-  def test_not_tilde
-    return if RUBY_VERSION >= "3.2.0"
-
-    Object.new !~ Object.new
-  end
-
-  def test_spaceship
-    Object.new <=> Object.new
-  end
-
-  def test_eqeqeq
-    Object.new === Object.new
+    with_untyped.and obj do |other|
+      assert_send_type  '(untyped) -> bool',
+                        obj, :===, other
+    end
   end
 
   def test_clone
-    Object.new.clone
-    Object.new.clone(freeze: false)
+    assert_send_type  '() -> KernelInstanceTest::JustKernel',
+                      OBJ, :clone
+  end
+
+  def test_define_singleton_method
+    obj = JustKernel.new
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned) { (?) -> untyped } -> Symbol',
+                        obj, :define_singleton_method, name do 1r end
+
+      obj.singleton_class.undef_method(:foo)
+    end
   end
 
   def test_display
-    1.display
-    1.display($stderr)
+    old_stdout = $stdout
+    $stdout = File.open(File::NULL, 'w')
 
-    stdout = STDOUT.dup
-    STDOUT.reopen(IO::NULL)
-    Object.new.display()
-    Object.new.display(STDOUT)
-    Object.new.display(StringIO.new)
+    assert_send_type  '() -> nil',
+                      OBJ, :display
+
+    writer = BlankSlate.new
+    def writer.write(*x) = nil
+    assert_send_type  '(_Writer) -> nil',
+                      OBJ, :display, writer
   ensure
-    STDOUT.reopen(stdout)
+    $stdout.close rescue nil
+    old_stdout = $stdout
   end
 
   def test_dup
-    1.dup
-  end
-
-  def each(*args)
-
+    assert_send_type  '() -> KernelInstanceTest::JustKernel',
+                      OBJ, :dup
   end
 
   def test_enum_for
-    enum_for :then
+    test_to_enum(method: :enum_for)
+  end
 
-    enum_for :each, 1
-    enum_for(:each, 1) { 2 }
+  def test_to_enum(method: :to_enum)
+    obj = JustKernel.new
+    def obj.each(a=3, *b, c: 5, **d, &e) = [1,2,3].each(&e)
 
-    obj = Object.new
+    assert_send_type  '() -> Enumerator[untyped, untyped]',
+                      obj, method
+    assert_send_type  '() { () -> Integer } -> Enumerator[untyped, untyped]',
+                      obj, method do 3 end
 
-    obj.enum_for(:instance_exec)
-    obj.enum_for(:instance_exec, 1,2,3)
-    obj.enum_for(:instance_exec, 1,2,3) { |x,y,z| x + y + z }
-
-    obj.to_enum(:instance_exec)
-    obj.to_enum(:instance_exec, 1, 2, 3)
-    obj.to_enum(:instance_exec, 1, 2, 3) { |x, y, z| x + y + z }
+    with_interned :each do |name|
+      assert_send_type  '(interned, *untyped, **untyped) -> Enumerator[untyped, untyped]',
+                        obj, method, name, 1, 2, c: 3, d: 4
+      assert_send_type  '(interned, *untyped, **untyped) { (?) -> Integer } -> Enumerator[untyped, untyped]',
+                        obj, method, name, 1, 2, c: 3, d: 4 do 3 end
+    end
   end
 
   def test_eql?
-    Object.new.eql? 1
+    with_untyped.and OBJ do |other|
+      assert_send_type  '(untyped) -> bool',
+                        OBJ, :eql?, other
+    end
   end
 
   def test_extend
-    Object.new.extend Module.new
-    Object.new.extend Module.new, Module.new
-  end
+    obj = JustKernel.new
 
-  def test_fork
-    if Process.respond_to?(:fork)
-      exit! unless fork
-      fork { exit! }
-    end
+    assert_send_type  '(Module) -> KernelInstanceTest::JustKernel',
+                      obj, :extend, Module.new
+
+    assert_send_type  '(Module, *Module) -> KernelInstanceTest::JustKernel',
+                      obj, :extend, Module.new, Module.new, Module.new
   end
 
   def test_freeze
-    Object.new.freeze
+    assert_send_type  '() -> KernelInstanceTest::JustKernel',
+                      JustKernel.new, :freeze
   end
 
   def test_frozen?
-    Object.new.frozen?
+    assert_send_type  '() -> bool',
+                      JustKernel.new, :frozen?
+
+    assert_send_type  '() -> bool',
+                      JustKernel.new.freeze, :frozen?
   end
 
   def test_hash
-    Object.new.hash
-  end
-
-  def test_initialize_copy
-    Object.new.instance_eval do
-      initialize_copy(Object.new)
-    end
+    assert_send_type  '() -> Integer',
+                      OBJ, :hash
   end
 
   def test_inspect
-    Object.new.inspect
+    assert_send_type  '() -> String',
+                      OBJ, :inspect
   end
 
   def test_instance_of?
-    Object.new.instance_of? String
+    with Class, Kernel, BasicObject, JustKernel, Integer, Enumerable do |class_or_module|
+      assert_send_type  '(Class | Module) -> bool',
+                        OBJ, :instance_of?, class_or_module
+    end
   end
 
   def test_instance_variable_defined?
-    Object.new.instance_variable_defined?('@foo')
-    Object.new.instance_variable_defined?(:@bar)
+    obj = JustKernel.new
+
+    obj.instance_variable_set(:@s, 3)
+    with_interned :@s do |variable|
+      assert_send_type  '(interned) -> bool',
+                        obj, :instance_variable_defined?, variable
+    end
+
+    with_interned :@p do |variable|
+      assert_send_type  '(interned) -> bool',
+                        obj, :instance_variable_defined?, variable
+    end
   end
 
   def test_instance_variable_get
-    Object.new.instance_variable_get('@foo')
-    Object.new.instance_variable_get(:@bar)
+    obj = JustKernel.new
+
+    obj.instance_variable_set(:@s, 3)
+    with_interned :@s do |variable|
+      assert_send_type  '(interned) -> untyped',
+                        obj, :instance_variable_get, variable
+    end
   end
 
   def test_instance_variable_set
-    Object.new.instance_variable_set('@foo', 1)
-    Object.new.instance_variable_set(:@bar, 2)
+    obj = JustKernel.new
+
+    with_untyped do |value|
+      with_interned :@s do |variable|
+        assert_send_type  '[T] (interned, T) -> T',
+                          obj, :instance_variable_set, variable, value
+      end
+    end
   end
 
   def test_instance_variables
-    obj = Object.new
-    obj.instance_eval do
-      @foo = 1
-    end
-    obj.instance_variables
+    obj = JustKernel.new
+
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :instance_variables
+
+    obj.instance_variable_set(:@s, 3)
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :instance_variables
   end
 
-  def test_is_a?
-    Object.new.is_a? String
-    Object.new.kind_of? Enumerable
+  def test_is_a?(method: :is_a?)
+    with Class, Kernel, BasicObject, JustKernel, Integer, Enumerable do |class_or_module|
+      assert_send_type  '(Class | Module) -> bool',
+                        OBJ, method, class_or_module
+    end
+  end
+
+  def test_kind_of?
+    test_is_a?(method: :kind_of?)
+  end
+
+  def test_itself
+    assert_send_type  '() -> KernelInstanceTest::JustKernel',
+                      OBJ, :itself
   end
 
   def test_method
-    Object.new.method(:tap)
-    Object.new.method('yield_self')
+    with_interned :method do |name|
+      assert_send_type  '(interned) -> Method',
+                        OBJ, :method, name
+    end
   end
 
   def test_methods
-    Object.new.methods
-    Object.new.methods true
-    Object.new.methods false
+    obj = JustKernel.new
+    class << obj
+      private def foo = 34
+      protected def bar = 34
+      public def baz = 34
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :methods
+
+    with_boolish do |boolish|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        obj, :methods, boolish
+    end
   end
 
   def test_nil?
-    Object.new.nil?
+    assert_send_type  '() -> false',
+                      OBJ, :nil?
+  end
+
+  def test_object_id
+    assert_send_type  '() -> Integer',
+                      OBJ, :object_id
   end
 
   def test_private_methods
-    Object.new.private_methods
-    Object.new.private_methods true
-    Object.new.private_methods false
+    obj = JustKernel.new
+    class << obj
+      private def foo = 34
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :private_methods
+
+    with_boolish do |boolish|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        obj, :private_methods, boolish
+    end
   end
 
   def test_protected_methods
-    Object.new.protected_methods
-    Object.new.protected_methods true
-    Object.new.protected_methods false
+    obj = JustKernel.new
+    class << obj
+      protected def foo = 34
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :protected_methods
+
+    with_boolish do |boolish|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        obj, :protected_methods, boolish
+    end
   end
 
   def test_public_method
-    Object.new.public_method(:tap)
-    Object.new.public_method('yield_self')
+    with_interned :public_method do |name|
+      assert_send_type  '(interned) -> Method',
+                        OBJ, :public_method, name
+    end
   end
 
   def test_public_methods
-    Object.new.public_methods
-    Object.new.public_methods true
-    Object.new.public_methods false
+    assert_send_type  '() -> Array[Symbol]',
+                      OBJ, :public_methods
+
+    with_boolish do |boolish|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        OBJ, :public_methods, boolish
+    end
   end
 
   def test_public_send
-    Object.new.public_send(:inspect)
-    Object.new.public_send('inspect')
-    Object.new.public_send(:public_send, :inspect)
-    Object.new.public_send(:tap) { 1 }
-    Object.new.public_send(:tap) { |this| this }
+    obj = JustKernel.new
+    def obj.foo(...) = nil
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned, *untyped, **untyped) -> untyped',
+                        obj, :public_send, name, 1, a: 2r
+      assert_send_type  '(interned, *untyped, **untyped) { (?) -> untyped } -> untyped',
+                        obj, :public_send, name, 1, a: 2r do 3i end
+    end
   end
 
   def test_remove_instance_variable
-    obj = Object.new
-    obj.instance_eval do
-      @foo = 1
-      @bar = 2
+    obj = JustKernel.new
+
+    with_interned :@s do |variable|
+      obj.instance_variable_set(:@s, 3)
+
+      assert_send_type  '(interned) -> untyped',
+                        obj, :remove_instance_variable, variable
+    end
+  end
+
+  def test_respond_to?
+    with_interned :respond_to? do |name|
+      assert_send_type  '(interned) -> bool',
+                        OBJ, :respond_to?, name
     end
 
-    obj.remove_instance_variable(:@foo)
-    obj.remove_instance_variable('@bar')
+    with_interned :__rbs_method_doesnt_exist do |name|
+      assert_send_type  '(interned) -> bool',
+                        OBJ, :respond_to?, name
+    end
   end
 
   def test_send
-    Object.new.send(:inspect)
-    Object.new.send('inspect')
-    Object.new.send(:public_send, :inspect)
-    Object.new.send(:tap) { 1 }
-    Object.new.send(:tap) { |this| this }
+    obj = JustKernel.new
+    def obj.foo(...) = nil
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned, *untyped, **untyped) -> untyped',
+                        obj, :send, name, 1, a: 2r
+      assert_send_type  '(interned, *untyped, **untyped) { (?) -> untyped } -> untyped',
+                        obj, :send, name, 1, a: 2r do 3i end
+    end
   end
 
   def test_singleton_class
-    Object.new.singleton_class
+    assert_send_type  '() -> Class',
+                      OBJ, :singleton_class
   end
 
   def test_singleton_method
-    o = Object.new
-    def o.x
+    obj = JustKernel.new
+    class << obj
+      protected def foo = 34
     end
-    o.singleton_method :x
-    o.singleton_method 'x'
+
+    with_interned :foo do |name|
+      assert_send_type  '(interned) -> Method',
+                        obj, :singleton_method, name
+    end
   end
 
   def test_singleton_methods
-    o = Object.new
-    def o.x
-    end
-    o.singleton_methods
-  end
-
-  if Kernel.method_defined?(:taint)
-    def test_taint
-      Object.new.taint
-      Object.new.untrust
+    obj = JustKernel.new
+    class << obj
+      private def foo = 34
+      protected def bar = 34
+      public def baz = 34
     end
 
-    def test_tainted?
-      Object.new.tainted?
-      Object.new.untrusted?
+    assert_send_type  '() -> Array[Symbol]',
+                      obj, :singleton_methods
+
+    with_boolish do |boolish|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        obj, :singleton_methods, boolish
     end
   end
 
   def test_tap
-    Object.new.tap do |this|
-      this
-    end
+    assert_send_type  '() { (KernelInstanceTest::JustKernel) -> void } -> KernelInstanceTest::JustKernel',
+                      OBJ, :tap do end
   end
 
   def test_to_s
-    Object.new.to_s
+    assert_send_type  '() -> String',
+                      OBJ, :to_s
   end
 
-  if Kernel.method_defined?(:taint)
-    def test_untaint
-      Object.new.untaint
-      Object.new.trust
-    end
+  def test_yield_self(method: :yield_self)
+    assert_send_type  '() -> Enumerator[KernelInstanceTest::JustKernel, untyped]',
+                      OBJ, method
+    assert_send_type  '[T] () { (KernelInstanceTest::JustKernel) -> T } -> T',
+                      OBJ, method do 1r end
   end
 
-  def test_Array
-    Array(nil)
-
-    # We add the `.first.whatever` tests to make sure that we're being returned the right type.
-    Array([1,2,3]).first.even?
-    Array(ToArray.new(1,2)).first.even?
-    Array(ToA.new(1,2)).first.even?
-    Array(1..4).first.even?
-    Array({34 => 'hello'}).first.first.even?
-
-    Array('foo').first.upcase
-    Array(['foo']).first.upcase
-  end
-
-  def test_Complex
-    Complex(1.3).real?
-    Complex(1.3, exception: true).real?
-    Complex(1.3, exception: false)&.real?
-    Complex(1.3, exception: $VERBOSE)&.real? # `$VERBOSE` is an undecidable-at-compile-time bool.
-
-    Complex('1+2i')
-    Complex(1r)
-    Complex(Class.new(Numeric).new)
-
-    # The `Kernel#Complex` function is the only place in the entire stdlib that uses `.to_c`
-    def (obj = BasicObject.new).to_c
-      1+3i
-    end
-    Complex(obj)
-
-    Complex(1.3, '1i')
-    Complex(Class.new(Numeric).new, "1")
-  end
-
-  def test_Float
-    Float(42).infinite?
-    Float(42, exception: true).real?
-    Float(42, exception: false)&.real?
-    Float(42, exception: $VERBOSE)&.real? # `$VERBOSE` is an undecidable-at-compile-time bool.
-
-    Float(1.4)
-    Float('1.4')
-    Float(ToF.new)
-  end
-
-  def test_Hash
-    Hash(nil)
-    Hash([])
-
-    Hash({key: 1})
-    Hash(ToHash.new)
-  end
-
-  def test_Integer
-    Integer(42).even?
-    Integer(42, exception: true).even?
-    Integer(42, exception: false)&.even?
-    Integer(42, exception: $VERBOSE)&.even? # `$VERBOSE` is an undecidable-at-compile-time bool.
-
-    Integer(2.3)
-    Integer(ToInt.new)
-    Integer(ToI.new)
-
-    Integer('2').even?
-    Integer('2', exception: true).even?
-    Integer('2', exception: false)&.even?
-    Integer('2', exception: $VERBOSE)&.even? # `$VERBOSE` is an undecidable-at-compile-time bool.
-
-    Integer('11', 2)
-    Integer(ToStr.new('11'), ToInt.new(12))
-  end
-
-  # These two classes are required to for `test_Rational`, and the `Class.new(Numeric)` construct
-  # doesn't type check them properly (yet.)
-  class Rational_RationalDiv < Numeric
-    def /(numeric) "Hello!" end
-  end
-  class Rational_OneCase < Numeric
-    def __unique_method_name__; 34 end
-  end
-
-  def test_Rational
-    Rational(42).integer?
-    Rational(42, exception: true).integer?
-    Rational(42, exception: false)&.integer?
-    Rational(42, exception: $VERBOSE)&.integer? # `$VERBOSE` is an undecidable-at-compile-time bool.
-
-    def (test_rational = BasicObject.new).to_r
-      1r
-    end
-
-    Rational(ToInt.new)
-    Rational(test_rational)
-
-    Rational(42.0, 3)
-    Rational('42.0', 3, exception: true)
-    Rational(ToInt.new, test_rational)
-    Rational(test_rational, ToInt.new, exception: false)
-
-    rational_div = Rational_RationalDiv.new
-    # `Rational` ignores `exception:` in the `_RationalDiv` variant.
-    Rational(rational_div, Class.new(Numeric).new).upcase
-    Rational(rational_div, Class.new(Numeric).new, exception: true).upcase
-    Rational(rational_div, Class.new(Numeric).new, exception: false).upcase
-    Rational(rational_div, Class.new(Numeric).new, exception: $VERBOSE).upcase
-
-    one_case = Rational_OneCase.new
-    # `Rational` also ignores `exception:` in the `(Numeric, 1)` variant.
-    Rational(one_case, 1).__unique_method_name__
-    Rational(one_case, 1, exception: true).__unique_method_name__
-    Rational(one_case, 1, exception: false).__unique_method_name__
-    Rational(one_case, 1, exception: $VERBOSE).__unique_method_name__
-  end
-
-  def test_String
-    String('foo')
-    String([])
-    String(nil)
-
-    String(ToS.new)
-    String(ToStr.new)
-  end
-
-  def test___callee__
-    __callee__
-  end
-
-  def test___dir__
-    __dir__
-  end
-
-  def test___method__
-    __method__
-  end
-
-  def test_backtick
-    `echo 1`
-  end
-
-  def test_abort
-    begin
-      abort
-    rescue SystemExit
-    end
-
-    begin
-      abort 'foo'
-    rescue SystemExit
-    end
-
-    begin
-      abort ToStr.new
-    rescue SystemExit
-    end
-  end
-
-  def test_at_exit
-    at_exit { 'foo' }
-  end
-
-  def test_autoload
-    autoload 'FooBar', 'fname'
-    autoload :FooBar, 'fname'
-  end
-
-  def test_autoload?
-    autoload? 'FooBar'
-    autoload? :FooBarBaz
-  end
-
-  def test_binding
-    binding
-  end
-
-  def test_exit
-    begin
-      exit
-    rescue SystemExit
-    end
-
-    begin
-      exit 1
-    rescue SystemExit
-    end
-
-    begin
-      exit ToInt.new
-    rescue SystemExit
-    end
-
-    begin
-      exit true
-    rescue SystemExit
-    end
-
-    begin
-      exit false
-    rescue SystemExit
-    end
-  end
-
-  def test_exit!
-    # TODO
-  end
-
-  def test_fail
-    begin
-      fail
-    rescue RuntimeError
-    end
-
-    begin
-      fail 'error'
-    rescue RuntimeError
-    end
-
-    begin
-      fail 'error', cause: nil
-    rescue RuntimeError
-    end
-
-    begin
-      fail 'error', cause: RuntimeError.new("oops!")
-    rescue RuntimeError
-    end
-
-    test_error = Class.new(StandardError)
-    begin
-      fail test_error
-    rescue test_error
-    end
-
-    begin
-      fail test_error, 'a'
-    rescue test_error
-    end
-
-    begin
-      fail test_error, ToS.new, ['1.rb, 2.rb']
-    rescue test_error
-    end
-
-    begin
-      fail test_error, 'b', '1.rb'
-    rescue test_error
-    end
-
-    begin
-      fail test_error, 'b', nil
-    rescue test_error
-    end
-
-    begin
-      fail test_error, 'b', cause: RuntimeError.new("?")
-    rescue test_error
-    end
-
-    begin
-      fail test_error, 'b', cause: nil
-    rescue test_error
-    end
-
-    begin
-      fail test_error.new('a')
-    rescue test_error
-    end
-
-    begin
-      fail test_error.new('a'), foo: 1, bar: 2, baz: 3, cause: RuntimeError.new("?")
-    rescue test_error
-    end
-
-    exception_container = Class.new do
-      define_method :exception do |arg = 'a'|
-        test_error.new(arg)
-      end
-    end
-
-    begin
-      fail exception_container.new
-    rescue test_error
-    end
-
-    begin
-      fail exception_container.new, 14
-    rescue test_error
-    end
-  end
-
-  def test_format
-    format 'x'
-    format '%d', 1
-    sprintf '%d%s', 1, 2
-  end
-
-  def test_gets
-    # TODO
-  end
-
-  def test_global_variables
-    global_variables
-  end
-
-  def test_load
-    Dir.mktmpdir do |dir|
-      path = File.join(dir, "foo.rb")
-
-      File.write(path, "class Foo; end")
-
-      load(path)
-      load(path, true)
-      load(path, false)
-      load(path, Module.new)
-    end
-  end
-
-  def test_loop
-    loop { break }
-    loop
-  end
-
-  def test_open
-    open(File.expand_path(__FILE__)).close
-    open(File.expand_path(__FILE__), 'r').close
-    open(File.expand_path(__FILE__)) do |f|
-      f.read
-    end
-  end
-
-  def test_print
-    print
-    print 1
-    print 'a', 2
-    print ToS.new
-  end
-
-  def test_printf
-    File.open('/dev/null', 'w') do |io|
-      printf io, 'a'
-      printf io, '%d', 2
-    end
-
-    printf
-    printf "123"
-    printf "%s%d%f", "A", 2, 3.0
-
-    def (writer = Object.new).write(*) end
-    printf writer, ToStr.new("%s%d"), '1', 2
-  end
-
-  def test_proc
-    proc {}
-  end
-
-  def test_lambda
-    lambda {}
-  end
-
-  def test_putc
-    putc 1
-    putc 'a'
-    putc ToInt.new
-  end
-
-  def test_puts
-    puts
-    puts 1, nil, false, "yes!", ToS.new
-  end
-
-  def test_p
-    p
-    p 1
-    p 'a', 2
-
-    def (obj = BasicObject.new).inspect
-      "foo"
-    end
-
-    p obj
-  end
-
-  def test_pp
-    pp
-    pp 1
-    pp 'a', 2
-
-    pp Object.new
-  end
-
-  def test_rand
-    rand
-    rand(10)
-    rand(1..10)
-    rand(1.0..10.0)
-  end
-
-  def test_readline
-    # TODO
-  end
-
-  def test_readlines
-    # TODO
-  end
-
-  def test_require
-    # TODO
-  end
-
-  def test_require_relative
-    # TODO
-  end
-
-  def test_select
-    # TODO
-  end
-
-  def test_sleep
-    sleep 0
-
-    sleep 0.01
-
-    o = Object.new
-    def o.divmod(i)
-      [0.001, 0.001]
-    end
-    sleep o
-  end
-
-  def test_syscall
-    # TODO
-  end
-
-  def test_test
-    test ?r, File.expand_path(__FILE__)
-    test ?r.ord, File.expand_path(__FILE__)
-    test ?s, File.expand_path(__FILE__)
-
-    File.open(File.expand_path(__FILE__)) do |f|
-      test ?r, f
-      test ?=, f, f
-    end
-  end
-
-  def test_warn
-    warn
-    warn 'foo'
-    warn 'foo', 'bar'
-    warn 'foo', uplevel: 1
-    warn ToS.new, uplevel: ToInt.new
-    warn ToS.new, uplevel: nil
-
-    omit_if(RUBY_VERSION < "3.0")
-
-    warn 'foo', uplevel: 1, category: :deprecated
-    warn 'foo', uplevel: 1, category: nil
-  end
-
-  def test_exec
-    # TODO
-  end
-
-  def test_system
-    # TODO
-  end
-
-  def test_operators
-    if RUBY_VERSION < "3.2.0"
-      Object.new !~ 123
-    end
-
-    Object.new <=> 123
-    Object.new <=> Object.new
-
-    Object.new === false
-  end
-
-  def test_eql
-    Object.new.eql?(1)
-  end
-
-  def test_frozen
-    Object.new.frozen?
-  end
-
-  def test_itself
-    Object.new.itself
-  end
-
-  def test_kind_of?
-    Object.new.kind_of?(String)
-  end
-
-  def test_object_id
-    Object.new.object_id
-  end
-
-  def test_respond_to?
-    obj = Object.new
-
-    obj.respond_to?(:to_s)
-    obj.respond_to?('to_s')
-    obj.respond_to?('to_s', true)
-  end
-
-  if Kernel.method_defined?(:taint)
-    def test_taint
-      obj = Object.new
-
-      obj.taint
-      obj.tainted?
-      obj.untaint
-    end
-  end
-
-  def test_yield_self
-    obj = Object.new
-
-    obj.yield_self { }
-    obj.then { }
-  end
-end
-
-class KernelInstanceTest < Test::Unit::TestCase
-  include TestHelper
-
-  testing "::Kernel"
-
-  def test_extend
-    assert_send_type "(Module) -> Object",
-                      Object.new, :extend, Module.new
-    assert_send_type "(Module, Module) -> Object",
-                      Object.new, :extend, Module.new, Module.new
-  end
-
-  def test_define_singleton_method
-    obj = Object.new
-
-    assert_send_type(
-      "(::Symbol) { () -> void } -> Symbol",
-      obj, :define_singleton_method,
-      :foo
-    ) do end
-
-    assert_send_type(
-      "(::Symbol, ::Proc) -> Symbol",
-      obj, :define_singleton_method,
-      :bar,
-      -> {}
-    )
-
-    assert_send_type(
-      "(::Symbol, ::Method) -> Symbol",
-      obj, :define_singleton_method,
-      :bar,
-      obj.method(:to_s)
-    )
-
-    assert_send_type(
-      "(::Symbol, ::UnboundMethod) -> Symbol",
-      obj, :define_singleton_method,
-      :bar,
-      Object.instance_method(:to_s)
-    )
-  end
-
-  def test_respond_to_missing?
-    obj = Object.new
-
-    # The default implementation always returns `false` regardless of the args,
-    # let alone their types; though overrides only have to support Symbol + bool
-    assert_send_type(
-      "(::Symbol, bool) -> bool",
-      obj, :respond_to_missing?, :to_s, true
-    )
-  end
-
-  def test_pp
-    original_stdout = $stdout
-    $stdout = StringIO.new
-
-    assert_send_type "() -> nil",
-                     self, :pp
-    assert_send_type "(123) -> 123",
-                     self, :pp, 123
-    assert_send_type "(123, :foo) -> [123, :foo]",
-                     self, :pp, 123, :foo
-    assert_send_type "(123, :foo, nil) -> [123, :foo, nil]",
-                     self, :pp, 123, :foo, nil
-  ensure
-    $stdout = original_stdout
+  def test_then
+    test_yield_self(method: :then)
   end
 
   def test_initialize_copy
-    assert_send_type(
-      "(Object) -> Object",
-      Object.new, :initialize_copy, Object.new
-    )
+    assert_send_type  '(KernelInstanceTest::JustKernel) -> KernelInstanceTest::JustKernel',
+                      JustKernel.allocate, :initialize_copy, OBJ
   end
 
   def test_initialize_clone
-    assert_send_type(
-      "(Object) -> Object",
-      Object.new, :initialize_clone, Object.new
-    )
+    assert_send_type  '(KernelInstanceTest::JustKernel) -> KernelInstanceTest::JustKernel',
+                      JustKernel.allocate, :initialize_clone, OBJ
 
-    assert_send_type(
-      "(Object, freeze: bool) -> Object",
-      Object.new, :initialize_clone, Object.new, freeze: true
-    )
+    with_bool.and_nil do |freeze|
+      assert_send_type  '(KernelInstanceTest::JustKernel, freeze: bool?) -> KernelInstanceTest::JustKernel',
+                        JustKernel.allocate, :initialize_clone, OBJ, freeze: freeze
+    end
   end
 
   def test_initialize_dup
-    assert_send_type(
-      "(Object) -> Object",
-      Object.new, :initialize_dup, Object.new
-    )
+    assert_send_type  '(KernelInstanceTest::JustKernel) -> KernelInstanceTest::JustKernel',
+                      JustKernel.allocate, :initialize_dup, OBJ
   end
 end

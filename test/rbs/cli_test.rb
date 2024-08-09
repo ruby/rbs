@@ -247,9 +247,9 @@ singleton(::BasicObject)
       assert_includes stdout.string, 'implementation: ::Kernel'
       assert_includes stdout.string, 'accessibility: public'
       assert_includes stdout.string, 'types:'
-      assert_includes stdout.string, '  [X] () { (self) -> X } -> X'
+      assert_includes stdout.string, '  () -> ::Enumerator[self, untyped]'
       assert_includes stdout.string, 'rbs/core/kernel.rbs'
-      assert_includes stdout.string, '| () -> ::Enumerator[self, untyped]'
+      assert_includes stdout.string, '| [T] () { (self) -> T } -> T'
       assert_includes stdout.string, 'rbs/core/kernel.rbs'
     end
 
