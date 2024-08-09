@@ -64,7 +64,8 @@ EOF
 
           assert_equal Ancestor::Singleton.new(name: type_name("::Array")),
                        a.super_class
-          assert_nil a.included_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::Bar"), args: [parse_type("X", variables: [:X])], source: nil)],
+                       a.included_modules
           assert_nil a.included_interfaces
           assert_nil a.prepended_modules
           assert_equal [Ancestor::Instance.new(name: type_name("::Foo"), args: [parse_type("::String")], source: nil)],
@@ -130,7 +131,8 @@ EOF
           assert_equal Ancestor::Instance.new(name: type_name("::Module"), args: [], source: nil),
                        a.super_class
           assert_nil a.self_types
-          assert_nil a.included_modules
+          assert_equal [Ancestor::Instance.new(name: type_name("::M2"), args: [parse_type("X", variables: [:X])], source: nil)],
+                       a.included_modules
           assert_nil a.prepended_modules
           assert_equal [Ancestor::Instance.new(name: type_name("::M1"), args: [parse_type("::String")], source: nil)],
                        a.extended_modules
