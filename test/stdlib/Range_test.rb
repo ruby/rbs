@@ -110,9 +110,14 @@ class RangeTest < StdlibTest
   def test_step
     (1..10).step
     (1..10).step(2)
+
     if_ruby(..."3.4.0", skip: false) do
       ('A'...'Z').step { |s| s.downcase }
       ('A'...'Z').step(2) { |s| s.downcase }
+    end
+
+    if_ruby("3.4.0"..., skip: false) do
+      ('A'...'AAA').step('A') { |s| s.downcase }
     end
   end
 
