@@ -108,8 +108,12 @@ class RangeTest < StdlibTest
   def test_step
     (1..10).step
     (1..10).step(2)
-    ('A'...'Z').step { |s| s.downcase }
-    ('A'...'Z').step(2) { |s| s.downcase }
+    if RUBY_VERSION < '3.4'
+      ('A'...'Z').step { |s| s.downcase }
+      ('A'...'Z').step(2) { |s| s.downcase }
+    else
+      ('A'...'AAA').step('A') { |s| s.downcase }
+    end
   end
 
   def test_to_s
