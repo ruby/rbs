@@ -2861,7 +2861,10 @@ parse_type_try(VALUE a) {
 static VALUE
 rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof)
 {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -2889,7 +2892,10 @@ parse_method_type_try(VALUE a) {
 static VALUE
 rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof)
 {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -2906,13 +2912,18 @@ parse_signature_try(VALUE a) {
 static VALUE
 rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE end_pos)
 {
-  parserstate *parser = alloc_parser(buffer, 0, FIX2INT(end_pos), Qnil);
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, 0, FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, 0, FIX2INT(end_pos), Qnil);
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
 static VALUE
 rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
-  lexstate *lexer = alloc_lexer(buffer, 0, FIX2INT(end_pos));
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, 0, FIX2INT(end_pos));
   VALUE results = rb_ary_new();
 
   token token = NullToken;
@@ -2931,6 +2942,7 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
+  rb_gc_register_mark_object(RBS_Parser);
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
