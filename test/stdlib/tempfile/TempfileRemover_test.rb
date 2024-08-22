@@ -1,6 +1,8 @@
 require_relative "../test_helper"
 require 'tempfile'
 
+return unless defined?(Tempfile::Remover)
+
 class TempfileRemoverSingletonTest < Test::Unit::TestCase
   include TestHelper
 

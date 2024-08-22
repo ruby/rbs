@@ -271,7 +271,7 @@ class Range[out Elem] < Object
   # Related: Range#step.
   #
   def %: (Numeric | int n) -> Enumerator[Elem, self]
-    | (Numeric | int n) { (Elem element) -> void } -> self
+       | (Numeric | int n) { (Elem element) -> void } -> self
 
   # <!--
   #   rdoc-file=range.c
