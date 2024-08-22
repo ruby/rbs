@@ -96,7 +96,9 @@ class RangeTest < StdlibTest
 
   def test_percent
     (1..10).%(2)
-    ('A'...'Z').%(2) { |s| s.downcase }
+    if_ruby(..."3.4.0") do
+      ('A'...'Z').%(2) { |s| s.downcase }
+    end
   end
 
   def test_size
@@ -108,8 +110,10 @@ class RangeTest < StdlibTest
   def test_step
     (1..10).step
     (1..10).step(2)
-    ('A'...'Z').step { |s| s.downcase }
-    ('A'...'Z').step(2) { |s| s.downcase }
+    if_ruby(..."3.4.0") do
+      ('A'...'Z').step { |s| s.downcase }
+      ('A'...'Z').step(2) { |s| s.downcase }
+    end
   end
 
   def test_to_s
