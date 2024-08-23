@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.5.3 (2024-08-23)
+
+### Library changes
+
+* Backport GC fix PR ([#1977](https://github.com/ruby/rbs/pull/1977))
+
 ## 3.5.2 (2024-07-10)
 
 ### Library changes
