@@ -654,6 +654,9 @@ module RBS
           ast = RubyVM::AbstractSyntaxTree.of(method)
         rescue ArgumentError
           return # When the method is defined in eval
+        rescue RuntimeError => error
+          raise unless error.message.include?("prism")
+          return # When the method was compiled by prism
         end
 
         if ast && ast.type == :SCOPE
