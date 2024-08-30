@@ -1019,13 +1019,44 @@ static VALUE parse_simple(parserstate *state) {
     range rg;
     rg.start = state->current_token.range.start;
     VALUE types = rb_ary_new();
+    VALUE rest_type = Qnil;
+    // parses type args with additional rest type arg
     if (state->next_token.type != pRBRACKET) {
-      parse_type_list(state, pRBRACKET, types);
+      while (true) {
+        rb_ary_push(types, parse_type(state));
+
+        if (state->next_token.type == pCOMMA) {
+          parser_advance(state);
+          if (state->next_token.type == pRBRACKET) {
+            break;
+          } else if (state->next_token.type == pSTAR) {
+            parser_advance(state);
+            rest_type = parse_type(state);
+            if (state->next_token.type != pRBRACKET) {
+              raise_syntax_error(
+                state,
+                state->next_token,
+                "tuple end expected"
+              );
+            }
+            break;
+          }
+        } else {
+          if (state->next_token.type == pRBRACKET) {
+            break;
+          }
+          raise_syntax_error(
+            state,
+            state->next_token,
+            "comma delimited type list is expected"
+          );
+        }
+      }
     }
     parser_advance_assert(state, pRBRACKET);
     rg.end = state->current_token.range.end;
 
-    return rbs_tuple(types, rbs_new_location(state->buffer, rg));
+    return rbs_tuple2(types, rbs_new_location(state->buffer, rg), rest_type);
   }
   case pAREF_OPR: {
     return rbs_tuple(rb_ary_new(), rbs_new_location(state->buffer, state->current_token.range));

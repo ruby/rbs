@@ -433,15 +433,17 @@ module RBS
 
     class Tuple
       attr_reader :types
+      attr_reader :rest_type
       attr_reader :location
 
-      def initialize(types:, location:)
+      def initialize(types:, location:, rest_type: nil)
         @types = types
+        @rest_type = rest_type
         @location = location
       end
 
       def ==(other)
-        other.is_a?(Tuple) && other.types == types
+        other.is_a?(Tuple) && other.types == types && other.rest_type == rest_type
       end
 
       alias eql? ==
@@ -455,15 +457,17 @@ module RBS
           types.each do |type|
             type.free_variables set
           end
+          rest_type&.free_variables
         end
       end
 
       def to_json(state = _ = nil)
-        { class: :tuple, types: types, location: location }.to_json(state)
+        { class: :tuple, types: types, rest_type: rest_type, location: location }.to_json(state)
       end
 
       def sub(s)
         self.class.new(types: types.map {|ty| ty.sub(s) },
+                       rest_type: rest_type&.sub(s),
                        location: location)
       end
 
@@ -471,13 +475,14 @@ module RBS
         if types.empty?
           "[ ]"
         else
-          "[ #{types.join(", ")} ]"
+          "[ #{types.join(", ")}#{", *#{rest_type}" if rest_type} ]"
         end
       end
 
       def each_type(&block)
         if block
           types.each(&block)
+          block.call(rest_type) if rest_type
         else
           enum_for :each_type
         end
@@ -486,6 +491,7 @@ module RBS
       def map_type_name(&block)
         Tuple.new(
           types: types.map {|type| type.map_type_name(&block) },
+          rest_type: rest_type.map_type_name(&block),
           location: location
         )
       end
@@ -494,6 +500,7 @@ module RBS
         if block
           Tuple.new(
             types: types.map {|type| yield type },
+            rest_type: (yield(rest_type) if rest_type),
             location: location
           )
         else
