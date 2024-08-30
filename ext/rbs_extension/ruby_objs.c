@@ -283,10 +283,12 @@ VALUE rbs_method_type(VALUE type_params, VALUE type, VALUE block, VALUE location
   );
 }
 
-VALUE rbs_ast_comment(VALUE string, VALUE location) {
+VALUE rbs_ast_comment(VALUE string, VALUE start_line, VALUE end_line, VALUE location) {
   VALUE args = rb_hash_new();
   rb_hash_aset(args, ID2SYM(rb_intern("string")), string);
   rb_hash_aset(args, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(args, ID2SYM(rb_intern("start_line")), start_line);
+  rb_hash_aset(args, ID2SYM(rb_intern("end_line")), end_line);
 
   return CLASS_NEW_INSTANCE(
     RBS_AST_Comment,

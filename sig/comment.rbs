@@ -12,7 +12,12 @@ module RBS
       attr_reader string: String
       attr_reader location: Location[bot, bot]?
 
+      @string_base: String
+      @start_line: Integer?
+      @end_line: Integer?
+
       def initialize: (string: String, location: Location[bot, bot]?) -> void
+                    | (string: String, start_line: Integer, end_line: Integer, location: Location[bot, bot]?) -> void
 
       def ==: (untyped other) -> bool
 
