@@ -2962,8 +2962,9 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_gc_register_mark_object(RBS_Parser);
-  rb_gc_register_address(&EMPTY_ARRAY);
-  EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+  VALUE empty_array = rb_obj_freeze(rb_ary_new());
+  rb_gc_register_mark_object(empty_array);
+  EMPTY_ARRAY = empty_array;
 
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
