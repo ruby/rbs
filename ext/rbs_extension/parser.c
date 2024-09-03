@@ -52,6 +52,14 @@ typedef struct {
   VALUE rest_keywords;
 } method_params;
 
+static VALUE EMPTY_ARRAY;
+
+static void inline melt_array(VALUE *array) {
+  if (*array == EMPTY_ARRAY) {
+    *array = rb_ary_new();
+  }
+}
+
 static bool rbs_is_untyped_params(method_params *params) {
   return NIL_P(params->required_positionals);
 }
@@ -137,7 +145,7 @@ void parser_advance_no_gap(parserstate *state) {
 */
 VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   VALUE absolute = Qfalse;
-  VALUE path = rb_ary_new();
+  VALUE path = EMPTY_ARRAY;
   VALUE namespace;
 
   if (rg) {
@@ -155,6 +163,7 @@ VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
     && state->current_token.range.end.byte_pos == state->next_token.range.start.byte_pos
     && state->next_token.range.end.byte_pos == state->next_token2.range.start.byte_pos
   ) {
+    melt_array(&path);
     rb_ary_push(path, ID2SYM(INTERN_TOKEN(state, state->current_token)));
 
     parser_advance(state);
@@ -211,9 +220,10 @@ VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   type_list ::= {} type `,` ... <`,`> eol
               | {} type `,` ... `,` <type> eol
 */
-static VALUE parse_type_list(parserstate *state, enum TokenType eol, VALUE types) {
+static void parse_type_list(parserstate *state, enum TokenType eol, VALUE *types) {
   while (true) {
-    rb_ary_push(types, parse_type(state));
+    melt_array(types);
+    rb_ary_push(*types, parse_type(state));
 
     if (state->next_token.type == pCOMMA) {
       parser_advance(state);
@@ -233,8 +243,6 @@ static VALUE parse_type_list(parserstate *state, enum TokenType eol, VALUE types
       }
     }
   }
-
-  return types;
 }
 
 static bool is_keyword_token(enum TokenType type) {
@@ -435,6 +443,7 @@ static void parse_params(parserstate *state, method_params *params) {
         }
 
         param = parse_function_param(state);
+        melt_array(&params->required_positionals);
         rb_ary_push(params->required_positionals, param);
 
         break;
@@ -460,6 +469,7 @@ PARSE_OPTIONAL_PARAMS:
         }
 
         param = parse_function_param(state);
+        melt_array(&params->optional_positionals);
         rb_ary_push(params->optional_positionals, param);
 
         break;
@@ -503,6 +513,7 @@ PARSE_TRAILING_PARAMS:
         }
 
         param = parse_function_param(state);
+        melt_array(&params->trailing_positionals);
         rb_ary_push(params->trailing_positionals, param);
 
         break;
@@ -593,10 +604,10 @@ static VALUE parse_optional(parserstate *state) {
 }
 
 static void initialize_method_params(method_params *params){
-  params->required_positionals = rb_ary_new();
-  params->optional_positionals = rb_ary_new();
+  params->required_positionals = EMPTY_ARRAY;
+  params->optional_positionals = EMPTY_ARRAY;
   params->rest_positionals = Qnil;
-  params->trailing_positionals = rb_ary_new();
+  params->trailing_positionals = EMPTY_ARRAY;
   params->required_keywords = rb_hash_new();
   params->optional_keywords = rb_hash_new();
   params->rest_keywords = Qnil;
@@ -863,7 +874,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     }
 
     VALUE typename = parse_type_name(state, expected_kind, &name_range);
-    VALUE types = rb_ary_new();
+    VALUE types = EMPTY_ARRAY;
 
     TypeNameKind kind;
     if (state->current_token.type == tUIDENT) {
@@ -879,7 +890,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, types);
+      parse_type_list(state, pRBRACKET, &types);
       parser_advance_assert(state, pRBRACKET);
       args_range.end = state->current_token.range.end;
     } else {
@@ -1018,9 +1029,9 @@ static VALUE parse_simple(parserstate *state) {
   case pLBRACKET: {
     range rg;
     rg.start = state->current_token.range.start;
-    VALUE types = rb_ary_new();
+    VALUE types = EMPTY_ARRAY;
     if (state->next_token.type != pRBRACKET) {
-      parse_type_list(state, pRBRACKET, types);
+      parse_type_list(state, pRBRACKET, &types);
     }
     parser_advance_assert(state, pRBRACKET);
     rg.end = state->current_token.range.end;
@@ -1028,7 +1039,7 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_tuple(types, rbs_new_location(state->buffer, rg));
   }
   case pAREF_OPR: {
-    return rbs_tuple(rb_ary_new(), rbs_new_location(state->buffer, state->current_token.range));
+    return rbs_tuple(EMPTY_ARRAY, rbs_new_location(state->buffer, state->current_token.range));
   }
   case pLBRACE: {
     position start = state->current_token.range.start;
@@ -1113,7 +1124,7 @@ VALUE parse_type(parserstate *state) {
   type_param ::= tUIDENT                            (module_type_params == false)
 */
 VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
-  VALUE params = rb_ary_new();
+  VALUE params = EMPTY_ARRAY;
 
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
@@ -1189,6 +1200,7 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       rbs_loc_add_optional_child(loc, rb_intern("upper_bound"), upper_bound_range);
 
       VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, location);
+      melt_array(&params);
       rb_ary_push(params, param);
 
       if (state->next_token.type == pCOMMA) {
@@ -1428,7 +1440,7 @@ VALUE parse_annotation(parserstate *state) {
   annotations ::= {} annotation ... <annotation>
                 | {<>}
 */
-void parse_annotations(parserstate *state, VALUE annotations, position *annot_pos) {
+void parse_annotations(parserstate *state, VALUE *annotations, position *annot_pos) {
   *annot_pos = NullPosition;
 
   while (true) {
@@ -1439,7 +1451,8 @@ void parse_annotations(parserstate *state, VALUE annotations, position *annot_po
         *annot_pos = state->current_token.range.start;
       }
 
-      rb_ary_push(annotations, parse_annotation(state));
+      melt_array(annotations);
+      rb_ary_push(*annotations, parse_annotation(state));
     } else {
       break;
     }
@@ -1623,11 +1636,11 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
 
   bool loop = true;
   while (loop) {
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position overload_annot_pos = NullPosition;
 
     if (state->next_token.type == tANNOTATION) {
-      parse_annotations(state, annotations, &overload_annot_pos);
+      parse_annotations(state, &annotations, &overload_annot_pos);
     }
 
     switch (state->next_token.type) {
@@ -1718,7 +1731,7 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
  *
  * @param kind
  * */
-void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE args, range *name_range, range *args_range) {
+void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE *args, range *name_range, range *args_range) {
   parser_advance(state);
 
   *name = parse_type_name(state, kind, name_range);
@@ -1785,11 +1798,11 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
   parser_push_typevar_table(state, reset_typevar_scope);
 
   VALUE name;
-  VALUE args = rb_ary_new();
+  VALUE args = EMPTY_ARRAY;
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
-    &name, args, &name_range, &args_range
+    &name, &args, &name_range, &args_range
   );
 
   parser_pop_typevar_table(state);
@@ -2141,13 +2154,13 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
                      | alias_member   (instance only)
 */
 VALUE parse_interface_members(parserstate *state) {
-  VALUE members = rb_ary_new();
+  VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
-    parse_annotations(state, annotations, &annot_pos);
+    parse_annotations(state, &annotations, &annot_pos);
 
     parser_advance(state);
 
@@ -2175,6 +2188,7 @@ VALUE parse_interface_members(parserstate *state) {
       );
     }
 
+    melt_array(&members);
     rb_ary_push(members, member);
   }
 
@@ -2231,7 +2245,7 @@ VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annot
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
 */
-void parse_module_self_types(parserstate *state, VALUE array) {
+void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
     range self_range;
     range name_range;
@@ -2244,11 +2258,11 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     VALUE module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &name_range);
     self_range.end = name_range.end;
 
-    VALUE args = rb_ary_new();
+    VALUE args = EMPTY_ARRAY;
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, args);
+      parse_type_list(state, pRBRACKET, &args);
       parser_advance(state);
       self_range.end = args_range.end = state->current_token.range.end;
     }
@@ -2260,7 +2274,8 @@ void parse_module_self_types(parserstate *state, VALUE array) {
     rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
 
     VALUE self_type = rbs_ast_decl_module_self(module_name, args, location);
-    rb_ary_push(array, self_type);
+    melt_array(array);
+    rb_ary_push(*array, self_type);
 
     if (state->next_token.type == pCOMMA) {
       parser_advance(state);
@@ -2284,14 +2299,14 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
                   | `private`
 */
 VALUE parse_module_members(parserstate *state) {
-  VALUE members = rb_ary_new();
+  VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
     VALUE member;
-    VALUE annotations = rb_ary_new();
+    VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
 
-    parse_annotations(state, annotations, &annot_pos);
+    parse_annotations(state, &annotations, &annot_pos);
 
     parser_advance(state);
 
@@ -2349,6 +2364,7 @@ VALUE parse_module_members(parserstate *state) {
       break;
     }
 
+    melt_array(&members);
     rb_ary_push(members, member);
   }
 
@@ -2371,13 +2387,13 @@ VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_n
   decl_range.start = keyword_range.start;
 
   VALUE type_params = parse_type_params(state, &type_params_range, true);
-  VALUE self_types = rb_ary_new();
+  VALUE self_types = EMPTY_ARRAY;
 
   if (state->next_token.type == pCOLON) {
     parser_advance(state);
     colon_range = state->current_token.range;
     self_types_range.start = state->next_token.range.start;
-    parse_module_self_types(state, self_types);
+    parse_module_self_types(state, &self_types);
     self_types_range.end = state->current_token.range.end;
   } else {
     colon_range = NULL_RANGE;
@@ -2472,8 +2488,8 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
     *lt_range = state->current_token.range;
     super_range.start = state->next_token.range.start;
 
-    args = rb_ary_new();
-    class_instance_name(state, CLASS_NAME, &name, args, &name_range, &args_range);
+    args = EMPTY_ARRAY;
+    class_instance_name(state, CLASS_NAME, &name, &args, &name_range, &args_range);
 
     super_range.end = state->current_token.range.end;
 
@@ -2626,10 +2642,10 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
 }
 
 VALUE parse_decl(parserstate *state) {
-  VALUE annotations = rb_ary_new();
+  VALUE annotations = EMPTY_ARRAY;
   position annot_pos = NullPosition;
 
-  parse_annotations(state, annotations, &annot_pos);
+  parse_annotations(state, &annotations, &annot_pos);
 
   parser_advance(state);
   switch (state->current_token.type) {
@@ -2670,10 +2686,11 @@ VALUE parse_namespace(parserstate *state, range *rg) {
     parser_advance(state);
   }
 
-  VALUE path = rb_ary_new();
+  VALUE path = EMPTY_ARRAY;
 
   while (true) {
     if (state->next_token.type == tUIDENT && state->next_token2.type == pCOLON2) {
+      melt_array(&path);
       rb_ary_push(path, ID2SYM(INTERN_TOKEN(state, state->next_token)));
       if (null_position_p(rg->start)) {
         rg->start = state->next_token.range.start;
@@ -2813,14 +2830,16 @@ VALUE parse_use_directive(parserstate *state) {
 }
 
 VALUE parse_signature(parserstate *state) {
-  VALUE dirs = rb_ary_new();
-  VALUE decls = rb_ary_new();
+  VALUE dirs = EMPTY_ARRAY;
+  VALUE decls = EMPTY_ARRAY;
 
   while (state->next_token.type == kUSE) {
+    melt_array(&dirs);
     rb_ary_push(dirs, parse_use_directive(state));
   }
 
   while (state->next_token.type != pEOF) {
+    melt_array(&decls);
     rb_ary_push(decls, parse_decl(state));
   }
 
@@ -2943,6 +2962,10 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_gc_register_mark_object(RBS_Parser);
+  VALUE empty_array = rb_obj_freeze(rb_ary_new());
+  rb_gc_register_mark_object(empty_array);
+  EMPTY_ARRAY = empty_array;
+
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
