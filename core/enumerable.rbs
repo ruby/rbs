@@ -1846,7 +1846,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     e = (1..3).chain([4, 5])
   #     e.to_a #=> [1, 2, 3, 4, 5]
   #
-  def chain: (*Enumerable[Elem] enumerables) -> ::Enumerator::Chain[Elem]
+  def chain: [Elem2] (*_Each[Elem2] enumerables) -> ::Enumerator::Chain[Elem | Elem2]
 
   # <!--
   #   rdoc-file=enum.c
