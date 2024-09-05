@@ -129,6 +129,22 @@ token next_token(lexstate *state, enum TokenType type) {
   return t;
 }
 
+token next_eof_token(lexstate *state) {
+  if (state->current.byte_pos == RSTRING_LEN(state->string)+1) {
+    // End of String
+    token t;
+    t.type = pEOF;
+    t.range.start = state->start;
+    t.range.end = state->start;
+    state->start = state->current;
+
+    return t;
+  } else {
+    // NULL byte in the middle of the string
+    return next_token(state, pEOF);
+  }
+}
+
 void rbs_skip(lexstate *state) {
   if (!state->last_char) {
     peek(state);

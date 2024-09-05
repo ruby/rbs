@@ -834,6 +834,6 @@ RBS
     assert_equal [:tTRIVIA, "\n", 52...53], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:kEND, 'end', 53...56], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:tTRIVIA, "\n", 56...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
-    assert_equal [:pEOF, '', 57...58], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 end
