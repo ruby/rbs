@@ -25,6 +25,11 @@ module RBS
             @ranges << range
             offset += size
           end
+
+          if !content.end_with?("\n") && content.size > 0
+            @ranges[-1] = @ranges[-1].begin...(@ranges[-1].end+1)
+          end
+
           @ranges
         end
     end
