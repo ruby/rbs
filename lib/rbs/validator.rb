@@ -43,7 +43,7 @@ module RBS
           InvalidTypeApplicationError.check!(
             type_name: type.name,
             args: type.args,
-            params: type_params.each.map(&:name),
+            params: type_params,
             location: type.location
           )
         end
