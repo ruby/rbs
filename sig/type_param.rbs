@@ -4,12 +4,13 @@ module RBS
       # Key
       # ^^^ name
       #
-      # unchecked out Elem < _ToJson
-      # ^^^^^^^^^                    unchecked
-      #           ^^^                variance
-      #               ^^^^           name
-      #                    ^^^^^^^^^ upper_bound
-      type loc = Location[:name, :variance | :unchecked | :upper_bound]
+      # unchecked out Elem < _ToJson = untyped
+      # ^^^^^^^^^                                 unchecked
+      #           ^^^                             variance
+      #               ^^^^                        name
+      #                    ^^^^^^^^^              upper_bound
+      #                              ^^^^^^^^^    default
+      type loc = Location[:name, :variance | :unchecked | :upper_bound | :default]
 
       type variance = :invariant | :covariant | :contravariant
 
@@ -25,7 +26,7 @@ module RBS
 
       attr_reader default_type: Types::t?
 
-      def initialize: (name: Symbol, variance: variance, upper_bound: Types::t?, location: loc?) -> void
+      def initialize: (name: Symbol, variance: variance, upper_bound: Types::t?, location: loc?, ?default_type: Types::t?) -> void
 
       include _ToJson
 

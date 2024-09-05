@@ -172,11 +172,14 @@ module RBS
         array.unshift(type_param)
 
         if upper_bound = type_param.upper_bound_type
-          find_in_type(pos, type: upper_bound, array: array) or
-            find_in_loc(pos, location: type_param.location, array: array)
-        else
-          find_in_loc(pos, location: type_param.location, array: array)
+          find_in_type(pos, type: upper_bound, array: array) and return true
         end
+
+        if default_type = type_param.default_type
+          find_in_type(pos, type: default_type, array: array) and return true
+        end
+
+        find_in_loc(pos, location: type_param.location, array: array)
 
         true
       else

@@ -3,14 +3,15 @@
 module RBS
   module AST
     class TypeParam
-      attr_reader :name, :variance, :location, :upper_bound_type
+      attr_reader :name, :variance, :location, :upper_bound_type, :default_type
 
-      def initialize(name:, variance:, upper_bound:, location:)
+      def initialize(name:, variance:, upper_bound:, location:, default_type: nil)
         @name = name
         @variance = variance
         @upper_bound_type = upper_bound
         @location = location
         @unchecked = false
+        @default_type = default_type
       end
 
       def upper_bound
@@ -34,13 +35,14 @@ module RBS
           other.name == name &&
           other.variance == variance &&
           other.upper_bound_type == upper_bound_type &&
+          other.default_type == default_type &&
           other.unchecked? == unchecked?
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash ^ variance.hash ^ upper_bound_type.hash ^ unchecked?.hash
+        self.class.hash ^ name.hash ^ variance.hash ^ upper_bound_type.hash ^ unchecked?.hash ^ default_type.hash
       end
 
       def to_json(state = JSON::State.new)
@@ -50,6 +52,7 @@ module RBS
           unchecked: unchecked?,
           location: location,
           upper_bound: upper_bound_type,
+          default_type: default_type
         }.to_json(state)
       end
 
@@ -57,8 +60,9 @@ module RBS
         TypeParam.new(
           name: name,
           variance: variance,
-          location: location
           upper_bound: upper_bound_type,
+          location: location,
+          default_type: default_type
         ).unchecked!(unchecked?)
       end
 
@@ -67,11 +71,16 @@ module RBS
           _upper_bound_type = yield(b)
         end
 
+        if dt = default_type
+          _default_type = yield(dt)
+        end
+
         TypeParam.new(
           name: name,
           variance: variance,
-          location: location
           upper_bound: _upper_bound_type,
+          location: location,
+          default_type: _default_type
         ).unchecked!(unchecked?)
       end
 
@@ -108,8 +117,9 @@ module RBS
           TypeParam.new(
             name: new_name,
             variance: param.variance,
-            location: param.location
             upper_bound: param.upper_bound_type&.map_type {|type| type.sub(subst) },
+            location: param.location,
+            default_type: param.default_type&.map_type {|type| type.sub(subst) }
           ).unchecked!(param.unchecked?)
         end
       end
@@ -134,6 +144,10 @@ module RBS
 
         if type = upper_bound_type
           s << " < #{type}"
+        end
+
+        if dt = default_type
+          s << " = #{dt}"
         end
 
         s
