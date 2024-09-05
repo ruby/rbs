@@ -171,7 +171,7 @@ module RBS
       if test_loc(pos, location: type_param.location)
         array.unshift(type_param)
 
-        if upper_bound = type_param.upper_bound
+        if upper_bound = type_param.upper_bound_type
           find_in_type(pos, type: upper_bound, array: array) or
             find_in_loc(pos, location: type_param.location, array: array)
         else

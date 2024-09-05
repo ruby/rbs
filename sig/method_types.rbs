@@ -40,7 +40,7 @@ module RBS
     #
     def map_type: () { (Types::t) -> Types::t } -> MethodType
 
-    def map_type_bound: () { (AST::TypeParam::bound) -> AST::TypeParam::bound } -> MethodType
+    def map_type_bound: () { (Types::t) -> Types::t } -> MethodType
 
     def each_type: () { (Types::t) -> void } -> void
                  | () -> Enumerator[Types::t, void]

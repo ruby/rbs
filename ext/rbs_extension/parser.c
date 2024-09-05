@@ -1179,6 +1179,10 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
 
       if (state->next_token.type == pLT) {
         parser_advance(state);
+        upper_bound_range.start = state->current_token.range.start;
+        upper_bound = parse_type(state);
+        upper_bound_range.end = state->current_token.range.end;
+      }
 
         if (state->next_token.type == kSINGLETON) {
           parser_advance(state);

@@ -2011,7 +2011,7 @@ end
 
   def test_generics_bound
     Parser.parse_signature(<<-EOF).tap do |_, _, decls|
-class Foo[X < _Each[Y], Y]
+class Foo[X < _Each[Y]?, Y]
   def foo: [X < Array[Y]] (X) -> X
 end
     EOF
@@ -2023,14 +2023,15 @@ end
           assert_equal :X, param.name
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
-          assert_equal parse_type("_Each[Y]", variables: [:Y]), param.upper_bound
+          assert_nil param.upper_bound
+          assert_equal parse_type("_Each[Y]?", variables: [:Y]), param.upper_bound_type
         end
 
         decl.type_params[1].tap do |param|
           assert_equal :Y, param.name
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
-          assert_nil param.upper_bound
+          assert_nil param.upper_bound_type
         end
 
         decl.members[0].tap do |member|
@@ -2039,6 +2040,7 @@ end
             assert_equal :invariant, param.variance
             refute_predicate param, :unchecked?
             assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound_type
           end
         end
       end

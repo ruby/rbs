@@ -125,7 +125,7 @@ module RBS
       # @type var each_child: ^(Symbol) { (Symbol) -> void } -> void
       each_child = -> (name, &block) do
         if param = params.find {|p| p.name == name }
-          if b = param.upper_bound
+          if b = param.upper_bound_type
             b.free_variables.each do |tv|
               block[tv]
             end

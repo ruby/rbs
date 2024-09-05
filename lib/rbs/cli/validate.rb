@@ -139,8 +139,8 @@ EOU
           )
 
           d.type_params.each do |param|
-            if ub = param.upper_bound
-              void_type_context_validator(ub)
+            if ub = param.upper_bound_type
+             void_type_context_validator(ub)
               no_self_type_validator(ub)
               no_classish_type_validator(ub)
             end

@@ -19,9 +19,13 @@ module RBS
       attr_reader variance: variance
       attr_reader location: loc?
 
-      attr_reader upper_bound: bound?
+      %a{pure} def upper_bound: () -> bound?
 
-      def initialize: (name: Symbol, variance: variance, upper_bound: bound?, location: loc?) -> void
+      attr_reader upper_bound_type: Types::t?
+
+      attr_reader default_type: Types::t?
+
+      def initialize: (name: Symbol, variance: variance, upper_bound: Types::t?, location: loc?) -> void
 
       include _ToJson
 
@@ -37,7 +41,7 @@ module RBS
 
       def unchecked?: () -> bool
 
-      def map_type: () { (bound) -> bound } -> TypeParam
+      def map_type: () { (Types::t) -> Types::t } -> TypeParam
 
       # Helper function to resolve _class instance types_ to _type variables_.
       #
