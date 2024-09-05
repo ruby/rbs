@@ -1119,12 +1119,14 @@ VALUE parse_type(parserstate *state) {
   type_params ::= {} `[` type_param `,` ... <`]`>
                 | {<>}
 
-  type_param ::= kUNCHECKED? (kIN|kOUT|) tUIDENT    (module_type_params == true)
+  type_param ::= kUNCHECKED? (kIN|kOUT|) tUIDENT upper_bound? default_type?   (module_type_params == true)
 
-  type_param ::= tUIDENT                            (module_type_params == false)
+  type_param ::= tUIDENT upper_bound? default_type?                           (module_type_params == false)
 */
 VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
   VALUE params = EMPTY_ARRAY;
+
+  bool required_param_allowed = true;
 
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
@@ -1136,12 +1138,14 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       bool unchecked = false;
       VALUE variance = ID2SYM(rb_intern("invariant"));
       VALUE upper_bound = Qnil;
+      VALUE default_type = Qnil;
 
       range param_range = NULL_RANGE;
       range name_range;
       range variance_range = NULL_RANGE;
       range unchecked_range = NULL_RANGE;
       range upper_bound_range = NULL_RANGE;
+      range default_type_range = NULL_RANGE;
 
       param_range.start = state->next_token.range.start;
 
@@ -1179,13 +1183,28 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
 
       if (state->next_token.type == pLT) {
         parser_advance(state);
+        upper_bound_range.start = state->current_token.range.start;
+        upper_bound = parse_type(state);
+        upper_bound_range.end = state->current_token.range.end;
+      }
 
-        if (state->next_token.type == kSINGLETON) {
+      if (module_type_params) {
+        if (state->next_token.type == pEQ) {
           parser_advance(state);
-          upper_bound = parse_singleton_type(state);
+
+          default_type_range.start = state->current_token.range.start;
+          default_type = parse_type(state);
+          default_type_range.start = state->current_token.range.end;
+
+          required_param_allowed = false;
         } else {
-          parser_advance(state);
-          upper_bound = parse_instance_type(state, false);
+          if (!required_param_allowed) {
+            raise_syntax_error(
+              state,
+              state->current_token,
+              "required type parameter is not allowed after optional type parameter"
+            );
+          }
         }
       }
 
@@ -1198,8 +1217,9 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       rbs_loc_add_optional_child(loc, rb_intern("variance"), variance_range);
       rbs_loc_add_optional_child(loc, rb_intern("unchecked"), unchecked_range);
       rbs_loc_add_optional_child(loc, rb_intern("upper_bound"), upper_bound_range);
+      rbs_loc_add_optional_child(loc, rb_intern("default"), default_type_range);
 
-      VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, location);
+      VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, default_type, location);
       melt_array(&params);
       rb_ary_push(params, param);
 

@@ -2011,7 +2011,7 @@ end
 
   def test_generics_bound
     Parser.parse_signature(<<-EOF).tap do |_, _, decls|
-class Foo[X < _Each[Y], Y]
+class Foo[X < _Each[Y]?, Y]
   def foo: [X < Array[Y]] (X) -> X
 end
     EOF
@@ -2023,14 +2023,15 @@ end
           assert_equal :X, param.name
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
-          assert_equal parse_type("_Each[Y]", variables: [:Y]), param.upper_bound
+          assert_nil param.upper_bound
+          assert_equal parse_type("_Each[Y]?", variables: [:Y]), param.upper_bound_type
         end
 
         decl.type_params[1].tap do |param|
           assert_equal :Y, param.name
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
-          assert_nil param.upper_bound
+          assert_nil param.upper_bound_type
         end
 
         decl.members[0].tap do |member|
@@ -2039,18 +2040,40 @@ end
             assert_equal :invariant, param.variance
             refute_predicate param, :unchecked?
             assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound_type
           end
         end
       end
     end
   end
 
-  def test_generics_bound_error
-    assert_raises RBS::ParsingError do
-      Parser.parse_signature(<<-EOF)
-        class Foo[X < string]
+  def test_generics_default
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
+class Foo[X < _Each[String]? = Array[String]]
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 1, decl.type_params.size
+        decl.type_params[0].tap do |param|
+          assert_equal :X, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.upper_bound
+          assert_equal parse_type("_Each[String]?"), param.upper_bound_type
+          assert_equal parse_type("Array[String]"), param.default_type
         end
-            EOF
+      end
+    end
+
+    assert_raises do
+      Parser.parse_signature(<<~EOF)
+        class Foo[X = untyped, Y]
+        end
+      EOF
+    end.tap do |error|
+      assert_match(/required type parameter is not allowed after optional type parameter/, error.message)
     end
   end
 

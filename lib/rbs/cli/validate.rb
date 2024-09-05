@@ -94,7 +94,7 @@ EOU
       private
 
       def validate_class_module_definition
-        @env.class_decls.each do |name, decl|
+        @env.class_decls.each do |name, entry|
           RBS.logger.info "Validating class/module definition: `#{name}`..."
           @builder.build_instance(name).each_type do |type|
             @validator.validate_type type, context: nil
@@ -107,30 +107,47 @@ EOU
             @errors.add(error)
           end
 
-          case decl
+          case entry
           when Environment::ClassEntry
-            decl.decls.each do |decl|
+            entry.decls.each do |decl|
               if super_class = decl.decl.super_class
                 super_class.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
                   no_classish_type_validator(arg)
+                  @validator.validate_type(arg, context: nil)
+                end
+
+                if super_entry = @env.normalized_class_entry(super_class.name)
+                  InvalidTypeApplicationError.check!(type_name: super_class.name, args: super_class.args, params: super_entry.type_params, location: super_class.location)
                 end
               end
             end
           when Environment::ModuleEntry
-            decl.decls.each do |decl|
+            entry.decls.each do |decl|
               decl.decl.self_types.each do |self_type|
                 self_type.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
                   no_classish_type_validator(arg)
+                  @validator.validate_type(arg, context: nil)
+                end
+
+                self_params =
+                  if self_type.name.class?
+                    @env.normalized_module_entry(self_type.name)&.type_params
+                  else
+                    @env.interface_decls[self_type.name]&.decl&.type_params
+                  end
+
+                if self_params
+                  InvalidTypeApplicationError.check!(type_name: self_type.name, params: self_params, args: self_type.args, location: self_type.location)
                 end
               end
             end
           end
 
-          d = decl.primary.decl
+          d = entry.primary.decl
 
           @validator.validate_type_params(
             d.type_params,
@@ -139,14 +156,22 @@ EOU
           )
 
           d.type_params.each do |param|
-            if ub = param.upper_bound
+            if ub = param.upper_bound_type
               void_type_context_validator(ub)
               no_self_type_validator(ub)
               no_classish_type_validator(ub)
+              @validator.validate_type(ub, context: nil)
+            end
+
+            if dt = param.default_type
+              void_type_context_validator(dt)
+              no_self_type_validator(dt)
+              no_classish_type_validator(dt)
+              @validator.validate_type(dt, context: nil)
             end
           end
 
-          decl.decls.each do |d|
+          entry.decls.each do |d|
             d.decl.each_member do |member|
               case member
               when AST::Members::MethodDefinition
@@ -163,6 +188,15 @@ EOU
                     void_type_context_validator(arg, true)
                   end
                 end
+                params =
+                  if member.name.class?
+                    module_decl = @env.normalized_module_entry(member.name) or raise
+                    module_decl.type_params
+                  else
+                    interface_decl = @env.interface_decls.fetch(member.name)
+                    interface_decl.decl.type_params
+                  end
+                InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
               when AST::Members::Var
                 void_type_context_validator(member.type)
                 if member.is_a?(AST::Members::ClassVariable)

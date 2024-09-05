@@ -236,7 +236,8 @@ module RBS
                 name: node.children[0],
                 variance: variance || :invariant,
                 location: nil,
-                upper_bound: nil
+                upper_bound: nil,
+                default_type: nil
               )
             end
           else

@@ -60,11 +60,12 @@ module RBS
     attr_reader type_name: TypeName
     attr_reader args: Array[Types::t]
     attr_reader params: Array[Symbol]
+    attr_reader type_params: Array[AST::TypeParam]
     attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location[untyped, untyped]?) -> void
+    def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
 
-    def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[Symbol], location: Location[untyped, untyped]?) -> void
+    def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAncestorError < DefinitionError
