@@ -152,6 +152,41 @@ module RBS
 
         s
       end
+
+      def self.application(params, args)
+        subst = Substitution.new()
+
+        if params.empty?
+          return nil
+        end
+
+        min_count = params.count { _1.default_type.nil? }
+        max_count = params.size
+
+        unless min_count <= args.size && args.size <= max_count
+          raise "Invalid type application: required type params=#{min_count}, optional type params=#{max_count - min_count}, given args=#{args.size}"
+        end
+
+        params.zip(args).each do |param, arg|
+          if arg
+            subst.add(from: param.name, to: arg)
+          else
+            subst.add(from: param.name, to: param.default_type || raise)
+          end
+        end
+
+        subst
+      end
+
+      def self.normalize_args(params, args)
+        params.zip(args).filter_map do |param, arg|
+          if arg
+            arg
+          else
+            param.default_type
+          end
+        end
+      end
     end
   end
 end

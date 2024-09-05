@@ -74,6 +74,33 @@ module RBS
       def self.rename: (Array[TypeParam], new_names: Array[Symbol]) -> Array[TypeParam]
 
       def to_s: () -> String
+
+      # Returns an application with respect to type params` default
+      #
+      def self.application: (Array[TypeParam], Array[Types::t]) -> Substitution?
+
+      # Returns an array of type args, that fills ommited types with the defaults
+      #
+      # ```rbs
+      # interface _Foo[T, S = untyped]
+      # end
+      # ```
+      #
+      # Normalizing type args with `_Foo` works as following:
+      #
+      # ```rbs
+      # _Foo[String]                   # => _Foo[String, untyped]
+      # _Foo[String, Integer]          # => _Foo[String, Integer]
+      # _Foo                           # => _Foo                            (Omitting missing args)
+      # _Foo[String, Integer, untyped] # => _Foo[String, Integer, untyped]  (Keeping extra args)
+      # ```
+      #
+      # Note that it allows iinvalid arities.
+      #
+      # * Missing args will be omitted
+      # * Extra args will be keeped
+      #
+      def self.normalize_args: (Array[TypeParam], Array[Types::t]) -> Array[Types::t]
     end
   end
 end

@@ -918,4 +918,182 @@ EOF
       end
     end
   end
+
+  def test_instance_ancestors__generic_default
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class A[T = String]
+end
+
+module B[S = Integer]
+end
+
+module C[T = bool]
+end
+
+class Foo < A
+  include B
+  prepend C
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [], a.params
+
+          ancestors = a.ancestors.dup
+
+          ancestors.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::C"), ancestor.name
+            assert_equal [parse_type("bool")], ancestor.args
+            assert_instance_of AST::Members::Prepend, ancestor.source
+          end
+          ancestors.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::Foo"), ancestor.name
+            assert_equal [], ancestor.args
+            assert_nil ancestor.source
+          end
+          ancestors.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::B"), ancestor.name
+            assert_equal [parse_type("::Integer")], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+          ancestors.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::A"), ancestor.name
+            assert_equal [parse_type("::String")], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+        end
+      end
+    end
+  end
+
+  def test_one_singleton_ancestors__generic_default
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module A[T = String]
+end
+
+interface _B[T = Integer]
+end
+
+class Foo
+  extend A
+  extend _B
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+
+          extended_modules = a.extended_modules.dup
+          extended_modules.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::A"), ancestor.name
+            assert_equal [parse_type("::String")], ancestor.args
+            assert_instance_of AST::Members::Extend, ancestor.source
+          end
+
+          extended_interfaces = a.extended_interfaces.dup
+          extended_interfaces.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_B"), ancestor.name
+            assert_equal [parse_type("::Integer")], ancestor.args
+            assert_instance_of AST::Members::Extend, ancestor.source
+          end
+        end
+      end
+    end
+  end
+
+  def test_one_instance_ancestors__generic_default
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class A[T = String]
+end
+
+module B[S = Integer]
+end
+
+module C[T = Symbol]
+end
+
+interface _D[T = untyped]
+end
+
+class Foo < A
+  include B
+  prepend C
+  include _D
+end
+
+module Bar : A, _D
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+
+          a.super_class.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::A"), ancestor.name
+            assert_equal [parse_type("::String")], ancestor.args
+            assert_equal :super, ancestor.source
+          end
+
+          included_modules = a.included_modules.dup
+          included_modules.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::B"), ancestor.name
+            assert_equal [parse_type("::Integer")], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+
+          included_interfaces = a.included_interfaces.dup
+          included_interfaces.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_D"), ancestor.name
+            assert_equal [parse_type("untyped")], ancestor.args
+            assert_instance_of AST::Members::Include, ancestor.source
+          end
+
+          prepended_modules = a.prepended_modules.dup
+          prepended_modules.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::C"), ancestor.name
+            assert_equal [parse_type("::Symbol")], ancestor.args
+            assert_instance_of AST::Members::Prepend, ancestor.source
+          end
+        end
+
+        builder.one_instance_ancestors(type_name("::Bar")).tap do |a|
+          assert_equal type_name("::Bar"), a.type_name
+
+          self_types = a.self_types.dup
+          self_types.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::A"), ancestor.name
+            assert_equal [parse_type("::String")], ancestor.args
+            assert_instance_of AST::Declarations::Module::Self, ancestor.source
+          end
+          self_types.shift.tap do |ancestor|
+            assert_instance_of Ancestor::Instance, ancestor
+            assert_equal type_name("::_D"), ancestor.name
+            assert_equal [parse_type("untyped")], ancestor.args
+            assert_instance_of AST::Declarations::Module::Self, ancestor.source
+          end
+        end
+      end
+    end
+  end
 end
