@@ -158,15 +158,6 @@ static VALUE location_end_pos(VALUE self) {
   return INT2FIX(loc->rg.end);
 }
 
-// TODO: remove it
-static VALUE location_start_loc(VALUE self) {
-  return Qnil;
-}
-
-static VALUE location_end_loc(VALUE self) {
-  return Qnil;
-}
-
 static VALUE location_add_required_child(VALUE self, VALUE name, VALUE start, VALUE end) {
   rbs_loc *loc = rbs_check_location(self);
 
@@ -293,8 +284,6 @@ void rbs__init_location(void) {
   rb_define_method(RBS_Location, "buffer", location_buffer, 0);
   rb_define_method(RBS_Location, "start_pos", location_start_pos, 0);
   rb_define_method(RBS_Location, "end_pos", location_end_pos, 0);
-  rb_define_private_method(RBS_Location, "_start_loc", location_start_loc, 0);
-  rb_define_private_method(RBS_Location, "_end_loc", location_end_loc, 0);
   rb_define_method(RBS_Location, "_add_required_child", location_add_required_child, 3);
   rb_define_method(RBS_Location, "_add_optional_child", location_add_optional_child, 3);
   rb_define_method(RBS_Location, "_add_optional_no_child", location_add_optional_no_child, 1);
