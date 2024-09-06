@@ -116,7 +116,7 @@ token rbsparser_next_token(lexstate *state) {
 yy1:
 	rbs_skip(state);
 #line 144 "ext/rbs_extension/lexer.re"
-	{ return next_token(state, pEOF); }
+	{ return next_eof_token(state); }
 #line 121 "ext/rbs_extension/lexer.c"
 yy2:
 	rbs_skip(state);

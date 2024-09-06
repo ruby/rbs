@@ -35,7 +35,7 @@ module RBS
       return msg unless location.start_line == location.end_line
 
       indent = " " * location.start_column
-      marker = "^" * (location.end_column - location.start_column)
+      marker = "^" * ([location.end_column - location.start_column, 1].max or raise)
 
       io = StringIO.new
       io.puts msg

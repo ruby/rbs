@@ -912,7 +912,7 @@ singleton(::BasicObject)
 
       assert_raises(SystemExit) { cli.run(['parse', '--method-type', '-e', '()']) }
       assert_equal [
-        "-e:1:2...1:3: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
+        "-e:1:2...1:2: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
         "",
         "  ()",
         "    ^"
