@@ -1194,7 +1194,7 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
 
           default_type_range.start = state->current_token.range.start;
           default_type = parse_type(state);
-          default_type_range.start = state->current_token.range.end;
+          default_type_range.end = state->current_token.range.end;
 
           required_param_allowed = false;
         } else {
