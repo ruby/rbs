@@ -18,7 +18,7 @@ interface _JsonRead
   def read: () -> string
 end
 
-type json_options = Hash[Symbol, untyped]
+type json_options = { ?max_nesting: bool, ?allow_nan: bool, ?script_safe: bool }
 
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # The base exception for JSON errors.

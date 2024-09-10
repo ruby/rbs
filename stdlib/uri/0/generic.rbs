@@ -101,6 +101,18 @@ module URI
   class Generic
     include URI
 
+    type build_opts = {
+      ?scheme: String?,
+      ?userinfo: String?,
+      ?host: String?,
+      ?port: Integer?,
+      ?registry: String?,
+      ?path: String?,
+      ?opaque: String?,
+      ?query: String?,
+      ?fragment: String?
+    }
+
     # <!-- rdoc-file=lib/uri/generic.rb -->
     # A Default port of nil for URI::Generic.
     #
@@ -153,8 +165,8 @@ module URI
     # URI::Generic::build. But, if exception URI::InvalidComponentError is raised,
     # then it does URI::Escape.escape all URI components and tries again.
     #
-    def self.build2: (Array[nil | String | Integer]) -> URI::Generic
-                   | ({ scheme: String?, userinfo: String?, host: String?, port: Integer?, registry: String?, path: String?, opaque: String?, query: String?, fragment: String? }) -> instance
+    def self.build2: (Array[nil | String | Integer] args) -> URI::Generic
+                   | (build_opts args) -> instance
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -171,8 +183,8 @@ module URI
     # query, and fragment. You can provide arguments either by an Array or a Hash.
     # See ::new for hash keys to use or for order of array items.
     #
-    def self.build: (Array[nil | String | Integer]) -> URI::Generic
-                  | ({ scheme: String?, userinfo: String?, host: String?, port: Integer?, registry: String?, path: String?, opaque: String?, query: String?, fragment: String? }) -> instance
+    def self.build: (Array[nil | String | Integer] args) -> URI::Generic
+                  | (build_opts args) -> instance
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
