@@ -35,4 +35,32 @@ class CSVSingletonTest < Test::Unit::TestCase
     assert_send_type "(String path, headers: bool, **untyped) -> Enumerator[CSV::Row, void]",
                      CSV, :foreach, path, headers: true, encoding: 'UTF-8'
   end
+
+  def test_read
+    tmpdir = Dir.mktmpdir
+    path = File.join(tmpdir, "example.csv")
+    File.write(path, "a,b,c\n1,2,3\n")
+
+    assert_send_type "(String path, headers: true) -> CSV::Table[CSV::Row]",
+                     CSV, :read, path, headers: true
+    assert_send_type "(IO path, headers: true) -> CSV::Table[CSV::Row]",
+                     CSV, :read, File.open(path), headers: true
+    assert_send_type "(String path, headers: :first_row) -> CSV::Table[CSV::Row]",
+                     CSV, :read, path, headers: :first_row
+    assert_send_type "(IO path, headers: :first_row) -> CSV::Table[CSV::Row]",
+                     CSV, :read, File.open(path), headers: :first_row
+    assert_send_type "(String path, headers: Array[String]) -> CSV::Table[CSV::Row]",
+                     CSV, :read, path, headers: %w[foo bar baz]
+    assert_send_type "(IO path, headers: Array[String]) -> CSV::Table[CSV::Row]",
+                     CSV, :read, File.open(path), headers: %w[foo bar baz]
+    assert_send_type "(String path, headers: String) -> CSV::Table[CSV::Row]",
+                     CSV, :read, path, headers: "foo,bar,baz"
+    assert_send_type "(IO path, headers: String) -> CSV::Table[CSV::Row]",
+                     CSV, :read, File.open(path), headers: "foo,bar,baz"
+
+    assert_send_type "(String path) -> Array[Array[String?]]",
+                     CSV, :read, path
+    assert_send_type "(IO path) -> Array[Array[String?]]",
+                     CSV, :read, File.open(path)
+  end
 end
