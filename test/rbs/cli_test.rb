@@ -1092,8 +1092,8 @@ Processing `lib`...
       RBS
 
       with_cli do |cli|
-        # Assumes there is `ls` command.
-        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo ls))
+        # `exit` is a common shell built-in command.
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo exit))
 
         assert_raises(SystemExit) { cli.run(%w(test)) }
         assert_raises(SystemExit) { cli.run(%W(-I #{dir} test)) }
