@@ -1,0 +1,4 @@
+# A custome matcher that implements String::_MatchAgainst[String, bool]
+class CustomMatcher
+  def =~: (String) -> bool
+end

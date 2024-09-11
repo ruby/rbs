@@ -40,3 +40,7 @@ gem 'csv'
 group :minitest do
   gem "minitest"
 end
+
+group :typecheck_test do
+  gem "steep", "~> 1.7.1", require: false
+end

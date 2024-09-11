@@ -2328,12 +2328,12 @@ end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
       definition_builder.build_instance(TypeName("::Foo")).tap do |defn|
         defn.methods[:request].tap do |m|
-          assert_equal ["(::interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+          assert_equal ["(::interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
       end
       definition_builder.build_instance(TypeName("::Mod")).tap do |defn|
         defn.methods[:request].tap do |m|
-          assert_equal ["(::interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped"], m.method_types.map(&:to_s)
+          assert_equal ["(::interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
       end
   end
@@ -2683,6 +2683,25 @@ end
 
         builder.build_instance(type_name("::Bar"))
         builder.build_singleton(type_name("::Bar"))
+      end
+    end
+  end
+
+  def test_alias__to_module_self_indierect_method
+    SignatureManager.new(system_builtin: false) do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Kernel
+  alias foo __id__
+end
+
+module Foo
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo"))
       end
     end
   end

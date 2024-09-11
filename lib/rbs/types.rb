@@ -1267,7 +1267,7 @@ module RBS
         return_type.has_classish_type?
       end
 
-      def with_nonreturn_void
+      def with_nonreturn_void?
         false
       end
 
@@ -1278,6 +1278,17 @@ module RBS
       def return_to_s
         return_type.to_s(1)
       end
+
+      def ==(other)
+        other.is_a?(UntypedFunction) && other.return_type == return_type
+      end
+
+      alias eql? ==
+
+      def hash
+        self.class.hash ^ return_type.hash
+      end
+
     end
 
     class Block

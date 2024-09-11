@@ -59,6 +59,8 @@ module RBS
       end
 
       def method_call(method_name, method_type, call, errors:)
+        return errors if method_type.type.is_a?(Types::UntypedFunction)
+
         args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
         self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
 
@@ -150,6 +152,8 @@ module RBS
       end
 
       def zip_args(args, fun, &block)
+        return true if fun.is_a?(Types::UntypedFunction)
+
         case
         when args.empty?
           if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
@@ -354,6 +358,8 @@ module RBS
       def callable_argument?(parameters, method_type)
         fun = method_type.type
         take_has_rest = !!parameters.find { |(op, _)| op == :rest }
+
+        return true if fun.is_a?(Types::UntypedFunction)
 
         fun.required_positionals.each do
           op, _ = parameters.first

@@ -83,7 +83,7 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
 
   def test_generate_lock_from_relative_git_repository
     mktmpdir do |git_tmpdir|
-      system('git', 'clone', 'https://github.com/ruby/gem_rbs_collection.git', git_tmpdir.to_s, exception: true, 2 => '/dev/null')
+      system('git', 'clone', 'https://github.com/ruby/gem_rbs_collection.git', git_tmpdir.to_s, exception: true, 2 => IO::NULL)
 
       mktmpdir do |tmpdir|
         config_path = tmpdir / 'rbs_collection.yaml'

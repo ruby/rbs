@@ -49,15 +49,11 @@ module RBS
     end
 
     def start_loc
-      @start_loc ||= begin
-        _start_loc || buffer.pos_to_loc(start_pos)
-      end
+      @start_loc ||= buffer.pos_to_loc(start_pos)
     end
 
     def end_loc
-      @end_loc ||= begin
-        _end_loc || buffer.pos_to_loc(end_pos)
-      end
+      @end_loc ||= buffer.pos_to_loc(end_pos)
     end
 
     def range

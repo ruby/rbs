@@ -32,6 +32,8 @@ jobs:
             job: lexer compile confirm_lexer
           - ruby: "3.3"
             job: rubocop validate test_doc build test_generate_stdlib raap
+          - ruby: "3.3"
+            job: typecheck_test
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
@@ -40,6 +42,8 @@ jobs:
           bundler: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
+      - name: Set up permission
+        run: chmod -R o-w /opt/hostedtoolcache/Ruby
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -64,27 +68,13 @@ jobs:
           echo "NO_MINITEST=true" >> $GITHUB_ENV
           bundle config set --local without 'minitest'
         if: ${{ contains(matrix.ruby, 'head') }}
+      - name: Skip installing type checkers
+        if: ${{ ! contains(matrix.job, 'typecheck_test') }}
+        run: |
+          bundle config set without 'typecheck_test'
       - name: bin/setup
         run: |
           bin/setup
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
-
-  windows:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-2019, windows-2022]
-        ruby: [ucrt, mswin]
-    steps:
-      - uses: actions/checkout@v4
-      - name: load ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-      - name: rake-compiler
-        run: gem install rake-compiler
-      - name: compile
-        run: rake compile

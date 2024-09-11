@@ -213,11 +213,14 @@ module RBS
             end
 
             super_name = env.normalize_module_name(super_name)
-
+            
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
             if super_class
               InheritModuleError.check!(super_class, env: env)
             end
+
+            super_entry = env.normalized_class_entry(super_name) or raise
+            super_args = AST::TypeParam.normalize_args(super_entry.type_params, super_args)
 
             ancestors = OneAncestors.class_instance(
               type_name: type_name,
@@ -243,9 +246,17 @@ module RBS
 
               module_name = module_self.name
               if module_name.class?
-                module_name = env.normalize_module_name(module_name)
+                module_entry = env.normalized_module_class_entry(module_name) or raise
+                module_name = module_entry.name
+                self_args = AST::TypeParam.normalize_args(module_entry.type_params, module_self.args)
               end
-              self_types.push Definition::Ancestor::Instance.new(name: module_name, args: module_self.args, source: module_self)
+              if module_name.interface?
+                interface_entry = env.interface_decls.fetch(module_name)
+                self_args = AST::TypeParam.normalize_args(interface_entry.decl.type_params, module_self.args)
+              end
+              self_args or raise
+
+              self_types.push Definition::Ancestor::Instance.new(name: module_name, args: self_args, source: module_self)
             end
           end
         end
@@ -346,10 +357,16 @@ module RBS
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
+              module_decl = env.normalized_module_entry(module_name) or raise
+              module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+
               module_name = env.normalize_module_name(module_name)
               included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             when member.name.interface? && included_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              interface_decl = env.interface_decls.fetch(module_name)
+              module_args = AST::TypeParam.normalize_args(interface_decl.decl.type_params, module_args)
 
               included_interfaces << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
@@ -359,8 +376,11 @@ module RBS
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
-              module_name = env.normalize_module_name(member.name)
+              module_decl = env.normalized_module_entry(member.name) or raise
+              module_name = module_decl.name
+
               module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
+              module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
 
               prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
@@ -374,10 +394,16 @@ module RBS
               MixinClassError.check!(type_name: type_name, env: env, member: member)
               NoMixinFoundError.check!(member.name, env: env, member: member)
 
+              module_decl = env.normalized_module_entry(module_name) or raise
+              module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+
               module_name = env.normalize_module_name(module_name)
               extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             when member.name.interface? && extended_interfaces
               NoMixinFoundError.check!(member.name, env: env, member: member)
+
+              interface_decl = env.interface_decls.fetch(module_name)
+              module_args = AST::TypeParam.normalize_args(interface_decl.decl.type_params, module_args)
 
               extended_interfaces << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end

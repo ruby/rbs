@@ -365,4 +365,30 @@ type Foo::list[T < Baz] = nil | [T, Bar::list[T]]
       end
     end
   end
+
+  def test_validate__generics_default
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+class A[T = String]
+end
+
+class Foo
+  def foo: () -> A
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type(parse_type("::A"), context: root)
+        validator.validate_type(parse_type("::A[Integer]"), context: root)
+        assert_raises(RBS::InvalidTypeApplicationError) do
+          validator.validate_type(parse_type("::A[Integer, untyped]"), context: root)
+        end
+      end
+    end
+  end
 end

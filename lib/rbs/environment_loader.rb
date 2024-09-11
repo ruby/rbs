@@ -152,7 +152,7 @@ module RBS
       each_dir do |source, dir|
         skip_hidden = !source.is_a?(Pathname)
 
-        FileFinder.each_file(dir, skip_hidden: skip_hidden, immediate: true) do |path|
+        FileFinder.each_file(dir, skip_hidden: skip_hidden) do |path|
           next if files.include?(path)
 
           files << path

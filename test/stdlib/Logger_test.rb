@@ -13,23 +13,23 @@ class LoggerSingletonTest < Test::Unit::TestCase
     assert_send_type  "(nil) -> Logger",
                       Logger, :new, nil
     assert_send_type  "(String logdev) -> void",
-                      Logger, :new, '/dev/null'
+                      Logger, :new, IO::NULL
     assert_send_type  "(StringIO logdev) -> void",
                       Logger, :new, StringIO.new
     assert_send_type  "(String logdev, Integer shift_age) -> void",
-                      Logger, :new, '/dev/null', 1
+                      Logger, :new, IO::NULL, 1
     assert_send_type  "(String logdev, String shift_age) -> void",
-                      Logger, :new, '/dev/null', 'weekly'
+                      Logger, :new, IO::NULL, 'weekly'
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size) -> void",
-                      Logger, :new, '/dev/null', 1, 1
+                      Logger, :new, IO::NULL, 1, 1
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: bool, datetime_format: String, formatter: Proc, progname: String, level: Integer) -> void",
-                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
+                      Logger, :new, IO::NULL, 1, 1, shift_period_suffix: '%Y', binmode: true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: Integer) -> void",
-                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
+                      Logger, :new, IO::NULL, 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: Logger::INFO
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: String) -> void",
-                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: "INFO"
+                      Logger, :new, IO::NULL, 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: "INFO"
     assert_send_type  "(String logdev, Integer shift_age, Integer shift_size, shift_period_suffix: String, binmode: Symbol, datetime_format: String, formatter: Proc, progname: String, level: Symbol) -> void",
-                      Logger, :new, '/dev/null', 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: :INFO
+                      Logger, :new, IO::NULL, 1, 1, shift_period_suffix: '%Y', binmode: :true, datetime_format: '%Y', formatter: proc { '' }, progname: 'foo', level: :INFO
   end
 end
 

@@ -247,9 +247,9 @@ singleton(::BasicObject)
       assert_includes stdout.string, 'implementation: ::Kernel'
       assert_includes stdout.string, 'accessibility: public'
       assert_includes stdout.string, 'types:'
-      assert_includes stdout.string, '  [X] () { (self) -> X } -> X'
+      assert_includes stdout.string, '  () -> ::Enumerator[self, untyped]'
       assert_includes stdout.string, 'rbs/core/kernel.rbs'
-      assert_includes stdout.string, '| () -> ::Enumerator[self, untyped]'
+      assert_includes stdout.string, '| [T] () { (self) -> T } -> T'
       assert_includes stdout.string, 'rbs/core/kernel.rbs'
     end
 
@@ -379,11 +379,14 @@ singleton(::BasicObject)
     with_cli do |cli|
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
-        class Foo[A < _Each[B]]
-          def foo: [X < _Foo[Y]] () -> X
+          class Foo[A < _Each[B]]
+            def foo: [X < _Foo[Y]] () -> X
 
-          def bar: [X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]] () -> void
-        end
+            def bar: [X < _Foo[Y], Y < _Bar[Z], Z < _Baz[X]] () -> void
+          end
+
+          class B
+          end
         RBS
 
         assert_raises SystemExit do
@@ -428,6 +431,121 @@ singleton(::BasicObject)
         end
 
         assert_include stdout.string, "a.rbs:4:11...4:50: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
+      end
+    end
+  end
+
+  def test_validate__generics_default
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          module A[T = Integer]
+          end
+
+          class B[S = String]
+          end
+
+          interface _C[T = Symbol]
+          end
+
+          class Foo[T = A]
+            type t = A
+
+            def foo: () -> A
+
+            def self.bar: () -> B
+          end
+
+          class Bar < B
+            include A
+            extend A
+            include _C
+            extend _C
+          end
+
+          module Baz : A, _C
+          end
+        RBS
+
+        cli.run(["-I", dir, "validate"])
+      end
+    end
+  end
+
+  def test_validate__generics_default2
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        dir = Pathname(dir)
+
+        (dir + 'a.rbs').write(<<~RBS)
+          module A[T = Integer]
+          end
+
+          class B[S = String]
+          end
+
+          interface _C[T = Symbol]
+          end
+        RBS
+
+        (dir + "x0.rbs").write(<<~RBS)
+          class X0[T = A[Symbol, Symbol]]
+          end
+        RBS
+
+        (dir + "x1.rbs").write(<<~RBS)
+          class X1 < B[String, untyped]
+          end
+        RBS
+
+        (dir + "x2.rbs").write(<<~RBS)
+          class X2
+            include A[String, untyped]
+          end
+        RBS
+
+        (dir + "x3.rbs").write(<<~RBS)
+          class X3
+            include _C[String, untyped]
+          end
+        RBS
+
+        (dir + "x4.rbs").write(<<~RBS)
+          class X4
+            prepend A[String, untyped]
+          end
+        RBS
+
+        (dir + "x5.rbs").write(<<~RBS)
+          class X5
+            extend A[String, untyped]
+          end
+        RBS
+
+        (dir + "x6.rbs").write(<<~RBS)
+          class X6
+            extend _C[String, untyped]
+          end
+        RBS
+
+        (dir + "x7.rbs").write(<<~RBS)
+          module X7 : A[String, untyped]
+          end
+        RBS
+
+
+        assert_raises SystemExit do
+          cli.run(["-I", dir.to_s, "validate"])
+        end
+
+        assert_include stdout.string, "/x0.rbs:1:13...1:30: ::A expects parameters [T = ::Integer], but given args [::Symbol, ::Symbol] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x1.rbs:1:11...1:29: ::B expects parameters [S = ::String], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x2.rbs:2:2...2:28: ::A expects parameters [T = ::Integer], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x3.rbs:2:2...2:29: ::_C expects parameters [T = ::Symbol], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x4.rbs:2:2...2:28: ::A expects parameters [T = ::Integer], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x5.rbs:2:2...2:27: ::A expects parameters [T = ::Integer], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x6.rbs:2:2...2:28: ::_C expects parameters [T = ::Symbol], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "/x7.rbs:1:12...1:30: ::A expects parameters [T = ::Integer], but given args [::String, untyped] (RBS::InvalidTypeApplicationError)"
       end
     end
   end
@@ -794,7 +912,7 @@ singleton(::BasicObject)
 
       assert_raises(SystemExit) { cli.run(['parse', '--method-type', '-e', '()']) }
       assert_equal [
-        "-e:1:2...1:3: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
+        "-e:1:2...1:2: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
         "",
         "  ()",
         "    ^"

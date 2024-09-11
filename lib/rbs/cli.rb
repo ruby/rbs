@@ -3,7 +3,6 @@
 require "open3"
 require "optparse"
 require "shellwords"
-require "abbrev"
 require "stringio"
 
 module RBS
@@ -110,7 +109,7 @@ module RBS
     end
 
     def has_parser?
-      defined?(RubyVM::AbstractSyntaxTree)
+      defined?(RubyVM::AbstractSyntaxTree) ? true : false
     end
 
     def run(args)
@@ -910,7 +909,7 @@ Options:
       syntax_error = false
       bufs = args.flat_map do |path|
         path = Pathname(path)
-        FileFinder.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
+        FileFinder.each_file(path, skip_hidden: false).map do |file_path|
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
@@ -1062,14 +1061,13 @@ EOB
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)
 
-      subcommand = Abbrev.abbrev(['install', 'update', 'help'])[args[0]] || args[0]
-      case subcommand
-      when 'install'
+      case args[0]
+      when 'install', 'instal', 'insta', 'inst', 'ins', 'in', 'i'
         unless params[:frozen]
           Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
-      when 'update'
+      when 'update', 'updat', 'upda', 'upd', 'up', 'u'
         # TODO: Be aware of argv to update only specified gem
         Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
@@ -1107,7 +1105,7 @@ EOB
           exit 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
-      when 'help'
+      when 'help', 'hel', 'he', 'h'
         puts opts.help
       else
         puts opts.help
@@ -1195,7 +1193,7 @@ EOB
       end
 
       minuend_paths.each do |minuend_path|
-        FileFinder.each_file(Pathname(minuend_path), immediate: true, skip_hidden: true) do |rbs_path|
+        FileFinder.each_file(Pathname(minuend_path), skip_hidden: true) do |rbs_path|
           buf = Buffer.new(name: rbs_path, content: rbs_path.read)
           _, dirs, decls = Parser.parse_signature(buf)
           subtracted = Subtractor.new(decls, subtrahend).call

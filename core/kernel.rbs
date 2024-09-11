@@ -282,7 +282,7 @@ module Kernel : BasicObject
   #     1.class      #=> Integer
   #     self.class   #=> Object
   #
-  def class: () -> untyped
+  def class: () -> Class
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -2066,7 +2066,7 @@ module Kernel : BasicObject
   # Returns true if two objects do not match (using the *=~* method), otherwise
   # false.
   #
-  def !~: (untyped) -> bool
+  def !~: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2086,7 +2086,7 @@ module Kernel : BasicObject
   # When you define #<=>, you can include Comparable to gain the methods #<=, #<,
   # #==, #>=, #> and #between?.
   #
-  def <=>: (untyped) -> Integer?
+  def <=>: (untyped other) -> 0?
 
   # <!--
   #   rdoc-file=object.c
@@ -2096,7 +2096,7 @@ module Kernel : BasicObject
   # typically overridden by descendants to provide meaningful semantics in `case`
   # statements.
   #
-  def ===: (untyped) -> bool
+  alias === ==
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2152,8 +2152,8 @@ module Kernel : BasicObject
   #     chris.define_singleton_method(:greet) {|greeting| "#{greeting}, I'm Chris!" }
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
-  def define_singleton_method: (interned, Method | UnboundMethod | Proc method) -> Symbol
-                             | (interned) { (*untyped) -> untyped } -> Symbol
+  def define_singleton_method: (interned name, Method | UnboundMethod | Proc method) -> Symbol
+                             | (interned name) { (?) -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
@@ -2170,7 +2170,7 @@ module Kernel : BasicObject
   #
   #     1cat[4, 5, 6]
   #
-  def display: (?_Writer port) -> void
+  def display: (?_Writer port) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -2210,7 +2210,7 @@ module Kernel : BasicObject
   #     s3 = s1.dup #=> #<Klass:0x401c1084>
   #     s3.foo #=> NoMethodError: undefined method `foo' for #<Klass:0x401c1084>
   #
-  def dup: () -> self
+  def dup: () -> instance
 
   # <!-- rdoc-file=enumerator.c -->
   # Creates a new Enumerator which will enumerate by calling `method` on `obj`,
@@ -2267,10 +2267,8 @@ module Kernel : BasicObject
   #     enum.first(4) # => [1, 1, 1, 2]
   #     enum.size # => 42
   #
-  def enum_for: (Symbol method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
-              | () ?{ () -> Integer } -> Enumerator[untyped, self]
+  def enum_for: (?interned method, *untyped, **untyped) ?{ (*untyped, **untyped) -> Integer } -> Enumerator[untyped, untyped]
 
-  %a{annotate:rdoc:skip}
   alias to_enum enum_for
 
   # <!--
@@ -2308,7 +2306,7 @@ module Kernel : BasicObject
   #     1 == 1.0     #=> true
   #     1.eql? 1.0   #=> false
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=eval.c
@@ -2333,7 +2331,7 @@ module Kernel : BasicObject
   #     k.extend(Mod)   #=> #<Klass:0x401b3bc8>
   #     k.hello         #=> "Hello from Mod.\n"
   #
-  def extend: (Module, *Module) -> self
+  def extend: (Module module, *Module other_modules) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -2447,7 +2445,7 @@ module Kernel : BasicObject
   #     b.instance_of? B   #=> true
   #     b.instance_of? C   #=> false
   #
-  def instance_of?: (Module) -> bool
+  def instance_of?: (Module | Class module_or_class) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2467,7 +2465,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_defined?("@b")   #=> true
   #     fred.instance_variable_defined?("@c")   #=> false
   #
-  def instance_variable_defined?: (interned var) -> bool
+  def instance_variable_defined?: (interned variable) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -2489,7 +2487,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_get(:@a)    #=> "cat"
   #     fred.instance_variable_get("@b")   #=> 99
   #
-  def instance_variable_get: (interned var) -> untyped
+  def instance_variable_get: (interned variable) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -2512,7 +2510,7 @@ module Kernel : BasicObject
   #     fred.instance_variable_set(:@c, 'cat')   #=> "cat"
   #     fred.inspect                             #=> "#<Fred:0x401b3da8 @a=\"dog\", @b=99, @c=\"cat\">"
   #
-  def instance_variable_set: [X] (interned var, X value) -> X
+  def instance_variable_set: [T] (interned variable, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -2553,9 +2551,8 @@ module Kernel : BasicObject
   #     b.kind_of? C       #=> false
   #     b.kind_of? M       #=> true
   #
-  def is_a?: (Module) -> bool
+  def is_a?: (Module | Class module_or_class) -> bool
 
-  %a{annotate:rdoc:skip}
   alias kind_of? is_a?
 
   # <!--
@@ -2636,7 +2633,7 @@ module Kernel : BasicObject
   #     k.extend M123
   #     k.methods(false)   #=> [:singleton_method]
   #
-  def methods: () -> Array[Symbol]
+  def methods: (?boolish regular) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -2647,7 +2644,7 @@ module Kernel : BasicObject
   #     Object.new.nil?   #=> false
   #     nil.nil?          #=> true
   #
-  def nil?: () -> bool
+  def nil?: () -> false
 
   # <!--
   #   rdoc-file=gc.c
@@ -2672,7 +2669,7 @@ module Kernel : BasicObject
   #     "hello".object_id     == "hello".object_id     # => false
   #     "hi".freeze.object_id == "hi".freeze.object_id # => true
   #
-  def object_id: () -> Integer
+  alias object_id __id__
 
   # <!--
   #   rdoc-file=object.c
@@ -2682,7 +2679,7 @@ module Kernel : BasicObject
   # parameter is set to `false`, only those methods in the receiver will be
   # listed.
   #
-  def private_methods: () -> Array[Symbol]
+  def private_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -2692,7 +2689,7 @@ module Kernel : BasicObject
   # parameter is set to `false`, only those methods in the receiver will be
   # listed.
   #
-  def protected_methods: () -> Array[Symbol]
+  def protected_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=proc.c
@@ -2722,7 +2719,7 @@ module Kernel : BasicObject
   #
   #     1.public_send(:puts, "hello")  # causes NoMethodError
   #
-  def public_send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  def public_send: (interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -2746,7 +2743,7 @@ module Kernel : BasicObject
   #     d.remove   #=> 99
   #     d.var      #=> nil
   #
-  def remove_instance_variable: (interned name) -> untyped
+  def remove_instance_variable: (interned variable) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -2782,8 +2779,7 @@ module Kernel : BasicObject
   #
   # See #respond_to?, and the example of BasicObject.
   #
-  %a{annotate:rdoc:copy:Object#respond_to_missing?}
-  private def respond_to_missing?: (Symbol, bool) -> bool
+  private def respond_to_missing?: (Symbol | String name, bool include_all) -> bool
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -2808,7 +2804,7 @@ module Kernel : BasicObject
   #     k = Klass.new
   #     k.send :hello, "gentle", "readers"   #=> "Hello gentle readers"
   #
-  def send: (interned name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  alias send __send__
 
   # <!--
   #   rdoc-file=object.c
@@ -2883,7 +2879,7 @@ module Kernel : BasicObject
   #     a.singleton_methods(false)  #=> [:two, :one]
   #     a.singleton_methods         #=> [:two, :one, :three]
   #
-  def singleton_methods: () -> Array[Symbol]
+  def singleton_methods: (?boolish all) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -2919,17 +2915,50 @@ module Kernel : BasicObject
   #
   #     "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   #
-  def yield_self: [X] () { (self) -> X } -> X
-                | () -> Enumerator[self, untyped]
+  def yield_self: () -> Enumerator[self, untyped]
+                | [T] () { (self) -> T } -> T
 
-  %a{annotate:rdoc:skip}
+  # <!--
+  #   rdoc-file=kernel.rb
+  #   - obj.then {|x| block }          -> an_object
+  # -->
+  # Yields self to the block and returns the result of the block.
+  #
+  #     3.next.then {|x| x**x }.to_s             #=> "256"
+  #
+  # Good usage for `then` is value piping in method chains:
+  #
+  #     require 'open-uri'
+  #     require 'json'
+  #
+  #     construct_url(arguments).
+  #       then {|url| URI(url).read }.
+  #       then {|response| JSON.parse(response) }
+  #
+  # When called without block, the method returns `Enumerator`, which can be used,
+  # for example, for conditional circuit-breaking:
+  #
+  #     # meets condition, no-op
+  #     1.then.detect(&:odd?)            # => 1
+  #     # does not meet condition, drop value
+  #     2.then.detect(&:odd?)            # => nil
+  #
+  # Good usage for `then` is value piping in method chains:
+  #
+  #     require 'open-uri'
+  #     require 'json'
+  #
+  #     construct_url(arguments).
+  #       then {|url| URI(url).read }.
+  #       then {|response| JSON.parse(response) }
+  #
   alias then yield_self
 
-  private def initialize_copy: (self object) -> self
+  private
 
-  private def initialize_clone: (self object, ?freeze: bool?) -> self
+  def initialize_copy: (instance object) -> self
 
-  private def initialize_dup: (self object) -> self
+  def initialize_clone: (instance object, ?freeze: bool?) -> self
+
+  def initialize_dup: (instance object) -> self
 end
-
-Kernel::RUBYGEMS_ACTIVATION_MONITOR: untyped

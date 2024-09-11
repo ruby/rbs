@@ -97,20 +97,21 @@ bool parser_typevar_member(parserstate *state, ID id);
  * Allocate new lexstate object.
  *
  * ```
- * alloc_lexer(buffer, 0, 31)    // New lexstate with buffer
+ * VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+ * alloc_lexer(string, 0, 31)    // New lexstate with buffer content
  * ```
  * */
-lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos);
+lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos);
 
 /**
  * Allocate new parserstate object.
  *
  * ```
- * alloc_parser(buffer, 0, 1, variables)    // New parserstate with variables
- * alloc_parser(buffer, 3, 5, Qnil)         // New parserstate without variables
+ * alloc_parser(buffer, lexer, 0, 1, variables)    // New parserstate with variables
+ * alloc_parser(buffer, lexer, 3, 5, Qnil)         // New parserstate without variables
  * ```
  * */
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables);
+parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_pos, VALUE variables);
 void free_parser(parserstate *parser);
 /**
  * Advance one token.
