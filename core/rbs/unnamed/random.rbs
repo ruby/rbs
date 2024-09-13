@@ -224,12 +224,12 @@ module RBS
       #
       %a{annotate:rdoc:copy:Random::Formatter#random_number}
       def random_number: () -> Float
-                      | (?Float? n) -> Float
-                      | (?Integer? n) -> Integer
-                      | (?Numeric? n) -> Numeric
-                      | (?::Range[Float]? n) -> Float
-                      | (?::Range[Integer]? n) -> Integer
-                      | (?::Range[Numeric]? n) -> Numeric
+                       | (?Float? n) -> Float
+                       | (?Integer? n) -> Integer
+                       | (?Numeric? n) -> Numeric
+                       | (?::Range[Float]? n) -> Float
+                       | (?::Range[Integer]? n) -> Integer
+                       | (?::Range[Numeric]? n) -> Numeric
 
       # <!--
       #   rdoc-file=lib/random/formatter.rb
