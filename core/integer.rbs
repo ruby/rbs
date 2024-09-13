@@ -1168,10 +1168,10 @@ class Integer < Numeric
           | (to: Numeric, ?by: Integer) { (Integer) -> void } -> void
           | (by: Numeric, ?to: Numeric) { (Numeric) -> void } -> void
           | () -> Enumerator[Integer, bot]
-          | (Numeric limit, ?Integer step) -> Enumerator[Integer, void]
-          | (Numeric limit, ?Numeric step) -> Enumerator[Numeric, void]
-          | (to: Numeric, ?by: Integer) -> Enumerator[Integer, void]
-          | (by: Numeric, ?to: Numeric) -> Enumerator[Numeric, void]
+          | (Numeric limit, ?Integer step) -> Enumerator[Integer]
+          | (Numeric limit, ?Numeric step) -> Enumerator[Numeric]
+          | (to: Numeric, ?by: Integer) -> Enumerator[Integer]
+          | (by: Numeric, ?to: Numeric) -> Enumerator[Numeric]
 
   # <!--
   #   rdoc-file=numeric.c

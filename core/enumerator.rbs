@@ -127,7 +127,7 @@
 #     puts ext_each(o.to_enum) {|*x| puts x; [:b, *x] }
 #     # => [], [:b], [1], [:b, 1], [1, 2], [:b, 1, 2], 3
 #
-class Enumerator[unchecked out Elem, out Return] < Object
+class Enumerator[unchecked out Elem, out Return = void] < Object
   include Enumerable[Elem]
 
   # A convenience interface for `each` with optional block
@@ -567,7 +567,7 @@ end
 #     # This returns an array of items like a normal enumerator does.
 #     all_checked = active_items.select(&:checked)
 #
-class Enumerator::Lazy[out Elem, out Return] < Enumerator[Elem, Return]
+class Enumerator::Lazy[out Elem, out Return = void] < Enumerator[Elem, Return]
   # <!-- rdoc-file=enumerator.c -->
   # Expands `lazy` enumerator to an array. See Enumerable#to_a.
   #
