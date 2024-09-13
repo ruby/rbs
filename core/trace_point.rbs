@@ -63,7 +63,7 @@
 # `:script_compiled`
 # :   new Ruby code compiled (with `eval`, `load` or `require`)
 #
-class TracePoint < Object
+class TracePoint
   # <!--
   #   rdoc-file=trace_point.rb
   #   - TracePoint.new(*events) { |obj| block }         -> obj
@@ -110,7 +110,7 @@ class TracePoint < Object
   #
   # Access from other threads is also forbidden.
   #
-  def initialize: (*Symbol events) { (TracePoint tp) -> void } -> void
+  def self.new: (*_ToSym events) { (instance tp) -> void } -> instance
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -172,7 +172,7 @@ class TracePoint < Object
   # (note that we needed to filter out calls by itself from :line handler,
   # otherwise it will call itself infinitely).
   #
-  def self.allow_reentry: () { () -> void } -> void
+  def self.allow_reentry: [T] () { (nil) -> T } -> T
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -199,7 +199,7 @@ class TracePoint < Object
   #
   #     trace.enabled? #=> true
   #
-  def self.trace: (*Symbol events) { (TracePoint tp) -> void } -> TracePoint
+  def self.trace: (*_ToSym events) { (instance tp) -> void } -> instance
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -218,7 +218,7 @@ class TracePoint < Object
   # -->
   # Return the called name of the method being called
   #
-  def callee_id: () -> Symbol
+  def callee_id: () -> Symbol?
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -257,7 +257,7 @@ class TracePoint < Object
   #       C.foo
   #     end
   #
-  def defined_class: () -> Module
+  def defined_class: () -> (Class | Module)?
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -293,7 +293,7 @@ class TracePoint < Object
   #     #=> RuntimeError: access from outside
   #
   def disable: () -> bool
-             | () { () -> void } -> void
+             | [T] () { () -> T } -> T
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -352,8 +352,8 @@ class TracePoint < Object
   #     trace.enable { p tp.lineno }
   #     #=> RuntimeError: access from outside
   #
-  def enable: (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) -> bool
-            | [R] (?target: (Method | UnboundMethod | Proc)?, ?target_line: Integer?, ?target_thread: Thread?) { () -> R } -> R
+  def enable: (?target: Method | RubyVM::InstructionSequence | Proc | nil, ?target_line: int?, ?target_thread: Thread | :default | nil) -> bool
+            | [T] (?target: Method | RubyVM::InstructionSequence | Proc | nil, ?target_line: int?, ?target_thread: Thread | :default | nil) { () -> T } -> T
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -395,7 +395,7 @@ class TracePoint < Object
   # -->
   # Return the name at the definition of the method being called
   #
-  def method_id: () -> Symbol
+  def method_id: () -> Symbol?
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -412,7 +412,7 @@ class TracePoint < Object
   # Return the parameters definition of the method or block that the current hook
   # belongs to. Format is the same as for Method#parameters
   #
-  def parameters: () -> ::Array[[ :req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol ] | [ :rest | :keyrest ]]
+  def parameters: () -> Method::param_types?
 
   # <!--
   #   rdoc-file=trace_point.rb
@@ -421,7 +421,7 @@ class TracePoint < Object
   # Value from exception raised on the `:raise` event, or rescued on the `:rescue`
   # event.
   #
-  def raised_exception: () -> untyped
+  def raised_exception: () -> Exception
 
   # <!--
   #   rdoc-file=trace_point.rb

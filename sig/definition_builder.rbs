@@ -116,6 +116,7 @@ module RBS
       Definition class_definition,
       MethodBuilder::Methods::Definition method_definition,
       Substitution subst,
+      Hash[Symbol, Definition::Method]? self_type_methods,
       defined_in: TypeName,
       ?implemented_in: TypeName?
     ) -> void
@@ -137,7 +138,8 @@ module RBS
       TypeName module_name,
       MethodBuilder::Methods module_methods,
       interface_methods interface_methods,
-      Substitution subst
+      Substitution subst,
+      Hash[Symbol, Definition::Method]? self_type_methods,
     ) -> void
 
     # Updates `definition` with methods and variables of `type_name` that can be a module or a class

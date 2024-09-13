@@ -131,9 +131,7 @@ class Symbol
   #     Symbol.all_symbols.size    # => 9334
   #     Symbol.all_symbols.take(3) # => [:!, :"\"", :"#"]
   #
-  def self.all_symbols: () -> ::Array[Symbol]
-
-  public
+  def self.all_symbols: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=string.c
@@ -152,8 +150,8 @@ class Symbol
   #
   # Related: String#<=>.
   #
-  def <=>: (Symbol other) -> Integer
-         | (untyped other) -> Integer?
+  def <=>: (Symbol object) -> (-1 | 0 | 1)
+         | (untyped) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=string.c
@@ -161,12 +159,12 @@ class Symbol
   # -->
   # Returns `true` if `object` is the same object as `self`, `false` otherwise.
   #
-  def ==: (untyped obj) -> bool
+  def ==: (untyped object) -> bool
 
   # <!-- rdoc-file=string.c -->
   # Returns `true` if `object` is the same object as `self`, `false` otherwise.
   #
-  def ===: (untyped obj) -> bool
+  alias === ==
 
   # <!--
   #   rdoc-file=string.c
@@ -176,7 +174,7 @@ class Symbol
   # variables; see String#=~.
   #
   def =~: (Regexp regex) -> Integer?
-        | [T] (String::_MatchAgainst[self, T] object) -> T
+        | [T] (String::_MatchAgainst[String, T] object) -> T
 
   # <!--
   #   rdoc-file=string.c
@@ -188,12 +186,10 @@ class Symbol
   # -->
   # Equivalent to `symbol.to_s[]`; see String#[].
   #
-  def []: (int index) -> String?
-        | (int start, int length) -> String?
-        | (Range[Integer?] range) -> String?
-        | (Regexp regexp) -> String?
-        | (Regexp regexp, int | String capture) -> String?
-        | (String match_str) -> String?
+  def []: (int start, ?int length) -> String?
+        | (range[int?] range) -> String?
+        | (Regexp regexp, ?MatchData::capture backref) -> String?
+        | (String substring) -> String?
 
   # <!--
   #   rdoc-file=string.c
@@ -240,7 +236,7 @@ class Symbol
   #
   # Related: Symbol#casecmp?, String#casecmp.
   #
-  def casecmp: (untyped other) -> Integer?
+  def casecmp: (untyped object) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=string.c
@@ -273,7 +269,7 @@ class Symbol
   #
   # Related: Symbol#casecmp, String#casecmp?.
   #
-  def casecmp?: (untyped other) -> bool?
+  def casecmp?: (untyped object) -> bool?
 
   # <!--
   #   rdoc-file=string.c
@@ -321,7 +317,7 @@ class Symbol
   #
   # Related: Symbol#inspect, Symbol#name.
   #
-  def id2name: () -> String
+  alias id2name to_s
 
   # <!--
   #   rdoc-file=string.c
@@ -340,7 +336,7 @@ class Symbol
   #   - intern()
   # -->
   #
-  def intern: () -> Symbol
+  alias intern to_sym
 
   # <!--
   #   rdoc-file=string.c
@@ -358,8 +354,8 @@ class Symbol
   # Equivalent to `self.to_s.match`, including possible updates to global
   # variables; see String#match.
   #
-  def match: (Regexp | string pattern, ?int pos) -> MatchData?
-           | (Regexp | string pattern, ?int pos) { (MatchData) -> void } -> untyped
+  def match: (Regexp | string pattern, ?int offset) -> MatchData?
+           | [T] (Regexp | string pattern, ?int offset) { (MatchData matchdata) -> T } -> T?
 
   # <!--
   #   rdoc-file=string.c
@@ -367,7 +363,7 @@ class Symbol
   # -->
   # Equivalent to `sym.to_s.match?`; see String#match.
   #
-  def match?: (Regexp | string pattern, ?int pos) -> bool
+  def match?: (Regexp | string pattern, ?int offset) -> bool
 
   # <!-- rdoc-file=string.c -->
   # Equivalent to `self.to_s.succ.to_sym`:
@@ -377,6 +373,20 @@ class Symbol
   # Related: String#succ.
   #
   def next: () -> Symbol
+
+  # <!--
+  #   rdoc-file=string.c
+  #   - name -> string
+  # -->
+  # Returns a frozen string representation of `self` (not including the leading
+  # colon):
+  #
+  #     :foo.name         # => "foo"
+  #     :foo.name.frozen? # => true
+  #
+  # Related: Symbol#to_s, Symbol#inspect.
+  #
+  def name: () -> String
 
   # <!-- rdoc-file=string.c -->
   # Equivalent to `self.to_s.length`; see String#length.
@@ -394,7 +404,7 @@ class Symbol
   # -->
   # Equivalent to `self.to_s.start_with?`; see String#start_with?.
   #
-  def start_with?: (*string | Regexp prefixes) -> bool
+  def start_with?: (*Regexp | string prefixes) -> bool
 
   # <!--
   #   rdoc-file=string.c
@@ -445,7 +455,7 @@ class Symbol
   #
   # Related: Symbol#inspect, Symbol#name.
   #
-  alias to_s id2name
+  def to_s: () -> String
 
   # <!--
   #   rdoc-file=symbol.rb
@@ -455,7 +465,7 @@ class Symbol
   #
   # Related: String#to_sym.
   #
-  alias to_sym intern
+  def to_sym: () -> self
 
   # <!--
   #   rdoc-file=string.c
@@ -469,6 +479,4 @@ class Symbol
             | (:ascii | :lithuanian | :turkic) -> Symbol
             | (:lithuanian, :turkic) -> Symbol
             | (:turkic, :lithuanian) -> Symbol
-
-  def clone: (?freeze: true?) -> self
 end

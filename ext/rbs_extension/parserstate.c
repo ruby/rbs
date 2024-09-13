@@ -274,11 +274,7 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
   );
 }
 
-lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-
-  StringValue(string);
-
+lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
   if (start_pos < 0 || end_pos < 0) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
@@ -295,8 +291,7 @@ lexstate *alloc_lexer(VALUE buffer, int start_pos, int end_pos) {
   return lexer;
 }
 
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
-  lexstate *lexer = alloc_lexer(buffer, start_pos, end_pos);
+parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_pos, VALUE variables) {
   parserstate *parser = calloc(1, sizeof(parserstate));
   parser->lexstate = lexer;
   parser->buffer = buffer;

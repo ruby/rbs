@@ -99,9 +99,6 @@ module RBS
 
     private
 
-    def _start_loc: () -> Buffer::loc?
-    def _end_loc: () -> Buffer::loc?
-
     def _add_required_child: (RequiredChildKeys name, Integer start_pos, Integer end_pos) -> void
     def _add_optional_child: (OptionalChildKeys name, Integer start_pos, Integer end_pos) -> void
     def _add_optional_no_child: (OptionalChildKeys name) -> void

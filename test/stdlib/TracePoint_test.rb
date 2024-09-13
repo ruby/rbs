@@ -1,160 +1,233 @@
-require_relative "test_helper"
+require_relative 'test_helper'
 
 class TracePointSingletonTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "singleton(::TracePoint)"
+  testing 'singleton(::TracePoint)'
+
+  MyTracePoint = Class.new(TracePoint)
 
   def test_new
-    assert_send_type  "(*::Symbol events) { (::TracePoint tp) -> void } -> ::TracePoint",
-                      TracePoint, :new, :line do end
+    assert_send_type  '(*::_ToSym) { (TracePointSingletonTest::MyTracePoint tp) -> void } -> TracePointSingletonTest::MyTracePoint',
+                      MyTracePoint, :new, :line, ToSym.new(:line) do end
   end
 
-  # TODO
-  # def test_allow_reentry
-  #   assert_send_type  "() { () -> void } -> void",
-  #                     TracePoint, :allow_reentry
-  # end
+  def test_allow_reentry
+    tp = TracePoint.new :script_compiled do
+      assert_send_type  '[T] () { (nil) -> T } -> T',
+                        TracePoint, :allow_reentry do 1r end
+    end
+    tp.enable
+
+    eval("1") # some no-op to trigger the tracepoint
+  ensure
+    tp.disable
+  end
 
   def test_stat
-    assert_send_type  "() -> untyped",
+    assert_send_type  '() -> untyped',
                       TracePoint, :stat
   end
 
   def test_trace
-    assert_send_type  "(*::Symbol events) { (::TracePoint tp) -> void } -> ::TracePoint",
-                      TracePoint, :trace, :line do |tp| tp.disable end
+    # Make sure to pick a tracepoint that won't be accidentaly called, to prevent loops.
+    tp = assert_send_type  '(*::_ToSym) { (TracePointSingletonTest::MyTracePoint tp) -> void } -> TracePointSingletonTest::MyTracePoint',
+                           MyTracePoint, :trace, :script_compiled, ToSym.new(:script_compiled) do end
+    tp.disable
   end
 end
 
 class TracePointTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "::TracePoint"
+  testing '::TracePoint'
 
-  def test_initialize
-    assert_send_type  "(*::Symbol events) { (::TracePoint tp) -> void } -> void",
-                      TracePoint.new(:line){}, :initialize do end
+  def tracepoint(event=:line, do: proc{ 1 }, &tp_body)
+    tp = TracePoint.new(event, &tp_body)
+    tp.enable(&binding.local_variable_get(:do))
+  ensure
+    tp.disable
   end
-
+  
   def test_binding
-    TracePoint.new(:line) do |tp|
-      assert_send_type "() -> ::Binding",
-                       tp, :binding
-    end.enable { 1 }
+    tracepoint do |tp|
+      assert_send_type  '() -> Binding',
+                        tp, :binding
+    end
+
+    tracepoint :c_call, do: method(:print) do |tp|
+      assert_send_type  '() -> nil',
+                        tp, :binding
+    end
   end
 
-  def test_inspect
-    TracePoint.new(:line) do |tp|
-      assert_send_type "() -> ::String",
-                       tp, :inspect
-    end.enable { 1 }
-  end
-
+  TracePoint.new(:b_return) { |tp|
+    const_set :CALLEE_ID_OUTSIDE_OF_A_METHOD, tp.callee_id
+    const_set :METHOD_ID_OUTSIDE_OF_A_METHOD, tp.method_id
+  }.enable { }
   def test_callee_id
-    TracePoint.new(:call) do |tp|
-      assert_send_type "() -> ::Symbol",
-                       tp, :callee_id
-    end.enable { 1 }
-  end
+    tracepoint do |tp|
+      assert_send_type  '() -> Symbol',
+                        tp, :callee_id
+    end
 
+    # No way to make the `callee_id` nil, as we're in a method already.
+    assert_type 'nil', CALLEE_ID_OUTSIDE_OF_A_METHOD
+  end
+  
   def test_defined_class
-    TracePoint.new(:call) do |tp|
-      assert_send_type "() -> ::Module",
-                       tp, :defined_class
-    end.enable { 1 }
-  end
+    tracepoint do |tp|
+      assert_send_type  '() -> (Class | Method)',
+                        tp, :defined_class
+    end
 
+    tracepoint :end, do: proc{ eval("class X; proc{}.call end") }  do |tp|
+      assert_send_type  '() -> nil',
+                        tp, :defined_class
+    end
+  end
+  
   def test_disable
-    tp = TracePoint.new(:line) {}
-    assert_send_type  "() -> bool",
-                      tp, :disable
-    assert_send_type  "() { () -> void } -> void",
-                      tp, :disable do end
-  end
+    tracepoint do |tp|
+      assert_send_type  '() -> bool',
+                        tp, :disable
 
+      assert_send_type  '[T] () { () -> T } -> T',
+                        tp, :disable do end
+    end
+  end
+  
   def test_enable
-    tp = TracePoint.new(:line) {}
-    assert_send_type  "(?target: (::Method | ::UnboundMethod | ::Proc)?, ?target_line: ::Integer?, ?target_thread: ::Thread?) -> bool",
-                      tp, :enable
-    assert_send_type  "[R] (?target: (::Method | ::UnboundMethod | ::Proc)?, ?target_line: ::Integer?, ?target_thread: ::Thread?) { () -> R } -> R",
-                      tp, :enable do end
+    # can't use the `tracepoint` helper here, because we're testing `enable`
+
+    begin
+      tp = TracePoint.new {}
+      assert_send_type  '() -> bool',
+                        tp, :enable
+      assert_send_type  '[T] () { () -> T } -> T',
+                        tp, :enable do 1r end
+    ensure
+      tp.disable
+    end
+
+    with(method(__method__), RubyVM::InstructionSequence.of(method(__method__)), proc{}).and_nil do |target|
+      with_int.and_nil do |line|
+        with(Thread.current, :default).and_nil do |thread|
+          next if nil == target && nil != line
+
+          begin
+            tp = TracePoint.new {}
+            assert_send_type  '(target: Method | RubyVM::InstructionSequence | Proc | nil, target_line: int?, target_thread: Thread | :default | nil) -> bool',
+                              tp, :enable, target: target, target_line: line, target_thread: thread
+          ensure
+            tp.disable
+          end
+
+          begin
+            tp = TracePoint.new {}
+            assert_send_type  '[T] (target: Method | RubyVM::InstructionSequence | Proc | nil, target_line: int?, target_thread: Thread | :default | nil) { () -> T } -> T',
+                              tp, :enable, target: target, target_line: line, target_thread: thread do 1r end
+          ensure
+            tp.disable
+          end
+        end
+      end
+    end
   end
 
   def test_enabled?
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> bool",
+    tracepoint do |tp|
+      assert_send_type  '() -> bool',
                         tp, :enabled?
-    end.enable { 1 }
+    end
   end
 
   def test_event
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> ::Symbol",
+    tracepoint do |tp|
+      assert_send_type  '() -> Symbol',
                         tp, :event
-    end.enable { 1 }
+    end
   end
-
+  
+  def test_inspect
+    tracepoint do |tp|
+      assert_send_type  '() -> String',
+                        tp, :inspect
+    end
+  end
+  
   def test_lineno
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> ::Integer",
-                        tp, :lineno
-    end.enable { 1 }
+    tracepoint do |tp|
+        assert_send_type  '() -> Integer',
+                          tp, :lineno
+    end
   end
-
+  
   def test_method_id
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> ::Symbol",
+    tracepoint do |tp|
+      assert_send_type  '() -> Symbol',
                         tp, :method_id
-    end.enable { 1 }
-  end
+    end
 
+    # No way to make the `method_id` nil, as we're in a method already.
+    assert_type 'nil', METHOD_ID_OUTSIDE_OF_A_METHOD
+  end
+  
   def test_path
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> ::String",
+    tracepoint do |tp|
+      assert_send_type  '() -> String',
                         tp, :path
-    end.enable { 1 }
+    end
   end
-
+  
   def test_parameters
-    TracePoint.new(:call) do |tp|
-      assert_send_type  "() -> ::Array[[ :req | :opt | :rest | :keyreq | :key | :keyrest | :block, ::Symbol ] | [ :rest | :keyrest ]]",
+    obj = BlankSlate.new
+    def obj.some_method(a, b=1, *c, d:, e: 2, **f, &g) = nil
+
+    tracepoint :call, do: proc{obj.some_method(1, d: 2) } do |tp|
+      assert_send_type  '() -> Method::param_types',
                         tp, :parameters
-    end.enable { 1 }
+    end
   end
-
+  
   def test_raised_exception
-    TracePoint.new(:raise) do |tp|
-      assert_send_type  "() -> untyped",
+    tracepoint :rescue, do: proc{begin; raise; rescue; end} do |tp|
+      assert_send_type  '() -> Exception',
                         tp, :raised_exception
-    end.enable { 1 }
+    end
   end
-
+  
   def test_return_value
-    TracePoint.new(:call) do |tp|
-      assert_send_type  "() -> untyped",
+    tracepoint :return do |tp|
+      assert_send_type  '() -> untyped',
                         tp, :return_value
-    end.enable { 1 }
+    end
   end
-
+  
   def test_self
-    TracePoint.new(:line) do |tp|
-      assert_send_type  "() -> untyped",
+    tracepoint do |tp|
+      assert_send_type  '() -> untyped',
                         tp, :self
-    end.enable { 1 }
+    end
   end
-
+  
   def test_eval_script
-    TracePoint.new(:script_compiled) do |tp|
-      assert_send_type  "() -> ::String?",
-                        tp, :eval_script
-    end.enable { eval("'hello'") }
-  end
+    # Technically the docs say you can get `-> nil` as a result, but I can't seem to find a way
+    # to do that. (And, MRI's tests (such as `test_settracefunc.rb`) don't test for this case).
+    # Just in case I'm wrong, I have the return value as `String?`.
 
+    tracepoint :script_compiled, do: proc { eval("") } do |tp|
+      assert_send_type  '() -> String',
+                        tp, :eval_script
+    end
+  end
+  
   def test_instruction_sequence
-    TracePoint.new(:script_compiled) do |tp|
-      assert_send_type  "() -> ::RubyVM::InstructionSequence",
+    omit 'not on MRI' unless defined?(RubyVM) && defined?(RubyVM::InstructionSequence)
+
+    tracepoint :script_compiled, do: proc { eval("") } do |tp|
+      assert_send_type  '() -> RubyVM::InstructionSequence',
                         tp, :instruction_sequence
-    end.enable { eval("'hello'") }
+    end
   end
 end

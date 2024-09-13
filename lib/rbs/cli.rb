@@ -909,7 +909,7 @@ Options:
       syntax_error = false
       bufs = args.flat_map do |path|
         path = Pathname(path)
-        FileFinder.each_file(path, skip_hidden: false, immediate: true).map do |file_path|
+        FileFinder.each_file(path, skip_hidden: false).map do |file_path|
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
@@ -1193,7 +1193,7 @@ EOB
       end
 
       minuend_paths.each do |minuend_path|
-        FileFinder.each_file(Pathname(minuend_path), immediate: true, skip_hidden: true) do |rbs_path|
+        FileFinder.each_file(Pathname(minuend_path), skip_hidden: true) do |rbs_path|
           buf = Buffer.new(name: rbs_path, content: rbs_path.read)
           _, dirs, decls = Parser.parse_signature(buf)
           subtracted = Subtractor.new(decls, subtrahend).call

@@ -35,7 +35,7 @@ module RBS
       return msg unless location.start_line == location.end_line
 
       indent = " " * location.start_column
-      marker = "^" * (location.end_column - location.start_column)
+      marker = "^" * ([location.end_column - location.start_column, 1].max or raise)
 
       io = StringIO.new
       io.puts msg
@@ -68,18 +68,23 @@ module RBS
     attr_reader :type_name
     attr_reader :args
     attr_reader :params
+    attr_reader :type_params
     attr_reader :location
 
     def initialize(type_name:, args:, params:, location:)
       @type_name = type_name
       @args = args
-      @params = params
+      @type_params = params
+      @params = params.map(&:name)
       @location = location
       super "#{Location.to_string location}: #{type_name} expects parameters [#{params.join(", ")}], but given args [#{args.join(", ")}]"
     end
 
     def self.check!(type_name:, args:, params:, location:)
-      unless args.size == params.size
+      min_arity = params.count { _1.default_type.nil? }
+      max_arity = params.size
+
+      unless min_arity <= args.size && args.size <= max_arity
         raise new(type_name: type_name, args: args, params: params, location: location)
       end
     end

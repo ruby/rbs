@@ -1,5 +1,5 @@
 %a{annotate:rdoc:skip}
-class Enumerator[unchecked out Elem, out Return]
+class Enumerator[unchecked out Elem, out Return = void]
   # <!-- rdoc-file=enumerator.c -->
   # Enumerator::Product generates a Cartesian product of any number of enumerable
   # objects.  Iterating over the product of enumerable objects is roughly

@@ -382,7 +382,7 @@ class Thread < Object
   # If you're going to subclass Thread, be sure to call super in your `initialize`
   # method, otherwise a ThreadError will be raised.
   #
-  def initialize: (*untyped) { (*untyped) -> void } -> void
+  def initialize: (*untyped) { (?) -> void } -> void
 
   # <!--
   #   rdoc-file=thread.c
@@ -1178,7 +1178,7 @@ class Thread < Object
   # calling `start` in that subclass will not invoke the subclass's `initialize`
   # method.
   #
-  def self.start: (*untyped args) { (*untyped) -> void } -> instance
+  def self.start: (*untyped args) { (?) -> void } -> instance
 
   # <!--
   #   rdoc-file=thread.c
@@ -1545,7 +1545,7 @@ end
 #
 #     consumer.join
 #
-class Thread::Queue < Object
+class Thread::Queue[Elem = untyped] < Object
   # <!-- rdoc-file=thread_sync.c -->
   # Pushes the given `object` to the queue.
   #
@@ -1661,7 +1661,7 @@ class Thread::Queue < Object
   # If `timeout` seconds have passed and no data is available `nil` is returned.
   # If `timeout` is `0` it returns immediately.
   #
-  def pop: (?boolish non_block, ?timeout: _ToF?) -> untyped
+  def pop: (?boolish non_block, ?timeout: _ToF?) -> Elem?
 
   # <!--
   #   rdoc-file=thread_sync.c
@@ -1671,7 +1671,7 @@ class Thread::Queue < Object
   # -->
   # Pushes the given `object` to the queue.
   #
-  def push: (untyped obj) -> void
+  def push: (Elem obj) -> void
 
   # <!--
   #   rdoc-file=thread_sync.rb
@@ -1692,7 +1692,7 @@ end
 #
 # See Thread::Queue for an example of how a Thread::SizedQueue works.
 #
-class Thread::SizedQueue < Thread::Queue
+class Thread::SizedQueue[Elem = untyped] < Thread::Queue[Elem]
   # <!--
   #   rdoc-file=thread_sync.rb
   #   - <<(object, non_block = false, timeout: nil)
@@ -1755,7 +1755,8 @@ class Thread::SizedQueue < Thread::Queue
   # If `timeout` seconds have passed and no space is available `nil` is returned.
   # If `timeout` is `0` it returns immediately. Otherwise it returns `self`.
   #
-  def push: (untyped obj, ?boolish non_block, timeout: _ToF?) -> void
+  def push: (Elem obj, ?boolish non_block) -> void
+          | (Elem obj, timeout: _ToF?) -> self?
 end
 
 class ConditionVariable = Thread::ConditionVariable

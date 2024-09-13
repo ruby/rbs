@@ -1722,8 +1722,8 @@ class CSV < Object
   #     would read `UTF-32BE` data from the file but transcode it to `UTF-8`
   #     before parsing.
   #
-  def self.foreach: (String | IO path, ?String mode, headers: true, **untyped options) { (::CSV::Row arg0) -> void } -> void
-                  | (String | IO path, ?String mode, headers: true, **untyped options) -> Enumerator[::CSV::Row, void]
+  def self.foreach: (String | IO path, ?String mode, headers: true | :first_row | Array[untyped] | String, **untyped options) { (::CSV::Row arg0) -> void } -> void
+                  | (String | IO path, ?String mode, headers: true | :first_row | Array[untyped] | String, **untyped options) -> Enumerator[::CSV::Row, void]
                   | (String | IO path, ?String mode, **untyped options) { (::Array[String?] arg0) -> void } -> void
                   | (String | IO path, ?String mode, **untyped options) -> Enumerator[::Array[String?], void]
 
@@ -2031,7 +2031,8 @@ class CSV < Object
   #     File.write(path, string)
   #     CSV.read(path, headers: true) # => #<CSV::Table mode:col_or_row row_count:4>
   #
-  def self.read: (String path, ?::Hash[Symbol, untyped] options) -> ::Array[::Array[String?]]
+  def self.read: (String | IO path, headers: true | :first_row | Array[untyped] | String, **untyped options) -> ::CSV::Table[CSV::Row]
+               | (String | IO path, ?::Hash[Symbol, untyped] options) -> ::Array[::Array[String?]]
 
   # <!--
   #   rdoc-file=lib/csv.rb
@@ -2286,6 +2287,33 @@ CSV::VERSION: String
 class CSV::Row < Object
   include Enumerable[Array[String]]
   extend Forwardable
+
+  # <!--
+  #   rdoc-file=lib/csv/row.rb
+  #   - CSV::Row.new(headers, fields, header_row = false) -> csv_row
+  # -->
+  # Returns the new CSV::Row instance constructed from arguments `headers` and
+  # `fields`; both should be Arrays; note that the fields need not be Strings:
+  #     row = CSV::Row.new(['Name', 'Value'], ['foo', 0])
+  #     row # => #<CSV::Row "Name":"foo" "Value":0>
+  #
+  # If the Array lengths are different, the shorter is `nil`-filled:
+  #     row = CSV::Row.new(['Name', 'Value', 'Date', 'Size'], ['foo', 0])
+  #     row # => #<CSV::Row "Name":"foo" "Value":0 "Date":nil "Size":nil>
+  #
+  # Each CSV::Row object is either a *field row* or a *header row*; by default, a
+  # new row is a field row;  for the row created above:
+  #     row.field_row? # => true
+  #     row.header_row? # => false
+  #
+  # If the optional argument `header_row` is given as `true`, the created row is a
+  # header row:
+  #     row = CSV::Row.new(['Name', 'Value'], ['foo', 0], header_row = true)
+  #     row # => #<CSV::Row "Name":"foo" "Value":0>
+  #     row.field_row? # => false
+  #     row.header_row? # => true
+  #
+  def initialize: (Array[untyped] headers, Array[untyped] fields, ?header_row: bool) -> void
 
   # <!--
   #   rdoc-file=lib/csv/row.rb
@@ -2975,7 +3003,7 @@ end
 #     table['Name'] # => ["Foo", "Bar", "Baz"]
 #
 class CSV::Table[out Elem] < Object
-  include Enumerable[untyped]
+  include Enumerable[Elem]
   extend Forwardable
 
   # <!--
@@ -3606,8 +3634,8 @@ class CSV::Table[out Elem] < Object
   # Returns a new Enumerator if no block is given:
   #     table.each # => #<Enumerator: #<CSV::Table mode:col row_count:4>:each>
   #
-  def each: () -> Enumerator[untyped, self]
-          | () { (untyped) -> void } -> self
+  def each: () -> Enumerator[Elem, self]
+          | () { (Elem) -> void } -> self
           | () { (*untyped) -> void } -> self
 
   def empty?: (*untyped args) { (*untyped) -> untyped } -> untyped

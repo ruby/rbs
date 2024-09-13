@@ -332,8 +332,6 @@ module RBS
 
         public_instance_methods = mod.public_instance_methods.select {|name| target_method?(mod, instance: name) }
         unless public_instance_methods.empty?
-          members << AST::Members::Public.new(location: nil)
-
           public_instance_methods.sort.each do |name|
             method = mod.instance_method(name)
             next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :public)
@@ -656,6 +654,9 @@ module RBS
           ast = RubyVM::AbstractSyntaxTree.of(method)
         rescue ArgumentError
           return # When the method is defined in eval
+        rescue RuntimeError => error
+          raise unless error.message.include?("prism")
+          return # When the method was compiled by prism
         end
 
         if ast && ast.type == :SCOPE

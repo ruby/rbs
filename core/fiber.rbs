@@ -268,7 +268,7 @@ class Fiber < Object
   # Explicitly using `storage: true` is currently experimental and may change in
   # the future.
   #
-  def initialize: (?blocking: boolish, ?storage: true | Hash[interned, untyped] | nil) { (*untyped) -> void } -> void
+  def initialize: (?blocking: boolish, ?storage: true | Hash[interned, untyped] | nil) { (?) -> void } -> void
 
   # <!--
   #   rdoc-file=cont.c

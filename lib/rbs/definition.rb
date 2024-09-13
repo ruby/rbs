@@ -238,10 +238,11 @@ module RBS
       end
 
       def apply(args, location:)
+        # Assume default types of type parameters are already added to `args`
         InvalidTypeApplicationError.check!(
           type_name: type_name,
           args: args,
-          params: params,
+          params: params.map { AST::TypeParam.new(name: _1, variance: :invariant, upper_bound: nil, location: nil, default_type: nil) },
           location: location
         )
 

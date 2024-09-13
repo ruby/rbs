@@ -446,6 +446,12 @@ module RBS
       def has_classish_type?: () -> bool
 
       def with_nonreturn_void?: () -> bool
+
+      def ==: (untyped) -> bool
+
+      alias eql? ==
+
+      def hash: () -> Integer
     end
 
     # Function type without type checking arguments
@@ -489,6 +495,12 @@ module RBS
 
       # Returns `return_type.to_s(1)`
       def return_to_s: () -> String
+
+      def ==: (untyped) -> bool
+
+      alias eql? ==
+
+      def hash: () -> Integer
     end
 
     type function = Types::Function | Types::UntypedFunction

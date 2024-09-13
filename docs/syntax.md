@@ -64,7 +64,7 @@ Interface type denotes _type of a value which can be a subtype of the interface_
 
 ```rbs
 _ToS                          # _ToS interface
-::MyApp::_Each[String]        # Interface name with namespace and type application
+::Enumerator::_Each[String]   # Interface name with namespace and type application
 ```
 
 ### Alias type
@@ -424,8 +424,10 @@ _visibility_ ::= `public` | `private`
 
 _attribute-type_ ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
-_include-member_ ::= `include` _class-name_ _type-arguments_
-                   | `include` _interface-name_ _type-arguments_
+_include-member_ ::= _include-class-member_
+                   | _include-interface-member_
+_include-class-member_ ::= `include` _class-name_ _type-arguments_
+_include-interface-member_ :== `include` _interface-name_ _type-arguments_
 _extend-member_ ::= `extend` _class-name_ _type-arguments_
                   | `extend` _interface-name_ _type-arguments_
 _prepend-member_ ::= `prepend` _class-name_ _type-arguments_
@@ -621,7 +623,7 @@ _module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_   
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
 _interface-members_ ::= _method-member_              # Method
-                      | _include-member_             # Mixin (include)
+                      | _include-interface-member_   # Mixin (include)
                       | _alias-member_               # Alias
 
 _type-alias-decl_ ::= `type` _alias-name_ _module-type-parameters_ `=` _type_
@@ -750,16 +752,15 @@ $LOAD_PATH: Array[String]
 ### Generics
 
 ```markdown
-_module-type-parameter_ ::= _generics-unchecked_ _generics-variance_ _type-variable_ _generics-bound_
+_module-type-parameter_ ::= _generics-unchecked_ _generics-variance_ _type-variable_ _generics-bound_ _default-type_
 
 _method-type-param_ ::= _type-variable_ _generics-bound_
 
-_generics-bound_ ::=                       (No type bound)
-                   | `<` _bound-type_      (The generics parameter is bounded)
+_generics-bound_ ::=                 (No type bound)
+                   | `<` _type_      (The generics parameter is bounded)
 
-_bound-type_ ::= _class-name_ _type-arguments_       (Class instance type)
-               | _interface-name_ _type-arguments_   (Interface type)
-               | `singleton(` _class-name_ `)`       (Class singleton type)
+_default-type_ ::=                    (No default type)
+                 | `=` _type_         (The generics parameter has default type)
 
 _generics-variance_ ::=               (Invariant)
                       | `out`         (Covariant)
@@ -826,14 +827,27 @@ class PrettyPrint[T < _Output]
 end
 ```
 
-If a type parameter has an upper bound, the type parameter must be instantiated with types that is a subclass of the upper bound.
+If a type parameter has an upper bound, the type parameter must be instantiated with types that is a subtype of the upper bound.
 
 ```rbs
 type str_printer = PrettyPrint[String]    # OK
 type int_printer = PrettyPrint[Integer]   # Type error
 ```
 
-The upper bound must be one of a class instance type, interface type, or class singleton type.
+The generics type parameter of modules, classes, interfaces, or type aliases can have a default type.
+
+```rbs
+interface _Foo[T = untyped]
+end
+
+interface _Bar[T, S = untyped]
+end
+
+type foo = _Foo          # equivalent to _Foo[untyped]
+type bar = _Bar[String]  # equivalent to _Bar[String, untyped]
+```
+
+Type parameters with default types cannot appear before type parameters without default types. The generic method type parameters cannot have the default types.
 
 ### Directives
 

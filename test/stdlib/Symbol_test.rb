@@ -1,12 +1,12 @@
-require_relative "test_helper"
+require_relative 'test_helper'
 
 class SymbolSingletonTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "singleton(::Symbol)"
+  testing 'singleton(::Symbol)'
 
   def test_all_symbols
-    assert_send_type "() -> Array[Symbol]",
+    assert_send_type '() -> Array[Symbol]',
                      Symbol, :all_symbols
   end
 end
@@ -14,33 +14,35 @@ end
 class SymbolInstanceTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "::Symbol"
+  testing '::Symbol'
 
-  def test_cmp
-    assert_send_type "(Symbol) -> Integer",
-                     :a, :<=>, :a
-    assert_send_type "(Integer) -> nil",
-                     :a, :<=>, 42
+  def test_op_cmp
+    %i[a b s y z].each do |other|
+      assert_send_type '(Symbol) -> (-1 | 0 |1)',
+                       :s, :<=>, other
+    end
+
+    with_untyped.and :sym do |untyped|
+      assert_send_type '(untyped) -> Integer?',
+                       :a, :<=>, untyped
+    end
   end
 
-  def test_eq
-    assert_send_type "(Symbol) -> true",
-                     :a, :==, :a
-    assert_send_type "(Integer) -> false",
-                     :a, :==, 42
+  def test_op_eq(method: :==)
+    with_untyped.and :a do |untyped|
+      assert_send_type '(untyped) -> bool',
+                       :a, method, untyped
+    end
   end
 
-  def test_eqq
-    assert_send_type "(Symbol) -> true",
-                     :a, :===, :a
-    assert_send_type "(Integer) -> false",
-                     :a, :===, 42
+  def test_op_eqq
+    test_op_eq(method: :===)
   end
 
-  def test_match_op
-    assert_send_type "(Regexp) -> Integer",
+  def test_op_match
+    assert_send_type '(Regexp) -> Integer',
                      :a, :=~, /a/
-    assert_send_type "(nil) -> nil",
+    assert_send_type '(nil) -> nil',
                      :a, :=~, nil
 
     matcher = BlankSlate.new
@@ -51,312 +53,278 @@ class SymbolInstanceTest < Test::Unit::TestCase
                      :hello, :=~, matcher
   end
 
-  def test_aref
-    assert_send_type "(Integer) -> String",
-                     :a, :[], 0
-    assert_send_type "(ToInt) -> String",
-                     :a, :[], ToInt.new(0)
-    assert_send_type "(Integer) -> nil",
-                     :a, :[], 1
-    assert_send_type "(ToInt) -> nil",
-                     :a, :[], ToInt.new(1)
-    assert_send_type "(Integer, Integer) -> String",
-                     :a, :[], 0, 1
-    assert_send_type "(Integer, Integer) -> nil",
-                     :a, :[], 2, 1
-    assert_send_type "(ToInt, ToInt) -> String",
-                     :a, :[], ToInt.new(0), ToInt.new(1)
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     :a, :[], ToInt.new(2), ToInt.new(1)
-    assert_send_type "(Range[Integer]) -> String",
-                     :a, :[], 0..1
-    assert_send_type "(Range[Integer]) -> nil",
-                     :a, :[], 2..1
-    assert_send_type "(Range[Integer?]) -> String",
-                     :a, :[], (0...)
-    assert_send_type "(Range[Integer?]) -> nil",
-                     :a, :[], (2...)
-    assert_send_type "(Range[Integer?]) -> String",
-                     :a, :[], (...0)
-    assert_send_type "(Regexp) -> String",
-                     :a, :[], /a/
-    assert_send_type "(Regexp) -> nil",
-                     :a, :[], /b/
-    assert_send_type "(Regexp, Integer) -> String",
-                     :a, :[], /a/, 0
-    assert_send_type "(Regexp, Integer) -> nil",
-                     :a, :[], /b/, 0
-    assert_send_type "(Regexp, ToInt) -> String",
-                     :a, :[], /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> nil",
-                     :a, :[], /b/, ToInt.new(0)
-    assert_send_type "(Regexp, String) -> String",
-                     :a, :[], /(?<a>a)/, "a"
-    assert_send_type "(Regexp, String) -> nil",
-                     :a, :[], /(?<b>b)/, "b"
-    assert_send_type "(String) -> String",
-                     :a, :[], "a"
-    assert_send_type "(String) -> nil",
-                     :a, :[], "b"
+  def test_op_aref(method: :[])
+    # (int start, ?int length) -> String?
+    with_int(3) do |start|
+      assert_send_type  '(int) -> String',
+                        :'hello, world', method, start
+      assert_send_type  '(int) -> nil',
+                        :q, method, start
+
+      with_int 3 do |length|
+        assert_send_type  '(int, int) -> String',
+                          :'hello, world', method, start, length
+        assert_send_type  '(int, int) -> nil',
+                          :q, method, start, length
+      end
+    end
+
+    # (range[int?] range) -> String?
+    with_range with_int(3).and_nil, with_int(5).and_nil do |range|
+      assert_send_type  '(range[int?]) -> String',
+                        :hello, method, range
+
+      next if nil == range.begin # if the starting value is `nil`, you can't get `nil` outputs.
+      assert_send_type  '(range[int?]) -> nil',
+                        :hi, method, range
+    end
+
+    # (Regexp regexp, ?MatchData::capture backref) -> String?
+    assert_send_type  '(Regexp) -> String',
+                      :hello, method, /./
+    assert_send_type  '(Regexp) -> nil',
+                      :hello, method, /doesn't match/
+    with_int(1).and 'a', :a do |backref|
+      assert_send_type  '(Regexp, MatchData::capture) -> String',
+                        :hallo, method, /(?<a>)./, backref
+      assert_send_type  '(Regexp, MatchData::capture) -> nil',
+                        :hallo, method, /(?<a>)doesn't match/, backref
+    end
+
+    # (String substring) -> String?
+    assert_send_type  '(String) -> String',
+                      :hello, method, 'hello'
+    assert_send_type  '(String) -> nil',
+                      :hello, method, 'does not exist'
+    refute_send_type  '(_ToStr) -> untyped',
+                      :hello, method, ToStr.new('e')
   end
 
   def test_capitalize
-    assert_send_type "() -> Symbol",
+    assert_send_type '() -> Symbol',
                      :a, :capitalize
-    assert_send_type "(:ascii) -> Symbol",
+    assert_send_type '(:ascii) -> Symbol',
                      :a, :capitalize, :ascii
-    assert_send_type "(:lithuanian) -> Symbol",
+    assert_send_type '(:lithuanian) -> Symbol',
                      :a, :capitalize, :lithuanian
-    assert_send_type "(:turkic) -> Symbol",
+    assert_send_type '(:turkic) -> Symbol',
                      :a, :capitalize, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+    assert_send_type '(:lithuanian, :turkic) -> Symbol',
                      :a, :capitalize, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+    assert_send_type '(:turkic, :lithuanian) -> Symbol',
                      :a, :capitalize, :turkic, :lithuanian
   end
 
   def test_casecmp
-    assert_send_type "(Symbol) -> 0",
-                     :a, :casecmp, :A
-    assert_send_type "(Symbol) -> -1",
-                     :a, :casecmp, :B
-    assert_send_type "(Symbol) -> 1",
-                     :b, :casecmp, :A
-    assert_send_type "(Symbol) -> nil",
-                     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym, :casecmp, :"\u{c4 d6 dc}"
-    assert_send_type "(Integer) -> nil",
-                     :a, :casecmp, 42
+    %i[a A s S z Z].each do |other|
+      assert_send_type '(Symbol) -> (-1 | 0 | 1)',
+                       :s, :casecmp, other
+    end
+
+    # invalid encoding
+    assert_send_type '(Symbol) -> nil',
+                     "\u{e4 f6 fc}".encode('ISO-8859-1').to_sym, :casecmp, :"\u{c4 d6 dc}"
+
+    with_untyped.and :sym do |other|
+      assert_send_type '(untyped) -> (-1 | 0 | 1)?',
+                       :a, :casecmp, other
+    end
   end
 
-  def test_casecmp_p
-    assert_send_type "(Symbol) -> true",
-                     :a, :casecmp?, :A
-    assert_send_type "(Symbol) -> false",
-                     :a, :casecmp?, :B
-    assert_send_type "(Symbol) ->nil",
-                     "\u{e4 f6 fc}".encode("ISO-8859-1").to_sym, :casecmp?, :"\u{c4 d6 dc}"
-    assert_send_type "(Integer) -> nil",
-                     :a, :casecmp?, 42
+  def test_casecmp?
+    %i[a A s S z Z].each do |other|
+      assert_send_type '(Symbol) -> bool',
+                       :s, :casecmp?, other
+    end
+
+    # invalid encoding
+    assert_send_type '(Symbol) -> nil',
+                     '\u{e4 f6 fc}'.encode('ISO-8859-1').to_sym, :casecmp?, :'\u{c4 d6 dc}'
+
+    with_untyped.and :sym do |other|
+      assert_send_type '(untyped) -> bool?',
+                       :a, :casecmp?, other
+    end
   end
 
   def test_downcase
-    assert_send_type "() -> Symbol",
+    assert_send_type '() -> Symbol',
                      :a, :downcase
-    assert_send_type "(:ascii) -> Symbol",
+    assert_send_type '(:ascii) -> Symbol',
                      :a, :downcase, :ascii
-    assert_send_type "(:fold) -> Symbol",
+    assert_send_type '(:fold) -> Symbol',
                      :a, :downcase, :fold
-    assert_send_type "(:lithuanian) -> Symbol",
+    assert_send_type '(:lithuanian) -> Symbol',
                      :a, :downcase, :lithuanian
-    assert_send_type "(:turkic) -> Symbol",
+    assert_send_type '(:turkic) -> Symbol',
                      :a, :downcase, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+    assert_send_type '(:lithuanian, :turkic) -> Symbol',
                      :a, :downcase, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+    assert_send_type '(:turkic, :lithuanian) -> Symbol',
                      :a, :downcase, :turkic, :lithuanian
   end
 
   def test_empty_p
-    assert_send_type "() -> true",
-                     :"", :empty?
-    assert_send_type "() -> false",
+    assert_send_type '() -> bool',
                      :a, :empty?
   end
 
   def test_encoding
-    assert_send_type "() -> Encoding",
+    assert_send_type '() -> Encoding',
                      :a, :encoding
   end
 
   def test_end_with?
-    assert_send_type "() -> false",
+    assert_send_type '() -> bool',
                      :a, :end_with?
-    assert_send_type "(String) -> true",
-                     :a, :end_with?, "a"
-    assert_send_type "(String) -> false",
-                     :a, :end_with?, "b"
-    assert_send_type "(String, String) -> true",
-                     :a, :end_with?, "a", "b"
-    assert_send_type "(ToStr) -> true",
-                     :a, :end_with?, ToStr.new("a")
+    
+    with_string 'a' do |string_a|
+      assert_send_type '(string) -> true',
+                       :a, :end_with?, string_a
+
+      with_string 'b' do |string_b|
+        assert_send_type '(string, string) -> true',
+                         :a, :end_with?, string_a, string_b
+      end
+    end
   end
 
   def test_id2name
-    assert_send_type "() -> String",
-                     :a, :id2name
+    test_to_s(method: :id2name)
   end
 
   def test_inspect
-    assert_send_type "() -> String",
+    assert_send_type '() -> String',
                      :a, :inspect
   end
 
   def test_intern
-    assert_send_type "() -> Symbol",
-                     :a, :intern
+    test_to_sym(method: :intern)
   end
 
-  def test_length
-    assert_send_type "() -> Integer",
-                     :a, :length
+  def test_length(method: :length)
+    assert_send_type '() -> Integer',
+                     :a, method
   end
 
   def test_match
-    assert_send_type "(Regexp) -> MatchData",
-                     :a, :match, /a/
-    assert_send_type "(Regexp) -> nil",
-                     :a, :match, /b/
-    assert_send_type "(String) -> MatchData",
-                     :a, :match, "a"
-    assert_send_type "(String) -> nil",
-                     :a, :match, "b"
-    assert_send_type "(ToStr) -> MatchData",
-                     :a, :match, ToStr.new("a")
-    assert_send_type "(ToStr) -> nil",
-                     :a, :match, ToStr.new("b")
-    assert_send_type "(Regexp, Integer) -> MatchData",
-                     :a, :match, /a/, 0
-    assert_send_type "(Regexp, Integer) -> nil",
-                     :a, :match, /a/, 1
-    assert_send_type "(String, Integer) -> MatchData",
-                     :a, :match, "a", 0
-    assert_send_type "(String, Integer) -> nil",
-                     :a, :match, "a", 1
-    assert_send_type "(ToStr, Integer) -> MatchData",
-                     :a, :match, ToStr.new("a"), 0
-    assert_send_type "(ToStr, Integer) -> nil",
-                     :a, :match, ToStr.new("a"), 1
-    assert_send_type "(Regexp, ToInt) -> MatchData",
-                     :a, :match, /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> nil",
-                     :a, :match, /a/, ToInt.new(1)
-    assert_send_type "(String, ToInt) -> MatchData",
-                     :a, :match, "a", ToInt.new(0)
-    assert_send_type "(String, ToInt) -> nil",
-                     :a, :match, "a", ToInt.new(1)
-    assert_send_type "(ToStr, ToInt) -> MatchData",
-                     :a, :match, ToStr.new("a"), ToInt.new(0)
-    assert_send_type "(ToStr, ToInt) -> nil",
-                     :a, :match, ToStr.new("a"), ToInt.new(1)
-    assert_send_type "(Regexp) { (MatchData) -> void } -> untyped",
-                     :a, :match, /a/ do |_m| end
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> MatchData',
+                        :hello, :match, pattern
+      assert_send_type  '(Regexp | string) -> nil',
+                        :heya, :match, pattern
+
+      assert_send_type  '[T] (Regexp | string) { (MatchData) -> T } -> T',
+                        :hello, :match, pattern do 1r end
+      assert_send_type  '[T] (Regexp | string) { (MatchData) -> T } -> nil',
+                        :heya, :match, pattern do 1r end
+
+      with_int 0 do |offset|
+        assert_send_type  '(Regexp | string, int) -> MatchData',
+                          :hello, :match, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> nil',
+                          :heya, :match, pattern, offset
+
+        assert_send_type  '[T] (Regexp | string, int) { (MatchData) -> T } -> T',
+                          :hello, :match, pattern, offset do 1r end
+        assert_send_type  '[T] (Regexp | string, int) { (MatchData) -> T } -> nil',
+                          :heya, :match, pattern, offset do 1r end
+      end
+    end
   end
 
   def test_match?
-    assert_send_type "(Regexp) -> true",
-                     :a, :match?, /a/
-    assert_send_type "(Regexp) -> false",
-                     :a, :match?, /b/
-    assert_send_type "(String) -> true",
-                     :a, :match?, "a"
-    assert_send_type "(String) -> false",
-                     :a, :match?, "b"
-    assert_send_type "(ToStr) -> true",
-                     :a, :match?, ToStr.new("a")
-    assert_send_type "(ToStr) -> false",
-                     :a, :match?, ToStr.new("b")
-    assert_send_type "(Regexp, Integer) -> true",
-                     :a, :match?, /a/, 0
-    assert_send_type "(Regexp, Integer) -> false",
-                     :a, :match?, /a/, 1
-    assert_send_type "(String, Integer) -> true",
-                     :a, :match?, "a", 0
-    assert_send_type "(String, Integer) -> false",
-                     :a, :match?, "a", 1
-    assert_send_type "(ToStr, Integer) -> true",
-                     :a, :match?, ToStr.new("a"), 0
-    assert_send_type "(ToStr, Integer) -> false",
-                     :a, :match?, ToStr.new("a"), 1
-    assert_send_type "(Regexp, ToInt) -> true",
-                     :a, :match?, /a/, ToInt.new(0)
-    assert_send_type "(Regexp, ToInt) -> false",
-                     :a, :match?, /a/, ToInt.new(1)
-    assert_send_type "(String, ToInt) -> true",
-                     :a, :match?, "a", ToInt.new(0)
-    assert_send_type "(String, ToInt) -> false",
-                     :a, :match?, "a", ToInt.new(1)
-    assert_send_type "(ToStr, ToInt) -> true",
-                     :a, :match?, ToStr.new("a"), ToInt.new(0)
-    assert_send_type "(ToStr, ToInt) -> false",
-                     :a, :match?, ToStr.new("a"), ToInt.new(1)
+    with_string('l').and /l/ do |pattern|
+      assert_send_type  '(Regexp | string) -> bool',
+                        :hello, :match?, pattern
+      assert_send_type  '(Regexp | string) -> bool',
+                        :heya, :match?, pattern
+
+      with_int 0 do |offset|
+        assert_send_type  '(Regexp | string, int) -> bool',
+                          :hello, :match?, pattern, offset
+        assert_send_type  '(Regexp | string, int) -> bool',
+                          :heya, :match?, pattern, offset
+      end
+    end
   end
 
-  def test_next
-    assert_send_type "() -> Symbol",
-                     :a, :next
+  def test_next(method: :next)
+    assert_send_type '() -> Symbol',
+                     :a, method
+  end
+
+  def test_name
+    assert_send_type '() -> String',
+                     :a, :name
   end
 
   def test_size
-    assert_send_type "() -> Integer",
-                     :a, :size
+    test_length(method: :size)
+  end
+
+  def test_slice
+    test_op_aref(method: :slice)
   end
 
   def test_start_with?
-    assert_send_type "() -> false",
-                     :a, :start_with?
-    assert_send_type "(String) -> true",
-                     :a, :start_with?, "a"
-    assert_send_type "(String) -> false",
-                     :a, :start_with?, "b"
-    assert_send_type "(String, String) -> true",
-                     :a, :start_with?, "b", "a"
-    assert_send_type "(ToStr) -> true",
-                     :a, :start_with?, ToStr.new("a")
-    assert_send_type "(ToStr) -> false",
-                     :a, :start_with?, ToStr.new("b")
-    assert_send_type "(ToStr, ToStr) -> true",
-                     :a, :start_with?, ToStr.new("b"), ToStr.new("a")
-    assert_send_type "(Regexp) -> true",
-                     :a, :start_with?, /a/
+    assert_send_type  '() -> bool',
+                      :hello, :start_with?
+
+    with_string('he').and /he/ do |prefix|
+      assert_send_type  '(*string | Regexp) -> bool',
+                        :hello, :start_with?, prefix
+      assert_send_type  '(*string | Regexp) -> bool',
+                        :hello, :start_with?, prefix, prefix
+    end
   end
 
   def test_succ
-    assert_send_type "() -> Symbol",
-                     :a, :succ
+    test_next(method: :succ)
   end
 
   def test_swapcase
-    assert_send_type "() -> Symbol",
+    assert_send_type '() -> Symbol',
                      :a, :swapcase
-    assert_send_type "(:ascii) -> Symbol",
+    assert_send_type '(:ascii) -> Symbol',
                      :a, :swapcase, :ascii
-    assert_send_type "(:lithuanian) -> Symbol",
+    assert_send_type '(:lithuanian) -> Symbol',
                      :a, :swapcase, :lithuanian
-    assert_send_type "(:turkic) -> Symbol",
+    assert_send_type '(:turkic) -> Symbol',
                      :a, :swapcase, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+    assert_send_type '(:lithuanian, :turkic) -> Symbol',
                      :a, :swapcase, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+    assert_send_type '(:turkic, :lithuanian) -> Symbol',
                      :a, :swapcase, :turkic, :lithuanian
   end
 
   def test_to_proc
-    assert_send_type "() -> Proc",
+    assert_send_type '() -> Proc',
                      :a, :to_proc
   end
 
-  def test_to_s
-    assert_send_type "() -> String",
-                     :a, :to_s
+  def test_to_s(method: :to_s)
+    assert_send_type '() -> String',
+                     :a, method
   end
 
-  def test_to_sym
-    assert_send_type "() -> Symbol",
-                     :a, :to_sym
+  def test_to_sym(method: :to_sym)
+    assert_send_type '() -> Symbol',
+                     :a, method
   end
 
   def test_upcase
-    assert_send_type "() -> Symbol",
+    assert_send_type '() -> Symbol',
                      :a, :upcase
-    assert_send_type "(:ascii) -> Symbol",
+    assert_send_type '(:ascii) -> Symbol',
                      :a, :upcase, :ascii
-    assert_send_type "(:lithuanian) -> Symbol",
+    assert_send_type '(:lithuanian) -> Symbol',
                      :a, :upcase, :lithuanian
-    assert_send_type "(:turkic) -> Symbol",
+    assert_send_type '(:turkic) -> Symbol',
                      :a, :upcase, :turkic
-    assert_send_type "(:lithuanian, :turkic) -> Symbol",
+    assert_send_type '(:lithuanian, :turkic) -> Symbol',
                      :a, :upcase, :lithuanian, :turkic
-    assert_send_type "(:turkic, :lithuanian) -> Symbol",
+    assert_send_type '(:turkic, :lithuanian) -> Symbol',
                      :a, :upcase, :turkic, :lithuanian
   end
 end

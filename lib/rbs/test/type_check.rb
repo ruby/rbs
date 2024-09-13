@@ -59,6 +59,8 @@ module RBS
       end
 
       def method_call(method_name, method_type, call, errors:)
+        return errors if method_type.type.is_a?(Types::UntypedFunction)
+
         args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
         self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
 
@@ -150,6 +152,8 @@ module RBS
       end
 
       def zip_args(args, fun, &block)
+        return true if fun.is_a?(Types::UntypedFunction)
+
         case
         when args.empty?
           if fun.required_positionals.empty? && fun.trailing_positionals.empty? && fun.required_keywords.empty?
@@ -256,6 +260,13 @@ module RBS
           Test.call(val, IS_AP, instance_class)
         when Types::ClassInstance
           klass = get_class(type.name) or return false
+          if params = builder.env.normalized_module_class_entry(type.name.absolute!)&.type_params
+            args = AST::TypeParam.normalize_args(params, type.args)
+            unless args == type.args
+              type = Types::ClassInstance.new(name: type.name, args: args, location: type.location)
+            end
+          end
+
           case
           when klass == ::Array
             Test.call(val, IS_AP, klass) && each_sample(val).all? {|v| value(v, type.args[0]) }
@@ -354,6 +365,8 @@ module RBS
       def callable_argument?(parameters, method_type)
         fun = method_type.type
         take_has_rest = !!parameters.find { |(op, _)| op == :rest }
+
+        return true if fun.is_a?(Types::UntypedFunction)
 
         fun.required_positionals.each do
           op, _ = parameters.first
