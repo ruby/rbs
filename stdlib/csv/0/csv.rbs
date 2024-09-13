@@ -2031,7 +2031,8 @@ class CSV < Object
   #     File.write(path, string)
   #     CSV.read(path, headers: true) # => #<CSV::Table mode:col_or_row row_count:4>
   #
-  def self.read: (String path, ?::Hash[Symbol, untyped] options) -> ::Array[::Array[String?]]
+  def self.read: (String | IO path, headers: true | :first_row | Array[untyped] | String, **untyped options) -> ::CSV::Table[CSV::Row]
+               | (String | IO path, ?::Hash[Symbol, untyped] options) -> ::Array[::Array[String?]]
 
   # <!--
   #   rdoc-file=lib/csv.rb
