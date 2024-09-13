@@ -424,8 +424,10 @@ _visibility_ ::= `public` | `private`
 
 _attribute-type_ ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
-_include-member_ ::= `include` _class-name_ _type-arguments_
-                   | `include` _interface-name_ _type-arguments_
+_include-member_ ::= _include-class-member_
+                   | _include-interface-member_
+_include-class-member_ ::= `include` _class-name_ _type-arguments_
+_include-interface-member_ :== `include` _interface-name_ _type-arguments_
 _extend-member_ ::= `extend` _class-name_ _type-arguments_
                   | `extend` _interface-name_ _type-arguments_
 _prepend-member_ ::= `prepend` _class-name_ _type-arguments_
@@ -621,7 +623,7 @@ _module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_   
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
 _interface-members_ ::= _method-member_              # Method
-                      | _include-member_             # Mixin (include)
+                      | _include-interface-member_   # Mixin (include)
                       | _alias-member_               # Alias
 
 _type-alias-decl_ ::= `type` _alias-name_ _module-type-parameters_ `=` _type_
