@@ -2061,6 +2061,7 @@ end
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
           assert_nil param.upper_bound
+          assert_equal 29...44, param.location[:default].range
           assert_equal parse_type("_Each[String]?"), param.upper_bound_type
           assert_equal parse_type("Array[String]"), param.default_type
         end
