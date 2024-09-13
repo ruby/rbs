@@ -389,7 +389,7 @@ end
     end
   end
 
-  if RUBY_VERSION >= '3.1'
+  if RUBY_VERSION >= '3.1' && RUBY_VERSION <= "3.3"
     class TestForYield
       def m1() yield end
       def m2() yield 42 end

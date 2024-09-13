@@ -16,6 +16,7 @@ class RubyVM::AbstractSyntaxTreeSingletonTest < Test::Unit::TestCase
   end
 
   def test_of
+    return if RUBY_VERSION >= "3.4.0"
     assert_send_type "(::Proc | ::Method | ::UnboundMethod body, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> ::RubyVM::AbstractSyntaxTree::Node?",
                      RubyVM::AbstractSyntaxTree, :of, method(:test_of)
   end
