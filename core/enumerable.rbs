@@ -1299,7 +1299,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # With no block given, returns an Enumerator.
   #
   def reverse_each: () { (Elem arg0) -> untyped } -> void
-                  | () -> ::Enumerator[Elem, void]
+                  | () -> ::Enumerator[Elem]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1760,7 +1760,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     # show pythagorean triples less than 100
   #     p pythagorean_triples.take_while { |*, z| z < 100 }.force
   #
-  def lazy: () -> Enumerator::Lazy[Elem, void]
+  def lazy: () -> Enumerator::Lazy[Elem]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2092,8 +2092,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       pp lines
   #     }
   #
-  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[ U, ::Array[Elem] ], void]
-           | () -> ::Enumerator[Elem, ::Enumerator[[ untyped, ::Array[Elem] ], void]]
+  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[ U, ::Array[Elem] ]]
+           | () -> ::Enumerator[Elem, ::Enumerator[[ untyped, ::Array[Elem] ]]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2142,7 +2142,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Enumerable#slice_when does the same, except splitting when the block returns
   # `true` instead of `false`.
   #
-  def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
+  def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2204,7 +2204,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Enumerable#chunk_while does the same, except splitting when the block returns
   # `false` instead of `true`.
   #
-  def slice_when: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem], void]
+  def slice_when: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2239,8 +2239,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     p e.map {|ll| ll[0...-1].map {|l| l.sub(/\\\n\z/, "") }.join + ll.last }
   #     #=>["foo\n", "barbaz\n", "\n", "qux\n"]
   #
-  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
-                 | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem], void]
+  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem]]
+                 | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2396,6 +2396,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       }
   #     }
   #
-  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem], void]
-                  | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem], void]
+  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem]]
+                  | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem]]
 end

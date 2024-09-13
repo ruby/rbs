@@ -260,6 +260,13 @@ module RBS
           Test.call(val, IS_AP, instance_class)
         when Types::ClassInstance
           klass = get_class(type.name) or return false
+          if params = builder.env.normalized_module_class_entry(type.name.absolute!)&.type_params
+            args = AST::TypeParam.normalize_args(params, type.args)
+            unless args == type.args
+              type = Types::ClassInstance.new(name: type.name, args: args, location: type.location)
+            end
+          end
+
           case
           when klass == ::Array
             Test.call(val, IS_AP, klass) && each_sample(val).all? {|v| value(v, type.args[0]) }

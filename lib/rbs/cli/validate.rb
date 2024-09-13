@@ -164,7 +164,7 @@ EOU
             end
 
             if dt = param.default_type
-              void_type_context_validator(dt)
+              void_type_context_validator(dt, true)
               no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
@@ -232,6 +232,22 @@ EOU
             location: decl.decl.location&.aref(:type_params)
           )
 
+          decl.decl.type_params.each do |param|
+            if ub = param.upper_bound_type
+              void_type_context_validator(ub)
+              no_self_type_validator(ub)
+              no_classish_type_validator(ub)
+              @validator.validate_type(ub, context: nil)
+            end
+
+            if dt = param.default_type
+              void_type_context_validator(dt, true)
+              no_self_type_validator(dt)
+              no_classish_type_validator(dt)
+              @validator.validate_type(dt, context: nil)
+            end
+          end
+
           decl.decl.members.each do |member|
             case member
             when AST::Members::MethodDefinition
@@ -278,7 +294,31 @@ EOU
           @builder.expand_alias1(name).tap do |type|
             @validator.validate_type type, context: nil
           end
+
           @validator.validate_type_alias(entry: decl)
+
+          @validator.validate_type_params(
+            decl.decl.type_params,
+            type_name: name,
+            location: decl.decl.location&.aref(:type_params)
+          )
+
+          decl.decl.type_params.each do |param|
+            if ub = param.upper_bound_type
+              void_type_context_validator(ub)
+              no_self_type_validator(ub)
+              no_classish_type_validator(ub)
+              @validator.validate_type(ub, context: nil)
+            end
+
+            if dt = param.default_type
+              void_type_context_validator(dt, true)
+              no_self_type_validator(dt)
+              no_classish_type_validator(dt)
+              @validator.validate_type(dt, context: nil)
+            end
+          end
+
           no_self_type_validator(decl.decl.type)
           no_classish_type_validator(decl.decl.type)
           void_type_context_validator(decl.decl.type)
