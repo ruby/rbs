@@ -74,7 +74,7 @@ module Digest
   # -->
   # Returns a BubbleBabble encoded version of a given *string*.
   #
-  def self.bubblebabble: (String) -> String
+  def self.bubblebabble: (string) -> String
 
   def self.const_missing: (Symbol name) -> singleton(::Digest::Base)
 
@@ -84,13 +84,13 @@ module Digest
   # -->
   # Generates a hex-encoded version of a given *string*.
   #
-  def self.hexencode: (String) -> String
+  def self.hexencode: (string) -> String
 
   private
 
-  def bubblebabble: (String) -> String
+  def bubblebabble: (string) -> String
 
-  def hexencode: (String) -> String
+  def hexencode: (string) -> String
 end
 
 # <!-- rdoc-file=ext/digest/lib/digest.rb -->
@@ -111,7 +111,7 @@ module Digest::Instance
   # The update() method and the left-shift operator are overridden by each
   # implementation subclass. (One should be an alias for the other)
   #
-  def <<: (String) -> self
+  def <<: (string) -> self
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -122,7 +122,7 @@ module Digest::Instance
   # of the digest object.  If another digest instance is given, checks whether
   # they have the same hash value.  Otherwise returns false.
   #
-  def ==: (::Digest::Instance | String) -> bool
+  def ==: (instance | string) -> bool
 
   # <!--
   #   rdoc-file=ext/digest/lib/digest.rb
@@ -138,7 +138,7 @@ module Digest::Instance
   # In either case, the return value is properly padded with '=' and contains no
   # line feeds.
   #
-  def base64digest: (?String? str) -> String
+  def base64digest: (?string? str) -> String
 
   # <!--
   #   rdoc-file=ext/digest/lib/digest.rb
@@ -177,7 +177,7 @@ module Digest::Instance
   # If a *string* is given, returns the hash value for the given *string*,
   # resetting the digest to the initial state before and after the process.
   #
-  def digest: (?String) -> String
+  def digest: (?string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -204,7 +204,7 @@ module Digest::Instance
   # -->
   # Updates the digest with the contents of a given file *name* and returns self.
   #
-  def file: (String name) -> self
+  def file: (string name) -> instance
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -218,7 +218,7 @@ module Digest::Instance
   # hex-encoded form, resetting the digest to the initial state before and after
   # the process.
   #
-  def hexdigest: (?String) -> String
+  def hexdigest: (?string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -253,7 +253,7 @@ module Digest::Instance
   # Returns a new, initialized copy of the digest object.  Equivalent to
   # digest_obj.clone().reset().
   #
-  def new: () -> ::Digest::Base
+  def new: () -> instance
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -288,7 +288,7 @@ module Digest::Instance
   # The update() method and the left-shift operator are overridden by each
   # implementation subclass. (One should be an alias for the other)
   #
-  def update: (String) -> self
+  def update: (string) -> self
 
   private
 
@@ -319,7 +319,7 @@ class Digest::Class
   # Returns the base64 encoded hash value of a given *string*.  The return value
   # is properly padded with '=' and contains no line feeds.
   #
-  def self.base64digest: (String str, *untyped) -> String
+  def self.base64digest: (string str) -> String
 
   # <!--
   #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
@@ -327,7 +327,7 @@ class Digest::Class
   # -->
   # Returns the BubbleBabble encoded hash value of a given *string*.
   #
-  def self.bubblebabble: (String, *untyped) -> String
+  def self.bubblebabble: (string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -338,7 +338,7 @@ class Digest::Class
   # any, are passed through to the constructor and the *string* is passed to
   # #digest().
   #
-  def self.digest: (String, *untyped) -> String
+  def self.digest: (string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/lib/digest.rb
@@ -350,7 +350,7 @@ class Digest::Class
   #     p Digest::SHA256.file("X11R6.8.2-src.tar.bz2").hexdigest
   #     # => "f02e3c85572dc9ad7cb77c2a638e3be24cc1b5bea9fdbb0b0299c9668475c534"
   #
-  def self.file: (String name, *untyped) -> ::Digest::Class
+  def self.file: (string name) -> instance
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -359,11 +359,11 @@ class Digest::Class
   # Returns the hex-encoded hash value of a given *string*.  This is almost
   # equivalent to Digest.hexencode(Digest::Class.new(*parameters).digest(string)).
   #
-  def self.hexdigest: (String, *untyped) -> String
+  def self.hexdigest: (string) -> String
 
   private
 
-  def initialize: () -> self
+  def initialize: () -> void
 end
 
 # <!-- rdoc-file=ext/digest/digest.c -->
@@ -408,7 +408,7 @@ class Digest::Base < Digest::Class
   # <!-- rdoc-file=ext/digest/digest.c -->
   # Update the digest using given *string* and return `self`.
   #
-  def <<: (String) -> self
+  def <<: (string) -> self
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -434,20 +434,14 @@ class Digest::Base < Digest::Class
   #
   def reset: () -> self
 
-  # <!--
-  #   rdoc-file=ext/digest/digest.c
-  #   - digest_base.update(string) -> digest_base
-  #   - digest_base << string -> digest_base
-  # -->
-  # Update the digest using given *string* and return `self`.
-  #
-  def update: (String) -> self
+  %a{annotate:rdoc:skip}
+  alias update <<
 
   private
 
   def finish: () -> String
 
-  def initialize_copy: (::Digest::Base) -> self
+  def initialize_copy: (self) -> self
 end
 
 # <!-- rdoc-file=ext/digest/sha1/sha1init.c -->
