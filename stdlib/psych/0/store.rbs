@@ -45,7 +45,7 @@ class Psych::Store < ::PStore
   # Options passed in through `yaml_opts` will be used when converting the store
   # to YAML via Hash#to_yaml().
   #
-  def initialize: (*untyped o) -> Psych::Store
+  def initialize: (*untyped o) -> void
 
   def dump: (untyped table) -> String
 

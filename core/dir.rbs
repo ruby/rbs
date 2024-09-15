@@ -182,7 +182,7 @@ class Dir
   #     Dir.new('.').read.encoding                       # => #<Encoding:UTF-8>
   #     Dir.new('.', encoding: 'US-ASCII').read.encoding # => #<Encoding:US-ASCII>
   #
-  def initialize: (path dir, ?encoding: encoding?) -> self
+  def initialize: (path dir, ?encoding: encoding?) -> void
 
   # <!--
   #   rdoc-file=dir.rb

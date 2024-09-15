@@ -597,7 +597,7 @@ class SystemCallError < StandardError
   # SystemCallError object. The error number is subsequently available via the
   # #errno method.
   #
-  def initialize: (string msg, Integer errno) -> SystemCallError
+  def initialize: (string msg, Integer errno) -> void
 
   # <!--
   #   rdoc-file=error.c
