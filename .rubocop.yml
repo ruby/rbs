@@ -11,6 +11,7 @@ Rubycw/Rubycw:
   Enabled: true
   Exclude:
     - 'test/**/*_test.rb'
+    - 'test/typecheck/**/*.rb'
 
 RBS:
   Enabled: true
