@@ -47,7 +47,7 @@ module RBS
       # (`-`) and add (`+`)methods, or rand will raise an ArgumentError.
       #
       %a{annotate:rdoc:copy:Random#rand}
-      def rand: () -> Float
+      def rand: (?0) -> Float
               | (Integer | ::Range[Integer] max) -> Integer
               | (Float | ::Range[Float] max) -> Float
 
@@ -200,13 +200,13 @@ module RBS
       # Generates formatted random number from raw random bytes. See Random#rand.
       #
       %a{annotate:rdoc:copy:Random::Formatter#rand}
-      def rand: () -> Float
-              | (?Float? n) -> Float
-              | (?Integer? n) -> Integer
-              | (?Numeric? n) -> Numeric
-              | (?::Range[Float]? n) -> Float
-              | (?::Range[Integer]? n) -> Integer
-              | (?::Range[Numeric]? n) -> Numeric
+      def rand: (?0) -> Float
+              | (Float? n) -> Float
+              | (Integer n) -> Integer
+              | (Numeric n) -> Numeric
+              | (::Range[Float] n) -> Float
+              | (::Range[Integer] n) -> Integer
+              | (::Range[Numeric] n) -> Numeric
 
       %a{annotate:rdoc:copy:Random::Formatter#random_byte}
       def random_bytes: (?Integer? n) -> String

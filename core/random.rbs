@@ -91,7 +91,7 @@ class Random < RBS::Unnamed::Random_Base
   #
   # See also Random#rand.
   #
-  def self.rand: () -> Float
+  def self.rand: (?0) -> Float
                | (Integer | ::Range[Integer] max) -> Integer
                | (Float | ::Range[Float] max) -> Float
                | [T < Numeric] (::Range[T]) -> T
