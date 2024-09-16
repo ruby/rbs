@@ -143,10 +143,10 @@ module RBS
         puts "module #{name_and_params(decl.name, decl.type_params)}#{self_type}"
 
         indent do
-          decl.members.each.with_index do |member, index|
-            if index > 0
-              puts
-            end
+          [nil, *decl.members].each_cons(2) do |prev, member|
+            raise unless member
+
+            preserve_empty_line prev, member
             write_member member
           end
         end

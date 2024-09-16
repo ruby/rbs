@@ -299,7 +299,6 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     assert_subtracted <<~RBS, subtracted
       module M
         def y: () -> untyped
-
         def self.x: () -> untyped
       end
     RBS

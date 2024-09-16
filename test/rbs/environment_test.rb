@@ -403,15 +403,11 @@ end
 
 module ::Foo : ::Foo::_Each[::Foo::String]
   attr_reader name: ::Foo::String
-
   attr_accessor size: Integer
-
   attr_writer email(@foo): ::String
 
   @created_at: ::Time
-
   self.@last_timestamp: ::Time?
-
   @@max_size: Integer
 
   include ::Enumerable[Integer]
