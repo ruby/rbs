@@ -1,5 +1,81 @@
 # CHANGELOG
 
+## 3.6.0.pre.1 (2024-09-17)
+
+### Signature updates
+
+* csv ([#2012](https://github.com/ruby/rbs/pull/2012), [#1864](https://github.com/ruby/rbs/pull/1864), [#2002](https://github.com/ruby/rbs/pull/2002), [#2003](https://github.com/ruby/rbs/pull/2003), [#1903](https://github.com/ruby/rbs/pull/1903))
+* digest ([#1880](https://github.com/ruby/rbs/pull/1880))
+* kconv ([#1857](https://github.com/ruby/rbs/pull/1857))
+* zlib ([#1911](https://github.com/ruby/rbs/pull/1911))
+* `_Each` ([#2006](https://github.com/ruby/rbs/pull/2006))
+* `Array` ([#1921](https://github.com/ruby/rbs/pull/1921))
+* `Enumerable` ([#1921](https://github.com/ruby/rbs/pull/1921))
+* `Enumerator::_Each` ([#2006](https://github.com/ruby/rbs/pull/2006), [#1915](https://github.com/ruby/rbs/pull/1915))
+* `Enumerator` ([#2004](https://github.com/ruby/rbs/pull/2004))
+* `Kernel` ([#1945](https://github.com/ruby/rbs/pull/1945))
+* `Method` ([#1939](https://github.com/ruby/rbs/pull/1939))
+* `Module` ([#1921](https://github.com/ruby/rbs/pull/1921))
+* `Net::HTTPHeader` ([#1932](https://github.com/ruby/rbs/pull/1932))
+* `Proc` ([#1937](https://github.com/ruby/rbs/pull/1937))
+* `Queue` ([#2004](https://github.com/ruby/rbs/pull/2004))
+* `Range` ([#1921](https://github.com/ruby/rbs/pull/1921))
+* `Refinement` ([#1931](https://github.com/ruby/rbs/pull/1931))
+* `Symbol` ([#1930](https://github.com/ruby/rbs/pull/1930))
+* `TracePoint` ([#1943](https://github.com/ruby/rbs/pull/1943))
+* `#rand` ([#2007](https://github.com/ruby/rbs/pull/2007))
+* Use untyped blocks ([#1935](https://github.com/ruby/rbs/pull/1935))
+* Update docs for ruby-3.3.4 ([#1923](https://github.com/ruby/rbs/pull/1923))
+* Update docs for ruby-3.3.3 ([#1889](https://github.com/ruby/rbs/pull/1889))
+
+### Language updates
+
+* Fix position for default_type ([#1997](https://github.com/ruby/rbs/pull/1997))
+* Update `syntax.md` ([#1995](https://github.com/ruby/rbs/pull/1995))
+* Improve generics ([#1994](https://github.com/ruby/rbs/pull/1994))
+* Allow alias to module-self-type from module ([#1948](https://github.com/ruby/rbs/pull/1948))
+* Make it a syntax error when the keys of keyword and record are duplicated. ([#1883](https://github.com/ruby/rbs/pull/1883))
+
+### Library changes
+
+* Omit unnecessary field from location range ([#1788](https://github.com/ruby/rbs/pull/1788))
+* Handle ISEQs compiled by Prism ([#1983](https://github.com/ruby/rbs/pull/1983))
+* Add AST Visitor ([#1975](https://github.com/ruby/rbs/pull/1975))
+* Make the extension `GC.auto_compact` compatible ([#1971](https://github.com/ruby/rbs/pull/1971))
+* Make `FileFinder` faster by globbing all possible files ([#1965](https://github.com/ruby/rbs/pull/1965))
+* Fix #1905: Fix typo in `UntypedFunction` ([#1906](https://github.com/ruby/rbs/pull/1906))
+
+#### rbs prototype
+
+* [prototype] Remove redundant access modifier ([#1914](https://github.com/ruby/rbs/pull/1914))
+
+### Miscellaneous
+
+* Allow RBS/Style/InitializeReturnType ([#2008](https://github.com/ruby/rbs/pull/2008))
+* docs: An interface can include interfaces only and not modules ([#1996](https://github.com/ruby/rbs/pull/1996))
+* Fix the portability of an external command ([#2001](https://github.com/ruby/rbs/pull/2001))
+* Skip `AbstractSyntaxTree` test with ruby-3.4 ([#2005](https://github.com/ruby/rbs/pull/2005))
+* Fix test ([#1972](https://github.com/ruby/rbs/pull/1972))
+* Use `File.open` instead of `IO.sysopen` ([#1912](https://github.com/ruby/rbs/pull/1912))
+
+## 3.5.3 (2024-08-23)
+
+### Library changes
+
+* Backport GC fix PR ([#1977](https://github.com/ruby/rbs/pull/1977))
+
+## 3.5.2 (2024-07-10)
+
+### Library changes
+
+* Update docs for ruby-3.3.4 ([#1923](https://github.com/ruby/rbs/pull/1923), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+* Update docs for ruby-3.3.3 ([#1889](https://github.com/ruby/rbs/pull/1889), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+* Fix #1905: Fix typo in `UntypedFunction` ([#1906](https://github.com/ruby/rbs/pull/1906), Backported in [#1925](https://github.com/ruby/rbs/pull/1925))
+
+### Miscellaneous
+
+* Use `File.open` instead of `IO.sysopen` ([#1913](https://github.com/ruby/rbs/pull/1913))
+
 ## 3.5.1 (2024-06-07)
 
 ### Library changes
