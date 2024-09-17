@@ -2078,7 +2078,7 @@ module Net
     #   - new(m, reqbody, resbody, uri_or_path, initheader = nil)
     # -->
     #
-    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?headers initheader) -> Net::HTTP
+    def initialize: (String m, boolish reqbody, boolish resbody, URI::Generic | String uri_or_path, ?headers initheader) -> void
 
     # <!-- rdoc-file=lib/net/http/generic_request.rb -->
     # Returns the string method name for the request:

@@ -250,7 +250,7 @@ class Exception
   # -->
   # Construct a new Exception object, optionally passing in a message.
   #
-  def initialize: (?string | _ToS message) -> self
+  def initialize: (?string | _ToS message) -> void
 
   # <!--
   #   rdoc-file=error.c

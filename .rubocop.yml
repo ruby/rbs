@@ -32,6 +32,8 @@ RBS/Style:
   Exclude:
     - 'sig/**/*'
     - 'test/**/*'
+RBS/Style/InitializeReturnType:
+  Enabled: true
 
 Lint/DuplicateMethods:
   Enabled: true
