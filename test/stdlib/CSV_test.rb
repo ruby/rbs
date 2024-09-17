@@ -76,3 +76,23 @@ class CSVSingletonTest < Test::Unit::TestCase
                      CSV, :read, File.open(path)
   end
 end
+
+class CSVTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "csv"
+  testing "CSV"
+
+  def test_headers
+    csv = CSV.new("header1,header2\nrow1_1,row1_2")
+    assert_send_type "() -> nil",
+                     csv, :headers
+
+    csv = CSV.new("header1,header2\nrow1_1,row1_2", headers: true)
+    assert_send_type "() -> true",
+                     csv, :headers
+    csv.read
+    assert_send_type "() -> Array[String]",
+                     csv, :headers
+  end
+end
