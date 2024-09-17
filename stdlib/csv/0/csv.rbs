@@ -2196,6 +2196,16 @@ class CSV < Object
   #
   def each: () -> Enumerator[untyped, Integer]
           | () { (untyped) -> void } -> Integer
+
+  # <!--
+  #   rdoc-file=lib/csv.rb
+  #   - csv.headers -> object
+  # -->
+  # Returns the value that determines whether headers are used; used for parsing;
+  # see {Option `headers`[}](#class-CSV-label-Option+headers):
+  #     CSV.new('').headers # => nil
+  #
+  def headers: () -> (Array[String] | true | nil)
 end
 
 # <!-- rdoc-file=lib/csv.rb -->
