@@ -301,16 +301,23 @@ module RBS
     end
 
     class Record
-      attr_reader all_fields: Hash[Symbol, [t, bool]]
+      type key = Symbol | String | Integer | bool
 
-      attr_reader fields: Hash[Symbol, t]
+      # All types of all files
+      #
+      # If the key is *required*, the second value of the tuple is `true`.
+      # If the key is *optional*, the second value of the tuple is `false`.
+      #
+      attr_reader all_fields: Hash[key, [t, bool]]
 
-      attr_reader optional_fields: Hash[Symbol, t]
+      attr_reader fields: Hash[key, t]
+
+      attr_reader optional_fields: Hash[key, t]
 
       type loc = Location[bot, bot]
 
-      def initialize: (fields: Hash[Symbol, t], location: loc?) -> void
-                    | (all_fields: Hash[Symbol, [t, bool]], location: loc?) -> void
+      def initialize: (fields: Hash[key, t], location: loc?) -> void
+                    | (all_fields: Hash[key, [t, bool]], location: loc?) -> void
 
       include _TypeBase
 
