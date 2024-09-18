@@ -694,7 +694,7 @@ module RBS
 
         types = types.map do |t|
           if t.is_a?(Types::Literal)
-            type_name = TypeName.new(name: t.literal.class.name.to_sym, namespace: Namespace.root)
+            type_name = TypeName.new(name: t.literal.class.name&.to_sym || raise, namespace: Namespace.root)
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
           else
             t
@@ -825,7 +825,7 @@ module RBS
           AST::Members::ClassVariable => -3,
           AST::Members::ClassInstanceVariable => -2,
           AST::Members::InstanceVariable => -1,
-        }
+        } #: Hash[Class, Integer]
         decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
       end
     end
