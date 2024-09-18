@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.6.0.pre.2 (2024-09-18)
+
+### Signature updates
+
+* `Kernel#class` ([#2017](https://github.com/ruby/rbs/pull/2017))
+* `TracePoint#enable` ([#2015](https://github.com/ruby/rbs/pull/2015))
+
+### Miscellaneous
+
+* Fix type definition and type errors ([#2016](https://github.com/ruby/rbs/pull/2016))
+
 ## 3.6.0.pre.1 (2024-09-17)
 
 ### Signature updates
