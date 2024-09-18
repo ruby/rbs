@@ -282,7 +282,7 @@ module Kernel : BasicObject
   #     1.class      #=> Integer
   #     self.class   #=> Object
   #
-  def class: () -> Class
+  def class: () -> class
 
   # <!--
   #   rdoc-file=vm_eval.c
