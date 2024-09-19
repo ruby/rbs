@@ -550,6 +550,32 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate__generics_default_self
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          module A[T = self]
+          end
+
+          class B[S = self]
+          end
+
+          interface _C[T = self]
+          end
+        RBS
+
+        (Pathname(dir) + 'b.rbs').write(<<~RBS)
+          type t[T = self] = untyped
+        RBS
+
+        cli.run(["-I", dir, "validate"])
+
+        refute_operator stdout.string, :include?, "/a.rbs"
+        assert_include stdout.string, "/b.rbs:1:11...1:15: `self` type is not allowed in this context (RBS::WillSyntaxError)"
+      end
+    end
+  end
+
   def test_validate_multiple
     with_cli do |cli|
       Dir.mktmpdir do |dir|
