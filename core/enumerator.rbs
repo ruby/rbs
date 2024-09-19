@@ -132,7 +132,7 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
 
   # A convenience interface for `each` with optional block
   #
-  interface _Each[out E, out R = self]
+  interface _Each[out E, out R]
     def each: () { (E) -> void } -> R
             | () -> Enumerator[E, R]
   end
