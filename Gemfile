@@ -43,5 +43,5 @@ group :minitest do
 end
 
 group :typecheck_test do
-  gem "steep", "~> 1.7.1", require: false
+  gem "steep", "~> 1.8.0.pre", require: false
 end
