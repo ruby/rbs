@@ -74,8 +74,6 @@ class DBM
   def self.open: (String filename, ?Integer mode, ?Integer flags) -> DBM
                | [T] (String filename, ?Integer mode, ?Integer flags) { (DBM) -> T } -> T
 
-  public
-
   # <!--
   #   rdoc-file=ext/dbm/dbm.c
   #   - dbm[key] -> string value or nil

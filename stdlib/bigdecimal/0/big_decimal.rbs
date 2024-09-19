@@ -408,8 +408,6 @@ class BigDecimal < Numeric
   #
   def self.save_rounding_mode: () { (?nil) -> void } -> void
 
-  public
-
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
   #   - a % b

@@ -454,8 +454,6 @@ class OptionParser
   #
   def self.with: (?String banner, ?Integer width, ?String indent) ?{ (instance opts) -> void } -> instance
 
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - abort(mesg = $!)
@@ -1109,8 +1107,6 @@ module OptionParser::Arguable
   #
   def self.extend_object: (untyped obj) -> untyped
 
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - getopts(*args, symbolize_names: false)
@@ -1184,8 +1180,6 @@ end
 class OptionParser::CompletingHash < Hash[untyped, untyped]
   include OptionParser::Completion
 
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - match(key)
@@ -1213,8 +1207,6 @@ module OptionParser::Completion
   # -->
   #
   def self.regexp: (untyped key, untyped icase) -> untyped
-
-  public
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -1260,8 +1252,6 @@ OptionParser::InvalidOption::Reason: String
 # and converter pair. Also provides summary feature.
 #
 class OptionParser::List
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - accept(t, pat = /.*/m, &block)
@@ -1450,8 +1440,6 @@ class OptionParser::ParseError < RuntimeError
   #
   def self.filter_backtrace: (untyped array) -> untyped
 
-  public
-
   def additional: () -> untyped
 
   def additional=: (untyped) -> untyped
@@ -1553,8 +1541,6 @@ class OptionParser::Switch
   #
   def self.pattern: () -> untyped
 
-  public
-
   def add_banner: (untyped to) -> untyped
 
   def arg: () -> untyped
@@ -1650,8 +1636,6 @@ class OptionParser::Switch::NoArgument < OptionParser::Switch
   #
   def self.pattern: () -> untyped
 
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - parse(arg, argv) { |NeedlessArgument, arg| ... }
@@ -1665,8 +1649,6 @@ end
 # Switch that can omit argument.
 #
 class OptionParser::Switch::OptionalArgument < OptionParser::Switch
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - parse(arg, argv, &error)
@@ -1680,8 +1662,6 @@ end
 # Switch that takes an argument, which does not begin with '-' or is '-'.
 #
 class OptionParser::Switch::PlacedArgument < OptionParser::Switch
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - parse(arg, argv, &error)
@@ -1695,8 +1675,6 @@ end
 # Switch that takes an argument.
 #
 class OptionParser::Switch::RequiredArgument < OptionParser::Switch
-  public
-
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - parse(arg, argv)

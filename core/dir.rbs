@@ -759,8 +759,6 @@ class Dir
   #
   alias self.unlink self.delete
 
-  public
-
   # <!--
   #   rdoc-file=dir.c
   #   - chdir -> 0

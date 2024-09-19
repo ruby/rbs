@@ -11,8 +11,6 @@ class Logger
     attr_reader dev: _WriteCloser
     attr_reader filename: String?
 
-    public
-
     # <!--
     #   rdoc-file=lib/logger/log_device.rb
     #   - close()

@@ -40,8 +40,6 @@ class UNIXSocket < BasicSocket
   #
   def self.socketpair: (?Symbol socktype, ?Integer protocol) -> [ instance, instance ]
 
-  public
-
   # <!--
   #   rdoc-file=ext/socket/unixsocket.c
   #   - unixsocket.addr => [address_family, unix_path]

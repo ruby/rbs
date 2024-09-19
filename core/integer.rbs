@@ -149,8 +149,6 @@ class Integer < Numeric
   def self.try_convert: (int) -> Integer
                       | (untyped) -> Integer?
 
-  public
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> real_number

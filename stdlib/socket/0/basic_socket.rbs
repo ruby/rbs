@@ -41,8 +41,6 @@ class BasicSocket < IO
   #
   def self.for_fd: (Integer fileno) -> BasicSocket
 
-  public
-
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c
   #   - basicsocket.close_read => nil

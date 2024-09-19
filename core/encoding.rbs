@@ -780,8 +780,6 @@ class Encoding::Converter < Object
                               ?xml: :text | :attr
                             ) -> conversion_path
 
-  public
-
   # <!--
   #   rdoc-file=transcode.c
   #   - ec == other        -> true or false

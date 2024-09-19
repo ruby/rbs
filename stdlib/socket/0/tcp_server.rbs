@@ -27,8 +27,6 @@
 #     end
 #
 class TCPServer < TCPSocket
-  public
-
   # <!--
   #   rdoc-file=ext/socket/tcpserver.c
   #   - tcpserver.accept => tcpsocket

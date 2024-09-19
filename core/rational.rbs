@@ -48,8 +48,6 @@
 #                        #=> (1.0000000000000002+1.7320508075688772i)
 #
 class Rational < Numeric
-  public
-
   def %: (Integer) -> Rational
        | (Float) -> Float
        | (Rational) -> Rational

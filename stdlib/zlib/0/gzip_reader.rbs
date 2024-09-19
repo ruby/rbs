@@ -152,8 +152,6 @@ module Zlib
     def self.zcat: (IO io, **untyped) -> String
                  | (IO io, **untyped) { (String chunk) -> void } -> nil
 
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - each(*args)

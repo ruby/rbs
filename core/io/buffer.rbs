@@ -184,8 +184,6 @@ class IO
     #
     def self.string: (int) { (Buffer) -> void } -> String
 
-    public
-
     # <!--
     #   rdoc-file=io_buffer.c
     #   - <=>(other) -> true or false

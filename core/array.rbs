@@ -600,8 +600,6 @@ class Array[unchecked out Elem] < Object
   #
   def self.try_convert: [U] (untyped) -> ::Array[U]?
 
-  public
-
   # <!--
   #   rdoc-file=array.c
   #   - array & other_array -> new_array

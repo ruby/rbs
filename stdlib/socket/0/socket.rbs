@@ -752,8 +752,6 @@ class Socket < BasicSocket
   #
   def self.unpack_sockaddr_un: (String path) -> String
 
-  public
-
   # <!--
   #   rdoc-file=ext/socket/socket.c
   #   - socket.accept => [client_socket, client_addrinfo]
@@ -3730,8 +3728,6 @@ Socket::UDP_CORK: Integer
 # Socket::Ifaddr represents a result of getifaddrs() function.
 #
 class Socket::Ifaddr
-  public
-
   # <!--
   #   rdoc-file=ext/socket/ifaddr.c
   #   - ifaddr.addr => addrinfo
@@ -3805,8 +3801,6 @@ end
 # UDP/IP address information used by Socket.udp_server_loop.
 #
 class Socket::UDPSource
-  public
-
   def inspect: () -> String
 
   # <!-- rdoc-file=ext/socket/lib/socket.rb -->
@@ -3910,8 +3904,6 @@ class Socket::AncillaryData
   #     #=> #<Socket::AncillaryData: UNIX SOCKET RIGHTS 2>
   #
   def self.unix_rights: (IO fd) -> instance
-
-  public
 
   # <!--
   #   rdoc-file=ext/socket/ancdata.c

@@ -2,8 +2,6 @@
 # UDPSocket represents a UDP/IP socket.
 #
 class UDPSocket < IPSocket
-  public
-
   # <!--
   #   rdoc-file=ext/socket/udpsocket.c
   #   - udpsocket.bind(host, port) #=> 0

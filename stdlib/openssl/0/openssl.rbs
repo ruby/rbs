@@ -934,8 +934,6 @@ module OpenSSL
     #     puts int2.value # => 1
     #
     class ASN1Data
-      public
-
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
@@ -1082,8 +1080,6 @@ module OpenSSL
     end
 
     class BitString < OpenSSL::ASN1::Primitive
-      public
-
       def unused_bits: () -> ::Integer
 
       def unused_bits=: (::Integer) -> ::Integer
@@ -1126,8 +1122,6 @@ module OpenSSL
     #
     class Constructive < OpenSSL::ASN1::ASN1Data
       include Enumerable[ASN1Data]
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_asn1.c
@@ -1192,8 +1186,6 @@ module OpenSSL
     end
 
     class EndOfContent < OpenSSL::ASN1::ASN1Data
-      public
-
       def to_der: () -> String
 
       private
@@ -1274,8 +1266,6 @@ module OpenSSL
       def value: () -> String
 
       def value=: (String) -> String
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_asn1.c
@@ -1393,8 +1383,6 @@ module OpenSSL
     #     prim_zero_tagged_explicit = <class>.new(value, 0, :EXPLICIT)
     #
     class Primitive < OpenSSL::ASN1::ASN1Data
-      public
-
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # May be used as a hint for encoding a value either implicitly or explicitly by
       # setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set when
@@ -1534,8 +1522,6 @@ module OpenSSL
     # See also the man page BN_rand_range(3).
     #
     def self.rand_range: (untyped) -> untyped
-
-    public
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1949,8 +1935,6 @@ module OpenSSL
   #
   module Buffering
     include Enumerable[untyped]
-
-    public
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
@@ -2490,8 +2474,6 @@ module OpenSSL
     #
     def self.ciphers: () -> Array[String]
 
-    public
-
     # <!--
     #   rdoc-file=ext/openssl/ossl_cipher.c
     #   - cipher.auth_data = string -> string
@@ -2908,8 +2890,6 @@ module OpenSSL
     #
     def self.parse_config: (IO io) -> Hash[String, Hash[String, String]]
 
-    public
-
     # <!--
     #   rdoc-file=ext/openssl/ossl_config.c
     #   - config[section] -> hash
@@ -3198,8 +3178,6 @@ module OpenSSL
     #
     def self.digest: (String name, String data) -> String
 
-    public
-
     # <!-- rdoc-file=ext/openssl/ossl_digest.c -->
     # Not every message digest can be computed in one single pass. If a message
     # digest is to be computed from several subsequent sources, then each may be
@@ -3456,8 +3434,6 @@ module OpenSSL
     #
     def self.load: (?String name) -> (true | nil)
 
-    public
-
     # <!--
     #   rdoc-file=ext/openssl/ossl_engine.c
     #   - engine.cipher(name) -> OpenSSL::Cipher
@@ -3688,8 +3664,6 @@ module OpenSSL
     #     #=> "de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9"
     #
     def self.hexdigest: (String | Digest algo, String key, String data) -> String
-
-    public
 
     # <!-- rdoc-file=ext/openssl/ossl_hmac.c -->
     # Returns *hmac* updated with the message to be authenticated. Can be called
@@ -4046,8 +4020,6 @@ module OpenSSL
     #
     def self.included: (untyped base) -> untyped
 
-    public
-
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/marshal.rb
     #   - _dump(_level)
@@ -4056,8 +4028,6 @@ module OpenSSL
     def _dump: (untyped _level) -> untyped
 
     module ClassMethods
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/marshal.rb
       #   - _load(string)
@@ -4112,8 +4082,6 @@ module OpenSSL
     #     #proceed
     #
     class SPKI
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ns_spki.c
       #   - spki.challenge => string
@@ -4505,8 +4473,6 @@ module OpenSSL
     # detailed than a Response.
     #
     class BasicResponse
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
       #   - basic_response.add_nonce(nonce = nil)
@@ -4644,8 +4610,6 @@ module OpenSSL
     # status check can be performed.
     #
     class CertificateId
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
       #   - certificate_id.cmp(other) -> true or false
@@ -4747,8 +4711,6 @@ module OpenSSL
     # certificate or from a DER-encoded request created elsewhere.
     #
     class Request
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
       #   - request.add_certid(certificate_id) -> request
@@ -4884,8 +4846,6 @@ module OpenSSL
       #
       def self.create: (Integer status, ?BasicResponse response) -> instance
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
       #   - response.basic
@@ -4943,8 +4903,6 @@ module OpenSSL
     # which contains the basic information of the status of the certificate.
     #
     class SingleResponse
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
       #   - single_response.cert_status -> Integer
@@ -5089,8 +5047,6 @@ module OpenSSL
     #
     def self.create: (String pass, String name, PKey::PKey key, X509::Certificate cert, ?Array[X509::Certificate]? ca, ?String? key_pbe, ?String? cert_pbe, ?Integer? key_iter, ?Integer? mac_iter, ?Integer? keytype) -> instance
 
-    public
-
     def ca_certs: () -> Array[X509::Certificate]?
 
     def certificate: () -> X509::Certificate
@@ -5181,8 +5137,6 @@ module OpenSSL
     # -->
     #
     def self.write_smime: (instance pkcs7, ?String data, ?Integer flags) -> String
-
-    public
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_pkcs7.c
@@ -5393,8 +5347,6 @@ module OpenSSL
     end
 
     class RecipientInfo
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkcs7.c
       #   - enc_key()
@@ -5427,8 +5379,6 @@ module OpenSSL
     end
 
     class SignerInfo
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkcs7.c
       #   - issuer()
@@ -5579,8 +5529,6 @@ module OpenSSL
       # :   The generator.
       #
       def self.generate: (Integer size, ?Integer generator) -> instance
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/pkey.rb
@@ -5881,8 +5829,6 @@ module OpenSSL
       # :   The desired key size in bits.
       #
       def self.generate: (Integer size) -> instance
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_dsa.c
@@ -6279,8 +6225,6 @@ module OpenSSL
       #
       def self.generate: (String | Group pem_or_der_or_group_or_curve_name) -> instance
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_ec.c
       #   - key.check_key   => true
@@ -6596,8 +6540,6 @@ module OpenSSL
       type point_conversion_format = :compressed | :uncompressed | :hybrid
 
       class Group
-        public
-
         # <!-- rdoc-file=ext/openssl/ossl_pkey_ec.c -->
         # Returns `true` if the two groups use the same curve and have the same
         # parameters, `false` otherwise.
@@ -6803,8 +6745,6 @@ module OpenSSL
       end
 
       class Point
-        public
-
         # <!--
         #   rdoc-file=ext/openssl/ossl_pkey_ec.c
         #   - ==(p1)
@@ -6953,8 +6893,6 @@ module OpenSSL
     # *   OpenSSL::PKey::EC
     #
     class PKey
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey.c
       #   - pkey.inspect -> string
@@ -7135,8 +7073,6 @@ module OpenSSL
       # :   An odd Integer, normally 3, 17, or 65537.
       #
       def self.generate: (Integer size, ?Integer exponent) -> instance
-
-      public
 
       def d: () -> BN?
 
@@ -7856,8 +7792,6 @@ module OpenSSL
     # be frozen afterward.
     #
     class SSLContext
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
       #   - ctx.add_certificate(certificate, pkey [, extra_certs]) -> self
@@ -8767,8 +8701,6 @@ module OpenSSL
     class SSLServer
       include OpenSSL::SSL::SocketForwarder
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
       #   - accept()
@@ -8858,8 +8790,6 @@ module OpenSSL
       #     sock.connect # Initiates a connection to localhost:443 with SSLContext
       #
       def self.open: (untyped remote_host, untyped remote_port, ?untyped local_host, ?untyped local_port, ?context: untyped) -> untyped
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
@@ -9250,8 +9180,6 @@ module OpenSSL
     end
 
     class Session
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl_session.c
       #   - session1 == session2 -> boolean
@@ -9350,8 +9278,6 @@ module OpenSSL
     end
 
     module SocketForwarder
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
       #   - addr()
@@ -9549,8 +9475,6 @@ module OpenSSL
     #     factory.allowed_digests                                               -> array or nil
     #
     class Factory
-      public
-
       def additional_certs: () -> Array[X509::Certificate]?
 
       def additional_certs=: (Array[X509::Certificate]? certs) -> Array[X509::Certificate]?
@@ -9609,8 +9533,6 @@ module OpenSSL
     # *   algorithm, message_imprint, policy_id, and nonce are set to `false`
     #
     class Request
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
       #   - request.algorithm    -> string
@@ -9753,8 +9675,6 @@ module OpenSSL
     # Response.
     #
     class Response
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
       #   - response.failure_info -> nil or symbol
@@ -9917,8 +9837,6 @@ module OpenSSL
     # Response.
     #
     class TokenInfo
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
       #   - token_info.algorithm -> string or nil
@@ -10287,8 +10205,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/x509.rb
       #   - ==(other)
@@ -10358,8 +10274,6 @@ module OpenSSL
       include OpenSSL::Marshal
 
       extend OpenSSL::Marshal::ClassMethods
-
-      public
 
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/x509.rb
@@ -10637,8 +10551,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509cert.c
       #   - cert1 == cert2 -> true | false
@@ -10867,8 +10779,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/x509.rb
       #   - ==(other)
@@ -10980,8 +10890,6 @@ module OpenSSL
       module AuthorityInfoAccess
         include OpenSSL::X509::Extension::Helpers
 
-        public
-
         # <!--
         #   rdoc-file=ext/openssl/lib/openssl/x509.rb
         #   - ca_issuer_uris()
@@ -11018,8 +10926,6 @@ module OpenSSL
       module AuthorityKeyIdentifier
         include OpenSSL::X509::Extension::Helpers
 
-        public
-
         # <!--
         #   rdoc-file=ext/openssl/lib/openssl/x509.rb
         #   - authority_key_identifier()
@@ -11035,8 +10941,6 @@ module OpenSSL
       module CRLDistributionPoints
         include OpenSSL::X509::Extension::Helpers
 
-        public
-
         # <!--
         #   rdoc-file=ext/openssl/lib/openssl/x509.rb
         #   - crl_uris()
@@ -11050,8 +10954,6 @@ module OpenSSL
       end
 
       module Helpers
-        public
-
         # <!--
         #   rdoc-file=ext/openssl/lib/openssl/x509.rb
         #   - find_extension(oid)
@@ -11062,8 +10964,6 @@ module OpenSSL
 
       module SubjectKeyIdentifier
         include OpenSSL::X509::Extension::Helpers
-
-        public
 
         # <!--
         #   rdoc-file=ext/openssl/lib/openssl/x509.rb
@@ -11082,8 +10982,6 @@ module OpenSSL
     end
 
     class ExtensionFactory
-      public
-
       def config: () -> Config?
 
       def config=: (Config config) -> Config
@@ -11232,8 +11130,6 @@ module OpenSSL
       # See also #to_utf8 for the opposite operation.
       #
       def self.parse_rfc2253: (String str, ?template template) -> instance
-
-      public
 
       # <!-- rdoc-file=ext/openssl/ossl_x509name.c -->
       # Compares this Name with *other* and returns `0` if they are the same and `-1`
@@ -11506,8 +11402,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/x509.rb
       #   - ==(other)
@@ -11649,8 +11543,6 @@ module OpenSSL
     end
 
     class Revoked
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/x509.rb
       #   - ==(other)
@@ -11770,8 +11662,6 @@ module OpenSSL
     #     ssl_socket = OpenSSL::SSL::SSLSocket.new tcp_socket, ssl_context
     #
     class Store
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509store.c
       #   - store.add_cert(cert) -> self
@@ -11980,8 +11870,6 @@ module OpenSSL
     # status involved.
     #
     class StoreContext
-      public
-
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509store.c
       #   - stctx.chain -> nil | Array of X509::Certificate

@@ -98,8 +98,6 @@ module Zlib
     #
     def self.deflate: (string string, ?compression_level level) -> String
 
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - << string

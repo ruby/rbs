@@ -382,8 +382,6 @@ class CGI
   #
   def self.parse: (String query) -> Hash[String, Array[String]]
 
-  public
-
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # Return the accept character set for this CGI instance.
   #
@@ -706,8 +704,6 @@ class CGI
     #
     def self.parse: (String raw_cookie) -> Hash[String, instance]
 
-    public
-
     # <!-- rdoc-file=lib/cgi/cookie.rb -->
     # Domain for which this cookie applies, as a `String`
     #
@@ -864,8 +860,6 @@ class CGI
   end
 
   module Escape
-    public
-
     # <!--
     #   rdoc-file=ext/cgi/escape/escape.c
     #   - CGI.escape(string) -> string
@@ -940,8 +934,6 @@ class CGI
   #     mode.
   #
   module QueryExtension
-    public
-
     # <!--
     #   rdoc-file=lib/cgi/core.rb
     #   - [](key)
@@ -1134,8 +1126,6 @@ class CGI
 
   module Util
     include CGI::Escape
-
-    public
 
     # <!--
     #   rdoc-file=lib/cgi/util.rb

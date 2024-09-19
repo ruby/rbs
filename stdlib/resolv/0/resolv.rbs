@@ -74,8 +74,6 @@ class Resolv
   #
   def self.getnames: (String address) -> Array[String]
 
-  public
-
   # <!--
   #   rdoc-file=lib/resolv.rb
   #   - each_address(name) { |name| ... }
@@ -178,8 +176,6 @@ class Resolv::DNS
                | (*untyped args) { (instance) -> void } -> void
 
   def self.random: (Integer arg) -> (Integer | Float)
-
-  public
 
   # <!--
   #   rdoc-file=lib/resolv.rb
@@ -395,8 +391,6 @@ class Resolv::DNS::Config
 
   def self.parse_resolv_conf: (String filename) -> Hash[Symbol, untyped]
 
-  public
-
   def generate_candidates: (String name) -> Array[Resolv::DNS::Name]
 
   def generate_timeouts: () -> Array[Integer | Float]
@@ -447,8 +441,6 @@ module Resolv::DNS::Label
 end
 
 class Resolv::DNS::Label::Str
-  public
-
   def eql?: (Resolv::DNS::Label::Str other) -> bool
 
   def downcase: () -> String
@@ -470,8 +462,6 @@ end
 
 class Resolv::DNS::Message
   def self.decode: (String m) -> instance
-
-  public
 
   def ==: (instance other) -> bool
 
@@ -541,8 +531,6 @@ class Resolv::DNS::Message
 end
 
 class Resolv::DNS::Message::MessageDecoder
-  public
-
   def get_bytes: (?Integer len) -> String
 
   def get_label: () -> Resolv::DNS::Label::Str
@@ -571,8 +559,6 @@ class Resolv::DNS::Message::MessageDecoder
 end
 
 class Resolv::DNS::Message::MessageEncoder
-  public
-
   def put_bytes: (string d) -> void
 
   def put_label: (_ToS d) -> void
@@ -612,8 +598,6 @@ class Resolv::DNS::Name
   # :   Creates a new Name.
   #
   def self.create: (Resolv::DNS::dns_name arg) -> untyped
-
-  public
 
   def ==: (instance other) -> bool
 
@@ -695,8 +679,6 @@ Resolv::DNS::OpCode::Update: Integer
 class Resolv::DNS::Query
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 end
 
@@ -740,8 +722,6 @@ Resolv::DNS::RCode::YXDomain: Integer
 Resolv::DNS::RCode::YXRRSet: Integer
 
 class Resolv::DNS::Requester
-  public
-
   def close: () -> void
 
   def request: (Resolv::DNS::Requester::Sender sender, Numeric tout) -> [ Resolv::DNS::Message, String ]
@@ -754,8 +734,6 @@ class Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
-  public
-
   def close: () -> void
 
   def lazy_initialize: () -> void
@@ -770,16 +748,12 @@ class Resolv::DNS::Requester::ConnectedUDP < Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::ConnectedUDP::Sender < Resolv::DNS::Requester::Sender
-  public
-
   def data: () -> String
 
   def send: () -> void
 end
 
 class Resolv::DNS::Requester::MDNSOneShot < Resolv::DNS::Requester::UnconnectedUDP
-  public
-
   def sender: (Resolv::DNS::Message msg, String data, ?String host, ?Integer port) -> Resolv::DNS::Requester::Sender
 
   def recv_reply: (Array[UDPSocket] readable_socks) -> [ String, String ]
@@ -798,8 +772,6 @@ class Resolv::DNS::Requester::Sender
 end
 
 class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
-  public
-
   def close: () -> untyped
 
   def recv_reply: (Array[TCPSocket] readable_socks) -> [ String, String ]
@@ -812,16 +784,12 @@ class Resolv::DNS::Requester::TCP < Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::TCP::Sender < Resolv::DNS::Requester::Sender
-  public
-
   def data: () -> String
 
   def send: () -> void
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
-  public
-
   def close: () -> void
 
   def lazy_initialize: () -> void
@@ -836,8 +804,6 @@ class Resolv::DNS::Requester::UnconnectedUDP < Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP::Sender < Resolv::DNS::Requester::Sender
-  public
-
   def data: () -> String
 
   def send: () -> void
@@ -854,8 +820,6 @@ class Resolv::DNS::Resource < Resolv::DNS::Query
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
   def self.get_class: (Integer type_value, Integer class_value) -> self
-
-  public
 
   def eql?: (Resolv::DNS::Resource other) -> bool
 
@@ -899,8 +863,6 @@ Resolv::DNS::Resource::CNAME::TypeValue: Integer
 class Resolv::DNS::Resource::DomainName < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # <!-- rdoc-file=lib/resolv.rb -->
@@ -927,8 +889,6 @@ class Resolv::DNS::Resource::Generic < Resolv::DNS::Resource
 
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   # <!-- rdoc-file=lib/resolv.rb -->
   # Data for this generic resource.
   #
@@ -952,8 +912,6 @@ end
 #
 class Resolv::DNS::Resource::HINFO < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
-
-  public
 
   # <!-- rdoc-file=lib/resolv.rb -->
   # CPU architecture for this resource.
@@ -994,8 +952,6 @@ Resolv::DNS::Resource::IN::ClassValue: Integer
 class Resolv::DNS::Resource::IN::A < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   # <!-- rdoc-file=lib/resolv.rb -->
   # The Resolv::IPv4 address for this A.
   #
@@ -1023,8 +979,6 @@ Resolv::DNS::Resource::IN::A::TypeValue: Integer
 #
 class Resolv::DNS::Resource::IN::AAAA < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
-
-  public
 
   # <!-- rdoc-file=lib/resolv.rb -->
   # The Resolv::IPv6 address for this AAAA.
@@ -1119,8 +1073,6 @@ Resolv::DNS::Resource::IN::SOA::TypeValue: Integer
 class Resolv::DNS::Resource::IN::SRV < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
   # <!-- rdoc-file=lib/resolv.rb -->
@@ -1191,8 +1143,6 @@ Resolv::DNS::Resource::IN::TXT::TypeValue: Integer
 class Resolv::DNS::Resource::IN::WKS < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   # <!-- rdoc-file=lib/resolv.rb -->
   # The host these services run on.
   #
@@ -1233,8 +1183,6 @@ Resolv::DNS::Resource::IN::WKS::TypeValue: Integer
 #
 class Resolv::DNS::Resource::LOC < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
-
-  public
 
   # <!-- rdoc-file=lib/resolv.rb -->
   # The altitude of the LOC above a reference sphere whose surface sits 100km
@@ -1297,8 +1245,6 @@ Resolv::DNS::Resource::LOC::TypeValue: Integer
 class Resolv::DNS::Resource::MINFO < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   # <!-- rdoc-file=lib/resolv.rb -->
   # Mailbox to use for error messages related to the mail list or mailbox.
   #
@@ -1328,8 +1274,6 @@ Resolv::DNS::Resource::MINFO::TypeValue: Integer
 #
 class Resolv::DNS::Resource::MX < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
-
-  public
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
@@ -1377,8 +1321,6 @@ Resolv::DNS::Resource::PTR::TypeValue: Integer
 #
 class Resolv::DNS::Resource::SOA < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
-
-  public
 
   def encode_rdata: (Resolv::DNS::Message::MessageEncoder msg) -> void
 
@@ -1440,8 +1382,6 @@ Resolv::DNS::Resource::SOA::TypeValue: Integer
 class Resolv::DNS::Resource::TXT < Resolv::DNS::Resource
   def self.decode_rdata: (Resolv::DNS::Message::MessageDecoder msg) -> instance
 
-  public
-
   # <!--
   #   rdoc-file=lib/resolv.rb
   #   - data()
@@ -1473,8 +1413,6 @@ Resolv::DNS::Resource::TXT::TypeValue: Integer
 # Resolv::Hosts is a hostname resolver that uses the system hosts file.
 #
 class Resolv::Hosts
-  public
-
   # <!--
   #   rdoc-file=lib/resolv.rb
   #   - each_address(name, &proc)
@@ -1549,8 +1487,6 @@ class Resolv::IPv4
   #
   def self.create: (String | instance arg) -> instance
 
-  public
-
   def ==: (instance other) -> bool
 
   # <!-- rdoc-file=lib/resolv.rb -->
@@ -1602,8 +1538,6 @@ class Resolv::IPv6
   # :   `arg` must match one of the IPv6::Regex* constants
   #
   def self.create: (String | instance arg) -> instance
-
-  public
 
   def ==: (instance other) -> bool
 
@@ -1688,8 +1622,6 @@ class Resolv::LOC::Alt
   #
   def self.create: (Resolv::LOC::Alt | String arg) -> instance
 
-  public
-
   def eql?: (Resolv::LOC::Alt other) -> bool
 
   # <!-- rdoc-file=lib/resolv.rb -->
@@ -1735,8 +1667,6 @@ class Resolv::LOC::Coord
   # :   `arg` must match the LOC::Coord::Regex constant
   #
   def self.create: (Resolv::LOC::Coord | String arg) -> instance
-
-  public
 
   def eql?: (Resolv::LOC::Coord other) -> bool
 
@@ -1787,8 +1717,6 @@ class Resolv::LOC::Size
   #
   def self.create: (Resolv::LOC::Size | String arg) -> instance
 
-  public
-
   def eql?: (Resolv::LOC::Size other) -> bool
 
   alias == eql?
@@ -1826,8 +1754,6 @@ Resolv::LOC::Size::Regex: Regexp
 # *   RFC 6762
 #
 class Resolv::MDNS < Resolv::DNS
-  public
-
   # <!--
   #   rdoc-file=lib/resolv.rb
   #   - each_address(name)

@@ -15,8 +15,6 @@ class IPSocket < BasicSocket
   #
   def self.getaddress: (String host) -> String
 
-  public
-
   # <!--
   #   rdoc-file=ext/socket/ipsocket.c
   #   - ipsocket.addr([reverse_lookup]) => [address_family, port, hostname, numeric_address]

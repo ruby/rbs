@@ -733,8 +733,6 @@ class Date
   #
   def self.xmlschema: (String str, ?Integer start) -> Date
 
-  public
-
   # <!--
   #   rdoc-file=ext/date/date_core.c
   #   - d + other  ->  date

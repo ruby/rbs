@@ -67,8 +67,6 @@
 #       Unique:  6
 #
 class SimpleDelegator < Delegator
-  public
-
   # <!--
   #   rdoc-file=lib/delegate.rb
   #   - __getobj__() { || ... }

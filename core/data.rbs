@@ -183,8 +183,6 @@ class Data
 
   def self.allocate: () -> bot
 
-  public
-
   # <!--
   #   rdoc-file=struct.c
   #   - self == other -> true or false

@@ -4,8 +4,6 @@ class Logger
   # Default formatter for log messages.
   #
   class Formatter
-    public
-
     attr_accessor datetime_format: String?
 
     # <!--

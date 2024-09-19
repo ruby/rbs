@@ -162,8 +162,6 @@
 class Numeric
   include Comparable
 
-  public
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> real_numeric

@@ -45,8 +45,6 @@ module RBS
     class ARGFClass
       include Enumerable[String]
 
-      public
-
       # <!--
       #   rdoc-file=io.c
       #   - ARGF.argv  -> ARGV

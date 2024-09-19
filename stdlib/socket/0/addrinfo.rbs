@@ -110,8 +110,6 @@ class Addrinfo
   #
   def self.unix: (String path, ?Symbol socktype) -> Addrinfo
 
-  public
-
   # <!--
   #   rdoc-file=ext/socket/raddrinfo.c
   #   - addrinfo.afamily => integer

@@ -113,8 +113,6 @@ class StringScanner
   #
   def self.must_C_version: () -> self
 
-  public
-
   # <!-- rdoc-file=ext/strscan/strscan.c -->
   # Appends `str` to the string being scanned. This method does not affect scan
   # pointer.

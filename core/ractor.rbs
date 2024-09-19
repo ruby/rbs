@@ -597,8 +597,6 @@ class Ractor
   #
   def self.yield: (untyped obj, ?move: boolish) -> untyped
 
-  public
-
   # <!--
   #   rdoc-file=ractor.rb
   #   - <<(obj, move: false)
@@ -925,8 +923,6 @@ class Ractor
   #     # Ractor::MovedError (can not send any methods to a moved object)
   #
   class MovedObject < BasicObject
-    public
-
     # <!--
     #   rdoc-file=ractor.c
     #   - !(*args)
@@ -1007,8 +1003,6 @@ class Ractor
   #     end
   #
   class RemoteError < Ractor::Error
-    public
-
     def ractor: () -> Ractor
   end
 
