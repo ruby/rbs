@@ -56,7 +56,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate"
+  sh "#{ruby} #{rbs} validate --exit-error-on-syntax-error"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -72,7 +72,7 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate"
+    sh "#{ruby} #{rbs} -r #{lib} validate --exit-error-on-syntax-error"
   end
 end
 
