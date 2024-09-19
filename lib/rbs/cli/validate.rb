@@ -165,6 +165,7 @@ EOU
 
             if dt = param.default_type
               void_type_context_validator(dt, true)
+              no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
@@ -241,6 +242,7 @@ EOU
 
             if dt = param.default_type
               void_type_context_validator(dt, true)
+              no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
