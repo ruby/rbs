@@ -562,16 +562,16 @@ singleton(::BasicObject)
 
           interface _C[T = self]
           end
-        RBS
 
-        (Pathname(dir) + 'b.rbs').write(<<~RBS)
           type t[T = self] = untyped
         RBS
 
         cli.run(["-I", dir, "validate"])
 
-        refute_operator stdout.string, :include?, "/a.rbs"
-        assert_include stdout.string, "/b.rbs:1:11...1:15: `self` type is not allowed in this context (RBS::WillSyntaxError)"
+        assert_include stdout.string, "/a.rbs:1:13...1:17: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
+        assert_include stdout.string, "/a.rbs:4:12...4:16: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
+        assert_include stdout.string, "/a.rbs:7:17...7:21: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
+        assert_include stdout.string, "/a.rbs:10:11...10:15: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
       end
     end
   end
