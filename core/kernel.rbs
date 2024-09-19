@@ -282,7 +282,7 @@ module Kernel : BasicObject
   #     1.class      #=> Integer
   #     self.class   #=> Object
   #
-  def class: () -> class
+  def class: () -> Class
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -2210,7 +2210,7 @@ module Kernel : BasicObject
   #     s3 = s1.dup #=> #<Klass:0x401c1084>
   #     s3.foo #=> NoMethodError: undefined method `foo' for #<Klass:0x401c1084>
   #
-  def dup: () -> instance
+  def dup: () -> self
 
   # <!-- rdoc-file=enumerator.c -->
   # Creates a new Enumerator which will enumerate by calling `method` on `obj`,
@@ -2956,9 +2956,9 @@ module Kernel : BasicObject
 
   private
 
-  def initialize_copy: (instance object) -> self
+  def initialize_copy: (self object) -> self
 
-  def initialize_clone: (instance object, ?freeze: bool?) -> self
+  def initialize_clone: (self object, ?freeze: bool?) -> self
 
-  def initialize_dup: (instance object) -> self
+  def initialize_dup: (self object) -> self
 end
