@@ -106,6 +106,10 @@
 # *   fatal
 #
 class Exception
+  interface _Exception[T]
+    def exception: (?T message) -> Exception
+  end
+
   # <!--
   #   rdoc-file=error.c
   #   - Exception.to_tty?   ->  true or false
