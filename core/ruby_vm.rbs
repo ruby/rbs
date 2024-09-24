@@ -50,6 +50,20 @@ RubyVM::OPTS: Array[String]
 # Of course, this class is MRI specific.
 #
 class RubyVM::InstructionSequence < Object
+  def absolute_path: () -> String?
+  def base_label: () -> String
+  def disasm: () -> String
+  def disassemble: () -> String
+  def each_child: () -> RubyVM::InstructionSequence
+  def eval: () -> untyped
+  def first_lineno: () -> Integer
+  def inspect: () -> String
+  def label: () -> String
+  def path: () -> String
+  def script_lines: () -> Array[String]?
+  def to_a: () -> Array[untyped]
+  def to_binary: () -> String
+  def trace_points: () -> Array[untyped]
 end
 
 # <!-- rdoc-file=ast.rb -->
