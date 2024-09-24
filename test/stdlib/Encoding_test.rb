@@ -275,3 +275,283 @@ class Encoding_UndefinedConversionErrorTest < Test::Unit::TestCase
     ec.last_error
   end
 end
+
+class Encoding_ConverterSingletonTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing 'singleton(::Encoding::Converter)'
+
+  def test_asciicompat_encoding
+    with_encoding 'ISO-2022-JP' do |enc|
+      assert_send_type  '(encoding) -> Encoding',
+                        Encoding::Converter, :asciicompat_encoding, enc
+    end
+
+    with_encoding 'UTF-8' do |enc|
+      assert_send_type  '(encoding) -> nil',
+                        Encoding::Converter, :asciicompat_encoding, enc
+    end
+  end
+
+  def test_search_convpath
+    with_encoding 'ISO-8859-1' do |src|
+      with_encoding 'EUC-JP' do |dst|
+        assert_send_type  '(encoding, encoding) -> ::Encoding::Converter::conversion_path',
+                          Encoding::Converter, :search_convpath, src, dst
+
+        with_int(0).chain([nil]).each do |flags|
+          assert_send_type  '(encoding, encoding, int?) -> ::Encoding::Converter::conversion_path',
+                            Encoding::Converter, :search_convpath, src, dst, flags
+        end
+
+        [:text, :attr, nil].each do |xml|
+          [:universal, :crlf, :cr, :lf, nil].each do |newline|
+            assert_send_type  '(encoding, encoding, xml: (:text | :attr)?, newline: (:universal | :crlf | :cr | :lf)?) -> ::Encoding::Converter::conversion_path',
+                              Encoding::Converter, :search_convpath, src, dst, xml: xml, newline: newline
+          end
+
+          # Theoretically you can pass all the kwargs at once, but i cant find a converter which'll accept more than one truthy one.
+          [1, nil, Object.new, false].each do |boolish|
+            assert_send_type  '(encoding, encoding, xml: (:text | :attr)?, universal_newline: boolish) -> ::Encoding::Converter::conversion_path',
+                              Encoding::Converter, :search_convpath, src, dst, xml: xml, universal_newline: boolish
+            assert_send_type  '(encoding, encoding, xml: (:text | :attr)?, crlf_newline: boolish) -> ::Encoding::Converter::conversion_path',
+                              Encoding::Converter, :search_convpath, src, dst, xml: xml, crlf_newline: boolish
+            assert_send_type  '(encoding, encoding, xml: (:text | :attr)?, cr_newline: boolish) -> ::Encoding::Converter::conversion_path',
+                              Encoding::Converter, :search_convpath, src, dst, xml: xml, cr_newline: boolish
+            assert_send_type  '(encoding, encoding, xml: (:text | :attr)?, lf_newline: boolish) -> ::Encoding::Converter::conversion_path',
+                              Encoding::Converter, :search_convpath, src, dst, xml: xml, lf_newline: boolish
+          end
+        end
+      end
+    end
+  end
+
+  def test_AFTER_OUTPUT
+    assert_const_type 'Integer',
+                      'Encoding::Converter::AFTER_OUTPUT'
+  end
+
+  def test_CRLF_NEWLINE_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::CRLF_NEWLINE_DECORATOR'
+  end
+
+  def test_CR_NEWLINE_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::CR_NEWLINE_DECORATOR'
+  end
+
+  def test_INVALID_MASK
+    assert_const_type 'Integer',
+                      'Encoding::Converter::INVALID_MASK'
+  end
+
+  def test_INVALID_REPLACE
+    assert_const_type 'Integer',
+                      'Encoding::Converter::INVALID_REPLACE'
+  end
+
+  def test_PARTIAL_INPUT
+    assert_const_type 'Integer',
+                      'Encoding::Converter::PARTIAL_INPUT'
+  end
+
+  def test_UNDEF_HEX_CHARREF
+    assert_const_type 'Integer',
+                      'Encoding::Converter::UNDEF_HEX_CHARREF'
+  end
+
+  def test_UNDEF_MASK
+    assert_const_type 'Integer',
+                      'Encoding::Converter::UNDEF_MASK'
+  end
+
+  def test_UNDEF_REPLACE
+    assert_const_type 'Integer',
+                      'Encoding::Converter::UNDEF_REPLACE'
+  end
+
+  def test_UNIVERSAL_NEWLINE_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::UNIVERSAL_NEWLINE_DECORATOR'
+  end
+
+  def test_XML_ATTR_CONTENT_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::XML_ATTR_CONTENT_DECORATOR'
+  end
+
+  def test_XML_ATTR_QUOTE_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::XML_ATTR_QUOTE_DECORATOR'
+  end
+
+  def test_XML_TEXT_DECORATOR
+    assert_const_type 'Integer',
+                      'Encoding::Converter::XML_TEXT_DECORATOR'
+  end
+end
+
+class Encoding_ConverterInstanceTest < Test::Unit::TestCase
+  include TypeAssertions
+
+  testing '::Encoding::Converter'
+
+  def test_initialize
+    with_encoding 'ISO-8859-1' do |src|
+      with_encoding 'EUC-JP' do |dst|
+        assert_send_type  '(encoding, encoding) -> void',
+                          Encoding::Converter.allocate, :initialize, src, dst
+
+        with_int(0).chain([nil]) do |flags|
+        end
+      end
+    end
+    # def initialize: (encoding src, encoding destination, ?int? flags) -> self
+    #               | (array[[encoding, encoding] | array[encoding] | decorator | string] convpath) -> self
+    #               | (
+    #                   encoding src,
+    #                   encoding destination,
+    #                   ?invalid: :replace?,
+    #                   ?undef: :replace?,
+    #                   ?replace: string?,
+    #                   ?xml: (:text | :attr)?,
+    #                   ?newline: (:universal | :crlf | :cr | :lf)?,
+    #                   ?universal_newline: boolish,
+    #                   ?crlf_newline: boolish,
+    #                   ?cr_newline: boolish,
+    #                   ?lf_newline: boolish
+    #                 ) -> self
+  end
+
+  def new_instance(src = 'ISO-8859-1', dst = 'EUC-JP')
+    Encoding::Converter.new(src, dst)
+  end
+
+  def test_eq
+    [new_instance, 1, Object.new, true, false, 1r].each do |rhs|
+      assert_send_type  '(untyped) -> boolish',
+                        new_instance, :==, rhs
+    end
+  end
+
+  def test_convert
+    with_string "A" do |string|
+      assert_send_type  '(string) -> String',
+                        new_instance, :convert, string
+    end
+  end
+
+  def test_convpath
+    assert_send_type  '() -> Array[[Encoding, Encoding] | decorator]',
+                      new_instance, :convpath
+  end
+
+  def test_destination_encoding
+    assert_send_type  '() -> Encoding',
+                      new_instance, :destination_encoding
+  end
+
+  def test_finish
+    assert_send_type  '() -> String',
+                      new_instance, :finish
+  end
+
+  def test_insert_output
+    with_string "hello" do |string|
+      assert_send_type  '(string) -> nil',
+                        new_instance, :insert_output, string
+    end
+  end
+
+  def test_inspect
+    assert_send_type  '() -> String',
+                      new_instance, :inspect
+  end
+
+  def test_last_error
+    assert_send_type  '() -> nil',
+                      new_instance, :last_error
+    
+    instance1 = new_instance('UTF-8', 'ISO-8859-1')
+    instance1.primitive_convert "\xF1abcd", ''
+    assert_send_type  '() -> ::Encoding::InvalidByteSequenceError',
+                      instance1, :last_error
+
+    instance2 = new_instance('ISO-8859-1', 'EUC-JP')
+    instance2.primitive_convert "\xA0", ''
+    assert_send_type  '() -> ::Encoding::UndefinedConversionError',
+                      instance2, :last_error
+  end
+
+  def test_primitive_convert
+    instance = new_instance
+
+    with_string.chain([nil]).each do |src|
+      with_string do |dst|
+        assert_send_type  '(string?, string) -> ::Encoding::Converter::convert_result',
+                          instance, :primitive_convert, src, dst
+        
+        with_int(0).chain([nil]).each do |dst_offset|
+          assert_send_type  '(string?, string, int?) -> ::Encoding::Converter::convert_result',
+                            instance, :primitive_convert, src, dst, dst_offset
+
+          with_int(0).chain([nil]).each do |dst_size|
+            assert_send_type  '(string?, string, int?, int?) -> ::Encoding::Converter::convert_result',
+                              instance, :primitive_convert, src, dst, dst_offset, dst_size
+
+            with_int(0).each do |flags|
+              assert_send_type  '(string?, string, int?, int?, int) -> ::Encoding::Converter::convert_result',
+                                instance, :primitive_convert, src, dst, dst_offset, dst_size, flags
+            end
+
+            [1, Object.new, nil].each do |boolish|
+              assert_send_type  '(string?, string, int?, int?, partial_input: boolish, after_output: boolish) -> ::Encoding::Converter::convert_result',
+                                instance, :primitive_convert, src, dst, dst_offset, dst_size, partial_input: boolish, after_output: boolish
+
+              assert_send_type  '(string?, string, int?, int?, nil, partial_input: boolish, after_output: boolish) -> ::Encoding::Converter::convert_result',
+                                instance, :primitive_convert, src, dst, dst_offset, dst_size, nil, partial_input: boolish, after_output: boolish
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_primitive_errinfo
+    assert_send_type  '() -> [::Encoding::Converter::convert_result, nil, nil, nil, nil]',
+                      new_instance, :primitive_errinfo
+
+    instance = new_instance('ISO-8859-1', 'EUC-JP')
+    instance.primitive_convert "\xA0", ''
+    assert_send_type  '() -> [::Encoding::Converter::convert_result, String, String, String, String]',
+                      instance, :primitive_errinfo
+  end
+
+  def test_putback
+    assert_send_type  '() -> String',
+                      new_instance, :putback
+    
+    with_int.chain([nil]).each do |max_numbytes|
+      assert_send_type  '(int?) -> String',
+                        new_instance, :putback, max_numbytes
+    end
+  end
+
+  def test_replacement
+    assert_send_type  '() -> String',
+                      new_instance, :replacement
+  end
+
+  def test_replacement_eq
+    with_string do |replacement|
+      assert_send_type  '[T < _ToStr] (T) -> T',
+                  new_instance, :replacement=, replacement
+    end
+  end
+
+  def test_source_encoding
+    assert_send_type  '() -> Encoding',
+                      new_instance, :source_encoding
+  end
+end
