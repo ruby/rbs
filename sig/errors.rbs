@@ -66,6 +66,8 @@ module RBS
     def initialize: (type_name: TypeName, args: Array[Types::t], params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
 
     def self.check!: (type_name: TypeName, args: Array[Types::t], params: Array[AST::TypeParam], location: Location[untyped, untyped]?) -> void
+
+    def self.check2!: (env: Environment, type_name: TypeName, args: Array[Types::t], location: Location[untyped, untyped]?) -> void
   end
 
   class RecursiveAncestorError < DefinitionError

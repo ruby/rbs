@@ -117,10 +117,6 @@ EOU
                   no_classish_type_validator(arg)
                   @validator.validate_type(arg, context: nil)
                 end
-
-                if super_entry = @env.normalized_class_entry(super_class.name)
-                  InvalidTypeApplicationError.check!(type_name: super_class.name, args: super_class.args, params: super_entry.type_params, location: super_class.location)
-                end
               end
             end
           when Environment::ModuleEntry

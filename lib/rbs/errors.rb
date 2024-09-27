@@ -88,6 +88,23 @@ module RBS
         raise new(type_name: type_name, args: args, params: params, location: location)
       end
     end
+
+    def self.check2!(env:, type_name:, args:, location:)
+      params =
+        case
+        when type_name.class?
+          decl = env.normalized_module_class_entry(type_name) or raise
+          decl.type_params
+        when type_name.interface?
+          env.interface_decls.fetch(type_name).decl.type_params
+        when type_name.alias?
+          env.type_alias_decls.fetch(type_name).decl.type_params
+        else
+          raise
+        end
+
+      check!(type_name: type_name, args: args, params: params, location: location)
+    end
   end
 
   class RecursiveAncestorError < DefinitionError
