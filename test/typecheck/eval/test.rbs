@@ -1,0 +1,11 @@
+class Foo
+  def self.singleton: () -> void
+
+  private
+
+  def private_method: () -> void
+end
+
+module Bar
+  def self.singleton: () -> void
+end

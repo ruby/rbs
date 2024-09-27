@@ -377,7 +377,7 @@ class Module < Object
   #         or method `code' for Thing:Class
   #
   def class_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                | [U] () { (self m) -> U } -> U
+                | [U] () { (self m) [self: self] -> U } -> U
 
   # <!-- rdoc-file=vm_eval.c -->
   # Evaluates the given block in the context of the class/module. The method
@@ -1083,7 +1083,7 @@ class Module < Object
   #         or method `code' for Thing:Class
   #
   def module_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                 | [U] () { (self m) -> U } -> U
+                 | [U] () { (self m) [self: self] -> U } -> U
 
   # <!--
   #   rdoc-file=vm_eval.c
