@@ -368,4 +368,14 @@ module RBS
 
     attr_reader location: Location[untyped, untyped]?
   end
+
+  class TypeParamDefaultReferenceError < BaseError
+    include DetailedMessageable
+
+    def initialize: (AST::TypeParam, location: Location[untyped, untyped]?) -> void
+
+    attr_reader location: Location[untyped, untyped]?
+
+    def self.check!: (Array[AST::TypeParam]) -> void
+  end
 end

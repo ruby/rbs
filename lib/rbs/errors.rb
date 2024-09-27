@@ -576,4 +576,23 @@ module RBS
       @location = location
     end
   end
+
+  class TypeParamDefaultReferenceError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :location
+
+    def initialize(type_param, location:)
+      super "#{Location.to_string(location)}: the default of #{type_param.name} cannot include optional type parameter"
+      @location = location
+    end
+
+    def self.check!(type_params)
+      if errors = AST::TypeParam.validate(type_params)
+        error = errors[0] or raise
+        error.default_type or raise
+        raise new(error, location: error.default_type.location)
+      end
+    end
+  end
 end

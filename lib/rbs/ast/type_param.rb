@@ -205,6 +205,21 @@ module RBS
           end
         end
       end
+
+      def self.validate(type_params)
+        optionals = type_params.filter {|param| param.default_type }
+
+        optional_param_names = optionals.map(&:name).sort
+
+        optionals.filter! do |param|
+          default_type = param.default_type or raise
+          optional_param_names.any? { default_type.free_variables.include?(_1) }
+        end
+
+        unless optionals.empty?
+          optionals
+        end
+      end
     end
   end
 end

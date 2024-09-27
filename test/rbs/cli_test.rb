@@ -576,6 +576,34 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate__generics_default_ref
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          module A[A, B = A, C = B?]
+          end
+
+          class B[A, B = A, C = B?]
+          end
+
+          interface _C[A, B = A, C = B?]
+          end
+
+          type t[A, B = A, C = B?] = untyped
+        RBS
+
+        assert_raises SystemExit do
+          cli.run(["-I", dir, "validate"])
+        end
+
+        assert_include stdout.string, "/a.rbs:1:23...1:25: the default of C cannot include optional type parameter (RBS::TypeParamDefaultReferenceError)\n"
+        assert_include stdout.string, "/a.rbs:4:22...4:24: the default of C cannot include optional type parameter (RBS::TypeParamDefaultReferenceError)\n"
+        assert_include stdout.string, "/a.rbs:7:27...7:29: the default of C cannot include optional type parameter (RBS::TypeParamDefaultReferenceError)\n"
+        assert_include stdout.string, "/a.rbs:10:21...10:23: the default of C cannot include optional type parameter (RBS::TypeParamDefaultReferenceError)\n"
+      end
+    end
+  end
+
   def test_validate_multiple
     with_cli do |cli|
       Dir.mktmpdir do |dir|

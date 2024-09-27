@@ -75,6 +75,13 @@ module RBS
 
       def to_s: () -> String
 
+      # Validates TypeParams if it refers another optiional type params
+      #
+      # * Returns array of TypeParam objects that refers other optional type params
+      # * Returns `nil` if all type params are valid
+      #
+      def self.validate: (Array[TypeParam]) -> Array[TypeParam]?
+
       # Returns an application with respect to type params' default
       #
       def self.application: (Array[TypeParam], Array[Types::t]) -> Substitution?

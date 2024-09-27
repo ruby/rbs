@@ -167,6 +167,8 @@ EOU
             end
           end
 
+          TypeParamDefaultReferenceError.check!(d.type_params)
+
           entry.decls.each do |d|
             d.decl.each_member do |member|
               case member
@@ -244,6 +246,8 @@ EOU
             end
           end
 
+          TypeParamDefaultReferenceError.check!(decl.decl.type_params)
+
           decl.decl.members.each do |member|
             case member
             when AST::Members::MethodDefinition
@@ -314,6 +318,8 @@ EOU
               @validator.validate_type(dt, context: nil)
             end
           end
+
+          TypeParamDefaultReferenceError.check!(decl.decl.type_params)
 
           no_self_type_validator(decl.decl.type)
           no_classish_type_validator(decl.decl.type)
