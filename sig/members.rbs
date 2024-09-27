@@ -122,8 +122,7 @@ module RBS
         # include Array[String]
         # ^^^^^^^                keyword
         #         ^^^^^          name
-        #              ^         arg_open
-        #                     ^  arg_close
+        #              ^^^^^^^^  args
         #
         type loc = Location[:name | :keyword, :args]
 

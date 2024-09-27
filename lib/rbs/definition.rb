@@ -237,14 +237,8 @@ module RBS
         @ancestors = ancestors
       end
 
-      def apply(args, location:)
-        # Assume default types of type parameters are already added to `args`
-        InvalidTypeApplicationError.check!(
-          type_name: type_name,
-          args: args,
-          params: params.map { AST::TypeParam.new(name: _1, variance: :invariant, upper_bound: nil, location: nil, default_type: nil) },
-          location: location
-        )
+      def apply(args, env:, location:)
+        InvalidTypeApplicationError.check2!(env: env, type_name: type_name, args: args, location: location)
 
         subst = Substitution.build(params, args)
 

@@ -154,37 +154,70 @@ module RBS
       end
 
       def self.application(params, args)
-        subst = Substitution.new()
-
         if params.empty?
           return nil
         end
 
-        min_count = params.count { _1.default_type.nil? }
-        max_count = params.size
+        optional_params, required_params = params.partition {|param| param.default_type }
 
-        unless min_count <= args.size && args.size <= max_count
-          raise "Invalid type application: required type params=#{min_count}, optional type params=#{max_count - min_count}, given args=#{args.size}"
+        param_subst = Substitution.new()
+        app_subst = Substitution.new()
+
+        required_params.zip(args.take(required_params.size)).each do |param, arg|
+          arg ||= Types::Bases::Any.new(location: nil)
+          param_subst.add(from: param.name, to: arg)
+          app_subst.add(from: param.name, to: arg)
         end
 
-        params.zip(args).each do |param, arg|
+        optional_params.each do |param|
+          param_subst.add(from: param.name, to: Types::Bases::Any.new(location: nil))
+        end
+
+        optional_params.zip(args.drop(required_params.size)).each do |param, arg|
           if arg
-            subst.add(from: param.name, to: arg)
+            app_subst.add(from: param.name, to: arg)
           else
-            subst.add(from: param.name, to: param.default_type || raise)
+            param.default_type or raise
+            app_subst.add(from: param.name, to: param.default_type.sub(param_subst))
           end
         end
 
-        subst
+        app_subst
       end
 
       def self.normalize_args(params, args)
+        app = application(params, args) or return []
+
+        min_count = params.count { _1.default_type.nil? }
+        unless min_count <= args.size && args.size <= params.size
+          return args
+        end
+
         params.zip(args).filter_map do |param, arg|
           if arg
             arg
           else
-            param.default_type
+            if param.default_type
+              param.default_type.sub(app)
+            else
+              Types::Bases::Any.new(location: nil)
+            end
           end
+        end
+      end
+
+      def self.validate(type_params)
+        optionals = type_params.filter {|param| param.default_type }
+
+        optional_param_names = optionals.map(&:name).sort
+
+        optionals.filter! do |param|
+          default_type = param.default_type or raise
+          optional_param_names.any? { default_type.free_variables.include?(_1) }
+        end
+
+        unless optionals.empty?
+          optionals
         end
       end
     end

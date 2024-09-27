@@ -79,7 +79,7 @@ module RBS
           raise
         end
 
-      Substitution.build(params.map(&:name), args)
+      AST::TypeParam.application(params, args) || Substitution.new()
     end
 
     def define_instance(definition, type_name, subst)
@@ -549,16 +549,17 @@ module RBS
       interfaces_methods.each do |interface, (methods, member)|
         unless interface.args.empty?
           methods.type.is_a?(Types::Interface) or raise
-          params = methods.type.args.map do |arg|
-            arg.is_a?(Types::Variable) or raise
-            arg.name
-          end
 
           interface.args.each do |arg|
             validate_type_presence(arg)
           end
 
-          subst_ = subst + Substitution.build(params, interface.args)
+          type_params = env.interface_decls.fetch(interface.name).decl.type_params
+          if s = AST::TypeParam.application(type_params, interface.args)
+            subst_ = subst + s
+          else
+            subst_ = subst
+          end
         else
           subst_ = subst
         end

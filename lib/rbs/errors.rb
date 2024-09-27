@@ -88,6 +88,23 @@ module RBS
         raise new(type_name: type_name, args: args, params: params, location: location)
       end
     end
+
+    def self.check2!(env:, type_name:, args:, location:)
+      params =
+        case
+        when type_name.class?
+          decl = env.normalized_module_class_entry(type_name) or raise
+          decl.type_params
+        when type_name.interface?
+          env.interface_decls.fetch(type_name).decl.type_params
+        when type_name.alias?
+          env.type_alias_decls.fetch(type_name).decl.type_params
+        else
+          raise
+        end
+
+      check!(type_name: type_name, args: args, params: params, location: location)
+    end
   end
 
   class RecursiveAncestorError < DefinitionError
@@ -557,6 +574,25 @@ module RBS
     def initialize(message, location:)
       super "#{Location.to_string(location)}: #{message}"
       @location = location
+    end
+  end
+
+  class TypeParamDefaultReferenceError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :location
+
+    def initialize(type_param, location:)
+      super "#{Location.to_string(location)}: the default of #{type_param.name} cannot include optional type parameter"
+      @location = location
+    end
+
+    def self.check!(type_params)
+      if errors = AST::TypeParam.validate(type_params)
+        error = errors[0] or raise
+        error.default_type or raise
+        raise new(error, location: error.default_type.location)
+      end
     end
   end
 end

@@ -213,7 +213,7 @@ module RBS
             end
 
             super_name = env.normalize_module_name(super_name)
-            
+
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
             if super_class
               InheritModuleError.check!(super_class, env: env)
@@ -458,7 +458,9 @@ module RBS
             super_name = super_class.name
             super_args = super_class.args
 
-            super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors).apply(super_args, location: entry.primary.decl.location)
+            super_ancestors =
+              instance_ancestors(super_name, building_ancestors: building_ancestors)
+                .apply(super_args, env: env, location: entry.primary.decl.super_class&.location)
             super_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: super_name, source: :super) }
             ancestors.unshift(*super_ancestors)
           end
@@ -477,7 +479,10 @@ module RBS
           included_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(arg_types, location: entry.primary.decl.location)
+            mod.source.is_a?(AST::Members::Include) or raise
+            mod_ancestors =
+              instance_ancestors(name, building_ancestors: building_ancestors)
+                .apply(arg_types, env: env, location: mod.source.location)
             mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
             ancestors.unshift(*mod_ancestors)
           end
@@ -489,7 +494,10 @@ module RBS
           prepended_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(arg_types, location: entry.primary.decl.location)
+            mod.source.is_a?(AST::Members::Prepend) or raise
+            mod_ancestors =
+              instance_ancestors(name, building_ancestors: building_ancestors)
+                .apply(arg_types, env: env, location: mod.source.location)
             mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
             ancestors.unshift(*mod_ancestors)
           end
@@ -524,7 +532,9 @@ module RBS
           super_name = super_class.name
           super_args = super_class.args
 
-          super_ancestors = instance_ancestors(super_name, building_ancestors: building_ancestors).apply(super_args, location: entry.primary.decl.location)
+          super_ancestors =
+            instance_ancestors(super_name, building_ancestors: building_ancestors)
+              .apply(super_args, env: env, location: nil)
           super_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: super_name, source: :super) }
           ancestors.unshift(*super_ancestors)
 
@@ -539,7 +549,10 @@ module RBS
         extended_modules.each do |mod|
           name = mod.name
           args = mod.args
-          mod_ancestors = instance_ancestors(name, building_ancestors: building_ancestors).apply(args, location: entry.primary.decl.location)
+          mod.source.is_a?(AST::Members::Extend) or raise
+          mod_ancestors =
+            instance_ancestors(name, building_ancestors: building_ancestors)
+              .apply(args, env: env, location: mod.source.location)
           mod_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: name, source: mod.source) }
           ancestors.unshift(*mod_ancestors)
         end
@@ -572,7 +585,10 @@ module RBS
 
         included_interfaces = one_ancestors.included_interfaces or raise
         included_interfaces.each do |a|
-          included_ancestors = interface_ancestors(a.name, building_ancestors: building_ancestors).apply(a.args, location: entry.decl.location)
+          a.source.is_a?(AST::Members::Include) or raise
+          included_ancestors =
+            interface_ancestors(a.name, building_ancestors: building_ancestors)
+              .apply(a.args, env: env, location: a.source.location)
           included_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: a.name, source: a.source) }
           ancestors.unshift(*included_ancestors)
         end
