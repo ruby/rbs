@@ -1,5 +1,6 @@
 require_relative "../test_helper"
 require "json"
+require "tempfile"
 
 class JsonToStr
   def initialize(value = "")
@@ -106,6 +107,26 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(JsonRead) -> 42", JSON, :load, JsonRead.new
     assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { }
     assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { }, { alllow_nan: true }
+  end
+
+  def test_load_file
+    Tempfile.create("json") do |f|
+      f.write '{}'
+      f.close
+
+      assert_send_type "(String) -> untyped", JSON, :load_file, f.path
+      assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file, f.path, { allow_nan: true }
+    end
+  end
+
+  def test_load_file!
+    Tempfile.create("json") do |f|
+      f.write '{}'
+      f.close
+
+      assert_send_type "(String) -> untyped", JSON, :load_file!, f.path
+      assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file!, f.path, { allow_nan: true }
+    end
   end
 
   def test_load_default_options

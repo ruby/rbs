@@ -980,6 +980,28 @@ module JSON
   #
   def self?.load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?json_options options) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON.load_file(path, opts={}) -> object
+  # -->
+  # Calls:
+  #     parse(File.read(path), opts)
+  #
+  # See method #parse.
+  #
+  def self?.load_file: (string path, ?json_options opts) -> untyped
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON.load_file!(path, opts = {})
+  # -->
+  # Calls:
+  #     JSON.parse!(File.read(path, opts))
+  #
+  # See method #parse!
+  #
+  def self?.load_file!: (string path, ?json_options opts) -> untyped
+
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns default options for the JSON.load method. Initially:
   #     opts = JSON.load_default_options
