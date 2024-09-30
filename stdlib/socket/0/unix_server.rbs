@@ -2,8 +2,6 @@
 # UNIXServer represents a UNIX domain stream server socket.
 #
 class UNIXServer < UNIXSocket
-  public
-
   # <!--
   #   rdoc-file=ext/socket/unixserver.c
   #   - unixserver.accept => unixsocket

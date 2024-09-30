@@ -270,8 +270,6 @@ class NameError[T] < StandardError
   #
   def initialize: (?string msg, ?String? name, ?receiver: T?) -> void
 
-  public
-
   # <!--
   #   rdoc-file=error.c
   #   - name_error.local_variables  ->  array
@@ -361,8 +359,6 @@ class NoMethodError[T] < NameError[T]
   # *receiver* argument stores an object whose method was called.
   #
   def initialize: (?string? msg, ?String? name, ?Array[untyped] args, ?boolish `private`, ?receiver: T?) -> void
-
-  public
 
   # <!--
   #   rdoc-file=error.c
@@ -470,8 +466,6 @@ class SignalException < Exception
   #
   def initialize: (?string sig_name) -> void
                 | (int sig_number, ?string sig_name) -> void
-
-  public
 
   def signm: () -> String
 
@@ -608,8 +602,6 @@ class SystemCallError < StandardError
   #
   def self.===: (untyped other) -> bool
 
-  public
-
   # <!--
   #   rdoc-file=error.c
   #   - system_call_error.errno   -> integer
@@ -636,8 +628,6 @@ class SystemExit < Exception
   def initialize: () -> void
                 | (string msg) -> void
                 | (true | false | int status, ?string msg) -> void
-
-  public
 
   # <!--
   #   rdoc-file=error.c
@@ -725,8 +715,6 @@ class UncaughtThrowError < ArgumentError
   #     UncaughtThrowError: uncaught throw "foo"
   #
   def initialize: (untyped tag, untyped value) -> void
-
-  public
 
   # <!--
   #   rdoc-file=vm_eval.c

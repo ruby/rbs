@@ -357,8 +357,6 @@ class Logger
 
   include Logger::Severity
 
-  public
-
   # <!--
   #   rdoc-file=lib/logger.rb
   #   - <<(msg)

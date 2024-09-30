@@ -10,8 +10,6 @@
 #     end
 #
 class Monitor
-  public
-
   # <!--
   #   rdoc-file=ext/monitor/monitor.c
   #   - enter()
@@ -195,8 +193,6 @@ module MonitorMixin
   #
   def self.extend_object: (untyped obj) -> untyped
 
-  public
-
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
   #   - mon_enter()
@@ -303,8 +299,6 @@ end
 # calls while_wait and signal, this class should be documented.
 #
 class MonitorMixin::ConditionVariable
-  public
-
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
   #   - broadcast()

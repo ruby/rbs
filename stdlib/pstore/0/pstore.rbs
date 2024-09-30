@@ -305,8 +305,6 @@
 #     end
 #
 class PStore
-  public
-
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - [](key)

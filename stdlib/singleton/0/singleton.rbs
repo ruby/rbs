@@ -101,8 +101,6 @@ module Singleton
   #
   def self.instance: () -> instance
 
-  public
-
   # <!--
   #   rdoc-file=lib/singleton.rb
   #   - _dump(depth = -1)

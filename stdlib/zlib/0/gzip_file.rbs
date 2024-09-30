@@ -120,8 +120,6 @@ module Zlib
     #
     def self.wrap: (IO io, *untyped) { (instance gz) -> void } -> void
 
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - close()

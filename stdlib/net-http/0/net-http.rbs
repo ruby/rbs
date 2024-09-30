@@ -1485,8 +1485,6 @@ module Net
     def start: [T] () { (Net::HTTP) -> T } -> T
              | () -> Net::HTTP
 
-    public
-
     # <!--
     #   rdoc-file=lib/net/http.rb
     #   - finish()
@@ -1502,8 +1500,6 @@ module Net
     # Raises IOError if not in a session.
     #
     def finish: () -> void
-
-    public
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -1582,8 +1578,6 @@ module Net
     # -->
     #
     alias proxyport proxy_port
-
-    public
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -3975,8 +3969,6 @@ module Net
     # true if the response has a body.
     #
     def self.body_permitted?: () -> bool
-
-    public
 
     include Net::HTTPHeader
 

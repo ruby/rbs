@@ -103,8 +103,6 @@ Digest::REQUIRE_MUTEX: Thread::Mutex
 # calculate message digest values.
 #
 module Digest::Instance
-  public
-
   # <!-- rdoc-file=ext/digest/digest.c -->
   # Updates the digest using a given *string* and returns self.
   #
@@ -403,8 +401,6 @@ end
 #                 Data_Wrap_Struct(0, 0, 0, (void *)&sha1));
 #
 class Digest::Base < Digest::Class
-  public
-
   # <!-- rdoc-file=ext/digest/digest.c -->
   # Update the digest using given *string* and return `self`.
   #

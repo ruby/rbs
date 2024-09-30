@@ -126,8 +126,6 @@ module Zlib
   # *   #closed?
   #
   class ZStream
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - adler()

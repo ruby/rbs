@@ -225,8 +225,6 @@ class Pathname
   #
   def self.pwd: () -> Pathname
 
-  public
-
   # <!--
   #   rdoc-file=ext/pathname/lib/pathname.rb
   #   - +(other)

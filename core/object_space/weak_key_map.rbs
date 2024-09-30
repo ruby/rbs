@@ -59,8 +59,6 @@ module ObjectSpace
   # sitting in the cache forever.
   #
   class WeakKeyMap[Key, Value]
-    public
-
     # <!--
     #   rdoc-file=weakmap.c
     #   - map[key] -> value

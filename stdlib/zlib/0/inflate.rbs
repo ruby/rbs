@@ -97,8 +97,6 @@ module Zlib
     #
     def self.inflate: (string string) -> String
 
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - <<(p1)

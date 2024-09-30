@@ -40,8 +40,6 @@ class Delegator < BasicObject
 
   def self.public_api: () -> untyped
 
-  public
-
   # <!--
   #   rdoc-file=lib/delegate.rb
   #   - !()

@@ -109,8 +109,6 @@ module Zlib
     #
     def self.open: (String filename) { (instance gz) -> void } -> instance
 
-    public
-
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
     #   - <<(p1)

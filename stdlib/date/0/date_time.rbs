@@ -388,8 +388,6 @@ class DateTime < Date
   #
   def self.xmlschema: (String str, ?Integer start) -> DateTime
 
-  public
-
   # <!--
   #   rdoc-file=ext/date/date_core.c
   #   - deconstruct_keys(array_of_names_or_nil) -> hash

@@ -709,8 +709,6 @@ module Etc
 
     def self.new: (*untyped) -> untyped
 
-    public
-
     def gid: () -> Integer
 
     def gid=: (Integer new_gid) -> void
@@ -806,8 +804,6 @@ module Etc
     def self.members: () -> untyped
 
     def self.new: (*untyped) -> untyped
-
-    public
 
     def change: () -> Integer
 

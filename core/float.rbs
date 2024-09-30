@@ -80,8 +80,6 @@
 # *   #truncate: Returns `self` truncated to a given precision.
 #
 class Float < Numeric
-  public
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> float

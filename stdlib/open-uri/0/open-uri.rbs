@@ -21,7 +21,7 @@ module URI
   # We can accept URIs and strings that begin with http://, https:// and ftp://.
   # In these cases, the opened file object is extended by OpenURI::Meta.
   #
-  def self.open: (String name, ?String mode, ?Integer perm, ?untyped options) -> (StringIO & OpenURI::Meta | Tempfile & OpenURI::Meta)
+  def self.open: (String name, ?String mode, ?Integer perm, ?untyped options) -> ((StringIO & OpenURI::Meta) | (Tempfile & OpenURI::Meta))
                | [T] (String name, ?String mode, ?Integer perm, ?untyped options) { (StringIO | Tempfile) -> T } -> T
 end
 

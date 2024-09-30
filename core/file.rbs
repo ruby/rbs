@@ -1769,8 +1769,6 @@ class File < IO
   #
   def self.zero?: (string | _ToPath | IO file_name) -> bool
 
-  public
-
   # <!--
   #   rdoc-file=file.c
   #   - file.atime    -> time

@@ -34,8 +34,6 @@ module Mutex_m
 
   def self.extend_object: (Object obj) -> untyped
 
-  public
-
   def mu_extended: () -> untyped
 
   # <!--

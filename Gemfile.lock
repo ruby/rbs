@@ -111,9 +111,9 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.32.3)
       parser (>= 3.3.1.0)
-    rubocop-on-rbs (0.6.0)
+    rubocop-on-rbs (1.0.0)
       rbs (~> 3.5)
-      rubocop (~> 1.41)
+      rubocop (~> 1.61)
       zlib
     rubocop-rubycw (0.1.6)
       rubocop (~> 1.0)
@@ -146,7 +146,7 @@ GEM
     timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    unicode-display_width (2.5.0)
+    unicode-display_width (2.6.0)
     zlib (3.1.1)
 
 PLATFORMS

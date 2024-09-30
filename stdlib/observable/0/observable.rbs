@@ -130,8 +130,6 @@
 #     ticker.run
 #
 module Observable
-  public
-
   # <!--
   #   rdoc-file=lib/observer.rb
   #   - add_observer(observer, func=:update)

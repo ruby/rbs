@@ -189,8 +189,6 @@ class Tempfile < File
   def self.open: (*untyped args, **untyped) -> Tempfile
                | [A] (*untyped args, **untyped) { (Tempfile) -> A } -> A
 
-  public
-
   # <!--
   #   rdoc-file=lib/tempfile.rb
   #   - close(unlink_now=false)
@@ -296,8 +294,6 @@ class Tempfile < File
   def unlink: () -> void
 
   class Remover
-    public
-
     def call: (*untyped args) -> void
 
     private

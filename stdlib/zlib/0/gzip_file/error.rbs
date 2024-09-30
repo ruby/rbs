@@ -109,8 +109,6 @@ module Zlib
     # Base class of errors that occur when processing GZIP files.
     #
     class Error < Zlib::Error
-      public
-
       # <!-- rdoc-file=ext/zlib/zlib.c -->
       # input gzipped string
       #

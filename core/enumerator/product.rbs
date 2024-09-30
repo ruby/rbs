@@ -44,8 +44,6 @@ class Enumerator[unchecked out Elem, out Return = void]
     #
     def initialize: (*_EachEntry[Elem]) -> void
 
-    public
-
     # <!--
     #   rdoc-file=enumerator.c
     #   - obj.each { |...| ... } -> obj
