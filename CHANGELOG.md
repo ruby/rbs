@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 3.6.0.pre.3 (2024-09-30)
+
+### Signature updates
+
+* `JSON.load_file`, `.load_file!` ([#2031](https://github.com/ruby/rbs/pull/2031))
+* `Module#class_eval`, `Module#module_eval` ([#2029](https://github.com/ruby/rbs/pull/2029))
+* `Open3` ([#2014](https://github.com/ruby/rbs/pull/2014))
+* `RubyVM::InstructionSequence` ([#2027](https://github.com/ruby/rbs/pull/2027))
+* Fixup RBS type definitions with rbs-on-rubocop ([#2023](https://github.com/ruby/rbs/pull/2023))
+* Avoid using `instance`/`class` types in modules ([#2020](https://github.com/ruby/rbs/pull/2020))
+
+### Language updates
+
+* Optional type param restriction ([#2030](https://github.com/ruby/rbs/pull/2030))
+* Prohibit `self` type as a generics default ([#2022](https://github.com/ruby/rbs/pull/2022))
+* Allow `self` types in generics default type ([#2021](https://github.com/ruby/rbs/pull/2021))
+
+### Library changes
+
+* Add `TypeParamDefaultReferenceError#type_param` ([#2032](https://github.com/ruby/rbs/pull/2032))
+
 ## 3.6.0.pre.2 (2024-09-18)
 
 ### Signature updates
