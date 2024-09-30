@@ -50,6 +50,311 @@ RubyVM::OPTS: Array[String]
 # Of course, this class is MRI specific.
 #
 class RubyVM::InstructionSequence < Object
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - absolute_path()
+  # -->
+  # Returns the absolute path of this instruction sequence.
+  #
+  # `nil` if the iseq was evaluated from a string.
+  #
+  # For example, using ::compile_file:
+  #
+  #     # /tmp/method.rb
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     # in irb
+  #     > iseq = RubyVM::InstructionSequence.compile_file('/tmp/method.rb')
+  #     > iseq.absolute_path #=> /tmp/method.rb
+  #
+  def absolute_path: () -> String?
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - base_label()
+  # -->
+  # Returns the base label of this instruction sequence.
+  #
+  # For example, using irb:
+  #
+  #     iseq = RubyVM::InstructionSequence.compile('num = 1 + 2')
+  #     #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #     iseq.base_label
+  #     #=> "<compiled>"
+  #
+  # Using ::compile_file:
+  #
+  #     # /tmp/method.rb
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     # in irb
+  #     > iseq = RubyVM::InstructionSequence.compile_file('/tmp/method.rb')
+  #     > iseq.base_label #=> <main>
+  #
+  def base_label: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.disasm -> str
+  #   - iseq.disassemble -> str
+  # -->
+  # Returns the instruction sequence as a `String` in human readable form.
+  #
+  #     puts RubyVM::InstructionSequence.compile('1 + 2').disasm
+  #
+  # Produces:
+  #
+  #     == disasm: <RubyVM::InstructionSequence:<compiled>@<compiled>>==========
+  #     0000 trace            1                                               (   1)
+  #     0002 putobject        1
+  #     0004 putobject        2
+  #     0006 opt_plus         <ic:1>
+  #     0008 leave
+  #
+  def disasm: () -> String
+
+  # <!-- rdoc-file=iseq.c -->
+  # Returns the instruction sequence as a `String` in human readable form.
+  #
+  #     puts RubyVM::InstructionSequence.compile('1 + 2').disasm
+  #
+  # Produces:
+  #
+  #     == disasm: <RubyVM::InstructionSequence:<compiled>@<compiled>>==========
+  #     0000 trace            1                                               (   1)
+  #     0002 putobject        1
+  #     0004 putobject        2
+  #     0006 opt_plus         <ic:1>
+  #     0008 leave
+  #
+  def disassemble: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.each_child{|child_iseq| ...} -> iseq
+  # -->
+  # Iterate all direct child instruction sequences. Iteration order is
+  # implementation/version defined so that people should not rely on the order.
+  #
+  def each_child: () -> RubyVM::InstructionSequence
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.eval -> obj
+  # -->
+  # Evaluates the instruction sequence and returns the result.
+  #
+  #     RubyVM::InstructionSequence.compile("1 + 2").eval #=> 3
+  #
+  def eval: () -> untyped
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - first_lineno()
+  # -->
+  # Returns the number of the first source line where the instruction sequence was
+  # loaded from.
+  #
+  # For example, using irb:
+  #
+  #     iseq = RubyVM::InstructionSequence.compile('num = 1 + 2')
+  #     #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #     iseq.first_lineno
+  #     #=> 1
+  #
+  def first_lineno: () -> Integer
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - inspect()
+  # -->
+  # Returns a human-readable string representation of this instruction sequence,
+  # including the #label and #path.
+  #
+  def inspect: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - label()
+  # -->
+  # Returns the label of this instruction sequence.
+  #
+  # `<main>` if it's at the top level, `<compiled>` if it was evaluated from a
+  # string.
+  #
+  # For example, using irb:
+  #
+  #     iseq = RubyVM::InstructionSequence.compile('num = 1 + 2')
+  #     #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #     iseq.label
+  #     #=> "<compiled>"
+  #
+  # Using ::compile_file:
+  #
+  #     # /tmp/method.rb
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     # in irb
+  #     > iseq = RubyVM::InstructionSequence.compile_file('/tmp/method.rb')
+  #     > iseq.label #=> <main>
+  #
+  def label: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - path()
+  # -->
+  # Returns the path of this instruction sequence.
+  #
+  # `<compiled>` if the iseq was evaluated from a string.
+  #
+  # For example, using irb:
+  #
+  #     iseq = RubyVM::InstructionSequence.compile('num = 1 + 2')
+  #     #=> <RubyVM::InstructionSequence:<compiled>@<compiled>>
+  #     iseq.path
+  #     #=> "<compiled>"
+  #
+  # Using ::compile_file:
+  #
+  #     # /tmp/method.rb
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     # in irb
+  #     > iseq = RubyVM::InstructionSequence.compile_file('/tmp/method.rb')
+  #     > iseq.path #=> /tmp/method.rb
+  #
+  def path: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.script_lines -> array or nil
+  # -->
+  # It returns recorded script lines if it is available. The script lines are not
+  # limited to the iseq range, but are entire lines of the source file.
+  #
+  # Note that this is an API for ruby internal use, debugging, and research. Do
+  # not use this for any other purpose. The compatibility is not guaranteed.
+  #
+  def script_lines: () -> Array[String]?
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.to_a -> ary
+  # -->
+  # Returns an Array with 14 elements representing the instruction sequence with
+  # the following data:
+  #
+  # magic
+  # :   A string identifying the data format. **Always
+  #     `YARVInstructionSequence/SimpleDataFormat`.**
+  #
+  # major_version
+  # :   The major version of the instruction sequence.
+  #
+  # minor_version
+  # :   The minor version of the instruction sequence.
+  #
+  # format_type
+  # :   A number identifying the data format. **Always 1**.
+  #
+  # misc
+  # :   A hash containing:
+  #
+  #     `:arg_size`
+  # :       the total number of arguments taken by the method or the block (0 if
+  #         *iseq* doesn't represent a method or block)
+  #     `:local_size`
+  # :       the number of local variables + 1
+  #     `:stack_max`
+  # :       used in calculating the stack depth at which a SystemStackError is
+  #         thrown.
+  #
+  #
+  # #label
+  # :   The name of the context (block, method, class, module, etc.) that this
+  #     instruction sequence belongs to.
+  #
+  #     `<main>` if it's at the top level, `<compiled>` if it was evaluated from a
+  #     string.
+  #
+  # #path
+  # :   The relative path to the Ruby file where the instruction sequence was
+  #     loaded from.
+  #
+  #     `<compiled>` if the iseq was evaluated from a string.
+  #
+  # #absolute_path
+  # :   The absolute path to the Ruby file where the instruction sequence was
+  #     loaded from.
+  #
+  #     `nil` if the iseq was evaluated from a string.
+  #
+  # #first_lineno
+  # :   The number of the first source line where the instruction sequence was
+  #     loaded from.
+  #
+  # type
+  # :   The type of the instruction sequence.
+  #
+  #     Valid values are `:top`, `:method`, `:block`, `:class`, `:rescue`,
+  #     `:ensure`, `:eval`, `:main`, and `plain`.
+  #
+  # locals
+  # :   An array containing the names of all arguments and local variables as
+  #     symbols.
+  #
+  # params
+  # :   An Hash object containing parameter information.
+  #
+  #     More info about these values can be found in `vm_core.h`.
+  #
+  # catch_table
+  # :   A list of exceptions and control flow operators (rescue, next, redo,
+  #     break, etc.).
+  #
+  # bytecode
+  # :   An array of arrays containing the instruction names and operands that make
+  #     up the body of the instruction sequence.
+  #
+  #
+  # Note that this format is MRI specific and version dependent.
+  #
+  def to_a: () -> Array[untyped]
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.to_binary(extra_data = nil) -> binary str
+  # -->
+  # Returns serialized iseq binary format data as a String object. A corresponding
+  # iseq object is created by RubyVM::InstructionSequence.load_from_binary()
+  # method.
+  #
+  # String extra_data will be saved with binary data. You can access this data
+  # with RubyVM::InstructionSequence.load_from_binary_extra_data(binary).
+  #
+  # Note that the translated binary data is not portable. You can not move this
+  # binary data to another machine. You can not use the binary data which is
+  # created by another version/another architecture of Ruby.
+  #
+  def to_binary: () -> String
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - iseq.trace_points -> ary
+  # -->
+  # Return trace points in the instruction sequence. Return an array of [line,
+  # event_symbol] pair.
+  #
+  def trace_points: () -> Array[untyped]
 end
 
 # <!-- rdoc-file=ast.rb -->
