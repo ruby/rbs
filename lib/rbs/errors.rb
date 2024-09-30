@@ -580,11 +580,13 @@ module RBS
   class TypeParamDefaultReferenceError < DefinitionError
     include DetailedMessageable
 
+    attr_reader :type_param
     attr_reader :location
 
     def initialize(type_param, location:)
       super "#{Location.to_string(location)}: the default of #{type_param.name} cannot include optional type parameter"
       @location = location
+      @type_param = type_param
     end
 
     def self.check!(type_params)

@@ -372,6 +372,8 @@ module RBS
   class TypeParamDefaultReferenceError < BaseError
     include DetailedMessageable
 
+    attr_reader type_param: AST::TypeParam
+
     def initialize: (AST::TypeParam, location: Location[untyped, untyped]?) -> void
 
     attr_reader location: Location[untyped, untyped]?
