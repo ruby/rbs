@@ -1209,7 +1209,7 @@ module Kernel : BasicObject
   # -->
   # Equivalent to Proc.new.
   #
-  def self?.proc: () { () -> untyped } -> Proc
+  def self?.proc: () { (?) -> untyped } -> Proc
 
   # <!--
   #   rdoc-file=proc.c

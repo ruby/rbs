@@ -95,6 +95,11 @@ class KernelSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_proc
+    assert_send_type "() { () -> untyped } -> Proc", Kernel, :proc do end
+    assert_send_type "() { () -> untyped } -> Proc", Kernel, :proc do |a, b| end
+  end
+
   def test_rand
     assert_send_type "() -> Float", Kernel, :rand
     assert_send_type "(0) -> Float", Kernel, :rand, 0
