@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.8.0 (2024-09-30)
+
+Nothing changed since `3.6.0.pre.3`.
+
 ## 3.6.0.pre.3 (2024-09-30)
 
 ### Signature updates
