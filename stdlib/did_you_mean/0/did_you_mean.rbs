@@ -243,7 +243,7 @@ module DidYouMean
     #   - requireables()
     # -->
     #
-    def self.requireables: -> Array[String]
+    def self.requireables: () -> Array[String]
 
     # <!--
     #   rdoc-file=lib/did_you_mean/spell_checkers/require_path_checker.rb

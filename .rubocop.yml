@@ -33,6 +33,8 @@ RBS/Style:
   Exclude:
     - 'sig/**/*'
     - 'test/**/*'
+RBS/Style/EmptyArgument:
+  Enabled: true
 RBS/Style/InitializeReturnType:
   Enabled: true
 
