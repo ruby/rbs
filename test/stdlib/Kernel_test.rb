@@ -177,7 +177,7 @@ class KernelInstanceTest < Test::Unit::TestCase
                       OBJ, :display, writer
   ensure
     $stdout.close rescue nil
-    old_stdout = $stdout
+    $stdout = old_stdout
   end
 
   def test_dup
