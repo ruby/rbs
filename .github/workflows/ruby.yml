@@ -34,6 +34,8 @@ jobs:
             job: rubocop validate test_doc build test_generate_stdlib raap
           - ruby: "3.3"
             job: typecheck_test
+    env:
+      RANDOMIZE_STDLIB_TEST_ORDER: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
