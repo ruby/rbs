@@ -1,7 +1,6 @@
 require_relative "test_helper"
 require "io/console"
 require "io/console/size"
-require 'pty'
 
 class IOConsoleSingletonTest < Test::Unit::TestCase
   include TestHelper
@@ -34,8 +33,9 @@ class IOConsoleTest < Test::Unit::TestCase
   testing "::IO"
 
   private def helper
+    require 'pty'
     m, s = PTY.open
-  rescue RuntimeError
+  rescue RuntimeError, LoadError
     omit $!
   else
     yield m, s
