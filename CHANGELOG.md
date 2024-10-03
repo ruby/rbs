@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.6.1 (2024-10-03)
+
+### Library changes
+
+* Mark as ractor-safe ([#2041](https://github.com/ruby/rbs/pull/2041))
+
+### Miscellaneous
+
+* Omit IOConsoleTest with Windows platform ([#2044](https://github.com/ruby/rbs/pull/2044))
+* Recover `$stdout` after test ([#2042](https://github.com/ruby/rbs/pull/2042))
+
 ## 3.6.0 (2024-09-30)
 
 Nothing changed since `3.6.0.pre.3`.
