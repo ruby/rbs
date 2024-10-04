@@ -895,7 +895,7 @@ class Pathname
   #
   # See FileUtils.mkpath and FileUtils.mkdir_p
   #
-  def mkpath: () -> nil
+  def mkpath: () -> self
 
   # <!--
   #   rdoc-file=ext/pathname/lib/pathname.rb
@@ -1106,7 +1106,7 @@ class Pathname
   #
   # See FileUtils.rm_rf
   #
-  def rmtree: () -> void
+  def rmtree: () -> self
 
   # <!--
   #   rdoc-file=ext/pathname/lib/pathname.rb
