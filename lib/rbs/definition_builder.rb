@@ -386,7 +386,8 @@ module RBS
                       type: method_type,
                       member: initialize_def.member,
                       defined_in: initialize_def.defined_in,
-                      implemented_in: initialize_def.implemented_in
+                      implemented_in: initialize_def.implemented_in,
+                      overload_annotations: initialize_def.overload_annotations
                     )
                   end,
                   accessibility: :public,
@@ -641,7 +642,8 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: original,
             defined_in: defined_in,
-            implemented_in: implemented_in
+            implemented_in: implemented_in,
+            overload_annotations: overload.annotations
           )
         end
 
@@ -750,7 +752,8 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: overloading_def,
             defined_in: defined_in,
-            implemented_in: implemented_in
+            implemented_in: implemented_in,
+            overload_annotations: overload.annotations
           )
 
           method_definition.defs.unshift(type_def)
