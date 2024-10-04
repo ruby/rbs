@@ -54,7 +54,7 @@ typedef struct {
 
 static VALUE EMPTY_ARRAY;
 
-static void inline melt_array(VALUE *array) {
+static inline void melt_array(VALUE *array) {
   if (*array == EMPTY_ARRAY) {
     *array = rb_ary_new();
   }
