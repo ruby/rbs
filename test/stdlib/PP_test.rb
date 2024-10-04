@@ -22,7 +22,7 @@ class PPSingletonTest < Test::Unit::TestCase
                      PP, :width_for, Object.new
     assert_send_type "(untyped out) -> ::Integer",
                      PP, :width_for, $stdout
-   end
+  end
 
   def test_singleline_pp
     assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out) -> untyped",

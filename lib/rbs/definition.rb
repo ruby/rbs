@@ -28,12 +28,18 @@ module RBS
         attr_reader :member
         attr_reader :defined_in
         attr_reader :implemented_in
+        attr_reader :member_annotations
+        attr_reader :overload_annotations
+        attr_reader :annotations
 
-        def initialize(type:, member:, defined_in:, implemented_in:)
+        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: [])
           @type = type
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
+          @member_annotations = member.annotations
+          @overload_annotations = overload_annotations
+          @annotations = member.annotations + overload_annotations
         end
 
         def ==(other)
@@ -54,12 +60,8 @@ module RBS
           member.comment
         end
 
-        def annotations
-          member.annotations
-        end
-
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
-          TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in)
+          TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in, overload_annotations: overload_annotations)
         end
 
         def overload?
@@ -82,7 +84,7 @@ module RBS
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
-        @extra_annotations = annotations
+        @extra_annotations = []
         @alias_of = alias_of
       end
 
@@ -124,7 +126,7 @@ module RBS
       end
 
       def annotations
-        @annotations ||= @extra_annotations + defs.flat_map {|d| d.annotations }
+        @annotations ||= defs.flat_map {|d| d.member_annotations }
       end
 
       def members

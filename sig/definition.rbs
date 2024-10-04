@@ -21,11 +21,18 @@ module RBS
         attr_reader defined_in: TypeName
         attr_reader implemented_in: TypeName?
 
-        def initialize: (type: MethodType, member: method_member, defined_in: TypeName, implemented_in: TypeName?) -> void
+        # Annotations given to `#member`
+        attr_reader member_annotations: Array[AST::Annotation]
+
+        # Annotations given to the overload associated to the method type
+        attr_reader overload_annotations: Array[AST::Annotation]
+
+        # Concatnation of `member_annotations` and `overload_annotations`
+        attr_reader annotations: Array[AST::Annotation]
+
+        def initialize: (type: MethodType, member: method_member, defined_in: TypeName, implemented_in: TypeName?, ?overload_annotations: Array[AST::Annotation]) -> void
 
         def comment: () -> AST::Comment?
-
-        def annotations: () -> Array[AST::Annotation]
 
         def update: (?type: MethodType, ?member: method_member, ?defined_in: TypeName, ?implemented_in: TypeName?) -> TypeDef
 
@@ -35,15 +42,23 @@ module RBS
       attr_reader super_method: Method?
       attr_reader defs: Array[TypeDef]
       attr_reader accessibility: accessibility
-      attr_reader extra_annotations: Array[AST::Annotation]
+
       attr_reader defined_in: TypeName?
       attr_reader implemented_in: TypeName?
       attr_reader method_types: Array[MethodType]
       attr_reader comments: Array[AST::Comment]
-      attr_reader annotations: Array[AST::Annotation]
+
       attr_reader members: Array[method_member]
       attr_reader alias_of: Method?
 
+      # Unused, always returns empty array
+      attr_reader extra_annotations: Array[AST::Annotation]
+
+      # Union of annotations given to `defs`, not contains annotations given to each overload
+      attr_reader annotations: Array[AST::Annotation]
+
+      # Note that the annotations given through `annotations:` keyword is ignored.
+      #
       def initialize: (super_method: Method?,
                        defs: Array[TypeDef],
                        accessibility: accessibility,
