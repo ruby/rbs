@@ -22,13 +22,15 @@ class CGISingletonTest < Test::Unit::TestCase
   end
 
   def test_accept_charset
-    assert_send_type  "() -> ::String",
+    assert_send_type  "() -> ::encoding",
                       CGI, :accept_charset
   end
 
   def test_accept_charset=
     assert_send_type  "(::String accept_charset) -> ::String",
                       CGI, :accept_charset=, 'utf-8'
+    assert_send_type  "(::Encoding accept_charset) -> ::Encoding",
+                      CGI, :accept_charset=, Encoding::UTF_8
   end
 
   def test_parse

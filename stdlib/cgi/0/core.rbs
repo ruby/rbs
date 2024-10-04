@@ -360,7 +360,7 @@ class CGI
   # -->
   # Return the accept character set for all new CGI instances.
   #
-  def self.accept_charset: () -> String
+  def self.accept_charset: () -> encoding
 
   # <!--
   #   rdoc-file=lib/cgi/core.rb
@@ -368,7 +368,7 @@ class CGI
   # -->
   # Set the accept character set for all new CGI instances.
   #
-  def self.accept_charset=: (String accept_charset) -> String
+  def self.accept_charset=: (encoding accept_charset) -> encoding
 
   # <!--
   #   rdoc-file=lib/cgi/core.rb
@@ -385,7 +385,7 @@ class CGI
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # Return the accept character set for this CGI instance.
   #
-  attr_reader accept_charset: String
+  attr_reader accept_charset: encoding
 
   # <!-- rdoc-file=lib/cgi/core.rb -->
   # This method is an alias for #http_header, when HTML5 tag maker is inactive.
