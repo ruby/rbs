@@ -458,11 +458,13 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_mkpath
-    Dir.mktmpdir do |dir|
-      dir = Pathname(dir)
+    if_ruby(... 3.4) do
+      Dir.mktmpdir do |dir|
+        dir = Pathname(dir)
 
-      assert_send_type '() -> nil',
-                       dir + 'a/b/c', :mkpath
+        assert_send_type '() -> nil',
+                        dir + 'a/b/c', :mkpath
+      end
     end
   end
 
