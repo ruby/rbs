@@ -96,50 +96,55 @@ def #{with_name}(#{param_source.join(", ")}, &#{block_param})
     block_calls = []
 
     if block_given?
-      receiver = self
       block_receives_block = #{block_param}.parameters.last&.yield_self {|type, _| type == :block }
 
-      wrapped_block = proc do |*block_args, &block2|
-        return_from_block = false
+      wrapped_block = Object.new.instance_exec do
+        new_object = self
 
-        begin
-          block_result = if receiver.equal?(self)
-                           if block_receives_block
-                             #{block_param}.call(*block_args, &block2)
-                           else
-                             yield(*block_args)
-                           end
-                         else
-                           instance_exec(*block_args, &#{block_param})
-                         end
+        proc do |*block_args, &block2|
+          return_from_block = false
 
-          return_from_block = true
-        ensure
-          exn = $!
+          begin
+            block_result = if self.equal?(new_object)
+                            if block_receives_block
+                              #{block_param}.call(*block_args, &block2)
+                            else
+                              yield(*block_args)
+                            end
+                          else
+                            # Detected that `self` inside `proc` is not equal to the `self` outside block (which is saved to `new_object`).
+                            # This means that the block is called with `instance_exec` or `instance_eval`.
+                            self.instance_exec(*block_args, &#{block_param})
+                          end
 
-          case
-          when return_from_block
-            # Returned from yield
-            block_calls << ::RBS::Test::ArgumentsReturn.return(
-              arguments: block_args,
-              value: block_result
-            )
-          when exn
-            # Exception
-            block_calls << ::RBS::Test::ArgumentsReturn.exception(
-              arguments: block_args,
-              exception: exn
-            )
-          else
-            # break?
-            block_calls << ::RBS::Test::ArgumentsReturn.break(
-              arguments: block_args
-            )
+            return_from_block = true
+          ensure
+            exn = $!
+
+            case
+            when return_from_block
+              # Returned from yield
+              block_calls << ::RBS::Test::ArgumentsReturn.return(
+                arguments: block_args,
+                value: block_result
+              )
+            when exn
+              # Exception
+              block_calls << ::RBS::Test::ArgumentsReturn.exception(
+                arguments: block_args,
+                exception: exn
+              )
+            else
+              # break?
+              block_calls << ::RBS::Test::ArgumentsReturn.break(
+                arguments: block_args
+              )
+            end
           end
-        end
 
-        block_result
-      end.ruby2_keywords
+          block_result
+        end.ruby2_keywords
+      end
 
       result = __send__(:"#{without_name}", *args, &wrapped_block)
     else
