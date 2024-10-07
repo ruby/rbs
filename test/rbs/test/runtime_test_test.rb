@@ -361,4 +361,64 @@ end
 RUBY
     )
   end
+
+  def test__untyped_block
+    assert_test_success(
+      other_env: { "RBS_TEST_TARGET" => "::Base,::DSL::ParameterBuilder" },
+      rbs_content: <<RBS, ruby_content: <<RUBY
+class Base
+  def self.parameter: (Symbol) ?{ () [self: DSL::ParameterBuilder] -> void } -> void
+
+  def self.parameter_builder: () -> DSL::ParameterBuilder
+end
+
+module DSL
+  class ParameterBuilder
+    def define: (Symbol) ?{ () [self: self] -> void } -> self
+
+    def build!: () -> void
+
+    def description: (String) -> void
+
+    alias desc description
+  end
+end
+RBS
+class Base
+  class << self
+    def parameter(parameter_name, &)
+      parameter_builder.define(parameter_name, &).build!
+    end
+
+    private
+
+    def parameter_builder
+      @parameter_builder ||= DSL::ParameterBuilder.new()
+    end
+  end
+end
+
+module DSL
+  class ParameterBuilder
+    def define(parameter_name, &)
+      instance_exec(&) if block_given?
+      self
+    end
+
+    def build!
+    end
+
+    def description(description_string)
+      self
+    end
+    alias desc description
+  end
+end
+
+Base.parameter(:foo) do
+  desc "Some message here"
+end
+RUBY
+    )
+  end
 end
