@@ -1221,6 +1221,12 @@ module RBS
         end
       end
 
+      def map_type_name(&block)
+        UntypedFunction.new(
+          return_type: return_type.map_type_name(&block)
+        )
+      end
+
       def each_type(&block)
         if block
           yield return_type
