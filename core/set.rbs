@@ -629,5 +629,5 @@ module Enumerable[unchecked out Elem]
   # Needs to `require "set"` to use this method.
   #
   def to_set: () -> Set[Elem]
-            | [T] { (Elem) -> T } -> Set[T]
+            | [T] () { (Elem) -> T } -> Set[T]
 end
