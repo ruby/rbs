@@ -41,7 +41,7 @@ GEM
     rbs (3.6.1)
       logger
     securerandom (0.3.1)
-    steep (1.8.0)
+    steep (1.8.1)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
@@ -68,7 +68,7 @@ PLATFORMS
 
 DEPENDENCIES
   rbs (~> 3.6.1)
-  steep (~> 1.8.0)
+  steep (~> 1.8.1)
 
 BUNDLED WITH
    2.5.16
