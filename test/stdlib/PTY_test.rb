@@ -1,5 +1,9 @@
 require_relative "test_helper"
-require "pty"
+begin
+  require "pty"
+rescue LoadError
+  # Skip the tests if the library is not available like Windows platform
+end
 
 class PTYSingletonTest < Test::Unit::TestCase
   include TestHelper
@@ -45,4 +49,4 @@ class PTYSingletonTest < Test::Unit::TestCase
     assert_send_type "(*::String command) { ([ ::IO, ::IO, ::Integer ]) -> ::Integer } -> nil",
                      PTY, :spawn, "echo" do |r, w, pid| 1 end
   end
-end
+end if defined?(PTY)
