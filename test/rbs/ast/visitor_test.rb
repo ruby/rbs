@@ -63,7 +63,7 @@ class RBS::AST::VisitorTest < Test::Unit::TestCase
 
   def parse_rbs_string(rbs)
     rbs = RBS::Buffer.new(content: rbs, name: "-")
-    buffer, directives, declarations = RBS::Parser.parse_signature(rbs)
+    _, _, declarations = RBS::Parser.parse_signature(rbs)
     declarations
   end
 end
