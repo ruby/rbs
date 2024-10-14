@@ -1638,7 +1638,7 @@ class IO < Object
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def readline: (?String sep, ?Integer limit) -> String
+  def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
