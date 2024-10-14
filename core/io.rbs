@@ -1701,7 +1701,7 @@ class IO < Object
   #     # => ["First line", "Second line", "", "Fourth line", "Fifth line"]
   #     f.close
   #
-  def readlines: (?String sep, ?Integer limit) -> ::Array[String]
+  def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c

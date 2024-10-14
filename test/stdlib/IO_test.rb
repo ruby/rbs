@@ -382,6 +382,22 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :gets, nil, chomp: true
     end
   end
+
+  def test_readlines
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '() -> Array[String]',
+                       io, :readlines
+
+      assert_send_type '(String, Integer) -> Array[String]',
+                       io, :readlines, "\n", 100
+
+      assert_send_type '(chomp: bool) -> Array[String]',
+                       io, :readlines, chomp: true
+
+      assert_send_type '(String, Integer, chomp: bool) -> Array[String]',
+                       io, :readlines, "\n", 100, chomp: true
+    end
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
