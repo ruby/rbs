@@ -10,14 +10,6 @@
 #include "ruby_objs.h"
 
 /**
- * Unescape escape sequences in the given string inplace:
- *
- *   '\\n' => "\n"
- *
- * */
-void rbs_unescape_string(VALUE string, bool dq_string);
-
-/**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.
  *
  *    Input token | Output string
