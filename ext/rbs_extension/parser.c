@@ -1747,6 +1747,8 @@ VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overl
 
 /**
  * class_instance_name ::= {} <class_name>
+ *                       | {} Data `{` kwarg args `}`
+ *                       | {} Struct `{` kwarg args `}`
  *                       | {} class_name `[` type args <`]`>
  *
  * @param kind
@@ -1756,13 +1758,28 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
 
   *name = parse_type_name(state, kind, name_range);
 
-  if (state->next_token.type == pLBRACKET) {
+  if (state->next_token.type == pLBRACE && CLASS_OF(*name) == RBS_TypeName && rb_funcall(*name, rb_intern("data?"), 0) == Qtrue) {
+    parser_advance_assert(state, pLBRACE);
+    args_range->start = state->current_token.range.start;
+    *args = parse_record_attributes(state);
+    parser_advance_assert(state, pRBRACE);
+    args_range->end = state->current_token.range.end;
+  }
+  else if (state->next_token.type == pLBRACE && CLASS_OF(*name) == RBS_TypeName && rb_funcall(*name, rb_intern("struct?"), 0) == Qtrue) {
+    parser_advance_assert(state, pLBRACE);
+    args_range->start = state->current_token.range.start;
+    *args = parse_record_attributes(state);
+    parser_advance_assert(state, pRBRACE);
+    args_range->end = state->current_token.range.end;
+  }
+  else if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
     args_range->start = state->current_token.range.start;
     parse_type_list(state, pRBRACKET, args);
     parser_advance_assert(state, pRBRACKET);
     args_range->end = state->current_token.range.end;
-  } else {
+  }
+  else {
     *args_range = NULL_RANGE;
   }
 }

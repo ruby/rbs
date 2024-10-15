@@ -2236,7 +2236,7 @@ end
 # <!-- rdoc-file=process.c -->
 # Placeholder for rusage
 #
-class Process::Tms < Struct[Float]
+class Process::Tms < Struct(utime: Float, stime: Float, cutime: Float, cstime: Float)
 end
 
 class Process::Waiter < Thread
