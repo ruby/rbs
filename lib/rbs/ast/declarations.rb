@@ -81,6 +81,141 @@ module RBS
               location: location
             }.to_json(state)
           end
+
+          def self.new(name: , args:, location:)
+
+            return super unless name.data?
+
+            superklass = super(name: name, args: [], location: location)
+
+            args.transform_values! do |(type, required)|
+              required ? type : Types::Optional.new(type: type, location: type.location)
+            end
+
+            # attribute readers
+            members = args.map do |k, type|
+              Members::AttrReader.new(
+                name: k,
+                type: type,
+                ivar_name: :"@#{type}",
+                kind: :instance,
+                location: location,
+                comment: nil,
+                annotations: nil
+              )
+            end
+
+            # initialize
+            members << Members::MethodDefinition.new(
+              name: :initialize,
+              kind: :instance,
+              location: location,
+              overloading: false,
+              comment: nil,
+              annotations: nil,
+              visibility: nil,
+              overloads: [
+                Members::MethodDefinition::Overload.new(
+                  method_type: MethodType.new(
+                    type_params: [],
+                    type: Types::Function.new(
+                      required_keywords: args.to_h { |k, type|
+                        [
+                          k,
+                          # set param
+                          Types::Function::Param.new(
+                            name: nil,
+                            type: type,
+                            location: location
+                          )
+                        ]
+                      },
+                      required_positionals: [],
+                      optional_keywords: {},
+                      optional_positionals: [],
+                      rest_keywords: nil,
+                      rest_positionals: nil,
+                      trailing_positionals: [],
+                      return_type: RBS::Types::Bases::Void.new(location: location),
+                    ),
+                    location: location,
+                    block: nil,
+                  ),
+                  annotations: []
+                ),
+                Members::MethodDefinition::Overload.new(
+                  method_type: MethodType.new(
+                    type_params: [],
+                    type: Types::Function.new(
+                      required_positionals: args.map { |k, type|
+                        # set param
+                        Types::Function::Param.new(
+                          name: k,
+                          type: type,
+                          location: location
+                        )
+                      },
+                      required_keywords: [],
+                      optional_keywords: {},
+                      optional_positionals: [],
+                      rest_keywords: nil,
+                      rest_positionals: nil,
+                      trailing_positionals: [],
+                      return_type: RBS::Types::Bases::Void.new(location: location),
+                    ),
+                    location: location,
+                    block: nil,
+                  ),
+                  annotations: []
+                )
+              ]
+            )
+
+            # members
+            members << Members::MethodDefinition.new(
+              name: :members,
+              kind: :instance,
+              location: location,
+              overloading: false,
+              comment: nil,
+              annotations: nil,
+              visibility: nil,
+              overloads: [
+                Members::MethodDefinition::Overload.new(
+                  method_type: MethodType.new(
+                    type_params: [],
+                    type: Types::Function.new(
+                      required_keywords: {},
+                      required_positionals: [],
+                      optional_keywords: {},
+                      optional_positionals: [],
+                      rest_keywords: nil,
+                      rest_positionals: nil,
+                      trailing_positionals: [],
+                      return_type: RBS::Types::ClassInstance.new(
+                        name: BuiltinNames::Array,
+                        args: [RBS::Types::ClassInstance.new(name: BuiltinNames::Symbol, args: [], location: location)],
+                        location: location
+                      ),
+                    ),
+                    location: location,
+                    block: nil,
+                  ),
+                  annotations: []
+                )
+              ]
+            )
+
+            Class.new(
+              name: nil,
+              type_params: nil,
+              super_class: superklass,
+              annotations: nil,
+              comment: nil,
+              location: location,
+              members: members
+            )
+          end
         end
 
         include NestedDeclarationHelper
