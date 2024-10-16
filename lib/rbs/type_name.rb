@@ -52,6 +52,10 @@ module RBS
       kind == :alias
     end
 
+    def data?
+      class? && namespace.empty? && name == :Data
+    end
+
     def absolute!
       self.class.new(namespace: namespace.absolute!, name: name)
     end

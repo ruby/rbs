@@ -428,6 +428,81 @@ end
     end
   end
 
+  def test_data_class_decl
+    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
+      class Foo < Data(a: Integer)
+      end
+          RBS
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Class, decl
+        assert_equal TypeName("Foo"), decl.name
+        assert_predicate decl.type_params, :empty?
+        assert_nil decl.super_class.name
+        assert_equal TypeName("Data"), decl.super_class.super_class.name
+
+        members = decl.super_class.members
+
+        # assert_equal 8, members.size
+
+        members[0].tap do |member|
+          assert_instance_of RBS::AST::Members::AttrReader, member
+          assert_equal :instance, member.kind
+          assert_equal :a, member.name
+          assert_equal "Integer", member.type.to_s
+        end
+
+        members[1].tap do |member|
+          assert_instance_of RBS::AST::Members::MethodDefinition, member
+          assert_equal :instance, member.kind
+          assert_equal :initialize, member.name
+          assert_equal 2, member.overloads.size
+          assert_equal "(a: Integer) -> void", member.overloads[0].method_type.to_s
+          assert_equal"(Integer a) -> void", member.overloads[1].method_type.to_s
+        end
+
+        members[2].tap do |member|
+          assert_instance_of RBS::AST::Members::MethodDefinition, member
+          assert_equal :instance, member.kind
+          assert_equal :members, member.name
+          assert_equal 1, member.overloads.size
+          assert_equal "() -> ::Array[::Symbol]", member.overloads[0].method_type.to_s
+        end
+
+        # members[3].tap do |member|
+        #   assert_instance_of RBS::AST::Members::MethodDefinition, member
+        #   assert_equal :method, member.kind
+        #   assert_equal :deconstruct, member.name
+        #   assert_equal 1, member.overloads.size
+        #   assert_equal "() -> [Integer]", member.overloads[0].method_type.to_s
+        # end
+
+        # members[4].tap do |member|
+        #   assert_instance_of RBS::AST::Members::MethodDefinition, member
+        #   assert_equal :method, member.kind
+        #   assert_equal :deconstruct_keys, member.name
+        #   assert_equal 2, member.overloads.size
+        #   assert_equal "(nil) -> {a: Integer}", member.overloads[0].method_type.to_s
+        #   assert_equal"(Array(Symbol)) -> Hash[untyped]", member.overloads[1].method_type.to_s
+        # end
+
+        # members[5].tap do |member|
+        #   assert_instance_of RBS::AST::Members::MethodDefinition, member
+        #   assert_equal :method, member.kind
+        #   assert_equal :with, member.name
+        #   assert_equal 1, member.overloads.size
+        #   assert_equal "(?a: Integer) -> Foo", member.overloads[0].method_type.to_s
+        # end
+      end
+
+      # decls[1].tap do |decl|
+      #   # as funcall: Foo[1]
+      #   assert_instance_of RBS::Types::UntypedFunction, decl.block.type
+      #   assert_equal TypeName("Foo"), decl.name
+      #     assert_equal ["(::Integer a) -> Foo |(a: ::Integer) -> Foo"], member.method_types.map(&:to_s)
+      # end
+    end
+  end
+
   def test_parse_type
     assert_equal "hello", RBS::Parser.parse_type(buffer('"hello"')).literal
     assert_equal "hello", RBS::Parser.parse_type(buffer("'hello'")).literal
