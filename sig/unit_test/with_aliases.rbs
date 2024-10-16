@@ -70,48 +70,48 @@ module RBS
 
       # Yields `::int` objects
       #
-      def with_int: (?Integer value) { (int) -> void } -> void
-                  | (?Integer value) -> WithEnum[int]
+      def with_int: (?Integer value, ?object: bool) { (int) -> void } -> void
+                  | (?Integer value, ?object: bool) -> WithEnum[int]
 
       # Yields `::float` objects
       #
-      def with_float: (?Float value) { (float) -> void } -> void
-                    | (?Float value) -> WithEnum[float]
+      def with_float: (?Float value, ?object: bool) { (float) -> void } -> void
+                    | (?Float value, ?object: bool) -> WithEnum[float]
 
       # Yields `::string` objects
       #
-      def with_string: (?String value) { (string) -> void } -> void
-                     | (?String value) -> WithEnum[string]
+      def with_string: (?String value, ?object: bool) { (string) -> void } -> void
+                     | (?String value, ?object: bool) -> WithEnum[string]
 
       # Yields `::array` objects
       #
-      def with_array: [T] (*T elements) { (array[T]) -> void } -> void
-                    | [T] (*T elements) -> WithEnum[array[T]]
+      def with_array: [T] (*T elements, ?object: bool) { (array[T]) -> void } -> void
+                    | [T] (*T elements, ?object: bool) -> WithEnum[array[T]]
 
       # Yields `::hash` objects
       #
-      def with_hash: [K, V] (?Hash[K, V] hash) { (hash[K, V]) -> void } -> void
-                   | [K, V] (?Hash[K, V] hash) -> WithEnum[hash[K, V]]
+      def with_hash: [K, V] (?Hash[K, V] hash, ?object: bool) { (hash[K, V]) -> void } -> void
+                   | [K, V] (?Hash[K, V] hash, ?object: bool) -> WithEnum[hash[K, V]]
 
       # Yields `::io` objects
       #
-      def with_io: (?untyped io) { (io) -> void } -> void
-                 | (?untyped io) -> WithEnum[io]
+      def with_io: (?untyped io, ?object: bool) { (io) -> void } -> void
+                 | (?untyped io, ?object: bool) -> WithEnum[io]
 
       # Yields `::path` objects
       #
-      def with_path: (?String path) { (path) -> void } -> void
-                   | (?String path) -> WithEnum[path]
+      def with_path: (?String path, ?object: bool) { (path) -> void } -> void
+                   | (?String path, ?object: bool) -> WithEnum[path]
 
       # Yields `::encoding` objects
       #
-      def with_encoding: (?untyped encoding) { (encoding) -> void } -> void
-                       | (?untyped encoding) -> WithEnum[encoding]
+      def with_encoding: (?untyped encoding, ?object: bool) { (encoding) -> void } -> void
+                       | (?untyped encoding, ?object: bool) -> WithEnum[encoding]
 
       # Yields `::interned` objects
       #
-      def with_interned: (?Symbol value) { (interned) -> void } -> void
-                       | (?Symbol value) -> WithEnum[interned]
+      def with_interned: (?Symbol value, ?object: bool) { (interned) -> void } -> void
+                       | (?Symbol value, ?object: bool) -> WithEnum[interned]
 
       # Yields `::bool` objects
       #
@@ -120,8 +120,8 @@ module RBS
 
       # Yields `::boolish` objects
       #
-      def with_boolish: () { (boolish) -> void } -> void
-                      | () -> WithEnum[boolish]
+      def with_boolish: (?object: bool) { (boolish) -> void } -> void
+                      | (?object: bool) -> WithEnum[boolish]
 
       # Yields `::untyped` objects
       #
@@ -131,6 +131,8 @@ module RBS
       # Yields `::range` objects
       #
       def with_range: (WithEnum[untyped] start, WithEnum[untyped] stop, ?bool exclude_end) { (range[untyped]) -> void } -> void
+
+      private def object_it: [T < Convertibles::BlankSlate] (T value, bool make_it_object) -> T
     end
   end
 end
