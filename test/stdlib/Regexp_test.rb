@@ -47,7 +47,7 @@ class RegexpSingletonTest < Test::Unit::TestCase
       assert_send_type  '(string) -> Regexp',
                         Regexp, :compile, pattern
 
-      with_int(Regexp::IGNORECASE).and with_string('i'), true, false, nil do |options|
+      with_int(Regexp::IGNORECASE, object: true).and with_string('i'), true, false, nil do |options|
         assert_send_type  '(string, int | string | bool | nil) -> Regexp',
                           Regexp, :compile, pattern, options
 
@@ -118,7 +118,7 @@ class RegexpSingletonTest < Test::Unit::TestCase
                           Regexp, :linear_time?, regexp, timeout: timeout
       end
 
-      with_int(Regexp::IGNORECASE).and(with_string('i'), true, false, nil) do |options|
+      with_int(Regexp::IGNORECASE, object: true).and(with_string('i'), true, false, nil) do |options|
         assert_send_type  '(string, int | string | bool | nil) -> bool',
                           Regexp, :linear_time?, regexp, options
 
@@ -229,7 +229,7 @@ class RegexpSingletonTest < Test::Unit::TestCase
       assert_send_type  '(string) -> Regexp',
                         Regexp, :new, pattern
 
-      with_int(Regexp::IGNORECASE).and with_string('i'), true, false, nil do |options|
+      with_int(Regexp::IGNORECASE, object: true).and with_string('i'), true, false, nil do |options|
         assert_send_type  '(string, int | string | bool | nil) -> Regexp',
                           Regexp, :new, pattern, options
 

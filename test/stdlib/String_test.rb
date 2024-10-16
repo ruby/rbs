@@ -103,7 +103,7 @@ class StringInstanceTest < Test::Unit::TestCase
                         '%d %d', :%, ary
     end
 
-    with_hash a: 3, b: 4 do |named|
+    with_hash({ a: 3, b: 4 }) do |named|
       assert_send_type  '(hash[Symbol, untyped]) -> String',
                         '%<a>d %<b>d', :%, named
     end
@@ -953,7 +953,7 @@ class StringInstanceTest < Test::Unit::TestCase
                           'hello', :gsub, pattern, replacement
       end
 
-      with_hash 'l' => ToS.new('!') do |replacement|
+      with_hash({ 'l' => ToS.new('!') }) do |replacement|
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
                           'hello', :gsub, pattern, replacement
       end
@@ -979,7 +979,7 @@ class StringInstanceTest < Test::Unit::TestCase
                           +'heya', :gsub!, pattern, replacement
       end
 
-      with_hash 'l' => ToS.new('!') do |replacement|
+      with_hash({ 'l' => ToS.new('!') }) do |replacement|
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
                           +'hello', :gsub!, pattern, replacement
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> nil',
@@ -1499,7 +1499,7 @@ class StringInstanceTest < Test::Unit::TestCase
                           'hello', :sub, pattern, replacement
       end
 
-      with_hash 'l' => ToS.new('!') do |replacement|
+      with_hash({ 'l' => ToS.new('!') }) do |replacement|
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
                           'hello', :sub, pattern, replacement
       end
@@ -1520,7 +1520,7 @@ class StringInstanceTest < Test::Unit::TestCase
                           'heya', :sub!, pattern, replacement
       end
 
-      with_hash 'l' => ToS.new('!') do |replacement|
+      with_hash({ 'l' => ToS.new('!') }) do |replacement|
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> String',
                           'hello', :sub!, pattern, replacement
         assert_send_type  '(Regexp | string, hash[String, _ToS]) -> nil',

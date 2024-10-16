@@ -40,7 +40,7 @@ class KernelSingletonTest < Test::Unit::TestCase
     assert_send_type "([]) -> Hash[untyped, untyped]",
                      Kernel, :Hash, []
 
-    with_hash 'a' => 3 do |hash|
+    with_hash({ 'a' => 3 }) do |hash|
       assert_send_type "(::hash[String, Integer]) -> Hash[String, Integer]",
                        Kernel, :Hash, hash
     end

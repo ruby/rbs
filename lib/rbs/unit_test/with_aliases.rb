@@ -43,62 +43,62 @@ module RBS
         args.each(&block)
       end
 
-      def with_int(value = 3, &block)
-        return WithEnum.new to_enum(__method__ || raise, value) unless block
+      def with_int(value = 3, object: false, &block)
+        return WithEnum.new to_enum(__method__ || raise, value, object: object) unless block
         yield value
-        yield ToInt.new(value)
+        yield object_it(ToInt.new(value), object)
       end
 
-      def with_float(value = 0.1)
-        return WithEnum.new to_enum(__method__ || raise, value) unless block_given?
+      def with_float(value = 0.1, object: false)
+        return WithEnum.new to_enum(__method__ || raise, value, object: object) unless block_given?
         yield value
-        yield ToF.new(value)
+        yield object_it(ToF.new(value), object)
       end
 
-      def with_string(value = '')
-        return WithEnum.new to_enum(__method__ || raise, value) unless block_given?
+      def with_string(value = '', object: false)
+        return WithEnum.new to_enum(__method__ || raise, value, object: object) unless block_given?
         yield value
-        yield ToStr.new(value)
+        yield object_it(ToStr.new(value), object)
       end
 
-      def with_array(*elements)
-        return WithEnum.new to_enum(__method__ || raise, *elements) unless block_given?
+      def with_array(*elements, object: false)
+        return WithEnum.new to_enum(__method__ || raise, *elements, object: object) unless block_given?
 
         yield _ = elements
-        yield ToArray.new(*elements)
+        yield object_it(ToArray.new(*elements), object)
       end
 
-      def with_hash(hash = {})
-        return WithEnum.new to_enum(__method__ || raise, hash) unless block_given?
+      def with_hash(hash = {}, object: false)
+        return WithEnum.new to_enum(__method__ || raise, hash, object: object) unless block_given?
 
         yield _ = hash
-        yield ToHash.new(hash)
+        yield object_it(ToHash.new(hash), object)
       end
 
-      def with_io(io = $stdout)
-        return WithEnum.new to_enum(__method__ || raise, io) unless block_given?
+      def with_io(io = $stdout, object: false)
+        return WithEnum.new to_enum(__method__ || raise, io, object: object) unless block_given?
         yield io
-        yield ToIO.new(io)
+        yield object_it(ToIO.new(io), object)
       end
 
-      def with_path(path = "/tmp/foo.txt", &block)
-        return WithEnum.new to_enum(__method__ || raise, path) unless block
+      def with_path(path = "/tmp/foo.txt", object: false, &block)
+        return WithEnum.new to_enum(__method__ || raise, path, object: object) unless block
 
         with_string(path, &block)
-        block.call ToPath.new(path)
+        block.call object_it(ToPath.new(path), object)
       end
 
-      def with_encoding(encoding = Encoding::UTF_8, &block)
-        return WithEnum.new to_enum(__method__ || raise, encoding) unless block
+      def with_encoding(encoding = Encoding::UTF_8, object: false, &block)
+        return WithEnum.new to_enum(__method__ || raise, encoding, object: object) unless block
 
         block.call encoding
-        with_string(encoding.to_s, &block)
+        with_string(encoding.to_s, object: object, &block)
       end
 
-      def with_interned(value = :&, &block)
-        return WithEnum.new to_enum(__method__ || raise, value) unless block
+      def with_interned(value = :&, object: false, &block)
+        return WithEnum.new to_enum(__method__ || raise, value, object: object) unless block
 
-        with_string(value.to_s, &block)
+        with_string(value.to_s, object: object, &block)
         block.call value.to_sym
       end
 
@@ -108,10 +108,10 @@ module RBS
         yield false
       end
 
-      def with_boolish(&block)
-        return WithEnum.new to_enum(__method__ || raise) unless block
+      def with_boolish(object: false, &block)
+        return WithEnum.new to_enum(__method__ || raise, object: object) unless block
         with_bool(&block)
-        [nil, 1, Object.new, BlankSlate.new, "hello, world!"].each(&block)
+        [nil, 1, Object.new, object_it(BlankSlate.new, object), "hello, world!"].each(&block)
       end
 
       alias with_untyped with_boolish
@@ -136,6 +136,14 @@ module RBS
 
             yield Range.new(lower, upper, exclude_end)
           end
+        end
+      end
+
+      def object_it(value, make)
+        if make
+          value.__with_object_methods
+        else
+          value
         end
       end
     end
