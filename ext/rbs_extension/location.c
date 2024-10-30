@@ -8,6 +8,15 @@
 rbs_loc_range RBS_LOC_NULL_RANGE = { -1, -1 };
 VALUE RBS_Location;
 
+rbs_location_t *rbs_location_new(VALUE buffer, range rg) {
+    rbs_location_t *location = (rbs_location_t *)malloc(sizeof(rbs_location_t));
+    location->cached_ruby_value = rbs_new_location(buffer, rg);
+    rb_gc_register_mark_object(location->cached_ruby_value);
+    location->buffer = buffer;
+    location->rg = rg;
+    return location;
+}
+
 position rbs_loc_position(int char_pos) {
   position pos = { 0, char_pos, -1, -1 };
   return pos;
@@ -30,7 +39,7 @@ static void check_children_max(unsigned short n) {
   }
 }
 
-void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
+void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap) {
   check_children_max(cap);
 
   size_t s = RBS_LOC_CHILDREN_SIZE(cap);
@@ -46,7 +55,7 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
 
 static void check_children_cap(rbs_loc *loc) {
   if (loc->children == NULL) {
-    rbs_loc_alloc_children(loc, 1);
+    rbs_loc_legacy_alloc_children(loc, 1);
   } else {
     if (loc->children->len == loc->children->cap) {
       check_children_max(loc->children->cap + 1);
@@ -56,14 +65,14 @@ static void check_children_cap(rbs_loc *loc) {
   }
 }
 
-void rbs_loc_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
-  rbs_loc_add_optional_child(loc, name, r);
+void rbs_loc_legacy_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
+  rbs_loc_legacy_add_optional_child(loc, name, r);
 
   unsigned short last_index = loc->children->len - 1;
   loc->children->required_p |= 1 << last_index;
 }
 
-void rbs_loc_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
+void rbs_loc_legacy_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
   check_children_cap(loc);
 
   unsigned short i = loc->children->len++;
@@ -146,7 +155,7 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
   };
 
   if (other_loc->children != NULL) {
-    rbs_loc_alloc_children(self_loc, other_loc->children->cap);
+    rbs_loc_legacy_alloc_children(self_loc, other_loc->children->cap);
     memcpy(self_loc->children, other_loc->children, RBS_LOC_CHILDREN_SIZE(other_loc->children->cap));
   }
 
@@ -184,7 +193,7 @@ static VALUE location_add_required_child(VALUE self, VALUE name, VALUE start, VA
   rg.start = rbs_loc_position(FIX2INT(start));
   rg.end = rbs_loc_position(FIX2INT(end));
 
-  rbs_loc_add_required_child(loc, rbs_constant_pool_insert_ruby_symbol(name), rg);
+  rbs_loc_legacy_add_required_child(loc, rbs_constant_pool_insert_ruby_symbol(name), rg);
 
   return Qnil;
 }
@@ -196,7 +205,7 @@ static VALUE location_add_optional_child(VALUE self, VALUE name, VALUE start, VA
   rg.start = rbs_loc_position(FIX2INT(start));
   rg.end = rbs_loc_position(FIX2INT(end));
 
-  rbs_loc_add_optional_child(loc, rbs_constant_pool_insert_ruby_symbol(name), rg);
+  rbs_loc_legacy_add_optional_child(loc, rbs_constant_pool_insert_ruby_symbol(name), rg);
 
   return Qnil;
 }
@@ -204,7 +213,7 @@ static VALUE location_add_optional_child(VALUE self, VALUE name, VALUE start, VA
 static VALUE location_add_optional_no_child(VALUE self, VALUE name) {
   rbs_loc *loc = rbs_check_location(self);
 
-  rbs_loc_add_optional_child(loc, rbs_constant_pool_insert_ruby_symbol(name), NULL_RANGE);
+  rbs_loc_legacy_add_optional_child(loc, rbs_constant_pool_insert_ruby_symbol(name), NULL_RANGE);
 
   return Qnil;
 }
@@ -298,14 +307,6 @@ static VALUE location_required_keys(VALUE self) {
   }
 
   return keys;
-}
-
-VALUE rbs_location_pp(VALUE buffer, const position *start_pos, const position *end_pos) {
-  range rg = { *start_pos, *end_pos };
-  rg.start = *start_pos;
-  rg.end = *end_pos;
-
-  return rbs_new_location(buffer, rg);
 }
 
 void rbs__init_location(void) {

@@ -638,13 +638,14 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_record
-    Parser.parse_type("{ foo: untyped, 3 => 'hoge' }").yield_self do |type|
+    Parser.parse_type("{ foo: untyped, 3 => 'hoge', 4 => 'huge' }").yield_self do |type|
       assert_instance_of Types::Record, type
       assert_equal({
                      foo: Types::Bases::Any.new(location: nil),
-                     3 => Types::Literal.new(literal: "hoge", location: nil)
+                     3 => Types::Literal.new(literal: "hoge", location: nil),
+                     4 => Types::Literal.new(literal: "huge", location: nil),
                    }, type.fields)
-      assert_equal "{ foo: untyped, 3 => 'hoge' }", type.location.source
+      assert_equal "{ foo: untyped, 3 => 'hoge', 4 => 'huge' }", type.location.source
     end
 
     Parser.parse_type("{}").yield_self do |type|

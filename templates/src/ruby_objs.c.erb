@@ -11,10 +11,10 @@
 #endif
 
 <%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
-VALUE <%= node.c_function_name %>(<%= node.fields.map { |field| "#{field.c_type} #{field.name}" }.join(", ") %>) {
+VALUE <%= node.c_function_name %>(<%= node.fields.map(&:parameter_decl).join(", ") %>) {
   VALUE _init_kwargs = rb_hash_new();
   <%- node.fields.each do |field| -%>
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("<%= field.name %>")), <%= field.name %>);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("<%= field.name %>")), <%= field.cached_ruby_value_expr %>);
   <%- end -%>
 
   return CLASS_NEW_INSTANCE(

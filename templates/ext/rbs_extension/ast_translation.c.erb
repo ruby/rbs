@@ -1,5 +1,31 @@
 #include "ast_translation.h"
 
+#include "rbs/constants.h"
+
+#include <stdlib.h>
+
+
+VALUE rbs_node_list_to_ruby_array(rbs_node_list_t *list) {
+    return list->cached_ruby_value;
+}
+
+VALUE rbs_hash_to_ruby_hash(rbs_hash_t *hash) {
+    return hash->cached_ruby_value;
+}
+
+VALUE rbs_loc_to_ruby_location(rbs_location_t *loc) {
+  return loc->cached_ruby_value;
+}
+
+#ifdef RB_PASS_KEYWORDS
+  // Ruby 2.7 or later
+  #define CLASS_NEW_INSTANCE(klass, argc, argv)\
+          rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
+#else
+  // Ruby 2.6
+  #define CLASS_NEW_INSTANCE(receiver, argc, argv)\
+          rb_class_new_instance(argc, argv, receiver)
+#endif
 
 const char* get_class_name(VALUE o) {
     VALUE klass = rb_class_of(o);      // Get the class of the object
@@ -9,15 +35,7 @@ const char* get_class_name(VALUE o) {
 }
 
 VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
-    if (instance == NULL) {
-        fprintf(stderr, "Tried to call rbs_struct_to_ruby_value(NULL)\n");
-        exit(1);
-    }
-
-    if (instance->type == RBS_TYPES_ZZZTMPNOTIMPLEMENTED) {
-        // Special case: skip assertions/translation below.
-        return instance->cached_ruby_value;
-    }
+    if (instance == NULL) return Qnil;
 
     VALUE ruby_value = instance->cached_ruby_value;
 
@@ -35,10 +53,51 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
                 fprintf(stderr, "Expected class name: <%= node.ruby_full_name %>, got %s\n", class_name);
                 exit(1);
             }
-            break;
+            <%-
+            rbs_struct_to_ruby_value_shitlist = [
+                "RBS::AST::Bool",
+                "RBS::AST::Symbol",
+                "RBS::AST::Declarations::Nodes",
+                "RBS::AST::Directives::Nodes",
+            ]
+
+            if rbs_struct_to_ruby_value_shitlist.include?(node.ruby_full_name) -%>
+            return instance->cached_ruby_value;
+            <%- else -%>
+            <%- if node.fields.any? -%> <%# This prevents "warning: unused variable 'node'" %>
+            <%= node.c_type_name %> *node = (<%= node.c_type_name %> *)instance;
+            <%- end -%>
+
+            VALUE h = rb_hash_new();
+            <%- node.fields.each do |field| -%>
+            <%- case field.c_type -%>
+            <%- when "VALUE" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %>);
+            <%- when "rbs_node_list" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(node-><%= field.name %>));
+            <%- when "rbs_hash" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(node-><%= field.name %>));
+            <%- when "rbs_location" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(node-><%= field.name %>));
+            <%- when "comment" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %>->string);
+            <%- when "bool" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %> ? Qtrue : Qfalse);
+            <%- else -%>
+            <%- unless field.ast_node? -%>
+            #warning unexpected type <%= field.c_type -%>
+            <%- end -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value((rbs_node_t *) node-><%= field.name %>)); // <%= field.c_type %>
+            <%- end -%>
+            <%- end -%>
+
+            return CLASS_NEW_INSTANCE(
+                <%= node.c_constant_name %>,
+                1,
+                &h
+            );
+            <%- end -%>
         }
         <%- end -%>
     }
-
-    return instance->cached_ruby_value;
 }

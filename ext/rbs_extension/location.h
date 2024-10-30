@@ -52,30 +52,21 @@ rbs_loc *rbs_check_location(VALUE location);
  *
  * Do not call twice for the same location.
  * */
-void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap);
+void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap);
 
 /**
  * Add a required child range with given name.
  *
- * Allocate memory for children with rbs_loc_alloc_children before calling this function.
+ * Allocate memory for children with rbs_loc_legacy_alloc_children before calling this function.
  * */
-void rbs_loc_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r);
+void rbs_loc_legacy_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r);
 
 /**
  * Add an optional child range with given name.
  *
- * Allocate memory for children with rbs_loc_alloc_children before calling this function.
+ * Allocate memory for children with rbs_loc_legacy_alloc_children before calling this function.
  * */
-void rbs_loc_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r);
-
-/**
- * Returns RBS::Location object with start/end positions.
- *
- * @param start_pos
- * @param end_pos
- * @return New RSS::Location object.
- * */
-VALUE rbs_location_pp(VALUE buffer, const position *start_pos, const position *end_pos);
+void rbs_loc_legacy_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r);
 
 /**
  * Define RBS::Location class.

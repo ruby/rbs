@@ -25,8 +25,8 @@ module RBS
           "#{@c_type} #{c_name}"
         when "rbs_string"
           "rbs_string_t #{c_name}"
-        when ->(c_type) { c_type.include?("_t") }
-          "#{c_type}#{c_name}"
+        when ->(c_type) { c_type.end_with?("_t *") }
+          "#{@c_type}#{c_name}"
         else
           "#{@c_type}_t *#{c_name}"
         end
@@ -54,8 +54,31 @@ module RBS
           @c_type.include?("_types_")
       end
 
+      # Returns a C expression that evaluates to the Ruby VALUE object for this field.
+      def cached_ruby_value_expr
+        case @c_type
+        when "VALUE"
+          @name
+        when "bool"
+          "#{@name} ? Qtrue : Qfalse"
+        when "rbs_node", "rbs_node_list", "rbs_location", "rbs_hash"
+          "#{@name} == NULL ? Qnil : #{@name}->cached_ruby_value"
+        else
+          "#{@name} == NULL ? Qnil : #{@name}->base.cached_ruby_value"
+        end
+      end
+
       def needs_to_be_freed?
         !["VALUE", "bool"].include?(@c_type)
+      end
+
+      def ast_node?
+        @c_type == "rbs_node" ||
+          @c_type == "rbs_typename" ||
+          @c_type == "rbs_namespace" ||
+          @c_type.include?("_ast_") ||
+          @c_type.include?("_decl_") ||
+          @c_type.include?("_types_")
       end
     end
 
@@ -68,7 +91,11 @@ module RBS
       # e.g. `TypeAlias`
       attr_reader :ruby_class_name #: String
 
-      # The name of the auto-generated C struct for this type,
+      # The base name of the auto-generated C struct for this type.
+      # e.g. `rbs_ast_declarations_typealias`
+      attr_reader :c_base_name #: String
+
+      # The name of the typedef of the auto-generated C struct for this type,
       # e.g. `rbs_ast_declarations_typealias_t`
       attr_reader :c_type_name #: String
 
@@ -106,13 +133,12 @@ module RBS
         @c_type_enum_name = @c_base_name.upcase
 
         @expose_to_ruby = yaml.fetch("expose_to_ruby", true)
+        @builds_ruby_object_internally = yaml.fetch("builds_ruby_object_internally", true)
 
         @fields = yaml.fetch("fields", []).map { |field| Field.from_hash(field) }.freeze
 
-        @constructor_params = [
-          Field.new(name: "allocator",  c_type: "rbs_allocator_t *"),
-          Field.new(name: "ruby_value", c_type: "VALUE"),
-        ]
+        @constructor_params = [Field.new(name: "allocator",  c_type: "rbs_allocator_t *")]
+        @constructor_params << Field.new(name: "ruby_value", c_type: "VALUE") unless builds_ruby_object_internally?
         @constructor_params.concat @fields
         @constructor_params.freeze
       end
@@ -127,6 +153,12 @@ module RBS
       # If this is true, then we will also create a Ruby class for it, otherwise we'll skip that.
       def expose_to_ruby?
         @expose_to_ruby
+      end
+
+      # When true, this object is expected to build its own Ruby VALUE object inside its `*_new()` function.
+      # When false, the `*_new()` function will take a Ruby VALUE as its first argument.
+      def builds_ruby_object_internally?
+        @builds_ruby_object_internally
       end
     end
 

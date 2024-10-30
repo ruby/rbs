@@ -7,6 +7,32 @@
 
 #include "ast_translation.h"
 
+#include "rbs/constants.h"
+
+#include <stdlib.h>
+
+
+VALUE rbs_node_list_to_ruby_array(rbs_node_list_t *list) {
+    return list->cached_ruby_value;
+}
+
+VALUE rbs_hash_to_ruby_hash(rbs_hash_t *hash) {
+    return hash->cached_ruby_value;
+}
+
+VALUE rbs_loc_to_ruby_location(rbs_location_t *loc) {
+  return loc->cached_ruby_value;
+}
+
+#ifdef RB_PASS_KEYWORDS
+  // Ruby 2.7 or later
+  #define CLASS_NEW_INSTANCE(klass, argc, argv)\
+          rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
+#else
+  // Ruby 2.6
+  #define CLASS_NEW_INSTANCE(receiver, argc, argv)\
+          rb_class_new_instance(argc, argv, receiver)
+#endif
 
 const char* get_class_name(VALUE o) {
     VALUE klass = rb_class_of(o);      // Get the class of the object
@@ -16,15 +42,7 @@ const char* get_class_name(VALUE o) {
 }
 
 VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
-    if (instance == NULL) {
-        fprintf(stderr, "Tried to call rbs_struct_to_ruby_value(NULL)\n");
-        exit(1);
-    }
-
-    if (instance->type == RBS_TYPES_ZZZTMPNOTIMPLEMENTED) {
-        // Special case: skip assertions/translation below.
-        return instance->cached_ruby_value;
-    }
+    if (instance == NULL) return Qnil;
 
     VALUE ruby_value = instance->cached_ruby_value;
 
@@ -41,415 +59,1152 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
                 fprintf(stderr, "Expected class name: RBS::AST::Annotation, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_annotation_t *node = (rbs_ast_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("string")), node->string);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Annotation,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_BOOL: {
+            if (strcmp(class_name, "RBS::AST::Bool") != 0) {
+                fprintf(stderr, "Expected class name: RBS::AST::Bool, got %s\n", class_name);
+                exit(1);
+            }
+            return instance->cached_ruby_value;
         }
         case RBS_AST_COMMENT: {
             if (strcmp(class_name, "RBS::AST::Comment") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Comment, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_comment_t *node = (rbs_ast_comment_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("string")), node->string);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Comment,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_CLASS: {
             if (strcmp(class_name, "RBS::AST::Declarations::Class") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Class, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_class_t *node = (rbs_ast_declarations_class_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(node->type_params));
+            rb_hash_aset(h, ID2SYM(rb_intern("super_class")), rbs_struct_to_ruby_value((rbs_node_t *) node->super_class)); // rbs_ast_declarations_class_super
+            rb_hash_aset(h, ID2SYM(rb_intern("members")), rbs_node_list_to_ruby_array(node->members));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Class,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_CLASS_SUPER: {
             if (strcmp(class_name, "RBS::AST::Declarations::Class::Super") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Class::Super, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_class_super_t *node = (rbs_ast_declarations_class_super_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Class_Super,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_CLASSALIAS: {
             if (strcmp(class_name, "RBS::AST::Declarations::ClassAlias") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::ClassAlias, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_classalias_t *node = (rbs_ast_declarations_classalias_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->new_name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->old_name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_ClassAlias,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_CONSTANT: {
             if (strcmp(class_name, "RBS::AST::Declarations::Constant") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Constant, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_constant_t *node = (rbs_ast_declarations_constant_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Constant,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_GLOBAL: {
             if (strcmp(class_name, "RBS::AST::Declarations::Global") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Global, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_global_t *node = (rbs_ast_declarations_global_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Global,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_INTERFACE: {
             if (strcmp(class_name, "RBS::AST::Declarations::Interface") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Interface, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_interface_t *node = (rbs_ast_declarations_interface_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(node->type_params));
+            rb_hash_aset(h, ID2SYM(rb_intern("members")), rbs_node_list_to_ruby_array(node->members));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Interface,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_MODULE: {
             if (strcmp(class_name, "RBS::AST::Declarations::Module") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Module, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_module_t *node = (rbs_ast_declarations_module_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(node->type_params));
+            rb_hash_aset(h, ID2SYM(rb_intern("self_types")), rbs_node_list_to_ruby_array(node->self_types));
+            rb_hash_aset(h, ID2SYM(rb_intern("members")), rbs_node_list_to_ruby_array(node->members));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Module,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_MODULE_SELF: {
             if (strcmp(class_name, "RBS::AST::Declarations::Module::Self") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::Module::Self, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_module_self_t *node = (rbs_ast_declarations_module_self_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_Module_Self,
+                1,
+                &h
+            );
         }
         case RBS_AST_DECLARATIONS_MODULEALIAS: {
             if (strcmp(class_name, "RBS::AST::Declarations::ModuleAlias") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::ModuleAlias, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_modulealias_t *node = (rbs_ast_declarations_modulealias_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->new_name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->old_name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_ModuleAlias,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_DECLARATIONS_NODES: {
+            if (strcmp(class_name, "RBS::AST::Declarations::Nodes") != 0) {
+                fprintf(stderr, "Expected class name: RBS::AST::Declarations::Nodes, got %s\n", class_name);
+                exit(1);
+            }
+            return instance->cached_ruby_value;
         }
         case RBS_AST_DECLARATIONS_TYPEALIAS: {
             if (strcmp(class_name, "RBS::AST::Declarations::TypeAlias") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Declarations::TypeAlias, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_declarations_typealias_t *node = (rbs_ast_declarations_typealias_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(node->type_params));
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Declarations_TypeAlias,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_DIRECTIVES_NODES: {
+            if (strcmp(class_name, "RBS::AST::Directives::Nodes") != 0) {
+                fprintf(stderr, "Expected class name: RBS::AST::Directives::Nodes, got %s\n", class_name);
+                exit(1);
+            }
+            return instance->cached_ruby_value;
         }
         case RBS_AST_DIRECTIVES_USE: {
             if (strcmp(class_name, "RBS::AST::Directives::Use") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Directives::Use, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_directives_use_t *node = (rbs_ast_directives_use_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("clauses")), rbs_node_list_to_ruby_array(node->clauses));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Directives_Use,
+                1,
+                &h
+            );
         }
         case RBS_AST_DIRECTIVES_USE_SINGLECLAUSE: {
             if (strcmp(class_name, "RBS::AST::Directives::Use::SingleClause") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Directives::Use::SingleClause, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_directives_use_singleclause_t *node = (rbs_ast_directives_use_singleclause_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->type_name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->new_name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Directives_Use_SingleClause,
+                1,
+                &h
+            );
         }
         case RBS_AST_DIRECTIVES_USE_WILDCARDCLAUSE: {
             if (strcmp(class_name, "RBS::AST::Directives::Use::WildcardClause") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Directives::Use::WildcardClause, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_directives_use_wildcardclause_t *node = (rbs_ast_directives_use_wildcardclause_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("namespace")), rbs_struct_to_ruby_value((rbs_node_t *) node->namespace)); // rbs_namespace
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Directives_Use_WildcardClause,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_ALIAS: {
             if (strcmp(class_name, "RBS::AST::Members::Alias") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Alias, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_alias_t *node = (rbs_ast_members_alias_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->new_name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->old_name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value((rbs_node_t *) node->kind)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Alias,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_ATTRACCESSOR: {
             if (strcmp(class_name, "RBS::AST::Members::AttrAccessor") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::AttrAccessor, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_attraccessor_t *node = (rbs_ast_members_attraccessor_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->ivar_name)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value((rbs_node_t *) node->kind)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+            rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value((rbs_node_t *) node->visibility)); // rbs_ast_symbol
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_AttrAccessor,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_ATTRREADER: {
             if (strcmp(class_name, "RBS::AST::Members::AttrReader") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::AttrReader, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_attrreader_t *node = (rbs_ast_members_attrreader_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->ivar_name)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value((rbs_node_t *) node->kind)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+            rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value((rbs_node_t *) node->visibility)); // rbs_ast_symbol
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_AttrReader,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_ATTRWRITER: {
             if (strcmp(class_name, "RBS::AST::Members::AttrWriter") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::AttrWriter, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_attrwriter_t *node = (rbs_ast_members_attrwriter_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value((rbs_node_t *) node->ivar_name)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value((rbs_node_t *) node->kind)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+            rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value((rbs_node_t *) node->visibility)); // rbs_ast_symbol
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_AttrWriter,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_CLASSINSTANCEVARIABLE: {
             if (strcmp(class_name, "RBS::AST::Members::ClassInstanceVariable") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::ClassInstanceVariable, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_classinstancevariable_t *node = (rbs_ast_members_classinstancevariable_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_ClassInstanceVariable,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_CLASSVARIABLE: {
             if (strcmp(class_name, "RBS::AST::Members::ClassVariable") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::ClassVariable, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_classvariable_t *node = (rbs_ast_members_classvariable_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_ClassVariable,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_EXTEND: {
             if (strcmp(class_name, "RBS::AST::Members::Extend") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Extend, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_extend_t *node = (rbs_ast_members_extend_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Extend,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_INCLUDE: {
             if (strcmp(class_name, "RBS::AST::Members::Include") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Include, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_include_t *node = (rbs_ast_members_include_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Include,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_INSTANCEVARIABLE: {
             if (strcmp(class_name, "RBS::AST::Members::InstanceVariable") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::InstanceVariable, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_instancevariable_t *node = (rbs_ast_members_instancevariable_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_InstanceVariable,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_METHODDEFINITION: {
             if (strcmp(class_name, "RBS::AST::Members::MethodDefinition") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::MethodDefinition, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_methoddefinition_t *node = (rbs_ast_members_methoddefinition_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value((rbs_node_t *) node->kind)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(node->overloads));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+            rb_hash_aset(h, ID2SYM(rb_intern("overloading")), node->overloading ? Qtrue : Qfalse);
+            rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value((rbs_node_t *) node->visibility)); // rbs_ast_symbol
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_MethodDefinition,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_METHODDEFINITION_OVERLOAD: {
             if (strcmp(class_name, "RBS::AST::Members::MethodDefinition::Overload") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::MethodDefinition::Overload, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_methoddefinition_overload_t *node = (rbs_ast_members_methoddefinition_overload_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("method_type")), rbs_struct_to_ruby_value((rbs_node_t *) node->method_type)); // rbs_node
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_MethodDefinition_Overload,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_PREPEND: {
             if (strcmp(class_name, "RBS::AST::Members::Prepend") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Prepend, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_prepend_t *node = (rbs_ast_members_prepend_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment")), node->comment);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Prepend,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_PRIVATE: {
             if (strcmp(class_name, "RBS::AST::Members::Private") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Private, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_private_t *node = (rbs_ast_members_private_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Private,
+                1,
+                &h
+            );
         }
         case RBS_AST_MEMBERS_PUBLIC: {
             if (strcmp(class_name, "RBS::AST::Members::Public") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::Members::Public, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_members_public_t *node = (rbs_ast_members_public_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Members_Public,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_SYMBOL: {
+            if (strcmp(class_name, "RBS::AST::Symbol") != 0) {
+                fprintf(stderr, "Expected class name: RBS::AST::Symbol, got %s\n", class_name);
+                exit(1);
+            }
+            return instance->cached_ruby_value;
         }
         case RBS_AST_TYPEPARAM: {
             if (strcmp(class_name, "RBS::AST::TypeParam") != 0) {
                 fprintf(stderr, "Expected class name: RBS::AST::TypeParam, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_ast_typeparam_t *node = (rbs_ast_typeparam_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("variance")), rbs_struct_to_ruby_value((rbs_node_t *) node->variance)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("upper_bound")), rbs_struct_to_ruby_value((rbs_node_t *) node->upper_bound)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("default_type")), rbs_struct_to_ruby_value((rbs_node_t *) node->default_type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("unchecked")), node->unchecked ? Qtrue : Qfalse);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_TypeParam,
+                1,
+                &h
+            );
         }
         case RBS_METHODTYPE: {
             if (strcmp(class_name, "RBS::MethodType") != 0) {
                 fprintf(stderr, "Expected class name: RBS::MethodType, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_methodtype_t *node = (rbs_methodtype_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(node->type_params));
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("block")), rbs_struct_to_ruby_value((rbs_node_t *) node->block)); // rbs_types_block
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_MethodType,
+                1,
+                &h
+            );
         }
         case RBS_NAMESPACE: {
             if (strcmp(class_name, "RBS::Namespace") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Namespace, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_namespace_t *node = (rbs_namespace_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("path")), rbs_node_list_to_ruby_array(node->path));
+            rb_hash_aset(h, ID2SYM(rb_intern("absolute")), node->absolute ? Qtrue : Qfalse);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Namespace,
+                1,
+                &h
+            );
         }
         case RBS_TYPENAME: {
             if (strcmp(class_name, "RBS::TypeName") != 0) {
                 fprintf(stderr, "Expected class name: RBS::TypeName, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_typename_t *node = (rbs_typename_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("namespace")), rbs_struct_to_ruby_value((rbs_node_t *) node->namespace)); // rbs_namespace
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+
+            return CLASS_NEW_INSTANCE(
+                RBS_TypeName,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_ALIAS: {
             if (strcmp(class_name, "RBS::Types::Alias") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Alias, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_alias_t *node = (rbs_types_alias_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Alias,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_ANY: {
             if (strcmp(class_name, "RBS::Types::Bases::Any") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Any, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_any_t *node = (rbs_types_bases_any_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("todo")), node->todo);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Any,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_BOOL: {
             if (strcmp(class_name, "RBS::Types::Bases::Bool") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Bool, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_bool_t *node = (rbs_types_bases_bool_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Bool,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_BOTTOM: {
             if (strcmp(class_name, "RBS::Types::Bases::Bottom") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Bottom, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_bottom_t *node = (rbs_types_bases_bottom_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Bottom,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_CLASS: {
             if (strcmp(class_name, "RBS::Types::Bases::Class") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Class, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_class_t *node = (rbs_types_bases_class_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Class,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_INSTANCE: {
             if (strcmp(class_name, "RBS::Types::Bases::Instance") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Instance, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_instance_t *node = (rbs_types_bases_instance_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Instance,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_NIL: {
             if (strcmp(class_name, "RBS::Types::Bases::Nil") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Nil, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_nil_t *node = (rbs_types_bases_nil_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Nil,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_SELF: {
             if (strcmp(class_name, "RBS::Types::Bases::Self") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Self, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_self_t *node = (rbs_types_bases_self_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Self,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_TOP: {
             if (strcmp(class_name, "RBS::Types::Bases::Top") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Top, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_top_t *node = (rbs_types_bases_top_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Top,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BASES_VOID: {
             if (strcmp(class_name, "RBS::Types::Bases::Void") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Bases::Void, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_bases_void_t *node = (rbs_types_bases_void_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Bases_Void,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_BLOCK: {
             if (strcmp(class_name, "RBS::Types::Block") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Block, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_block_t *node = (rbs_types_block_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("required")), node->required ? Qtrue : Qfalse);
+            rb_hash_aset(h, ID2SYM(rb_intern("self_type")), rbs_struct_to_ruby_value((rbs_node_t *) node->self_type)); // rbs_node
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Block,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_CLASSINSTANCE: {
             if (strcmp(class_name, "RBS::Types::ClassInstance") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::ClassInstance, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_classinstance_t *node = (rbs_types_classinstance_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_ClassInstance,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_CLASSSINGLETON: {
             if (strcmp(class_name, "RBS::Types::ClassSingleton") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::ClassSingleton, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_classsingleton_t *node = (rbs_types_classsingleton_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_ClassSingleton,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_FUNCTION: {
             if (strcmp(class_name, "RBS::Types::Function") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Function, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_function_t *node = (rbs_types_function_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("required_positionals")), node->required_positionals);
+            rb_hash_aset(h, ID2SYM(rb_intern("optional_positionals")), node->optional_positionals);
+            rb_hash_aset(h, ID2SYM(rb_intern("rest_positionals")), node->rest_positionals);
+            rb_hash_aset(h, ID2SYM(rb_intern("trailing_positionals")), node->trailing_positionals);
+            rb_hash_aset(h, ID2SYM(rb_intern("required_keywords")), node->required_keywords);
+            rb_hash_aset(h, ID2SYM(rb_intern("optional_keywords")), node->optional_keywords);
+            rb_hash_aset(h, ID2SYM(rb_intern("rest_keywords")), node->rest_keywords);
+            rb_hash_aset(h, ID2SYM(rb_intern("return_type")), node->return_type);
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Function,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_FUNCTION_PARAM: {
             if (strcmp(class_name, "RBS::Types::Function::Param") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Function::Param, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_function_param_t *node = (rbs_types_function_param_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Function_Param,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_INTERFACE: {
             if (strcmp(class_name, "RBS::Types::Interface") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Interface, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_interface_t *node = (rbs_types_interface_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_typename
+            rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(node->args));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Interface,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_INTERSECTION: {
             if (strcmp(class_name, "RBS::Types::Intersection") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Intersection, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_intersection_t *node = (rbs_types_intersection_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("types")), rbs_node_list_to_ruby_array(node->types));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Intersection,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_LITERAL: {
             if (strcmp(class_name, "RBS::Types::Literal") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Literal, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_literal_t *node = (rbs_types_literal_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("literal")), node->literal);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Literal,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_OPTIONAL: {
             if (strcmp(class_name, "RBS::Types::Optional") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Optional, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_optional_t *node = (rbs_types_optional_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Optional,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_PROC: {
             if (strcmp(class_name, "RBS::Types::Proc") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Proc, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_proc_t *node = (rbs_types_proc_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value((rbs_node_t *) node->type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("block")), rbs_struct_to_ruby_value((rbs_node_t *) node->block)); // rbs_types_block
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+            rb_hash_aset(h, ID2SYM(rb_intern("self_type")), rbs_struct_to_ruby_value((rbs_node_t *) node->self_type)); // rbs_node
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Proc,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_RECORD: {
             if (strcmp(class_name, "RBS::Types::Record") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Record, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_record_t *node = (rbs_types_record_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("all_fields")), node->all_fields);
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Record,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_TUPLE: {
             if (strcmp(class_name, "RBS::Types::Tuple") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Tuple, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_tuple_t *node = (rbs_types_tuple_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("types")), rbs_node_list_to_ruby_array(node->types));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Tuple,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_UNION: {
             if (strcmp(class_name, "RBS::Types::Union") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Union, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_union_t *node = (rbs_types_union_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("types")), rbs_node_list_to_ruby_array(node->types));
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Union,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_UNTYPEDFUNCTION: {
             if (strcmp(class_name, "RBS::Types::UntypedFunction") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::UntypedFunction, got %s\n", class_name);
                 exit(1);
             }
-            break;
+ 
+            rbs_types_untypedfunction_t *node = (rbs_types_untypedfunction_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("return_type")), rbs_struct_to_ruby_value((rbs_node_t *) node->return_type)); // rbs_node
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_UntypedFunction,
+                1,
+                &h
+            );
         }
         case RBS_TYPES_VARIABLE: {
             if (strcmp(class_name, "RBS::Types::Variable") != 0) {
                 fprintf(stderr, "Expected class name: RBS::Types::Variable, got %s\n", class_name);
                 exit(1);
             }
-            break;
-        }
-        case RBS_TYPES_ZZZTMPNOTIMPLEMENTED: {
-            if (strcmp(class_name, "RBS::Types::ZzzTmpNotImplemented") != 0) {
-                fprintf(stderr, "Expected class name: RBS::Types::ZzzTmpNotImplemented, got %s\n", class_name);
-                exit(1);
-            }
-            break;
+ 
+            rbs_types_variable_t *node = (rbs_types_variable_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value((rbs_node_t *) node->name)); // rbs_ast_symbol
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
+
+            return CLASS_NEW_INSTANCE(
+                RBS_Types_Variable,
+                1,
+                &h
+            );
         }
     }
-
-    return instance->cached_ruby_value;
 }

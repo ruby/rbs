@@ -3,257 +3,418 @@ nodes:
     fields:
       - name: string
       - name: location
+        c_type: rbs_location
+  - name: RBS::AST::Bool
+    expose_to_ruby: false
+    fields:
+      - name: value
+        c_type: bool
   - name: RBS::AST::Comment
+    builds_ruby_object_internally: false
     fields:
       - name: string
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Declarations::Class
     fields:
       - name: name
+        c_type: rbs_typename
       - name: type_params
+        c_type: rbs_node_list
       - name: super_class
+        c_type: rbs_ast_declarations_class_super
       - name: members
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Class::Super
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Declarations::ClassAlias
     fields:
       - name: new_name
+        c_type: rbs_typename
       - name: old_name
+        c_type: rbs_typename
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Constant
     fields:
       - name: name
+        c_type: rbs_typename
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Global
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Interface
     fields:
       - name: name
+        c_type: rbs_typename
       - name: type_params
+        c_type: rbs_node_list
       - name: members
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Module
     fields:
       - name: name
+        c_type: rbs_typename
       - name: type_params
+        c_type: rbs_node_list
       - name: self_types
+        c_type: rbs_node_list
       - name: members
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Declarations::Module::Self
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Declarations::ModuleAlias
     fields:
       - name: new_name
+        c_type: rbs_typename
       - name: old_name
+        c_type: rbs_typename
       - name: location
+        c_type: rbs_location
       - name: comment
+  - name: RBS::AST::Declarations::Nodes
+    builds_ruby_object_internally: false
+    expose_to_ruby: false
+    fields:
+      - name: declarations
+        c_type: rbs_node_list
   - name: RBS::AST::Declarations::TypeAlias
     fields:
       - name: name
+        c_type: rbs_typename
       - name: type_params
+        c_type: rbs_node_list
       - name: type
+        c_type: rbs_node
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
+  - name: RBS::AST::Directives::Nodes
+    builds_ruby_object_internally: false
+    expose_to_ruby: false
+    fields:
+      - name: directives
+        c_type: rbs_node_list
   - name: RBS::AST::Directives::Use
     fields:
       - name: clauses
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Directives::Use::SingleClause
     fields:
       - name: type_name
+        c_type: rbs_typename
       - name: new_name
+        c_type: rbs_ast_symbol
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Directives::Use::WildcardClause
     fields:
       - name: namespace
+        c_type: rbs_namespace
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Members::Alias
     fields:
       - name: new_name
+        c_type: rbs_ast_symbol
       - name: old_name
+        c_type: rbs_ast_symbol
       - name: kind
+        c_type: rbs_ast_symbol
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::AttrAccessor
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: ivar_name
+        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
+        c_type: rbs_ast_symbol
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
       - name: visibility
+        c_type: rbs_ast_symbol
   - name: RBS::AST::Members::AttrReader
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: ivar_name
+        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
+        c_type: rbs_ast_symbol
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
       - name: visibility
+        c_type: rbs_ast_symbol
   - name: RBS::AST::Members::AttrWriter
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: ivar_name
+        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
+        c_type: rbs_ast_symbol
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
       - name: visibility
+        c_type: rbs_ast_symbol
   - name: RBS::AST::Members::ClassInstanceVariable
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::ClassVariable
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::Extend
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::Include
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::InstanceVariable
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::MethodDefinition
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: kind
+        c_type: rbs_ast_symbol
       - name: overloads
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
       - name: overloading
+        c_type: bool
       - name: visibility
+        c_type: rbs_ast_symbol
   - name: RBS::AST::Members::MethodDefinition::Overload
     fields:
       - name: annotations
+        c_type: rbs_node_list
       - name: method_type
+        c_type: rbs_node
   - name: RBS::AST::Members::Prepend
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: annotations
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
       - name: comment
   - name: RBS::AST::Members::Private
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::AST::Members::Public
     fields:
       - name: location
+        c_type: rbs_location
+  - name: RBS::AST::Symbol
+    builds_ruby_object_internally: false
   - name: RBS::AST::TypeParam
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: variance
+        c_type: rbs_ast_symbol
       - name: upper_bound
+        c_type: rbs_node
       - name: default_type
+        c_type: rbs_node
       - name: unchecked
+        c_type: bool
       - name: location
+        c_type: rbs_location
   - name: RBS::MethodType
     fields:
       - name: type_params
+        c_type: rbs_node_list
       - name: type
+        c_type: rbs_node
       - name: block
+        c_type: rbs_types_block
       - name: location
+        c_type: rbs_location
   - name: RBS::Namespace
     fields:
       - name: path
+        c_type: rbs_node_list
       - name: absolute
+        c_type: bool
   - name: RBS::TypeName
     fields:
       - name: namespace
+        c_type: rbs_namespace
       - name: name
+        c_type: rbs_ast_symbol
   - name: RBS::Types::Alias
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Any
     fields:
       - name: todo
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Bool
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Bottom
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Class
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Instance
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Nil
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Self
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Top
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Bases::Void
     fields:
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Block
     fields:
       - name: type
+        c_type: rbs_node
       - name: required
+        c_type: bool
       - name: self_type
+        c_type: rbs_node
   - name: RBS::Types::ClassInstance
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::ClassSingleton
     fields:
       - name: name
+        c_type: rbs_typename
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Function
     fields:
       - name: required_positionals
@@ -267,50 +428,70 @@ nodes:
   - name: RBS::Types::Function::Param
     fields:
       - name: type
+        c_type: rbs_node
       - name: name
+        c_type: rbs_ast_symbol
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Interface
     fields:
       - name: name
+        c_type: rbs_typename
       - name: args
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Intersection
     fields:
       - name: types
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Literal
     fields:
       - name: literal
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Optional
     fields:
       - name: type
+        c_type: rbs_node
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Proc
     fields:
       - name: type
+        c_type: rbs_node
       - name: block
+        c_type: rbs_types_block
       - name: location
+        c_type: rbs_location
       - name: self_type
+        c_type: rbs_node
   - name: RBS::Types::Record
     fields:
       - name: all_fields
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Tuple
     fields:
       - name: types
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::Union
     fields:
       - name: types
+        c_type: rbs_node_list
       - name: location
+        c_type: rbs_location
   - name: RBS::Types::UntypedFunction
     fields:
       - name: return_type
+        c_type: rbs_node
   - name: RBS::Types::Variable
     fields:
       - name: name
+        c_type: rbs_ast_symbol
       - name: location
-  - name: RBS::Types::ZzzTmpNotImplemented
-    expose_to_ruby: false
-    fields: []
+        c_type: rbs_location
