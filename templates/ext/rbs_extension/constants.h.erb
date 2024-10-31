@@ -1,0 +1,92 @@
+#ifndef RBS__CONSTANTS_H
+#define RBS__CONSTANTS_H
+
+extern VALUE RBS;
+
+extern VALUE RBS_AST;
+extern VALUE RBS_AST_Declarations;
+extern VALUE RBS_AST_Directives;
+extern VALUE RBS_AST_Members;
+extern VALUE RBS_Types;
+extern VALUE RBS_Types_Bases;
+extern VALUE RBS_ParsingError;
+
+<%-
+# This list contains the symbols in the order that they used to be defined in the C code.
+# We'll temporarily rearrange our auto-generated code to match this order, to minimize the diff.
+# It's temporary and will be removed in a follow-up PR.
+ordered_constant_names = [
+  "RBS",
+  "RBS_AST",
+  "RBS_AST_Annotation",
+  "RBS_AST_Comment",
+  "RBS_AST_TypeParam",
+  "RBS_AST_Declarations",
+  "RBS_AST_Declarations_TypeAlias",
+  "RBS_AST_Declarations_Class_Super",
+  "RBS_AST_Declarations_Class",
+  "RBS_AST_Declarations_Constant",
+  "RBS_AST_Declarations_Global",
+  "RBS_AST_Declarations_Interface",
+  "RBS_AST_Declarations_Module_Self",
+  "RBS_AST_Declarations_Module",
+  "RBS_AST_Declarations_ModuleAlias",
+  "RBS_AST_Declarations_ClassAlias",
+  "RBS_AST_Directives",
+  "RBS_AST_Directives_Use",
+  "RBS_AST_Directives_Use_SingleClause",
+  "RBS_AST_Directives_Use_WildcardClause",
+  "RBS_AST_Members",
+  "RBS_AST_Members_Alias",
+  "RBS_AST_Members_AttrAccessor",
+  "RBS_AST_Members_AttrReader",
+  "RBS_AST_Members_AttrWriter",
+  "RBS_AST_Members_ClassInstanceVariable",
+  "RBS_AST_Members_ClassVariable",
+  "RBS_AST_Members_Extend",
+  "RBS_AST_Members_Include",
+  "RBS_AST_Members_InstanceVariable",
+  "RBS_AST_Members_MethodDefinition",
+  "RBS_AST_Members_MethodDefinition_Overload",
+  "RBS_AST_Members_Prepend",
+  "RBS_AST_Members_Private",
+  "RBS_AST_Members_Public",
+  "RBS_MethodType",
+  "RBS_Namespace",
+  "RBS_ParsingError",
+  "RBS_TypeName",
+  "RBS_Types",
+  "RBS_Types_Alias",
+  "RBS_Types_Bases",
+  "RBS_Types_Bases_Any",
+  "RBS_Types_Bases_Bool",
+  "RBS_Types_Bases_Bottom",
+  "RBS_Types_Bases_Class",
+  "RBS_Types_Bases_Instance",
+  "RBS_Types_Bases_Nil",
+  "RBS_Types_Bases_Self",
+  "RBS_Types_Bases_Top",
+  "RBS_Types_Bases_Void",
+  "RBS_Types_Block",
+  "RBS_Types_ClassInstance",
+  "RBS_Types_ClassSingleton",
+  "RBS_Types_Function_Param",
+  "RBS_Types_Function",
+  "RBS_Types_UntypedFunction",
+  "RBS_Types_Interface",
+  "RBS_Types_Intersection",
+  "RBS_Types_Literal",
+  "RBS_Types_Optional",
+  "RBS_Types_Proc",
+  "RBS_Types_Record",
+  "RBS_Types_Tuple",
+  "RBS_Types_Union",
+  "RBS_Types_Variable",
+] -%>
+<%- nodes.sort_by { |node| ordered_constant_names.index(node.c_constant_name) || 999 }.each do |node| -%>
+extern VALUE <%= node.c_constant_name %>;
+<%- end -%>
+
+void rbs__init_constants();
+
+#endif
