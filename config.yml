@@ -209,7 +209,6 @@ nodes:
   - name: RBS::Types::Alias
     fields:
       - name: name
-        c_name: typename # Temporary name to match existing C code. Will be removed in next PR.
       - name: args
       - name: location
   - name: RBS::Types::Bases::Any
@@ -247,25 +246,18 @@ nodes:
   - name: RBS::Types::ClassInstance
     fields:
       - name: name
-        c_name: typename  # Temporary name to match existing C code. Will be removed in next PR.
       - name: args
-        c_name: type_args # Temporary name to match existing C code. Will be removed in next PR.
       - name: location
   - name: RBS::Types::ClassSingleton
     fields:
       - name: name
-        c_name: typename  # Temporary name to match existing C code. Will be removed in next PR.
       - name: location
   - name: RBS::Types::Function
     fields:
       - name: required_positionals
-        c_name: required_positional_params # Temporary name to match existing C code. Will be removed in next PR.
       - name: optional_positionals
-        c_name: optional_positional_params # Temporary name to match existing C code. Will be removed in next PR.
       - name: rest_positionals
-        c_name: rest_positional_params     # Temporary name to match existing C code. Will be removed in next PR.
       - name: trailing_positionals
-        c_name: trailing_positional_params # Temporary name to match existing C code. Will be removed in next PR.
       - name: required_keywords
       - name: optional_keywords
       - name: rest_keywords
@@ -278,9 +270,7 @@ nodes:
   - name: RBS::Types::Interface
     fields:
       - name: name
-        c_name: typename  # Temporary name to match existing C code. Will be removed in next PR.
       - name: args
-        c_name: type_args # Temporary name to match existing C code. Will be removed in next PR.
       - name: location
   - name: RBS::Types::Intersection
     fields:
@@ -297,14 +287,12 @@ nodes:
   - name: RBS::Types::Proc
     fields:
       - name: type
-        c_name: function # Temporary name to match existing C code. Will be removed in next PR.
       - name: block
       - name: location
       - name: self_type
   - name: RBS::Types::Record
     fields:
       - name: all_fields
-        c_name: fields   # Temporary name to match existing C code. Will be removed in next PR.
       - name: location
   - name: RBS::Types::Tuple
     fields:

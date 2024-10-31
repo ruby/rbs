@@ -488,9 +488,9 @@ VALUE rbs_type_name(VALUE namespace, VALUE name) {
   );
 }
 
-VALUE rbs_alias(VALUE typename, VALUE args, VALUE location) {
+VALUE rbs_alias(VALUE name, VALUE args, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), typename);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("args")), args);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
@@ -613,10 +613,10 @@ VALUE rbs_block(VALUE type, VALUE required, VALUE self_type) {
   );
 }
 
-VALUE rbs_class_instance(VALUE typename, VALUE type_args, VALUE location) {
+VALUE rbs_class_instance(VALUE name, VALUE args, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), typename);
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("args")), type_args);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("args")), args);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
@@ -626,9 +626,9 @@ VALUE rbs_class_instance(VALUE typename, VALUE type_args, VALUE location) {
   );
 }
 
-VALUE rbs_class_singleton(VALUE typename, VALUE location) {
+VALUE rbs_class_singleton(VALUE name, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), typename);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
@@ -638,12 +638,12 @@ VALUE rbs_class_singleton(VALUE typename, VALUE location) {
   );
 }
 
-VALUE rbs_function(VALUE required_positional_params, VALUE optional_positional_params, VALUE rest_positional_params, VALUE trailing_positional_params, VALUE required_keywords, VALUE optional_keywords, VALUE rest_keywords, VALUE return_type) {
+VALUE rbs_function(VALUE required_positionals, VALUE optional_positionals, VALUE rest_positionals, VALUE trailing_positionals, VALUE required_keywords, VALUE optional_keywords, VALUE rest_keywords, VALUE return_type) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("required_positionals")), required_positional_params);
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("optional_positionals")), optional_positional_params);
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("rest_positionals")), rest_positional_params);
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("trailing_positionals")), trailing_positional_params);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("required_positionals")), required_positionals);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("optional_positionals")), optional_positionals);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("rest_positionals")), rest_positionals);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("trailing_positionals")), trailing_positionals);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("required_keywords")), required_keywords);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("optional_keywords")), optional_keywords);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("rest_keywords")), rest_keywords);
@@ -669,10 +669,10 @@ VALUE rbs_function_param(VALUE type, VALUE name, VALUE location) {
   );
 }
 
-VALUE rbs_interface(VALUE typename, VALUE type_args, VALUE location) {
+VALUE rbs_interface(VALUE name, VALUE args, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), typename);
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("args")), type_args);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("args")), args);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
@@ -718,9 +718,9 @@ VALUE rbs_optional(VALUE type, VALUE location) {
   );
 }
 
-VALUE rbs_proc(VALUE function, VALUE block, VALUE location, VALUE self_type) {
+VALUE rbs_proc(VALUE type, VALUE block, VALUE location, VALUE self_type) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), function);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("block")), block);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("self_type")), self_type);
@@ -732,9 +732,9 @@ VALUE rbs_proc(VALUE function, VALUE block, VALUE location, VALUE self_type) {
   );
 }
 
-VALUE rbs_record(VALUE fields, VALUE location) {
+VALUE rbs_record(VALUE all_fields, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
-  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("all_fields")), fields);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("all_fields")), all_fields);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(

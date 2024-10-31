@@ -11,12 +11,10 @@ module RBS
   class Template
     class Field
       attr_reader :name
-      attr_reader :c_name
       attr_reader :c_type
 
       def initialize(yaml)
         @name = yaml["name"]
-        @c_name = yaml["c_name"] || @name
         @c_type = "VALUE"
       end
     end
