@@ -523,4 +523,11 @@ class KernelInstanceTest < Test::Unit::TestCase
     assert_send_type  '(KernelInstanceTest::JustKernel) -> KernelInstanceTest::JustKernel',
                       JustKernel.allocate, :initialize_dup, OBJ
   end
+
+  def test_system
+    with_bool do |exception|
+      assert_send_type '(String, exception: bool) -> bool',
+                       Kernel, :system, ":", exception: exception
+    end
+  end
 end
