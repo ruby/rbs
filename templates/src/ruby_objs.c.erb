@@ -10,56 +10,17 @@
           rb_class_new_instance(argc, argv, receiver)
 #endif
 
-<%-
-
-uses_args_hash = [
-  "rbs_base_type",
-  "rbs_namespace",
-  "rbs_type_name",
-  "rbs_class_instance",
-  "rbs_class_singleton",
-  "rbs_interface",
-  "rbs_union",
-  "rbs_intersection",
-  "rbs_optional",
-  "rbs_untyped_function",
-  "rbs_ast_type_param",
-  "rbs_ast_decl_constant",
-  "rbs_ast_decl_global",
-  "rbs_ast_decl_type_alias",
-  "rbs_ast_decl_interface",
-  # "rbs_ast_decl_module_self",
-  "rbs_ast_decl_module",
-  "rbs_ast_decl_class_alias",
-  "rbs_ast_decl_module_alias",
-  "rbs_ast_members_method_definition_overload",
-  "rbs_ast_members_method_definition",
-  "rbs_ast_members_alias",
-  "rbs_tuple",
-  "rbs_block",
-  "rbs_function_param",
-  "rbs_proc",
-  "rbs_literal",
-  "rbs_record",
-  "rbs_variable",
-  "rbs_method_type",
-  "rbs_ast_comment",
-  "rbs_ast_annotation"
-]-%>
-
 <%- nodes.each do |node| -%>
 VALUE <%= node.c_function_name %>(<%= node.fields.map { |field| "#{field.c_type} #{field.c_name}" }.join(", ") %>) {
-  <%- hash_var = uses_args_hash.include?(node.c_function_name) ? "args" : "kwargs" -%>
-  <%- hash_var = "kw_args" if node.c_function_name == "rbs_ast_decl_module_self" -%>
-  VALUE <%= hash_var %> = rb_hash_new();
+  VALUE _init_kwargs = rb_hash_new();
   <%- node.fields.each do |field| -%>
-  rb_hash_aset(<%= hash_var %>, ID2SYM(rb_intern("<%= field.name %>")), <%= field.c_name %>);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("<%= field.name %>")), <%= field.c_name %>);
   <%- end -%>
 
   return CLASS_NEW_INSTANCE(
     <%= node.c_constant_name %>,
     1,
-    &<%= hash_var %>
+    &_init_kwargs
   );
 }
 
