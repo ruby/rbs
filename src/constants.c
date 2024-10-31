@@ -18,7 +18,6 @@ VALUE RBS_Parser;
 VALUE RBS_Types;
 VALUE RBS_Types_Bases;
 
-
 VALUE RBS_AST_Annotation;
 VALUE RBS_AST_Comment;
 VALUE RBS_AST_Declarations_Class;
@@ -35,6 +34,7 @@ VALUE RBS_AST_Directives_Use;
 VALUE RBS_AST_Directives_Use_SingleClause;
 VALUE RBS_AST_Directives_Use_WildcardClause;
 VALUE RBS_AST_Members_Alias;
+VALUE RBS_AST_Members_AttrAccessor;
 VALUE RBS_AST_Members_AttrReader;
 VALUE RBS_AST_Members_AttrWriter;
 VALUE RBS_AST_Members_ClassInstanceVariable;
@@ -76,7 +76,6 @@ VALUE RBS_Types_Tuple;
 VALUE RBS_Types_Union;
 VALUE RBS_Types_UntypedFunction;
 VALUE RBS_Types_Variable;
-VALUE RBS_AST_Members_AttrAccessor;
 
 VALUE RBS_ParsingError;
 
@@ -92,7 +91,6 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Members, RBS_AST, "Members");
   IMPORT_CONSTANT(RBS_Types, RBS, "Types");
   IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
-
 
   IMPORT_CONSTANT(RBS_AST_Annotation, RBS_AST, "Annotation");
   IMPORT_CONSTANT(RBS_AST_Comment, RBS_AST, "Comment");
@@ -110,6 +108,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Directives_Use_SingleClause, RBS_AST_Directives_Use, "SingleClause");
   IMPORT_CONSTANT(RBS_AST_Directives_Use_WildcardClause, RBS_AST_Directives_Use, "WildcardClause");
   IMPORT_CONSTANT(RBS_AST_Members_Alias, RBS_AST_Members, "Alias");
+  IMPORT_CONSTANT(RBS_AST_Members_AttrAccessor, RBS_AST_Members, "AttrAccessor");
   IMPORT_CONSTANT(RBS_AST_Members_AttrReader, RBS_AST_Members, "AttrReader");
   IMPORT_CONSTANT(RBS_AST_Members_AttrWriter, RBS_AST_Members, "AttrWriter");
   IMPORT_CONSTANT(RBS_AST_Members_ClassInstanceVariable, RBS_AST_Members, "ClassInstanceVariable");
@@ -151,5 +150,4 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_Types_Union, RBS_Types, "Union");
   IMPORT_CONSTANT(RBS_Types_UntypedFunction, RBS_Types, "UntypedFunction");
   IMPORT_CONSTANT(RBS_Types_Variable, RBS_Types, "Variable");
-  IMPORT_CONSTANT(RBS_AST_Members_AttrAccessor, RBS_AST_Members, "AttrAccessor");
 }
