@@ -525,6 +525,11 @@ class OpenSSLHMACSingletonTest < Test::Unit::TestCase
     assert_send_type "(String, String, String) -> String",
       OpenSSL::HMAC, :hexdigest, "SHA256", "key", "data"
   end
+
+  def test_base64digest
+    assert_send_type "(String, String, String) -> String",
+      OpenSSL::HMAC, :base64digest, "SHA256", "key", "data"
+  end
 end
 
 class OpenSSLHMACTest < Test::Unit::TestCase
@@ -540,6 +545,11 @@ class OpenSSLHMACTest < Test::Unit::TestCase
   def test_hexdigest
     assert_send_type "() -> String",
       hmac, :hexdigest
+  end
+
+  def test_base64digest
+    assert_send_type "() -> String",
+      hmac, :base64digest
   end
 
   def test_reset
