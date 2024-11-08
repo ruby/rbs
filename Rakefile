@@ -64,16 +64,11 @@ task :templates do
 
   sh "#{ruby} templates/template.rb include/rbs/constants.h"
   sh "#{ruby} templates/template.rb src/constants.c"
-
-  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
-  sh "#{ruby} templates/template.rb src/ruby_objs.c"
 end
 
 task :compile => "ext/rbs_extension/lexer.c"
 task :compile => "include/rbs/constants.h"
-task :compile => "include/rbs/ruby_objs.h"
 task :compile => "src/constants.c"
-task :compile => "src/ruby_objs.c"
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do

@@ -18,7 +18,7 @@ VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes) {
     byte_length -= 2 * bs;
   }
 
-  char *buffer = RSTRING_PTR(state->lexstate->string) + rg.start.byte_pos + offset_bytes;
+  char *buffer = RSTRING_PTR(string) + rg.start.byte_pos + offset_bytes;
   VALUE str = rb_enc_str_new(buffer, byte_length, enc);
 
   return rb_funcall(
@@ -29,4 +29,3 @@ VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes) {
     first_char == '\"' ? Qtrue : Qfalse
   );
 }
-

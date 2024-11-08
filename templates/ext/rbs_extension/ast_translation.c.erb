@@ -1,16 +1,31 @@
 #include "ast_translation.h"
 
+#include "ruby.h"
+#include "ruby/encoding.h"
+
 #include "rbs/constants.h"
+#include "rbs_string_bridging.h"
 
-#include <stdlib.h>
+VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
+    VALUE ruby_array = rb_ary_new();
 
+    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_struct_to_ruby_value(ctx, n->node));
+    }
 
-VALUE rbs_node_list_to_ruby_array(rbs_node_list_t *list) {
-    return list->cached_ruby_value;
+    return ruby_array;
 }
 
-VALUE rbs_hash_to_ruby_hash(rbs_hash_t *hash) {
-    return hash->cached_ruby_value;
+VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash) {
+    VALUE ruby_hash = rb_hash_new();
+
+    for (rbs_hash_node_t *n = rbs_hash->head; n != NULL; n = n->next) {
+        VALUE key = rbs_struct_to_ruby_value(ctx, n->key);
+        VALUE value = rbs_struct_to_ruby_value(ctx, n->value);
+        rb_hash_aset(ruby_hash, key, value);
+    }
+
+    return ruby_hash;
 }
 
 VALUE rbs_loc_to_ruby_location(rbs_location_t *loc) {
@@ -27,43 +42,46 @@ VALUE rbs_loc_to_ruby_location(rbs_location_t *loc) {
           rb_class_new_instance(argc, argv, receiver)
 #endif
 
-const char* get_class_name(VALUE o) {
-    VALUE klass = rb_class_of(o);      // Get the class of the object
-    VALUE klass_name = rb_class_name(klass);  // Get the name of the class
-    const char* name = StringValueCStr(klass_name);  // Convert to C string
-    return name;
-}
-
-VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
+VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instance) {
     if (instance == NULL) return Qnil;
-
-    VALUE ruby_value = instance->cached_ruby_value;
-
-    if (ruby_value == Qnil || ruby_value == Qundef) {
-        fprintf(stderr, "cached_ruby_value is NULL\n");
-        exit(1);
-    }
-
-    const char *class_name = get_class_name(ruby_value);
 
     switch (instance->type) {
         <%- nodes.each do |node| -%>
         case <%= node.c_type_enum_name %>: {
-            <%-
-            rbs_struct_to_ruby_value_shitlist = [
-                "RBS::AST::Bool",
-                "RBS::AST::Symbol",
-                "RBS::AST::Declarations::Nodes",
-                "RBS::AST::Directives::Nodes",
-            ]
+            <%- case node.ruby_full_name -%>
+            <%- when "RBS::AST::Bool" -%>
+            return ((rbs_ast_bool_t *) instance)->value ? Qtrue : Qfalse;
 
-            if rbs_struct_to_ruby_value_shitlist.include?(node.ruby_full_name) -%>
-            return instance->cached_ruby_value;
+            <%- when "RBS::AST::Integer" -%>
+            rbs_ast_integer_t *integer_node = (rbs_ast_integer_t *) instance;
+            rbs_string_t string_repr = integer_node->string_representation;
+
+            VALUE str = rb_enc_str_new(string_repr.start, rbs_string_len(string_repr), rb_utf8_encoding());
+
+            return rb_funcall(str, rb_intern("to_i"), 0);
+
+            <%- when "RBS::AST::String" -%>
+            rbs_ast_string_t *string_node = (rbs_ast_string_t *) instance;
+            rbs_string_t s = string_node->string;
+
+            return rb_enc_str_new(s.start, rbs_string_len(s), rb_utf8_encoding());
+
+            <%- when "RBS::Types::Record::FieldType" -%>
+            rbs_types_record_fieldtype_t *record_fieldtype = (rbs_types_record_fieldtype_t *) instance;
+
+            VALUE array = rb_ary_new();
+            rb_ary_push(array, rbs_struct_to_ruby_value(ctx, record_fieldtype->type));
+            rb_ary_push(array, record_fieldtype->required ? Qtrue : Qfalse);
+            return array;
+
+            <%- when "RBS::Signature" -%>
+            rbs_signature_t *signature = (rbs_signature_t *) instance;
+
+            VALUE array = rb_ary_new();
+            rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->directives));
+            rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->declarations));
+            return array;
             <%- else -%>
-            if (strcmp(class_name, "<%= node.ruby_full_name %>") != 0) {
-                fprintf(stderr, "Expected class name: <%= node.ruby_full_name %>, got %s\n", class_name);
-                exit(1);
-            }
             <%- if node.fields.any? -%> <%# This prevents "warning: unused variable 'node'" %>
             <%= node.c_type_name %> *node = (<%= node.c_type_name %> *)instance;
             <%- end -%>
@@ -74,21 +92,35 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
             <%- when "VALUE" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %>);
             <%- when "rbs_node_list" -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(node-><%= field.name %>));
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(ctx, node-><%= field.name %>));
             <%- when "rbs_hash" -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(node-><%= field.name %>));
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(ctx, node-><%= field.name %>));
             <%- when "rbs_location" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(node-><%= field.name %>));
-            <%- when "comment" -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %>->string);
+            <%- when "rbs_ast_symbol" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.name %>)); // rbs_ast_symbol
+            <%- when "rbs_keyword" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.name %>)); // rbs_keyword
+            <%- when "rbs_string" -%>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.name %>));
             <%- when "bool" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %> ? Qtrue : Qfalse);
             <%- else -%>
             <%- unless field.ast_node? -%>
             #warning unexpected type <%= field.c_type -%>
             <%- end -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value((rbs_node_t *) node-><%= field.name %>)); // <%= field.c_type %>
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.name %>)); // <%= field.c_type %>
             <%- end -%>
+            <%- end -%>
+
+            <%- case node.ruby_full_name -%>
+            <%- when "RBS::AST::Declarations::Class", "RBS::AST::Declarations::Module", "RBS::AST::Declarations::Interface", "RBS::AST::Declarations::TypeAlias", "RBS::MethodType" -%>
+            rb_funcall(
+              RBS_AST_TypeParam,
+              rb_intern("resolve_variables"),
+              1,
+              rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
+            );
             <%- end -%>
 
             return CLASS_NEW_INSTANCE(
@@ -99,5 +131,25 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
             <%- end -%>
         }
         <%- end -%>
+        case RBS_KEYWORD: {
+            rbs_constant_t *constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, ((rbs_keyword_t *) instance)->constant_id);
+            assert(constant != NULL && "constant is NULL");
+            assert(constant->start != NULL && "constant->start is NULL");
+
+            return ID2SYM(rb_intern2((const char *) constant->start, constant->length));
+        }
+        case RBS_AST_SYMBOL: {
+            rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_keyword_t *) instance)->constant_id);
+            assert(constant != NULL && "constant is NULL");
+            assert(constant->start != NULL && "constant->start is NULL");
+
+            // FIXME: Add `rb_encoding` to the `ctx` and use it here.
+            rb_encoding *encoding = rb_usascii_encoding();
+
+            return ID2SYM(rb_intern3((const char *) constant->start, constant->length, encoding));
+        }
+        case RBS_OTHER_RUBY_VALUE: {
+            return ((rbs_other_ruby_value_t *) instance)->ruby_value;
+        }
     }
 }

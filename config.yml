@@ -2,6 +2,7 @@ nodes:
   - name: RBS::AST::Annotation
     fields:
       - name: string
+        c_type: rbs_string
       - name: location
         c_type: rbs_location
   - name: RBS::AST::Bool
@@ -10,7 +11,6 @@ nodes:
       - name: value
         c_type: bool
   - name: RBS::AST::Comment
-    builds_ruby_object_internally: false
     fields:
       - name: string
       - name: location
@@ -30,6 +30,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Class::Super
     fields:
       - name: name
@@ -47,6 +48,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Constant
     fields:
       - name: name
@@ -56,6 +58,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Global
     fields:
       - name: name
@@ -65,6 +68,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Interface
     fields:
       - name: name
@@ -78,6 +82,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module
     fields:
       - name: name
@@ -93,6 +98,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module::Self
     fields:
       - name: name
@@ -110,12 +116,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
-  - name: RBS::AST::Declarations::Nodes
-    builds_ruby_object_internally: false
-    expose_to_ruby: false
-    fields:
-      - name: declarations
-        c_type: rbs_node_list
+        c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::TypeAlias
     fields:
       - name: name
@@ -129,12 +130,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
-  - name: RBS::AST::Directives::Nodes
-    builds_ruby_object_internally: false
-    expose_to_ruby: false
-    fields:
-      - name: directives
-        c_type: rbs_node_list
+        c_type: rbs_ast_comment
   - name: RBS::AST::Directives::Use
     fields:
       - name: clauses
@@ -162,12 +158,13 @@ nodes:
       - name: old_name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::AttrAccessor
     fields:
       - name: name
@@ -177,14 +174,15 @@ nodes:
       - name: ivar_name
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
       - name: visibility
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
   - name: RBS::AST::Members::AttrReader
     fields:
       - name: name
@@ -194,14 +192,15 @@ nodes:
       - name: ivar_name
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
       - name: visibility
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
   - name: RBS::AST::Members::AttrWriter
     fields:
       - name: name
@@ -211,14 +210,15 @@ nodes:
       - name: ivar_name
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
       - name: kind
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
       - name: visibility
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
   - name: RBS::AST::Members::ClassInstanceVariable
     fields:
       - name: name
@@ -228,6 +228,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::ClassVariable
     fields:
       - name: name
@@ -237,6 +238,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::Extend
     fields:
       - name: name
@@ -248,6 +250,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::Include
     fields:
       - name: name
@@ -259,6 +262,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::InstanceVariable
     fields:
       - name: name
@@ -268,12 +272,13 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::MethodDefinition
     fields:
       - name: name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: overloads
         c_type: rbs_node_list
       - name: annotations
@@ -281,10 +286,11 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
       - name: overloading
         c_type: bool
       - name: visibility
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
   - name: RBS::AST::Members::MethodDefinition::Overload
     fields:
       - name: annotations
@@ -302,6 +308,7 @@ nodes:
       - name: location
         c_type: rbs_location
       - name: comment
+        c_type: rbs_ast_comment
   - name: RBS::AST::Members::Private
     fields:
       - name: location
@@ -310,14 +317,12 @@ nodes:
     fields:
       - name: location
         c_type: rbs_location
-  - name: RBS::AST::Symbol
-    builds_ruby_object_internally: false
   - name: RBS::AST::TypeParam
     fields:
       - name: name
         c_type: rbs_ast_symbol
       - name: variance
-        c_type: rbs_ast_symbol
+        c_type: rbs_keyword
       - name: upper_bound
         c_type: rbs_node
       - name: default_type
@@ -326,6 +331,16 @@ nodes:
         c_type: bool
       - name: location
         c_type: rbs_location
+  - name: RBS::AST::Integer
+    expose_to_ruby: false
+    fields:
+      - name: string_representation
+        c_type: rbs_string
+  - name: RBS::AST::String
+    expose_to_ruby: false
+    fields:
+      - name: string
+        c_type: rbs_string
   - name: RBS::MethodType
     fields:
       - name: type_params
@@ -342,6 +357,13 @@ nodes:
         c_type: rbs_node_list
       - name: absolute
         c_type: bool
+  - name: RBS::Signature
+    expose_to_ruby: false
+    fields:
+      - name: directives
+        c_type: rbs_node_list
+      - name: declarations
+        c_type: rbs_node_list
   - name: RBS::TypeName
     fields:
       - name: namespace
@@ -359,6 +381,7 @@ nodes:
   - name: RBS::Types::Bases::Any
     fields:
       - name: todo
+        c_type: bool
       - name: location
         c_type: rbs_location
   - name: RBS::Types::Bases::Bool
@@ -418,13 +441,21 @@ nodes:
   - name: RBS::Types::Function
     fields:
       - name: required_positionals
+        c_type: rbs_node_list
       - name: optional_positionals
+        c_type: rbs_node_list
       - name: rest_positionals
+        c_type: rbs_node
       - name: trailing_positionals
+        c_type: rbs_node_list
       - name: required_keywords
+        c_type: rbs_hash
       - name: optional_keywords
+        c_type: rbs_hash
       - name: rest_keywords
+        c_type: rbs_node
       - name: return_type
+        c_type: rbs_node
   - name: RBS::Types::Function::Param
     fields:
       - name: type
@@ -450,6 +481,7 @@ nodes:
   - name: RBS::Types::Literal
     fields:
       - name: literal
+        c_type: rbs_node
       - name: location
         c_type: rbs_location
   - name: RBS::Types::Optional
@@ -471,8 +503,16 @@ nodes:
   - name: RBS::Types::Record
     fields:
       - name: all_fields
+        c_type: rbs_hash
       - name: location
         c_type: rbs_location
+  - name: RBS::Types::Record::FieldType
+    expose_to_ruby: false
+    fields:
+      - name: type
+        c_type: rbs_node
+      - name: required
+        c_type: bool
   - name: RBS::Types::Tuple
     fields:
       - name: types

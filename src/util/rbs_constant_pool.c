@@ -301,6 +301,11 @@ rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start,
     return rbs_constant_pool_insert(pool, start, length, RBS_CONSTANT_POOL_BUCKET_DEFAULT);
 }
 
+rbs_constant_id_t
+rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, void *encoding) {
+    return rbs_constant_pool_insert_shared(pool, start, length);
+}
+
 /**
  * Insert a constant into a constant pool from memory that is now owned by the
  * constant pool. Returns the id of the constant, or RBS_CONSTANT_ID_UNSET if any

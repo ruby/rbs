@@ -3,6 +3,5 @@
 
 #include "rbs/ast.h"
 #include "rbs/constants.h"
-#include "rbs/ruby_objs.h"
 
 #endif

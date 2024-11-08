@@ -185,6 +185,7 @@ rbs_constant_id_t rbs_constant_pool_find(const rbs_constant_pool_t *pool, const 
  * @return The id of the constant.
  */
 rbs_constant_id_t rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start, size_t length);
+rbs_constant_id_t rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, void *encoding);
 
 /**
  * Insert a constant into a constant pool from memory that is now owned by the

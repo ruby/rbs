@@ -47,7 +47,6 @@ extern VALUE RBS_AST_Members_MethodDefinition_Overload;
 extern VALUE RBS_AST_Members_Prepend;
 extern VALUE RBS_AST_Members_Private;
 extern VALUE RBS_AST_Members_Public;
-extern VALUE RBS_AST_Symbol;
 extern VALUE RBS_AST_TypeParam;
 extern VALUE RBS_MethodType;
 extern VALUE RBS_Namespace;

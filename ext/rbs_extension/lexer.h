@@ -1,6 +1,8 @@
 #ifndef RBS__LEXER_H
 #define RBS__LEXER_H
 
+#include "ruby.h"
+
 enum TokenType {
   NullType,         /* (Nothing) */
   pEOF,             /* EOF */

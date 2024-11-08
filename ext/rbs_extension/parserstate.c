@@ -175,15 +175,15 @@ void insert_comment_line(parserstate *state, token tok) {
   }
 }
 
-VALUE get_comment(parserstate *state, int subject_line) {
+rbs_ast_comment_t *get_comment(parserstate *state, int subject_line) {
   int comment_line = subject_line - 1;
 
   comment *com = comment_get_comment(state->last_comment, comment_line);
 
   if (com) {
-    return comment_to_ruby(com, state->buffer);
+    return comment_to_ruby(&state->allocator, com, state->buffer);
   } else {
-    return Qnil;
+    return NULL;
   }
 }
 
@@ -243,7 +243,7 @@ comment *comment_get_comment(comment *com, int line) {
   return comment_get_comment(com->next_comment, line);
 }
 
-VALUE comment_to_ruby(comment *com, VALUE buffer) {
+rbs_ast_comment_t *comment_to_ruby(rbs_allocator_t *allocator, comment *com, VALUE buffer) {
   VALUE content = rb_funcall(buffer, rb_intern("content"), 0);
   rb_encoding *enc = rb_enc_get(content);
   VALUE string = rb_enc_str_new_cstr("", enc);
@@ -267,7 +267,8 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
     rb_str_cat_cstr(string, "\n");
   }
 
-  return rbs_ast_comment(
+  return rbs_ast_comment_new(
+    allocator,
     string,
     rbs_location_pp(buffer, &com->start, &com->end)
   );

@@ -47,7 +47,6 @@ VALUE RBS_AST_Members_MethodDefinition_Overload;
 VALUE RBS_AST_Members_Prepend;
 VALUE RBS_AST_Members_Private;
 VALUE RBS_AST_Members_Public;
-VALUE RBS_AST_Symbol;
 VALUE RBS_AST_TypeParam;
 VALUE RBS_MethodType;
 VALUE RBS_Namespace;
@@ -122,7 +121,6 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Members_Prepend, RBS_AST_Members, "Prepend");
   IMPORT_CONSTANT(RBS_AST_Members_Private, RBS_AST_Members, "Private");
   IMPORT_CONSTANT(RBS_AST_Members_Public, RBS_AST_Members, "Public");
-  IMPORT_CONSTANT(RBS_AST_Symbol, RBS_AST, "Symbol");
   IMPORT_CONSTANT(RBS_AST_TypeParam, RBS_AST, "TypeParam");
   IMPORT_CONSTANT(RBS_MethodType, RBS, "MethodType");
   IMPORT_CONSTANT(RBS_Namespace, RBS, "Namespace");

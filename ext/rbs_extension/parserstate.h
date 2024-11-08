@@ -7,6 +7,7 @@
 #include "rbs/util/rbs_constant_pool.h"
 #include "lexer.h"
 #include "location.h"
+#include "rbs/ast.h"
 
 /**
  * id_table represents a set of RBS constant IDs.
@@ -65,7 +66,7 @@ typedef struct {
 comment *alloc_comment(rbs_allocator_t *, token comment_token, comment *last_comment);
 void comment_insert_new_line(rbs_allocator_t *, comment *com, token comment_token);
 comment *comment_get_comment(comment *com, int line);
-VALUE comment_to_ruby(comment *com, VALUE buffer);
+rbs_ast_comment_t *comment_to_ruby(rbs_allocator_t *, comment *com, VALUE buffer);
 
 /**
  * Insert new table entry.
@@ -160,6 +161,6 @@ void insert_comment_line(parserstate *state, token token);
  * end
  * ```
  * */
-VALUE get_comment(parserstate *state, int subject_line);
+rbs_ast_comment_t *get_comment(parserstate *state, int subject_line);
 
 #endif
