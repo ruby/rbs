@@ -49,10 +49,6 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
     switch (instance->type) {
         <%- nodes.each do |node| -%>
         case <%= node.c_type_enum_name %>: {
-            if (strcmp(class_name, "<%= node.ruby_full_name %>") != 0) {
-                fprintf(stderr, "Expected class name: <%= node.ruby_full_name %>, got %s\n", class_name);
-                exit(1);
-            }
             <%-
             rbs_struct_to_ruby_value_shitlist = [
                 "RBS::AST::Bool",
@@ -64,6 +60,10 @@ VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
             if rbs_struct_to_ruby_value_shitlist.include?(node.ruby_full_name) -%>
             return instance->cached_ruby_value;
             <%- else -%>
+            if (strcmp(class_name, "<%= node.ruby_full_name %>") != 0) {
+                fprintf(stderr, "Expected class name: <%= node.ruby_full_name %>, got %s\n", class_name);
+                exit(1);
+            }
             <%- if node.fields.any? -%> <%# This prevents "warning: unused variable 'node'" %>
             <%= node.c_type_name %> *node = (<%= node.c_type_name %> *)instance;
             <%- end -%>
