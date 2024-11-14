@@ -615,7 +615,7 @@ module Process
   #
   #     thread.join.pid                       # => 313262
   #
-  def self.detach: (Integer pid) -> Thread
+  def self.detach: (Integer pid) -> Process::Waiter
 
   # <!--
   #   rdoc-file=process.c
