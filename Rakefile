@@ -63,7 +63,12 @@ task :validate => :compile do
   # Skip RBS validation because Ruby CI runs without rubygems
   case skip_rbs_validation = ENV["SKIP_RBS_VALIDATION"]
   when nil
-    libs << "rbs"
+    begin
+      Gem::Specification.find_by_name("rbs")
+      libs << "rbs"
+    rescue Gem::MissingSpecError
+      STDERR.puts "🚨🚨🚨🚨 Skipping `rbs` gem because it's not found"
+    end
   when "true"
     # Skip
   else
@@ -90,7 +95,7 @@ task :stdlib_test => :compile do
   if ENV["RANDOMIZE_STDLIB_TEST_ORDER"] == "true"
     test_files.shuffle!
   end
-  
+
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
