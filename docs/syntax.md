@@ -416,10 +416,12 @@ _method-types_ ::= _method-type-parameters_ _method-type_                       
 _method-type-parameters_ ::=                                                    # Empty
                            | `[` _type-variable_ `,` ... `]`
 
-_attribute-member_ ::= _visibility_ _attribute-type_ _method-name_ `:` _type_                     # Attribute
-                     | _visibility_ _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_   # Attribute with variable name specification
-                     | _visibility_ _attribute-type_ _method-name_ `() :` _type_                  # Attribute without variable
-
+_attribute-member_ ::= _visibility_ _attribute-type_ _method-name_ `:` _type_                             # Attribute
+                     | _visibility_ _attribute-type_ _method-name_ `(` _ivar-name_ `) :` _type_           # Attribute with variable name specification
+                     | _visibility_ _attribute-type_ _method-name_ `() :` _type_                          # Attribute without variable
+                     | _visibility_ _attribute-type_ `self.` _method-name_ `:` _type_                     # Singleton attribute
+                     | _visibility_ _attribute-type_ `self.` _method-name_ `(` _ivar-name_ `) :` _type_   # Singleton attribute with variable name specification
+                     | _visibility_ _attribute-type_ `self.` _method-name_ `() :` _type_                  # Singleton attribute without variable
 _visibility_ ::= `public` | `private`
 
 _attribute-type_ ::= `attr_reader` | `attr_writer` | `attr_accessor`
