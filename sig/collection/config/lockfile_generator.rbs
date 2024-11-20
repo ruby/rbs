@@ -45,6 +45,9 @@ module RBS
 
         def assign_stdlib: (name: String, from_gem: String?) -> void
 
+        def assign_by: (name: String, version: String?, from_gem: String?) -> void
+
+        def assign_by_source: (source: Sources::t?, name: String, version: String?, from_gem: String?) -> void
         # Find a source of a gem from ones registered in `config.sources`
         #
         # Returns `nil` if no source contains the definition of the gem.

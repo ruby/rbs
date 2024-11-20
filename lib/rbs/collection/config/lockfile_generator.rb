@@ -58,13 +58,14 @@ module RBS
 
         def generate
           config.gems.each do |gem|
-            if Sources::Stdlib.instance.has?(gem["name"], nil) || gem.dig("source", "type") == "stdlib"
-              unless gem.fetch("ignore", false)
-                assign_stdlib(name: gem["name"], from_gem: nil)
-              end
-            else
-              assign_gem(name: gem["name"], version: gem["version"])
-            end
+            next if gem.fetch("ignore", false)
+
+            source = if src_data = gem["source"]
+                       Sources.from_config_entry(gem["source"], base_directory: config.config_path.dirname)
+                     else
+                       find_source(name: gem["name"])
+                     end
+            assign_by_source(source: source, name: gem["name"], version: gem["version"], from_gem: gem["name"])
           end
 
           definition.dependencies.each do |dep|
@@ -130,7 +131,7 @@ module RBS
 
               begin
                 locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
-                  assign_stdlib(name: dep["name"], from_gem: name)
+                  assign_by(name: dep["name"], version: nil, from_gem: name)
                 end
               rescue
                 RBS.logger.warn "Cannot find `#{locked[:name]}-#{locked[:version]}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
@@ -170,8 +171,24 @@ module RBS
 
           if deps = source.dependencies_of(name, "0")
             deps.each do |dep|
-              assign_stdlib(name: dep["name"], from_gem: name)
+              assign_by(name: dep["name"], version: nil, from_gem: name)
             end
+          end
+        end
+
+        private def assign_by(name:, version:, from_gem:)
+          source = find_source(name: name)
+          assign_by_source(source: source, name: name, version: version, from_gem: from_gem)
+        end
+
+        private def assign_by_source(source:, name:, version:, from_gem:)
+          case source
+          when Sources::Stdlib
+            assign_stdlib(name: name, from_gem: from_gem)
+          when nil
+            raise "Cannot find `#{name}` v#{version}"
+          else # rubygems, git, local
+            assign_gem(name: name, version: version)
           end
         end
 
