@@ -7,4 +7,6 @@ class Minitest::UnexpectedError < ::Minitest::Assertion
   def message: () -> ::String
   def result_label: () -> "Error"
   attr_accessor error: untyped
+  include Minitest::Compress
+  BASE_RE: Regexp
 end

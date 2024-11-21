@@ -8,6 +8,10 @@
 # See Minitest::Runnable for an example.
 #
 module Minitest::Assertions
+  self.@diff: untyped
+
+  @skip: untyped
+
   def self.inspect: () -> "UNDEFINED"
 
   # <!--
@@ -93,6 +97,8 @@ module Minitest::Assertions
   # Fails unless `obj` is empty.
   #
   def assert_empty: (untyped obj, ?untyped? msg) -> untyped
+
+  def _where: () -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -195,7 +201,7 @@ module Minitest::Assertions
   #
   # See also: #assert_silent
   #
-  def assert_output: (?untyped? stdout, ?untyped? stderr) { () -> untyped } -> untyped
+  def assert_output: (?untyped? stdout, ?untyped? stderr) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -204,6 +210,25 @@ module Minitest::Assertions
   # Fails unless `path` exists.
   #
   def assert_path_exists: (untyped path, ?untyped? msg) -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest/assertions.rb
+  #   - assert_pattern() { || ... }
+  # -->
+  # For testing with pattern matching (only supported with Ruby 3.0 and later)
+  #
+  #     # pass
+  #     assert_pattern { [1,2,3] => [Integer, Integer, Integer] }
+  #
+  #     # fail "length mismatch (given 3, expected 1)"
+  #     assert_pattern { [1,2,3] => [Integer] }
+  #
+  # The bare `=>` pattern will raise a NoMatchingPatternError on failure, which
+  # would normally be counted as a test error. This assertion rescues
+  # NoMatchingPatternError and generates a test failure. Any other exception will
+  # be raised as normal and generate a test error.
+  #
+  def assert_pattern: () ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -243,15 +268,16 @@ module Minitest::Assertions
   #
   #     assert_equal 'This is really bad', error.message
   #
-  def assert_raises: (*untyped exp) { () -> untyped } -> untyped
+  def assert_raises: (*untyped exp) ?{ () -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
-  #   - assert_respond_to(obj, meth, msg = nil)
+  #   - assert_respond_to(obj, meth, msg = nil, include_all: false)
   # -->
-  # Fails unless `obj` responds to `meth`.
+  # Fails unless `obj` responds to `meth`. include_all defaults to false to match
+  # Object#respond_to?
   #
-  def assert_respond_to: (untyped obj, untyped meth, ?untyped? msg) -> untyped
+  def assert_respond_to: (untyped obj, untyped meth, ?untyped? msg, ?include_all: bool) -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -338,7 +364,7 @@ module Minitest::Assertions
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
-  #   - fail_after(y,m,d,msg)
+  #   - fail_after(y, m, d, msg)
   # -->
   # Fails after a given date (in the local time zone). This allows you to put
   # time-bombs in your tests if you need to keep something around until a later
@@ -360,7 +386,7 @@ module Minitest::Assertions
   # -->
   # Returns a proc that will output `msg` along with the default message.
   #
-  def message: (?untyped? msg, ?untyped? ending) ?{ () -> untyped } -> untyped
+  def message: (?untyped? msg, ?untyped? ending) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -457,6 +483,24 @@ module Minitest::Assertions
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
+  #   - refute_pattern() { || ... }
+  # -->
+  # For testing with pattern matching (only supported with Ruby 3.0 and later)
+  #
+  #     # pass
+  #     refute_pattern { [1,2,3] => [String] }
+  #
+  #     # fail "NoMatchingPatternError expected, but nothing was raised."
+  #     refute_pattern { [1,2,3] => [Integer, Integer, Integer] }
+  #
+  # This assertion expects a NoMatchingPatternError exception, and will fail if
+  # none is raised. Any other exceptions will be raised as normal and generate a
+  # test error.
+  #
+  def refute_pattern: () ?{ () -> untyped } -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest/assertions.rb
   #   - refute_operator(o1, op, o2 = UNDEFINED, msg = nil)
   # -->
   # Fails if `o1` is not `op` `o2`. Eg:
@@ -490,11 +534,12 @@ module Minitest::Assertions
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
-  #   - refute_respond_to(obj, meth, msg = nil)
+  #   - refute_respond_to(obj, meth, msg = nil, include_all: false)
   # -->
-  # Fails if `obj` responds to the message `meth`.
+  # Fails if `obj` responds to the message `meth`. include_all defaults to false
+  # to match Object#respond_to?
   #
-  def refute_respond_to: (untyped obj, untyped meth, ?untyped? msg) -> untyped
+  def refute_respond_to: (untyped obj, untyped meth, ?untyped? msg, ?include_all: bool) -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
@@ -506,16 +551,16 @@ module Minitest::Assertions
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
-  #   - skip(msg = nil, bt = caller)
+  #   - skip(msg = nil, _ignored = nil)
   # -->
   # Skips the current run. If run in verbose-mode, the skipped run gets listed at
   # the end of the run but doesn't cause a failure exit code.
   #
-  def skip: (?untyped? msg, ?untyped bt) -> untyped
+  def skip: (?untyped? msg, ?untyped? _ignored) -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/assertions.rb
-  #   - skip_until(y,m,d,msg)
+  #   - skip_until(y, m, d, msg)
   # -->
   # Skips the current run until a given date (in the local time zone). This allows
   # you to put some fixes on hold until a later date, but still holds you

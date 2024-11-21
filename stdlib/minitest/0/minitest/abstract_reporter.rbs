@@ -3,6 +3,9 @@
 # Go nuts.
 #
 class Minitest::AbstractReporter
+  @mutex: untyped
+  def initialize: () -> void
+
   # <!--
   #   rdoc-file=lib/minitest.rb
   #   - start()
@@ -45,5 +48,5 @@ class Minitest::AbstractReporter
   # Did this run pass?
   #
   def passed?: () -> true
-  include Mutex_m
+  def synchronize: () { (?) -> untyped } -> untyped
 end
