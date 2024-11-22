@@ -1,5 +1,5 @@
 module RBS
-  # TypeAliasDependency calculates the dependnecies between type aliases
+  # TypeAliasDependency calculates the dependencies between type aliases
   #
   # The dependencies are normalized automatically.
   #
@@ -12,7 +12,7 @@ module RBS
     #
     attr_reader direct_dependencies: Hash[TypeName, Set[TypeName]]
 
-    # A hash table from type alias name to a hash name with keys of transitive dependnecies
+    # A hash table from type alias name to a hash name with keys of transitive dependencies
     #
     # The source type name and dependencies are normalized.
     #

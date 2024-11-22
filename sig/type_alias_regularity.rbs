@@ -71,7 +71,7 @@ module RBS
     def initialize: (env: Environment) -> void
 
     # Returns `Diagnostic` instance if the alias type is nonregular.
-    # Regurns `nil` if the alias type is regular.
+    # Returns `nil` if the alias type is regular.
     #
     # Normalizes the given type name automatically.
     #
