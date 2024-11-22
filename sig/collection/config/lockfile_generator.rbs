@@ -2,6 +2,8 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        DEPRECATED_STDLIBS: Array[[String, String]]
+
         class GemfileLockMismatchError < StandardError
           @expected: Pathname
 
