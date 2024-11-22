@@ -4,6 +4,10 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        DEPRECATED_STDLIBS = [
+          ['mutex_m', '0.3.0']
+        ]
+
         class GemfileLockMismatchError < StandardError
           def initialize(expected:, actual:)
             @expected = expected
@@ -160,6 +164,9 @@ module RBS
             RBS.logger.warn msg
 
             return
+          end
+          if deprecated = DEPRECATED_STDLIBS.find { |n, v| n == name }
+            RBS.logger.warn "`#{deprecated[0]}` in rbs/stdlib is deprecated. Please install gem v#{deprecated[1]} or over instead."
           end
 
           source = Sources::Stdlib.instance
