@@ -1,2 +1,2 @@
-class Minitest::Expectation < ::Struct[untyped]
+class Minitest::Expectation < ::Struct{target: untyped, ctx: untyped}
 end

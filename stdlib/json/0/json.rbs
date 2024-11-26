@@ -1787,14 +1787,14 @@ class Set[unchecked out A]
 end
 
 %a{annotate:rdoc:skip}
-class Struct[Elem]
+class Struct
   # <!--
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - json_create(object)
   # -->
   # See #as_json.
   #
-  def self.json_create: [Elem] (Hash[String, String | Array[Elem]] object) -> Struct[Elem]
+  def self.json_create: (Hash[String, String | Array[untyped]] object) -> Struct[untyped]
 
   # <!--
   #   rdoc-file=ext/json/lib/json/add/struct.rb

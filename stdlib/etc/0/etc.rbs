@@ -672,58 +672,7 @@ module Etc
   # :   is an Array of Strings containing the short login names of the members of
   #     the group.
   #
-  class Group < Struct[untyped]
-    extend Enumerable[untyped]
-
-    def self.[]: (*untyped) -> untyped
-
-    # <!--
-    #   rdoc-file=ext/etc/etc.c
-    #   - Etc::Group.each { |group| block }   ->       obj
-    #   - Etc::Group.each                          ->     Enumerator
-    # -->
-    # Iterates for each entry in the `/etc/group` file if a block is given.
-    #
-    # If no block is given, returns the Enumerator.
-    #
-    # The code block is passed a Group struct.
-    #
-    # Example:
-    #
-    #     require 'etc'
-    #
-    #     Etc::Group.each {|g|
-    #       puts g.name + ": " + g.mem.join(', ')
-    #     }
-    #
-    #     Etc::Group.collect {|g| g.name}
-    #     Etc::Group.select {|g| !g.mem.empty?}
-    #
-    def self.each: () -> untyped
-
-    def self.inspect: () -> untyped
-
-    def self.keyword_init?: () -> untyped
-
-    def self.members: () -> untyped
-
-    def self.new: (*untyped) -> untyped
-
-    def gid: () -> Integer
-
-    def gid=: (Integer new_gid) -> void
-
-    def mem: () -> Array[String]
-
-    def mem=: (Array[String] new_mem) -> void
-
-    def name: () -> String
-
-    def name=: (String new_name) -> void
-
-    def passwd: () -> String
-
-    def passwd=: (String new_passwd) -> void
+  class Group < Struct{name: String, passwd: String, gid: Integer, mem: Array[String]}
   end
 
   # <!-- rdoc-file=ext/etc/etc.c -->
@@ -766,83 +715,6 @@ module Etc
   # expire
   # :   account expiration time(integer).
   #
-  class Passwd < Struct[untyped]
-    extend Enumerable[untyped]
-
-    def self.[]: (*untyped) -> untyped
-
-    # <!--
-    #   rdoc-file=ext/etc/etc.c
-    #   - Etc::Passwd.each { |struct| block }  ->  Passwd
-    #   - Etc::Passwd.each                     ->  Enumerator
-    # -->
-    # Iterates for each entry in the `/etc/passwd` file if a block is given.
-    #
-    # If no block is given, returns the Enumerator.
-    #
-    # The code block is passed an Passwd struct.
-    #
-    # See Etc.getpwent above for details.
-    #
-    # Example:
-    #
-    #     require 'etc'
-    #
-    #     Etc::Passwd.each {|u|
-    #       puts u.name + " = " + u.gecos
-    #     }
-    #
-    #     Etc::Passwd.collect {|u| u.gecos}
-    #     Etc::Passwd.collect {|u| u.gecos}
-    #
-    def self.each: () -> untyped
-
-    def self.inspect: () -> untyped
-
-    def self.keyword_init?: () -> untyped
-
-    def self.members: () -> untyped
-
-    def self.new: (*untyped) -> untyped
-
-    def change: () -> Integer
-
-    def change=: (Integer new_change) -> void
-
-    def dir: () -> String
-
-    def dir=: (String new_dir) -> void
-
-    def expire: () -> Integer
-
-    def expire=: (Integer new_expire) -> void
-
-    def gecos: () -> String
-
-    def gecos=: (String new_gecos) -> void
-
-    def gid: () -> Integer
-
-    def gid=: (Integer new_gid) -> void
-
-    def name: () -> String
-
-    def name=: (String new_name) -> void
-
-    def passwd: () -> String
-
-    def passwd=: (String new_passwd) -> void
-
-    def shell: () -> String
-
-    def shell=: (String new_shell) -> void
-
-    def uclass: () -> String
-
-    def uclass=: (String new_uclass) -> void
-
-    def uid: () -> Integer
-
-    def uid=: (Integer new_uid) -> void
+  class Passwd < Struct{name: String, passwd: String, uid: Integer, gid: Integer, mem: Array[String], gecos: String, dir: String, shell: String, change: Integer, uclass: String, expire: Integer}
   end
 end

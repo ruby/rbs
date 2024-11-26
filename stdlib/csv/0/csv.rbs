@@ -2858,7 +2858,7 @@ class CSV::Row < Object
   alias values_at fields
 end
 
-class CSV::FieldInfo < Struct[untyped]
+class CSV::FieldInfo < Struct{index: Integer, line: Integer, header: String?, quoted?: bool}
 end
 
 # <!-- rdoc-file=lib/csv.rb -->
