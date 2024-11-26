@@ -3756,3 +3756,21 @@ class CSV::Table[out Elem] < Object
   #
   def values_at: (*untyped indices_or_headers) -> untyped
 end
+
+%a{annotate:rdoc:skip}
+class Array[unchecked out Elem] < Object
+  # Equivalent to CSV::generate_line(self, options)
+  #
+  #   ["CSV", "data"].to_csv
+  #     #=> "CSV,data\n"
+  def to_csv: (**untyped options) -> String
+end
+
+%a{annotate:rdoc:skip}
+class String
+  # Equivalent to CSV::parse_line(self, options)
+  #
+  #   "CSV,data".parse_csv
+  #     #=> ["CSV", "data"]
+  def parse_csv: (**untyped options) -> ::Array[String?]?
+end
