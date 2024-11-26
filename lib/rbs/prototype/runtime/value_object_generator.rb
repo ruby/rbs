@@ -13,7 +13,7 @@ module RBS
         end
 
         def build_decl
-          decl = AST::Declarations::Class.new(
+          AST::Declarations::Class.new(
             name: to_type_name(only_name(@target_class)),
             type_params: [],
             super_class: build_super_class,
@@ -22,10 +22,6 @@ module RBS
             location: nil,
             comment: nil
           )
-
-          add_decl_members(decl)
-
-          decl
         end
 
         private
@@ -100,112 +96,9 @@ module RBS
         CAN_CALL_KEYWORD_INIT_P = Struct.new(:tmp).respond_to?(:keyword_init?)
 
         def build_super_class
-          AST::Declarations::Class::Super.new(name: TypeName("::Struct"), args: [untyped], location: nil)
+          AST::Declarations::Class::Super.new(name: TypeName("::Struct"), args: @target_class.members.to_h{ |m| [m, untyped] }, location: nil)
         end
 
-        def add_decl_members(decl)
-          decl.members.concat build_s_new
-          decl.members.concat build_s_keyword_init_p
-          decl.members.concat build_s_members
-          decl.members.concat build_member_accessors(AST::Members::AttrAccessor)
-        end
-
-        # def self.new: (?untyped foo, ?untyped bar) -> instance
-        #             | (?foo: untyped, ?bar: untyped) -> instance
-        def build_s_new
-          [:new, :[]].map do |name|
-            new_overloads = []
-
-            if CAN_CALL_KEYWORD_INIT_P
-              case @target_class.keyword_init?
-              when false
-                new_overloads << build_overload_for_positional_arguments
-              when true
-                new_overloads << build_overload_for_keyword_arguments
-              when nil
-                new_overloads << build_overload_for_positional_arguments
-                new_overloads << build_overload_for_keyword_arguments
-              else
-                raise
-              end
-            else
-              new_overloads << build_overload_for_positional_arguments
-              new_overloads << build_overload_for_keyword_arguments
-            end
-
-            AST::Members::MethodDefinition.new(
-              name: name,
-              overloads: new_overloads,
-              kind: :singleton,
-              location: nil,
-              comment: nil,
-              annotations: [],
-              overloading: false,
-              visibility: nil
-            )
-          end
-        end
-
-        def build_overload_for_positional_arguments
-          AST::Members::MethodDefinition::Overload.new(
-            annotations: [],
-            method_type: MethodType.new(
-              type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
-                optional_positionals: @target_class.members.map { |m| Types::Function::Param.new(name: m, type: untyped) },
-              ),
-              type_params: [],
-              block: nil,
-              location: nil,
-            )
-          )
-        end
-
-        def build_overload_for_keyword_arguments
-          AST::Members::MethodDefinition::Overload.new(
-            annotations: [],
-            method_type: MethodType.new(
-              type: Types::Function.empty(Types::Bases::Instance.new(location: nil)).update(
-                optional_keywords: @target_class.members.to_h { |m| [m, Types::Function::Param.new(name: nil, type: untyped)] },
-              ),
-              type_params: [],
-              block: nil,
-              location: nil,
-            )
-          )
-        end
-
-        # def self.keyword_init?: () -> bool?
-        def build_s_keyword_init_p
-          return [] unless CAN_CALL_KEYWORD_INIT_P
-
-          return_type = @target_class.keyword_init?.nil? \
-                      ? Types::Bases::Nil.new(location: nil)
-                      : Types::Literal.new(literal: @target_class.keyword_init?, location: nil)
-          type = Types::Function.empty(return_type)
-
-          [
-            AST::Members::MethodDefinition.new(
-              name: :keyword_init?,
-              overloads: [
-                AST::Members::MethodDefinition::Overload.new(
-                  annotations: [],
-                  method_type: MethodType.new(
-                    type: type,
-                    type_params: [],
-                    block: nil,
-                    location: nil,
-                  )
-                )
-              ],
-              kind: :singleton,
-              location: nil,
-              comment: nil,
-              annotations: [],
-              overloading: false,
-              visibility: nil
-            )
-          ]
-        end
       end
 
       class DataGenerator < ValueObjectBase
@@ -221,13 +114,7 @@ module RBS
         private
 
         def build_super_class
-          AST::Declarations::Class::Super.new(name: TypeName("::Data"), args: [], location: nil)
-        end
-
-        def add_decl_members(decl)
-          decl.members.concat build_s_new
-          decl.members.concat build_s_members
-          decl.members.concat build_member_accessors(AST::Members::AttrReader)
+          AST::Declarations::Class::Super.new(name: TypeName("::Data"), args: @target_class.members.to_h{ |m| [m, untyped] }, location: nil)
         end
 
         # def self.new: (untyped foo, untyped bar) -> instance

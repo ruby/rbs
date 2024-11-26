@@ -150,8 +150,7 @@ class Hash[unchecked out K, unchecked out V]
   include Enumerable[[K, V]]
 end
 
-class Struct[Elem]
-  include Enumerable[Elem?]
+class Struct
 end
 SIG
 

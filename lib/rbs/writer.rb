@@ -215,6 +215,12 @@ module RBS
       if name && args
         if args.empty?
           "#{name}"
+        elsif name.struct? || name.data?
+          fields = args.map do |param|
+            # same imple as Function::Param
+            "#{param.name}: #{param.type}"
+          end
+          "#{name}{#{fields.join(", ")}}"
         else
           "#{name}[#{args.join(", ")}]"
         end
