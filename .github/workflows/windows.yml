@@ -20,7 +20,9 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      - name: rake-compiler
-        run: gem install rake-compiler
+      - name: bundle install
+        run: |
+          bundle config set without profilers libs
+          bundle install
       - name: compile
-        run: rake compile
+        run: bundle exec rake compile

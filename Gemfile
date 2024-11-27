@@ -14,22 +14,28 @@ gem "rubocop-on-rbs" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.1'
 gem "json"
 gem "json-schema"
 gem "goodcheck"
-gem "dbm"
 gem 'digest'
 gem 'tempfile'
 gem "rdoc"
-gem "bigdecimal"
-gem "abbrev"
-gem "base64"
-gem "mutex_m"
-gem "nkf"
 gem "fileutils"
 gem "raap"
 
-# Performance profiling and benchmarking
-gem 'stackprof'
-gem 'memory_profiler'
-gem 'benchmark-ips'
+group :libs do
+  # Libraries required for stdlib test
+  gem "abbrev"
+  gem "base64"
+  gem "bigdecimal"
+  gem "dbm"
+  gem "mutex_m"
+  gem "nkf"
+end
+
+group :profilers do
+  # Performance profiling and benchmarking
+  gem 'stackprof'
+  gem 'memory_profiler'
+  gem 'benchmark-ips'
+end
 
 # Test gems
 gem "rbs-amber", path: "test/assets/test-gem"
