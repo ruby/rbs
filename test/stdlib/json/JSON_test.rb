@@ -48,8 +48,9 @@ class JSONSingletonTest < Test::Unit::TestCase
   end
 
   def test_deep_const_get
-    assert_send_type "(String) -> String", JSON, :deep_const_get, "File::SEPARATOR"
-    assert_send_type "(_ToS) -> String", JSON, :deep_const_get, JsonToS.new("File::SEPARATOR")
+    with_interned("File") do |val|
+      assert_send_type "(interned) -> singleton(File)", JSON, :deep_const_get, val
+    end
   end
 
   def test_dump

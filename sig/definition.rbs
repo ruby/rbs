@@ -27,7 +27,7 @@ module RBS
         # Annotations given to the overload associated to the method type
         attr_reader overload_annotations: Array[AST::Annotation]
 
-        # Concatnation of `member_annotations` and `overload_annotations`
+        # Concatenation of `member_annotations` and `overload_annotations`
         attr_reader annotations: Array[AST::Annotation]
 
         def initialize: (type: MethodType, member: method_member, defined_in: TypeName, implemented_in: TypeName?, ?overload_annotations: Array[AST::Annotation]) -> void

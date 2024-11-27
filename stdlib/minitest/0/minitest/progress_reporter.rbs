@@ -6,6 +6,6 @@
 # composite and replace it with your own.
 #
 class Minitest::ProgressReporter < ::Minitest::Reporter
-  def prerecord: (untyped klass, untyped name) -> (untyped | nil)
+  def prerecord: (untyped klass, untyped name) -> (nil | untyped)
   def record: (untyped result) -> untyped
 end
