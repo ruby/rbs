@@ -75,7 +75,7 @@ module RBS
 
       def to_s: () -> String
 
-      # Validates TypeParams if it refers another optiional type params
+      # Validates TypeParams if it refers another optional type params
       #
       # * Returns array of TypeParam objects that refers other optional type params
       # * Returns `nil` if all type params are valid
@@ -86,7 +86,7 @@ module RBS
       #
       def self.application: (Array[TypeParam], Array[Types::t]) -> Substitution?
 
-      # Returns an array of type args, that fills ommited types with the defaults
+      # Returns an array of type args, that fills omitted types with the defaults
       #
       # ```rbs
       # interface _Foo[T, S = untyped]
@@ -102,7 +102,7 @@ module RBS
       # _Foo[String, Integer, untyped] # => _Foo[String, Integer, untyped]  (Keeping extra args)
       # ```
       #
-      # Note that it allows iinvalid arities, returning the `args` immediately.
+      # Note that it allows invalid arities, returning the `args` immediately.
       #
       def self.normalize_args: (Array[TypeParam], Array[Types::t]) -> Array[Types::t]
     end
