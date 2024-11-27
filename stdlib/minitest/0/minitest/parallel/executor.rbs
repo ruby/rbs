@@ -2,6 +2,10 @@
 # The engine used to run multiple tests in parallel.
 #
 class Minitest::Parallel::Executor
+  @size: untyped
+  @queue: untyped
+  @pool: untyped
+
   # <!--
   #   rdoc-file=lib/minitest/parallel.rb
   #   - new(size)

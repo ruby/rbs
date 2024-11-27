@@ -4,6 +4,8 @@
 # (Inspired by lolcat, but with clean math)
 #
 class Minitest::PrideLOL < ::Minitest::PrideIO
+  @colors: untyped
+  @index: untyped
   def initialize: (untyped io) -> void
 
   # <!--

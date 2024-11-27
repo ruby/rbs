@@ -70,6 +70,11 @@ class Minitest::StatisticsReporter < ::Minitest::Reporter
   attr_accessor errors: untyped
 
   # <!-- rdoc-file=lib/minitest.rb -->
+  # Total number of tests that warned.
+  #
+  attr_accessor warnings: untyped
+
+  # <!-- rdoc-file=lib/minitest.rb -->
   # Total number of tests that where skipped.
   #
   attr_accessor skips: untyped
