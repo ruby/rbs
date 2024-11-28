@@ -28,11 +28,17 @@ RBS/Lint:
   Exclude:
     - 'sig/**/*'
     - 'test/**/*'
+RBS/Lint/TopLevelInterface:
+  Enabled: false
+RBS/Lint/TopLevelTypeAlias:
+  Enabled: false
 RBS/Style:
   Enabled: false
   Exclude:
     - 'sig/**/*'
     - 'test/**/*'
+RBS/Style/EmptyArgument:
+  Enabled: true
 RBS/Style/InitializeReturnType:
   Enabled: true
 

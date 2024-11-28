@@ -4,10 +4,9 @@
 #include "ruby/re.h"
 #include "ruby/encoding.h"
 
+#include "rbs.h"
 #include "lexer.h"
 #include "parser.h"
-#include "constants.h"
-#include "ruby_objs.h"
 
 /**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.

@@ -32,11 +32,11 @@ module Kernel : ::BasicObject
   #
   # For some suggestions on how to improve your specs, try:
   #
-  # http://betterspecs.org
+  # https://betterspecs.org
   #
   # but do note that several items there are debatable or specific to rspec.
   #
   # For more information about expectations, see Minitest::Expectations.
   #
-  private def describe: (untyped desc, *untyped additional_desc) ?{ () -> untyped } -> untyped
+  private def describe: (untyped desc, *untyped additional_desc) { (?) -> untyped } -> untyped
 end

@@ -157,7 +157,7 @@ module RBS
     # Returns a substitution that corresponds to type application
     #
     # ```
-    # tapp_subst(`::Array`, [`::Integer`]) # => Subsitution.build([:Elem], [`::Integer`])
+    # tapp_subst(`::Array`, [`::Integer`]) # => Substitution.build([:Elem], [`::Integer`])
     # ```
     #
     def tapp_subst: (TypeName, Array[Types::t]) -> Substitution

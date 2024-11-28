@@ -48,4 +48,6 @@ module Minitest::Reportable
   # Did this run error?
   #
   def error?: () -> untyped
+
+  BASE_DIR: String
 end

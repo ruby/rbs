@@ -1,5 +1,5 @@
 module RBS
-  # AncestorGraph is a utility class that helps iterating through ancestors and decendants of a class/module
+  # AncestorGraph is a utility class that helps iterating through ancestors and descendants of a class/module
   #
   # ```ruby
   # graph = AncestorGraph.new(env: env, ancestor_builder: ancestor_builder)

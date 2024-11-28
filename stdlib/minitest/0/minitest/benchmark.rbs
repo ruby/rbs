@@ -5,6 +5,7 @@
 # See Minitest::Assertions
 #
 class Minitest::Benchmark < ::Minitest::Test
+  self.@io: untyped
   def self.io: () -> untyped
   def io: () -> untyped
   def self.run: (untyped reporter, ?::Hash[untyped, untyped] options) -> untyped
@@ -63,7 +64,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance: (untyped validation) ?{ () -> untyped } -> untyped
+  def assert_performance: (untyped validation) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -91,7 +92,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_constant: (?::Float threshold) ?{ () -> untyped } -> untyped
+  def assert_performance_constant: (?::Float threshold) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -112,7 +113,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_exponential: (?::Float threshold) ?{ () -> untyped } -> untyped
+  def assert_performance_exponential: (?::Float threshold) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -133,7 +134,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_logarithmic: (?::Float threshold) ?{ () -> untyped } -> untyped
+  def assert_performance_logarithmic: (?::Float threshold) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -154,7 +155,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_linear: (?::Float threshold) ?{ () -> untyped } -> untyped
+  def assert_performance_linear: (?::Float threshold) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -175,7 +176,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #       end
   #     end
   #
-  def assert_performance_power: (?::Float threshold) ?{ () -> untyped } -> untyped
+  def assert_performance_power: (?::Float threshold) { (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -183,7 +184,7 @@ class Minitest::Benchmark < ::Minitest::Test
   # -->
   # Takes an array of x/y pairs and calculates the general R^2 value.
   #
-  # See: http://en.wikipedia.org/wiki/Coefficient_of_determination
+  # See: https://en.wikipedia.org/wiki/Coefficient_of_determination
   #
   def fit_error: (untyped xys) { (untyped) -> untyped } -> untyped
 
@@ -195,9 +196,9 @@ class Minitest::Benchmark < ::Minitest::Test
   #
   # Takes x and y values and returns [a, b, r^2].
   #
-  # See: http://mathworld.wolfram.com/LeastSquaresFittingExponential.html
+  # See: https://mathworld.wolfram.com/LeastSquaresFittingExponential.html
   #
-  def fit_exponential: (untyped xs, untyped ys) -> untyped
+  def fit_exponential: (untyped xs, untyped ys) -> ::Array[untyped]
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -207,9 +208,9 @@ class Minitest::Benchmark < ::Minitest::Test
   #
   # Takes x and y values and returns [a, b, r^2].
   #
-  # See: http://mathworld.wolfram.com/LeastSquaresFittingLogarithmic.html
+  # See: https://mathworld.wolfram.com/LeastSquaresFittingLogarithmic.html
   #
-  def fit_logarithmic: (untyped xs, untyped ys) -> untyped
+  def fit_logarithmic: (untyped xs, untyped ys) -> ::Array[untyped]
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -219,9 +220,9 @@ class Minitest::Benchmark < ::Minitest::Test
   #
   # Takes x and y values and returns [a, b, r^2].
   #
-  # See: http://mathworld.wolfram.com/LeastSquaresFitting.html
+  # See: https://mathworld.wolfram.com/LeastSquaresFitting.html
   #
-  def fit_linear: (untyped xs, untyped ys) -> untyped
+  def fit_linear: (untyped xs, untyped ys) -> ::Array[untyped]
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -231,9 +232,9 @@ class Minitest::Benchmark < ::Minitest::Test
   #
   # Takes x and y values and returns [a, b, r^2].
   #
-  # See: http://mathworld.wolfram.com/LeastSquaresFittingPowerLaw.html
+  # See: https://mathworld.wolfram.com/LeastSquaresFittingPowerLaw.html
   #
-  def fit_power: (untyped xs, untyped ys) -> untyped
+  def fit_power: (untyped xs, untyped ys) -> ::Array[untyped]
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb
@@ -245,7 +246,7 @@ class Minitest::Benchmark < ::Minitest::Test
   #     sigma([1, 2, 3])                # => 1 + 2 + 3 => 6
   #     sigma([1, 2, 3]) { |n| n ** 2 } # => 1 + 4 + 9 => 14
   #
-  def sigma: (untyped enum) ?{ () -> untyped } -> untyped
+  def sigma: (untyped enum) ?{ (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest/benchmark.rb

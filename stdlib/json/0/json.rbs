@@ -714,7 +714,7 @@ module JSON
   #
   def self.create_id=: (_ToS create_id) -> _ToS
 
-  def self.deep_const_get: (_ToS path) -> untyped
+  def self.deep_const_get: (interned path) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
