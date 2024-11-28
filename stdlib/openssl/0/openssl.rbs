@@ -3665,6 +3665,23 @@ module OpenSSL
     #
     def self.hexdigest: (String | Digest algo, String key, String data) -> String
 
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/hmac.rb
+    #   - HMAC.base64digest(digest, key, data) -> aString
+    # -->
+    # Returns the authentication code as a Base64-encoded string. The *digest*
+    # parameter specifies the digest algorithm to use. This may be a String
+    # representing the algorithm name or an instance of OpenSSL::Digest.
+    #
+    # ### Example
+    #     key = 'key'
+    #     data = 'The quick brown fox jumps over the lazy dog'
+    #
+    #     hmac = OpenSSL::HMAC.base64digest('SHA1', key, data)
+    #     #=> "3nybhbi3iqa8ino29wqQcBydtNk="
+    #
+    def self.base64digest: (String | Digest algo, String key, String data) -> String
+
     # <!-- rdoc-file=ext/openssl/ossl_hmac.c -->
     # Returns *hmac* updated with the message to be authenticated. Can be called
     # repeatedly with chunks of the message.
@@ -3711,6 +3728,14 @@ module OpenSSL
     # string.
     #
     def hexdigest: () -> String
+
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/hmac.rb
+    #   - hmac.base64digest -> string
+    # -->
+    # Returns the authentication code an a Base64-encoded string.
+    #
+    def base64digest: () -> String
 
     # <!-- rdoc-file=ext/openssl/lib/openssl/hmac.rb -->
     # Returns the authentication code as a hex-encoded string. The *digest*
