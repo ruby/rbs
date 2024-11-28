@@ -22,7 +22,7 @@
  * */
 VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes);
 
-PRINTF_ARGS(void syntax_error(parserstate *state, token tok, const char *fmt, ...), 3, 4);
+PRINTF_ARGS(void set_syntax_error(parserstate *state, token tok, const char *fmt, ...), 3, 4);
 
 /**
  * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.

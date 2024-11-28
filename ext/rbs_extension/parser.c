@@ -96,11 +96,7 @@ static rbs_location_t *rbs_location_current_token(parserstate *state) {
 static bool parse_optional(parserstate *state, rbs_node_t **optional);
 static bool parse_simple(parserstate *state, rbs_node_t **type);
 
-bool has_error(parserstate *state) {
-  return state->error != NULL || state->aborted;
-}
-
-void syntax_error(parserstate *state, token tok, const char *fmt, ...) {
+void set_syntax_error(parserstate *state, token tok, const char *fmt, ...) {
   if (state->error) {
     return;
   }
@@ -143,7 +139,7 @@ void parser_advance_no_gap(parserstate *state) {
   if (state->current_token.range.end.byte_pos == state->next_token.range.start.byte_pos) {
     parser_advance(state);
   } else {
-    syntax_error(state, state->next_token, "unexpected token");
+    set_syntax_error(state, state->next_token, "unexpected token");
   }
 }
 
@@ -222,7 +218,7 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
 
     VALUE string = rb_funcall(ids, rb_intern("join"), 1, rb_str_new_cstr(", "));
 
-    syntax_error(state, state->current_token, "expected one of %s", StringValuePtr(string));
+    set_syntax_error(state, state->current_token, "expected one of %s", StringValuePtr(string));
     return false;
   }
 }
@@ -248,7 +244,7 @@ static bool parse_type_list(parserstate *state, enum TokenType eol, rbs_node_lis
       if (state->next_token.type == eol) {
         break;
       } else {
-        syntax_error(state, state->next_token, "comma delimited type list is expected");
+        set_syntax_error(state, state->next_token, "comma delimited type list is expected");
         return false;
       }
     }
@@ -305,7 +301,7 @@ static bool parse_function_param(parserstate *state, rbs_types_function_param_t 
     };
 
     if (!is_keyword_token(state->current_token.type)) {
-      syntax_error(state, state->current_token, "unexpected token for function parameter name");
+      set_syntax_error(state, state->current_token, "unexpected token for function parameter name");
       return false;
     }
 
@@ -365,7 +361,7 @@ static bool parse_keyword(parserstate *state, rbs_hash_t *keywords, rbs_hash_t *
   CHECK_PARSE(parse_keyword_key(state, &key));
 
   if (rbs_hash_find(memo, (rbs_node_t *) key)) {
-    syntax_error(state, state->current_token, "duplicated keyword argument");
+    set_syntax_error(state, state->current_token, "duplicated keyword argument");
     return false;
   } else {
     rbs_hash_set(memo, (rbs_node_t *) key, (rbs_node_t *) rbs_ast_bool_new(&state->allocator, true));
@@ -548,7 +544,7 @@ PARSE_KEYWORDS:
       if (is_keyword(state)) {
         CHECK_PARSE(parse_keyword(state, params->optional_keywords, memo));
       } else {
-        syntax_error(state, state->next_token, "optional keyword argument type is expected");
+        set_syntax_error(state, state->next_token, "optional keyword argument type is expected");
         return false;
       }
       break;
@@ -570,7 +566,7 @@ PARSE_KEYWORDS:
       if (is_keyword(state)) {
         CHECK_PARSE(parse_keyword(state, params->required_keywords, memo));
       } else {
-        syntax_error(state, state->next_token, "required keyword argument type is expected");
+        set_syntax_error(state, state->next_token, "required keyword argument type is expected");
         return false;
       }
       break;
@@ -586,7 +582,7 @@ PARSE_KEYWORDS:
 
 EOP:
   if (state->next_token.type != pRPAREN) {
-    syntax_error(state, state->next_token, "unexpected token for method type parameters");
+    set_syntax_error(state, state->next_token, "unexpected token for method type parameters");
     return false;
   }
 
@@ -678,7 +674,7 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
   // Untyped method parameter means it cannot have block
   if (rbs_is_untyped_params(&params)) {
     if (state->next_token.type != pARROW) {
-      syntax_error(state, state->next_token2, "A method type with untyped method parameter cannot have block");
+      set_syntax_error(state, state->next_token2, "A method type with untyped method parameter cannot have block");
       return false;
     }
   }
@@ -785,7 +781,7 @@ static bool parse_proc_type(parserstate *state, rbs_types_proc_t **proc) {
 
 static void check_key_duplication(parserstate *state, rbs_hash_t *fields, rbs_node_t *key) {
   if (rbs_hash_find(fields, ((rbs_node_t *) key))) {
-    syntax_error(state, state->current_token, "duplicated record key");
+    set_syntax_error(state, state->current_token, "duplicated record key");
   }
 }
 
@@ -839,7 +835,7 @@ static bool parse_record_attributes(parserstate *state, rbs_hash_t **fields) {
         break;
       }
       default:
-        syntax_error(state, state->next_token, "unexpected record key token");
+        set_syntax_error(state, state->next_token, "unexpected record key token");
         return false;
       }
       check_key_duplication(state, *fields, (rbs_node_t *) key);
@@ -1182,7 +1178,7 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
     return true;
   }
   default:
-    syntax_error(state, state->current_token, "unexpected token for simple type");
+    set_syntax_error(state, state->current_token, "unexpected token for simple type");
     return false;
   }
 }
@@ -1338,7 +1334,7 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
           required_param_allowed = false;
         } else {
           if (!required_param_allowed) {
-            syntax_error(state, state->current_token, "required type parameter is not allowed after optional type parameter");
+            set_syntax_error(state, state->current_token, "required type parameter is not allowed after optional type parameter");
             return false;
           }
         }
@@ -1664,7 +1660,7 @@ static bool parse_method_name(parserstate *state, range *range, rbs_ast_symbol_t
   }
 
   default:
-    syntax_error(state, state->current_token, "unexpected token for method name");
+    set_syntax_error(state, state->current_token, "unexpected token for method name");
     return false;
   }
 }
@@ -1767,7 +1763,6 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
     kind = INSTANCE_KIND;
   } else {
     kind = parse_instance_singleton_kind(state, visibility == NULL, &kind_range);
-    if (has_error(state)) return false;
   }
 
   range name_range;
@@ -1777,7 +1772,7 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
   #define SELF_ID rbs_constant_pool_insert_constant(&state->constant_pool, (const unsigned char *) "self?", strlen("self?"))
 
   if (state->next_token.type == pDOT && name->constant_id == SELF_ID) {
-    syntax_error(state, state->next_token, "`self?` method cannot have visibility");
+    set_syntax_error(state, state->next_token, "`self?` method cannot have visibility");
     return false;
   } else {
     parser_advance_assert(state, pCOLON);
@@ -1822,12 +1817,12 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
         member_range.end = overloading_range.end;
         break;
       } else {
-        syntax_error(state, state->next_token, "unexpected overloading method definition");
+        set_syntax_error(state, state->next_token, "unexpected overloading method definition");
         return false;
       }
 
     default:
-      syntax_error(state, state->next_token, "unexpected token for method type");
+      set_syntax_error(state, state->next_token, "unexpected token for method type");
       return false;
     }
 
@@ -1933,7 +1928,7 @@ static bool parse_mixin_member(parserstate *state, bool from_interface, position
 
   if (from_interface) {
     if (state->current_token.type != kINCLUDE) {
-      syntax_error(state, state->current_token, "unexpected mixin in interface declaration");
+      set_syntax_error(state, state->current_token, "unexpected mixin in interface declaration");
       return false;
     }
   }
@@ -2042,7 +2037,7 @@ static bool parse_alias_member(parserstate *state, bool instance_only, position 
 NODISCARD
 static bool parse_variable_member(parserstate *state, position comment_pos, rbs_node_list_t *annotations, rbs_node_t **variable_member) {
   if (annotations->length > 0) {
-    syntax_error(state, state->current_token, "annotation cannot be given to variable members");
+    set_syntax_error(state, state->current_token, "annotation cannot be given to variable members");
     return false;
   }
 
@@ -2142,7 +2137,7 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
 NODISCARD
 static bool parse_visibility_member(parserstate *state, rbs_node_list_t *annotations, rbs_node_t **visibility_member) {
   if (annotations->length > 0) {
-    syntax_error(state, state->current_token, "annotation cannot be given to visibility members");
+    set_syntax_error(state, state->current_token, "annotation cannot be given to visibility members");
     return false;
   }
 
@@ -2214,7 +2209,6 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
 
   range kind_range;
   InstanceSingletonKind is_kind = parse_instance_singleton_kind(state, false, &kind_range);
-  if (has_error(state)) return false;
 
   rbs_keyword_t *kind = rbs_keyword_new(&state->allocator, INTERN(((is_kind == INSTANCE_KIND) ? "instance" : "singleton")));
 
@@ -2324,7 +2318,7 @@ static bool parse_interface_members(parserstate *state, rbs_node_list_t **member
     }
 
     default:
-      syntax_error(state, state->current_token, "unexpected token for interface declaration member");
+      set_syntax_error(state, state->current_token, "unexpected token for interface declaration member");
       return false;
     }
 
@@ -2505,7 +2499,7 @@ static bool parse_module_members(parserstate *state, rbs_node_list_t **members) 
           break;
         }
         default:
-          syntax_error(state, state->next_token, "method or attribute definition is expected after visibility modifier");
+          set_syntax_error(state, state->next_token, "method or attribute definition is expected after visibility modifier");
           return false;
         }
       } else {
@@ -2795,7 +2789,7 @@ static bool parse_nested_decl(parserstate *state, const char *nested_in, positio
     break;
   }
   default:
-    syntax_error(state, state->current_token, "unexpected token for class/module declaration member");
+    set_syntax_error(state, state->current_token, "unexpected token for class/module declaration member");
     return false;
   }
 
@@ -2851,7 +2845,7 @@ static bool parse_decl(parserstate *state, rbs_node_t **decl) {
     return true;
   }
   default:
-    syntax_error(state, state->current_token, "cannot start a declaration");
+    set_syntax_error(state, state->current_token, "cannot start a declaration");
     return false;
   }
 }
@@ -2972,7 +2966,7 @@ static bool parse_use_clauses(parserstate *state, rbs_node_list_t *clauses) {
         break;
       }
       default:
-        syntax_error(state, state->next_token, "use clause is expected");
+        set_syntax_error(state, state->next_token, "use clause is expected");
         return false;
     }
 

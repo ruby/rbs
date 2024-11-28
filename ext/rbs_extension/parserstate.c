@@ -140,7 +140,7 @@ bool parser_advance_if(parserstate *state, enum TokenType type) {
 
 void parser_assert(parserstate *state, enum TokenType type) {
   if (state->current_token.type != type) {
-    syntax_error(
+    set_syntax_error(
       state,
       state->current_token,
       "expected a token `%s`",
