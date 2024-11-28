@@ -784,7 +784,7 @@ class Dir
   # caveats.
   #
   def chdir: () -> Integer
-           | [T] { () -> T } -> T
+           | [T] () { () -> T } -> T
 
   # <!--
   #   rdoc-file=dir.c

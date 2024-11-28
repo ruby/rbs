@@ -43,7 +43,15 @@ task :confirm_annotation do
   sh "git diff --exit-code core stdlib"
 end
 
+task :templates do
+  sh "bundle exec ruby templates/template.rb include/rbs/constants.h"
+  sh "bundle exec ruby templates/template.rb include/rbs/ruby_objs.h"
+  sh "bundle exec ruby templates/template.rb src/constants.c"
+  sh "bundle exec ruby templates/template.rb src/ruby_objs.c"
+end
+
 task :compile => "ext/rbs_extension/lexer.c"
+Rake::Task[:compile].prereqs.prepend :templates
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
@@ -63,7 +71,12 @@ task :validate => :compile do
   # Skip RBS validation because Ruby CI runs without rubygems
   case skip_rbs_validation = ENV["SKIP_RBS_VALIDATION"]
   when nil
-    libs << "rbs"
+    begin
+      Gem::Specification.find_by_name("rbs")
+      libs << "rbs"
+    rescue Gem::MissingSpecError
+      STDERR.puts "🚨🚨🚨🚨 Skipping `rbs` gem because it's not found"
+    end
   when "true"
     # Skip
   else
@@ -90,7 +103,7 @@ task :stdlib_test => :compile do
   if ENV["RANDOMIZE_STDLIB_TEST_ORDER"] == "true"
     test_files.shuffle!
   end
-  
+
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"

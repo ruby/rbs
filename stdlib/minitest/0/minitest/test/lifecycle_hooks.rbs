@@ -35,7 +35,7 @@ module Minitest::Test::LifecycleHooks
   #       end
   #     end
   #
-  #     class MiniTest::Test
+  #     class Minitest::Test
   #       include MyMinitestPlugin
   #     end
   #

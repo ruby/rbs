@@ -6,6 +6,11 @@
 # Runnable.runnables.
 #
 class Minitest::Runnable
+  @@runnables: untyped
+  @@marshal_dump_warned: untyped
+  self.@_info_handler: untyped
+  @NAME: untyped
+  @metadata: untyped
   def time_it: () { () -> untyped } -> untyped
 
   # <!--
@@ -52,7 +57,16 @@ class Minitest::Runnable
   # Minitest::ParallelTest::ClassMethods for an example.
   #
   def self.run_one_method: (untyped klass, untyped method_name, untyped reporter) -> untyped
-  def self.with_info_handler: (untyped reporter) ?{ () -> untyped } -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - test_order()
+  # -->
+  # Defines the order to run tests (:random by default). Override this or use a
+  # convenience method to change it for your tests.
+  #
+  def self.test_order: () -> :random
+  def self.with_info_handler: (untyped reporter) { (?) -> untyped } -> untyped
   def self.on_signal: (untyped name, untyped action) { () -> untyped } -> untyped
 
   # <!--
@@ -75,6 +89,19 @@ class Minitest::Runnable
   def marshal_load: (untyped ary) -> untyped
   def failure: () -> untyped
   def initialize: (untyped name) -> void
+
+  # <!-- rdoc-file=lib/minitest.rb -->
+  # Sets metadata, mainly used for `Result.from`.
+  #
+  def metadata: () -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - metadata?()
+  # -->
+  # Returns true if metadata exists.
+  #
+  def metadata?: () -> untyped
 
   # <!--
   #   rdoc-file=lib/minitest.rb
@@ -127,5 +154,10 @@ class Minitest::Runnable
   # The time it took to run.
   #
   attr_accessor time: untyped
+
+  # <!-- rdoc-file=lib/minitest.rb -->
+  # Sets metadata, mainly used for `Result.from`.
+  #
+  attr_writer metadata: untyped
   SIGNALS: Hash[String, Integer]
 end

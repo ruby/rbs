@@ -2,6 +2,14 @@
 # Show your testing pride!
 #
 class Minitest::PrideIO
+  self.@pride: untyped
+  @io: untyped
+  # stolen from /System/Library/Perl/5.10.0/Term/ANSIColor.pm
+  # also reference https://en.wikipedia.org/wiki/ANSI_escape_code
+  @colors: untyped
+  @size: untyped
+  @index: untyped
+
   # <!--
   #   rdoc-file=lib/minitest/pride_plugin.rb
   #   - pride!()
