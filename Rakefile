@@ -43,7 +43,15 @@ task :confirm_annotation do
   sh "git diff --exit-code core stdlib"
 end
 
+task :templates do
+  sh "bundle exec ruby templates/template.rb ext/rbs_extension/constants.h"
+  sh "bundle exec ruby templates/template.rb ext/rbs_extension/ruby_objs.h"
+  sh "bundle exec ruby templates/template.rb ext/rbs_extension/constants.c"
+  sh "bundle exec ruby templates/template.rb ext/rbs_extension/ruby_objs.c"
+end
+
 task :compile => "ext/rbs_extension/lexer.c"
+Rake::Task[:compile].prereqs.prepend :templates
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
