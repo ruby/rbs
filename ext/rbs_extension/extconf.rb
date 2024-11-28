@@ -11,5 +11,5 @@ root_dir = File.expand_path('../../../', __FILE__)
 $srcs = Dir.glob("#{root_dir}/src/**/*.c") +
         Dir.glob("#{root_dir}/ext/rbs_extension/*.c")
 
-append_cflags ['-std=gnu99']
+append_cflags ['-std=gnu99', '-Wunused-result']
 create_makefile 'rbs_extension'
