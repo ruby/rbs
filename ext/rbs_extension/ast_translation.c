@@ -10,7 +10,7 @@
 #include "ruby.h"
 #include "ruby/encoding.h"
 
-#include "rbs/constants.h"
+#include "class_constants.h"
 #include "rbs_string_bridging.h"
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
