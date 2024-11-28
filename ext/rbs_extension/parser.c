@@ -963,25 +963,25 @@ static VALUE parse_simple(parserstate *state) {
     return type;
   }
   case kBOOL:
-    return rbs_base_type(RBS_Types_Bases_Bool, rbs_location_current_token(state));
+    return rbs_bases_bool(rbs_location_current_token(state));
   case kBOT:
-    return rbs_base_type(RBS_Types_Bases_Bottom, rbs_location_current_token(state));
+    return rbs_bases_bottom(rbs_location_current_token(state));
   case kCLASS:
-    return rbs_base_type(RBS_Types_Bases_Class, rbs_location_current_token(state));
+    return rbs_bases_class(rbs_location_current_token(state));
   case kINSTANCE:
-    return rbs_base_type(RBS_Types_Bases_Instance, rbs_location_current_token(state));
+    return rbs_bases_instance(rbs_location_current_token(state));
   case kNIL:
-    return rbs_base_type(RBS_Types_Bases_Nil, rbs_location_current_token(state));
+    return rbs_bases_nil(rbs_location_current_token(state));
   case kSELF:
-    return rbs_base_type(RBS_Types_Bases_Self, rbs_location_current_token(state));
+    return rbs_bases_self(rbs_location_current_token(state));
   case kTOP:
-    return rbs_base_type(RBS_Types_Bases_Top, rbs_location_current_token(state));
+    return rbs_bases_top(rbs_location_current_token(state));
   case kVOID:
-    return rbs_base_type(RBS_Types_Bases_Void, rbs_location_current_token(state));
+    return rbs_bases_void(rbs_location_current_token(state));
   case kUNTYPED:
-    return rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+    return rbs_bases_any(rbs_location_current_token(state));
   case k__TODO__: {
-    VALUE type = rbs_base_type(RBS_Types_Bases_Any, rbs_location_current_token(state));
+    VALUE type = rbs_bases_any(rbs_location_current_token(state));
     rb_funcall(type, rb_intern("todo!"), 0);
     return type;
   }
@@ -1219,7 +1219,12 @@ VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) 
       rbs_loc_add_optional_child(loc, rb_intern("upper_bound"), upper_bound_range);
       rbs_loc_add_optional_child(loc, rb_intern("default"), default_type_range);
 
-      VALUE param = rbs_ast_type_param(name, variance, unchecked, upper_bound, default_type, location);
+      VALUE param = rbs_ast_type_param(name, variance, upper_bound, default_type, location);
+
+      if (unchecked) {
+        rb_funcall(param, rb_intern("unchecked!"), 0);
+      }
+
       melt_array(&params);
       rb_ary_push(params, param);
 
@@ -1780,25 +1785,23 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
   range keyword_range;
   range args_range = NULL_RANGE;
   bool reset_typevar_scope;
+  enum TokenType type;
 
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
 
+  type = state->current_token.type;
   keyword_range = state->current_token.range;
 
-  VALUE klass = Qnil;
-  switch (state->current_token.type)
+  switch (type)
   {
   case kINCLUDE:
-    klass = RBS_AST_Members_Include;
     reset_typevar_scope = false;
     break;
   case kEXTEND:
-    klass = RBS_AST_Members_Extend;
     reset_typevar_scope = true;
     break;
   case kPREPEND:
-    klass = RBS_AST_Members_Prepend;
     reset_typevar_scope = false;
     break;
   default:
@@ -1836,14 +1839,18 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
   rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
   rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
 
-  return rbs_ast_members_mixin(
-    klass,
-    name,
-    args,
-    annotations,
-    location,
-    get_comment(state, comment_pos.line)
-  );
+  VALUE comment = get_comment(state, comment_pos.line);
+  switch (type)
+  {
+  case kINCLUDE:
+    return rbs_ast_members_include(name, args, annotations, location, comment);
+  case kEXTEND:
+    return rbs_ast_members_extend(name, args, annotations, location, comment);
+  case kPREPEND:
+    return rbs_ast_members_prepend(name, args, annotations, location, comment);
+  default:
+    rbs_abort();
+  }
 }
 
 /**
@@ -1921,6 +1928,7 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
   range member_range;
   range name_range, colon_range;
   range kind_range = NULL_RANGE;
+  rbs_loc *loc;
 
   if (rb_array_len(annotations) > 0) {
     raise_syntax_error(
@@ -1934,7 +1942,6 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
   VALUE comment = get_comment(state, comment_pos.line);
 
-  VALUE klass;
   VALUE location;
   VALUE name;
   VALUE type;
@@ -1942,8 +1949,6 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
   switch (state->current_token.type)
   {
   case tAIDENT:
-    klass = RBS_AST_Members_InstanceVariable;
-
     name_range = state->current_token.range;
     name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1953,11 +1958,16 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
     type = parse_type(state);
     member_range.end = state->current_token.range.end;
 
-    break;
+    location = rbs_new_location(state->buffer, member_range);
+    loc = rbs_check_location(location);
+    rbs_loc_alloc_children(loc, 3);
+    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+    rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
+
+    return rbs_ast_members_instance_variable(name, type, location, comment);
 
   case tA2IDENT:
-    klass = RBS_AST_Members_ClassVariable;
-
     name_range = state->current_token.range;
     name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1969,11 +1979,16 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
-    break;
+    location = rbs_new_location(state->buffer, member_range);
+    loc = rbs_check_location(location);
+    rbs_loc_alloc_children(loc, 3);
+    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+    rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
+
+    return rbs_ast_members_class_variable(name, type, location, comment);
 
   case kSELF:
-    klass = RBS_AST_Members_ClassInstanceVariable;
-
     kind_range.start = state->current_token.range.start;
     kind_range.end = state->next_token.range.end;
 
@@ -1991,20 +2006,18 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
-    break;
+    location = rbs_new_location(state->buffer, member_range);
+    loc = rbs_check_location(location);
+    rbs_loc_alloc_children(loc, 3);
+    rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
+    rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
+
+    return rbs_ast_members_class_instance_variable(name, type, location, comment);
 
   default:
     rbs_abort();
   }
-
-  location = rbs_new_location(state->buffer, member_range);
-  rbs_loc *loc = rbs_check_location(location);
-  rbs_loc_alloc_children(loc, 3);
-  rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
-  rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
-  rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
-
-  return rbs_ast_members_variable(klass, name, type, location, comment);
 }
 
 /*
@@ -2020,24 +2033,17 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
     );
   }
 
-  VALUE klass;
+  VALUE location = rbs_new_location(state->buffer, state->current_token.range);
 
   switch (state->current_token.type)
   {
   case kPUBLIC:
-    klass = RBS_AST_Members_Public;
-    break;
+    return rbs_ast_members_public(location);
   case kPRIVATE:
-    klass = RBS_AST_Members_Private;
-    break;
+    return rbs_ast_members_private(location);
   default:
     rbs_abort();
   }
-
-  return rbs_ast_members_visibility(
-    klass,
-    rbs_new_location(state->buffer, state->current_token.range)
-  );
 }
 
 /*
@@ -2060,7 +2066,6 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
   range kind_range = NULL_RANGE, ivar_range = NULL_RANGE, ivar_name_range = NULL_RANGE, visibility_range = NULL_RANGE;
 
   InstanceSingletonKind is_kind;
-  VALUE klass;
   VALUE kind;
   VALUE attr_name;
   VALUE ivar_name;
@@ -2069,6 +2074,7 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
   VALUE location;
   VALUE visibility;
   rbs_loc *loc;
+  enum TokenType attr_type;
 
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
@@ -2092,21 +2098,8 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
     break;
   }
 
+  attr_type = state->current_token.type;
   keyword_range = state->current_token.range;
-  switch (state->current_token.type)
-  {
-  case kATTRREADER:
-    klass = RBS_AST_Members_AttrReader;
-    break;
-  case kATTRWRITER:
-    klass = RBS_AST_Members_AttrWriter;
-    break;
-  case kATTRACCESSOR:
-    klass = RBS_AST_Members_AttrAccessor;
-    break;
-  default:
-    rbs_abort();
-  }
 
   is_kind = parse_instance_singleton_kind(state, false, &kind_range);
   if (is_kind == INSTANCE_KIND) {
@@ -2153,17 +2146,17 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
   rbs_loc_add_optional_child(loc, rb_intern("ivar_name"), ivar_name_range);
   rbs_loc_add_optional_child(loc, rb_intern("visibility"), visibility_range);
 
-  return rbs_ast_members_attribute(
-    klass,
-    attr_name,
-    type,
-    ivar_name,
-    kind,
-    annotations,
-    location,
-    comment,
-    visibility
-  );
+  switch (attr_type)
+  {
+  case kATTRREADER:
+    return rbs_ast_members_attr_reader(attr_name, type, ivar_name, kind, annotations, location, comment, visibility);
+  case kATTRWRITER:
+    return rbs_ast_members_attr_writer(attr_name, type, ivar_name, kind, annotations, location, comment, visibility);
+  case kATTRACCESSOR:
+    return rbs_ast_members_attr_accessor(attr_name, type, ivar_name, kind, annotations, location, comment, visibility);
+  default:
+    rbs_abort();
+  }
 }
 
 /*

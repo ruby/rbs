@@ -24,7 +24,7 @@ module RBS
   # vendor/rbs/minitest-1.2.3  => Will include `minitest` library RBSs.
   # ```
   #
-  # The vendorerd RBSs will be loaded through :dir source.
+  # The vendored RBSs will be loaded through :dir source.
   #
   # ```rb
   # loader = RBS::EnvironmentLoader.new(core_root: nil, repository: RBS::Repository.new(no_stdlib: true))
