@@ -368,7 +368,7 @@ module RBS
                        when node.children[0].is_a?(Symbol)
                          TypeName.new(name: node.children[0], namespace: Namespace.empty)
                        else
-                         const_to_name!(node.children[0])
+                         const_to_name!(node.children[0], context: context)
                        end
 
           value_node = node.children.last
@@ -429,13 +429,13 @@ module RBS
         end
       end
 
-      def const_to_name!(node)
+      def const_to_name!(node, context: nil)
         case node.type
         when :CONST
           TypeName.new(name: node.children[0], namespace: Namespace.empty)
         when :COLON2
           if node.children[0]
-            namespace = const_to_name!(node.children[0]).to_namespace
+            namespace = const_to_name!(node.children[0], context: context).to_namespace
           else
             namespace = Namespace.empty
           end
@@ -443,6 +443,10 @@ module RBS
           TypeName.new(name: node.children[1], namespace: namespace)
         when :COLON3
           TypeName.new(name: node.children[0], namespace: Namespace.root)
+        when :SELF
+          raise if context.nil?
+
+          context.namespace.to_type_name
         else
           raise
         end

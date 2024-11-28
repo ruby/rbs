@@ -688,6 +688,7 @@ module Foo
   VERSION = '0.1.1'
   FROZEN = 'str'.freeze
   ::Hello::World = :foo
+  self::MAX = 42
 end
     EOR
 
@@ -700,6 +701,8 @@ module Foo
   FROZEN: "str"
 
   ::Hello::World: :foo
+
+  ::Foo::MAX: 42
 end
     EOF
   end

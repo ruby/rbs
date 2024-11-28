@@ -44,7 +44,7 @@ module RBS
       # Returns a type name that represents the name of the constant.
       # `node` must be _constant_ node, `CONST`, `COLON2`, or `COLON3` node.
       #
-      def const_to_name!: (RubyVM::AbstractSyntaxTree::Node node) -> TypeName
+      def const_to_name!: (RubyVM::AbstractSyntaxTree::Node node, ?context: Context?) -> TypeName
 
       # Returns a type name that represents the name of the constant.
       # `node` can be `SELF` for `extend self` pattern.
