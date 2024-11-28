@@ -52,6 +52,14 @@ module RBS
       kind == :alias
     end
 
+    def data?
+      class? && namespace.empty? && name == :Data
+    end
+
+    def struct?
+      class? && namespace.empty? && name == :Struct
+    end
+
     def absolute!
       self.class.new(namespace: namespace.absolute!, name: name)
     end

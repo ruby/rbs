@@ -10,7 +10,7 @@
 #ifdef RB_PASS_KEYWORDS
   // Ruby 2.7 or later
   #define CLASS_NEW_INSTANCE(klass, argc, argv)\
-          rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
+          rb_respond_to(klass, rb_intern("new")) ? rb_funcallv_kw(klass, rb_intern("new"), argc, argv, RB_PASS_KEYWORDS) : rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
 #else
   // Ruby 2.6
   #define CLASS_NEW_INSTANCE(receiver, argc, argv)\

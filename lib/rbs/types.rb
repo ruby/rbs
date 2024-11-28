@@ -886,6 +886,22 @@ module RBS
 
         alias eql? ==
 
+        def has_self_type?
+          false
+        end
+
+        def has_classish_type?
+          false
+        end
+
+        def each_type
+          if block_given?
+            # nop
+          else
+            enum_for :each_type
+          end
+        end
+
         def hash
           self.class.hash ^ type.hash ^ name.hash
         end
@@ -912,6 +928,18 @@ module RBS
           else
             "#{type}"
           end
+        end
+
+        def map_type_name(&block)
+          Param.new(
+            name: name,
+            type: type.map_type_name(&block),
+            location: location
+          )
+        end
+
+        def with_nonreturn_void?
+          type.with_nonreturn_void?
         end
       end
 

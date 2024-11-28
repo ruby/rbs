@@ -43,8 +43,6 @@ module RBS
 
         def build_super_class: () -> AST::Declarations::Class::Super
 
-        def add_decl_members: (AST::Declarations::Class) -> void
-
         def initialize: (Class target_class) -> void
       end
 
@@ -52,8 +50,6 @@ module RBS
         def self.generatable?: (Class target) -> bool
 
         private
-
-        def add_decl_members: (AST::Declarations::Class decl) -> void
 
         def build_overload_for_keyword_arguments: () -> AST::Members::MethodDefinition::Overload
 
@@ -72,8 +68,6 @@ module RBS
         def self.generatable?: (Class target) -> bool
 
         private
-
-        def add_decl_members: (AST::Declarations::Class decl) -> void
 
         def build_s_new: () -> Array[AST::Members::MethodDefinition]
 

@@ -54,5 +54,6 @@ module RBS
     TrueClass = Name.define(:TrueClass)
     FalseClass = Name.define(:FalseClass)
     Numeric = Name.define(:Numeric)
+    Data = Name.define(:Data)
   end
 end
