@@ -7,6 +7,7 @@ module RBS
         DEPRECATED_STDLIBS = [
           ['mutex_m', '0.3.0']
         ]
+        ALMUNI_STDLIBS = []
 
         class GemfileLockMismatchError < StandardError
           def initialize(expected:, actual:)
@@ -135,6 +136,11 @@ module RBS
 
               begin
                 locked[:source].dependencies_of(locked[:name], locked[:version])&.each do |dep|
+                  next if ALMUNI_STDLIBS.include?(dep["name"])
+                  unless Sources::Stdlib.instance.has?(dep["name"], nil)
+                    RBS.logger.warn "`#{dep["name"]}` has been specified in #{locked[:name]}/#{locked[:version]}/manifest.yaml. However, only stdlib gem can be specified here."
+                    next
+                  end
                   assign_by(name: dep["name"], version: nil, from_gem: name)
                 end
               rescue
@@ -178,6 +184,11 @@ module RBS
 
           if deps = source.dependencies_of(name, "0")
             deps.each do |dep|
+              next if ALMUNI_STDLIBS.include?(dep["name"])
+              unless Sources::Stdlib.instance.has?(dep["name"], nil)
+                RBS.logger.warn "`#{dep["name"]}` has been specified in #{name}/0/manifest.yaml. However, only stdlib gem can be specified here."
+                next
+              end
               assign_by(name: dep["name"], version: nil, from_gem: name)
             end
           end
