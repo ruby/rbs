@@ -28,7 +28,7 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
     return ruby_hash;
 }
 
-VALUE rbs_loc_to_ruby_location(rbs_location_t *loc) {
+VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *loc) {
   return loc->cached_ruby_value;
 }
 
@@ -96,7 +96,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             <%- when "rbs_hash" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(ctx, node-><%= field.name %>));
             <%- when "rbs_location" -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(node-><%= field.name %>));
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
             <%- when "rbs_ast_symbol" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.name %>)); // rbs_ast_symbol
             <%- when "rbs_keyword" -%>
