@@ -1060,9 +1060,7 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
   case tINTEGER: {
     rbs_location_t *loc = rbs_location_current_token(state);
 
-    rbs_string_t string = rbs_string_from_ruby_string(state->lexstate->string);
-    rbs_string_drop_first(&string, state->current_token.range.start.byte_pos);
-    rbs_string_limit_length(&string, state->current_token.range.end.byte_pos - state->current_token.range.start.byte_pos);
+    rbs_string_t string = rbs_parser_get_current_token(state);
     rbs_string_strip_whitespace(&string);
     rbs_string_ensure_owned(&string);
 
@@ -1289,12 +1287,8 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
       parser_advance_assert(state, tUIDENT);
       range name_range = state->current_token.range;
 
-      rbs_constant_id_t id = rbs_constant_pool_insert_shared(
-        &state->constant_pool,
-        (const uint8_t *) peek_token(state->lexstate, state->current_token),
-        token_bytes(state->current_token)
-      );
-
+      rbs_string_t string = rbs_parser_get_current_token(state);
+      rbs_constant_id_t id = rbs_constant_pool_insert_string(&state->constant_pool, string);
       rbs_ast_symbol_t *name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, id);
 
       parser_insert_typevar(state, id);
@@ -1541,9 +1535,9 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
   int open_bytes = rb_enc_codelen(open_char, enc);
   int close_bytes = rb_enc_codelen(close_char, enc);
 
-  rbs_string_t string = rbs_string_from_ruby_string(state->lexstate->string);
-  rbs_string_drop_first(&string, rg.start.byte_pos + offset_bytes + open_bytes);
-  rbs_string_limit_length(&string, rg.end.byte_pos - rg.start.byte_pos - offset_bytes - open_bytes - close_bytes);
+  rbs_string_t string = rbs_parser_get_current_token(state);
+  rbs_string_drop_first(&string, offset_bytes + open_bytes);
+  rbs_string_limit_length(&string, rbs_string_len(string) - close_bytes);
   rbs_string_strip_whitespace(&string);
   rbs_string_ensure_owned(&string);
 
