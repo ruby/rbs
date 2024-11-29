@@ -15,6 +15,6 @@
  *    :"baz\\t"   | baz\t
  *    :'baz'      | baz
  * */
-rbs_string_t rbs_unquote_string2(rbs_string_t input);
+rbs_string_t rbs_unquote_string(rbs_string_t input);
 
 #endif // RBS_RBS_UNESCAPE_H

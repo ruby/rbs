@@ -109,7 +109,7 @@ rbs_string_t unescape_string(const rbs_string_t string, bool is_double_quote) {
     return str;
 }
 
-rbs_string_t rbs_unquote_string2(rbs_string_t input) {
+rbs_string_t rbs_unquote_string(rbs_string_t input) {
     unsigned int first_char = utf8_to_codepoint(input);
     size_t byte_length = rbs_string_len(input);
 
