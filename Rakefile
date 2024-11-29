@@ -44,10 +44,10 @@ task :confirm_annotation do
 end
 
 task :templates do
-  sh "bundle exec ruby templates/template.rb include/rbs/constants.h"
-  sh "bundle exec ruby templates/template.rb include/rbs/ruby_objs.h"
-  sh "bundle exec ruby templates/template.rb src/constants.c"
-  sh "bundle exec ruby templates/template.rb src/ruby_objs.c"
+  sh "#{ruby} templates/template.rb include/rbs/constants.h"
+  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
+  sh "#{ruby} templates/template.rb src/constants.c"
+  sh "#{ruby} templates/template.rb src/ruby_objs.c"
 end
 
 task :compile => "ext/rbs_extension/lexer.c"
