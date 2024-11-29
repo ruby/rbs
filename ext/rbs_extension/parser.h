@@ -1,7 +1,6 @@
 #ifndef RBS__PARSER_H
 #define RBS__PARSER_H
 
-#include "ruby.h"
 #include "parserstate.h"
 
 PRINTF_ARGS(void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt, ...), 4, 5);
