@@ -47,6 +47,7 @@ typedef struct comment {
 typedef struct error {
   char *message;
   token token;
+  bool syntax_error;
 } error;
 
 /**
@@ -66,7 +67,6 @@ typedef struct {
 
   rbs_constant_pool_t constant_pool;
   rbs_allocator_t allocator;
-  bool aborted;
   error *error;
 } parserstate;
 
