@@ -10,6 +10,11 @@
 #include "parser.h"
 
 /**
+ * RBS::Parser class
+ * */
+extern VALUE RBS_Parser;
+
+/**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.
  *
  *    Input token | Output string
@@ -21,8 +26,6 @@
  *    :'baz'      | baz
  * */
 VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes);
-
-PRINTF_ARGS(void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt, ...), 4, 5);
 
 /**
  * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.

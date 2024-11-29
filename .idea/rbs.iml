@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RUBY_MODULE" version="4">
+  <component name="ModuleRunConfigurationManager">
+    <shared />
+  </component>
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/features" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+    </content>
+    <orderEntry type="jdk" jdkName="ruby-3.3.4-p94" jdkType="RUBY_SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="abbrev (v0.1.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="activesupport (v8.0.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="addressable (v2.8.7, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ast (v2.4.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="base64 (v0.2.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="benchmark (v0.4.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="benchmark-ips (v2.14.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="bigdecimal (v3.1.8, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="bundler (v2.5.16, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="concurrent-ruby (v1.3.4, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="connection_pool (v2.5.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="csv (v3.3.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="dbm (v1.1.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.5.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="digest (v3.1.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="drb (v2.2.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ffi (v1.17.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="fileutils (v1.7.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="goodcheck (v3.1.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="i18n (v1.14.6, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="json (v2.9.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="json-schema (v5.1.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="language_server-protocol (v3.17.0.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="listen (v3.9.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="logger (v1.6.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="marcel (v1.0.4, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="memory_profiler (v1.1.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="minitest (v5.25.4, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="mutex_m (v0.3.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="net-protocol (v0.2.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="net-smtp (v0.5.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="nkf (v0.2.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="parallel (v1.26.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="parser (v3.3.6.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="power_assert (v2.0.4, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="psych (v4.0.6, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="public_suffix (v6.0.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="raap (v1.0.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="racc (v1.8.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rainbow (v3.1.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rake (v13.2.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rake-compiler (v1.2.8, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rb-fsevent (v0.11.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rb-inotify (v0.11.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rdoc (v6.9.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="regexp_parser (v2.9.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec (v3.13.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-core (v3.13.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-expectations (v3.13.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-mocks (v3.13.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-support (v3.13.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubocop (v1.69.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubocop-ast (v1.37.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubocop-on-rbs (v1.2.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubocop-rubycw (v0.1.6, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.13.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="securerandom (v0.4.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="stackprof (v0.2.26, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="steep (v1.9.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="stringio (v3.1.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="strong_json (v2.1.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="strscan (v3.1.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="tempfile (v0.3.1, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="terminal-table (v3.0.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="test-unit (v3.6.7, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="timeout (v0.4.3, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="tzinfo (v2.0.6, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="unicode-display_width (v2.6.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="uri (v1.0.2, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="vernier (v1.5.0, ruby-3.3.4-p94) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="zlib (v3.2.1, ruby-3.3.4-p94) [gem]" level="application" />
+  </component>
+  <component name="RakeTasksCache-v2">
+    <option name="myRootTask">
+      <RakeTaskImpl id="rake">
+        <subtasks>
+          <RakeTaskImpl description="Build rbs-3.8.0.dev.gem into the pkg directory" fullCommand="build" id="build" />
+          <RakeTaskImpl id="build">
+            <subtasks>
+              <RakeTaskImpl description="Generate SHA512 checksum of rbs-3.8.0.dev.gem into the checksums directory" fullCommand="build:checksum" id="checksum" />
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl description="Generate changelog template from GH pull requests" fullCommand="changelog" id="changelog" />
+          <RakeTaskImpl description="Remove any temporary products" fullCommand="clean" id="clean" />
+          <RakeTaskImpl description="Remove any generated files" fullCommand="clobber" id="clobber" />
+          <RakeTaskImpl description="Compile all the extensions" fullCommand="compile" id="compile" />
+          <RakeTaskImpl id="compile">
+            <subtasks>
+              <RakeTaskImpl description="Compile rbs_extension" fullCommand="compile:rbs_extension" id="rbs_extension" />
+              <RakeTaskImpl description="" fullCommand="compile:arm64-darwin23" id="arm64-darwin23" />
+              <RakeTaskImpl id="rbs_extension">
+                <subtasks>
+                  <RakeTaskImpl description="" fullCommand="compile:rbs_extension:arm64-darwin23" id="arm64-darwin23" />
+                </subtasks>
+              </RakeTaskImpl>
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl id="generate">
+            <subtasks>
+              <RakeTaskImpl description="Generate a test file for a stdlib class signatures" fullCommand="generate:stdlib_test[class]" id="stdlib_test[class]" />
+              <RakeTaskImpl description="" fullCommand="generate:stdlib_test" id="stdlib_test" />
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl description="Build and install rbs-3.8.0.dev.gem into system gems" fullCommand="install" id="install" />
+          <RakeTaskImpl id="install">
+            <subtasks>
+              <RakeTaskImpl description="Build and install rbs-3.8.0.dev.gem into system gems without network access" fullCommand="install:local" id="local" />
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl description="Run tests for {:just_test=&gt;:compile}" fullCommand="just_test" id="just_test" />
+          <RakeTaskImpl description="Create tag v3.8.0.dev and build and push rbs-3.8.0.dev.gem to rubygems.org" fullCommand="release[remote]" id="release[remote]" />
+          <RakeTaskImpl id="release">
+            <subtasks>
+              <RakeTaskImpl description="Explain the post-release steps automatically" fullCommand="release:note" id="note" />
+              <RakeTaskImpl description="" fullCommand="release:guard_clean" id="guard_clean" />
+              <RakeTaskImpl description="" fullCommand="release:rubygem_push" id="rubygem_push" />
+              <RakeTaskImpl description="" fullCommand="release:source_control_push" id="source_control_push" />
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl description="" fullCommand="annotate" id="annotate" />
+          <RakeTaskImpl description="" fullCommand="confirm_annotation" id="confirm_annotation" />
+          <RakeTaskImpl description="" fullCommand="confirm_lexer" id="confirm_lexer" />
+          <RakeTaskImpl description="" fullCommand="confirm_templates" id="confirm_templates" />
+          <RakeTaskImpl id="copy">
+            <subtasks>
+              <RakeTaskImpl id="rbs_extension">
+                <subtasks>
+                  <RakeTaskImpl id="arm64-darwin23">
+                    <subtasks>
+                      <RakeTaskImpl description="" fullCommand="copy:rbs_extension:arm64-darwin23:3.3.4" id="3.3.4" />
+                    </subtasks>
+                  </RakeTaskImpl>
+                </subtasks>
+              </RakeTaskImpl>
+            </subtasks>
+          </RakeTaskImpl>
+          <RakeTaskImpl description="" fullCommand="default" id="default" />
+          <RakeTaskImpl description="" fullCommand="lexer" id="lexer" />
+          <RakeTaskImpl description="" fullCommand="lib" id="lib" />
+          <RakeTaskImpl description="" fullCommand="lib/rbs_extension.bundle" id="lib/rbs_extension.bundle" />
+          <RakeTaskImpl description="" fullCommand="raap" id="raap" />
+          <RakeTaskImpl description="" fullCommand="release" id="release" />
+          <RakeTaskImpl description="" fullCommand="rubocop" id="rubocop" />
+          <RakeTaskImpl description="" fullCommand="stdlib_test" id="stdlib_test" />
+          <RakeTaskImpl description="" fullCommand="templates" id="templates" />
+          <RakeTaskImpl description="" fullCommand="test" id="test" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ARGF_test.rb" id="test/stdlib/ARGF_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Abbrev_test.rb" id="test/stdlib/Abbrev_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Array_test.rb" id="test/stdlib/Array_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Base64_test.rb" id="test/stdlib/Base64_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/BasicObject_test.rb" id="test/stdlib/BasicObject_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Benchmark_test.rb" id="test/stdlib/Benchmark_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/BigDecimal_test.rb" id="test/stdlib/BigDecimal_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/BigMath_test.rb" id="test/stdlib/BigMath_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Binding_test.rb" id="test/stdlib/Binding_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/CGI_test.rb" id="test/stdlib/CGI_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/CSV_Row_test.rb" id="test/stdlib/CSV_Row_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/CSV_Table_test.rb" id="test/stdlib/CSV_Table_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/CSV_test.rb" id="test/stdlib/CSV_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Class_test.rb" id="test/stdlib/Class_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Comparable_test.rb" id="test/stdlib/Comparable_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Complex_test.rb" id="test/stdlib/Complex_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/DBM_test.rb" id="test/stdlib/DBM_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Data_test.rb" id="test/stdlib/Data_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/DateTime_test.rb" id="test/stdlib/DateTime_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Date_test.rb" id="test/stdlib/Date_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Dir_test.rb" id="test/stdlib/Dir_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Dir_tmpdir_test.rb" id="test/stdlib/Dir_tmpdir_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ENV_test.rb" id="test/stdlib/ENV_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ERB_test.rb" id="test/stdlib/ERB_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Encoding_Converter_test.rb" id="test/stdlib/Encoding_Converter_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Encoding_test.rb" id="test/stdlib/Encoding_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Enumerable_test.rb" id="test/stdlib/Enumerable_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Enumerator_test.rb" id="test/stdlib/Enumerator_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Errno_test.rb" id="test/stdlib/Errno_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Etc_test.rb" id="test/stdlib/Etc_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Exception_test.rb" id="test/stdlib/Exception_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/FalseClass_test.rb" id="test/stdlib/FalseClass_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Fiber_test.rb" id="test/stdlib/Fiber_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/FileTest_test.rb" id="test/stdlib/FileTest_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/FileUtils_test.rb" id="test/stdlib/FileUtils_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/File_Stat_test.rb" id="test/stdlib/File_Stat_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/File_test.rb" id="test/stdlib/File_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Find_test.rb" id="test/stdlib/Find_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Float_test.rb" id="test/stdlib/Float_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Forwardable_test.rb" id="test/stdlib/Forwardable_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/FrozenError_test.rb" id="test/stdlib/FrozenError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/GC_test.rb" id="test/stdlib/GC_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Hash_test.rb" id="test/stdlib/Hash_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/IO_console_test.rb" id="test/stdlib/IO_console_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/IO_test.rb" id="test/stdlib/IO_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/IPAddr_test.rb" id="test/stdlib/IPAddr_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Integer_test.rb" id="test/stdlib/Integer_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Kconv_test.rb" id="test/stdlib/Kconv_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Kernel_test.rb" id="test/stdlib/Kernel_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/KeyError_test.rb" id="test/stdlib/KeyError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/LoadError_test.rb" id="test/stdlib/LoadError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/LocalJumpError_test.rb" id="test/stdlib/LocalJumpError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Logger_test.rb" id="test/stdlib/Logger_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Marshal_test.rb" id="test/stdlib/Marshal_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/MatchData_test.rb" id="test/stdlib/MatchData_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Math_test.rb" id="test/stdlib/Math_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Method_test.rb" id="test/stdlib/Method_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Minitest_test.rb" id="test/stdlib/Minitest_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Module_test.rb" id="test/stdlib/Module_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Monitor_test.rb" id="test/stdlib/Monitor_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Mutex_m_test.rb" id="test/stdlib/Mutex_m_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/NKF_test.rb" id="test/stdlib/NKF_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/NameError_test.rb" id="test/stdlib/NameError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Net_HTTP_test.rb" id="test/stdlib/Net_HTTP_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/NilClass_test.rb" id="test/stdlib/NilClass_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/NoMatchingPatternKeyError_test.rb" id="test/stdlib/NoMatchingPatternKeyError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/NoMethodError_test.rb" id="test/stdlib/NoMethodError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ObjectSpace_WeakKeyMap_test.rb" id="test/stdlib/ObjectSpace_WeakKeyMap_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ObjectSpace_test.rb" id="test/stdlib/ObjectSpace_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Open3_test.rb" id="test/stdlib/Open3_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/OpenSSL_test.rb" id="test/stdlib/OpenSSL_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/OptionParser_test.rb" id="test/stdlib/OptionParser_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/PP_test.rb" id="test/stdlib/PP_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/PStore_test.rb" id="test/stdlib/PStore_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/PTY_test.rb" id="test/stdlib/PTY_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Pathname_test.rb" id="test/stdlib/Pathname_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/PrettyPrint_test.rb" id="test/stdlib/PrettyPrint_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Proc_test.rb" id="test/stdlib/Proc_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Ractor_test.rb" id="test/stdlib/Ractor_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Random_test.rb" id="test/stdlib/Random_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Range_test.rb" id="test/stdlib/Range_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Rational_test.rb" id="test/stdlib/Rational_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/RbConfig_test.rb" id="test/stdlib/RbConfig_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Refinement_test.rb" id="test/stdlib/Refinement_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Regexp_test.rb" id="test/stdlib/Regexp_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Resolv_test.rb" id="test/stdlib/Resolv_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Ripper_test.rb" id="test/stdlib/Ripper_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/RubyVM_test.rb" id="test/stdlib/RubyVM_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/SecureRandom_test.rb" id="test/stdlib/SecureRandom_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Set_test.rb" id="test/stdlib/Set_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Shellwords_test.rb" id="test/stdlib/Shellwords_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/SignalException_test.rb" id="test/stdlib/SignalException_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Signal_test.rb" id="test/stdlib/Signal_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/StringIO_test.rb" id="test/stdlib/StringIO_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/String_test.rb" id="test/stdlib/String_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Struct_test.rb" id="test/stdlib/Struct_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Symbol_test.rb" id="test/stdlib/Symbol_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/SystemCallError_test.rb" id="test/stdlib/SystemCallError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/SystemExit_test.rb" id="test/stdlib/SystemExit_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/TSort_test.rb" id="test/stdlib/TSort_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ThreadConditionVariable_test.rb" id="test/stdlib/ThreadConditionVariable_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ThreadGroup_test.rb" id="test/stdlib/ThreadGroup_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ThreadMutex_test.rb" id="test/stdlib/ThreadMutex_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ThreadQueue_test.rb" id="test/stdlib/ThreadQueue_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/ThreadSizedQueue_test.rb" id="test/stdlib/ThreadSizedQueue_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Thread_Backtrace_Location_test.rb" id="test/stdlib/Thread_Backtrace_Location_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Thread_Backtrace_test.rb" id="test/stdlib/Thread_Backtrace_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Thread_test.rb" id="test/stdlib/Thread_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/TimeExtension_test.rb" id="test/stdlib/TimeExtension_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Time_test.rb" id="test/stdlib/Time_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Timeout_test.rb" id="test/stdlib/Timeout_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/TracePoint_test.rb" id="test/stdlib/TracePoint_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/TrueClass_test.rb" id="test/stdlib/TrueClass_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/URI_test.rb" id="test/stdlib/URI_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/UnboundMethod_test.rb" id="test/stdlib/UnboundMethod_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/UncaughtThrowError_test.rb" id="test/stdlib/UncaughtThrowError_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Warning_test.rb" id="test/stdlib/Warning_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/Zlib_test.rb" id="test/stdlib/Zlib_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/constants_test.rb" id="test/stdlib/constants_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/did_you_mean/DidYouMean_test.rb" id="test/stdlib/did_you_mean/DidYouMean_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestMD5_test.rb" id="test/stdlib/digest/DigestMD5_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestRMD160_test.rb" id="test/stdlib/digest/DigestRMD160_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestSHA1_test.rb" id="test/stdlib/digest/DigestSHA1_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestSHA256_test.rb" id="test/stdlib/digest/DigestSHA256_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestSHA384_test.rb" id="test/stdlib/digest/DigestSHA384_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/DigestSHA512_test.rb" id="test/stdlib/digest/DigestSHA512_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/digest/Digest_test.rb" id="test/stdlib/digest/Digest_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/enumerator/Product_test.rb" id="test/stdlib/enumerator/Product_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/global_variables_test.rb" id="test/stdlib/global_variables_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/io/Buffer_test.rb" id="test/stdlib/io/Buffer_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONBigDecimal_test.rb" id="test/stdlib/json/JSONBigDecimal_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONComplex_test.rb" id="test/stdlib/json/JSONComplex_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONDateTime_test.rb" id="test/stdlib/json/JSONDateTime_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONDate_test.rb" id="test/stdlib/json/JSONDate_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONException_test.rb" id="test/stdlib/json/JSONException_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONKernel_test.rb" id="test/stdlib/json/JSONKernel_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONOpenStruct_test.rb" id="test/stdlib/json/JSONOpenStruct_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONRange_test.rb" id="test/stdlib/json/JSONRange_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONRational_test.rb" id="test/stdlib/json/JSONRational_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONRegexp_test.rb" id="test/stdlib/json/JSONRegexp_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONSet_test.rb" id="test/stdlib/json/JSONSet_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONStruct_test.rb" id="test/stdlib/json/JSONStruct_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONSymbol_test.rb" id="test/stdlib/json/JSONSymbol_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSONTime_test.rb" id="test/stdlib/json/JSONTime_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/json/JSON_test.rb" id="test/stdlib/json/JSON_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/open-uri_test.rb" id="test/stdlib/open-uri_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/psych_test.rb" id="test/stdlib/psych_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/resolv/DNS_test.rb" id="test/stdlib/resolv/DNS_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/resolv/Hosts_test.rb" id="test/stdlib/resolv/Hosts_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/resolv/IPv4_test.rb" id="test/stdlib/resolv/IPv4_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/resolv/IPv6_test.rb" id="test/stdlib/resolv/IPv6_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/rubygems/GemRequirement_test.rb" id="test/stdlib/rubygems/GemRequirement_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/rubygems/GemVersion_test.rb" id="test/stdlib/rubygems/GemVersion_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/rubygems/Gem_test.rb" id="test/stdlib/rubygems/Gem_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/singleton_test.rb" id="test/stdlib/singleton_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/tempfile/TempfileRemover_test.rb" id="test/stdlib/tempfile/TempfileRemover_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/tempfile/Tempfile_test.rb" id="test/stdlib/tempfile/Tempfile_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/file_test.rb" id="test/stdlib/uri/file_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/generic_test.rb" id="test/stdlib/uri/generic_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/http_test.rb" id="test/stdlib/uri/http_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/https_test.rb" id="test/stdlib/uri/https_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/ldap_test.rb" id="test/stdlib/uri/ldap_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/mailto_test.rb" id="test/stdlib/uri/mailto_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/uri/rfc2396_parser_test.rb" id="test/stdlib/uri/rfc2396_parser_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/yaml_test.rb" id="test/stdlib/yaml_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test/stdlib/zlib/GzipReader_test.rb" id="test/stdlib/zlib/GzipReader_test.rb" />
+          <RakeTaskImpl description="" fullCommand="test_doc" id="test_doc" />
+          <RakeTaskImpl description="" fullCommand="test_generate_stdlib" id="test_generate_stdlib" />
+          <RakeTaskImpl description="" fullCommand="tmp" id="tmp" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23" id="tmp/arm64-darwin23" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/rbs_extension" id="tmp/arm64-darwin23/rbs_extension" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/rbs_extension/3.3.4" id="tmp/arm64-darwin23/rbs_extension/3.3.4" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/rbs_extension/3.3.4/Makefile" id="tmp/arm64-darwin23/rbs_extension/3.3.4/Makefile" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/rbs_extension/3.3.4/rbs_extension.bundle" id="tmp/arm64-darwin23/rbs_extension/3.3.4/rbs_extension.bundle" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/stage" id="tmp/arm64-darwin23/stage" />
+          <RakeTaskImpl description="" fullCommand="tmp/arm64-darwin23/stage/lib" id="tmp/arm64-darwin23/stage/lib" />
+          <RakeTaskImpl description="" fullCommand="typecheck_test" id="typecheck_test" />
+          <RakeTaskImpl description="" fullCommand="validate" id="validate" />
+        </subtasks>
+      </RakeTaskImpl>
+    </option>
+  </component>
+</module>
