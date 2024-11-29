@@ -30,6 +30,11 @@ task :confirm_lexer => :lexer do
   sh "git diff --exit-code ext/rbs_extension/lexer.c"
 end
 
+task :confirm_templates => :templates do
+  puts "Testing if generated code under include and src is updated with respect to templates"
+  sh "git diff --exit-code -- include src"
+end
+
 rule ".c" => ".re" do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake lexer` ⚠️⚠️⚠️"
 end
