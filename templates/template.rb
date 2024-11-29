@@ -4,9 +4,6 @@ require "erb"
 require "fileutils"
 require "yaml"
 
-require "active_support"
-require "active_support/core_ext/string/inflections"
-
 module RBS
   class Template
     class Field
@@ -48,12 +45,12 @@ module RBS
 
       def initialize(yaml)
         @ruby_full_name = yaml["name"]
-        @ruby_class_name = @ruby_full_name.demodulize
+        @ruby_class_name = @ruby_full_name[/[^:]+\z/] # demodulize-like
+        name = @ruby_full_name.gsub("::", "_")
+        name = name.gsub(/(^)?(_)?([A-Z](?:[A-Z]*(?=[A-Z_])|[a-z0-9]*))/) { ($1 || $2 || "_") + $3.downcase } # underscore-like
         @c_function_name = if @ruby_full_name =~ /^RBS::Types/
-          name = @ruby_full_name.gsub("::", "_").underscore
           name.gsub("_types_", "_")
         else
-          name = @ruby_full_name.gsub("::", "_").underscore
           name.gsub("_declarations_", "_decl_")
         end
         @c_constant_name = @ruby_full_name.gsub("::", "_")
