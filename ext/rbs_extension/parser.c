@@ -190,20 +190,18 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
   }
 
   error: {
-    VALUE ids = rb_ary_new();
+    const char *ids;
     if (kind & ALIAS_NAME) {
-      rb_ary_push(ids, rb_str_new_literal("alias name"));
+      ids = "alias name";
     }
     if (kind & INTERFACE_NAME) {
-      rb_ary_push(ids, rb_str_new_literal("interface name"));
+      ids = "interface name";
     }
     if (kind & CLASS_NAME) {
-      rb_ary_push(ids, rb_str_new_literal("class/module/constant name"));
+      ids = "class/module/constant name";
     }
 
-    VALUE string = rb_funcall(ids, rb_intern("join"), 1, rb_str_new_cstr(", "));
-
-    set_error(state, state->current_token, true, "expected one of %s", StringValuePtr(string));
+    set_error(state, state->current_token, true, "expected one of %s", ids);
     return false;
   }
 }
