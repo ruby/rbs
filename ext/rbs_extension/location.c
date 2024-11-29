@@ -56,13 +56,6 @@ static void check_children_cap(rbs_loc *loc) {
   }
 }
 
-void rbs_loc_legacy_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
-  rbs_loc_legacy_add_optional_child(loc, name, r);
-
-  unsigned short last_index = loc->children->len - 1;
-  loc->children->required_p |= 1 << last_index;
-}
-
 void rbs_loc_legacy_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
   check_children_cap(loc);
 
@@ -71,6 +64,13 @@ void rbs_loc_legacy_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, ran
     .name = name,
     .rg = rbs_new_loc_range(r),
   };
+}
+
+void rbs_loc_legacy_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r) {
+  rbs_loc_legacy_add_optional_child(loc, name, r);
+
+  unsigned short last_index = loc->children->len - 1;
+  loc->children->required_p |= 1 << last_index;
 }
 
 void rbs_loc_init(rbs_loc *loc, VALUE buffer, rbs_loc_range rg) {

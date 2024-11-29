@@ -3,6 +3,7 @@
 
 #include "ruby.h"
 #include "lexer.h"
+
 #include "rbs/util/rbs_constant_pool.h"
 #include "rbs/rbs_location_internals.h"
 
