@@ -143,7 +143,7 @@ void parser_advance_no_gap(parserstate *state) {
               | {(tUIDENT `::`)*} <tXIDENT>
               | {<tXIDENT>}
 */
-VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
+static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   VALUE absolute = Qfalse;
   VALUE path = EMPTY_ARRAY;
   VALUE namespace;
@@ -757,7 +757,7 @@ static void check_key_duplication(parserstate *state, VALUE fields, VALUE key) {
   record_attribute ::= {} keyword_token `:` <type>
                      | {} literal_type `=>` <type>
 */
-VALUE parse_record_attributes(parserstate *state) {
+static VALUE parse_record_attributes(parserstate *state) {
   VALUE fields = rb_hash_new();
 
   if (state->next_token.type == pRBRACE) {
@@ -1123,7 +1123,7 @@ VALUE parse_type(parserstate *state) {
 
   type_param ::= tUIDENT upper_bound? default_type?                           (module_type_params == false)
 */
-VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
+static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_params) {
   VALUE params = EMPTY_ARRAY;
 
   bool required_param_allowed = true;
@@ -1295,7 +1295,7 @@ VALUE parse_method_type(parserstate *state) {
 /*
   global_decl ::= {tGIDENT} `:` <type>
 */
-VALUE parse_global_decl(parserstate *state) {
+static VALUE parse_global_decl(parserstate *state) {
   range decl_range;
   range name_range, colon_range;
 
@@ -1330,7 +1330,7 @@ VALUE parse_global_decl(parserstate *state) {
 /*
   const_decl ::= {const_name} `:` <type>
 */
-VALUE parse_const_decl(parserstate *state) {
+static VALUE parse_const_decl(parserstate *state) {
   range decl_range;
   range name_range, colon_range;
 
@@ -1364,7 +1364,7 @@ VALUE parse_const_decl(parserstate *state) {
 /*
   type_decl ::= {kTYPE} alias_name `=` <type>
 */
-VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range decl_range;
   range keyword_range, name_range, params_range, eq_range;
 
@@ -1409,7 +1409,7 @@ VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotation
 /*
   annotation ::= {<tANNOTATION>}
 */
-VALUE parse_annotation(parserstate *state) {
+static VALUE parse_annotation(parserstate *state) {
   VALUE content = rb_funcall(state->buffer, rb_intern("content"), 0);
   rb_encoding *enc = rb_enc_get(content);
 
@@ -1465,7 +1465,7 @@ VALUE parse_annotation(parserstate *state) {
   annotations ::= {} annotation ... <annotation>
                 | {<>}
 */
-void parse_annotations(parserstate *state, VALUE *annotations, position *annot_pos) {
+static void parse_annotations(parserstate *state, VALUE *annotations, position *annot_pos) {
   *annot_pos = NullPosition;
 
   while (true) {
@@ -1488,7 +1488,7 @@ void parse_annotations(parserstate *state, VALUE *annotations, position *annot_p
   method_name ::= {} <IDENT | keyword>
                 | {} (IDENT | keyword)~<`?`>
 */
-VALUE parse_method_name(parserstate *state, range *range) {
+static VALUE parse_method_name(parserstate *state, range *range) {
   parser_advance(state);
 
   switch (state->current_token.type)
@@ -1556,7 +1556,7 @@ typedef enum {
 
   @param allow_selfq `true` to accept `self?` kind.
 */
-InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool allow_selfq, range *rg) {
+static InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool allow_selfq, range *rg) {
   InstanceSingletonKind kind = INSTANCE_KIND;
 
   if (state->next_token.type == kSELF) {
@@ -1599,7 +1599,7 @@ InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, bool all
  * @param instance_only `true` to reject singleton method definition.
  * @param accept_overload `true` to accept overloading (...) definition.
  * */
-VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overload, position comment_pos, VALUE annotations) {
+static VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overload, position comment_pos, VALUE annotations) {
   range member_range;
   range visibility_range;
   range keyword_range;
@@ -1779,7 +1779,7 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
  *
  * @param from_interface `true` when the member is in an interface.
  * */
-VALUE parse_mixin_member(parserstate *state, bool from_interface, position comment_pos, VALUE annotations) {
+static VALUE parse_mixin_member(parserstate *state, bool from_interface, position comment_pos, VALUE annotations) {
   range member_range;
   range name_range;
   range keyword_range;
@@ -1861,7 +1861,7 @@ VALUE parse_mixin_member(parserstate *state, bool from_interface, position comme
  *
  * @param[in] instance_only `true` to reject `self.` alias.
  * */
-VALUE parse_alias_member(parserstate *state, bool instance_only, position comment_pos, VALUE annotations) {
+static VALUE parse_alias_member(parserstate *state, bool instance_only, position comment_pos, VALUE annotations) {
   range member_range;
   range keyword_range, new_name_range, old_name_range;
   range new_kind_range, old_kind_range;
@@ -1924,7 +1924,7 @@ VALUE parse_alias_member(parserstate *state, bool instance_only, position commen
                     | {kSELF} `.` tAIDENT `:` <type>
                     | {tA2IDENT} `:` <type>
 */
-VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE annotations) {
   range member_range;
   range name_range, colon_range;
   range kind_range = NULL_RANGE;
@@ -2024,7 +2024,7 @@ VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE anno
   visibility_member ::= {<`public`>}
                       | {<`private`>}
 */
-VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
+static VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
   if (rb_array_len(annotations) > 0) {
     raise_syntax_error(
       state,
@@ -2060,7 +2060,7 @@ VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
              | `(` tAIDENT `)`    # Ivar name
              | `(` `)`            # No variable
 */
-VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE annotations) {
   range member_range;
   range keyword_range, name_range, colon_range;
   range kind_range = NULL_RANGE, ivar_range = NULL_RANGE, ivar_name_range = NULL_RANGE, visibility_range = NULL_RANGE;
@@ -2166,7 +2166,7 @@ VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE ann
                      | mixin_member   (interface only)
                      | alias_member   (instance only)
 */
-VALUE parse_interface_members(parserstate *state) {
+static VALUE parse_interface_members(parserstate *state) {
   VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
@@ -2211,7 +2211,7 @@ VALUE parse_interface_members(parserstate *state) {
 /*
   interface_decl ::= {`interface`} interface_name module_type_params interface_members <kEND>
 */
-VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range member_range;
   range name_range, keyword_range, end_range;
   range type_params_range = NULL_RANGE;
@@ -2258,7 +2258,7 @@ VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annot
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
 */
-void parse_module_self_types(parserstate *state, VALUE *array) {
+static void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
     range self_range;
     range name_range;
@@ -2298,7 +2298,7 @@ void parse_module_self_types(parserstate *state, VALUE *array) {
   }
 }
 
-VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations);
+static VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations);
 
 /*
   module_members ::= {} ...<module_member> kEND
@@ -2311,7 +2311,7 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
                   | `public`
                   | `private`
 */
-VALUE parse_module_members(parserstate *state) {
+static VALUE parse_module_members(parserstate *state) {
   VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
@@ -2388,7 +2388,7 @@ VALUE parse_module_members(parserstate *state) {
   module_decl ::= {module_name} module_type_params module_members <kEND>
                 | {module_name} module_name module_type_params `:` module_self_types module_members <kEND>
 */
-VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_name, range name_range, VALUE comment, VALUE annotations) {
+static VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_name, range name_range, VALUE comment, VALUE annotations) {
   range decl_range;
   range end_range;
   range type_params_range;
@@ -2447,7 +2447,7 @@ VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_n
                 | {`module`} module_name module_decl0 <kEND>
 
 */
-VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range keyword_range = state->current_token.range;
   range module_name_range;
 
@@ -2487,7 +2487,7 @@ VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotati
   class_decl_super ::= {} `<` <class_instance_name>
                      | {<>}
 */
-VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
+static VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
   if (parser_advance_if(state, pLT)) {
     range super_range;
     range name_range;
@@ -2522,7 +2522,7 @@ VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
 /*
   class_decl ::= {class_name} type_params class_decl_super class_members <`end`>
 */
-VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE name, range name_range, VALUE comment, VALUE annotations) {
+static VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE name, range name_range, VALUE comment, VALUE annotations) {
   range decl_range;
   range end_range;
   range type_params_range;
@@ -2573,7 +2573,7 @@ VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE name, ran
   class_decl ::= {`class`} class_name `=` <class_name>
                | {`class`} class_name <class_decl0>
 */
-VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range keyword_range = state->current_token.range;
   range class_name_range;
 
@@ -2616,7 +2616,7 @@ VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotatio
                 | {<module_decl>}
                 | {<class_decl>}
 */
-VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations) {
+static VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations) {
   VALUE decl;
 
   parser_push_typevar_table(state, true);
@@ -2654,7 +2654,7 @@ VALUE parse_nested_decl(parserstate *state, const char *nested_in, position anno
   return decl;
 }
 
-VALUE parse_decl(parserstate *state) {
+static VALUE parse_decl(parserstate *state) {
   VALUE annotations = EMPTY_ARRAY;
   position annot_pos = NullPosition;
 
@@ -2688,7 +2688,7 @@ VALUE parse_decl(parserstate *state) {
   namespace ::= {} (`::`)? (`tUIDENT` `::`)* `tUIDENT` <`::`>
               | {} <>                                            (empty -- returns empty namespace)
 */
-VALUE parse_namespace(parserstate *state, range *rg) {
+static VALUE parse_namespace(parserstate *state, range *rg) {
   bool is_absolute = false;
 
   if (state->next_token.type == pCOLON2) {
@@ -2726,7 +2726,7 @@ VALUE parse_namespace(parserstate *state, range *rg) {
                | {} namespace tUIDENT `as` <tUIDENT>
                | {} namespace <tSTAR>
 */
-void parse_use_clauses(parserstate *state, VALUE clauses) {
+static void parse_use_clauses(parserstate *state, VALUE clauses) {
   while (true) {
     range namespace_range = NULL_RANGE;
     VALUE namespace = parse_namespace(state, &namespace_range);
@@ -2819,7 +2819,7 @@ void parse_use_clauses(parserstate *state, VALUE clauses) {
 /*
   use_directive ::= {} `use` <clauses>
  */
-VALUE parse_use_directive(parserstate *state) {
+static VALUE parse_use_directive(parserstate *state) {
   if (state->next_token.type == kUSE) {
     parser_advance(state);
 
