@@ -8,15 +8,6 @@
 rbs_loc_range RBS_LOC_NULL_RANGE = { -1, -1 };
 VALUE RBS_Location;
 
-rbs_location_t *rbs_location_new(VALUE buffer, range rg) {
-    rbs_location_t *location = (rbs_location_t *)malloc(sizeof(rbs_location_t));
-    location->cached_ruby_value = rbs_new_location(buffer, rg);
-    rb_gc_register_mark_object(location->cached_ruby_value);
-    location->buffer = buffer;
-    location->rg = rg;
-    return location;
-}
-
 position rbs_loc_position(int char_pos) {
   position pos = { 0, char_pos, -1, -1 };
   return pos;

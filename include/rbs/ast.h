@@ -89,6 +89,7 @@ typedef struct rbs_node {
 /// A bag of values needed when copying RBS C structs into Ruby objects.
 typedef struct rbs_translation_context {
     rbs_constant_pool_t *constant_pool;
+    VALUE buffer;
 } rbs_translation_context_t;
 
 /* rbs_node_list_node */

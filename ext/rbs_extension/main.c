@@ -56,6 +56,7 @@ static VALUE parse_type_try(VALUE a) {
 
   rbs_translation_context_t ctx = {
     .constant_pool = &parser->constant_pool,
+    .buffer = parser->buffer,
   };
 
   return rbs_struct_to_ruby_value(ctx, type);
@@ -93,6 +94,7 @@ static VALUE parse_method_type_try(VALUE a) {
 
   rbs_translation_context_t ctx = {
     .constant_pool = &parser->constant_pool,
+    .buffer = parser->buffer,
   };
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) method_type);
@@ -121,6 +123,7 @@ static VALUE parse_signature_try(VALUE a) {
 
   rbs_translation_context_t ctx = {
     .constant_pool = &parser->constant_pool,
+    .buffer = parser->buffer,
   };
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) signature);

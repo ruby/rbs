@@ -209,7 +209,7 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_allocator_t *allocator, commen
   return rbs_ast_comment_new(
     allocator,
     rbs_buffer_to_string(&rbs_buffer),
-    rbs_location_pp(buffer, &com->start, &com->end)
+    rbs_location_pp(&com->start, &com->end)
   );
 }
 

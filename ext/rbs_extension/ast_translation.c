@@ -12,6 +12,7 @@
 
 #include "class_constants.h"
 #include "rbs_string_bridging.h"
+#include "location.h"
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
     VALUE ruby_array = rb_ary_new();
@@ -36,7 +37,9 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
 }
 
 VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *loc) {
-  return loc->cached_ruby_value;
+  VALUE ruby_loc = loc->cached_ruby_value;
+  rbs_check_location(ruby_loc)->buffer = ctx.buffer;
+  return ruby_loc;
 }
 
 #ifdef RB_PASS_KEYWORDS
