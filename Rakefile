@@ -34,6 +34,13 @@ rule ".c" => ".re" do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake lexer` ⚠️⚠️⚠️"
 end
 
+rule %r{^src/(.*)\.c} => 'templates/%X.c.erb' do |t|
+  puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake templates` ⚠️⚠️⚠️"
+end
+rule %r{^include/(.*)\.c} => 'templates/%X.c.erb' do |t|
+  puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake templates` ⚠️⚠️⚠️"
+end
+
 task :annotate do
   sh "bin/generate_docs.sh"
 end
@@ -51,7 +58,10 @@ task :templates do
 end
 
 task :compile => "ext/rbs_extension/lexer.c"
-Rake::Task[:compile].prereqs.prepend :templates
+task :compile => "include/rbs/constants.h"
+task :compile => "include/rbs/ruby_objs.h"
+task :compile => "src/constants.c"
+task :compile => "src/ruby_objs.c"
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
