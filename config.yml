@@ -13,6 +13,7 @@ nodes:
   - name: RBS::AST::Comment
     fields:
       - name: string
+        c_type: rbs_string
       - name: location
         c_type: rbs_location
   - name: RBS::AST::Declarations::Class

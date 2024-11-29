@@ -77,7 +77,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rbs_ast_comment_t *node = (rbs_ast_comment_t *)instance;
 
             VALUE h = rb_hash_new();
-            rb_hash_aset(h, ID2SYM(rb_intern("string")), node->string);
+            rb_hash_aset(h, ID2SYM(rb_intern("string")), rbs_string_to_ruby_string(&node->string));
             rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(node->location));
 
 

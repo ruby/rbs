@@ -1,5 +1,8 @@
 #include "rbs_extension.h"
 
+#include "rbs_string_bridging.h"
+#include "rbs/rbs_buffer.h"
+
 #define RESET_TABLE_P(table) (table->size == 0)
 
 id_table *alloc_empty_table(rbs_allocator_t *allocator) {
@@ -177,13 +180,46 @@ void insert_comment_line(parserstate *state, token tok) {
   }
 }
 
+static rbs_ast_comment_t *parse_comment_lines(rbs_allocator_t *allocator, comment *com, VALUE buffer) {
+  VALUE content = rb_funcall(buffer, rb_intern("content"), 0);
+  rb_encoding *enc = rb_enc_get(content);
+
+  int hash_bytes = rb_enc_codelen('#', enc);
+  int space_bytes = rb_enc_codelen(' ', enc);
+
+  rbs_buffer_t rbs_buffer;
+  rbs_buffer_init(&rbs_buffer);
+
+  for (size_t i = 0; i < com->line_count; i++) {
+    token tok = com->tokens[i];
+
+    char *comment_start = RSTRING_PTR(content) + tok.range.start.byte_pos + hash_bytes;
+    int comment_bytes = RANGE_BYTES(tok.range) - hash_bytes;
+    unsigned char c = rb_enc_mbc_to_codepoint(comment_start, RSTRING_END(content), enc);
+
+    if (c == ' ') {
+      comment_start += space_bytes;
+      comment_bytes -= space_bytes;
+    }
+
+    rbs_buffer_append_string(&rbs_buffer, comment_start, comment_bytes);
+    rbs_buffer_append_cstr(&rbs_buffer, "\n");
+  }
+
+  return rbs_ast_comment_new(
+    allocator,
+    rbs_buffer_to_string(&rbs_buffer),
+    rbs_location_pp(buffer, &com->start, &com->end)
+  );
+}
+
 rbs_ast_comment_t *get_comment(parserstate *state, int subject_line) {
   int comment_line = subject_line - 1;
 
   comment *com = comment_get_comment(state->last_comment, comment_line);
 
   if (com) {
-    return comment_to_ruby(&state->allocator, com, state->buffer);
+    return parse_comment_lines(&state->allocator, com, state->buffer);
   } else {
     return NULL;
   }
@@ -243,37 +279,6 @@ comment *comment_get_comment(comment *com, int line) {
   }
 
   return comment_get_comment(com->next_comment, line);
-}
-
-rbs_ast_comment_t *comment_to_ruby(rbs_allocator_t *allocator, comment *com, VALUE buffer) {
-  VALUE content = rb_funcall(buffer, rb_intern("content"), 0);
-  rb_encoding *enc = rb_enc_get(content);
-  VALUE string = rb_enc_str_new_cstr("", enc);
-
-  int hash_bytes = rb_enc_codelen('#', enc);
-  int space_bytes = rb_enc_codelen(' ', enc);
-
-  for (size_t i = 0; i < com->line_count; i++) {
-    token tok = com->tokens[i];
-
-    char *comment_start = RSTRING_PTR(content) + tok.range.start.byte_pos + hash_bytes;
-    int comment_bytes = RANGE_BYTES(tok.range) - hash_bytes;
-    unsigned char c = rb_enc_mbc_to_codepoint(comment_start, RSTRING_END(content), enc);
-
-    if (c == ' ') {
-      comment_start += space_bytes;
-      comment_bytes -= space_bytes;
-    }
-
-    rb_str_cat(string, comment_start, comment_bytes);
-    rb_str_cat_cstr(string, "\n");
-  }
-
-  return rbs_ast_comment_new(
-    allocator,
-    string,
-    rbs_location_pp(buffer, &com->start, &com->end)
-  );
 }
 
 lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, int end_pos) {

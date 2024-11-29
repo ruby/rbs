@@ -73,7 +73,6 @@ typedef struct {
 comment *alloc_comment(rbs_allocator_t *, token comment_token, comment *last_comment);
 void comment_insert_new_line(rbs_allocator_t *, comment *com, token comment_token);
 comment *comment_get_comment(comment *com, int line);
-rbs_ast_comment_t *comment_to_ruby(rbs_allocator_t *, comment *com, VALUE buffer);
 
 /**
  * Insert new table entry.

@@ -151,7 +151,7 @@ typedef struct rbs_ast_bool {
 typedef struct rbs_ast_comment {
     rbs_node_t base;
 
-    VALUE string;
+    rbs_string_t string;
     struct rbs_location *location;
 } rbs_ast_comment_t;
 
@@ -682,7 +682,7 @@ rbs_other_ruby_value_t *rbs_other_ruby_value_new(VALUE ruby_value);
 
 rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_string_t string, rbs_location_t *location);
 rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, bool value);
-rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, VALUE string, rbs_location_t *location);
+rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_string_t string, rbs_location_t *location);
 rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment);
 rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location);
 rbs_ast_declarations_classalias_t *rbs_ast_declarations_classalias_new(rbs_allocator_t *allocator, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_location_t *location, rbs_ast_comment_t *comment);
