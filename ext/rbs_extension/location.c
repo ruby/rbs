@@ -18,7 +18,7 @@ position rbs_loc_position3(int char_pos, int line, int column) {
   return pos;
 }
 
-rbs_loc_range rbs_new_loc_range(range rg) {
+static rbs_loc_range rbs_new_loc_range(range rg) {
   rbs_loc_range r = { rg.start.char_pos, rg.end.char_pos };
   return r;
 }

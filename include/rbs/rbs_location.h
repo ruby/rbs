@@ -4,10 +4,11 @@
 #include "ruby.h"
 #include "lexer.h"
 #include "rbs/util/rbs_constant_pool.h"
+#include "rbs/rbs_location_internals.h"
 
 typedef struct rbs_location {
-    VALUE cached_ruby_value;
     range rg;
+    rbs_loc_children *children;
 } rbs_location_t;
 
 rbs_location_t *rbs_location_new(range rg);

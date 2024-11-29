@@ -7,6 +7,8 @@
 #include "rbs_string_bridging.h"
 #include "location.h"
 
+#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
+
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
     VALUE ruby_array = rb_ary_new();
 
@@ -29,10 +31,16 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
     return ruby_hash;
 }
 
-VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *loc) {
-  VALUE ruby_loc = loc->cached_ruby_value;
-  rbs_check_location(ruby_loc)->buffer = ctx.buffer;
-  return ruby_loc;
+VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *source_loc) {
+  VALUE new_loc = rbs_new_location(ctx.buffer, source_loc->rg);
+  rbs_loc *new_loc_struct = rbs_check_location(new_loc);
+
+  if (source_loc->children != NULL) {
+    rbs_loc_legacy_alloc_children(new_loc_struct, source_loc->children->cap);
+    memcpy(new_loc_struct->children, source_loc->children, RBS_LOC_CHILDREN_SIZE(source_loc->children->cap));
+  }
+
+  return new_loc;
 }
 
 #ifdef RB_PASS_KEYWORDS
