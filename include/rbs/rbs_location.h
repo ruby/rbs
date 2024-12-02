@@ -1,7 +1,6 @@
 #ifndef RBS__RBS_LOCATION_H
 #define RBS__RBS_LOCATION_H
 
-#include "ruby.h"
 #include "lexer.h"
 
 #include "rbs/util/rbs_constant_pool.h"

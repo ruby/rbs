@@ -2,6 +2,7 @@
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
 #include "ast_translation.h"
+#include "location.h"
 
 #include "ruby/vm.h"
 

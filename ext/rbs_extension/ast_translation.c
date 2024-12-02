@@ -7,9 +7,6 @@
 
 #include "ast_translation.h"
 
-#include "ruby.h"
-#include "ruby/encoding.h"
-
 #include "class_constants.h"
 #include "rbs_string_bridging.h"
 #include "location.h"

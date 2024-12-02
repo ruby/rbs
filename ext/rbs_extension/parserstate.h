@@ -8,7 +8,6 @@
 #include "ruby/encoding.h" // TODO: remove this
 
 #include "lexer.h"
-#include "location.h"
 #include "rbs/ast.h"
 
 /**

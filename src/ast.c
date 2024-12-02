@@ -7,6 +7,8 @@
 
 #include "rbs/ast.h"
 
+#include <stdio.h>
+
 /* rbs_node_list */
 
 rbs_node_list_t* rbs_node_list_new(rbs_allocator_t *allocator) {

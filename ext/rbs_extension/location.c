@@ -1,3 +1,4 @@
+#include "location.h"
 #include "rbs_extension.h"
 
 #define RBS_LOC_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))

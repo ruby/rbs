@@ -8,6 +8,8 @@
 #ifndef RBS__CONSTANTS_H
 #define RBS__CONSTANTS_H
 
+#include "ruby.h"
+
 extern VALUE RBS;
 
 extern VALUE RBS_AST;
