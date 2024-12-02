@@ -353,12 +353,19 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
 
   for (long i = 0; i < rb_array_len(variables); i++) {
     VALUE symbol = rb_ary_entry(variables, i);
-    VALUE name = rb_sym2str(symbol);
+
+    if (!RB_TYPE_P(symbol, T_SYMBOL)) {
+      rb_raise(rb_eTypeError,
+        "Type variables Array contains invalid value %"PRIsVALUE" of type %"PRIsVALUE" (must be an Array of Symbols or nil)",
+        rb_inspect(symbol), rb_obj_class(symbol));
+    }
+
+    VALUE name_str = rb_sym2str(symbol);
 
     rbs_constant_id_t id = rbs_constant_pool_insert_shared(
       &parser->constant_pool,
-      (const uint8_t *) RSTRING_PTR(name),
-      RSTRING_LEN(name)
+      (const uint8_t *) RSTRING_PTR(name_str),
+      RSTRING_LEN(name_str)
     );
 
     parser_insert_typevar(parser, id);
