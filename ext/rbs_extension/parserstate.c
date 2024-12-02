@@ -353,8 +353,7 @@ parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_
     parser_push_typevar_table(parser, true);
 
     for (long i = 0; i < rb_array_len(variables); i++) {
-      VALUE index = INT2FIX(i);
-      VALUE symbol = rb_ary_aref(1, &index, variables);
+      VALUE symbol = rb_ary_entry(variables, i);
       VALUE name = rb_sym2str(symbol);
 
       rbs_constant_id_t id = rbs_constant_pool_insert_shared(
