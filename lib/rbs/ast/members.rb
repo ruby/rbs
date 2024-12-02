@@ -304,6 +304,21 @@ module RBS
             visibility: visibility
           )
         end
+
+        def ivar
+          @ivar ||= begin
+            ivar_name = case self.ivar_name
+            when false
+              return nil # Skip the instance variable declaration entirely
+            when nil
+              :"@#{name}" # Infer the instance variable name from the attribute name
+            else
+              self.ivar_name # Use the custom instance variable name given by the user
+            end
+
+            InstanceVariable.new(name: ivar_name, type: type, location: location, comment: comment)
+          end
+        end
       end
 
       class AttrReader < Base
