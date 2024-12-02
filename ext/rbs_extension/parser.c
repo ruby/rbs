@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "rbs/encoding.h"
 #include "rbs/rbs_string.h"
 #include "ast_translation.h"
 #include "rbs/rbs_unescape.h"
@@ -1488,18 +1489,18 @@ static bool parse_type_decl(parserstate *state, position comment_pos, rbs_node_l
 */
 NODISCARD
 static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotation) {
-  VALUE content = rb_funcall(state->buffer, rb_intern("content"), 0);
-  rb_encoding *enc = rb_enc_get(content);
-
   range rg = state->current_token.range;
 
-  int offset_bytes = rb_enc_codelen('%', enc) + rb_enc_codelen('a', enc);
+  size_t offset_bytes =
+    state->lexstate->encoding->char_width((const uint8_t *) "%", (size_t) 1) +
+    state->lexstate->encoding->char_width((const uint8_t *) "a", (size_t) 1);
 
-  unsigned int open_char = rb_enc_mbc_to_codepoint(
-    state->lexstate->string.start + rg.start.byte_pos + offset_bytes,
-    state->lexstate->string.end,
-    enc
-  );
+  rbs_string_t str = {
+    .start = state->lexstate->string.start + rg.start.byte_pos + offset_bytes,
+    .end = state->lexstate->string.end,
+    .type = RBS_STRING_SHARED,
+  };
+  unsigned int open_char = utf8_to_codepoint(str);
 
   unsigned int close_char;
 
@@ -1524,8 +1525,8 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
     return false;
   }
 
-  int open_bytes = rb_enc_codelen(open_char, enc);
-  int close_bytes = rb_enc_codelen(close_char, enc);
+  size_t open_bytes = state->lexstate->encoding->char_width((const uint8_t *) &open_char, (size_t) 1);
+  size_t close_bytes = state->lexstate->encoding->char_width((const uint8_t *) &close_char, (size_t) 1);
 
   rbs_string_t string = rbs_parser_get_current_token(state);
   rbs_string_drop_first(&string, offset_bytes + open_bytes);
