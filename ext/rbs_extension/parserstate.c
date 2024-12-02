@@ -341,27 +341,27 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
   parser_advance(parser);
   parser_advance(parser);
 
-  if (!NIL_P(variables)) {
-    if (!RB_TYPE_P(variables, T_ARRAY)) {
-      rb_raise(rb_eTypeError,
-               "wrong argument type %"PRIsVALUE" (must be array or nil)",
-               rb_obj_class(variables));
-    }
+  if (NIL_P(variables)) return parser;
 
-    parser_push_typevar_table(parser, true);
+  if (!RB_TYPE_P(variables, T_ARRAY)) {
+    rb_raise(rb_eTypeError,
+              "wrong argument type %"PRIsVALUE" (must be array or nil)",
+              rb_obj_class(variables));
+  }
 
-    for (long i = 0; i < rb_array_len(variables); i++) {
-      VALUE symbol = rb_ary_entry(variables, i);
-      VALUE name = rb_sym2str(symbol);
+  parser_push_typevar_table(parser, true);
 
-      rbs_constant_id_t id = rbs_constant_pool_insert_shared(
-        &parser->constant_pool,
-        (const uint8_t *) RSTRING_PTR(name),
-        RSTRING_LEN(name)
-      );
+  for (long i = 0; i < rb_array_len(variables); i++) {
+    VALUE symbol = rb_ary_entry(variables, i);
+    VALUE name = rb_sym2str(symbol);
 
-      parser_insert_typevar(parser, id);
-    }
+    rbs_constant_id_t id = rbs_constant_pool_insert_shared(
+      &parser->constant_pool,
+      (const uint8_t *) RSTRING_PTR(name),
+      RSTRING_LEN(name)
+    );
+
+    parser_insert_typevar(parser, id);
   }
 
   return parser;
