@@ -1098,8 +1098,5 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
             return ID2SYM(rb_intern3((const char *) constant->start, constant->length, encoding));
         }
-        case RBS_OTHER_RUBY_VALUE: {
-            return ((rbs_other_ruby_value_t *) instance)->ruby_value;
-        }
     }
 }

@@ -14,7 +14,6 @@
 #include "rbs_location.h"
 
 enum rbs_node_type {
-    RBS_OTHER_RUBY_VALUE = 0,
     RBS_AST_ANNOTATION = 1,
     RBS_AST_BOOL = 2,
     RBS_AST_COMMENT = 3,
@@ -672,13 +671,6 @@ typedef struct rbs_ast_symbol {
 } rbs_ast_symbol_t;
 
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_constant_pool_t *, rbs_constant_id_t);
-
-typedef struct rbs_other_ruby_value {
-    rbs_node_t base;
-    VALUE ruby_value;
-} rbs_other_ruby_value_t;
-
-rbs_other_ruby_value_t *rbs_other_ruby_value_new(VALUE ruby_value);
 
 rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_string_t string, rbs_location_t *location);
 rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, bool value);

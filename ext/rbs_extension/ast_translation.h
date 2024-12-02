@@ -8,7 +8,6 @@
 #ifndef RBS_EXTENSION_AST_TRANSLATION_H
 #define RBS_EXTENSION_AST_TRANSLATION_H
 
-#include "ruby.h"
 #include "rbs/ast.h"
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t, rbs_node_list_t *list);

@@ -68,8 +68,6 @@ bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
         return rbs_string_equal(((rbs_ast_integer_t *) lhs)->string_representation, ((rbs_ast_integer_t *) rhs)->string_representation);
     case RBS_AST_STRING:
         return rbs_string_equal(((rbs_ast_string_t *) lhs)->string, ((rbs_ast_string_t *) rhs)->string);
-    case RBS_OTHER_RUBY_VALUE:
-        return rb_equal(((rbs_other_ruby_value_t *) lhs)->ruby_value, ((rbs_other_ruby_value_t *) rhs)->ruby_value);
     default:
         printf("Unhandled node type: %d\n", lhs->type);
         return false;
@@ -136,21 +134,6 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_po
             .type = RBS_AST_SYMBOL,
         },
         .constant_id = constant_id,
-    };
-
-    return instance;
-}
-
-rbs_other_ruby_value_t *rbs_other_ruby_value_new(VALUE ruby_value) {
-    rb_gc_register_mark_object(ruby_value);
-
-    rbs_other_ruby_value_t *instance = malloc(sizeof(rbs_other_ruby_value_t));
-
-    *instance = (rbs_other_ruby_value_t) {
-        .base = (rbs_node_t) {
-            .type = RBS_OTHER_RUBY_VALUE
-        },
-        .ruby_value = ruby_value,
     };
 
     return instance;

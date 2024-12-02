@@ -7,7 +7,6 @@
 #include "rbs_location.h"
 
 enum rbs_node_type {
-    RBS_OTHER_RUBY_VALUE = 0,
 <%- nodes.each_with_index do |node, index| -%>
     <%= node.c_type_enum_name %> = <%= index + 1 %>,
 <%- end -%>
@@ -97,13 +96,6 @@ typedef struct rbs_ast_symbol {
 } rbs_ast_symbol_t;
 
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_constant_pool_t *, rbs_constant_id_t);
-
-typedef struct rbs_other_ruby_value {
-    rbs_node_t base;
-    VALUE ruby_value;
-} rbs_other_ruby_value_t;
-
-rbs_other_ruby_value_t *rbs_other_ruby_value_new(VALUE ruby_value);
 
 <%- nodes.each do |node| -%>
 <%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>);
