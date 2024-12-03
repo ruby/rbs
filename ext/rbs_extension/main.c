@@ -28,6 +28,8 @@ NORETURN(void) raise_error(parserstate *state, error *error) {
 }
 
 struct parse_type_arg {
+  VALUE buffer;
+  rb_encoding *encoding;
   parserstate *parser;
   VALUE require_eof;
 };
@@ -58,23 +60,19 @@ static VALUE parse_type_try(VALUE a) {
 
   rbs_translation_context_t ctx = rbs_translation_context_create(
     &parser->constant_pool,
-    parser->buffer,
-    parser->lexstate->encoding
+    arg->buffer,
+    arg->encoding
   );
 
 
   return rbs_struct_to_ruby_value(ctx, type);
 }
 
-static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE buffer, int start_pos, int end_pos) {
+static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
   if (start_pos < 0 || end_pos < 0) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
 
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-
-  rb_encoding *encoding = rb_enc_get(string);
   const char *encoding_name = rb_enc_name(encoding);
 
   return alloc_lexer(
@@ -109,10 +107,16 @@ static parserstate *alloc_parser_from_buffer(VALUE buffer, int start_pos, int en
 }
 
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
-    parser,
-    require_eof
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .require_eof = require_eof
   };
   return rb_ensure(parse_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
 }
@@ -138,24 +142,31 @@ static VALUE parse_method_type_try(VALUE a) {
 
   rbs_translation_context_t ctx = rbs_translation_context_create(
     &parser->constant_pool,
-    parser->buffer,
-    parser->lexstate->encoding
+    arg->buffer,
+    arg->encoding
   );
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) method_type);
 }
 
 static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
-    parser,
-    require_eof
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .require_eof = require_eof
   };
   return rb_ensure(parse_method_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
 }
 
 static VALUE parse_signature_try(VALUE a) {
-  parserstate *parser = (parserstate *)a;
+  struct parse_type_arg *arg = (struct parse_type_arg *)a;
+  parserstate *parser = arg->parser;
 
   rbs_signature_t *signature = NULL;
   parse_signature(parser, &signature);
@@ -166,22 +177,36 @@ static VALUE parse_signature_try(VALUE a) {
 
   rbs_translation_context_t ctx = rbs_translation_context_create(
     &parser->constant_pool,
-    parser->buffer,
-    parser->lexstate->encoding
+    arg->buffer,
+    arg->encoding
   );
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) signature);
 }
 
 static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
-  return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
+  struct parse_type_arg arg = {
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .require_eof = false
+  };
+  return rb_ensure(parse_signature_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
 }
 
 static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
-  lexstate *lexer = alloc_lexer_from_buffer(&allocator, buffer, 0, FIX2INT(end_pos));
+  lexstate *lexer = alloc_lexer_from_buffer(&allocator, string, encoding, 0, FIX2INT(end_pos));
 
   VALUE results = rb_ary_new();
   token token = NullToken;

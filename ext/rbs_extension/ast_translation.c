@@ -13,17 +13,11 @@
 
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 
-static rb_encoding *rbs_encoding_to_ruby_new(const rbs_encoding_t *encoding) {
-    rb_encoding *ruby_encoding = rb_enc_find(encoding->name);
-    assert(ruby_encoding != NULL);
-    return ruby_encoding;
-}
-
-rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, const rbs_encoding_t *encoding) {
+rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
     return (rbs_translation_context_t) {
         .constant_pool = constant_pool,
         .buffer = buffer,
-        .encoding = rbs_encoding_to_ruby_new(encoding),
+        .encoding = ruby_encoding,
     };
 }
 

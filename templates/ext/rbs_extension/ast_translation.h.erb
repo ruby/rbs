@@ -15,7 +15,7 @@ typedef struct rbs_translation_context {
     rb_encoding *encoding;
 } rbs_translation_context_t;
 
-rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *, VALUE buffer_string, const rbs_encoding_t *);
+rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *, VALUE buffer_string, rb_encoding *ruby_encoding);
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t, rbs_node_list_t *list);
 VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t, rbs_hash_t *hash);
