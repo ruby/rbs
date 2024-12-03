@@ -2,7 +2,8 @@
 #define RBS_RBS_UNESCAPE_H
 
 #include <stddef.h>
-#include "parserstate.h"
+
+#include "rbs/rbs_string.h"
 
 /**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.

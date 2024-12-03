@@ -8,6 +8,7 @@
 #include "rbs/ast.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* rbs_node_list */
 
