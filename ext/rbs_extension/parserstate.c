@@ -281,16 +281,7 @@ comment *comment_get_comment(comment *com, int line) {
   return comment_get_comment(com->next_comment, line);
 }
 
-lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, int end_pos) {
-  if (start_pos < 0 || end_pos < 0) {
-    rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
-  }
-
-  rb_encoding *ruby_encoding = rb_enc_get(string);
-  const char *encoding_name = rb_enc_name(ruby_encoding);
-  const char *encoding_name_end = encoding_name + strlen(encoding_name);
-  const rbs_encoding_t *encoding = rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) encoding_name_end);
-
+lexstate *alloc_lexer(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
   lexstate *lexer = rbs_allocator_alloc(allocator, lexstate);
 
   position start_position = (position) {
@@ -301,7 +292,7 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, i
   };
 
   *lexer = (lexstate) {
-    .string = rbs_string_from_ruby_string(string),
+    .string = string,
     .start_pos = start_pos,
     .end_pos = end_pos,
     .current = start_position,
@@ -318,14 +309,11 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, i
   return lexer;
 }
 
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-
+parserstate *alloc_parser(VALUE buffer, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables) {
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
 
-  lexstate *lexer = alloc_lexer(&allocator, string, start_pos, end_pos);
+  lexstate *lexer = alloc_lexer(&allocator, string, encoding, start_pos, end_pos);
   parserstate *parser = rbs_allocator_alloc(&allocator, parserstate);
 
   *parser = (parserstate) {

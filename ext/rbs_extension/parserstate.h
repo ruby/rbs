@@ -114,17 +114,17 @@ bool parser_typevar_member(parserstate *state, rbs_constant_id_t id);
  * alloc_lexer(string, 0, 31)    // New lexstate with buffer content
  * ```
  * */
-lexstate *alloc_lexer(rbs_allocator_t *, VALUE string, int start_pos, int end_pos);
+lexstate *alloc_lexer(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 
 /**
  * Allocate new parserstate object.
  *
  * ```
- * alloc_parser(buffer, 0, 1, variables)    // New parserstate with variables
- * alloc_parser(buffer, 3, 5, Qnil)         // New parserstate without variables
+ * alloc_parser(buffer, string, encoding, 0, 1, variables) // New parserstate with variables
+ * alloc_parser(buffer, string, encoding, 3, 5, Qnil)      // New parserstate without variables
  * ```
  * */
-parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables);
+parserstate *alloc_parser(VALUE buffer, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables);
 void free_parser(parserstate *parser);
 /**
  * Advance one token.

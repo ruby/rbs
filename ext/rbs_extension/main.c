@@ -3,6 +3,7 @@
 #include "rbs/util/rbs_constant_pool.h"
 #include "ast_translation.h"
 #include "location.h"
+#include "rbs_string_bridging.h"
 
 #include "ruby/vm.h"
 
@@ -64,8 +65,50 @@ static VALUE parse_type_try(VALUE a) {
   return rbs_struct_to_ruby_value(ctx, type);
 }
 
+static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE buffer, int start_pos, int end_pos) {
+  if (start_pos < 0 || end_pos < 0) {
+    rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
+  }
+
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+
+  rb_encoding *encoding = rb_enc_get(string);
+  const char *encoding_name = rb_enc_name(encoding);
+
+  return alloc_lexer(
+    allocator,
+    rbs_string_from_ruby_string(string),
+    rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
+    start_pos,
+    end_pos
+  );
+}
+
+static parserstate *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+  if (start_pos < 0 || end_pos < 0) {
+    rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
+  }
+
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+
+  rb_encoding *encoding = rb_enc_get(string);
+  const char *encoding_name = rb_enc_name(encoding);
+
+  return alloc_parser(
+    buffer,
+    rbs_string_from_ruby_string(string),
+    rbs_encoding_find((const uint8_t *) encoding_name,
+    (const uint8_t *) (encoding_name + strlen(encoding_name))),
+    start_pos,
+    end_pos,
+    variables
+  );
+}
+
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -102,7 +145,7 @@ static VALUE parse_method_type_try(VALUE a) {
 }
 
 static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -130,17 +173,14 @@ static VALUE parse_signature_try(VALUE a) {
 }
 
 static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
-  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
+  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
 static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
-  lexstate *lexer = alloc_lexer(&allocator, string, 0, FIX2INT(end_pos));
+  lexstate *lexer = alloc_lexer_from_buffer(&allocator, buffer, 0, FIX2INT(end_pos));
 
   VALUE results = rb_ary_new();
   token token = NullToken;
