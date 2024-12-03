@@ -294,7 +294,7 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, rbs_string_t string, const rbs
   return lexer;
 }
 
-parserstate *alloc_parser(VALUE buffer, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables) {
+parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables) {
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
 
@@ -308,7 +308,6 @@ parserstate *alloc_parser(VALUE buffer, rbs_string_t string, const rbs_encoding_
     .next_token = NullToken,
     .next_token2 = NullToken,
     .next_token3 = NullToken,
-    .buffer = buffer,
 
     .vars = NULL,
     .last_comment = NULL,

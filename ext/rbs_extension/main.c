@@ -107,7 +107,6 @@ static parserstate *alloc_parser_from_buffer(VALUE buffer, int start_pos, int en
   const char *encoding_name = rb_enc_name(encoding);
 
   return alloc_parser(
-    buffer,
     rbs_string_from_ruby_string(string),
     rbs_encoding_find((const uint8_t *) encoding_name,
     (const uint8_t *) (encoding_name + strlen(encoding_name))),
