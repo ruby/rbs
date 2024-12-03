@@ -116,14 +116,26 @@ lexstate *alloc_lexer(rbs_allocator_t *, rbs_string_t string, const rbs_encoding
 
 /**
  * Allocate new parserstate object.
+ * Optionally call `rbs_parser_declare_type_variables_from_ruby_array()` after, to populate the type variable table.
+ *
+ * Once allocated, optionally call `rbs_parser_declare_type_variables_from_ruby_array` if you'd like to declare
+ * any type variables to be used during the parsing.
  *
  * ```
- * alloc_parser(buffer, string, encoding, 0, 1, variables) // New parserstate with variables
- * alloc_parser(buffer, string, encoding, 3, 5, Qnil)      // New parserstate without variables
+ * alloc_parser(buffer, string, encoding, 0, 1);
+ * rbs_parser_declare_type_variables_from_ruby_array(variables);
  * ```
  * */
-parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables);
+parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 void free_parser(parserstate *parser);
+
+/**
+ * Inserts the given array of type variables names into the parser's type variable table.
+ * @param parser
+ * @param variables A Ruby Array of Symbols, or nil.
+ */
+void rbs_parser_declare_type_variables_from_ruby_array(parserstate *parser, VALUE variables);
+
 /**
  * Advance one token.
  * */

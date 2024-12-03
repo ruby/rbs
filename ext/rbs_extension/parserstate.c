@@ -294,7 +294,7 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, rbs_string_t string, const rbs
   return lexer;
 }
 
-parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, VALUE variables) {
+parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
 
@@ -341,12 +341,31 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
   parser_advance(parser);
   parser_advance(parser);
 
-  if (NIL_P(variables)) return parser;
+  return parser;
+}
+
+void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const char *variables[count]) {
+  if (variables == NULL) return; // Nothing to do.
+
+  parser_push_typevar_table(parser, true);
+
+  for (size_t i = 0; i < count; i++) {
+    rbs_constant_id_t name = rbs_constant_pool_insert_shared(
+      &parser->constant_pool,
+      (const uint8_t *) variables[i],
+      strlen(variables[i])
+    );
+    parser_insert_typevar(parser, name);
+  }
+}
+
+void rbs_parser_declare_type_variables_from_ruby_array(parserstate *parser, VALUE variables) {
+  if (NIL_P(variables)) return; // Nothing to do.
 
   if (!RB_TYPE_P(variables, T_ARRAY)) {
     rb_raise(rb_eTypeError,
-              "wrong argument type %"PRIsVALUE" (must be array or nil)",
-              rb_obj_class(variables));
+      "wrong argument type %"PRIsVALUE" (must be an Array of Symbols or nil)",
+      rb_obj_class(variables));
   }
 
   parser_push_typevar_table(parser, true);
@@ -370,8 +389,6 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
 
     parser_insert_typevar(parser, id);
   }
-
-  return parser;
 }
 
 void free_parser(parserstate *parser) {
