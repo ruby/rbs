@@ -113,6 +113,11 @@ module RBS
       # @type var loaded: Array[[AST::Declarations::t, Pathname, source]]
       loaded = []
 
+      # For migrating stringio to stdlib
+      if @core_root && libs.none? { |lib| lib.name == 'stringio' }
+        add(library: 'stringio', version: nil)
+      end
+
       each_signature do |source, path, buffer, decls, dirs|
         decls.each do |decl|
           loaded << [decl, path, source]
