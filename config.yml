@@ -150,6 +150,7 @@ nodes:
     fields:
       - name: namespace
         c_type: rbs_namespace
+        c_name: rbs_namespace
       - name: location
         c_type: rbs_location
   - name: RBS::AST::Members::Alias
@@ -369,6 +370,7 @@ nodes:
     fields:
       - name: namespace
         c_type: rbs_namespace
+        c_name: rbs_namespace
       - name: name
         c_type: rbs_ast_symbol
   - name: RBS::Types::Alias

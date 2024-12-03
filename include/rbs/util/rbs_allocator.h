@@ -3,6 +3,20 @@
 
 #include <stddef.h>
 
+#ifndef alignof
+    #if defined(__GNUC__) || defined(__clang__)
+        /* GCC or Clang */
+        #define alignof(type) __alignof__(type)
+    #elif defined(_MSC_VER)
+        /* Microsoft Visual C++ */
+        #define alignof(type) __alignof(type)
+    #else
+        /* Fallback using offset trick */
+        #include <stddef.h>
+        #define alignof(type) offsetof(struct { char c; type member; }, member)
+    #endif
+#endif
+
 typedef struct rbs_allocator {
     // The head of a linked list of pages, starting with the most recently allocated page.
     struct rbs_allocator_page *page;

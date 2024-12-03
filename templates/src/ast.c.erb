@@ -140,7 +140,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_po
     <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
 
     <%- node.fields.filter { |f| f.c_type == "VALUE" }.each do |f| -%>
-    rb_gc_register_mark_object(<%= f.name %>);
+    rb_gc_register_mark_object(<%= f.c_name %>);
     <%- end -%>
 
     *instance = (<%= node.c_type_name %>) {
@@ -148,7 +148,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_po
             .type = <%= node.c_type_enum_name %>
         },
         <%- node.fields.each do |field| -%>
-        .<%= field.name %> = <%= field.name %>,
+        .<%= field.c_name %> = <%= field.c_name %>,
         <%- end -%>
     };
 
