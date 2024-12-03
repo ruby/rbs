@@ -158,7 +158,6 @@ PLATFORMS
 
 DEPENDENCIES
   abbrev
-  activesupport
   base64
   benchmark-ips
   bigdecimal

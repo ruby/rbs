@@ -19,7 +19,6 @@ gem 'tempfile'
 gem "rdoc"
 gem "fileutils"
 gem "raap"
-gem "activesupport"
 
 group :libs do
   # Libraries required for stdlib test
