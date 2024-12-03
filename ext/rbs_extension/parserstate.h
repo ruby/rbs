@@ -131,20 +131,6 @@ void free_parser(parserstate *parser);
 void parser_advance(parserstate *state);
 
 /**
- * @brief Raises an exception if `current_token->type != type`.
- *
- * @param state
- * @param type
- */
-void parser_assert(parserstate *state, enum TokenType type);
-
-/**
- * Advance one token, and assert the current token type.
- * Raises an exception if `current_token->type != type`.
- * */
-void parser_advance_assert(parserstate *state, enum TokenType type);
-
-/**
  * Advance one token if the next_token is a token of the type.
  * */
 bool parser_advance_if(parserstate *state, enum TokenType type);

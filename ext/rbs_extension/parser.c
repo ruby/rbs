@@ -62,6 +62,17 @@
     return false; \
   }
 
+#define ASSERT_TOKEN(state, expected_type) \
+  if (state->current_token.type != expected_type) { \
+    set_error(state, state->current_token, true, "expected a token `%s`", token_type_str(expected_type)); \
+    return false; \
+  }
+
+#define ADVANCE_ASSERT(state, expected_type) do {\
+    parser_advance(state); \
+    ASSERT_TOKEN(state, expected_type) \
+  } while(0);
+
 typedef struct {
   rbs_node_list_t *required_positionals;
   rbs_node_list_t *optional_positionals;
@@ -357,7 +368,7 @@ static bool parse_keyword(parserstate *state, rbs_hash_t *keywords, rbs_hash_t *
     rbs_hash_set(memo, (rbs_node_t *) key, (rbs_node_t *) rbs_ast_bool_new(&state->allocator, true));
   }
 
-  parser_advance_assert(state, pCOLON);
+  ADVANCE_ASSERT(state, pCOLON);
   rbs_types_function_param_t *param = NULL;
   CHECK_PARSE(parse_function_param(state, &param));
 
@@ -623,11 +634,11 @@ NODISCARD
 static bool parse_self_type_binding(parserstate *state, rbs_node_t **self_type) {
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
-    parser_advance_assert(state, kSELF);
-    parser_advance_assert(state, pCOLON);
+    ADVANCE_ASSERT(state, kSELF);
+    ADVANCE_ASSERT(state, pCOLON);
     rbs_node_t *type;
     CHECK_PARSE(parse_type(state, &type));
-    parser_advance_assert(state, pRBRACKET);
+    ADVANCE_ASSERT(state, pRBRACKET);
     *self_type = type;
   }
 
@@ -658,7 +669,7 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
   if (state->next_token.type == pLPAREN) {
     parser_advance(state);
     CHECK_PARSE(parse_params(state, &params));
-    parser_advance_assert(state, pRPAREN);
+    ADVANCE_ASSERT(state, pRPAREN);
   }
 
   // Untyped method parameter means it cannot have block
@@ -689,13 +700,13 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
     if (state->next_token.type == pLPAREN) {
       parser_advance(state);
       CHECK_PARSE(parse_params(state, &block_params));
-      parser_advance_assert(state, pRPAREN);
+      ADVANCE_ASSERT(state, pRPAREN);
     }
 
     rbs_node_t *self_type = NULL;
     CHECK_PARSE(parse_self_type_binding(state, &self_type));
 
-    parser_advance_assert(state, pARROW);
+    ADVANCE_ASSERT(state, pARROW);
     rbs_node_t *block_return_type = NULL;
     CHECK_PARSE(parse_optional(state, &block_return_type));
 
@@ -718,10 +729,10 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
 
     block = rbs_types_block_new(&state->allocator, block_function, required, self_type);
 
-    parser_advance_assert(state, pRBRACE);
+    ADVANCE_ASSERT(state, pRBRACE);
   }
 
-  parser_advance_assert(state, pARROW);
+  ADVANCE_ASSERT(state, pARROW);
   rbs_node_t *type = NULL;
   CHECK_PARSE(parse_optional(state, &type));
 
@@ -806,7 +817,7 @@ static bool parse_record_attributes(parserstate *state, rbs_hash_t **fields) {
       CHECK_PARSE(parse_keyword_key(state, &key));
 
       check_key_duplication(state, *fields, (rbs_node_t *) key);
-      parser_advance_assert(state, pCOLON);
+      ADVANCE_ASSERT(state, pCOLON);
     } else {
       // { key => type } syntax
       switch (state->next_token.type) {
@@ -829,7 +840,7 @@ static bool parse_record_attributes(parserstate *state, rbs_hash_t **fields) {
         return false;
       }
       check_key_duplication(state, *fields, (rbs_node_t *) key);
-      parser_advance_assert(state, pFATARROW);
+      ADVANCE_ASSERT(state, pFATARROW);
     }
 
     rbs_node_t *type;
@@ -924,7 +935,7 @@ static bool parse_instance_type(parserstate *state, bool parse_alias, rbs_node_t
       parser_advance(state);
       args_range.start = state->current_token.range.start;
       CHECK_PARSE(parse_type_list(state, pRBRACKET, types));
-      parser_advance_assert(state, pRBRACKET);
+      ADVANCE_ASSERT(state, pRBRACKET);
       args_range.end = state->current_token.range.end;
     } else {
       args_range = NULL_RANGE;
@@ -956,18 +967,18 @@ static bool parse_instance_type(parserstate *state, bool parse_alias, rbs_node_t
 */
 NODISCARD
 static bool parse_singleton_type(parserstate *state, rbs_types_classsingleton_t **singleton) {
-  parser_assert(state, kSINGLETON);
+  ASSERT_TOKEN(state, kSINGLETON);
 
   range type_range;
   type_range.start = state->current_token.range.start;
-  parser_advance_assert(state, pLPAREN);
+  ADVANCE_ASSERT(state, pLPAREN);
   parser_advance(state);
 
   range name_range;
   rbs_typename_t *typename = NULL;
   CHECK_PARSE(parse_type_name(state, CLASS_NAME, &name_range, &typename));
 
-  parser_advance_assert(state, pRPAREN);
+  ADVANCE_ASSERT(state, pRPAREN);
   type_range.end = state->current_token.range.end;
 
   rbs_location_t *loc = rbs_location_new(type_range);
@@ -996,7 +1007,7 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
   case pLPAREN: {
     rbs_node_t *lparen_type;
     CHECK_PARSE(parse_type(state, &lparen_type));
-    parser_advance_assert(state, pRPAREN);
+    ADVANCE_ASSERT(state, pRPAREN);
     *type = lparen_type;
     return true;
   }
@@ -1124,7 +1135,7 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
     if (state->next_token.type != pRBRACKET) {
       CHECK_PARSE(parse_type_list(state, pRBRACKET, types));
     }
-    parser_advance_assert(state, pRBRACKET);
+    ADVANCE_ASSERT(state, pRBRACKET);
     rg.end = state->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(rg);
@@ -1141,7 +1152,7 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
     position start = state->current_token.range.start;
     rbs_hash_t *fields = NULL;
     CHECK_PARSE(parse_record_attributes(state, &fields));
-    parser_advance_assert(state, pRBRACE);
+    ADVANCE_ASSERT(state, pRBRACE);
     position end = state->current_token.range.end;
     rbs_location_t *loc = rbs_location_pp(&start, &end);
     *type = (rbs_node_t *) rbs_types_record_new(&state->allocator, fields, loc);
@@ -1277,7 +1288,7 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
         }
       }
 
-      parser_advance_assert(state, tUIDENT);
+      ADVANCE_ASSERT(state, tUIDENT);
       range name_range = state->current_token.range;
 
       rbs_string_t string = rbs_parser_get_current_token(state);
@@ -1335,7 +1346,7 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
       }
     }
 
-    parser_advance_assert(state, pRBRACKET);
+    ADVANCE_ASSERT(state, pRBRACKET);
     rg->end = state->current_token.range.end;
   } else {
     *rg = NULL_RANGE;
@@ -1391,7 +1402,7 @@ static bool parse_global_decl(parserstate *state, rbs_ast_declarations_global_t 
   range name_range = state->current_token.range;
   rbs_ast_symbol_t *typename = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, INTERN_TOKEN(state, state->current_token));
 
-  parser_advance_assert(state, pCOLON);
+  ADVANCE_ASSERT(state, pCOLON);
   range colon_range = state->current_token.range;
 
   rbs_node_t *type;
@@ -1421,7 +1432,7 @@ static bool parse_const_decl(parserstate *state, rbs_ast_declarations_constant_t
   rbs_typename_t *typename = NULL;
   CHECK_PARSE(parse_type_name(state, CLASS_NAME, &name_range, &typename));
 
-  parser_advance_assert(state, pCOLON);
+  ADVANCE_ASSERT(state, pCOLON);
   range colon_range = state->current_token.range;
 
   rbs_node_t *type;
@@ -1461,7 +1472,7 @@ static bool parse_type_decl(parserstate *state, position comment_pos, rbs_node_l
   rbs_node_list_t *type_params;
   CHECK_PARSE(parse_type_params(state, &params_range, true, &type_params));
 
-  parser_advance_assert(state, pEQ);
+  ADVANCE_ASSERT(state, pEQ);
   range eq_range = state->current_token.range;
 
   rbs_node_t *type;
@@ -1744,7 +1755,7 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
     set_error(state, state->next_token, true, "`self?` method cannot have visibility");
     return false;
   } else {
-    parser_advance_assert(state, pCOLON);
+    ADVANCE_ASSERT(state, pCOLON);
   }
 
   parser_push_typevar_table(state, kind != INSTANCE_KIND);
@@ -1853,7 +1864,7 @@ static bool class_instance_name(parserstate *state, TypeNameKind kind, rbs_node_
     parser_advance(state);
     args_range->start = state->current_token.range.start;
     CHECK_PARSE(parse_type_list(state, pRBRACKET, args));
-    parser_advance_assert(state, pRBRACKET);
+    ADVANCE_ASSERT(state, pRBRACKET);
     args_range->end = state->current_token.range.end;
   } else {
     *args_range = NULL_RANGE;
@@ -1968,14 +1979,14 @@ static bool parse_alias_member(parserstate *state, bool instance_only, position 
 
     new_kind_range.start = state->next_token.range.start;
     new_kind_range.end = state->next_token2.range.end;
-    parser_advance_assert(state, kSELF);
-    parser_advance_assert(state, pDOT);
+    ADVANCE_ASSERT(state, kSELF);
+    ADVANCE_ASSERT(state, pDOT);
     CHECK_PARSE(parse_method_name(state, &new_name_range, &new_name));
 
     old_kind_range.start = state->next_token.range.start;
     old_kind_range.end = state->next_token2.range.end;
-    parser_advance_assert(state, kSELF);
-    parser_advance_assert(state, pDOT);
+    ADVANCE_ASSERT(state, kSELF);
+    ADVANCE_ASSERT(state, pDOT);
     CHECK_PARSE(parse_method_name(state, &old_name_range, &old_name));
   } else {
     kind = rbs_keyword_new(&state->allocator, INTERN("instance"));
@@ -2021,7 +2032,7 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
     range name_range = state->current_token.range;
     rbs_ast_symbol_t *name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, INTERN_TOKEN(state, state->current_token));
 
-    parser_advance_assert(state, pCOLON);
+    ADVANCE_ASSERT(state, pCOLON);
     range colon_range = state->current_token.range;
 
     rbs_node_t *type;
@@ -2041,7 +2052,7 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
     range name_range = state->current_token.range;
     rbs_ast_symbol_t *name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, INTERN_TOKEN(state, state->current_token));
 
-    parser_advance_assert(state, pCOLON);
+    ADVANCE_ASSERT(state, pCOLON);
     range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
@@ -2067,13 +2078,13 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
       .end = state->next_token.range.end
     };
 
-    parser_advance_assert(state, pDOT);
-    parser_advance_assert(state, tAIDENT);
+    ADVANCE_ASSERT(state, pDOT);
+    ADVANCE_ASSERT(state, tAIDENT);
 
     range name_range = state->current_token.range;
     rbs_ast_symbol_t *name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, INTERN_TOKEN(state, state->current_token));
 
-    parser_advance_assert(state, pCOLON);
+    ADVANCE_ASSERT(state, pCOLON);
     range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
@@ -2187,7 +2198,7 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
   rbs_node_t *ivar_name; // rbs_ast_symbol_t, NULL or rbs_ast_bool_new(&state->allocator, false)
   range ivar_range, ivar_name_range;
   if (state->next_token.type == pLPAREN) {
-    parser_advance_assert(state, pLPAREN);
+    ADVANCE_ASSERT(state, pLPAREN);
     ivar_range.start = state->current_token.range.start;
 
     if (parser_advance_if(state, tAIDENT)) {
@@ -2198,7 +2209,7 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
       ivar_name_range = NULL_RANGE;
     }
 
-    parser_advance_assert(state, pRPAREN);
+    ADVANCE_ASSERT(state, pRPAREN);
     ivar_range.end = state->current_token.range.end;
   } else {
     ivar_range = NULL_RANGE;
@@ -2206,7 +2217,7 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
     ivar_name_range = NULL_RANGE;
   }
 
-  parser_advance_assert(state, pCOLON);
+  ADVANCE_ASSERT(state, pCOLON);
   range colon_range = state->current_token.range;
 
   parser_push_typevar_table(state, is_kind == SINGLETON_KIND);
@@ -2322,7 +2333,7 @@ static bool parse_interface_decl(parserstate *state, position comment_pos, rbs_n
   rbs_node_list_t *members = NULL;
   CHECK_PARSE(parse_interface_members(state, &members));
 
-  parser_advance_assert(state, kEND);
+  ADVANCE_ASSERT(state, kEND);
   range end_range = state->current_token.range;
   member_range.end = end_range.end;
 
@@ -2518,7 +2529,7 @@ static bool parse_module_decl0(parserstate *state, range keyword_range, rbs_type
   rbs_node_list_t *members = NULL;
   CHECK_PARSE(parse_module_members(state, &members));
 
-  parser_advance_assert(state, kEND);
+  ADVANCE_ASSERT(state, kEND);
   range end_range = state->current_token.range;
   decl_range.end = state->current_token.range.end;
 
@@ -2640,7 +2651,7 @@ static bool parse_class_decl0(parserstate *state, range keyword_range, rbs_typen
   rbs_node_list_t *members = NULL;
   CHECK_PARSE(parse_module_members(state, &members));
 
-  parser_advance_assert(state, kEND);
+  ADVANCE_ASSERT(state, kEND);
 
   range end_range = state->current_token.range;
 
@@ -2895,9 +2906,9 @@ static bool parse_use_clauses(parserstate *state, rbs_node_list_t *clauses) {
           parser_advance(state);
           keyword_range = state->current_token.range;
 
-          if (ident_type == tUIDENT) parser_advance_assert(state, tUIDENT);
-          if (ident_type == tLIDENT) parser_advance_assert(state, tLIDENT);
-          if (ident_type == tULIDENT) parser_advance_assert(state, tULIDENT);
+          if (ident_type == tUIDENT) ADVANCE_ASSERT(state, tUIDENT);
+          if (ident_type == tLIDENT) ADVANCE_ASSERT(state, tLIDENT);
+          if (ident_type == tULIDENT) ADVANCE_ASSERT(state, tULIDENT);
 
           new_name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, INTERN_TOKEN(state, state->current_token));
           new_name_range = state->current_token.range;

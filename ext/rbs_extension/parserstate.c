@@ -141,24 +141,6 @@ bool parser_advance_if(parserstate *state, enum TokenType type) {
   }
 }
 
-void parser_assert(parserstate *state, enum TokenType type) {
-  if (state->current_token.type != type) {
-    set_error(
-      state,
-      state->current_token,
-      true,
-      "expected a token `%s`",
-      token_type_str(type)
-    );
-    raise_error(state, state->error);
-  }
-}
-
-void parser_advance_assert(parserstate *state, enum TokenType type) {
-  parser_advance(state);
-  parser_assert(state, type);
-}
-
 void print_token(token tok) {
   printf(
     "%s char=%d...%d\n",
