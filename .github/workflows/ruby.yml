@@ -29,7 +29,7 @@ jobs:
             job: stdlib_test
             rubyopt: "--enable-frozen-string-literal"
           - ruby: "3.3"
-            job: lexer compile confirm_lexer
+            job: lexer templates compile confirm_lexer confirm_templates
           - ruby: "3.3"
             job: rubocop validate test_doc build test_generate_stdlib raap
           - ruby: "3.3"
