@@ -43,7 +43,7 @@ GEM
       ffi (~> 1.0)
     rbs (3.6.1)
       logger
-    securerandom (0.3.2)
+    securerandom (0.4.0)
     steep (1.8.3)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
