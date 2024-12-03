@@ -22,12 +22,12 @@ end
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
-  sh "re2c -W --no-generation-date -o ext/rbs_extension/lexer.c ext/rbs_extension/lexer.re"
+  sh "re2c -W --no-generation-date -o src/lexer.c src/lexer.re"
 end
 
 task :confirm_lexer => :lexer do
   puts "Testing if lexer.c is updated with respect to lexer.re"
-  sh "git diff --exit-code ext/rbs_extension/lexer.c"
+  sh "git diff --exit-code src/lexer.c"
 end
 
 task :confirm_templates => :templates do
@@ -66,9 +66,9 @@ task :templates do
   sh "#{ruby} templates/template.rb src/ast.c"
 end
 
-task :compile => "ext/rbs_extension/lexer.c"
 task :compile => "ext/rbs_extension/class_constants.h"
 task :compile => "ext/rbs_extension/class_constants.c"
+task :compile => "src/lexer.c"
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do

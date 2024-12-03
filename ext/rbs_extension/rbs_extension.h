@@ -6,7 +6,7 @@
 
 #include "class_constants.h"
 #include "rbs.h"
-#include "lexer.h"
+#include "rbs/lexer.h"
 #include "parser.h"
 
 /**

@@ -7,7 +7,7 @@
 #include "rbs/util/rbs_constant_pool.h"
 #include "ruby/encoding.h" // TODO: remove this
 
-#include "lexer.h"
+#include "rbs/lexer.h"
 #include "rbs/ast.h"
 
 /**

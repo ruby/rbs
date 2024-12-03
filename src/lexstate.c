@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "rbs/lexer.h"
 #include "rbs/encoding.h"
 
 static const char *RBS_TOKENTYPE_NAMES[] = {
