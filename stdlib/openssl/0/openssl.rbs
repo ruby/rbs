@@ -3164,7 +3164,7 @@ module OpenSSL
   #     sha256.reset
   #     digest2 = sha256.digest(data2)
   #
-  class Digest
+  class Digest < ::Digest::Class
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/digest.rb
     #   - digest(name, data)
