@@ -324,7 +324,6 @@ parserstate *alloc_parser(VALUE buffer, rbs_string_t string, const rbs_encoding_
     .next_token2 = NullToken,
     .next_token3 = NullToken,
     .buffer = buffer,
-    .encoding = rb_enc_get(buffer),
 
     .vars = NULL,
     .last_comment = NULL,

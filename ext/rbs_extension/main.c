@@ -56,11 +56,12 @@ static VALUE parse_type_try(VALUE a) {
     parser_advance_assert(parser, pEOF);
   }
 
-  rbs_translation_context_t ctx = {
-    .constant_pool = &parser->constant_pool,
-    .buffer = parser->buffer,
-    .encoding = parser->encoding,
-  };
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    parser->buffer,
+    parser->lexstate->encoding
+  );
+
 
   return rbs_struct_to_ruby_value(ctx, type);
 }
@@ -135,11 +136,11 @@ static VALUE parse_method_type_try(VALUE a) {
     parser_advance_assert(parser, pEOF);
   }
 
-  rbs_translation_context_t ctx = {
-    .constant_pool = &parser->constant_pool,
-    .buffer = parser->buffer,
-    .encoding = parser->encoding,
-  };
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    parser->buffer,
+    parser->lexstate->encoding
+  );
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) method_type);
 }
@@ -163,11 +164,11 @@ static VALUE parse_signature_try(VALUE a) {
     raise_error(parser, parser->error);
   }
 
-  rbs_translation_context_t ctx = {
-    .constant_pool = &parser->constant_pool,
-    .buffer = parser->buffer,
-    .encoding = parser->encoding,
-  };
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    parser->buffer,
+    parser->lexstate->encoding
+  );
 
   return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) signature);
 }
