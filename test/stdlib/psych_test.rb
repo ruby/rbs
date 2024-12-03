@@ -75,4 +75,21 @@ foo: 123
       Psych, :dump, [1], indentation: 3, line_width: 30, canonical: true, header: true
     )
   end
+
+  def test_to_yaml
+    assert_send_type(
+      "() -> ::String",
+      [1], :to_yaml
+    )
+
+    assert_send_type(
+      "(::StringIO) -> ::StringIO",
+      [1], :to_yaml, StringIO.new()
+    )
+
+    assert_send_type(
+      "(indentation: ::Integer, line_width: ::Integer, canonical: bool, header: bool) -> ::String",
+      [1], :to_yaml, indentation: 3, line_width: 30, canonical: true, header: true
+    )
+  end
 end
