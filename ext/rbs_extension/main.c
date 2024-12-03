@@ -65,9 +65,7 @@ static VALUE parse_type_try(VALUE a) {
 }
 
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -104,9 +102,7 @@ static VALUE parse_method_type_try(VALUE a) {
 }
 
 static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -134,16 +130,13 @@ static VALUE parse_signature_try(VALUE a) {
 }
 
 static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
-  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
-  StringValue(string);
-  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
+  parserstate *parser = alloc_parser(buffer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
 static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-
 
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);

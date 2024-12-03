@@ -318,7 +318,10 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, i
   return lexer;
 }
 
-parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos, VALUE variables) {
+parserstate *alloc_parser(VALUE buffer, int start_pos, int end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
 
