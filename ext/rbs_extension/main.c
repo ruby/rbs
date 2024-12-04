@@ -8,13 +8,15 @@
 #include "ruby/vm.h"
 
 /**
- * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.
+ * Raises `RBS::ParsingError` or `RuntimeError` on `tok` with message constructed with given `fmt`.
  *
  * ```
  * foo.rbs:11:21...11:25: Syntax error: {message}, token=`{tok source}` ({tok type})
  * ```
  * */
 static NORETURN(void) raise_error(error *error, VALUE buffer) {
+  assert(error != NULL && "raise_error() called with NULL error");
+
   if (!error->syntax_error) {
     rb_raise(rb_eRuntimeError, "Unexpected error");
   }
@@ -32,6 +34,12 @@ static NORETURN(void) raise_error(error *error, VALUE buffer) {
   );
 
   rb_exc_raise(rb_error);
+}
+
+void raise_error_if_any(parserstate *parser, VALUE buffer) {
+  if (parser->error != NULL) {
+    raise_error(parser->error, buffer);
+  }
 }
 
 /**
@@ -68,7 +76,6 @@ static void declare_type_variables(parserstate *parser, VALUE variables, VALUE b
     );
 
     if (!parser_insert_typevar(parser, id)) {
-      assert(parser->error != NULL);
       raise_error(parser->error, buffer);
     }
   }
@@ -97,9 +104,7 @@ static VALUE parse_type_try(VALUE a) {
   rbs_node_t *type;
   parse_type(parser, &type);
 
-  if (parser->error) {
-    raise_error(parser->error, arg->buffer);
-  }
+  raise_error_if_any(parser, arg->buffer);
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
@@ -182,9 +187,7 @@ static VALUE parse_method_type_try(VALUE a) {
   rbs_methodtype_t *method_type = NULL;
   parse_method_type(parser, &method_type);
 
-  if (parser->error) {
-    raise_error(parser->error, arg->buffer);
-  }
+  raise_error_if_any(parser, arg->buffer);
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
@@ -226,9 +229,7 @@ static VALUE parse_signature_try(VALUE a) {
   rbs_signature_t *signature = NULL;
   parse_signature(parser, &signature);
 
-  if (parser->error) {
-    raise_error(parser->error, arg->buffer);
-  }
+  raise_error_if_any(parser, arg->buffer);
 
   rbs_translation_context_t ctx = rbs_translation_context_create(
     &parser->constant_pool,
