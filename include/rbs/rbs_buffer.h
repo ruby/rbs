@@ -1,11 +1,11 @@
 #ifndef RBS__RBS_BUFFER_H
 #define RBS__RBS_BUFFER_H
 
+#include "rbs_string.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "rbs/rbs_string.h"
 
 /**
  * A rbs_buffer_t is a simple memory buffer that stores data in a contiguous block of memory.

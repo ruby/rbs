@@ -1,6 +1,6 @@
 #ifndef RBS_H
 #define RBS_H
 
-#include "rbs/ast.h"
+#include "rbs/parser.h"
 
 #endif

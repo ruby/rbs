@@ -5,14 +5,11 @@
 
 #ifndef alignof
     #if defined(__GNUC__) || defined(__clang__)
-        /* GCC or Clang */
         #define alignof(type) __alignof__(type)
     #elif defined(_MSC_VER)
-        /* Microsoft Visual C++ */
         #define alignof(type) __alignof(type)
     #else
-        /* Fallback using offset trick */
-        #include <stddef.h>
+        // Fallback using offset trick
         #define alignof(type) offsetof(struct { char c; type member; }, member)
     #endif
 #endif

@@ -6,8 +6,6 @@
 
 #include "class_constants.h"
 #include "rbs.h"
-#include "rbs/lexer.h"
-#include "rbs/parser.h"
 
 /**
  * RBS::Parser class

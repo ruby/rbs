@@ -1,9 +1,10 @@
 #include "rbs/parserstate.h"
 
-#include "rbs_extension.h"
-
+#include "rbs/parser.h"
 #include "rbs/encoding.h"
 #include "rbs/rbs_buffer.h"
+
+#include <stdio.h>
 
 #define RESET_TABLE_P(table) (table->size == 0)
 

@@ -3,8 +3,6 @@
 
 #include <stddef.h>
 
-#include "rbs/rbs_string.h"
-
 /**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.
  *

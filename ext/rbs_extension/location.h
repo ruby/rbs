@@ -2,10 +2,7 @@
 #define RBS_LOCATION_H
 
 #include "ruby.h"
-#include "rbs/lexer.h"
-#include "rbs/rbs_location.h"
-#include "rbs/rbs_location_internals.h"
-#include "rbs/util/rbs_constant_pool.h"
+#include "rbs.h"
 
 /**
  * RBS::Location class

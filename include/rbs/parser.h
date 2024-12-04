@@ -1,7 +1,6 @@
 #ifndef RBS__PARSER_H
 #define RBS__PARSER_H
 
-#include "rbs/defines.h"
 #include "parserstate.h"
 
 void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
