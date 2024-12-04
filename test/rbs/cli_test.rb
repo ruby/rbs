@@ -55,7 +55,11 @@ class RBS::CliTest < Test::Unit::TestCase
           if gem == :gemspec
             "gemspec"
           else
-            "gem '#{gem}'"
+            if gem.is_a?(Array)
+              "gem #{gem.map(&:inspect).join(", ")}"
+            else
+              "gem '#{gem}'"
+            end
           end
         end
 
