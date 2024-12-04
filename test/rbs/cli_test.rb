@@ -1292,6 +1292,260 @@ Processing `lib`...
     end
   end
 
+  def test_collection_install__mutex_m__config__bundled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: mutex_m
+        YAML
+
+        bundle_install(["mutex_m", ">= 0.3.0"])
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Rubygems, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__config__no_bundled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: mutex_m
+        YAML
+
+        bundle_install(["mutex_m", "0.2.0"])
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
+        assert_include stderr, 'Add `mutex_m` (>= 0.3.0) to the dependency of your Ruby program to use the gem-bundled type definition.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__config__stdlib_source
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: mutex_m
+            source:
+              type: stdlib
+        YAML
+
+        bundle_install
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
+        assert_include stderr, 'Add `mutex_m` (>= 0.3.0) to the dependency of your Ruby program to use the gem-bundled type definition.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__bundled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        bundle_install(["mutex_m", ">= 0.3.0"])
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Rubygems, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__no_bundled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        bundle_install(["mutex_m", "0.2.0"])
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
+        assert_include stderr, 'Add `mutex_m` (>= 0.3.0) to the dependency of your Ruby program to use the gem-bundled type definition.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__dependency_no_bundled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - type: local
+              path: repo
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        (dir/"repo/true_string/0").mkpath
+        (dir/"repo/true_string/0/manifest.yaml").write(<<~YAML)
+          dependencies:
+          - name: mutex_m
+        YAML
+
+        bundle_install("true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`mutex_m` is included in the RBS dependencies of `true_string`, but the type definition as a stdlib in rbs-gem is deprecated.'
+        assert_include stderr, 'Add `mutex_m` (>= 0.3.0) to the dependency of your Ruby program to use the gem-bundled type definition.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__mutex_m__rbs_dependency_and__gem_dependency
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir/"gem").mkpath
+        (dir/"gem/hola.gemspec").write(<<~RUBY)
+          Gem::Specification.new do |s|
+            s.name        = "hola"
+            s.version     = "0.0.0"
+            s.summary     = "Hola!"
+            s.description = "A simple hello world gem"
+            s.authors     = ["Nick Quaranto"]
+            s.email       = "nick@quaran.to"
+            s.files       = ["lib/hola.rb", "sig/hola.rbs"]
+            s.homepage    =
+              "https://rubygems.org/gems/hola"
+            s.license       = "MIT"
+            s.add_runtime_dependency "mutex_m", ">= 0.3.0"
+          end
+        RUBY
+        (dir/"gem/sig").mkpath
+        (dir/"gem/sig/manifest.yaml").write(<<~YAML)
+          dependencies:
+          - name: mutex_m
+        YAML
+
+        bundle_install(["hola", { path: "gem" }])
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`mutex_m` is included in the RBS dependencies of `hola`, but the type definition as a stdlib in rbs-gem is deprecated.'
+        assert_include stderr, 'Delete `mutex_m` from the RBS dependencies of `hola`.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Rubygems, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
   def test_subtract
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
