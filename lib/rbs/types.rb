@@ -521,13 +521,20 @@ module RBS
       def initialize(all_fields: nil, fields: nil, location:)
         case
         when fields && all_fields.nil?
-          @all_fields = fields.map { |k, v| [k, [v, true]] }.to_h
+          @all_fields = fields.transform_values { |v| [v, true] }
           @fields = fields
           @optional_fields = {}
         when all_fields && fields.nil?
           @all_fields = all_fields
-          @fields = all_fields.filter_map { |k, (v, required)| [k, v] if required }.to_h
-          @optional_fields = all_fields.filter_map { |k, (v, required)| [k, v] unless required }.to_h
+          @fields = {}
+          @optional_fields = {}
+          all_fields.each do |(k, (v, required))|
+            if required
+              @fields[k] = v
+            else
+              @optional_fields[k] = v
+            end
+          end
         else
           raise ArgumentError, "only one of `:fields` or `:all_fields` is requireds"
         end
