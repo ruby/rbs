@@ -1,7 +1,10 @@
-// This file contains a modified subset of Prism's `include/prism/defines.h`
-
 #ifndef RBS_DEFINES_H
 #define RBS_DEFINES_H
+
+
+/***********************************************************************************************************************
+ * Copied+modified subset of Prism's `include/prism/defines.h`                                                         *
+ **********************************************************************************************************************/
 
 /**
  * Certain compilers support specifying that a function accepts variadic
@@ -20,5 +23,11 @@
 #else
 #   define RBS_ATTRIBUTE_FORMAT(string_index, argument_index)
 #endif
+
+/***********************************************************************************************************************
+ * Custom defines for RBS                                                                                              *
+ **********************************************************************************************************************/
+
+#define NODISCARD __attribute__((warn_unused_result))
 
 #endif

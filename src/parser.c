@@ -61,9 +61,6 @@
   case k__TODO__: \
   /* nop */
 
-#define NODISCARD \
-  __attribute__ ((warn_unused_result))
-
 #define CHECK_PARSE(call) \
   if (!call) { \
     return false; \
