@@ -36,7 +36,7 @@ class RBS::CliTest < Test::Unit::TestCase
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "collection", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
