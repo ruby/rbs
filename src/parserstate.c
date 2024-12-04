@@ -1,3 +1,5 @@
+#include "rbs/parserstate.h"
+
 #include "rbs_extension.h"
 
 #include "rbs/encoding.h"

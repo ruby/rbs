@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "rbs/parser.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
