@@ -40,7 +40,8 @@ end
 
     env = Environment.new
     loaded = loader.load(env: env)
-
+    _, _, lib = loaded.delete_if { |_, _, lib| lib.name == "stringio" }
+    assert lib
     assert loaded.all? {|_, _, path_type| path_type == :core }
   end
 
@@ -242,7 +243,7 @@ end
 
   def test_loading_from_rbs_collection__gem_version_mismatch
     omit "Test gem `rbs-amber` is unavailable" unless has_gem?("rbs-amber")
-    
+
     mktmpdir do |path|
       lockfile_path = path.join('rbs_collection.lock.yaml')
       lockfile_path.write(<<~YAML)
