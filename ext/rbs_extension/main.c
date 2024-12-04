@@ -34,6 +34,38 @@ static NORETURN(void) raise_error(error *error, VALUE buffer) {
   rb_exc_raise(rb_error);
 }
 
+static void declare_type_variables(parserstate *parser, VALUE variables) {
+  if (NIL_P(variables)) return; // Nothing to do.
+
+  if (!RB_TYPE_P(variables, T_ARRAY)) {
+    rb_raise(rb_eTypeError,
+      "wrong argument type %"PRIsVALUE" (must be an Array of Symbols or nil)",
+      rb_obj_class(variables));
+  }
+
+  parser_push_typevar_table(parser, true);
+
+  for (long i = 0; i < rb_array_len(variables); i++) {
+    VALUE symbol = rb_ary_entry(variables, i);
+
+    if (!RB_TYPE_P(symbol, T_SYMBOL)) {
+      rb_raise(rb_eTypeError,
+        "Type variables Array contains invalid value %"PRIsVALUE" of type %"PRIsVALUE" (must be an Array of Symbols or nil)",
+        rb_inspect(symbol), rb_obj_class(symbol));
+    }
+
+    VALUE name_str = rb_sym2str(symbol);
+
+    rbs_constant_id_t id = rbs_constant_pool_insert_shared(
+      &parser->constant_pool,
+      (const uint8_t *) RSTRING_PTR(name_str),
+      RSTRING_LEN(name_str)
+    );
+
+    parser_insert_typevar(parser, id);
+  }
+}
+
 struct parse_type_arg {
   VALUE buffer;
   rb_encoding *encoding;
@@ -121,7 +153,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
   rb_encoding *encoding = rb_enc_get(string);
 
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-  rbs_parser_declare_type_variables_from_ruby_array(parser, variables);
+  declare_type_variables(parser, variables);
   struct parse_type_arg arg = {
     .buffer = buffer,
     .encoding = encoding,
@@ -169,7 +201,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
   rb_encoding *encoding = rb_enc_get(string);
 
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-  rbs_parser_declare_type_variables_from_ruby_array(parser, variables);
+  declare_type_variables(parser, variables);
   struct parse_type_arg arg = {
     .buffer = buffer,
     .encoding = encoding,
