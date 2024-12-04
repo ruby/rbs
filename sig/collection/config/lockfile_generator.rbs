@@ -2,6 +2,10 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        # Name of stdlibs that was rbs-bundled stdlib but is now a gem.
+        #
+        ALUMNI_STDLIBS: Hash[String, String]
+
         class GemfileLockMismatchError < StandardError
           @expected: Pathname
 
@@ -43,7 +47,11 @@ module RBS
         #
         def assign_gem: (name: String, version: String?, ?skip: bool) -> void
 
-        def assign_stdlib: (name: String, from_gem: String?) -> void
+        # Assign a gem from stdlib to lockfile
+        #
+        # `from_gem` is a String when the stdlib is assigned through the `dependencies:` in `manifest.yaml` of a gem.
+        #
+        def assign_stdlib: (name: String, ?from_gem: String) -> void
 
         # Find a source of a gem from ones registered in `config.sources`
         #

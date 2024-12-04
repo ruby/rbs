@@ -4,6 +4,8 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        ALUMNI_STDLIBS = { "mutex_m" => ">= 0.3.0" }
+
         class GemfileLockMismatchError < StandardError
           def initialize(expected:, actual:)
             @expected = expected
@@ -58,9 +60,10 @@ module RBS
 
         def generate
           config.gems.each do |gem|
-            if Sources::Stdlib.instance.has?(gem["name"], nil) || gem.dig("source", "type") == "stdlib"
+            case
+            when gem.dig("source", "type") == "stdlib"
               unless gem.fetch("ignore", false)
-                assign_stdlib(name: gem["name"], from_gem: nil)
+                assign_stdlib(name: gem["name"])
               end
             else
               assign_gem(name: gem["name"], version: gem["version"])
@@ -113,6 +116,11 @@ module RBS
                   find_source(name: name)
                 end
 
+              if source.is_a?(Sources::Stdlib)
+                assign_stdlib(name: name)
+                return
+              end
+
               if source
                 installed_version = version
                 best_version = find_best_version(version: installed_version, versions: source.versions(name))
@@ -149,16 +157,37 @@ module RBS
           end
         end
 
-        private def assign_stdlib(name:, from_gem:)
+        private def assign_stdlib(name:, from_gem: nil)
           return if lockfile.gems.key?(name)
 
           case name
           when 'rubygems', 'set'
             msg = "`#{name}` has been moved to core library, so it is always loaded. Remove explicit loading `#{name}`"
             msg << " from `#{from_gem}`" if from_gem
-            RBS.logger.warn msg
-
+            msg << "."
             return
+          when *ALUMNI_STDLIBS.keys
+            version = ALUMNI_STDLIBS.fetch(name)
+            if from_gem
+              # From `dependencies:` of a `manifest.yaml` of a gem
+              source = find_source(name: name) or raise
+              if source.is_a?(Sources::Stdlib)
+                RBS.logger.warn {
+                  "`#{name}` is included in the RBS dependencies of `#{from_gem}`, but the type definition as a stdlib in rbs-gem is deprecated. Add `#{name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
+                }
+              else
+                RBS.logger.info {
+                  "`#{name}` is included in the RBS dependencies of `#{from_gem}`, but the type definition as a stdlib in rbs-gem is deprecated. Delete `#{name}` from the RBS dependencies of `#{from_gem}`."
+                }
+                assign_gem(name: name, version: nil)
+                return
+              end
+            else
+              # From `gems:` of a `rbs_collection.yaml`
+              RBS.logger.warn {
+                "`#{name}` as a stdlib in rbs-gem is deprecated. Add `#{name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
+              }
+            end
           end
 
           source = Sources::Stdlib.instance
