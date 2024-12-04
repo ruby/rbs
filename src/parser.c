@@ -1299,7 +1299,7 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
       rbs_constant_id_t id = rbs_constant_pool_insert_string(&state->constant_pool, string);
       rbs_ast_symbol_t *name = rbs_ast_symbol_new(&state->allocator, &state->constant_pool, id);
 
-      parser_insert_typevar(state, id);
+      CHECK_PARSE(parser_insert_typevar(state, id));
 
       range upper_bound_range = NULL_RANGE;
       if (state->next_token.type == pLT) {
@@ -1382,7 +1382,7 @@ bool parse_method_type(parserstate *state, rbs_methodtype_t **method_type) {
   rg.end = state->current_token.range.end;
   type_range.end = rg.end;
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   rbs_location_t *loc = rbs_location_new(rg);
   rbs_loc_alloc_children(loc, 2);
@@ -1491,7 +1491,7 @@ static bool parse_type_decl(parserstate *state, position comment_pos, rbs_node_l
   rbs_loc_add_optional_child(loc, INTERN("type_params"), params_range);
   rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
@@ -1817,7 +1817,7 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
     }
   }
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   rbs_keyword_t *k;
   switch (kind) {
@@ -1929,7 +1929,7 @@ static bool parse_mixin_member(parserstate *state, bool from_interface, position
     args, &name_range, &args_range, &name
   ));
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   member_range.end = state->current_token.range.end;
 
@@ -2064,7 +2064,8 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
     rbs_node_t *type;
     CHECK_PARSE(parse_type(state, &type));
 
-    parser_pop_typevar_table(state);
+    CHECK_PARSE(parser_pop_typevar_table(state));
+
     member_range.end = state->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(member_range);
@@ -2096,7 +2097,8 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
     rbs_node_t *type;
     CHECK_PARSE(parse_type(state, &type));
 
-    parser_pop_typevar_table(state);
+    CHECK_PARSE(parser_pop_typevar_table(state));
+
     member_range.end = state->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(member_range);
@@ -2229,7 +2231,8 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
   rbs_node_t *type;
   CHECK_PARSE(parse_type(state, &type));
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
+
   member_range.end = state->current_token.range.end;
 
   rbs_location_t *loc = rbs_location_new(member_range);
@@ -2341,7 +2344,7 @@ static bool parse_interface_decl(parserstate *state, position comment_pos, rbs_n
   range end_range = state->current_token.range;
   member_range.end = end_range.end;
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   rbs_location_t *loc = rbs_location_new(member_range);
   rbs_loc_alloc_children(loc, 4);
@@ -2546,7 +2549,7 @@ static bool parse_module_decl0(parserstate *state, range keyword_range, rbs_type
   rbs_loc_add_optional_child(loc, INTERN("colon"), colon_range);
   rbs_loc_add_optional_child(loc, INTERN("self_types"), self_types_range);
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   *module_decl = rbs_ast_declarations_module_new(&state->allocator, module_name, type_params, self_types, members, annotations, loc, comment);
   return true;
@@ -2661,7 +2664,7 @@ static bool parse_class_decl0(parserstate *state, range keyword_range, rbs_typen
 
   decl_range.end = end_range.end;
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   rbs_location_t *loc = rbs_location_new(decl_range);
   rbs_loc_alloc_children(loc, 5);
@@ -2776,7 +2779,7 @@ static bool parse_nested_decl(parserstate *state, const char *nested_in, positio
     return false;
   }
 
-  parser_pop_typevar_table(state);
+  CHECK_PARSE(parser_pop_typevar_table(state));
 
   return true;
 }

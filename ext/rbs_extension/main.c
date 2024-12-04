@@ -34,7 +34,12 @@ static NORETURN(void) raise_error(error *error, VALUE buffer) {
   rb_exc_raise(rb_error);
 }
 
-static void declare_type_variables(parserstate *parser, VALUE variables) {
+/**
+ * Inserts the given array of type variables names into the parser's type variable table.
+ * @param parser
+ * @param variables A Ruby Array of Symbols, or nil.
+ */
+static void declare_type_variables(parserstate *parser, VALUE variables, VALUE buffer) {
   if (NIL_P(variables)) return; // Nothing to do.
 
   if (!RB_TYPE_P(variables, T_ARRAY)) {
@@ -62,7 +67,10 @@ static void declare_type_variables(parserstate *parser, VALUE variables) {
       RSTRING_LEN(name_str)
     );
 
-    parser_insert_typevar(parser, id);
+    if (!parser_insert_typevar(parser, id)) {
+      assert(parser->error != NULL);
+      raise_error(parser->error, buffer);
+    }
   }
 }
 
@@ -153,7 +161,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
   rb_encoding *encoding = rb_enc_get(string);
 
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-  declare_type_variables(parser, variables);
+  declare_type_variables(parser, variables, buffer);
   struct parse_type_arg arg = {
     .buffer = buffer,
     .encoding = encoding,
@@ -201,7 +209,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
   rb_encoding *encoding = rb_enc_get(string);
 
   parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-  declare_type_variables(parser, variables);
+  declare_type_variables(parser, variables, buffer);
   struct parse_type_arg arg = {
     .buffer = buffer,
     .encoding = encoding,

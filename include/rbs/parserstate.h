@@ -3,9 +3,9 @@
 
 #include <stdbool.h>
 
+#include "rbs/defines.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
-#include "ruby.h" // TODO: remove this
 
 #include "rbs/lexer.h"
 #include "rbs/ast.h"
@@ -91,11 +91,12 @@ comment *comment_get_comment(comment *com, int line);
  * ```
  * */
 id_table *parser_push_typevar_table(parserstate *state, bool reset);
-void parser_pop_typevar_table(parserstate *state);
+NODISCARD bool parser_pop_typevar_table(parserstate *state);
+
 /**
  * Insert new type variable into the latest table.
  * */
-void parser_insert_typevar(parserstate *state, rbs_constant_id_t id);
+NODISCARD bool parser_insert_typevar(parserstate *state, rbs_constant_id_t id);
 
 /**
  * Returns true if given type variable is recorded in the table.

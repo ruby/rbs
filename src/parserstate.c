@@ -47,27 +47,33 @@ id_table *parser_push_typevar_table(parserstate *state, bool reset) {
   return table;
 }
 
-void parser_pop_typevar_table(parserstate *state) {
+NODISCARD
+bool parser_pop_typevar_table(parserstate *state) {
   id_table *table;
 
   if (state->vars) {
     table = state->vars;
     state->vars = table->next;
   } else {
-    rb_raise(rb_eRuntimeError, "Cannot pop empty table");
+    set_error(state, state->current_token, false, "Cannot pop empty table");
+    return false;
   }
 
   if (state->vars && RESET_TABLE_P(state->vars)) {
     table = state->vars;
     state->vars = table->next;
   }
+
+  return true;
 }
 
-void parser_insert_typevar(parserstate *state, rbs_constant_id_t id) {
+NODISCARD
+bool parser_insert_typevar(parserstate *state, rbs_constant_id_t id) {
   id_table *table = state->vars;
 
   if (RESET_TABLE_P(table)) {
-    rb_raise(rb_eRuntimeError, "Cannot insert to reset table");
+    set_error(state, state->current_token, false, "Cannot insert to reset table");
+    return false;
   }
 
   if (table->size == table->count) {
@@ -79,6 +85,8 @@ void parser_insert_typevar(parserstate *state, rbs_constant_id_t id) {
   }
 
   table->ids[table->count++] = id;
+
+  return true;
 }
 
 bool parser_typevar_member(parserstate *state, rbs_constant_id_t id) {
@@ -357,7 +365,11 @@ void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const 
       (const uint8_t *) variables[i],
       strlen(variables[i])
     );
-    parser_insert_typevar(parser, name);
+
+    if (!parser_insert_typevar(parser, name)) {
+      fprintf(stderr, "RuntimeError: %s\n", parser->error->message);
+      exit(1);
+    }
   }
 }
 
