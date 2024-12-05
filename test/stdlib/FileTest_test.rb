@@ -5,12 +5,11 @@ class FileTestSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::FileTest)"
 
-
-  def with_path_io(path: __FILE__, io: default=File.open(File.expand_path(__FILE__)), &block)
-    with_path(path, &block)
-    with_io(io, &block)
-  ensure
-    io.close if default
+  def with_path_io(&block)
+    with_path(__FILE__, &block)
+    File.open(File.expand_path(__FILE__)) do |io|
+      with_io(io, &block)
+    end
   end
 
   def test_blockdev?
