@@ -281,9 +281,9 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               type: stdlib
           - name: mutex_m
-            version: "0"
+            version: "0.3.0"
             source:
-              type: stdlib
+              type: rubygems
           - name: singleton
             version: "0"
             source:
@@ -788,9 +788,9 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             source:
               type: stdlib
           - name: mutex_m
-            version: "0"
+            version: "0.3.0"
             source:
-              type: stdlib
+              type: rubygems
           - name: securerandom
             version: "0"
             source:
