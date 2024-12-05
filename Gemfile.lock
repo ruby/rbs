@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (3.7.0)
+    rbs (3.8.0.dev)
       logger
 
 PATH
@@ -41,6 +41,7 @@ GEM
     digest (3.1.1)
     drb (2.2.1)
     ffi (1.17.0)
+    ffi (1.17.0-x86_64-darwin)
     fileutils (1.7.2)
     goodcheck (3.1.0)
       marcel (>= 1.0, < 2.0)
