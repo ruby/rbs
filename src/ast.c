@@ -10,6 +10,76 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char* rbs_node_type_name(rbs_node_t *node) {
+    switch (node->type) {
+        case RBS_AST_ANNOTATION: return "RBS::AST::Annotation";
+        case RBS_AST_BOOL: return "RBS::AST::Bool";
+        case RBS_AST_COMMENT: return "RBS::AST::Comment";
+        case RBS_AST_DECLARATIONS_CLASS: return "RBS::AST::Declarations::Class";
+        case RBS_AST_DECLARATIONS_CLASS_SUPER: return "RBS::AST::Declarations::Class::Super";
+        case RBS_AST_DECLARATIONS_CLASSALIAS: return "RBS::AST::Declarations::ClassAlias";
+        case RBS_AST_DECLARATIONS_CONSTANT: return "RBS::AST::Declarations::Constant";
+        case RBS_AST_DECLARATIONS_GLOBAL: return "RBS::AST::Declarations::Global";
+        case RBS_AST_DECLARATIONS_INTERFACE: return "RBS::AST::Declarations::Interface";
+        case RBS_AST_DECLARATIONS_MODULE: return "RBS::AST::Declarations::Module";
+        case RBS_AST_DECLARATIONS_MODULE_SELF: return "RBS::AST::Declarations::Module::Self";
+        case RBS_AST_DECLARATIONS_MODULEALIAS: return "RBS::AST::Declarations::ModuleAlias";
+        case RBS_AST_DECLARATIONS_TYPEALIAS: return "RBS::AST::Declarations::TypeAlias";
+        case RBS_AST_DIRECTIVES_USE: return "RBS::AST::Directives::Use";
+        case RBS_AST_DIRECTIVES_USE_SINGLECLAUSE: return "RBS::AST::Directives::Use::SingleClause";
+        case RBS_AST_DIRECTIVES_USE_WILDCARDCLAUSE: return "RBS::AST::Directives::Use::WildcardClause";
+        case RBS_AST_INTEGER: return "RBS::AST::Integer";
+        case RBS_AST_MEMBERS_ALIAS: return "RBS::AST::Members::Alias";
+        case RBS_AST_MEMBERS_ATTRACCESSOR: return "RBS::AST::Members::AttrAccessor";
+        case RBS_AST_MEMBERS_ATTRREADER: return "RBS::AST::Members::AttrReader";
+        case RBS_AST_MEMBERS_ATTRWRITER: return "RBS::AST::Members::AttrWriter";
+        case RBS_AST_MEMBERS_CLASSINSTANCEVARIABLE: return "RBS::AST::Members::ClassInstanceVariable";
+        case RBS_AST_MEMBERS_CLASSVARIABLE: return "RBS::AST::Members::ClassVariable";
+        case RBS_AST_MEMBERS_EXTEND: return "RBS::AST::Members::Extend";
+        case RBS_AST_MEMBERS_INCLUDE: return "RBS::AST::Members::Include";
+        case RBS_AST_MEMBERS_INSTANCEVARIABLE: return "RBS::AST::Members::InstanceVariable";
+        case RBS_AST_MEMBERS_METHODDEFINITION: return "RBS::AST::Members::MethodDefinition";
+        case RBS_AST_MEMBERS_METHODDEFINITION_OVERLOAD: return "RBS::AST::Members::MethodDefinition::Overload";
+        case RBS_AST_MEMBERS_PREPEND: return "RBS::AST::Members::Prepend";
+        case RBS_AST_MEMBERS_PRIVATE: return "RBS::AST::Members::Private";
+        case RBS_AST_MEMBERS_PUBLIC: return "RBS::AST::Members::Public";
+        case RBS_AST_STRING: return "RBS::AST::String";
+        case RBS_AST_TYPEPARAM: return "RBS::AST::TypeParam";
+        case RBS_METHODTYPE: return "RBS::MethodType";
+        case RBS_NAMESPACE: return "RBS::Namespace";
+        case RBS_SIGNATURE: return "RBS::Signature";
+        case RBS_TYPENAME: return "RBS::TypeName";
+        case RBS_TYPES_ALIAS: return "RBS::Types::Alias";
+        case RBS_TYPES_BASES_ANY: return "RBS::Types::Bases::Any";
+        case RBS_TYPES_BASES_BOOL: return "RBS::Types::Bases::Bool";
+        case RBS_TYPES_BASES_BOTTOM: return "RBS::Types::Bases::Bottom";
+        case RBS_TYPES_BASES_CLASS: return "RBS::Types::Bases::Class";
+        case RBS_TYPES_BASES_INSTANCE: return "RBS::Types::Bases::Instance";
+        case RBS_TYPES_BASES_NIL: return "RBS::Types::Bases::Nil";
+        case RBS_TYPES_BASES_SELF: return "RBS::Types::Bases::Self";
+        case RBS_TYPES_BASES_TOP: return "RBS::Types::Bases::Top";
+        case RBS_TYPES_BASES_VOID: return "RBS::Types::Bases::Void";
+        case RBS_TYPES_BLOCK: return "RBS::Types::Block";
+        case RBS_TYPES_CLASSINSTANCE: return "RBS::Types::ClassInstance";
+        case RBS_TYPES_CLASSSINGLETON: return "RBS::Types::ClassSingleton";
+        case RBS_TYPES_FUNCTION: return "RBS::Types::Function";
+        case RBS_TYPES_FUNCTION_PARAM: return "RBS::Types::Function::Param";
+        case RBS_TYPES_INTERFACE: return "RBS::Types::Interface";
+        case RBS_TYPES_INTERSECTION: return "RBS::Types::Intersection";
+        case RBS_TYPES_LITERAL: return "RBS::Types::Literal";
+        case RBS_TYPES_OPTIONAL: return "RBS::Types::Optional";
+        case RBS_TYPES_PROC: return "RBS::Types::Proc";
+        case RBS_TYPES_RECORD: return "RBS::Types::Record";
+        case RBS_TYPES_RECORD_FIELDTYPE: return "RBS::Types::Record::FieldType";
+        case RBS_TYPES_TUPLE: return "RBS::Types::Tuple";
+        case RBS_TYPES_UNION: return "RBS::Types::Union";
+        case RBS_TYPES_UNTYPEDFUNCTION: return "RBS::Types::UntypedFunction";
+        case RBS_TYPES_VARIABLE: return "RBS::Types::Variable";
+        case RBS_AST_SYMBOL: return "Symbol";
+        default: return "Unknown";
+    }
+}
+
 /* rbs_node_list */
 
 rbs_node_list_t* rbs_node_list_new(rbs_allocator_t *allocator) {

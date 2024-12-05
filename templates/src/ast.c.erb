@@ -3,6 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char* rbs_node_type_name(rbs_node_t *node) {
+    switch (node->type) {
+        <%- nodes.each do |node| -%>
+        case <%= node.c_type_enum_name %>: return "<%= node.ruby_full_name %>";
+        <%- end -%>
+        case RBS_AST_SYMBOL: return "Symbol";
+        default: return "Unknown";
+    }
+}
+
 /* rbs_node_list */
 
 rbs_node_list_t* rbs_node_list_new(rbs_allocator_t *allocator) {

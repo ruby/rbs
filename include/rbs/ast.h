@@ -85,6 +85,8 @@ typedef struct rbs_node {
     enum rbs_node_type type;
 } rbs_node_t;
 
+const char* rbs_node_type_name(rbs_node_t *node);
+
 /* rbs_node_list_node */
 
 typedef struct rbs_node_list_node {
