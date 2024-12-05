@@ -141,6 +141,7 @@ module RBS
 end
 
 module Kernel
+  %a{steep:deprecated}
   # Parses given string and returns Namespace.
   #
   def Namespace: (String) -> RBS::Namespace
