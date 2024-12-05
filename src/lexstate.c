@@ -89,7 +89,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tANNOTATION",      /* Annotation */
 };
 
-token NullToken = { NullType };
+token NullToken = { .type = NullType, .range = {} };
 position NullPosition = { -1, -1, -1, -1 };
 range NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
 
