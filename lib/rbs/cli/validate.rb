@@ -52,7 +52,7 @@ module RBS
         loader = options.loader()
         @env = Environment.from_loader(loader).resolve_type_names
         @builder = DefinitionBuilder.new(env: @env)
-        @validator = Validator.new(env: @env, resolver: Resolver::TypeNameResolver.new(@env))
+        @validator = Validator.new(env: @env)
         exit_error = false
         limit = nil #: Integer?
         OptionParser.new do |opts|

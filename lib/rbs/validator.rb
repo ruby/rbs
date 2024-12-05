@@ -6,13 +6,15 @@ module RBS
     attr_reader :resolver
     attr_reader :definition_builder
 
-    def initialize(env:, resolver:)
+    def initialize(env:, resolver: nil)
       @env = env
       @resolver = resolver
       @definition_builder = DefinitionBuilder.new(env: env)
     end
 
     def absolute_type(type, context:, &block)
+      return type unless resolver
+
       type.map_type_name do |type_name, _, type|
         resolver.resolve(type_name, context: context) || (block ? yield(type) : type_name)
       end

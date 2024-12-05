@@ -2,7 +2,7 @@ module RBS
   class Validator
     attr_reader env: Environment
 
-    attr_reader resolver: Resolver::TypeNameResolver
+    attr_reader resolver: Resolver::TypeNameResolver?
 
     attr_reader definition_builder: DefinitionBuilder
 
@@ -10,7 +10,7 @@ module RBS
 
     attr_reader type_alias_regularity: TypeAliasRegularity
 
-    def initialize: (env: Environment, resolver: Resolver::TypeNameResolver) -> void
+    def initialize: (env: Environment, ?resolver: Resolver::TypeNameResolver?) -> void
 
     # Validates the presence of type names and type application arity match.
     #
