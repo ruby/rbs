@@ -94,7 +94,7 @@ RUBY
 
   def test_test_target
     output = refute_test_success(other_env: { "RBS_TEST_TARGET" => nil })
-    assert_match "rbs/test/setup handles the following environment variables:", output
+    assert_match "test/setup handles the following environment variables:", output
   end
 
   def test_no_test_install
