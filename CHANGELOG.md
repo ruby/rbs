@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.7.0 (2024-12-05)
+
+### Miscellaneous
+
+* bundle update mutex_m ([#2122](https://github.com/ruby/rbs/pull/2122))
+
 ## 3.7.0.pre.1 (2024-12-05)
 
 ### Signature updates
