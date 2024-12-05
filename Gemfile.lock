@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (3.7.0.dev.1)
+    rbs (3.7.0.pre.1)
       logger
 
 PATH
@@ -120,7 +120,7 @@ GEM
     rubocop-rubycw (0.1.6)
       rubocop (~> 1.0)
     ruby-progressbar (1.13.0)
-    securerandom (0.3.2)
+    securerandom (0.4.0)
     stackprof (0.2.26)
     steep (1.8.3)
       activesupport (>= 5.1)

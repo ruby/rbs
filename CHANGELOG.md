@@ -1,5 +1,52 @@
 # CHANGELOG
 
+## 3.7.0.pre.1 (2024-12-05)
+
+### Signature updates
+
+* `CGI.accept_charset` ([#2045](https://github.com/ruby/rbs/pull/2045))
+* `IO#readline`, `IO#readlines` ([#2059](https://github.com/ruby/rbs/pull/2059))
+* `Kernel#proc` ([#2036](https://github.com/ruby/rbs/pull/2036))
+* `Kernel#system` ([#2075](https://github.com/ruby/rbs/pull/2075))
+* `Object#to_yaml` ([#2107](https://github.com/ruby/rbs/pull/2107))
+* `OpenSSL::Digest` ([#2108](https://github.com/ruby/rbs/pull/2108))
+* `OpenSSL.base64digest` ([#2078](https://github.com/ruby/rbs/pull/2078))
+* `Process.detach` ([#2083](https://github.com/ruby/rbs/pull/2083))
+
+### Library changes
+
+* Reduce object allocation for record type ([#2118](https://github.com/ruby/rbs/pull/2118))
+* Milestone to graduate stringio from core. ([#2114](https://github.com/ruby/rbs/pull/2114))
+* Mark all internal `parse_` methods as `static` ([#2103](https://github.com/ruby/rbs/pull/2103))
+* Add templating mechanism to automatically generate `.c`/`.h` files ([#2098](https://github.com/ruby/rbs/pull/2098))
+* Remove unused `rbs_unescape_string` declaration ([#2058](https://github.com/ruby/rbs/pull/2058))
+* Fix UntypedFunction does not provide #map_type_name ([#2054](https://github.com/ruby/rbs/pull/2054))
+* Better `instance_eval`/`instance_exec` detection ([#2052](https://github.com/ruby/rbs/pull/2052))
+* Overload annotations ([#2049](https://github.com/ruby/rbs/pull/2049))
+
+#### rbs prototype
+
+* prototype rb: Fix crashed by self::CONST ([#2079](https://github.com/ruby/rbs/pull/2079))
+
+#### rbs collection
+
+* mutex_m support ([#2115](https://github.com/ruby/rbs/pull/2115))
+
+### Miscellaneous
+
+* Use `File.open` with block ([#2119](https://github.com/ruby/rbs/pull/2119))
+* Compile without activesupport ([#2105](https://github.com/ruby/rbs/pull/2105))
+* docs: Add singleton attribute members to syntax.md ([#2090](https://github.com/ruby/rbs/pull/2090))
+* Bundle update rubocop-on-rbs ([#2094](https://github.com/ruby/rbs/pull/2094))
+* `bundle exec` on windows ([#2101](https://github.com/ruby/rbs/pull/2101))
+* Fix typos ([#2097](https://github.com/ruby/rbs/pull/2097))
+* Bundle update json 2.8.2 ([#2095](https://github.com/ruby/rbs/pull/2095))
+* Skip `rbs` gem validation ([#2084](https://github.com/ruby/rbs/pull/2084))
+* Skip PTY_test with Windows platform ([#2055](https://github.com/ruby/rbs/pull/2055))
+* Randomize stdlib test order to uncover hidden assumptions ([#2043](https://github.com/ruby/rbs/pull/2043))
+* Suppress `inline` is not at beginning of declaration for melt_array ([#2050](https://github.com/ruby/rbs/pull/2050))
+* Skip `mkpath` test with 3.4 ([#2053](https://github.com/ruby/rbs/pull/2053))
+
 ## 3.6.1 (2024-10-03)
 
 ### Library changes
