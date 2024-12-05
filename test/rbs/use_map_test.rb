@@ -36,7 +36,7 @@ class RBS::Environment::UseMapTest < Test::Unit::TestCase
   end
 
   def test_import_wildcard_clause
-    map.build_map(Use::WildcardClause.new(namespace: Namespace("Foo::"), location: nil))
+    map.build_map(Use::WildcardClause.new(namespace: RBS::Namespace.parse("Foo::"), location: nil))
 
     assert_equal TypeName("::Foo::M"), map.resolve?(TypeName("M"))
     assert_equal TypeName("::Foo::_I"), map.resolve?(TypeName("_I"))

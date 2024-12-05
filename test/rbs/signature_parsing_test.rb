@@ -2153,7 +2153,7 @@ end
         end
 
         use.clauses[1].tap do |clause|
-          assert_equal Namespace("RBS::AST::Declarations::"), clause.namespace
+          assert_equal RBS::Namespace.parse("RBS::AST::Declarations::"), clause.namespace
           assert_equal "RBS::AST::Declarations::", clause.location[:namespace].source
           assert_equal "*", clause.location[:star].source
         end
