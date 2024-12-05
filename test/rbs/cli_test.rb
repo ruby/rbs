@@ -252,9 +252,9 @@ singleton(::BasicObject)
       assert_includes stdout.string, 'accessibility: public'
       assert_includes stdout.string, 'types:'
       assert_includes stdout.string, '  () -> ::Enumerator[self, untyped]'
-      assert_includes stdout.string, 'rbs/core/kernel.rbs'
+      assert_includes stdout.string, 'core/kernel.rbs'
       assert_includes stdout.string, '| [T] () { (self) -> T } -> T'
-      assert_includes stdout.string, 'rbs/core/kernel.rbs'
+      assert_includes stdout.string, 'core/kernel.rbs'
     end
 
     Dir.mktmpdir do |dir|
@@ -855,8 +855,8 @@ singleton(::BasicObject)
   def test_paths
     with_cli do |cli|
       cli.run(%w(-r pathname -I no-such-dir paths))
-      assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
-      assert_match %r{/rbs/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
+      assert_match %r{/core \(dir, core\)$}, stdout.string
+      assert_match %r{/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
       assert_match %r{^no-such-dir \(absent\)$}, stdout.string
     end
   end
@@ -866,7 +866,7 @@ singleton(::BasicObject)
 
     with_cli do |cli|
       cli.run(%w(-r rbs-amber paths))
-      assert_match %r{/rbs/core \(dir, core\)$}, stdout.string
+      assert_match %r{/core \(dir, core\)$}, stdout.string
       assert_match %r{/sig \(dir, library, name=rbs-amber\)$}, stdout.string
     end
   end

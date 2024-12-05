@@ -105,7 +105,7 @@ class RBS::Collection::InstallerTest < Test::Unit::TestCase
 
       assert dest.directory?
       assert dest.glob('*').empty? # because rubygems installer does nothing
-      assert_match(%r!Using rbs-amber:1.0.0 \(.+/rbs/test/assets/test-gem/sig\)!, stdout.string)
+      assert_match(%r!Using rbs-amber:1.0.0 \(.+/test/assets/test-gem/sig\)!, stdout.string)
       assert_match("It's done! 1 gems' RBSs now installed.", stdout.string)
     end
   end
