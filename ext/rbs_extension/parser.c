@@ -790,9 +790,10 @@ static VALUE parse_record_attributes(parserstate *state) {
       case tDQSTRING:
       case tINTEGER:
       case kTRUE:
-      case kFALSE:
+      case kFALSE: {
         key = rb_funcall(parse_simple(state), rb_intern("literal"), 0);
         break;
+      }
       default:
         raise_syntax_error(
           state,
@@ -962,24 +963,33 @@ static VALUE parse_simple(parserstate *state) {
     parser_advance_assert(state, pRPAREN);
     return type;
   }
-  case kBOOL:
+  case kBOOL: {
     return rbs_bases_bool(rbs_location_current_token(state));
-  case kBOT:
+  }
+  case kBOT: {
     return rbs_bases_bottom(rbs_location_current_token(state));
-  case kCLASS:
+  }
+  case kCLASS: {
     return rbs_bases_class(rbs_location_current_token(state));
-  case kINSTANCE:
+  }
+  case kINSTANCE: {
     return rbs_bases_instance(rbs_location_current_token(state));
-  case kNIL:
+  }
+  case kNIL: {
     return rbs_bases_nil(rbs_location_current_token(state));
-  case kSELF:
+  }
+  case kSELF: {
     return rbs_bases_self(rbs_location_current_token(state));
-  case kTOP:
+  }
+  case kTOP: {
     return rbs_bases_top(rbs_location_current_token(state));
-  case kVOID:
+  }
+  case kVOID: {
     return rbs_bases_void(rbs_location_current_token(state));
-  case kUNTYPED:
+  }
+  case kUNTYPED: {
     return rbs_bases_any(rbs_location_current_token(state));
+  }
   case k__TODO__: {
     VALUE type = rbs_bases_any(rbs_location_current_token(state));
     rb_funcall(type, rb_intern("todo!"), 0);
@@ -996,10 +1006,12 @@ static VALUE parse_simple(parserstate *state) {
       rbs_location_current_token(state)
     );
   }
-  case kTRUE:
+  case kTRUE: {
     return rbs_literal(Qtrue, rbs_location_current_token(state));
-  case kFALSE:
+  }
+  case kFALSE: {
     return rbs_literal(Qfalse, rbs_location_current_token(state));
+  }
   case tSQSTRING:
   case tDQSTRING: {
     VALUE literal = rbs_unquote_string(state, state->current_token.range, 0);
@@ -1022,10 +1034,12 @@ static VALUE parse_simple(parserstate *state) {
   }
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
-  case pCOLON2:
+  case pCOLON2: {
     return parse_instance_type(state, true);
-  case kSINGLETON:
+  }
+  case kSINGLETON: {
     return parse_singleton_type(state);
+  }
   case pLBRACKET: {
     range rg;
     rg.start = state->current_token.range.start;
@@ -1520,8 +1534,9 @@ static VALUE parse_method_name(parserstate *state, range *range) {
     *range = state->current_token.range;
     return ID2SYM(INTERN_TOKEN(state, state->current_token));
 
-  case tQIDENT:
+  case tQIDENT: {
     return rb_to_symbol(rbs_unquote_string(state, state->current_token.range, 0));
+  }
 
   case pBAR:
   case pHAT:
@@ -1615,18 +1630,20 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
 
   switch (state->current_token.type)
   {
-  case kPRIVATE:
+  case kPRIVATE: {
     visibility_range = state->current_token.range;
     visibility = ID2SYM(rb_intern("private"));
     member_range.start = visibility_range.start;
     parser_advance(state);
     break;
-  case kPUBLIC:
+  }
+  case kPUBLIC: {
     visibility_range = state->current_token.range;
     visibility = ID2SYM(rb_intern("public"));
     member_range.start = visibility_range.start;
     parser_advance(state);
     break;
+  }
   default:
     visibility_range = NULL_RANGE;
     visibility = Qnil;
@@ -1948,7 +1965,7 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
 
   switch (state->current_token.type)
   {
-  case tAIDENT:
+  case tAIDENT: {
     name_range = state->current_token.range;
     name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1966,8 +1983,8 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
 
     return rbs_ast_members_instance_variable(name, type, location, comment);
-
-  case tA2IDENT:
+  }
+  case tA2IDENT: {
     name_range = state->current_token.range;
     name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1987,8 +2004,8 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
 
     return rbs_ast_members_class_variable(name, type, location, comment);
-
-  case kSELF:
+  }
+  case kSELF: {
     kind_range.start = state->current_token.range.start;
     kind_range.end = state->next_token.range.end;
 
@@ -2014,7 +2031,7 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
 
     return rbs_ast_members_class_instance_variable(name, type, location, comment);
-
+  }
   default:
     rbs_abort();
   }
@@ -2179,19 +2196,22 @@ static VALUE parse_interface_members(parserstate *state) {
 
     VALUE member;
     switch (state->current_token.type) {
-    case kDEF:
+    case kDEF: {
       member = parse_member_def(state, true, true, annot_pos, annotations);
       break;
+    }
 
     case kINCLUDE:
     case kEXTEND:
-    case kPREPEND:
+    case kPREPEND: {
       member = parse_mixin_member(state, true, annot_pos, annotations);
       break;
+    }
 
-    case kALIAS:
+    case kALIAS: {
       member = parse_alias_member(state, true, annot_pos, annotations);
       break;
+    }
 
     default:
       raise_syntax_error(
@@ -2325,45 +2345,52 @@ static VALUE parse_module_members(parserstate *state) {
 
     switch (state->current_token.type)
     {
-    case kDEF:
+    case kDEF: {
       member = parse_member_def(state, false, true, annot_pos, annotations);
       break;
+    }
 
     case kINCLUDE:
     case kEXTEND:
-    case kPREPEND:
+    case kPREPEND: {
       member = parse_mixin_member(state, false, annot_pos, annotations);
       break;
+    }
 
-    case kALIAS:
+    case kALIAS: {
       member = parse_alias_member(state, false, annot_pos, annotations);
       break;
+    }
 
     case tAIDENT:
     case tA2IDENT:
-    case kSELF:
+    case kSELF: {
       member = parse_variable_member(state, annot_pos, annotations);
       break;
+    }
 
     case kATTRREADER:
     case kATTRWRITER:
-    case kATTRACCESSOR:
+    case kATTRACCESSOR: {
       member = parse_attribute_member(state, annot_pos, annotations);
       break;
+    }
 
     case kPUBLIC:
     case kPRIVATE:
       if (state->next_token.range.start.line == state->current_token.range.start.line) {
         switch (state->next_token.type)
         {
-        case kDEF:
+        case kDEF: {
           member = parse_member_def(state, false, true, annot_pos, annotations);
           break;
+        }
         case kATTRREADER:
         case kATTRWRITER:
-        case kATTRACCESSOR:
+        case kATTRACCESSOR: {
           member = parse_attribute_member(state, annot_pos, annotations);
           break;
+        }
         default:
           raise_syntax_error(state, state->next_token, "method or attribute definition is expected after visibility modifier");
         }
@@ -2623,24 +2650,30 @@ static VALUE parse_nested_decl(parserstate *state, const char *nested_in, positi
 
   switch (state->current_token.type) {
   case tUIDENT:
-  case pCOLON2:
+  case pCOLON2: {
     decl = parse_const_decl(state);
     break;
-  case tGIDENT:
+  }
+  case tGIDENT: {
     decl = parse_global_decl(state);
     break;
-  case kTYPE:
+  }
+  case kTYPE: {
     decl = parse_type_decl(state, annot_pos, annotations);
     break;
-  case kINTERFACE:
+  }
+  case kINTERFACE: {
     decl = parse_interface_decl(state, annot_pos, annotations);
     break;
-  case kMODULE:
+  }
+  case kMODULE: {
     decl = parse_module_decl(state, annot_pos, annotations);
     break;
-  case kCLASS:
+  }
+  case kCLASS: {
     decl = parse_class_decl(state, annot_pos, annotations);
     break;
+  }
   default:
     raise_syntax_error(
       state,
@@ -2663,18 +2696,24 @@ static VALUE parse_decl(parserstate *state) {
   parser_advance(state);
   switch (state->current_token.type) {
   case tUIDENT:
-  case pCOLON2:
+  case pCOLON2: {
     return parse_const_decl(state);
-  case tGIDENT:
+  }
+  case tGIDENT: {
     return parse_global_decl(state);
-  case kTYPE:
+  }
+  case kTYPE: {
     return parse_type_decl(state, annot_pos, annotations);
-  case kINTERFACE:
+  }
+  case kINTERFACE: {
     return parse_interface_decl(state, annot_pos, annotations);
-  case kMODULE:
+  }
+  case kMODULE: {
     return parse_module_decl(state, annot_pos, annotations);
-  case kCLASS:
+  }
+  case kCLASS: {
     return parse_class_decl(state, annot_pos, annotations);
+  }
   default:
     raise_syntax_error(
       state,
