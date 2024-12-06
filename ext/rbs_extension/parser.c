@@ -146,7 +146,6 @@ void parser_advance_no_gap(parserstate *state) {
 static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   VALUE absolute = Qfalse;
   VALUE path = EMPTY_ARRAY;
-  VALUE namespace;
 
   if (rg) {
     rg->start = state->current_token.range.start;
@@ -169,7 +168,8 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
     parser_advance(state);
     parser_advance(state);
   }
-  namespace = rbs_namespace(path, absolute);
+
+  VALUE namespace = rbs_namespace(path, absolute);
 
   switch (state->current_token.type) {
     case tLIDENT:
@@ -267,7 +267,6 @@ static bool is_keyword_token(enum TokenType type) {
 */
 static VALUE parse_function_param(parserstate *state) {
   range type_range;
-
   type_range.start = state->next_token.range.start;
   VALUE type = parse_type(state);
   type_range.end = state->current_token.range.end;
@@ -283,11 +282,13 @@ static VALUE parse_function_param(parserstate *state) {
     return rbs_function_param(type, Qnil, location);
   } else {
     range name_range = state->next_token.range;
-    range param_range;
 
     parser_advance(state);
-    param_range.start = type_range.start;
-    param_range.end = name_range.end;
+
+    range param_range = {
+      .start = type_range.start,
+      .end = name_range.end,
+    };
 
     if (!is_keyword_token(state->current_token.type)) {
       raise_syntax_error(
@@ -320,28 +321,22 @@ static ID intern_token_start_end(parserstate *state, token start_token, token en
                 | {} keyword <`?`> `:`
 */
 static VALUE parse_keyword_key(parserstate *state) {
-  VALUE key;
-
   parser_advance(state);
 
   if (state->next_token.type == pQUESTION) {
-    key = ID2SYM(intern_token_start_end(state, state->current_token, state->next_token));
+    VALUE key = ID2SYM(intern_token_start_end(state, state->current_token, state->next_token));
     parser_advance(state);
+    return key;
   } else {
-    key = ID2SYM(INTERN_TOKEN(state, state->current_token));
+    return ID2SYM(INTERN_TOKEN(state, state->current_token));
   }
-
-  return key;
 }
 
 /*
   keyword ::= {} keyword `:` <function_param>
 */
 static void parse_keyword(parserstate *state, VALUE keywords, VALUE memo) {
-  VALUE key;
-  VALUE param;
-
-  key = parse_keyword_key(state);
+  VALUE key = parse_keyword_key(state);
 
   if (!NIL_P(rb_hash_aref(memo, key))) {
     raise_syntax_error(
@@ -354,7 +349,7 @@ static void parse_keyword(parserstate *state, VALUE keywords, VALUE memo) {
   }
 
   parser_advance_assert(state, pCOLON);
-  param = parse_function_param(state);
+  VALUE param = parse_function_param(state);
 
   rb_hash_aset(keywords, key, param);
 
@@ -591,6 +586,7 @@ EOP:
 static VALUE parse_optional(parserstate *state) {
   range rg;
   rg.start = state->next_token.range.start;
+
   VALUE type = parse_simple(state);
 
   if (state->next_token.type == pQUESTION) {
@@ -865,15 +861,12 @@ static VALUE parse_symbol(parserstate *state) {
              | {} `[` type_list <`]`>
  */
 static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
-    range name_range;
-    range args_range;
-    range type_range;
-
     TypeNameKind expected_kind = INTERFACE_NAME | CLASS_NAME;
     if (parse_alias) {
       expected_kind |= ALIAS_NAME;
     }
 
+    range name_range;
     VALUE typename = parse_type_name(state, expected_kind, &name_range);
     VALUE types = EMPTY_ARRAY;
 
@@ -888,6 +881,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
       rbs_abort();
     }
 
+    range args_range;
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
@@ -898,8 +892,10 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
       args_range = NULL_RANGE;
     }
 
-    type_range.start = name_range.start;
-    type_range.end = nonnull_pos_or(args_range.end, name_range.end);
+    range type_range = {
+      .start = name_range.start,
+      .end = nonnull_pos_or(args_range.end, name_range.end),
+    };
 
     VALUE location = rbs_new_location(state->buffer, type_range);
     rbs_loc *loc = rbs_check_location(location);
@@ -922,15 +918,14 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
   singleton_type ::= {`singleton`} `(` type_name <`)`>
 */
 static VALUE parse_singleton_type(parserstate *state) {
-  range name_range;
-  range type_range;
-
   parser_assert(state, kSINGLETON);
 
+  range type_range;
   type_range.start = state->current_token.range.start;
   parser_advance_assert(state, pLPAREN);
   parser_advance(state);
 
+  range name_range;
   VALUE typename = parse_type_name(state, CLASS_NAME, &name_range);
 
   parser_advance_assert(state, pRPAREN);
@@ -1081,8 +1076,8 @@ static VALUE parse_simple(parserstate *state) {
 */
 static VALUE parse_intersection(parserstate *state) {
   range rg;
-
   rg.start = state->next_token.range.start;
+
   VALUE type = parse_optional(state);
   VALUE intersection_types = rb_ary_new();
 
@@ -1108,8 +1103,8 @@ static VALUE parse_intersection(parserstate *state) {
 */
 VALUE parse_type(parserstate *state) {
   range rg;
-
   rg.start = state->next_token.range.start;
+
   VALUE type = parse_intersection(state);
   VALUE union_types = rb_ary_new();
 
@@ -1148,21 +1143,16 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
     rg->start = state->current_token.range.start;
 
     while (true) {
-      VALUE name;
       bool unchecked = false;
       VALUE variance = ID2SYM(rb_intern("invariant"));
       VALUE upper_bound = Qnil;
       VALUE default_type = Qnil;
 
-      range param_range = NULL_RANGE;
-      range name_range;
-      range variance_range = NULL_RANGE;
-      range unchecked_range = NULL_RANGE;
-      range upper_bound_range = NULL_RANGE;
-      range default_type_range = NULL_RANGE;
-
+      range param_range;
       param_range.start = state->next_token.range.start;
 
+      range variance_range = NULL_RANGE;
+      range unchecked_range = NULL_RANGE;
       if (module_type_params) {
         if (state->next_token.type == kUNCHECKED) {
           unchecked = true;
@@ -1188,13 +1178,14 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       }
 
       parser_advance_assert(state, tUIDENT);
-      name_range = state->current_token.range;
+      range name_range = state->current_token.range;
 
       ID id = INTERN_TOKEN(state, state->current_token);
-      name = ID2SYM(id);
+      VALUE name = ID2SYM(id);
 
       parser_insert_typevar(state, id);
 
+      range upper_bound_range = NULL_RANGE;
       if (state->next_token.type == pLT) {
         parser_advance(state);
         upper_bound_range.start = state->current_token.range.start;
@@ -1202,6 +1193,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
         upper_bound_range.end = state->current_token.range.end;
       }
 
+      range default_type_range = NULL_RANGE;
       if (module_type_params) {
         if (state->next_token.type == pEQ) {
           parser_advance(state);
@@ -1271,20 +1263,19 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
   method_type ::= {} type_params <function>
   */
 VALUE parse_method_type(parserstate *state) {
+  parser_push_typevar_table(state, false);
+
   range rg;
+  rg.start = state->next_token.range.start;
+
   range params_range = NULL_RANGE;
+  VALUE type_params = parse_type_params(state, &params_range, false);
+
   range type_range;
+  type_range.start = state->next_token.range.start;
 
   VALUE function = Qnil;
   VALUE block = Qnil;
-  parser_push_typevar_table(state, false);
-
-  rg.start = state->next_token.range.start;
-
-  VALUE type_params = parse_type_params(state, &params_range, false);
-
-  type_range.start = state->next_token.range.start;
-
   parse_function(state, &function, &block, NULL);
 
   rg.end = state->current_token.range.end;
@@ -1311,29 +1302,20 @@ VALUE parse_method_type(parserstate *state) {
 */
 static VALUE parse_global_decl(parserstate *state) {
   range decl_range;
-  range name_range, colon_range;
-
-  VALUE typename;
-  VALUE type;
-  VALUE location;
-  VALUE comment;
-
-  rbs_loc *loc;
-
   decl_range.start = state->current_token.range.start;
-  comment = get_comment(state, decl_range.start.line);
 
-  name_range = state->current_token.range;
-  typename = ID2SYM(INTERN_TOKEN(state, state->current_token));
+  VALUE comment = get_comment(state, decl_range.start.line);
+  range name_range = state->current_token.range;
+  VALUE typename = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
   parser_advance_assert(state, pCOLON);
-  colon_range = state->current_token.range;
+  range colon_range = state->current_token.range;
 
-  type = parse_type(state);
+  VALUE type = parse_type(state);
   decl_range.end = state->current_token.range.end;
 
-  location = rbs_new_location(state->buffer, decl_range);
-  loc = rbs_check_location(location);
+  VALUE location = rbs_new_location(state->buffer, decl_range);
+  rbs_loc *loc = rbs_check_location(location);
   rbs_loc_alloc_children(loc, 2);
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
   rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
@@ -1346,28 +1328,21 @@ static VALUE parse_global_decl(parserstate *state) {
 */
 static VALUE parse_const_decl(parserstate *state) {
   range decl_range;
-  range name_range, colon_range;
-
-  VALUE typename;
-  VALUE type;
-  VALUE location;
-  VALUE comment;
-
-  rbs_loc *loc;
 
   decl_range.start = state->current_token.range.start;
-  comment = get_comment(state, decl_range.start.line);
+  VALUE comment = get_comment(state, decl_range.start.line);
 
-  typename = parse_type_name(state, CLASS_NAME, &name_range);
+  range name_range;
+  VALUE typename = parse_type_name(state, CLASS_NAME, &name_range);
 
   parser_advance_assert(state, pCOLON);
-  colon_range = state->current_token.range;
+  range colon_range = state->current_token.range;
 
-  type = parse_type(state);
+  VALUE type = parse_type(state);
   decl_range.end = state->current_token.range.end;
 
-  location = rbs_new_location(state->buffer, decl_range);
-  loc = rbs_check_location(location);
+  VALUE location = rbs_new_location(state->buffer, decl_range);
+  rbs_loc *loc = rbs_check_location(location);
   rbs_loc_alloc_children(loc, 2);
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
   rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
@@ -1379,23 +1354,24 @@ static VALUE parse_const_decl(parserstate *state) {
   type_decl ::= {kTYPE} alias_name `=` <type>
 */
 static VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE annotations) {
-  range decl_range;
-  range keyword_range, name_range, params_range, eq_range;
-
   parser_push_typevar_table(state, true);
 
+  range decl_range;
   decl_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, decl_range.start);
 
-  keyword_range = state->current_token.range;
+  range keyword_range = state->current_token.range;
 
   parser_advance(state);
+
+  range name_range;
   VALUE typename = parse_type_name(state, ALIAS_NAME, &name_range);
 
+  range params_range;
   VALUE type_params = parse_type_params(state, &params_range, true);
 
   parser_advance_assert(state, pEQ);
-  eq_range = state->current_token.range;
+  range eq_range = state->current_token.range;
 
   VALUE type = parse_type(state);
   decl_range.end = state->current_token.range.end;
@@ -1616,18 +1592,13 @@ static InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, b
  * */
 static VALUE parse_member_def(parserstate *state, bool instance_only, bool accept_overload, position comment_pos, VALUE annotations) {
   range member_range;
-  range visibility_range;
-  range keyword_range;
-  range name_range;
-  range kind_range;
-  range overloading_range = NULL_RANGE;
-
-  VALUE visibility;
-
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+
   VALUE comment = get_comment(state, comment_pos.line);
 
+  range visibility_range;
+  VALUE visibility;
   switch (state->current_token.type)
   {
   case kPRIVATE: {
@@ -1650,8 +1621,9 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
     break;
   }
 
-  keyword_range = state->current_token.range;
+  range keyword_range = state->current_token.range;
 
+  range kind_range;
   InstanceSingletonKind kind;
   if (instance_only) {
     kind_range = NULL_RANGE;
@@ -1660,6 +1632,7 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
     kind = parse_instance_singleton_kind(state, NIL_P(visibility), &kind_range);
   }
 
+  range name_range;
   VALUE name = parse_method_name(state, &name_range);
   VALUE overloads = rb_ary_new();
   VALUE overloading = Qfalse;
@@ -1676,6 +1649,7 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
 
   parser_push_typevar_table(state, kind != INSTANCE_KIND);
 
+  range overloading_range = NULL_RANGE;
   bool loop = true;
   while (loop) {
     VALUE annotations = EMPTY_ARRAY;
@@ -1798,18 +1772,13 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
  * */
 static VALUE parse_mixin_member(parserstate *state, bool from_interface, position comment_pos, VALUE annotations) {
   range member_range;
-  range name_range;
-  range keyword_range;
-  range args_range = NULL_RANGE;
-  bool reset_typevar_scope;
-  enum TokenType type;
-
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
 
-  type = state->current_token.type;
-  keyword_range = state->current_token.range;
+  enum TokenType type = state->current_token.type;
+  range keyword_range = state->current_token.range;
 
+  bool reset_typevar_scope;
   switch (type)
   {
   case kINCLUDE:
@@ -1839,6 +1808,8 @@ static VALUE parse_mixin_member(parserstate *state, bool from_interface, positio
 
   VALUE name;
   VALUE args = EMPTY_ARRAY;
+  range name_range;
+  range args_range = NULL_RANGE;
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
@@ -1880,19 +1851,14 @@ static VALUE parse_mixin_member(parserstate *state, bool from_interface, positio
  * */
 static VALUE parse_alias_member(parserstate *state, bool instance_only, position comment_pos, VALUE annotations) {
   range member_range;
-  range keyword_range, new_name_range, old_name_range;
-  range new_kind_range, old_kind_range;
-
   member_range.start = state->current_token.range.start;
-  keyword_range = state->current_token.range;
+  range keyword_range = state->current_token.range;
 
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
   VALUE comment = get_comment(state, comment_pos.line);
 
-  VALUE new_name;
-  VALUE old_name;
-  VALUE kind;
-
+  VALUE kind, new_name, old_name;
+  range new_kind_range, old_kind_range, new_name_range, old_name_range;
   if (!instance_only && state->next_token.type == kSELF) {
     kind = ID2SYM(rb_intern("singleton"));
 
@@ -1942,11 +1908,6 @@ static VALUE parse_alias_member(parserstate *state, bool instance_only, position
                     | {tA2IDENT} `:` <type>
 */
 static VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE annotations) {
-  range member_range;
-  range name_range, colon_range;
-  range kind_range = NULL_RANGE;
-  rbs_loc *loc;
-
   if (rb_array_len(annotations) > 0) {
     raise_syntax_error(
       state,
@@ -1955,76 +1916,75 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     );
   }
 
+  range member_range;
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
   VALUE comment = get_comment(state, comment_pos.line);
 
-  VALUE location;
-  VALUE name;
-  VALUE type;
-
   switch (state->current_token.type)
   {
   case tAIDENT: {
-    name_range = state->current_token.range;
-    name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+    range name_range = state->current_token.range;
+    VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
     parser_advance_assert(state, pCOLON);
-    colon_range = state->current_token.range;
+    range colon_range = state->current_token.range;
 
-    type = parse_type(state);
+    VALUE type = parse_type(state);
     member_range.end = state->current_token.range.end;
 
-    location = rbs_new_location(state->buffer, member_range);
-    loc = rbs_check_location(location);
+    VALUE location = rbs_new_location(state->buffer, member_range);
+    rbs_loc *loc = rbs_check_location(location);
     rbs_loc_alloc_children(loc, 3);
     rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
     rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
-    rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
+    rbs_loc_add_optional_child(loc, rb_intern("kind"), NULL_RANGE);
 
     return rbs_ast_members_instance_variable(name, type, location, comment);
   }
   case tA2IDENT: {
-    name_range = state->current_token.range;
-    name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+    range name_range = state->current_token.range;
+    VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
     parser_advance_assert(state, pCOLON);
-    colon_range = state->current_token.range;
+    range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
-    type = parse_type(state);
+    VALUE type = parse_type(state);
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
-    location = rbs_new_location(state->buffer, member_range);
-    loc = rbs_check_location(location);
+    VALUE location = rbs_new_location(state->buffer, member_range);
+    rbs_loc *loc = rbs_check_location(location);
     rbs_loc_alloc_children(loc, 3);
     rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
     rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
-    rbs_loc_add_optional_child(loc, rb_intern("kind"), kind_range);
+    rbs_loc_add_optional_child(loc, rb_intern("kind"), NULL_RANGE);
 
     return rbs_ast_members_class_variable(name, type, location, comment);
   }
   case kSELF: {
-    kind_range.start = state->current_token.range.start;
-    kind_range.end = state->next_token.range.end;
+    range kind_range = {
+      .start = state->current_token.range.start,
+      .end = state->next_token.range.end
+    };
 
     parser_advance_assert(state, pDOT);
     parser_advance_assert(state, tAIDENT);
 
-    name_range = state->current_token.range;
-    name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+    range name_range = state->current_token.range;
+    VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
     parser_advance_assert(state, pCOLON);
-    colon_range = state->current_token.range;
+    range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
-    type = parse_type(state);
+    VALUE type = parse_type(state);
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
-    location = rbs_new_location(state->buffer, member_range);
-    loc = rbs_check_location(location);
+    VALUE location = rbs_new_location(state->buffer, member_range);
+    rbs_loc *loc = rbs_check_location(location);
     rbs_loc_alloc_children(loc, 3);
     rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
     rbs_loc_add_required_child(loc, rb_intern("colon"), colon_range);
@@ -2079,24 +2039,12 @@ static VALUE parse_visibility_member(parserstate *state, VALUE annotations) {
 */
 static VALUE parse_attribute_member(parserstate *state, position comment_pos, VALUE annotations) {
   range member_range;
-  range keyword_range, name_range, colon_range;
-  range kind_range = NULL_RANGE, ivar_range = NULL_RANGE, ivar_name_range = NULL_RANGE, visibility_range = NULL_RANGE;
-
-  InstanceSingletonKind is_kind;
-  VALUE kind;
-  VALUE attr_name;
-  VALUE ivar_name;
-  VALUE type;
-  VALUE comment;
-  VALUE location;
-  VALUE visibility;
-  rbs_loc *loc;
-  enum TokenType attr_type;
-
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
-  comment = get_comment(state, comment_pos.line);
+  VALUE comment = get_comment(state, comment_pos.line);
 
+  VALUE visibility;
+  range visibility_range;
   switch (state->current_token.type)
   {
   case kPRIVATE:
@@ -2115,18 +2063,18 @@ static VALUE parse_attribute_member(parserstate *state, position comment_pos, VA
     break;
   }
 
-  attr_type = state->current_token.type;
-  keyword_range = state->current_token.range;
+  enum TokenType attr_type = state->current_token.type;
+  range keyword_range = state->current_token.range;
 
-  is_kind = parse_instance_singleton_kind(state, false, &kind_range);
-  if (is_kind == INSTANCE_KIND) {
-    kind = ID2SYM(rb_intern("instance"));
-  } else {
-    kind = ID2SYM(rb_intern("singleton"));
-  }
+  range kind_range;
+  InstanceSingletonKind is_kind = parse_instance_singleton_kind(state, false, &kind_range);
+  VALUE kind = ID2SYM(rb_intern((is_kind == INSTANCE_KIND) ? "instance" : "singleton"));
 
-  attr_name = parse_method_name(state, &name_range);
+  range name_range;
+  VALUE attr_name = parse_method_name(state, &name_range);
 
+  VALUE ivar_name;
+  range ivar_range, ivar_name_range;
   if (state->next_token.type == pLPAREN) {
     parser_advance_assert(state, pLPAREN);
     ivar_range.start = state->current_token.range.start;
@@ -2136,24 +2084,27 @@ static VALUE parse_attribute_member(parserstate *state, position comment_pos, VA
       ivar_name_range = state->current_token.range;
     } else {
       ivar_name = Qfalse;
+      ivar_name_range = NULL_RANGE;
     }
 
     parser_advance_assert(state, pRPAREN);
     ivar_range.end = state->current_token.range.end;
   } else {
+    ivar_range = NULL_RANGE;
     ivar_name = Qnil;
+    ivar_name_range = NULL_RANGE;
   }
 
   parser_advance_assert(state, pCOLON);
-  colon_range = state->current_token.range;
+  range colon_range = state->current_token.range;
 
   parser_push_typevar_table(state, is_kind == SINGLETON_KIND);
-  type = parse_type(state);
+  VALUE type = parse_type(state);
   parser_pop_typevar_table(state);
   member_range.end = state->current_token.range.end;
 
-  location = rbs_new_location(state->buffer, member_range);
-  loc = rbs_check_location(location);
+  VALUE location = rbs_new_location(state->buffer, member_range);
+  rbs_loc *loc = rbs_check_location(location);
   rbs_loc_alloc_children(loc, 7);
   rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
@@ -2232,24 +2183,24 @@ static VALUE parse_interface_members(parserstate *state) {
   interface_decl ::= {`interface`} interface_name module_type_params interface_members <kEND>
 */
 static VALUE parse_interface_decl(parserstate *state, position comment_pos, VALUE annotations) {
-  range member_range;
-  range name_range, keyword_range, end_range;
-  range type_params_range = NULL_RANGE;
+  parser_push_typevar_table(state, true);
 
+  range member_range;
   member_range.start = state->current_token.range.start;
   comment_pos = nonnull_pos_or(comment_pos, member_range.start);
 
-  parser_push_typevar_table(state, true);
-  keyword_range = state->current_token.range;
+  range keyword_range = state->current_token.range;
 
   parser_advance(state);
 
+  range name_range;
   VALUE name = parse_type_name(state, INTERFACE_NAME, &name_range);
+  range type_params_range;
   VALUE params = parse_type_params(state, &type_params_range, true);
   VALUE members = parse_interface_members(state);
 
   parser_advance_assert(state, kEND);
-  end_range = state->current_token.range;
+  range end_range = state->current_token.range;
   member_range.end = end_range.end;
 
   parser_pop_typevar_table(state);
@@ -2280,18 +2231,16 @@ static VALUE parse_interface_decl(parserstate *state, position comment_pos, VALU
 */
 static void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
-    range self_range;
-    range name_range;
-    range args_range = NULL_RANGE;
-
     parser_advance(state);
 
+    range self_range;
     self_range.start = state->current_token.range.start;
-
+    range name_range;
     VALUE module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &name_range);
     self_range.end = name_range.end;
 
     VALUE args = EMPTY_ARRAY;
+    range args_range = NULL_RANGE;
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
@@ -2335,14 +2284,13 @@ static VALUE parse_module_members(parserstate *state) {
   VALUE members = EMPTY_ARRAY;
 
   while (state->next_token.type != kEND) {
-    VALUE member;
     VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
-
     parse_annotations(state, &annotations, &annot_pos);
 
     parser_advance(state);
 
+    VALUE member;
     switch (state->current_token.type)
     {
     case kDEF: {
@@ -2416,19 +2364,16 @@ static VALUE parse_module_members(parserstate *state) {
                 | {module_name} module_name module_type_params `:` module_self_types module_members <kEND>
 */
 static VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE module_name, range name_range, VALUE comment, VALUE annotations) {
-  range decl_range;
-  range end_range;
-  range type_params_range;
-  range colon_range;
-  range self_types_range;
-
   parser_push_typevar_table(state, true);
 
+  range decl_range;
   decl_range.start = keyword_range.start;
-
+  range type_params_range;
   VALUE type_params = parse_type_params(state, &type_params_range, true);
-  VALUE self_types = EMPTY_ARRAY;
 
+  VALUE self_types = EMPTY_ARRAY;
+  range colon_range;
+  range self_types_range;
   if (state->next_token.type == pCOLON) {
     parser_advance(state);
     colon_range = state->current_token.range;
@@ -2443,7 +2388,7 @@ static VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE m
   VALUE members = parse_module_members(state);
 
   parser_advance_assert(state, kEND);
-  end_range = state->current_token.range;
+  range end_range = state->current_token.range;
   decl_range.end = state->current_token.range.end;
 
   VALUE location = rbs_new_location(state->buffer, decl_range);
@@ -2476,12 +2421,12 @@ static VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE m
 */
 static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range keyword_range = state->current_token.range;
-  range module_name_range;
 
   comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
   VALUE comment = get_comment(state, comment_pos.line);
 
   parser_advance(state);
+  range module_name_range;
   VALUE module_name = parse_type_name(state, CLASS_NAME, &module_name_range);
 
   if (state->next_token.type == pEQ) {
@@ -2492,9 +2437,10 @@ static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE a
     range old_name_range;
     VALUE old_name = parse_type_name(state, CLASS_NAME, &old_name_range);
 
-    range decl_range;
-    decl_range.start = keyword_range.start;
-    decl_range.end = old_name_range.end;
+    range decl_range = {
+      .start = keyword_range.start,
+      .end = old_name_range.end
+    };
 
     VALUE location = rbs_new_location(state->buffer, decl_range);
     rbs_loc *loc = rbs_check_location(location);
@@ -2516,25 +2462,20 @@ static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE a
 */
 static VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
   if (parser_advance_if(state, pLT)) {
-    range super_range;
-    range name_range;
-    range args_range = NULL_RANGE;
-
-    VALUE name;
-    VALUE args;
-    VALUE location;
-    rbs_loc *loc;
-
     *lt_range = state->current_token.range;
+
+    range super_range;
     super_range.start = state->next_token.range.start;
 
-    args = EMPTY_ARRAY;
+    VALUE name;
+    VALUE args = EMPTY_ARRAY;
+    range name_range, args_range;
     class_instance_name(state, CLASS_NAME, &name, &args, &name_range, &args_range);
 
     super_range.end = state->current_token.range.end;
 
-    location = rbs_new_location(state->buffer, super_range);
-    loc = rbs_check_location(location);
+    VALUE location = rbs_new_location(state->buffer, super_range);
+    rbs_loc *loc = rbs_check_location(location);
     rbs_loc_alloc_children(loc, 2);
     rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
     rbs_loc_add_optional_child(loc, rb_intern("args"), args_range);
@@ -2550,34 +2491,29 @@ static VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
   class_decl ::= {class_name} type_params class_decl_super class_members <`end`>
 */
 static VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE name, range name_range, VALUE comment, VALUE annotations) {
-  range decl_range;
-  range end_range;
-  range type_params_range;
-  range lt_range;
-
-  VALUE type_params;
-  VALUE super;
-  VALUE members;
-  VALUE location;
-
-  rbs_loc *loc;
-
   parser_push_typevar_table(state, true);
 
+  range decl_range;
   decl_range.start = keyword_range.start;
 
-  type_params = parse_type_params(state, &type_params_range, true);
-  super = parse_class_decl_super(state, &lt_range);
-  members = parse_module_members(state);
+  range type_params_range;
+  VALUE type_params = parse_type_params(state, &type_params_range, true);
+
+  range lt_range;
+  VALUE super = parse_class_decl_super(state, &lt_range);
+
+  VALUE members = parse_module_members(state);
+
   parser_advance_assert(state, kEND);
-  end_range = state->current_token.range;
+
+  range end_range = state->current_token.range;
 
   decl_range.end = end_range.end;
 
   parser_pop_typevar_table(state);
 
-  location = rbs_new_location(state->buffer, decl_range);
-  loc = rbs_check_location(location);
+  VALUE location = rbs_new_location(state->buffer, decl_range);
+  rbs_loc *loc = rbs_check_location(location);
   rbs_loc_alloc_children(loc, 5);
   rbs_loc_add_required_child(loc, rb_intern("keyword"), keyword_range);
   rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
@@ -2602,12 +2538,12 @@ static VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE na
 */
 static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE annotations) {
   range keyword_range = state->current_token.range;
-  range class_name_range;
 
   comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
   VALUE comment = get_comment(state, comment_pos.line);
 
   parser_advance(state);
+  range class_name_range;
   VALUE class_name = parse_type_name(state, CLASS_NAME, &class_name_range);
 
   if (state->next_token.type == pEQ) {
@@ -2618,9 +2554,10 @@ static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE an
     range old_name_range;
     VALUE old_name = parse_type_name(state, CLASS_NAME, &old_name_range);
 
-    range decl_range;
-    decl_range.start = keyword_range.start;
-    decl_range.end = old_name_range.end;
+    range decl_range = {
+      .start = keyword_range.start,
+      .end = old_name_range.end,
+    };
 
     VALUE location = rbs_new_location(state->buffer, decl_range);
     rbs_loc *loc = rbs_check_location(location);
@@ -2644,10 +2581,9 @@ static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE an
                 | {<class_decl>}
 */
 static VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations) {
-  VALUE decl;
-
   parser_push_typevar_table(state, true);
 
+  VALUE decl;
   switch (state->current_token.type) {
   case tUIDENT:
   case pCOLON2: {
@@ -2770,8 +2706,6 @@ static void parse_use_clauses(parserstate *state, VALUE clauses) {
     range namespace_range = NULL_RANGE;
     VALUE namespace = parse_namespace(state, &namespace_range);
 
-    range clause_range = namespace_range;
-
     switch (state->next_token.type)
     {
       case tLIDENT:
@@ -2781,14 +2715,9 @@ static void parse_use_clauses(parserstate *state, VALUE clauses) {
 
         enum TokenType ident_type = state->current_token.type;
 
-        range type_name_range;
-        if (null_range_p(namespace_range)) {
-          type_name_range = state->current_token.range;
-        } else {
-          type_name_range.start = namespace_range.start;
-          type_name_range.end = state->current_token.range.end;
-        }
-        clause_range = type_name_range;
+        range type_name_range = null_range_p(namespace_range)
+          ? state->current_token.range
+          : (range) { .start = namespace_range.start, .end = state->current_token.range.end };
 
         VALUE type_name = rbs_type_name(namespace, ID2SYM(INTERN_TOKEN(state, state->current_token)));
 
@@ -2796,6 +2725,7 @@ static void parse_use_clauses(parserstate *state, VALUE clauses) {
         range new_name_range = NULL_RANGE;
 
         VALUE new_name = Qnil;
+        range clause_range = type_name_range;
         if (state->next_token.type == kAS) {
           parser_advance(state);
           keyword_range = state->current_token.range;
@@ -2822,6 +2752,7 @@ static void parse_use_clauses(parserstate *state, VALUE clauses) {
       }
       case pSTAR:
       {
+        range clause_range = namespace_range;
         parser_advance(state);
 
         range star_range = state->current_token.range;
