@@ -22,6 +22,8 @@
  * */
 VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes);
 
+PRINTF_ARGS(void syntax_error(parserstate *state, token tok, const char *fmt, ...), 3, 4);
+
 /**
  * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.
  *
@@ -29,4 +31,4 @@ VALUE rbs_unquote_string(parserstate *state, range rg, int offset_bytes);
  * foo.rbs:11:21...11:25: Syntax error: {message}, token=`{tok source}` ({tok type})
  * ```
  * */
-PRINTF_ARGS(NORETURN(void) raise_syntax_error(parserstate *state, token tok, const char *fmt, ...), 3, 4);
+NORETURN(void) raise_syntax_error(parserstate *state, error *error);
