@@ -4,16 +4,26 @@
 
 id_table *alloc_empty_table(void) {
   id_table *table = malloc(sizeof(id_table));
-  table->size = 10;
-  table->count = 0;
-  table->ids = calloc(10, sizeof(ID));
+
+  *table = (id_table) {
+    .size = 10,
+    .count = 0,
+    .ids = calloc(10, sizeof(ID)),
+    .next = NULL,
+  };
 
   return table;
 }
 
 id_table *alloc_reset_table(void) {
   id_table *table = malloc(sizeof(id_table));
-  table->size = 0;
+
+  *table = (id_table) {
+    .size = 0,
+    .count = 0,
+    .ids = NULL,
+    .next = NULL,
+  };
 
   return table;
 }
@@ -182,15 +192,18 @@ VALUE get_comment(parserstate *state, int subject_line) {
 }
 
 comment *alloc_comment(token comment_token, comment *last_comment) {
-  comment *new_comment = calloc(1, sizeof(comment));
+  comment *new_comment = malloc(sizeof(comment));
 
-  new_comment->next_comment = last_comment;
+  *new_comment = (comment) {
+    .start = comment_token.range.start,
+    .end = comment_token.range.end,
 
-  new_comment->start = comment_token.range.start;
-  new_comment->end = comment_token.range.end;
+    .line_size = 0,
+    .line_count = 0,
+    .tokens = NULL,
 
-  new_comment->line_size = 0;
-  new_comment->line_count = 0;
+    .next_comment = last_comment,
+  };
 
   comment_insert_new_line(new_comment, comment_token);
 
@@ -279,11 +292,25 @@ lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
 
-  lexstate *lexer = calloc(1, sizeof(lexstate));
-  lexer->string = string;
-  lexer->current.line = 1;
-  lexer->start_pos = start_pos;
-  lexer->end_pos = end_pos;
+  lexstate *lexer = malloc(sizeof(lexstate));
+
+  position start_position = (position) {
+    .byte_pos = 0,
+    .char_pos = 0,
+    .line = 1,
+    .column = 0,
+  };
+
+  *lexer = (lexstate) {
+    .string = string,
+    .start_pos = start_pos,
+    .end_pos = end_pos,
+    .current = start_position,
+    .start = { 0 },
+    .first_token_of_line = false,
+    .last_char = 0,
+  };
+
   skipn(lexer, start_pos);
   lexer->start = lexer->current;
   lexer->first_token_of_line = lexer->current.column == 0;
@@ -292,13 +319,20 @@ lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
 }
 
 parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_pos, VALUE variables) {
-  parserstate *parser = calloc(1, sizeof(parserstate));
-  parser->lexstate = lexer;
-  parser->buffer = buffer;
-  parser->current_token = NullToken;
-  parser->next_token = NullToken;
-  parser->next_token2 = NullToken;
-  parser->next_token3 = NullToken;
+  parserstate *parser = malloc(sizeof(parserstate));
+
+  *parser = (parserstate) {
+    .lexstate = lexer,
+
+    .current_token = NullToken,
+    .next_token = NullToken,
+    .next_token2 = NullToken,
+    .next_token3 = NullToken,
+    .buffer = buffer,
+
+    .vars = NULL,
+    .last_comment = NULL,
+  };
 
   parser_advance(parser);
   parser_advance(parser);

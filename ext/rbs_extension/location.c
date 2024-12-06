@@ -36,9 +36,12 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
   size_t s = RBS_LOC_CHILDREN_SIZE(cap);
   loc->children = malloc(s);
 
-  loc->children->len = 0;
-  loc->children->required_p = 0;
-  loc->children->cap = cap;
+  *loc->children = (rbs_loc_children) {
+    .len = 0,
+    .required_p = 0,
+    .cap = cap,
+    .entries = { 0 },
+  };
 }
 
 static void check_children_cap(rbs_loc *loc) {
@@ -57,8 +60,10 @@ void rbs_loc_add_required_child(rbs_loc *loc, ID name, range r) {
   check_children_cap(loc);
 
   unsigned short i = loc->children->len++;
-  loc->children->entries[i].name = name;
-  loc->children->entries[i].rg = rbs_new_loc_range(r);
+  loc->children->entries[i] = (rbs_loc_entry) {
+    .name = name,
+    .rg = rbs_new_loc_range(r),
+  };
 
   loc->children->required_p |= 1 << i;
 }
@@ -67,14 +72,18 @@ void rbs_loc_add_optional_child(rbs_loc *loc, ID name, range r) {
   check_children_cap(loc);
 
   unsigned short i = loc->children->len++;
-  loc->children->entries[i].name = name;
-  loc->children->entries[i].rg = rbs_new_loc_range(r);
+  loc->children->entries[i] = (rbs_loc_entry) {
+    .name = name,
+    .rg = rbs_new_loc_range(r),
+  };
 }
 
 void rbs_loc_init(rbs_loc *loc, VALUE buffer, rbs_loc_range rg) {
-  loc->buffer = buffer;
-  loc->rg = rg;
-  loc->children = NULL;
+  *loc = (rbs_loc) {
+    .buffer = buffer,
+    .rg = rg,
+    .children = NULL,
+  };
 }
 
 void rbs_loc_free(rbs_loc *loc) {
@@ -122,9 +131,11 @@ static VALUE location_initialize(VALUE self, VALUE buffer, VALUE start_pos, VALU
   int start = FIX2INT(start_pos);
   int end = FIX2INT(end_pos);
 
-  loc->buffer = buffer;
-  loc->rg.start = start;
-  loc->rg.end = end;
+  *loc = (rbs_loc) {
+    .buffer = buffer,
+    .rg = (rbs_loc_range) { start, end },
+    .children = NULL,
+  };
 
   return Qnil;
 }
@@ -133,8 +144,12 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
   rbs_loc *self_loc = rbs_check_location(self);
   rbs_loc *other_loc = rbs_check_location(other);
 
-  self_loc->buffer = other_loc->buffer;
-  self_loc->rg = other_loc->rg;
+  *self_loc = (rbs_loc) {
+    .buffer = other_loc->buffer,
+    .rg = other_loc->rg,
+    .children = NULL,
+  };
+
   if (other_loc->children != NULL) {
     rbs_loc_alloc_children(self_loc, other_loc->children->cap);
     memcpy(self_loc->children, other_loc->children, RBS_LOC_CHILDREN_SIZE(other_loc->children->cap));
