@@ -604,13 +604,15 @@ static VALUE parse_optional(parserstate *state) {
 }
 
 static void initialize_method_params(method_params *params){
-  params->required_positionals = EMPTY_ARRAY;
-  params->optional_positionals = EMPTY_ARRAY;
-  params->rest_positionals = Qnil;
-  params->trailing_positionals = EMPTY_ARRAY;
-  params->required_keywords = rb_hash_new();
-  params->optional_keywords = rb_hash_new();
-  params->rest_keywords = Qnil;
+  *params = (method_params) {
+    .required_positionals = EMPTY_ARRAY,
+    .optional_positionals = EMPTY_ARRAY,
+    .rest_positionals = Qnil,
+    .trailing_positionals = EMPTY_ARRAY,
+    .required_keywords = rb_hash_new(),
+    .optional_keywords = rb_hash_new(),
+    .rest_keywords = Qnil,
+  };
 }
 
 /*
@@ -1566,8 +1568,6 @@ static InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, b
       parser_advance(state);
       parser_advance(state);
       kind = SINGLETON_KIND;
-      rg->start = self_range.start;
-      rg->end = state->current_token.range.end;
     } else if (
       state->next_token2.type == pQUESTION
     && state->next_token.range.end.char_pos == state->next_token2.range.start.char_pos
@@ -1577,9 +1577,12 @@ static InstanceSingletonKind parse_instance_singleton_kind(parserstate *state, b
       parser_advance(state);
       parser_advance(state);
       kind = INSTANCE_SINGLETON_KIND;
-      rg->start = self_range.start;
-      rg->end = state->current_token.range.end;
     }
+
+    *rg = (range) {
+      .start = self_range.start,
+      .end = state->current_token.range.end,
+    };
   } else {
     *rg = NULL_RANGE;
   }
@@ -2692,8 +2695,10 @@ static VALUE parse_namespace(parserstate *state, range *rg) {
   bool is_absolute = false;
 
   if (state->next_token.type == pCOLON2) {
-    rg->start = state->next_token.range.start;
-    rg->end = state->next_token.range.end;
+    *rg = (range) {
+      .start = state->next_token.range.start,
+      .end = state->next_token.range.end,
+    };
     is_absolute = true;
 
     parser_advance(state);
