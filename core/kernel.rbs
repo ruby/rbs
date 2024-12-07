@@ -154,7 +154,6 @@
 # *   #trap: Specifies the handling of system signals.
 # *   #warn: Issue a warning based on the given messages and options.
 #
-%a{annotate:rdoc:source:from=object.c}
 module Kernel : BasicObject
   # <!--
   #   rdoc-file=vm_backtrace.c
@@ -191,9 +190,9 @@ module Kernel : BasicObject
   #     c(4)   #=> []
   #     c(5)   #=> nil
   #
-  def self?.caller: (Integer start_or_range, ?Integer length) -> ::Array[String]?
-                  | (::Range[Integer] start_or_range) -> ::Array[String]?
-                  | () -> ::Array[String]
+  def self?.caller: () -> Array[String]
+                  | (int start, ?int? length) -> Array[String]?
+                  | (range[int?] range) -> Array[String]?
 
   # <!--
   #   rdoc-file=vm_backtrace.c
@@ -216,8 +215,9 @@ module Kernel : BasicObject
   # Optionally you can pass a range, which will return an array containing the
   # entries within the specified range.
   #
-  def self?.caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
-                            | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
+  def self?.caller_locations: () -> Array[Thread::Backtrace::Location]
+                            | (int start, ?int? length) -> Array[Thread::Backtrace::Location]?
+                            | (range[int?] range) -> Array[Thread::Backtrace::Location]?
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -269,8 +269,8 @@ module Kernel : BasicObject
   #
   #     # => 123
   #
-  def self?.catch: [T] (T tag) { (T tag) -> untyped } -> untyped
-                 | () { (Object tag) -> untyped } -> untyped
+  def self?.catch: () { (Object tag) -> untyped } -> untyped
+                 | [T] (T tag) { (T tag) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -334,7 +334,7 @@ module Kernel : BasicObject
   #     end
   #     local_variables   #=> [:fred, :i]
   #
-  def self?.local_variables: () -> ::Array[Symbol]
+  def self?.local_variables: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=random.c
@@ -441,7 +441,7 @@ module Kernel : BasicObject
   #
   def self?.Array: (nil) -> []
                  | [T] (array[T] | _ToA[T] array_like) -> Array[T]
-                 | [T] (T ele) -> [T]
+                 | [T] (T element) -> [T]
 
   # <!--
   #   rdoc-file=complex.c
@@ -495,8 +495,8 @@ module Kernel : BasicObject
   #
   def self?.Complex: (_ToC complex_like, ?exception: true) -> Complex
                    | (_ToC complex_like, exception: bool) -> Complex?
-                   | (Numeric | String real, ?Numeric | String imag, ?exception: true) -> Complex
-                   | (Numeric | String real, ?Numeric | String imag, exception: bool) -> Complex?
+                   | (Numeric | String real, ?(Numeric & _ToF) | String imag, ?exception: true) -> Complex
+                   | (Numeric | String real, ?(Numeric & _ToF) | String imag, exception: bool) -> Complex?
                    | (untyped, ?untyped, ?exception: bool) -> Complex?
 
   # <!--
@@ -541,7 +541,7 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (nil | [] _empty) -> Hash[K, V]
+  def self?.Hash: [K, V] ([]?) -> Hash[K, V]
                 | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
@@ -678,6 +678,7 @@ module Kernel : BasicObject
                     | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
                     | (untyped, ?untyped, ?exception: bool) -> Rational?
+                    | (__todo__) -> __todo__
 
   interface _RationalDiv[T]
     def /: (Numeric) -> T
@@ -747,7 +748,7 @@ module Kernel : BasicObject
   #
   # The built-in syntax `%x{...}` uses this method.
   #
-  def self?.`: (String arg0) -> String
+  def self?.`: (string command) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -796,7 +797,7 @@ module Kernel : BasicObject
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
   #
-  def self?.autoload: (interned _module, String filename) -> NilClass
+  def self?.autoload: (interned const, path filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -807,7 +808,7 @@ module Kernel : BasicObject
   #     autoload(:B, "b")
   #     autoload?(:B)            #=> "b"
   #
-  def self?.autoload?: (interned name) -> String?
+  def self?.autoload?: (interned name, ?boolish inherit) -> String?
 
   # <!--
   #   rdoc-file=proc.c
@@ -931,8 +932,7 @@ module Kernel : BasicObject
   #
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?_ToS? message, ?String | Array[String] | nil backtrace, ?cause: Exception?) -> bot
-                | (_Exception exception, ?cause: Exception?, **untyped) -> bot
+                | [T] (Exception::_Exception[T] exception, ?T message, ?Array[String] | String | Thread::Backtrace | nil backtrace, ?cause: Exception?) -> bot
 
   # <!--
   #   rdoc-file=eval.c
@@ -964,14 +964,6 @@ module Kernel : BasicObject
 
   alias self.raise self.fail
 
-  # <!-- rdoc-file=object.c -->
-  # Returns the string resulting from formatting `objects` into `format_string`.
-  #
-  # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
-  #
-  def self?.format: (String format, *untyped args) -> String
-
   # <!--
   #   rdoc-file=object.c
   #   - sprintf(format_string *objects)  -> string
@@ -981,9 +973,19 @@ module Kernel : BasicObject
   # For details on `format_string`, see [Format
   # Specifications](rdoc-ref:format_specifications.rdoc).
   #
-  alias sprintf format
+  def self?.sprintf: (string format, hash[Symbol, untyped] keywords) -> String
+                   | (string format, **untyped keywords) -> String
+                   | (string format, *untyped positional) -> String
 
-  alias self.sprintf self.format
+  # <!-- rdoc-file=object.c -->
+  # Returns the string resulting from formatting `objects` into `format_string`.
+  #
+  # For details on `format_string`, see [Format
+  # Specifications](rdoc-ref:format_specifications.rdoc).
+  #
+  alias format sprintf
+
+  alias self.format self.sprintf
 
   # <!--
   #   rdoc-file=io.c
@@ -1015,7 +1017,8 @@ module Kernel : BasicObject
   # The style of programming using `$_` as an implicit parameter is gradually
   # losing favor in the Ruby community.
   #
-  def self?.gets: (?String arg0, ?Integer arg1) -> String?
+  def self?.gets: (?string? separator, ?int limit, ?chomp: boolish) -> String?
+                | (int limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=eval.c
@@ -1027,7 +1030,7 @@ module Kernel : BasicObject
   #
   #     global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
   #
-  def self?.global_variables: () -> ::Array[Symbol]
+  def self?.global_variables: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -1056,7 +1059,7 @@ module Kernel : BasicObject
   # executed under the given module. In no circumstance will any local variables
   # in the loaded file be propagated to the loading environment.
   #
-  def self?.load: (String filename, ?Module | bool) -> bool
+  def self?.load: (path filename, ?Module | bool wrap) -> true
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -1087,8 +1090,8 @@ module Kernel : BasicObject
   #       puts enum.next
   #     } #=> :ok
   #
-  def self?.loop: () { () -> void } -> bot
-                | () -> ::Enumerator[nil, bot]
+  def self?.loop: () -> Enumerator[nil, untyped]
+                | () { () -> void } -> untyped
 
   # <!--
   #   rdoc-file=io.c
@@ -1165,7 +1168,7 @@ module Kernel : BasicObject
   #     gets  # Sets $_ to the most recent user input.
   #     print # Prints $_.
   #
-  def self?.print: (*_ToS args) -> nil
+  def self?.print: (*_ToS objects) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -1200,8 +1203,12 @@ module Kernel : BasicObject
   # With no arguments, does nothing.
   #
   def self?.printf: () -> nil
-                  | (String fmt, *untyped args) -> nil
-                  | (_Writer io, string fmt, *untyped args) -> nil
+                  | (String fmt, hash[Symbol, untyped] keywords) -> nil
+                  | (String fmt, **untyped keywords) -> nil
+                  | (String fmt, *untyped positional) -> nil
+                  | (_Writer io, string fmt, hash[Symbol, untyped] keywords) -> nil
+                  | (_Writer io, string fmt, **untyped keywords) -> nil
+                  | (_Writer io, string fmt, *untyped positional) -> nil
 
   # <!--
   #   rdoc-file=proc.c
@@ -1218,7 +1225,7 @@ module Kernel : BasicObject
   # Equivalent to Proc.new, except the resulting Proc objects check the number of
   # parameters passed when called.
   #
-  def self?.lambda: () { () -> untyped } -> Proc
+  def self?.lambda: () { (?) -> untyped } -> Proc
 
   # <!--
   #   rdoc-file=io.c
@@ -1230,8 +1237,8 @@ module Kernel : BasicObject
   #
   # See IO#putc for important information regarding multi-byte characters.
   #
-  def self?.putc: [T < _ToInt] (T chr) -> T
-                | (String chr) -> String
+  def self?.putc: (String chr) -> String
+                | [T < _ToInt] (T chr) -> T
 
   # <!--
   #   rdoc-file=io.c
@@ -1272,9 +1279,9 @@ module Kernel : BasicObject
   # Kernel#p to be uninterruptible in whole or in part. On CRuby, Kernel#p's
   # writing of data is uninterruptible.
   #
-  def self?.p: [T < _Inspect] (T arg0) -> T
-             | (_Inspect arg0, _Inspect arg1, *_Inspect rest) -> Array[_Inspect]
-             | () -> nil
+  def self?.p: () -> nil
+             | [T < _Inspect] (T object) -> T
+             | [T < _Inspect] (T object1, T object2, *T objects) -> Array[T]
 
   # <!--
   #   rdoc-file=lib/pp.rb
@@ -1284,9 +1291,9 @@ module Kernel : BasicObject
   #
   # pp returns argument(s).
   #
-  def self?.pp: [T] (T arg0) -> T
-              | (untyped, untyped, *untyped) -> Array[untyped]
-              | () -> nil
+  def self?.pp: () -> nil
+              | [T < PP::_PrettyPrint] (T object) -> T
+              | [T < PP::_PrettyPrint] (T object1, T object2, *T objects) -> Array[T]
 
   # <!--
   #   rdoc-file=random.c
@@ -1339,7 +1346,8 @@ module Kernel : BasicObject
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def self?.readline: (?String arg0, ?Integer arg1) -> String
+  def self?.readline: (?string? separator, ?int limit, ?chomp: boolish) -> String
+                    | (int limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1394,7 +1402,8 @@ module Kernel : BasicObject
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self?.readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
+  def self?.readlines: (?string? separator, ?int limit, ?chomp: boolish) -> Array[String]
+                     | (int limit, ?chomp: boolish) -> Array[String]
 
   # <!--
   #   rdoc-file=lib/rubygems/core_ext/kernel_require.rb
@@ -1412,7 +1421,7 @@ module Kernel : BasicObject
   # The normal `require` functionality of returning false if that file has already
   # been loaded is preserved.
   #
-  def self?.require: (String path) -> bool
+  def self?.require: (path feature) -> bool
 
   # <!--
   #   rdoc-file=load.c
@@ -1423,7 +1432,7 @@ module Kernel : BasicObject
   # raised. Returns `true` if the file was loaded and `false` if the file was
   # already loaded before.
   #
-  def self?.require_relative: (String feature) -> bool
+  def self?.require_relative: (path feature) -> bool
 
   # <!--
   #   rdoc-file=io.c
@@ -1564,7 +1573,14 @@ module Kernel : BasicObject
   #     (snipped)
   #     ping
   #
-  def self?.select: (::Array[IO] read, ?::Array[IO] write, ?::Array[IO] error, ?Time::_Timeout timeout) -> ::Array[String]
+  def self?.select: ([]?, ?[]?, ?[]?, ?nil) -> bot
+                  | [R < _ToIO]                       (Array[R] read, ?[]?,            ?[]?,            ?nil                  ) -> [Array[R], [], []]
+                  | [R < _ToIO]                       (Array[R] read,  []?,             []?,            Time::_Timeout timeout) -> [Array[R], [], []]?
+                  | [R < _ToIO, W < _ToIO]            (Array[R] read, ?Array[W] write, ?[]?,            ?nil                  ) -> [Array[R], Array[W], []]
+                  | [R < _ToIO, W < _ToIO]            (Array[R] read,  Array[W] write,  []?,            Time::_Timeout timeout) -> [Array[R], Array[W], []]?
+                  | [R < _ToIO, W < _ToIO, E < _ToIO] (Array[R] read, ?Array[W] write, ?Array[E] error, ?nil                  ) -> [Array[R], Array[W], Array[E]]
+                  | [R < _ToIO, W < _ToIO, E < _ToIO] (Array[R] read,  Array[W] write,  Array[E] error, Time::_Timeout timeout) -> [Array[R], Array[W], Array[E]]?
+                  | (Array[_ToIO]? read, ?Array[_ToIO]? write, ?Array[_ToIO]? error, ?Time::_Timeout? timeout) -> [Array[_ToIO], Array[_ToIO], Array[_ToIO]]?
 
   # <!--
   #   rdoc-file=process.c
@@ -1670,7 +1686,12 @@ module Kernel : BasicObject
   #     ">"  | boolean | True if the modification time of file1
   #          |         | is after that of file2
   #
-  def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
+  def self?.test: ('b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'G' | 'k' | 'o' | 'O' | 'p' | 'S' | 'u' | 'z' |  98 |  99 | 100 | 101 | 102 | 103 |  71 | 107 | 111 |  79 | 112 |  83 | 117 | 122, IO | path file) -> bool
+                | ('l' | 'r' | 'R' | 'w' | 'W' | 'x' | 'X' | 108 | 114 | 82 | 119 | 87 | 120 | 88, path filename) -> bool
+                | ('s' | 115, IO | path filename) -> Integer?
+                | ('M' | 'A' | 'C' | 77  | 65 | 67, IO | path file) -> Time
+                | ('-' | '=' | '<' | '>' | 45 | 60 | 61 | 62, IO | path file1, IO | path file2) -> bool
+                | (String | int cmd, IO | path file1, ?IO | path file2) -> (bool | Integer? | Time)
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1728,7 +1749,7 @@ module Kernel : BasicObject
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
-  def self?.warn: (*_ToS msg, ?uplevel: int?, ?category: Warning::category?) -> nil
+  def self?.warn: (*_ToS msgs, ?uplevel: int?, ?category: Warning::category | _ToSym | nil) -> nil
 
   # <!--
   #   rdoc-file=process.c

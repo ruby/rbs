@@ -214,6 +214,7 @@ interface _Range[T]
   def exclude_end?: () -> bool
 end
 
+%a{steep:deprecate}
 interface _Exception
   def exception: () -> Exception
                | (String arg0) -> Exception

@@ -53,7 +53,7 @@ end
 module WithStdlibAliases
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?    
-      return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(
+      return RBS::UnitTest::WithAliases::WithEnum.new(
         to_enum(__method__, seconds: seconds, nanoseconds: nanoseconds)
       )
     end

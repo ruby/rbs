@@ -336,6 +336,27 @@ module RBS
       def pass(message = nil)
         assert true, message
       end
+
+      def assert_send_raises(sig, errclass, object, method, ...)
+        # TODO: ensure args match with signature
+        _ignored = sig
+
+        ::BasicObject.instance_method(:__send__).bind_call(object, method, ...)
+      rescue (:any.equal?(errclass) ? StandardError : errclass) => err
+        if :any.equal?(errclass)
+          pass "`#{::Kernel.instance_method(:class).bind_call(object)}##{method}` returned `bot`"
+          return
+        end
+
+        # Ensure it's actually a `errclass`, and not some subclass that indicates some other
+        # problem (like `ArgumentError < RuntimeError`).
+        assert(
+          ::Kernel.instance_method(:instance_of?).bind_call(err, errclass),
+          "#{::Kernel.instance_method(:inspect).bind_call(err)} should be an #{errclass}"
+        )
+      else
+        assert false, "`#{::Kernel.instance_method(:class).bind_call(object)}##{method}` doesn't return `bot`"
+      end
     end
   end
 end
