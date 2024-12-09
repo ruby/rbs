@@ -8,6 +8,8 @@ end
 
 interface _JsonWrite
   def write: (String json) -> void
+
+  def flush: () -> void
 end
 
 interface _JsonReadableIO
