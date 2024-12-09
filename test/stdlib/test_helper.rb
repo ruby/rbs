@@ -52,7 +52,7 @@ end
 
 module WithStdlibAliases
   def with_timeout(seconds: 1, nanoseconds: 0)
-    unless block_given?    
+    unless block_given?
       return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(
         to_enum(__method__, seconds: seconds, nanoseconds: nanoseconds)
       )
@@ -105,6 +105,8 @@ end
 class JsonWrite
   def write(_str)
   end
+
+  def flush = nil
 end
 
 class JsonToWritableIO
