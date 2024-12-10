@@ -126,7 +126,7 @@ class Ripper
 
   SCANNER_EVENT_TABLE: Hash[Symbol, Integer]
 
-  # <!-- rdoc-file=parse.c -->
+  # <!-- rdoc-file=parse.y -->
   # version of Ripper
   #
   Version: String
@@ -956,7 +956,7 @@ class Ripper
   end
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - Ripper.dedent_string(input, width)   -> Integer
   # -->
   # USE OF RIPPER LIBRARY ONLY.
@@ -994,7 +994,7 @@ class Ripper
   def self.lex: (String src, ?String filename, ?Integer lineno, ?raise_errors: boolish) -> Array[[ [ Integer, Integer ], Symbol, String, Lexer::State ]]
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - Ripper.lex_state_name(integer)   -> string
   # -->
   # Returns a string representation of lex_state.
@@ -1099,7 +1099,7 @@ class Ripper
   private
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - Ripper.new(src, filename="(ripper)", lineno=1) -> ripper
   # -->
   # Create a new Ripper object. *src* must be a String, an IO, or an Object which
@@ -1112,7 +1112,7 @@ class Ripper
   public
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.column   -> Integer
   # -->
   # Return column number of current parsing line. This number starts from 0.
@@ -1120,7 +1120,7 @@ class Ripper
   def column: () -> Integer?
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.debug_output   -> obj
   # -->
   # Get debug output.
@@ -1128,7 +1128,7 @@ class Ripper
   def debug_output: () -> untyped
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.debug_output = obj
   # -->
   # Set debug output.
@@ -1136,7 +1136,7 @@ class Ripper
   def debug_output=: (untyped) -> untyped
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.encoding   -> encoding
   # -->
   # Return encoding of the source.
@@ -1144,7 +1144,7 @@ class Ripper
   def encoding: () -> Encoding
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.end_seen?   -> Boolean
   # -->
   # Return true if parsed source ended by +_*END*_+.
@@ -1152,7 +1152,7 @@ class Ripper
   def end_seen?: () -> bool
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.error?   -> Boolean
   # -->
   # Return true if parsed source has errors.
@@ -1160,7 +1160,7 @@ class Ripper
   def error?: () -> bool
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.filename   -> String
   # -->
   # Return current parsing filename.
@@ -1168,7 +1168,7 @@ class Ripper
   def filename: () -> String
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.lineno   -> Integer
   # -->
   # Return line number of current parsing line. This number starts from 1.
@@ -1554,7 +1554,7 @@ class Ripper
   alias on_zsuper _dispatch_0
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.parse
   # -->
   # Start parsing and returns the value of the root action.
@@ -1562,7 +1562,7 @@ class Ripper
   def parse: () -> nil
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.state   -> Integer
   # -->
   # Return scanner state of current token.
@@ -1570,7 +1570,7 @@ class Ripper
   def state: () -> Integer?
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.token   -> String
   # -->
   # Return the current token string.
@@ -1578,7 +1578,7 @@ class Ripper
   def token: () -> String?
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.yydebug   -> true or false
   # -->
   # Get yydebug.
@@ -1586,7 +1586,7 @@ class Ripper
   def yydebug: () -> bool
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - ripper.yydebug = flag
   # -->
   # Set yydebug.
@@ -1620,7 +1620,7 @@ class Ripper
   def compile_error: (untyped msg) -> untyped
 
   # <!--
-  #   rdoc-file=parse.c
+  #   rdoc-file=parse.y
   #   - Ripper.dedent_string(input, width)   -> Integer
   # -->
   # USE OF RIPPER LIBRARY ONLY.
