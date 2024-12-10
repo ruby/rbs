@@ -209,7 +209,7 @@ module RBS
               super_args = super_class.args
             else
               super_name = BuiltinNames::Object.name
-              super_args = []
+              super_args = [] #: Array[Types::t]
             end
 
             super_name = env.normalize_module_name(super_name)
@@ -525,7 +525,7 @@ module RBS
 
         one_ancestors = one_singleton_ancestors(type_name)
 
-        ancestors = []
+        ancestors = [] #: Array[Definition::Ancestor::t]
 
         case super_class = one_ancestors.super_class
         when Definition::Ancestor::Instance
@@ -581,7 +581,7 @@ module RBS
         building_ancestors.push self_ancestor
 
         one_ancestors = one_interface_ancestors(type_name)
-        ancestors = []
+        ancestors = [] #: Array[Definition::Ancestor::t]
 
         included_interfaces = one_ancestors.included_interfaces or raise
         included_interfaces.each do |a|

@@ -11,8 +11,8 @@ module RBS
         # @type var type_name: String?
         type_name = nil
         library_options = library_options
-        before_path = []
-        after_path = []
+        before_path = [] #: Array[String]
+        after_path = [] #: Array[String]
         detail = false
 
         opt = OptionParser.new do |o|

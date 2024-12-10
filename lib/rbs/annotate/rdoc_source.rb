@@ -31,7 +31,7 @@ module RBS
       end
 
       def find_class(typename)
-        classes = []
+        classes = [] #: Array[::RDoc::ClassModule]
 
         @stores.each do |store|
           if klass = store.find_class_or_module(typename.relative!.to_s)

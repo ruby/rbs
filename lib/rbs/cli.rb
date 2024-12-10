@@ -554,11 +554,11 @@ EOU
       when "rbi", "rb"
         run_prototype_file(format, args)
       when "runtime"
-        require_libs = []
-        relative_libs = []
+        require_libs = [] #: Array[String]
+        relative_libs = [] #: Array[String]
         merge = false
         todo = false
-        owners_included = []
+        owners_included = [] #: Array[Symbol]
         outline = false
         autoload = false
 
@@ -591,7 +591,7 @@ EOU
             todo = true
           end
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
-            owners_included << klass
+            owners_included << klass.to_sym
           end
           opts.on("--outline", "Generates only module/class/constant declaration (no method definition)") do
             outline = true
@@ -615,9 +615,9 @@ EOU
             ::Module.prepend(hook)
             ::Kernel.prepend(hook)
 
-            arguments = []
+            arguments = [] #: Array[[Module, interned]]
             TracePoint.new(:call) do |tp|
-              base = tp.self.kind_of?(Module) ? tp.self : Kernel
+              base = tp.self.kind_of?(Module) ? tp.self : Kernel #: Module
               name = (tp.binding or raise).local_variable_get(:name)
               arguments << [base, name]
             end.enable(target: hook.instance_method(:autoload), &block)
@@ -979,7 +979,7 @@ Options:
     end
 
     def test_opt options
-      opts = []
+      opts = [] #: Array[String]
 
       opts.push(*options.repos.map {|dir| "--repo #{Shellwords.escape(dir)}"})
       opts.push(*options.dirs.map {|dir| "-I #{Shellwords.escape(dir)}"})
@@ -1056,7 +1056,7 @@ EOB
       require 'bundler'
 
       opts = collection_options(args)
-      params = {}
+      params = {} #: Hash[Symbol, untyped]
       opts.order args.drop(1), into: params
       config_path = options.config_path or raise
       lock_path = Collection::Config.to_lockfile_path(config_path)

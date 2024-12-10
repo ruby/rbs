@@ -75,8 +75,8 @@ module RBS
       def parse(string)
         # @type var comments: Hash[Integer, AST::Comment]
         comments = Ripper.lex(string).yield_self do |tokens|
-          code_lines = {}
-          tokens.each.with_object({}) do |token, hash|
+          code_lines = {} #: Hash[Integer, bool]
+          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
             case token[1]
             when :on_sp, :on_ignored_nl
               # skip
@@ -643,11 +643,11 @@ module RBS
             children = list.children
             children.pop
           else
-            children = []
+            children = [] #: Array[untyped]
           end
 
-          key_types = []
-          value_types = []
+          key_types = [] #: Array[Types::t]
+          value_types = [] #: Array[Types::t]
           children.each_slice(2) do |k, v|
             if k
               key_types << literal_to_type(k)
@@ -659,7 +659,10 @@ module RBS
           end
 
           if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
-            fields = key_types.map { |t| t.literal }.zip(value_types).to_h
+            fields = key_types.map {|t|
+              t.is_a?(Types::Literal) or raise
+              t.literal
+            }.zip(value_types).to_h #: Hash[Types::Literal::literal, Types::t]
             Types::Record.new(fields: fields, location: nil)
           else
             key_type = types_to_union_type(key_types)

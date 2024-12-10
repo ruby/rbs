@@ -17,9 +17,7 @@ module RBS
 
       def parse(string)
         comments = Ripper.lex(string).yield_self do |tokens|
-          tokens.each.with_object({}) do |token, hash|
-            # @type var hash: Hash[Integer, AST::Comment]
-
+          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
             if token[1] == :on_comment
               line = token[0][0]
               body = token[2][2..-1] or raise
@@ -325,11 +323,17 @@ module RBS
               end
             end
           when :type_parameters
-            type_params = []
+            type_params = [] #: Array[AST::TypeParam]
 
             each_arg args do |node|
               if name = symbol_literal_node?(node)
-                type_params << name
+                type_params << AST::TypeParam.new(
+                  name: name,
+                  variance: :invariant,
+                  upper_bound: nil,
+                  location: nil,
+                  default_type: nil
+                )
               end
             end
 
