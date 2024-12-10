@@ -80,7 +80,9 @@ module RBS
               kind: :instance,
               location: nil,
               comment: nil,
-              annotations: []
+              annotations: (
+                [] #: Array[AST::Annotation]
+              )
             )
           end
         end
@@ -114,7 +116,7 @@ module RBS
         #             | (?foo: untyped, ?bar: untyped) -> instance
         def build_s_new
           [:new, :[]].map do |name|
-            new_overloads = []
+            new_overloads = [] #: Array[AST::Members::MethodDefinition::Overload]
 
             if CAN_CALL_KEYWORD_INIT_P
               case @target_class.keyword_init?
@@ -234,7 +236,7 @@ module RBS
         #             | (foo: untyped, bar: untyped) -> instance
         def build_s_new
           [:new, :[]].map do |name|
-            new_overloads = []
+            new_overloads = [] #: Array[AST::Members::MethodDefinition::Overload]
 
             new_overloads << AST::Members::MethodDefinition::Overload.new(
               annotations: [],

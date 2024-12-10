@@ -70,8 +70,8 @@ module RBS
       untyped
       true
       false
-      ).each_with_object({}) do |keyword, hash|
-        hash[keyword] = nil
+      ).each_with_object({}) do |keyword, hash| #$ Hash[String, bot]
+        hash[keyword] = _ = nil
       end
   end
 end

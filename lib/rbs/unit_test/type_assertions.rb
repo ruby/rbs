@@ -15,7 +15,7 @@ module RBS
           @target = nil
         end
 
-        @@env_cache = {}
+        @@env_cache = {} #: Hash[Array[String], RBS::Environment]
 
         def env
           @env = @@env_cache[@libs] ||=

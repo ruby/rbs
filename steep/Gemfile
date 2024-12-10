@@ -1,4 +1,4 @@
 source "https://rubygems.org"
 
-gem "rbs", "~> 3.6.1"
-gem "steep", "~> 1.8.3"
+gem "rbs", "~> 3.7.0"
+gem "steep", "~> 1.9.0"

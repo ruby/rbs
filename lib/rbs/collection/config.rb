@@ -72,7 +72,9 @@ module RBS
       end
 
       def gems
-        @data['gems'] ||= []
+        @data['gems'] ||= (
+          [] #: Array[gem_entry]
+        )
       end
     end
   end

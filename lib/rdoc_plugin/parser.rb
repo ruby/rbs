@@ -108,7 +108,7 @@ module RBS
 
       def parse_include_decl(decl:, context:, outer_name: nil)
         name = decl.name.to_s
-        outer_names = outer_name ? outer_name.to_s.split("::") : []
+        outer_names = outer_name ? outer_name.to_s.split("::") : [] #: Array[String]
         qualified_name = ''
         outer_names.each do |namespace|
           qualified_name += namespace
@@ -124,7 +124,7 @@ module RBS
 
       def parse_extend_decl(decl:, context:, outer_name: nil)
         name = decl.name.to_s
-        outer_names = outer_name ? outer_name.to_s.split("::") : []
+        outer_names = outer_name ? outer_name.to_s.split("::") : [] #: Array[String]
         qualified_name = ''
         outer_names.each do |namespace|
           qualified_name += namespace
