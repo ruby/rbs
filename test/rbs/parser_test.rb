@@ -6,14 +6,15 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_interface
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-interface _Foo[unchecked in A]
-  def bar: [A] () -> A
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Foo[unchecked in A]
+          def bar: [A] () -> A
 
-  def foo: () -> A
-         | { () -> void } -> void
-end
-    RBS
+          def foo: () -> A
+                | { () -> void } -> void
+        end
+      RBS
+
       decls[0].tap do |decl|
         decl.members[0].tap do |member|
           assert_equal :bar, member.name
@@ -30,11 +31,12 @@ end
 
   def test_interface_def_singleton_error
     assert_raises do
-      RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
-        interface _Foo
-          def self?.foo: () -> A
-        end
-            RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |decls|
+          interface _Foo
+            def self?.foo: () -> A
+          end
+        RBS
+
         decls[0].tap do |decl|
           pp decl
         end
@@ -44,13 +46,14 @@ end
 
   def test_interface_mixin
     assert_raises do
-      RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |decls|
-interface _Foo[unchecked in A]
-  include Array[A]
-  extend Object
-  prepend _Foo[String]
-end
-      RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |decls|
+          interface _Foo[unchecked in A]
+            include Array[A]
+            extend Object
+            prepend _Foo[String]
+          end
+        RBS
+
         decls[0].tap do |decl|
           pp decl.members
         end
@@ -72,11 +75,12 @@ end
   end
 
   def test_interface_alias
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-interface _Foo[unchecked in A]
-  alias hello world
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Foo[unchecked in A]
+          alias hello world
+        end
+      RBS
+
       decls[0].tap do |decl|
         decl.members[0].tap do |member|
           assert_instance_of RBS::AST::Members::Alias, member
@@ -90,10 +94,11 @@ end
   end
 
   def test_module_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[X] : String, _Array[Symbol]
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[X] : String, _Array[Symbol]
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
         assert_equal TypeName("Foo"), decl.name
@@ -109,15 +114,16 @@ end
   end
 
   def test_module_decl_def
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[X] : String, _Array[Symbol]
-  def foo: () -> void
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[X] : String, _Array[Symbol]
+          def foo: () -> void
 
-  def self.bar: () -> void
+          def self.bar: () -> void
 
-  def self?.baz: () -> void
-end
-    RBS
+          def self?.baz: () -> void
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
       end
@@ -125,15 +131,16 @@ end
   end
 
   def test_module_decl_vars
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[X] : String, _Array[Symbol]
-  @foo: Integer
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[X] : String, _Array[Symbol]
+          @foo: Integer
 
-  self.@bar: String
+          self.@bar: String
 
-  @@baz: X
-end
-    RBS
+          @@baz: X
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
       end
@@ -141,13 +148,14 @@ end
   end
 
   def test_module_decl_attributes
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo
-  attr_reader string: String
-  attr_writer self.name (): Integer
-  attr_accessor writer (@Writer): Symbol
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo
+          attr_reader string: String
+          attr_writer self.name (): Integer
+          attr_accessor writer (@Writer): Symbol
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -196,12 +204,13 @@ end
   end
 
   def test_module_decl_public_private
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo
-  public
-  private
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo
+          public
+          private
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -212,13 +221,14 @@ end
   end
 
   def test_module_decl_nested
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo
-  type foo = bar
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo
+          type foo = bar
 
-  BAZ: Intger
-end
-    RBS
+          BAZ: Intger
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
       end
@@ -226,13 +236,14 @@ end
   end
 
   def test_module_type_var_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[A]
-  type t = A
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[A]
+          type t = A
 
-  FOO: A
-end
-    RBS
+          FOO: A
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -250,13 +261,14 @@ end
   end
 
   def test_module_type_var_ivar
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[A]
-  @x: A
-  @@x: A
-  self.@x: A
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[A]
+          @x: A
+          @@x: A
+          self.@x: A
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -279,12 +291,13 @@ end
   end
 
   def test_module_type_var_attr
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[A]
-  attr_reader foo: A
-  attr_writer self.bar: A
-end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[A]
+          attr_reader foo: A
+          attr_writer self.bar: A
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -302,15 +315,16 @@ end
   end
 
   def test_module_type_var_method
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[A]
-  def foo: () -> A
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[A]
+          def foo: () -> A
 
-  def self.bar: () -> A
+          def self.bar: () -> A
 
-  def self?.baz: () -> A
-end
-    RBS
+          def self?.baz: () -> A
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -333,15 +347,16 @@ end
   end
 
   def test_module_type_var_mixin
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-module Foo[A]
-  include X[A]
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        module Foo[A]
+          include X[A]
 
-  extend X[A]
+          extend X[A]
 
-  prepend X[A]
-end
-    RBS
+          prepend X[A]
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
 
@@ -364,10 +379,11 @@ end
   end
 
   def test_class_decl
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-      class Foo
-      end
-          RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class Foo
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Class, decl
         assert_equal TypeName("Foo"), decl.name
@@ -376,10 +392,11 @@ end
       end
     end
 
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-      class Foo[A] < Bar[A]
-      end
-          RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class Foo[A] < Bar[A]
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Class, decl
         assert_equal TypeName("Foo"), decl.name
@@ -390,38 +407,39 @@ end
   end
 
   def test_method_name
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-      class Foo
-        def |: () -> void
-        def ^: () -> void
-        def &: () -> void
-        def <=>: () -> void
-        def ==: () -> void
-        def ===: () -> void
-        def =~: () -> void
-        def >: () -> void
-        def >=: () -> void
-        def <: () -> void
-        def <=: () -> void
-        def <<: () -> void
-        def >>: () -> void
-        def +: () -> void
-        def -: () -> void
-        def *: () -> void
-        def /: () -> void
-        def %: () -> void
-        def **: () -> void
-        def ~: () -> void
-        def +@: () -> void
-        def -@: () -> void
-        def []: () -> void
-        def []=: () -> void
-        def !: () -> void
-        def !=: () -> void
-        def !~: () -> void
-        def `: () -> void
-      end
-          RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class Foo
+          def |: () -> void
+          def ^: () -> void
+          def &: () -> void
+          def <=>: () -> void
+          def ==: () -> void
+          def ===: () -> void
+          def =~: () -> void
+          def >: () -> void
+          def >=: () -> void
+          def <: () -> void
+          def <=: () -> void
+          def <<: () -> void
+          def >>: () -> void
+          def +: () -> void
+          def -: () -> void
+          def *: () -> void
+          def /: () -> void
+          def %: () -> void
+          def **: () -> void
+          def ~: () -> void
+          def +@: () -> void
+          def -@: () -> void
+          def []: () -> void
+          def []=: () -> void
+          def !: () -> void
+          def !=: () -> void
+          def !~: () -> void
+          def `: () -> void
+        end
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Class, decl
       end
@@ -436,15 +454,16 @@ end
   end
 
   def test_parse_comment
-    RBS::Parser.parse_signature(buffer(<<-RBS)).tap do |_, _, decls|
-      # Hello
-      #  World
-      #Yes
-      #
-      # No
-      class Foo
-      end
-    RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        # Hello
+        #  World
+        #Yes
+        #
+        # No
+        class Foo
+        end
+      RBS
+
       assert_equal "Hello\n World\nYes\n\nNo\n", decls[0].comment.string
     end
   end
@@ -466,9 +485,10 @@ end
   end
 
   def test_parse_global
-    RBS::Parser.parse_signature(buffer(<<RBS)).tap do |_buf, _dirs, decls|
-$日本語: String
-RBS
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_buf, _dirs, decls|
+        $日本語: String
+      RBS
+
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Global, decl
         assert_equal :"$日本語", decl.name
@@ -498,9 +518,9 @@ RBS
     end
 
     assert_raises RBS::ParsingError do
-      RBS::Parser.parse_signature(buffer(<<RBS))
-interface foo
-RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS))
+        interface foo
+      RBS
     end.tap do |exn|
       assert_equal(
         'test.rbs:1:10...1:13: Syntax error: expected one of interface name, token=`foo` (tLIDENT)',
@@ -518,11 +538,11 @@ RBS
     end
 
     assert_raises RBS::ParsingError do
-      RBS::Parser.parse_signature(buffer(<<RBS))
-interface _Foo
-  def 123: () -> void
-end
-RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS))
+        interface _Foo
+          def 123: () -> void
+        end
+      RBS
     end.tap do |exn|
       assert_equal(
         'test.rbs:2:6...2:9: Syntax error: unexpected token for method name, token=`123` (tINTEGER)',
@@ -531,12 +551,12 @@ RBS
     end
 
     assert_raises RBS::ParsingError do
-      RBS::Parser.parse_signature(buffer(<<RBS))
-interface _Foo
-  def foo: () -> void |
-  end
-end
-RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS))
+        interface _Foo
+          def foo: () -> void |
+          end
+        end
+      RBS
     end.tap do |exn|
       assert_equal(
         'test.rbs:3:2...3:5: Syntax error: unexpected token for method type, token=`end` (kEND)',
@@ -545,11 +565,11 @@ RBS
     end
 
     assert_raises RBS::ParsingError do
-      RBS::Parser.parse_signature(buffer(<<RBS))
-interface _Foo
-  extend _Bar
-end
-RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS))
+        interface _Foo
+          extend _Bar
+        end
+      RBS
     end.tap do |exn|
       assert_equal(
         'test.rbs:2:2...2:8: Syntax error: unexpected mixin in interface declaration, token=`extend` (kEXTEND)',
@@ -558,9 +578,9 @@ RBS
     end
 
     assert_raises RBS::ParsingError do
-      RBS::Parser.parse_signature(buffer(<<RBS))
-type a = Array[Integer String]
-RBS
+      RBS::Parser.parse_signature(buffer(<<~RBS))
+        type a = Array[Integer String]
+      RBS
     end.tap do |exn|
       assert_equal(
         'test.rbs:1:23...1:29: Syntax error: comma delimited type list is expected, token=`String` (tUIDENT)',
