@@ -207,7 +207,8 @@ module Zlib
     # is yielded to the block until the input buffer has been flushed to the output
     # buffer.
     #
-    def finish: () -> void
+    def finish: () -> String
+              | () { (String chunk) -> void } -> void
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
