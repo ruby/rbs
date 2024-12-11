@@ -34,6 +34,13 @@ module RBS
         end
       end
 
+      class Resolved < Base
+        attr_reader :location
+
+        def initialize(location:)
+          @location = location
+        end
+      end
     end
   end
 end

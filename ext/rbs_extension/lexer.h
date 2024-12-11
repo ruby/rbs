@@ -59,6 +59,7 @@ enum TokenType {
   kUNTYPED,         /* untyped */
   kVOID,            /* void */
   kUSE,             /* use */
+  kRESOLVED,        /* resolved*/
   kAS,              /* as */
   k__TODO__,        /* __todo__ */
 

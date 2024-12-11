@@ -189,6 +189,17 @@ VALUE rbs_ast_decl_type_alias(VALUE name, VALUE type_params, VALUE type, VALUE a
   );
 }
 
+VALUE rbs_ast_directives_resolved(VALUE location) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Directives_Resolved,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_directives_use(VALUE clauses, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("clauses")), clauses);

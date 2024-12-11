@@ -95,20 +95,25 @@ module RBS
     end
 
     def write_directive(dir)
-      clauses = dir.clauses.map do |clause|
-        case clause
-        when AST::Directives::Use::SingleClause
-          if clause.new_name
-            "#{clause.type_name} as #{clause.new_name}"
-          else
-            "#{clause.type_name}"
+      case dir
+      when AST::Directives::Use
+        clauses = dir.clauses.map do |clause|
+          case clause
+          when AST::Directives::Use::SingleClause
+            if clause.new_name
+              "#{clause.type_name} as #{clause.new_name}"
+            else
+              "#{clause.type_name}"
+            end
+          when AST::Directives::Use::WildcardClause
+            "#{clause.namespace}*"
           end
-        when AST::Directives::Use::WildcardClause
-          "#{clause.namespace}*"
         end
-      end
 
-      puts "use #{clauses.join(", ")}"
+        puts "use #{clauses.join(", ")}"
+      when AST::Directives::Resolved
+        puts "resolved"
+      end
     end
 
     def write_decl(decl)

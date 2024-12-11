@@ -88,6 +88,9 @@ nodes:
     fields:
       - name: namespace
       - name: location
+  - name: RBS::AST::Directives::Resolved
+    fields:
+      - name: location
   - name: RBS::AST::Members::Alias
     fields:
       - name: new_name

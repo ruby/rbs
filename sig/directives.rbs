@@ -1,7 +1,7 @@
 module RBS
   module AST
     module Directives
-      type t = Use
+      type t = Use | Resolved
 
       class Base
       end
@@ -55,6 +55,30 @@ module RBS
         attr_reader location: loc?
 
         def initialize: (clauses: Array[clause], location: loc?) -> void
+      end
+
+      # `Resolved` directive tells all of the type names in the RBS source is *resolved*
+      #
+      # Resolved type is:
+      #
+      # * An absolute type name, or
+      # * A type name that is defined by `use` directive
+      #
+      # ```rbs
+      # use String
+      # resolved
+      #
+      # type t = ::String      # This is resolved because it's an absolute type name
+      #
+      # type s = String        # This is resolved too because of the use directive
+      # ```
+      #
+      class Resolved < Base
+        type loc = Location[bot, bot]
+
+        attr_reader location: loc?
+
+        def initialize: (location: loc?) -> void
       end
     end
   end

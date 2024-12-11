@@ -93,7 +93,7 @@ module RBS
       @stderr = stderr
     end
 
-    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract, :diff]
+    COMMANDS = [:ast, :annotate, :list, :ancestors, :methods, :method, :validate, :constant, :paths, :prototype, :vendor, :parse, :test, :collection, :subtract, :diff, :resolve, :load, :marshal]
 
     def parse_logging_options(opts)
       opts.on("--log-level LEVEL", "Specify log level (defaults to `warn`)") do |level|
@@ -1218,6 +1218,110 @@ EOB
 
     def run_diff(argv, library_options)
       Diff.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
+    end
+
+    def run_resolve(args, library_options)
+      output_dir = nil #: Pathname?
+      src_prefix = nil #: Pathname?
+
+      OptionParser.new do |opts|
+        opts.banner = <<EOU
+Usage: rbs resolve [options...] [paths...]
+
+Resolve type names in given files.
+
+Examples:
+
+$ rbs resolve sig/foo.rbs
+$ rbs resolve --output=sig/resolved sig
+
+Options:
+EOU
+        opts.on("--output=DIR", "Write RBS files under output dir") do |dir|
+          # @type var dir: String
+          output_dir = Pathname(dir)
+        end
+
+        opts.on("--src-prefix=PREFIX", "The prefix that will be dropped from output path") do |prefix|
+          src_prefix = Pathname(prefix)
+        end
+      end.parse!(args)
+
+      loader = library_options.loader()
+
+      env = Environment.new()
+      loader.load(env: env)
+
+      resolver = Resolver::TypeNameResolver.new(env)
+
+      table = Environment::UseMap::Table.new()
+      table.known_types.merge(env.class_decls.keys)
+      table.known_types.merge(env.class_alias_decls.keys)
+      table.known_types.merge(env.type_alias_decls.keys)
+      table.known_types.merge(env.interface_decls.keys)
+      table.compute_children
+
+      if output_dir
+        args.each do |arg|
+          path = Pathname(arg)
+
+          output_path =
+            if src_prefix
+              output_dir + path.relative_path_from(src_prefix).cleanpath
+            else
+              output_dir + path
+            end
+
+          stdout.puts "Writing to #{output_path}..."
+
+          _, dirs, decls = Parser.parse_signature(Buffer.new(name: path, content: path.read))
+          _, decls = env.resolve_signature(resolver, table, dirs, decls)
+
+          output_path.parent.mkpath
+          output_path.open("w") do |io|
+            Writer.new(out: io).write([AST::Directives::Resolved.new(location: nil)] + decls)
+          end
+        end
+      else
+        decls = args.flat_map do |arg|
+          path = Pathname(arg)
+
+          _, dirs, decls = Parser.parse_signature(Buffer.new(name: path, content: path.read))
+          _, decls = env.resolve_signature(resolver, table, dirs, decls)
+
+          decls
+        end
+
+        writer = Writer.new(out: stdout)
+        writer.write([AST::Directives::Resolved.new(location: nil)] + decls)
+      end
+    end
+
+    def run_load(args, library_options)
+      OptionParser.new do |opts|
+        opts.banner = <<~EOU
+          Usage: rbs load
+
+          Load RBS files and resolve type names.
+
+          Examples:
+
+          $ rbs load
+        EOU
+      end.parse!(args)
+
+      RBS.logger.info { "Running `load` command..." }
+
+      loader = library_options.loader()
+
+      env = Environment.new()
+      loader.load(env: env)
+
+      RBS.logger.info { "Loaded #{env.buffers.size} files..." }
+
+      env.resolve_type_names()
+
+      RBS.logger.info { "Successfully resolved type names in #{env.buffers.size} files..." }
     end
   end
 end

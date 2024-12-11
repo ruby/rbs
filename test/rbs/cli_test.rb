@@ -1763,4 +1763,71 @@ Processing `lib`...
       end
     end
   end
+
+  def test_resolve__stdout
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + "foo.rbs").write(<<~RBS)
+          use Kernel as K
+
+          class Foo
+            type t = String
+
+            type k = K
+          end
+        RBS
+        with_cli do |cli|
+          cli.run(['resolve', 'foo.rbs'])
+
+          assert_equal <<~RBS, stdout.string
+            resolved
+
+            class ::Foo
+              type ::Foo::t = ::String
+
+              type ::Foo::k = ::Kernel
+            end
+          RBS
+        end
+      end
+    end
+  end
+
+  def test_resolve__output_dir
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir/"sig").mkpath
+        (dir + "sig/foo.rbs").write(<<~RBS)
+          use Kernel as K
+
+          class Foo
+            type t = String
+
+            type k = K
+          end
+        RBS
+        with_cli do |cli|
+          cli.run(['resolve', '--output=tmp/sig', '--src-prefix=sig', 'sig/foo.rbs'])
+
+          assert_equal <<~OUTPUT, stdout.string
+            Writing to tmp/sig/foo.rbs...
+          OUTPUT
+
+          assert_equal <<~RBS, (dir + "tmp/sig/foo.rbs").read
+            resolved
+
+            class ::Foo
+              type ::Foo::t = ::String
+
+              type ::Foo::k = ::Kernel
+            end
+          RBS
+        end
+      end
+    end
+  end
 end

@@ -38,6 +38,7 @@
   case kPRIVATE: \
   case kUNTYPED: \
   case kUSE: \
+  case kRESOLVED: \
   case kAS: \
   case k__TODO__: \
   /* nop */
@@ -2792,6 +2793,16 @@ static void parse_use_clauses(parserstate *state, VALUE clauses) {
 }
 
 /*
+  resolved_directive ::= {} <`resolved`>
+*/
+static VALUE parse_resolved_directive(parserstate *state) {
+  parser_advance_assert(state, kRESOLVED);
+  VALUE location = rbs_new_location(state->buffer, state->current_token.range);
+
+  return rbs_ast_directives_resolved(location);
+}
+
+/*
   use_directive ::= {} `use` <clauses>
  */
 static VALUE parse_use_directive(parserstate *state) {
@@ -2817,14 +2828,33 @@ static VALUE parse_use_directive(parserstate *state) {
   }
 }
 
-VALUE parse_signature(parserstate *state) {
+VALUE parse_directives(parserstate *state) {
   VALUE dirs = EMPTY_ARRAY;
-  VALUE decls = EMPTY_ARRAY;
 
-  while (state->next_token.type == kUSE) {
-    melt_array(&dirs);
-    rb_ary_push(dirs, parse_use_directive(state));
+  while (true) {
+    switch (state->next_token.type) {
+      case kUSE: {
+        melt_array(&dirs);
+        rb_ary_push(dirs, parse_use_directive(state));
+        break;
+      }
+      case kRESOLVED: {
+        melt_array(&dirs);
+        rb_ary_push(dirs, parse_resolved_directive(state));
+        break;
+      }
+      default: {
+        return dirs;
+      }
+    }
   }
+
+  return dirs;
+}
+
+VALUE parse_signature(parserstate *state) {
+  VALUE dirs = parse_directives(state);
+  VALUE decls = EMPTY_ARRAY;
 
   while (state->next_token.type != pEOF) {
     melt_array(&decls);

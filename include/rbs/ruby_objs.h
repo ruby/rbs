@@ -22,6 +22,7 @@ VALUE rbs_ast_decl_module(VALUE name, VALUE type_params, VALUE self_types, VALUE
 VALUE rbs_ast_decl_module_self(VALUE name, VALUE args, VALUE location);
 VALUE rbs_ast_decl_module_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment);
 VALUE rbs_ast_decl_type_alias(VALUE name, VALUE type_params, VALUE type, VALUE annotations, VALUE location, VALUE comment);
+VALUE rbs_ast_directives_resolved(VALUE location);
 VALUE rbs_ast_directives_use(VALUE clauses, VALUE location);
 VALUE rbs_ast_directives_use_single_clause(VALUE type_name, VALUE new_name, VALUE location);
 VALUE rbs_ast_directives_use_wildcard_clause(VALUE namespace, VALUE location);

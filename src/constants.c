@@ -30,6 +30,7 @@ VALUE RBS_AST_Declarations_Module;
 VALUE RBS_AST_Declarations_Module_Self;
 VALUE RBS_AST_Declarations_ModuleAlias;
 VALUE RBS_AST_Declarations_TypeAlias;
+VALUE RBS_AST_Directives_Resolved;
 VALUE RBS_AST_Directives_Use;
 VALUE RBS_AST_Directives_Use_SingleClause;
 VALUE RBS_AST_Directives_Use_WildcardClause;
@@ -104,6 +105,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Declarations_Module_Self, RBS_AST_Declarations_Module, "Self");
   IMPORT_CONSTANT(RBS_AST_Declarations_ModuleAlias, RBS_AST_Declarations, "ModuleAlias");
   IMPORT_CONSTANT(RBS_AST_Declarations_TypeAlias, RBS_AST_Declarations, "TypeAlias");
+  IMPORT_CONSTANT(RBS_AST_Directives_Resolved, RBS_AST_Directives, "Resolved");
   IMPORT_CONSTANT(RBS_AST_Directives_Use, RBS_AST_Directives, "Use");
   IMPORT_CONSTANT(RBS_AST_Directives_Use_SingleClause, RBS_AST_Directives_Use, "SingleClause");
   IMPORT_CONSTANT(RBS_AST_Directives_Use_WildcardClause, RBS_AST_Directives_Use, "WildcardClause");

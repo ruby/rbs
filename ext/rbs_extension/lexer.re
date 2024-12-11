@@ -93,6 +93,7 @@ token rbsparser_next_token(lexstate *state) {
       "untyped"       { return next_token(state, kUNTYPED); }
       "void"          { return next_token(state, kVOID); }
       "use"           { return next_token(state, kUSE); }
+      "resolved"      { return next_token(state, kRESOLVED); }
       "as"            { return next_token(state, kAS); }
       "__todo__"      { return next_token(state, k__TODO__); }
 

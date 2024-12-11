@@ -2171,4 +2171,22 @@ end
       RBS
     end
   end
+
+  def test_resolved_directive
+    Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
+      resolved
+
+      module Foo
+        type t = ::String
+      end
+    RBS
+
+      assert_equal 1, dirs.size
+
+      dirs[0].tap do |use|
+        assert_instance_of RBS::AST::Directives::Resolved, use
+        assert_equal "resolved", use.location.source
+      end
+    end
+  end
 end

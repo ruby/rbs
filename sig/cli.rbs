@@ -80,6 +80,10 @@ module RBS
 
     def run_subtract: (Array[String], top) -> void
 
+    def run_resolve: (Array[String], LibraryOptions) -> void
+
+    def run_load: (Array[String], LibraryOptions) -> void
+
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser

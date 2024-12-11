@@ -58,6 +58,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "kUNTYPED",         /* untyped */
   "kVOID",            /* void */
   "kUSE",             /* use */
+  "kRESOLVED",        /* resolved */
   "kAS",              /* as */
   "k__TODO__",        /* __todo__ */
 

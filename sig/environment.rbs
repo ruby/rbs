@@ -141,6 +141,8 @@ module RBS
     #
     def resolve_type_names: (?only: Set[AST::Declarations::t]?) -> Environment
 
+    def resolve_signature: (Resolver::TypeNameResolver, UseMap::Table, Array[AST::Directives::t], Array[AST::Declarations::t], ?only: Set[AST::Declarations::t]?) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+
     def inspect: () -> String
 
     def buffers: () -> Array[Buffer]
