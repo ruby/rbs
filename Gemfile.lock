@@ -70,7 +70,7 @@ GEM
     parser (3.3.6.0)
       ast (~> 2.4.1)
       racc
-    power_assert (2.0.3)
+    power_assert (2.0.4)
     psych (4.0.6)
       stringio
     public_suffix (6.0.1)
