@@ -13,7 +13,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     abbrev (0.1.2)
-    activesupport (8.0.0)
+    activesupport (8.0.1)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -41,7 +41,6 @@ GEM
     digest (3.1.1)
     drb (2.2.1)
     ffi (1.17.0)
-    ffi (1.17.0-x86_64-darwin)
     fileutils (1.7.3)
     goodcheck (3.1.0)
       marcel (>= 1.0, < 2.0)
@@ -140,7 +139,7 @@ GEM
       terminal-table (>= 2, < 4)
     stringio (3.1.1)
     strong_json (2.1.2)
-    strscan (3.1.0)
+    strscan (3.1.2)
     tempfile (0.2.1)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
