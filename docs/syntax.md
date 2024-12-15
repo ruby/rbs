@@ -291,7 +291,7 @@ class Foo
 
   def foo: () -> instance
 
-  @@foos: Array[instances]
+  @@foos: Array[instance]
 
   include Enumerable[class]
 end
