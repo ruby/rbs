@@ -13,7 +13,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     abbrev (0.1.2)
-    activesupport (7.2.2.1)
+    activesupport (8.0.1)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -25,6 +25,7 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.2)
@@ -56,7 +57,7 @@ GEM
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    logger (1.6.2)
+    logger (1.6.3)
     marcel (1.0.4)
     memory_profiler (1.0.2)
     minitest (5.25.4)
@@ -149,6 +150,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
+    uri (1.0.2)
     zlib (3.2.0)
 
 PLATFORMS
