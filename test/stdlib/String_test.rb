@@ -1259,11 +1259,15 @@ class StringInstanceTest < Test::Unit::TestCase
                       'hello', :scan, /l/
     assert_send_type  '(Regexp) -> Array[Array[String]]',
                       'hello', :scan, /(l)/
+    assert_send_type  '(Regexp) -> Array[Array[nil]]',
+                      'hello', :scan, /(x)?/
 
     assert_send_type  '(Regexp) { (String) -> void } -> String',
                       'hello', :scan, /l/ do end
     assert_send_type  '(Regexp) { (Array[String]) -> void } -> String',
                       'hello', :scan, /(l)/ do end
+    assert_send_type  '(Regexp) { (Array[nil]) -> void } -> String',
+                      'hello', :scan, /(x)?/ do end
 
     with_string 'l' do |pattern|
       assert_send_type  '(string) -> Array[String]',
