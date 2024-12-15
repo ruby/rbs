@@ -190,7 +190,7 @@ end
 #
 class LoadError < ScriptError
   # <!-- rdoc-file=error.c -->
-  # the path failed to load
+  # the path that failed to load
   #
   def path: () -> String?
 end
@@ -564,7 +564,7 @@ class SyntaxError < ScriptError
   def initialize: (?string msg) -> void
 
   # <!-- rdoc-file=error.c -->
-  # the path failed to parse
+  # the path that failed to parse
   #
   def path: () -> String?
 end
