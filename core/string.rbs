@@ -2733,8 +2733,8 @@ class String
   #     <<cruel>> <<world>>
   #     rceu lowlr
   #
-  def scan: (Regexp pattern) -> Array[String | Array[String]]
-          | (Regexp pattern) { (String | Array[String] matches) -> void } -> self
+  def scan: (Regexp pattern) -> Array[String | Array[String?]]
+          | (Regexp pattern) { (String | Array[String?] matches) -> void } -> self
           | (string pattern) -> Array[String]
           | (string pattern) { (String match) -> void } -> self
 
