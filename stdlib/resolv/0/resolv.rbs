@@ -292,7 +292,6 @@ class Resolv::DNS
   # *   Resolv::DNS::Resource::IN::TXT
   # *   Resolv::DNS::Resource::IN::WKS
   #
-  #
   # Returned resource is represented as a Resolv::DNS::Resource instance, i.e.
   # Resolv::DNS::Resource::IN::A.
   #
@@ -341,8 +340,10 @@ class Resolv::DNS
   #
   # nil
   # :   Uses /etc/resolv.conf.
+  #
   # String
   # :   Path to a file using /etc/resolv.conf's format.
+  #
   # Hash
   # :   Must contain :nameserver, :search and :ndots keys.
   #
@@ -355,11 +356,9 @@ class Resolv::DNS
   # *   :nameserver => '8.8.8.8'
   # *   :nameserver => ['8.8.8.8', '8.8.4.4']
   #
-  #
   # The value of :nameserver_port should be an array of pair of nameserver address
   # and port number.
   # *   :nameserver_port => [['8.8.8.8', 53], ['8.8.4.4', 53]]
-  #
   #
   # Example:
   #
@@ -594,6 +593,7 @@ class Resolv::DNS::Name
   #
   # Name
   # :   returns `arg`.
+  #
   # String
   # :   Creates a new Name.
   #
@@ -1534,6 +1534,7 @@ class Resolv::IPv6
   #
   # IPv6
   # :   returns `arg`.
+  #
   # String
   # :   `arg` must match one of the IPv6::Regex* constants
   #
@@ -1617,6 +1618,7 @@ class Resolv::LOC::Alt
   #
   # LOC::Alt
   # :   returns `arg`.
+  #
   # String
   # :   `arg` must match the LOC::Alt::Regex constant
   #
@@ -1663,6 +1665,7 @@ class Resolv::LOC::Coord
   #
   # LOC::Coord
   # :   returns `arg`.
+  #
   # String
   # :   `arg` must match the LOC::Coord::Regex constant
   #
@@ -1712,6 +1715,7 @@ class Resolv::LOC::Size
   #
   # LOC::Size
   # :   returns `arg`.
+  #
   # String
   # :   `arg` must match the LOC::Size::Regex constant
   #
@@ -1781,6 +1785,7 @@ class Resolv::MDNS < Resolv::DNS
   #
   # nil
   # :   Uses the default mDNS addresses
+  #
   #
   # Hash
   # :   Must contain :nameserver or :nameserver_port like Resolv::DNS#initialize.

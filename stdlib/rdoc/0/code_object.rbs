@@ -15,15 +15,11 @@ module RDoc
   #         *   RDoc::NormalClass
   #         *   RDoc::NormalModule
   #         *   RDoc::SingleClass
-  #
-  #
   # *   RDoc::MethodAttr
   #     *   RDoc::Attr
   #     *   RDoc::AnyMethod
   #         *   RDoc::GhostMethod
   #         *   RDoc::MetaMethod
-  #
-  #
   # *   RDoc::Alias
   # *   RDoc::Constant
   # *   RDoc::Mixin

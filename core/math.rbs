@@ -37,7 +37,6 @@
 #
 #         [1.0, INFINITY)
 #
-#
 # Many values returned by Math methods are numerical approximations. This is
 # because many such values are, in mathematics, of infinite precision, while in
 # numerical computation the precision is finite.
@@ -64,7 +63,6 @@
 # *   ::sin: Returns the sine of the given argument.
 # *   ::tan: Returns the tangent of the given argument.
 #
-#
 # #### Inverse Trigonometric Functions
 #
 # *   ::acos: Returns the arc cosine of the given argument.
@@ -72,20 +70,17 @@
 # *   ::atan: Returns the arc tangent of the given argument.
 # *   ::atan2: Returns the arg tangent of two given arguments.
 #
-#
 # #### Hyperbolic Trigonometric Functions
 #
 # *   ::cosh: Returns the hyperbolic cosine of the given argument.
 # *   ::sinh: Returns the hyperbolic sine of the given argument.
 # *   ::tanh: Returns the hyperbolic tangent of the given argument.
 #
-#
 # #### Inverse Hyperbolic Trigonometric Functions
 #
 # *   ::acosh: Returns the inverse hyperbolic cosine of the given argument.
 # *   ::asinh: Returns the inverse hyperbolic sine of the given argument.
 # *   ::atanh: Returns the inverse hyperbolic tangent of the given argument.
-#
 #
 # #### Exponentiation and Logarithmic Functions
 #
@@ -94,18 +89,15 @@
 # *   ::log10: Returns the base 10 logarithm of the given argument.
 # *   ::log2: Returns the base 2 logarithm of the given argument.
 #
-#
 # #### Fraction and Exponent Functions
 #
 # *   ::frexp: Returns the fraction and exponent of the given argument.
 # *   ::ldexp: Returns the value for a given fraction and exponent.
 #
-#
 # #### Root Functions
 #
 # *   ::cbrt: Returns the cube root of the given argument.
 # *   ::sqrt: Returns the square root of the given argument.
-#
 #
 # #### Error Functions
 #
@@ -114,13 +106,11 @@
 # *   ::erfc: Returns the value of the complementary error function for the
 #     given argument.
 #
-#
 # #### Gamma Functions
 #
 # *   ::gamma: Returns the value of the gamma function for the given argument.
 # *   ::lgamma: Returns the value of the logarithmic gamma function for the
 #     given argument.
-#
 #
 # #### Hypotenuse Function
 #
@@ -168,7 +158,6 @@ module Math
   # *   Domain: `[-1, 1]`.
   # *   Range: `[0, PI]`.
   #
-  #
   # Examples:
   #
   #     acos(-1.0) # => 3.141592653589793  # PI
@@ -187,7 +176,6 @@ module Math
   # *   Domain: `[1, INFINITY]`.
   # *   Range: `[0, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     acosh(1.0)      # => 0.0
@@ -204,7 +192,6 @@ module Math
   #
   # *   Domain: `[-1, -1]`.
   # *   Range: `[-PI/2, PI/2]`.
-  #
   #
   # Examples:
   #
@@ -224,7 +211,6 @@ module Math
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     asinh(-INFINITY) # => -Infinity
@@ -243,7 +229,6 @@ module Math
   #
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-PI/2, PI/2]  `.
-  #
   #
   # Examples:
   #
@@ -270,7 +255,6 @@ module Math
   # *   Domain of `x`: `[-INFINITY, INFINITY]`.
   # *   Range: `[-PI, PI]`.
   #
-  #
   # Examples:
   #
   #     atan2(-1.0, -1.0) # => -2.356194490192345  # -3*PI/4
@@ -290,7 +274,6 @@ module Math
   # *   Domain: `[-1, 1]`.
   # *   Range: `[-INFINITY, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     atanh(-1.0) # => -Infinity
@@ -307,7 +290,6 @@ module Math
   #
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY]`.
-  #
   #
   # Examples:
   #
@@ -336,7 +318,6 @@ module Math
   # *   Domain: `(-INFINITY, INFINITY)`.
   # *   Range: `[-1.0, 1.0]`.
   #
-  #
   # Examples:
   #
   #     cos(-PI)   # => -1.0
@@ -359,7 +340,6 @@ module Math
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[1, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     cosh(-INFINITY) # => Infinity
@@ -377,7 +357,6 @@ module Math
   #
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-1, 1]`.
-  #
   #
   # Examples:
   #
@@ -400,7 +379,6 @@ module Math
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[0, 2]`.
   #
-  #
   # Examples:
   #
   #     erfc(-INFINITY) # => 2.0
@@ -419,7 +397,6 @@ module Math
   #
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[0, INFINITY]`.
-  #
   #
   # Examples:
   #
@@ -449,7 +426,6 @@ module Math
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range `[-INFINITY, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     frexp(-INFINITY) # => [-Infinity, -1]
@@ -473,7 +449,6 @@ module Math
   #
   # *   Domain: `(-INFINITY, INFINITY]` excluding negative integers.
   # *   Range: `[-INFINITY, INFINITY]`.
-  #
   #
   # Examples:
   #
@@ -502,7 +477,6 @@ module Math
   # *   Domain of +ab: `[-INFINITY, INFINITY]`.
   # *   Range: `[0, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     hypot(0.0, 1.0)       # => 1.0
@@ -524,7 +498,6 @@ module Math
   #
   # *   Domain of `fraction`: `[0.0, 1.0)`.
   # *   Domain of `exponent`: `[0, 1024]` (larger values are equivalent to 1024).
-  #
   #
   # See [IEEE 754 double-precision binary floating-point format:
   # binary64](https://en.wikipedia.org/wiki/Double-precision_floating-point_format
@@ -560,7 +533,6 @@ module Math
   # *   Range of first element: `(-INFINITY, INFINITY]`.
   # *   Second element is -1 or 1.
   #
-  #
   # Examples:
   #
   #     lgamma(-4.0) # => [Infinity, -1]
@@ -595,7 +567,6 @@ module Math
   # *   Domain: `[0, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY)]`.
   #
-  #
   # Examples:
   #
   #     log(0.0)        # => -Infinity
@@ -623,7 +594,6 @@ module Math
   # *   Domain: `[0, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     log10(0.0)      # => -Infinity
@@ -642,7 +612,6 @@ module Math
   #
   # *   Domain: `[0, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY]`.
-  #
   #
   # Examples:
   #
@@ -663,7 +632,6 @@ module Math
   #
   # *   Domain: `(-INFINITY, INFINITY)`.
   # *   Range: `[-1.0, 1.0]`.
-  #
   #
   # Examples:
   #
@@ -687,7 +655,6 @@ module Math
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-INFINITY, INFINITY]`.
   #
-  #
   # Examples:
   #
   #     sinh(-INFINITY) # => -Infinity
@@ -705,7 +672,6 @@ module Math
   #
   # *   Domain: `[0, INFINITY]`.
   # *   Range: `[0, INFINITY]`.
-  #
   #
   # Examples:
   #
@@ -731,7 +697,6 @@ module Math
   # *   Domain: `(-INFINITY, INFINITY)`.
   # *   Range: `(-INFINITY, INFINITY)`.
   #
-  #
   # Examples:
   #
   #     tan(-PI)   # => 1.2246467991473532e-16  # -0.0000000000000001
@@ -753,7 +718,6 @@ module Math
   #
   # *   Domain: `[-INFINITY, INFINITY]`.
   # *   Range: `[-1, 1]`.
-  #
   #
   # Examples:
   #

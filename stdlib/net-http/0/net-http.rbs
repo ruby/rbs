@@ -18,7 +18,6 @@ module Net
   #     overview](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Techni
   #     cal_overview).
   #
-  #
   # ## About the Examples
   #
   # Examples here assume that `net/http` has been required (which also requires
@@ -30,7 +29,6 @@ module Net
   #
   # *   https://jsonplaceholder.typicode.com.
   # *   http://example.com.
-  #
   #
   # Some examples also assume these variables:
   #
@@ -107,7 +105,6 @@ module Net
   #           http.unlock(path, body)
   #           # Session finished automatically at block exit.
   #         end
-  #
   #
   # The methods cited above are convenience methods that, via their few arguments,
   # allow minimal control over the requests. For greater control, consider using
@@ -196,7 +193,6 @@ module Net
   # *   May contain any number of requests.
   # *   Is ended by instance method Net::HTTP#finish.
   #
-  #
   # See example sessions at [Strategies](rdoc-ref:Net::HTTP@Strategies).
   #
   # ### Session Using Net::HTTP.start
@@ -208,7 +204,6 @@ module Net
   # *   Calling #start before block execution.
   # *   Executing the block.
   # *   Calling #finish after block execution.
-  #
   #
   # In the block, you can use these instance methods, each of which that sends a
   # single request:
@@ -225,7 +220,6 @@ module Net
   #     *   #trace: TRACE.
   #     *   #patch: PATCH.
   #
-  #
   # *   [WebDAV methods](https://en.wikipedia.org/wiki/WebDAV#Implementation):
   #
   #     *   #copy: COPY.
@@ -235,8 +229,6 @@ module Net
   #     *   #propfind: PROPFIND.
   #     *   #proppatch: PROPPATCH.
   #     *   #unlock: UNLOCK.
-  #
-  #
   #
   # ### Session Using Net::HTTP.start and Net::HTTP.finish
   #
@@ -259,19 +251,16 @@ module Net
   # *   Finishing the session.
   # *   Destroying the object.
   #
-  #
   # Such methods that send GET requests:
   #
   # *   ::get: Returns the string response body.
   # *   ::get_print: Writes the string response body to $stdout.
   # *   ::get_response: Returns a Net::HTTPResponse object.
   #
-  #
   # Such methods that send POST requests:
   #
   # *   ::post: Posts data to the host.
   # *   ::post_form: Posts form data to the host.
-  #
   #
   # ## HTTP Requests and Responses
   #
@@ -284,7 +273,6 @@ module Net
   #
   # *   Net::HTTPRequest.
   # *   Net::HTTPResponse.
-  #
   #
   # ## Following Redirection
   #
@@ -453,7 +441,6 @@ module Net
   #         http = Net::HTTP.new('example.com', nil, 'my.proxy', 8000, 'pname', 'ppass', 'my.proxy,proxy.example:8000')
   #         http.proxy_address # => nil
   #
-  #
   # ## Compression and Decompression
   #
   # Net::HTTP does not compress the body of a request before sending.
@@ -480,7 +467,6 @@ module Net
   #     header.
   # *   Any other value: leaves the body and header unchanged.
   #
-  #
   # ## What's Here
   #
   # This is a categorized summary of methods and attributes.
@@ -491,7 +477,6 @@ module Net
   # *   [#inspect](rdoc-ref:Net::HTTP#inspect): Returns a string representation of
   #     `self`.
   #
-  #
   # ### Sessions
   #
   # *   [::start](rdoc-ref:Net::HTTP.start): Begins a new session in a new
@@ -501,7 +486,6 @@ module Net
   # *   [#finish](rdoc-ref:Net::HTTP#finish): Ends an active session.
   # *   [#start](rdoc-ref:Net::HTTP#start): Begins a new session in an existing
   #     Net::HTTP object (`self`).
-  #
   #
   # ### Connections
   #
@@ -529,7 +513,6 @@ module Net
   #     timeout.
   # *   [write_timeout=](rdoc-ref:Net::HTTP#write_timeout=): Sets the write
   #     timeout.
-  #
   #
   # ### Requests
   #
@@ -590,7 +573,6 @@ module Net
   # *   [#unlock](rdoc-ref:Net::HTTP#unlock): Sends an UNLOCK request and returns
   #     a response object.
   #
-  #
   # ### Responses
   #
   # *   [:close_on_empty_response](rdoc-ref:Net::HTTP#close_on_empty_response):
@@ -605,7 +587,6 @@ module Net
   #     Returns the encoding to use for the response body.
   # *   [#response_body_encoding=](rdoc-ref:Net::HTTP#response_body_encoding=):
   #     Sets the response body encoding.
-  #
   #
   # ### Proxies
   #
@@ -628,7 +609,6 @@ module Net
   # *   [:proxy_port=](rdoc-ref:Net::HTTP#proxy_port=): Sets the proxy port.
   # *   [#proxy_user](rdoc-ref:Net::HTTP#proxy_user): Returns the proxy user name.
   # *   [:proxy_user=](rdoc-ref:Net::HTTP#proxy_user=): Sets the proxy user.
-  #
   #
   # ### Security
   #
@@ -694,7 +674,6 @@ module Net
   #     server the certification verification at the beginning of the SSL/TLS
   #     session.
   #
-  #
   # ### Addresses and Ports
   #
   # *   [:address](rdoc-ref:Net::HTTP#address): Returns the string host name or
@@ -719,14 +698,12 @@ module Net
   #     port used to establish the connection.
   # *   [:port](rdoc-ref:Net::HTTP#port): Returns the integer port number.
   #
-  #
   # ### HTTP Version
   #
   # *   [::version_1_2?](rdoc-ref:Net::HTTP.version_1_2?) (aliased as
   #     [::is_version_1_2?](rdoc-ref:Net::HTTP.is_version_1_2?) and
   #     [::version_1_2](rdoc-ref:Net::HTTP.version_1_2)): Returns true; retained
   #     for compatibility.
-  #
   #
   # ### Debugging
   #
@@ -925,7 +902,6 @@ module Net
     #     Server](rdoc-ref:Net::HTTP@Proxy+Server).
     # *   For argument `opts`, see below.
     #
-    #
     # With no block given:
     #
     # *   Calls `http.start` with no block (see #start), which opens a TCP
@@ -938,7 +914,6 @@ module Net
     #         http.finish
     #         http.started? # => false
     #
-    #
     # With a block given:
     #
     # *   Calls `http.start` with the block (see #start), which:
@@ -948,9 +923,7 @@ module Net
     #     *   Closes the HTTP session and TCP connection on block exit.
     #     *   Returns the block's value `object`.
     #
-    #
     # *   Returns `object`.
-    #
     #
     # Example:
     #
@@ -999,7 +972,6 @@ module Net
     # *   #verify_mode
     # *   #write_timeout
     #
-    #
     # Note: If `port` is `nil` and `opts[:use_ssl]` is a truthy value, the value
     # passed to `new` is Net::HTTP.https_default_port, not `port`.
     #
@@ -1026,7 +998,6 @@ module Net
     # *   Has the given address.
     # *   Has the default port number, Net::HTTP.default_port (80).
     # *   Has no proxy.
-    #
     #
     # Example:
     #
@@ -2040,7 +2011,6 @@ module Net
   # *   https://jsonplaceholder.typicode.com.
   # *   http://example.com.
   #
-  #
   # Some examples also assume these variables:
   #
   #     uri = URI('https://jsonplaceholder.typicode.com/')
@@ -2208,7 +2178,6 @@ module Net
   # *   Net::HTTPGenericRequest (and therefore Net::HTTPRequest).
   # *   Net::HTTPResponse.
   #
-  #
   # The headers are a hash-like collection of key/value pairs called *fields*.
   #
   # ## Request and Response Fields
@@ -2223,7 +2192,6 @@ module Net
   #     [Getters](rdoc-ref:Net::HTTPHeader@Getters) and
   #     [Iterators](rdoc-ref:Net::HTTPHeader@Iterators).
   #
-  #
   # Exactly which fields should be sent or expected depends on the host; see:
   #
   # *   [Request
@@ -2232,7 +2200,6 @@ module Net
   # *   [Response
   #     fields](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_
   #     fields).
-  #
   #
   # ## About the Examples
   #
@@ -2245,7 +2212,6 @@ module Net
   #
   # *   https://jsonplaceholder.typicode.com.
   # *   http://example.com.
-  #
   #
   # Some examples also assume these variables:
   #
@@ -2283,7 +2249,6 @@ module Net
   # *   A symbol: Key `:Accept` is treated as if it were `:Accept.to_s.downcase`;
   #     i.e., `'accept'`.
   #
-  #
   # Examples:
   #
   #     req = Net::HTTP::Get.new(uri)
@@ -2306,7 +2271,6 @@ module Net
   #     *   #to_hash: Returns a hash of all header fields: each key is a field
   #         name; its value is the array value for the field.
   #
-  #
   # *   These methods return field values as string; the string value for a field
   #     is equivalent to `self[key.downcase.to_s].join(', '))`:
   #
@@ -2315,8 +2279,6 @@ module Net
   #     *   #fetch: Like #[], but accepts a default value to be returned if the
   #         key does not exist.
   #
-  #
-  #
   # The field value may be set:
   #
   # *   #[]=: Sets the value for the given key; the given value may be a string, a
@@ -2324,7 +2286,6 @@ module Net
   # *   #add_field: Adds a given value to a value for the given key (not
   #     overwriting the existing value).
   # *   #delete: Deletes the field for the given key.
-  #
   #
   # Example field values:
   #
@@ -2362,7 +2323,6 @@ module Net
   #         req[:foo]            # => "bar, baz, bat, bam, bah, 0, bad, 1"
   #         req.get_fields(:foo) # => ["bar", "baz", "bat", "bam", "bah", "0", "bad", "1"]
   #
-  #
   # ## Convenience Methods
   #
   # Various convenience methods retrieve values, set values, query values, set
@@ -2382,12 +2342,10 @@ module Net
   #     `'Proxy-Authorization'`.
   # *   #set_range: Sets the value for field `'Range'`.
   #
-  #
   # ### Form Setters
   #
   # *   #set_form: Sets an HTML form data set.
   # *   #set_form_data: Sets header fields and a body from HTML form data.
-  #
   #
   # ### Getters
   #
@@ -2410,7 +2368,6 @@ module Net
   #     `'Content-Range'`.
   # *   #type_params: Returns the string parameters for `'Content-Type'`.
   #
-  #
   # ### Queries
   #
   # *   #chunked?: Returns whether field `'Transfer-Encoding'` is set to
@@ -2420,7 +2377,6 @@ module Net
   # *   #connection_keep_alive?: Returns whether field `'Connection'` is set to
   #     `'keep-alive'`.
   # *   #key?: Returns whether a given key exists.
-  #
   #
   # ### Iterators
   #
@@ -3039,7 +2995,6 @@ module Net
     # *   A name/value pair.
     # *   An IO stream opened for reading.
     #
-    #
     # Argument `params` should be an
     # [Enumerable](rdoc-ref:Enumerable@Enumerable+in+Ruby+Classes) (method
     # `params.map` will be called), and is often an array or hash.
@@ -3076,12 +3031,9 @@ module Net
     #         *   `:filename`: The name of the file to use.
     #         *   `:content_type`: The content type of the uploaded file.
     #
-    #
     #         Example:
     #
     #             req.set_form([['file', file, {filename: "other-filename.foo"}]]
-    #
-    #
     #
     # The various forms may be mixed:
     #
@@ -3099,8 +3051,6 @@ module Net
     #     *   Another string.
     #     *   An IO stream opened for reading (only when argument `enctype` -- see
     #         below -- is given as `'multipart/form-data'`).
-    #
-    #
     #
     # Examples:
     #
@@ -3123,7 +3073,6 @@ module Net
     # *   `'application/x-www-form-urlencoded'` (the default).
     # *   `'multipart/form-data'`; see [RFC
     #     7578](https://www.rfc-editor.org/rfc/rfc7578).
-    #
     #
     # Optional argument `formopt` is a hash of options (applicable only when
     # argument `enctype` is `'multipart/form-data'`) that may include the following
@@ -3240,7 +3189,6 @@ module Net
   #     Host](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#host-reques
   #     t-header).
   #
-  #
   # You can add headers or override default headers:
   #
   #     #   res = Net::HTTP::Get.new(uri, {'foo' => '0', 'bar' => '1'})
@@ -3261,7 +3209,6 @@ module Net
   # *   Net::HTTP::Options
   # *   Net::HTTP::Trace
   # *   Net::HTTP::Patch
-  #
   #
   # Subclasses for WebDAV requests:
   #
@@ -3314,7 +3261,6 @@ module Net
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): yes.
   #
-  #
   # Related:
   #
   # *   Net::HTTP.get: sends `GET` request, returns response body.
@@ -3353,7 +3299,6 @@ module Net
   #     mpotent_methods): yes.
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): yes.
-  #
   #
   # Related:
   #
@@ -3395,7 +3340,6 @@ module Net
   #     mpotent_methods): no.
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): yes.
-  #
   #
   # Related:
   #
@@ -3474,7 +3418,6 @@ module Net
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): no.
   #
-  #
   # Related:
   #
   # *   Net::HTTP#delete: sends `DELETE` request, returns response object.
@@ -3513,7 +3456,6 @@ module Net
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): no.
   #
-  #
   # Related:
   #
   # *   Net::HTTP#options: sends `OPTIONS` request, returns response object.
@@ -3551,7 +3493,6 @@ module Net
   #     mpotent_methods): yes.
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): no.
-  #
   #
   # Related:
   #
@@ -3593,7 +3534,6 @@ module Net
   #     mpotent_methods): no.
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): no.
-  #
   #
   # Related:
   #
@@ -3804,7 +3744,6 @@ module Net
   # *   https://jsonplaceholder.typicode.com.
   # *   http://example.com.
   #
-  #
   # Some examples also assume these variables:
   #
   #     uri = URI('https://jsonplaceholder.typicode.com/')
@@ -3851,7 +3790,6 @@ module Net
   # *   Hash-like method `[]`.
   # *   Specific reader methods, such as `content_type`.
   #
-  #
   # Examples:
   #
   #     res = Net::HTTP.get_response(uri) # => #<Net::HTTPOK 200 OK readbody=true>
@@ -3884,7 +3822,6 @@ module Net
   #     *   Net::HTTPProcessing (102)
   #     *   Net::HTTPEarlyHints (103)
   #
-  #
   # *   Net::HTTPSuccess:
   #
   #     *   Net::HTTPOK (200)
@@ -3898,7 +3835,6 @@ module Net
   #     *   Net::HTTPAlreadyReported (208)
   #     *   Net::HTTPIMUsed (226)
   #
-  #
   # *   Net::HTTPRedirection:
   #
   #     *   Net::HTTPMultipleChoices (300)
@@ -3909,7 +3845,6 @@ module Net
   #     *   Net::HTTPUseProxy (305)
   #     *   Net::HTTPTemporaryRedirect (307)
   #     *   Net::HTTPPermanentRedirect (308)
-  #
   #
   # *   Net::HTTPClientError:
   #
@@ -3941,7 +3876,6 @@ module Net
   #     *   Net::HTTPRequestHeaderFieldsTooLarge (431)
   #     *   Net::HTTPUnavailableForLegalReasons (451)
   #
-  #
   # *   Net::HTTPServerError:
   #
   #     *   Net::HTTPInternalServerError (500)
@@ -3955,8 +3889,6 @@ module Net
   #     *   Net::HTTPLoopDetected (508)
   #     *   Net::HTTPNotExtended (510)
   #     *   Net::HTTPNetworkAuthenticationRequired (511)
-  #
-  #
   #
   # There is also the Net::HTTPBadResponse exception which is raised when there is
   # a protocol error.
@@ -5423,7 +5355,6 @@ module Net
   # *   https://jsonplaceholder.typicode.com.
   # *   http://example.com.
   #
-  #
   # Some examples also assume these variables:
   #
   #     uri = URI('https://jsonplaceholder.typicode.com/')
@@ -5470,7 +5401,6 @@ module Net
   # *   Hash-like method `[]`.
   # *   Specific reader methods, such as `content_type`.
   #
-  #
   # Examples:
   #
   #     res = Net::HTTP.get_response(uri) # => #<Net::HTTPOK 200 OK readbody=true>
@@ -5503,7 +5433,6 @@ module Net
   #     *   Net::HTTPProcessing (102)
   #     *   Net::HTTPEarlyHints (103)
   #
-  #
   # *   Net::HTTPSuccess:
   #
   #     *   Net::HTTPOK (200)
@@ -5517,7 +5446,6 @@ module Net
   #     *   Net::HTTPAlreadyReported (208)
   #     *   Net::HTTPIMUsed (226)
   #
-  #
   # *   Net::HTTPRedirection:
   #
   #     *   Net::HTTPMultipleChoices (300)
@@ -5528,7 +5456,6 @@ module Net
   #     *   Net::HTTPUseProxy (305)
   #     *   Net::HTTPTemporaryRedirect (307)
   #     *   Net::HTTPPermanentRedirect (308)
-  #
   #
   # *   Net::HTTPClientError:
   #
@@ -5560,7 +5487,6 @@ module Net
   #     *   Net::HTTPRequestHeaderFieldsTooLarge (431)
   #     *   Net::HTTPUnavailableForLegalReasons (451)
   #
-  #
   # *   Net::HTTPServerError:
   #
   #     *   Net::HTTPInternalServerError (500)
@@ -5574,8 +5500,6 @@ module Net
   #     *   Net::HTTPLoopDetected (508)
   #     *   Net::HTTPNotExtended (510)
   #     *   Net::HTTPNetworkAuthenticationRequired (511)
-  #
-  #
   #
   # There is also the Net::HTTPBadResponse exception which is raised when there is
   # a protocol error.

@@ -33,7 +33,6 @@ end
 # *   Flexibility to have an alternate URI::Parser (or just different patterns
 #     and regexp's).
 #
-#
 # ## Basic example
 #
 #     require 'uri'
@@ -81,7 +80,6 @@ end
 # *   [RFC2732](http://tools.ietf.org/html/rfc2732)
 # *   [RFC3986](http://tools.ietf.org/html/rfc3986)
 #
-#
 # ## Class tree
 #
 # *   URI::Generic (in uri/generic.rb)
@@ -89,31 +87,27 @@ end
 #     *   URI::FTP - (in uri/ftp.rb)
 #     *   URI::HTTP - (in uri/http.rb)
 #         *   URI::HTTPS - (in uri/https.rb)
-#
 #     *   URI::LDAP - (in uri/ldap.rb)
 #         *   URI::LDAPS - (in uri/ldaps.rb)
-#
 #     *   URI::MailTo - (in uri/mailto.rb)
-#
 # *   URI::Parser - (in uri/common.rb)
 # *   URI::REGEXP - (in uri/common.rb)
 #     *   URI::REGEXP::PATTERN - (in uri/common.rb)
-#
 # *   URI::Util - (in uri/common.rb)
 # *   URI::Error - (in uri/common.rb)
 #     *   URI::InvalidURIError - (in uri/common.rb)
 #     *   URI::InvalidComponentError - (in uri/common.rb)
 #     *   URI::BadURIError - (in uri/common.rb)
 #
-#
-#
 # ## Copyright Info
 #
 # Author
 # :   Akira Yamada <akira@ruby-lang.org>
+#
 # Documentation
 # :   Akira Yamada <akira@ruby-lang.org> Dmitry V. Sabanin <sdmitry@lrn.ru>
 #     Vincent Batts <vbatts@hashbangbash.com>
+#
 # License
 # :   Copyright (c) 2001 akira yamada <akira@ruby-lang.org> You can redistribute
 #     it and/or modify it under the same term as Ruby.
@@ -176,7 +170,6 @@ module URI
   #     *   Characters `'*'`, `'.'`, `'-'`, and `'_'`.
   #     *   Character in ranges `'a'..'z'`, `'A'..'Z'`, and `'0'..'9'`.
   #
-  #
   #     Example:
   #
   #         URI.decode_www_form_component('*.-_azAZ09')
@@ -187,12 +180,10 @@ module URI
   #     *   Character `'+'` to character `' '`.
   #     *   Each "percent notation" to an ASCII character.
   #
-  #
   #     Example:
   #
   #         URI.decode_www_form_component('Here+are+some+punctuation+characters%3A+%2C%3B%3F%3A')
   #         # => "Here are some punctuation characters: ,;?:"
-  #
   #
   # Related: URI.decode_uri_component (preserves `'+'`).
   #
@@ -258,7 +249,6 @@ module URI
   #         URI.encode_www_form(['foo', :bar, 0])
   #         # => "foo&bar&0"
   #
-  #
   # The elements of an Array-like `enum` may be mixture:
   #
   #     URI.encode_www_form([['foo', 0], ['bar', 1, 2], ['baz'], :bat])
@@ -292,7 +282,6 @@ module URI
   #         URI.encode_www_form({foo: 0, bar: 1, baz: 2})
   #         # => "foo=0&bar=1&baz=2"
   #
-  #
   # The elements of a Hash-like `enum` may be mixture:
   #
   #     URI.encode_www_form({foo: [0, 1], bar: 2})
@@ -313,7 +302,6 @@ module URI
   #     *   Characters `'*'`, `'.'`, `'-'`, and `'_'`.
   #     *   Character in ranges `'a'..'z'`, `'A'..'Z'`, and `'0'..'9'`.
   #
-  #
   #     Example:
   #
   #         URI.encode_www_form_component('*.-_azAZ09')
@@ -325,19 +313,16 @@ module URI
   #     *   Any other character to "percent notation"; the percent notation for
   #         character *c* is `'%%%X' % c.ord`.
   #
-  #
   #     Example:
   #
   #         URI.encode_www_form_component('Here are some punctuation characters: ,;?:')
   #         # => "Here+are+some+punctuation+characters%3A+%2C%3B%3F%3A"
-  #
   #
   # Encoding:
   #
   # *   If `str` has encoding Encoding::ASCII_8BIT, argument `enc` is ignored.
   # *   Otherwise `str` is converted first to Encoding::UTF_8 (with suitable
   #     character replacements), and then to encoding `enc`.
-  #
   #
   # In either case, the returned string has forced encoding Encoding::US_ASCII.
   #
@@ -492,7 +477,6 @@ module URI
   # *   The new object is an instance of `URI.scheme_list[scheme.upcase]`.
   # *   The object is initialized by calling the class initializer using `scheme`
   #     and `arguments`. See URI::Generic.new.
-  #
   #
   # Examples:
   #

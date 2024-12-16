@@ -8,7 +8,6 @@
 # *   #===
 # *   #^
 #
-#
 # One other method:
 #
 # *   #to_s and its alias #inspect.

@@ -5,7 +5,6 @@
 # *   An Array index is always an Integer.
 # *   A Hash key can be (almost) any object.
 #
-#
 # ### Hash Data Syntax
 #
 # The older syntax for Hash data uses the "hash rocket," `=>`:
@@ -80,11 +79,9 @@
 #
 # *   A [hash literal](rdoc-ref:syntax/literals.rdoc@Hash+Literals).
 #
-#
 # You can convert certain objects to Hashes with:
 #
 # *   Method #Hash.
-#
 #
 # You can create a Hash by calling method Hash.new.
 #
@@ -147,7 +144,6 @@
 # *   Iterative methods such as `each`, `each_key`, `each_pair`, `each_value`.
 # *   Other order-sensitive methods such as `shift`, `keys`, `values`.
 # *   The String returned by method `inspect`.
-#
 #
 # A new Hash has its initial ordering per the given entries:
 #
@@ -357,7 +353,6 @@
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-#
 # Here, class Hash provides methods that are useful for:
 #
 # *   [Creating a Hash](rdoc-ref:Hash@Methods+for+Creating+a+Hash)
@@ -373,7 +368,6 @@
 #     Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values)
 # *   [And more....](rdoc-ref:Hash@Other+Methods)
 #
-#
 # Class Hash also includes methods from module Enumerable.
 #
 # #### Methods for Creating a Hash
@@ -381,7 +375,6 @@
 # *   ::[]: Returns a new hash populated with given objects.
 # *   ::new: Returns a new empty hash.
 # *   ::try_convert: Returns a new hash created from a given object.
-#
 #
 # #### Methods for Setting Hash State
 #
@@ -391,7 +384,6 @@
 # *   #default_proc=: Sets the default proc to a given proc.
 # *   #rehash: Rebuilds the hash table by recomputing the hash index for each
 #     key.
-#
 #
 # #### Methods for Querying
 #
@@ -409,7 +401,6 @@
 # *   #length, #size: Returns the count of entries.
 # *   #value?: Returns whether a given object is a value in `self`.
 #
-#
 # #### Methods for Comparing
 #
 # *   #<: Returns whether `self` is a proper subset of a given object.
@@ -417,7 +408,6 @@
 # *   #==: Returns whether a given object is equal to `self`.
 # *   #>: Returns whether `self` is a proper superset of a given object
 # *   #>=: Returns whether `self` is a superset of a given object.
-#
 #
 # #### Methods for Fetching
 #
@@ -435,7 +425,6 @@
 # *   #values: Returns an array containing all values in `self`/
 # *   #values_at: Returns an array containing values for given keys.
 #
-#
 # #### Methods for Assigning
 #
 # *   #[]=, #store: Associates a given key with a given value.
@@ -444,7 +433,6 @@
 # *   #merge!, #update: Merges each given hash into `self`.
 # *   #replace: Replaces the entire contents of `self` with the contents of a
 #     given hash.
-#
 #
 # #### Methods for Deleting
 #
@@ -459,7 +447,6 @@
 # *   #reject!: Removes entries selected by a given block.
 # *   #shift: Removes and returns the first entry.
 #
-#
 # These methods return a copy of `self` with some entries removed:
 #
 # *   #compact: Returns a copy of `self` with all `nil`-valued entries removed.
@@ -470,12 +457,10 @@
 #     given block.
 # *   #slice: Returns a hash containing the entries for given keys.
 #
-#
 # #### Methods for Iterating
 # *   #each, #each_pair: Calls a given block with each key-value pair.
 # *   #each_key: Calls a given block with each key.
 # *   #each_value: Calls a given block with each value.
-#
 #
 # #### Methods for Converting
 #
@@ -487,14 +472,12 @@
 # *   #to_hash: Returns `self`.
 # *   #to_proc: Returns a proc that maps a given key to its value.
 #
-#
 # #### Methods for Transforming Keys and Values
 #
 # *   #transform_keys: Returns a copy of `self` with modified keys.
 # *   #transform_keys!: Modifies keys in `self`
 # *   #transform_values: Returns a copy of `self` with modified values.
 # *   #transform_values!: Modifies values in `self`.
-#
 #
 # #### Other Methods
 # *   #flatten: Returns an array that is a 1-dimensional flattening of `self`.
@@ -594,7 +577,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   `object` is a Hash object.
   # *   `hash` and `object` have the same keys (regardless of order).
   # *   For each key `key`, `hash[key] == object[key]`.
-  #
   #
   # Otherwise, returns `false`.
   #
@@ -1059,7 +1041,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   `hash` and `object` have the same keys (regardless of order).
   # *   For each key `key`, `h[key] eql? object[key]`.
   #
-  #
   # Otherwise, returns `false`.
   #
   # Equal:
@@ -1341,7 +1322,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   Each new-key entry is added at the end.
   # *   Each duplicate-key entry's value overwrites the previous value.
   #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1356,8 +1336,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     *   Calls the block with the key and the old and new values.
   #     *   The block's return value becomes the new value for the entry.
   #
-  #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1368,7 +1346,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With no arguments:
   # *   Returns a copy of `self`.
   # *   The block, if given, is ignored.
-  #
   #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1390,7 +1367,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   Each new entry is added at the end.
   # *   Each duplicate-key entry's value overwrites the previous value.
   #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1405,8 +1381,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     *   Calls the block with the key and the old and new values.
   #     *   The block's return value becomes the new value for the entry.
   #
-  #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1417,7 +1391,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With no arguments:
   # *   Returns `self`, unmodified.
   # *   The block, if given, is ignored.
-  #
   #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1666,7 +1639,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   A key provided by the block.
   # *   The value from `self`.
   #
-  #
   # An optional hash argument can be provided to map keys to new keys. Any key not
   # given will be mapped using the provided block, or remain the same if no block
   # is given.
@@ -1718,7 +1690,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   A key from `self`.
   # *   A value provided by the block.
   #
-  #
   # Transform values:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = h.transform_values {|value| value * 100}
@@ -1768,7 +1739,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   Each new entry is added at the end.
   # *   Each duplicate-key entry's value overwrites the previous value.
   #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1783,8 +1753,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     *   Calls the block with the key and the old and new values.
   #     *   The block's return value becomes the new value for the entry.
   #
-  #
-  #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = {bat: 3, bar: 4}
@@ -1795,7 +1763,6 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With no arguments:
   # *   Returns `self`, unmodified.
   # *   The block, if given, is ignored.
-  #
   #
   # Example:
   #     h = {foo: 0, bar: 1, baz: 2}

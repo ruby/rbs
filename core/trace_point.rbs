@@ -30,36 +30,52 @@
 #
 # `:line`
 # :   execute an expression or statement on a new line
+#
 # `:class`
 # :   start a class or module definition
+#
 # `:end`
 # :   finish a class or module definition
+#
 # `:call`
 # :   call a Ruby method
+#
 # `:return`
 # :   return from a Ruby method
+#
 # `:c_call`
 # :   call a C-language routine
+#
 # `:c_return`
 # :   return from a C-language routine
+#
 # `:raise`
 # :   raise an exception
+#
 # `:rescue`
 # :   rescue an exception
+#
 # `:b_call`
 # :   event hook at block entry
+#
 # `:b_return`
 # :   event hook at block ending
+#
 # `:a_call`
 # :   event hook at all calls (`call`, `b_call`, and `c_call`)
+#
 # `:a_return`
 # :   event hook at all returns (`return`, `b_return`, and `c_return`)
+#
 # `:thread_begin`
 # :   event hook at thread beginning
+#
 # `:thread_end`
 # :   event hook at thread ending
+#
 # `:fiber_switch`
 # :   event hook at fiber switch
+#
 # `:script_compiled`
 # :   new Ruby code compiled (with `eval`, `load` or `require`)
 #

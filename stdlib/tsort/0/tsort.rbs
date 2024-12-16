@@ -11,7 +11,6 @@
 # *   tsort_each_node is used to iterate for all nodes over a graph.
 # *   tsort_each_child is used to iterate for child nodes of a given node.
 #
-#
 # The equality of nodes are defined by eql? and hash since TSort uses Hash
 # internally.
 #
@@ -109,12 +108,9 @@
 #     strongly connected components. Although 'strongly_connected_components.rb'
 #     is correct but too long.
 #
-#
 # ## References
 #
 #     1.  Tarjan, "Depth First Search and Linear Graph Algorithms",
-#
-#
 # *SIAM Journal on Computing*, Vol. 1, No. 2, pp. 146-160, June 1972.
 #
 module TSort[Node] : TSort::_Sortable[Node]

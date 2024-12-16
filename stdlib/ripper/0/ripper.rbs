@@ -55,12 +55,10 @@
 #     Inside](http://www.rubyinside.com/using-ripper-to-see-how-ruby-is-parsing-
 #     your-code-5270.html)
 #
-#
 # ## Requirements
 #
 # *   ruby 1.9 (support CVS HEAD only)
 # *   bison 1.28 or later (Other yaccs do not work)
-#
 #
 # ## License
 #

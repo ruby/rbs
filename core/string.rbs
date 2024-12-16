@@ -11,11 +11,9 @@
 # *   A [string literal](rdoc-ref:syntax/literals.rdoc@String+Literals).
 # *   A [heredoc literal](rdoc-ref:syntax/literals.rdoc@Here+Document+Literals).
 #
-#
 # You can convert certain objects to Strings with:
 #
 # *   Method #String.
-#
 #
 # Some String methods modify `self`. Typically, a method whose name ends with
 # `!` modifies `self` and returns `self`; often a similarly named method
@@ -34,7 +32,6 @@
 # *   String#gsub: Zero or more substitutions; returns a new string.
 # *   String#gsub!: Zero or more substitutions; returns `self`.
 #
-#
 # Each of these methods takes:
 #
 # *   A first argument, `pattern` (string or regexp), that specifies the
@@ -45,8 +42,6 @@
 #     *   A second argument, `replacement` (string or hash), that determines the
 #         replacing string.
 #     *   A block that will determine the replacing string.
-#
-#
 #
 # The examples in this section mostly use methods String#sub and String#gsub;
 # the principles illustrated apply to all four substitution methods.
@@ -80,7 +75,6 @@
 # *   `\n` (*n* a non-negative integer) refers to `$n`.
 # *   `\k<name>` refers to the named capture `name`.
 #
-#
 # See Regexp for details.
 #
 # Note that within the string `replacement`, a character combination such as
@@ -93,7 +87,6 @@
 # *   `\'` corresponds to `$'`, which contains string after match.
 # *   `\`` corresponds to `$``, which contains string before match.
 # *   `\+` corresponds to `$+`, which contains last capture group.
-#
 #
 # See Regexp for details.
 #
@@ -151,13 +144,11 @@
 # *   CR (carriage return): `"\x0d"`, `"\r"`.
 # *   SP (space): `"\x20"`, `" "`.
 #
-#
 # Whitespace is relevant for these methods:
 #
 # *   #lstrip, #lstrip!: strip leading whitespace.
 # *   #rstrip, #rstrip!: strip trailing whitespace.
 # *   #strip, #strip!: strip leading and trailing whitespace.
-#
 #
 # ## String Slices
 #
@@ -170,7 +161,6 @@
 # *   String#[]= returns a copy of `self` with a slice replaced.
 # *   String#slice! returns `self` with a slice removed.
 #
-#
 # Each of the above methods takes arguments that determine the slice to be
 # copied or replaced.
 #
@@ -181,7 +171,6 @@
 # *   `string[range]`.
 # *   `string[regexp, capture = 0]`.
 # *   `string[substring]`.
-#
 #
 # **`string[index]`**
 #
@@ -304,7 +293,6 @@
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
-#
 # Here, class String provides methods that are useful for:
 #
 # *   [Creating a String](rdoc-ref:String@Methods+for+Creating+a+String)
@@ -319,12 +307,10 @@
 #     Non-String](rdoc-ref:String@Methods+for+Converting+to+Non--5CString)
 # *   [Iterating](rdoc-ref:String@Methods+for+Iterating)
 #
-#
 # ### Methods for Creating a String
 #
 # *   ::new: Returns a new string.
 # *   ::try_convert: Returns a new string created from a given object.
-#
 #
 # ### Methods for a Frozen/Unfrozen String
 #
@@ -334,7 +320,6 @@
 #     `self.freeze` otherwise.
 # *   #freeze: Freezes `self`, if not already frozen; returns `self`.
 #
-#
 # ### Methods for Querying
 #
 # *Counts*
@@ -343,7 +328,6 @@
 # *   #empty?: Returns `true` if `self.length` is zero; `false` otherwise.
 # *   #bytesize: Returns the count of bytes.
 # *   #count: Returns the count of substrings matching given strings.
-#
 #
 # *Substrings*
 #
@@ -364,7 +348,6 @@
 # *   #end_with?: Returns `true` if the string ends with any of the given
 #     substrings.
 #
-#
 # *Encodings*
 #
 # *   #encoding: Returns the Encoding object that represents the encoding of the
@@ -376,12 +359,10 @@
 # *   #ascii_only?: Returns `true` if the string has only ASCII characters;
 #     `false` otherwise.
 #
-#
 # *Other*
 #
 # *   #sum: Returns a basic checksum for the string: the sum of each byte.
 # *   #hash: Returns the integer hash code.
-#
 #
 # ### Methods for Comparing
 #
@@ -396,7 +377,6 @@
 # *   #casecmp?: Returns `true` if the string is equal to a given string after
 #     Unicode case folding; `false` otherwise.
 #
-#
 # ### Methods for Modifying a String
 #
 # Each of these methods modifies `self`.
@@ -405,7 +385,6 @@
 #
 # *   #insert: Returns `self` with a given string inserted at a given offset.
 # *   #<<: Returns `self` concatenated with a given string or integer.
-#
 #
 # *Substitution*
 #
@@ -425,7 +404,6 @@
 #     characters, removing duplicates from the substrings that were modified;
 #     returns `self` if any changes, `nil` otherwise.
 #
-#
 # *Casing*
 #
 # *   #capitalize!: Upcases the initial character and downcases all others;
@@ -437,7 +415,6 @@
 # *   #swapcase!: Upcases each downcase character and downcases each upcase
 #     character; returns `self` if any changes, `nil` otherwise.
 #
-#
 # *Encoding*
 #
 # *   #encode!: Returns `self` with all characters transcoded from one given
@@ -446,7 +423,6 @@
 # *   #scrub!: Replaces each invalid byte with a given character; returns
 #     `self`.
 # *   #force_encoding: Changes the encoding to a given encoding; returns `self`.
-#
 #
 # *Deletion*
 #
@@ -467,7 +443,6 @@
 # *   #chop!: Removes trailing newline characters if found; otherwise removes
 #     the last character; returns `self` if any changes, `nil` otherwise.
 #
-#
 # ### Methods for Converting to New String
 #
 # Each of these methods returns a new String based on `self`, often just a
@@ -485,7 +460,6 @@
 # *   #rjust: Returns a copy of `self` of a given length, left-padded with a
 #     given other string.
 #
-#
 # *Encoding*
 #
 # *   #b: Returns a copy of `self` with ASCII-8BIT encoding.
@@ -495,7 +469,6 @@
 #     Unicode-normalized.
 # *   #encode: Returns a copy of `self` with all characters transcoded from one
 #     given encoding into another.
-#
 #
 # *Substitution*
 #
@@ -517,7 +490,6 @@
 # *   #%: Returns the string resulting from formatting a given object into
 #     `self`
 #
-#
 # *Casing*
 #
 # *   #capitalize: Returns a copy of `self` with the first character upcased and
@@ -526,7 +498,6 @@
 # *   #upcase: Returns a copy of `self` with all characters upcased.
 # *   #swapcase: Returns a copy of `self` with all upcase characters downcased
 #     and all downcase characters upcased.
-#
 #
 # *Deletion*
 #
@@ -549,12 +520,10 @@
 #     or range.
 # *   #chr: Returns the first character.
 #
-#
 # *Duplication*
 #
 # *   #to_s, $to_str: If `self` is a subclass of String, returns `self` copied
 #     into a String; otherwise, returns `self`.
-#
 #
 # ### Methods for Converting to Non-String
 #
@@ -568,7 +537,6 @@
 # *   #getbyte: Returns an integer byte as determined by a given index.
 # *   #grapheme_clusters: Returns an array of the grapheme clusters in `self`.
 #
-#
 # *Splitting*
 #
 # *   #lines: Returns an array of the lines in `self`, as determined by a given
@@ -581,7 +549,6 @@
 #     regexp or string -- or, if a block given, passes those substrings to the
 #     block.
 #
-#
 # *Matching*
 #
 # *   #scan: Returns an array of substrings matching a given regexp or string,
@@ -590,7 +557,6 @@
 #     a given format.
 # *   #unpack1: Returns the first substring extracted from `self` according to a
 #     given format.
-#
 #
 # *Numerics*
 #
@@ -604,13 +570,11 @@
 # *   #to_f: Returns the floating-point value of leading characters, interpreted
 #     as a floating-point number.
 #
-#
 # *Strings and Symbols*
 #
 # *   #inspect: Returns copy of `self`, enclosed in double-quotes, with special
 #     characters escaped.
 # *   #to_sym, #intern: Returns the symbol corresponding to `self`.
-#
 #
 # ### Methods for Iterating
 #
@@ -822,7 +786,6 @@ class String
   # *   0 if the two are equal.
   # *   1 if `other_string` is smaller.
   # *   `nil` if the two are incomparable.
-  #
   #
   # Examples:
   #
@@ -1246,7 +1209,6 @@ class String
   # *   1 if `other_string.downcase` is smaller.
   # *   `nil` if the two are incomparable.
   #
-  #
   # Examples:
   #
   #     'foo'.casecmp('foo') # => 0
@@ -1522,7 +1484,6 @@ class String
   #             "foo".crypt("$5$rounds=1000$salt$") # OK, proper usage
   #             "foo".crypt("$5$round=1000$salt$")  # Typo not detected
   #
-  #
   # *   Even in the "modular" mode, some hash functions are considered archaic and
   #     no longer recommended at all; for instance module `$1$` is officially
   #     abandoned by its author: see http://phk.freebsd.dk/sagas/md5crypt_eol/ .
@@ -1535,7 +1496,6 @@ class String
   #     is no way for you to be aware of.
   #
   #         "foo".crypt("$5$rounds=1000$salt$") # => "$5fNPQMxC5j6."
-  #
   #
   # If for some reason you cannot migrate to other secure contemporary password
   # hashing algorithms, install the string-crypt gem and `require 'string/crypt'`
@@ -1893,7 +1853,6 @@ class String
   #         Encoding.default_internal = 'UTF-8'
   #         t = s.encode              # => "Ruby™"
   #         t.encoding                # => #<Encoding:UTF-8>
-  #
   #
   # With only argument `dst_encoding` given, uses that encoding:
   #
@@ -2339,7 +2298,6 @@ class String
   #     (see Regexp#match):
   #         matchdata = <tt>regexp.match(self)
   #
-  #
   # With no block given, returns the computed `matchdata`:
   #
   #     'foo'.match('f') # => #<MatchData "f">
@@ -2487,7 +2445,6 @@ class String
   #
   # *   `string_or_regexp` itself, if it is a Regexp.
   # *   `Regexp.quote(string_or_regexp)`, if `string_or_regexp` is a string.
-  #
   #
   # If the pattern is matched, returns pre-match, first-match, post-match:
   #
@@ -2647,7 +2604,6 @@ class String
   # *   `string_or_regexp` itself, if it is a Regexp.
   # *   `Regexp.quote(string_or_regexp)`, if `string_or_regexp` is a string.
   #
-  #
   # If the pattern is matched, returns pre-match, last-match, post-match:
   #
   #     'hello'.rpartition('l')      # => ["hel", "l", "o"]
@@ -2704,14 +2660,12 @@ class String
   # *   `string_or_regexp` itself, if it is a Regexp.
   # *   `Regexp.quote(string_or_regexp)`, if `string_or_regexp` is a string.
   #
-  #
   # Iterates through `self`, generating a collection of matching results:
   #
   # *   If the pattern contains no groups, each result is the matched string,
   #     `$&`.
   # *   If the pattern contains groups, each result is an array containing one
   #     entry per group.
-  #
   #
   # With no block given, returns an array of the results:
   #
@@ -2858,7 +2812,6 @@ class String
   # *   If `$;` is a string, the split ocurs just as if `field_sep` were given as
   #     that string (see below).
   #
-  #
   # When `field_sep` is `' '` and `limit` is `nil`, the split occurs at each
   # sequence of whitespace:
   #
@@ -2969,7 +2922,6 @@ class String
   #
   # *   `string_or_regexp` itself, if it is a Regexp.
   # *   `Regexp.quote(string_or_regexp)`, if `string_or_regexp` is a string.
-  #
   #
   # Returns `true` if any pattern matches the beginning, `false` otherwise:
   #
@@ -3320,7 +3272,6 @@ class String
   #     translated to the second character in `replacements`.
   # *   And so on.
   #
-  #
   # Example:
   #
   #     'hello'.tr('el', 'ip') #=> "hippo"
@@ -3411,7 +3362,6 @@ class String
   # *   `:nfkc`: Compatibility decomposition, followed by canonical composition.
   # *   `:nfkd`: Compatibility decomposition.
   #
-  #
   # The encoding of `self` must be one of:
   #
   # *   Encoding::UTF_8
@@ -3422,7 +3372,6 @@ class String
   # *   Encoding::GB18030
   # *   Encoding::UCS_2BE
   # *   Encoding::UCS_4BE
-  #
   #
   # Examples:
   #

@@ -7,11 +7,9 @@
 #
 # *   A [rational literal](rdoc-ref:syntax/literals.rdoc@Rational+Literals).
 #
-#
 # You can convert certain objects to Rationals with:
 #
 # *   Method #Rational.
-#
 #
 # Examples
 #

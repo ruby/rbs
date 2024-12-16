@@ -21,7 +21,6 @@
 #     collection of prospective changes to the store; a transaction is defined
 #     in the block given with a call to PStore#transaction.
 #
-#
 # ## About the Examples
 #
 # Examples on this page need a store that has known properties. They can get a
@@ -73,7 +72,6 @@
 #     must also be Marshal-able. See [Hierarchical
 #     Values](rdoc-ref:PStore@Hierarchical+Values).
 #
-#
 # ## Transactions
 #
 # ### The Transaction Block
@@ -103,7 +101,6 @@
 # *   May not contain a nested call to #transaction.
 # *   Is the only context where methods that read from or write to the store are
 #     allowed.
-#
 #
 # As seen above, changes in a transaction are made automatically when the block
 # exits. The block may be exited early by calling method #commit or #abort.
@@ -137,7 +134,6 @@
 #             store.keys # => [:foo, :bar, :baz]
 #           end
 #         end
-#
 #
 # ### Read-Only Transactions
 #
@@ -249,7 +245,6 @@
 #
 # *   Optional argument `thread_safe` at method PStore.new.
 # *   Attribute #ultra_safe.
-#
 #
 # Needless to say, if you're storing valuable data with PStore, then you should
 # backup the PStore file from time to time.
@@ -402,7 +397,6 @@ class PStore
   #             store.fetch(:nope)      # Raises an exception.
   #           end
   #         end
-  #
   #
   # Raises an exception if called outside a transaction block.
   #

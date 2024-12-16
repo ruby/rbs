@@ -51,17 +51,19 @@
 #
 # MD5
 # :   See RFC 1321 The MD5 Message-Digest Algorithm
+#
 # RIPEMD-160
 # :   As Digest::RMD160. See
 #     http://homes.esat.kuleuven.be/~bosselae/ripemd160.html.
+#
 # SHA1
 # :   See FIPS 180 Secure Hash Standard.
+#
 # SHA2 family
 # :   See FIPS 180 Secure Hash Standard which defines the following algorithms:
 #     *   SHA512
 #     *   SHA384
 #     *   SHA256
-#
 #
 #
 # The latest versions of the FIPS publications can be found here:

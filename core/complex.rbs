@@ -16,19 +16,16 @@
 #     string arguments.
 # *   Method String#to_c, for certain strings.
 #
-#
 # Note that each of the stored parts may be a an instance one of the classes
 # Complex, Float, Integer, or Rational; they may be retrieved:
 #
 # *   Separately, with methods Complex#real and Complex#imaginary.
 # *   Together, with method Complex#rect.
 #
-#
 # The corresponding (computed) polar values may be retrieved:
 #
 # *   Separately, with methods Complex#abs and Complex#arg.
 # *   Together, with method Complex#polar.
-#
 #
 # ## Polar Coordinates
 #
@@ -46,13 +43,11 @@
 # *   Method Kernel#Complex, with certain string arguments.
 # *   Method String#to_c, for certain strings.
 #
-#
 # Note that each of the stored parts may be a an instance one of the classes
 # Complex, Float, Integer, or Rational; they may be retrieved:
 #
 # *   Separately, with methods Complex#abs and Complex#arg.
 # *   Together, with method Complex#polar.
-#
 #
 # The corresponding (computed) rectangular values may be retrieved:
 #
@@ -205,9 +200,7 @@ class Complex < Numeric
   #     *   `object.imag == 0`. # Always true if object is numeric but not
   #         complex.
   #
-  #
   # *   `nil` otherwise.
-  #
   #
   # Examples:
   #

@@ -257,14 +257,18 @@ class RubyVM::InstructionSequence < Object
   # :   A string identifying the data format. **Always
   #     `YARVInstructionSequence/SimpleDataFormat`.**
   #
+  #
   # major_version
   # :   The major version of the instruction sequence.
+  #
   #
   # minor_version
   # :   The minor version of the instruction sequence.
   #
+  #
   # format_type
   # :   A number identifying the data format. **Always 1**.
+  #
   #
   # misc
   # :   A hash containing:
@@ -272,11 +276,14 @@ class RubyVM::InstructionSequence < Object
   #     `:arg_size`
   # :       the total number of arguments taken by the method or the block (0 if
   #         *iseq* doesn't represent a method or block)
+  #
   #     `:local_size`
   # :       the number of local variables + 1
+  #
   #     `:stack_max`
   # :       used in calculating the stack depth at which a SystemStackError is
   #         thrown.
+  #
   #
   #
   # #label
@@ -286,11 +293,13 @@ class RubyVM::InstructionSequence < Object
   #     `<main>` if it's at the top level, `<compiled>` if it was evaluated from a
   #     string.
   #
+  #
   # #path
   # :   The relative path to the Ruby file where the instruction sequence was
   #     loaded from.
   #
   #     `<compiled>` if the iseq was evaluated from a string.
+  #
   #
   # #absolute_path
   # :   The absolute path to the Ruby file where the instruction sequence was
@@ -298,9 +307,11 @@ class RubyVM::InstructionSequence < Object
   #
   #     `nil` if the iseq was evaluated from a string.
   #
+  #
   # #first_lineno
   # :   The number of the first source line where the instruction sequence was
   #     loaded from.
+  #
   #
   # type
   # :   The type of the instruction sequence.
@@ -308,18 +319,22 @@ class RubyVM::InstructionSequence < Object
   #     Valid values are `:top`, `:method`, `:block`, `:class`, `:rescue`,
   #     `:ensure`, `:eval`, `:main`, and `plain`.
   #
+  #
   # locals
   # :   An array containing the names of all arguments and local variables as
   #     symbols.
+  #
   #
   # params
   # :   An Hash object containing parameter information.
   #
   #     More info about these values can be found in `vm_core.h`.
   #
+  #
   # catch_table
   # :   A list of exceptions and control flow operators (rescue, next, redo,
   #     break, etc.).
+  #
   #
   # bytecode
   # :   An array of arrays containing the instruction names and operands that make

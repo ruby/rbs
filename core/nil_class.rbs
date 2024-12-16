@@ -9,7 +9,6 @@
 # *   #=~
 # *   #^
 #
-#
 # Others act as converters, carrying the concept of *nullity* to other classes:
 #
 # *   #rationalize
@@ -19,11 +18,9 @@
 # *   #to_r
 # *   #to_s
 #
-#
 # Another method provides inspection:
 #
 # *   #inspect
-#
 #
 # Finally, there is this query method:
 #

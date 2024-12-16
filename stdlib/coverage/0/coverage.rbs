@@ -15,7 +15,6 @@
 #     of line execution by the interpreter. A `nil` value means coverage is
 #     disabled for this line (lines like `else` and `end`).
 #
-#
 # # Examples
 #
 #     [foo.rb]
@@ -95,7 +94,6 @@
 # 5.  The ending line number it appears on in the file.
 # 6.  The ending column number it appears on in the file.
 #
-#
 # ## Methods Coverage
 #
 # Methods coverage reports how many times each method was executed.
@@ -133,7 +131,6 @@
 # 4.  The starting column number the method appears on in the file.
 # 5.  The ending line number the method appears on in the file.
 # 6.  The ending column number the method appears on in the file.
-#
 #
 # ## All Coverage Modes
 #

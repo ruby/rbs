@@ -73,6 +73,7 @@ module URI
     #
     # `str`
     # :   String to make safe
+    #
     # `unsafe`
     # :   Regexp to apply. Defaults to `self.regexp[:UNSAFE]`
     #
@@ -94,6 +95,7 @@ module URI
     #
     # `str`
     # :   String to search
+    #
     # `schemes`
     # :   Patterns to apply to `str`
     #
@@ -173,6 +175,7 @@ module URI
     #
     # `str`
     # :   String to remove escapes from
+    #
     # `escaped`
     # :   Regexp to apply. Defaults to `self.regexp[:ESCAPED]`
     #

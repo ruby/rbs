@@ -57,8 +57,6 @@
 #     *   Zlib::VersionError
 #     *   Zlib::InProgressError
 #
-#
-#
 # (if you have GZIP_SUPPORT)
 # *   Zlib::GzipReader
 # *   Zlib::GzipWriter

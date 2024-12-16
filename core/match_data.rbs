@@ -41,7 +41,6 @@
 # *   `$'` is Regexp.last_match`.post_match`;
 # *   `$+` is Regexp.last_match`[ -1 ]` (the last capture).
 #
-#
 # See also "Special global variables" section in Regexp documentation.
 #
 class MatchData
@@ -543,7 +542,6 @@ class MatchData
   # *   Integers.
   # *   Ranges.
   # *   Names (strings and symbols).
-  #
   #
   # Examples:
   #

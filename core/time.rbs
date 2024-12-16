@@ -127,7 +127,6 @@
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
-#
 # Here, class `Time` provides methods that are useful for:
 #
 # *   {Creating `Time`[objects}](rdoc-ref:Time@Methods+for+Creating).
@@ -136,7 +135,6 @@
 # *   {Comparing `Time`[objects}](rdoc-ref:Time@Methods+for+Comparing).
 # *   {Converting a `Time`[object}](rdoc-ref:Time@Methods+for+Converting).
 # *   {Rounding a `Time`[}](rdoc-ref:Time@Methods+for+Rounding).
-#
 #
 # ### Methods for Creating
 #
@@ -149,7 +147,6 @@
 # *   ::now: Returns a new time based on the current system time.
 # *   #+ (plus): Returns a new time increased by the given number of seconds.
 # *   #- (minus): Returns a new time decreased by the given number of seconds.
-#
 #
 # ### Methods for Fetching
 #
@@ -175,7 +172,6 @@
 # *   #to_r: Returns the Rational number of seconds since epoch for the time.
 # *   #zone: Returns a string representation of the timezone of the time.
 #
-#
 # ### Methods for Querying
 #
 # *   #utc? (aliased as #gmt?): Returns whether the time is UTC.
@@ -189,12 +185,10 @@
 # *   #friday?: Returns whether time is a Friday.
 # *   #saturday?: Returns whether the time is a Saturday.
 #
-#
 # ### Methods for Comparing
 #
 # *   #<=>: Compares `self` to another time.
 # *   #eql?: Returns whether the time is equal to another time.
-#
 #
 # ### Methods for Converting
 #
@@ -210,13 +204,11 @@
 # *   #deconstruct_keys: Returns a hash of time components used in
 #     pattern-matching.
 #
-#
 # ### Methods for Rounding
 #
 # *   #round:Returns a new time with subseconds rounded.
 # *   #ceil: Returns a new time with subseconds raised to a ceiling.
 # *   #floor: Returns a new time with subseconds lowered to a floor.
-#
 #
 # For the forms of argument `zone`, see [Timezone
 # Specifiers](rdoc-ref:Time@Timezone+Specifiers).
@@ -231,7 +223,6 @@
 # *   Time#getlocal: positional argument `zone`.
 # *   Time#localtime: positional argument `zone`.
 #
-#
 # The value given with any of these must be one of the following (each detailed
 # below):
 #
@@ -241,7 +232,6 @@
 # *   [Timezone object](rdoc-ref:Time@Timezone+Objects).
 # *   [Timezone name](rdoc-ref:Time@Timezone+Names).
 #
-#
 # ### Hours/Minutes Offsets
 #
 # The zone value may be a string offset from UTC in the form `'+HH:MM'` or
@@ -249,7 +239,6 @@
 #
 # *   `HH` is the 2-digit hour in the range `0..23`.
 # *   `MM` is the 2-digit minute in the range `0..59`.
-#
 #
 # Examples:
 #
@@ -295,7 +284,6 @@
 #     *   Returns: a [Time-like object](rdoc-ref:Time@Time-Like+Objects) in the
 #         UTC timezone.
 #
-#
 # *   `utc_to_local`:
 #
 #     *   Called when Time.at or Time.now is invoked with `tz` as the value for
@@ -304,8 +292,6 @@
 #     *   Argument: a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
 #     *   Returns: a [Time-like object](rdoc-ref:Time@Time-Like+Objects) in the
 #         local timezone.
-#
-#
 #
 # A custom timezone class may have these instance methods, which will be called
 # if defined:
@@ -316,7 +302,6 @@
 #     *   Argument: a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
 #     *   Returns: a string abbreviation for the timezone name.
 #
-#
 # *   `dst?`:
 #
 #     *   Called when Time.at or Time.now is invoked with `tz` as the value for
@@ -325,14 +310,11 @@
 #     *   Argument: a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
 #     *   Returns: whether the time is daylight saving time.
 #
-#
 # *   `name`:
 #
 #     *   Called when `Marshal.dump(t)` is invoked
 #     *   Argument: none.
 #     *   Returns: the string name of the timezone.
-#
-#
 #
 # #### `Time`-Like Objects
 #
@@ -357,7 +339,6 @@
 # *   `sec`
 # *   `isdst`
 # *   `to_i`
-#
 #
 # For a returned `Integer`, its components, decomposed in UTC, are interpreted
 # as times in the specified timezone.
@@ -424,7 +405,6 @@ class Time < Object
   # *   A numeric number of [Epoch seconds](rdoc-ref:Time@Epoch+Seconds) for the
   #     returned time.
   #
-  #
   # Examples:
   #
   #     t = Time.new(2000, 12, 31, 23, 59, 59) # => 2000-12-31 23:59:59 -0600
@@ -459,7 +439,6 @@ class Time < Object
   #         Time.at(secs, 500000000, :nanosecond)   # => 2000-12-31 23:59:59.5 -0600
   #         Time.at(secs, 1000000000, :nanosecond)  # => 2001-01-01 00:00:00 -0600
   #         Time.at(secs, -1000000000, :nanosecond) # => 2000-12-31 23:59:58 -0600
-  #
   #
   # Optional keyword argument `in: zone` specifies the timezone for the returned
   # time:
@@ -527,7 +506,6 @@ class Time < Object
   #         Time.utc(2000, 1, 1, 0, 0, 0, 0)      # => 2000-01-01 00:00:00 UTC
   #         Time.utc(2000, 1, 1, 0, 0, 0, 999999) # => 2000-01-01 00:00:00.999999 UTC
   #
-  #
   # The values may be:
   #
   # *   Integers, as above.
@@ -541,7 +519,6 @@ class Time < Object
   #         a = %w[0 1 1 0 0 0 0 0]
   #         # => ["0", "1", "1", "0", "0", "0", "0", "0"]
   #         Time.utc(*a) # => 0000-01-01 00:00:00 UTC
-  #
   #
   # When exactly ten arguments are given, the arguments are interpreted as in the
   # second calling sequence above:
@@ -659,7 +636,6 @@ class Time < Object
   #         Time.utc(2000, 1, 1, 0, 0, 0, 0)      # => 2000-01-01 00:00:00 UTC
   #         Time.utc(2000, 1, 1, 0, 0, 0, 999999) # => 2000-01-01 00:00:00.999999 UTC
   #
-  #
   # The values may be:
   #
   # *   Integers, as above.
@@ -673,7 +649,6 @@ class Time < Object
   #         a = %w[0 1 1 0 0 0 0 0]
   #         # => ["0", "1", "1", "0", "0", "0", "0", "0"]
   #         Time.utc(*a) # => 0000-01-01 00:00:00 UTC
-  #
   #
   # When exactly ten arguments are given, the arguments are interpreted as in the
   # second calling sequence above:
@@ -755,7 +730,6 @@ class Time < Object
   # *   `0`, if `self` is equal to `other_time`.
   # *   `1`, if `self` is greater then `other_time`.
   # *   `nil`, if `self` and `other_time` are incomparable.
-  #
   #
   # Examples:
   #
@@ -1066,7 +1040,6 @@ class Time < Object
   #         Time.new(2000, 1, 1, 0, 0, 59.5)  # => 2000-12-31 23:59:59.5 +0900
   #         Time.new(2000, 1, 1, 0, 0, 59.7r) # => 2000-12-31 23:59:59.7 +0900
   #
-  #
   # These values may be:
   #
   # *   Integers, as above.
@@ -1080,7 +1053,6 @@ class Time < Object
   #         a = %w[0 1 1 0 0 0]
   #         # => ["0", "1", "1", "0", "0", "0"]
   #         Time.new(*a) # => 0000-01-01 00:00:00 -0600
-  #
   #
   # When positional argument `zone` or keyword argument `in:` is given, the new
   # `Time` object is in the specified timezone. For the forms of argument `zone`,
@@ -1150,7 +1122,6 @@ class Time < Object
   #
   #         t = Time.utc(2000, 1, 1, 20, 15, 1) # => 2000-01-01 20:15:01 UTC
   #         t.localtime                         # => 2000-01-01 14:15:01 -0600
-  #
   #
   # With argument `zone` given, returns the new `Time` object created by
   # converting `self` to the given time zone:

@@ -41,7 +41,6 @@
 # *   the nature of the tags that are recognized;
 # *   the binding used to resolve local variables in the template.
 #
-#
 # See the ERB.new and ERB#result methods for more detail.
 #
 # ## Character encodings

@@ -19,8 +19,10 @@ module RDoc
   # :   The markdown format as described by
   #     http://daringfireball.net/projects/markdown/.  See RDoc::Markdown for
   #     details on the parser and supported extensions.
+  #
   # rd
   # :   The rdtool format.  See RDoc::RD for details on the parser and format.
+  #
   # tomdoc
   # :   The TomDoc format as described by http://tomdoc.org/.  See RDoc::TomDoc
   #     for details on the parser and supported extensions.
@@ -36,9 +38,11 @@ module RDoc
   #         rdoc --markup your_favorite_format --write-options
   #
   #     and commit `.rdoc_options` and ship it with your packaged gem.
+  #
   # per file
   # :   At the top of the file use the `:markup:` directive to set the default
   #     format for the rest of the file.
+  #
   # per comment
   # :   Use the `:markup:` directive at the top of a comment you want to write in
   #     a different format.

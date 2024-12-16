@@ -10,7 +10,6 @@
 #     retrieved in an [array-like fashion](rdoc-ref:Dir@Dir+As+Array-Like) or in
 #     a [stream-like fashion](rdoc-ref:Dir@Dir+As+Stream-Like).
 #
-#
 # ## About the Examples
 #
 # Some examples on this page use this simple file tree:
@@ -33,7 +32,6 @@
 # *   It has instance methods #children, #each, and #each_child.
 # *   It includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here).
 #
-#
 # ## Dir As Stream-Like
 #
 # A Dir object is in some ways stream-like.
@@ -53,7 +51,6 @@
 # *   Method #read, if not at end-of-stream, reads the next entry and increments
 #     the position; if at end-of-stream, does not increment the position.
 # *   Method #rewind sets the position to zero.
-#
 #
 # Examples (using the [simple file tree](rdoc-ref:Dir@About+the+Examples)):
 #
@@ -89,7 +86,6 @@
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-#
 # Here, class Dir provides methods that are useful for:
 #
 # *   [Reading](rdoc-ref:Dir@Reading)
@@ -97,7 +93,6 @@
 # *   [Querying](rdoc-ref:Dir@Querying)
 # *   [Iterating](rdoc-ref:Dir@Iterating)
 # *   [Other](rdoc-ref:Dir@Other)
-#
 #
 # ### Reading
 #
@@ -110,14 +105,12 @@
 # *   #seek: Sets the position in the directory stream for `self` the entry at
 #     the given offset.
 #
-#
 # ### Setting
 #
 # *   ::chdir: Changes the working directory of the current process to the given
 #     directory.
 # *   ::chroot: Changes the file-system root for the current process to the
 #     given directory.
-#
 #
 # ### Querying
 #
@@ -141,7 +134,6 @@
 # *   #tell (aliased as #pos): Returns the integer position in the directory
 #     stream for `self`.
 #
-#
 # ### Iterating
 #
 # *   ::each_child: Calls the given block with each entry in the given
@@ -152,7 +144,6 @@
 #     `..`.
 # *   #each_child: Calls the given block with each entry in `self`, but not
 #     including `.` or `..`.
-#
 #
 # ### Other
 #
@@ -215,7 +206,6 @@ class Dir
   #     defined.
   # *   Otherwise makes no change.
   #
-  #
   # With argument `new_dirpath` and a block, temporarily changes the working
   # directory:
   #
@@ -224,7 +214,6 @@ class Dir
   # *   Executes the block (yielding the new path).
   # *   Restores the previous working directory.
   # *   Returns the block's return value.
-  #
   #
   # Example:
   #
@@ -395,7 +384,6 @@ class Dir
   # *   Restores the previous working directory.
   # *   Returns the block's return value.
   #
-  #
   # Example:
   #
   #     Dir.chdir('/var/spool/mail')
@@ -504,7 +492,6 @@ class Dir
   # *   We use method Array#take to shorten returned arrays that otherwise would
   #     be very large.
   #
-  #
   # With no block, returns array *entry_names*; example (using the [simple file
   # tree](rdoc-ref:Dir@About+the+Examples)):
   #
@@ -564,7 +551,6 @@ class Dir
   #
   #             Dir.glob('*c*').take(3) # => ["CONTRIBUTING.md", "COPYING", "COPYING.ja"]
   #
-  #
   #     Does not match Unix-like hidden entry names ("dot files"). To include
   #     those in the matched entry names, use flag IO::FNM_DOTMATCH or something
   #     like `'{*,.*}'`.
@@ -599,7 +585,6 @@ class Dir
   #
   #     Note that on Windows, the backslash character may not be used in a string
   #     pattern: `Dir['c:\\foo*']` will not work, use `Dir['c:/foo*']` instead.
-  #
   #
   # More examples (using the [simple file tree](rdoc-ref:Dir@About+the+Examples)):
   #
@@ -778,7 +763,6 @@ class Dir
   # *   Executes the block (yields no args).
   # *   Restores the previous working directory.
   # *   Returns the block's return value.
-  #
   #
   # Uses Dir.fchdir if available, and Dir.chdir if not, see those methods for
   # caveats.

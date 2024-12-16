@@ -222,7 +222,6 @@ module Etc
   # *   sysconf(_SC_NPROCESSORS_ONLN): GNU/Linux, NetBSD, FreeBSD, OpenBSD,
   #     DragonFly BSD, OpenIndiana, Mac OS X, AIX
   #
-  #
   # Example:
   #
   #     require 'etc'
@@ -661,13 +660,16 @@ module Etc
   #
   # name
   # :   contains the name of the group as a String.
+  #
   # passwd
   # :   contains the encrypted password as a String. An `'x'` is returned if
   #     password access to the group is not available; an empty string is returned
   #     if no password is needed to obtain membership of the group. This is
   #     system-dependent.
+  #
   # gid
   # :   contains the group's numeric ID as an integer.
+  #
   # mem
   # :   is an Array of Strings containing the short login names of the members of
   #     the group.
@@ -733,16 +735,21 @@ module Etc
   #
   # name
   # :   contains the short login name of the user as a String.
+  #
   # passwd
   # :   contains the encrypted password of the user as a String. an `'x'` is
   #     returned if shadow passwords are in use. An `'*'` is returned if the user
   #     cannot log in using a password.
+  #
   # uid
   # :   contains the integer user ID (uid) of the user.
+  #
   # gid
   # :   contains the integer group ID (gid) of the user's primary group.
+  #
   # dir
   # :   contains the path to the home directory of the user as a String.
+  #
   # shell
   # :   contains the path to the login shell of the user as a String.
   #
@@ -753,16 +760,22 @@ module Etc
   # :   contains a longer String description of the user, such as a full name.
   #     Some Unix systems provide structured information in the gecos field, but
   #     this is system-dependent.
+  #
   # change
   # :   password change time(integer).
+  #
   # quota
   # :   quota value(integer).
+  #
   # age
   # :   password age(integer).
+  #
   # class
   # :   user access class(string).
+  #
   # comment
   # :   comment(string).
+  #
   # expire
   # :   account expiration time(integer).
   #

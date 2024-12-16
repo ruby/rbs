@@ -82,7 +82,6 @@
 # *   #each_child
 # *   #mountpoint?
 #
-#
 # ### File status predicate methods
 #
 # These methods are a facade for FileTest:
@@ -110,7 +109,6 @@
 # *   #world_writable?
 # *   #writable_real?
 # *   #zero?
-#
 #
 # ### File property and manipulation methods
 #
@@ -142,7 +140,6 @@
 # *   #expand_path(*args)
 # *   #split
 #
-#
 # ### Directory methods
 #
 # These methods are a facade for Dir:
@@ -153,7 +150,6 @@
 # *   #each_entry(&block)
 # *   #mkdir(*args)
 # *   #opendir(*args)
-#
 #
 # ### IO
 #
@@ -166,7 +162,6 @@
 # *   #write(*args)
 # *   #binwrite(*args)
 #
-#
 # ### Utilities
 #
 # These methods are a mixture of Find, FileUtils, and others:
@@ -174,7 +169,6 @@
 # *   #mkpath
 # *   #rmtree
 # *   #unlink / #delete
-#
 #
 # ## Method documentation
 #

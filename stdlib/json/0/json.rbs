@@ -117,7 +117,6 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #     name is double-quoted text; the values may be any JSON values:
 #         {"a": "foo", "b": 1, "c": 1.0, "d": 2.0e2, "e": true, "f": false, "g": null}
 #
-#
 # A JSON array or object may contain nested arrays, objects, and scalars to any
 # depth:
 #     {"foo": {"bar": 1, "baz": 2}, "bat": [0, 1, 2]}
@@ -136,12 +135,10 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 # *   `JSON.parse(source, opts)`
 # *   `JSON.parse!(source, opts)`
 #
-#
 # where
 # *   `source` is a Ruby object.
 # *   `opts` is a Hash object containing options that control both input allowed
 #     and output formatting.
-#
 #
 # The difference between the two methods is that JSON.parse! omits some checks
 # and may not be safe for some `source` data; use it only for data from trusted
@@ -300,7 +297,6 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 # *   `opts` is a Hash object containing options that control both input allowed
 #     and output formatting.
 #
-#
 # #### Generating JSON from Arrays
 #
 # When the source is a Ruby Array, JSON.generate returns a String containing a
@@ -419,7 +415,6 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #     inserted before the colon in each JSON object's pair; defaults to the
 #     empty String, `''`.
 #
-#
 # In this example, `obj` is used first to generate the shortest JSON data (no
 # whitespace), then again with all formatting options specified:
 #
@@ -466,7 +461,6 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 # *   JSON.generate stores more information in the JSON string.
 # *   JSON.parse, called with option `create_additions`, uses that information
 #     to create a proper Ruby object.
-#
 #
 # This example shows a Range being generated into JSON and parsed back into
 # Ruby, both without and with the addition for Range:
@@ -518,7 +512,6 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 # *   Struct: `require 'json/add/struct'`
 # *   Symbol: `require 'json/add/symbol'`
 # *   Time: `require 'json/add/time'`
-#
 #
 # To reduce punctuation clutter, the examples below show the generated JSON via
 # `puts`, rather than the usual `inspect`,
@@ -733,7 +726,6 @@ module JSON
   # *   Argument `limit`, if given, is passed to JSON.generate as option
   #     `max_nesting`.
   #
-  #
   # ---
   #
   # When argument `io` is not given, returns the JSON String generated from `obj`:
@@ -862,9 +854,7 @@ module JSON
   #     *   If both of the following are true, source becomes the String `'null'`:
   #         *   Option `allow_blank` specifies a truthy value.
   #         *   The source, as defined above, is `nil` or the empty String `''`.
-  #
   #     *   Otherwise, `source` remains the source.
-  #
   # *   Argument `proc`, if given, must be a Proc that accepts one argument. It
   #     will be called recursively with each result (depth-first order). See
   #     details below. BEWARE: This method is meant to serialise data from trusted
@@ -874,7 +864,6 @@ module JSON
   # *   Argument `opts`, if given, contains a Hash of options for the parsing. See
   #     [Parsing Options](#module-JSON-label-Parsing+Options). The default options
   #     can be changed via method JSON.load_default_options=.
-  #
   #
   # ---
   #
@@ -917,7 +906,6 @@ module JSON
   # *   Gets the `result` from calling `parse(source, opts)`.
   # *   Recursively calls `proc(result)`.
   # *   Returns the final result.
-  #
   #
   # Example:
   #     require 'json'

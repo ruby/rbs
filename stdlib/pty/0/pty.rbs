@@ -68,6 +68,7 @@ module PTY
   #
   # `pid`
   # :   The process id of the process to check
+  #
   # `raise`
   # :   If `true` and the process identified by `pid` is no longer alive a
   #     PTY::ChildExited is raised.
@@ -101,8 +102,10 @@ module PTY
   # `r`
   # :   A readable IO that contains the command's standard output and standard
   #     error
+  #
   # `w`
   # :   A writable IO that is the command's standard input
+  #
   # `pid`
   # :   The process identifier for the command.
   #
@@ -136,6 +139,7 @@ module PTY
   #
   # `master_io`
   # :   the master of the pty, as an IO.
+  #
   # `slave_file`
   # :   the slave of the pty, as a File.  The path to the terminal device is
   #     available via `slave_file.path`
@@ -185,8 +189,10 @@ module PTY
   # `r`
   # :   A readable IO that contains the command's standard output and standard
   #     error
+  #
   # `w`
   # :   A writable IO that is the command's standard input
+  #
   # `pid`
   # :   The process identifier for the command.
   #

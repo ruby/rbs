@@ -27,7 +27,6 @@ class TCPSocket < IPSocket
   #     cannot be released since gethostbyname() is not thread safe.)
   # *   This method uses gethostbyname() function already removed from POSIX.
   #
-  #
   # This method lookups host information by *hostname*.
   #
   #     TCPSocket.gethostbyname("localhost")

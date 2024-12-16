@@ -12,7 +12,6 @@
 # *   assert that it has `#changed`
 # *   call `#notify_observers`
 #
-#
 # An observer subscribes to updates using Observable#add_observer, which also
 # specifies the method called via #notify_observers. The default method for
 # #notify_observers is #update.
@@ -139,6 +138,7 @@ module Observable
   #
   # `observer`
   # :   the object that will be notified of changes.
+  #
   # `func`
   # :   Symbol naming the method that will be called when this Observable has
   #     changes.

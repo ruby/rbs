@@ -13,13 +13,11 @@
 # *   Index 1 indicates the second element.
 # *   ...
 #
-#
 # A negative index is an offset, backwards, from the end of the array:
 #
 # *   Index -1 indicates the last element.
 # *   Index -2 indicates the next-to-last element.
 # *   ...
-#
 #
 # A non-negative index is *in range* if and only if it is smaller than the size
 # of the array.  For a 3-element array:
@@ -27,13 +25,11 @@
 # *   Indexes 0 through 2 are in range.
 # *   Index 3 is out of range.
 #
-#
 # A negative index is *in range* if and only if its absolute value is not larger
 # than the size of the array.  For a 3-element array:
 #
 # *   Indexes -1 through -3 are in range.
 # *   Index -4 is out of range.
-#
 #
 # Although the effective index into an array is always an integer, some methods
 # (both within and outside of class Array) accept one or more non-integer
@@ -91,7 +87,6 @@
 #         Array.new(3) {Array.new(3)}
 #         # => [[nil, nil, nil], [nil, nil, nil], [nil, nil, nil]]
 #
-#
 # A number of Ruby methods, both in the core and in the standard library,
 # provide instance method `to_a`, which converts an object to an array.
 #
@@ -121,7 +116,6 @@
 # *   Ripper::Lexer::Elem#to_a
 # *   RubyVM::InstructionSequence#to_a
 # *   YAML::DBM#to_a
-#
 #
 # ## Example Usage
 #
@@ -320,7 +314,6 @@
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-#
 # Here, class Array provides methods that are useful for:
 #
 # *   [Creating an Array](rdoc-ref:Array@Methods+for+Creating+an+Array)
@@ -334,13 +327,11 @@
 # *   [Converting](rdoc-ref:Array@Methods+for+Converting)
 # *   [And more....](rdoc-ref:Array@Other+Methods)
 #
-#
 # ### Methods for Creating an Array
 #
 # *   ::[]: Returns a new array populated with given objects.
 # *   ::new: Returns a new array.
 # *   ::try_convert: Returns a new array created from a given object.
-#
 #
 # ### Methods for Querying
 #
@@ -358,7 +349,6 @@
 #     criterion.
 # *   #hash: Returns the integer hash code.
 #
-#
 # ### Methods for Comparing
 #
 # *   #<=>: Returns -1, 0, or 1 * as `self` is less than, equal to, or greater
@@ -367,7 +357,6 @@
 #     element in a given object.
 # *   #eql?: Returns whether each element in `self` is `eql?` to the
 #     corresponding element in a given object.
-#
 #
 # ### Methods for Fetching
 #
@@ -411,7 +400,6 @@
 # *   #sample: Returns one or more random elements.
 # *   #shuffle: Returns elements in a random order.
 #
-#
 # ### Methods for Assigning
 #
 # These methods add, replace, or reorder elements in `self`.
@@ -433,7 +421,6 @@
 # *   #sort_by!: Replaces `self` with its elements sorted, as determined by a
 #     given block.
 #
-#
 # ### Methods for Deleting
 #
 # Each of these methods removes elements from `self`:
@@ -449,7 +436,6 @@
 # *   #select!, #filter!: Removes elements not specified by a given block.
 # *   #slice!: Removes and returns a sequence of elements.
 # *   #uniq!: Removes duplicates.
-#
 #
 # ### Methods for Combining
 #
@@ -470,7 +456,6 @@
 # *   #product: Returns or yields all combinations of elements from `self` and
 #     given arrays.
 #
-#
 # ### Methods for Iterating
 #
 # *   #each: Passes each element to a given block.
@@ -486,7 +471,6 @@
 #     of `self`; a combination may use the same element more than once.
 # *   #repeated_permutation: Calls a given block with permutations of elements
 #     of `self`; a permutation may use the same element more than once.
-#
 #
 # ### Methods for Converting
 #
@@ -506,7 +490,6 @@
 # *   #zip: Returns a new array of arrays containing `self` and given arrays;
 #     follow the link for details.
 #
-#
 # ### Other Methods
 #
 # *   #*: Returns one of the following:
@@ -515,7 +498,6 @@
 #         `n` copies of `self`.
 #     *   With string argument `field_separator`, a new string that is
 #         equivalent to `join(field_separator)`.
-#
 #
 # *   #abbrev: Returns a hash of unambiguous abbreviations for elements.
 # *   #pack: Packs the elements into a binary sequence.
@@ -1952,7 +1934,6 @@ class Array[unchecked out Elem] < Object
   # *   Each non-Array element is unchanged.
   # *   Each Array is replaced by its individual elements.
   #
-  #
   # With non-negative Integer argument `level`, flattens recursively through
   # `level` levels:
   #
@@ -2168,7 +2149,6 @@ class Array[unchecked out Elem] < Object
   # *   Uses recursive `element.join(separator)` if `element` is a
   #     `kind_of?(Array)`.
   #
-  #
   # With no argument, joins using the output field separator, `$,`:
   #
   #     a = [:foo, 'bar', 2]
@@ -2292,7 +2272,6 @@ class Array[unchecked out Elem] < Object
   # *   The maximum-valued element from `self`.
   # *   A new Array of maximum-valued elements selected from `self`.
   #
-  #
   # When no block is given, each element in `self` must respond to method `<=>`
   # with an Integer.
   #
@@ -2335,7 +2314,6 @@ class Array[unchecked out Elem] < Object
   #
   # *   The minimum-valued element from `self`.
   # *   A new Array of minimum-valued elements selected from `self`.
-  #
   #
   # When no block is given, each element in `self` must respond to method `<=>`
   # with an Integer.
@@ -2605,7 +2583,6 @@ class Array[unchecked out Elem] < Object
   # *   The number of combinations is the product of the sizes of all the arrays,
   #     including both `self` and `other_arrays`.
   # *   The order of the returned combinations is indeterminate.
-  #
   #
   # When no block is given, returns the combinations as an Array of Arrays:
   #
@@ -3416,7 +3393,6 @@ class Array[unchecked out Elem] < Object
   # *   Zero when `a` and `b` are equivalent.
   # *   Positive when `a` is to follow `b`.
   #
-  #
   # Example:
   #
   #     a = 'abcde'.split('').shuffle
@@ -3459,7 +3435,6 @@ class Array[unchecked out Elem] < Object
   # *   Negative when `b` is to follow `a`.
   # *   Zero when `a` and `b` are equivalent.
   # *   Positive when `a` is to follow `b`.
-  #
   #
   # Example:
   #
@@ -3810,7 +3785,6 @@ class Array[unchecked out Elem] < Object
   #
   # *   The *nth* element of `self`.
   # *   The *nth* element of each of the `other_arrays`.
-  #
   #
   # If all `other_arrays` and `self` are the same size:
   #

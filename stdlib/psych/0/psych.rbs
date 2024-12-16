@@ -219,14 +219,17 @@ module Psych
   #     `0..9` range, otherwise option is ignored.
   #
   #     Default: `2`.
+  #
   # `:line_width`
   # :   Max character to wrap line at.
   #
   #     Default: `0` (meaning "wrap at 81").
+  #
   # `:canonical`
   # :   Write "canonical" YAML form (very verbose, yet strictly formal).
   #
   #     Default: `false`.
+  #
   # `:header`
   # :   Write `%YAML [version]` at the beginning of document.
   #
@@ -313,7 +316,6 @@ module Psych
   # *   String
   # *   Array
   # *   Hash
-  #
   #
   # Recursive data structures are not allowed by default.  Arbitrary classes can
   # be allowed by adding those classes to the `permitted_classes` keyword

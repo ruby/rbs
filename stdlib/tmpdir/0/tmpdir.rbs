@@ -25,7 +25,6 @@ class Dir
   # *   If it is an array, first element is used as the prefix and second element
   #     is used as a suffix.
   #
-  #
   #     Dir.mktmpdir {|dir| dir is ".../d..." }
   #     Dir.mktmpdir("foo") {|dir| dir is ".../foo..." }
   #     Dir.mktmpdir(["foo", "bar"]) {|dir| dir is ".../foo...bar" }

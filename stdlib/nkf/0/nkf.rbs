@@ -71,8 +71,10 @@
 # -h1 --hiragana
 # :   Katakana to Hiragana conversion.
 #
+#
 # -h2 --katakana
 # :   Hiragana to Katakana conversion.
+#
 #
 # -h3 --katakana-hiragana
 # :   Katakana to Hiragana and Hiragana to Katakana conversion.
@@ -102,11 +104,14 @@
 # -Z -Z0
 # :   Convert X0208 alphabet to ASCII.
 #
+#
 # -Z1
 # :   Converts X0208 kankaku to single ASCII space.
 #
+#
 # -Z2
 # :   Converts X0208 kankaku to double ASCII spaces.
+#
 #
 # -Z3
 # :   Replacing Fullwidth >, <, ", & into '&gt;', '&lt;', '&quot;', '&amp;' as
@@ -127,6 +132,7 @@
 #
 # -B1
 # :   allows any char after ESC-( or ESC-$.
+#
 #
 # -B2
 # :   forces ASCII after NL.
@@ -154,6 +160,7 @@
 # -mQ
 # :   Decode MIME quoted stream. '_' in quoted stream is converted to space.
 #
+#
 # -mN
 # :   Non-strict decoding.
 #
@@ -172,6 +179,7 @@
 # -MB
 # :   MIME encode Base64 stream.
 #
+#
 # -MQ
 # :   Perform quoted encoding.
 #
@@ -188,8 +196,10 @@
 # -Lu
 # :   unix (LF)
 #
+#
 # -Lw
 # :   windows (CRLF)
+#
 #
 # -Lm
 # :   mac (CR)
@@ -215,62 +225,82 @@
 # ISO-2022-JP
 # :   a.k.a. RFC1468, 7bit JIS, JUNET
 #
+#
 # EUC-JP (eucJP-nkf)
 # :   a.k.a. AT&T JIS, Japanese EUC, UJIS
+#
 #
 # eucJP-ascii
 # :   a.k.a. x-eucjp-open-19970715-ascii
 #
+#
 # eucJP-ms
 # :   a.k.a. x-eucjp-open-19970715-ms
+#
 #
 # CP51932
 # :   Microsoft Version of EUC-JP.
 #
+#
 # Shift_JIS
 # :   SJIS, MS-Kanji
+#
 #
 # Windows-31J
 # :   a.k.a. CP932
 #
+#
 # UTF-8
 # :   same as UTF-8N
+#
 #
 # UTF-8N
 # :   UTF-8 without BOM
 #
+#
 # UTF-8-BOM
 # :   UTF-8 with BOM
+#
 #
 # UTF-16
 # :   same as UTF-16BE
 #
+#
 # UTF-16BE
 # :   UTF-16 Big Endian without BOM
+#
 #
 # UTF-16BE-BOM
 # :   UTF-16 Big Endian with BOM
 #
+#
 # UTF-16LE
 # :   UTF-16 Little Endian without BOM
+#
 #
 # UTF-16LE-BOM
 # :   UTF-16 Little Endian with BOM
 #
+#
 # UTF-32
 # :   same as UTF-32BE
+#
 #
 # UTF-32BE
 # :   UTF-32 Big Endian without BOM
 #
+#
 # UTF-32BE-BOM
 # :   UTF-32 Big Endian with BOM
+#
 #
 # UTF-32LE
 # :   UTF-32 Little Endian without BOM
 #
+#
 # UTF-32LE-BOM
 # :   UTF-32 Little Endian with BOM
+#
 #
 # UTF8-MAC
 # :   NKDed UTF-8, a.k.a. UTF8-NFD (input only)

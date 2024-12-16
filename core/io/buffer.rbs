@@ -15,7 +15,6 @@ class IO
   # *   Create a string of a fixed size with ::string, then #read into it, or
   #     modify it using #set_value.
   #
-  #
   # Interaction with string and file memory is performed by efficient low-level C
   # mechanisms like `memcpy`.
   #
@@ -313,7 +312,6 @@ class IO
     # *   for a buffer created from scratch: free memory.
     # *   for a buffer created from string: undo the association.
     #
-    #
     # After the buffer is freed, no further operations can't be performed on it.
     #
     # You can resize a freed buffer to re-allocate it.
@@ -375,7 +373,6 @@ class IO
     # *   `:F32`: float, 4 bytes, big-endian
     # *   `:f64`: double, 8 bytes, little-endian
     # *   `:F64`: double, 8 bytes, big-endian
-    #
     #
     # A buffer type refers specifically to the type of binary buffer that is stored
     # in the buffer. For example, a `:u32` buffer type is a 32-bit unsigned integer

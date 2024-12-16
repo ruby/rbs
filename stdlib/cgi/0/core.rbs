@@ -91,8 +91,10 @@
 #
 # #local_path()
 # :   the path of the uploaded file on the local filesystem
+#
 # #original_filename()
 # :   the name of the file on the client computer
+#
 # #content_type()
 # :   the content type of the file
 #
@@ -285,6 +287,7 @@ class CGI
   #     :tag_maker => tag_maker }` Note that it is recommended to use the
   #     `options_hash` form, since it also allows you specify the charset you will
   #     accept.
+  #
   # `options_hash`
   # :   A Hash that recognizes three options:
   #
@@ -303,6 +306,7 @@ class CGI
   #
   #             cgi=CGI.new(:accept_charset => "EUC-JP") # => "EUC-JP"
   #
+  #
   #     `:tag_maker`
   # :       String that specifies which version of the HTML generation methods to
   #         use.  If not specified, no HTML generation methods will be loaded.
@@ -311,14 +315,19 @@ class CGI
   #
   #         "html3"
   # :           HTML 3.x
+  #
   #         "html4"
   # :           HTML 4.0
+  #
   #         "html4Tr"
   # :           HTML 4.0 Transitional
+  #
   #         "html4Fr"
   # :           HTML 4.0 with Framesets
+  #
   #         "html5"
   # :           HTML 5
+  #
   #
   #
   #     `:max_multipart_length`
@@ -332,6 +341,7 @@ class CGI
   #             cgi=CGI.new(:max_multipart_length => 268435456) # simple scalar
   #
   #             cgi=CGI.new(:max_multipart_length => -> {check_filesystem}) # lambda
+  #
   #
   #
   # `block`
@@ -408,72 +418,99 @@ class CGI
   #
   # `content_type_string`
   # :   If this form is used, this string is the `Content-Type`
+  #
   # `headers_hash`
   # :   A Hash of header values. The following header keys are recognized:
   #
   #     type
   # :       The Content-Type header.  Defaults to "text/html"
+  #
   #     charset
   # :       The charset of the body, appended to the Content-Type header.
+  #
   #     nph
   # :       A boolean value.  If true, prepend protocol string and status code,
   #         and date; and sets default values for "server" and "connection" if not
   #         explicitly set.
+  #
   #     status
   # :       The HTTP status code as a String, returned as the Status header.  The
   #         values are:
   #
   #         OK
   # :           200 OK
+  #
   #         PARTIAL_CONTENT
   # :           206 Partial Content
+  #
   #         MULTIPLE_CHOICES
   # :           300 Multiple Choices
+  #
   #         MOVED
   # :           301 Moved Permanently
+  #
   #         REDIRECT
   # :           302 Found
+  #
   #         NOT_MODIFIED
   # :           304 Not Modified
+  #
   #         BAD_REQUEST
   # :           400 Bad Request
+  #
   #         AUTH_REQUIRED
   # :           401 Authorization Required
+  #
   #         FORBIDDEN
   # :           403 Forbidden
+  #
   #         NOT_FOUND
   # :           404 Not Found
+  #
   #         METHOD_NOT_ALLOWED
   # :           405 Method Not Allowed
+  #
   #         NOT_ACCEPTABLE
   # :           406 Not Acceptable
+  #
   #         LENGTH_REQUIRED
   # :           411 Length Required
+  #
   #         PRECONDITION_FAILED
   # :           412 Precondition Failed
+  #
   #         SERVER_ERROR
   # :           500 Internal Server Error
+  #
   #         NOT_IMPLEMENTED
   # :           501 Method Not Implemented
+  #
   #         BAD_GATEWAY
   # :           502 Bad Gateway
+  #
   #         VARIANT_ALSO_VARIES
   # :           506 Variant Also Negotiates
   #
   #
+  #
   #     server
   # :       The server software, returned as the Server header.
+  #
   #     connection
   # :       The connection type, returned as the Connection header (for instance,
   #         "close".
+  #
   #     length
   # :       The length of the content that will be sent, returned as the
   #         Content-Length header.
+  #
   #     language
   # :       The language of the content, returned as the Content-Language header.
+  #
   #     expires
   # :       The time on which the current content expires, as a `Time` object,
   #         returned as the Expires header.
+  #
   #     cookie
   # :       A cookie or cookies, returned as one or more Set-Cookie headers.  The
   #         value can be the literal string of the cookie; a CGI::Cookie object;
@@ -526,8 +563,10 @@ class CGI
   #
   # `content_type_string`
   # :   If a string is passed, it is assumed to be the content type.
+  #
   # `headers_hash`
   # :   This is a Hash of headers, similar to that used by #http_header.
+  #
   # `block`
   # :   A block is required and should evaluate to the body of the response.
   #
@@ -829,25 +868,33 @@ class CGI
     # :   The name of the cookie; in this form, there is no #domain or #expiration.
     #     The #path is gleaned from the `SCRIPT_NAME` environment variable, and
     #     #secure is false.
+    #
     # `*value`
     # :   value or list of values of the cookie
+    #
     # `options_hash`
     # :   A Hash of options to initialize this Cookie.  Possible options are:
     #
     #     name
     # :       the name of the cookie.  Required.
+    #
     #     value
     # :       the cookie's value or list of values.
+    #
     #     path
     # :       the path for which this cookie applies.  Defaults to the value of the
     #         `SCRIPT_NAME` environment variable.
+    #
     #     domain
     # :       the domain for which this cookie applies.
+    #
     #     expires
     # :       the time at which this cookie expires, as a `Time` object.
+    #
     #     secure
     # :       whether this cookie is a secure cookie or not (default to false).
     #         Secure cookies are only transmitted to HTTPS servers.
+    #
     #     httponly
     # :       whether this cookie is a HttpOnly cookie or not (default to
     #

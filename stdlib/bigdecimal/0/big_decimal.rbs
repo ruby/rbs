@@ -53,7 +53,6 @@
 # *   If `value` is other object, the precision is determined by the result of
 #     +BigDecimal(value)+.
 #
-#
 # ## Special features of accurate decimal arithmetic
 #
 # Because BigDecimal is more accurate than normal binary floating point
@@ -131,14 +130,12 @@
 # *   [#to_json](rdoc-ref:BigDecimal#to_json): Returns a JSON string
 #     representing `self`.
 #
-#
 # These methods are provided by the [JSON gem](https://github.com/flori/json).
 # To make these methods available:
 #
 #     require 'json/add/bigdecimal'
 #
 # *   ## License
-#
 #
 # Copyright (C) 2002 by Shigeo Kobayashi <shigeo@tinyforest.gr.jp>.
 #
@@ -208,13 +205,11 @@ class BigDecimal < Numeric
   # *   BigDecimal::EXCEPTION_ZERODIVIDE.
   # *   BigDecimal::EXCEPTION_ALL.
   #
-  #
   # Values for `setting` for exception handling:
   #
   # *   `true`: sets the given `mode` to `true`.
   # *   `false`: sets the given `mode` to `false`.
   # *   `nil`: does not modify the mode settings.
-  #
   #
   # You can use method BigDecimal.save_exception_mode to temporarily change, and
   # then automatically restore, exception modes.
@@ -225,7 +220,6 @@ class BigDecimal < Numeric
   # This mode controls the way rounding is to be performed:
   #
   # *   BigDecimal::ROUND_MODE
-  #
   #
   # You can use method BigDecimal.save_rounding_mode to temporarily change, and
   # then automatically restore, the rounding mode.
@@ -239,7 +233,6 @@ class BigDecimal < Numeric
   #
   # *   `false` (default): Returns `BigDecimal('NaN')`.
   # *   `true`: Raises FloatDomainError.
-  #
   #
   # Examples:
   #
@@ -257,7 +250,6 @@ class BigDecimal < Numeric
   #     `BigDecimal('-Infinity')`.
   # *   `true`: Raises FloatDomainError.
   #
-  #
   # Examples:
   #
   #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)     # => 0
@@ -274,7 +266,6 @@ class BigDecimal < Numeric
   #
   # *   `false` (default): Returns `BigDecimal('0')` or `BigDecimal('-Infinity')`.
   # *   `true`: Raises FloatDomainError.
-  #
   #
   # Examples:
   #
@@ -296,7 +287,6 @@ class BigDecimal < Numeric
   #     `BigDecimal('-Infinity')`.
   # *   `true`: Raises FloatDomainError.
   #
-  #
   # Examples:
   #
   #     BigDecimal.mode(BigDecimal::EXCEPTION_ALL, false)     # => 0
@@ -316,7 +306,6 @@ class BigDecimal < Numeric
   # *   `false` (default): Returns `BigDecimal('Infinity')` or
   #     `BigDecimal('-Infinity')`.
   # *   `true`: Raises FloatDomainError.
-  #
   #
   # Examples:
   #
@@ -1030,16 +1019,22 @@ class BigDecimal < Numeric
   #
   # BigDecimal::SIGN_NaN
   # :   value is Not a Number
+  #
   # BigDecimal::SIGN_POSITIVE_ZERO
   # :   value is +0
+  #
   # BigDecimal::SIGN_NEGATIVE_ZERO
   # :   value is -0
+  #
   # BigDecimal::SIGN_POSITIVE_INFINITE
   # :   value is +Infinity
+  #
   # BigDecimal::SIGN_NEGATIVE_INFINITE
   # :   value is -Infinity
+  #
   # BigDecimal::SIGN_POSITIVE_FINITE
   # :   value is positive
+  #
   # BigDecimal::SIGN_NEGATIVE_FINITE
   # :   value is negative
   #
@@ -1402,8 +1397,6 @@ module Kernel
   #
   #     *   Raises an exception if keyword argument `exception` is `true`.
   #     *   Returns `nil` if keyword argument `exception` is `false`.
-  #
-  #
   #
   # Raises an exception if `value` evaluates to a Float and `digits` is larger
   # than Float::DIG + 1.

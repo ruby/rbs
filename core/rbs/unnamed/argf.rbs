@@ -585,7 +585,6 @@ module RBS
       # *   If not the last object, writes the output field separator
       #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
       #
-      #
       # With default separators:
       #
       #     f = File.open('t.tmp', 'w+')
@@ -677,7 +676,6 @@ module RBS
       # *   String: writes the string.
       # *   Neither string nor array: writes `object.to_s`.
       # *   Array: writes each element of the array; arrays may be nested.
-      #
       #
       # To keep these examples brief, we define this helper method:
       #

@@ -56,7 +56,6 @@
 #
 #         lambda2 = ->(x) { x**2 }
 #
-#
 # ## Lambda and non-lambda semantics
 #
 # Procs are coming in two flavors: lambda and non-lambda (regular procs).
@@ -74,7 +73,6 @@
 # *   Regular procs accept arguments more generously: missing arguments are
 #     filled with `nil`, single Array arguments are deconstructed if the proc
 #     has multiple arguments, and there is no error raised on extra arguments.
-#
 #
 # Examples:
 #
