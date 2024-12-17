@@ -16,7 +16,6 @@
 #      set to an unreliable state.
 # *   When a string is to be stored, a frozen copy of the string is
 #      stored instead unless the original string is already frozen.
-#
 # ## Comparison
 # The comparison operators `<`, `>`, `<=`, and `>=` are implemented as
 # shorthand for the {proper_,}{subset?,superset?} methods. The `<=>`
@@ -34,13 +33,11 @@
 #
 # ## Contact
 # *   Akinori MUSHA <mailto:knu@iDaemons.org> (current maintainer)
-#
 # ## What's Here
 # First, what's elsewhere. Class Set:
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here),
 #      which provides dozens of additional methods.
-#
 # In particular, class Set does not have many methods of its own
 # for fetching or for iterating.
 # Instead, it relies on those in Enumerable.
@@ -54,7 +51,6 @@
 # *   [Converting](#class-Set-label-Methods+for+Converting)
 # *   [Iterating](#class-Set-label-Methods+for+Iterating)
 # *   [And more....](#class-Set-label-Other+Methods)
-#
 # ### Methods for Creating a Set
 # *   ::[]:
 #      Returns a new set containing the given objects.
@@ -62,7 +58,6 @@
 #      Returns a new set containing either the given objects
 #      (if no block given) or the return values from the called block
 #      (if a block given).
-#
 # ### Methods for Set Operations
 # *   [|](#method-i-7C) (aliased as #union and #+):
 #      Returns a new set containing all elements from `self`
@@ -76,7 +71,6 @@
 # *   [\^](#method-i-5E):
 #      Returns a new set containing all elements from `self`
 #      and a given enumerable except those common to both.
-#
 # ### Methods for Comparing
 # *   [<=>](#method-i-3C-3D-3E):
 #      Returns -1, 0, or 1 as `self` is less than, equal to,
@@ -87,7 +81,6 @@
 # *   #compare_by_identity?:
 #      Returns whether the set considers only identity
 #      when comparing elements.
-#
 # ### Methods for Querying
 # *   #length (aliased as #size):
 #      Returns the count of elements.
@@ -112,7 +105,6 @@
 # *   #compare_by_identity?:
 #      Returns whether the set considers only identity
 #      when comparing elements.
-#
 # ### Methods for Assigning
 # *   #add (aliased as #<<):
 #      Adds a given object to the set; returns `self`.
@@ -125,7 +117,6 @@
 # *   #replace:
 #      Replaces the contents of the set with the contents
 #      of a given enumerable.
-#
 # ### Methods for Deleting
 # *   #clear:
 #      Removes all elements in the set; returns `self`.
@@ -143,7 +134,6 @@
 #      Removes elements not specified by a given block.
 # *   #reject!
 #      Removes elements specified by a given block.
-#
 # ### Methods for Converting
 # *   #classify:
 #      Returns a hash that classifies the elements,
@@ -170,11 +160,9 @@
 #      Returns `self` if given no arguments and no block;
 #      with a block given, returns a new set consisting of block
 #      return values.
-#
 # ### Methods for Iterating
 # *   #each:
 #      Calls the block with each successive element; returns `self`.
-#
 # ### Other Methods
 # *   #reset:
 #      Resets the internal state; useful if an object

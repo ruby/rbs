@@ -50,7 +50,6 @@
 # *   Ractor.yield and Ractor#take for when the *receiver* knows the sender
 #     (pull);
 #
-#
 # In addition to that, any arguments passed to Ractor.new are passed to the
 # block and available there as if received by Ractor.receive, and the last block
 # value is sent outside of the ractor as if sent by Ractor.yield.

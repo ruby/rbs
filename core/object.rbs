@@ -21,13 +21,11 @@
 # *   Inherits from [class BasicObject](rdoc-ref:BasicObject@What-27s+Here).
 # *   Includes [module Kernel](rdoc-ref:Kernel@What-27s+Here).
 #
-#
 # Here, class Object provides methods for:
 #
 # *   [Querying](rdoc-ref:Object@Querying)
 # *   [Instance Variables](rdoc-ref:Object@Instance+Variables)
 # *   [Other](rdoc-ref:Object@Other)
-#
 #
 # ### Querying
 #
@@ -70,7 +68,6 @@
 #     argument.
 # *   #send: Calls the given method in `self` with the given argument.
 #
-#
 # ### Instance Variables
 #
 # *   #instance_variable_get: Returns the value of the given instance variable
@@ -81,7 +78,6 @@
 #     variables in `self`.
 # *   #remove_instance_variable: Removes the named instance variable from
 #     `self`.
-#
 #
 # ### Other
 #

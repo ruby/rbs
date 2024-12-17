@@ -5,11 +5,9 @@
 #
 # *   An [integer literal](rdoc-ref:syntax/literals.rdoc@Integer+Literals).
 #
-#
 # You can convert certain objects to Integers with:
 #
 # *   Method #Integer.
-#
 #
 # An attempt to add a singleton method to an instance of this class causes an
 # exception to be raised.
@@ -20,7 +18,6 @@
 #
 # *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here).
 #
-#
 # Here, class Integer provides methods for:
 #
 # *   [Querying](rdoc-ref:Integer@Querying)
@@ -28,13 +25,11 @@
 # *   [Converting](rdoc-ref:Integer@Converting)
 # *   [Other](rdoc-ref:Integer@Other)
 #
-#
 # ### Querying
 #
 # *   #allbits?: Returns whether all bits in `self` are set.
 # *   #anybits?: Returns whether any bits in `self` are set.
 # *   #nobits?: Returns whether no bits in `self` are set.
-#
 #
 # ### Comparing
 #
@@ -47,7 +42,6 @@
 #
 # *   #>: Returns whether `self` is greater than the given value.
 # *   #>=: Returns whether `self` is greater than or equal to the given value.
-#
 #
 # ### Converting
 #
@@ -86,7 +80,6 @@
 #     representation of `self` in the given radix.
 # *   #truncate: Returns `self` truncated to the given precision.
 # *   #|: Returns the bitwise OR of `self` and the given value.
-#
 #
 # ### Other
 #
@@ -361,7 +354,6 @@ class Integer < Numeric
   # *   0, if `self` is equal to `other`.
   # *   1, if `self` is greater then `other`.
   # *   `nil`, if `self` and `other` are incomparable.
-  #
   #
   # Examples:
   #
@@ -1135,7 +1127,6 @@ class Integer < Numeric
   #         25.round(-1, half: :even)    # => 20
   #         15.round(-1, half: :even)    # => 20
   #         (-25).round(-1, half: :even) # => -20
-  #
   #
   # Raises and exception if the value for `half` is invalid.
   #

@@ -14,7 +14,6 @@ module RBS
     # *   When you delete a name-value pair in ENV, it is immediately deleted from
     #     the environment variables.
     #
-    #
     # ### Names and Values
     #
     # Generally, a name or value is a String.
@@ -27,7 +26,6 @@ module RBS
     # *   An object that responds to #to_str by returning a String, in which case
     #     that String will be used as the name or value.
     #
-    #
     # #### Invalid Names and Values
     #
     # A new name:
@@ -39,7 +37,6 @@ module RBS
     # *   May not contain character `"="`:
     #         ENV['='] = '0'
     #         # Raises Errno::EINVAL (Invalid argument - ruby_setenv(=))
-    #
     #
     # A new name or value:
     #
@@ -65,7 +62,6 @@ module RBS
     #         ENV["foo".force_encoding(Encoding::ISO_2022_JP)] = '0'
     #         # Raises ArgumentError (bad environment variable name: ASCII incompatible encoding: ISO-2022-JP)
     #
-    #
     # ### About Ordering
     #
     # ENV enumerates its name/value pairs in the order found in the operating
@@ -80,7 +76,6 @@ module RBS
     # *   The Array returned by ENV.shift.
     # *   The name returned by ENV.key.
     #
-    #
     # ### About the Examples
     # Some methods in ENV return ENV itself. Typically, there are many environment
     # variables. It's not useful to display a large ENV in the examples here, so
@@ -88,14 +83,12 @@ module RBS
     # *   ENV.replace replaces ENV with a new collection of entries.
     # *   ENV.clear empties ENV.
     #
-    #
     # ## What's Here
     #
     # First, what's elsewhere. Class ENV:
     #
     # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
     # *   Extends [module Enumerable](rdoc-ref:Enumerable@What-27s+Here),
-    #
     #
     # Here, class ENV provides methods that are useful for:
     #
@@ -105,7 +98,6 @@ module RBS
     # *   [Iterating](rdoc-ref:ENV@Methods+for+Iterating)
     # *   [Converting](rdoc-ref:ENV@Methods+for+Converting)
     # *   [And more ....](rdoc-ref:ENV@More+Methods)
-    #
     #
     # ### Methods for Querying
     #
@@ -119,7 +111,6 @@ module RBS
     # *   ::size, ::length: Returns the number of entries.
     # *   ::value?: Returns whether any entry has the given value.
     #
-    #
     # ### Methods for Assigning
     #
     # *   ::[]=, ::store: Creates, updates, or deletes the named environment
@@ -128,7 +119,6 @@ module RBS
     # *   ::update, ::merge!: Adds to ENV each key/value pair in the given hash.
     # *   ::replace: Replaces the entire content of the ENV with the name/value
     #     pairs in the given hash.
-    #
     #
     # ### Methods for Deleting
     #
@@ -139,13 +129,11 @@ module RBS
     # *   ::select!, ::filter!: Deletes entries selected by the block.
     # *   ::shift: Removes and returns the first entry.
     #
-    #
     # ### Methods for Iterating
     #
     # *   ::each, ::each_pair: Calls the block with each name/value pair.
     # *   ::each_key: Calls the block with each name.
     # *   ::each_value: Calls the block with each value.
-    #
     #
     # ### Methods for Converting
     #
@@ -170,7 +158,6 @@ module RBS
     # *   ::to_s: Returns the string `'ENV'`.
     # *   ::values: Returns all values as an array.
     # *   ::values_at: Returns an array of the values for the given name.
-    #
     #
     # ### More Methods
     #
@@ -260,7 +247,6 @@ module RBS
       #             ENV.store('bar', '1') # => '1'
       #             ENV['bar'] # => '1'
       #
-      #
       # *   If the named environment variable exists:
       #     *   If `value` is not `nil`, updates the environment variable with value
       #         `value`:
@@ -278,8 +264,6 @@ module RBS
       #             # Delete 'bar' using ENV.store.
       #             ENV.store('bar', nil) # => nil
       #             ENV.include?('bar') # => false
-      #
-      #
       #
       # Raises an exception if `name` or `value` is invalid. See [Invalid Names and
       # Values](rdoc-ref:ENV@Invalid+Names+and+Values).
@@ -313,7 +297,6 @@ module RBS
       #             ENV.store('bar', '1') # => '1'
       #             ENV['bar'] # => '1'
       #
-      #
       # *   If the named environment variable exists:
       #     *   If `value` is not `nil`, updates the environment variable with value
       #         `value`:
@@ -331,8 +314,6 @@ module RBS
       #             # Delete 'bar' using ENV.store.
       #             ENV.store('bar', nil) # => nil
       #             ENV.include?('bar') # => false
-      #
-      #
       #
       # Raises an exception if `name` or `value` is invalid. See [Invalid Names and
       # Values](rdoc-ref:ENV@Invalid+Names+and+Values).

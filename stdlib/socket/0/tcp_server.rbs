@@ -91,7 +91,6 @@ class TCPServer < TCPSocket
   # ### Parameter
   # *   `backlog` - the maximum length of the queue for pending connections.
   #
-  #
   # ### Example 1
   #     require 'socket'
   #     include Socket::Constants
@@ -128,7 +127,6 @@ class TCPServer < TCPSocket
   # *   Errno::ENOBUFS - insufficient resources are available in the system to
   #     complete the call
   #
-  #
   # ### Windows Exceptions
   # On Windows systems the following system exceptions may be raised if the call
   # to *listen* fails:
@@ -147,7 +145,6 @@ class TCPServer < TCPSocket
   # *   Errno::ENOTSOC - `socket` is not a socket
   # *   Errno::EOPNOTSUPP - the referenced `socket` is not a type that supports
   #     the *listen* method
-  #
   #
   # ### See
   # *   listen manual pages on unix-based systems

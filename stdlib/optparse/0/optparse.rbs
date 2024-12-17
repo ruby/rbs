@@ -21,7 +21,6 @@
 # 4.  Arguments can be automatically converted to a specified class.
 # 5.  Arguments can be restricted to a certain set.
 #
-#
 # All of these features are demonstrated in the examples below.  See
 # #make_switch for full documentation.
 #
@@ -128,7 +127,6 @@
 # *   FalseClass -- Same as `TrueClass`, but defaults to `false`
 # *   Array -- Strings separated by ',' (e.g. 1,2,3)
 # *   Regexp -- Regular expressions. Also includes options.
-#
 #
 # We can also add our own coercions, which we will cover below.
 #
@@ -470,6 +468,7 @@ class OptionParser
   #
   # `t`
   # :   Argument class specifier, any object including Class.
+  #
   # `pat`
   # :   Pattern for argument, defaults to `t` if it responds to match.
   #
@@ -884,10 +883,13 @@ class OptionParser
   #
   # `to`
   # :   Output destination, which must have method <<. Defaults to [].
+  #
   # `width`
   # :   Width of left side, defaults to @summary_width.
+  #
   # `max`
   # :   Maximum length allowed for left side, defaults to `width` - 1.
+  #
   # `indent`
   # :   Indentation, defaults to @summary_indent.
   #
@@ -983,8 +985,10 @@ class OptionParser
   #
   # `banner`
   # :   Banner message.
+  #
   # `width`
   # :   Summary width.
+  #
   # `indent`
   # :   Summary indent.
   #
@@ -1271,10 +1275,13 @@ class OptionParser::List
   #
   # `switch`
   # :   OptionParser::Switch instance to be inserted.
+  #
   # `short_opts`
   # :   List of short style options.
+  #
   # `long_opts`
   # :   List of long style options.
+  #
   # `nolong_opts`
   # :   List of long style options with "no-" prefix.
   #
@@ -1334,10 +1341,13 @@ class OptionParser::List
   #
   # `switch`
   # :   OptionParser::Switch instance to be inserted.
+  #
   # `short_opts`
   # :   List of short style options.
+  #
   # `long_opts`
   # :   List of long style options.
+  #
   # `nolong_opts`
   # :   List of long style options with "no-" prefix.
   #
@@ -1570,13 +1580,17 @@ class OptionParser::Switch
   #
   # `sdone`
   # :   Already summarized short style options keyed hash.
+  #
   # `ldone`
   # :   Already summarized long style options keyed hash.
+  #
   # `width`
   # :   Width of left side (option part). In other words, the right side
   #     (description part) starts after `width` columns.
+  #
   # `max`
   # :   Maximum width of left side -> the options are filled within `max` columns.
+  #
   # `indent`
   # :   Prefix string indents all summarized lines.
   #

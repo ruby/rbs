@@ -16,10 +16,13 @@
 #
 # `:backtrace`
 # :   See #backtrace
+#
 # `:sources`
 # :   Sets Gem::sources
+#
 # `:verbose`
 # :   See #verbose
+#
 # `:concurrent_downloads`
 # :   See #concurrent_downloads
 #

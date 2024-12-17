@@ -186,6 +186,7 @@ module OpenURI
     #     When false or nil is given, the environment variables are ignored and
     #     connection will be made to a server directly.
     #
+    #
     # :proxy_http_basic_authentication
     # :   Synopsis:
     #         :proxy_http_basic_authentication =>
@@ -204,6 +205,7 @@ module OpenURI
     #     If :proxy and :proxy_http_basic_authentication is specified, ArgumentError
     #     is raised.
     #
+    #
     # :http_basic_authentication
     # :   Synopsis:
     #         :http_basic_authentication=>[user, password]
@@ -211,6 +213,7 @@ module OpenURI
     #     If :http_basic_authentication is specified, the value should be an array
     #     which contains 2 strings: username and password. It is used for HTTP Basic
     #     authentication defined by RFC 2617.
+    #
     #
     # :content_length_proc
     # :   Synopsis:
@@ -225,6 +228,7 @@ module OpenURI
     #
     #     When expected content length is unknown, the procedure is called with nil.
     #      This happens when the HTTP response has no Content-Length header.
+    #
     #
     # :progress_proc
     # :   Synopsis:
@@ -253,12 +257,14 @@ module OpenURI
     #             pbar.set s if pbar
     #           }) {|f| ... }
     #
+    #
     # :read_timeout
     # :   Synopsis:
     #         :read_timeout=>nil     (no timeout)
     #         :read_timeout=>10      (10 second)
     #
     #     :read_timeout option specifies a timeout of read for http connections.
+    #
     #
     # :open_timeout
     # :   Synopsis:
@@ -267,6 +273,7 @@ module OpenURI
     #
     #     :open_timeout option specifies a timeout of open for http connections.
     #
+    #
     # :ssl_ca_cert
     # :   Synopsis:
     #         :ssl_ca_cert=>filename or an Array of filenames
@@ -274,11 +281,13 @@ module OpenURI
     #     :ssl_ca_cert is used to specify CA certificate for SSL. If it is given,
     #     default certificates are not used.
     #
+    #
     # :ssl_verify_mode
     # :   Synopsis:
     #         :ssl_verify_mode=>mode
     #
     #     :ssl_verify_mode is used to specify openssl verify mode.
+    #
     #
     # :ssl_min_version
     # :   Synopsis:
@@ -287,12 +296,14 @@ module OpenURI
     #     :ssl_min_version option specifies the minimum allowed SSL/TLS protocol
     #     version.  See also OpenSSL::SSL::SSLContext#min_version=.
     #
+    #
     # :ssl_max_version
     # :   Synopsis:
     #         :ssl_max_version=>:TLS1_2
     #
     #     :ssl_max_version option specifies the maximum allowed SSL/TLS protocol
     #     version.  See also OpenSSL::SSL::SSLContext#max_version=.
+    #
     #
     # :ftp_active_mode
     # :   Synopsis:
@@ -301,6 +312,7 @@ module OpenURI
     #     `:ftp_active_mode => true` is used to make ftp active mode. Ruby 1.9 uses
     #     passive mode by default. Note that the active mode is default in Ruby 1.8
     #     or prior.
+    #
     #
     # :redirect
     # :   Synopsis:

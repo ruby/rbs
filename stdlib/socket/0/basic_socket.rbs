@@ -82,7 +82,6 @@ class BasicSocket < IO
   #     (127.0.0.1).
   # *   IPv6 unspecified address (::) is replaced by IPv6 loopback address (::1).
   #
-  #
   # If the local address is not suitable for connect, SocketError is raised. IPv4
   # and IPv6 address which port is 0 is not suitable for connect. Unix domain
   # socket which has no path is not suitable for connect.
@@ -202,7 +201,6 @@ class BasicSocket < IO
   #     Socket::SO_REUSEADDR. A string or symbol of the name, possibly without
   #     prefix, is also accepted.
   #
-  #
   # ### Examples
   #
   # Some socket options are integers with boolean values, in this case #getsockopt
@@ -301,7 +299,6 @@ class BasicSocket < IO
   # *   `flags` - zero or more of the `MSG_` options
   # *   `buf` - destination String buffer
   # *   `options` - keyword hash, supporting `exception: false`
-  #
   #
   # ### Example
   #     serv = TCPServer.new("127.0.0.1", 0)
@@ -518,9 +515,7 @@ class BasicSocket < IO
   #         int is passed as for an Integer. Note that `false` must be passed, not
   #         `nil`.
   #     *   String: the string's data and length is passed to the socket.
-  #
   # *   `socketoption` is an instance of Socket::Option
-  #
   #
   # ### Examples
   #

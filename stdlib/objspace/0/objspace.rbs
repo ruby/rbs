@@ -246,7 +246,6 @@ module ObjectSpace
   # *   if an instance of IO object is provided, the output goes there, and the
   #     object is returned.
   #
-  #
   # This method is only expected to work with C Ruby. This is an experimental
   # method and is subject to change. In particular, the function signature and
   # output format are not guaranteed to be compatible in future versions of ruby.

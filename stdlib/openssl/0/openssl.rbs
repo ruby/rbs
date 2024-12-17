@@ -549,8 +549,10 @@ module OpenSSL
   #
   # OpenSSL 3
   # :   `0xMNN00PP0 (major minor 00 patch 0)`
+  #
   # OpenSSL before 3
   # :   `0xMNNFFPPS (major minor fix patch status)`
+  #
   # LibreSSL
   # :   `0x20000000 (fixed value)`
   #
@@ -627,7 +629,6 @@ module OpenSSL
   # *   `:APPLICATION`
   # *   `:PRIVATE`
   #
-  #
   # ## Tag constants
   #
   # There is a constant defined for each universal tag:
@@ -654,7 +655,6 @@ module OpenSSL
   # *   OpenSSL::ASN1::GENERALSTRING (27)
   # *   OpenSSL::ASN1::UNIVERSALSTRING (28)
   # *   OpenSSL::ASN1::BMPSTRING (30)
-  #
   #
   # ## UNIVERSAL_TAG_NAME constant
   #
@@ -775,7 +775,6 @@ module OpenSSL
     # *   tag_class: Current tag class (Symbol)
     # *   tag: The current tag number (Integer)
     #
-    #
     # ## Example
     #     der = File.binread('asn1data.der')
     #     OpenSSL::ASN1.traverse(der) do | depth, offset, header_len, length, constructed, tag_class, tag|
@@ -871,7 +870,6 @@ module OpenSSL
     # *   *tag* equal to 1
     # *   *tag_class* equal to `:CONTEXT_SPECIFIC`
     # *   *value* equal to a String that carries the raw encoding of the INTEGER.
-    #
     # This implies that a subsequent decoding step is required to completely decode
     # implicitly tagged values.
     #
@@ -883,7 +881,6 @@ module OpenSSL
     # *   *value* equal to an Array with one single element, an instance of
     #     OpenSSL::ASN1::Integer, i.e. the inner element is the non-tagged primitive
     #     value, and the tagging is represented in the outer ASN1Data
-    #
     #
     # ## Example - Decoding an implicitly tagged INTEGER
     #     int = OpenSSL::ASN1::Integer.new(1, 0, :IMPLICIT) # implicit 0-tagged
@@ -1106,7 +1103,6 @@ module OpenSSL
     # encodings are represented by one of the two sub-classes of Constructive:
     # *   OpenSSL::ASN1::Set
     # *   OpenSSL::ASN1::Sequence
-    #
     # Please note that tagged sequences and sets are still parsed as instances of
     # ASN1Data. Find further details on tagged values there.
     #
@@ -1348,7 +1344,6 @@ module OpenSSL
     # *   OpenSSL::ASN1::UniversalString <=> *value* is a String
     # *   OpenSSL::ASN1::BMPString       <=> *value* is a String
     #
-    #
     # ## OpenSSL::ASN1::BitString
     #
     # ### Additional attributes
@@ -1368,7 +1363,6 @@ module OpenSSL
     # *   *oid*: the object identifier as a String, e.g. "1.2.3.4.5"
     # *   *short_name*: alias for *sn*.
     # *   *long_name*: alias for *ln*.
-    #
     #
     # ## Examples
     # With the Exception of OpenSSL::ASN1::EndOfContent, each Primitive class
@@ -1896,6 +1890,7 @@ module OpenSSL
     #
     # `string`
     # :   The string to be parsed.
+    #
     # `base`
     # :   The format. Must be one of the following:
     #     *   `0`  - MPI format. See the man page BN_mpi2bn(3) for details.
@@ -2564,7 +2559,6 @@ module OpenSSL
     #
     #     #key=, #iv=, #random_key, #random_iv, #pkcs5_keyivgen
     # :
-    #
     # Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 0).
     #
     def decrypt: () -> self
@@ -2580,7 +2574,6 @@ module OpenSSL
     #
     #     #key=, #iv=, #random_key, #random_iv, #pkcs5_keyivgen
     # :
-    #
     # Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 1).
     #
     def encrypt: () -> self
@@ -2708,7 +2701,6 @@ module OpenSSL
     # *   *salt* must be an 8 byte string if provided.
     # *   *iterations* is an integer with a default of 2048.
     # *   *digest* is a Digest object that defaults to 'MD5'
-    #
     #
     # A minimum of 1000 iterations is recommended.
     #
@@ -3124,7 +3116,6 @@ module OpenSSL
   # *   SHA224, SHA256, SHA384, SHA512, SHA512-224 and SHA512-256
   # *   SHA3-224, SHA3-256, SHA3-384 and SHA3-512
   # *   BLAKE2s256 and BLAKE2b512
-  #
   #
   # Each of these algorithms can be instantiated using the name:
   #
@@ -3562,6 +3553,7 @@ module OpenSSL
     #
     # All flags
     # :   0xFFFF
+    #
     # No flags
     # :   0x0000
     #
@@ -3888,7 +3880,6 @@ module OpenSSL
   # *   scrypt
   # *   HKDF
   #
-  #
   # ## Examples
   # ### Generating a 128 bit key for a Cipher (e.g. AES)
   #     pass = "secret"
@@ -3930,13 +3921,17 @@ module OpenSSL
     # ### Parameters
     # *ikm*
     # :   The input keying material.
+    #
     # *salt*
     # :   The salt.
+    #
     # *info*
     # :   The context and application specific information.
+    #
     # *length*
     # :   The output length in octets. Must be <= `255 * HashLen`, where HashLen is
     #     the length of the hash function output in octets.
+    #
     # *hash*
     # :   The hash function.
     #
@@ -3965,17 +3960,21 @@ module OpenSSL
     # ### Parameters
     # pass
     # :   The password.
+    #
     # salt
     # :   The salt. Salts prevent attacks based on dictionaries of common passwords
     #     and attacks based on rainbow tables. It is a public value that can be
     #     safely stored along with the password (e.g. if the derived value is used
     #     for password storage).
+    #
     # iterations
     # :   The iteration count. This provides the ability to tune the algorithm. It
     #     is better to use the highest count possible for the maximum resistance to
     #     brute-force attacks.
+    #
     # length
     # :   The desired length of the derived key in octets.
+    #
     # hash
     # :   The hash algorithm used with HMAC for the PRF. May be a String
     #     representing the algorithm name, or an instance of OpenSSL::Digest.
@@ -4002,14 +4001,19 @@ module OpenSSL
     # ### Parameters
     # pass
     # :   Passphrase.
+    #
     # salt
     # :   Salt.
+    #
     # N
     # :   CPU/memory cost parameter. This must be a power of 2.
+    #
     # r
     # :   Block size parameter.
+    #
     # p
     # :   Parallelization parameter.
+    #
     # length
     # :   Length in octets of the derived key.
     #
@@ -4122,7 +4126,6 @@ module OpenSSL
       # ### Parameters
       # *   *str* - the challenge string to be set for this instance
       #
-      #
       # Sets the challenge to be associated with the SPKI. May be used by the server,
       # e.g. to prevent replay.
       #
@@ -4143,7 +4146,6 @@ module OpenSSL
       # ### Parameters
       # *   *pub* - the public key to be set for this instance
       #
-      #
       # Sets the public key to be associated with the SPKI, an instance of
       # OpenSSL::PKey. This should be the public key corresponding to the private key
       # used for signing the SPKI.
@@ -4157,7 +4159,6 @@ module OpenSSL
       # ### Parameters
       # *   *key* - the private key to be used for signing this instance
       # *   *digest* - the digest to be used for signing this instance
-      #
       #
       # To sign an SPKI, the private key corresponding to the public key set for this
       # instance should be used, in addition to a digest algorithm in the form of an
@@ -4200,7 +4201,6 @@ module OpenSSL
       # -->
       # ### Parameters
       # *   *key* - the public key to be used for verifying the SPKI signature
-      #
       #
       # Returns `true` if the signature is valid, `false` otherwise. To verify an
       # SPKI, the public key contained within the SPKI should be used.
@@ -4518,7 +4518,6 @@ module OpenSSL
       # *   OpenSSL::OCSP::V_CERTSTATUS_REVOKED
       # *   OpenSSL::OCSP::V_CERTSTATUS_UNKNOWN
       #
-      #
       # *reason* and *revocation_time* can be given only when *status* is
       # OpenSSL::OCSP::V_CERTSTATUS_REVOKED. *reason* describes the reason for the
       # revocation, and must be one of OpenSSL::OCSP::REVOKED_STATUS_* constants.
@@ -4573,8 +4572,10 @@ module OpenSSL
       # *flags* can include:
       # OpenSSL::OCSP::NOCERTS
       # :   don't include certificates
+      #
       # OpenSSL::OCSP::NOTIME
       # :   don't set producedAt
+      #
       # OpenSSL::OCSP::RESPID_KEY
       # :   use signer's public key hash as responderID
       #
@@ -4774,12 +4775,16 @@ module OpenSSL
       #
       # -1
       # :   nonce in request only.
+      #
       # 0
       # :   nonces both present and not equal.
+      #
       # 1
       # :   nonces present and equal.
+      #
       # 2
       # :   nonces both absent.
+      #
       # 3
       # :   nonce present in response only.
       #
@@ -4939,7 +4944,6 @@ module OpenSSL
       # *   V_CERTSTATUS_REVOKED
       # *   V_CERTSTATUS_UNKNOWN
       #
-      #
       # When the status is V_CERTSTATUS_REVOKED, the time at which the certificate was
       # revoked can be retrieved by #revocation_time.
       #
@@ -5056,14 +5060,12 @@ module OpenSSL
     #     *   The public_key portion of the certificate must contain a valid public
     #         key.
     #     *   The not_before and not_after fields must be filled in.
-    #
     # *   *ca* - An optional array of X509::Certificate's.
     # *   *key_pbe* - string
     # *   *cert_pbe* - string
     # *   *key_iter* - integer
     # *   *mac_iter* - integer
     # *   *keytype* - An integer representing an MSIE specific extension.
-    #
     #
     # Any optional arguments may be supplied as `nil` to preserve the OpenSSL
     # defaults.
@@ -5466,7 +5468,6 @@ module OpenSSL
   # *   RSA (OpenSSL::PKey::RSA)
   # *   DSA (OpenSSL::PKey::DSA)
   # *   Elliptic Curve Cryptography (OpenSSL::PKey::EC)
-  #
   # Each of these implementations is in fact a sub-class of the abstract PKey
   # class which offers the interface for supporting digital signatures in the form
   # of PKey#sign and PKey#verify.
@@ -5509,11 +5510,14 @@ module OpenSSL
     # ### Accessor methods for the Diffie-Hellman parameters
     # DH#p
     # :   The prime (an OpenSSL::BN) of the Diffie-Hellman parameters.
+    #
     # DH#g
     # :   The generator (an OpenSSL::BN) g of the Diffie-Hellman parameters.
+    #
     # DH#pub_key
     # :   The per-session public key (an OpenSSL::BN) matching the private key. This
     #     needs to be passed to DH#compute_key.
+    #
     # DH#priv_key
     # :   The per-session private key, an OpenSSL::BN.
     #
@@ -5550,6 +5554,7 @@ module OpenSSL
       #
       # `size`
       # :   The desired key size in bits.
+      #
       # `generator`
       # :   The generator.
       #
@@ -5793,8 +5798,10 @@ module OpenSSL
       #
       # `string`
       # :   A String that contains the DER or PEM encoded key.
+      #
       # `size`
       # :   See DH.generate.
+      #
       # `generator`
       # :   See DH.generate.
       #
@@ -5877,6 +5884,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
       #     private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
       #
@@ -5885,6 +5893,7 @@ module OpenSSL
       #         -----BEGIN DSA PRIVATE KEY-----
       #         [...]
       #         -----END DSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
@@ -6023,6 +6032,7 @@ module OpenSSL
       #
       # `digest`
       # :   A message digest of the original input data to be signed.
+      #
       # `sig`
       # :   A DSA signature value.
       #
@@ -6060,6 +6070,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
       #     private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
       #
@@ -6068,6 +6079,7 @@ module OpenSSL
       #         -----BEGIN DSA PRIVATE KEY-----
       #         [...]
       #         -----END DSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
@@ -6112,6 +6124,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
       #     private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey.
       #
@@ -6120,6 +6133,7 @@ module OpenSSL
       #         -----BEGIN DSA PRIVATE KEY-----
       #         [...]
       #         -----END DSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in
@@ -6177,8 +6191,10 @@ module OpenSSL
       #
       # `string`
       # :   A String that contains a DER or PEM encoded key.
+      #
       # `pass`
       # :   A String that contains an optional password.
+      #
       # `size`
       # :   See DSA.generate.
       #
@@ -6311,6 +6327,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
       #     private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey.
       #
@@ -6319,6 +6336,7 @@ module OpenSSL
       #         -----BEGIN EC PRIVATE KEY-----
       #         [...]
       #         -----END EC PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in
@@ -6488,6 +6506,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a
       #     private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey.
       #
@@ -6496,6 +6515,7 @@ module OpenSSL
       #         -----BEGIN EC PRIVATE KEY-----
       #         [...]
       #         -----END EC PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in
@@ -6593,7 +6613,6 @@ module OpenSSL
         # *   EC::NAMED_CURVE
         # *   EC::EXPLICIT_CURVE
         #
-        #
         # See the OpenSSL documentation for EC_GROUP_set_asn1_flag().
         #
         def asn1_flag=: (Integer) -> Integer
@@ -6677,8 +6696,10 @@ module OpenSSL
         # `:compressed`
         # :   Encoded as z||x, where z is an octet indicating which solution of the
         #     equation y is. z will be 0x02 or 0x03.
+        #
         # `:uncompressed`
         # :   Encoded as z||x||y, where z is an octet 0x04.
+        #
         # `:hybrid`
         # :   Encodes as z||x||y, where z is an octet indicating which solution of the
         #     equation y is. z will be 0x06 or 0x07.
@@ -7008,8 +7029,10 @@ module OpenSSL
       #     the PKey type requires no digest algorithm. For backwards compatibility,
       #     this can be an instance of OpenSSL::Digest. Its state will not affect the
       #     signature.
+      #
       # `data`
       # :   A String. The data to be hashed and signed.
+      #
       # `options`
       # :   A Hash that contains algorithm specific control operations to OpenSSL. See
       #     OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details. `options`
@@ -7044,10 +7067,13 @@ module OpenSSL
       #
       # `digest`
       # :   See #sign.
+      #
       # `signature`
       # :   A String containing the signature to be verified.
+      #
       # `data`
       # :   See #sign.
+      #
       # `options`
       # :   See #sign. `options` parameter was added in version 3.0.
       #
@@ -7094,6 +7120,7 @@ module OpenSSL
       #
       # `size`
       # :   The desired key size in bits.
+      #
       # `exponent`
       # :   An odd Integer, normally 3, 17, or 65537.
       #
@@ -7129,6 +7156,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
       #     or a private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey.
       #
@@ -7137,6 +7165,7 @@ module OpenSSL
       #         -----BEGIN RSA PRIVATE KEY-----
       #         [...]
       #         -----END RSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
@@ -7312,13 +7341,16 @@ module OpenSSL
       # ### Parameters
       # *digest*
       # :   A String containing the message digest algorithm name.
+      #
       # *data*
       # :   A String. The data to be signed.
+      #
       # *salt_length*
       # :   The length in octets of the salt. Two special values are reserved:
       #     `:digest` means the digest length, and `:max` means the maximum possible
       #     length for the combination of the private key and the selected message
       #     digest algorithm.
+      #
       # *mgf1_hash*
       # :   The hash algorithm used in MGF1 (the currently supported mask generation
       #     function (MGF)).
@@ -7366,6 +7398,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
       #     or a private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey.
       #
@@ -7374,6 +7407,7 @@ module OpenSSL
       #         -----BEGIN RSA PRIVATE KEY-----
       #         [...]
       #         -----END RSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
@@ -7418,6 +7452,7 @@ module OpenSSL
       #     X.509 SubjectPublicKeyInfo regardless of whether the key is a public key
       #     or a private key.
       #
+      #
       # When the key contains private components, and no parameters are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey.
       #
@@ -7426,6 +7461,7 @@ module OpenSSL
       #         -----BEGIN RSA PRIVATE KEY-----
       #         [...]
       #         -----END RSA PRIVATE KEY-----
+      #
       #
       # When the key contains private components, and *cipher* and *password* are given
       # :   Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL's
@@ -7479,12 +7515,15 @@ module OpenSSL
       # ### Parameters
       # *digest*
       # :   A String containing the message digest algorithm name.
+      #
       # *data*
       # :   A String. The data to be signed.
+      #
       # *salt_length*
       # :   The length in octets of the salt. Two special values are reserved:
       #     `:digest` means the digest length, and `:auto` means automatically
       #     determining the length based on the signature.
+      #
       # *mgf1_hash*
       # :   The hash algorithm used in MGF1.
       #
@@ -7834,8 +7873,10 @@ module OpenSSL
       # ### Parameters
       # *certificate*
       # :   A certificate. An instance of OpenSSL::X509::Certificate.
+      #
       # *pkey*
       # :   The private key for *certificate*. An instance of OpenSSL::PKey::PKey.
+      #
       # *extra_certs*
       # :   Optional. An array of OpenSSL::X509::Certificate. When sending a
       #     certificate chain, the certificates specified by this are sent following
@@ -8349,26 +8390,37 @@ module OpenSSL
       #
       # :accept
       # :   Number of started SSL/TLS handshakes in server mode
+      #
       # :accept_good
       # :   Number of established SSL/TLS sessions in server mode
+      #
       # :accept_renegotiate
       # :   Number of start renegotiations in server mode
+      #
       # :cache_full
       # :   Number of sessions that were removed due to cache overflow
+      #
       # :cache_hits
       # :   Number of successfully reused connections
+      #
       # :cache_misses
       # :   Number of sessions proposed by clients that were not found in the cache
+      #
       # :cache_num
       # :   Number of sessions in the internal session cache
+      #
       # :cb_hits
       # :   Number of sessions retrieved from the external cache in server mode
+      #
       # :connect
       # :   Number of started SSL/TLS handshakes in client mode
+      #
       # :connect_good
       # :   Number of established SSL/TLS sessions in client mode
+      #
       # :connect_renegotiate
       # :   Number of start renegotiations in client mode
+      #
       # :timeouts
       # :   Number of sessions proposed by clients that were found in the cache but
       #     had expired due to timeouts
@@ -9521,12 +9573,10 @@ module OpenSSL
       # *   Request#algorithm
       # *   Request#message_imprint
       #
-      #
       # Mandatory parameters that need to be set in the Factory:
       # *   Factory#serial_number
       # *   Factory#gen_time
       # *   Factory#allowed_digests
-      #
       #
       # In addition one of either Request#policy_id or Factory#default_policy_id must
       # be set.
@@ -11136,7 +11186,6 @@ module OpenSSL
       #     `#to_s(OpenSSL::X509::Name::COMPAT)`. For example: `DC=com, DC=example,
       #     CN=nobody`
       #
-      #
       # Neither of them is standardized and has quirks and inconsistencies in handling
       # of escaped characters or multi-valued RDNs.
       #
@@ -11172,14 +11221,19 @@ module OpenSSL
       #
       # C
       # :   Country Name
+      #
       # CN
       # :   Common Name
+      #
       # DC
       # :   Domain Component
+      #
       # O
       # :   Organization Name
+      #
       # OU
       # :   Organizational Unit Name
+      #
       # ST
       # :   State or Province Name
       #
@@ -11264,7 +11318,6 @@ module OpenSSL
       # *   OpenSSL::X509::Name::RFC2253
       # *   OpenSSL::X509::Name::ONELINE
       # *   OpenSSL::X509::Name::MULTILINE
-      #
       #
       # If *format* is omitted, the largely broken and traditional OpenSSL format
       # (`X509_NAME_oneline()` format) is chosen.
@@ -11785,7 +11838,6 @@ module OpenSSL
       # *   X509::PURPOSE_OCSP_HELPER
       # *   X509::PURPOSE_TIMESTAMP_SIGN
       #
-      #
       # OpenSSL::X509::StoreContext#purpose= can be used to change the value for a
       # single verification operation.
       #
@@ -11803,7 +11855,6 @@ module OpenSSL
       #
       # *   OpenSSL::X509::DEFAULT_CERT_FILE
       # *   OpenSSL::X509::DEFAULT_CERT_DIR
-      #
       #
       # See also the man page X509_STORE_set_default_paths(3).
       #

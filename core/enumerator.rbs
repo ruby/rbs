@@ -6,7 +6,6 @@
 # *   Object#enum_for
 # *   Enumerator.new
 #
-#
 # Most methods have two forms: a block form where the contents are evaluated for
 # each item in the enumeration, and a non-block form which returns a new
 # Enumerator wrapping the iteration.
@@ -74,7 +73,6 @@
 #     current Fiber, so if you want to change state in the caller Fiber of the
 #     Enumerator Fiber, you need to use an extra indirection (e.g., use some
 #     object in the Fiber storage variable and mutate some ivar of it).
-#
 #
 # Concretely:
 #

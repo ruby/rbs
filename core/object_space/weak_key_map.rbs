@@ -32,7 +32,6 @@ module ObjectSpace
   #         # garbage-collected.
   #         map["name"] #=> nil
   #
-  #
   # (Note that GC.start is used here only for demonstrational purposes and might
   # not always lead to demonstrated results.)
   #

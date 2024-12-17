@@ -9,7 +9,6 @@
 # *   Flexibility to have an alternate URI::Parser (or just different patterns
 #     and regexp's).
 #
-#
 # ## Basic example
 #
 #     require 'uri'
@@ -57,7 +56,6 @@
 # *   [RFC2732](http://tools.ietf.org/html/rfc2732)
 # *   [RFC3986](http://tools.ietf.org/html/rfc3986)
 #
-#
 # ## Class tree
 #
 # *   URI::Generic (in uri/generic.rb)
@@ -65,31 +63,27 @@
 #     *   URI::FTP - (in uri/ftp.rb)
 #     *   URI::HTTP - (in uri/http.rb)
 #         *   URI::HTTPS - (in uri/https.rb)
-#
 #     *   URI::LDAP - (in uri/ldap.rb)
 #         *   URI::LDAPS - (in uri/ldaps.rb)
-#
 #     *   URI::MailTo - (in uri/mailto.rb)
-#
 # *   URI::Parser - (in uri/common.rb)
 # *   URI::REGEXP - (in uri/common.rb)
 #     *   URI::REGEXP::PATTERN - (in uri/common.rb)
-#
 # *   URI::Util - (in uri/common.rb)
 # *   URI::Error - (in uri/common.rb)
 #     *   URI::InvalidURIError - (in uri/common.rb)
 #     *   URI::InvalidComponentError - (in uri/common.rb)
 #     *   URI::BadURIError - (in uri/common.rb)
 #
-#
-#
 # ## Copyright Info
 #
 # Author
 # :   Akira Yamada <akira@ruby-lang.org>
+#
 # Documentation
 # :   Akira Yamada <akira@ruby-lang.org> Dmitry V. Sabanin <sdmitry@lrn.ru>
 #     Vincent Batts <vbatts@hashbangbash.com>
+#
 # License
 # :   Copyright (c) 2001 akira yamada <akira@ruby-lang.org> You can redistribute
 #     it and/or modify it under the same term as Ruby.
@@ -182,24 +176,34 @@ module URI
     #
     # `scheme`
     # :   Protocol scheme, i.e. 'http','ftp','mailto' and so on.
+    #
     # `userinfo`
     # :   User name and password, i.e. 'sdmitry:bla'.
+    #
     # `host`
     # :   Server host name.
+    #
     # `port`
     # :   Server port.
+    #
     # `registry`
     # :   Registry of naming authorities.
+    #
     # `path`
     # :   Path on server.
+    #
     # `opaque`
     # :   Opaque part.
+    #
     # `query`
     # :   Query data.
+    #
     # `fragment`
     # :   Part of the URI after '#' character.
+    #
     # `parser`
     # :   Parser for internal use [URI::DEFAULT_PARSER by default].
+    #
     # `arg_check`
     # :   Check arguments [false by default].
     #

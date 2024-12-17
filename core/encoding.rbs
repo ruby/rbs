@@ -12,7 +12,6 @@
 # *   The name of an encoding.
 # *   An alias for an encoding name.
 #
-#
 # These are equivalent:
 #
 #     'foo'.encode(Encoding::US_ASCII) # Encoding object.
@@ -109,7 +108,6 @@ class Encoding
   # *   String#inspect
   # *   Regexp#inspect
   #
-  #
   # While strings created from these locations will have this encoding, the
   # encoding may not be valid.  Be sure to check String#valid_encoding?.
   #
@@ -157,7 +155,6 @@ class Encoding
   # *   Values from ENV
   # *   Values in ARGV including $PROGRAM_NAME
   #
-  #
   # Additionally String#encode and String#encode! use the default internal
   # encoding if no encoding is given.
   #
@@ -198,10 +195,13 @@ class Encoding
   #
   # "external"
   # :   default external encoding
+  #
   # "internal"
   # :   default internal encoding
+  #
   # "locale"
   # :   locale encoding
+  #
   # "filesystem"
   # :   filesystem encoding
   #
@@ -999,7 +999,6 @@ class Encoding::Converter < Object
   #     :partial_input is specified.
   # *   conversion is finished (:finished)
   #
-  #
   # example:
   #     ec = Encoding::Converter.new("UTF-8", "UTF-16BE")
   #     ret = ec.primitive_convert(src="pi", dst="", nil, 100)
@@ -1212,7 +1211,6 @@ class Encoding::Converter < Object
   # *   two-element arrays which contain encodings or encoding names, or
   # *   strings representing decorator names.
   #
-  #
   # Encoding::Converter.new optionally takes an option. The option should be a
   # hash or an integer. The option hash can contain :invalid => nil, etc. The
   # option integer should be logical-or of constants such as
@@ -1220,25 +1218,34 @@ class Encoding::Converter < Object
   #
   # :invalid => nil
   # :   Raise error on invalid byte sequence.  This is a default behavior.
+  #
   # :invalid => :replace
   # :   Replace invalid byte sequence by replacement string.
+  #
   # :undef => nil
   # :   Raise an error if a character in source_encoding is not defined in
   #     destination_encoding. This is a default behavior.
+  #
   # :undef => :replace
   # :   Replace undefined character in destination_encoding with replacement
   #     string.
+  #
   # :replace => string
   # :   Specify the replacement string. If not specified, "uFFFD" is used for
   #     Unicode encodings and "?" for others.
+  #
   # :universal_newline => true
   # :   Convert CRLF and CR to LF.
+  #
   # :crlf_newline => true
   # :   Convert LF to CRLF.
+  #
   # :cr_newline => true
   # :   Convert LF to CR.
+  #
   # :lf_newline => true
   # :   Convert CRLF and CR to LF (when writing).
+  #
   # :xml => :text
   # :   Escape as XML CharData. This form can be used as an HTML 4.0 #PCDATA.
   #     *   '&' -> '&amp;'
@@ -1256,7 +1263,6 @@ class Encoding::Converter < Object
   #     *   '"' -> '&quot;'
   #     *   undefined characters in destination_encoding -> hexadecimal CharRef
   #         such as &#xHH;
-  #
   #
   #
   # Examples:

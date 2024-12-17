@@ -66,12 +66,10 @@
 # *   A severity (the required argument to #add).
 # *   An automatically created timestamp.
 #
-#
 # And may also have:
 #
 # *   A message.
 # *   A program name.
-#
 #
 # Example:
 #
@@ -92,7 +90,6 @@
 # *   Program name.
 # *   Message.
 #
-#
 # You can use a different entry format by:
 #
 # *   Setting a custom format proc (affects following entries); see
@@ -112,8 +109,6 @@
 #
 #             logger.error("#{my_slow_message_generator}")
 #
-#
-#
 # ### Severity
 #
 # The severity of a log entry has two effects:
@@ -122,7 +117,6 @@
 #     [Log Level](rdoc-ref:Logger@Log+Level).
 # *   Indicates to any log reader (whether a person or a program) the relative
 #     importance of the entry.
-#
 #
 # ### Timestamp
 #
@@ -156,7 +150,6 @@
 # *   A string: used as-is.
 # *   An Exception: `message.message` is used.
 # *   Anything else: `message.inspect` is used.
-#
 #
 # **Note**: Logger::Formatter does not escape or sanitize the message passed to
 # it. Developers should be aware that malicious data (user input) may be in the
@@ -271,7 +264,6 @@
 # *   Only the most recent log file is open and active; the others are closed
 #     and inactive.
 #
-#
 # ### Size-Based Rotation
 #
 # For size-based log file rotation, call Logger.new with:
@@ -281,7 +273,6 @@
 #     be in the rotation.
 # *   Argument `shift_size` as a positive integer: the maximum size (in bytes)
 #     of each log file; defaults to 1048576 (1 megabyte).
-#
 #
 # Examples:
 #
@@ -300,13 +291,11 @@
 # *   `t.log` is closed and renamed to `t.log.0`.
 # *   A new file `t.log` is opened.
 #
-#
 # The second time `t.log` is full:
 #
 # *   +t.log.0 is renamed as `t.log.1`.
 # *   `t.log` is closed and renamed to `t.log.0`.
 # *   A new file `t.log` is opened.
-#
 #
 # Each subsequent time that `t.log` is full, the log files are rotated:
 #
@@ -315,14 +304,12 @@
 # *   `t.log` is closed and renamed to `t.log.0`.
 # *   A new file `t.log` is opened.
 #
-#
 # ### Periodic Rotation
 #
 # For periodic rotation, call Logger.new with:
 #
 # *   Argument `logdev` as a file path.
 # *   Argument `shift_age` as a string period indicator.
-#
 #
 # Examples:
 #
@@ -340,7 +327,6 @@
 #     such as `t.log.20220509`.
 # *   A new log file `t.log` is opened.
 # *   Nothing is removed.
-#
 #
 # The default format for the suffix is `'%Y%m%d'`, which produces a suffix
 # similar to the one above. You can set a different format using create-time
@@ -534,7 +520,6 @@ class Logger
   # *   `progname`: The program name for the entry.
   # *   `msg`: The message for the entry (string or string-convertible object).
   #
-  #
   # The proc should return a string containing the formatted entry.
   #
   # This custom formatter uses [String#dump](rdoc-ref:String#dump) to escape the
@@ -567,7 +552,6 @@ class Logger
   # *   `time`: A Time object representing the entry's timestamp.
   # *   `progname`: The program name for the entry.
   # *   `msg`: The message for the entry (string or string-convertible object).
-  #
   #
   # The proc should return a string containing the formatted entry.
   #
@@ -670,7 +654,6 @@ class Logger
   # *   If `logdev` is an IO stream (usually `$stdout`, `$stderr`, or an open File
   #     object), opens the stream for append.
   #
-  #
   # Example:
   #
   #     logger = Logger.new('t.log')
@@ -769,7 +752,6 @@ class Logger
   # *   An IO stream (typically +$stdout+, +$stderr+. or an open file): entries
   #     are to be written to the given stream.
   # *   `nil` or `File::NULL`: no entries are to be written.
-  #
   #
   # Examples:
   #

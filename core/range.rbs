@@ -13,7 +13,6 @@
 #         (1...4).to_a     # => [1, 2, 3]
 #         ('a'...'d').to_a # => ["a", "b", "c"]
 #
-#
 # A range may be created using method Range.new:
 #
 #     # Ranges that by default include the given end value.
@@ -117,7 +116,6 @@
 # *   Included from module Enumerable: #each_entry, #each_with_index,
 #     #each_with_object, #each_slice, #each_cons, and #reverse_each.
 #
-#
 # Example:
 #
 #     a = []
@@ -168,7 +166,6 @@
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-#
 # Here, class Range provides methods that are useful for:
 #
 # *   [Creating a Range](rdoc-ref:Range@Methods+for+Creating+a+Range)
@@ -179,11 +176,9 @@
 # *   [Methods for Working with
 #     JSON](rdoc-ref:Range@Methods+for+Working+with+JSON)
 #
-#
 # ### Methods for Creating a Range
 #
 # *   ::new: Returns a new range.
-#
 #
 # ### Methods for Querying
 #
@@ -200,7 +195,6 @@
 # *   #minmax: Returns the minimum and maximum values in `self`.
 # *   #size: Returns the count of elements in `self`.
 #
-#
 # ### Methods for Comparing
 #
 # *   #==: Returns whether a given object is equal to `self` (uses #==).
@@ -211,7 +205,6 @@
 # *   #include? (aliased as #member?): Returns whether a given object is an
 #     element of `self`.
 #
-#
 # ### Methods for Iterating
 #
 # *   #%: Requires argument `n`; calls the block with each `n`-th element of
@@ -220,13 +213,11 @@
 # *   #step: Takes optional argument `n` (defaults to 1); calls the block with
 #     each `n`-th element of `self`.
 #
-#
 # ### Methods for Converting
 #
 # *   #inspect: Returns a string representation of `self` (uses #inspect).
 # *   #to_a (aliased as #entries): Returns elements of `self` in an array.
 # *   #to_s: Returns a string representation of `self` (uses #to_s).
-#
 #
 # ### Methods for Working with JSON
 #
@@ -234,7 +225,6 @@
 #     object.
 # *   #as_json: Returns a 2-element hash representing `self`.
 # *   #to_json: Returns a JSON string representing `self`.
-#
 #
 # To make these methods available:
 #
@@ -283,7 +273,6 @@ class Range[out Elem] < Object
   # *   `other.begin == self.begin`.
   # *   `other.end == self.end`.
   # *   `other.exclude_end? == self.exclude_end?`.
-  #
   #
   # Otherwise returns `false`.
   #
@@ -449,7 +438,6 @@ class Range[out Elem] < Object
   # *   The begin value of `self` is larger than its end value.
   # *   An internal call to `<=>` returns `nil`; that is, the operands are not
   #     comparable.
-  #
   #
   # Beginless ranges cover all values of the same type before the end, excluding
   # the end for exclusive ranges. Beginless ranges cover ranges that end before
@@ -706,7 +694,6 @@ class Range[out Elem] < Object
   # *   Then, sequentially, with the so-far maximum value and the next element of
   #     `self`.
   #
-  #
   # To illustrate:
   #
   #     (1..4).max {|a, b| p [a, b]; a <=> b } # => 4
@@ -749,12 +736,10 @@ class Range[out Elem] < Object
   #         (1...1).max  {|a, b| -(a <=> b) }    # => nil
   #         (1...1).max(2)  {|a, b| -(a <=> b) } # => []
   #
-  #
   # Raises an exception if either:
   #
   # *   `self` is a endless range: `(1..)`.
   # *   A block is given and `self` is a beginless range.
-  #
   #
   # Related: Range#min, Range#minmax.
   #
@@ -793,7 +778,6 @@ class Range[out Elem] < Object
   # *   First, with the first two element of `self`.
   # *   Then, sequentially, with the so-far minimum value and the next element of
   #     `self`.
-  #
   #
   # To illustrate:
   #
@@ -837,12 +821,10 @@ class Range[out Elem] < Object
   #         (1...1).min  {|a, b| -(a <=> b) }    # => nil
   #         (1...1).min(2)  {|a, b| -(a <=> b) } # => []
   #
-  #
   # Raises an exception if either:
   #
   # *   `self` is a beginless range: `(..4)`.
   # *   A block is given and `self` is an endless range.
-  #
   #
   # Related: Range#max, Range#minmax.
   #
@@ -1025,7 +1007,6 @@ class Range[out Elem] < Object
   # *   `other.begin eql? self.begin`.
   # *   `other.end eql? self.end`.
   # *   `other.exclude_end? == self.exclude_end?`.
-  #
   #
   # Otherwise returns `false`.
   #

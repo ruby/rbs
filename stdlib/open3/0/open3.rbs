@@ -17,7 +17,6 @@
 #     *   Open3.capture3: Executes the command; returns strings from $stdout and
 #         $stderr.
 #
-#
 # *   Each of these methods executes a single command in a process or subshell,
 #     and returns pipes for $stdin, $stdout, and/or $stderr:
 #
@@ -28,7 +27,6 @@
 #     *   Open3.popen3: Executes the command; returns pipes for $stdin, $stdout,
 #         and $stderr.
 #
-#
 # *   Each of these methods executes one or more commands in processes and/or
 #     subshells, returns pipes for the first $stdin, the last $stdout, or both:
 #
@@ -38,8 +36,6 @@
 #     *   Open3.pipeline_w: Returns a pipe for the first $stdin.
 #     *   Open3.pipeline_start: Does not wait for processes to complete.
 #     *   Open3.pipeline: Waits for processes to complete.
-#
-#
 #
 # Each of the methods above accepts:
 #
@@ -65,7 +61,6 @@ module Open3
   #     standard error of the child process.
   # *   Returns as `status` a `Process::Status` object that represents the exit
   #     status of the child process.
-  #
   #
   # Returns the array `[stdout_and_stderr_s, status]`:
   #
@@ -99,13 +94,11 @@ module Open3
   # *   If entry `options[:binmode]` exists, the entry is removed and the internal
   #     streams are set to binary mode.
   #
-  #
   # The single required argument is one of the following:
   #
   # *   `command_line` if it is a string, and if it begins with a shell reserved
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
-  #
   #
   # **Argument `command_line`**
   #
@@ -132,7 +125,6 @@ module Open3
   # *   The string path to an executable to be called.
   # *   A 2-element array containing the path to an executable and the string to
   #     be used as the name of the executing process.
-  #
   #
   # Example:
   #

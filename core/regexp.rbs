@@ -41,7 +41,6 @@
 #
 #     See [Regexp Methods](rdoc-ref:regexp/methods.rdoc).
 #
-#
 # ## Regexp Objects
 #
 # A regexp object has:
@@ -53,7 +52,6 @@
 # *   A timeout; see [Timeouts](rdoc-ref:Regexp@Timeouts).
 #
 # *   An encoding; see [Encodings](rdoc-ref:Regexp@Encodings).
-#
 #
 # ## Creating a Regexp
 #
@@ -81,7 +79,6 @@
 #         %r<foo> # => /foo/
 #
 # *   Method Regexp.new.
-#
 #
 # ## Method `match`
 #
@@ -118,7 +115,6 @@
 # *   `#match`: see [Method match](rdoc-ref:Regexp@Method+match).
 # *   `#=~`: see [Operator =~](rdoc-ref:Regexp@Operator+-3D~).
 #
-#
 # The affected global variables are:
 #
 # *   `$~`: Returns a MatchData object, or `nil`.
@@ -129,7 +125,6 @@
 # *   `$1`, `$2`, etc.: Returns the first, second, etc., matched group, or
 #     `nil`. Note that `$0` is quite different; it returns the name of the
 #     currently executing program.
-#
 #
 # Examples:
 #
@@ -188,7 +183,6 @@
 # *   [POSIX Bracket Expressions](rdoc-ref:Regexp@POSIX+Bracket+Expressions)
 # *   [Comments](rdoc-ref:Regexp@Comments)
 #
-#
 # ### Special Characters
 #
 # Regexp special characters, called *metacharacters*, have special meanings in
@@ -236,7 +230,6 @@
 #     in a source literal, they are shorthands for various matching characters:
 #
 #         \w \W \d \D \h \H \S \R
-#
 #
 # ### Character Classes
 #
@@ -342,7 +335,6 @@
 #         /\R/.match("\u2028") # => #<MatchData "\u2028"> # Line separator (LSEP)
 #         /\R/.match("\u2029") # => #<MatchData "\u2029"> # Paragraph separator (PSEP)
 #
-#
 # ### Anchors
 #
 # An anchor is a metasequence that matches a zero-width position between
@@ -414,7 +406,6 @@
 #         "hello, world".match(/,/, 3)   # => #<MatchData ",">
 #         "hello, world".match(/\G,/, 3) # => nil
 #
-#
 # #### Lookaround Anchors
 #
 # Lookahead anchors:
@@ -427,7 +418,6 @@
 #     characters *do not* match *pat*, but doesn't include those characters in
 #     the matched substring.
 #
-#
 # Lookbehind anchors:
 #
 # *   `(?<=*pat*)`: Positive lookbehind assertion: ensures that the preceding
@@ -437,7 +427,6 @@
 # *   `(?<!*pat*)`: Negative lookbehind assertion: ensures that the preceding
 #     characters do not match *pat*, but doesn't include those characters in the
 #     matched substring.
-#
 #
 # The pattern below uses positive lookahead and positive lookbehind to match
 # text appearing in **...** tags without including the tags in the match:
@@ -461,7 +450,6 @@
 #
 #         /(a)\K(b)\Kc/
 #         /(?<=(?<=(a))(b))c/
-#
 #
 # ### Alternation
 #
@@ -546,7 +534,6 @@
 #         /\w{1,2}/.match('x')   # => #<MatchData "x">
 #         /\w{1,2}/.match('xyz') # => #<MatchData "xy">
 #
-#
 # #### Greedy, Lazy, or Possessive Matching
 #
 # Quantifier matching may be greedy, lazy, or possessive:
@@ -561,7 +548,6 @@
 #     Possessive quantifiers: `*+`, `++`, `?+`. Note that `{min, max}` and its
 #     variants do *not* support possessive matching.
 #
-#
 # More:
 #
 # *   About greedy and lazy matching, see [Choosing Minimal or Maximal
@@ -574,7 +560,6 @@
 #     egular%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Pro
 #     gramming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%202
 #     012-09-06%5D.pdf#tutorial-backtrack).
-#
 #
 # ### Groups and Captures
 #
@@ -660,14 +645,12 @@
 #     *   The ordinary `\*n`* notation applies only for *n* in range (1..9).
 #     *   The `MatchData[*n*]` notation applies for any non-negative *n*.
 #
-#
 # *   `\0` is a special backreference, referring to the entire matched string;
 #     it may not be used within the regexp itself, but may be used outside it
 #     (for example, in a substitution method call):
 #
 #         'The cat sat in the hat'.gsub(/[csh]at/, '\0s')
 #         # => "The cats sats in the hats"
-#
 #
 # #### Named Captures
 #
@@ -733,7 +716,6 @@
 # 5.  The final subexpression `"` now matches the final substring `"`, and the
 #     overall match succeeds.
 #
-#
 # If subexpression `.*` is grouped atomically, the backtracking is disabled, and
 # the overall match fails:
 #
@@ -775,7 +757,6 @@
 # 9.  Matches the fourth character in the string, `')'`.
 # 10. Matches the end of the string.
 #
-#
 # See [Subexpression
 # calls](https://learnbyexample.github.io/Ruby_Regexp/groupings-and-backreferenc
 # es.html?highlight=subexpression#subexpression-calls).
@@ -788,7 +769,6 @@
 # *   The match to be applied is *yes* if *cond* is captured; otherwise the
 #     match to be applied is *no*.
 # *   If not needed, `|*no`* may be omitted.
-#
 #
 # Examples:
 #
@@ -852,7 +832,6 @@
 # *   `/\p{Upper}/`: Uppercase alphabetical
 # *   `/\p{XDigit}/`: Digit allowed in a hexadecimal number (i.e., 0-9a-fA-F)
 #
-#
 # These are also commonly used:
 #
 # *   `/\p{Emoji}/`: Unicode emoji.
@@ -866,17 +845,13 @@
 #         *   `Decimal Number` (`Nd`)
 #         *   `Connector Punctuation` (`Pc`).
 #
-#
 #     *   Unicode properties:
 #         *   `Alpha`
 #         *   `Join_Control`
 #
-#
-#
 # *   `/\p{ASCII}/`: A character in the ASCII character set.
 # *   `/\p{Any}/`: Any Unicode character (including unassigned characters).
 # *   `/\p{Assigned}/`: An assigned character.
-#
 #
 # #### Unicode Character Categories
 #
@@ -885,7 +860,6 @@
 # *   May be either its full name or its abbreviated name.
 # *   Is case-insensitive.
 # *   Treats a space, a hyphen, and an underscore as equivalent.
-#
 #
 # Examples:
 #
@@ -908,7 +882,6 @@
 # *   [Lu, Titlecase_Letter](https://www.compart.com/en/unicode/category/Lt).
 # *   [Lu, Uppercase_Letter](https://www.compart.com/en/unicode/category/Lu).
 #
-#
 # Marks:
 #
 # *   `M`, `Mark`: `Mc`, `Me`, or `Mn`.
@@ -916,14 +889,12 @@
 # *   [Me, Enclosing_Mark](https://www.compart.com/en/unicode/category/Me).
 # *   [Mn, Nonapacing_Mark](https://www.compart.com/en/unicode/category/Mn).
 #
-#
 # Numbers:
 #
 # *   `N`, `Number`: `Nd`, `Nl`, or `No`.
 # *   [Nd, Decimal_Number](https://www.compart.com/en/unicode/category/Nd).
 # *   [Nl, Letter_Number](https://www.compart.com/en/unicode/category/Nl).
 # *   [No, Other_Number](https://www.compart.com/en/unicode/category/No).
-#
 #
 # Punctation:
 #
@@ -955,7 +926,6 @@
 # *   [Co, Private_Use](https://www.compart.com/en/unicode/category/Co).
 # *   [Cs, Surrogate](https://www.compart.com/en/unicode/category/Cs).
 #
-#
 # #### Unicode Scripts and Blocks
 #
 # Among the Unicode properties are:
@@ -964,7 +934,6 @@
 #     [supported scripts](https://www.unicode.org/standard/supported.html).
 # *   [Unicode blocks](https://en.wikipedia.org/wiki/Unicode_block); see
 #     [supported blocks](http://www.unicode.org/Public/UNIDATA/Blocks.txt).
-#
 #
 # ### POSIX Bracket Expressions
 #
@@ -975,7 +944,6 @@
 # *   `/\d/` matches only ASCII decimal digits `0` through `9`.
 # *   `/[[:digit:]]/` matches any character in the Unicode `Decimal Number`
 #     (`Nd`) category; see below.
-#
 #
 # The POSIX bracket expressions:
 #
@@ -1030,7 +998,6 @@
 # *   `/[[:punct:]]/`: Matches any (Unicode punctuation
 #     character}[https://www.compart.com/en/unicode/category/Po]:
 #
-#
 # Ruby also supports these (non-POSIX) bracket expressions:
 #
 # *   `/[[:ascii:]]/`: Matches a character in the ASCII character set.
@@ -1042,13 +1009,9 @@
 #         *   `Decimal Number` (`Nd`)
 #         *   `Connector Punctuation` (`Pc`).
 #
-#
 #     *   Unicode properties:
 #         *   `Alpha`
 #         *   `Join_Control`
-#
-#
-#
 #
 # ### Comments
 #
@@ -1073,7 +1036,6 @@
 # *   `o`: `/*pattern*/o` sets [Interpolation
 #     Mode](rdoc-ref:Regexp@Interpolation+Mode).
 #
-#
 # Any, all, or none of these may be applied.
 #
 # Modifiers `i`, `m`, and `x` may be applied to subexpressions:
@@ -1083,7 +1045,6 @@
 # *   `(?*modifier*:*subexp*)` turns the mode "on" for *subexp* within the group
 # *   `(?-*modifier*:*subexp*)` turns the mode "off" for *subexp* within the
 #     group
-#
 #
 # Example:
 #
@@ -1126,7 +1087,6 @@
 #
 #         /a.c/m.match("a\nc") # => #<MatchData "a\nc">
 #
-#
 # Unlike other languages, the modifier `m` does not affect the anchors `^` and
 # `$`. These anchors always match at line-boundaries in Ruby.
 #
@@ -1137,7 +1097,6 @@
 # *   Literal white space in the pattern is to be ignored.
 # *   Character `#` marks the remainder of its containing line as a comment,
 #     which is also to be ignored for matching purposes.
-#
 #
 # In extended mode, whitespace and comments may be used to form a
 # self-documented regexp.
@@ -1219,14 +1178,12 @@
 #
 #         /foo/s.encoding # => #<Encoding:Windows-31J>
 #
-#
 # A regexp can be matched against a target string when either:
 #
 # *   They have the same encoding.
 # *   The regexp's encoding is a fixed encoding and the string contains only
 #     ASCII characters. Method Regexp#fixed_encoding? returns whether the regexp
 #     has a *fixed* encoding.
-#
 #
 # If a match between incompatible encodings is attempted an
 # `Encoding::CompatibilityError` exception is raised.
@@ -1270,7 +1227,6 @@
 #         re = Regexp.new('foo', timeout: 5.0)
 #         re.timeout # => 5.0
 #
-#
 # When regexp.timeout is `nil`, the timeout "falls through" to Regexp.timeout;
 # when regexp.timeout is non-`nil`, that value controls timing out:
 #
@@ -1300,7 +1256,6 @@
 # *   No nested quantifiers with counting (i.e. no nested `{n}`, `{min,}`,
 #     `{,max}`, or `{min,max}` style quantifiers)
 #
-#
 # You can use method Regexp.linear_time? to determine whether a pattern meets
 # these criteria:
 #
@@ -1325,7 +1280,6 @@
 #     ar%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Program
 #     ming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%202012-
 #     09-06%5D.pdf) by Jan Goyvaerts & Steven Levithan.
-#
 #
 # Explore, test (interactive online editor):
 #
@@ -1580,7 +1534,6 @@ class Regexp
   # *   `nil` or `false`, which is ignored.
   # *   Any other truthy value, in which case the regexp will be case-insensitive.
   #
-  #
   # If optional keyword argument `timeout` is given, its float value overrides the
   # timeout interval for the class, Regexp.timeout. If `nil` is passed as
   # +timeout, it uses the timeout interval for the class, Regexp.timeout.
@@ -1653,7 +1606,6 @@ class Regexp
   # *   Does not contain interpolations; see [Regexp
   #     interpolation](rdoc-ref:Regexp@Interpolation+Mode).
   # *   Is at the left of the expression.
-  #
   #
   # Example:
   #
@@ -1842,7 +1794,6 @@ class Regexp
   #
   # *   Each key is the name of a named capture.
   # *   Each value is an array of integer indexes for that named capture.
-  #
   #
   # Examples:
   #

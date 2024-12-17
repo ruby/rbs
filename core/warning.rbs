@@ -45,8 +45,8 @@ module Warning
   # :   deprecation warnings
   #     *   assignment of non-nil value to `$,` and `$;`
   #     *   keyword arguments
-  #
   #     etc.
+  #
   #
   # `:experimental`
   # :   experimental features

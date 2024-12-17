@@ -11,7 +11,6 @@
 # *   [Iterating](rdoc-ref:Enumerable@Methods+for+Iterating)
 # *   [And more....](rdoc-ref:Enumerable@Other+Methods)
 #
-#
 # ### Methods for Querying
 #
 # These methods return information about the Enumerable other than the elements
@@ -32,7 +31,6 @@
 # *   #tally: Returns a new Hash containing the counts of occurrences of each
 #     element.
 #
-#
 # ### Methods for Fetching
 #
 # These methods return entries from the Enumerable, without modifying it:
@@ -46,7 +44,6 @@
 # *   #take_while: Returns leading elements as specified by the given block.
 # *   #drop_while: Returns trailing elements as specified by the given block.
 #
-#
 # *Minimum and maximum value elements*:
 #
 # *   #min: Returns the elements whose values are smallest among the elements,
@@ -59,7 +56,6 @@
 # *   #max_by: Returns the largest element, as determined by the given block.
 # *   #minmax_by: Returns the smallest and largest elements, as determined by
 #     the given block.
-#
 #
 # *Groups, slices, and partitions*:
 #
@@ -77,7 +73,6 @@
 # *   #chunk_while: Returns elements organized into chunks as specified by the
 #     given block.
 #
-#
 # ### Methods for Searching and Filtering
 #
 # These methods return elements that meet a specified criterion:
@@ -89,14 +84,12 @@
 # *   #reject: Returns elements not rejected by the block.
 # *   #uniq: Returns elements that are not duplicates.
 #
-#
 # ### Methods for Sorting
 #
 # These methods return elements in sorted order:
 #
 # *   #sort: Returns the elements, sorted by `<=>` or the given block.
 # *   #sort_by: Returns the elements, sorted by the given block.
-#
 #
 # ### Methods for Iterating
 #
@@ -111,7 +104,6 @@
 #     from #each_slice).
 # *   #reverse_each: Calls the block with each successive element, in reverse
 #     order.
-#
 #
 # ### Other Methods
 #
@@ -129,7 +121,6 @@
 #     the n-tuples or calls the block with each.
 # *   #cycle: Calls the block with each element, cycling repeatedly.
 #
-#
 # ## Usage
 #
 # To use module Enumerable in a collection class:
@@ -140,7 +131,6 @@
 #
 # *   Implement method `#each` which must yield successive elements of the
 #     collection. The method will be called by almost any Enumerable method.
-#
 #
 # Example:
 #
@@ -174,14 +164,12 @@
 # *   Range
 # *   Struct
 #
-#
 # These Ruby standard library classes include Enumerable:
 #
 # *   CSV
 # *   CSV::Table
 # *   CSV::Row
 # *   Set
-#
 #
 # Virtually all methods in Enumerable call method `#each` in the including
 # class:
@@ -190,7 +178,6 @@
 # *   `Struct#each` yields the next name-value pair as a 2-element Array.
 # *   For the other classes above, `#each` yields the next object from the
 #     collection.
-#
 #
 # ## About the Examples
 #
@@ -704,7 +691,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   Each value is an array of those elements for which the block returned that
   #     key.
   #
-  #
   # Examples:
   #
   #     g = (1..6).group_by {|i| i%3 }
@@ -744,7 +730,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   A method named by `symbol`.
   # *   A block to which each operand is passed.
   #
-  #
   # With method-name argument `symbol`, combines operands using the method:
   #
   #     # Sum, without initial_operand.
@@ -777,7 +762,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # :       `['a', 'b', 'c']`.
   #
   #
-  #
   # Examples with first operand (which is `self.first`) of various types:
   #
   #     # Integer.
@@ -805,7 +789,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # :       `['e', 'a', 'b', 'c']`.
   #
   #
-  #
   # Examples with `initial_operand` of various types:
   #
   #     # Integer.
@@ -828,7 +811,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   That result is combined with the third operand.
   # *   That result is combined with the fourth operand.
   # *   And so on.
-  #
   #
   # The return value from `inject` is the result of the last combination.
   #
@@ -863,7 +845,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   The third call passes the result of the second call, along with the fourth
   #     operand.
   # *   And so on.
-  #
   #
   # The return value from `inject` is the return value from the last block call.
   #
@@ -920,7 +901,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   A negative integer if `a < b`.
   # *   Zero if `a == b`.
   # *   A positive integer if `a > b`.
-  #
   #
   # With a block given and no argument, returns the maximum element as determined
   # by the block:
@@ -1019,7 +999,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   A negative integer if `a < b`.
   # *   Zero if `a == b`.
   # *   A positive integer if `a > b`.
-  #
   #
   # With a block given and no argument, returns the minimum element as determined
   # by the block:
@@ -1234,7 +1213,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     value.
   # *   The other having all other elements.
   #
-  #
   # Examples:
   #
   #     p = (1..4).partition {|i| i.even? }
@@ -1320,7 +1298,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   A negative integer if `a < b`.
   # *   Zero if `a == b`.
   # *   A positive integer if `a > b`.
-  #
   #
   # Examples:
   #
@@ -1583,7 +1560,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   A method named by `symbol`.
   # *   A block to which each operand is passed.
   #
-  #
   # With method-name argument `symbol`, combines operands using the method:
   #
   #     # Sum, without initial_operand.
@@ -1616,7 +1592,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # :       `['a', 'b', 'c']`.
   #
   #
-  #
   # Examples with first operand (which is `self.first`) of various types:
   #
   #     # Integer.
@@ -1644,7 +1619,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # :       `['e', 'a', 'b', 'c']`.
   #
   #
-  #
   # Examples with `initial_operand` of various types:
   #
   #     # Integer.
@@ -1667,7 +1641,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   That result is combined with the third operand.
   # *   That result is combined with the fourth operand.
   # *   And so on.
-  #
   #
   # The return value from `inject` is the result of the last combination.
   #
@@ -1702,7 +1675,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   The third call passes the result of the second call, along with the fourth
   #     operand.
   # *   And so on.
-  #
   #
   # The return value from `inject` is the return value from the last block call.
   #
@@ -1858,7 +1830,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   Each key is an element of `self`.
   # *   Each value is the number elements equal to that key.
   #
-  #
   # With no argument:
   #
   #     %w[a b c b c a c b].tally # => {"a"=>2, "b"=>3, "c"=>3}
@@ -1928,7 +1899,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # *   The `n`-th element of self.
   # *   The `n`-th element of each of the `other_enums`.
   #
-  #
   # If all `other_enums` and self are the same size, all elements are included in
   # the result, and there is no `nil`-filling:
   #
@@ -1997,14 +1967,12 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     returned, and all following elements for which the block returned the same
   #     value:
   #
-  #
   # So that:
   #
   # *   Each block return value that is different from its predecessor begins a
   #     new chunk.
   # *   Each block return value that is the same as its predecessor continues the
   #     same chunk.
-  #
   #
   # Example:
   #

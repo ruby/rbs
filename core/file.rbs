@@ -49,7 +49,6 @@
 # *   May also contain a 1-character [file-create
 #     mode](rdoc-ref:File@File-Create+Mode).
 #
-#
 # #### Read/Write Mode
 #
 # The read/write `mode` determines:
@@ -61,13 +60,10 @@
 #     *   The initial read position in the file.
 #     *   Where in the file reading can occur.
 #
-#
 # *   Whether writing is allowed, and if so:
 #
 #     *   The initial write position in the file.
 #     *   Where in the file writing can occur.
-#
-#
 #
 # These tables summarize:
 #
@@ -110,7 +106,6 @@
 # *   `Error` means that an exception is raised if disallowed reading or writing
 #     is attempted.
 #
-#
 # ##### Read/Write Modes for Existing File
 #
 # *   `'r'`:
@@ -141,7 +136,6 @@
 #     *   Writing is not allowed:
 #
 #             f.write('foo') # Raises IOError.
-#
 #
 # *   `'w'`:
 #
@@ -197,7 +191,6 @@
 #
 #             f.read # Raises IOError.
 #
-#
 # *   `'a'`:
 #
 #     *   File is not initially truncated:
@@ -229,7 +222,6 @@
 #     *   Reading is not allowed:
 #
 #             f.read # Raises IOError.
-#
 #
 # *   `'r+'`:
 #
@@ -286,7 +278,6 @@
 #             File.read(path)
 #             # => "WWWst lineXXXecond line\nFourth line\nFifth YYYe\n\u0000\u0000ZZZ"
 #
-#
 # *   `'a+'`:
 #
 #     *   File is not initially truncated:
@@ -325,8 +316,6 @@
 #
 #             f.seek(-3, :END)
 #             f.read # => "bat"
-#
-#
 #
 # ##### Read/Write Modes for File To Be Created
 #
@@ -383,7 +372,6 @@
 #
 #             f.read # Raises IOError.
 #
-#
 # *   `'a'`:
 #
 #     *   File's initial write position is 0:
@@ -410,7 +398,6 @@
 #     *   Reading is not allowed:
 #
 #             f.read # Raises IOError.
-#
 #
 # *   `'w+'`:
 #
@@ -476,7 +463,6 @@
 #             f.read
 #             # => "bah"
 #
-#
 # *   `'a+'`:
 #
 #     *   File's initial write position is 0:
@@ -515,8 +501,6 @@
 #             f.pos = 800
 #             f.read # => ""
 #
-#
-#
 # #### Data Mode
 #
 # To specify whether data is to be treated as text or as binary data, either of
@@ -528,7 +512,6 @@
 # *   `'b'`: Binary data; sets the default external encoding to
 #     `Encoding::ASCII_8BIT`; on Windows, suppresses conversion between EOL and
 #     CRLF and disables interpreting `0x1A` as an end-of-file marker.
-#
 #
 # If neither is given, the stream defaults to text data.
 #
@@ -550,7 +533,6 @@
 # *   `'x'`: Creates the file if it does not exist; raises an exception if the
 #     file exists.
 #
-#
 # Example:
 #
 #     File.new('t.tmp', 'wx')
@@ -571,7 +553,6 @@
 # *   `File::RDWR`: Open for reading and writing.
 # *   `File::APPEND`: Open for appending only.
 #
-#
 # Examples:
 #
 #     File.new('t.txt', File::RDONLY)
@@ -587,7 +568,6 @@
 # *   `File::CREAT`: Create file if it does not exist.
 # *   `File::EXCL`: Raise an exception if `File::CREAT` is given and the file
 #     exists.
-#
 #
 # ### Data Mode Specified as an Integer
 #
@@ -699,14 +679,12 @@
 #     methods for creating, reading, and writing files
 # *   Includes module FileTest, which provides dozens of additional methods.
 #
-#
 # Here, class File provides methods that are useful for:
 #
 # *   [Creating](rdoc-ref:File@Creating)
 # *   [Querying](rdoc-ref:File@Querying)
 # *   [Settings](rdoc-ref:File@Settings)
 # *   [Other](rdoc-ref:File@Other)
-#
 #
 # ### Creating
 #
@@ -716,7 +694,6 @@
 # *   ::link: Creates a new name for an existing file using a hard link.
 # *   ::mkfifo: Returns the FIFO file created at the given path.
 # *   ::symlink: Creates a symbolic link for the given file path.
-#
 #
 # ### Querying
 #
@@ -744,7 +721,6 @@
 # *   #path (aliased as #to_path):  Returns the string representation of the
 #     given path.
 #
-#
 # *Times*
 #
 # *   ::atime: Returns a Time for the most recent access to the given file.
@@ -757,7 +733,6 @@
 # *   #ctime: Returns a Time for the metadata change of `self`.
 # *   #mtime: Returns a Time for the most recent data modification to the
 #     content of `self`.
-#
 #
 # *Types*
 #
@@ -805,7 +780,6 @@
 # *   #lstat: Returns the File::Stat object for the last symbolic link in the
 #     path for `self`.
 #
-#
 # *Contents*
 #
 # *   ::empty? (aliased as ::zero?): Returns whether the file at the given path
@@ -814,7 +788,6 @@
 # *   ::size?: Returns `nil` if there is no file at the given path, or if that
 #     file is empty; otherwise returns the file size (bytes).
 # *   #size: Returns the size (bytes) of `self`.
-#
 #
 # ### Settings
 #
@@ -828,7 +801,6 @@
 # *   ::utime: Sets the access time and modification time of each file at the
 #     given paths.
 # *   #flock: Locks or unlocks `self`.
-#
 #
 # ### Other
 #
@@ -1193,10 +1165,13 @@ class File < IO
   #
   #     `*`
   # :       Matches all regular files
+  #
   #     `c*`
   # :       Matches all files beginning with `c`
+  #
   #     `*c`
   # :       Matches all files ending with `c`
+  #
   #     `*c*`
   # :       Matches all files that have `c` in them (including at the beginning or
   #         end).
@@ -1205,18 +1180,23 @@ class File < IO
   #     To match hidden files (that start with a `.`) set the File::FNM_DOTMATCH
   #     flag.
   #
+  #
   # `**`
   # :   Matches directories recursively or files expansively.
   #
+  #
   # `?`
   # :   Matches any one character. Equivalent to `/.{1}/` in regexp.
+  #
   #
   # `[set]`
   # :   Matches any one character in `set`.  Behaves exactly like character sets
   #     in Regexp, including set negation (`[^a-z]`).
   #
+  #
   # `\`
   # :   Escapes the next metacharacter.
+  #
   #
   # `{a,b}`
   # :   Matches pattern a and pattern b if File::FNM_EXTGLOB flag is enabled.
@@ -2010,7 +1990,6 @@ File::Separator: String
 #     globbing](rdoc-ref:File::Constants@Filename+Globbing+Constants+-28File-3A-
 #     3AFNM_-2A-29).
 #
-#
 # File constants defined for the local process may be retrieved with method
 # File::Constants.constants:
 #
@@ -2033,7 +2012,6 @@ File::Separator: String
 # *   StringIO.new.
 # *   StringIO.open.
 # *   StringIO#reopen.
-#
 #
 # ### Read/Write Access
 #
@@ -2133,7 +2111,6 @@ File::Separator: String
 # *   File::NOFOLLOW.
 # *   File::TMPFILE.
 #
-#
 # #### File::SYNC, File::RSYNC, and File::DSYNC
 #
 # Flag File::SYNC, File::RSYNC, or File::DSYNC specifies synchronization of I/O
@@ -2159,7 +2136,6 @@ File::Separator: String
 # *   File::DSYNC specifies that all *data* write operations are immediately to
 #     be flushed to the underlying storage device; this differs from File::SYNC,
 #     which requires that *metadata* also be synchronized.
-#
 #
 # Note that the behavior of these flags may vary slightly depending on the
 # operating system and filesystem being used. Additionally, using these flags
@@ -2257,7 +2233,6 @@ File::Separator: String
 # *   Pathname.glob.
 # *   Pathname#glob.
 #
-#
 # The constants are:
 #
 # #### File::FNM_CASEFOLD
@@ -2343,36 +2318,43 @@ File::Constants::DSYNC: Integer
 File::Constants::EXCL: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_CASEFOLD
 # [File::FNM_CASEFOLD](rdoc-ref:File::Constants@File-3A-3AFNM_CASEFOLD)
 #
 File::Constants::FNM_CASEFOLD: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_DOTMATCH
 # [File::FNM_DOTMATCH](rdoc-ref:File::Constants@File-3A-3AFNM_DOTMATCH)
 #
 File::Constants::FNM_DOTMATCH: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_EXTGLOB
 # [File::FNM_EXTGLOB](rdoc-ref:File::Constants@File-3A-3AFNM_EXTGLOB)
 #
 File::Constants::FNM_EXTGLOB: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_NOESCAPE
 # [File::FNM_NOESCAPE](rdoc-ref:File::Constants@File-3A-3AFNM_NOESCAPE)
 #
 File::Constants::FNM_NOESCAPE: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_PATHNAME
 # [File::FNM_PATHNAME](rdoc-ref:File::Constants@File-3A-3AFNM_PATHNAME)
 #
 File::Constants::FNM_PATHNAME: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_SHORTNAME
 # [File::FNM_SHORTNAME](rdoc-ref:File::Constants@File-3A-3AFNM_SHORTNAME)
 #
 File::Constants::FNM_SHORTNAME: Integer
 
 # <!-- rdoc-file=dir.c -->
+# FNM_SYSCASE
 # [File::FNM_SYSCASE](rdoc-ref:File::Constants@File-3A-3AFNM_SYSCASE)
 #
 File::Constants::FNM_SYSCASE: Integer

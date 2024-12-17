@@ -57,7 +57,6 @@
 # *   #skip
 # *   #skip_until
 #
-#
 # ### Looking Ahead
 #
 # *   #check
@@ -65,7 +64,6 @@
 # *   #exist?
 # *   #match?
 # *   #peek
-#
 #
 # ### Finding Where we Are
 #
@@ -75,13 +73,11 @@
 # *   #rest_size
 # *   #pos
 #
-#
 # ### Setting Where we Are
 #
 # *   #reset
 # *   #terminate
 # *   #pos=
-#
 #
 # ### Match Data
 #
@@ -92,7 +88,6 @@
 # *   #pre_match
 # *   #post_match
 #
-#
 # ### Miscellaneous
 #
 # *   `<<`
@@ -100,7 +95,6 @@
 # *   #string
 # *   #string=
 # *   #unscan
-#
 #
 # There are aliases to several of the methods.
 #

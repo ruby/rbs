@@ -642,7 +642,6 @@ class Addrinfo
   # *   `Socket.sockaddr_in(80, "www.ruby-lang.org")`
   # *   `Socket.sockaddr_un("/tmp/sock")`
   #
-  #
   # In an AF_INET/AF_INET6 sockaddr array, the 4th element, numeric IP address, is
   # used to construct socket address in the Addrinfo instance. If the 3rd element,
   # textual host name, is non-nil, it is also recorded but used only for

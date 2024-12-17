@@ -25,7 +25,6 @@
 # *   [Random Values](rdoc-ref:Kernel@Random+Values)
 # *   [Other](rdoc-ref:Kernel@Other)
 #
-#
 # ### Converting
 #
 # *   #Array: Returns an Array based on the given argument.
@@ -35,7 +34,6 @@
 # *   #Integer: Returns an Integer based on the given arguments.
 # *   #Rational: Returns a Rational based on the given arguments.
 # *   #String: Returns a String based on the given argument.
-#
 #
 # ### Querying
 #
@@ -56,7 +54,6 @@
 # *   #local_variables: Returns an array of local variables as symbols.
 # *   #test: Performs specified tests on the given single file or pair of files.
 #
-#
 # ### Exiting
 #
 # *   #abort: Exits the current process after printing the given arguments.
@@ -66,14 +63,12 @@
 # *   #exit!: Exits the current process without calling any registered `at_exit`
 #     handlers.
 #
-#
 # ### Exceptions
 #
 # *   #catch: Executes the given block, possibly catching a thrown object.
 # *   #raise (aliased as #fail): Raises an exception based on the given
 #     arguments.
 # *   #throw: Returns from the active catch block waiting for the given tag.
-#
 #
 # ### IO
 #
@@ -92,12 +87,10 @@
 #     input.
 # *   #select: Same as IO.select.
 #
-#
 # ### Procs
 #
 # *   #lambda: Returns a lambda proc for the given block.
 # *   #proc: Returns a new Proc; equivalent to Proc.new.
-#
 #
 # ### Tracing
 #
@@ -106,7 +99,6 @@
 # *   #trace_var: Starts tracing assignments to the given global variable.
 # *   #untrace_var: Disables tracing of assignments to the given global
 #     variable.
-#
 #
 # ### Subprocesses
 #
@@ -118,7 +110,6 @@
 #     completion.
 # *   #system: Executes the given command in a subshell.
 #
-#
 # ### Loading
 #
 # *   #autoload: Registers the given file to be loaded when the given constant
@@ -128,20 +119,17 @@
 # *   #require_relative: Loads the Ruby file path relative to the calling file,
 #     unless it has already been loaded.
 #
-#
 # ### Yielding
 #
 # *   #tap: Yields `self` to the given block; returns `self`.
 # *   #then (aliased as #yield_self): Yields `self` to the block and returns the
 #     result of the block.
 #
-#
 # ### Random Values
 #
 # *   #rand: Returns a pseudo-random floating point number strictly between 0.0
 #     and 1.0.
 # *   #srand: Seeds the pseudo-random number generator with the given number.
-#
 #
 # ### Other
 #
@@ -387,7 +375,6 @@ module Kernel : BasicObject
   # *   Once in the parent process, returning the pid of the child process.
   # *   Once in the child process, returning `nil`.
   #
-  #
   # Example:
   #
   #     puts "This is the first line before the fork (pid #{Process.pid})"
@@ -409,7 +396,6 @@ module Kernel : BasicObject
   #
   # *   Process.wait, to collect the termination statuses of its children.
   # *   Process.detach, to register disinterest in their status.
-  #
   #
   # The thread calling `fork` is the only thread in the created child process;
   # `fork` doesn't copy other threads.
@@ -482,7 +468,6 @@ module Kernel : BasicObject
   #             Complex('+1i') # => (0+1i)
   #             Complex('-1i') # => (0-1i)
   #
-  #
   # *   At-sign separated real and imaginary rational substrings, each of which
   #     specifies a Rational value, specifying [polar
   #     coordinates](rdoc-ref:Complex@Polar+Coordinates):
@@ -530,10 +515,8 @@ module Kernel : BasicObject
   #     *   A hash, returns `object`.
   #     *   An empty array or `nil`, returns an empty hash.
   #
-  #
   # *   Otherwise, if `object.to_hash` returns a hash, returns that hash.
   # *   Otherwise, returns TypeError.
-  #
   #
   # Examples:
   #
@@ -623,7 +606,6 @@ module Kernel : BasicObject
   # *   Raises TypeError if `object` does not respond to `to_int` or `to_i`.
   # *   Raises TypeError if `object` is `nil`.
   # *   Raise ArgumentError if `object` is an invalid string.
-  #
   #
   # With `exception` given as `false`, an exception of any kind is suppressed and
   # `nil` is returned.
@@ -1135,7 +1117,6 @@ module Kernel : BasicObject
   # *   If not the last object, writes the output field separator
   #     `$OUTPUT_FIELD_SEPARATOR` (`$,` if it is not `nil`.
   #
-  #
   # With default separators:
   #
   #     objects = [0, 0.0, Rational(0, 1), Complex(0, 0), :zero, 'zero']
@@ -1408,7 +1389,6 @@ module Kernel : BasicObject
   # *   Otherwise, installed gems are searched for a file that matches. If it's
   #     found in gem 'y', that gem is activated (added to the loadpath).
   #
-  #
   # The normal `require` functionality of returning false if that file has already
   # been loaded is preserved.
   #
@@ -1446,7 +1426,6 @@ module Kernel : BasicObject
   # *   An array of the objects in `read_ios` that are ready for reading.
   # *   An array of the objects in `write_ios` that are ready for writing.
   # *   An array of the objects in `error_ios` have pending exceptions.
-  #
   #
   # If no object becomes ready within the given `timeout`, `nil` is returned.
   #
@@ -1725,6 +1704,7 @@ module Kernel : BasicObject
   # :deprecated
   # :   Used for warning for deprecated functionality that may be removed in the
   #     future.
+  #
   # :experimental
   # :   Used for experimental features that may change in future releases.
   #
@@ -1739,7 +1719,6 @@ module Kernel : BasicObject
   #
   # *   Passing string `command_line` to the shell.
   # *   Invoking the executable at `exe_path`.
-  #
   #
   # This method has potential security vulnerabilities if called with untrusted
   # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
@@ -1760,7 +1739,6 @@ module Kernel : BasicObject
   # *   `command_line` if it is a string, and if it begins with a shell reserved
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
-  #
   #
   # **Argument `command_line`**
   #
@@ -1792,7 +1770,6 @@ module Kernel : BasicObject
   # *   The string path to an executable to be called.
   # *   A 2-element array containing the path to an executable and the string to
   #     be used as the name of the executing process.
-  #
   #
   # Example:
   #
@@ -1834,7 +1811,6 @@ module Kernel : BasicObject
   # *   Passing string `command_line` to the shell.
   # *   Invoking the executable at `exe_path`.
   #
-  #
   # This method has potential security vulnerabilities if called with untrusted
   # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
@@ -1845,7 +1821,6 @@ module Kernel : BasicObject
   #
   # *   Process.wait, to collect the termination statuses of its children.
   # *   Process.detach, to register disinterest in their status.
-  #
   #
   # The new process is created using the [exec system
   # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/e
@@ -1863,7 +1838,6 @@ module Kernel : BasicObject
   # *   `command_line` if it is a string, and if it begins with a shell reserved
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
-  #
   #
   # **Argument `command_line`**
   #
@@ -1917,7 +1891,6 @@ module Kernel : BasicObject
   #
   #         "Hello! 1\n"
   #
-  #
   # Ruby invokes the executable directly, with no shell and no shell expansion.
   #
   # If one or more `args` is given, each is an argument or option to be passed to
@@ -1948,7 +1921,6 @@ module Kernel : BasicObject
   # *   Passing string `command_line` to the shell.
   # *   Invoking the executable at `exe_path`.
   #
-  #
   # This method has potential security vulnerabilities if called with untrusted
   # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
   #
@@ -1957,7 +1929,6 @@ module Kernel : BasicObject
   # *   `true` if the command exits with status zero.
   # *   `false` if the exit status is a non-zero integer.
   # *   `nil` if the command could not execute.
-  #
   #
   # Raises an exception (instead of returning `false` or `nil`) if keyword
   # argument `exception` is set to `true`.
@@ -1980,7 +1951,6 @@ module Kernel : BasicObject
   # *   `command_line` if it is a string, and if it begins with a shell reserved
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
-  #
   #
   # **Argument `command_line`**
   #
@@ -2021,7 +1991,6 @@ module Kernel : BasicObject
   # *   The string path to an executable to be called.
   # *   A 2-element array containing the path to an executable and the string to
   #     be used as the name of the executing process.
-  #
   #
   # Example:
   #

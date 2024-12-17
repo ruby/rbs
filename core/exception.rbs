@@ -7,7 +7,6 @@
 # *   An optional descriptive message.
 # *   Optional backtrace information.
 #
-#
 # Some built-in subclasses of Exception have additional methods: e.g.,
 # NameError#name.
 #
@@ -17,14 +16,12 @@
 # *   `raise`: defaults to RuntimeError.
 # *   `rescue`: defaults to StandardError.
 #
-#
 # ## Global Variables
 #
 # When an exception has been raised but not yet handled (in `rescue`, `ensure`,
 # `at_exit` and `END` blocks), two global variables are set:
 # *   `$!` contains the current exception.
 # *   `$@` contains its backtrace.
-#
 #
 # ## Custom Exceptions
 #
@@ -63,44 +60,33 @@
 #     *   LoadError
 #     *   NotImplementedError
 #     *   SyntaxError
-#
 # *   SecurityError
 # *   SignalException
 #     *   Interrupt
-#
 # *   StandardError
 #     *   ArgumentError
 #         *   UncaughtThrowError
-#
 #     *   EncodingError
 #     *   FiberError
 #     *   IOError
 #         *   EOFError
-#
 #     *   IndexError
 #         *   KeyError
 #         *   StopIteration
 #             *   ClosedQueueError
-#
-#
 #     *   LocalJumpError
 #     *   NameError
 #         *   NoMethodError
-#
 #     *   RangeError
 #         *   FloatDomainError
-#
 #     *   RegexpError
 #     *   RuntimeError
 #         *   FrozenError
-#
 #     *   SystemCallError
 #         *   Errno::*
-#
 #     *   ThreadError
 #     *   TypeError
 #     *   ZeroDivisionError
-#
 # *   SystemExit
 # *   SystemStackError
 # *   fatal
@@ -223,8 +209,6 @@ class Exception
   #     *   Blue (`\e[34m`)
   #     *   Magenta (`\e[35m`)
   #     *   Cyan (`\e[36m`)
-  #
-  #
   #
   # Use escape sequences carefully even if `highlight` is true. Do not use escape
   # sequences to express essential information; the message should be readable

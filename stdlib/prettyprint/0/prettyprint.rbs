@@ -9,17 +9,14 @@
 # *   optional width argument for PrettyPrint#text
 # *   PrettyPrint#breakable
 #
-#
 # There are several candidate uses:
 # *   text formatting using proportional fonts
 # *   multibyte characters which has columns different to number of bytes
 # *   non-string formatting
 #
-#
 # ## Bugs
 # *   Box based formatting?
 # *   Other (better) model/algorithm?
-#
 #
 # Report any bugs at http://bugs.ruby-lang.org
 #
@@ -315,7 +312,6 @@ class PrettyPrint
   # *   #group
   # *   #flush
   # *   #first?
-  #
   #
   # but instead, the output has no line breaks
   #

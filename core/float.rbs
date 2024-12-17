@@ -10,16 +10,13 @@
 #     ys-floats-imprecise
 # *   https://en.wikipedia.org/wiki/Floating_point#Accuracy_problems
 #
-#
 # You can create a Float object explicitly with:
 #
 # *   A [floating-point literal](rdoc-ref:syntax/literals.rdoc@Float+Literals).
 #
-#
 # You can convert certain objects to Floats with:
 #
 # *   Method #Float.
-#
 #
 # ## What's Here
 #
@@ -27,13 +24,11 @@
 #
 # *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here).
 #
-#
 # Here, class Float provides methods for:
 #
 # *   [Querying](rdoc-ref:Float@Querying)
 # *   [Comparing](rdoc-ref:Float@Comparing)
 # *   [Converting](rdoc-ref:Float@Converting)
-#
 #
 # ### Querying
 #
@@ -41,7 +36,6 @@
 # *   #hash: Returns the integer hash code for `self`.
 # *   #infinite?: Returns whether `self` is infinite.
 # *   #nan?: Returns whether `self` is a NaN (not-a-number).
-#
 #
 # ### Comparing
 #
@@ -53,7 +47,6 @@
 #     given value.
 # *   #>: Returns whether `self` is greater than the given value.
 # *   #>=: Returns whether `self` is greater than or equal to the given value.
-#
 #
 # ### Converting
 #
@@ -240,7 +233,6 @@ class Float < Numeric
   # *   0, if `self` is equal to `other`.
   # *   1, if `self` is greater than `other`.
   # *   `nil`, if the two values are incommensurate.
-  #
   #
   # Examples:
   #
@@ -557,7 +549,6 @@ class Float < Numeric
   # *   -1 if `self` is `-Infinity`.
   # *   `nil`, otherwise.
   #
-  #
   # Examples:
   #
   #     f = 1.0/0.0  # => Infinity
@@ -843,7 +834,6 @@ class Float < Numeric
   #         2.5.round(half: :even)    # => 2
   #         3.5.round(half: :even)    # => 4
   #         (-2.5).round(half: :even) # => -2
-  #
   #
   # Raises and exception if the value for `half` is invalid.
   #

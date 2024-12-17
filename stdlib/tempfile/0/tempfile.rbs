@@ -94,7 +94,6 @@ class Tempfile < File
   #     Permissions](rdoc-ref:File@File+Permissions).
   # *   Mode is `'w+'` (read/write mode, positioned at the end).
   #
-  #
   # With no block, the file is not removed automatically, and so should be
   # explicitly removed.
   #
@@ -119,7 +118,6 @@ class Tempfile < File
   #
   #         Tempfile.create(%w/foo .jpg/) # => #<File:/tmp/foo20220505-17839-tnjchh.jpg>
   #
-  #
   # With arguments `basename` and `tmpdir`, the file is created in directory
   # `tmpdir`:
   #
@@ -132,7 +130,6 @@ class Tempfile < File
   #     the logical OR of constants defined in
   #     [File::Constants](rdoc-ref:File::Constants).
   # *   For `options`, see [Open Options](rdoc-ref:IO@Open+Options).
-  #
   #
   # With a block given, creates the file as above, passes it to the block, and
   # returns the block's value; before the return, the file object is closed and
@@ -315,7 +312,6 @@ class Tempfile < File
   # *   Does not rely on a finalizer to close and unlink the file, which can be
   #     unreliable.
   #
-  #
   # Creates and returns file whose:
   #
   # *   Class is Tempfile (not File, as in Tempfile.create).
@@ -324,7 +320,6 @@ class Tempfile < File
   # *   Permissions are `0600`; see [File
   #     Permissions](rdoc-ref:File@File+Permissions).
   # *   Mode is `'w+'` (read/write mode, positioned at the end).
-  #
   #
   # The underlying file is removed when the Tempfile object dies and is reclaimed
   # by the garbage collector.
@@ -350,7 +345,6 @@ class Tempfile < File
   #
   #         Tempfile.new(%w/foo .jpg/) # => #<Tempfile:/tmp/foo20220505-17839-58xtfi.jpg>
   #
-  #
   # With arguments `basename` and `tmpdir`, the file is created in directory
   # `tmpdir`:
   #
@@ -363,7 +357,6 @@ class Tempfile < File
   #     the logical OR of constants defined in
   #     [File::Constants](rdoc-ref:File::Constants).
   # *   For `options`, see [Open Options](rdoc-ref:IO@Open+Options).
-  #
   #
   # Related: Tempfile.create.
   #

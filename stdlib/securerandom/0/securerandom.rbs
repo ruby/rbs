@@ -14,7 +14,6 @@
 # *   /dev/urandom
 # *   Win32
 #
-#
 # SecureRandom is extended by the Random::Formatter module which defines the
 # following methods:
 #
@@ -28,7 +27,6 @@
 # *   random_number
 # *   urlsafe_base64
 # *   uuid
-#
 #
 # These methods are usable as class methods of SecureRandom such as
 # `SecureRandom.hex`.

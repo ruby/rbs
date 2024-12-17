@@ -493,7 +493,6 @@ class Fiber < Object
   #     transferred back, and if it had yielded, it only can be resumed back.
   #     After that, it again can transfer or yield.
   #
-  #
   # If those rules are broken FiberError is raised.
   #
   # For an individual Fiber design, yield/resume is easier to use (the Fiber just

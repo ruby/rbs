@@ -5,7 +5,6 @@
 #
 # *   A [symbol literal](rdoc-ref:syntax/literals.rdoc@Symbol+Literals).
 #
-#
 # The same Symbol object will be created for a given name or string for the
 # duration of a program's execution, regardless of the context or meaning of
 # that name. Thus if `Fred` is a constant in one context, a method in another,
@@ -62,13 +61,11 @@
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
-#
 # Here, class Symbol provides methods that are useful for:
 #
 # *   [Querying](rdoc-ref:Symbol@Methods+for+Querying)
 # *   [Comparing](rdoc-ref:Symbol@Methods+for+Comparing)
 # *   [Converting](rdoc-ref:Symbol@Methods+for+Converting)
-#
 #
 # ### Methods for Querying
 #
@@ -90,7 +87,6 @@
 # *   #start_with?: Returns `true` if symbol starts with any of the given
 #     strings.
 #
-#
 # ### Methods for Comparing
 #
 # *   #<=>: Returns -1, 0, or 1 as a given symbol is smaller than, equal to, or
@@ -101,7 +97,6 @@
 #     than, equal to, or larger than symbol.
 # *   #casecmp?: Returns `true` if symbol is equal to a given symbol after
 #     Unicode case folding; `false` otherwise.
-#
 #
 # ### Methods for Converting
 #

@@ -21,7 +21,6 @@
 # *   $stderr.
 # *   Instances of class File.
 #
-#
 # An instance of IO may be created using:
 #
 # *   IO.new: returns a new IO object for the given integer file descriptor.
@@ -31,7 +30,6 @@
 # *   Kernel#open: Returns a new IO object connected to a given source: stream,
 #     file, or subprocess.
 #
-#
 # Like a File stream, an IO stream has:
 #
 # *   A read/write mode, which may be read-only, write-only, or read/write; see
@@ -40,7 +38,6 @@
 #     Mode](rdoc-ref:File@Data+Mode).
 # *   Internal and external encodings; see [Encodings](rdoc-ref:File@Encodings).
 #
-#
 # And like other IO streams, it has:
 #
 # *   A position, which determines where in the stream the next read or write is
@@ -48,7 +45,6 @@
 # *   A line number, which is a special, line-oriented, "position" (different
 #     from the position mentioned above); see [Line
 #     Number](rdoc-ref:IO@Line+Number).
-#
 #
 # ## Extension `io/console`
 #
@@ -108,7 +104,6 @@
 # *   `:path:` If a string value is provided, it is used in #inspect and is
 #     available as #path method.
 #
-#
 # Also available are the options offered in String#encode, which may control
 # conversion between external and internal encoding.
 #
@@ -121,7 +116,6 @@
 #     stream.
 # *   IO#write: Writes zero or more strings to the stream; each given object
 #     that is not already a string is converted via `to_s`.
-#
 #
 # ### Position
 #
@@ -142,7 +136,6 @@
 # *   IO#rewind: Positions the stream at the beginning (also resetting the line
 #     number).
 #
-#
 # ### Open and Closed Streams
 #
 # A new IO stream may be open for reading, open for writing, or both.
@@ -158,14 +151,12 @@
 # *   IO#close_write: Closes the stream for writing.
 # *   IO#closed?: Returns whether the stream is closed.
 #
-#
 # ### End-of-Stream
 #
 # You can query whether a stream is positioned at its end:
 #
 # *   IO#eof? (also aliased as `#eof`): Returns whether the stream is at
 #     end-of-stream.
-#
 #
 # You can reposition to end-of-stream by using method IO#seek:
 #
@@ -191,14 +182,12 @@
 # *   IO#readline: Like #gets, but raises an exception at end-of-stream.
 # *   IO#readlines: Returns all remaining lines in an array.
 #
-#
 # Each of these reader methods accepts:
 #
 # *   An optional line separator, `sep`; see [Line
 #     Separator](rdoc-ref:IO@Line+Separator).
 # *   An optional line-size limit, `limit`; see [Line
 #     Limit](rdoc-ref:IO@Line+Limit).
-#
 #
 # For each of these reader methods, reading may begin mid-line, depending on the
 # stream's position; see [Position](rdoc-ref:IO@Position):
@@ -217,7 +206,6 @@
 #
 # *   IO#puts: Writes objects to the stream.
 #
-#
 # ### Line Separator
 #
 # Each of these methods uses a *line separator*, which is the string that
@@ -229,7 +217,6 @@
 # *   IO#gets.
 # *   IO#readline.
 # *   IO#readlines.
-#
 #
 # The default line separator is the given by the global variable `$/`, whose
 # value is by default `"\n"`. The line to be read next is all data from the
@@ -268,7 +255,6 @@
 #         f.gets('') # => "Fourth line\nFifth line\n"
 #         f.close
 #
-#
 # ### Line Limit
 #
 # Each of these methods uses a *line limit*, which specifies that the number of
@@ -280,7 +266,6 @@
 # *   IO#gets.
 # *   IO#readline.
 # *   IO#readlines.
-#
 #
 # A multi-byte character will not be split, and so a line may be slightly longer
 # than the given limit.
@@ -310,7 +295,6 @@
 # *   Returns the next line as determined by line separator `sep`.
 # *   But returns no more bytes than are allowed by the limit.
 #
-#
 # Example:
 #
 #     File.open('t.txt') {|f| f.gets('li', 20) } # => "First li"
@@ -325,7 +309,6 @@
 # *   IO#lineno: Returns the line number.
 # *   IO#lineno=: Resets and returns the line number.
 #
-#
 # Unless modified by a call to method IO#lineno=, the line number is the number
 # of lines read by certain line-oriented methods, according to the given line
 # separator `sep`:
@@ -335,7 +318,6 @@
 # *   IO#gets: Increments the line number.
 # *   IO#readline: Increments the line number.
 # *   IO#readlines: Increments the line number for each line read.
-#
 #
 # A new stream is initially has line number zero (and position zero); method
 # `rewind` resets the line number (and position) to zero:
@@ -419,7 +401,6 @@
 #         $.          # => 5
 #         f.close
 #
-#
 # ## Character IO
 #
 # You can process an IO stream character-by-character using these methods:
@@ -431,7 +412,6 @@
 # *   IO#putc: Writes a character to the stream.
 # *   IO#each_char: Reads each remaining character in the stream, passing the
 #     character to the given block.
-#
 # ## Byte IO
 #
 # You can process an IO stream byte-by-byte using these methods:
@@ -442,14 +422,12 @@
 # *   IO#each_byte: Reads each remaining byte in the stream, passing the byte to
 #     the given block.
 #
-#
 # ## Codepoint IO
 #
 # You can process an IO stream codepoint-by-codepoint:
 #
 # *   IO#each_codepoint: Reads each remaining codepoint, passing it to the given
 #     block.
-#
 #
 # ## What's Here
 #
@@ -458,7 +436,6 @@
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
-#
 #
 # Here, class IO provides methods that are useful for:
 #
@@ -473,7 +450,6 @@
 # *   [Low-Level Access](rdoc-ref:IO@Low-Level+Access)
 # *   [Other](rdoc-ref:IO@Other)
 #
-#
 # ### Creating
 #
 # *   ::new (aliased as ::for_fd): Creates and returns a new IO object for the
@@ -483,7 +459,6 @@
 # *   ::popen: Creates an IO object to interact with a subprocess.
 # *   ::select: Selects which given IO instances are ready for reading, writing,
 #     or have pending exceptions.
-#
 #
 # ### Reading
 #
@@ -511,7 +486,6 @@
 # *   #readlines: Returns an array of all lines read read from `self`.
 # *   #readpartial: Returns up to the given number of bytes from `self`.
 #
-#
 # ### Writing
 #
 # *   ::binwrite: Writes the given string to the file at the given filepath, in
@@ -528,7 +502,6 @@
 # *   #write_nonblock: Writes one or more given strings to `self` in
 #     non-blocking mode.
 #
-#
 # ### Positioning
 #
 # *   #lineno: Returns the current line number in `self`.
@@ -538,7 +511,6 @@
 # *   #reopen: Reassociates `self` with a new or existing IO stream.
 # *   #rewind: Positions `self` to the beginning of input.
 # *   #seek: Sets the offset for `self` relative to given position.
-#
 #
 # ### Iterating
 #
@@ -552,7 +524,6 @@
 # *   #each_codepoint: Calls the given block with each successive codepoint in
 #     `self` as an integer.
 #
-#
 # ### Settings
 #
 # *   #autoclose=: Sets whether `self` auto-closes.
@@ -565,7 +536,6 @@
 # *   #set_encoding_by_bom: Sets the encoding for `self`, based on its Unicode
 #     byte-order-mark.
 # *   #sync=: Sets the sync-mode to the given value.
-#
 #
 # ### Querying
 #
@@ -584,7 +554,6 @@
 # *   #sync: Returns whether `self` is in sync-mode.
 # *   #tty? (aliased as #isatty): Returns whether `self` is a terminal.
 #
-#
 # ### Buffering
 #
 # *   #fdatasync: Immediately writes all buffered data in `self` to disk.
@@ -594,7 +563,6 @@
 #     disk.
 # *   #ungetbyte: Prepends buffer for `self` with given integer byte or string.
 # *   #ungetc: Prepends buffer for `self` with given string.
-#
 #
 # ### Low-Level Access
 #
@@ -610,7 +578,6 @@
 #     low-level read.
 # *   #sysseek: Sets the offset for `self`.
 # *   #syswrite: Writes the given string to `self` using a low-level write.
-#
 #
 # ### Other
 #
@@ -660,7 +627,6 @@ class IO < Object
   # *   `len`: The number of bytes to be accessed; if `len` is zero, or is larger
   #     than the number of bytes remaining, all remaining bytes will be accessed.
   #
-  #
   # Argument `advice` is one of the following symbols:
   #
   # *   `:normal`: The application has no advice to give about its access pattern
@@ -672,7 +638,6 @@ class IO < Object
   # *   `:noreuse`: The specified data will be accessed only once.
   # *   `:willneed`: The specified data will be accessed in the near future.
   # *   `:dontneed`: The specified data will not be accessed in the near future.
-  #
   #
   # Not implemented on all platforms.
   #
@@ -1045,7 +1010,6 @@ class IO < Object
   # *   IO#fsync: Ensures both that data is flushed from internal buffers, and
   #     that data is written to disk.
   #
-  #
   # Raises an exception if the operating system does not support `fsync(2)`.
   #
   def fsync: () -> Integer?
@@ -1142,7 +1106,6 @@ class IO < Object
   #     none.
   # *   But returns no more bytes than are allowed by the limit.
   #
-  #
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted:
   #
@@ -1192,7 +1155,6 @@ class IO < Object
   #
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  #
   #
   # Examples:
   #
@@ -1341,7 +1303,6 @@ class IO < Object
   # *   If not the last object, writes the output field separator
   #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
   #
-  #
   # With default separators:
   #
   #     f = File.open('t.tmp', 'w+')
@@ -1431,7 +1392,6 @@ class IO < Object
   # *   Neither string nor array: writes `object.to_s`.
   # *   Array: writes each element of the array; arrays may be nested.
   #
-  #
   # To keep these examples brief, we define this helper method:
   #
   #     def show(*objects)
@@ -1470,7 +1430,6 @@ class IO < Object
   # *   If `maxlen` is `nil`, reads all bytes using the stream's data mode.
   # *   Otherwise reads up to `maxlen` bytes in binary mode.
   #
-  #
   # Returns a string (either a new string or the given `out_string`) containing
   # the bytes read. The encoding of the string depends on both `maxLen` and
   # `out_string`:
@@ -1481,8 +1440,6 @@ class IO < Object
   #
   #     *   `out_string` given: encoding of `out_string` not modified.
   #     *   `out_string` not given: ASCII-8BIT is used.
-  #
-  #
   #
   # **Without Argument `out_string`**
   #
@@ -1692,7 +1649,6 @@ class IO < Object
   # *   Returns lines as determined by line separator `sep`.
   # *   But returns no more bytes in a line than are allowed by the limit.
   #
-  #
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted:
   #
@@ -1717,7 +1673,6 @@ class IO < Object
   # *   Contains `maxlen` bytes from the stream, if available.
   # *   Otherwise contains all available bytes, if any available.
   # *   Otherwise is an empty string.
-  #
   #
   # With the single non-negative integer argument `maxlen` given, returns a new
   # string:
@@ -1747,19 +1702,16 @@ class IO < Object
   # *   The content of the stream is empty.
   # *   The stream is not at EOF.
   #
-  #
   # When blocked, the method waits for either more data or EOF on the stream:
   #
   # *   If more data is read, the method returns the data.
   # *   If EOF is reached, the method raises EOFError.
-  #
   #
   # When not blocked, the method responds immediately:
   #
   # *   Returns data from the buffer if there is any.
   # *   Otherwise returns data from the stream if there is any.
   # *   Otherwise raises EOFError if the stream has reached EOF.
-  #
   #
   # Note that this method is similar to sysread. The differences are:
   #
@@ -1768,7 +1720,6 @@ class IO < Object
   # *   It doesn't cause Errno::EWOULDBLOCK and Errno::EINTR.  When readpartial
   #     meets EWOULDBLOCK and EINTR by read system call, readpartial retries the
   #     system call.
-  #
   #
   # The latter means that readpartial is non-blocking-flag insensitive. It blocks
   # on the situation IO#sysread causes Errno::EWOULDBLOCK as if the fd is blocking
@@ -1898,7 +1849,6 @@ class IO < Object
   #         f.tell           # => 40
   #         f.close
   #
-  #
   # Related: IO#pos=, IO#tell.
   #
   def seek: (Integer amount, ?Integer whence) -> Integer
@@ -1996,7 +1946,6 @@ class IO < Object
   # *   `true`: All output is immediately flushed to the underlying operating
   #     system and is not buffered internally.
   # *   `false`: Output may be buffered internally.
-  #
   #
   # Example;
   #
@@ -2153,7 +2102,6 @@ class IO < Object
   #     IO#sysread).
   # *   Calling #rewind on the stream discards the pushed-back data.
   #
-  #
   # When argument `integer` is given, uses only its low-order byte:
   #
   #     File.write('t.tmp', '012')
@@ -2192,7 +2140,6 @@ class IO < Object
   # *   Calling the method has no effect with unbuffered reads (such as
   #     IO#sysread).
   # *   Calling #rewind on the stream discards the pushed-back data.
-  #
   #
   # When argument `integer` is given, interprets the integer as a character:
   #
@@ -2338,14 +2285,11 @@ class IO < Object
   #     *   An IO-like object, opened for reading and capable of responding to
   #         method `:readpartial` or method `:read`.
   #
-  #
   # *   The given `dst` must be one of the following:
   #
   #     *   The path to a writable file, to which data is to be written.
   #     *   An IO-like object, opened for writing and capable of responding to
   #         method `:write`.
-  #
-  #
   #
   # The examples here use file `t.txt` as source:
   #
@@ -2409,7 +2353,6 @@ class IO < Object
   # *   A specified program runs with specified arguments.
   # *   A specified program runs with specified arguments and a specified `argv0`.
   #
-  #
   # Each of these is detailed below.
   #
   # The optional hash argument `env` specifies name/value pairs that are to be
@@ -2426,7 +2369,6 @@ class IO < Object
   # *   [Open options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   Options for Kernel#spawn.
-  #
   #
   # **Forked \Process**
   #
@@ -2495,7 +2437,6 @@ class IO < Object
   # *   `cmd[0][1]` (the second string in the nested array) is set as the
   #     program's `argv[0]`.
   # *   `cmd[1..-1]` (the strings in the outer array) are the program's arguments.
-  #
   #
   # Example (sets `$0` to 'foo'):
   #
@@ -2630,7 +2571,6 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
-  #
   # Returns an Enumerator if no block is given.
   #
   def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
@@ -2654,7 +2594,6 @@ class IO < Object
   # *   The colon-separated names of two encodings to be used as the external and
   #     internal encodings.
   #
-  #
   # If argument `int_enc` is given, it must be an Encoding object or encoding name
   # string that specifies the internal encoding to be used; if argument `ext_enc`
   # is also given, it must be an Encoding object or encoding name string that
@@ -2671,7 +2610,6 @@ class IO < Object
   #
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding Options](rdoc-ref:encodings.rdoc@Encoding+Options).
-  #
   #
   # With no block given, returns the two endpoints in an array:
   #
@@ -2833,7 +2771,6 @@ class IO < Object
   # *   An array of the objects in `read_ios` that are ready for reading.
   # *   An array of the objects in `write_ios` that are ready for writing.
   # *   An array of the objects in `error_ios` have pending exceptions.
-  #
   #
   # If no object becomes ready within the given `timeout`, `nil` is returned.
   #
@@ -3130,7 +3067,6 @@ class IO < Object
   # *   Calls with the next line as determined by line separator `sep`.
   # *   But returns no more bytes than are allowed by the limit.
   #
-  #
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted:
   #
@@ -3234,7 +3170,6 @@ class IO < Object
   #
   # *   Calls with the next line as determined by line separator `sep`.
   # *   But returns no more bytes than are allowed by the limit.
-  #
   #
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted:

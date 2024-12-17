@@ -22,7 +22,6 @@ module Gem
   # 3.  1.0.a.2
   # 4.  0.9
   #
-  #
   # If you want to specify a version restriction that includes both prereleases
   # and regular releases of the 1.x series this is the best way:
   #
@@ -46,7 +45,6 @@ module Gem
   # 3.  The change may change the public interface of the library in such a way
   #     that old software is no longer compatible.
   #
-  #
   # Some examples are appropriate at this point.  Suppose I have a Stack class
   # that supports a `push` and a `pop` method.
   #
@@ -56,7 +54,6 @@ module Gem
   #     implementation.
   # *   Provide an automatic (and transparent) backing store for large stacks.
   #
-  #
   # ### Examples of Category 2 changes might be:
   #
   # *   Add a `depth` method to return the current depth of the stack.
@@ -65,13 +62,11 @@ module Gem
   # *   Change `push` so that it returns the item pushed (previously it had no
   #     usable return value).
   #
-  #
   # ### Examples of Category 3 changes might be:
   #
   # *   Changes `pop` so that it no longer returns a value (you must use `top` to
   #     get the top of the stack).
   # *   Rename the methods to `push_item` and `pop_item`.
-  #
   #
   # ## RubyGems Rational Versioning
   #
@@ -94,24 +89,29 @@ module Gem
   #     generate builds all day long, but as soon as they make a public release,
   #     the version must be updated.
   #
-  #
   # ### Examples
   #
   # Let's work through a project lifecycle using our Stack example from above.
   #
   # Version 0.0.1
   # :   The initial Stack class is release.
+  #
   # Version 0.0.2
   # :   Switched to a linked=list implementation because it is cooler.
+  #
   # Version 0.1.0
   # :   Added a `depth` method.
+  #
   # Version 1.0.0
   # :   Added `top` and made `pop` return nil (`pop` used to return the  old top
   #     item).
+  #
   # Version 1.1.0
   # :   `push` now returns the value pushed (it used it return nil).
+  #
   # Version 1.1.1
   # :   Fixed a bug in the linked list implementation.
+  #
   # Version 1.1.2
   # :   Fixed a bug introduced in the last fix.
   #

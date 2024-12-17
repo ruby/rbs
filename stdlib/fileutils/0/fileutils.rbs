@@ -9,7 +9,6 @@
 # *   Supplements [class File](rdoc-ref:File) (but is not included or extended
 #     there).
 #
-#
 # Here, module FileUtils provides methods that are useful for:
 #
 # *   [Creating](rdoc-ref:FileUtils@Creating).
@@ -21,7 +20,6 @@
 # *   [Moving](rdoc-ref:FileUtils@Moving).
 # *   [Options](rdoc-ref:FileUtils@Options).
 #
-#
 # ### Creating
 #
 # *   ::mkdir: Creates directories.
@@ -32,7 +30,6 @@
 # *   ::ln_s, ::symlink: Creates symbolic links.
 # *   ::ln_sf: Creates symbolic links, overwriting if necessary.
 # *   ::ln_sr: Creates symbolic links relative to targets
-#
 #
 # ### Deleting
 #
@@ -47,13 +44,11 @@
 # *   ::rm_rf, ::rmtree: Like ::rm_r, but removes forcibly.
 # *   ::rmdir: Removes directories.
 #
-#
 # ### Querying
 #
 # *   ::pwd, ::getwd: Returns the path to the working directory.
 # *   ::uptodate?: Returns whether a given entry is newer than given other
 #     entries.
-#
 #
 # ### Setting
 #
@@ -65,13 +60,11 @@
 # *   ::touch: Sets modification and access times for entries, creating if
 #     necessary.
 #
-#
 # ### Comparing
 #
 # *   ::compare_file, ::cmp, ::identical?: Returns whether two entries are
 #     identical.
 # *   ::compare_stream: Returns whether two streams are identical.
-#
 #
 # ### Copying
 #
@@ -84,11 +77,9 @@
 # *   ::install: Recursively copies files, optionally setting mode, owner, and
 #     group.
 #
-#
 # ### Moving
 #
 # *   ::mv, ::move: Moves entries.
-#
 #
 # ### Options
 #
@@ -98,7 +89,6 @@
 # *   ::options: Returns all option names.
 # *   ::options_of: Returns the names of the options for a given method.
 #
-#
 # ## Path Arguments
 #
 # Some methods in FileUtils accept *path* arguments, which are interpreted as
@@ -107,7 +97,6 @@
 # *   If the argument is a string, that value is the path.
 # *   If the argument has method `:to_path`, it is converted via that method.
 # *   If the argument has method `:to_str`, it is converted via that method.
-#
 #
 # ## About the Examples
 #
@@ -149,13 +138,10 @@
 #     *   A world-writable descendant directory.
 #     *   A symbolic link.
 #
-#
-#
 # To avoid that vulnerability, you can use this method to remove entries:
 #
 # *   FileUtils.remove_entry_secure: removes recursively if the target path
 #     points to a directory.
-#
 #
 # Also available are these methods, each of which calls
 # FileUtils.remove_entry_secure:
@@ -163,13 +149,11 @@
 # *   FileUtils.rm_r with keyword argument `secure: true`.
 # *   FileUtils.rm_rf with keyword argument `secure: true`.
 #
-#
 # Finally, this method for moving entries calls FileUtils.remove_entry_secure if
 # the source and destination are on different file systems (which means that the
 # "move" is really a copy and remove):
 #
 # *   FileUtils.mv with keyword argument `secure: true`.
-#
 #
 # Method FileUtils.remove_entry_secure removes securely by applying a special
 # pre-process:
@@ -179,7 +163,6 @@
 #     removing directories.
 # *   The owner of the target directory should be either the current process or
 #     the super user (root).
-#
 #
 # WARNING: You must ensure that **ALL** parent directories cannot be moved by
 # other untrusted users.  For example, parent directories should not be owned by
@@ -237,7 +220,6 @@ module FileUtils
   #         cd ..
   #         cd fileutils
   #
-  #
   # Related: FileUtils.pwd.
   #
   def self?.cd: (path dir, ?verbose: boolish) -> void
@@ -270,7 +252,6 @@ module FileUtils
   # *   Modifies each entry that is a symbolic link using
   #     [File.lchmod](rdoc-ref:File.lchmod).
   #
-  #
   # Argument `list` or its elements should be [interpretable as
   # paths](rdoc-ref:FileUtils@Path+Arguments).
   #
@@ -292,13 +273,11 @@ module FileUtils
   #         *   `'o'`: permissions apply to other users not in the file's group.
   #         *   `'a'` (the default): permissions apply to all users.
   #
-  #
   #     *   `operator` may be one of these letters:
   #
   #         *   `'+'`: adds permissions.
   #         *   `'-'`: removes permissions.
   #         *   `'='`: sets (replaces) permissions.
-  #
   #
   #     *   `perms` (may be repeated, with separating commas) may be any
   #         combination of these letters:
@@ -310,13 +289,10 @@ module FileUtils
   #         *   `'s'`: Uid or gid.
   #         *   `'t'`: Sticky bit.
   #
-  #
-  #
   #     Examples:
   #
   #         FileUtils.chmod('u=wrx,go=rx', 'src1.txt')
   #         FileUtils.chmod('u=wrx,go=rx', '/usr/bin/ruby')
-  #
   #
   # Keyword arguments:
   #
@@ -334,7 +310,6 @@ module FileUtils
   #         chmod 644 src0.txt src0.dat
   #         chmod u=wrx,go=rx src1.txt
   #         chmod u=wrx,go=rx /usr/bin/ruby
-  #
   #
   # Related: FileUtils.chmod_R.
   #
@@ -361,7 +336,6 @@ module FileUtils
   # *   Modifies each entry that is a symbolic link using
   #     [File.lchown](rdoc-ref:File.lchown).
   #
-  #
   # Argument `list` or its elements should be [interpretable as
   # paths](rdoc-ref:FileUtils@Path+Arguments).
   #
@@ -372,7 +346,6 @@ module FileUtils
   # *   Argument `group` may be a group name or a group id; if `nil` or `-1`, the
   #     group is not changed.
   # *   The user must be a member of the group.
-  #
   #
   # Examples:
   #
@@ -413,7 +386,6 @@ module FileUtils
   #         chown 1006:1005 src0.txt src0.dat
   #         chown user2:group1 src0.txt
   #         chown user2:group1 .
-  #
   #
   # Related: FileUtils.chown_R.
   #
@@ -553,7 +525,6 @@ module FileUtils
   # *   `preserve: true` - preserves file times.
   # *   `remove_destination: true` - removes `dest` before copying files.
   #
-  #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
   def self?.copy_entry: (path src, path dest, ?boolish preserve, ?boolish dereference_root, ?boolish remove_destination) -> void
@@ -579,7 +550,6 @@ module FileUtils
   #     link.
   # *   `preserve: true` - preserves file times.
   # *   `remove_destination: true` - removes `dest` before copying files.
-  #
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
@@ -646,7 +616,6 @@ module FileUtils
   #         cp src0.txt dest0.txt
   #         cp src1.txt dest1
   #         cp src2.txt src2.dat dest2
-  #
   #
   # Raises an exception if `src` is a directory.
   #
@@ -763,7 +732,6 @@ module FileUtils
   #         cp -lr src1 dest1
   #         cp -lr src2/sub0 src2/sub1 dest2
   #
-  #
   # Raises an exception if `dest` is the path to an existing file or directory and
   # keyword argument `remove_destination: true` is not given.
   #
@@ -869,7 +837,6 @@ module FileUtils
   #         cp -r src2 dest2
   #         cp -r src3 dest3
   #
-  #
   # Raises an exception of `src` is the path to a directory and `dest` is the path
   # to a file.
   #
@@ -954,7 +921,6 @@ module FileUtils
   #         install -c src1.txt dest1.txt
   #         install -c src2.txt dest2
   #
-  #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
   def self?.install: (path src, path dest, ?mode: mode?, ?owner: String?, ?group: String?, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
@@ -998,7 +964,6 @@ module FileUtils
   #
   # *   `dereference_root: true` - dereferences `src` if it is a symbolic link.
   # *   `remove_destination: true` - removes `dest` before creating links.
-  #
   #
   # Raises an exception if `dest` is the path to an existing file or directory and
   # keyword argument `remove_destination: true` is not given.
@@ -1058,7 +1023,6 @@ module FileUtils
   #         ln tmp2/t.dat tmp3
   #         ln tmp0/t.txt tmp2/t.dat tmp4/
   #
-  #
   # Raises an exception if `dest` is the path to an existing file and keyword
   # argument `force` is not `true`.
   #
@@ -1110,7 +1074,6 @@ module FileUtils
   #
   #         FileUtils.ln_s('src1.txt', 'dest1.txt') # Raises Errno::EEXIST.
   #
-  #
   # If `dest` is the path to a directory, creates a symbolic link at `dest/src`
   # pointing to `src`:
   #
@@ -1149,7 +1112,6 @@ module FileUtils
   #         ln -s src1.txt destdir1
   #         ln -sf src2.txt dest2.txt
   #         ln -s srcdir3/src0.txt srcdir3/src1.txt destdir3
-  #
   #
   # Related: FileUtils.ln_sf.
   #
@@ -1216,7 +1178,6 @@ module FileUtils
   #         mkdir tmp0 tmp1
   #         mkdir -m 700 tmp2 tmp3
   #
-  #
   # Raises an exception if any path points to an existing file or directory, or if
   # for any reason a directory cannot be created.
   #
@@ -1256,7 +1217,6 @@ module FileUtils
   #
   #         mkdir -p tmp0 tmp1
   #         mkdir -p -m 700 tmp2 tmp3
-  #
   #
   # Raises an exception if for any reason a directory cannot be created.
   #
@@ -1524,7 +1484,6 @@ module FileUtils
   #
   #         rm src0.dat src0.txt
   #
-  #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
   def self?.rm: (pathlist list, ?force: boolish, ?noop: boolish, ?verbose: boolish) -> void
@@ -1625,7 +1584,6 @@ module FileUtils
   #         rm -r src0.dat src0.txt
   #         rm -r src1
   #
-  #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
   def self?.rm_r: (pathlist list, ?force: boolish, ?noop: boolish, ?verbose: boolish, ?secure: boolish) -> void
@@ -1695,7 +1653,6 @@ module FileUtils
   #         rmdir -p tmp0/tmp1 tmp2/tmp3
   #         rmdir -p tmp4/tmp5
   #
-  #
   # Raises an exception if a directory does not exist or if for any reason a
   # directory cannot be removed.
   #
@@ -1748,7 +1705,6 @@ module FileUtils
   #         touch src0.txt
   #         touch src0.txt src0.dat
   #         touch src0.txt
-  #
   #
   # Related: FileUtils.uptodate?.
   #

@@ -485,7 +485,6 @@ class Thread < Object
   # *   On Windows it is the thread identifier returned by GetThreadId().
   # *   On other platforms, it raises NotImplementedError.
   #
-  #
   # NOTE: If the thread is not associated yet or already deassociated with a
   # native thread, it returns *nil*. If the Ruby implementation uses M:N thread
   # model, the ID may change depending on the timing.
@@ -614,12 +613,16 @@ class Thread < Object
   #
   # `"sleep"`
   # :   Returned if this thread is sleeping or waiting on I/O
+  #
   # `"run"`
   # :   When this thread is executing
+  #
   # `"aborting"`
   # :   If this thread is aborting
+  #
   # `false`
   # :   When this thread is terminated normally
+  #
   # `nil`
   # :   If terminated with an exception.
   #
@@ -873,8 +876,10 @@ class Thread < Object
   #
   # `:immediate`
   # :   Invoke interrupts immediately.
+  #
   # `:on_blocking`
   # :   Invoke interrupts while *BlockingOperation*.
+  #
   # `:never`
   # :   Never invoke all interrupts.
   #
@@ -1129,7 +1134,6 @@ class Thread < Object
   #     `Thread.current.report_on_exception = false` when starting the Thread.
   #     However, this might handle the exception much later, or not at all if the
   #     Thread is never joined due to the parent thread being blocked, etc.
-  #
   #
   # See also ::report_on_exception=.
   #
@@ -1577,7 +1581,6 @@ class Thread::Queue[Elem = untyped] < Object
   #     the queue as usual.
   # *   when `empty?` is true, deq(false) will not suspend the thread and will
   #     return nil. deq(true) will raise a `ThreadError`.
-  #
   #
   # ClosedQueueError is inherited from StopIteration, so that you can break loop
   # block.

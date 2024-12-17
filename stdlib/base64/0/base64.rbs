@@ -5,13 +5,11 @@
 #     printable ASCII characters.
 # *   Decoding such an encoded string.
 #
-#
 # Base64 is commonly used in contexts where binary data is not allowed or
 # supported:
 #
 # *   Images in HTML or CSS files, or in URLs.
 # *   Email attachments.
-#
 #
 # A Base64-encoded string is about one-third larger that its source. See the
 # [Wikipedia article](https://en.wikipedia.org/wiki/Base64) for more
@@ -23,7 +21,6 @@
 # *   Which character set is to be used for encoding and decoding.
 # *   Whether "padding" is to be used.
 # *   Whether encoded strings are to contain newlines.
-#
 #
 # Note: Examples on this page assume that the including program has executed:
 #
@@ -45,21 +42,17 @@
 #         [RFC-4648-compliant](https://datatracker.ietf.org/doc/html/rfc4648);
 #         safe for URLs.
 #
-#
-#
 # If you are working with Base64-encoded strings that will come from or be put
 # into URLs, you should choose this encoder-decoder pair of RFC-4648-compliant
 # methods:
 #
 # *   Base64.urlsafe_encode64 and Base64.urlsafe_decode64.
 #
-#
 # Otherwise, you may choose any of the pairs in this module, including the pair
 # above, or the RFC-2045-compliant pairs:
 #
 # *   Base64.encode64 and Base64.decode64.
 # *   Base64.strict_encode64 and Base64.strict_decode64.
-#
 #
 # ## Padding
 #
@@ -104,7 +97,6 @@
 #         # n = 2:  8 bytes => 12 characters.
 #         Base64.strict_encode64('12345678') # => "MDEyMzQ1Njc="
 #
-#
 # When padding is suppressed, for a positive integer *n*:
 #
 # *   Input bytes of length *3n* generate unpadded output characters of length
@@ -130,7 +122,6 @@
 #         Base64.urlsafe_encode64('12345', padding: false)    # => "MDEyMzQ"
 #         # m = 2:  8 bytes => 11 characters.
 #         Base64.urlsafe_encode64('12345678', padding: false) # => "MDEyMzQ1Njc"
-#
 #
 # **Padding in Decode Methods**
 #

@@ -9,7 +9,6 @@
 # *   A *column* *separator* delimits fields in a row. A common column separator
 #     is the comma character `","`.
 #
-#
 # This CSV String, with row separator `"\n"` and column separator `","`, has
 # three rows and two columns:
 #     "foo,0\nbar,1\nbaz,2\n"
@@ -27,7 +26,6 @@
 # *   Parsing CSV data from a String object, a File (via its file path), or an
 #     IO object.
 # *   Generating CSV data to a String object.
-#
 #
 # To make CSV available:
 #     require 'csv'
@@ -51,10 +49,8 @@
 #     *   The outer Array is the entire "table".
 #     *   Each inner Array is a row.
 #     *   Each String is a field.
-#
 # *   A CSV::Table object.  For details, see [\CSV with
 #     Headers](#class-CSV-label-CSV+with+Headers).
-#
 #
 # #### Parsing a String
 #
@@ -168,14 +164,12 @@
 # *   Method CSV.instance returns a new or cached CSV object.
 # *   Method CSV() also returns a new or cached CSV object.
 #
-#
 # ### Instance Methods
 #
 # CSV has three groups of instance methods:
 # *   Its own internally defined instance methods.
 # *   Methods included by module Enumerable.
 # *   Methods delegated to class IO. See below.
-#
 #
 # #### Delegated Methods
 #
@@ -214,7 +208,6 @@
 # *   #to_io
 # *   IO#truncate
 # *   IO#tty?
-#
 #
 # ### Options
 #
@@ -273,7 +266,6 @@
 #     (no-text) field.
 # *   `empty_value`: Specifies the object that is to be substituted for each
 #     empty field.
-#
 #
 # ###### Option `row_sep`
 #
@@ -364,7 +356,6 @@
 # *   None of those sequences is found.
 # *   Data is `ARGF`, `STDIN`, `STDOUT`, or `STDERR`.
 # *   The stream is only available for output.
-#
 #
 # Obviously, discovery takes a little time. Set manually if speed is important.
 # Also note that IO objects should be opened in binary mode on Windows if this
@@ -684,7 +675,6 @@
 # *   The converters apply only to the header row.
 # *   The built-in header converters are `:downcase` and `:symbol`.
 #
-#
 # This section assumes prior execution of:
 #     str = <<-EOT
 #     Name,Value
@@ -755,7 +745,6 @@
 # *   If a Regexp, ignores lines that match it.
 # *   If a String, converts it to a Regexp, ignores lines that match it.
 # *   If `nil`, no lines are considered to be comments.
-#
 #
 # Default value:
 #     CSV::DEFAULT_OPTIONS.fetch(:skip_lines) # => nil
@@ -885,7 +874,6 @@
 # *   `write_empty_value`: Specifies the object that is to be substituted for
 #     each empty field.
 #
-#
 # ###### Option `row_sep`
 #
 # Specifies the row separator, a String or the Symbol `:auto` (see below), to be
@@ -975,7 +963,6 @@
 # *   None of those sequences is found.
 # *   Data is `ARGF`, `STDIN`, `STDOUT`, or `STDERR`.
 # *   The stream is only available for output.
-#
 #
 # Obviously, discovery takes a little time. Set manually if speed is important.
 # Also note that IO objects should be opened in binary mode on Windows if this
@@ -1231,11 +1218,9 @@
 # *   See [Field Converters](#class-CSV-label-Field+Converters).
 # *   See [Header Converters](#class-CSV-label-Header+Converters).
 #
-#
 # Also by default, each value to be written during generation is written
 # 'as-is'. You can use a *write* *converter* to modify values before writing.
 # *   See [Write Converters](#class-CSV-label-Write+Converters).
-#
 #
 # #### Specifying Converters
 #
@@ -1245,13 +1230,11 @@
 # *   Option `header_converters` for converting parsed header values.
 # *   Option `write_converters` for converting values to be written (generated).
 #
-#
 # There are three forms for specifying converters:
 # *   A converter proc: executable code to be used for conversion.
 # *   A converter name: the name of a stored converter.
 # *   A converter list: an array of converter procs, converter names, and
 #     converter lists.
-#
 #
 # ##### Converter Procs
 #
@@ -1263,7 +1246,6 @@
 # string_converter` specifies that:
 # *   Proc `string_converter` is to be called for each parsed field.
 # *   The converter's return value is to replace the `field` value.
-#
 # Example:
 #     string = " foo , 0 \n bar , 1 \n baz , 2 \n"
 #     array = CSV.parse(string, converters: strip_converter)
@@ -1293,7 +1275,6 @@
 # *   The 1-based line index.
 # *   The field header, if any.
 #
-#
 # ##### Stored Converters
 #
 # A converter may be given a name and stored in a structure where the parsing
@@ -1305,7 +1286,6 @@
 # *   `:float`: converts each String-embedded float into a true Float.
 # *   `:date`: converts each String-embedded date into a true Date.
 # *   `:date_time`: converts each String-embedded date-time into a true DateTime
-#
 # . This example creates a converter proc, then stores it:
 #     strip_converter = proc {|field| field.strip }
 #     CSV::Converters[:strip] = strip_converter
@@ -1319,7 +1299,6 @@
 # which works in the same way. It also has built-in converter procs:
 # *   `:downcase`: Downcases each header.
 # *   `:symbol`: Converts each header to a Symbol.
-#
 #
 # There is no such storage structure for write headers.
 #
@@ -1337,7 +1316,6 @@
 # *   Converter procs.
 # *   Names of stored converters.
 # *   Nested converter lists.
-#
 #
 # Examples:
 #     numeric_converters = [:integer, :float]
@@ -1387,7 +1365,6 @@
 #         csv.converters # => [:integer]
 #         csv.read # => [["foo", 0], ["bar", 1], ["baz", 2]]
 #
-#
 # Installing a field converter does not affect already-read rows:
 #     csv = CSV.new(string)
 #     csv.shift # => ["foo", "0"]
@@ -1406,8 +1383,6 @@
 # *   Each value is one of:
 #     *   A Proc field converter.
 #     *   An Array of field converter names.
-#
-#
 #
 # Display:
 #     CSV::Converters.each_pair do |name, value|
@@ -1522,7 +1497,6 @@
 #         tbl = CSV.parse(string, headers: true)
 #         tbl.headers # => ["Name", "Count"]
 #
-#
 # ##### Built-In Header Converters
 #
 # The built-in header converters are in Hash CSV::HeaderConverters. The keys
@@ -1546,7 +1520,6 @@
 # *   Replaces embedded spaces with underscores.
 # *   Removes non-word characters.
 # *   Makes the string into a Symbol.
-#
 #
 # ##### Custom Header Converters
 #
@@ -1744,14 +1717,11 @@ class CSV < Object
   #     *   Positioned at the beginning. To position at the end, for appending,
   #         use method CSV.generate. For any other positioning, pass a preset
   #         StringIO object instead.
-  #
   # *   Argument `options`: See:
   #     *   [Options for Parsing](#class-CSV-label-Options+for+Parsing)
   #     *   [Options for Generating](#class-CSV-label-Options+for+Generating)
-  #
   #     For performance reasons, the options cannot be overridden in a CSV object,
   #     so those specified here will endure.
-  #
   #
   # In addition to the CSV instance methods, several IO methods are delegated. See
   # [Delegated Methods](#class-CSV-label-Delegated+Methods).
@@ -1793,10 +1763,8 @@ class CSV < Object
   #     *   Positioned at the beginning. To position at the end, for appending,
   #         use method CSV.generate. For any other positioning, pass a preset
   #         StringIO object instead.
-  #
   # *   Argument `options`: see [Options for
   #     Parsing](#class-CSV-label-Options+for+Parsing)
-  #
   #
   # ###### Without Option `headers`
   #
@@ -1916,10 +1884,8 @@ class CSV < Object
   #     *   Positioned at the beginning. To position at the end, for appending,
   #         use method CSV.generate. For any other positioning, pass a preset
   #         StringIO object instead.
-  #
   # *   Argument `options`: see [Options for
   #     Parsing](#class-CSV-label-Options+for+Parsing)
-  #
   #
   # ###### Without Option `headers`
   #
@@ -1974,7 +1940,6 @@ class CSV < Object
   # Forms the remaining rows from `self` into:
   # *   A CSV::Table object, if headers are in use.
   # *   An Array of Arrays, otherwise.
-  #
   #
   # The data source must be opened for reading.
   #
@@ -2043,7 +2008,6 @@ class CSV < Object
   # *   Argument `row` must be an Array object or a CSV::Row object.
   # *   The output stream must be open for writing.
   #
-  #
   # ---
   #
   # Append Arrays:
@@ -2098,7 +2062,6 @@ class CSV < Object
   #     new empty String.
   # *   Arguments `options`, if given, should be generating options. See [Options
   #     for Generating](#class-CSV-label-Options+for+Generating).
-  #
   #
   # ---
   #
@@ -2227,7 +2190,6 @@ CSV::VERSION: String
 # *   Fields: each is an object, not necessarily a String.
 # *   Headers: each serves a key, and also need not be a String.
 #
-#
 # ### Instance Methods
 #
 # CSV::Row has three groups of instance methods:
@@ -2237,8 +2199,6 @@ CSV::VERSION: String
 #     *   Array#empty?
 #     *   Array#length
 #     *   Array#size
-#
-#
 #
 # ## Creating a CSV::Row Instance
 #
@@ -2658,7 +2618,6 @@ class CSV::Row < Object
   # *   Header.
   # *   Range of headers.
   #
-  #
   # For `specifier` in one of the first four cases above, returns the result of
   # `self.field(specifier)`;  see #field.
   #
@@ -2765,7 +2724,6 @@ class CSV::Row < Object
   # Returns an ASCII-compatible String showing:
   # *   Class CSV::Row.
   # *   Header-value pairs.
-  #
   # Example:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
   #     table = CSV.parse(source, headers: true)
@@ -2875,7 +2833,6 @@ end
 # *   Rows: each is a Table::Row object.
 # *   Headers: names for the columns.
 #
-#
 # ### Instance Methods
 #
 # CSV::Table has three groups of instance methods:
@@ -2885,8 +2842,6 @@ end
 #     *   Array#empty?
 #     *   Array#length
 #     *   Array#size
-#
-#
 #
 # ## Creating a CSV::Table Instance
 #
@@ -2921,7 +2876,6 @@ end
 # *   Column mode.
 # *   Mixed mode (the default for a new table).
 #
-#
 # The access mode for aCSV::Table instance affects the behavior of some of its
 # instance methods:
 # *   #[]
@@ -2930,7 +2884,6 @@ end
 # *   #delete_if
 # *   #each
 # *   #values_at
-#
 #
 # ### Row Mode
 #
@@ -2984,7 +2937,6 @@ end
 # *   A Range index refers to multiple rows.
 # *   A String index refers to a column.
 #
-#
 # Set a table to mixed mode with method #by_col_or_row!:
 #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
 #     table = CSV.parse(source, headers: true)
@@ -3024,7 +2976,6 @@ class CSV::Table[out Elem] < Object
   #
   # *   Argument `array_of_rows` must be an Array of CSV::Row objects.
   # *   Argument `headers`, if given, may be an Array of Strings.
-  #
   #
   # ---
   #
@@ -3135,7 +3086,6 @@ class CSV::Table[out Elem] < Object
   # *   Access mode: `:row` or `:col_or_row`.
   # *   Return value: *nth* row of the table, if that row exists; otherwise `nil`.
   #
-  #
   # Returns the *nth* row of the table if that row exists:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
   #     table = CSV.parse(source, headers: true)
@@ -3166,7 +3116,6 @@ class CSV::Table[out Elem] < Object
   # *   Return value: *nth* column of the table, if that column exists; otherwise
   #     an Array of `nil` fields of length `self.size`.
   #
-  #
   # Returns the *nth* column of the table if that column exists:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
   #     table = CSV.parse(source, headers: true)
@@ -3189,7 +3138,6 @@ class CSV::Table[out Elem] < Object
   # *   Access mode: `:row` or `:col_or_row`.
   # *   Return value: rows from the table, beginning at row `range.start`, if
   #     those rows exists.
-  #
   #
   # Returns rows from the table, beginning at row `range.first`, if those rows
   # exist:
@@ -3230,7 +3178,6 @@ class CSV::Table[out Elem] < Object
   # *   Return value: column data from the table, beginning at column
   #     `range.start`, if those columns exist.
   #
-  #
   # Returns column values from the table, if the column exists; the values are
   # arranged by row:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
@@ -3260,7 +3207,6 @@ class CSV::Table[out Elem] < Object
   # *   Form: `table[header]`, `header` a String header.
   # *   Access mode: `:col` or `:col_or_row`
   # *   Return value: column data from the table, if that `header` exists.
-  #
   #
   # Returns column values from the table, if the column exists:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
@@ -3298,7 +3244,6 @@ class CSV::Table[out Elem] < Object
   #     Array of fields.
   # *   Access mode: `:row` or `:col_or_row`.
   # *   Return value: `row`.
-  #
   #
   # If the row exists, it is replaced:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
@@ -3341,7 +3286,6 @@ class CSV::Table[out Elem] < Object
   # *   Access mode: `:col`.
   # *   Return value: `array_of_fields`.
   #
-  #
   # If the column exists, it is replaced:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
   #     table = CSV.parse(source, headers: true)
@@ -3379,7 +3323,6 @@ class CSV::Table[out Elem] < Object
   #     fields.
   # *   Access mode: `:col` or `:col_or_row`.
   # *   Return value: `field_or_array_of_fields`.
-  #
   #
   # If the column exists, it is replaced:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
@@ -3683,7 +3626,6 @@ class CSV::Table[out Elem] < Object
   # *   Class: `CSV::Table`.
   # *   Access mode: `:row`, `:col`, or `:col_or_row`.
   # *   Size:  Row count, including the header row.
-  #
   #
   # Example:
   #     source = "Name,Value\nfoo,0\nbar,1\nbaz,2\n"
