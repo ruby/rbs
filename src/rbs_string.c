@@ -44,35 +44,7 @@ void rbs_string_free(rbs_string_t *self) {
     free((void *) self->start);
 }
 
-// // Ensure the given string is shared, so that we can slice it without needing to free the old string.
-// static void ensure_shared(rbs_string_t *self) {
-//     if (self->type != RBS_STRING_SHARED) {
-//         fprintf(stderr, "Calling this function requires a shared string.\n");
-//         exit(EXIT_FAILURE);
-//     }
-// }
-
-void rbs_string_drop_first(rbs_string_t *self, size_t n) {
-    // ensure_shared(self);
-
-    self->start += n;
-}
-
-void rbs_string_drop_last(rbs_string_t *self, size_t n) {
-    // ensure_shared(self);
-
-    self->end -= n;
-}
-
-void rbs_string_limit_length(rbs_string_t *self, size_t new_length) {
-    // ensure_shared(self);
-
-    self->end = self->start + new_length;
-}
-
 rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
-    // ensure_shared(self);
-
     const char *new_start = self->start;
     while (isspace(*new_start) && new_start < self->end) {
         new_start++;
