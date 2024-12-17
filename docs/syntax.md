@@ -289,7 +289,9 @@ The following `class`/`instance` types are allowed.
 class Foo
   attr_reader parent: class
 
-  def foo: () -> instance
+  def foo: () -> instance # behaves like `self` in this context
+
+  def self?.bar: () -> instance # behaves like `class` for `def self.bar()` and `self` for `def bar()`
 
   @@foos: Array[instance]
 
