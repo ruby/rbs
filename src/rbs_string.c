@@ -55,22 +55,6 @@ void rbs_string_limit_length(rbs_string_t *self, size_t new_length) {
     self->end = self->start + new_length;
 }
 
-rbs_string_t rbs_string_slice(const rbs_string_t self, size_t start_inset, size_t length) {
-    if (length > rbs_string_len(self)) {
-        fprintf(stderr, "rbs_string_slice tried to slice more characters than exist in the string.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if (self.start + start_inset + length >= self.end) {
-        fprintf(stderr, "rbs_string_slice tried to slice past the end of the string.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    const char *new_start = self.start + start_inset;
-
-    return rbs_string_shared_new(new_start, new_start + length);
-}
-
 void rbs_string_strip_whitespace(rbs_string_t *self) {
     // ensure_shared(self);
 
