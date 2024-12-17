@@ -151,7 +151,7 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
     uri (1.0.2)
-    zlib (3.2.0)
+    zlib (3.2.1)
 
 PLATFORMS
   ruby
