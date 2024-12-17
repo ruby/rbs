@@ -43,6 +43,22 @@ rbs_string_t rbs_string_owned_new(const char *start, const char *end);
 rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length);
 
 /**
+ * Free the associated memory of the given string if it is owned, otherwise does nothing.
+ *
+ * @param string The string to free.
+ * \public \memberof rbs_string_t
+ */
+void rbs_string_free_if_needed(rbs_string_t *self);
+
+/**
+ * Free the associated memory of the given string if it is owned, otherwise fails (exits the program).
+ *
+ * @param string The string to free.
+ * \public \memberof rbs_string_t
+ */
+void rbs_string_free(rbs_string_t *self);
+
+/**
  * Drops the leading and trailing whitespace from the given string, in-place.
  * @returns A new owned string that needs to be freed with `rbs_string_free()`
  */

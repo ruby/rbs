@@ -29,6 +29,21 @@ rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_
     return rbs_string_owned_new(buffer, buffer + length);
 }
 
+void rbs_string_free_if_needed(rbs_string_t *self) {
+    if (self->type == RBS_STRING_OWNED) {
+        rbs_string_free(self);
+    }
+}
+
+void rbs_string_free(rbs_string_t *self) {
+    if (self->type != RBS_STRING_OWNED) {
+        fprintf(stderr, "rbs_string_free(%p): not owned\n", self->start);
+        exit(EXIT_FAILURE);
+    }
+
+    free((void *) self->start);
+}
+
 // // Ensure the given string is shared, so that we can slice it without needing to free the old string.
 // static void ensure_shared(rbs_string_t *self) {
 //     if (self->type != RBS_STRING_SHARED) {
