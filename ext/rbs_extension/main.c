@@ -173,7 +173,12 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
     .parser = parser,
     .require_eof = require_eof
   };
-  return rb_ensure(parse_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  VALUE result = rb_ensure(parse_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
 }
 
 static VALUE parse_method_type_try(VALUE a) {
@@ -219,7 +224,12 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
     .parser = parser,
     .require_eof = require_eof
   };
-  return rb_ensure(parse_method_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  VALUE result = rb_ensure(parse_method_type_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
 }
 
 static VALUE parse_signature_try(VALUE a) {
@@ -252,7 +262,12 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
     .parser = parser,
     .require_eof = false
   };
-  return rb_ensure(parse_signature_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  VALUE result = rb_ensure(parse_signature_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
 }
 
 static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
@@ -275,6 +290,7 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   }
 
   rbs_allocator_free(&allocator);
+  RB_GC_GUARD(string);
 
   return results;
 }

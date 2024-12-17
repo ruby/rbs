@@ -7,7 +7,8 @@
 #include "rbs/rbs_string.h"
 
 /**
- * Returns a new shared rbs_string_t from the given Ruby string.
+ * @returns A new shared rbs_string_t from the given Ruby string, which points into the given Ruby String's memory,
+ * and does not need to be `free()`ed. However, the Ruby String needs to be kept alive for the duration of the rbs_string_t.
  */
 rbs_string_t rbs_string_from_ruby_string(VALUE ruby_string);
 
