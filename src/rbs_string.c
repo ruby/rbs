@@ -21,6 +21,14 @@ rbs_string_t rbs_string_owned_new(const char *start, const char *end) {
     };
 }
 
+rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length) {
+    char *buffer = (char *) malloc(length + 1);
+    strncpy(buffer, self->start + start_inset, length);
+    buffer[length] = '\0';
+
+    return rbs_string_owned_new(buffer, buffer + length);
+}
+
 void rbs_string_ensure_owned(rbs_string_t *self) {
     if (self->type == RBS_STRING_OWNED) return;
 

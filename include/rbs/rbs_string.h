@@ -35,6 +35,14 @@ rbs_string_t rbs_string_shared_new(const char *start, const char *end);
 rbs_string_t rbs_string_owned_new(const char *start, const char *end);
 
 /**
+ * Copies a portion of the input string into a new owned string.
+ * @param start_inset Number of characters to exclude from the start
+ * @param length Number of characters to include
+ * @return A new owned string that needs to be freed using `rbs_string_free()`.
+ */
+rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length);
+
+/**
  * Ensures that the given string is owned, so that it manages its own memory, uncoupled from its original source.
  */
 void rbs_string_ensure_owned(rbs_string_t *self);
