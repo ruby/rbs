@@ -55,7 +55,7 @@ void rbs_string_limit_length(rbs_string_t *self, size_t new_length) {
     self->end = self->start + new_length;
 }
 
-void rbs_string_strip_whitespace(rbs_string_t *self) {
+rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     // ensure_shared(self);
 
     const char *new_start = self->start;
@@ -64,8 +64,7 @@ void rbs_string_strip_whitespace(rbs_string_t *self) {
     }
 
     if (new_start == self->end) { // Handle empty string case
-        self->start = new_start;
-        return;
+        return rbs_string_shared_new(new_start, new_start);
     }
 
     const char *new_end = self->end - 1;
@@ -73,8 +72,7 @@ void rbs_string_strip_whitespace(rbs_string_t *self) {
         new_end--;
     }
 
-    self->start = new_start;
-    self->end = new_end + 1;
+    return rbs_string_copy_slice(self, new_start - self->start, new_end - new_start + 1);
 }
 
 size_t rbs_string_len(const rbs_string_t self) {
