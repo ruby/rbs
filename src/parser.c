@@ -925,13 +925,12 @@ static bool parse_symbol(parserstate *state, rbs_location_t *location, rbs_types
     rbs_string_t symbol = rbs_string_copy_slice(&current_token, offset_bytes, rbs_string_len(current_token) - offset_bytes);
 
     rbs_string_t unquoted_symbol = rbs_unquote_string(symbol);
+    rbs_string_free(&symbol);
 
-    literal = rbs_ast_symbol_new(
-      &state->allocator,
-      symbolLoc,
-      &state->constant_pool,
-      rbs_constant_pool_insert_string(&state->constant_pool, unquoted_symbol)
-    );
+    rbs_constant_id_t constant_id = rbs_constant_pool_insert_string(&state->constant_pool, unquoted_symbol);
+    // rbs_string_free(&unquoted_symbol);
+
+    literal = rbs_ast_symbol_new(&state->allocator, symbolLoc, &state->constant_pool, constant_id);
     break;
   }
   default:
@@ -1596,6 +1595,7 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
   );
 
   rbs_string_t stripped_annotation_str = rbs_string_strip_whitespace(&annotation_str);
+  rbs_string_free(&annotation_str);
 
   *annotation = rbs_ast_annotation_new(&state->allocator, rbs_location_new(rg), stripped_annotation_str);
   return true;
