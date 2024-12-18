@@ -57,8 +57,6 @@ class WarningTest < Test::Unit::TestCase
     assert_send_type "(::String) -> nil",
         TestClass.new, :warn, 'message'
 
-    omit_if(RUBY_VERSION < "3.0")
-
     WARNING_CATEGORIES.each do |category|
       assert_send_type "(::String, category: #{category.inspect}) -> nil",
           Warning, :warn, 'message', category: category

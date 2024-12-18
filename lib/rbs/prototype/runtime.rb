@@ -649,8 +649,6 @@ module RBS
       end
 
       def block_from_ast_of(method)
-        return nil if RUBY_VERSION < '3.1'
-
         begin
           ast = RubyVM::AbstractSyntaxTree.of(method)
         rescue ArgumentError

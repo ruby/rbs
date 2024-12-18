@@ -846,14 +846,8 @@ end
 
     rb = <<-'EOR'
 class C
-  if RUBY_VERSION >= '2.7'
-    def foo(x, y, z)
-      do_something_27
-    end
-  else
-    def foo(x, y, z)
-      do_something
-    end
+  def foo(x, y, z)
+    do_something_27
   end
 end
     EOR
@@ -1086,21 +1080,19 @@ end
     end
   end
 
-  if RUBY_VERSION >= '3'
-    def test_endless_method_definition
-      parser = RB.new
-      rb = <<~'RUBY'
+  def test_endless_method_definition
+    parser = RB.new
+    rb = <<~'RUBY'
 module M
   def foo = 42
 end
-      RUBY
-      parser.parse(rb)
+    RUBY
+    parser.parse(rb)
 
-      assert_write parser.decls, <<~RBS
+    assert_write parser.decls, <<~RBS
 module M
   def foo: () -> 42
 end
-      RBS
-    end
+    RBS
   end
 end

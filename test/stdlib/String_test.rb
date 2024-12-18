@@ -1695,8 +1695,6 @@ class StringInstanceTest < Test::Unit::TestCase
       assert_send_type  '(string) { (Integer | Float | String | nil) -> void } -> nil',
                         packed, :unpack, template do end
 
-      next if RUBY_VERSION < '3.1'
-
       with_int 0 do |offset|
         assert_send_type  '(string, offset: int) -> Array[Integer | Float | String | nil]',
                           packed, :unpack, template, offset: offset
@@ -1713,8 +1711,6 @@ class StringInstanceTest < Test::Unit::TestCase
       with_string template do |template_string|
         assert_send_type  "(string) -> #{type}",
                           packed, :unpack1, template_string
-
-        next if RUBY_VERSION < '3.1'
 
         with_int 0 do |offset|
           assert_send_type  "(string, offset: int) -> #{type}",
