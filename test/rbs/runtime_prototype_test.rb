@@ -370,6 +370,8 @@ end
   end
 
   def test_for_yield
+    omit "Ruby 3.4 uses Prism and needs migration" if RUBY_VERSION >= "3.4"
+    
     SignatureManager.new do |manager|
       manager.build do |env|
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
