@@ -37,6 +37,10 @@ Gem::Specification.new do |spec|
   end
   spec.extensions = %w{ext/rbs_extension/extconf.rb}
 
+  if false
+    spec.required_ruby_version = ">= 3.3"
+  end
+
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
