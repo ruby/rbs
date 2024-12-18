@@ -779,6 +779,9 @@ class Logger
   # *   `shift_period_suffix`: sets the format for the filename suffix for
   #     periodic log file rotation; default is `'%Y%m%d'`. See [Periodic
   #     Rotation](rdoc-ref:Logger@Periodic+Rotation).
+  # *   `reraise_write_errors`: An array of exception classes, which will be
+  #     reraised if there is an error when writing to the log device. The default
+  #     is to swallow all exceptions raised.
   #
   def initialize: (logdev? logdev, ?Numeric | String shift_age, ?Integer shift_size, ?shift_period_suffix: String, ?binmode: boolish, ?datetime_format: String, ?formatter: _Formatter, ?progname: String, ?level: Integer | interned) -> void
 end

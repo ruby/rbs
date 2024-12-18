@@ -315,14 +315,14 @@ class Module < Object
   #   rdoc-file=load.c
   #   - mod.autoload(const, filename)   -> nil
   # -->
-  # Registers _filename_ to be loaded (using Kernel::require)
-  #     the first time that _const_ (which may be a String or
-  #     a symbol) is accessed in the namespace of _mod_.
+  # Registers *filename* to be loaded (using Kernel::require) the first time that
+  # *const* (which may be a String or a symbol) is accessed in the namespace of
+  # *mod*.
   #
-  #        module A
-  #        end
-  #        A.autoload(:B, "b")
-  #        A::B.doit            # autoloads "b"
+  #     module A
+  #     end
+  #     A.autoload(:B, "b")
+  #     A::B.doit            # autoloads "b"
   #
   # If *const* in *mod* is defined as autoload, the file name to be loaded is
   # replaced with *filename*.  If *const* is defined but not as autoload, does
@@ -574,7 +574,7 @@ class Module < Object
   # -->
   # Invoked when a reference is made to an undefined constant in *mod*. It is
   # passed a symbol for the undefined constant, and returns a value to be used for
-  # that constant. The following code is an example of the same:
+  # that constant. For example, consider:
   #
   #     def Foo.const_missing(name)
   #       name # return the constant name as Symbol
@@ -582,22 +582,27 @@ class Module < Object
   #
   #     Foo::UNDEFINED_CONST    #=> :UNDEFINED_CONST: symbol returned
   #
-  # In the next example when a reference is made to an undefined constant, it
-  # attempts to load a file whose name is the lowercase version of the constant
-  # (thus class `Fred` is assumed to be in file `fred.rb`).  If found, it returns
-  # the loaded class. It therefore implements an autoload feature similar to
-  # Kernel#autoload and Module#autoload.
+  # As the example above shows, `const_missing` is not required to create the
+  # missing constant in *mod*, though that is often a side-effect. The caller gets
+  # its return value when triggered. If the constant is also defined, further
+  # lookups won't hit `const_missing` and will return the value stored in the
+  # constant as usual. Otherwise, `const_missing` will be invoked again.
+  #
+  # In the next example, when a reference is made to an undefined constant,
+  # `const_missing` attempts to load a file whose path is the lowercase version of
+  # the constant name (thus class `Fred` is assumed to be in file `fred.rb`). If
+  # defined as a side-effect of loading the file, the method returns the value
+  # stored in the constant. This implements an autoload feature similar to
+  # Kernel#autoload and Module#autoload, though it differs in important ways.
   #
   #     def Object.const_missing(name)
   #       @looked_for ||= {}
   #       str_name = name.to_s
-  #       raise "Class not found: #{name}" if @looked_for[str_name]
+  #       raise "Constant not found: #{name}" if @looked_for[str_name]
   #       @looked_for[str_name] = 1
   #       file = str_name.downcase
   #       require file
-  #       klass = const_get(name)
-  #       return klass if klass
-  #       raise "Class not found: #{name}"
+  #       const_get(name, false)
   #     end
   #
   def const_missing: (Symbol arg0) -> untyped
@@ -1155,9 +1160,9 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
-  #   - mod.name    -> string
+  #   - mod.name    -> string or nil
   # -->
-  # Returns the name of the module *mod*.  Returns nil for anonymous modules.
+  # Returns the name of the module *mod*.  Returns `nil` for anonymous modules.
   #
   def name: () -> String?
 
@@ -1482,7 +1487,7 @@ class Module < Object
   #   rdoc-file=eval.c
   #   - refinements -> array
   # -->
-  # Returns an array of modules defined within the receiver.
+  # Returns an array of `Refinement` defined within the receiver.
   #
   #     module A
   #       refine Integer do
@@ -1549,8 +1554,8 @@ class Module < Object
   # of the module and the values that are related to it, such as instances,
   # constants, and methods.
   #
-  # The name should be `nil` or non-empty string that is not a valid constant name
-  # (to avoid confusing between permanent and temporary names).
+  # The name should be `nil` or a non-empty string that is not a valid constant
+  # path (to avoid confusing between permanent and temporary names).
   #
   # The method can be useful to distinguish dynamically generated classes and
   # modules without assigning them to constants.
@@ -1651,7 +1656,7 @@ class Module < Object
   #
   #     In child
   #     In parent
-  #     prog.rb:23: undefined method `hello' for #<Child:0x401b3bb4> (NoMethodError)
+  #     prog.rb:23: undefined method 'hello' for #<Child:0x401b3bb4> (NoMethodError)
   #
   def undef_method: (*interned arg0) -> self
 

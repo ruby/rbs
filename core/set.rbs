@@ -388,7 +388,7 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
-  #   - delete_if() { |o| ... }
+  #   - delete_if(&block)
   # -->
   # Deletes every element of the set for which block evaluates to
   # true, and returns self. Returns an enumerator if no block is
@@ -492,7 +492,7 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
-  #   - keep_if() { |o| ... }
+  #   - keep_if(&block)
   # -->
   # Deletes every element of the set for which block evaluates to
   # false, and returns self. Returns an enumerator if no block is
@@ -600,7 +600,7 @@ class Set[unchecked out A]
   #   rdoc-file=lib/set.rb
   #   - to_a()
   # -->
-  # Converts the set to an array. The order of elements is uncertain.
+  # Returns an array containing all elements in the set.
   #     Set[1, 2].to_a                    #=> [1, 2]
   #     Set[1, 'c', :s].to_a              #=> [1, "c", :s]
   #

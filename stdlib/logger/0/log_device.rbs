@@ -57,7 +57,7 @@ class Logger
 
     # <!--
     #   rdoc-file=lib/logger/log_device.rb
-    #   - new(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil, binmode: false)
+    #   - new(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil, binmode: false, reraise_write_errors: [])
     # -->
     #
     def initialize: (?untyped logdev, ?binmode: boolish, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void

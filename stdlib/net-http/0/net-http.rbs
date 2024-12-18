@@ -77,6 +77,8 @@ module Net
   #         Net::HTTP.post(uri, data)
   #         params = {title: 'foo', body: 'bar', userId: 1}
   #         Net::HTTP.post_form(uri, params)
+  #         data = '{"title": "foo", "body": "bar", "userId": 1}'
+  #         Net::HTTP.put(uri, data)
   #
   # *   If performance is important, consider using sessions, which lower request
   #     overhead. This [session](rdoc-ref:Net::HTTP@Sessions) has multiple
@@ -469,6 +471,10 @@ module Net
   #
   # ## What's Here
   #
+  # First, what's elsewhere. Class Net::HTTP:
+  #
+  # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
+  #
   # This is a categorized summary of methods and attributes.
   #
   # ### Net::HTTP Objects
@@ -526,6 +532,8 @@ module Net
   #     form data and returns a response object.
   # *   [::post](rdoc-ref:Net::HTTP.post): Sends a POST request with data and
   #     returns a response object.
+  # *   [::put](rdoc-ref:Net::HTTP.put): Sends a PUT request with data and returns
+  #     a response object.
   # *   [#copy](rdoc-ref:Net::HTTP#copy): Sends a COPY request and returns a
   #     response object.
   # *   [#delete](rdoc-ref:Net::HTTP#delete): Sends a DELETE request and returns a
@@ -987,7 +995,7 @@ module Net
 
     # <!--
     #   rdoc-file=lib/net/http.rb
-    #   - new(address, port = nil, p_addr = :ENV, p_port = nil, p_user = nil, p_pass = nil, p_no_proxy = nil)
+    #   - new(address, port = nil, p_addr = :ENV, p_port = nil, p_user = nil, p_pass = nil, p_no_proxy = nil, p_use_ssl = nil)
     # -->
     # Returns a new Net::HTTP object `http` (but does not open a TCP connection or
     # HTTP session).
@@ -1676,6 +1684,11 @@ module Net
     #     data = '{"userId": 1, "id": 1, "title": "delectus aut autem", "completed": false}'
     #     http = Net::HTTP.new(hostname)
     #     http.put('/todos/1', data) # => #<Net::HTTPOK 200 OK readbody=true>
+    #
+    # Related:
+    #
+    # *   Net::HTTP::Put: request class for HTTP method PUT.
+    # *   Net::HTTP.put: sends PUT request, returns response body.
     #
     def put: (String path, String data, ?headers initheader) -> Net::HTTPResponse
 
@@ -3382,6 +3395,11 @@ module Net
   #     mpotent_methods): yes.
   # *   [Cacheable](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Cach
   #     eable_methods): no.
+  #
+  # Related:
+  #
+  # *   Net::HTTP.put: sends `PUT` request, returns response object.
+  # *   Net::HTTP#put: sends `PUT` request, returns response object.
   #
   class HTTP::Put < HTTPRequest
     METHOD: String

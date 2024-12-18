@@ -1,18 +1,18 @@
 # <!-- rdoc-file=hash.c -->
-# A Hash maps each of its unique keys to a specific value.
+# A `Hash` maps each of its unique keys to a specific value.
 #
-# A Hash has certain similarities to an Array, but:
+# A `Hash` has certain similarities to an Array, but:
 # *   An Array index is always an Integer.
-# *   A Hash key can be (almost) any object.
+# *   A `Hash` key can be (almost) any object.
 #
-# ### Hash Data Syntax
+# ### `Hash` Data Syntax
 #
-# The older syntax for Hash data uses the "hash rocket," `=>`:
+# The older syntax for `Hash` data uses the "hash rocket," `=>`:
 #
 #     h = {:foo => 0, :bar => 1, :baz => 2}
 #     h # => {:foo=>0, :bar=>1, :baz=>2}
 #
-# Alternatively, but only for a Hash key that's a Symbol, you can use a newer
+# Alternatively, but only for a `Hash` key that's a Symbol, you can use a newer
 # JSON-style syntax, where each bareword becomes a Symbol:
 #
 #     h = {foo: 0, bar: 1, baz: 2}
@@ -34,8 +34,8 @@
 #     # Raises SyntaxError (syntax error, unexpected ':', expecting =>):
 #     h = {0: 'zero'}
 #
-# Hash value can be omitted, meaning that value will be fetched from the context
-# by the name of the key:
+# `Hash` value can be omitted, meaning that value will be fetched from the
+# context by the name of the key:
 #
 #     x = 0
 #     y = 100
@@ -44,24 +44,24 @@
 #
 # ### Common Uses
 #
-# You can use a Hash to give names to objects:
+# You can use a `Hash` to give names to objects:
 #
 #     person = {name: 'Matz', language: 'Ruby'}
 #     person # => {:name=>"Matz", :language=>"Ruby"}
 #
-# You can use a Hash to give names to method arguments:
+# You can use a `Hash` to give names to method arguments:
 #
 #     def some_method(hash)
 #       p hash
 #     end
 #     some_method({foo: 0, bar: 1, baz: 2}) # => {:foo=>0, :bar=>1, :baz=>2}
 #
-# Note: when the last argument in a method call is a Hash, the curly braces may
-# be omitted:
+# Note: when the last argument in a method call is a `Hash`, the curly braces
+# may be omitted:
 #
 #     some_method(foo: 0, bar: 1, baz: 2) # => {:foo=>0, :bar=>1, :baz=>2}
 #
-# You can use a Hash to initialize an object:
+# You can use a `Hash` to initialize an object:
 #
 #     class Dev
 #       attr_accessor :name, :language
@@ -73,9 +73,9 @@
 #     matz = Dev.new(name: 'Matz', language: 'Ruby')
 #     matz # => #<Dev: @name="Matz", @language="Ruby">
 #
-# ### Creating a Hash
+# ### Creating a `Hash`
 #
-# You can create a Hash object explicitly with:
+# You can create a `Hash` object explicitly with:
 #
 # *   A [hash literal](rdoc-ref:syntax/literals.rdoc@Hash+Literals).
 #
@@ -83,46 +83,46 @@
 #
 # *   Method #Hash.
 #
-# You can create a Hash by calling method Hash.new.
+# You can create a `Hash` by calling method Hash.new.
 #
-# Create an empty Hash:
+# Create an empty `Hash`:
 #
 #     h = Hash.new
 #     h # => {}
 #     h.class # => Hash
 #
-# You can create a Hash by calling method Hash.[].
+# You can create a `Hash` by calling method Hash.[].
 #
-# Create an empty Hash:
+# Create an empty `Hash`:
 #
 #     h = Hash[]
 #     h # => {}
 #
-# Create a Hash with initial entries:
+# Create a `Hash` with initial entries:
 #
 #     h = Hash[foo: 0, bar: 1, baz: 2]
 #     h # => {:foo=>0, :bar=>1, :baz=>2}
 #
-# You can create a Hash by using its literal form (curly braces).
+# You can create a `Hash` by using its literal form (curly braces).
 #
-# Create an empty Hash:
+# Create an empty `Hash`:
 #
 #     h = {}
 #     h # => {}
 #
-# Create a Hash with initial entries:
+# Create a `Hash` with initial entries:
 #
 #     h = {foo: 0, bar: 1, baz: 2}
 #     h # => {:foo=>0, :bar=>1, :baz=>2}
 #
-# ### Hash Value Basics
+# ### `Hash` Value Basics
 #
-# The simplest way to retrieve a Hash value (instance method #[]):
+# The simplest way to retrieve a `Hash` value (instance method #[]):
 #
 #     h = {foo: 0, bar: 1, baz: 2}
 #     h[:foo] # => 0
 #
-# The simplest way to create or update a Hash value (instance method #[]=):
+# The simplest way to create or update a `Hash` value (instance method #[]=):
 #
 #     h = {foo: 0, bar: 1, baz: 2}
 #     h[:bat] = 3 # => 3
@@ -130,7 +130,7 @@
 #     h[:foo] = 4 # => 4
 #     h # => {:foo=>4, :bar=>1, :baz=>2, :bat=>3}
 #
-# The simplest way to delete a Hash entry (instance method #delete):
+# The simplest way to delete a `Hash` entry (instance method #delete):
 #
 #     h = {foo: 0, bar: 1, baz: 2}
 #     h.delete(:bar) # => 1
@@ -138,14 +138,14 @@
 #
 # ### Entry Order
 #
-# A Hash object presents its entries in the order of their creation. This is
+# A `Hash` object presents its entries in the order of their creation. This is
 # seen in:
 #
 # *   Iterative methods such as `each`, `each_key`, `each_pair`, `each_value`.
 # *   Other order-sensitive methods such as `shift`, `keys`, `values`.
 # *   The String returned by method `inspect`.
 #
-# A new Hash has its initial ordering per the given entries:
+# A new `Hash` has its initial ordering per the given entries:
 #
 #     h = Hash[foo: 0, bar: 1]
 #     h # => {:foo=>0, :bar=>1}
@@ -166,18 +166,18 @@
 #     h[:foo] = 5
 #     h # => {:bar=>1, :baz=>3, :foo=>5}
 #
-# ### Hash Keys
+# ### `Hash` Keys
 #
-# #### Hash Key Equivalence
+# #### `Hash` Key Equivalence
 #
 # Two objects are treated as the same hash key when their `hash` value is
 # identical and the two objects are `eql?` to each other.
 #
-# #### Modifying an Active Hash Key
+# #### Modifying an Active `Hash` Key
 #
-# Modifying a Hash key while it is in use damages the hash's index.
+# Modifying a `Hash` key while it is in use damages the hash's index.
 #
-# This Hash has keys that are Arrays:
+# This `Hash` has keys that are Arrays:
 #
 #     a0 = [ :foo, :bar ]
 #     a1 = [ :baz, :bat ]
@@ -191,7 +191,7 @@
 #     a0[0] = :bam
 #     a0.hash # => 1069447059
 #
-# And damages the Hash index:
+# And damages the `Hash` index:
 #
 #     h.include?(a0) # => false
 #     h[a0] # => nil
@@ -211,10 +211,10 @@
 #     first_key = h.keys.first
 #     first_key.frozen? # => true
 #
-# #### User-Defined Hash Keys
+# #### User-Defined `Hash` Keys
 #
-# To be useable as a Hash key, objects must implement the methods `hash` and
-# `eql?`. Note: this requirement does not apply if the Hash uses
+# To be usable as a `Hash` key, objects must implement the methods `hash` and
+# `eql?`. Note: this requirement does not apply if the `Hash` uses
 # #compare_by_identity since comparison will then rely on the keys' object id
 # instead of `hash` and `eql?`.
 #
@@ -303,7 +303,7 @@
 #
 # #### Default Proc
 #
-# When the default proc for a Hash is set (i.e., not `nil`), the default value
+# When the default proc for a `Hash` is set (i.e., not `nil`), the default value
 # returned by method #[] is determined by the default proc alone.
 #
 # You can retrieve the default proc with method #default_proc:
@@ -320,8 +320,8 @@
 #     h.default_proc.class # => Proc
 #
 # When the default proc is set (i.e., not `nil`) and method #[] is called with
-# with a non-existent key, #[] calls the default proc with both the Hash object
-# itself and the missing key, then returns the proc's return value:
+# with a non-existent key, #[] calls the default proc with both the `Hash`
+# object itself and the missing key, then returns the proc's return value:
 #
 #     h = Hash.new { |hash, key| "Default value for #{key}" }
 #     h[:nosuch] # => "Default value for nosuch"
@@ -347,13 +347,13 @@
 #
 # ### What's Here
 #
-# First, what's elsewhere. Class Hash:
+# First, what's elsewhere. Class `Hash`:
 #
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-# Here, class Hash provides methods that are useful for:
+# Here, class `Hash` provides methods that are useful for:
 #
 # *   [Creating a Hash](rdoc-ref:Hash@Methods+for+Creating+a+Hash)
 # *   [Setting Hash State](rdoc-ref:Hash@Methods+for+Setting+Hash+State)
@@ -368,15 +368,15 @@
 #     Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values)
 # *   [And more....](rdoc-ref:Hash@Other+Methods)
 #
-# Class Hash also includes methods from module Enumerable.
+# Class `Hash` also includes methods from module Enumerable.
 #
-# #### Methods for Creating a Hash
+# #### Methods for Creating a `Hash`
 #
 # *   ::[]: Returns a new hash populated with given objects.
 # *   ::new: Returns a new empty hash.
 # *   ::try_convert: Returns a new hash created from a given object.
 #
-# #### Methods for Setting Hash State
+# #### Methods for Setting `Hash` State
 #
 # *   #compare_by_identity: Sets `self` to consider only identity in comparing
 #     keys.
@@ -395,11 +395,11 @@
 # *   #empty?: Returns whether there are no entries.
 # *   #eql?: Returns whether a given object is equal to `self`.
 # *   #hash: Returns the integer hash code.
-# *   #has_value?: Returns whether a given object is a value in `self`.
-# *   #include?, #has_key?, #member?, #key?: Returns whether a given object is a
-#     key in `self`.
-# *   #length, #size: Returns the count of entries.
-# *   #value?: Returns whether a given object is a value in `self`.
+# *   #has_value? (aliased as #value?): Returns whether a given object is a
+#     value in `self`.
+# *   #include? (aliased as #has_key?, #member?, #key?): Returns whether a given
+#     object is a key in `self`.
+# *   #size (aliased as #length): Returns the count of entries.
 #
 # #### Methods for Comparing
 #
@@ -427,12 +427,12 @@
 #
 # #### Methods for Assigning
 #
-# *   #[]=, #store: Associates a given key with a given value.
+# *   #[]= (aliased as #store): Associates a given key with a given value.
 # *   #merge: Returns the hash formed by merging each given hash into a copy of
 #     `self`.
-# *   #merge!, #update: Merges each given hash into `self`.
-# *   #replace: Replaces the entire contents of `self` with the contents of a
-#     given hash.
+# *   #update (aliased as #merge!): Merges each given hash into `self`.
+# *   #replace (aliased as #initialize_copy): Replaces the entire contents of
+#     `self` with the contents of a given hash.
 #
 # #### Methods for Deleting
 #
@@ -442,7 +442,8 @@
 # *   #compact!: Removes all `nil`-valued entries from `self`.
 # *   #delete: Removes the entry for a given key.
 # *   #delete_if: Removes entries selected by a given block.
-# *   #filter!, #select!: Keep only those entries selected by a given block.
+# *   #select! (aliased as #filter!): Keep only those entries selected by a
+#     given block.
 # *   #keep_if: Keep only those entries selected by a given block.
 # *   #reject!: Removes entries selected by a given block.
 # *   #shift: Removes and returns the first entry.
@@ -451,24 +452,26 @@
 #
 # *   #compact: Returns a copy of `self` with all `nil`-valued entries removed.
 # *   #except: Returns a copy of `self` with entries removed for specified keys.
-# *   #filter, #select: Returns a copy of `self` with only those entries
-#     selected by a given block.
+# *   #select (aliased as #filter): Returns a copy of `self` with only those
+#     entries selected by a given block.
 # *   #reject: Returns a copy of `self` with entries removed as specified by a
 #     given block.
 # *   #slice: Returns a hash containing the entries for given keys.
 #
 # #### Methods for Iterating
-# *   #each, #each_pair: Calls a given block with each key-value pair.
+# *   #each_pair (aliased as #each): Calls a given block with each key-value
+#     pair.
 # *   #each_key: Calls a given block with each key.
 # *   #each_value: Calls a given block with each value.
 #
 # #### Methods for Converting
 #
-# *   #inspect, #to_s: Returns a new String containing the hash entries.
+# *   #inspect (aliased as #to_s): Returns a new String containing the hash
+#     entries.
 # *   #to_a: Returns a new array of 2-element arrays; each nested array contains
 #     a key-value pair from `self`.
-# *   #to_h: Returns `self` if a Hash; if a subclass of Hash, returns a Hash
-#     containing the entries from `self`.
+# *   #to_h: Returns `self` if a `Hash`; if a subclass of `Hash`, returns a
+#     `Hash` containing the entries from `self`.
 # *   #to_hash: Returns `self`.
 # *   #to_proc: Returns a proc that maps a given key to its value.
 #
@@ -499,23 +502,23 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - Hash[ [*2_element_arrays] ] -> new_hash
   #   - Hash[*objects] -> new_hash
   # -->
-  # Returns a new Hash object populated with the given objects, if any. See
+  # Returns a new `Hash` object populated with the given objects, if any. See
   # Hash::new.
   #
-  # With no argument, returns a new empty Hash.
+  # With no argument, returns a new empty `Hash`.
   #
-  # When the single given argument is a Hash, returns a new Hash populated with
-  # the entries from the given Hash, excluding the default value or proc.
+  # When the single given argument is a `Hash`, returns a new `Hash` populated
+  # with the entries from the given `Hash`, excluding the default value or proc.
   #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     Hash[h] # => {:foo=>0, :bar=>1, :baz=>2}
   #
   # When the single given argument is an Array of 2-element Arrays, returns a new
-  # Hash object wherein each 2-element array forms a key-value entry:
+  # `Hash` object wherein each 2-element array forms a key-value entry:
   #
   #     Hash[ [ [:foo, 0], [:bar, 1] ] ] # => {:foo=>0, :bar=>1}
   #
-  # When the argument count is an even number; returns a new Hash object wherein
+  # When the argument count is an even number; returns a new `Hash` object wherein
   # each successive pair of arguments has become a key-value entry:
   #
   #     Hash[:foo, 0, :bar, 1] # => {:foo=>0, :bar=>1}
@@ -530,14 +533,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - Hash.try_convert(obj) -> obj, new_hash, or nil
   # -->
-  # If `obj` is a Hash object, returns `obj`.
+  # If `obj` is a `Hash` object, returns `obj`.
   #
   # Otherwise if `obj` responds to `:to_hash`, calls `obj.to_hash` and returns the
   # result.
   #
   # Returns `nil` if `obj` does not respond to `:to_hash`
   #
-  # Raises an exception unless `obj.to_hash` returns a Hash object.
+  # Raises an exception unless `obj.to_hash` returns a `Hash` object.
   #
   def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
                       | (untyped) -> (::Hash[untyped, untyped] | nil)
@@ -574,7 +577,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash == object -> true or false
   # -->
   # Returns `true` if all of the following are true:
-  # *   `object` is a Hash object.
+  # *   `object` is a `Hash` object.
   # *   `hash` and `object` have the same keys (regardless of order).
   # *   For each key `key`, `hash[key] == object[key]`.
   #
@@ -825,7 +828,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - hash.default_proc = proc -> proc
   # -->
-  # Sets the default proc for `self` to `proc`: (see [Default
+  # Sets the default proc for `self` to `proc` (see [Default
   # Values](rdoc-ref:Hash@Default+Values)):
   #     h = {}
   #     h.default_proc # => nil
@@ -1034,16 +1037,15 @@ class Hash[unchecked out K, unchecked out V] < Object
 
   # <!--
   #   rdoc-file=hash.c
-  #   - hash.eql? object -> true or false
+  #   - hash.eql?(object) -> true or false
   # -->
   # Returns `true` if all of the following are true:
-  # *   `object` is a Hash object.
+  # *   `object` is a `Hash` object.
   # *   `hash` and `object` have the same keys (regardless of order).
-  # *   For each key `key`, `h[key] eql? object[key]`.
+  # *   For each key `key`, `h[key].eql?(object[key])`.
   #
   # Otherwise, returns `false`.
   #
-  # Equal:
   #     h1 = {foo: 0, bar: 1, baz: 2}
   #     h2 = {foo: 0, bar: 1, baz: 2}
   #     h1.eql? h2 # => true
@@ -1056,7 +1058,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - hsh.except(*keys) -> a_hash
   # -->
-  # Returns a new Hash excluding entries for the given `keys`:
+  # Returns a new `Hash` excluding entries for the given `keys`:
   #     h = { a: 100, b: 200, c: 300 }
   #     h.except(:a)          #=> {:b=>200, :c=>300}
   #
@@ -1114,8 +1116,8 @@ class Hash[unchecked out K, unchecked out V] < Object
                   | [X] (*K) { (K) -> X } -> ::Array[V | X]
 
   # <!-- rdoc-file=hash.c -->
-  # Returns a new Hash object whose entries are those for which the block returns
-  # a truthy value:
+  # Returns a new `Hash` object whose entries are those for which the block
+  # returns a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.select {|key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
@@ -1197,7 +1199,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Returns the Integer hash-code for the hash.
   #
-  # Two Hash objects have the same hash-code if their content is the same
+  # Two `Hash` objects have the same hash-code if their content is the same
   # (regardless of order):
   #     h1 = {foo: 0, bar: 1, baz: 2}
   #     h2 = {baz: 2, bar: 1, foo: 0}
@@ -1232,7 +1234,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - hash.invert -> new_hash
   # -->
-  # Returns a new Hash object with the each key-value pair inverted:
+  # Returns a new `Hash` object with the each key-value pair inverted:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = h.invert
   #     h1 # => {0=>:foo, 1=>:bar, 2=>:baz}
@@ -1309,15 +1311,15 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.merge(*other_hashes) -> new_hash
   #   - hash.merge(*other_hashes) { |key, old_value, new_value| ... } -> new_hash
   # -->
-  # Returns the new Hash formed by merging each of `other_hashes` into a copy of
+  # Returns the new `Hash` formed by merging each of `other_hashes` into a copy of
   # `self`.
   #
-  # Each argument in `other_hashes` must be a Hash.
+  # Each argument in `other_hashes` must be a `Hash`.
   #
   # ---
   #
   # With arguments and no block:
-  # *   Returns the new Hash object formed by merging each successive Hash in
+  # *   Returns the new `Hash` object formed by merging each successive `Hash` in
   #     `other_hashes` into `self`.
   # *   Each new-key entry is added at the end.
   # *   Each duplicate-key entry's value overwrites the previous value.
@@ -1329,7 +1331,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.merge(h1, h2) # => {:foo=>0, :bar=>4, :baz=>2, :bat=>6, :bam=>5}
   #
   # With arguments and a block:
-  # *   Returns a new Hash object that is the merge of `self` and each given hash.
+  # *   Returns a new `Hash` object that is the merge of `self` and each given
+  #     hash.
   # *   The given hashes are merged left to right.
   # *   Each new-key entry is added at the end.
   # *   For each duplicate key:
@@ -1359,7 +1362,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # <!-- rdoc-file=hash.c -->
   # Merges each of `other_hashes` into `self`; returns `self`.
   #
-  # Each argument in `other_hashes` must be a Hash.
+  # Each argument in `other_hashes` must be a `Hash`.
   #
   # With arguments and no block:
   # *   Returns `self`, after the given hashes are merged into it.
@@ -1433,7 +1436,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.reject {|key, value| ... } -> new_hash
   #   - hash.reject -> new_enumerator
   # -->
-  # Returns a new Hash object whose entries are all those from `self` for which
+  # Returns a new `Hash` object whose entries are all those from `self` for which
   # the block returns `false` or `nil`:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = h.reject {|key, value| key.start_with?('b') }
@@ -1481,8 +1484,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.select {|key, value| ... } -> new_hash
   #   - hash.select -> new_enumerator
   # -->
-  # Returns a new Hash object whose entries are those for which the block returns
-  # a truthy value:
+  # Returns a new `Hash` object whose entries are those for which the block
+  # returns a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.select {|key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
@@ -1541,7 +1544,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - hash.slice(*keys) -> new_hash
   # -->
-  # Returns a new Hash object containing the entries for the given `keys`:
+  # Returns a new `Hash` object containing the entries for the given `keys`:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.slice(:baz, :foo) # => {:baz=>2, :foo=>0}
   #
@@ -1584,12 +1587,13 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.to_h -> self or new_hash
   #   - hash.to_h {|key, value| ... } -> new_hash
   # -->
-  # For an instance of Hash, returns `self`.
+  # For an instance of `Hash`, returns `self`.
   #
-  # For a subclass of Hash, returns a new Hash containing the content of `self`.
+  # For a subclass of `Hash`, returns a new `Hash` containing the content of
+  # `self`.
   #
-  # When a block is given, returns a new Hash object whose content is based on the
-  # block; the block should return a 2-element Array object specifying the
+  # When a block is given, returns a new `Hash` object whose content is based on
+  # the block; the block should return a 2-element Array object specifying the
   # key-value pair to be included in the returned Array:
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h1 = h.to_h {|key, value| [value, key] }
@@ -1635,7 +1639,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.transform_keys(hash2) {|other_key| ...} -> new_hash
   #   - hash.transform_keys -> new_enumerator
   # -->
-  # Returns a new Hash object; each entry has:
+  # Returns a new `Hash` object; each entry has:
   # *   A key provided by the block.
   # *   The value from `self`.
   #
@@ -1686,7 +1690,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - hash.transform_values {|value| ... } -> new_hash
   #   - hash.transform_values -> new_enumerator
   # -->
-  # Returns a new Hash object; each entry has:
+  # Returns a new `Hash` object; each entry has:
   # *   A key from `self`.
   # *   A value provided by the block.
   #
@@ -1731,7 +1735,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Merges each of `other_hashes` into `self`; returns `self`.
   #
-  # Each argument in `other_hashes` must be a Hash.
+  # Each argument in `other_hashes` must be a `Hash`.
   #
   # With arguments and no block:
   # *   Returns `self`, after the given hashes are merged into it.
@@ -1804,33 +1808,41 @@ class Hash[unchecked out K, unchecked out V] < Object
   private
 
   # <!--
-  #   rdoc-file=hash.c
+  #   rdoc-file=hash.rb
   #   - Hash.new(default_value = nil) -> new_hash
+  #   - Hash.new(default_value = nil, capacity: size) -> new_hash
   #   - Hash.new {|hash, key| ... } -> new_hash
+  #   - Hash.new(capacity: size) {|hash, key| ... } -> new_hash
   # -->
-  # Returns a new empty Hash object.
+  # Returns a new empty `Hash` object.
   #
   # The initial default value and initial default proc for the new hash depend on
   # which form above was used. See [Default Values](rdoc-ref:Hash@Default+Values).
   #
-  # If neither an argument nor a block given, initializes both the default value
-  # and the default proc to `nil`:
+  # If neither an argument nor a block is given, initializes both the default
+  # value and the default proc to `nil`:
   #     h = Hash.new
   #     h.default # => nil
   #     h.default_proc # => nil
   #
-  # If argument `default_value` given but no block given, initializes the default
-  # value to the given `default_value` and the default proc to `nil`:
+  # If argument `default_value` is given but no block is given, initializes the
+  # default value to the given `default_value` and the default proc to `nil`:
   #     h = Hash.new(false)
   #     h.default # => false
   #     h.default_proc # => nil
   #
-  # If a block given but no argument, stores the block as the default proc and
-  # sets the default value to `nil`:
+  # If a block is given but no `default_value`, stores the block as the default
+  # proc and sets the default value to `nil`:
   #     h = Hash.new {|hash, key| "Default value for #{key}" }
   #     h.default # => nil
   #     h.default_proc.class # => Proc
   #     h[:nosuch] # => "Default value for nosuch"
+  #
+  # If both a block and a `default_value` are given, raises an `ArgumentError`
+  #
+  # If the optional keyword argument `capacity` is given, the hash will be
+  # allocated with enough capacity to accommodate this many keys without having to
+  # be resized.
   #
   def initialize: () -> void
                 | (untyped default) -> void

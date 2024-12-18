@@ -240,7 +240,11 @@ module Benchmark
   #   rdoc-file=lib/benchmark.rb
   #   - realtime() { || ... }
   # -->
-  # Returns the elapsed real time used to execute the given block.
+  # Returns the elapsed real time used to execute the given block. The unit of
+  # time is seconds.
+  #
+  #     Benchmark.realtime { "a" * 1_000_000_000 }
+  #     #=> 0.5098029999935534
   #
   def self?.realtime: () { () -> void } -> Float
 

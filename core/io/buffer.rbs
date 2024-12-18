@@ -41,30 +41,28 @@ class IO
   #
   # Buffer from string:
   #
-  #     string = 'buffer'
-  #     buffer = IO::Buffer.for(string)
-  #     # =>
-  #     # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
-  #     # ...
-  #     buffer
-  #     # =>
-  #     # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
-  #     # 0x00000000  64 61 74 61                                     buffer
+  #     string = 'data'
+  #     IO::Buffer.for(string) do |buffer|
+  #       buffer
+  #       # =>
+  #       # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
+  #       # 0x00000000  64 61 74 61                                     data
   #
-  #     buffer.get_string(2)  # read content starting from offset 2
-  #     # => "ta"
-  #     buffer.set_string('---', 1) # write content, starting from offset 1
-  #     # => 3
-  #     buffer
-  #     # =>
-  #     # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
-  #     # 0x00000000  64 2d 2d 2d                                     d---
-  #     string  # original string changed, too
-  #     # => "d---"
+  #       buffer.get_string(2)  # read content starting from offset 2
+  #       # => "ta"
+  #       buffer.set_string('---', 1) # write content, starting from offset 1
+  #       # => 3
+  #       buffer
+  #       # =>
+  #       # #<IO::Buffer 0x00007f3f02be9b18+4 SLICE>
+  #       # 0x00000000  64 2d 2d 2d                                     d---
+  #       string  # original string changed, too
+  #       # => "d---"
+  #     end
   #
   # Buffer from file:
   #
-  #     File.write('test.txt', 'test buffer')
+  #     File.write('test.txt', 'test data')
   #     # => 9
   #     buffer = IO::Buffer.map(File.open('test.txt'))
   #     # =>
@@ -81,7 +79,7 @@ class IO
   #     buffer.set_string('---', 1)
   #     # => 3 -- bytes written
   #     File.read('test.txt')
-  #     # => "t--- buffer"
+  #     # => "t--- data"
   #
   # **The class is experimental and the interface is subject to change, this is
   # especially true of file mappings which may be removed entirely in the
@@ -198,29 +196,29 @@ class IO
     # -->
     # Fill buffer with `value`, starting with `offset` and going for `length` bytes.
     #
-    #     buffer = IO::Buffer.for('test')
+    #     buffer = IO::Buffer.for('test').dup
     #     # =>
-    #     #   <IO::Buffer 0x00007fca40087c38+4 SLICE>
+    #     #   <IO::Buffer 0x00007fca40087c38+4 INTERNAL>
     #     #   0x00000000  74 65 73 74         test
     #
     #     buffer.clear
     #     # =>
-    #     #   <IO::Buffer 0x00007fca40087c38+4 SLICE>
+    #     #   <IO::Buffer 0x00007fca40087c38+4 INTERNAL>
     #     #   0x00000000  00 00 00 00         ....
     #
     #     buf.clear(1) # fill with 1
     #     # =>
-    #     #   <IO::Buffer 0x00007fca40087c38+4 SLICE>
+    #     #   <IO::Buffer 0x00007fca40087c38+4 INTERNAL>
     #     #   0x00000000  01 01 01 01         ....
     #
     #     buffer.clear(2, 1, 2) # fill with 2, starting from offset 1, for 2 bytes
     #     # =>
-    #     #   <IO::Buffer 0x00007fca40087c38+4 SLICE>
+    #     #   <IO::Buffer 0x00007fca40087c38+4 INTERNAL>
     #     #   0x00000000  01 02 02 01         ....
     #
     #     buffer.clear(2, 1) # fill with 2, starting from offset 1
     #     # =>
-    #     #   <IO::Buffer 0x00007fca40087c38+4 SLICE>
+    #     #   <IO::Buffer 0x00007fca40087c38+4 INTERNAL>
     #     #   0x00000000  01 02 02 02         ....
     #
     def clear: (?Integer value, ?Integer offset, ?Integer length) -> self
@@ -230,7 +228,7 @@ class IO
     #   - copy(source, [offset, [length, [source_offset]]]) -> size
     # -->
     # Efficiently copy from a source IO::Buffer into the buffer, at `offset` using
-    # `memcpy`. For copying String instances, see #set_string.
+    # `memmove`. For copying String instances, see #set_string.
     #
     #     buffer = IO::Buffer.new(32)
     #     # =>
@@ -248,13 +246,14 @@ class IO
     #
     # #copy can be used to put buffer into strings associated with buffer:
     #
-    #     string= "buffer:    "
-    #     # => "buffer:    "
-    #     buffer = IO::Buffer.for(string)
-    #     buffer.copy(IO::Buffer.for("test"), 5)
+    #     string = "data:    "
+    #     # => "data:    "
+    #     buffer = IO::Buffer.for(string) do |buffer|
+    #       buffer.copy(IO::Buffer.for("test"), 5)
+    #     end
     #     # => 4
     #     string
-    #     # => "buffer:test"
+    #     # => "data:test"
     #
     # Attempt to copy into a read-only buffer will fail:
     #
@@ -277,6 +276,20 @@ class IO
     #     buffer = IO::Buffer.new(2)
     #     buffer.copy(IO::Buffer.for('test'), 0)
     #     # in `copy': Specified offset+length is bigger than the buffer size! (ArgumentError)
+    #
+    # It is safe to copy between memory regions that overlaps each other. In such
+    # case, the data is copied as if the data was first copied from the source
+    # buffer to a temporary buffer, and then copied from the temporary buffer to the
+    # destination buffer.
+    #
+    #     buffer = IO::Buffer.new(10)
+    #     buffer.set_string("0123456789")
+    #     buffer.copy(buffer, 3, 7)
+    #     # => 7
+    #     buffer
+    #     # =>
+    #     # #<IO::Buffer 0x000056494f8ce440+10 INTERNAL>
+    #     # 0x00000000  30 31 32 30 31 32 33 34 35 36                   0120123456
     #
     def copy: (Buffer source, ?Integer offset, ?Integer length, ?Integer source_offset) -> Integer
 
@@ -651,7 +664,7 @@ class IO
     #   - set_string(string, [offset, [length, [source_offset]]]) -> size
     # -->
     # Efficiently copy from a source String into the buffer, at `offset` using
-    # `memcpy`.
+    # `memmove`.
     #
     #     buf = IO::Buffer.new(8)
     #     # =>
@@ -736,7 +749,7 @@ class IO
     # bounds.
     #
     #     string = 'test'
-    #     buffer = IO::Buffer.for(string)
+    #     buffer = IO::Buffer.for(string).dup
     #
     #     slice = buffer.slice
     #     # =>
@@ -763,12 +776,8 @@ class IO
     #     # it is also visible at position 1 of the original buffer
     #     buffer
     #     # =>
-    #     # #<IO::Buffer 0x00007fc3d31e2d80+4 SLICE>
+    #     # #<IO::Buffer 0x00007fc3d31e2d80+4 INTERNAL>
     #     # 0x00000000  74 6f 73 74                                     tost
-    #
-    #     # ...and original string
-    #     string
-    #     # => tost
     #
     def slice: (Integer offset, Integer length) -> Buffer
 

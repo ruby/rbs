@@ -177,6 +177,9 @@
 #     52).
 #
 module FileUtils
+  # <!-- rdoc-file=lib/fileutils.rb -->
+  # The version number.
+  #
   VERSION: String
 
   type mode = Integer | String

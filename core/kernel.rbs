@@ -489,9 +489,9 @@ module Kernel : BasicObject
   #   - Float(arg, exception: true)    -> float or nil
   # -->
   # Returns *arg* converted to a float. Numeric types are converted directly, and
-  # with exception to String and `nil` the rest are converted using *arg*`.to_f`.
-  # Converting a String with invalid characters will result in a ArgumentError.
-  # Converting `nil` generates a TypeError.  Exceptions can be suppressed by
+  # with exception to String and `nil`, the rest are converted using *arg*`.to_f`.
+  # Converting a String with invalid characters will result in an ArgumentError.
+  # Converting `nil` generates a TypeError. Exceptions can be suppressed by
   # passing `exception: false`.
   #
   #     Float(1)                 #=> 1.0
@@ -538,22 +538,22 @@ module Kernel : BasicObject
   #
   # With a non-zero `base`, `object` must be a string or convertible to a string.
   #
-  # #### numeric objects
+  # #### Numeric objects
   #
-  # With integer argument `object` given, returns `object`:
+  # With an integer argument `object` given, returns `object`:
   #
   #     Integer(1)                # => 1
   #     Integer(-1)               # => -1
   #
-  # With floating-point argument `object` given, returns `object` truncated to an
-  # integer:
+  # With a floating-point argument `object` given, returns `object` truncated to
+  # an integer:
   #
   #     Integer(1.9)              # => 1  # Rounds toward zero.
   #     Integer(-1.9)             # => -1 # Rounds toward zero.
   #
-  # #### string objects
+  # #### String objects
   #
-  # With string argument `object` and zero `base` given, returns `object`
+  # With a string argument `object` and zero `base` given, returns `object`
   # converted to an integer in base 10:
   #
   #     Integer('100')    # => 100
@@ -563,7 +563,7 @@ module Kernel : BasicObject
   # the actual base (radix indicator):
   #
   #     Integer('0100')  # => 64  # Leading '0' specifies base 8.
-  #     Integer('0b100') # => 4   # Leading '0b', specifies base 2.
+  #     Integer('0b100') # => 4   # Leading '0b' specifies base 2.
   #     Integer('0x100') # => 256 # Leading '0x' specifies base 16.
   #
   # With a positive `base` (in range 2..36) given, returns `object` converted to
@@ -574,7 +574,7 @@ module Kernel : BasicObject
   #     Integer('-100', 16) # => -256
   #
   # With a negative `base` (in range -36..-2) given, returns `object` converted to
-  # an integer in the radix indicator if exists or `-base`:
+  # the radix indicator if it exists or `base`:
   #
   #     Integer('0x100', -2)   # => 256
   #     Integer('100', -2)     # => 4
@@ -583,7 +583,7 @@ module Kernel : BasicObject
   #     Integer('0o100', -10)  # => 64
   #     Integer('100', -10)    # => 100
   #
-  # `base` -1 is equal the -10 case.
+  # `base` -1 is equivalent to the -10 case.
   #
   # When converting strings, surrounding whitespace and embedded underscores are
   # allowed and ignored:
@@ -591,7 +591,7 @@ module Kernel : BasicObject
   #     Integer(' 100 ')      # => 100
   #     Integer('-1_0_0', 16) # => -256
   #
-  # #### other classes
+  # #### Other classes
   #
   # Examples with `object` of various other classes:
   #
@@ -599,13 +599,13 @@ module Kernel : BasicObject
   #     Integer(Complex(2, 0))   # => 2  # Imaginary part must be zero.
   #     Integer(Time.now)        # => 1650974042
   #
-  # #### keywords
+  # #### Keywords
   #
-  # With optional keyword argument `exception` given as `true` (the default):
+  # With the optional keyword argument `exception` given as `true` (the default):
   #
   # *   Raises TypeError if `object` does not respond to `to_int` or `to_i`.
   # *   Raises TypeError if `object` is `nil`.
-  # *   Raise ArgumentError if `object` is an invalid string.
+  # *   Raises ArgumentError if `object` is an invalid string.
   #
   # With `exception` given as `false`, an exception of any kind is suppressed and
   # `nil` is returned.
@@ -769,11 +769,10 @@ module Kernel : BasicObject
   #   rdoc-file=load.c
   #   - autoload(const, filename)   -> nil
   # -->
-  # Registers _filename_ to be loaded (using Kernel::require)
-  #     the first time that _const_ (which may be a String or
-  #     a symbol) is accessed.
+  # Registers *filename* to be loaded (using Kernel::require) the first time that
+  # *const* (which may be a String or a symbol) is accessed.
   #
-  #        autoload(:MyModule, "/usr/local/lib/modules/my_module.rb")
+  #     autoload(:MyModule, "/usr/local/lib/modules/my_module.rb")
   #
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
@@ -784,10 +783,23 @@ module Kernel : BasicObject
   #   rdoc-file=load.c
   #   - autoload?(name, inherit=true)   -> String or nil
   # -->
-  # Returns *filename* to be loaded if *name* is registered as `autoload`.
+  # Returns *filename* to be loaded if *name* is registered as `autoload` in the
+  # current namespace or one of its ancestors.
   #
   #     autoload(:B, "b")
   #     autoload?(:B)            #=> "b"
+  #
+  #     module C
+  #       autoload(:D, "d")
+  #       autoload?(:D)          #=> "d"
+  #       autoload?(:B)          #=> nil
+  #     end
+  #
+  #     class E
+  #       autoload(:F, "f")
+  #       autoload?(:F)          #=> "f"
+  #       autoload?(:B)          #=> "b"
+  #     end
   #
   def self?.autoload?: (interned name) -> String?
 
@@ -894,22 +906,80 @@ module Kernel : BasicObject
   def self?.exit!: (?int | bool status) -> bot
 
   # <!-- rdoc-file=eval.c -->
-  # With no arguments, raises the exception in `$!` or raises a RuntimeError if
-  # `$!` is `nil`.  With a single `String` argument, raises a `RuntimeError` with
-  # the string as a message. Otherwise, the first parameter should be an
-  # `Exception` class (or another object that returns an `Exception` object when
-  # sent an `exception` message).  The optional second parameter sets the message
-  # associated with the exception (accessible via Exception#message), and the
-  # third parameter is an array of callback information (accessible via
-  # Exception#backtrace). The `cause` of the generated exception (accessible via
-  # Exception#cause) is automatically set to the "current" exception (`$!`), if
-  # any. An alternative value, either an `Exception` object or `nil`, can be
-  # specified via the `:cause` argument.
+  # Raises an exception; see [Exceptions](rdoc-ref:exceptions.md).
   #
-  # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
+  # Argument `exception` sets the class of the new exception; it should be class
+  # Exception or one of its subclasses (most commonly, RuntimeError or
+  # StandardError), or an instance of one of those classes:
   #
-  #     raise "Failed to create socket"
-  #     raise ArgumentError, "No parameters", caller
+  #     begin
+  #       raise(StandardError)
+  #     rescue => x
+  #       p x.class
+  #     end
+  #     # => StandardError
+  #
+  # Argument `message` sets the stored message in the new exception, which may be
+  # retrieved by method Exception#message; the message must be a
+  # [string-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@String-Convertible+Objects) or
+  # `nil`:
+  #
+  #     begin
+  #       raise(StandardError, 'Boom')
+  #     rescue => x
+  #       p x.message
+  #     end
+  #     # => "Boom"
+  #
+  # If argument `message` is not given, the message is the exception class name.
+  #
+  # See [Messages](rdoc-ref:exceptions.md@Messages).
+  #
+  # Argument `backtrace` sets the stored backtrace in the new exception, which may
+  # be retrieved by method Exception#backtrace; the backtrace must be an array of
+  # strings or `nil`:
+  #
+  #     begin
+  #       raise(StandardError, 'Boom', %w[foo bar baz])
+  #     rescue => x
+  #       p x.backtrace
+  #     end
+  #     # => ["foo", "bar", "baz"]
+  #
+  # If argument `backtrace` is not given, the backtrace is set according to an
+  # array of Thread::Backtrace::Location objects, as derived from the call stack.
+  #
+  # See [Backtraces](rdoc-ref:exceptions.md@Backtraces).
+  #
+  # Keyword argument `cause` sets the stored cause in the new exception, which may
+  # be retrieved by method Exception#cause; the cause must be an exception object
+  # (Exception or one of its subclasses), or `nil`:
+  #
+  #     begin
+  #       raise(StandardError, cause: RuntimeError.new)
+  #     rescue => x
+  #       p x.cause
+  #     end
+  #     # => #<RuntimeError: RuntimeError>
+  #
+  # If keyword argument `cause` is not given, the cause is the value of `$!`.
+  #
+  # See [Cause](rdoc-ref:exceptions.md@Cause).
+  #
+  # In the alternate calling sequence, where argument `exception` *not* given,
+  # raises a new exception of the class given by `$!`, or of class RuntimeError if
+  # `$!` is `nil`:
+  #
+  #     begin
+  #       raise
+  #     rescue => x
+  #       p x
+  #     end
+  #     # => RuntimeError
+  #
+  # With argument `exception` not given, argument `message` and keyword argument
+  # `cause` may be given, but argument `backtrace` may not be given.
   #
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
@@ -918,29 +988,83 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=eval.c
-  #   - raise
-  #   - raise(string, cause: $!)
-  #   - raise(exception [, string [, array]], cause: $!)
-  #   - fail
-  #   - fail(string, cause: $!)
-  #   - fail(exception [, string [, array]], cause: $!)
+  #   - raise(exception, message = exception.to_s, backtrace = nil, cause: $!)
+  #   - raise(message = nil, cause: $!)
   # -->
-  # With no arguments, raises the exception in `$!` or raises a RuntimeError if
-  # `$!` is `nil`.  With a single `String` argument, raises a `RuntimeError` with
-  # the string as a message. Otherwise, the first parameter should be an
-  # `Exception` class (or another object that returns an `Exception` object when
-  # sent an `exception` message).  The optional second parameter sets the message
-  # associated with the exception (accessible via Exception#message), and the
-  # third parameter is an array of callback information (accessible via
-  # Exception#backtrace). The `cause` of the generated exception (accessible via
-  # Exception#cause) is automatically set to the "current" exception (`$!`), if
-  # any. An alternative value, either an `Exception` object or `nil`, can be
-  # specified via the `:cause` argument.
+  # Raises an exception; see [Exceptions](rdoc-ref:exceptions.md).
   #
-  # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
+  # Argument `exception` sets the class of the new exception; it should be class
+  # Exception or one of its subclasses (most commonly, RuntimeError or
+  # StandardError), or an instance of one of those classes:
   #
-  #     raise "Failed to create socket"
-  #     raise ArgumentError, "No parameters", caller
+  #     begin
+  #       raise(StandardError)
+  #     rescue => x
+  #       p x.class
+  #     end
+  #     # => StandardError
+  #
+  # Argument `message` sets the stored message in the new exception, which may be
+  # retrieved by method Exception#message; the message must be a
+  # [string-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@String-Convertible+Objects) or
+  # `nil`:
+  #
+  #     begin
+  #       raise(StandardError, 'Boom')
+  #     rescue => x
+  #       p x.message
+  #     end
+  #     # => "Boom"
+  #
+  # If argument `message` is not given, the message is the exception class name.
+  #
+  # See [Messages](rdoc-ref:exceptions.md@Messages).
+  #
+  # Argument `backtrace` sets the stored backtrace in the new exception, which may
+  # be retrieved by method Exception#backtrace; the backtrace must be an array of
+  # strings or `nil`:
+  #
+  #     begin
+  #       raise(StandardError, 'Boom', %w[foo bar baz])
+  #     rescue => x
+  #       p x.backtrace
+  #     end
+  #     # => ["foo", "bar", "baz"]
+  #
+  # If argument `backtrace` is not given, the backtrace is set according to an
+  # array of Thread::Backtrace::Location objects, as derived from the call stack.
+  #
+  # See [Backtraces](rdoc-ref:exceptions.md@Backtraces).
+  #
+  # Keyword argument `cause` sets the stored cause in the new exception, which may
+  # be retrieved by method Exception#cause; the cause must be an exception object
+  # (Exception or one of its subclasses), or `nil`:
+  #
+  #     begin
+  #       raise(StandardError, cause: RuntimeError.new)
+  #     rescue => x
+  #       p x.cause
+  #     end
+  #     # => #<RuntimeError: RuntimeError>
+  #
+  # If keyword argument `cause` is not given, the cause is the value of `$!`.
+  #
+  # See [Cause](rdoc-ref:exceptions.md@Cause).
+  #
+  # In the alternate calling sequence, where argument `exception` *not* given,
+  # raises a new exception of the class given by `$!`, or of class RuntimeError if
+  # `$!` is `nil`:
+  #
+  #     begin
+  #       raise
+  #     rescue => x
+  #       p x
+  #     end
+  #     # => RuntimeError
+  #
+  # With argument `exception` not given, argument `message` and keyword argument
+  # `cause` may be given, but argument `backtrace` may not be given.
   #
   alias raise fail
 
@@ -1033,10 +1157,10 @@ module Kernel : BasicObject
   # will be raised.
   #
   # If the optional *wrap* parameter is `true`, the loaded script will be executed
-  # under an anonymous module, protecting the calling program's global namespace.
-  # If the optional *wrap* parameter is a module, the loaded script will be
-  # executed under the given module. In no circumstance will any local variables
-  # in the loaded file be propagated to the loading environment.
+  # under an anonymous module. If the optional *wrap* parameter is a module, the
+  # loaded script will be executed under the given module. In no circumstance will
+  # any local variables in the loaded file be propagated to the loading
+  # environment.
   #
   def self?.load: (String filename, ?Module | bool) -> bool
 
@@ -1056,8 +1180,8 @@ module Kernel : BasicObject
   #       # ...
   #     end
   #
-  # StopIteration raised in the block breaks the loop.  In this case, loop returns
-  # the "result" value stored in the exception.
+  # A StopIteration raised in the block breaks the loop. In this case, loop
+  # returns the "result" value stored in the exception.
   #
   #     enum = Enumerator.new { |y|
   #       y << "one"
@@ -1263,7 +1387,7 @@ module Kernel : BasicObject
   # -->
   # prints arguments in pretty form.
   #
-  # pp returns argument(s).
+  # `#pp` returns argument(s).
   #
   def self?.pp: [T] (T arg0) -> T
               | (untyped, untyped, *untyped) -> Array[untyped]
@@ -1363,8 +1487,8 @@ module Kernel : BasicObject
   #     $cat t.txt | ruby -e "p readlines 12"
   #     ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
   #
-  # With arguments `sep` and `limit` given, combines the two behaviors; see [Line
-  # Separator and Line Limit](rdoc-ref:IO@Line+Separator+and+Line+Limit).
+  # With arguments `sep` and `limit` given, combines the two behaviors (see [Line
+  # Separator and Line Limit](rdoc-ref:IO@Line+Separator+and+Line+Limit)).
   #
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted:
@@ -1418,7 +1542,8 @@ module Kernel : BasicObject
   # Each of the arguments `read_ios`, `write_ios`, and `error_ios` is an array of
   # IO objects.
   #
-  # Argument `timeout` is an integer timeout interval in seconds.
+  # Argument `timeout` is a numeric value (such as integer or float) timeout
+  # interval in seconds.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:
@@ -1595,59 +1720,69 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=file.c
-  #   - test(cmd, file1 [, file2] ) -> obj
+  #   - test(char, path0, path1 = nil) -> object
   # -->
-  # Uses the character `cmd` to perform various tests on `file1` (first table
-  # below) or on `file1` and `file2` (second table).
-  #
-  # File tests on a single file:
-  #
-  #     Cmd    Returns   Meaning
-  #     "A"  | Time    | Last access time for file1
-  #     "b"  | boolean | True if file1 is a block device
-  #     "c"  | boolean | True if file1 is a character device
-  #     "C"  | Time    | Last change time for file1
-  #     "d"  | boolean | True if file1 exists and is a directory
-  #     "e"  | boolean | True if file1 exists
-  #     "f"  | boolean | True if file1 exists and is a regular file
-  #     "g"  | boolean | True if file1 has the setgid bit set
-  #     "G"  | boolean | True if file1 exists and has a group
-  #          |         | ownership equal to the caller's group
-  #     "k"  | boolean | True if file1 exists and has the sticky bit set
-  #     "l"  | boolean | True if file1 exists and is a symbolic link
-  #     "M"  | Time    | Last modification time for file1
-  #     "o"  | boolean | True if file1 exists and is owned by
-  #          |         | the caller's effective uid
-  #     "O"  | boolean | True if file1 exists and is owned by
-  #          |         | the caller's real uid
-  #     "p"  | boolean | True if file1 exists and is a fifo
-  #     "r"  | boolean | True if file1 is readable by the effective
-  #          |         | uid/gid of the caller
-  #     "R"  | boolean | True if file is readable by the real
-  #          |         | uid/gid of the caller
-  #     "s"  | int/nil | If file1 has nonzero size, return the size,
-  #          |         | otherwise return nil
-  #     "S"  | boolean | True if file1 exists and is a socket
-  #     "u"  | boolean | True if file1 has the setuid bit set
-  #     "w"  | boolean | True if file1 exists and is writable by
-  #          |         | the effective uid/gid
-  #     "W"  | boolean | True if file1 exists and is writable by
-  #          |         | the real uid/gid
-  #     "x"  | boolean | True if file1 exists and is executable by
-  #          |         | the effective uid/gid
-  #     "X"  | boolean | True if file1 exists and is executable by
-  #          |         | the real uid/gid
-  #     "z"  | boolean | True if file1 exists and has a zero length
-  #
-  # Tests that take two files:
-  #
-  #     "-"  | boolean | True if file1 and file2 are identical
-  #     "="  | boolean | True if the modification times of file1
-  #          |         | and file2 are equal
-  #     "<"  | boolean | True if the modification time of file1
-  #          |         | is prior to that of file2
-  #     ">"  | boolean | True if the modification time of file1
-  #          |         | is after that of file2
+  # Performs a test on one or both of the *filesystem entities* at the given paths
+  # `path0` and `path1`:
+  # *   Each path `path0` or `path1` points to a file, directory, device, pipe,
+  #     etc.
+  # *   Character `char` selects a specific test.
+  # The tests:
+  # *   Each of these tests operates only on the entity at `path0`,
+  #      and returns `true` or `false`;
+  #      for a non-existent entity, returns `false` (does not raise exception):
+  #  Character  |Test
+  # ------------|-------------------------------------------------------------------------
+  # <tt>'b'</tt>|Whether the entity is a block device.
+  # <tt>'c'</tt>|Whether the entity is a character device.
+  # <tt>'d'</tt>|Whether the entity is a directory.
+  # <tt>'e'</tt>|Whether the entity is an existing entity.
+  # <tt>'f'</tt>|Whether the entity is an existing regular file.
+  # <tt>'g'</tt>|Whether the entity's setgid bit is set.
+  # <tt>'G'</tt>|Whether the entity's group ownership is equal to the caller's.
+  # <tt>'k'</tt>|Whether the entity's sticky bit is set.
+  # <tt>'l'</tt>|Whether the entity is a symbolic link.
+  # <tt>'o'</tt>|Whether the entity is owned by the caller's effective uid.
+  # <tt>'O'</tt>|Like <tt>'o'</tt>, but uses the real uid (not the effective uid).
+  # <tt>'p'</tt>|Whether the entity is a FIFO device (named pipe).
+  # <tt>'r'</tt>|Whether the entity is readable by the caller's effective uid/gid.
+  # <tt>'R'</tt>|Like <tt>'r'</tt>, but uses the real uid/gid (not the effective uid/gid).
+  # <tt>'S'</tt>|Whether the entity is a socket.
+  # <tt>'u'</tt>|Whether the entity's setuid bit is set.
+  # <tt>'w'</tt>|Whether the entity is writable by the caller's effective uid/gid.
+  # <tt>'W'</tt>|Like <tt>'w'</tt>, but uses the real uid/gid (not the effective uid/gid).
+  # <tt>'x'</tt>|Whether the entity is executable by the caller's effective uid/gid.
+  # <tt>'X'</tt>|Like <tt>'x'</tt>, but uses the real uid/gid (not the effective uid/git).
+  # <tt>'z'</tt>|Whether the entity exists and is of length zero.
+  # *   This test operates only on the entity at `path0`,
+  #      and returns an integer size or `nil`:
+  #  Character  |Test
+  # ------------|--------------------------------------------------------------------------------------------
+  # <tt>'s'</tt>|Returns positive integer size if the entity exists and has non-zero length, +nil+ otherwise.
+  # *   Each of these tests operates only on the entity at `path0`,
+  #      and returns a Time object;
+  #      raises an exception if the entity does not exist:
+  #  Character  |Test
+  # ------------|--------------------------------------
+  # <tt>'A'</tt>|Last access time for the entity.
+  # <tt>'C'</tt>|Last change time for the entity.
+  # <tt>'M'</tt>|Last modification time for the entity.
+  # *   Each of these tests operates on the modification time (`mtime`)
+  #      of each of the entities at `path0` and `path1`,
+  #      and returns a `true` or `false`;
+  #      returns `false` if either entity does not exist:
+  #  Character  |Test
+  # ------------|---------------------------------------------------------------
+  # <tt>'<'</tt>|Whether the `mtime` at `path0` is less than that at `path1`.
+  # <tt>'='</tt>|Whether the `mtime` at `path0` is equal to that at `path1`.
+  # <tt>'>'</tt>|Whether the `mtime` at `path0` is greater than that at `path1`.
+  # *   This test operates on the content of each of the entities at `path0` and
+  #     `path1`,
+  #      and returns a `true` or `false`;
+  #      returns `false` if either entity does not exist:
+  #  Character  |Test
+  # ------------|---------------------------------------------
+  # <tt>'-'</tt>|Whether the entities exist and are identical.
   #
   def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
 
@@ -1698,8 +1833,7 @@ module Kernel : BasicObject
   #     baz.rb:6: warning: invalid call to foo
   #
   # If `category` keyword argument is given, passes the category to
-  # `Warning.warn`.  The category given must be be one of the following
-  # categories:
+  # `Warning.warn`.  The category given must be one of the following categories:
   #
   # :deprecated
   # :   Used for warning for deprecated functionality that may be removed in the
@@ -1707,6 +1841,10 @@ module Kernel : BasicObject
   #
   # :experimental
   # :   Used for experimental features that may change in future releases.
+  #
+  # :performance
+  # :   Used for warning about APIs or pattern that have negative performance
+  #     impact
   #
   def self?.warn: (*_ToS msg, ?uplevel: int?, ?category: Warning::category?) -> nil
 
@@ -1747,7 +1885,7 @@ module Kernel : BasicObject
   # contain meta characters:
   #
   #     exec('if true; then echo "Foo"; fi') # Shell reserved word.
-  #     exec('echo')                         # Built-in.
+  #     exec('exit')                         # Built-in.
   #     exec('date > date.tmp')              # Contains meta character.
   #
   # The command line may also contain arguments and options for the command:
@@ -1779,7 +1917,8 @@ module Kernel : BasicObject
   #
   #     Sat Aug 26 09:38:00 AM CDT 2023
   #
-  # Ruby invokes the executable directly, with no shell and no shell expansion:
+  # Ruby invokes the executable directly. This form does not use the shell; see
+  # [Arguments args](rdoc-ref:Process@Arguments+args) for caveats.
   #
   #     exec('doesnt_exist') # Raises Errno::ENOENT
   #
@@ -1847,7 +1986,7 @@ module Kernel : BasicObject
   #
   #     spawn('if true; then echo "Foo"; fi') # => 798847 # Shell reserved word.
   #     Process.wait                          # => 798847
-  #     spawn('echo')                         # => 798848 # Built-in.
+  #     spawn('exit')                         # => 798848 # Built-in.
   #     Process.wait                          # => 798848
   #     spawn('date > /tmp/date.tmp')         # => 798879 # Contains meta character.
   #     Process.wait                          # => 798849
@@ -1872,26 +2011,19 @@ module Kernel : BasicObject
   #
   # Argument `exe_path` is one of the following:
   #
-  # *   The string path to an executable to be called:
+  # *   The string path to an executable to be called.
+  # *   A 2-element array containing the path to an executable to be called, and
+  #     the string to be used as the name of the executing process.
   #
   #         spawn('/usr/bin/date') # Path to date on Unix-style system.
   #         Process.wait
   #
   #     Output:
   #
-  #         Thu Aug 31 10:06:48 AM CDT 2023
+  #         Mon Aug 28 11:43:10 AM CDT 2023
   #
-  # *   A 2-element array containing the path to an executable and the string to
-  #     be used as the name of the executing process:
-  #
-  #         pid = spawn(['sleep', 'Hello!'], '1') # 2-element array.
-  #         p `ps -p #{pid} -o command=`
-  #
-  #     Output:
-  #
-  #         "Hello! 1\n"
-  #
-  # Ruby invokes the executable directly, with no shell and no shell expansion.
+  # Ruby invokes the executable directly. This form does not use the shell; see
+  # [Arguments args](rdoc-ref:Process@Arguments+args) for caveats.
   #
   # If one or more `args` is given, each is an argument or option to be passed to
   # the executable:
@@ -1959,14 +2091,14 @@ module Kernel : BasicObject
   # contain meta characters:
   #
   #     system('if true; then echo "Foo"; fi')          # => true  # Shell reserved word.
-  #     system('echo')                                  # => true  # Built-in.
+  #     system('exit')                                  # => true  # Built-in.
   #     system('date > /tmp/date.tmp')                  # => true  # Contains meta character.
   #     system('date > /nop/date.tmp')                  # => false
   #     system('date > /nop/date.tmp', exception: true) # Raises RuntimeError.
   #
   # Assigns the command's error status to `$?`:
   #
-  #     system('echo')                             # => true  # Built-in.
+  #     system('exit')                             # => true  # Built-in.
   #     $?                                         # => #<Process::Status: pid 640610 exit 0>
   #     system('date > /nop/date.tmp')             # => false
   #     $?                                         # => #<Process::Status: pid 640742 exit 2>
@@ -2008,7 +2140,8 @@ module Kernel : BasicObject
   #     system('foo')           # => nil
   #     $?                      # => #<Process::Status: pid 645608 exit 127>
   #
-  # Ruby invokes the executable directly, with no shell and no shell expansion:
+  # Ruby invokes the executable directly. This form does not use the shell; see
+  # [Arguments args](rdoc-ref:Process@Arguments+args) for caveats.
   #
   #     system('doesnt_exist') # => nil
   #
@@ -2086,7 +2219,7 @@ module Kernel : BasicObject
   #     s1.inspect          #=> "#<Klass:0x401b3a38 @str=\"Hi\">"
   #     s2.inspect          #=> "#<Klass:0x401b3998 @str=\"Hi\">"
   #
-  # This method may have class-specific behavior.  If so, that behavior will be
+  # This method may have class-specific behavior. If so, that behavior will be
   # documented under the #`initialize_copy` method of the class.
   #
   def clone: (?freeze: bool?) -> self
@@ -2854,7 +2987,7 @@ module Kernel : BasicObject
   #   rdoc-file=kernel.rb
   #   - obj.tap {|x| block }    -> obj
   # -->
-  # Yields self to the block, and then returns self. The primary purpose of this
+  # Yields self to the block and then returns self. The primary purpose of this
   # method is to "tap into" a method chain, in order to perform operations on
   # intermediate results within the chain.
   #
@@ -2878,11 +3011,8 @@ module Kernel : BasicObject
 
   # <!--
   #   rdoc-file=kernel.rb
-  #   - obj.yield_self {|x| block }    -> an_object
+  #   - yield_self()
   # -->
-  # Yields self to the block and returns the result of the block.
-  #
-  #     "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   #
   def yield_self: () -> Enumerator[self, untyped]
                 | [T] () { (self) -> T } -> T
@@ -2895,31 +3025,22 @@ module Kernel : BasicObject
   #
   #     3.next.then {|x| x**x }.to_s             #=> "256"
   #
-  # Good usage for `then` is value piping in method chains:
+  # A good use of `then` is value piping in method chains:
   #
   #     require 'open-uri'
   #     require 'json'
   #
-  #     construct_url(arguments).
-  #       then {|url| URI(url).read }.
-  #       then {|response| JSON.parse(response) }
+  #     construct_url(arguments)
+  #       .then {|url| URI(url).read }
+  #       .then {|response| JSON.parse(response) }
   #
-  # When called without block, the method returns `Enumerator`, which can be used,
-  # for example, for conditional circuit-breaking:
+  # When called without a block, the method returns an `Enumerator`, which can be
+  # used, for example, for conditional circuit-breaking:
   #
-  #     # meets condition, no-op
+  #     # Meets condition, no-op
   #     1.then.detect(&:odd?)            # => 1
-  #     # does not meet condition, drop value
+  #     # Does not meet condition, drop value
   #     2.then.detect(&:odd?)            # => nil
-  #
-  # Good usage for `then` is value piping in method chains:
-  #
-  #     require 'open-uri'
-  #     require 'json'
-  #
-  #     construct_url(arguments).
-  #       then {|url| URI(url).read }.
-  #       then {|response| JSON.parse(response) }
   #
   alias then yield_self
 

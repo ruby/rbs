@@ -113,7 +113,7 @@ module Zlib
     #   rdoc-file=ext/zlib/zlib.c
     #   - data_type()
     # -->
-    # Guesses the type of the data which have been inputed into the stream. The
+    # Guesses the type of the data which have been inputted into the stream. The
     # returned value is either `BINARY`, `ASCII`, or `UNKNOWN`.
     #
     def data_type: () -> String

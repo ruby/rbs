@@ -13,14 +13,13 @@
 #         (1...4).to_a     # => [1, 2, 3]
 #         ('a'...'d').to_a # => ["a", "b", "c"]
 #
-# A range may be created using method Range.new:
+# *   Method Range.new:
 #
-#     # Ranges that by default include the given end value.
-#     Range.new(1, 4).to_a     # => [1, 2, 3, 4]
-#     Range.new('a', 'd').to_a # => ["a", "b", "c", "d"]
-#     # Ranges that use third argument +exclude_end+ to exclude the given end value.
-#     Range.new(1, 4, true).to_a     # => [1, 2, 3]
-#     Range.new('a', 'd', true).to_a # => ["a", "b", "c"]
+#     # Ranges that by default include the given end value. Range.new(1, 4).to_a
+#         # => [1, 2, 3, 4] Range.new('a', 'd').to_a # => ["a", "b", "c", "d"] #
+#     Ranges that use third argument `exclude_end` to exclude the given end
+#     value. Range.new(1, 4, true).to_a     # => [1, 2, 3] Range.new('a', 'd',
+#     true).to_a # => ["a", "b", "c"]
 #
 # ## Beginless Ranges
 #
@@ -41,8 +40,12 @@
 # A beginless range may be used to slice an array:
 #
 #     a = [1, 2, 3, 4]
-#     r = (..2) # => nil...2
-#     a[r]      # => [1, 2]
+#     # Include the third array element in the slice
+#     r = (..2)  # => nil..2
+#     a[r]       # => [1, 2, 3]
+#     # Exclude the third array element from the slice
+#     r = (...2) # => nil...2
+#     a[r]       # => [1, 2]
 #
 # Method `each` for a beginless range raises an exception.
 #
@@ -95,8 +98,8 @@
 # ## Ranges and Other Classes
 #
 # An object may be put into a range if its class implements instance method
-# `<=>`. Ruby core classes that do so include Array, Complex, File::Stat, Float,
-# Integer, Kernel, Module, Numeric, Rational, String, Symbol, and Time.
+# `#<=>`. Ruby core classes that do so include Array, Complex, File::Stat,
+# Float, Integer, Kernel, Module, Numeric, Rational, String, Symbol, and Time.
 #
 # Example:
 #
@@ -125,12 +128,12 @@
 # ## Ranges and User-Defined Classes
 #
 # A user-defined class that is to be used in a range must implement instance
-# `<=>`; see Integer#<=>. To make iteration available, it must also implement
-# instance method `succ`; see Integer#succ.
+# method `#<=>`; see Integer#<=>. To make iteration available, it must also
+# implement instance method `succ`; see Integer#succ.
 #
-# The class below implements both `<=>` and `succ`, and so can be used both to
+# The class below implements both `#<=>` and `succ`, and so can be used both to
 # construct ranges and to iterate over them. Note that the Comparable module is
-# included so the `==` method is defined in terms of `<=>`.
+# included so the `==` method is defined in terms of `#<=>`.
 #
 #     # Represent a string of 'X' characters.
 #     class Xs
@@ -236,29 +239,24 @@ class Range[out Elem] < Object
   # <!--
   #   rdoc-file=range.c
   #   - %(n) {|element| ... } -> self
-  #   - %(n)                  -> enumerator
+  #   - %(n)                  -> enumerator or arithmetic_sequence
   # -->
-  # Iterates over the elements of `self`.
+  # Same as #step (but doesn't provide default value for `n`). The method is
+  # convenient for experssive producing of Enumerator::ArithmeticSequence.
   #
-  # With a block given, calls the block with selected elements of the range;
-  # returns `self`:
+  #     array = [0, 1, 2, 3, 4, 5, 6]
   #
-  #     a = []
-  #     (1..5).%(2) {|element| a.push(element) } # => 1..5
-  #     a # => [1, 3, 5]
-  #     a = []
-  #     ('a'..'e').%(2) {|element| a.push(element) } # => "a".."e"
-  #     a # => ["a", "c", "e"]
+  #     # slice each second element:
+  #     seq = (0..) % 2 #=> ((0..).%(2))
+  #     array[seq] #=> [0, 2, 4, 6]
+  #     # or just
+  #     array[(0..) % 2] #=> [0, 2, 4, 6]
   #
-  # With no block given, returns an enumerator, which will be of class
-  # Enumerator::ArithmeticSequence if `self` is numeric; otherwise of class
-  # Enumerator:
+  # Note that due to operator precedence in Ruby, parentheses are mandatory around
+  # range in this case:
   #
-  #     e = (1..5) % 2 # => ((1..5).%(2))
-  #     e.class        # => Enumerator::ArithmeticSequence
-  #     ('a'..'e') % 2 # =>  #<Enumerator: ...>
-  #
-  # Related: Range#step.
+  #     (0..7) % 2 #=> ((0..7).%(2)) -- as expected
+  #     0..7 % 2 #=> 0..1 -- parsed as 0..(7 % 2)
   #
   def %: (Numeric | int n) -> Enumerator[Elem, self]
        | (Numeric | int n) { (Elem element) -> void } -> self
@@ -436,7 +434,7 @@ class Range[out Elem] < Object
   # Returns `false` if either:
   #
   # *   The begin value of `self` is larger than its end value.
-  # *   An internal call to `<=>` returns `nil`; that is, the operands are not
+  # *   An internal call to `#<=>` returns `nil`; that is, the operands are not
   #     comparable.
   #
   # Beginless ranges cover all values of the same type before the end, excluding
@@ -670,7 +668,7 @@ class Range[out Elem] < Object
   #   - max {|a, b| ... } -> object
   #   - max(n) {|a, b| ... } -> array
   # -->
-  # Returns the maximum value in `self`, using method `<=>` or a given block for
+  # Returns the maximum value in `self`, using method `#<=>` or a given block for
   # comparison.
   #
   # With no argument and no block given, returns the maximum-valued element of
@@ -755,7 +753,7 @@ class Range[out Elem] < Object
   #   - min {|a, b| ... } -> object
   #   - min(n) {|a, b| ... } -> array
   # -->
-  # Returns the minimum value in `self`, using method `<=>` or a given block for
+  # Returns the minimum value in `self`, using method `#<=>` or a given block for
   # comparison.
   #
   # With no argument and no block given, returns the minimum-valued element of
@@ -847,7 +845,7 @@ class Range[out Elem] < Object
   #
   #     (1..3).overlap?(1)         # TypeError
   #
-  # Returns `false` if an internal call to `<=>` returns `nil`; that is, the
+  # Returns `false` if an internal call to `#<=>` returns `nil`; that is, the
   # operands are not comparable.
   #
   #     (1..3).overlap?('a'..'d')  # => false
@@ -929,7 +927,12 @@ class Range[out Elem] < Object
   #     (1..4).size      # => 4
   #     (1...4).size     # => 3
   #     (1..).size       # => Infinity
-  #     ('a'..'z').size  #=> nil
+  #     ('a'..'z').size  # => nil
+  #
+  # If `self` is not iterable, raises an exception:
+  #
+  #     (0.5..2.5).size  # TypeError
+  #     (..1).size       # TypeError
   #
   # Related: Range#count.
   #
@@ -938,40 +941,81 @@ class Range[out Elem] < Object
 
   # <!--
   #   rdoc-file=range.c
-  #   - step(n = 1) {|element| ... } -> self
-  #   - step(n = 1)                  -> enumerator
+  #   - step(s = 1) {|element| ... } -> self
+  #   - step(s = 1)                  -> enumerator/arithmetic_sequence
   # -->
-  # Iterates over the elements of `self`.
+  # Iterates over the elements of range in steps of `s`. The iteration is
+  # performed by `+` operator:
   #
-  # With a block given and no argument, calls the block each element of the range;
-  # returns `self`:
+  #     (0..6).step(2) { puts _1 } #=> 1..5
+  #     # Prints: 0, 2, 4, 6
   #
-  #     a = []
-  #     (1..5).step {|element| a.push(element) } # => 1..5
-  #     a # => [1, 2, 3, 4, 5]
-  #     a = []
-  #     ('a'..'e').step {|element| a.push(element) } # => "a".."e"
-  #     a # => ["a", "b", "c", "d", "e"]
+  #     # Iterate between two dates in step of 1 day (24 hours)
+  #     (Time.utc(2022, 2, 24)..Time.utc(2022, 3, 1)).step(24*60*60) { puts _1 }
+  #     # Prints:
+  #     #   2022-02-24 00:00:00 UTC
+  #     #   2022-02-25 00:00:00 UTC
+  #     #   2022-02-26 00:00:00 UTC
+  #     #   2022-02-27 00:00:00 UTC
+  #     #   2022-02-28 00:00:00 UTC
+  #     #   2022-03-01 00:00:00 UTC
   #
-  # With a block given and a positive integer argument `n` given, calls the block
-  # with element `0`, element `n`, element `2n`, and so on:
+  # If ` + step` decreases the value, iteration is still performed when step
+  # `begin` is higher than the `end`:
   #
-  #     a = []
-  #     (1..5).step(2) {|element| a.push(element) } # => 1..5
-  #     a # => [1, 3, 5]
-  #     a = []
-  #     ('a'..'e').step(2) {|element| a.push(element) } # => "a".."e"
-  #     a # => ["a", "c", "e"]
+  #     (0..6).step(-2) { puts _1 }
+  #     # Prints nothing
   #
-  # With no block given, returns an enumerator, which will be of class
-  # Enumerator::ArithmeticSequence if `self` is numeric; otherwise of class
-  # Enumerator:
+  #     (6..0).step(-2) { puts _1 }
+  #     # Prints: 6, 4, 2, 0
   #
-  #     e = (1..5).step(2) # => ((1..5).step(2))
-  #     e.class            # => Enumerator::ArithmeticSequence
-  #     ('a'..'e').step # => #<Enumerator: ...>
+  #     (Time.utc(2022, 3, 1)..Time.utc(2022, 2, 24)).step(-24*60*60) { puts _1 }
+  #     # Prints:
+  #     #   2022-03-01 00:00:00 UTC
+  #     #   2022-02-28 00:00:00 UTC
+  #     #   2022-02-27 00:00:00 UTC
+  #     #   2022-02-26 00:00:00 UTC
+  #     #   2022-02-25 00:00:00 UTC
+  #     #   2022-02-24 00:00:00 UTC
   #
-  # Related: Range#%.
+  # When the block is not provided, and range boundaries and step are Numeric, the
+  # method returns Enumerator::ArithmeticSequence.
+  #
+  #     (1..5).step(2) # => ((1..5).step(2))
+  #     (1.0..).step(1.5) #=> ((1.0..).step(1.5))
+  #     (..3r).step(1/3r) #=> ((..3/1).step((1/3)))
+  #
+  # Enumerator::ArithmeticSequence can be further used as a value object for
+  # iteration or slicing of collections (see Array#[]). There is a convenience
+  # method #% with behavior similar to `step` to produce arithmetic sequences more
+  # expressively:
+  #
+  #     # Same as (1..5).step(2)
+  #     (1..5) % 2 # => ((1..5).%(2))
+  #
+  # In a generic case, when the block is not provided, Enumerator is returned:
+  #
+  #     ('a'..).step('b')         #=> #<Enumerator: "a"..:step("b")>
+  #     ('a'..).step('b').take(3) #=> ["a", "ab", "abb"]
+  #
+  # If `s` is not provided, it is considered `1` for ranges with numeric `begin`:
+  #
+  #     (1..5).step { p _1 }
+  #     # Prints: 1, 2, 3, 4, 5
+  #
+  # For non-Numeric ranges, step absence is an error:
+  #
+  #     (Time.utc(2022, 3, 1)..Time.utc(2022, 2, 24)).step { p _1 }
+  #     # raises: step is required for non-numeric ranges (ArgumentError)
+  #
+  # For backward compatibility reasons, String ranges support the iteration both
+  # with string step and with integer step. In the latter case, the iteration is
+  # performed by calculating the next values with String#succ:
+  #
+  #     ('a'..'e').step(2) { p _1 }
+  #     # Prints: a, c, e
+  #     ('a'..'e').step { p _1 }
+  #     # Default step 1; prints: a, b, c, d, e
   #
   def step: (?Numeric | int n) -> Enumerator[Elem, self]
           | (?Numeric | int n) { (Elem element) -> void } -> self
@@ -1004,8 +1048,8 @@ class Range[out Elem] < Object
   # Returns `true` if and only if:
   #
   # *   `other` is a range.
-  # *   `other.begin eql? self.begin`.
-  # *   `other.end eql? self.end`.
+  # *   `other.begin.eql?(self.begin)`.
+  # *   `other.end.eql?(self.end)`.
   # *   `other.exclude_end? == self.exclude_end?`.
   #
   # Otherwise returns `false`.

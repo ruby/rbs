@@ -4,9 +4,11 @@
 # This module manipulates strings according to the word parsing rules of the
 # UNIX Bourne shell.
 #
-# The shellwords() function was originally a port of shellwords.pl, but modified
-# to conform to the Shell & Utilities volume of the IEEE Std 1003.1-2008, 2016
-# Edition [1].
+# The `shellwords()` function was originally a port of shellwords.pl, but
+# modified to conform to [the Shell & Utilities volume of the IEEE Std
+# 1003.1-2008, 2016
+# Edition](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.ht
+# ml)
 #
 # ### Usage
 #
@@ -61,12 +63,6 @@
 # ### Contact
 # *   Akinori MUSHA <knu@iDaemons.org> (current maintainer)
 #
-# ### Resources
-#
-# 1: [IEEE Std 1003.1-2008, 2016 Edition, the Shell & Utilities
-# volume](http://pubs.opengroup.org/onlinepubs/9699919799/utilities/contents.htm
-# l)
-#
 module Shellwords
   # <!--
   #   rdoc-file=lib/shellwords.rb
@@ -74,6 +70,8 @@ module Shellwords
   # -->
   # Escapes a string so that it can be safely used in a Bourne shell command line.
   #  `str` can be a non-string object that responds to `to_s`.
+  #
+  # `str` must not contain NUL characters because of nature of `exec` system call.
   #
   # Note that a resulted string should be used unquoted and is not intended for
   # use in double quotes nor in single quotes.
@@ -112,7 +110,7 @@ module Shellwords
   #
   # All elements are joined into a single string with fields separated by a space,
   # where each element is escaped for the Bourne shell and stringified using
-  # `to_s`.
+  # `to_s`. See also Shellwords.shellescape.
   #
   #     ary = ["There's", "a", "time", "and", "place", "for", "everything"]
   #     argv = Shellwords.join(ary)
@@ -139,6 +137,9 @@ module Shellwords
   #
   #     argv = Shellwords.split('here are "two words"')
   #     argv #=> ["here", "are", "two words"]
+  #
+  # `line` must not contain NUL characters because of nature of `exec` system
+  # call.
   #
   # Note, however, that this is not a command line parser.  Shell metacharacters
   # except for the single and double quotes and backslash are not treated as such.

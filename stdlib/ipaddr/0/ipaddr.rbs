@@ -37,7 +37,8 @@ class IPAddr
   #   - ntop(addr)
   # -->
   # Convert a network byte ordered string form of an IP address into human
-  # readable form.
+  # readable form. It expects the string to be encoded in Encoding::ASCII_8BIT
+  # (BINARY).
   #
   def self.ntop: (String addr) -> String
 
@@ -240,8 +241,10 @@ class IPAddr
   #   - link_local?()
   # -->
   # Returns true if the ipaddr is a link-local address.  IPv4 addresses in
-  # 169.254.0.0/16 reserved by RFC 3927 and Link-Local IPv6 Unicast Addresses in
-  # fe80::/10 reserved by RFC 4291 are considered link-local.
+  # 169.254.0.0/16 reserved by RFC 3927 and link-local IPv6 Unicast Addresses in
+  # fe80::/10 reserved by RFC 4291 are considered link-local. Link-local IPv4
+  # addresses in the IPv4-mapped IPv6 address range are also considered
+  # link-local.
   #
   def link_local?: () -> bool
 
@@ -249,7 +252,8 @@ class IPAddr
   #   rdoc-file=lib/ipaddr.rb
   #   - loopback?()
   # -->
-  # Returns true if the ipaddr is a loopback address.
+  # Returns true if the ipaddr is a loopback address. Loopback IPv4 addresses in
+  # the IPv4-mapped IPv6 address range are also considered as loopback addresses.
   #
   def loopback?: () -> bool
 

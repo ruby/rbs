@@ -1,5 +1,5 @@
 # <!-- rdoc-file=gc.rb -->
-# The GC module provides an interface to Ruby's mark and sweep garbage
+# The GC module provides an interface to Ruby's mark-and-sweep garbage
 # collection mechanism.
 #
 # Some of the underlying methods are also available via the ObjectSpace module.
@@ -161,15 +161,13 @@ module GC
   #   rdoc-file=gc.rb
   #   - GC.count -> Integer
   # -->
-  # The number of times GC occurred.
-  #
-  # It returns the number of times GC occurred since the process started.
+  # Returns the number of times GC has occurred since the process started.
   #
   def self.count: () -> Integer
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.disable    -> true or false
+  #   - GC.disable -> true or false
   # -->
   # Disables garbage collection, returning `true` if garbage collection was
   # already disabled.
@@ -181,7 +179,7 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.enable    -> true or false
+  #   - GC.enable -> true or false
   # -->
   # Enables garbage collection, returning `true` if garbage collection was
   # previously disabled.
@@ -200,24 +198,24 @@ module GC
   #
   # The `full_mark` keyword argument determines whether or not to perform a major
   # garbage collection cycle. When set to `true`, a major garbage collection cycle
-  # is ran, meaning all objects are marked. When set to `false`, a minor garbage
-  # collection cycle is ran, meaning only young objects are marked.
+  # is run, meaning all objects are marked. When set to `false`, a minor garbage
+  # collection cycle is run, meaning only young objects are marked.
   #
   # The `immediate_mark` keyword argument determines whether or not to perform
   # incremental marking. When set to `true`, marking is completed during the call
-  # to this method. When set to `false`, marking is performed in steps that is
+  # to this method. When set to `false`, marking is performed in steps that are
   # interleaved with future Ruby code execution, so marking might not be completed
-  # during this method call. Note that if `full_mark` is `false` then marking will
-  # always be immediate, regardless of the value of `immediate_mark`.
+  # during this method call. Note that if `full_mark` is `false`, then marking
+  # will always be immediate, regardless of the value of `immediate_mark`.
   #
-  # The `immedate_sweep` keyword argument determines whether or not to defer
-  # sweeping (using lazy sweep). When set to `true`, sweeping is performed in
-  # steps that is interleaved with future Ruby code execution, so sweeping might
-  # not be completed during this method call. When set to `false`, sweeping is
+  # The `immediate_sweep` keyword argument determines whether or not to defer
+  # sweeping (using lazy sweep). When set to `false`, sweeping is performed in
+  # steps that are interleaved with future Ruby code execution, so sweeping might
+  # not be completed during this method call. When set to `true`, sweeping is
   # completed during the call to this method.
   #
-  # Note: These keyword arguments are implementation and version dependent. They
-  # are not guaranteed to be future-compatible, and may be ignored if the
+  # Note: These keyword arguments are implementation and version-dependent. They
+  # are not guaranteed to be future-compatible and may be ignored if the
   # underlying implementation does not support them.
   #
   def self.start: (?immediate_sweep: boolish, ?immediate_mark: boolish, ?full_mark: boolish) -> nil
@@ -230,13 +228,13 @@ module GC
   # -->
   # Returns a Hash containing information about the GC.
   #
-  # The contents of the hash are implementation specific and may change in the
+  # The contents of the hash are implementation-specific and may change in the
   # future without notice.
   #
-  # The hash includes information about internal statistics about GC such as:
+  # The hash includes internal statistics about GC such as:
   #
   # count
-  # :   The total number of garbage collections ran since application start (count
+  # :   The total number of garbage collections run since application start (count
   #     includes both minor and major garbage collections)
   #
   # time
@@ -325,12 +323,11 @@ module GC
   # :   Amount of memory allocated on the heap for objects. Decreased by major GC
   #
   # oldmalloc_increase_bytes_limit
-  # :   When `:old_malloc_increase_bytes` crosses this limit, major GC is
-  #     triggered
+  # :   When `:oldmalloc_increase_bytes` crosses this limit, major GC is triggered
   #
   #
   # If the optional argument, hash, is given, it is overwritten and returned. This
-  # is intended to avoid probe effect.
+  # is intended to avoid the probe effect.
   #
   # This method is only expected to work on CRuby.
   #
@@ -341,7 +338,7 @@ module GC
   #   rdoc-file=gc.rb
   #   - GC.measure_total_time = true/false
   # -->
-  # Enable to measure GC time. You can get the result with `GC.stat(:time)`. Note
+  # Enables measuring GC time. You can get the result with `GC.stat(:time)`. Note
   # that GC time measurement can cause some performance overhead.
   #
   def self.measure_total_time=: [T] (T enable) -> T
@@ -350,8 +347,8 @@ module GC
   #   rdoc-file=gc.rb
   #   - GC.measure_total_time -> true/false
   # -->
-  # Return measure_total_time flag (default: `true`). Note that measurement can
-  # affect the application performance.
+  # Returns the measure_total_time flag (default: `true`). Note that measurement
+  # can affect the application's performance.
   #
   def self.measure_total_time: () -> bool
 
@@ -390,16 +387,16 @@ module GC
   # it will return a `Hash` with heap names as keys and a `Hash` containing
   # information about the heap as values.
   #
-  # If the second optional argument, `hash_or_key`, is given as `Hash`, it will be
-  # overwritten and returned. This is intended to avoid the probe effect.
+  # If the second optional argument, `hash_or_key`, is given as a `Hash`, it will
+  # be overwritten and returned. This is intended to avoid the probe effect.
   #
   # If both optional arguments are passed in and the second optional argument is a
-  # symbol, it will return a `Numeric` of the value for the particular heap.
+  # symbol, it will return a `Numeric` value for the particular heap.
   #
   # On CRuby, `heap_name` is of the type `Integer` but may be of type `String` on
   # other implementations.
   #
-  # The contents of the hash are implementation specific and may change in the
+  # The contents of the hash are implementation-specific and may change in the
   # future without notice.
   #
   # If the optional argument, hash, is given, it is overwritten and returned.
@@ -436,7 +433,7 @@ module GC
   #     system in the heap.
   #
   # force_major_gc_count
-  # :   The number of times major garbage collection cycles this heap has forced
+  # :   The number of times this heap has forced major garbage collection cycles
   #     to start due to running out of free slots.
   #
   # force_incremental_marking_finish_count
@@ -462,24 +459,25 @@ module GC
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.stress            -> integer, true or false
+  #   - GC.stress -> integer, true, or false
   # -->
-  # Returns current status of GC stress mode.
+  # Returns the current status of GC stress mode.
   #
   def self.stress: () -> (Integer | bool)
 
   # <!--
   #   rdoc-file=gc.rb
-  #   - GC.stress = flag          -> flag
+  #   - GC.stress = flag -> flag
   # -->
   # Updates the GC stress mode.
   #
   # When stress mode is enabled, the GC is invoked at every GC opportunity: all
   # memory and object allocations.
   #
-  # Enabling stress mode will degrade performance, it is only for debugging.
+  # Enabling stress mode will degrade performance; it is only for debugging.
   #
-  # flag can be true, false, or an integer bit-ORed following flags.
+  # The flag can be true, false, or an integer bitwise-ORed with the following
+  # flags:
   #     0x01:: no major GC
   #     0x02:: no immediate sweep
   #     0x04:: full mark after malloc/calloc/realloc
@@ -491,7 +489,7 @@ module GC
   #   rdoc-file=gc.rb
   #   - GC.total_time -> int
   # -->
-  # Return measured GC total time in nano seconds.
+  # Returns the measured GC total time in nanoseconds.
   #
   def self.total_time: () -> Integer
 
@@ -550,12 +548,15 @@ module GC
   #   rdoc-file=gc.rb
   #   - GC.latest_gc_info -> hash
   #   - GC.latest_gc_info(hash) -> hash
-  #   - GC.latest_gc_info(:major_by) -> :malloc
+  #   - GC.latest_gc_info(key) -> value
   # -->
   # Returns information about the most recent garbage collection.
   #
-  # If the optional argument, hash, is given, it is overwritten and returned. This
-  # is intended to avoid probe effect.
+  # If the argument `hash` is given and is a Hash object, it is overwritten and
+  # returned. This is intended to avoid the probe effect.
+  #
+  # If the argument `key` is given and is a Symbol object, it returns the value
+  # associated with the key. This is equivalent to `GC.latest_gc_info[key]`.
   #
   def self.latest_gc_info: (?Hash[Symbol, untyped]? hash) -> Hash[Symbol, untyped]
                          | (Symbol key) -> untyped

@@ -183,7 +183,7 @@ module Zlib
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
-    #   - read(p1 = v1)
+    #   - read(p1 = v1, p2 = v2)
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
@@ -225,7 +225,7 @@ module Zlib
     #   rdoc-file=ext/zlib/zlib.c
     #   - gzipreader.readpartial(maxlen [, outbuf]) => string, outbuf
     # -->
-    # Reads at most *maxlen* bytes from the gziped stream but it blocks only if
+    # Reads at most *maxlen* bytes from the gzipped stream but it blocks only if
     # *gzipreader* has no data immediately available. If the optional *outbuf*
     # argument is present, it must reference a String, which will receive the data.
     # It raises `EOFError` on end of file.

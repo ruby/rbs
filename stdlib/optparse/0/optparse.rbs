@@ -429,6 +429,7 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - terminate(arg = nil)
   # -->
+  # See #terminate.
   #
   def self.terminate: (?String arg) -> bot
 
@@ -436,6 +437,9 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - top()
   # -->
+  # Returns the global top option list.
+  #
+  # Do not use directly.
   #
   def self.top: () -> OptionParser::List
 
@@ -456,6 +460,13 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - abort(mesg = $!)
   # -->
+  # Shows message with the program name then aborts.
+  #
+  # `mesg`
+  # :   Message, defaulted to +$!+.
+  #
+  #
+  # See Kernel#abort.
   #
   def abort: (?_ToS mesg) -> bot
 
@@ -504,6 +515,7 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - candidate(word)
   # -->
+  # Return candidates for `word`.
   #
   def candidate: (String word) -> Array[untyped]
 
@@ -588,7 +600,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - environment(env = File.basename($0, '.*'))
+  #   - environment(env = File.basename($0, '.*'), **keywords)
   # -->
   # Parses environment variable `env` or its uppercase with splitting like a
   # shell.
@@ -599,7 +611,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - getopts(*args, symbolize_names: false)
+  #   - getopts(*args, symbolize_names: false, **keywords)
   # -->
   # Wrapper method for getopts.rb.
   #
@@ -635,12 +647,13 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - inc(*args)
   # -->
+  # See self.inc
   #
   def inc: (*untyped args) -> untyped
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - load(filename = nil, into: nil)
+  #   - load(filename = nil, **keywords)
   # -->
   # Loads options from file names as `filename`. Does nothing when the file is not
   # present. Returns whether successfully loaded.
@@ -673,6 +686,9 @@ class OptionParser
   #   - new() { |self| ... }
   # -->
   # Pushes a new List.
+  #
+  # If a block is given, yields `self` and returns the result of the block,
+  # otherwise returns `self`.
   #
   def new: () -> self
          | [T] () { (self) -> T } -> T
@@ -740,7 +756,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - order(*argv, into: nil, &nonopt)
+  #   - order(*argv, **keywords, &nonopt)
   # -->
   # Parses command line arguments `argv` in order. When a block is given, each
   # non-option argument is yielded. When optional `into` keyword argument is
@@ -754,7 +770,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - order!(argv = default_argv, into: nil, &nonopt)
+  #   - order!(argv = default_argv, into: nil, **keywords, &nonopt)
   # -->
   # Same as #order, but removes switches destructively. Non-option arguments
   # remain in `argv`.
@@ -763,7 +779,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - parse(*argv, into: nil)
+  #   - parse(*argv, **keywords)
   # -->
   # Parses command line arguments `argv` in order when environment variable
   # POSIXLY_CORRECT is set, and in permutation mode otherwise. When optional
@@ -775,7 +791,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - parse!(argv = default_argv, into: nil)
+  #   - parse!(argv = default_argv, **keywords)
   # -->
   # Same as #parse, but removes switches destructively. Non-option arguments
   # remain in `argv`.
@@ -784,7 +800,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - permute(*argv, into: nil)
+  #   - permute(*argv, **keywords)
   # -->
   # Parses command line arguments `argv` in permutation mode and returns list of
   # non-option arguments. When optional `into` keyword argument is provided, the
@@ -796,7 +812,7 @@ class OptionParser
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - permute!(argv = default_argv, into: nil)
+  #   - permute!(argv = default_argv, **keywords)
   # -->
   # Same as #permute, but removes switches destructively. Non-option arguments
   # remain in `argv`.
@@ -815,11 +831,11 @@ class OptionParser
   # -->
   # Directs to reject specified class argument.
   #
-  # `t`
+  # `type`
   # :   Argument class specifier, any object including Class.
   #
   #
-  #     reject(t)
+  #     reject(type)
   #
   def reject: (Class t) -> void
 
@@ -954,6 +970,13 @@ class OptionParser
   #   rdoc-file=lib/optparse.rb
   #   - warn(mesg = $!)
   # -->
+  # Shows warning message with the program name
+  #
+  # `mesg`
+  # :   Message, defaulted to +$!+.
+  #
+  #
+  # See Kernel#warn.
   #
   def warn: (?_ToS mesg) -> void
 
@@ -1068,6 +1091,9 @@ OptionParser::RequiredArgument: Array[untyped]
 
 OptionParser::SPLAT_PROC: Proc
 
+# <!-- rdoc-file=lib/optparse.rb -->
+# The version string
+#
 OptionParser::Version: String
 
 # <!-- rdoc-file=lib/optparse.rb -->
@@ -1113,7 +1139,7 @@ module OptionParser::Arguable
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - getopts(*args, symbolize_names: false)
+  #   - getopts(*args, symbolize_names: false, **keywords)
   # -->
   # Substitution of getopts is possible as follows. Also see OptionParser#getopts.
   #
@@ -1152,7 +1178,7 @@ module OptionParser::Arguable
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - order!(&blk)
+  #   - order!(**keywords, &blk)
   # -->
   # Parses `self` destructively in order and returns `self` containing the rest
   # arguments left unparsed.
@@ -1161,7 +1187,7 @@ module OptionParser::Arguable
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - parse!()
+  #   - parse!(**keywords)
   # -->
   # Parses `self` destructively and returns `self` containing the rest arguments
   # left unparsed.
@@ -1170,7 +1196,7 @@ module OptionParser::Arguable
 
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - permute!()
+  #   - permute!(**keywords)
   # -->
   # Parses `self` destructively in permutation mode and returns `self` containing
   # the rest arguments left unparsed.
@@ -1691,7 +1717,7 @@ end
 class OptionParser::Switch::RequiredArgument < OptionParser::Switch
   # <!--
   #   rdoc-file=lib/optparse.rb
-  #   - parse(arg, argv)
+  #   - parse(arg, argv, &_)
   # -->
   # Raises an exception if argument is not present.
   #

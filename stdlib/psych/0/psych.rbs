@@ -221,7 +221,7 @@ module Psych
   #     Default: `2`.
   #
   # `:line_width`
-  # :   Max character to wrap line at.
+  # :   Max character to wrap line at. For unlimited line width use `-1`.
   #
   #     Default: `0` (meaning "wrap at 81").
   #
@@ -232,6 +232,12 @@ module Psych
   #
   # `:header`
   # :   Write `%YAML [version]` at the beginning of document.
+  #
+  #     Default: `false`.
+  #
+  #
+  # `:stringify_names`
+  # :   Dump symbol keys in Hash objects as string.
   #
   #     Default: `false`.
   #
@@ -250,6 +256,9 @@ module Psych
   #     # Dump an array to an IO with indentation set
   #     Psych.dump(['a', ['b']], StringIO.new, indentation: 3)
   #
+  #     # Dump hash with symbol keys as string
+  #     Psych.dump({a: "b"}, stringify_names: true) # => "---\na: b\n"
+  #
   %a{annotate:rdoc:copy:Psych.dump}
   def self.dump: (untyped o, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool) -> String
                | [IO] (untyped o, IO, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool) -> IO
@@ -262,7 +271,7 @@ module Psych
   # the object contained in the first document will be returned. `filename` will
   # be used in the exception message if any exception is raised while parsing.  If
   # `yaml` is empty, it returns the specified `fallback` return value, which
-  # defaults to `false`.
+  # defaults to `nil`.
   #
   # Raises a Psych::SyntaxError when a YAML syntax error is detected.
   #
@@ -296,7 +305,7 @@ module Psych
   # -->
   # Loads the document contained in `filename`.  Returns the yaml contained in
   # `filename` as a Ruby object, or if the file is empty, it returns the specified
-  # `fallback` return value, which defaults to `false`. See load for options.
+  # `fallback` return value, which defaults to `nil`. See load for options.
   #
   %a{annotate:rdoc:copy:Psych.load_file}
   def self.load_file: (string | _ToPath, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped

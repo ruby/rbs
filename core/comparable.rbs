@@ -38,7 +38,7 @@
 #
 # ## What's Here
 #
-# Module Comparable provides these methods, all of which use method `<=>`:
+# Module Comparable provides these methods, all of which use method `#<=>`:
 #
 # *   #<: Returns whether `self` is less than the given object.
 # *   #<=: Returns whether `self` is less than or equal to the given object.
