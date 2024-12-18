@@ -40,7 +40,7 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap) {
     .len = 0,
     .required_p = 0,
     .cap = cap,
-    .entries = { 0 },
+    .entries = {{ 0 }},
   };
 }
 
