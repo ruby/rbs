@@ -55,7 +55,7 @@ class RBS::DiffTest < Test::Unit::TestCase
       RBS
 
       diff = Diff.new(
-        type_name: TypeName("::Foo"),
+        type_name: RBS::TypeName.parse("::Foo"),
         library_options: RBS::CLI::LibraryOptions.new,
         before_path: [dir1],
         after_path: [dir2],
@@ -118,7 +118,7 @@ class RBS::DiffTest < Test::Unit::TestCase
       RBS
 
       diff = Diff.new(
-        type_name: TypeName("::Foo"),
+        type_name: RBS::TypeName.parse("::Foo"),
         library_options: RBS::CLI::LibraryOptions.new,
         before_path: [dir1],
         after_path: [dir2],
@@ -167,7 +167,7 @@ class RBS::DiffTest < Test::Unit::TestCase
       RBS
 
       diff = Diff.new(
-        type_name: TypeName("::Pathname"),
+        type_name: RBS::TypeName.parse("::Pathname"),
         library_options: RBS::CLI::LibraryOptions.new,
         before_path: [dir1],
         after_path: [dir2],
@@ -200,7 +200,7 @@ class RBS::DiffTest < Test::Unit::TestCase
       RBS
 
       diff = Diff.new(
-        type_name: TypeName("::Foo"),
+        type_name: RBS::TypeName.parse("::Foo"),
         library_options: RBS::CLI::LibraryOptions.new,
         before_path: [dir1],
         after_path: [dir2],

@@ -101,7 +101,7 @@ class RBS::ParserTest < Test::Unit::TestCase
 
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Module, decl
-        assert_equal TypeName("Foo"), decl.name
+        assert_equal RBS::TypeName.parse("Foo"), decl.name
 
         assert_equal "module", decl.location[:keyword].source
         assert_equal "Foo", decl.location[:name].source
@@ -386,7 +386,7 @@ class RBS::ParserTest < Test::Unit::TestCase
 
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Class, decl
-        assert_equal TypeName("Foo"), decl.name
+        assert_equal RBS::TypeName.parse("Foo"), decl.name
         assert_predicate decl.type_params, :empty?
         assert_nil decl.super_class
       end
@@ -399,9 +399,9 @@ class RBS::ParserTest < Test::Unit::TestCase
 
       decls[0].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Class, decl
-        assert_equal TypeName("Foo"), decl.name
+        assert_equal RBS::TypeName.parse("Foo"), decl.name
         assert_equal [:A], decl.type_params.each.map(&:name)
-        assert_equal TypeName("Bar"), decl.super_class.name
+        assert_equal RBS::TypeName.parse("Bar"), decl.super_class.name
       end
     end
   end

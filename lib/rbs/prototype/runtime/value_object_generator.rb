@@ -102,7 +102,7 @@ module RBS
         CAN_CALL_KEYWORD_INIT_P = Struct.new(:tmp).respond_to?(:keyword_init?)
 
         def build_super_class
-          AST::Declarations::Class::Super.new(name: TypeName("::Struct"), args: [untyped], location: nil)
+          AST::Declarations::Class::Super.new(name: TypeName.parse("::Struct"), args: [untyped], location: nil)
         end
 
         def add_decl_members(decl)
@@ -223,7 +223,7 @@ module RBS
         private
 
         def build_super_class
-          AST::Declarations::Class::Super.new(name: TypeName("::Data"), args: [], location: nil)
+          AST::Declarations::Class::Super.new(name: TypeName.parse("::Data"), args: [], location: nil)
         end
 
         def add_decl_members(decl)

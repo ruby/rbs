@@ -70,7 +70,7 @@ module RBS
       def find_const(const_name)
         namespace =
           if const_name.namespace.empty?
-            TypeName("::Object")
+            TypeName.parse("::Object")
           else
             const_name.namespace.to_type_name
           end

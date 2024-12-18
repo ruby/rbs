@@ -86,19 +86,24 @@ module RBS
         )
       end
     end
+    
+    def self.parse(string)
+      absolute = string.start_with?("::")
+
+      *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
+      raise unless name
+
+      TypeName.new(
+        name: name,
+        namespace: RBS::Namespace.new(path: path, absolute: absolute)
+      )
+    end
   end
 end
 
 module Kernel
   def TypeName(string)
-    absolute = string.start_with?("::")
-
-    *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
-    raise unless name
-
-    RBS::TypeName.new(
-      name: name,
-      namespace: RBS::Namespace.new(path: path, absolute: absolute)
-    )
+    warn "Kernel#TypeName() is deprecated. Use RBS::TypeName.parse instead.", category: :deprecated
+    RBS::TypeName.parse(string)
   end
 end

@@ -340,13 +340,13 @@ EOF
           assert_equal 5, a.ancestors.size
           a.ancestors[0].tap do |ancestor|
             assert_instance_of Ancestor::Instance, ancestor
-            assert_equal TypeName("::Foo"), ancestor.name
+            assert_equal RBS::TypeName.parse("::Foo"), ancestor.name
             assert_equal [Types::Variable.build(:X)], ancestor.args
             assert_nil ancestor.source
           end
           a.ancestors[1].tap do |ancestor|
             assert_instance_of Ancestor::Instance, ancestor
-            assert_equal TypeName("::Bar"), ancestor.name
+            assert_equal RBS::TypeName.parse("::Bar"), ancestor.name
             assert_equal [Types::Variable.build(:X), parse_type("::String")], ancestor.args
             assert_instance_of AST::Members::Include, ancestor.source
           end

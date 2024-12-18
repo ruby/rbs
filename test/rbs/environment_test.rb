@@ -65,7 +65,7 @@ EOF
       env << decl
     end
 
-    env.class_alias_decls[TypeName("::RBS::Kernel")].tap do |decl|
+    env.class_alias_decls[RBS::TypeName.parse("::RBS::Kernel")].tap do |decl|
       assert_instance_of Environment::ModuleAliasEntry, decl
     end
   end
@@ -462,8 +462,8 @@ end
     env.add_signature(buffer: buf, directives: dirs, decls: decls)
 
     env.resolve_type_names.tap do |env|
-      class_decl = env.class_decls[TypeName("::A::B")]
-      assert_equal TypeName("::A::C"), class_decl.primary.decl.super_class.name
+      class_decl = env.class_decls[RBS::TypeName.parse("::A::B")]
+      assert_equal RBS::TypeName.parse("::A::C"), class_decl.primary.decl.super_class.name
     end
   end
 
@@ -543,10 +543,10 @@ end
     env.add_signature(buffer: buf, directives: dirs, decls: decls)
 
     env.resolve_type_names.tap do |env|
-      class_decl = env.class_decls[TypeName("::Foo")]
-      assert_equal TypeName("::Object"), class_decl.primary.decl.super_class.name
+      class_decl = env.class_decls[RBS::TypeName.parse("::Foo")]
+      assert_equal RBS::TypeName.parse("::Object"), class_decl.primary.decl.super_class.name
 
-      assert_operator env.class_decls, :key?, TypeName("::OB")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::OB")
     end
   end
 end

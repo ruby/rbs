@@ -30,14 +30,14 @@ EOF
         assert_nil resolver.resolve(type_name("Baz"), context: nil)
 
         assert_equal type_name("::Foo"),
-                     resolver.resolve(type_name("Foo"), context: [nil, TypeName("::Foo")])
+                     resolver.resolve(type_name("Foo"), context: [nil, RBS::TypeName.parse("::Foo")])
         assert_equal type_name("::Foo::Bar"),
-                     resolver.resolve(type_name("Bar"), context: [nil, TypeName("::Foo")])
+                     resolver.resolve(type_name("Bar"), context: [nil, RBS::TypeName.parse("::Foo")])
         assert_equal type_name("::Foo::Bar::Baz"),
-                     resolver.resolve(type_name("Bar::Baz"), context: [nil, TypeName("::Foo")])
+                     resolver.resolve(type_name("Bar::Baz"), context: [nil, RBS::TypeName.parse("::Foo")])
 
         assert_equal type_name("::Bar"),
-                     resolver.resolve(type_name("Bar"), context: [nil, TypeName("::Foo::Bar::Baz")])
+                     resolver.resolve(type_name("Bar"), context: [nil, RBS::TypeName.parse("::Foo::Bar::Baz")])
       end
     end
   end
@@ -56,7 +56,7 @@ EOF
       manager.build do |env|
         resolver = Resolver::TypeNameResolver.new(env)
 
-        assert_nil resolver.resolve(type_name("Foo::Bar"), context: [[nil, TypeName("::Foo")], TypeName("::Foo::Foo")])
+        assert_nil resolver.resolve(type_name("Foo::Bar"), context: [[nil, RBS::TypeName.parse("::Foo")], RBS::TypeName.parse("::Foo::Foo")])
       end
     end
   end
@@ -74,7 +74,7 @@ EOF
         resolver = Resolver::TypeNameResolver.new(env)
 
         assert_equal type_name("::X::X"),
-                     resolver.resolve(type_name("X"), context: [nil, TypeName("::X")])
+                     resolver.resolve(type_name("X"), context: [nil, RBS::TypeName.parse("::X")])
       end
     end
   end
@@ -97,14 +97,14 @@ EOF
 
         assert_equal type_name("::X::Y::Y"),
                      resolver.resolve(type_name("Y"),
-                                      context: [[nil, TypeName("::X::Y")], TypeName("::X::Y::Z")])
+                                      context: [[nil, RBS::TypeName.parse("::X::Y")], RBS::TypeName.parse("::X::Y::Z")])
 
         assert_nil resolver.resolve(type_name("Y::Z"),
-                                    context: [[nil, TypeName("::X::Y")], TypeName("::X::Y::Z")])
+                                    context: [[nil, RBS::TypeName.parse("::X::Y")], RBS::TypeName.parse("::X::Y::Z")])
 
         assert_equal type_name("::X::Y::Z"),
                      resolver.resolve(type_name("Y::Z"),
-                                      context: [[nil, TypeName("::X")], TypeName("::X::Y::Z")])
+                                      context: [[nil, RBS::TypeName.parse("::X")], RBS::TypeName.parse("::X::Y::Z")])
       end
     end
   end
@@ -122,9 +122,9 @@ EOF
         resolver = Resolver::TypeNameResolver.new(env)
 
         assert_equal type_name("::MyObject::name"),
-                     resolver.resolve(type_name("name"), context: [nil, TypeName("::MyObject")])
+                     resolver.resolve(type_name("name"), context: [nil, RBS::TypeName.parse("::MyObject")])
         assert_equal type_name("::MyObject::name2"),
-                     resolver.resolve(type_name("name2"), context: [nil, TypeName("::MyObject")])
+                     resolver.resolve(type_name("name2"), context: [nil, RBS::TypeName.parse("::MyObject")])
       end
     end
   end

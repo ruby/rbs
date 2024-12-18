@@ -3,7 +3,7 @@ module RBS
     # ```rb
     # map = UseMap.build(environment)
     #
-    # map.resolve?(TypeName("TN"))   # => nil or resolved type name
+    # map.resolve?(TypeName.parse("TN"))   # => nil or resolved type name
     # ```
     #
     class UseMap

@@ -341,7 +341,7 @@ EOF
           assert_operator Set[:get], :subset?, Set.new(definition.methods.keys)
           assert_method_definition definition.methods[:get], ["(::Integer) -> ::String", "() -> ::String"], accessibility: :public
 
-          assert definition.methods[:get].defs.all? {|td| td.implemented_in == TypeName("::M2") }
+          assert definition.methods[:get].defs.all? {|td| td.implemented_in == RBS::TypeName.parse("::M2") }
         end
       end
     end
@@ -923,11 +923,11 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        builder.build_instance(TypeName("::Hello")).tap do |definition|
+        builder.build_instance(RBS::TypeName.parse("::Hello")).tap do |definition|
           assert_equal ["(instance) -> class"], definition.methods[:foo].method_types.map(&:to_s)
         end
 
-        builder.build_singleton(TypeName("::Hello")).tap do |definition|
+        builder.build_singleton(RBS::TypeName.parse("::Hello")).tap do |definition|
           assert_equal ["(instance) -> class"], definition.methods[:foo].method_types.map(&:to_s)
         end
       end
@@ -2326,12 +2326,12 @@ end
         env.add_signature(buffer: buf, directives: dirs, decls: decls)
       end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
-      definition_builder.build_instance(TypeName("::Foo")).tap do |defn|
+      definition_builder.build_instance(RBS::TypeName.parse("::Foo")).tap do |defn|
         defn.methods[:request].tap do |m|
           assert_equal ["(::interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
       end
-      definition_builder.build_instance(TypeName("::Mod")).tap do |defn|
+      definition_builder.build_instance(RBS::TypeName.parse("::Mod")).tap do |defn|
         defn.methods[:request].tap do |m|
           assert_equal ["(::interned name, *untyped, **untyped) ?{ (?) -> untyped } -> untyped"], m.method_types.map(&:to_s)
         end
@@ -2573,23 +2573,23 @@ end
           assert_instance_of Definition, definition
 
           definition.methods[:b].tap do |method|
-            assert_equal [TypeName("::B")], method.defs.map(&:defined_in)
-            assert_equal [TypeName("::B")], method.defs.map(&:implemented_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:defined_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:implemented_in)
           end
 
           definition.methods[:c].tap do |method|
-            assert_equal [TypeName("::B")], method.defs.map(&:defined_in)
-            assert_equal [TypeName("::B")], method.defs.map(&:implemented_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:defined_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:implemented_in)
           end
 
           definition.methods[:d].tap do |method|
-            assert_equal [TypeName("::B")], method.defs.map(&:defined_in)
-            assert_equal [TypeName("::B")], method.defs.map(&:implemented_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:defined_in)
+            assert_equal [RBS::TypeName.parse("::B")], method.defs.map(&:implemented_in)
           end
 
           definition.methods[:__id__].tap do |method|
-            assert_equal [TypeName("::B"), TypeName("::Object")], method.defs.map(&:defined_in)
-            assert_equal [TypeName("::B"), TypeName("::B")], method.defs.map(&:implemented_in)
+            assert_equal [RBS::TypeName.parse("::B"), RBS::TypeName.parse("::Object")], method.defs.map(&:defined_in)
+            assert_equal [RBS::TypeName.parse("::B"), RBS::TypeName.parse("::B")], method.defs.map(&:implemented_in)
           end
         end
       end
@@ -2615,8 +2615,8 @@ end
           assert_instance_of Definition, definition
 
           definition.methods[:f].tap do |method|
-            assert_equal [TypeName("::A"), TypeName("::M")], method.defs.map(&:defined_in)
-            assert_equal [TypeName("::A"), TypeName("::A")], method.defs.map(&:implemented_in)
+            assert_equal [RBS::TypeName.parse("::A"), RBS::TypeName.parse("::M")], method.defs.map(&:defined_in)
+            assert_equal [RBS::TypeName.parse("::A"), RBS::TypeName.parse("::A")], method.defs.map(&:implemented_in)
           end
         end
       end

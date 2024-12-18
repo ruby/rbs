@@ -288,7 +288,7 @@ EOU
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder::AncestorBuilder.new(env: env)
-      type_name = TypeName(args[0]).absolute!
+      type_name = TypeName.parse(args[0]).absolute!
 
       case env.constant_entry(type_name)
       when Environment::ClassEntry, Environment::ModuleEntry, Environment::ClassAliasEntry, Environment::ModuleAliasEntry
@@ -353,7 +353,7 @@ EOU
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      type_name = TypeName(args[0]).absolute!
+      type_name = TypeName.parse(args[0]).absolute!
 
       if env.module_name?(type_name)
         definition = case kind
@@ -406,7 +406,7 @@ EOU
       env = Environment.from_loader(loader).resolve_type_names
 
       builder = DefinitionBuilder.new(env: env)
-      type_name = TypeName(args[0]).absolute!
+      type_name = TypeName.parse(args[0]).absolute!
       method_name = args[1].to_sym
 
       unless env.module_name?(type_name)
@@ -479,9 +479,9 @@ EOU
       builder = DefinitionBuilder.new(env: env)
       resolver = Resolver::ConstantResolver.new(builder: builder)
 
-      resolver_context = context ? [nil, TypeName(context).absolute!] : nil #: Resolver::context
+      resolver_context = context ? [nil, TypeName.parse(context).absolute!] : nil #: Resolver::context
       stdout.puts "Context: #{context}"
-      const_name = TypeName(args[0])
+      const_name = TypeName.parse(args[0])
       stdout.puts "Constant name: #{const_name}"
 
       if const_name.absolute?

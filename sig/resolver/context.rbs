@@ -9,7 +9,7 @@ module RBS
     #
     # Note that the `TypeName` must be an absolute type name.
     #
-    # The following Ruby code has context of `[[nil, TypeName("::Foo")], false]` where
+    # The following Ruby code has context of `[[nil, TypeName.parse("::Foo")], false]` where
     #
     # * `Foo` is a class defined in RBS file
     # * `Bar` is not defined in RBS files

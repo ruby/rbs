@@ -20,9 +20,9 @@ module RBS
   # ```rb
   # validator = RBS::TypeAliasRegularity.validate(env: env)
   #
-  # validator.nonregular?(TypeName("::foo"))    # => nil
-  # validator.nonregular?(TypeName("::bar"))    # => nil
-  # validator.nonregular?(TypeName("::baz"))    # => TypeAliasRegularity::Diagnostic
+  # validator.nonregular?(TypeName.parse("::foo"))    # => nil
+  # validator.nonregular?(TypeName.parse("::bar"))    # => nil
+  # validator.nonregular?(TypeName.parse("::baz"))    # => TypeAliasRegularity::Diagnostic
   # ```
   #
   # A special case is when the type argument is `untyped`.
@@ -51,8 +51,8 @@ module RBS
     # The type `t` is nonregular because it contains `t[T?]` on it's right hand side.
     #
     # ```
-    # diagnostic = validator.nonregular?(TypeName("::t"))
-    # diagnostic.type_name         # => TypeName("::t")
+    # diagnostic = validator.nonregular?(TypeName.parse("::t"))
+    # diagnostic.type_name         # => TypeName.parse("::t")
     # diagnostic.nonregular_type   # => t[T?]
     # ```
     #

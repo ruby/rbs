@@ -64,9 +64,9 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Person")
-      assert_operator env.class_decls, :key?, TypeName("::PeopleController")
-      assert_operator env.class_decls, :key?, TypeName("::Person::Internal")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Person")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::PeopleController")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Person::Internal")
     end
   end
 
@@ -78,7 +78,7 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::URI")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::URI")
     end
   end
 
@@ -91,7 +91,7 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Gem")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Gem")
       assert io.string.include?('`rubygems` has been moved to core library')
     end
   ensure
@@ -115,9 +115,9 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Person")
-      assert_operator env.class_decls, :key?, TypeName("::PeopleController")
-      refute_operator env.class_decls, :key?, TypeName("::Person::Internal")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Person")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::PeopleController")
+      refute_operator env.class_decls, :key?, RBS::TypeName.parse("::Person::Internal")
     end
   end
 
@@ -145,7 +145,7 @@ end
       env = Environment.new
       loaded = loader.load(env: env)
 
-      assert_equal 1, loaded.count {|decl, _, _| decl.respond_to?(:name) && decl.name == TypeName("Person") }
+      assert_equal 1, loaded.count {|decl, _, _| decl.respond_to?(:name) && decl.name == RBS::TypeName.parse("Person") }
     end
   end
 
@@ -161,7 +161,7 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Amber")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Amber")
     end
   end
 
@@ -190,9 +190,9 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::Psych")
-      assert_operator env.class_decls, :key?, TypeName("::DBM")
-      assert_operator env.class_decls, :key?, TypeName("::PStore")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Psych")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::DBM")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::PStore")
     end
   end
 
@@ -235,8 +235,8 @@ end
       env = Environment.new
       loader.load(env: env)
 
-      assert_operator env.class_decls, :key?, TypeName("::AST")
-      assert_operator env.class_decls, :key?, TypeName("::Rainbow")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::AST")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Rainbow")
       assert repo.dirs.include? lock.fullpath
     end
   end
