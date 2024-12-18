@@ -458,13 +458,11 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_mkpath
-    if_ruby(... 3.4) do
-      Dir.mktmpdir do |dir|
-        dir = Pathname(dir)
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
 
-        assert_send_type '() -> nil',
+      assert_send_type '() -> Pathname',
                         dir + 'a/b/c', :mkpath
-      end
     end
   end
 
@@ -644,7 +642,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
     Dir.mktmpdir do |dir|
       target = Pathname(dir).join('target')
       target.mkdir
-      assert_send_type '() -> void',
+      assert_send_type '() -> Pathname',
                        target, :rmtree
     end
   end
