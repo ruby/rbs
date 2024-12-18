@@ -23,7 +23,7 @@ class Test::Unit::TestCase
 end
 
 module VersionHelper
-  def if_ruby(range)
+  def if_ruby(range, skip: true)
     r = Range.new(
       range.begin&.yield_self {|b| Gem::Version.new(b) },
       range.end&.yield_self {|e| Gem::Version.new(e) },
@@ -33,27 +33,17 @@ module VersionHelper
     if r === Gem::Version.new(RUBY_VERSION)
       yield
     else
-      notify "Skipping test: #{r} !== #{RUBY_VERSION}"
+      if skip
+        notify "Skipping test: #{r} !== #{RUBY_VERSION}"
+      end
     end
-  end
-
-  def if_ruby3(&block)
-    if_ruby("3.0.0"..."4.0.0", &block)
-  end
-
-  def if_ruby30(&block)
-    if_ruby("3.0.0"..."3.1.0", &block)
-  end
-
-  def if_ruby31(&block)
-    if_ruby("3.1.0"..."3.2.0", &block)
   end
 end
 
 module WithStdlibAliases
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?
-      return RBS::UnitTest::Convertibles::WithAliases::WithEnum.new(
+      return RBS::UnitTest::WithAliases::WithEnum.new(
         to_enum(__method__, seconds: seconds, nanoseconds: nanoseconds)
       )
     end
