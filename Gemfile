@@ -16,7 +16,7 @@ gem "json-schema"
 gem "goodcheck"
 gem 'digest'
 gem 'tempfile'
-gem "rdoc"
+gem "rdoc", git: "https://github.com/ruby/rdoc.git", branch: "master"
 gem "fileutils"
 gem "raap"
 

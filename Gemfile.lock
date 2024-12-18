@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/ruby/rdoc.git
+  revision: f12a96b7faecd2ced5c6643778e06614f5ef7251
+  branch: master
+  specs:
+    rdoc (6.9.1)
+      psych (>= 4.0.0)
+
 PATH
   remote: .
   specs:
@@ -86,8 +94,6 @@ GEM
     rb-fsevent (0.11.2)
     rb-inotify (0.11.1)
       ffi (~> 1.0)
-    rdoc (6.9.1)
-      psych (>= 4.0.0)
     regexp_parser (2.9.3)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
@@ -179,7 +185,7 @@ DEPENDENCIES
   rake-compiler
   rbs!
   rbs-amber!
-  rdoc
+  rdoc!
   rspec
   rubocop
   rubocop-on-rbs
