@@ -422,24 +422,22 @@ class IOWaitTest < Test::Unit::TestCase
   testing "::IO"
 
   def test_readyp
-    if_ruby31 do
-      # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
+    # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
 
-      IO.pipe.tap do |r, w|
-        assert_send_type(
-          "() -> untyped",
-          r, :ready?
-        )
-      end
+    IO.pipe.tap do |r, w|
+      assert_send_type(
+        "() -> untyped",
+        r, :ready?
+      )
+    end
 
-      IO.pipe.tap do |r, w|
-        w.write("hello")
+    IO.pipe.tap do |r, w|
+      w.write("hello")
 
-        assert_send_type(
-          "() -> untyped",
-          r, :ready?
-        )
-      end
+      assert_send_type(
+        "() -> untyped",
+        r, :ready?
+      )
     end
   end
 
@@ -491,7 +489,7 @@ class IOWaitTest < Test::Unit::TestCase
   end
 
   def test_wait
-    if_ruby "3.0.0"..."3.2.0" do
+    if_ruby "3.0.0"..."3.2.0", skip: false do
       IO.pipe.tap do |r, w|
         w.write("hello")
 

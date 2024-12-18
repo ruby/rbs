@@ -3,8 +3,6 @@ require "test_helper"
 require "rbs/test"
 require "logger"
 
-return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
-
 class RBS::Test::HookTest < Test::Unit::TestCase
   class Example
     def hello(x, y)

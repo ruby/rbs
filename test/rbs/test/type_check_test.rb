@@ -3,8 +3,6 @@ require "test_helper"
 require "rbs/test"
 require "logger"
 
-return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
-
 RSPEC_MOCK = -> { double('foo') }
 
 class RBS::Test::TypeCheckTest < Test::Unit::TestCase

@@ -15,25 +15,25 @@ class NetSingletonTest < Test::Unit::TestCase
     assert_send_type "(String, String) -> nil",
                      Net::HTTP, :get_print, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> nil",
-                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}
     assert_send_type "(URI::Generic, Hash[Symbol, String]) -> nil",
-                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get_print, URI("https://www.ruby-lang.org"), {Accept: "text/html"}
     assert_send_type "(URI::Generic) -> String",
                      Net::HTTP, :get, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> String",
                      Net::HTTP, :get, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> String",
-                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}
     assert_send_type "(URI::Generic, Hash[Symbol, String]) -> String",
-                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get, URI("https://www.ruby-lang.org"), {Accept: "text/html"}
     assert_send_type "(URI::Generic) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, URI("https://www.ruby-lang.org")
     assert_send_type "(String, String) -> Net::HTTPResponse",
                      Net::HTTP, :get_response, 'www.ruby-lang.org', '/en'
     assert_send_type "(URI::Generic, Hash[String, String]) -> Net::HTTPResponse",
-                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {"Accept" => "text/html"}
     assert_send_type "(URI::Generic, Hash[Symbol, String]) -> Net::HTTPResponse",
-                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {Accept: "text/html"} if RUBY_VERSION >= '3.0'
+                     Net::HTTP, :get_response, URI("https://www.ruby-lang.org"), {Accept: "text/html"}
   ensure
     $stdout = STDOUT
   end

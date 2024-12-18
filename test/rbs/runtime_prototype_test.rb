@@ -241,33 +241,6 @@ end
     end
   end
 
-  if RUBY_VERSION >= '2.7' && RUBY_VERSION <= '3.0'
-    class TestForArgumentForwarding
-      eval <<~RUBY
-        def foo(...)
-        end
-      RUBY
-    end
-
-    def test_argument_forwarding
-      SignatureManager.new do |manager|
-        manager.build do |env|
-          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForArgumentForwarding"], env: env, merge: true)
-
-          assert_write p.decls, <<-EOF
-module RBS
-  class RuntimePrototypeTest < ::Test::Unit::TestCase
-    class TestForArgumentForwarding
-      def foo: (*untyped) { (*untyped) -> untyped } -> untyped
-    end
-  end
-end
-          EOF
-        end
-      end
-    end
-  end
-
   module TestForOverrideModuleName
     module M
       def self.name() 'FakeNameM' end
@@ -389,35 +362,35 @@ end
     end
   end
 
-  if RUBY_VERSION >= '3.1' && RUBY_VERSION <= "3.3"
-    class TestForYield
-      def m1() yield end
-      def m2() yield 42 end
-      def m3() yield 42; yield 42, 43 end
-      eval 'def m4() yield end'
-    end
+  class TestForYield
+    def m1() yield end
+    def m2() yield 42 end
+    def m3() yield 42; yield 42, 43 end
+    eval 'def m4() yield end'
+  end
 
-    def test_for_yield
-      SignatureManager.new do |manager|
-        manager.build do |env|
-          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
+  def test_for_yield
+    omit "Ruby 3.4 uses Prism and needs migration" if RUBY_VERSION >= "3.4"
+    
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
 
-          assert_write p.decls, <<~RBS
-            module RBS
-              class RuntimePrototypeTest < ::Test::Unit::TestCase
-                class TestForYield
-                  def m1: () { () -> untyped } -> untyped
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class TestForYield
+                def m1: () { () -> untyped } -> untyped
 
-                  def m2: () { (untyped) -> untyped } -> untyped
+                def m2: () { (untyped) -> untyped } -> untyped
 
-                  def m3: () { (untyped, untyped) -> untyped } -> untyped
+                def m3: () { (untyped, untyped) -> untyped } -> untyped
 
-                  def m4: () -> untyped
-                end
+                def m4: () -> untyped
               end
             end
-          RBS
-        end
+          end
+        RBS
       end
     end
   end

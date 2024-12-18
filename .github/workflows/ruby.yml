@@ -13,26 +13,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.1', '3.2', '3.3', head]
+        ruby: ['3.1', '3.2', '3.3', '3.4.0-rc1', head]
         rubyopt: [""]
         job:
           - test
         include:
           - ruby: head
             job: stdlib_test rubocop
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: stdlib_test
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: stdlib_test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: lexer templates compile confirm_lexer confirm_templates
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: rubocop validate test_doc build test_generate_stdlib raap
-          - ruby: "3.3"
+          - ruby: "3.4.0-rc1"
             job: typecheck_test
     env:
       RANDOMIZE_STDLIB_TEST_ORDER: "true"

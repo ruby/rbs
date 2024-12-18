@@ -13,7 +13,7 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
     def only_ddd(...) end
     def tailing_ddd(a, ...) end
     def no_kwargs(**nil) end
-    eval "def shorthand(*, **, &) end" unless RUBY_VERSION < '3.1'
+    eval "def shorthand(*, **, &) end"
   end
 
   def test_eq
@@ -83,8 +83,6 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
                       ParamMeths.instance_method(:tailing_ddd), :parameters
     assert_send_type  '() -> ::Method::param_types',
                       ParamMeths.instance_method(:no_kwargs), :parameters
-
-    omit_if(RUBY_VERSION < '3.1')
 
     assert_send_type  '() -> ::Method::param_types',
                       ParamMeths.instance_method(:shorthand), :parameters

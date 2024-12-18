@@ -318,106 +318,98 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_attr
-    if RUBY_VERSION >= '3.0'
-      mod = Module.new
-      assert_send_type(
-        "(*interned arg0) -> Array[Symbol]",
-        mod, :attr, :foo
-      )
-    end
+    mod = Module.new
+    assert_send_type(
+      "(*interned arg0) -> Array[Symbol]",
+      mod, :attr, :foo
+    )
   end
 
   def test_attr_reader
-    if RUBY_VERSION >= '3.0'
-      mod = Module.new
+    mod = Module.new
 
-      assert_send_type(
-        "(Symbol) -> Array[Symbol]",
-        mod, :attr_reader, :foo
-      )
+    assert_send_type(
+      "(Symbol) -> Array[Symbol]",
+      mod, :attr_reader, :foo
+    )
 
-      assert_send_type(
-        "(Symbol, Symbol) -> Array[Symbol]",
-        mod, :attr_reader, :foo, :bar
-      )
+    assert_send_type(
+      "(Symbol, Symbol) -> Array[Symbol]",
+      mod, :attr_reader, :foo, :bar
+    )
 
-      assert_send_type(
-        "(String) -> Array[Symbol]",
-        mod, :attr_reader, "foo"
-      )
+    assert_send_type(
+      "(String) -> Array[Symbol]",
+      mod, :attr_reader, "foo"
+    )
 
-      assert_send_type(
-        "(String, String) -> Array[Symbol]",
-        mod, :attr_reader, "foo", "bar"
-      )
+    assert_send_type(
+      "(String, String) -> Array[Symbol]",
+      mod, :attr_reader, "foo", "bar"
+    )
 
-      assert_send_type(
-        "(Symbol, String) -> Array[Symbol]",
-        mod, :attr_reader, :foo, "bar"
-      )
-    end
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol]",
+      mod, :attr_reader, :foo, "bar"
+    )
   end
 
   def test_attr_writer
-    if RUBY_VERSION >= '3.0'
-      mod = Module.new
+    mod = Module.new
 
-      assert_send_type(
-        "(Symbol) -> Array[Symbol]",
-        mod, :attr_writer, :foo
-      )
+    assert_send_type(
+      "(Symbol) -> Array[Symbol]",
+      mod, :attr_writer, :foo
+    )
 
-      assert_send_type(
-        "(Symbol, Symbol) -> Array[Symbol]",
-        mod, :attr_writer, :foo, :bar
-      )
+    assert_send_type(
+      "(Symbol, Symbol) -> Array[Symbol]",
+      mod, :attr_writer, :foo, :bar
+    )
 
-      assert_send_type(
-        "(String) -> Array[Symbol]",
-        mod, :attr_writer, "foo"
-      )
+    assert_send_type(
+      "(String) -> Array[Symbol]",
+      mod, :attr_writer, "foo"
+    )
 
-      assert_send_type(
-        "(String, String) -> Array[Symbol]",
-        mod, :attr_writer, "foo", "bar"
-      )
+    assert_send_type(
+      "(String, String) -> Array[Symbol]",
+      mod, :attr_writer, "foo", "bar"
+    )
 
-      assert_send_type(
-        "(Symbol, String) -> Array[Symbol]",
-        mod, :attr_writer, :foo, "bar"
-      )
-    end
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol]",
+      mod, :attr_writer, :foo, "bar"
+    )
   end
 
   def test_attr_accessor
-    if RUBY_VERSION >= '3.0'
-      mod = Module.new
+    mod = Module.new
 
-      assert_send_type(
-        "(Symbol) -> Array[Symbol]",
-        mod, :attr_accessor, :foo
-      )
+    assert_send_type(
+      "(Symbol) -> Array[Symbol]",
+      mod, :attr_accessor, :foo
+    )
 
-      assert_send_type(
-        "(Symbol, Symbol) -> Array[Symbol]",
-        mod, :attr_accessor, :foo, :bar
-      )
+    assert_send_type(
+      "(Symbol, Symbol) -> Array[Symbol]",
+      mod, :attr_accessor, :foo, :bar
+    )
 
-      assert_send_type(
-        "(String) -> Array[Symbol]",
-        mod, :attr_accessor, "foo"
-      )
+    assert_send_type(
+      "(String) -> Array[Symbol]",
+      mod, :attr_accessor, "foo"
+    )
 
-      assert_send_type(
-        "(String, String) -> Array[Symbol]",
-        mod, :attr_accessor, "foo", "bar"
-      )
+    assert_send_type(
+      "(String, String) -> Array[Symbol]",
+      mod, :attr_accessor, "foo", "bar"
+    )
 
-      assert_send_type(
-        "(Symbol, String) -> Array[Symbol]",
-        mod, :attr_accessor, :foo, "bar"
-      )
-    end
+    assert_send_type(
+      "(Symbol, String) -> Array[Symbol]",
+      mod, :attr_accessor, :foo, "bar"
+    )
   end
 
   def test_set_temporary_name
