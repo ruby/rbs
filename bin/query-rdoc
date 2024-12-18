@@ -28,17 +28,17 @@ source.load()
 
 case
 when match = name.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
-  type_name = TypeName(match[:constant_name] || raise)
+  type_name = RBS::TypeName.parse(match[:constant_name] || raise)
   instance_method = (match[:method_name] or raise).to_sym
 
   doc = annotator.doc_for_method(type_name, instance_method: instance_method, tester: tester)
 when match = name.match(/(?<constant_name>[^#]+)\.(?<method_name>.+)/)
-  type_name = TypeName(match[:constant_name] || raise)
+  type_name = RBS::TypeName.parse(match[:constant_name] || raise)
   singleton_method = (match[:method_name] or raise).to_sym
 
   doc = annotator.doc_for_method(type_name, singleton_method: singleton_method, tester: tester)
 else
-  type_name = TypeName(name)
+  type_name = RBS::TypeName.parse(name)
 
   doc = annotator.doc_for_class(type_name, tester: tester) || annotator.doc_for_constant(type_name, tester: tester)
 end

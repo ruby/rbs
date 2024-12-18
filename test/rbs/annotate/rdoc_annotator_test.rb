@@ -79,7 +79,7 @@ This is another doc for CLI.
       TEXT
 
       decl.members[0].tap do |decl|
-        annotator.annotate_class(decl, outer: [TypeName("CLI").to_namespace])
+        annotator.annotate_class(decl, outer: [RBS::TypeName.parse("CLI").to_namespace])
 
         assert_equal <<-TEXT, decl.comment.string
 <!-- rdoc-file=lib/helper.rb -->
@@ -113,7 +113,7 @@ end
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
 
-    assert_equal <<-TEXT, annotator.doc_for_method(TypeName("Foo"), instance_method: :m1, tester: tester)
+    assert_equal <<-TEXT, annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m1, tester: tester)
 <!--
   rdoc-file=lib/cli.rb
   - m1()
@@ -122,25 +122,25 @@ Doc for m1
 
     TEXT
 
-    assert_equal <<-TEXT, annotator.doc_for_method(TypeName("Foo"), instance_method: :m2, tester: tester)
+    assert_equal <<-TEXT, annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m2, tester: tester)
 <!-- rdoc-file=lib/cli.rb -->
 Doc for m2
 
     TEXT
 
-    assert_equal <<-TEXT, annotator.doc_for_method(TypeName("Foo"), instance_method: :m3, tester: tester)
+    assert_equal <<-TEXT, annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m3, tester: tester)
 <!-- rdoc-file=lib/cli.rb -->
 Doc for m3
 
     TEXT
 
-    assert_equal <<-TEXT, annotator.doc_for_method(TypeName("Foo"), instance_method: :m3=, tester: tester)
+    assert_equal <<-TEXT, annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m3=, tester: tester)
 <!-- rdoc-file=lib/cli.rb -->
 Doc for m3
 
     TEXT
 
-    assert_nil annotator.doc_for_method(TypeName("Foo"), instance_method: :m4=, tester: tester)
+    assert_nil annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m4=, tester: tester)
   end
 
   def assert_annotated_decls(expected, decls)

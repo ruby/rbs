@@ -35,7 +35,7 @@ class RBS::Annotate::AnnotationsTest < Test::Unit::TestCase
     RBS::Annotate::Annotations.parse(an("annotate:rdoc:copy:Bar#baz")).tap do |a|
       assert_instance_of RBS::Annotate::Annotations::Copy, a
 
-      assert_equal TypeName("Bar"), a.type_name
+      assert_equal RBS::TypeName.parse("Bar"), a.type_name
       refute_predicate a, :singleton?
       assert_equal :baz, a.method_name
     end
@@ -43,7 +43,7 @@ class RBS::Annotate::AnnotationsTest < Test::Unit::TestCase
     RBS::Annotate::Annotations.parse(an("annotate:rdoc:copy:Bar.baz")).tap do |a|
       assert_instance_of RBS::Annotate::Annotations::Copy, a
 
-      assert_equal TypeName("Bar"), a.type_name
+      assert_equal RBS::TypeName.parse("Bar"), a.type_name
       assert_predicate a, :singleton?
       assert_equal :baz, a.method_name
     end
@@ -51,7 +51,7 @@ class RBS::Annotate::AnnotationsTest < Test::Unit::TestCase
     RBS::Annotate::Annotations.parse(an("annotate:rdoc:copy:Bar")).tap do |a|
       assert_instance_of RBS::Annotate::Annotations::Copy, a
 
-      assert_equal TypeName("Bar"), a.type_name
+      assert_equal RBS::TypeName.parse("Bar"), a.type_name
       refute_predicate a, :singleton?
       assert_nil a.method_name
     end

@@ -6,8 +6,8 @@ module RBS
       # ```rb
       # table = RBS::ConstantResolver::Table.new(env)
       #
-      # table.children(TypeName("::Object"))                # -> { ... }  Returns a hash of name and constants.
-      # table.children(TypeName("::File::PATH_SEPARATOR"))  # -> nil      Returns nil because the constant is not a module.
+      # table.children(TypeName.parse("::Object"))                # -> { ... }  Returns a hash of name and constants.
+      # table.children(TypeName.parse("::File::PATH_SEPARATOR"))  # -> nil      Returns nil because the constant is not a module.
       #
       # table.toplevel                                      # -> { ... }  Returns a hash of top level constants.
       # ```

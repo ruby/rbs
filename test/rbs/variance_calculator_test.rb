@@ -78,19 +78,19 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         calculator = VarianceCalculator.new(builder: builder)
 
-        calculator.in_type_alias(name: TypeName("::a")).tap do |result|
+        calculator.in_type_alias(name: RBS::TypeName.parse("::a")).tap do |result|
           assert_equal({ T: :covariant }, result.result)
         end
 
-        calculator.in_type_alias(name: TypeName("::b")).tap do |result|
+        calculator.in_type_alias(name: RBS::TypeName.parse("::b")).tap do |result|
           assert_equal({ T: :contravariant, S: :covariant }, result.result)
         end
 
-        calculator.in_type_alias(name: TypeName("::c")).tap do |result|
+        calculator.in_type_alias(name: RBS::TypeName.parse("::c")).tap do |result|
           assert_equal({ T: :contravariant, S: :covariant }, result.result)
         end
 
-        calculator.in_type_alias(name: TypeName("::d")).tap do |result|
+        calculator.in_type_alias(name: RBS::TypeName.parse("::d")).tap do |result|
           assert_equal({ T: :invariant }, result.result)
         end
       end
@@ -135,8 +135,8 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         calculator = VarianceCalculator.new(builder: builder)
 
-        calculator.in_type_alias(name: TypeName("::Foo::foo"))
-        calculator.in_type_alias(name: TypeName("::Foo::bar"))
+        calculator.in_type_alias(name: RBS::TypeName.parse("::Foo::foo"))
+        calculator.in_type_alias(name: RBS::TypeName.parse("::Foo::bar"))
       end
     end
   end

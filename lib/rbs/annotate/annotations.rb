@@ -93,7 +93,7 @@ module RBS
           case
           when match = source.match(/(?<constant_name>[^#]+)#(?<method_name>.+)/)
             [
-              TypeName(match[:constant_name] || raise),
+              TypeName.parse(match[:constant_name] || raise),
               [
                 false,
                 (match[:method_name] or raise).to_sym
@@ -101,7 +101,7 @@ module RBS
             ]
           when match = source.match(/(?<constant_name>[^#]+)\.(?<method_name>.+)/)
             [
-              TypeName(match[:constant_name] || raise),
+              TypeName.parse(match[:constant_name] || raise),
               [
                 true,
                 (match[:method_name] or raise).to_sym
@@ -109,7 +109,7 @@ module RBS
             ]
           else
             [
-              TypeName(source),
+              TypeName.parse(source),
               nil
             ]
           end

@@ -1040,10 +1040,10 @@ end
   def test_const_to_name
     parser = RBS::Prototype::RB.new
     [
-      ["self", TypeName("::Foo")],
-      ["Bar", TypeName("Bar")],
-      ["::Bar", TypeName("::Bar")],
-      ["Bar::Baz", TypeName("Bar::Baz")],
+      ["self", RBS::TypeName.parse("::Foo")],
+      ["Bar", RBS::TypeName.parse("Bar")],
+      ["::Bar", RBS::TypeName.parse("::Bar")],
+      ["Bar::Baz", RBS::TypeName.parse("Bar::Baz")],
       ["obj::Baz", nil],
     ].each do |rb, name|
       node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]

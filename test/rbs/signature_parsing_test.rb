@@ -43,7 +43,7 @@ RBS
       type_decl = decls[0]
 
       assert_instance_of Declarations::TypeAlias, type_decl
-      assert_equal TypeName("optional"), type_decl.name
+      assert_equal RBS::TypeName.parse("optional"), type_decl.name
       assert_equal [:A], type_decl.type_params.each.map(&:name)
       assert_equal parse_type("A?", variables: [:A]), type_decl.type
       assert_equal "[A]", type_decl.location[:type_params].source
@@ -56,7 +56,7 @@ end
 RBS
       decls[0].members[0].tap do |type_decl|
         assert_instance_of Declarations::TypeAlias, type_decl
-        assert_equal TypeName("bar"), type_decl.name
+        assert_equal RBS::TypeName.parse("bar"), type_decl.name
         assert_equal [], type_decl.type_params.each.map(&:name)
         assert_instance_of Types::ClassInstance, type_decl.type
         assert_nil type_decl.location[:type_params]
@@ -1328,15 +1328,15 @@ module Baz::Baz: Object
 end
 EOF
       decls[0].tap do |decl|
-        assert_equal TypeName("Foo"), decl.name
+        assert_equal RBS::TypeName.parse("Foo"), decl.name
       end
 
       decls[1].tap do |decl|
-        assert_equal TypeName("::Bar"), decl.name
+        assert_equal RBS::TypeName.parse("::Bar"), decl.name
       end
 
       decls[2].tap do |decl|
-        assert_equal TypeName("Baz::Baz"), decl.name
+        assert_equal RBS::TypeName.parse("Baz::Baz"), decl.name
       end
     end
   end
@@ -2086,8 +2086,8 @@ end
       decls[0].tap do |decl|
         assert_instance_of Declarations::ModuleAlias, decl
 
-        assert_equal TypeName("RBS::Kernel"), decl.new_name
-        assert_equal TypeName("Kernel"), decl.old_name
+        assert_equal RBS::TypeName.parse("RBS::Kernel"), decl.new_name
+        assert_equal RBS::TypeName.parse("Kernel"), decl.old_name
         assert_equal "module", decl.location[:keyword].source
         assert_equal "RBS::Kernel", decl.location[:new_name].source
         assert_equal "=", decl.location[:eq].source
@@ -2104,8 +2104,8 @@ end
       decls[0].tap do |decl|
         assert_instance_of Declarations::ClassAlias, decl
 
-        assert_equal TypeName("RBS::Object"), decl.new_name
-        assert_equal TypeName("Object"), decl.old_name
+        assert_equal RBS::TypeName.parse("RBS::Object"), decl.new_name
+        assert_equal RBS::TypeName.parse("Object"), decl.old_name
         assert_equal "class", decl.location[:keyword].source
         assert_equal "RBS::Object", decl.location[:new_name].source
         assert_equal "=", decl.location[:eq].source
@@ -2132,7 +2132,7 @@ end
         assert_equal 1, use.clauses.size
 
         use.clauses[0].tap do |clause|
-          assert_equal TypeName("RBS::Namespace"), clause.type_name
+          assert_equal RBS::TypeName.parse("RBS::Namespace"), clause.type_name
           assert_equal :NS, clause.new_name
           assert_equal "RBS::Namespace as NS", clause.location.source
           assert_equal "RBS::Namespace", clause.location[:type_name].source
@@ -2145,7 +2145,7 @@ end
         assert_equal 2, use.clauses.size
 
         use.clauses[0].tap do |clause|
-          assert_equal TypeName("RBS::TypeName"), clause.type_name
+          assert_equal RBS::TypeName.parse("RBS::TypeName"), clause.type_name
           assert_nil clause.new_name
           assert_equal "RBS::TypeName", clause.location[:type_name].source
           assert_nil clause.location[:keyword]
@@ -2153,7 +2153,7 @@ end
         end
 
         use.clauses[1].tap do |clause|
-          assert_equal Namespace("RBS::AST::Declarations::"), clause.namespace
+          assert_equal RBS::Namespace.parse("RBS::AST::Declarations::"), clause.namespace
           assert_equal "RBS::AST::Declarations::", clause.location[:namespace].source
           assert_equal "*", clause.location[:star].source
         end

@@ -271,7 +271,7 @@ module RBS
 
         assert typecheck.value(constant, value_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with given type `#{value_type}`"
 
-        type_name = TypeName(constant_name).absolute!
+        type_name = TypeName.parse(constant_name).absolute!
         definition = env.constant_entry(type_name)
         assert definition, "Cannot find RBS type definition of `#{constant_name}`"
 

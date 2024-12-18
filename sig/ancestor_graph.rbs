@@ -4,11 +4,11 @@ module RBS
   # ```ruby
   # graph = AncestorGraph.new(env: env, ancestor_builder: ancestor_builder)
   #
-  # graph.each_parent(AncestorGraph::InstanceNode.new(type_name: TypeName("::Object")))
-  # graph.each_ancestor(AncestorGraph::InstanceNode.new(type_name: TypeName("::Object")))
+  # graph.each_parent(AncestorGraph::InstanceNode.new(type_name: TypeName.parse("::Object")))
+  # graph.each_ancestor(AncestorGraph::InstanceNode.new(type_name: TypeName.parse("::Object")))
   #
-  # graph.each_child(AncestorGraph::InstanceNode.new(type_name: TypeName("::Object")))
-  # graph.each_descendant(AncestorGraph::InstanceNode.new(type_name: TypeName("::Object")))
+  # graph.each_child(AncestorGraph::InstanceNode.new(type_name: TypeName.parse("::Object")))
+  # graph.each_descendant(AncestorGraph::InstanceNode.new(type_name: TypeName.parse("::Object")))
   # ```
   #
   # Note that the class works for class/module declarations.

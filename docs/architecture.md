@@ -92,7 +92,7 @@ The `#build_singleton` calculates the type of `.new` methods based on the defini
 `DefinitionBuilder#expand_alias` and its variants provide one step *unfold* operation of type aliases.
 
 ```ruby
-builder.expand_alias2(TypeName("::int"), []) # => returns `::Integer | ::_ToInt`
+builder.expand_alias2(RBS::TypeName.parse("::int"), []) # => returns `::Integer | ::_ToInt`
 ```
 
 We don't have *normalize* operation for type aliases, because RBS allows recursive type alias definition, which cannot be *fully* unfolded.

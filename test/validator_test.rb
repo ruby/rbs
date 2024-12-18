@@ -175,7 +175,7 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
           validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
         end
 
-        assert_equal error.type_name, TypeName("::bar")
+        assert_equal error.type_name, RBS::TypeName.parse("::bar")
         assert_equal "[T < _Foo[S], S < _Bar[T]]", error.location.source
         assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
           #{error.message} (RBS::CyclicTypeParameterBound)
@@ -242,7 +242,7 @@ class Baz = Baz
         resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        env.class_alias_decls[TypeName("::Foo")].tap do |entry|
+        env.class_alias_decls[RBS::TypeName.parse("::Foo")].tap do |entry|
           assert_raises RBS::InconsistentClassModuleAliasError do
             validator.validate_class_alias(entry: entry)
           end.tap do |error|
@@ -255,13 +255,13 @@ class Baz = Baz
           end
         end
 
-        env.class_alias_decls[TypeName("::Bar")].tap do |entry|
+        env.class_alias_decls[RBS::TypeName.parse("::Bar")].tap do |entry|
           assert_raises RBS::NoTypeFoundError do
             validator.validate_class_alias(entry: entry)
           end
         end
 
-        env.class_alias_decls[TypeName("::Baz")].tap do |entry|
+        env.class_alias_decls[RBS::TypeName.parse("::Baz")].tap do |entry|
           assert_raises RBS::CyclicClassAliasDefinitionError do
             validator.validate_class_alias(entry: entry)
           end.tap do |error|
@@ -361,7 +361,7 @@ type Foo::list[T < Baz] = nil | [T, Bar::list[T]]
         resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        validator.validate_type_alias(entry: env.type_alias_decls[TypeName("::Foo::list")])
+        validator.validate_type_alias(entry: env.type_alias_decls[RBS::TypeName.parse("::Foo::list")])
       end
     end
   end

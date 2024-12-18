@@ -46,7 +46,7 @@ module RBS
         end
 
         @diff = RBS::Diff.new(
-          type_name: TypeName(type_name).absolute!,
+          type_name: TypeName.parse(type_name).absolute!,
           library_options: library_options,
           after_path: after_path,
           before_path: before_path,

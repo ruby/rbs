@@ -57,9 +57,9 @@ module RBS
     # Returns a new type name with a namespace appended to given namespace.
     #
     # ```rb
-    # TypeName("Hello").with_prefix(Namespace("World"))           # => World::Hello
-    # TypeName("Foo::Bar").with_prefix(Namespace("::Hello"))      # => ::Hello::Foo::Bar
-    # TypeName("::A::B").with_prefix(Namespace("C"))              # => ::A::B
+    # TypeName.parse("Hello").with_prefix(Namespace("World"))           # => World::Hello
+    # TypeName.parse("Foo::Bar").with_prefix(Namespace("::Hello"))      # => ::Hello::Foo::Bar
+    # TypeName.parse("::A::B").with_prefix(Namespace("C"))              # => ::A::B
     # ```
     #
     def with_prefix: (Namespace namespace) -> TypeName
@@ -67,10 +67,13 @@ module RBS
     def +: (TypeName) -> TypeName
 
     def split: () -> Array[Symbol]
+
+    # Returns type name with given string representation.
+    def self.parse: (String name) -> RBS::TypeName
   end
 end
 
 module Kernel
-  # Returns type name with given string representation.
-  def TypeName: (String name) -> RBS::TypeName
+  # Deprecated: Use `RBS::TypeName.parse` instead
+  %a{steep:deprecated} def TypeName: (String name) -> RBS::TypeName
 end

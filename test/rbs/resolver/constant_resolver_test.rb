@@ -21,19 +21,19 @@ EOF
 
         assert table.toplevel.key?(:M1)
 
-        table.children(TypeName("::M1")).tap do |children|
+        table.children(RBS::TypeName.parse("::M1")).tap do |children|
           assert_equal [:C1, :D], children.keys.sort
 
-          assert_equal TypeName("::M1::C1"), children[:C1].name
+          assert_equal RBS::TypeName.parse("::M1::C1"), children[:C1].name
           assert_equal parse_type("singleton(::M1::C1)"), children[:C1].type
 
-          assert_equal TypeName("::M1::D"), children[:D].name
+          assert_equal RBS::TypeName.parse("::M1::D"), children[:D].name
           assert_equal parse_type("::String"), children[:D].type
         end
 
-        assert_equal [:D], table.children(TypeName("::M1::C1")).keys
+        assert_equal [:D], table.children(RBS::TypeName.parse("::M1::C1")).keys
 
-        assert_nil table.children(TypeName("::M1::C1::D"))
+        assert_nil table.children(RBS::TypeName.parse("::M1::C1::D"))
       end
     end
   end
@@ -77,7 +77,7 @@ EOF
         resolver = Resolver::ConstantResolver.new(builder: builder)
         Namespace.parse("::Foo")
 
-        resolver.resolve(:Name, context: [nil, TypeName("::Foo")]).tap do |constant|
+        resolver.resolve(:Name, context: [nil, RBS::TypeName.parse("::Foo")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo::Name", constant.name.to_s
           assert_equal '"Foo::Name"', constant.type.to_s
@@ -108,12 +108,12 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:Bar, context: [nil, TypeName("::Foo")]).tap do |constant|
+        resolver.resolve(:Bar, context: [nil, RBS::TypeName.parse("::Foo")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo::Bar", constant.name.to_s
         end
 
-        resolver.resolve(:Bar, context: [nil, TypeName("::Foo::Bar")]).tap do |constant|
+        resolver.resolve(:Bar, context: [nil, RBS::TypeName.parse("::Foo::Bar")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo::Bar", constant.name.to_s
         end
@@ -140,7 +140,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:X, context: [[nil, TypeName("::Foo")], TypeName("::Foo::Bar::Baz")]).tap do |constant|
+        resolver.resolve(:X, context: [[nil, RBS::TypeName.parse("::Foo")], RBS::TypeName.parse("::Foo::Bar::Baz")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::X", constant.name.to_s
           assert_equal '"::X"', constant.type.to_s
@@ -170,13 +170,13 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:MAX, context: [nil, TypeName("::Child")]).tap do |constant|
+        resolver.resolve(:MAX, context: [nil, RBS::TypeName.parse("::Child")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Parent::MAX", constant.name.to_s
           assert_equal "10000", constant.type.to_s
         end
 
-        resolver.resolve(:MIN, context: [nil, TypeName("::Child")]).tap do |constant|
+        resolver.resolve(:MIN, context: [nil, RBS::TypeName.parse("::Child")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Mix::MIN", constant.name.to_s
           assert_equal '0', constant.type.to_s
@@ -207,12 +207,12 @@ EOF
           assert_equal "::Object::FOO", constant.name.to_s
         end
 
-        resolver.resolve(:FOO, context: [nil, TypeName("::C")]).tap do |constant|
+        resolver.resolve(:FOO, context: [nil, RBS::TypeName.parse("::C")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Object::FOO", constant.name.to_s
         end
 
-        resolver.resolve(:FOO, context: [nil, TypeName("::M")]).tap do |constant|
+        resolver.resolve(:FOO, context: [nil, RBS::TypeName.parse("::M")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Object::FOO", constant.name.to_s
         end
@@ -241,13 +241,13 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:Set, context: [[nil, TypeName("::Foo")], TypeName("::Foo::Bar")]).tap do |constant|
+        resolver.resolve(:Set, context: [[nil, RBS::TypeName.parse("::Foo")], RBS::TypeName.parse("::Foo::Bar")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Set", constant.name.to_s
           assert_equal 'singleton(::Set)', constant.type.to_s
         end
 
-        resolver.resolve(:X, context: [[nil, TypeName("::Foo")], TypeName("::Foo::Bar")]).tap do |constant|
+        resolver.resolve(:X, context: [[nil, RBS::TypeName.parse("::Foo")], RBS::TypeName.parse("::Foo::Bar")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Baz::X", constant.name.to_s
           assert_equal '::Integer', constant.type.to_s
@@ -271,7 +271,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:BAZ, context: [nil, TypeName("::Foo")]).tap do |constant|
+        resolver.resolve(:BAZ, context: [nil, RBS::TypeName.parse("::Foo")]).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::BAZ", constant.name.to_s
         end
@@ -293,7 +293,7 @@ EOF
 
         resolver.resolve(
           :Foo,
-          context: [nil, TypeName("::Foo")],
+          context: [nil, RBS::TypeName.parse("::Foo")],
         ).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Foo", constant.name.to_s
@@ -318,21 +318,21 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve_child(TypeName("::Stuff"), :ONE).tap do |constant|
+        resolver.resolve_child(RBS::TypeName.parse("::Stuff"), :ONE).tap do |constant|
           assert_nil constant
         end
 
-        resolver.resolve_child(TypeName("::Stuff"), :TWO).tap do |constant|
+        resolver.resolve_child(RBS::TypeName.parse("::Stuff"), :TWO).tap do |constant|
           assert_nil constant
         end
 
-        resolver.resolve_child(TypeName("::Stuff"), :THREE).tap do |constant|
+        resolver.resolve_child(RBS::TypeName.parse("::Stuff"), :THREE).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::Kernel::THREE", constant.name.to_s
           assert_equal "3", constant.type.to_s
         end
 
-        resolver.resolve_child(TypeName("::Stuff"), :FOUR).tap do |constant|
+        resolver.resolve_child(RBS::TypeName.parse("::Stuff"), :FOUR).tap do |constant|
           assert_instance_of Constant, constant
           assert_equal "::BasicObject::FOUR", constant.name.to_s
           assert_equal "4", constant.type.to_s
@@ -357,7 +357,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:CONST, context: [nil, TypeName("::Bar")]).tap do |constant|
+        resolver.resolve(:CONST, context: [nil, RBS::TypeName.parse("::Bar")]).tap do |constant|
           assert_equal "::Foo::CONST", constant.name.to_s
         end
       end
@@ -377,7 +377,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.resolve(:CONST, context: [nil, TypeName("::String")]).tap do |constant|
+        resolver.resolve(:CONST, context: [nil, RBS::TypeName.parse("::String")]).tap do |constant|
           assert_equal "::CONST", constant.name.to_s
         end
       end
@@ -416,7 +416,7 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.constants([[nil, TypeName("::M")], TypeName("::M::M2")]).tap do |constants|
+        resolver.constants([[nil, RBS::TypeName.parse("::M")], RBS::TypeName.parse("::M::M2")]).tap do |constants|
           assert constants.key?(:Hello)
         end
       end
@@ -438,11 +438,11 @@ EOF
         builder = DefinitionBuilder.new(env: env)
         resolver = Resolver::ConstantResolver.new(builder: builder)
 
-        resolver.constants([nil, TypeName("::M3")]).tap do |constants|
+        resolver.constants([nil, RBS::TypeName.parse("::M3")]).tap do |constants|
           assert constants.key?(:M2)
         end
 
-        resolver.constants([nil, TypeName("::M3")]).tap do |constants|
+        resolver.constants([nil, RBS::TypeName.parse("::M3")]).tap do |constants|
           assert constants.key?(:M3)
         end
       end

@@ -19,9 +19,9 @@ type baz = bar | foo | Integer
         alias_dependency = TypeAliasDependency.new(env: env)
         alias_dependency.transitive_closure()
 
-        assert_equal Set[], alias_dependency.direct_dependencies[TypeName("::foo")]
-        assert_equal Set[TypeName("::foo")], alias_dependency.direct_dependencies[TypeName("::bar")]
-        assert_equal Set[TypeName("::foo"), TypeName("::bar")], alias_dependency.direct_dependencies[TypeName("::baz")]
+        assert_equal Set[], alias_dependency.direct_dependencies[RBS::TypeName.parse("::foo")]
+        assert_equal Set[RBS::TypeName.parse("::foo")], alias_dependency.direct_dependencies[RBS::TypeName.parse("::bar")]
+        assert_equal Set[RBS::TypeName.parse("::foo"), RBS::TypeName.parse("::bar")], alias_dependency.direct_dependencies[RBS::TypeName.parse("::baz")]
       end
     end
   end
@@ -44,19 +44,19 @@ type Foo::baz = Bar::bar | String
         alias_dependency = TypeAliasDependency.new(env: env)
         alias_dependency.transitive_closure()
 
-        assert_equal Set[], alias_dependency.direct_dependencies_of(TypeName("::Foo::foo"))
-        assert_equal Set[], alias_dependency.direct_dependencies_of(TypeName("::Bar::foo"))
-        assert_equal Set[TypeName("::Foo::foo")], alias_dependency.direct_dependencies_of(TypeName("::Foo::bar"))
-        assert_equal Set[TypeName("::Foo::foo")], alias_dependency.direct_dependencies_of(TypeName("::Bar::bar"))
-        assert_equal Set[TypeName("::Foo::bar")], alias_dependency.direct_dependencies_of(TypeName("::Foo::baz"))
-        assert_equal Set[TypeName("::Foo::bar")], alias_dependency.direct_dependencies_of(TypeName("::Bar::baz"))
+        assert_equal Set[], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Foo::foo"))
+        assert_equal Set[], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Bar::foo"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo")], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Foo::bar"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo")], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Bar::bar"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::bar")], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Foo::baz"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::bar")], alias_dependency.direct_dependencies_of(RBS::TypeName.parse("::Bar::baz"))
 
-        assert_equal Set[], alias_dependency.dependencies_of(TypeName("::Foo::foo"))
-        assert_equal Set[], alias_dependency.dependencies_of(TypeName("::Bar::foo"))
-        assert_equal Set[TypeName("::Foo::foo")], alias_dependency.dependencies_of(TypeName("::Foo::bar"))
-        assert_equal Set[TypeName("::Foo::foo")], alias_dependency.dependencies_of(TypeName("::Bar::bar"))
-        assert_equal Set[TypeName("::Foo::foo"), TypeName("::Foo::bar")], alias_dependency.dependencies_of(TypeName("::Foo::baz"))
-        assert_equal Set[TypeName("::Foo::foo"), TypeName("::Foo::bar")], alias_dependency.dependencies_of(TypeName("::Bar::baz"))
+        assert_equal Set[], alias_dependency.dependencies_of(RBS::TypeName.parse("::Foo::foo"))
+        assert_equal Set[], alias_dependency.dependencies_of(RBS::TypeName.parse("::Bar::foo"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo")], alias_dependency.dependencies_of(RBS::TypeName.parse("::Foo::bar"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo")], alias_dependency.dependencies_of(RBS::TypeName.parse("::Bar::bar"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo"), RBS::TypeName.parse("::Foo::bar")], alias_dependency.dependencies_of(RBS::TypeName.parse("::Foo::baz"))
+        assert_equal Set[RBS::TypeName.parse("::Foo::foo"), RBS::TypeName.parse("::Foo::bar")], alias_dependency.dependencies_of(RBS::TypeName.parse("::Bar::baz"))
       end
     end
   end

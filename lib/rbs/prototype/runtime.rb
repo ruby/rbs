@@ -449,9 +449,9 @@ module RBS
                      location: nil
                    )
                  when ARGF
-                   Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ARGFClass"), args: [], location: nil)
+                   Types::ClassInstance.new(name: TypeName.parse("::RBS::Unnamed::ARGFClass"), args: [], location: nil)
                  when ENV
-                   Types::ClassInstance.new(name: TypeName("::RBS::Unnamed::ENVClass"), args: [], location: nil)
+                   Types::ClassInstance.new(name: TypeName.parse("::RBS::Unnamed::ENVClass"), args: [], location: nil)
                  else
                    value_type_name = to_type_name(const_name!(Reflection.object_class(value)), full_name: true).absolute!
                    args = type_args(value_type_name)

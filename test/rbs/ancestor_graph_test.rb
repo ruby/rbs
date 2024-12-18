@@ -9,7 +9,7 @@ class RBS::AncestorGraphTest < Test::Unit::TestCase
 
   def InstanceNode(name)
     if name.is_a?(String)
-      name = TypeName(name)
+      name = RBS::TypeName.parse(name)
     end
 
     AncestorGraph::InstanceNode.new(type_name: name)
@@ -17,7 +17,7 @@ class RBS::AncestorGraphTest < Test::Unit::TestCase
 
   def SingletonNode(name)
     if name.is_a?(String)
-      name = TypeName(name)
+      name = RBS::TypeName.parse(name)
     end
 
     AncestorGraph::SingletonNode.new(type_name: name)

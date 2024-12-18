@@ -238,7 +238,7 @@ SIG
     end
 
     def no_argument_error?(method_name)
-      method = @builder.build_interface(TypeName(@interface)).methods[method_name]
+      method = @builder.build_interface(RBS::TypeName.parse(@interface)).methods[method_name]
       method.defs.any? do |type_def|
         type_def.member.overloads.all? do |overload|
           fun = overload.method_type.type

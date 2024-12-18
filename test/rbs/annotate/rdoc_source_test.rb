@@ -49,9 +49,9 @@ end
       }
     )
 
-    assert_nil source.find_class(TypeName("Hello0"))
+    assert_nil source.find_class(RBS::TypeName.parse("Hello0"))
 
-    source.find_class(TypeName("Hello1")).tap do |klss|
+    source.find_class(RBS::TypeName.parse("Hello1")).tap do |klss|
       assert_instance_of Array, klss
 
       assert_equal 1, klss.size
@@ -64,7 +64,7 @@ end
       end
     end
 
-    source.find_class(TypeName("Hello2")).tap do |klss|
+    source.find_class(RBS::TypeName.parse("Hello2")).tap do |klss|
       assert_instance_of Array, klss
 
       assert_equal 1, klss.size
@@ -76,7 +76,7 @@ end
       end
     end
 
-    source.find_class(TypeName("Hello3")).tap do |klss|
+    source.find_class(RBS::TypeName.parse("Hello3")).tap do |klss|
       assert_instance_of Array, klss
 
       assert_equal 1, klss.size
@@ -105,7 +105,7 @@ end
       }
     )
 
-    source.find_const(TypeName("FOO")).tap do |consts|
+    source.find_const(RBS::TypeName.parse("FOO")).tap do |consts|
       assert_instance_of Array, consts
 
       assert_equal 1, consts.size
@@ -115,7 +115,7 @@ end
       end
     end
 
-    source.find_const(TypeName("Hello::VERSION")).tap do |consts|
+    source.find_const(RBS::TypeName.parse("Hello::VERSION")).tap do |consts|
       assert_instance_of Array, consts
 
       assert_equal 1, consts.size
@@ -125,9 +125,9 @@ end
       end
     end
 
-    assert_nil source.find_const(TypeName("Hello::World"))
+    assert_nil source.find_const(RBS::TypeName.parse("Hello::World"))
 
-    assert_nil source.find_const(TypeName("Hello"))
+    assert_nil source.find_const(RBS::TypeName.parse("Hello"))
   end
 
   def test_load_method
@@ -153,7 +153,7 @@ end
       }
     )
 
-    source.find_method(TypeName("Foo"), instance_method: :m1).tap do |ms|
+    source.find_method(RBS::TypeName.parse("Foo"), instance_method: :m1).tap do |ms|
       assert_equal 1, ms.size
 
       ms[0].tap do |m|
@@ -162,7 +162,7 @@ end
       end
     end
 
-    source.find_method(TypeName("Foo"), instance_method: :m2).tap do |ms|
+    source.find_method(RBS::TypeName.parse("Foo"), instance_method: :m2).tap do |ms|
       assert_equal 1, ms.size
 
       ms[0].tap do |m|
@@ -172,9 +172,9 @@ end
       end
     end
 
-    assert_nil source.find_method(TypeName("Foo"), instance_method: :m3)
+    assert_nil source.find_method(RBS::TypeName.parse("Foo"), instance_method: :m3)
 
-    source.find_method(TypeName("Foo"), singleton_method: :m4).tap do |ms|
+    source.find_method(RBS::TypeName.parse("Foo"), singleton_method: :m4).tap do |ms|
       assert_equal 1, ms.size
 
       ms[0].tap do |m|
@@ -183,7 +183,7 @@ end
       end
     end
 
-    source.find_method(TypeName("Foo"), singleton_method: :m5).tap do |ms|
+    source.find_method(RBS::TypeName.parse("Foo"), singleton_method: :m5).tap do |ms|
       assert_equal 1, ms.size
 
       ms[0].tap do |m|
@@ -213,7 +213,7 @@ end
       }
     )
 
-    source.find_attribute(TypeName("Foo"), :foo, singleton: false).tap do |attrs|
+    source.find_attribute(RBS::TypeName.parse("Foo"), :foo, singleton: false).tap do |attrs|
       assert_equal 1, attrs.size
 
       attrs[0].tap do |attr|
@@ -223,7 +223,7 @@ end
       end
     end
 
-    source.find_attribute(TypeName("Foo"), :bar, singleton: false).tap do |attrs|
+    source.find_attribute(RBS::TypeName.parse("Foo"), :bar, singleton: false).tap do |attrs|
       assert_equal 1, attrs.size
 
       attrs[0].tap do |attr|
@@ -233,7 +233,7 @@ end
       end
     end
 
-    source.find_attribute(TypeName("Foo"), :baz, singleton: false).tap do |attrs|
+    source.find_attribute(RBS::TypeName.parse("Foo"), :baz, singleton: false).tap do |attrs|
       assert_equal 1, attrs.size
 
       attrs[0].tap do |attr|

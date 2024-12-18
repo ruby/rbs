@@ -19,13 +19,13 @@ type baz[T] = baz[bar[T]]
       manager.build do |env|
         validator = TypeAliasRegularity.validate(env: env)
 
-        refute_operator validator, :nonregular?, TypeName("::foo")
-        refute_operator validator, :nonregular?, TypeName("::bar")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::foo")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::bar")
 
-        assert_operator validator, :nonregular?, TypeName("::baz")
+        assert_operator validator, :nonregular?, RBS::TypeName.parse("::baz")
         assert_equal(
           parse_type("::baz[::bar[T]]", variables: [:T]),
-          validator.nonregular?(TypeName("::baz")).nonregular_type
+          validator.nonregular?(RBS::TypeName.parse("::baz")).nonregular_type
         )
       end
     end
@@ -44,10 +44,10 @@ type baz[T] = foo[Array[T]]
       manager.build do |env|
         validator = TypeAliasRegularity.validate(env: env)
 
-        assert_operator validator, :nonregular?, TypeName("::foo")
+        assert_operator validator, :nonregular?, RBS::TypeName.parse("::foo")
         assert_equal(
           parse_type("::foo[Array[::String | T]]", variables: [:T]),
-          validator.nonregular?(TypeName("::foo")).nonregular_type
+          validator.nonregular?(RBS::TypeName.parse("::foo")).nonregular_type
         )
       end
     end
@@ -73,17 +73,17 @@ type Foo::baz[T] = Bar::baz[Foo::bar[T]]
       manager.build do |env|
         validator = TypeAliasRegularity.validate(env: env)
 
-        refute_operator validator, :nonregular?, TypeName("::Foo::foo")
-        refute_operator validator, :nonregular?, TypeName("::Bar::foo")
-        refute_operator validator, :nonregular?, TypeName("::Foo::bar")
-        refute_operator validator, :nonregular?, TypeName("::Bar::bar")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::Foo::foo")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::Bar::foo")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::Foo::bar")
+        refute_operator validator, :nonregular?, RBS::TypeName.parse("::Bar::bar")
 
-        assert_operator validator, :nonregular?, TypeName("::Foo::baz")
-        assert_operator validator, :nonregular?, TypeName("::Bar::baz")
+        assert_operator validator, :nonregular?, RBS::TypeName.parse("::Foo::baz")
+        assert_operator validator, :nonregular?, RBS::TypeName.parse("::Bar::baz")
 
         assert_equal(
           parse_type("::Bar::baz[::Foo::bar[T]]", variables: [:T]),
-          validator.nonregular?(TypeName("::Foo::baz")).nonregular_type
+          validator.nonregular?(RBS::TypeName.parse("::Foo::baz")).nonregular_type
         )
       end
     end
