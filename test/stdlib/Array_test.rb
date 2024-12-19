@@ -347,6 +347,23 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :fetch, 10 do :hello end
   end
 
+  def test_fetch_values
+    if_ruby("3.4"...) do
+      with_int(1) do |one|
+        with_int(2) do |two|
+          assert_send_type(
+            "(int, int) -> Array[Symbol]",
+            [:a, :b, :c], :fetch_values, one, two
+          )
+        end
+      end
+      assert_send_type(
+        "() -> Array[Symbol]",
+        [:a, :b, :c], :fetch_values
+      )
+    end
+  end
+
   def test_fill
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :fill, 0
