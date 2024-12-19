@@ -184,6 +184,17 @@ class FiberTest < Test::Unit::TestCase
     f, :raise, StandardError, 'Error!'
     assert_send_type "(singleton(StandardError), String, Array[String]) -> untyped",
     f, :raise, StandardError, 'Error!', caller
+
+    if_ruby("3.4"..., skip: false) do
+      assert_send_type(
+        "(singleton(StandardError), String, Array[Thread::Backtrace::Location]) -> untyped",
+        f, :raise, StandardError, 'Error!', caller_locations
+      )
+      assert_send_type(
+        "(singleton(StandardError), String, nil) -> untyped",
+        f, :raise, StandardError, 'Error!', nil
+      )
+    end
   end
 
   def test_resume
