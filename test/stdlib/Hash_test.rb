@@ -384,12 +384,6 @@ class HashTest < StdlibTest
   def test_values_at
     { a: 1, b: 2, c: 3 }.values_at(:a, :b, :d)
   end
-
-  def test_initialize
-    Hash.new
-    Hash.new(10)
-    Hash.new { |hash, key| key.to_s }
-  end
 end
 
 class HashInstanceTest < Test::Unit::TestCase
@@ -398,10 +392,47 @@ class HashInstanceTest < Test::Unit::TestCase
   testing "::Hash[::Symbol, ::Integer]"
 
   def test_except
-    omit_if(!Hash.method_defined?(:except))
     assert_send_type "() -> ::Hash[::Symbol, ::Integer]",
                       { a: 100, b: 200, c: 300 }, :except
     assert_send_type "(*Symbol keys) -> ::Hash[::Symbol, ::Integer]",
                       { a: 100, b: 200, c: 300 }, :except, :a
+  end
+end
+
+class HashSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "singleton(::Hash)"
+
+  def test_new
+    assert_send_type(
+      "() -> ::Hash[untyped, untyped]",
+      Hash, :new
+    )
+    assert_send_type(
+      "(String) -> ::Hash[untyped, String]",
+      Hash, :new, "default"
+    )
+    assert_send_type(
+      "() { (Hash[untyped, untyped], untyped) -> untyped } -> ::Hash[untyped, String]",
+      Hash, :new, &-> (hash, key) { }
+    )
+
+    if_ruby("3.4"..., skip: false) do
+      with_int(1) do |int|
+        assert_send_type(
+          "(capacity: int) -> ::Hash[untyped, untyped]",
+          Hash, :new, capacity: int
+        )
+        assert_send_type(
+          "(String, capacity: int) -> ::Hash[untyped, String]",
+          Hash, :new, "default", capacity: int
+        )
+        assert_send_type(
+          "(capacity: int) { (Hash[untyped, untyped], untyped) -> untyped } -> ::Hash[untyped, String]",
+          Hash, :new, capacity: int, &-> (hash, key) { }
+        )
+      end
+    end
   end
 end

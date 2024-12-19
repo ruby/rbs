@@ -67,6 +67,13 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "(singleton(StandardError), String, Array[String]) -> nil",
                      t, :raise, StandardError, 'Error!', caller
 
+    if_ruby("3.4"..., skip: false) do
+      assert_send_type "(singleton(StandardError), String, untyped) -> nil",
+                       t, :raise, StandardError, 'Error!', nil
+      assert_send_type "(singleton(StandardError), String, Array[Thread::Backtrace::Location]) -> nil",
+                       t, :raise, StandardError, 'Error!', caller_locations
+    end
+
     t.kill
   end
 end

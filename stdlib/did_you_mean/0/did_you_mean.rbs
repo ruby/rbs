@@ -71,11 +71,6 @@
 #     # => NoMethodError (undefined method `zeor?' for 1:Integer)
 #
 module DidYouMean
-  # <!-- rdoc-file=lib/did_you_mean.rb -->
-  # TODO: Remove on the 3.4 development start:
-  #
-  SPELL_CHECKERS: untyped
-
   NameErrorCheckers: Object
 
   VERSION: String

@@ -68,6 +68,14 @@ module Warning
 
   # <!--
   #   rdoc-file=error.c
+  #   - categories  -> array
+  # -->
+  # Returns a list of the supported category symbols.
+  #
+  def self.categories: () -> Array[Symbol]
+
+  # <!--
+  #   rdoc-file=error.c
   #   - warn(msg, category: nil)  -> nil
   # -->
   # Writes warning message `msg` to $stderr. This method is called by Ruby for all

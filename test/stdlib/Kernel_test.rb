@@ -530,4 +530,35 @@ class KernelInstanceTest < Test::Unit::TestCase
                        Kernel, :system, ":", exception: exception
     end
   end
+
+  class TestException < Exception
+  end
+
+  def test_raise
+    begin
+      assert_send_type(
+        "(_Exception, String, Array[String]) -> bot",
+        JustKernel.new, :raise, TestException, "test message", ["location.rb:123"]
+      )
+    rescue TestException
+    end
+
+    begin
+      assert_send_type(
+        "(_Exception, String, String) -> bot",
+        JustKernel.new, :raise, TestException, "test message", "location.rb:123"
+      )
+    rescue TestException
+    end
+
+    if_ruby("3.4"..., skip: false) do
+      begin
+        assert_send_type(
+          "(_Exception, String, Array[Thread::Backtrace::Location]) -> bot",
+          JustKernel.new, :raise, TestException, "test message", [caller_locations[0]]
+        )
+      rescue TestException
+      end
+    end
+  end
 end

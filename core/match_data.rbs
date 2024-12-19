@@ -134,6 +134,82 @@ class MatchData
 
   # <!--
   #   rdoc-file=re.c
+  #   - bytebegin(n) -> integer
+  #   - bytebegin(name) -> integer
+  # -->
+  # Returns the offset (in bytes) of the beginning of the specified match.
+  #
+  # When non-negative integer argument `n` is given, returns the offset of the
+  # beginning of the `n`th match:
+  #
+  #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
+  #     m[0]       # => "HX1138"
+  #     m.bytebegin(0) # => 1
+  #     m[3]       # => "113"
+  #     m.bytebegin(3) # => 3
+  #
+  #     m = /(т)(е)(с)/.match('тест')
+  #     # => #<MatchData "тес" 1:"т" 2:"е" 3:"с">
+  #     m[0]       # => "тес"
+  #     m.bytebegin(0) # => 0
+  #     m[3]       # => "с"
+  #     m.bytebegin(3) # => 4
+  #
+  # When string or symbol argument `name` is given, returns the offset of the
+  # beginning for the named match:
+  #
+  #     m = /(?<foo>.)(.)(?<bar>.)/.match("hoge")
+  #     # => #<MatchData "hog" foo:"h" bar:"g">
+  #     m[:foo]        # => "h"
+  #     m.bytebegin('foo') # => 0
+  #     m[:bar]        # => "g"
+  #     m.bytebegin(:bar)  # => 2
+  #
+  # Related: MatchData#byteend, MatchData#byteoffset.
+  #
+  def bytebegin: (capture backref) -> Integer?
+
+  # <!--
+  #   rdoc-file=re.c
+  #   - byteend(n) -> integer
+  #   - byteend(name) -> integer
+  # -->
+  # Returns the offset (in bytes) of the end of the specified match.
+  #
+  # When non-negative integer argument `n` is given, returns the offset of the end
+  # of the `n`th match:
+  #
+  #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
+  #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
+  #     m[0]     # => "HX1138"
+  #     m.byteend(0) # => 7
+  #     m[3]     # => "113"
+  #     m.byteend(3) # => 6
+  #
+  #     m = /(т)(е)(с)/.match('тест')
+  #     # => #<MatchData "тес" 1:"т" 2:"е" 3:"с">
+  #     m[0]     # => "тес"
+  #     m.byteend(0) # => 6
+  #     m[3]     # => "с"
+  #     m.byteend(3) # => 6
+  #
+  # When string or symbol argument `name` is given, returns the offset of the end
+  # for the named match:
+  #
+  #     m = /(?<foo>.)(.)(?<bar>.)/.match("hoge")
+  #     # => #<MatchData "hog" foo:"h" bar:"g">
+  #     m[:foo]      # => "h"
+  #     m.byteend('foo') # => 1
+  #     m[:bar]      # => "g"
+  #     m.byteend(:bar)  # => 3
+  #
+  # Related: MatchData#bytebegin, MatchData#byteoffset.
+  #
+  def byteend: (capture backref) -> Integer?
+
+  # <!--
+  #   rdoc-file=re.c
   #   - mtch.byteoffset(n)   -> array
   # -->
   # Returns a two-element array containing the beginning and ending byte-based

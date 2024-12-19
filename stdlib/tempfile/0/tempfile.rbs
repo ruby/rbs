@@ -253,8 +253,8 @@ class Tempfile < File
   #
   # Related: Tempfile.new.
   #
-  def self.create: (?String | [ String, String ] basename, ?String? tmpdir, ?mode: Integer, **untyped) -> File
-                 | [A] (?String | [ String, String ] basename, ?String? tmpdir, ?mode: Integer, **untyped) { (File) -> A } -> A
+  def self.create: (?String | [ String, String ] basename, ?String? tmpdir, ?mode: Integer, ?anonymous: bool, **untyped) -> File
+                 | [A] (?String | [ String, String ] basename, ?String? tmpdir, ?mode: Integer, ?anonymous: bool, **untyped) { (File) -> A } -> A
 
   # <!--
   #   rdoc-file=lib/tempfile.rb

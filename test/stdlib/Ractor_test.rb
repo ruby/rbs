@@ -5,6 +5,24 @@ class RactorSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Ractor)"
 
+  def test_aref
+    if_ruby("3.4"...) do
+      assert_send_type(
+        "(Symbol) -> untyped",
+        Ractor, :[], :foo
+      )
+    end
+  end
+
+  def test_arefeq
+    if_ruby("3.4"...) do
+      assert_send_type(
+        "(Symbol, Integer) -> Integer",
+        Ractor, :[]=, :foo, 1
+      )
+    end
+  end
+
   def test_count
     assert_send_type "() -> Integer",
                      Ractor, :count
@@ -18,6 +36,13 @@ class RactorSingletonTest < Test::Unit::TestCase
   def test_main
     assert_send_type "() -> Ractor",
                      Ractor, :main
+  end
+
+  def test_main?
+    if_ruby("3.4"...) do
+      # FIXME: 3.4.0-rc1 ships with a bug that returns Integer instead of bool
+      assert_send_type "() -> boolish", Ractor, :main?
+    end
   end
 
   def test_make_shareable

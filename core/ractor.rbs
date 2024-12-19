@@ -251,6 +251,30 @@
 class Ractor
   # <!--
   #   rdoc-file=ractor.rb
+  #   - _require(feature)
+  # -->
+  # internal method
+  #
+  def self._require: (String feature) -> bool
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - [](sym)
+  # -->
+  # get a value from ractor-local storage of current Ractor
+  #
+  def self.[]: (Symbol) -> untyped
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - []=(sym, val)
+  # -->
+  # set a value in ractor-local storage of current Ractor
+  #
+  def self.[]=: (Symbol, untyped) -> untyped
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - count()
   # -->
   # Returns the number of Ractors currently running or blocking (waiting).
@@ -280,7 +304,15 @@ class Ractor
   # -->
   # returns main ractor
   #
-  def self.main: () -> untyped
+  def self.main: () -> Ractor
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - main?()
+  # -->
+  # return true if the current ractor is main ractor
+  #
+  def self.main?: () -> boolish
 
   # <!--
   #   rdoc-file=ractor.rb

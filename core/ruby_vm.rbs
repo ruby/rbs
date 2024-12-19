@@ -537,6 +537,15 @@ module RubyVM::AbstractSyntaxTree
 
     # <!--
     #   rdoc-file=ast.rb
+    #   - node.locations -> array
+    # -->
+    # Returns location objects associated with the AST node. The returned array
+    # contains RubyVM::AbstractSyntaxTree::Location.
+    #
+    def locations: () -> Array[Location]
+
+    # <!--
+    #   rdoc-file=ast.rb
     #   - node.tokens -> array
     # -->
     # Returns tokens corresponding to the location of the node. Returns `nil` if
@@ -578,6 +587,54 @@ module RubyVM::AbstractSyntaxTree
     # The returned array may contain other nodes or `nil`.
     #
     def children: () -> Array[untyped]
+  end
+
+  # <!-- rdoc-file=ast.rb -->
+  # RubyVM::AbstractSyntaxTree::Location instances are created by
+  # RubyVM::AbstractSyntaxTree#locations.
+  #
+  # This class is MRI specific.
+  #
+  class Location
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - location.first_column -> integer
+    # -->
+    # The column number in the source code where this AST's text began.
+    #
+    def first_column: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - location.first_lineno -> integer
+    # -->
+    # The line number in the source code where this AST's text began.
+    #
+    def first_lineno: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - location.inspect -> string
+    # -->
+    # Returns debugging information about this location as a string.
+    #
+    def inspect: () -> String
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - location.last_lineno -> integer
+    # -->
+    # The line number in the source code where this AST's text ended.
+    #
+    def last_lineno: () -> Integer
+
+    # <!--
+    #   rdoc-file=ast.rb
+    #   - location.last_column -> integer
+    # -->
+    # The column number in the source code where this AST's text ended.
+    #
+    def last_column: () -> Integer
   end
 end
 
