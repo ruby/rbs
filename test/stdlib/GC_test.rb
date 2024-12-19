@@ -15,6 +15,20 @@ class GCSingletonTest < Test::Unit::TestCase
                       'GC::OPTS'
   end
 
+  def test_config
+    if_ruby("3.4"...) do
+      assert_send_type(
+        "() -> Hash[Symbol, untyped]",
+        GC, :config
+      )
+
+      assert_send_type(
+        "(Hash[Symbol, untyped]) -> Hash[Symbol, untyped]",
+        GC, :config, {}
+      )
+    end
+  end
+
   def test_count
     assert_send_type  '() -> Integer',
                       GC, :count
@@ -41,7 +55,7 @@ class GCSingletonTest < Test::Unit::TestCase
   def test_start
     assert_send_type  '() -> nil',
                       GC, :start
-    
+
     # Don't test all combinations of passing args or not, just use them all
     with_boolish do |boolish|
       assert_send_type  '(immediate_sweep: boolish, immediate_mark: boolish, full_mark: boolish) -> nil',
@@ -163,7 +177,7 @@ class GCIncludeTest < Test::Unit::TestCase
   def test_garbage_collect
     assert_send_type  '() -> nil',
                       Foo, :garbage_collect
-    
+
     # Don't test all combinations of passing args or not, just use them all
     with_boolish do |boolish|
       assert_send_type  '(immediate_sweep: boolish, immediate_mark: boolish, full_mark: boolish) -> nil',
