@@ -429,49 +429,4 @@ class Time
   # You must require 'time' to use this method.
   #
   def httpdate: () -> String
-
-  # <!--
-  #   rdoc-file=lib/time.rb
-  #   - xmlschema(fraction_digits=0)
-  # -->
-  # Returns a string which represents the time as a dateTime defined by XML
-  # Schema:
-  #
-  #     CCYY-MM-DDThh:mm:ssTZD
-  #     CCYY-MM-DDThh:mm:ss.sssTZD
-  #
-  # where TZD is Z or [+-]hh:mm.
-  #
-  # If self is a UTC time, Z is used as TZD.  [+-]hh:mm is used otherwise.
-  #
-  # `fraction_digits` specifies a number of digits to use for fractional seconds.
-  # Its default value is 0.
-  #
-  #     require 'time'
-  #
-  #     t = Time.now
-  #     t.iso8601  # => "2011-10-05T22:26:12-04:00"
-  #
-  # You must require 'time' to use this method.
-  #
-  def xmlschema: (?Integer fraction_digits) -> String
-
-  # <!-- rdoc-file=lib/time.rb -->
-  # Parses `time` as a dateTime defined by the XML Schema and converts it to a
-  # Time object.  The format is a restricted version of the format defined by ISO
-  # 8601.
-  #
-  # ArgumentError is raised if `time` is not compliant with the format or if the
-  # Time class cannot represent the specified time.
-  #
-  # See #xmlschema for more information on this format.
-  #
-  #     require 'time'
-  #
-  #     Time.xmlschema("2011-10-05T22:26:12-04:00")
-  #     #=> 2011-10-05 22:26:12-04:00
-  #
-  # You must require 'time' to use this method.
-  #
-  alias iso8601 xmlschema
 end

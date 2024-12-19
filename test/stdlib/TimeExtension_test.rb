@@ -102,18 +102,4 @@ class TimeExtensionInstanceTest < Test::Unit::TestCase
     assert_send_type "() -> String",
                      Time.now, :httpdate
   end
-
-  def test_xmlschema
-    assert_send_type "() -> String",
-                     Time.now, :xmlschema
-    assert_send_type "(Integer) -> String",
-                     Time.now, :xmlschema, 3
-  end
-
-  def test_iso8601
-    assert_send_type "() -> String",
-                     Time.now, :iso8601
-    assert_send_type "(Integer) -> String",
-                     Time.now, :iso8601, 3
-  end
 end
