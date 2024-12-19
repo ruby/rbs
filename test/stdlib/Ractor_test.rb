@@ -5,6 +5,24 @@ class RactorSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Ractor)"
 
+  def test_aref
+    if_ruby("3.4"...) do
+      assert_send_type(
+        "(Symbol) -> untyped",
+        Ractor, :[], :foo
+      )
+    end
+  end
+
+  def test_arefeq
+    if_ruby("3.4"...) do
+      assert_send_type(
+        "(Symbol, Integer) -> Integer",
+        Ractor, :[]=, :foo, 1
+      )
+    end
+  end
+
   def test_count
     assert_send_type "() -> Integer",
                      Ractor, :count

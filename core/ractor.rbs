@@ -259,6 +259,22 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
+  #   - [](sym)
+  # -->
+  # get a value from ractor-local storage of current Ractor
+  #
+  def self.[]: (Symbol) -> untyped
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - []=(sym, val)
+  # -->
+  # set a value in ractor-local storage of current Ractor
+  #
+  def self.[]=: (Symbol, untyped) -> untyped
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - count()
   # -->
   # Returns the number of Ractors currently running or blocking (waiting).
