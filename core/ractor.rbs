@@ -288,7 +288,15 @@ class Ractor
   # -->
   # returns main ractor
   #
-  def self.main: () -> untyped
+  def self.main: () -> Ractor
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - main?()
+  # -->
+  # return true if the current ractor is main ractor
+  #
+  def self.main?: () -> boolish
 
   # <!--
   #   rdoc-file=ractor.rb

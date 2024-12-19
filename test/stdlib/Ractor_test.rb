@@ -20,6 +20,13 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :main
   end
 
+  def test_main?
+    if_ruby("3.4"...) do
+      # FIXME: 3.4.0-rc1 ships with a bug that returns Integer instead of bool
+      assert_send_type "() -> boolish", Ractor, :main?
+    end
+  end
+
   def test_make_shareable
     assert_send_type "(String) -> String",
                      Ractor, :make_shareable, 'foo'
