@@ -21,6 +21,28 @@ class MatchDataInstanceTest < Test::Unit::TestCase
                       instance, :initialize_copy, INSTANCE
   end
 
+  def test_bytebegin
+    if_ruby("3.4"...) do
+      with_backref do |backref|
+        assert_send_type  '(MatchData::capture) -> Integer',
+                          INSTANCE, :bytebegin, backref
+        assert_send_type  '(MatchData::capture) -> Integer',
+                          INSTANCE2, :bytebegin, backref
+      end
+    end
+  end
+
+  def test_byteend
+    if_ruby("3.4"...) do
+      with_backref do |backref|
+        assert_send_type  '(MatchData::capture) -> Integer',
+                          INSTANCE, :byteend, backref
+        assert_send_type  '(MatchData::capture) -> Integer',
+                          INSTANCE2, :byteend, backref
+      end
+    end
+  end
+
   def test_eq(method: :==)
     with INSTANCE, INSTANCE2 do |instance|
       assert_send_type  '(MatchData) -> bool',
