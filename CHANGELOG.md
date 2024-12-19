@@ -1,5 +1,57 @@
 # CHANGELOG
 
+## 3.8.0.pre.1 (2024-12-19)
+
+### Signature updates
+
+* `RubyVM::AbstractSyntaxTree::Location` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `_JsonWrite#flush` ([#2134](https://github.com/ruby/rbs/pull/2134))
+* `Array#fetch_values` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Array#to_csv` ([#2099](https://github.com/ruby/rbs/pull/2099))
+* `Exception#set_backtrace` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Fiber#raise` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `GC.config` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Hash.new` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Kernel#raise` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `MatchData#bytebegin` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `MatchData#byteend` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Pathname#mkpath` ([#2048](https://github.com/ruby/rbs/pull/2048))
+* `Pathname#rmtree` ([#2048](https://github.com/ruby/rbs/pull/2048))
+* `Ractor._require` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Ractor.[]` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Ractor.[]=` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Ractor.main?` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Range#step` ([#1958](https://github.com/ruby/rbs/pull/1958))
+* `RubyVM::AbstractSyntaxTree::Node#locations` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `String#append_as_bytes` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `String#parse_csv` ([#2099](https://github.com/ruby/rbs/pull/2099))
+* `String#scan` ([#2146](https://github.com/ruby/rbs/pull/2146))
+* `Tempfile.create` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Thread#raise` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Time#iso8601` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Time#xmlschema` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `Warning.categories` ([#2189](https://github.com/ruby/rbs/pull/2189))
+* `ZStream#finish` ([#2136](https://github.com/ruby/rbs/pull/2136))
+* Generate docs based on ruby 3.4.0-rc1 ([#2183](https://github.com/ruby/rbs/pull/2183))
+
+### Library changes
+
+* Deprecate `Kernel#Namespace` ([#2123](https://github.com/ruby/rbs/pull/2123))
+* Fix `missing braces around initializer` warning ([#2180](https://github.com/ruby/rbs/pull/2180))
+* Avoid double name resolution ([#2127](https://github.com/ruby/rbs/pull/2127))
+* Remove forward declarations of local variables ([#2132](https://github.com/ruby/rbs/pull/2132))
+* Designated initializers ([#2131](https://github.com/ruby/rbs/pull/2131))
+
+### Miscellaneous
+
+* Update docs with rdoc-6.10.0 ([#2182](https://github.com/ruby/rbs/pull/2182))
+* Update rdoc ([#2160](https://github.com/ruby/rbs/pull/2160))
+* Prepare for ruby 3.4.0 ([#2181](https://github.com/ruby/rbs/pull/2181))
+* Fix typo in `instance` usage example ([#2139](https://github.com/ruby/rbs/pull/2139))
+* Indent `parser_test` code snippets properly ([#2137](https://github.com/ruby/rbs/pull/2137))
+* Bump rbs and steep in /steep ([#2129](https://github.com/ruby/rbs/pull/2129))
+* Un-hardcode repo name in test suite ([#2128](https://github.com/ruby/rbs/pull/2128))
+
 ## 3.7.0 (2024-12-05)
 
 ### Miscellaneous
