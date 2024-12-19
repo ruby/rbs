@@ -34,6 +34,17 @@ class TempfileSingletonTest < Test::Unit::TestCase
 
     assert_send_type "() { (::File) -> Integer } -> Integer",
                      Tempfile, :create do |file| 123 end
+
+    if_ruby("3.4"..., skip: false) do
+      assert_send_type(
+        "(anonymous: true) -> File",
+        Tempfile, :create, anonymous: true
+      )
+      assert_send_type(
+        "(anonymous: true) { (File) -> String } -> String",
+        Tempfile, :create, anonymous: true, &->(file) { "test" }
+      )
+    end
   end
 
   def test_initialize
