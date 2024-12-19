@@ -96,3 +96,31 @@ class CSVTest < Test::Unit::TestCase
                      csv, :headers
   end
 end
+
+class CSVArrayTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "csv"
+  testing "Array[untyped]"
+
+  def test_to_csv_with_array
+    assert_send_type "() -> String",
+                     [1, 2, 3], :to_csv
+    assert_send_type "(**untyped) -> String",
+                     [1, 2, 3], :to_csv, col_sep: '\t'
+  end
+end
+
+class CSVStringTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "csv"
+  testing "String"
+
+  def test_parse_csv_with_string
+    assert_send_type "() -> Array[String?]",
+                     "1,2,3", :parse_csv
+    assert_send_type "(**untyped) -> Array[String?]",
+                     "1,2,3", :parse_csv, col_sep: '\t'
+  end
+end
