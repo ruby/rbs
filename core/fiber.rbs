@@ -412,6 +412,8 @@ class Fiber < Object
   #
   # Raises `FiberError` if called on a Fiber belonging to another `Thread`.
   #
+  # See Kernel#raise for more information.
+  #
   def raise: (?string msg) -> untyped
            | (_Exception, ?string msg, ?Array[string] backtrace) -> untyped
 

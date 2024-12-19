@@ -22,13 +22,13 @@ module ObjectSpace
   #
   #         val = nil
   #         GC.start
-  #         # There is no more references to `val`, yet the pair isn't
+  #         # There are no more references to `val`, yet the pair isn't
   #         # garbage-collected.
   #         map["name"] #=> 2023-12-07 00:00:00 +0200
   #
   #         key = nil
   #         GC.start
-  #         # There is no more references to `key`, key and value are
+  #         # There are no more references to `key`, key and value are
   #         # garbage-collected.
   #         map["name"] #=> nil
   #
@@ -54,7 +54,7 @@ module ObjectSpace
   #     end
   #
   # This will result in `make_value` returning the same object for same set of
-  # attributes always, but the values that aren't needed anymore woudn't be
+  # attributes always, but the values that aren't needed anymore wouldn't be
   # sitting in the cache forever.
   #
   class WeakKeyMap[Key, Value]

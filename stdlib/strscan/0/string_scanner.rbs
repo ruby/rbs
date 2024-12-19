@@ -1,102 +1,426 @@
 # <!-- rdoc-file=ext/strscan/strscan.c -->
-# StringScanner provides for lexical scanning operations on a String.  Here is
-# an example of its usage:
+# Class `StringScanner` supports processing a stored string as a stream;
+# this code creates a new `StringScanner` object with string `'foobarbaz'`:
+#     require 'strscan'
+# scanner = StringScanner.new('foobarbaz')
 #
+# ## About the Examples
+# All examples here assume that `StringScanner` has been required:
 #     require 'strscan'
 #
-#     s = StringScanner.new('This is an example string')
-#     s.eos?               # -> false
+# Some examples here assume that these constants are defined:
+#     MULTILINE_TEXT = <<~EOT
+# Go placidly amid the noise and haste,
+# and remember what peace there may be in silence.
+# EOT
 #
-#     p s.scan(/\w+/)      # -> "This"
-#     p s.scan(/\w+/)      # -> nil
-#     p s.scan(/\s+/)      # -> " "
-#     p s.scan(/\s+/)      # -> nil
-#     p s.scan(/\w+/)      # -> "is"
-#     s.eos?               # -> false
+# HIRAGANA_TEXT = 'こんにちは'
 #
-#     p s.scan(/\s+/)      # -> " "
-#     p s.scan(/\w+/)      # -> "an"
-#     p s.scan(/\s+/)      # -> " "
-#     p s.scan(/\w+/)      # -> "example"
-#     p s.scan(/\s+/)      # -> " "
-#     p s.scan(/\w+/)      # -> "string"
-#     s.eos?               # -> true
+# ENGLISH_TEXT = 'Hello'
 #
-#     p s.scan(/\s+/)      # -> nil
-#     p s.scan(/\w+/)      # -> nil
+# Some examples here assume that certain helper methods are defined:
+# *   `put_situation(scanner)`:
+#      Displays the values of the scanner's
+#      methods #pos, #charpos, #rest, and #rest_size.
+# *   `put_match_values(scanner)`:
+#      Displays the scanner's [match
+#     values](rdoc-ref:StringScanner@Match+Values).
+# *   `match_values_cleared?(scanner)`:
+#      Returns whether the scanner's [match
+#     values](rdoc-ref:StringScanner@Match+Values) are cleared.
+# See examples [[here]](ext/strscan/helper_methods_md.html).
+# ## The `StringScanner` Object
+# This code creates a `StringScanner` object
+# (we'll call it simply a *scanner*),
+# and shows some of its basic properties:
+#     scanner = StringScanner.new('foobarbaz')
+# scanner.string # => "foobarbaz"
+# put_situation(scanner)
+# # Situation:
+# #   pos:       0
+# #   charpos:   0
+# #   rest:      "foobarbaz"
+# #   rest_size: 9
 #
-# Scanning a string means remembering the position of a *scan pointer*, which is
-# just an index.  The point of scanning is to move forward a bit at a time, so
-# matches are sought after the scan pointer; usually immediately after it.
+# The scanner has:
+# *   A *stored string*, which is:
+#     *   Initially set by StringScanner.new(string) to the given `string`
+#          (`'foobarbaz'` in the example above).
+#     *   Modifiable by methods #string=(new_string) and #concat(more_string).
+#     *   Returned by method #string.
+#     More at [Stored String](rdoc-ref:StringScanner@Stored+String) below.
+# *   A *position*;
+#      a zero-based index into the bytes of the stored string (*not* into its
+#     characters):
+#     *   Initially set by StringScanner.new to `0`.
+#     *   Returned by method #pos.
+#     *   Modifiable explicitly by methods #reset, #terminate, and
+#         #pos=(new_pos).
+#     *   Modifiable implicitly (various traversing methods, among others).
+#     More at [Byte
+#     Position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) below.
+# *   A *target substring*,
+#      which is a trailing substring of the stored string;
+#      it extends from the current position to the end of the stored string:
+#     *   Initially set by StringScanner.new(string) to the given `string`
+#          (`'foobarbaz'` in the example above).
+#     *   Returned by method #rest.
+#     *   Modified by any modification to either the stored string or the
+#         position.
+#     **Most importantly**:
+#     the searching and traversing methods operate on the target substring,
+#     which may be (and often is) less than the entire stored string.
+#     More at [Target Substring](rdoc-ref:StringScanner@Target+Substring) below.
+# ## Stored String
+# The *stored string* is the string stored in the `StringScanner` object.
+# Each of these methods sets, modifies, or returns the stored string:
+#        Method       |                    Effect
+# --------------------|-----------------------------------------------
+#    ::new(string)    |  Creates a new scanner for the given string.
+# #string=(new_string)|     Replaces the existing stored string.
+# #concat(more_string)|Appends a string to the existing stored string.
+#       #string       |          Returns the stored string.
+# ## Positions
+# A `StringScanner` object maintains a zero-based *byte position*
+# and a zero-based *character position*.
+# Each of these methods explicitly sets positions:
+#          Method         |                         Effect
+# ------------------------|--------------------------------------------------------
+#          #reset         |Sets both positions to zero (begining of stored string).
+#        #terminate       |  Sets both positions to the end of the stored string.
+# #pos=(new_byte_position)|    Sets byte position; adjusts character position.
+# ### Byte Position (Position)
+# The byte position (or simply *position*)
+# is a zero-based index into the bytes in the scanner's stored string;
+# for a new `StringScanner` object, the byte position is zero.
+# When the byte position is:
+# *   Zero (at the beginning), the target substring is the entire stored string.
+# *   Equal to the size of the stored string (at the end),
+#      the target substring is the empty string `''`.
+# To get or set the byte position:
+# *   #pos: returns the byte position.
+# *   #pos=(new_pos): sets the byte position.
+# Many methods use the byte position as the basis for finding matches;
+# many others set, increment, or decrement the byte position:
+#     scanner = StringScanner.new('foobar')
+# scanner.pos # => 0
+# scanner.scan(/foo/) # => "foo" # Match found.
+# scanner.pos         # => 3     # Byte position incremented.
+# scanner.scan(/foo/) # => nil   # Match not found.
+# scanner.pos # => 3             # Byte position not changed.
 #
-# Given the string "test string", here are the pertinent scan pointer positions:
+# Some methods implicitly modify the byte position;
+# see:
+# *   [Setting the Target
+#     Substring](rdoc-ref:StringScanner@Setting+the+Target+Substring).
+# *   [Traversing the Target
+#     Substring](rdoc-ref:StringScanner@Traversing+the+Target+Substring).
+# The values of these methods are derived directly from the values of #pos and
+# #string:
+# *   #charpos: the [character
+#     position](rdoc-ref:StringScanner@Character+Position).
+# *   #rest: the [target substring](rdoc-ref:StringScanner@Target+Substring).
+# *   #rest_size: `rest.size`.
+# ### Character Position
+# The character position is a zero-based index into the *characters*
+# in the stored string;
+# for a new `StringScanner` object, the character position is zero.
+# Method #charpos returns the character position;
+# its value may not be reset explicitly.
+# Some methods change (increment or reset) the character position;
+# see:
+# *   [Setting the Target
+#     Substring](rdoc-ref:StringScanner@Setting+the+Target+Substring).
+# *   [Traversing the Target
+#     Substring](rdoc-ref:StringScanner@Traversing+the+Target+Substring).
+# Example (string includes multi-byte characters):
+#     scanner = StringScanner.new(ENGLISH_TEXT) # Five 1-byte characters.
+# scanner.concat(HIRAGANA_TEXT)             # Five 3-byte characters
+# scanner.string # => "Helloこんにちは"       # Twenty bytes in all.
+# put_situation(scanner)
+# # Situation:
+# #   pos:       0
+# #   charpos:   0
+# #   rest:      "Helloこんにちは"
+# #   rest_size: 20
+# scanner.scan(/Hello/) # => "Hello" # Five 1-byte characters.
+# put_situation(scanner)
+# # Situation:
+# #   pos:       5
+# #   charpos:   5
+# #   rest:      "こんにちは"
+# #   rest_size: 15
+# scanner.getch         # => "こ"    # One 3-byte character.
+# put_situation(scanner)
+# # Situation:
+# #   pos:       8
+# #   charpos:   6
+# #   rest:      "んにちは"
+# #   rest_size: 12
 #
-#       t e s t   s t r i n g
-#     0 1 2 ...             1
-#                           0
+# ## Target Substring
+# The target substring is the the part of the [stored
+# string](rdoc-ref:StringScanner@Stored+String)
+# that extends from the current [byte
+# position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) to the end of
+# the stored string;
+# it is always either:
+# *   The entire stored string (byte position is zero).
+# *   A trailing substring of the stored string (byte position positive).
+# The target substring is returned by method #rest,
+# and its size is returned by method #rest_size.
+# Examples:
+#     scanner = StringScanner.new('foobarbaz')
+# put_situation(scanner)
+# # Situation:
+# #   pos:       0
+# #   charpos:   0
+# #   rest:      "foobarbaz"
+# #   rest_size: 9
+# scanner.pos = 3
+# put_situation(scanner)
+# # Situation:
+# #   pos:       3
+# #   charpos:   3
+# #   rest:      "barbaz"
+# #   rest_size: 6
+# scanner.pos = 9
+# put_situation(scanner)
+# # Situation:
+# #   pos:       9
+# #   charpos:   9
+# #   rest:      ""
+# #   rest_size: 0
 #
-# When you #scan for a pattern (a regular expression), the match must occur at
-# the character after the scan pointer.  If you use #scan_until, then the match
-# can occur anywhere after the scan pointer.  In both cases, the scan pointer
-# moves *just beyond* the last character of the match, ready to scan again from
-# the next character onwards.  This is demonstrated by the example above.
+# ### Setting the Target Substring
+# The target substring is set whenever:
+# *   The [stored string](rdoc-ref:StringScanner@Stored+String) is set (position
+#     reset to zero; target substring set to stored string).
+# *   The [byte position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+#     is set (target substring adjusted accordingly).
+# ### Querying the Target Substring
+# This table summarizes (details and examples at the links):
+#   Method  |             Returns
+# ----------|---------------------------------
+#   #rest   |        Target substring.
+# #rest_size|Size (bytes) of target substring.
+# ### Searching the Target Substring
+# A *search* method examines the target substring,
+# but does not advance the [positions](rdoc-ref:StringScanner@Positions)
+# or (by implication) shorten the target substring.
+# This table summarizes (details and examples at the links):
+#        Method        |                   Returns                   |Sets Match Values?
+# ---------------------|---------------------------------------------|------------------
+#    #check(pattern)   |     Matched leading substring or +nil+.     |       Yes.
+# #check_until(pattern)|   Matched substring (anywhere) or +nil+.    |       Yes.
+#   #exist?(pattern)   |   Matched substring (anywhere) end index.   |       Yes.
+#   #match?(pattern)   | Size of matched leading substring or +nil+. |       Yes.
+#      #peek(size)     | Leading substring of given length (bytes).  |       No.
+#      #peek_byte      |       Integer leading byte or +nil+.        |       No.
+#         #rest        |Target substring (from byte position to end).|       No.
+# ### Traversing the Target Substring
+# A *traversal* method examines the target substring,
+# and, if successful:
+# *   Advances the [positions](rdoc-ref:StringScanner@Positions).
+# *   Shortens the target substring.
+# This table summarizes (details and examples at links):
+#        Method       |                      Returns                       |Sets Match Values?
+# --------------------|----------------------------------------------------|------------------
+#      #get_byte      |               Leading byte or +nil+.               |       No.
+#        #getch       |            Leading character or +nil+.             |       No.
+#    #scan(pattern)   |        Matched leading substring or +nil+.         |       Yes.
+#      #scan_byte     |           Integer leading byte or +nil+.           |       No.
+# #scan_until(pattern)|       Matched substring (anywhere) or +nil+.       |       Yes.
+#    #skip(pattern)   |      Matched leading substring size or +nil+.      |       Yes.
+# #skip_until(pattern)|Position delta to end-of-matched-substring or +nil+.|       Yes.
+#       #unscan       |                      +self+.                       |       No.
+# ## Querying the Scanner
+# Each of these methods queries the scanner object
+# without modifying it (details and examples at links)
+#       Method       |            Returns
+# -------------------|--------------------------------
+# #beginning_of_line?|       +true+ or +false+.
+#      #charpos      |      Character position.
+#        #eos?       |       +true+ or +false+.
+#   #fixed_anchor?   |       +true+ or +false+.
+#      #inspect      |String representation of +self+.
+#        #pos        |         Byte position.
+#        #rest       |       Target substring.
+#     #rest_size     |   Size of target substring.
+#       #string      |         Stored string.
+# ## Matching
+# `StringScanner` implements pattern matching via Ruby class
+# [Regexp](https://docs.ruby-lang.org/en/master/Regexp.html),
+# and its matching behaviors are the same as Ruby's
+# except for the [fixed-anchor
+# property](rdoc-ref:StringScanner@Fixed-Anchor+Property).
+# ### Matcher Methods
+# Each *matcher method* takes a single argument `pattern`,
+# and attempts to find a matching substring in the [target
+# substring](rdoc-ref:StringScanner@Target+Substring).
+#    Method   |  Pattern Type   |Matches Target Substring|  Success Return  |May Update Positions?
+# ------------|-----------------|------------------------|------------------|---------------------
+#    #check   |Regexp or String.|     At beginning.      |Matched substring.|         No.
+# #check_until|Regexp or String.|       Anywhere.        |    Substring.    |         No.
+#   #match?   |Regexp or String.|     At beginning.      |   Match size.    |         No.
+#   #exist?   |Regexp or String.|       Anywhere.        | Substring size.  |         No.
+#    #scan    |Regexp or String.|     At beginning.      |Matched substring.|        Yes.
+# #scan_until |Regexp or String.|       Anywhere.        |    Substring.    |        Yes.
+#    #skip    |Regexp or String.|     At beginning.      |   Match size.    |        Yes.
+# #skip_until |Regexp or String.|       Anywhere.        | Substring size.  |        Yes.
 #
-# ## Method Categories
+# Which matcher you choose will depend on:
+# *   Where you want to find a match:
+#     *   Only at the beginning of the target substring:
+#          #check, #match?, #scan, #skip.
+#     *   Anywhere in the target substring:
+#          #check_until, #exist?, #scan_until, #skip_until.
+# *   Whether you want to:
+#     *   Traverse, by advancing the positions:
+#          #scan, #scan_until, #skip, #skip_until.
+#     *   Keep the positions unchanged:
+#          #check, #check_until, #match?, #exist?.
+# *   What you want for the return value:
+#     *   The matched substring: #check, #scan.
+#     *   The substring: #check_until, #scan_until.
+#     *   The match size: #match?, #skip.
+#     *   The substring size: #exist?, #skip_until.
+# ### Match Values
+# The *match values* in a `StringScanner` object
+# generally contain the results of the most recent attempted match.
+# Each match value may be thought of as:
+# *   *Clear*: Initially, or after an unsuccessful match attempt:
+#      usually, `false`, `nil`, or `{}`.
+# *   *Set*: After a successful match attempt:
+#      `true`, string, array, or hash.
+# Each of these methods clears match values:
+# *   ::new(string).
+# *   #reset.
+# *   #terminate.
+# Each of these methods attempts a match based on a pattern,
+# and either sets match values (if successful) or clears them (if not);
+# *   #check(pattern)
+# *   #check_until(pattern)
+# *   #exist?(pattern)
+# *   #match?(pattern)
+# *   #scan(pattern)
+# *   #scan_until(pattern)
+# *   #skip(pattern)
+# *   #skip_until(pattern)
+# #### Basic Match Values
+# Basic match values are those not related to captures.
+# Each of these methods returns a basic match value:
+#    Method    |          Return After Match          |Return After No Match
+# -------------|--------------------------------------|---------------------
+#   #matched?  |               +true+.                |      +false+.
+# #matched_size|      Size of matched substring.      |       +nil+.
+#   #matched   |          Matched substring.          |       +nil+.
+#  #pre_match  |Substring preceding matched substring.|       +nil+.
+#  #post_match |Substring following matched substring.|       +nil+.
 #
-# There are other methods besides the plain scanners.  You can look ahead in the
-# string without actually scanning.  You can access the most recent match. You
-# can modify the string being scanned, reset or terminate the scanner, find out
-# or change the position of the scan pointer, skip ahead, and so on.
+# See examples below.
+# #### Captured Match Values
+# Captured match values are those related to
+# [captures](https://docs.ruby-lang.org/en/master/Regexp.html#class-Regexp-label
+# -Groups+and+Captures).
+# Each of these methods returns a captured match value:
+#     Method     |          Return After Match           |Return After No Match
+# ---------------|---------------------------------------|---------------------
+#      #size     |     Count of captured substrings.     |       +nil+.
+#     #[](n)     |   <tt>n</tt>th captured substring.    |       +nil+.
+#    #captures   |   Array of all captured substrings.   |       +nil+.
+# #values_at(*n) |Array of specified captured substrings.|       +nil+.
+# #named_captures|        Hash of named captures.        |    <tt>{}</tt>.
 #
-# ### Advancing the Scan Pointer
+# See examples below.
+# #### Match Values Examples
+# Successful basic match attempt (no captures):
+#     scanner = StringScanner.new('foobarbaz')
+# scanner.exist?(/bar/)
+# put_match_values(scanner)
+# # Basic match values:
+# #   matched?:       true
+# #   matched_size:   3
+# #   pre_match:      "foo"
+# #   matched  :      "bar"
+# #   post_match:     "baz"
+# # Captured match values:
+# #   size:           1
+# #   captures:       []
+# #   named_captures: {}
+# #   values_at:      ["bar", nil]
+# #   []:
+# #     [0]:          "bar"
+# #     [1]:          nil
 #
-# *   #getch
-# *   #get_byte
-# *   #scan
-# *   #scan_until
-# *   #skip
-# *   #skip_until
+# Failed basic match attempt (no captures);
+#     scanner = StringScanner.new('foobarbaz')
+# scanner.exist?(/nope/)
+# match_values_cleared?(scanner) # => true
 #
-# ### Looking Ahead
+# Successful unnamed capture match attempt:
+#     scanner = StringScanner.new('foobarbazbatbam')
+# scanner.exist?(/(foo)bar(baz)bat(bam)/)
+# put_match_values(scanner)
+# # Basic match values:
+# #   matched?:       true
+# #   matched_size:   15
+# #   pre_match:      ""
+# #   matched  :      "foobarbazbatbam"
+# #   post_match:     ""
+# # Captured match values:
+# #   size:           4
+# #   captures:       ["foo", "baz", "bam"]
+# #   named_captures: {}
+# #   values_at:      ["foobarbazbatbam", "foo", "baz", "bam", nil]
+# #   []:
+# #     [0]:          "foobarbazbatbam"
+# #     [1]:          "foo"
+# #     [2]:          "baz"
+# #     [3]:          "bam"
+# #     [4]:          nil
 #
-# *   #check
-# *   #check_until
-# *   #exist?
-# *   #match?
-# *   #peek
+# Successful named capture match attempt;
+# same as unnamed above, except for #named_captures:
+#     scanner = StringScanner.new('foobarbazbatbam')
+# scanner.exist?(/(?<x>foo)bar(?<y>baz)bat(?<z>bam)/)
+# scanner.named_captures # => {"x"=>"foo", "y"=>"baz", "z"=>"bam"}
 #
-# ### Finding Where we Are
+# Failed unnamed capture match attempt:
+#     scanner = StringScanner.new('somestring')
+# scanner.exist?(/(foo)bar(baz)bat(bam)/)
+# match_values_cleared?(scanner) # => true
 #
-# *   #beginning_of_line? (`#bol?`)
-# *   #eos?
-# *   #rest?
-# *   #rest_size
-# *   #pos
+# Failed named capture match attempt;
+# same as unnamed above, except for #named_captures:
+#     scanner = StringScanner.new('somestring')
+# scanner.exist?(/(?<x>foo)bar(?<y>baz)bat(?<z>bam)/)
+# match_values_cleared?(scanner) # => false
+# scanner.named_captures # => {"x"=>nil, "y"=>nil, "z"=>nil}
 #
-# ### Setting Where we Are
+# ## Fixed-Anchor Property
+# Pattern matching in `StringScanner` is the same as in Ruby's,
+# except for its fixed-anchor property,
+# which determines the meaning of `'\A'`:
+# *   `false` (the default): matches the current byte position.
+#         scanner = StringScanner.new('foobar')
+# scanner.scan(/\A./) # => "f"
+# scanner.scan(/\A./) # => "o"
+# scanner.scan(/\A./) # => "o"
+# scanner.scan(/\A./) # => "b"
 #
-# *   #reset
-# *   #terminate
-# *   #pos=
+# *   `true`: matches the beginning of the target substring;
+#      never matches unless the byte position is zero:
+#         scanner = StringScanner.new('foobar', fixed_anchor: true)
+# scanner.scan(/\A./) # => "f"
+# scanner.scan(/\A./) # => nil
+# scanner.reset
+# scanner.scan(/\A./) # => "f"
 #
-# ### Match Data
-#
-# *   #matched
-# *   #matched?
-# *   #matched_size
-# *   `#[]`
-# *   #pre_match
-# *   #post_match
-#
-# ### Miscellaneous
-#
-# *   `<<`
-# *   #concat
-# *   #string
-# *   #string=
-# *   #unscan
-#
-# There are aliases to several of the methods.
+# The fixed-anchor property is set when the `StringScanner` object is created,
+# and may not be modified
+# (see StringScanner.new);
+# method #fixed_anchor? returns the setting.
 #
 class StringScanner
   # <!--
@@ -108,61 +432,103 @@ class StringScanner
   def self.must_C_version: () -> self
 
   # <!-- rdoc-file=ext/strscan/strscan.c -->
-  # Appends `str` to the string being scanned. This method does not affect scan
-  # pointer.
-  #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/Fri /)
-  #     s << " +1000 GMT"
-  #     s.string            # -> "Fri Dec 12 1975 14:39 +1000 GMT"
-  #     s.scan(/Dec/)       # -> "Dec"
+  # *   Appends the given `more_string`
+  #      to the [stored string](rdoc-ref:StringScanner@Stored+String).
+  # *   Returns `self`.
+  # *   Does not affect the [positions](rdoc-ref:StringScanner@Positions)
+  #      or [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new('foo')
+  # scanner.string           # => "foo"
+  # scanner.terminate
+  # scanner.concat('barbaz') # => #<StringScanner 3/9 "foo" @ "barba...">
+  # scanner.string           # => "foobarbaz"
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "barbaz"
+  # #   rest_size: 6
   #
   def <<: (String) -> self
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - [](n)
+  #   - [](specifier) -> substring or nil
   # -->
-  # Returns the n-th subgroup in the most recent match.
+  # Returns a captured substring or `nil`;
+  # see [Captured Match Values](rdoc-ref:StringScanner@Captured+Match+Values).
+  # When there are captures:
+  #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
+  # scanner.scan(/(?<wday>\w+) (?<month>\w+) (?<day>\d+) /)
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> "Fri Dec 12 "
-  #     s[0]                               # -> "Fri Dec 12 "
-  #     s[1]                               # -> "Fri"
-  #     s[2]                               # -> "Dec"
-  #     s[3]                               # -> "12"
-  #     s.post_match                       # -> "1975 14:39"
-  #     s.pre_match                        # -> ""
+  # *   `specifier` zero: returns the entire matched substring:
+  #         scanner[0]         # => "Fri Dec 12 "
+  # scanner.pre_match  # => ""
+  # scanner.post_match # => "1975 14:39"
   #
-  #     s.reset
-  #     s.scan(/(?<wday>\w+) (?<month>\w+) (?<day>\d+) /)       # -> "Fri Dec 12 "
-  #     s[0]                               # -> "Fri Dec 12 "
-  #     s[1]                               # -> "Fri"
-  #     s[2]                               # -> "Dec"
-  #     s[3]                               # -> "12"
-  #     s[:wday]                           # -> "Fri"
-  #     s[:month]                          # -> "Dec"
-  #     s[:day]                            # -> "12"
-  #     s.post_match                       # -> "1975 14:39"
-  #     s.pre_match                        # -> ""
+  # *   `specifier` positive integer. returns the `n`th capture, or `nil` if out
+  #     of range:
+  #         scanner[1] # => "Fri"
+  # scanner[2] # => "Dec"
+  # scanner[3] # => "12"
+  # scanner[4] # => nil
+  #
+  # *   `specifier` negative integer. counts backward from the last subgroup:
+  #         scanner[-1] # => "12"
+  # scanner[-4] # => "Fri Dec 12 "
+  # scanner[-5] # => nil
+  #
+  # *   `specifier` symbol or string. returns the named subgroup, or `nil` if no
+  #     such:
+  #         scanner[:wday]  # => "Fri"
+  # scanner['wday'] # => "Fri"
+  # scanner[:month] # => "Dec"
+  # scanner[:day]   # => "12"
+  # scanner[:nope]  # => nil
+  #
+  # When there are no captures, only `[0]` returns non-`nil`:
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.exist?(/bar/)
+  # scanner[0] # => "bar"
+  # scanner[1] # => nil
+  #
+  # For a failed match, even `[0]` returns `nil`:
+  #     scanner.scan(/nope/) # => nil
+  # scanner[0]           # => nil
+  # scanner[1]           # => nil
   #
   def []: (Integer) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - beginning_of_line?()
+  #   - beginning_of_line? -> true or false
   # -->
-  # Returns `true` if and only if the scan pointer is at the beginning of the
-  # line.
+  # Returns whether the
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) is at the
+  # beginning of a line;
+  # that is, at the beginning of the [stored
+  # string](rdoc-ref:StringScanner@Stored+String)
+  # or immediately after a newline:
+  #     scanner = StringScanner.new(MULTILINE_TEXT)
+  #     scanner.string
+  #     # => "Go placidly amid the noise and haste,\nand remember what peace there may be in silence.\n"
+  #     scanner.pos                # => 0
+  #     scanner.beginning_of_line? # => true
   #
-  #     s = StringScanner.new("test\ntest\n")
-  #     s.bol?           # => true
-  #     s.scan(/te/)
-  #     s.bol?           # => false
-  #     s.scan(/st\n/)
-  #     s.bol?           # => true
-  #     s.terminate
-  #     s.bol?           # => true
+  #     scanner.scan_until(/,/)    # => "Go placidly amid the noise and haste,"
+  #     scanner.beginning_of_line? # => false
+  #
+  #     scanner.scan(/\n/)         # => "\n"
+  #     scanner.beginning_of_line? # => true
+  #
+  #     scanner.terminate
+  #     scanner.beginning_of_line? # => true
+  #
+  #     scanner.concat('x')
+  #     scanner.terminate
+  #     scanner.beginning_of_line? # => false
+  #
+  # StringScanner#bol? is an alias for StringScanner#beginning_of_line?.
   #
   def beginning_of_line?: () -> bool
 
@@ -170,16 +536,23 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - captures
+  #   - captures -> substring_array or nil
   # -->
-  # Returns the subgroups in the most recent match (not including the full match).
-  # If nothing was priorly matched, it returns nil.
+  # Returns the array of [captured match
+  # values](rdoc-ref:StringScanner@Captured+Match+Values) at indexes `(1..)`
+  # if the most recent match attempt succeeded, or `nil` otherwise:
+  #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
+  # scanner.captures         # => nil
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/(\w+) (\w+) (\d+) (1980)?/)       # -> "Fri Dec 12 "
-  #     s.captures                                # -> ["Fri", "Dec", "12", nil]
-  #     s.scan(/(\w+) (\w+) (\d+) (1980)?/)       # -> nil
-  #     s.captures                                # -> nil
+  # scanner.exist?(/(?<wday>\w+) (?<month>\w+) (?<day>\d+) /)
+  # scanner.captures         # => ["Fri", "Dec", "12"]
+  # scanner.values_at(*0..4) # => ["Fri Dec 12 ", "Fri", "Dec", "12", nil]
+  #
+  # scanner.exist?(/Fri/)
+  # scanner.captures         # => []
+  #
+  # scanner.scan(/nope/)
+  # scanner.captures         # => nil
   #
   def captures: () -> Array[String]?
 
@@ -187,51 +560,116 @@ class StringScanner
   #   rdoc-file=ext/strscan/strscan.c
   #   - charpos()
   # -->
-  # Returns the character position of the scan pointer.  In the 'reset' position,
-  # this value is zero.  In the 'terminated' position (i.e. the string is
-  # exhausted), this value is the size of the string.
-  #
-  # In short, it's a 0-based index into the string.
-  #
-  #     s = StringScanner.new("abc\u00e4def\u00f6ghi")
-  #     s.charpos                # -> 0
-  #     s.scan_until(/\u00e4/)   # -> "abc\u00E4"
-  #     s.pos                    # -> 5
-  #     s.charpos                # -> 4
+  # call-seq:
+  #  charpos -> character_position
+  # Returns the [character position](rdoc-ref:StringScanner@Character+Position)
+  # (initially zero),
+  # which may be different from the [byte
+  # position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  # given by method #pos:
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string # => "こんにちは"
+  # scanner.getch  # => "こ" # 3-byte character.
+  # scanner.getch  # => "ん" # 3-byte character.
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       6
+  # #   charpos:   2
+  # #   rest:      "にちは"
+  # #   rest_size: 9
   #
   def charpos: () -> Integer
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - check(pattern)
+  #   - check(pattern) -> matched_substring or nil
   # -->
-  # This returns the value that #scan would return, without advancing the scan
-  # pointer.  The match register is affected, though.
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # at the beginning of the [target
+  # substring](rdoc-ref:StringScanner@Target+Substring);
+  # does not modify the [positions](rdoc-ref:StringScanner@Positions).
+  # If the match succeeds:
+  # *   Returns the matched substring.
+  # *   Sets all [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.pos = 3
+  # scanner.check('bar') # => "bar"
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "foo"
+  # #   matched  :      "bar"
+  # #   post_match:     "baz"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["bar", nil]
+  # #   []:
+  # #     [0]:          "bar"
+  # #     [1]:          nil
+  # # => 0..1
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "barbaz"
+  # #   rest_size: 6
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.check /Fri/               # -> "Fri"
-  #     s.pos                       # -> 0
-  #     s.matched                   # -> "Fri"
-  #     s.check /12/                # -> nil
-  #     s.matched                   # -> nil
-  #
-  # Mnemonic: it "checks" to see whether a #scan will return a value.
+  # If the match fails:
+  # *   Returns `nil`.
+  # *   Clears all [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner.check(/nope/)          # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def check: (Regexp) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - check_until(pattern)
+  #   - check_until(pattern) -> substring or nil
   # -->
-  # This returns the value that #scan_until would return, without advancing the
-  # scan pointer.  The match register is affected, though.
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # anywhere (at any
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29))
+  # in the [target substring](rdoc-ref:StringScanner@Target+Substring);
+  # does not modify the [positions](rdoc-ref:StringScanner@Positions).
+  # If the match succeeds:
+  # *   Sets all [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns the matched substring,
+  #      which extends from the current
+  #     [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  #      to the end of the matched substring.
+  #     scanner = StringScanner.new('foobarbazbatbam')
+  # scanner.pos = 6
+  # scanner.check_until(/bat/) # => "bazbat"
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "foobarbaz"
+  # #   matched  :      "bat"
+  # #   post_match:     "bam"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["bat", nil]
+  # #   []:
+  # #     [0]:          "bat"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       6
+  # #   charpos:   6
+  # #   rest:      "bazbatbam"
+  # #   rest_size: 9
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.check_until /12/          # -> "Fri Dec 12"
-  #     s.pos                       # -> 0
-  #     s.matched                   # -> 12
-  #
-  # Mnemonic: it "checks" to see whether a #scan_until will return a value.
+  # If the match fails:
+  # *   Clears all [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns `nil`.
+  #     scanner.check_until(/nope/)    # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def check_until: (Regexp) -> String
 
@@ -245,17 +683,24 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - concat(str)
-  #   - <<(str)
+  #   - concat(more_string) -> self
   # -->
-  # Appends `str` to the string being scanned. This method does not affect scan
-  # pointer.
-  #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/Fri /)
-  #     s << " +1000 GMT"
-  #     s.string            # -> "Fri Dec 12 1975 14:39 +1000 GMT"
-  #     s.scan(/Dec/)       # -> "Dec"
+  # *   Appends the given `more_string`
+  #      to the [stored string](rdoc-ref:StringScanner@Stored+String).
+  # *   Returns `self`.
+  # *   Does not affect the [positions](rdoc-ref:StringScanner@Positions)
+  #      or [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new('foo')
+  # scanner.string           # => "foo"
+  # scanner.terminate
+  # scanner.concat('barbaz') # => #<StringScanner 3/9 "foo" @ "barba...">
+  # scanner.string           # => "foobarbaz"
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "barbaz"
+  # #   rest_size: 6
   #
   alias concat <<
 
@@ -269,43 +714,74 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - eos?()
+  #   - eos? -> true or false
   # -->
-  # Returns `true` if the scan pointer is at the end of the string.
-  #
-  #     s = StringScanner.new('test string')
-  #     p s.eos?          # => false
-  #     s.scan(/test/)
-  #     p s.eos?          # => false
-  #     s.terminate
-  #     p s.eos?          # => true
+  # Returns whether the
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  # is at the end of the [stored string](rdoc-ref:StringScanner@Stored+String):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.eos? # => false
+  # pos = 3
+  # scanner.eos? # => false
+  # scanner.terminate
+  # scanner.eos? # => true
   #
   def eos?: () -> bool
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - exist?(pattern)
+  #   - exist?(pattern) -> byte_offset or nil
   # -->
-  # Looks *ahead* to see if the `pattern` exists *anywhere* in the string, without
-  # advancing the scan pointer.  This predicates whether a #scan_until will return
-  # a value.
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # anywhere (at any
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29))
+  # n the [target substring](rdoc-ref:StringScanner@Target+Substring);
+  # does not modify the [positions](rdoc-ref:StringScanner@Positions).
+  # If the match succeeds:
+  # *   Returns a byte offset:
+  #      the distance in bytes between the current
+  #     [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  #      and the end of the matched substring.
+  # *   Sets all [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new('foobarbazbatbam')
+  # scanner.pos = 6
+  # scanner.exist?(/bat/) # => 6
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "foobarbaz"
+  # #   matched  :      "bat"
+  # #   post_match:     "bam"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["bat", nil]
+  # #   []:
+  # #     [0]:          "bat"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       6
+  # #   charpos:   6
+  # #   rest:      "bazbatbam"
+  # #   rest_size: 9
   #
-  #     s = StringScanner.new('test string')
-  #     s.exist? /s/            # -> 3
-  #     s.scan /test/           # -> "test"
-  #     s.exist? /s/            # -> 2
-  #     s.exist? /e/            # -> nil
+  # If the match fails:
+  # *   Returns `nil`.
+  # *   Clears all [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner.exist?(/nope/)         # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def exist?: (Regexp) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - scanner.fixed_anchor? -> true or false
+  #   - fixed_anchor? -> true or false
   # -->
-  # Whether `scanner` uses fixed anchor mode or not.
-  #
-  # If fixed anchor mode is used, `\A` always matches the beginning of the string.
-  # Otherwise, `\A` always matches the current position.
+  # Returns whether the [fixed-anchor
+  # property](rdoc-ref:StringScanner@Fixed-Anchor+Property) is set.
   #
   def fixed_anchor?: () -> bool
 
@@ -313,18 +789,30 @@ class StringScanner
   #   rdoc-file=ext/strscan/strscan.c
   #   - get_byte()
   # -->
-  # Scans one byte and returns it. This method is not multibyte character
-  # sensitive. See also: #getch.
+  # call-seq:
+  #  get_byte -> byte_as_character or nil
+  # Returns the next byte, if available:
+  # *   If the [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  #      is not at the end of the [stored
+  #     string](rdoc-ref:StringScanner@Stored+String):
+  #     *   Returns the next byte.
+  #     *   Increments the [byte
+  #         position](rdoc-ref:StringScanner@Byte+Position+-28Position-29).
+  #     *   Adjusts the [character
+  #         position](rdoc-ref:StringScanner@Character+Position).
+  #         scanner = StringScanner.new(HIRAGANA_TEXT)
+  # # => #<StringScanner 0/15 @ "\xE3\x81\x93\xE3\x82...">
+  # scanner.string                                   # => "こんにちは"
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\xE3", 1, 1]
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x81", 2, 2]
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x93", 3, 1]
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\xE3", 4, 2]
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x82", 5, 3]
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x93", 6, 2]
   #
-  #     s = StringScanner.new('ab')
-  #     s.get_byte         # => "a"
-  #     s.get_byte         # => "b"
-  #     s.get_byte         # => nil
-  #
-  #     s = StringScanner.new("\244\242".force_encoding("euc-jp"))
-  #     s.get_byte         # => "\xA4"
-  #     s.get_byte         # => "\xA2"
-  #     s.get_byte         # => nil
+  # *   Otherwise, returns `nil`, and does not change the positions.
+  #         scanner.terminate
+  # [scanner.get_byte, scanner.pos, scanner.charpos] # => [nil, 15, 5]
   #
   def get_byte: () -> String?
 
@@ -340,103 +828,185 @@ class StringScanner
   #   rdoc-file=ext/strscan/strscan.c
   #   - getch()
   # -->
-  # Scans one character and returns it. This method is multibyte character
-  # sensitive.
+  # call-seq:
+  #  getch -> character or nil
+  # Returns the next (possibly multibyte) character,
+  # if available:
+  # *   If the [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  #      is at the beginning of a character:
+  #     *   Returns the character.
+  #     *   Increments the [character
+  #         position](rdoc-ref:StringScanner@Character+Position) by 1.
+  #     *   Increments the [byte
+  #         position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  #          by the size (in bytes) of the character.
+  #         scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string                                # => "こんにちは"
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["こ", 3, 1]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["ん", 6, 2]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["に", 9, 3]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["ち", 12, 4]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["は", 15, 5]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => [nil, 15, 5]
   #
-  #     s = StringScanner.new("ab")
-  #     s.getch           # => "a"
-  #     s.getch           # => "b"
-  #     s.getch           # => nil
+  # *   If the [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) is
+  #     within a multi-byte character
+  #      (that is, not at its beginning),
+  #      behaves like #get_byte (returns a 1-byte character):
+  #         scanner.pos = 1
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["\x81", 2, 2]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["\x93", 3, 1]
+  # [scanner.getch, scanner.pos, scanner.charpos] # => ["ん", 6, 2]
   #
-  #     s = StringScanner.new("\244\242".force_encoding("euc-jp"))
-  #     s.getch           # => "\x{A4A2}"   # Japanese hira-kana "A" in EUC-JP
-  #     s.getch           # => nil
+  # *   If the [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) is
+  #     at the end of the [stored string](rdoc-ref:StringScanner@Stored+String),
+  #      returns `nil` and does not modify the positions:
+  #         scanner.terminate
+  # [scanner.getch, scanner.pos, scanner.charpos] # => [nil, 15, 5]
   #
   def getch: () -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - inspect()
+  #   - inspect -> string
   # -->
-  # Returns a string that represents the StringScanner object, showing:
-  # *   the current position
-  # *   the size of the string
-  # *   the characters surrounding the scan pointer
+  # Returns a string representation of `self` that may show:
+  # 1.  The current
+  #     [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29).
+  # 2.  The size (in bytes) of the [stored
+  #     string](rdoc-ref:StringScanner@Stored+String).
+  # 3.  The substring preceding the current position.
+  # 4.  The substring following the current position (which is also the [target
+  #     substring](rdoc-ref:StringScanner@Target+Substring)).
+  #     scanner = StringScanner.new("Fri Dec 12 1975 14:39")
+  # scanner.pos = 11
+  # scanner.inspect # => "#<StringScanner 11/21 \"...c 12 \" @ \"1975 ...\">"
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39") s.inspect            # ->
-  #     '#<StringScanner 0/21 @ "Fri D...">' s.scan_until /12/    # -> "Fri Dec
-  #     12" s.inspect            # -> '#<StringScanner 10/21 "...ec 12" @ "
-  #     1975...">'
+  # If at beginning-of-string, item 4 above (following substring) is omitted:
+  #     scanner.reset
+  # scanner.inspect # => "#<StringScanner 0/21 @ \"Fri D...\">"
+  #
+  # If at end-of-string, all items above are omitted:
+  #     scanner.terminate
+  # scanner.inspect # => "#<StringScanner fin>"
   #
   def inspect: () -> String
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - match?(pattern)
+  #   - match?(pattern) -> updated_position or nil
   # -->
-  # Tests whether the given `pattern` is matched from the current scan pointer.
-  # Returns the length of the match, or `nil`.  The scan pointer is not advanced.
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # at the beginning of the [target
+  # substring](rdoc-ref:StringScanner@Target+Substring);
+  # does not modify the [positions](rdoc-ref:StringScanner@Positions).
+  # If the match succeeds:
+  # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns the size in bytes of the matched substring.
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.pos = 3
+  # scanner.match?(/bar/) => 3
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "foo"
+  # #   matched  :      "bar"
+  # #   post_match:     "baz"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["bar", nil]
+  # #   []:
+  # #     [0]:          "bar"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "barbaz"
+  # #   rest_size: 6
   #
-  #     s = StringScanner.new('test string')
-  #     p s.match?(/\w+/)   # -> 4
-  #     p s.match?(/\w+/)   # -> 4
-  #     p s.match?("test")  # -> 4
-  #     p s.match?(/\s+/)   # -> nil
+  # If the match fails:
+  # *   Clears match values.
+  # *   Returns `nil`.
+  # *   Does not increment positions.
+  #     scanner.match?(/nope/)         # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def match?: (Regexp) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - matched()
+  #   - matched -> matched_substring or nil
   # -->
-  # Returns the last matched string.
-  #
-  #     s = StringScanner.new('test string')
-  #     s.match?(/\w+/)     # -> 4
-  #     s.matched           # -> "test"
+  # Returns the matched substring from the most recent
+  # [match](rdoc-ref:StringScanner@Matching) attempt
+  # if it was successful,
+  # or `nil` otherwise;
+  # see [Basic Matched Values](rdoc-ref:StringScanner@Basic+Match+Values):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.matched        # => nil
+  # scanner.pos = 3
+  # scanner.match?(/bar/)  # => 3
+  # scanner.matched        # => "bar"
+  # scanner.match?(/nope/) # => nil
+  # scanner.matched        # => nil
   #
   def matched: () -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - matched?()
+  #   - matched? -> true or false
   # -->
-  # Returns `true` if and only if the last match was successful.
-  #
-  #     s = StringScanner.new('test string')
-  #     s.match?(/\w+/)     # => 4
-  #     s.matched?          # => true
-  #     s.match?(/\d+/)     # => nil
-  #     s.matched?          # => false
+  # Returns `true` of the most recent [match
+  # attempt](rdoc-ref:StringScanner@Matching) was successful,
+  # `false` otherwise;
+  # see [Basic Matched Values](rdoc-ref:StringScanner@Basic+Match+Values):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.matched?       # => false
+  # scanner.pos = 3
+  # scanner.exist?(/baz/)  # => 6
+  # scanner.matched?       # => true
+  # scanner.exist?(/nope/) # => nil
+  # scanner.matched?       # => false
   #
   def matched?: () -> bool
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - matched_size()
+  #   - matched_size -> substring_size or nil
   # -->
-  # Returns the size of the most recent match in bytes, or `nil` if there was no
-  # recent match.  This is different than `matched.size`, which will return the
-  # size in characters.
+  # Returns the size (in bytes) of the matched substring
+  # from the most recent match [match attempt](rdoc-ref:StringScanner@Matching) if
+  # it was successful,
+  # or `nil` otherwise;
+  # see [Basic Matched Values](rdoc-ref:StringScanner@Basic+Match+Values):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.matched_size   # => nil
   #
-  #     s = StringScanner.new('test string')
-  #     s.check /\w+/           # -> "test"
-  #     s.matched_size          # -> 4
-  #     s.check /\d+/           # -> nil
-  #     s.matched_size          # -> nil
+  # pos = 3
+  # scanner.exist?(/baz/)  # => 9
+  # scanner.matched_size   # => 3
+  #
+  # scanner.exist?(/nope/) # => nil
+  # scanner.matched_size   # => nil
   #
   def matched_size: () -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - peek(len)
+  #   - peek(length) -> substring
   # -->
-  # Extracts a string corresponding to `string[pos,len]`, without advancing the
-  # scan pointer.
-  #
-  #     s = StringScanner.new('test string')
-  #     s.peek(7)          # => "test st"
-  #     s.peek(7)          # => "test st"
+  # Returns the substring `string[pos, length]`;
+  # does not update [match values](rdoc-ref:StringScanner@Match+Values) or
+  # [positions](rdoc-ref:StringScanner@Positions):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.pos = 3
+  # scanner.peek(3)   # => "bar"
+  # scanner.terminate
+  # scanner.peek(3)   # => ""
   #
   def peek: (Integer) -> String
 
@@ -449,27 +1019,42 @@ class StringScanner
   def peep: (Integer) -> String
 
   # <!-- rdoc-file=ext/strscan/strscan.c -->
-  # Returns the byte position of the scan pointer.  In the 'reset' position, this
-  # value is zero.  In the 'terminated' position (i.e. the string is exhausted),
-  # this value is the bytesize of the string.
-  #
-  # In short, it's a 0-based index into bytes of the string.
-  #
-  #     s = StringScanner.new('test string')
-  #     s.pos               # -> 0
-  #     s.scan_until /str/  # -> "test str"
-  #     s.pos               # -> 8
-  #     s.terminate         # -> #<StringScanner fin>
-  #     s.pos               # -> 11
+  # call-seq:
+  #  pos -> byte_position
+  # Returns the integer [byte
+  # position](rdoc-ref:StringScanner@Byte+Position+-28Position-29),
+  # which may be different from the [character
+  # position](rdoc-ref:StringScanner@Character+Position):
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string  # => "こんにちは"
+  # scanner.pos     # => 0
+  # scanner.getch   # => "こ" # 3-byte character.
+  # scanner.charpos # => 1
+  # scanner.pos     # => 3
   #
   def pointer: () -> Integer
 
   # <!-- rdoc-file=ext/strscan/strscan.c -->
-  # Sets the byte position of the scan pointer.
+  # call-seq:
+  #  pos = n -> n
+  #  pointer = n -> n
+  # Sets the [byte position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  # and the [character position](rdoc-ref:StringScanner@Positions);
+  # returns `n`.
+  # Does not affect [match values](rdoc-ref:StringScanner@Match+Values).
+  # For non-negative `n`, sets the position to `n`:
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string  # => "こんにちは"
+  # scanner.pos = 3 # => 3
+  # scanner.rest    # => "んにちは"
+  # scanner.charpos # => 1
   #
-  #     s = StringScanner.new('test string')
-  #     s.pos = 7            # -> 7
-  #     s.rest               # -> "ring"
+  # For negative `n`, counts from the end of the [stored
+  # string](rdoc-ref:StringScanner@Stored+String):
+  #     scanner.pos = -9 # => -9
+  # scanner.pos      # => 6
+  # scanner.rest     # => "にちは"
+  # scanner.charpos  # => 2
   #
   def pointer=: (Integer) -> Integer
 
@@ -477,77 +1062,124 @@ class StringScanner
   #   rdoc-file=ext/strscan/strscan.c
   #   - pos()
   # -->
-  # Returns the byte position of the scan pointer.  In the 'reset' position, this
-  # value is zero.  In the 'terminated' position (i.e. the string is exhausted),
-  # this value is the bytesize of the string.
-  #
-  # In short, it's a 0-based index into bytes of the string.
-  #
-  #     s = StringScanner.new('test string')
-  #     s.pos               # -> 0
-  #     s.scan_until /str/  # -> "test str"
-  #     s.pos               # -> 8
-  #     s.terminate         # -> #<StringScanner fin>
-  #     s.pos               # -> 11
+  # call-seq:
+  #  pos -> byte_position
+  # Returns the integer [byte
+  # position](rdoc-ref:StringScanner@Byte+Position+-28Position-29),
+  # which may be different from the [character
+  # position](rdoc-ref:StringScanner@Character+Position):
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string  # => "こんにちは"
+  # scanner.pos     # => 0
+  # scanner.getch   # => "こ" # 3-byte character.
+  # scanner.charpos # => 1
+  # scanner.pos     # => 3
   #
   def pos: () -> Integer
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - pos=(n)
+  #   - pos=(p1)
   # -->
-  # Sets the byte position of the scan pointer.
+  # call-seq:
+  #  pos = n -> n
+  #  pointer = n -> n
+  # Sets the [byte position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  # and the [character position](rdoc-ref:StringScanner@Positions);
+  # returns `n`.
+  # Does not affect [match values](rdoc-ref:StringScanner@Match+Values).
+  # For non-negative `n`, sets the position to `n`:
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string  # => "こんにちは"
+  # scanner.pos = 3 # => 3
+  # scanner.rest    # => "んにちは"
+  # scanner.charpos # => 1
   #
-  #     s = StringScanner.new('test string')
-  #     s.pos = 7            # -> 7
-  #     s.rest               # -> "ring"
+  # For negative `n`, counts from the end of the [stored
+  # string](rdoc-ref:StringScanner@Stored+String):
+  #     scanner.pos = -9 # => -9
+  # scanner.pos      # => 6
+  # scanner.rest     # => "にちは"
+  # scanner.charpos  # => 2
   #
   def pos=: (Integer) -> Integer
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - post_match()
+  #   - post_match -> substring
   # -->
-  # Returns the ***post**-match* (in the regular expression sense) of the last
-  # scan.
+  # Returns the substring that follows the matched substring
+  # from the most recent match attempt if it was successful,
+  # or `nil` otherwise;
+  # see [Basic Match Values](rdoc-ref:StringScanner@Basic+Match+Values):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.post_match     # => nil
   #
-  #     s = StringScanner.new('test string')
-  #     s.scan(/\w+/)           # -> "test"
-  #     s.scan(/\s+/)           # -> " "
-  #     s.pre_match             # -> "test"
-  #     s.post_match            # -> "string"
+  # scanner.pos = 3
+  # scanner.match?(/bar/)  # => 3
+  # scanner.post_match     # => "baz"
+  #
+  # scanner.match?(/nope/) # => nil
+  # scanner.post_match     # => nil
   #
   def post_match: () -> String
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - pre_match()
+  #   - pre_match -> substring
   # -->
-  # Returns the ***pre**-match* (in the regular expression sense) of the last
-  # scan.
+  # Returns the substring that precedes the matched substring
+  # from the most recent match attempt if it was successful,
+  # or `nil` otherwise;
+  # see [Basic Match Values](rdoc-ref:StringScanner@Basic+Match+Values):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.pre_match      # => nil
   #
-  #     s = StringScanner.new('test string')
-  #     s.scan(/\w+/)           # -> "test"
-  #     s.scan(/\s+/)           # -> " "
-  #     s.pre_match             # -> "test"
-  #     s.post_match            # -> "string"
+  # scanner.pos = 3
+  # scanner.exist?(/baz/)  # => 6
+  # scanner.pre_match      # => "foobar" # Substring of entire string, not just target string.
+  #
+  # scanner.exist?(/nope/) # => nil
+  # scanner.pre_match      # => nil
   #
   def pre_match: () -> String
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - reset()
+  #   - reset -> self
   # -->
-  # Reset the scan pointer (index 0) and clear matching data.
+  # Sets both [byte position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
+  # and [character position](rdoc-ref:StringScanner@Character+Position) to zero,
+  # and clears [match values](rdoc-ref:StringScanner@Match+Values);
+  # returns `self`:
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.exist?(/bar/)          # => 6
+  # scanner.reset                  # => #<StringScanner 0/9 @ "fooba...">
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       0
+  # #   charpos:   0
+  # #   rest:      "foobarbaz"
+  # #   rest_size: 9
+  # # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def reset: () -> void
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - rest()
+  #   - rest -> target_substring
   # -->
-  # Returns the "rest" of the string (i.e. everything after the scan pointer). If
-  # there is no more data (eos? = true), it returns `""`.
+  # Returns the 'rest' of the [stored
+  # string](rdoc-ref:StringScanner@Stored+String) (all after the current
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)),
+  # which is the [target substring](rdoc-ref:StringScanner@Target+Substring):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.rest # => "foobarbaz"
+  # scanner.pos = 3
+  # scanner.rest # => "barbaz"
+  # scanner.terminate
+  # scanner.rest # => ""
   #
   def rest: () -> String
 
@@ -567,9 +1199,19 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - rest_size()
+  #   - rest_size -> integer
   # -->
-  # `s.rest_size` is equivalent to `s.rest.size`.
+  # Returns the size (in bytes) of the #rest of the [stored
+  # string](rdoc-ref:StringScanner@Stored+String):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.rest      # => "foobarbaz"
+  # scanner.rest_size # => 9
+  # scanner.pos = 3
+  # scanner.rest      # => "barbaz"
+  # scanner.rest_size # => 6
+  # scanner.terminate
+  # scanner.rest      # => ""
+  # scanner.rest_size # => 0
   #
   def rest_size: () -> Integer
 
@@ -584,19 +1226,53 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - scan(pattern) => String
+  #   - scan(p1)
   # -->
-  # Tries to match with `pattern` at the current position. If there's a match, the
-  # scanner advances the "scan pointer" and returns the matched string. Otherwise,
-  # the scanner returns `nil`.
+  # call-seq:
+  #  scan(pattern) -> substring or nil
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # at the beginning of the [target
+  # substring](rdoc-ref:StringScanner@Target+Substring).
+  # If the match succeeds:
+  # *   Returns the matched substring.
+  # *   Increments the [byte
+  #     position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) by
+  #     `substring.bytesize`,
+  #      and may increment the [character
+  #     position](rdoc-ref:StringScanner@Character+Position).
+  # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string     # => "こんにちは"
+  # scanner.pos = 6
+  # scanner.scan(/に/) # => "に"
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "こん"
+  # #   matched  :      "に"
+  # #   post_match:     "ちは"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["に", nil]
+  # #   []:
+  # #     [0]:          "に"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       9
+  # #   charpos:   3
+  # #   rest:      "ちは"
+  # #   rest_size: 6
   #
-  #     s = StringScanner.new('test string')
-  #     p s.scan(/\w+/)   # -> "test"
-  #     p s.scan(/\w+/)   # -> nil
-  #     p s.scan(/\s+/)   # -> " "
-  #     p s.scan("str")   # -> "str"
-  #     p s.scan(/\w+/)   # -> "ing"
-  #     p s.scan(/./)     # -> nil
+  # If the match fails:
+  # *   Returns `nil`.
+  # *   Does not increment byte and character positions.
+  # *   Clears match values.
+  #     scanner.scan(/nope/)           # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def scan: (Regexp) -> String?
 
@@ -614,16 +1290,54 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - scan_until(pattern)
+  #   - scan_until(p1)
   # -->
-  # Scans the string *until* the `pattern` is matched.  Returns the substring up
-  # to and including the end of the match, advancing the scan pointer to that
-  # location. If there is no match, `nil` is returned.
+  # call-seq:
+  #  scan_until(pattern) -> substring or nil
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # anywhere (at any
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)) in the
+  # [target substring](rdoc-ref:StringScanner@Target+Substring).
+  # If the match attempt succeeds:
+  # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Sets the [byte
+  #     position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) to the end
+  #     of the matched substring;
+  #      may adjust the [character
+  #     position](rdoc-ref:StringScanner@Character+Position).
+  # *   Returns the matched substring.
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string           # => "こんにちは"
+  # scanner.pos = 6
+  # scanner.scan_until(/ち/) # => "にち"
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "こんに"
+  # #   matched  :      "ち"
+  # #   post_match:     "は"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["ち", nil]
+  # #   []:
+  # #     [0]:          "ち"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       12
+  # #   charpos:   4
+  # #   rest:      "は"
+  # #   rest_size: 3
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan_until(/1/)        # -> "Fri Dec 1"
-  #     s.pre_match              # -> "Fri Dec "
-  #     s.scan_until(/XYZ/)      # -> nil
+  # If the match attempt fails:
+  # *   Clears match data.
+  # *   Returns `nil`.
+  # *   Does not update positions.
+  #     scanner.scan_until(/nope/)     # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def scan_until: (Regexp) -> String?
 
@@ -640,110 +1354,237 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - size
+  #   - size -> captures_count
   # -->
-  # Returns the amount of subgroups in the most recent match. The full match
-  # counts as a subgroup.
+  # Returns the count of captures if the most recent match attempt succeeded,
+  # `nil` otherwise;
+  # see [Captures Match Values](rdoc-ref:StringScanner@Captured+Match+Values):
+  #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
+  # scanner.size                        # => nil
   #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> "Fri Dec 12 "
-  #     s.size                             # -> 4
+  # pattern = /(?<wday>\w+) (?<month>\w+) (?<day>\d+) /
+  # scanner.match?(pattern)
+  # scanner.values_at(*0..scanner.size) # => ["Fri Dec 12 ", "Fri", "Dec", "12", nil]
+  # scanner.size                        # => 4
+  #
+  # scanner.match?(/nope/)              # => nil
+  # scanner.size                        # => nil
   #
   def size: () -> Integer
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - skip(pattern)
+  #   - skip(p1)
   # -->
-  # Attempts to skip over the given `pattern` beginning with the scan pointer. If
-  # it matches, the scan pointer is advanced to the end of the match, and the
-  # length of the match is returned.  Otherwise, `nil` is returned.
+  # call-seq:
+  #  skip(pattern) match_size or nil
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # at the beginning of the [target
+  # substring](rdoc-ref:StringScanner@Target+Substring);
+  # If the match succeeds:
+  # *   Increments the [byte
+  #     position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) by
+  #     substring.bytesize,
+  #      and may increment the [character
+  #     position](rdoc-ref:StringScanner@Character+Position).
+  # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns the size (bytes) of the matched substring.
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string                  # => "こんにちは"
+  # scanner.pos = 6
+  # scanner.skip(/に/)              # => 3
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "こん"
+  # #   matched  :      "に"
+  # #   post_match:     "ちは"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["に", nil]
+  # #   []:
+  # #     [0]:          "に"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       9
+  # #   charpos:   3
+  # #   rest:      "ちは"
+  # #   rest_size: 6
   #
-  # It's similar to #scan, but without returning the matched string.
-  #
-  #     s = StringScanner.new('test string')
-  #     p s.skip(/\w+/)   # -> 4
-  #     p s.skip(/\w+/)   # -> nil
-  #     p s.skip(/\s+/)   # -> 1
-  #     p s.skip("st")    # -> 2
-  #     p s.skip(/\w+/)   # -> 4
-  #     p s.skip(/./)     # -> nil
+  # scanner.skip(/nope/)            # => nil
+  # match_values_cleared?(scanner)  # => true
   #
   def skip: (Regexp) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - skip_until(pattern)
+  #   - skip_until(p1)
   # -->
-  # Advances the scan pointer until `pattern` is matched and consumed.  Returns
-  # the number of bytes advanced, or `nil` if no match was found.
+  # call-seq:
+  #  skip_until(pattern) -> matched_substring_size or nil
+  # Attempts to [match](rdoc-ref:StringScanner@Matching) the given `pattern`
+  # anywhere (at any
+  # [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)) in the
+  # [target substring](rdoc-ref:StringScanner@Target+Substring);
+  # does not modify the positions.
+  # If the match attempt succeeds:
+  # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns the size of the matched substring.
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string           # => "こんにちは"
+  # scanner.pos = 6
+  # scanner.skip_until(/ち/) # => 6
+  # put_match_values(scanner)
+  # # Basic match values:
+  # #   matched?:       true
+  # #   matched_size:   3
+  # #   pre_match:      "こんに"
+  # #   matched  :      "ち"
+  # #   post_match:     "は"
+  # # Captured match values:
+  # #   size:           1
+  # #   captures:       []
+  # #   named_captures: {}
+  # #   values_at:      ["ち", nil]
+  # #   []:
+  # #     [0]:          "ち"
+  # #     [1]:          nil
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       12
+  # #   charpos:   4
+  # #   rest:      "は"
+  # #   rest_size: 3
   #
-  # Look ahead to match `pattern`, and advance the scan pointer to the *end* of
-  # the match.  Return the number of characters advanced, or `nil` if the match
-  # was unsuccessful.
-  #
-  # It's similar to #scan_until, but without returning the intervening string.
-  #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.skip_until /12/           # -> 10
-  #     s                           #
+  # If the match attempt fails:
+  # *   Clears match values.
+  # *   Returns `nil`.
+  #     scanner.skip_until(/nope/)     # => nil
+  # match_values_cleared?(scanner) # => true
   #
   def skip_until: (Regexp) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - string()
+  #   - string -> stored_string
   # -->
-  # Returns the string being scanned.
+  # Returns the [stored string](rdoc-ref:StringScanner@Stored+String):
+  #     scanner = StringScanner.new('foobar')
+  # scanner.string # => "foobar"
+  # scanner.concat('baz')
+  # scanner.string # => "foobarbaz"
   #
   def string: () -> String
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - string=(str)
+  #   - string = other_string -> other_string
   # -->
-  # Changes the string being scanned to `str` and resets the scanner. Returns
-  # `str`.
+  # Replaces the [stored string](rdoc-ref:StringScanner@Stored+String) with the
+  # given `other_string`:
+  # *   Sets both [positions](rdoc-ref:StringScanner@Positions) to zero.
+  # *   Clears [match values](rdoc-ref:StringScanner@Match+Values).
+  # *   Returns `other_string`.
+  #     scanner = StringScanner.new('foobar')
+  # scanner.scan(/foo/)
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "bar"
+  # #   rest_size: 3
+  # match_values_cleared?(scanner) # => false
+  #
+  # scanner.string = 'baz'         # => "baz"
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       0
+  # #   charpos:   0
+  # #   rest:      "baz"
+  # #   rest_size: 3
+  # match_values_cleared?(scanner) # => true
   #
   def string=: (String) -> String
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - terminate
-  #   - clear
+  #   - terminate()
   # -->
-  # Sets the scan pointer to the end of the string and clear matching data.
+  # call-seq:
+  #  terminate -> self
+  # Sets the scanner to end-of-string;
+  # returns `self`:
+  # *   Sets both [positions](rdoc-ref:StringScanner@Positions) to end-of-stream.
+  # *   Clears [match values](rdoc-ref:StringScanner@Match+Values).
+  #     scanner = StringScanner.new(HIRAGANA_TEXT)
+  # scanner.string                 # => "こんにちは"
+  # scanner.scan_until(/に/)
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       9
+  # #   charpos:   3
+  # #   rest:      "ちは"
+  # #   rest_size: 6
+  # match_values_cleared?(scanner) # => false
+  #
+  # scanner.terminate              # => #<StringScanner fin>
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       15
+  # #   charpos:   5
+  # #   rest:      ""
+  # #   rest_size: 0
+  # match_values_cleared?(scanner) # => true
   #
   def terminate: () -> void
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - unscan()
+  #   - unscan -> self
   # -->
-  # Sets the scan pointer to the previous position.  Only one previous position is
-  # remembered, and it changes with each scanning operation.
+  # Sets the [position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) to
+  # its value previous to the recent successful
+  # [match](rdoc-ref:StringScanner@Matching) attempt:
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.scan(/foo/)
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       3
+  # #   charpos:   3
+  # #   rest:      "barbaz"
+  # #   rest_size: 6
+  # scanner.unscan
+  # # => #<StringScanner 0/9 @ "fooba...">
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       0
+  # #   charpos:   0
+  # #   rest:      "foobarbaz"
+  # #   rest_size: 9
   #
-  #     s = StringScanner.new('test string')
-  #     s.scan(/\w+/)        # => "test"
-  #     s.unscan
-  #     s.scan(/../)         # => "te"
-  #     s.scan(/\d/)         # => nil
-  #     s.unscan             # ScanError: unscan failed: previous match record not exist
+  # Raises an exception if match values are clear:
+  #     scanner.scan(/nope/)           # => nil
+  # match_values_cleared?(scanner) # => true
+  # scanner.unscan                 # Raises StringScanner::Error.
   #
   def unscan: () -> void
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - scanner.values_at( i1, i2, ... iN )   -> an_array
+  #   - values_at(*specifiers) -> array_of_captures or nil
   # -->
-  # Returns the subgroups in the most recent match at the given indices. If
-  # nothing was priorly matched, it returns nil.
-  #
-  #     s = StringScanner.new("Fri Dec 12 1975 14:39")
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> "Fri Dec 12 "
-  #     s.values_at 0, -1, 5, 2            # -> ["Fri Dec 12 ", "12", nil, "Dec"]
-  #     s.scan(/(\w+) (\w+) (\d+) /)       # -> nil
-  #     s.values_at 0, -1, 5, 2            # -> nil
+  # Returns an array of captured substrings, or `nil` of none.
+  # For each `specifier`, the returned substring is `[specifier]`;
+  # see #[].
+  #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
+  # pattern = /(?<wday>\w+) (?<month>\w+) (?<day>\d+) /
+  # scanner.match?(pattern)
+  # scanner.values_at(*0..3)               # => ["Fri Dec 12 ", "Fri", "Dec", "12"]
+  # scanner.values_at(*%i[wday month day]) # => ["Fri", "Dec", "12"]
   #
   def values_at: (*Integer) -> Array[String]?
 
@@ -751,24 +1592,32 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - StringScanner.new(string, fixed_anchor: false)
-  #   - StringScanner.new(string, dup = false)
+  #   - StringScanner.new(string, fixed_anchor: false) -> string_scanner
   # -->
-  # Creates a new StringScanner object to scan over the given `string`.
-  #
-  # If `fixed_anchor` is `true`, `\A` always matches the beginning of the string.
-  # Otherwise, `\A` always matches the current position.
-  #
-  # `dup` argument is obsolete and not used now.
+  # Returns a new `StringScanner` object whose [stored
+  # string](rdoc-ref:StringScanner@Stored+String)
+  # is the given `string`;
+  # sets the [fixed-anchor
+  # property](rdoc-ref:StringScanner@Fixed-Anchor+Property):
+  #     scanner = StringScanner.new('foobarbaz')
+  # scanner.string        # => "foobarbaz"
+  # scanner.fixed_anchor? # => false
+  # put_situation(scanner)
+  # # Situation:
+  # #   pos:       0
+  # #   charpos:   0
+  # #   rest:      "foobarbaz"
+  # #   rest_size: 9
   #
   def initialize: (String, ?bool dup, ?fixed_anchor: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - dup
-  #   - clone
+  #   - dup -> shallow_copy
   # -->
-  # Duplicates a StringScanner object.
+  # Returns a shallow copy of `self`;
+  # the [stored string](rdoc-ref:StringScanner@Stored+String) in the copy is the
+  # same string as in `self`.
   #
   def initialize_copy: (StringScanner) -> void
 end

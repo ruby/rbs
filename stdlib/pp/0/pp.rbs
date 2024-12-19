@@ -72,6 +72,9 @@ class PP < PrettyPrint
     def group: (?Integer indent, ?String open_obj, ?String close_obj, ?Integer open_width, ?Integer close_width) { () -> untyped } -> void
   end
 
+  # <!-- rdoc-file=lib/pp.rb -->
+  # Module that defines helper methods for pretty_print.
+  #
   module PPMethods : _PPMethodsRequired
     # <!--
     #   rdoc-file=lib/pp.rb

@@ -43,7 +43,7 @@ class Time
   #
   # This method **does not** function as a validator.  If the input string does
   # not match valid formats strictly, you may get a cryptic result.  Should
-  # consider to use `Time.strptime` instead of this method as possible.
+  # consider to use Time.strptime instead of this method as possible.
   #
   #     require 'time'
   #
@@ -146,6 +146,8 @@ class Time
   # Works similar to `parse` except that instead of using a heuristic to detect
   # the format of the input string, you provide a second argument that describes
   # the format of the string.
+  #
+  # Raises ArgumentError if the date or format is invalid.
   #
   # If a block is given, the year described in `date` is converted by the block.
   # For example:
@@ -281,7 +283,7 @@ class Time
   # :   Year which may include century, if provided
   #
   # %z
-  # :   Time zone as  hour offset from UTC (e.g. +0900)
+  # :   Time zone as hour offset from UTC (e.g. +0900)
   #
   # %Z
   # :   Time zone name
@@ -454,10 +456,22 @@ class Time
   #
   def xmlschema: (?Integer fraction_digits) -> String
 
-  # <!--
-  #   rdoc-file=lib/time.rb
-  #   - iso8601(fraction_digits=0)
-  # -->
+  # <!-- rdoc-file=lib/time.rb -->
+  # Parses `time` as a dateTime defined by the XML Schema and converts it to a
+  # Time object.  The format is a restricted version of the format defined by ISO
+  # 8601.
+  #
+  # ArgumentError is raised if `time` is not compliant with the format or if the
+  # Time class cannot represent the specified time.
+  #
+  # See #xmlschema for more information on this format.
+  #
+  #     require 'time'
+  #
+  #     Time.xmlschema("2011-10-05T22:26:12-04:00")
+  #     #=> 2011-10-05 22:26:12-04:00
+  #
+  # You must require 'time' to use this method.
   #
   alias iso8601 xmlschema
 end

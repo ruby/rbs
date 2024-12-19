@@ -196,7 +196,7 @@ class Numeric
   def +: (Numeric) -> Numeric
 
   # <!--
-  #   rdoc-file=numeric.c
+  #   rdoc-file=numeric.rb
   #   - +self -> self
   # -->
   # Returns `self`.
@@ -261,13 +261,15 @@ class Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - ceil(digits = 0) -> integer or float
+  #   - ceil(ndigits = 0) -> float or integer
   # -->
-  # Returns the smallest number that is greater than or equal to `self` with a
-  # precision of `digits` decimal digits.
+  # Returns the smallest float or integer that is greater than or equal to `self`,
+  # as specified by the given `ndigits`, which must be an [integer-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
   #
-  # Numeric implements this by converting `self` to a Float and invoking
-  # Float#ceil.
+  # Equivalent to `self.to_f.ceil(ndigits)`.
+  #
+  # Related: #floor, Float#ceil.
   #
   def ceil: () -> Integer
           | (Integer digits) -> (Integer | Numeric)
@@ -387,8 +389,8 @@ class Numeric
   #     1.eql?(Rational(1, 1)) # => false
   #     1.eql?(Complex(1, 0))  # => false
   #
-  # Method `eql?` is different from +==+ in that `eql?` requires matching types,
-  # while +==+ does not.
+  # Method `eql?` is different from `==` in that `eql?` requires matching types,
+  # while `==` does not.
   #
   def eql?: (untyped) -> bool
 
@@ -414,13 +416,15 @@ class Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - floor(digits = 0) -> integer or float
+  #   - floor(ndigits = 0) -> float or integer
   # -->
-  # Returns the largest number that is less than or equal to `self` with a
-  # precision of `digits` decimal digits.
+  # Returns the largest float or integer that is less than or equal to `self`, as
+  # specified by the given `ndigits`, which must be an [integer-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
   #
-  # Numeric implements this by converting `self` to a Float and invoking
-  # Float#floor.
+  # Equivalent to `self.to_f.floor(ndigits)`.
+  #
+  # Related: #ceil, Float#floor.
   #
   def floor: () -> Integer
            | (Integer digits) -> Numeric
@@ -526,17 +530,19 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - nonzero?  ->  self or nil
   # -->
-  # Returns `self` if `self` is not a zero value, `nil` otherwise; uses method
-  # `zero?` for the evaluation.
+  # Returns +self+ if +self+ is not a zero value, +nil+ otherwise;
+  #     uses method <tt>zero?</tt> for the evaluation.
   #
-  # The returned `self` allows the method to be chained:
+  #     The returned +self+ allows the method to be chained:
   #
-  #     a = %w[z Bb bB bb BB a aA Aa AA A]
-  #     a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
-  #     # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
+  #       a = %w[z Bb bB bb BB a aA Aa AA A]
+  #       a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
+  #       # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
   #
-  # Of the Core and Standard Library classes, Integer, Float, Rational, and
-  # Complex use this implementation.
+  #     Of the Core and Standard Library classes,
+  #     Integer, Float, Rational, and Complex use this implementation.
+  #
+  # Related: #zero?
   #
   def nonzero?: () -> self?
 
@@ -664,86 +670,83 @@ class Numeric
   # -->
   # Generates a sequence of numbers; with a block given, traverses the sequence.
   #
-  #     Of the Core and Standard Library classes,
-  #     Integer, Float, and Rational use this implementation.
+  # Of the Core and Standard Library classes, Integer, Float, and Rational use
+  # this implementation.
   #
-  #     A quick example:
+  # A quick example:
   #
-  #       squares = []
-  #       1.step(by: 2, to: 10) {|i| squares.push(i*i) }
-  #       squares # => [1, 9, 25, 49, 81]
+  #     squares = []
+  #     1.step(by: 2, to: 10) {|i| squares.push(i*i) }
+  #     squares # => [1, 9, 25, 49, 81]
   #
-  #     The generated sequence:
+  # The generated sequence:
   #
-  #     - Begins with +self+.
-  #     - Continues at intervals of +by+ (which may not be zero).
-  #     - Ends with the last number that is within or equal to +to+;
-  #       that is, less than or equal to +to+ if +by+ is positive,
-  #       greater than or equal to +to+ if +by+ is negative.
-  #       If +to+ is +nil+, the sequence is of infinite length.
+  # *   Begins with `self`.
+  # *   Continues at intervals of `by` (which may not be zero).
+  # *   Ends with the last number that is within or equal to `to`; that is, less
+  #     than or equal to `to` if `by` is positive, greater than or equal to `to`
+  #     if `by` is negative. If `to` is `nil`, the sequence is of infinite length.
   #
-  #     If a block is given, calls the block with each number in the sequence;
-  #     returns +self+.  If no block is given, returns an Enumerator::ArithmeticSequence.
+  # If a block is given, calls the block with each number in the sequence; returns
+  # `self`. If no block is given, returns an Enumerator::ArithmeticSequence.
   #
-  #     <b>Keyword Arguments</b>
+  # **Keyword Arguments**
   #
-  #     With keyword arguments +by+ and +to+,
-  #     their values (or defaults) determine the step and limit:
+  # With keyword arguments `by` and `to`, their values (or defaults) determine the
+  # step and limit:
   #
-  #       # Both keywords given.
-  #       squares = []
-  #       4.step(by: 2, to: 10) {|i| squares.push(i*i) }    # => 4
-  #       squares # => [16, 36, 64, 100]
-  #       cubes = []
-  #       3.step(by: -1.5, to: -3) {|i| cubes.push(i*i*i) } # => 3
-  #       cubes   # => [27.0, 3.375, 0.0, -3.375, -27.0]
-  #       squares = []
-  #       1.2.step(by: 0.2, to: 2.0) {|f| squares.push(f*f) }
-  #       squares # => [1.44, 1.9599999999999997, 2.5600000000000005, 3.24, 4.0]
+  #     # Both keywords given.
+  #     squares = []
+  #     4.step(by: 2, to: 10) {|i| squares.push(i*i) }    # => 4
+  #     squares # => [16, 36, 64, 100]
+  #     cubes = []
+  #     3.step(by: -1.5, to: -3) {|i| cubes.push(i*i*i) } # => 3
+  #     cubes   # => [27.0, 3.375, 0.0, -3.375, -27.0]
+  #     squares = []
+  #     1.2.step(by: 0.2, to: 2.0) {|f| squares.push(f*f) }
+  #     squares # => [1.44, 1.9599999999999997, 2.5600000000000005, 3.24, 4.0]
   #
-  #       squares = []
-  #       Rational(6/5).step(by: 0.2, to: 2.0) {|r| squares.push(r*r) }
-  #       squares # => [1.0, 1.44, 1.9599999999999997, 2.5600000000000005, 3.24, 4.0]
+  #     squares = []
+  #     Rational(6/5).step(by: 0.2, to: 2.0) {|r| squares.push(r*r) }
+  #     squares # => [1.0, 1.44, 1.9599999999999997, 2.5600000000000005, 3.24, 4.0]
   #
-  #       # Only keyword to given.
-  #       squares = []
-  #       4.step(to: 10) {|i| squares.push(i*i) }           # => 4
-  #       squares # => [16, 25, 36, 49, 64, 81, 100]
-  #       # Only by given.
+  #     # Only keyword to given.
+  #     squares = []
+  #     4.step(to: 10) {|i| squares.push(i*i) }           # => 4
+  #     squares # => [16, 25, 36, 49, 64, 81, 100]
+  #     # Only by given.
   #
-  #       # Only keyword by given
-  #       squares = []
-  #       4.step(by:2) {|i| squares.push(i*i); break if i > 10 }
-  #       squares # => [16, 36, 64, 100, 144]
+  #     # Only keyword by given
+  #     squares = []
+  #     4.step(by:2) {|i| squares.push(i*i); break if i > 10 }
+  #     squares # => [16, 36, 64, 100, 144]
   #
-  #       # No block given.
-  #       e = 3.step(by: -1.5, to: -3) # => (3.step(by: -1.5, to: -3))
-  #       e.class                      # => Enumerator::ArithmeticSequence
+  #     # No block given.
+  #     e = 3.step(by: -1.5, to: -3) # => (3.step(by: -1.5, to: -3))
+  #     e.class                      # => Enumerator::ArithmeticSequence
   #
-  #     <b>Positional Arguments</b>
+  # **Positional Arguments**
   #
-  #     With optional positional arguments +to+ and +by+,
-  #     their values (or defaults) determine the step and limit:
+  # With optional positional arguments `to` and `by`, their values (or defaults)
+  # determine the step and limit:
   #
-  #       squares = []
-  #       4.step(10, 2) {|i| squares.push(i*i) }    # => 4
-  #       squares # => [16, 36, 64, 100]
-  #       squares = []
-  #       4.step(10) {|i| squares.push(i*i) }
-  #       squares # => [16, 25, 36, 49, 64, 81, 100]
-  #       squares = []
-  #       4.step {|i| squares.push(i*i); break if i > 10 }  # => nil
-  #       squares # => [16, 25, 36, 49, 64, 81, 100, 121]
+  #     squares = []
+  #     4.step(10, 2) {|i| squares.push(i*i) }    # => 4
+  #     squares # => [16, 36, 64, 100]
+  #     squares = []
+  #     4.step(10) {|i| squares.push(i*i) }
+  #     squares # => [16, 25, 36, 49, 64, 81, 100]
+  #     squares = []
+  #     4.step {|i| squares.push(i*i); break if i > 10 }  # => nil
+  #     squares # => [16, 25, 36, 49, 64, 81, 100, 121]
   #
   # **Implementation Notes**
   #
-  #     If all the arguments are integers, the loop operates using an integer
-  #     counter.
+  # If all the arguments are integers, the loop operates using an integer counter.
   #
-  #     If any of the arguments are floating point numbers, all are converted
-  #     to floats, and the loop is executed
-  #     <i>floor(n + n*Float::EPSILON) + 1</i> times,
-  #     where <i>n = (limit - self)/step</i>.
+  # If any of the arguments are floating point numbers, all are converted to
+  # floats, and the loop is executed *floor(n + n*Float::EPSILON) + 1* times,
+  # where *n = (limit - self)/step*.
   #
   def step: (?Numeric limit, ?Numeric step) { (Numeric) -> void } -> self
           | (?Numeric limit, ?Numeric step) -> Enumerator[Numeric, self]

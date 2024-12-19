@@ -4,7 +4,7 @@
 # ## Synopsis
 #
 #     require 'timeout'
-#     status = Timeout::timeout(5) {
+#     status = Timeout.timeout(5) {
 #       # Something that should be interrupted if it takes more than 5 seconds...
 #     }
 #
@@ -12,10 +12,6 @@
 #
 # Timeout provides a way to auto-terminate a potentially long-running operation
 # if it hasn't finished in a fixed amount of time.
-#
-# Previous versions didn't use a module for namespacing, however #timeout is
-# provided for backwards compatibility.  You should prefer Timeout.timeout
-# instead.
 #
 # ## Copyright
 #
@@ -34,9 +30,10 @@ module Timeout
   # `sec` seconds to complete.
   #
   # `sec`
-  # :   Number of seconds to wait for the block to terminate. Any number may be
-  #     used, including Floats to specify fractional seconds. A value of 0 or
-  #     `nil` will execute the block without any timeout.
+  # :   Number of seconds to wait for the block to terminate. Any non-negative
+  #     number or nil may be used, including Floats to specify fractional seconds.
+  #     A value of 0 or `nil` will execute the block without any timeout. Any
+  #     negative number will raise an ArgumentError.
   #
   # `klass`
   # :   Exception Class to raise if the block fails to terminate in `sec` seconds.
@@ -78,4 +75,7 @@ class Timeout::Error < RuntimeError
   attr_reader thread: Thread?
 end
 
+# <!-- rdoc-file=lib/timeout.rb -->
+# The version
+#
 Timeout::VERSION: String

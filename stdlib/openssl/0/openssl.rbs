@@ -931,7 +931,7 @@ module OpenSSL
     #     puts int2.value # => 1
     #
     class ASN1Data
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -948,7 +948,7 @@ module OpenSSL
       #
       def indefinite_length: () -> bool
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -965,7 +965,7 @@ module OpenSSL
       #
       def indefinite_length=: [U] (boolish) -> U
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -982,7 +982,7 @@ module OpenSSL
       #
       alias infinite_length indefinite_length
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -999,24 +999,24 @@ module OpenSSL
       #
       alias infinite_length= indefinite_length=
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # An Integer representing the tag number of this ASN1Data. Never `nil`.
       #
       def tag: () -> bn
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # An Integer representing the tag number of this ASN1Data. Never `nil`.
       #
       def tag=: (::Integer) -> ::Integer
               | (BN) -> BN
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # A Symbol representing the tag class of this ASN1Data. Never `nil`. See
       # ASN1Data for possible values.
       #
       def tag_class: () -> tag_class
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # A Symbol representing the tag class of this ASN1Data. Never `nil`. See
       # ASN1Data for possible values.
       #
@@ -1033,13 +1033,13 @@ module OpenSSL
       #
       def to_der: () -> String
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Carries the value of a ASN.1 type. Please confer Constructive and Primitive
       # for the mappings between ASN.1 data types and Ruby classes.
       #
       def value: () -> untyped
 
-      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
+      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
       # Carries the value of a ASN.1 type. Please confer Constructive and Primitive
       # for the mappings between ASN.1 data types and Ruby classes.
       #
@@ -1048,7 +1048,7 @@ module OpenSSL
       private
 
       # <!--
-      #   rdoc-file=ext/openssl/ossl_asn1.c
+      #   rdoc-file=ext/openssl/lib/openssl/asn1.rb
       #   - OpenSSL::ASN1::ASN1Data.new(value, tag, tag_class) => ASN1Data
       # -->
       # *value*: Please have a look at Constructive and Primitive to see how Ruby
@@ -1120,7 +1120,7 @@ module OpenSSL
       include Enumerable[ASN1Data]
 
       # <!--
-      #   rdoc-file=ext/openssl/ossl_asn1.c
+      #   rdoc-file=ext/openssl/lib/openssl/asn1.rb
       #   - asn1_ary.each { |asn1| block } => asn1_ary
       # -->
       # Calls the given block once for each element in self, passing that element as
@@ -1186,6 +1186,11 @@ module OpenSSL
 
       private
 
+      # <!--
+      #   rdoc-file=ext/openssl/lib/openssl/asn1.rb
+      #   - new()
+      # -->
+      #
       def initialize: () -> void
     end
 
@@ -1267,7 +1272,7 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_asn1.c
       #   - oid == other_oid => true or false
       # -->
-      # Returns `true` if *other_oid* is the same as *oid*
+      # Returns `true` if *other_oid* is the same as *oid*.
       #
       def ==: (ObjectId other) -> bool
 
@@ -1848,7 +1853,7 @@ module OpenSSL
     #         bignum is ignored.
     #     *   `10` - Decimal number representation, with a leading '-' for a
     #         negative bignum.
-    #     *   `16` - Hexadeciaml number representation, with a leading '-' for a
+    #     *   `16` - Hexadecimal number representation, with a leading '-' for a
     #         negative bignum.
     #
     def to_s: () -> String
@@ -1898,7 +1903,7 @@ module OpenSSL
     #         number.
     #     *   `10` - Decimal number representation, with a leading '-' for a
     #         negative number.
-    #     *   `16` - Hexadeciaml number representation, with a leading '-' for a
+    #     *   `16` - Hexadecimal number representation, with a leading '-' for a
     #         negative number.
     #
     def initialize: (instance) -> void
@@ -2008,7 +2013,7 @@ module OpenSSL
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
-    #   - gets(eol=$/, limit=nil)
+    #   - gets(eol=$/, limit=nil, chomp: false)
     # -->
     # Reads the next "line" from the stream.  Lines are separated by *eol*.  If
     # *limit* is provided the result will not be longer than the given number of
@@ -2666,8 +2671,8 @@ module OpenSSL
     #   rdoc-file=ext/openssl/ossl_cipher.c
     #   - cipher.name -> string
     # -->
-    # Returns the name of the cipher which may differ slightly from the original
-    # name provided.
+    # Returns the short name of the cipher which may differ slightly from the
+    # original name provided.
     #
     def name: () -> String
 
@@ -3020,19 +3025,16 @@ module OpenSSL
     # -->
     # Gets the parsable form of the current configuration.
     #
-    # Given the following configuration being created:
+    # Given the following configuration file being loaded:
     #
-    #     config = OpenSSL::Config.new
-    #       #=> #<OpenSSL::Config sections=[]>
-    #     config['default'] = {"foo"=>"bar","baz"=>"buz"}
-    #       #=> {"foo"=>"bar", "baz"=>"buz"}
+    #     config = OpenSSL::Config.load('baz.cnf')
+    #       #=> #<OpenSSL::Config sections=["default"]>
     #     puts config.to_s
     #       #=> [ default ]
     #       #   foo=bar
     #       #   baz=buz
     #
-    # You can parse get the serialized configuration using #to_s and then parse it
-    # later:
+    # You can get the serialized configuration using #to_s and then parse it later:
     #
     #     serialized_config = config.to_s
     #     # much later...
@@ -3217,7 +3219,8 @@ module OpenSSL
     #   rdoc-file=ext/openssl/ossl_digest.c
     #   - digest.name -> string
     # -->
-    # Returns the sn of this Digest algorithm.
+    # Returns the short name of this Digest algorithm which may differ slightly from
+    # the original name provided.
     #
     # ### Example
     #     digest = OpenSSL::Digest.new('SHA512')
@@ -3264,7 +3267,8 @@ module OpenSSL
     #   - Digest.new(string [, data]) -> Digest
     # -->
     # Creates a Digest instance based on *string*, which is either the ln (long
-    # name) or sn (short name) of a supported digest algorithm.
+    # name) or sn (short name) of a supported digest algorithm. A list of supported
+    # algorithms can be obtained by calling OpenSSL::Digest.digests.
     #
     # If *data* (a String) is given, it is used as the initial input to the Digest
     # instance, i.e.
@@ -3914,7 +3918,7 @@ module OpenSSL
     #   - KDF.hkdf(ikm, salt:, info:, length:, hash:) -> String
     # -->
     # HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified in
-    # [RFC 5869](https://tools.ietf.org/html/rfc5869).
+    # [RFC 5869](https://www.rfc-editor.org/rfc/rfc5869).
     #
     # New in OpenSSL 1.1.0.
     #
@@ -3937,7 +3941,7 @@ module OpenSSL
     #
     #
     # ### Example
-    #     # The values from https://datatracker.ietf.org/doc/html/rfc5869#appendix-A.1
+    #     # The values from https://www.rfc-editor.org/rfc/rfc5869#appendix-A.1
     #     ikm = ["0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"].pack("H*")
     #     salt = ["000102030405060708090a0b0c"].pack("H*")
     #     info = ["f0f1f2f3f4f5f6f7f8f9"].pack("H*")
@@ -3955,7 +3959,7 @@ module OpenSSL
     # *length* bytes.
     #
     # For more information about PBKDF2, see RFC 2898 Section 5.2
-    # (https://tools.ietf.org/html/rfc2898#section-5.2).
+    # (https://www.rfc-editor.org/rfc/rfc2898#section-5.2).
     #
     # ### Parameters
     # pass
@@ -3993,10 +3997,10 @@ module OpenSSL
     # attacks using custom hardwares than alternative KDFs such as PBKDF2 or bcrypt.
     #
     # The keyword arguments *N*, *r* and *p* can be used to tune scrypt. RFC 7914
-    # (published on 2016-08, https://tools.ietf.org/html/rfc7914#section-2) states
-    # that using values r=8 and p=1 appears to yield good results.
+    # (published on 2016-08, https://www.rfc-editor.org/rfc/rfc7914#section-2)
+    # states that using values r=8 and p=1 appears to yield good results.
     #
-    # See RFC 7914 (https://tools.ietf.org/html/rfc7914) for more information.
+    # See RFC 7914 (https://www.rfc-editor.org/rfc/rfc7914) for more information.
     #
     # ### Parameters
     # pass
@@ -4069,8 +4073,8 @@ module OpenSSL
   # <!-- rdoc-file=ext/openssl/ossl_ns_spki.c -->
   # OpenSSL::Netscape is a namespace for SPKI (Simple Public Key Infrastructure)
   # which implements Signed Public Key and Challenge. See [RFC
-  # 2692](http://tools.ietf.org/html/rfc2692) and [RFC
-  # 2693](http://tools.ietf.org/html/rfc2692) for details.
+  # 2692](https://www.rfc-editor.org/rfc/rfc2692) and [RFC
+  # 2693](https://www.rfc-editor.org/rfc/rfc2692) for details.
   #
   module Netscape
     # <!-- rdoc-file=ext/openssl/ossl_ns_spki.c -->
@@ -5139,8 +5143,13 @@ module OpenSSL
   class PKCS7
     # <!--
     #   rdoc-file=ext/openssl/ossl_pkcs7.c
-    #   - PKCS7.encrypt(certs, data, [, cipher [, flags]]) => pkcs7
+    #   - PKCS7.encrypt(certs, data, cipher, flags = 0) => pkcs7
     # -->
+    # Creates a PKCS #7 enveloped-data structure.
+    #
+    # Before version 3.3.0, `cipher` was optional and defaulted to `"RC2-40-CBC"`.
+    #
+    # See also the man page PKCS7_encrypt(3).
     #
     def self.encrypt: (X509::Certificate certs, String data, ?Cipher cipher, ?Integer flags) -> instance
 
@@ -8235,7 +8244,7 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
-      #   - options()
+      #   - ctx.options -> integer
       # -->
       # Gets various OpenSSL options.
       #
@@ -8243,9 +8252,16 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
-      #   - options=(p1)
+      #   - ctx.options = integer
       # -->
-      # Sets various OpenSSL options.
+      # Sets various OpenSSL options. The options are a bit field and can be combined
+      # with the bitwise OR operator (`|`). Available options are defined as constants
+      # in OpenSSL::SSL that begin with `OP_`.
+      #
+      # For backwards compatibility, passing `nil` has the same effect as passing
+      # OpenSSL::SSL::OP_ALL.
+      #
+      # See also man page SSL_CTX_set_options(3).
       #
       def options=: (Integer ssl_options) -> Integer
 
@@ -11021,7 +11037,7 @@ module OpenSSL
         #   - crl_uris()
         # -->
         # Get the distributionPoint fullName URI from the certificate's CRL distribution
-        # points extension, as described in RFC5280 Section 4.2.1.13
+        # points extension, as described in RFC 5280 Section 4.2.1.13.
         #
         # Returns an array of strings or nil or raises ASN1::ASN1Error.
         #

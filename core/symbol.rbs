@@ -1,14 +1,14 @@
 # <!-- rdoc-file=string.c -->
-# Symbol objects represent named identifiers inside the Ruby interpreter.
+# A `Symbol` object represents a named identifier inside the Ruby interpreter.
 #
-# You can create a Symbol object explicitly with:
+# You can create a `Symbol` object explicitly with:
 #
 # *   A [symbol literal](rdoc-ref:syntax/literals.rdoc@Symbol+Literals).
 #
-# The same Symbol object will be created for a given name or string for the
+# The same `Symbol` object will be created for a given name or string for the
 # duration of a program's execution, regardless of the context or meaning of
 # that name. Thus if `Fred` is a constant in one context, a method in another,
-# and a class in a third, the Symbol `:Fred` will be the same object in all
+# and a class in a third, the `Symbol` `:Fred` will be the same object in all
 # three contexts.
 #
 #     module One
@@ -51,17 +51,17 @@
 #     local_variables
 #     # => [:seven]
 #
-# Symbol objects are different from String objects in that Symbol objects
-# represent identifiers, while String objects represent text or data.
+# A `Symbol` object differs from a String object in that a `Symbol` object
+# represents an identifier, while a String object represents text or data.
 #
 # ## What's Here
 #
-# First, what's elsewhere. Class Symbol:
+# First, what's elsewhere. Class `Symbol`:
 #
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
-# Here, class Symbol provides methods that are useful for:
+# Here, class `Symbol` provides methods that are useful for:
 #
 # *   [Querying](rdoc-ref:Symbol@Methods+for+Querying)
 # *   [Comparing](rdoc-ref:Symbol@Methods+for+Comparing)
@@ -305,12 +305,10 @@ class Symbol
   #
   def end_with?: (*string suffixes) -> bool
 
-  # <!-- rdoc-file=string.c -->
-  # Returns a string representation of `self` (not including the leading colon):
-  #
-  #     :foo.to_s # => "foo"
-  #
-  # Related: Symbol#inspect, Symbol#name.
+  # <!--
+  #   rdoc-file=symbol.rb
+  #   - id2name()
+  # -->
   #
   alias id2name to_s
 
@@ -370,7 +368,7 @@ class Symbol
   def next: () -> Symbol
 
   # <!--
-  #   rdoc-file=string.c
+  #   rdoc-file=symbol.rb
   #   - name -> string
   # -->
   # Returns a frozen string representation of `self` (not including the leading
@@ -441,7 +439,7 @@ class Symbol
   def to_proc: () -> Proc
 
   # <!--
-  #   rdoc-file=string.c
+  #   rdoc-file=symbol.rb
   #   - to_s -> string
   # -->
   # Returns a string representation of `self` (not including the leading colon):

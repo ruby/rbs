@@ -50,7 +50,6 @@ module Warning
   #
   # `:experimental`
   # :   experimental features
-  #     *   Pattern matching
   #
   #
   # `:performance`

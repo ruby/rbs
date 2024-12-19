@@ -83,7 +83,7 @@ class Data
   #     #=> #<data Measure amount=1, unit="km">
   #
   # Note that member-less Data is acceptable and might be a useful technique for
-  # defining several homogenous data classes, like
+  # defining several homogeneous data classes, like
   #
   #     class HTTPFetcher
   #       Response = Data.define(:body)

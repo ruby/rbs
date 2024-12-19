@@ -86,9 +86,17 @@ module PTY
   # the spawned pty.
   #
   #     # sets FOO to "bar"
-  #     PTY.spawn({"FOO"=>"bar"}, "printenv", "FOO") { |r,w,pid| p r.read } #=> "bar\r\n"
+  #     PTY.spawn({"FOO"=>"bar"}, "printenv", "FOO") do |r, w, pid|
+  #       p r.read #=> "bar\r\n"
+  #     ensure
+  #       r.close; w.close; Process.wait(pid)
+  #     end
   #     # unsets FOO
-  #     PTY.spawn({"FOO"=>nil}, "printenv", "FOO") { |r,w,pid| p r.read } #=> ""
+  #     PTY.spawn({"FOO"=>nil}, "printenv", "FOO") do |r, w, pid|
+  #       p r.read #=> ""
+  #     ensure
+  #       r.close; w.close; Process.wait(pid)
+  #     end
   #
   # `command` and `command_line` are the full commands to run, given a String. Any
   # additional `arguments` will be passed to the command.
@@ -108,6 +116,16 @@ module PTY
   #
   # `pid`
   # :   The process identifier for the command.
+  #
+  #
+  # ### Clean up
+  #
+  # This method does not clean up like closing IOs or waiting for child process,
+  # except that the process is detached in the block form to prevent it from
+  # becoming a zombie (see Process.detach).  Any other cleanup is the
+  # responsibility of the caller.  If waiting for `pid`, be sure to close both `r`
+  # and `w` before doing so; doing it in the reverse order may cause deadlock on
+  # some OSes.
   #
   alias self.getpty self.spawn
 
@@ -173,9 +191,17 @@ module PTY
   # the spawned pty.
   #
   #     # sets FOO to "bar"
-  #     PTY.spawn({"FOO"=>"bar"}, "printenv", "FOO") { |r,w,pid| p r.read } #=> "bar\r\n"
+  #     PTY.spawn({"FOO"=>"bar"}, "printenv", "FOO") do |r, w, pid|
+  #       p r.read #=> "bar\r\n"
+  #     ensure
+  #       r.close; w.close; Process.wait(pid)
+  #     end
   #     # unsets FOO
-  #     PTY.spawn({"FOO"=>nil}, "printenv", "FOO") { |r,w,pid| p r.read } #=> ""
+  #     PTY.spawn({"FOO"=>nil}, "printenv", "FOO") do |r, w, pid|
+  #       p r.read #=> ""
+  #     ensure
+  #       r.close; w.close; Process.wait(pid)
+  #     end
   #
   # `command` and `command_line` are the full commands to run, given a String. Any
   # additional `arguments` will be passed to the command.
@@ -195,6 +221,16 @@ module PTY
   #
   # `pid`
   # :   The process identifier for the command.
+  #
+  #
+  # ### Clean up
+  #
+  # This method does not clean up like closing IOs or waiting for child process,
+  # except that the process is detached in the block form to prevent it from
+  # becoming a zombie (see Process.detach).  Any other cleanup is the
+  # responsibility of the caller.  If waiting for `pid`, be sure to close both `r`
+  # and `w` before doing so; doing it in the reverse order may cause deadlock on
+  # some OSes.
   #
   def self.spawn: (*String command) -> [ IO, IO, Integer ]
                 | (*String command) { ([ IO, IO, Integer ]) -> void } -> void

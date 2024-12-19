@@ -473,13 +473,13 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #     json1 = JSON.generate(ruby)
 #     ruby1 = JSON.parse(json1, create_additions: true)
 #     # Make a nice display.
-#     display = <<EOT
-#     Generated JSON:
-#       Without addition:  #{json0} (#{json0.class})
-#       With addition:     #{json1} (#{json1.class})
-#     Parsed JSON:
-#       Without addition:  #{ruby0.inspect} (#{ruby0.class})
-#       With addition:     #{ruby1.inspect} (#{ruby1.class})
+#     display = <<~EOT
+#       Generated JSON:
+#         Without addition:  #{json0} (#{json0.class})
+#         With addition:     #{json1} (#{json1.class})
+#       Parsed JSON:
+#         Without addition:  #{ruby0.inspect} (#{ruby0.class})
+#         With addition:     #{ruby1.inspect} (#{ruby1.class})
 #     EOT
 #     puts display
 #
@@ -655,13 +655,13 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #     json1 = JSON.generate(foo1)
 #     obj1 = JSON.parse(json1, create_additions: true)
 #     #   Make a nice display.
-#     display = <<EOT
-#     Generated JSON:
-#       Without custom addition:  #{json0} (#{json0.class})
-#       With custom addition:     #{json1} (#{json1.class})
-#     Parsed JSON:
-#       Without custom addition:  #{obj0.inspect} (#{obj0.class})
-#       With custom addition:     #{obj1.inspect} (#{obj1.class})
+#     display = <<~EOT
+#       Generated JSON:
+#         Without custom addition:  #{json0} (#{json0.class})
+#         With custom addition:     #{json1} (#{json1.class})
+#       Parsed JSON:
+#         Without custom addition:  #{obj0.inspect} (#{obj0.class})
+#         With custom addition:     #{obj1.inspect} (#{obj1.class})
 #     EOT
 #     puts display
 #
@@ -750,14 +750,14 @@ module JSON
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
-  #     opts # => {:max_nesting=>false, :allow_nan=>true, :script_safe=>false}
+  #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
   def self.dump_default_options: () -> json_options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
-  #     opts # => {:max_nesting=>false, :allow_nan=>true, :script_safe=>false}
+  #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
   def self.dump_default_options=: (json_options) -> json_options
 
@@ -822,9 +822,7 @@ module JSON
   def self?.generate: (_ToJson obj, ?json_options opts) -> String
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
-  # Returns the JSON generator module that is used by JSON. This is either
-  # JSON::Ext::Generator or JSON::Pure::Generator:
-  #     JSON.generator # => JSON::Ext::Generator
+  # Returns the JSON generator module that is used by JSON.
   #
   def self.generator: () -> json_generator
 
@@ -844,6 +842,15 @@ module JSON
   # -->
   # Returns the Ruby objects created by parsing the given `source`.
   #
+  # BEWARE: This method is meant to serialise data from trusted user input, like
+  # from your own database server or clients under your control, it could be
+  # dangerous to allow untrusted users to pass JSON sources into it. If you must
+  # use it, use JSON.unsafe_load instead to make it clear.
+  #
+  # Since JSON version 2.8.0, `load` emits a deprecation warning when a non native
+  # type is deserialized, without `create_additions` being explicitly enabled, and
+  # in JSON version 3.0, `load` will have `create_additions` disabled by default.
+  #
   # *   Argument `source` must be, or be convertible to, a String:
   #     *   If `source` responds to instance method `to_str`, `source.to_str`
   #         becomes the source.
@@ -857,10 +864,7 @@ module JSON
   #     *   Otherwise, `source` remains the source.
   # *   Argument `proc`, if given, must be a Proc that accepts one argument. It
   #     will be called recursively with each result (depth-first order). See
-  #     details below. BEWARE: This method is meant to serialise data from trusted
-  #     user input, like from your own database server or clients under your
-  #     control, it could be dangerous to allow untrusted users to pass JSON
-  #     sources into it.
+  #     details below.
   # *   Argument `opts`, if given, contains a Hash of options for the parsing. See
   #     [Parsing Options](#module-JSON-label-Parsing+Options). The default options
   #     can be changed via method JSON.load_default_options=.
@@ -871,17 +875,17 @@ module JSON
   # `parse(source, opts)`;  see #parse.
   #
   # Source for following examples:
-  #     source = <<-EOT
-  #     {
-  #     "name": "Dave",
-  #       "age" :40,
-  #       "hats": [
-  #         "Cattleman's",
-  #         "Panama",
-  #         "Tophat"
-  #       ]
-  #     }
-  #     EOT
+  #     source = <<~JSON
+  #       {
+  #         "name": "Dave",
+  #         "age" :40,
+  #         "hats": [
+  #           "Cattleman's",
+  #           "Panama",
+  #           "Tophat"
+  #         ]
+  #       }
+  #     JSON
   #
   # Load a String:
   #     ruby = JSON.load(source)
@@ -1035,17 +1039,17 @@ module JSON
   # \JSON](#module-JSON-label-Parsing+JSON).
   #
   # Parses nested JSON objects:
-  #     source = <<-EOT
-  #     {
-  #     "name": "Dave",
-  #       "age" :40,
-  #       "hats": [
-  #         "Cattleman's",
-  #         "Panama",
-  #         "Tophat"
-  #       ]
-  #     }
-  #     EOT
+  #     source = <<~JSON
+  #       {
+  #       "name": "Dave",
+  #         "age" :40,
+  #         "hats": [
+  #           "Cattleman's",
+  #           "Panama",
+  #           "Tophat"
+  #         ]
+  #       }
+  #     JSON
   #     ruby = JSON.parse(source)
   #     ruby # => {"name"=>"Dave", "age"=>40, "hats"=>["Cattleman's", "Panama", "Tophat"]}
   #
@@ -1074,9 +1078,7 @@ module JSON
   def self?.parse!: (string source, ?json_options opts) -> untyped
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
-  # Returns the JSON parser class that is used by JSON. This is either
-  # JSON::Ext::Parser or JSON::Pure::Parser:
-  #     JSON.parser # => JSON::Ext::Parser
+  # Returns the JSON parser class that is used by JSON.
   #
   def self.parser: () -> json_parser
 
@@ -1127,29 +1129,25 @@ module JSON
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = {})
+  #   - restore(source, proc = nil, options = nil)
   # -->
   #
   alias self.restore self.load
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = {})
+  #   - restore(source, proc = nil, options = nil)
   # -->
   #
   alias restore load
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
-  # Sets or Returns the JSON generator state class that is used by JSON. This is
-  # either JSON::Ext::Generator::State or JSON::Pure::Generator::State:
-  #     JSON.state # => JSON::Ext::Generator::State
+  # Sets or Returns the JSON generator state class that is used by JSON.
   #
   def self.state: () -> json_state
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
-  # Sets or Returns the JSON generator state class that is used by JSON. This is
-  # either JSON::Ext::Generator::State or JSON::Pure::Generator::State:
-  #     JSON.state # => JSON::Ext::Generator::State
+  # Sets or Returns the JSON generator state class that is used by JSON.
   #
   def self.state=: (json_state) -> json_state
 
@@ -1172,9 +1170,6 @@ JSON::PRETTY_STATE_PROTOTYPE: json_state
 
 JSON::SAFE_STATE_PROTOTYPE: json_state
 
-# <!-- rdoc-file=ext/json/lib/json/version.rb -->
-# JSON version
-#
 JSON::VERSION: String
 
 JSON::VERSION_ARRAY: Array[Integer]

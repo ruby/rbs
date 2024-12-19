@@ -400,7 +400,7 @@ end
 #     };
 #
 #     rb_ivar_set(cDigest_SHA1, rb_intern("metadata"),
-#                 Data_Wrap_Struct(0, 0, 0, (void *)&sha1));
+#                 rb_digest_make_metadata(&sha1));
 #
 class Digest::Base < Digest::Class
   # <!-- rdoc-file=ext/digest/digest.c -->
@@ -523,12 +523,33 @@ end
 class Digest::RMD160 < Digest::Base
 end
 
+# <!-- rdoc-file=ext/digest/sha2/sha2init.c -->
+# Classes for calculating message digests using the SHA-256/384/512 Secure Hash
+# Algorithm(s) by NIST (the US' National Institute of Standards and Technology),
+# described in FIPS PUB 180-2.
+#
+# See SHA2.
+#
 class Digest::SHA256 < Digest::Base
 end
 
+# <!-- rdoc-file=ext/digest/sha2/sha2init.c -->
+# Classes for calculating message digests using the SHA-256/384/512 Secure Hash
+# Algorithm(s) by NIST (the US' National Institute of Standards and Technology),
+# described in FIPS PUB 180-2.
+#
+# See SHA2.
+#
 class Digest::SHA384 < Digest::Base
 end
 
+# <!-- rdoc-file=ext/digest/sha2/sha2init.c -->
+# Classes for calculating message digests using the SHA-256/384/512 Secure Hash
+# Algorithm(s) by NIST (the US' National Institute of Standards and Technology),
+# described in FIPS PUB 180-2.
+#
+# See SHA2.
+#
 class Digest::SHA512 < Digest::Base
 end
 

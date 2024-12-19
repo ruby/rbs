@@ -22,7 +22,9 @@
 #
 # First, what's elsewhere. Class Float:
 #
-# *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here).
+# *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here) and [class
+#     Object](rdoc-ref:Object@What-27s+Here).
+# *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
 #
 # Here, class Float provides methods for:
 #
@@ -343,33 +345,58 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - ceil(ndigits = 0) -> float or integer
   # -->
-  # Returns the smallest number greater than or equal to `self` with a precision
-  # of `ndigits` decimal digits.
-  #
-  # When `ndigits` is positive, returns a float with `ndigits` digits after the
-  # decimal point (as available):
-  #
+  # Returns a numeric that is a "ceiling" value for `self`,
+  # as specified by the given `ndigits`,
+  # which must be an
+  # [integer-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
+  # When `ndigits` is positive, returns a Float with `ndigits`
+  # decimal digits after the decimal point
+  # (as available, but no fewer than 1):
   #     f = 12345.6789
-  #     f.ceil(1) # => 12345.7
-  #     f.ceil(3) # => 12345.679
-  #     f = -12345.6789
-  #     f.ceil(1) # => -12345.6
-  #     f.ceil(3) # => -12345.678
+  # f.ceil(1) # => 12345.7
+  # f.ceil(3) # => 12345.679
+  # f.ceil(30) # => 12345.6789
+  # f = -12345.6789
+  # f.ceil(1) # => -12345.6
+  # f.ceil(3) # => -12345.678
+  # f.ceil(30) # => -12345.6789
+  # f = 0.0
+  # f.ceil(1)   # => 0.0
+  # f.ceil(100) # => 0.0
   #
-  # When `ndigits` is non-positive, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is non-positive,
+  # returns an Integer based on a computed granularity:
+  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The returned value is the largest multiple of the granularity
+  #      that is less than or equal to `self`.
+  # Examples with positive `self`:
+  # ndigits|Granularity|12345.6789.ceil(ndigits)
+  # -------|-----------|------------------------
+  #       0|          1|                   12346
+  #      -1|         10|                   12350
+  #      -2|        100|                   12400
+  #      -3|       1000|                   13000
+  #      -4|      10000|                   20000
+  #      -5|     100000|                  100000
+  # Examples with negative `self`:
+  # ndigits|Granularity|-12345.6789.ceil(ndigits)
+  # -------|-----------|-------------------------
+  #       0|          1|                   -12345
+  #      -1|         10|                   -12340
+  #      -2|        100|                   -12300
+  #      -3|       1000|                   -12000
+  #      -4|      10000|                   -10000
+  #      -5|     100000|                        0
+  # When `self` is zero and `ndigits` is non-positive,
+  # returns Integer zero:
+  #     0.0.ceil(0)  # => 0
+  # 0.0.ceil(-1) # => 0
+  # 0.0.ceil(-2) # => 0
   #
-  #     f = 12345.6789
-  #     f.ceil(0)  # => 12346
-  #     f.ceil(-3) # => 13000
-  #     f = -12345.6789
-  #     f.ceil(0)  # => -12345
-  #     f.ceil(-3) # => -12000
-  #
-  # Note that the limited precision of floating-point arithmetic may lead to
-  # surprising results:
-  #
-  #     (2.1 / 0.7).ceil  #=> 4 (!)
+  # Note that the limited precision of floating-point arithmetic
+  # may lead to surprising results:
+  #     (2.1 / 0.7).ceil  #=> 4 # Not 3 (because 2.1 / 0.7 # => 3.0000000000000004, not 3.0)
   #
   # Related: Float#floor.
   #
@@ -490,33 +517,59 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - floor(ndigits = 0) -> float or integer
   # -->
-  # Returns the largest number less than or equal to `self` with a precision of
-  # `ndigits` decimal digits.
+  # Returns a float or integer that is a "floor" value for `self`,
+  # as specified by `ndigits`,
+  # which must be an
+  # [integer-convertible
+  # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
+  # When `self` is zero,
+  # returns a zero value:
+  # a float if `ndigits` is positive,
+  # an integer otherwise:
+  #     f = 0.0      # => 0.0
+  # f.floor(20)  # => 0.0
+  # f.floor(0)   # => 0
+  # f.floor(-20) # => 0
   #
-  # When `ndigits` is positive, returns a float with `ndigits` digits after the
-  # decimal point (as available):
-  #
+  # When `self` is non-zero and `ndigits` is positive, returns a float with
+  # `ndigits`
+  # digits after the decimal point (as available):
   #     f = 12345.6789
-  #     f.floor(1) # => 12345.6
-  #     f.floor(3) # => 12345.678
-  #     f = -12345.6789
-  #     f.floor(1) # => -12345.7
-  #     f.floor(3) # => -12345.679
+  # f.floor(1)  # => 12345.6
+  # f.floor(3)  # => 12345.678
+  # f.floor(30) # => 12345.6789
+  # f = -12345.6789
+  # f.floor(1)  # => -12345.7
+  # f.floor(3)  # => -12345.679
+  # f.floor(30) # => -12345.6789
   #
-  # When `ndigits` is non-positive, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
-  #
-  #     f = 12345.6789
-  #     f.floor(0)  # => 12345
-  #     f.floor(-3) # => 12000
-  #     f = -12345.6789
-  #     f.floor(0)  # => -12346
-  #     f.floor(-3) # => -13000
-  #
-  # Note that the limited precision of floating-point arithmetic may lead to
-  # surprising results:
-  #
-  #     (0.3 / 0.1).floor  #=> 2 (!)
+  # When `self` is non-zero and `ndigits` is non-positive,
+  # returns an integer value based on a computed granularity:
+  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The returned value is the largest multiple of the granularity
+  #      that is less than or equal to `self`.
+  # Examples with positive `self`:
+  # ndigits|Granularity|12345.6789.floor(ndigits)
+  # -------|-----------|-------------------------
+  #       0|          1|                    12345
+  #      -1|         10|                    12340
+  #      -2|        100|                    12300
+  #      -3|       1000|                    12000
+  #      -4|      10000|                    10000
+  #      -5|     100000|                        0
+  # Examples with negative `self`:
+  # ndigits|Granularity|-12345.6789.floor(ndigits)
+  # -------|-----------|--------------------------
+  #       0|          1|                    -12346
+  #      -1|         10|                    -12350
+  #      -2|        100|                    -12400
+  #      -3|       1000|                    -13000
+  #      -4|      10000|                    -20000
+  #      -5|     100000|                   -100000
+  #      -6|    1000000|                  -1000000
+  # Note that the limited precision of floating-point arithmetic
+  # may lead to surprising results:
+  #     (0.3 / 0.1).floor  # => 2 # Not 3, (because (0.3 / 0.1) # => 2.9999999999999996, not 3.0)
   #
   # Related: Float#ceil.
   #
@@ -567,14 +620,19 @@ class Float < Numeric
   # of `self`, the string representation may contain:
   #
   # *   A fixed-point number.
-  # *   A number in "scientific notation" (containing an exponent).
-  # *   'Infinity'.
-  # *   '-Infinity'.
-  # *   'NaN' (indicating not-a-number).
+  #         3.14.to_s         # => "3.14"
   #
-  #     3.14.to_s         # => "3.14" (10.1**50).to_s   # =>
-  #     "1.644631821843879e+50" (10.1**500).to_s  # => "Infinity"
-  #     (-10.1**500).to_s # => "-Infinity" (0.0/0.0).to_s    # => "NaN"
+  # *   A number in "scientific notation" (containing an exponent).
+  #         (10.1**50).to_s   # => "1.644631821843879e+50"
+  #
+  # *   'Infinity'.
+  #         (10.1**500).to_s  # => "Infinity"
+  #
+  # *   '-Infinity'.
+  #         (-10.1**500).to_s # => "-Infinity"
+  #
+  # *   'NaN' (indicating not-a-number).
+  #         (0.0/0.0).to_s    # => "NaN"
   #
   alias inspect to_s
 
@@ -789,7 +847,7 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - round(ndigits = 0, half: :up]) -> integer or float
+  #   - round(ndigits = 0, half: :up) -> integer or float
   # -->
   # Returns `self` rounded to the nearest value with a precision of `ndigits`
   # decimal digits.
@@ -916,14 +974,19 @@ class Float < Numeric
   # of `self`, the string representation may contain:
   #
   # *   A fixed-point number.
-  # *   A number in "scientific notation" (containing an exponent).
-  # *   'Infinity'.
-  # *   '-Infinity'.
-  # *   'NaN' (indicating not-a-number).
+  #         3.14.to_s         # => "3.14"
   #
-  #     3.14.to_s         # => "3.14" (10.1**50).to_s   # =>
-  #     "1.644631821843879e+50" (10.1**500).to_s  # => "Infinity"
-  #     (-10.1**500).to_s # => "-Infinity" (0.0/0.0).to_s    # => "NaN"
+  # *   A number in "scientific notation" (containing an exponent).
+  #         (10.1**50).to_s   # => "1.644631821843879e+50"
+  #
+  # *   'Infinity'.
+  #         (10.1**500).to_s  # => "Infinity"
+  #
+  # *   '-Infinity'.
+  #         (-10.1**500).to_s # => "-Infinity"
+  #
+  # *   'NaN' (indicating not-a-number).
+  #         (0.0/0.0).to_s    # => "NaN"
   #
   def to_s: () -> String
 

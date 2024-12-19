@@ -39,22 +39,33 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - beep()
+  #   - io.beep
   # -->
+  # Beeps on the output console.
+  #
+  # You must require 'io/console' to use this method.
   #
   def beep: () -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - check_winsize_changed()
+  #   - io.check_winsize_changed { ... }   -> io
   # -->
+  # Yields while console input events are queued.
+  #
+  # This method is Windows only.
+  #
+  # You must require 'io/console' to use this method.
   #
   def check_winsize_changed: () { () -> void } -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - clear_screen()
+  #   - io.clear_screen            -> io
   # -->
+  # Clears the entire screen and moves the cursor top-left corner.
+  #
+  # You must require 'io/console' to use this method.
   #
   def clear_screen: () -> self
 
@@ -119,36 +130,53 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor=(p1)
+  #   - io.cursor = [line, column]         -> io
   # -->
+  # Same as `io.goto(line, column)`
+  #
+  # See IO#goto.
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor=: ([ Integer, Integer ]) -> [ Integer, Integer ]
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor_down(p1)
+  #   - io.cursor_down(n)          -> io
   # -->
+  # Moves the cursor down `n` lines.
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor_down: (int) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor_left(p1)
+  #   - io.cursor_left(n)          -> io
   # -->
+  # Moves the cursor left `n` columns.
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor_left: (int) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor_right(p1)
+  #   - io.cursor_right(n)         -> io
   # -->
+  # Moves the cursor right `n` columns.
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor_right: (int) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - cursor_up(p1)
+  #   - io.cursor_up(n)            -> io
   # -->
+  # Moves the cursor up `n` lines.
+  #
+  # You must require 'io/console' to use this method.
   #
   def cursor_up: (int) -> self
 
@@ -175,15 +203,23 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - erase_line(p1)
+  #   - io.erase_line(mode)        -> io
   # -->
+  # Erases the line at the cursor corresponding to `mode`. `mode` may be either:
+  # 0: after cursor 1: before and cursor 2: entire line
+  #
+  # You must require 'io/console' to use this method.
   #
   def erase_line: (0 | 1 | 2 | nil) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - erase_screen(p1)
+  #   - io.erase_screen(mode)      -> io
   # -->
+  # Erases the screen at the cursor corresponding to `mode`. `mode` may be either:
+  # 0: after cursor 1: before and cursor 2: entire screen
+  #
+  # You must require 'io/console' to use this method.
   #
   def erase_screen: (0 | 1 | 2 | 3 | nil) -> self
 
@@ -220,15 +256,21 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - goto(p1, p2)
+  #   - io.goto(line, column)      -> io
   # -->
+  # Set the cursor position at `line` and `column`.
+  #
+  # You must require 'io/console' to use this method.
   #
   def goto: (int, int) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - goto_column(p1)
+  #   - io.goto_column(column)     -> io
   # -->
+  # Set the cursor position at `column` in the same line of the current position.
+  #
+  # You must require 'io/console' to use this method.
   #
   def goto_column: (int) -> self
 
@@ -278,8 +320,14 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - pressed?(p1)
+  #   - io.pressed?(key)   -> bool
   # -->
+  # Returns `true` if `key` is pressed.  `key` may be a virtual key code or its
+  # name (String or Symbol) with out "VK_" prefix.
+  #
+  # This method is Windows only.
+  #
+  # You must require 'io/console' to use this method.
   #
   def pressed?: (Integer | interned) -> bool
 
@@ -324,15 +372,21 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - scroll_backward(p1)
+  #   - io.scroll_backward(n)      -> io
   # -->
+  # Scrolls the entire scrolls backward `n` lines.
+  #
+  # You must require 'io/console' to use this method.
   #
   def scroll_backward: (int) -> self
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
-  #   - scroll_forward(p1)
+  #   - io.scroll_forward(n)       -> io
   # -->
+  # Scrolls the entire scrolls forward `n` lines.
+  #
+  # You must require 'io/console' to use this method.
   #
   def scroll_forward: (int) -> self
 

@@ -822,7 +822,7 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=vm_backtrace.c
-  #   - Thread.each_caller_location{ |loc| ... } -> nil
+  #   - Thread.each_caller_location(...) { |loc| ... } -> nil
   # -->
   # Yields each frame of the current execution stack as a backtrace location
   # object.
@@ -927,30 +927,6 @@ class Thread < Object
   # While we are ignoring the RuntimeError exception, it's safe to write our
   # resource allocation code. Then, the ensure block is where we can safely
   # deallocate your resources.
-  #
-  # #### Guarding from Timeout::Error
-  #
-  # In the next example, we will guard from the Timeout::Error exception. This
-  # will help prevent from leaking resources when Timeout::Error exceptions occur
-  # during normal ensure clause. For this example we use the help of the standard
-  # library Timeout, from lib/timeout.rb
-  #
-  #     require 'timeout'
-  #     Thread.handle_interrupt(Timeout::Error => :never) {
-  #       timeout(10){
-  #         # Timeout::Error doesn't occur here
-  #         Thread.handle_interrupt(Timeout::Error => :on_blocking) {
-  #           # possible to be killed by Timeout::Error
-  #           # while blocking operation
-  #         }
-  #         # Timeout::Error doesn't occur here
-  #       }
-  #     }
-  #
-  # In the first part of the `timeout` block, we can rely on Timeout::Error being
-  # ignored. Then in the `Timeout::Error => :on_blocking` block, any operation
-  # that will block the calling thread is susceptible to a Timeout::Error
-  # exception being raised.
   #
   # #### Stack control settings
   #
@@ -1322,9 +1298,28 @@ class Thread::Backtrace::Location
   #   rdoc-file=vm_backtrace.c
   #   - base_label()
   # -->
-  # Returns the base label of this frame.
+  # Returns the base label of this frame, which is usually equal to the label,
+  # without decoration.
   #
-  # Usually same as #label, without decoration.
+  # Consider the following example:
+  #
+  #     def foo
+  #       puts caller_locations(0).first.base_label
+  #
+  #       1.times do
+  #         puts caller_locations(0).first.base_label
+  #
+  #         1.times do
+  #           puts caller_locations(0).first.base_label
+  #         end
+  #       end
+  #     end
+  #
+  # The result of calling `foo` is this:
+  #
+  #     foo
+  #     foo
+  #     foo
   #
   def base_label: () -> String?
 
@@ -1347,15 +1342,14 @@ class Thread::Backtrace::Location
   #         1.times do
   #           puts caller_locations(0).first.label
   #         end
-  #
   #       end
   #     end
   #
   # The result of calling `foo` is this:
   #
-  #     label: foo
-  #     label: block in foo
-  #     label: block (2 levels) in foo
+  #     foo
+  #     block in foo
+  #     block (2 levels) in foo
   #
   def label: () -> String?
 

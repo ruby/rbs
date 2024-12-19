@@ -284,8 +284,7 @@ module RBS
       #
       # The result contains 122 random bits (15.25 random bytes).
       #
-      # See [RFC4122](https://datatracker.ietf.org/doc/html/rfc4122) for details of
-      # UUID.
+      # See [RFC9562](https://www.rfc-editor.org/rfc/rfc9562) for details of UUIDv4.
       #
       %a{annotate:rdoc:copy:Random::Formatter#uuid}
       def uuid: () -> String

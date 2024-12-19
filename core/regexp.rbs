@@ -210,8 +210,9 @@
 #
 # ### Source Literals
 #
-# The source literal largely behaves like a double-quoted string; see [String
-# Literals](rdoc-ref:syntax/literals.rdoc@String+Literals).
+# The source literal largely behaves like a double-quoted string; see
+# [Double-Quoted String
+# Literals](rdoc-ref:syntax/literals.rdoc@Double-Quoted+String+Literals).
 #
 # In particular, a source literal may contain interpolated expressions:
 #
@@ -1352,7 +1353,7 @@ class Regexp
   #   - Regexp.last_match(n) -> string or nil
   #   - Regexp.last_match(name) -> string or nil
   # -->
-  # With no argument, returns the value of `$!`, which is the result of the most
+  # With no argument, returns the value of `$~`, which is the result of the most
   # recent pattern match (see [Regexp global
   # variables](rdoc-ref:Regexp@Global+Variables)):
   #
