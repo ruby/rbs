@@ -297,6 +297,13 @@ class StringInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_append_as_bytes
+    if_ruby("3.4"...) do
+      assert_send_type  '(String) -> String',
+                        'hello', :append_as_bytes, "world"
+    end
+  end
+
   def test_ascii_only?
     assert_send_type  '() -> bool',
                       'hello', :ascii_only?

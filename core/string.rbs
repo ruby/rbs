@@ -941,6 +941,30 @@ class String
 
   # <!--
   #   rdoc-file=string.c
+  #   - append_as_bytes(*objects) -> string
+  # -->
+  # Concatenates each object in `objects` into `self` without any encoding
+  # validation or conversion and returns `self`:
+  #
+  #     s = 'foo'
+  #     s.append_as_bytes(" \xE2\x82")  # => "foo \xE2\x82"
+  #     s.valid_encoding?               # => false
+  #     s.append_as_bytes("\xAC 12")
+  #     s.valid_encoding?               # => true
+  #
+  # For each given object `object` that is an Integer, the value is considered a
+  # Byte. If the Integer is bigger than one byte, only the lower byte is
+  # considered, similar to String#setbyte:
+  #
+  #     s = ""
+  #     s.append_as_bytes(0, 257)             # =>  "\u0000\u0001"
+  #
+  # Related: String#<<, String#concat, which do an encoding aware concatenation.
+  #
+  def append_as_bytes: (String) -> String
+
+  # <!--
+  #   rdoc-file=string.c
   #   - ascii_only? -> true or false
   # -->
   # Returns `true` if `self` contains only ASCII characters, `false` otherwise:
