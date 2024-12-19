@@ -59,6 +59,13 @@ class RubyVM::AbstractSyntaxTree::NodeTest < Test::Unit::TestCase
                      RubyVM::AbstractSyntaxTree.parse("1 + 2"), :last_column
   end
 
+  if RUBY_VERSION >= '3.4'
+    def test_locations
+      assert_send_type "() -> ::Array[::RubyVM::AbstractSyntaxTree::Location]",
+                      RubyVM::AbstractSyntaxTree.parse("1 + 2"), :locations
+    end
+  end
+
   if RUBY_VERSION >= '3.2'
     def test_tokens
       assert_send_type "() -> ::Array[[ ::Integer, ::Symbol, ::String, [ ::Integer, ::Integer, ::Integer, ::Integer ] ]]?",
