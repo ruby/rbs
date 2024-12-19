@@ -392,7 +392,6 @@ class HashInstanceTest < Test::Unit::TestCase
   testing "::Hash[::Symbol, ::Integer]"
 
   def test_except
-    omit_if(!Hash.method_defined?(:except))
     assert_send_type "() -> ::Hash[::Symbol, ::Integer]",
                       { a: 100, b: 200, c: 300 }, :except
     assert_send_type "(*Symbol keys) -> ::Hash[::Symbol, ::Integer]",
