@@ -1017,8 +1017,10 @@ class Range[out Elem] < Object
   #     ('a'..'e').step { p _1 }
   #     # Default step 1; prints: a, b, c, d, e
   #
-  def step: (?Numeric | int n) -> Enumerator[Elem, self]
-          | (?Numeric | int n) { (Elem element) -> void } -> self
+  def step: (?Numeric | int) -> Enumerator[Elem, self]
+          | (?Numeric | int) { (Elem element) -> void } -> self
+          | (untyped) -> Enumerator[Elem, self]
+          | (untyped) { (Elem element) -> void } -> self
 
   # <!--
   #   rdoc-file=range.c
