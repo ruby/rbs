@@ -33,6 +33,13 @@ class WarningSingletonTest < Test::Unit::TestCase
     refute_send_type "(_ToSym, Rational) -> Rational",
         Warning, :[]=, ToSym.new(WARNING_CATEGORIES.first), 1r
   end
+
+  def test_categories
+    if_ruby("3.4"...) do
+      assert_send_type "() -> Array[Symbol]",
+                       Warning, :categories
+    end
+  end
 end
 
 class WarningTest < Test::Unit::TestCase
