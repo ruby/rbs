@@ -251,6 +251,14 @@
 class Ractor
   # <!--
   #   rdoc-file=ractor.rb
+  #   - _require(feature)
+  # -->
+  # internal method
+  #
+  def self._require: (String feature) -> bool
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - count()
   # -->
   # Returns the number of Ractors currently running or blocking (waiting).
