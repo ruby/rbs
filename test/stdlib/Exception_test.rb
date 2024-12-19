@@ -133,6 +133,16 @@ class ExceptionInstanceTest < Test::Unit::TestCase
 
     assert_send_type  '(Array[String]) -> Array[String]',
                       exception, :set_backtrace, ["hello", "there"]
+
+    if_ruby("3.4"..., skip: false) do
+      caller_locations[0].tap do |location|
+        assert_instance_of Thread::Backtrace::Location, location
+        assert_send_type(
+          "(Array[Thread::Backtrace::Location]) -> Array[Thread::Backtrace::Location]",
+          exception, :set_backtrace, [location]
+        )
+      end
+    end
   end
 
   def test_to_s

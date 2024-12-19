@@ -306,7 +306,8 @@ class Exception
   #
   # See [Backtraces](rdoc-ref:exceptions.md@Backtraces).
   #
-  def set_backtrace: (String | Array[String] backtrace) -> Array[String]
+  def set_backtrace: (String | Array[String]) -> Array[String]
+                   | (Array[Thread::Backtrace::Location]) -> Array[Thread::Backtrace::Location]
                    | (nil) -> nil
 
   # <!--
