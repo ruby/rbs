@@ -1427,6 +1427,7 @@ module RBS
       def each_type(&block)
         if block
           type.each_type(&block)
+          yield self_type if self_type
           self.block&.type&.each_type(&block)
           if self_type = self.block&.self_type
             yield self_type
@@ -1467,7 +1468,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        if type.with_nonreturn_void?
+        if type.with_nonreturn_void? || self_type&.with_nonreturn_void?
           true
         else
           if block = block()
