@@ -231,6 +231,39 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_each_line
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      assert_send_type(
+        "() -> Enumerator[String, IO]",
+        io, :each_line
+      )
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      assert_send_type(
+        "() { (String) -> void } -> void",
+        io, :each_line, &->(_x) { }
+      )
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      with_string("\n") do |sep|
+        with_int(3) do |limit|
+          with_boolish() do |chomp|
+            assert_send_type(
+              "(string, int, chomp: boolish) -> Enumerator[String, IO]",
+              io, :each_line, sep, limit, chomp: chomp
+            )
+            assert_send_type(
+              "(string, int, chomp: boolish) { (String) -> void } -> void",
+              io, :each_line, sep, limit, chomp: chomp, &->(_x) { }
+            )
+            end
+        end
+      end
+    end
+  end
+
   def test_path
     IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
       assert_send_type(
