@@ -3104,8 +3104,8 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def each_line: (?String sep, ?Integer limit) { (String line) -> void } -> self
-               | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+  def each_line: (?string sep, ?int limit, ?chomp: boolish) { (String line) -> void } -> self
+               | (?string sep, ?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # <!--
   #   rdoc-file=io.c

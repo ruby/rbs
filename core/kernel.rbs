@@ -1499,7 +1499,7 @@ module Kernel : BasicObject
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self?.readlines: (?String arg0, ?Integer arg1) -> ::Array[String]
+  def self?.readlines: (?string sep, ?int limit, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=lib/rubygems/core_ext/kernel_require.rb
