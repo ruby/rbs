@@ -487,8 +487,7 @@ module Net
   #
   # *   [::start](rdoc-ref:Net::HTTP.start): Begins a new session in a new
   #     Net::HTTP object.
-  # *   [#started?](rdoc-ref:Net::HTTP#started?) (aliased as
-  #     [#active?](rdoc-ref:Net::HTTP#active?)): Returns whether in a session.
+  # *   [#started?](rdoc-ref:Net::HTTP#started?): Returns whether in a session.
   # *   [#finish](rdoc-ref:Net::HTTP#finish): Ends an active session.
   # *   [#start](rdoc-ref:Net::HTTP#start): Begins a new session in an existing
   #     Net::HTTP object (`self`).
@@ -562,18 +561,15 @@ module Net
   #     object.
   # *   [#request](rdoc-ref:Net::HTTP#request): Sends a request and returns a
   #     response object.
-  # *   [#request_get](rdoc-ref:Net::HTTP#request_get) (aliased as
-  #     [#get2](rdoc-ref:Net::HTTP#get2)): Sends a GET request and forms a
-  #     response object; if a block given, calls the block with the object,
-  #     otherwise returns the object.
-  # *   [#request_head](rdoc-ref:Net::HTTP#request_head) (aliased as
-  #     [#head2](rdoc-ref:Net::HTTP#head2)): Sends a HEAD request and forms a
-  #     response object; if a block given, calls the block with the object,
-  #     otherwise returns the object.
-  # *   [#request_post](rdoc-ref:Net::HTTP#request_post) (aliased as
-  #     [#post2](rdoc-ref:Net::HTTP#post2)): Sends a POST request and forms a
-  #     response object; if a block given, calls the block with the object,
-  #     otherwise returns the object.
+  # *   [#request_get](rdoc-ref:Net::HTTP#request_get): Sends a GET request and
+  #     forms a response object; if a block given, calls the block with the
+  #     object, otherwise returns the object.
+  # *   [#request_head](rdoc-ref:Net::HTTP#request_head): Sends a HEAD request and
+  #     forms a response object; if a block given, calls the block with the
+  #     object, otherwise returns the object.
+  # *   [#request_post](rdoc-ref:Net::HTTP#request_post): Sends a POST request and
+  #     forms a response object; if a block given, calls the block with the
+  #     object, otherwise returns the object.
   # *   [#send_request](rdoc-ref:Net::HTTP#send_request): Sends a request and
   #     returns a response object.
   # *   [#trace](rdoc-ref:Net::HTTP#trace): Sends a TRACE request and returns a
@@ -605,8 +601,8 @@ module Net
   # *   [::proxy_class?](rdoc-ref:Net::HTTP.proxy_class?): Returns whether `self`
   #     is a proxy class.
   # *   [#proxy?](rdoc-ref:Net::HTTP#proxy?): Returns whether `self` has a proxy.
-  # *   [#proxy_address](rdoc-ref:Net::HTTP#proxy_address) (aliased as
-  #     [#proxyaddr](rdoc-ref:Net::HTTP#proxyaddr)): Returns the proxy address.
+  # *   [#proxy_address](rdoc-ref:Net::HTTP#proxy_address): Returns the proxy
+  #     address.
   # *   [#proxy_from_env?](rdoc-ref:Net::HTTP#proxy_from_env?): Returns whether
   #     the proxy is taken from an environment variable.
   # *   [:proxy_from_env=](rdoc-ref:Net::HTTP#proxy_from_env=): Sets whether the
@@ -709,7 +705,6 @@ module Net
   # ### HTTP Version
   #
   # *   [::version_1_2?](rdoc-ref:Net::HTTP.version_1_2?) (aliased as
-  #     [::is_version_1_2?](rdoc-ref:Net::HTTP.is_version_1_2?) and
   #     [::version_1_2](rdoc-ref:Net::HTTP.version_1_2)): Returns true; retained
   #     for compatibility.
   #
@@ -1359,16 +1354,15 @@ module Net
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the available SSL ciphers. See
-    # [OpenSSL::SSL::SSLContext#ciphers=](rdoc-ref:OpenSSL::SSL::SSLContext#ciphers-
-    # 3D).
+    # [:SSL::SSLContext#ciphers=](OpenSSL::SSL::SSL::Context#ciphers=).
     #
     attr_accessor ciphers: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the extra X509 certificates to be added to the certificate
     # chain. See
-    # [OpenSSL::SSL::SSLContext#add_certificate](rdoc-ref:OpenSSL::SSL::SSLContext#a
-    # dd_certificate).
+    # [:SSL::SSLContext#add_certificate](OpenSSL::SSL::SSL::Context#add_certificate)
+    # .
     #
     attr_accessor extra_chain_cert: untyped
 
@@ -1384,22 +1378,19 @@ module Net
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the SSL version. See
-    # [OpenSSL::SSL::SSLContext#ssl_version=](rdoc-ref:OpenSSL::SSL::SSLContext#ssl_
-    # version-3D).
+    # [:SSL::SSLContext#ssl_version=](OpenSSL::SSL::SSL::Context#ssl_version=).
     #
     attr_accessor ssl_version: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the minimum SSL version. See
-    # [OpenSSL::SSL::SSLContext#min_version=](rdoc-ref:OpenSSL::SSL::SSLContext#min_
-    # version-3D).
+    # [:SSL::SSLContext#min_version=](OpenSSL::SSL::SSL::Context#min_version=).
     #
     attr_accessor min_version: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the maximum SSL version. See
-    # [OpenSSL::SSL::SSLContext#max_version=](rdoc-ref:OpenSSL::SSL::SSLContext#max_
-    # version-3D).
+    # [:SSL::SSLContext#max_version=](OpenSSL::SSL::SSL::Context#max_version=).
     #
     attr_accessor max_version: untyped
 
@@ -1423,8 +1414,8 @@ module Net
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns whether to verify that the server certificate is valid for the
     # hostname. See
-    # [OpenSSL::SSL::SSLContext#verify_hostname=](rdoc-ref:OpenSSL::SSL::SSLContext#
-    # attribute-i-verify_mode).
+    # [:SSL::SSLContext#verify_hostname=](OpenSSL::SSL::SSL::Context#verify_hostname
+    # =).
     #
     attr_accessor verify_hostname: untyped
 

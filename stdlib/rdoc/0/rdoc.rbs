@@ -1,9 +1,3 @@
-# <!-- rdoc-file=lib/rdoc/rubygems_hook.rb -->
-# Gem::RDoc provides methods to generate RDoc and ri data for installed gems
-# upon gem installation.
-#
-# This file is automatically required by RubyGems 1.9 and newer.
-#
 # <!-- rdoc-file=lib/rdoc.rb -->
 # RDoc produces documentation for Ruby source files by parsing the source and
 # extracting the definition for classes, modules, methods, includes and
@@ -54,6 +48,18 @@
 # *   The Ruby parser in rdoc/parse.rb is based heavily on the outstanding work
 #     of Keiju ISHITSUKA of Nippon Rational Inc, who produced the Ruby parser
 #     for irb and the rtags package.
+#
+# <!-- rdoc-file=lib/rdoc/rubygems_hook.rb -->
+# This class is referenced by RubyGems to create documents. All implementations
+# are moved to the above RubyGemsHook.
+#
+# This class does nothing when this RDoc is installed as a normal gem or a
+# bundled gem.
+#
+# This class does generate/remove documents for compatibility when this RDoc is
+# installed as a default gem.
+#
+# We can remove this when all maintained RubyGems remove `rubygems/rdoc.rb`.
 #
 module RDoc
   # <!-- rdoc-file=lib/rdoc/token_stream.rb -->

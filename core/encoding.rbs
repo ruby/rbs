@@ -1302,96 +1302,70 @@ class Encoding::Converter < Object
 end
 
 # <!-- rdoc-file=transcode.c -->
-# AFTER_OUTPUT
-#
 # Stop converting after some output is complete but before all of the input was
 # consumed.  See primitive_convert for an example.
 #
 Encoding::Converter::AFTER_OUTPUT: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# CRLF_NEWLINE_DECORATOR
-#
 # Decorator for converting LF to CRLF
 #
 Encoding::Converter::CRLF_NEWLINE_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# CR_NEWLINE_DECORATOR
-#
 # Decorator for converting LF to CR
 #
 Encoding::Converter::CR_NEWLINE_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# INVALID_MASK
-#
 # Mask for invalid byte sequences
 #
 Encoding::Converter::INVALID_MASK: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# INVALID_REPLACE
-#
 # Replace invalid byte sequences
 #
 Encoding::Converter::INVALID_REPLACE: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# PARTIAL_INPUT
-#
 # Indicates the source may be part of a larger string.  See primitive_convert
 # for an example.
 #
 Encoding::Converter::PARTIAL_INPUT: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# UNDEF_HEX_CHARREF
-#
 # Replace byte sequences that are undefined in the destination encoding with an
 # XML hexadecimal character reference.  This is valid for XML conversion.
 #
 Encoding::Converter::UNDEF_HEX_CHARREF: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# UNDEF_MASK
-#
 # Mask for a valid character in the source encoding but no related character(s)
 # in destination encoding.
 #
 Encoding::Converter::UNDEF_MASK: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# UNDEF_REPLACE
-#
 # Replace byte sequences that are undefined in the destination encoding.
 #
 Encoding::Converter::UNDEF_REPLACE: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# UNIVERSAL_NEWLINE_DECORATOR
-#
 # Decorator for converting CRLF and CR to LF
 #
 Encoding::Converter::UNIVERSAL_NEWLINE_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# XML_ATTR_CONTENT_DECORATOR
-#
 # Escape as XML AttValue
 #
 Encoding::Converter::XML_ATTR_CONTENT_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# XML_ATTR_QUOTE_DECORATOR
-#
 # Escape as XML AttValue
 #
 Encoding::Converter::XML_ATTR_QUOTE_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
-# XML_TEXT_DECORATOR
-#
 # Escape as XML CharData
 #
 Encoding::Converter::XML_TEXT_DECORATOR: Integer
