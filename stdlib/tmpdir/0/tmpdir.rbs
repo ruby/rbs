@@ -64,6 +64,6 @@ class Dir
   #       FileUtils.remove_entry dir
   #     end
   #
-  def self.mktmpdir: (?String | [ String, String ] | nil, ?String?, ?max_try: Integer?) -> String
-                   | [X] (?String | [ String, String ] | nil, ?String?, ?max_try: Integer?) { (String) -> X } -> X
+  def self.mktmpdir: (?string | [ string, string ] | nil, ?path?, ?max_try: Integer?) -> String
+                   | [X] (?string | [string, string ] | nil, ?path?, ?max_try: Integer?) { (String) -> X } -> X
 end

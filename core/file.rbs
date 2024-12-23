@@ -1314,7 +1314,7 @@ class File < IO
   #
   #     File.join("usr", "mail", "gumby")   #=> "usr/mail/gumby"
   #
-  def self.join: (*string) -> String
+  def self.join: (*path) -> String
 
   # <!--
   #   rdoc-file=file.c

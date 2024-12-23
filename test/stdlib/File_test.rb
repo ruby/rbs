@@ -353,12 +353,16 @@ class FileSingletonTest < Test::Unit::TestCase
   end
 
   def test_join
-    assert_send_type "(String) -> String",
-                     File, :join, "foo"
-    assert_send_type "(ToStr) -> String",
-                     File, :join, ToStr.new("foo")
-    assert_send_type "(String, String) -> String",
-                     File, :join, "foo", "bar"
+    with_path("foo") do |str|
+      assert_send_type(
+        "(path) -> String",
+        File, :join, str
+      )
+      assert_send_type(
+        "(path, path) -> String",
+        File, :join, str, str
+      )
+    end
   end
 
   def test_lchown
