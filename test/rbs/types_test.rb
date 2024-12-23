@@ -40,6 +40,7 @@ class RBS::TypesTest < Test::Unit::TestCase
       "[self]",
       "Array[self]",
       "^(self) -> void",
+      "^() [self: self] -> void",
       "^() { () [self: self] -> void } -> void"
     ].each do |str|
       type = parse_type(str)
@@ -61,6 +62,7 @@ class RBS::TypesTest < Test::Unit::TestCase
       "class",
       "class?",
       "^() -> instance",
+      "^() [self: class] -> void",
       "^() { () [self: class] -> void } -> void"
     ].each do |str|
       type = parse_type(str)
@@ -80,7 +82,8 @@ class RBS::TypesTest < Test::Unit::TestCase
     [
       "void",
       "[void]",
-      "void?"
+      "void?",
+      "^() [self: void] -> void"
     ].each do |str|
       type = parse_type(str)
       assert_predicate type, :with_nonreturn_void?
