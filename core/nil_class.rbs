@@ -18,6 +18,9 @@
 # *   #to_r
 # *   #to_s
 #
+# While `nil` doesn't have an explicitly defined #to_hash method, it can be used
+# in `**` unpacking, not adding any keyword arguments.
+#
 # Another method provides inspection:
 #
 # *   #inspect

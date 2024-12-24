@@ -2295,43 +2295,36 @@ File::Constants::DSYNC: Integer
 File::Constants::EXCL: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_CASEFOLD
 # [File::FNM_CASEFOLD](rdoc-ref:File::Constants@File-3A-3AFNM_CASEFOLD)
 #
 File::Constants::FNM_CASEFOLD: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_DOTMATCH
 # [File::FNM_DOTMATCH](rdoc-ref:File::Constants@File-3A-3AFNM_DOTMATCH)
 #
 File::Constants::FNM_DOTMATCH: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_EXTGLOB
 # [File::FNM_EXTGLOB](rdoc-ref:File::Constants@File-3A-3AFNM_EXTGLOB)
 #
 File::Constants::FNM_EXTGLOB: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_NOESCAPE
 # [File::FNM_NOESCAPE](rdoc-ref:File::Constants@File-3A-3AFNM_NOESCAPE)
 #
 File::Constants::FNM_NOESCAPE: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_PATHNAME
 # [File::FNM_PATHNAME](rdoc-ref:File::Constants@File-3A-3AFNM_PATHNAME)
 #
 File::Constants::FNM_PATHNAME: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_SHORTNAME
 # [File::FNM_SHORTNAME](rdoc-ref:File::Constants@File-3A-3AFNM_SHORTNAME)
 #
 File::Constants::FNM_SHORTNAME: Integer
 
 # <!-- rdoc-file=dir.c -->
-# FNM_SYSCASE
 # [File::FNM_SYSCASE](rdoc-ref:File::Constants@File-3A-3AFNM_SYSCASE)
 #
 File::Constants::FNM_SYSCASE: Integer

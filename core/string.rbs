@@ -16,12 +16,12 @@
 # *   Method #String.
 #
 # Some `String` methods modify `self`. Typically, a method whose name ends with
-# `!` modifies `self` and returns `self`; often a similarly named method
+# `!` modifies `self` and returns `self`; often, a similarly named method
 # (without the `!`) returns a new string.
 #
-# In general, if there exist both bang and non-bang version of method, the bang!
-# mutates and the non-bang! does not. However, a method without a bang can also
-# mutate, such as String#replace.
+# In general, if both bang and non-bang versions of a method exist, the bang
+# method mutates and the non-bang method does not. However, a method without a
+# bang can also mutate, such as String#replace.
 #
 # ## Substitution Methods
 #
@@ -36,59 +36,58 @@
 #
 # Each of these methods takes:
 #
-# *   A first argument, `pattern` (string or regexp), that specifies the
+# *   A first argument, `pattern` (String or Regexp), that specifies the
 #     substring(s) to be replaced.
 #
-# *   Either of these:
+# *   Either of the following:
 #
-#     *   A second argument, `replacement` (string or hash), that determines the
+#     *   A second argument, `replacement` (String or Hash), that determines the
 #         replacing string.
 #     *   A block that will determine the replacing string.
 #
-# The examples in this section mostly use methods String#sub and String#gsub;
-# the principles illustrated apply to all four substitution methods.
+# The examples in this section mostly use the String#sub and String#gsub
+# methods; the principles illustrated apply to all four substitution methods.
 #
 # **Argument `pattern`**
 #
 # Argument `pattern` is commonly a regular expression:
 #
 #     s = 'hello'
-#     s.sub(/[aeiou]/, '*')# => "h*llo"
+#     s.sub(/[aeiou]/, '*') # => "h*llo"
 #     s.gsub(/[aeiou]/, '*') # => "h*ll*"
-#     s.gsub(/[aeiou]/, '')# => "hll"
-#     s.sub(/ell/, 'al')   # => "halo"
-#     s.gsub(/xyzzy/, '*') # => "hello"
+#     s.gsub(/[aeiou]/, '')  # => "hll"
+#     s.sub(/ell/, 'al')     # => "halo"
+#     s.gsub(/xyzzy/, '*')   # => "hello"
 #     'THX1138'.gsub(/\d+/, '00') # => "THX00"
 #
 # When `pattern` is a string, all its characters are treated as ordinary
-# characters (not as regexp special characters):
+# characters (not as Regexp special characters):
 #
 #     'THX1138'.gsub('\d+', '00') # => "THX1138"
 #
 # **`String` `replacement`**
 #
-# If `replacement` is a string, that string will determine the replacing string
-# that is to be substituted for the matched text.
+# If `replacement` is a string, that string determines the replacing string that
+# is substituted for the matched text.
 #
 # Each of the examples above uses a simple string as the replacing string.
 #
 # `String` `replacement` may contain back-references to the pattern's captures:
 #
-# *   `\n` (*n* a non-negative integer) refers to `$n`.
+# *   `\n` (*n* is a non-negative integer) refers to `$n`.
 # *   `\k<name>` refers to the named capture `name`.
 #
 # See Regexp for details.
 #
 # Note that within the string `replacement`, a character combination such as
-# `$&` is treated as ordinary text, and not as a special match variable.
-# However, you may refer to some special match variables using these
-# combinations:
+# `$&` is treated as ordinary text, not as a special match variable. However,
+# you may refer to some special match variables using these combinations:
 #
 # *   `\&` and `\0` correspond to `$&`, which contains the complete matched
 #     text.
-# *   `\'` corresponds to `$'`, which contains string after match.
-# *   `\`` corresponds to `$``, which contains string before match.
-# *   `\+` corresponds to `$+`, which contains last capture group.
+# *   `\'` corresponds to `$'`, which contains the string after the match.
+# *   `\`` corresponds to `$``, which contains the string before the match.
+# *   `\+` corresponds to `$+`, which contains the last capture group.
 #
 # See Regexp for details.
 #
@@ -103,16 +102,16 @@
 # double-quoted string literal, you need to write `"..\\\\&.."`.
 #
 # If you want to write a non-back-reference string `\&` in `replacement`, you
-# need first to escape the backslash to prevent this method from interpreting it
+# need to first escape the backslash to prevent this method from interpreting it
 # as a back-reference, and then you need to escape the backslashes again to
 # prevent a string literal from consuming them: `"..\\\\\\\\&.."`.
 #
-# You may want to use the block form to avoid a lot of backslashes.
+# You may want to use the block form to avoid excessive backslashes.
 #
 # **\Hash `replacement`**
 #
-# If argument `replacement` is a hash, and `pattern` matches one of its keys,
-# the replacing string is the value for that key:
+# If the argument `replacement` is a hash, and `pattern` matches one of its
+# keys, the replacing string is the value for that key:
 #
 #     h = {'foo' => 'bar', 'baz' => 'bat'}
 #     'food'.sub('foo', h) # => "bard"
@@ -127,15 +126,15 @@
 # In the block form, the current match string is passed to the block; the
 # block's return value becomes the replacing string:
 #
-#      s = '@'
-#     '1234'.gsub(/\d/) {|match| s.succ! } # => "ABCD"
+#     s = '@'
+#     '1234'.gsub(/\d/) { |match| s.succ! } # => "ABCD"
 #
 # Special match variables such as `$1`, `$2`, `$``, `$&`, and `$'` are set
 # appropriately.
 #
 # ## Whitespace in Strings
 #
-# In class `String`, *whitespace* is defined as a contiguous sequence of
+# In the class `String`, *whitespace* is defined as a contiguous sequence of
 # characters consisting of any mixture of the following:
 #
 # *   NL (null): `"\x00"`, `"\u0000"`.
@@ -146,50 +145,51 @@
 # *   CR (carriage return): `"\x0d"`, `"\r"`.
 # *   SP (space): `"\x20"`, `" "`.
 #
-# Whitespace is relevant for these methods:
+# Whitespace is relevant for the following methods:
 #
-# *   #lstrip, #lstrip!: strip leading whitespace.
-# *   #rstrip, #rstrip!: strip trailing whitespace.
-# *   #strip, #strip!: strip leading and trailing whitespace.
+# *   #lstrip, #lstrip!: Strip leading whitespace.
+# *   #rstrip, #rstrip!: Strip trailing whitespace.
+# *   #strip, #strip!: Strip leading and trailing whitespace.
 #
 # ## `String` Slices
 #
-# A *slice* of a string is a substring that is selected by certain criteria.
+# A *slice* of a string is a substring selected by certain criteria.
 #
-# These instance methods make use of slicing:
+# These instance methods utilize slicing:
 #
-# *   String#[] (aliased as String#slice): returns a slice copied from `self`.
-# *   String#[]=: returns a copy of `self` with a slice replaced.
-# *   String#slice!: returns `self` with a slice removed.
+# *   String#[] (aliased as String#slice): Returns a slice copied from `self`.
+# *   String#[]=: Mutates `self` with the slice replaced.
+# *   String#slice!: Mutates `self` with the slice removed and returns the
+#     removed slice.
 #
 # Each of the above methods takes arguments that determine the slice to be
 # copied or replaced.
 #
-# The arguments have several forms. For string `string`,  the forms are:
+# The arguments have several forms. For a string `string`, the forms are:
 #
-# *   `string[index]`.
-# *   `string[start, length]`.
-# *   `string[range]`.
-# *   `string[regexp, capture = 0]`.
-# *   `string[substring]`.
+# *   `string[index]`
+# *   `string[start, length]`
+# *   `string[range]`
+# *   `string[regexp, capture = 0]`
+# *   `string[substring]`
 #
 # **`string[index]`**
 #
-# When non-negative integer argument `index` is given, the slice is the
+# When a non-negative integer argument `index` is given, the slice is the
 # 1-character substring found in `self` at character offset `index`:
 #
-#     'bar'[0]       # => "b"
-#     'bar'[2]       # => "r"
-#     'bar'[20]      # => nil
-#     'тест'[2]      # => "с"
-#     'こんにちは'[4]  # => "は"
+#     'bar'[0]      # => "b"
+#     'bar'[2]      # => "r"
+#     'bar'[20]     # => nil
+#     'тест'[2]     # => "с"
+#     'こんにちは'[4] # => "は"
 #
-# When negative integer `index` is given, the slice begins at the offset given
+# When a negative integer `index` is given, the slice begins at the offset given
 # by counting backward from the end of `self`:
 #
-#     'bar'[-3]         # => "b"
-#     'bar'[-1]         # => "r"
-#     'bar'[-20]        # => nil
+#     'bar'[-3]      # => "b"
+#     'bar'[-1]      # => "r"
+#     'bar'[-20]     # => nil
 #
 # **`string[start, length]`**
 #
@@ -197,92 +197,92 @@
 # begins at character offset `start`, if it exists, and continues for `length`
 # characters, if available:
 #
-#     'foo'[0, 2]       # => "fo"
-#     'тест'[1, 2]      # => "ес"
-#     'こんにちは'[2, 2]  # => "にち"
+#     'foo'[0, 2]      # => "fo"
+#     'тест'[1, 2]     # => "ес"
+#     'こんにちは'[2, 2] # => "にち"
 #     # Zero length.
-#     'foo'[2, 0]       # => ""
+#     'foo'[2, 0]      # => ""
 #     # Length not entirely available.
-#     'foo'[1, 200]     # => "oo"
+#     'foo'[1, 200]    # => "oo"
 #     # Start out of range.
 #     'foo'[4, 2]      # => nil
 #
-# Special case: if `start` is equal to the length of `self`, the slice is a new
-# empty string:
+# Special case: if `start` equals the length of `self`, the slice is a new empty
+# string:
 #
-#     'foo'[3, 2]   # => ""
-#     'foo'[3, 200] # => ""
+#     'foo'[3, 2]    # => ""
+#     'foo'[3, 200]  # => ""
 #
-# When negative `start` and non-negative `length` are given, the slice beginning
-# is determined by counting backward from the end of `self`, and the slice
-# continues for `length` characters, if available:
+# When a negative `start` and non-negative `length` are given, the slice begins
+# by counting backward from the end of `self`, and continues for `length`
+# characters, if available:
 #
-#     'foo'[-2, 2]    # => "oo"
-#     'foo'[-2, 200]  # => "oo"
+#     'foo'[-2, 2]     # => "oo"
+#     'foo'[-2, 200]   # => "oo"
 #     # Start out of range.
 #     'foo'[-4, 2]     # => nil
 #
-# When negative `length` is given, there is no slice:
+# When a negative `length` is given, there is no slice:
 #
-#     'foo'[1, -1]  # => nil
-#     'foo'[-2, -1] # => nil
+#     'foo'[1, -1]   # => nil
+#     'foo'[-2, -1]  # => nil
 #
 # **`string[range]`**
 #
-# When Range argument `range` is given, creates a substring of `string` using
-# the indices in `range`. The slice is then determined as above:
+# When a Range argument `range` is given, it creates a substring of `string`
+# using the indices in `range`. The slice is then determined as above:
 #
-#     'foo'[0..1]    # => "fo"
-#     'foo'[0, 2]    # => "fo"
+#     'foo'[0..1]     # => "fo"
+#     'foo'[0, 2]     # => "fo"
 #
-#     'foo'[2...2]   # => ""
-#     'foo'[2, 0]    # => ""
+#     'foo'[2...2]    # => ""
+#     'foo'[2, 0]     # => ""
 #
-#     'foo'[1..200]  # => "oo"
-#     'foo'[1, 200]  # => "oo"
+#     'foo'[1..200]   # => "oo"
+#     'foo'[1, 200]   # => "oo"
 #
-#     'foo'[4..5]    # => nil
-#     'foo'[4, 2]    # => nil
+#     'foo'[4..5]     # => nil
+#     'foo'[4, 2]     # => nil
 #
-#     'foo'[-4..-3]  # => nil
-#     'foo'[-4, 2]   # => nil
+#     'foo'[-4..-3]   # => nil
+#     'foo'[-4, 2]    # => nil
 #
-#     'foo'[3..4]    # => ""
-#     'foo'[3, 2]    # => ""
+#     'foo'[3..4]     # => ""
+#     'foo'[3, 2]     # => ""
 #
-#     'foo'[-2..-1]  # => "oo"
-#     'foo'[-2, 2]   # => "oo"
+#     'foo'[-2..-1]   # => "oo"
+#     'foo'[-2, 2]    # => "oo"
 #
-#     'foo'[-2..197] # => "oo"
-#     'foo'[-2, 200] # => "oo"
+#     'foo'[-2..197]  # => "oo"
+#     'foo'[-2, 200]  # => "oo"
 #
 # **`string[regexp, capture = 0]`**
 #
 # When the Regexp argument `regexp` is given, and the `capture` argument is `0`,
 # the slice is the first matching substring found in `self`:
 #
-#     'foo'[/o/] # => "o"
-#     'foo'[/x/] # => nil
+#     'foo'[/o/]                # => "o"
+#     'foo'[/x/]                # => nil
 #     s = 'hello there'
-#     s[/[aeiou](.)\1/] # => "ell"
-#     s[/[aeiou](.)\1/, 0] # => "ell"
+#     s[/[aeiou](.)\1/]        # => "ell"
+#     s[/[aeiou](.)\1/, 0]     # => "ell"
 #
-# If argument `capture` is given and not `0`, it should be either an capture
-# group index (integer) or a capture group name (string or symbol); the slice is
-# the specified capture (see Regexp@Groups+and+Captures):
+# If the argument `capture` is provided and not `0`, it should be either a
+# capture group index (integer) or a capture group name (String or Symbol); the
+# slice is the specified capture (see Regexp@Groups and Captures):
 #
 #     s = 'hello there'
 #     s[/[aeiou](.)\1/, 1] # => "l"
 #     s[/(?<vowel>[aeiou])(?<non_vowel>[^aeiou])/, "non_vowel"] # => "l"
-#     s[/(?<vowel>[aeiou])(?<non_vowel>[^aeiou])/, :vowel] # => "e"
+#     s[/(?<vowel>[aeiou])(?<non_vowel>[^aeiou])/, :vowel]      # => "e"
 #
 # If an invalid capture group index is given, there is no slice. If an invalid
 # capture group name is given, `IndexError` is raised.
 #
 # **`string[substring]`**
 #
-# When the single `String` argument `substring` is given, returns the substring
-# from `self` if found, otherwise `nil`:
+# When the single `String` argument `substring` is given, it returns the
+# substring from `self` if found, otherwise `nil`:
 #
 #     'foo'['oo'] # => "oo"
 #     'foo'['xx'] # => nil
@@ -291,8 +291,8 @@
 #
 # First, what's elsewhere. Class `String`:
 #
-# *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
-# *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
+# *   Inherits from the [Object class](rdoc-ref:Object@What-27s+Here).
+# *   Includes the [Comparable module](rdoc-ref:Comparable@What-27s+Here).
 #
 # Here, class `String` provides methods that are useful for:
 #
@@ -315,11 +315,11 @@
 #
 # ### Methods for a Frozen/Unfrozen String
 #
-# *   #+@: Returns a string that is not frozen: `self`, if not frozen;
-#     `self.dup` otherwise.
-# *   #-@ (aliased as #dedup): Returns a string that is frozen: `self`, if
+# *   #+@: Returns a string that is not frozen: `self` if not frozen; `self.dup`
+#     otherwise.
+# *   #-@ (aliased as #dedup): Returns a string that is frozen: `self` if
 #     already frozen; `self.freeze` otherwise.
-# *   #freeze: Freezes `self`, if not already frozen; returns `self`.
+# *   #freeze: Freezes `self` if not already frozen; returns `self`.
 #
 # ### Methods for Querying
 #
@@ -384,7 +384,8 @@
 #
 # *Insertion*
 #
-# *   #insert: Returns `self` with a given string inserted at a given offset.
+# *   #insert: Returns `self` with a given string inserted at a specified
+#     offset.
 # *   #<<: Returns `self` concatenated with a given string or integer.
 # *   #append_as_bytes: Returns `self` concatenated with strings without
 #     performing any encoding validation or conversion.
@@ -421,8 +422,8 @@
 #
 # *Encoding*
 #
-# *   #encode!: Returns `self` with all characters transcoded from one given
-#     encoding into another.
+# *   #encode!: Returns `self` with all characters transcoded from one encoding
+#     to another.
 # *   #unicode_normalize!: Unicode-normalizes `self`; returns `self`.
 # *   #scrub!: Replaces each invalid byte with a given character; returns
 #     `self`.
@@ -442,8 +443,8 @@
 #     `nil` otherwise.
 # *   #strip!: Removes leading and trailing whitespace; returns `self` if any
 #     changes, `nil` otherwise.
-# *   #chomp!: Removes trailing record separator, if found; returns `self` if
-#     any changes, `nil` otherwise.
+# *   #chomp!: Removes the trailing record separator, if found; returns `self`
+#     if any changes, `nil` otherwise.
 # *   #chop!: Removes trailing newline characters if found; otherwise removes
 #     the last character; returns `self` if any changes, `nil` otherwise.
 #
@@ -454,9 +455,9 @@
 #
 # *Extension*
 #
-# *   #*: Returns the concatenation of multiple copies of `self`,
+# *   #*: Returns the concatenation of multiple copies of `self`.
 # *   #+: Returns the concatenation of `self` and a given other string.
-# *   #center: Returns a copy of `self` centered between pad substring.
+# *   #center: Returns a copy of `self` centered between pad substrings.
 # *   #concat: Returns the concatenation of `self` with given other strings.
 # *   #prepend: Returns the concatenation of a given other string with `self`.
 # *   #ljust: Returns a copy of `self` of a given length, right-padded with a
@@ -472,28 +473,28 @@
 # *   #unicode_normalize: Returns a copy of `self` with each character
 #     Unicode-normalized.
 # *   #encode: Returns a copy of `self` with all characters transcoded from one
-#     given encoding into another.
+#     encoding to another.
 #
 # *Substitution*
 #
 # *   #dump: Returns a copy of `self` with all non-printing characters replaced
 #     by xHH notation and all special characters escaped.
-# *   #undump: Returns a copy of `self` with all `\xNN` notation replace by
-#     `\uNNNN` notation and all escaped characters unescaped.
+# *   #undump: Returns a copy of `self` with all `\xNN` notations replaced by
+#     `\uNNNN` notations and all escaped characters unescaped.
 # *   #sub: Returns a copy of `self` with the first substring matching a given
-#     pattern replaced with a given replacement string;.
+#     pattern replaced with a given replacement string.
 # *   #gsub: Returns a copy of `self` with each substring that matches a given
 #     pattern replaced with a given replacement string.
 # *   #succ (aliased as #next): Returns the string that is the successor to
 #     `self`.
 # *   #reverse: Returns a copy of `self` with its characters in reverse order.
 # *   #tr: Returns a copy of `self` with specified characters replaced with
-#     specified      replacement characters.
+#     specified replacement characters.
 # *   #tr_s: Returns a copy of `self` with specified characters replaced with
 #     specified replacement characters, removing duplicates from the substrings
 #     that were modified.
 # *   #%: Returns the string resulting from formatting a given object into
-#     `self`
+#     `self`.
 #
 # *Casing*
 #
@@ -506,7 +507,7 @@
 #
 # *Deletion*
 #
-# *   #delete: Returns a copy of `self` with characters removed
+# *   #delete: Returns a copy of `self` with characters removed.
 # *   #delete_prefix: Returns a copy of `self` with a given prefix removed.
 # *   #delete_suffix: Returns a copy of `self` with a given suffix removed.
 # *   #lstrip: Returns a copy of `self` with leading whitespace removed.
@@ -520,7 +521,7 @@
 # *   #squeeze: Returns a copy of `self` with contiguous duplicate characters
 #     removed.
 # *   #[] (aliased as #slice): Returns a substring determined by a given index,
-#     start/length, or range, or string.
+#     start/length, range, regexp, or string.
 # *   #byteslice: Returns a substring determined by a given index, start/length,
 #     or range.
 # *   #chr: Returns the first character.
@@ -539,7 +540,7 @@
 # *   #bytes: Returns an array of the bytes in `self`.
 # *   #chars: Returns an array of the characters in `self`.
 # *   #codepoints: Returns an array of the integer ordinals in `self`.
-# *   #getbyte: Returns an integer byte as determined by a given index.
+# *   #getbyte: Returns the integer byte at the given index in `self`.
 # *   #grapheme_clusters: Returns an array of the grapheme clusters in `self`.
 #
 # *Splitting*
@@ -547,17 +548,17 @@
 # *   #lines: Returns an array of the lines in `self`, as determined by a given
 #     record separator.
 # *   #partition: Returns a 3-element array determined by the first substring
-#     that matches a given substring or regexp,
+#     that matches a given substring or regexp.
 # *   #rpartition: Returns a 3-element array determined by the last substring
-#     that matches a given substring or regexp,
+#     that matches a given substring or regexp.
 # *   #split: Returns an array of substrings determined by a given delimiter --
-#     regexp or string -- or, if a block given, passes those substrings to the
-#     block.
+#     regexp or string -- or, if a block is given, passes those substrings to
+#     the block.
 #
 # *Matching*
 #
 # *   #scan: Returns an array of substrings matching a given regexp or string,
-#     or, if a block given, passes each matching substring to the  block.
+#     or, if a block is given, passes each matching substring to the block.
 # *   #unpack: Returns an array of substrings extracted from `self` according to
 #     a given format.
 # *   #unpack1: Returns the first substring extracted from `self` according to a
@@ -577,8 +578,8 @@
 #
 # *Strings and Symbols*
 #
-# *   #inspect: Returns copy of `self`, enclosed in double-quotes, with special
-#     characters escaped.
+# *   #inspect: Returns a copy of `self`, enclosed in double quotes, with
+#     special characters escaped.
 # *   #intern (aliased as #to_sym): Returns the symbol corresponding to `self`.
 #
 # ### Methods for Iterating
@@ -734,7 +735,8 @@ class String
   #   rdoc-file=string.c
   #   - +string -> new_string or self
   # -->
-  # Returns `self` if `self` is not frozen.
+  # Returns `self` if `self` is not frozen and can be mutated without warning
+  # issuance.
   #
   # Otherwise returns `self.dup`, which is not frozen.
   #

@@ -19,7 +19,7 @@
 #
 # *   NoMemoryError
 # *   ScriptError
-#     *   [LoadError](https://docs.ruby-lang.org/en/master/LoadError.html)
+#     *   LoadError
 #     *   NotImplementedError
 #     *   SyntaxError
 # *   SecurityError
@@ -51,7 +51,7 @@
 #     *   ZeroDivisionError
 # *   SystemExit
 # *   SystemStackError
-# *   [fatal](https://docs.ruby-lang.org/en/master/fatal.html)
+# *   [fatal](rdoc-ref:fatal)
 #
 class Exception
   # <!--

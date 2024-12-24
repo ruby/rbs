@@ -897,7 +897,7 @@
 # *   [Nl, Letter_Number](https://www.compart.com/en/unicode/category/Nl).
 # *   [No, Other_Number](https://www.compart.com/en/unicode/category/No).
 #
-# Punctation:
+# Punctuation:
 #
 # *   `P`, `Punctuation`: `Pc`, `Pd`, `Pe`, `Pf`, `Pi`, `Po`, or `Ps`.
 # *   [Pc,
@@ -1603,7 +1603,7 @@ class Regexp
   # `self`:
   #
   # *   Is a regexp literal; see [Regexp
-  #     Literals](rdoc-ref:literals.rdoc@Regexp+Literals).
+  #     Literals](rdoc-ref:syntax/literals.rdoc@Regexp+Literals).
   # *   Does not contain interpolations; see [Regexp
   #     interpolation](rdoc-ref:Regexp@Interpolation+Mode).
   # *   Is at the left of the expression.

@@ -5,7 +5,7 @@
 #
 # *   You need both dates and times; Date handles only dates.
 # *   You need only Gregorian dates (and not Julian dates); see [Julian and
-#     Gregorian Calendars](rdoc-ref:calendars.rdoc).
+#     Gregorian Calendars](rdoc-ref:date/calendars.rdoc).
 #
 # A Date object, once created, is immutable, and cannot be modified.
 #
@@ -88,7 +88,7 @@ class Date
   # number of days in the month; when the argument is negative, counts backward
   # from the end of the month.
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd.
   #
@@ -309,7 +309,7 @@ class Date
   #         Date.commercial(2020, 1, 1).to_s # => "2019-12-30"
   #         Date.commercial(2020, 1, 7).to_s # => "2020-01-05"
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new, Date.ordinal.
   #
@@ -343,7 +343,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._httpdate (returns a hash).
@@ -364,7 +364,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._iso8601 (returns a hash).
@@ -393,7 +393,7 @@ class Date
   #
   #         Date.jd(Date::ITALY - 1).julian?    # => true
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.new.
   #
@@ -417,7 +417,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._jisx0301 (returns a hash).
@@ -480,7 +480,7 @@ class Date
   #
   # Raises an exception if `yday` is zero or out of range.
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -510,7 +510,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._parse (returns a hash).
@@ -531,7 +531,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -551,7 +551,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc3339 (returns a hash).
@@ -572,7 +572,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -598,7 +598,7 @@ class Date
   # Times](rdoc-ref:strftime_formatting.rdoc). (Unlike Date.strftime, does not
   # support flags and width.)
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # See also [strptime(3)](https://man7.org/linux/man-pages/man3/strptime.3.html).
   #
@@ -614,7 +614,7 @@ class Date
   #
   #     Date.today.to_s # => "2022-07-06"
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   def self.today: (?Integer start) -> Date
 
@@ -629,7 +629,7 @@ class Date
   #     Date.valid_date?(2001, 2, 29) # => false
   #     Date.valid_date?(2001, 2, -1) # => true
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -647,7 +647,7 @@ class Date
   #
   # See Date.commercial.
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.commercial.
   #
@@ -664,7 +664,7 @@ class Date
   #     Date.valid_date?(2001, 2, 29) # => false
   #     Date.valid_date?(2001, 2, -1) # => true
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -679,7 +679,7 @@ class Date
   #
   #     Date.valid_jd?(2451944) # => true
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd.
   #
@@ -695,7 +695,7 @@ class Date
   #     Date.valid_ordinal?(2001, 34)  # => true
   #     Date.valid_ordinal?(2001, 366) # => false
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.ordinal.
   #
@@ -714,7 +714,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._xmlschema (returns a hash).
@@ -1225,7 +1225,7 @@ class Date
   #     d1 = d0.new_start(Date::JULIAN)
   #     d1.julian? # => true
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   def new_start: (?Integer start) -> Date
 
@@ -1322,7 +1322,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -1355,7 +1355,7 @@ class Date
   #     Date.new(2001, 2, 3, Date::GREGORIAN).start # => -Infinity
   #     Date.new(2001, 2, 3, Date::JULIAN).start    # => Infinity
   #
-  # See argument [start](rdoc-ref:calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
   #
   def start: () -> Float
 

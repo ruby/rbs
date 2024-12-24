@@ -126,9 +126,13 @@ class Resolv
 
   # <!--
   #   rdoc-file=lib/resolv.rb
-  #   - new(resolvers=nil, use_ipv6: nil)
+  #   - new(resolvers=(arg_not_set = true; nil), use_ipv6: (keyword_not_set = true; nil))
   # -->
   # Creates a new Resolv using `resolvers`.
+  #
+  # If `resolvers` is not given, a hash, or `nil`, uses a Hosts resolver and and a
+  # DNS resolver.  If `resolvers` is a hash, uses the hash as configuration for
+  # the DNS resolver.
   #
   def initialize: (?Resolv::Hosts | Resolv::DNS resolvers) -> untyped
 end

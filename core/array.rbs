@@ -70,18 +70,20 @@
 #
 # You can create an Array object explicitly with:
 #
-# *   An [array literal](rdoc-ref:literals.rdoc@Array+Literals):
+# *   An [array literal](rdoc-ref:syntax/literals.rdoc@Array+Literals):
 #
 #         [1, 'one', :one, [2, 'two', :two]]
 #
-# *   A [%w or %W: string-array
-#     Literal](rdoc-ref:literals.rdoc@25w+and+-25W-3A+String-Array+Literals):
+# *   A [%w or %W string-array
+#     Literal](rdoc-ref:syntax/literals.rdoc@25w+and+-25W-3A+String-Array+Litera
+#     ls):
 #
 #         %w[foo bar baz] # => ["foo", "bar", "baz"]
 #         %w[1 % *]       # => ["1", "%", "*"]
 #
-# *   A [%i pr %I: symbol-array
-#     Literal](rdoc-ref:literals.rdoc@25i+and+-25I-3A+Symbol-Array+Literals):
+# *   A [%i or %I symbol-array
+#     Literal](rdoc-ref:syntax/literals.rdoc@25i+and+-25I-3A+Symbol-Array+Litera
+#     ls):
 #
 #         %i[foo bar baz] # => [:foo, :bar, :baz]
 #         %i[1 % *]       # => [:"1", :%, :*]
@@ -677,7 +679,7 @@ class Array[unchecked out Elem] < Object
   # When string argument `string_separator` is given, equivalent to
   # `self.join(string_separator)`:
   #
-  #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {:foo=>0}"
+  #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {foo: 0}"
   #
   def *: (string str) -> ::String
        | (int int) -> ::Array[Elem]
@@ -1293,13 +1295,13 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - combination(n) {|element| ... } -> self
-  #   - combination(n) -> new_enumerator
+  #   - combination(count) {|element| ... } -> self
+  #   - combination(count) -> new_enumerator
   # -->
   # When a block and a positive [integer-convertible
   # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects)
-  # argument `n` (`0 < n <= self.size`) are given, calls the block with all
-  # `n`-tuple combinations of `self`; returns `self`:
+  # argument `count` (`0 < count <= self.size`) are given, calls the block with
+  # each combination of `self` of size `count`; returns `self`:
   #
   #     a = %w[a b c]                                   # => ["a", "b", "c"]
   #     a.combination(2) {|combination| p combination } # => ["a", "b", "c"]
@@ -1312,7 +1314,7 @@ class Array[unchecked out Elem] < Object
   #
   # The order of the yielded combinations is not guaranteed.
   #
-  # When `n` is zero, calls the block once with a new empty array:
+  # When `count` is zero, calls the block once with a new empty array:
   #
   #     a.combination(0) {|combination| p combination }
   #     [].combination(0) {|combination| p combination }
@@ -1322,8 +1324,8 @@ class Array[unchecked out Elem] < Object
   #     []
   #     []
   #
-  # When `n` is negative or larger than `self.size` and `self` is non-empty, does
-  # not call the block:
+  # When `count` is negative or larger than `self.size` and `self` is non-empty,
+  # does not call the block:
   #
   #     a.combination(-1) {|combination| fail 'Cannot happen' } # => ["a", "b", "c"]
   #     a.combination(4)  {|combination| fail 'Cannot happen' } # => ["a", "b", "c"]
@@ -1583,10 +1585,10 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - drop(n) -> new_array
+  #   - drop(count) -> new_array
   # -->
-  # Returns a new array containing all but the first `n` element of `self`, where
-  # `n` is a non-negative Integer; does not modify `self`.
+  # Returns a new array containing all but the first `count` element of `self`,
+  # where `count` is a non-negative integer; does not modify `self`.
   #
   # Examples:
   #
@@ -1766,34 +1768,34 @@ class Array[unchecked out Elem] < Object
   # <!--
   #   rdoc-file=array.rb
   #   - fetch_values(*indexes) -> new_array
-  #   - fetch_values(*indexes) {|index| ... } -> new_array
+  #   - fetch_values(*indexes) { |index| ... } -> new_array
   # -->
   # With no block given, returns a new array containing the elements of `self` at
-  # the offsets given by `indexes`; each of the `indexes` must be an
+  # the offsets specified by `indexes`. Each of the `indexes` must be an
   # [integer-convertible
   # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects):
   #
   #     a = [:foo, :bar, :baz]
-  #     a.fetch_values(3, 1)   # => [:baz, :foo]
-  #     a.fetch_values(3.1, 1) # => [:baz, :foo]
+  #     a.fetch_values(2, 0)   # => [:baz, :foo]
+  #     a.fetch_values(2.1, 0) # => [:baz, :foo]
   #     a.fetch_values         # => []
   #
   # For a negative index, counts backwards from the end of the array:
   #
-  #     a.fetch_values([-2, -1]) # [:bar, :baz]
+  #     a.fetch_values(-2, -1) # [:bar, :baz]
   #
   # When no block is given, raises an exception if any index is out of range.
   #
   # With a block given, for each index:
   #
-  # *   If the index in in range, uses an element of `self` (as above).
-  # *   Otherwise calls, the block with the index, and uses the block's return
+  # *   If the index is in range, uses an element of `self` (as above).
+  # *   Otherwise, calls the block with the index and uses the block's return
   #     value.
   #
   # Example:
   #
   #     a = [:foo, :bar, :baz]
-  #     a.fetch_values(1, 0, 42, 777) {|index| index.to_s}
+  #     a.fetch_values(1, 0, 42, 777) { |index| index.to_s }
   #     # => [:bar, :foo, "42", "777"]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
@@ -2070,7 +2072,7 @@ class Array[unchecked out Elem] < Object
   #
   #     [].first # => nil
   #
-  # With non-negative integer argument `count` given, returns the first `count`
+  # With a non-negative integer argument `count` given, returns the first `count`
   # elements (as available) in a new array:
   #
   #     a.first(0)  # => []
@@ -2348,7 +2350,7 @@ class Array[unchecked out Elem] < Object
   # <!--
   #   rdoc-file=array.rb
   #   - last  -> last_object or nil
-  #   - last(n) -> new_array
+  #   - last(count) -> new_array
   # -->
   # Returns elements from `self`, or `nil`; `self` is not modified.
   #
@@ -2359,8 +2361,8 @@ class Array[unchecked out Elem] < Object
   #     a # => [:foo, "bar", 2]
   #     [].last # => nil
   #
-  # With non-negative integer argument `n` is given, returns a new array
-  # containing the trailing `n` elements of `self`, as available:
+  # With non-negative integer argument `count` given, returns a new array
+  # containing the trailing `count` elements of `self`, as available:
   #
   #     a = [:foo, 'bar', 2]
   #     a.last(2)  # => ["bar", 2]
@@ -2419,9 +2421,9 @@ class Array[unchecked out Elem] < Object
   # <!--
   #   rdoc-file=array.c
   #   - max -> element
-  #   - max(n) -> new_array
+  #   - max(count) -> new_array
   #   - max {|a, b| ... } -> element
-  #   - max(n) {|a, b| ... } -> new_array
+  #   - max(count) {|a, b| ... } -> new_array
   # -->
   # Returns one of the following:
   #
@@ -2438,8 +2440,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [1, 0, 3, 2].max # => 3
   #
-  # With non-negative numeric argument `n` and no block, returns a new array with
-  # at most `n` elements, in descending order, per method `#<=>`:
+  # With non-negative numeric argument `count` and no block, returns a new array
+  # with at most `count` elements, in descending order, per method `#<=>`:
   #
   #     [1, 0, 3, 2].max(3)   # => [3, 2, 1]
   #     [1, 0, 3, 2].max(3.0) # => [3, 2, 1]
@@ -2454,8 +2456,8 @@ class Array[unchecked out Elem] < Object
   #     ['0', '', '000', '00'].max {|a, b| a.size <=> b.size }
   #     # => "000"
   #
-  # With non-negative numeric argument `n` and a block, returns a new array with
-  # at most `n` elements, in descending order, per the block:
+  # With non-negative numeric argument `count` and a block, returns a new array
+  # with at most `count` elements, in descending order, per the block:
   #
   #     ['0', '', '000', '00'].max(2) {|a, b| a.size <=> b.size }
   #     # => ["000", "00"]
@@ -2470,9 +2472,9 @@ class Array[unchecked out Elem] < Object
   # <!--
   #   rdoc-file=array.c
   #   - min -> element
-  #   - min(n) -> new_array
+  #   - min(count) -> new_array
   #   - min {|a, b| ... } -> element
-  #   - min(n) {|a, b| ... } -> new_array
+  #   - min(count) {|a, b| ... } -> new_array
   # -->
   # Returns one of the following:
   #
@@ -2489,8 +2491,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [1, 0, 3, 2].min # => 0
   #
-  # With non-negative numeric argument `n` and no block, returns a new array with
-  # at most `n` elements, in ascending order, per method `#<=>`:
+  # With non-negative numeric argument `count` and no block, returns a new array
+  # with at most `count` elements, in ascending order, per method `#<=>`:
   #
   #     [1, 0, 3, 2].min(3)   # => [0, 1, 2]
   #     [1, 0, 3, 2].min(3.0) # => [0, 1, 2]
@@ -2505,8 +2507,8 @@ class Array[unchecked out Elem] < Object
   #     ['0', '', '000', '00'].min {|a, b| a.size <=> b.size }
   #     # => ""
   #
-  # With non-negative numeric argument `n` and a block, returns a new array with
-  # at most `n` elements, in ascending order, per the block:
+  # With non-negative numeric argument `count` and a block, returns a new array
+  # with at most `count` elements, in ascending order, per the block:
   #
   #     ['0', '', '000', '00'].min(2) {|a, b| a.size <=> b.size }
   #     # => ["", "0"]
@@ -2623,15 +2625,15 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - permutation(n = self.size) {|permutation| ... } -> self
-  #   - permutation(n = self.size) -> new_enumerator
+  #   - permutation(count = self.size) {|permutation| ... } -> self
+  #   - permutation(count = self.size) -> new_enumerator
   # -->
   # Iterates over permutations of the elements of `self`; the order of
   # permutations is indeterminate.
   #
-  # With a block and an in-range positive integer argument `n` (`0 < n <=
-  # self.size`) given, calls the block with each `n`-tuple permutations of `self`;
-  # returns `self`:
+  # With a block and an in-range positive integer argument `count` (`0 < count <=
+  # self.size`) given, calls the block with each permutation of `self` of size
+  # `count`; returns `self`:
   #
   #     a = [0, 1, 2]
   #     perms = []
@@ -2646,14 +2648,14 @@ class Array[unchecked out Elem] < Object
   #     a.permutation(3) {|perm| perms.push(perm) }
   #     perms # => [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
   #
-  # When `n` is zero, calls the block once with a new empty array:
+  # When `count` is zero, calls the block once with a new empty array:
   #
   #     perms = []
   #     a.permutation(0) {|perm| perms.push(perm) }
   #     perms # => [[]]
   #
-  # When `n` is out of range (negative or larger than `self.size`), does not call
-  # the block:
+  # When `count` is out of range (negative or larger than `self.size`), does not
+  # call the block:
   #
   #     a.permutation(-1) {|permutation| fail 'Cannot happen' }
   #     a.permutation(4) {|permutation| fail 'Cannot happen' }
@@ -3092,7 +3094,7 @@ class Array[unchecked out Elem] < Object
   #   - sample(random: Random) -> object
   #   - sample(count, random: Random) -> new_ary
   # -->
-  # Returns random elements from `self`, as selected by the object given by
+  # Returns random elements from `self`, as selected by the object given by the
   # keyword argument `random`.
   #
   # With no argument `count` given, returns one random element from `self`:
@@ -3105,7 +3107,7 @@ class Array[unchecked out Elem] < Object
   #
   #     [].sample # => nil
   #
-  # With non-negative numeric argument `count` given, returns a new array
+  # With a non-negative numeric argument `count` given, returns a new array
   # containing `count` random elements from `self`:
   #
   #     a.sample(3) # => [8, 9, 2]
@@ -3127,12 +3129,12 @@ class Array[unchecked out Elem] < Object
   #
   #     a.sample(50) # => [6, 4, 1, 8, 5, 9, 0, 2, 3, 7]
   #
-  # The object given with keyword argument `random` is used as the random number
-  # generator:
+  # The object given with the keyword argument `random` is used as the random
+  # number generator:
   #
   #     a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-  #     a.sample(random: Random.new(1))     #=> 6
-  #     a.sample(4, random: Random.new(1))  #=> [6, 10, 9, 2]
+  #     a.sample(random: Random.new(1))     # => 6
+  #     a.sample(4, random: Random.new(1))  # => [6, 10, 9, 2]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
@@ -3229,7 +3231,7 @@ class Array[unchecked out Elem] < Object
   #   - shuffle(random: Random) -> new_array
   # -->
   # Returns a new array containing all elements from `self` in a random order, as
-  # selected by the object given by keyword argument `random`:
+  # selected by the object given by the keyword argument `random`:
   #
   #     a =            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   #     a.shuffle # => [0, 8, 1, 9, 6, 3, 4, 7, 2, 5]
@@ -3241,8 +3243,8 @@ class Array[unchecked out Elem] < Object
   #     a.shuffle # => [1, 0, 1, 1, 0, 0, 1, 0, 0, 1]
   #     a.shuffle # => [1, 1, 0, 0, 0, 1, 1, 0, 0, 1]
   #
-  # The object given with keyword argument `random` is used as the random number
-  # generator.
+  # The object given with the keyword argument `random` is used as the random
+  # number generator.
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
@@ -3253,20 +3255,20 @@ class Array[unchecked out Elem] < Object
   #   - shuffle!(random: Random) -> self
   # -->
   # Shuffles all elements in `self` into a random order, as selected by the object
-  # given by keyword argument `random`; returns `self`:
+  # given by the keyword argument `random`. Returns `self`:
   #
   #     a =             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   #     a.shuffle! # => [5, 3, 8, 7, 6, 1, 9, 4, 2, 0]
   #     a.shuffle! # => [9, 4, 0, 6, 2, 8, 1, 5, 3, 7]
   #
-  #     Duplicate elements are included:
+  # Duplicate elements are included:
   #
   #     a =             [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
   #     a.shuffle! # => [1, 0, 0, 1, 1, 0, 1, 0, 0, 1]
   #     a.shuffle! # => [0, 1, 0, 1, 1, 0, 1, 0, 1, 0]
   #
-  # The object given with keyword argument `random` is used as the random number
-  # generator.
+  # The object given with the keyword argument `random` is used as the random
+  # number generator.
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
@@ -3922,7 +3924,7 @@ class Array[unchecked out Elem] < Object
   # <!--
   #   rdoc-file=array.c
   #   - zip(*other_arrays) -> new_array
-  #   - zip(*other_arrays) {|other_array| ... } -> nil
+  #   - zip(*other_arrays) {|sub_array| ... } -> nil
   # -->
   # With no block given, combines `self` with the collection of `other_arrays`;
   # returns a new array of sub-arrays:
