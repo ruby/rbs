@@ -1220,7 +1220,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
 
       VALUE location = rbs_new_location(state->buffer, param_range);
       rbs_loc *loc = rbs_check_location(location);
-      rbs_loc_alloc_children(loc, 4);
+      rbs_loc_alloc_children(loc, 5);
       rbs_loc_add_required_child(loc, rb_intern("name"), name_range);
       rbs_loc_add_optional_child(loc, rb_intern("variance"), variance_range);
       rbs_loc_add_optional_child(loc, rb_intern("unchecked"), unchecked_range);
