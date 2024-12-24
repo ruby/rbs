@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 3.8.0 (2024-12-24)
+
+### Signature updates
+
+* `Dir.mktmpdir` ([#2158](https://github.com/ruby/rbs/pull/2158))
+* `File.join` ([#2158](https://github.com/ruby/rbs/pull/2158))
+* `IO#each_line` ([#2151](https://github.com/ruby/rbs/pull/2151))
+* `Kernel#readlines` ([#2151](https://github.com/ruby/rbs/pull/2151))
+* `Ractor.store_if_absent` ([#2198](https://github.com/ruby/rbs/pull/2198))
+* Update docs as of 2024-12-24, 16:13 JST ([#2193](https://github.com/ruby/rbs/pull/2193))
+
+### Library changes
+
+* Adjust capacity of location children ([#2197](https://github.com/ruby/rbs/pull/2197))
+* Should validate self-type on Proc ([#2192](https://github.com/ruby/rbs/pull/2192))
+
 ## 3.8.0.pre.1 (2024-12-19)
 
 ### Signature updates
