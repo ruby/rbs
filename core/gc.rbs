@@ -587,7 +587,7 @@ module GC
 
   # The type that `GC.compact` and related functions can return.
   #
-  type compact_info = Hash[:considered | :moved |:moved_up | :moved_down, Hash[Symbol, Integer]]
+  type compact_info = Hash[:considered | :moved | :moved_up | :moved_down, Hash[Symbol, Integer]]
 
   # <!--
   #   rdoc-file=gc.rb

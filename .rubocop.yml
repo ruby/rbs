@@ -15,6 +15,7 @@ Rubycw/Rubycw:
 
 RBS:
   Enabled: true
+
 RBS/Layout:
   Enabled: true
   Exclude:
@@ -23,6 +24,7 @@ RBS/Layout:
 RBS/Layout/CommentIndentation:
   Exclude:
     - core/string.rbs
+
 RBS/Lint:
   Enabled: true
   Exclude:
@@ -32,6 +34,11 @@ RBS/Lint/TopLevelInterface:
   Enabled: false
 RBS/Lint/TopLevelTypeAlias:
   Enabled: false
+RBS/Lint/AmbiguousKeywordArgumentKey:
+  Exclude:
+    # OpenSSL::KDF.scrypt
+    - 'stdlib/openssl/0/openssl.rbs'
+
 RBS/Style:
   Enabled: false
   Exclude:
