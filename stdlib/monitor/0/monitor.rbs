@@ -12,15 +12,17 @@
 class Monitor
   # <!--
   #   rdoc-file=ext/monitor/monitor.c
-  #   - enter()
+  #   - enter -> nil
   # -->
+  # Enters exclusive section.
   #
   def enter: () -> nil
 
   # <!--
   #   rdoc-file=ext/monitor/monitor.c
-  #   - exit()
+  #   - exit -> nil
   # -->
+  # Leaves exclusive section.
   #
   def exit: () -> nil
 
@@ -77,20 +79,25 @@ class Monitor
   #   rdoc-file=ext/monitor/lib/monitor.rb
   #   - new_cond()
   # -->
+  # Creates a new MonitorMixin::ConditionVariable associated with the Monitor
+  # object.
   #
   def new_cond: () -> ::MonitorMixin::ConditionVariable
 
   # <!--
   #   rdoc-file=ext/monitor/monitor.c
-  #   - synchronize()
+  #   - synchronize { } -> result of the block
   # -->
+  # Enters exclusive section and executes the block.  Leaves the exclusive section
+  # automatically when the block exits.  See example under `MonitorMixin`.
   #
   def synchronize: [T] () { () -> T } -> T
 
   # <!--
   #   rdoc-file=ext/monitor/monitor.c
-  #   - try_enter()
+  #   - try_enter -> true or false
   # -->
+  # Attempts to enter exclusive section.  Returns `false` if lock fails.
   #
   def try_enter: () -> bool
 
@@ -279,6 +286,8 @@ module MonitorMixin
   #   rdoc-file=ext/monitor/lib/monitor.rb
   #   - mon_check_owner()
   # -->
+  # Ensures that the MonitorMixin is owned by the current thread, otherwise raises
+  # an exception.
   #
   def mon_check_owner: () -> nil
 

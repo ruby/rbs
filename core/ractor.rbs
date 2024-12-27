@@ -1053,6 +1053,9 @@ class Ractor
   #     end
   #
   class RemoteError < Ractor::Error
+    # <!-- rdoc-file=ractor.rb -->
+    # The Ractor an uncaught exception is raised in.
+    #
     def ractor: () -> Ractor
   end
 
