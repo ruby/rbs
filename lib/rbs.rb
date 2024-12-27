@@ -59,6 +59,8 @@ require "rbs/collection"
 require "rbs_extension"
 require "rbs/parser_aux"
 require "rbs/location_aux"
+require "rbs/bundle/writer"
+require "rbs/bundle/loader"
 
 module RBS
   class <<self
