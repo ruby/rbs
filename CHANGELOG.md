@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 3.8.1 (2024-12-27)
+
+### Signature updates
+
+* `Ractor.store_if_absent` ([#2206](https://github.com/ruby/rbs/pull/2206))
+* `Time#iso860t1` ([#2207](https://github.com/ruby/rbs/pull/2207))
+* `Time#xmlschema` ([#2207](https://github.com/ruby/rbs/pull/2207))
+
+### Miscellaneous
+
+* Update rubocop-on-rbs ([#2200](https://github.com/ruby/rbs/pull/2200))
+* Update docs based on Ruby 3.4.1 ([#2208](https://github.com/ruby/rbs/pull/2208))
+* Ruby 3.4.1 ([#2206](https://github.com/ruby/rbs/pull/2206))
+
 ## 3.8.0 (2024-12-24)
 
 ### Signature updates
