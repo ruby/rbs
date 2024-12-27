@@ -355,10 +355,10 @@ class TimeInstanceTest < Test::Unit::TestCase
   end
 
   def test_xmlschema
-    if_ruby("3.4.0"...) do
-      assert_send_type "() -> String",
-                      Time.now, :xmlschema
-    end
+    assert_send_type "() -> String",
+                    Time.now, :xmlschema
+    assert_send_type "(Integer) -> String",
+                    Time.now, :xmlschema, 3
   end
 
   def test_zone
