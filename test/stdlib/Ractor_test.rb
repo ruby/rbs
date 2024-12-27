@@ -107,6 +107,13 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :shareable?, []
   end
 
+  def test_store_if_absent
+    assert_send_type(
+      "(Symbol) { (nil) -> true } -> true",
+      Ractor, :store_if_absent, :test_store_if_absent, &->(_x) { true }
+    )
+  end
+
   def test_yield
     Ractor.new(Ractor.current) { |r| loop { r.take } }
 
