@@ -1,0 +1,410 @@
+module RBS
+  module Bundle
+    # start_pos * end_pos * required_children * optional_children
+    type location = [Integer, Integer, Hash[String, [Integer, Integer]]?, Hash[String, [Integer, Integer]?]?]
+
+    # Directives::Use::t
+    type directives__use__clause__json = directives__use__single_clause__json | directives__use__wildcard_clause__json
+
+    # Directives::Use::SingleClause ::= type_name * new_name * location
+    type directives__use__single_clause__json = [String, String?, location]
+
+    # Directives::Use::WildcardClause ::= namespace * location
+    type directives__use__wildcard_clause__json = [String, location]
+
+    # Directives::Use ::= "use" * clauses * location
+    type directives__use__json = ["use", Array[directives__use__clause__json], location]
+
+    # Directives::t
+    type directives__json = directives__use__json
+
+    # Declarations::t
+    type declarations__json = declarations__class__json
+                            | declarations__module__json
+                            | declarations__interface__json
+                            | declarations__type_alias__json
+                            | declarations__constant__json
+                            | declarations__global__json
+                            | declarations__class_alias__json
+                            | declarations__module_alias__json
+
+    # Declarations::Class ::= "decls:class" * name * type_params * members * super_class * comment * annotations * location
+    type declarations__class__json = ["decls:class", String, Array[type_param__json], Array[declarations__class__member__json], declarations__class__super_class__json?, comment__json?, Array[annotation__json], location]
+
+    type declarations__class__member__json = declarations__json | members__json
+
+    # Declarations::Class::SuperClass ::= name * args * location
+    type declarations__class__super_class__json = [String, Array[type__json], location]
+
+    # Declarations::Module ::= "decls:module" * name * type_params * members * self_types * comment * annotations * location
+    type declarations__module__json = ["decls:module", String, Array[type_param__json], Array[declarations__module__member__json], Array[declarations__module__self__json], comment__json?, Array[annotation__json], location]
+
+    type declarations__module__self__json = [String, Array[type__json], location]
+
+    type declarations__module__member__json = declarations__json | members__json
+
+    # Declarations::Interface ::= "decls:interface" * name * type_params * members * comment * annotations * location
+    type declarations__interface__json = ["decls:interface", String, Array[type_param__json], Array[declarations__interface__member__json], comment__json?, Array[annotation__json], location]
+
+    type declarations__interface__member__json = members__json
+
+    # TypeParam ::= name * variance * unchecked * location * upper_bound_type * default_type
+    type type_param__json = [String, type_param__variance__json, bool, location, type__json?, type__json?]
+
+    type type_param__variance__json = "invariant" | "covariant" | "contravariant"
+
+    # Declarations::TypeAlias ::= "decls:type_alias" * name * type_params * type * comment * annotations * location
+    type declarations__type_alias__json = ["decls:type_alias", String, Array[type_param__json], type__json, comment__json?, Array[annotation__json], location]
+
+    # Declarations::Constant ::= "decls:constant" * name * type * comment * location
+    type declarations__constant__json = ["decls:constant", String, type__json, comment__json?, location]
+
+    # Declarations::Global ::= "decls:global" * name * type * comment * location
+    type declarations__global__json = ["decls:global", String, type__json, comment__json?, location]
+
+    # Declarations::ClassAlias ::= "decls:class_alias" * new_name * old_name * comment * location
+    type declarations__class_alias__json = ["decls:class_alias", String, String, comment__json?, location]
+
+    # Declarations::ModuleAlias ::= "decls:module_alias" * new_name * old_name * comment * location
+    type declarations__module_alias__json = ["decls:module_alias", String, String, comment__json?, location]
+
+    type members__json = members__method_definition__json
+                       | members__instance_variable__json
+                       | members__class_instance_variable__json
+                       | members__class_variable__json
+                       | members__include__json
+                       | members__extend__json
+                       | members__prepend__json
+                       | members__attr_reader__json
+                       | members__attr_writer__json
+                       | members__attr_accessor__json
+                       | members__public__json
+                       | members__private__json
+                       | members__alias__json
+
+    # Members::MethodDefinition ::= tag * name * kind * overloads * overloading * visibility * annotations * comment * location
+    type members__method_definition__json = [
+      "members:method_definition",
+      String,
+      members__method_definition__kind__json,
+      Array[members__method_definition__overload__json],
+      bool,
+      members__visibility__json?,
+      Array[annotation__json],
+      comment__json?,
+      location
+    ]
+
+    # Members::MethodDefinition::kind
+    type members__method_definition__kind__json = "instance" | "singleton" | "singleton_instance"
+
+    # Members::MethodDefinition::Overload ::= method_type * annotations
+    type members__method_definition__overload__json = [method_type__json, Array[annotation__json]]
+
+    # Members::InstanceVariable ::= tag * name * type * comment * location
+    type members__instance_variable__json = ["members:instance_variable", String, type__json, comment__json?, location]
+
+    # Members::ClassInstanceVariable ::= tag * name * type * comment * location
+    type members__class_instance_variable__json = ["members:class_instance_variable", String, type__json, comment__json?, location]
+
+    # Members::ClassVariable ::= tag * name * type * comment * location
+    type members__class_variable__json = ["members:class_variable", String, type__json, comment__json?, location]
+
+    # Members::Include ::= tag * name * args * annotations * comment * location
+    type members__include__json = ["members:include", String, Array[type__json], Array[annotation__json], comment__json?, location]
+
+    # Members::Extend ::= tag * name * args * annotations * comment * location
+    type members__extend__json = ["members:extend", String, Array[type__json], Array[annotation__json], comment__json?, location]
+
+    # Members::Prepend ::= tag * name * args * annotations * comment * location
+    type members__prepend__json = ["members:prepend", String, Array[type__json], Array[annotation__json], comment__json?, location]
+
+    # Members::AttrReader ::= tag * name * kind * type * ivar_name * visibility * annotations * comment * location
+    type members__attr_reader__json = [
+      "members:attr_reader",
+      String,
+      members__attribute__kind__json,
+      type__json,
+      String | false | nil,
+      members__visibility__json?,
+      Array[annotation__json],
+      comment__json?,
+      location
+    ]
+
+    # Members::AttrWriter ::= tag * name * kind * type * ivar_name * visibility * annotations * comment * location
+    type members__attr_writer__json = [
+      "members:attr_writer",
+      String,
+      members__attribute__kind__json,
+      type__json,
+      String | false | nil,
+      members__visibility__json?,
+      Array[annotation__json],
+      comment__json?,
+      location
+    ]
+
+    # Members::AttrAccessor ::= tag * name * kind * type * ivar_name * visibility * annotations * comment * location
+    type members__attr_accessor__json = [
+      "members:attr_accessor",
+      String,
+      members__attribute__kind__json,
+      type__json,
+      String | false | nil,
+      members__visibility__json?,
+      Array[annotation__json],
+      comment__json?,
+      location
+    ]
+
+    # Members::Attribute::kind
+    type members__attribute__kind__json = "instance" | "singleton"
+
+    type members__public__json = ["members:public"]
+
+    type members__private__json = ["members:private"]
+
+    # Members::Alias ::= tag * new_name * old_name * kind * annotations * comment * location
+    type members__alias__json = ["members:alias", String, String, members__alias__kind__json, Array[annotation__json] , comment__json?, location]
+
+    type members__alias__kind__json = "instance" | "singleton"
+
+    # Members::visibility
+    type members__visibility__json = "public" | "private"
+
+    # Types::t
+    type type__json = types__bases__bool__json
+                    | types__bases__void__json
+                    | types__bases__untyped__json
+                    | types__bases__todo__json
+                    | types__bases__nil__json
+                    | types__bases__self__json
+                    | types__bases__instance__json
+                    | types__bases__class__json
+                    | types__bases__top__json
+                    | types__bases__bot__json
+                    | types__variable__json
+                    | types__class_singleton__json
+                    | types__interface__json
+                    | types__class_instance__json
+                    | types__alias__json
+                    | types__tuple__json
+                    | types__record__json
+                    | types__optional__json
+                    | types__union__json
+                    | types__intersection__json
+                    | types__proc__json
+                    | types__literal__json
+
+    # Types::Bases::Bool ::= tag * location
+    type types__bases__bool__json = ["types:bool", location]
+
+    type types__bases__void__json = ["types:void", location]
+
+    type types__bases__untyped__json = ["types:untyped", location]
+
+    type types__bases__todo__json = ["types:todo", location]
+
+    type types__bases__nil__json = ["types:nil", location]
+
+    type types__bases__self__json = ["types:self", location]
+
+    type types__bases__instance__json = ["types:instance", location]
+
+    type types__bases__class__json = ["types:class", location]
+
+    type types__bases__top__json = ["types:top", location]
+
+    type types__bases__bot__json = ["types:bot", location]
+
+    # Types::Variable ::= tag * name * location
+    type types__variable__json = ["types:variable", String, location]
+
+    # Types::ClassSingleton ::= tag * name * location
+    type types__class_singleton__json = ["types::class_singleton", String, location]
+
+    # Types::Interface ::= tag * name * args * location
+    type types__interface__json = ["types:interface", String, Array[type__json], location]
+
+    # Types::ClassInstance ::= tag * name * args * location
+    type types__class_instance__json = ["types:class_instance", String, Array[type__json], location]
+
+    # Types::Alias ::= tag * name * type * location
+    type types__alias__json = ["types:alias", String, Array[type__json], location]
+
+    # Types::Tuple ::= tag * types * location
+    type types__tuple__json = ["types:tuple", Array[type__json], location]
+
+    # Types::Record ::= tag * types * location
+    type types__record__json = ["types:record", Array[[types__record__key__json, type__json]], location]
+
+    # Types::Record::key
+    type types__record__key__json = String
+                                  | Array[String]       # Symbol
+                                  | Integer
+                                  | bool
+
+    # Types::Optional ::= tag * type * location
+    type types__optional__json = ["types:optional", type__json, location]
+
+    # Types::Union ::= tag * types * location
+    type types__union__json = ["types:union", Array[type__json], location]
+
+    # Types::Intersection ::= tag * types * location
+    type types__intersection__json = ["types:intersection", Array[type__json], location]
+
+    # Types::Proc ::= tag * type * block? * location
+    type types__proc__json = ["types:proc", types__function__json, types__block__json?, location]
+
+    # Types::Literal ::= tag * literal * location
+    type types__literal__json = ["types:literal", types__literal__literal, location]
+
+    type types__literal__literal = String
+                                 | Integer
+                                 | bool
+                                 | Array[String]        # Symbol
+
+    # Types::Function::Param ::= type * name * location
+    type types__function__param__json = [type__json, String?, location]
+
+    # Types::Function ::= tag * required_positionals * optional_positionals * rest_positionals * trailing_positionals * required_keywords * optional_keywords * rest_keywords * return_type
+    type types__typed_function__json = [
+      "function:typed",
+      Array[types__function__param__json],
+      Array[types__function__param__json],
+      types__function__param__json?,
+      Array[types__function__param__json],
+      Hash[String, types__function__param__json],
+      Hash[String, types__function__param__json],
+      types__function__param__json?,
+      type__json
+    ]
+
+    # Types::UntypedFunction ::= tag * return_type
+    type types__untyped_function__json = ["function:untyped", type__json]
+
+    # Types::function
+    type types__function__json = types__typed_function__json | types__untyped_function__json
+
+    # Types::Block ::= type * required * self_type
+    type types__block__json = [types__function__json, bool, type__json?]
+
+    # MethodType ::= type_params * type * block * location
+    type method_type__json = [Array[type_param__json], types__function__json, types__block__json?, location]
+
+    # Comment ::= string * location
+    type comment__json = [String, location]
+
+    # Annotation ::= string * location
+    type annotation__json = [String, location]
+
+    type json = Hash[String, [Array[directives__json], Array[declarations__json]]]
+
+    class Writer
+      attr_reader buffers: Hash[String, [Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]]]
+
+      def initialize: () -> void
+
+      def add_buffer: (String name, Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]) -> void
+
+      def as_json: () -> json
+
+      private
+
+      def location_as_json: (Location[untyped, untyped]?) -> location
+
+      def comment_as_json: (AST::Comment?) -> comment__json?
+
+      def annotations_as_json: (Array[AST::Annotation]) -> Array[annotation__json]
+
+      def use_directive_as_json: (AST::Directives::Use) -> directives__use__json
+
+      def directive_as_json: (AST::Directives::t) -> directives__json
+
+      def declaration_as_json: (AST::Declarations::t) -> declarations__json
+
+      def class_declaration_as_json: (AST::Declarations::Class) -> declarations__class__json
+
+      def class_member_as_json: (AST::Declarations::Class::member) -> declarations__class__member__json
+
+      def module_declaration_as_json: (AST::Declarations::Module) -> declarations__module__json
+
+      def module_member_as_json: (AST::Declarations::Module::member) -> declarations__module__member__json
+
+      def interface_declaration_as_json: (AST::Declarations::Interface) -> declarations__interface__json
+
+      def type_params_as_json: (Array[AST::TypeParam]) -> Array[type_param__json]
+
+      def type_opt_as_json: (Types::t?) -> type__json?
+
+      def types_as_json: (Array[Types::t]) -> Array[type__json]
+
+      def member_as_json: (AST::Members::t) -> members__json
+
+      def type_alias_declaration_as_json: (AST::Declarations::TypeAlias) -> declarations__type_alias__json
+
+      def type_as_json: (Types::t) -> type__json
+
+      def constant_declaration_as_json: (AST::Declarations::Constant) -> declarations__constant__json
+
+      def global_declaration_as_json: (AST::Declarations::Global) -> declarations__global__json
+
+      def class_alias_declaration_as_json: (AST::Declarations::ClassAlias) -> declarations__class_alias__json
+
+      def module_alias_declaration_as_json: (AST::Declarations::ModuleAlias) -> declarations__module_alias__json
+
+      def method_type_as_json: (MethodType) -> method_type__json
+
+      def attribute_member_as_json: (AST::Members::AttrReader | AST::Members::AttrAccessor | AST::Members::AttrWriter) -> members__json
+
+      def function_as_json: (RBS::Types::function) -> types__function__json
+
+      def function_param_as_json: (RBS::Types::Function::Param) -> types__function__param__json
+
+      def block_as_json: (RBS::Types::Block?) -> types__block__json?
+    end
+
+    class Loader
+      attr_reader json: json
+
+      attr_reader buffers: Hash[String, Buffer]
+
+      def initialize: (json) { (String name) -> RBS::Buffer } -> void
+
+      @current_buffer: RBS::Buffer?
+
+      def set_buffer: [A] (String name) { () -> A } -> A
+
+      def buffer: () -> RBS::Buffer
+
+      def load: () { (Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]) -> void } -> void
+
+      def load_location: (location) -> RBS::Location[untyped, untyped]
+
+      def load_directive: (directives__json) -> AST::Directives::t
+
+      def load_use_clause: (directives__use__clause__json) -> AST::Directives::Use::clause
+
+      def load_declaration: (declarations__json) -> AST::Declarations::t
+
+      def load_comment: (comment__json?) -> AST::Comment?
+
+      def load_annotations: (Array[annotation__json]) -> Array[AST::Annotation]
+
+      def load_type_params: (Array[type_param__json]) -> Array[AST::TypeParam]
+
+      def load_type_opt: (type__json?) -> Types::t?
+
+      def load_type: (type__json) -> Types::t
+
+      def load_types: (Array[type__json]) -> Array[Types::t]
+
+      def load_class_members: (Array[declarations__class__member__json]) -> Array[AST::Declarations::Class::member]
+
+      def load_module_members: (Array[declarations__module__member__json]) -> Array[AST::Declarations::Module::member]
+
+      def load_member: (members__json) -> AST::Members::t
+    end
+  end
+end
