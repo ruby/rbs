@@ -603,7 +603,7 @@ class Ractor
   #       }
   #     }.map(&:value).uniq.size #=> 1 and f() is called only once
   #
-  def self.store_if_absent: (Symbol) { () -> untyped } -> untyped
+  def self.store_if_absent: [A] (Symbol) { (nil) -> A } -> A
 
   # <!--
   #   rdoc-file=ractor.rb

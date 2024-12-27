@@ -40,8 +40,7 @@ class RactorSingletonTest < Test::Unit::TestCase
 
   def test_main?
     if_ruby("3.4"...) do
-      # FIXME: 3.4.0-rc1 ships with a bug that returns Integer instead of bool
-      assert_send_type "() -> boolish", Ractor, :main?
+      assert_send_type "() -> bool", Ractor, :main?
     end
   end
 
@@ -106,6 +105,13 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :shareable?, 42
     assert_send_type "(untyped) -> false",
                      Ractor, :shareable?, []
+  end
+
+  def test_store_if_absent
+    assert_send_type(
+      "(Symbol) { (nil) -> true } -> true",
+      Ractor, :store_if_absent, :test_store_if_absent, &->(_x) { true }
+    )
   end
 
   def test_yield
