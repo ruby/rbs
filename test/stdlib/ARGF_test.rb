@@ -27,6 +27,10 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(__FILE__), :gets, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::String",
                       ARGF.class.new(__FILE__), :gets, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::String",
+                      ARGF.class.new(__FILE__), :gets, chomp: true
+    assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
+                      ARGF.class.new(__FILE__), :gets, "\n", 1, chomp: true
     assert_send_type  "() -> nil",
                       ARGF.class.new(Tempfile.new), :gets
   end
