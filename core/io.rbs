@@ -2278,7 +2278,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  def self.binread: (String name, ?Integer length, ?Integer offset) -> String
+  def self.binread: (String name, ?Integer? length, ?Integer offset) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2343,7 +2343,7 @@ class IO < Object
   #     IO.copy_stream('t.txt', 't.tmp', 11, 11) # => 11
   #     IO.read('t.tmp')                         # => "Second line"
   #
-  def self.copy_stream: (String | _Reader | _ReaderPartial src, String | _Writer dst, ?Integer copy_length, ?Integer src_offset) -> Integer
+  def self.copy_stream: (String | _Reader | _ReaderPartial src, String | _Writer dst, ?Integer? copy_length, ?Integer src_offset) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2716,7 +2716,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (String name, ?Integer length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
+  def self.read: (String name, ?Integer? length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
 
   # <!--
   #   rdoc-file=io.c
