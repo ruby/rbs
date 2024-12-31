@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
     `git ls-files -z`.split("\x0").reject do |f|
       [
-        %r{^(test|spec|features|bin|steep|benchmark)/},
+        %r{^(test|spec|features|bin|steep|benchmark|templates)/},
         /Gemfile/
       ].any? {|r| f.match(r) }
     end
