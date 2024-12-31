@@ -405,9 +405,12 @@ _ivar-member_ ::= _ivar-name_ `:` _type_
                 | `self` `.` _ivar-name_ `:` _type_
                 | _cvar-name_ `:` _type_
 
-_method-member_ ::= _visibility_ `def` _method-name_ `:` _method-types_            # Instance method
-                  | _visibility_ `def self.` _method-name_ `:` _method-types_      # Singleton method
-                  | `def self?.` _method-name_ `:` _method-types_     # Singleton and instance method
+_method-member_ ::= _method-class-member_
+                  | _method-interface-member_
+_method-class-member_ ::= _visibility_ `def` _method-name_ `:` _method-types_            # Instance method
+                        | _visibility_ `def self.` _method-name_ `:` _method-types_      # Singleton method
+                        | `def self?.` _method-name_ `:` _method-types_                  # Singleton and instance method
+_method-interface-member_ ::= `def` _method-name_ `:` _method-types_                     # Instance method
 
 _method-types_ ::= _method-type-parameters_ _method-type_                       # Single method type
                  | _method-type-parameters_ _method-type_ `|` _method-types_    # Overloading types
@@ -624,7 +627,7 @@ _module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_   
 
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
-_interface-members_ ::= _method-member_              # Method
+_interface-members_ ::= _method-interface-member_    # Method
                       | _include-interface-member_   # Mixin (include)
                       | _alias-member_               # Alias
 
