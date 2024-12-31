@@ -15,6 +15,8 @@ class IOSingletonTest < Test::Unit::TestCase
                      IO, :binread, File.expand_path(__FILE__), 3
     assert_send_type "(String, Integer, Integer) -> String",
                      IO, :binread, File.expand_path(__FILE__), 3, 0
+    assert_send_type "(String, Integer?, Integer) -> String",
+                     IO, :binread, File.expand_path(__FILE__), nil, 3
   end
 
   def test_binwrite
@@ -88,6 +90,8 @@ class IOSingletonTest < Test::Unit::TestCase
                        IO, :copy_stream, src_name, dst_name, 1
       assert_send_type "(String, String, Integer, Integer) -> Integer",
                        IO, :copy_stream, src_name, dst_name, 1, 0
+      assert_send_type "(String, String, Integer?, Integer) -> Integer",
+                       IO, :copy_stream, src_name, dst_name, nil, 1
 
       File.open(dst_name, "w") do |dst_io|
         assert_send_type "(String, IO) -> Integer",
