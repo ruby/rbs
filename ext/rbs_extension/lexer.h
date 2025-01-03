@@ -2,6 +2,7 @@
 #define RBS__LEXER_H
 
 #include "ruby.h"
+#include "rbs/rbs_encoding.h"
 
 enum TokenType {
   NullType,         /* (Nothing) */
@@ -132,6 +133,7 @@ typedef struct {
   position start;                 /* The start position of the current token */
   bool first_token_of_line;       /* This flag is used for tLINECOMMENT */
   unsigned int last_char;         /* Last peeked character */
+  const rbs_encoding_t *encoding;
 } lexstate;
 
 extern token NullToken;

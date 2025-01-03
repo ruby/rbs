@@ -286,6 +286,11 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, i
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
 
+  rb_encoding *ruby_encoding = rb_enc_get(string);
+  const char *encoding_name = rb_enc_name(ruby_encoding);
+  const char *encoding_name_end = encoding_name + strlen(encoding_name);
+  const rbs_encoding_t *encoding = rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) encoding_name_end);
+
   lexstate *lexer = rbs_allocator_alloc(allocator, lexstate);
 
   position start_position = (position) {
@@ -303,6 +308,7 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, i
     .start = { 0 },
     .first_token_of_line = false,
     .last_char = 0,
+    .encoding = encoding,
   };
 
   skipn(lexer, start_pos);
