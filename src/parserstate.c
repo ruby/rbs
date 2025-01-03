@@ -204,8 +204,8 @@ static rbs_ast_comment_t *parse_comment_lines(parserstate *state, comment *com) 
 
   return rbs_ast_comment_new(
     &state->allocator,
-    rbs_buffer_to_string(&rbs_buffer),
-    rbs_location_pp(&com->start, &com->end)
+    rbs_location_pp(&com->start, &com->end),
+    rbs_buffer_to_string(&rbs_buffer)
   );
 }
 

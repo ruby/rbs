@@ -3,10 +3,9 @@ nodes:
     fields:
       - name: string
         c_type: rbs_string
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Bool
     expose_to_ruby: false
+    expose_location: false
     fields:
       - name: value
         c_type: bool
@@ -14,8 +13,6 @@ nodes:
     fields:
       - name: string
         c_type: rbs_string
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Declarations::Class
     fields:
       - name: name
@@ -28,8 +25,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Class::Super
@@ -38,16 +33,12 @@ nodes:
         c_type: rbs_typename
       - name: args
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Declarations::ClassAlias
     fields:
       - name: new_name
         c_type: rbs_typename
       - name: old_name
         c_type: rbs_typename
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Constant
@@ -56,8 +47,6 @@ nodes:
         c_type: rbs_typename
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Global
@@ -66,8 +55,6 @@ nodes:
         c_type: rbs_ast_symbol
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Interface
@@ -80,8 +67,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module
@@ -96,8 +81,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module::Self
@@ -106,16 +89,12 @@ nodes:
         c_type: rbs_typename
       - name: args
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Declarations::ModuleAlias
     fields:
       - name: new_name
         c_type: rbs_typename
       - name: old_name
         c_type: rbs_typename
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::TypeAlias
@@ -128,31 +107,23 @@ nodes:
         c_type: rbs_node
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Directives::Use
     fields:
       - name: clauses
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Directives::Use::SingleClause
     fields:
       - name: type_name
         c_type: rbs_typename
       - name: new_name
         c_type: rbs_ast_symbol
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Directives::Use::WildcardClause
     fields:
       - name: namespace
         c_type: rbs_namespace
         c_name: rbs_namespace
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Members::Alias
     fields:
       - name: new_name
@@ -163,8 +134,6 @@ nodes:
         c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::AttrAccessor
@@ -179,8 +148,6 @@ nodes:
         c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
       - name: visibility
@@ -197,8 +164,6 @@ nodes:
         c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
       - name: visibility
@@ -215,8 +180,6 @@ nodes:
         c_type: rbs_keyword
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
       - name: visibility
@@ -227,8 +190,6 @@ nodes:
         c_type: rbs_ast_symbol
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::ClassVariable
@@ -237,8 +198,6 @@ nodes:
         c_type: rbs_ast_symbol
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Extend
@@ -249,8 +208,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Include
@@ -261,8 +218,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::InstanceVariable
@@ -271,8 +226,6 @@ nodes:
         c_type: rbs_ast_symbol
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::MethodDefinition
@@ -285,8 +238,6 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
       - name: overloading
@@ -294,6 +245,7 @@ nodes:
       - name: visibility
         c_type: rbs_keyword
   - name: RBS::AST::Members::MethodDefinition::Overload
+    expose_location: false
     fields:
       - name: annotations
         c_type: rbs_node_list
@@ -307,18 +259,10 @@ nodes:
         c_type: rbs_node_list
       - name: annotations
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Private
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Members::Public
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::TypeParam
     fields:
       - name: name
@@ -331,15 +275,15 @@ nodes:
         c_type: rbs_node
       - name: unchecked
         c_type: bool
-      - name: location
-        c_type: rbs_location
   - name: RBS::AST::Integer
     expose_to_ruby: false
+    expose_location: false
     fields:
       - name: string_representation
         c_type: rbs_string
   - name: RBS::AST::String
     expose_to_ruby: false
+    expose_location: false
     fields:
       - name: string
         c_type: rbs_string
@@ -351,9 +295,8 @@ nodes:
         c_type: rbs_node
       - name: block
         c_type: rbs_types_block
-      - name: location
-        c_type: rbs_location
   - name: RBS::Namespace
+    expose_location: false
     fields:
       - name: path
         c_type: rbs_node_list
@@ -361,12 +304,14 @@ nodes:
         c_type: bool
   - name: RBS::Signature
     expose_to_ruby: false
+    expose_location: false
     fields:
       - name: directives
         c_type: rbs_node_list
       - name: declarations
         c_type: rbs_node_list
   - name: RBS::TypeName
+    expose_location: false
     fields:
       - name: namespace
         c_type: rbs_namespace
@@ -379,47 +324,20 @@ nodes:
         c_type: rbs_typename
       - name: args
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Any
     fields:
       - name: todo
         c_type: bool
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Bool
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Bottom
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Class
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Instance
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Nil
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Self
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Top
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Bases::Void
-    fields:
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Block
+    expose_location: false
     fields:
       - name: type
         c_type: rbs_node
@@ -433,15 +351,12 @@ nodes:
         c_type: rbs_typename
       - name: args
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::ClassSingleton
     fields:
       - name: name
         c_type: rbs_typename
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Function
+    expose_location: false
     fields:
       - name: required_positionals
         c_type: rbs_node_list
@@ -465,52 +380,39 @@ nodes:
         c_type: rbs_node
       - name: name
         c_type: rbs_ast_symbol
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Interface
     fields:
       - name: name
         c_type: rbs_typename
       - name: args
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Intersection
     fields:
       - name: types
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Literal
     fields:
       - name: literal
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Optional
     fields:
       - name: type
         c_type: rbs_node
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Proc
     fields:
       - name: type
         c_type: rbs_node
       - name: block
         c_type: rbs_types_block
-      - name: location
-        c_type: rbs_location
       - name: self_type
         c_type: rbs_node
   - name: RBS::Types::Record
     fields:
       - name: all_fields
         c_type: rbs_hash
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Record::FieldType
     expose_to_ruby: false
+    expose_location: false
     fields:
       - name: type
         c_type: rbs_node
@@ -520,15 +422,12 @@ nodes:
     fields:
       - name: types
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::Union
     fields:
       - name: types
         c_type: rbs_node_list
-      - name: location
-        c_type: rbs_location
   - name: RBS::Types::UntypedFunction
+    expose_location: false
     fields:
       - name: return_type
         c_type: rbs_node
@@ -536,5 +435,3 @@ nodes:
     fields:
       - name: name
         c_type: rbs_ast_symbol
-      - name: location
-        c_type: rbs_location

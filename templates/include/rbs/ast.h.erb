@@ -16,6 +16,7 @@ enum rbs_node_type {
 
 typedef struct rbs_node {
     enum rbs_node_type type;
+    rbs_location_t *location;
 } rbs_node_t;
 
 const char* rbs_node_type_name(rbs_node_t *node);
@@ -82,7 +83,7 @@ typedef struct rbs_keyword {
     rbs_constant_id_t constant_id;
 } rbs_keyword_t;
 
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *, rbs_constant_id_t);
+rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *, rbs_location_t *, rbs_constant_id_t);
 
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.
 /// These get stored in the parser's own constant pool, and get surfaced to Ruby as `Symbol`s.
@@ -91,7 +92,7 @@ typedef struct rbs_ast_symbol {
     rbs_constant_id_t constant_id;
 } rbs_ast_symbol_t;
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_constant_pool_t *, rbs_constant_id_t);
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_t *, rbs_constant_pool_t *, rbs_constant_id_t);
 
 <%- nodes.each do |node| -%>
 <%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>);

@@ -119,12 +119,13 @@ rbs_node_t* rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
     return node ? node->value : NULL;
 }
 
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_constant_id_t constant_id) {
+rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
     rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
 
     *instance = (rbs_keyword_t) {
         .base = (rbs_node_t) {
             .type = RBS_KEYWORD,
+            .location = location,
         },
         .constant_id = constant_id,
     };
@@ -132,12 +133,13 @@ rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_constant_id_t con
     return instance;
 }
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
     rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
         .base = (rbs_node_t) {
             .type = RBS_AST_SYMBOL,
+            .location = location,
         },
         .constant_id = constant_id,
     };
@@ -155,7 +157,8 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_po
 
     *instance = (<%= node.c_type_name %>) {
         .base = (rbs_node_t) {
-            .type = <%= node.c_type_enum_name %>
+            .type = <%= node.c_type_enum_name %>,
+            .location = location,
         },
         <%- node.fields.each do |field| -%>
         .<%= field.c_name %> = <%= field.c_name %>,

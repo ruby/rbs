@@ -109,10 +109,14 @@ module RBS
         @c_type_enum_name = @c_base_name.upcase
 
         @expose_to_ruby = yaml.fetch("expose_to_ruby", true)
+        @expose_location = yaml.fetch("expose_location", true)
 
         @fields = yaml.fetch("fields", []).map { |field| Field.from_hash(field) }.freeze
 
-        @constructor_params = [Field.new(name: "allocator",  c_type: "rbs_allocator_t *")]
+        @constructor_params = [
+          Field.new(name: "allocator",  c_type: "rbs_allocator_t *"),
+          Field.new(name: "location",   c_type: "rbs_location_t *" ),
+        ]
         @constructor_params.concat @fields
         @constructor_params.freeze
       end
@@ -127,6 +131,10 @@ module RBS
       # If this is true, then we will also create a Ruby class for it, otherwise we'll skip that.
       def expose_to_ruby?
         @expose_to_ruby
+      end
+
+      def expose_location?
+        @expose_location
       end
     end
 

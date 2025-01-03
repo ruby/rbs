@@ -186,12 +186,13 @@ rbs_node_t* rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
     return node ? node->value : NULL;
 }
 
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_constant_id_t constant_id) {
+rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
     rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
 
     *instance = (rbs_keyword_t) {
         .base = (rbs_node_t) {
             .type = RBS_KEYWORD,
+            .location = location,
         },
         .constant_id = constant_id,
     };
@@ -199,12 +200,13 @@ rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_constant_id_t con
     return instance;
 }
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
     rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
         .base = (rbs_node_t) {
             .type = RBS_AST_SYMBOL,
+            .location = location,
         },
         .constant_id = constant_id,
     };
@@ -212,28 +214,29 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_constant_po
     return instance;
 }
 
-rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_string_t string, rbs_location_t *location) {
+rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
     rbs_ast_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_annotation_t);
 
 
     *instance = (rbs_ast_annotation_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_ANNOTATION
+            .type = RBS_AST_ANNOTATION,
+            .location = location,
         },
         .string = string,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, bool value) {
+rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_t *location, bool value) {
     rbs_ast_bool_t *instance = rbs_allocator_alloc(allocator, rbs_ast_bool_t);
 
 
     *instance = (rbs_ast_bool_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_BOOL
+            .type = RBS_AST_BOOL,
+            .location = location,
         },
         .value = value,
     };
@@ -241,252 +244,253 @@ rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, bool value) {
     return instance;
 }
 
-rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_string_t string, rbs_location_t *location) {
+rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
     rbs_ast_comment_t *instance = rbs_allocator_alloc(allocator, rbs_ast_comment_t);
 
 
     *instance = (rbs_ast_comment_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_COMMENT
+            .type = RBS_AST_COMMENT,
+            .location = location,
         },
         .string = string,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_class_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_class_t);
 
 
     *instance = (rbs_ast_declarations_class_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_CLASS
+            .type = RBS_AST_DECLARATIONS_CLASS,
+            .location = location,
         },
         .name = name,
         .type_params = type_params,
         .super_class = super_class,
         .members = members,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location) {
+rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args) {
     rbs_ast_declarations_class_super_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_class_super_t);
 
 
     *instance = (rbs_ast_declarations_class_super_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_CLASS_SUPER
+            .type = RBS_AST_DECLARATIONS_CLASS_SUPER,
+            .location = location,
         },
         .name = name,
         .args = args,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_classalias_t *rbs_ast_declarations_classalias_new(rbs_allocator_t *allocator, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_classalias_t *rbs_ast_declarations_classalias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_classalias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_classalias_t);
 
 
     *instance = (rbs_ast_declarations_classalias_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_CLASSALIAS
+            .type = RBS_AST_DECLARATIONS_CLASSALIAS,
+            .location = location,
         },
         .new_name = new_name,
         .old_name = old_name,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_t *type, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_constant_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_constant_t);
 
 
     *instance = (rbs_ast_declarations_constant_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_CONSTANT
+            .type = RBS_AST_DECLARATIONS_CONSTANT,
+            .location = location,
         },
         .name = name,
         .type = type,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_global_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_global_t);
 
 
     *instance = (rbs_ast_declarations_global_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_GLOBAL
+            .type = RBS_AST_DECLARATIONS_GLOBAL,
+            .location = location,
         },
         .name = name,
         .type = type,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_interface_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_interface_t);
 
 
     *instance = (rbs_ast_declarations_interface_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_INTERFACE
+            .type = RBS_AST_DECLARATIONS_INTERFACE,
+            .location = location,
         },
         .name = name,
         .type_params = type_params,
         .members = members,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_module_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_t);
 
 
     *instance = (rbs_ast_declarations_module_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_MODULE
+            .type = RBS_AST_DECLARATIONS_MODULE,
+            .location = location,
         },
         .name = name,
         .type_params = type_params,
         .self_types = self_types,
         .members = members,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location) {
+rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args) {
     rbs_ast_declarations_module_self_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_self_t);
 
 
     *instance = (rbs_ast_declarations_module_self_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_MODULE_SELF
+            .type = RBS_AST_DECLARATIONS_MODULE_SELF,
+            .location = location,
         },
         .name = name,
         .args = args,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_modulealias_t *rbs_ast_declarations_modulealias_new(rbs_allocator_t *allocator, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_modulealias_t *rbs_ast_declarations_modulealias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_modulealias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_modulealias_t);
 
 
     *instance = (rbs_ast_declarations_modulealias_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_MODULEALIAS
+            .type = RBS_AST_DECLARATIONS_MODULEALIAS,
+            .location = location,
         },
         .new_name = new_name,
         .old_name = old_name,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_declarations_typealias_t *rbs_ast_declarations_typealias_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_declarations_typealias_t *rbs_ast_declarations_typealias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_declarations_typealias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_typealias_t);
 
 
     *instance = (rbs_ast_declarations_typealias_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DECLARATIONS_TYPEALIAS
+            .type = RBS_AST_DECLARATIONS_TYPEALIAS,
+            .location = location,
         },
         .name = name,
         .type_params = type_params,
         .type = type,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_node_list_t *clauses, rbs_location_t *location) {
+rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *clauses) {
     rbs_ast_directives_use_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_t);
 
 
     *instance = (rbs_ast_directives_use_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DIRECTIVES_USE
+            .type = RBS_AST_DIRECTIVES_USE,
+            .location = location,
         },
         .clauses = clauses,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_directives_use_singleclause_t *rbs_ast_directives_use_singleclause_new(rbs_allocator_t *allocator, rbs_typename_t *type_name, rbs_ast_symbol_t *new_name, rbs_location_t *location) {
+rbs_ast_directives_use_singleclause_t *rbs_ast_directives_use_singleclause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *type_name, rbs_ast_symbol_t *new_name) {
     rbs_ast_directives_use_singleclause_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_singleclause_t);
 
 
     *instance = (rbs_ast_directives_use_singleclause_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DIRECTIVES_USE_SINGLECLAUSE
+            .type = RBS_AST_DIRECTIVES_USE_SINGLECLAUSE,
+            .location = location,
         },
         .type_name = type_name,
         .new_name = new_name,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_directives_use_wildcardclause_t *rbs_ast_directives_use_wildcardclause_new(rbs_allocator_t *allocator, rbs_namespace_t *rbs_namespace, rbs_location_t *location) {
+rbs_ast_directives_use_wildcardclause_t *rbs_ast_directives_use_wildcardclause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace) {
     rbs_ast_directives_use_wildcardclause_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_wildcardclause_t);
 
 
     *instance = (rbs_ast_directives_use_wildcardclause_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_DIRECTIVES_USE_WILDCARDCLAUSE
+            .type = RBS_AST_DIRECTIVES_USE_WILDCARDCLAUSE,
+            .location = location,
         },
         .rbs_namespace = rbs_namespace,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_string_t string_representation) {
+rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string_representation) {
     rbs_ast_integer_t *instance = rbs_allocator_alloc(allocator, rbs_ast_integer_t);
 
 
     *instance = (rbs_ast_integer_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_INTEGER
+            .type = RBS_AST_INTEGER,
+            .location = location,
         },
         .string_representation = string_representation,
     };
@@ -494,39 +498,39 @@ rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_string_t 
     return instance;
 }
 
-rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_members_alias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_alias_t);
 
 
     *instance = (rbs_ast_members_alias_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_ALIAS
+            .type = RBS_AST_MEMBERS_ALIAS,
+            .location = location,
         },
         .new_name = new_name,
         .old_name = old_name,
         .kind = kind,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_attraccessor_t *rbs_ast_members_attraccessor_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
+rbs_ast_members_attraccessor_t *rbs_ast_members_attraccessor_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
     rbs_ast_members_attraccessor_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attraccessor_t);
 
 
     *instance = (rbs_ast_members_attraccessor_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_ATTRACCESSOR
+            .type = RBS_AST_MEMBERS_ATTRACCESSOR,
+            .location = location,
         },
         .name = name,
         .type = type,
         .ivar_name = ivar_name,
         .kind = kind,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
         .visibility = visibility,
     };
@@ -534,20 +538,20 @@ rbs_ast_members_attraccessor_t *rbs_ast_members_attraccessor_new(rbs_allocator_t
     return instance;
 }
 
-rbs_ast_members_attrreader_t *rbs_ast_members_attrreader_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
+rbs_ast_members_attrreader_t *rbs_ast_members_attrreader_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
     rbs_ast_members_attrreader_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attrreader_t);
 
 
     *instance = (rbs_ast_members_attrreader_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_ATTRREADER
+            .type = RBS_AST_MEMBERS_ATTRREADER,
+            .location = location,
         },
         .name = name,
         .type = type,
         .ivar_name = ivar_name,
         .kind = kind,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
         .visibility = visibility,
     };
@@ -555,20 +559,20 @@ rbs_ast_members_attrreader_t *rbs_ast_members_attrreader_new(rbs_allocator_t *al
     return instance;
 }
 
-rbs_ast_members_attrwriter_t *rbs_ast_members_attrwriter_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
+rbs_ast_members_attrwriter_t *rbs_ast_members_attrwriter_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
     rbs_ast_members_attrwriter_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attrwriter_t);
 
 
     *instance = (rbs_ast_members_attrwriter_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_ATTRWRITER
+            .type = RBS_AST_MEMBERS_ATTRWRITER,
+            .location = location,
         },
         .name = name,
         .type = type,
         .ivar_name = ivar_name,
         .kind = kind,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
         .visibility = visibility,
     };
@@ -576,106 +580,106 @@ rbs_ast_members_attrwriter_t *rbs_ast_members_attrwriter_new(rbs_allocator_t *al
     return instance;
 }
 
-rbs_ast_members_classinstancevariable_t *rbs_ast_members_classinstancevariable_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_classinstancevariable_t *rbs_ast_members_classinstancevariable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
     rbs_ast_members_classinstancevariable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_classinstancevariable_t);
 
 
     *instance = (rbs_ast_members_classinstancevariable_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_CLASSINSTANCEVARIABLE
+            .type = RBS_AST_MEMBERS_CLASSINSTANCEVARIABLE,
+            .location = location,
         },
         .name = name,
         .type = type,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_classvariable_t *rbs_ast_members_classvariable_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_classvariable_t *rbs_ast_members_classvariable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
     rbs_ast_members_classvariable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_classvariable_t);
 
 
     *instance = (rbs_ast_members_classvariable_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_CLASSVARIABLE
+            .type = RBS_AST_MEMBERS_CLASSVARIABLE,
+            .location = location,
         },
         .name = name,
         .type = type,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_members_extend_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_extend_t);
 
 
     *instance = (rbs_ast_members_extend_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_EXTEND
+            .type = RBS_AST_MEMBERS_EXTEND,
+            .location = location,
         },
         .name = name,
         .args = args,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_members_include_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_include_t);
 
 
     *instance = (rbs_ast_members_include_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_INCLUDE
+            .type = RBS_AST_MEMBERS_INCLUDE,
+            .location = location,
         },
         .name = name,
         .args = args,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_instancevariable_t *rbs_ast_members_instancevariable_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_instancevariable_t *rbs_ast_members_instancevariable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
     rbs_ast_members_instancevariable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_instancevariable_t);
 
 
     *instance = (rbs_ast_members_instancevariable_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_INSTANCEVARIABLE
+            .type = RBS_AST_MEMBERS_INSTANCEVARIABLE,
+            .location = location,
         },
         .name = name,
         .type = type,
-        .location = location,
         .comment = comment,
     };
 
     return instance;
 }
 
-rbs_ast_members_methoddefinition_t *rbs_ast_members_methoddefinition_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_keyword_t *kind, rbs_node_list_t *overloads, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment, bool overloading, rbs_keyword_t *visibility) {
+rbs_ast_members_methoddefinition_t *rbs_ast_members_methoddefinition_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *kind, rbs_node_list_t *overloads, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, bool overloading, rbs_keyword_t *visibility) {
     rbs_ast_members_methoddefinition_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_methoddefinition_t);
 
 
     *instance = (rbs_ast_members_methoddefinition_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_METHODDEFINITION
+            .type = RBS_AST_MEMBERS_METHODDEFINITION,
+            .location = location,
         },
         .name = name,
         .kind = kind,
         .overloads = overloads,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
         .overloading = overloading,
         .visibility = visibility,
@@ -684,13 +688,14 @@ rbs_ast_members_methoddefinition_t *rbs_ast_members_methoddefinition_new(rbs_all
     return instance;
 }
 
-rbs_ast_members_methoddefinition_overload_t *rbs_ast_members_methoddefinition_overload_new(rbs_allocator_t *allocator, rbs_node_list_t *annotations, rbs_node_t *method_type) {
+rbs_ast_members_methoddefinition_overload_t *rbs_ast_members_methoddefinition_overload_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *annotations, rbs_node_t *method_type) {
     rbs_ast_members_methoddefinition_overload_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_methoddefinition_overload_t);
 
 
     *instance = (rbs_ast_members_methoddefinition_overload_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_METHODDEFINITION_OVERLOAD
+            .type = RBS_AST_MEMBERS_METHODDEFINITION_OVERLOAD,
+            .location = location,
         },
         .annotations = annotations,
         .method_type = method_type,
@@ -699,18 +704,18 @@ rbs_ast_members_methoddefinition_overload_t *rbs_ast_members_methoddefinition_ov
     return instance;
 }
 
-rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_location_t *location, rbs_ast_comment_t *comment) {
+rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
     rbs_ast_members_prepend_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_prepend_t);
 
 
     *instance = (rbs_ast_members_prepend_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_PREPEND
+            .type = RBS_AST_MEMBERS_PREPEND,
+            .location = location,
         },
         .name = name,
         .args = args,
         .annotations = annotations,
-        .location = location,
         .comment = comment,
     };
 
@@ -723,9 +728,9 @@ rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocato
 
     *instance = (rbs_ast_members_private_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_PRIVATE
+            .type = RBS_AST_MEMBERS_PRIVATE,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -737,21 +742,22 @@ rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator,
 
     *instance = (rbs_ast_members_public_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_MEMBERS_PUBLIC
+            .type = RBS_AST_MEMBERS_PUBLIC,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_string_t string) {
+rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
     rbs_ast_string_t *instance = rbs_allocator_alloc(allocator, rbs_ast_string_t);
 
 
     *instance = (rbs_ast_string_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_STRING
+            .type = RBS_AST_STRING,
+            .location = location,
         },
         .string = string,
     };
@@ -759,49 +765,50 @@ rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_string_t st
     return instance;
 }
 
-rbs_ast_typeparam_t *rbs_ast_typeparam_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *default_type, bool unchecked, rbs_location_t *location) {
+rbs_ast_typeparam_t *rbs_ast_typeparam_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *default_type, bool unchecked) {
     rbs_ast_typeparam_t *instance = rbs_allocator_alloc(allocator, rbs_ast_typeparam_t);
 
 
     *instance = (rbs_ast_typeparam_t) {
         .base = (rbs_node_t) {
-            .type = RBS_AST_TYPEPARAM
+            .type = RBS_AST_TYPEPARAM,
+            .location = location,
         },
         .name = name,
         .variance = variance,
         .upper_bound = upper_bound,
         .default_type = default_type,
         .unchecked = unchecked,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_methodtype_t *rbs_methodtype_new(rbs_allocator_t *allocator, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block, rbs_location_t *location) {
+rbs_methodtype_t *rbs_methodtype_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block) {
     rbs_methodtype_t *instance = rbs_allocator_alloc(allocator, rbs_methodtype_t);
 
 
     *instance = (rbs_methodtype_t) {
         .base = (rbs_node_t) {
-            .type = RBS_METHODTYPE
+            .type = RBS_METHODTYPE,
+            .location = location,
         },
         .type_params = type_params,
         .type = type,
         .block = block,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_node_list_t *path, bool absolute) {
+rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *path, bool absolute) {
     rbs_namespace_t *instance = rbs_allocator_alloc(allocator, rbs_namespace_t);
 
 
     *instance = (rbs_namespace_t) {
         .base = (rbs_node_t) {
-            .type = RBS_NAMESPACE
+            .type = RBS_NAMESPACE,
+            .location = location,
         },
         .path = path,
         .absolute = absolute,
@@ -810,13 +817,14 @@ rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_node_list_t *
     return instance;
 }
 
-rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_node_list_t *directives, rbs_node_list_t *declarations) {
+rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *directives, rbs_node_list_t *declarations) {
     rbs_signature_t *instance = rbs_allocator_alloc(allocator, rbs_signature_t);
 
 
     *instance = (rbs_signature_t) {
         .base = (rbs_node_t) {
-            .type = RBS_SIGNATURE
+            .type = RBS_SIGNATURE,
+            .location = location,
         },
         .directives = directives,
         .declarations = declarations,
@@ -825,13 +833,14 @@ rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_node_list_t *
     return instance;
 }
 
-rbs_typename_t *rbs_typename_new(rbs_allocator_t *allocator, rbs_namespace_t *rbs_namespace, rbs_ast_symbol_t *name) {
+rbs_typename_t *rbs_typename_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace, rbs_ast_symbol_t *name) {
     rbs_typename_t *instance = rbs_allocator_alloc(allocator, rbs_typename_t);
 
 
     *instance = (rbs_typename_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPENAME
+            .type = RBS_TYPENAME,
+            .location = location,
         },
         .rbs_namespace = rbs_namespace,
         .name = name,
@@ -840,32 +849,32 @@ rbs_typename_t *rbs_typename_new(rbs_allocator_t *allocator, rbs_namespace_t *rb
     return instance;
 }
 
-rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location) {
+rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args) {
     rbs_types_alias_t *instance = rbs_allocator_alloc(allocator, rbs_types_alias_t);
 
 
     *instance = (rbs_types_alias_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_ALIAS
+            .type = RBS_TYPES_ALIAS,
+            .location = location,
         },
         .name = name,
         .args = args,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, bool todo, rbs_location_t *location) {
+rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, rbs_location_t *location, bool todo) {
     rbs_types_bases_any_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_any_t);
 
 
     *instance = (rbs_types_bases_any_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_ANY
+            .type = RBS_TYPES_BASES_ANY,
+            .location = location,
         },
         .todo = todo,
-        .location = location,
     };
 
     return instance;
@@ -877,9 +886,9 @@ rbs_types_bases_bool_t *rbs_types_bases_bool_new(rbs_allocator_t *allocator, rbs
 
     *instance = (rbs_types_bases_bool_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_BOOL
+            .type = RBS_TYPES_BASES_BOOL,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -891,9 +900,9 @@ rbs_types_bases_bottom_t *rbs_types_bases_bottom_new(rbs_allocator_t *allocator,
 
     *instance = (rbs_types_bases_bottom_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_BOTTOM
+            .type = RBS_TYPES_BASES_BOTTOM,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -905,9 +914,9 @@ rbs_types_bases_class_t *rbs_types_bases_class_new(rbs_allocator_t *allocator, r
 
     *instance = (rbs_types_bases_class_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_CLASS
+            .type = RBS_TYPES_BASES_CLASS,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -919,9 +928,9 @@ rbs_types_bases_instance_t *rbs_types_bases_instance_new(rbs_allocator_t *alloca
 
     *instance = (rbs_types_bases_instance_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_INSTANCE
+            .type = RBS_TYPES_BASES_INSTANCE,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -933,9 +942,9 @@ rbs_types_bases_nil_t *rbs_types_bases_nil_new(rbs_allocator_t *allocator, rbs_l
 
     *instance = (rbs_types_bases_nil_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_NIL
+            .type = RBS_TYPES_BASES_NIL,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -947,9 +956,9 @@ rbs_types_bases_self_t *rbs_types_bases_self_new(rbs_allocator_t *allocator, rbs
 
     *instance = (rbs_types_bases_self_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_SELF
+            .type = RBS_TYPES_BASES_SELF,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -961,9 +970,9 @@ rbs_types_bases_top_t *rbs_types_bases_top_new(rbs_allocator_t *allocator, rbs_l
 
     *instance = (rbs_types_bases_top_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_TOP
+            .type = RBS_TYPES_BASES_TOP,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
@@ -975,21 +984,22 @@ rbs_types_bases_void_t *rbs_types_bases_void_new(rbs_allocator_t *allocator, rbs
 
     *instance = (rbs_types_bases_void_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BASES_VOID
+            .type = RBS_TYPES_BASES_VOID,
+            .location = location,
         },
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_node_t *type, bool required, rbs_node_t *self_type) {
+rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required, rbs_node_t *self_type) {
     rbs_types_block_t *instance = rbs_allocator_alloc(allocator, rbs_types_block_t);
 
 
     *instance = (rbs_types_block_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_BLOCK
+            .type = RBS_TYPES_BLOCK,
+            .location = location,
         },
         .type = type,
         .required = required,
@@ -999,44 +1009,45 @@ rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_node_t *t
     return instance;
 }
 
-rbs_types_classinstance_t *rbs_types_classinstance_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location) {
+rbs_types_classinstance_t *rbs_types_classinstance_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args) {
     rbs_types_classinstance_t *instance = rbs_allocator_alloc(allocator, rbs_types_classinstance_t);
 
 
     *instance = (rbs_types_classinstance_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_CLASSINSTANCE
+            .type = RBS_TYPES_CLASSINSTANCE,
+            .location = location,
         },
         .name = name,
         .args = args,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_classsingleton_t *rbs_types_classsingleton_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_location_t *location) {
+rbs_types_classsingleton_t *rbs_types_classsingleton_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name) {
     rbs_types_classsingleton_t *instance = rbs_allocator_alloc(allocator, rbs_types_classsingleton_t);
 
 
     *instance = (rbs_types_classsingleton_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_CLASSSINGLETON
+            .type = RBS_TYPES_CLASSSINGLETON,
+            .location = location,
         },
         .name = name,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_node_list_t *required_positionals, rbs_node_list_t *optional_positionals, rbs_node_t *rest_positionals, rbs_node_list_t *trailing_positionals, rbs_hash_t *required_keywords, rbs_hash_t *optional_keywords, rbs_node_t *rest_keywords, rbs_node_t *return_type) {
+rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *required_positionals, rbs_node_list_t *optional_positionals, rbs_node_t *rest_positionals, rbs_node_list_t *trailing_positionals, rbs_hash_t *required_keywords, rbs_hash_t *optional_keywords, rbs_node_t *rest_keywords, rbs_node_t *return_type) {
     rbs_types_function_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_t);
 
 
     *instance = (rbs_types_function_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_FUNCTION
+            .type = RBS_TYPES_FUNCTION,
+            .location = location,
         },
         .required_positionals = required_positionals,
         .optional_positionals = optional_positionals,
@@ -1051,122 +1062,123 @@ rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_nod
     return instance;
 }
 
-rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *allocator, rbs_node_t *type, rbs_ast_symbol_t *name, rbs_location_t *location) {
+rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_ast_symbol_t *name) {
     rbs_types_function_param_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_param_t);
 
 
     *instance = (rbs_types_function_param_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_FUNCTION_PARAM
+            .type = RBS_TYPES_FUNCTION_PARAM,
+            .location = location,
         },
         .type = type,
         .name = name,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_typename_t *name, rbs_node_list_t *args, rbs_location_t *location) {
+rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args) {
     rbs_types_interface_t *instance = rbs_allocator_alloc(allocator, rbs_types_interface_t);
 
 
     *instance = (rbs_types_interface_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_INTERFACE
+            .type = RBS_TYPES_INTERFACE,
+            .location = location,
         },
         .name = name,
         .args = args,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator, rbs_node_list_t *types, rbs_location_t *location) {
+rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
     rbs_types_intersection_t *instance = rbs_allocator_alloc(allocator, rbs_types_intersection_t);
 
 
     *instance = (rbs_types_intersection_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_INTERSECTION
+            .type = RBS_TYPES_INTERSECTION,
+            .location = location,
         },
         .types = types,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_node_t *literal, rbs_location_t *location) {
+rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *literal) {
     rbs_types_literal_t *instance = rbs_allocator_alloc(allocator, rbs_types_literal_t);
 
 
     *instance = (rbs_types_literal_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_LITERAL
+            .type = RBS_TYPES_LITERAL,
+            .location = location,
         },
         .literal = literal,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_node_t *type, rbs_location_t *location) {
+rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type) {
     rbs_types_optional_t *instance = rbs_allocator_alloc(allocator, rbs_types_optional_t);
 
 
     *instance = (rbs_types_optional_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_OPTIONAL
+            .type = RBS_TYPES_OPTIONAL,
+            .location = location,
         },
         .type = type,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_node_t *type, rbs_types_block_t *block, rbs_location_t *location, rbs_node_t *self_type) {
+rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_types_block_t *block, rbs_node_t *self_type) {
     rbs_types_proc_t *instance = rbs_allocator_alloc(allocator, rbs_types_proc_t);
 
 
     *instance = (rbs_types_proc_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_PROC
+            .type = RBS_TYPES_PROC,
+            .location = location,
         },
         .type = type,
         .block = block,
-        .location = location,
         .self_type = self_type,
     };
 
     return instance;
 }
 
-rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_hash_t *all_fields, rbs_location_t *location) {
+rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_hash_t *all_fields) {
     rbs_types_record_t *instance = rbs_allocator_alloc(allocator, rbs_types_record_t);
 
 
     *instance = (rbs_types_record_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_RECORD
+            .type = RBS_TYPES_RECORD,
+            .location = location,
         },
         .all_fields = all_fields,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_record_fieldtype_t *rbs_types_record_fieldtype_new(rbs_allocator_t *allocator, rbs_node_t *type, bool required) {
+rbs_types_record_fieldtype_t *rbs_types_record_fieldtype_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required) {
     rbs_types_record_fieldtype_t *instance = rbs_allocator_alloc(allocator, rbs_types_record_fieldtype_t);
 
 
     *instance = (rbs_types_record_fieldtype_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_RECORD_FIELDTYPE
+            .type = RBS_TYPES_RECORD_FIELDTYPE,
+            .location = location,
         },
         .type = type,
         .required = required,
@@ -1175,43 +1187,44 @@ rbs_types_record_fieldtype_t *rbs_types_record_fieldtype_new(rbs_allocator_t *al
     return instance;
 }
 
-rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_node_list_t *types, rbs_location_t *location) {
+rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
     rbs_types_tuple_t *instance = rbs_allocator_alloc(allocator, rbs_types_tuple_t);
 
 
     *instance = (rbs_types_tuple_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_TUPLE
+            .type = RBS_TYPES_TUPLE,
+            .location = location,
         },
         .types = types,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_node_list_t *types, rbs_location_t *location) {
+rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
     rbs_types_union_t *instance = rbs_allocator_alloc(allocator, rbs_types_union_t);
 
 
     *instance = (rbs_types_union_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_UNION
+            .type = RBS_TYPES_UNION,
+            .location = location,
         },
         .types = types,
-        .location = location,
     };
 
     return instance;
 }
 
-rbs_types_untypedfunction_t *rbs_types_untypedfunction_new(rbs_allocator_t *allocator, rbs_node_t *return_type) {
+rbs_types_untypedfunction_t *rbs_types_untypedfunction_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *return_type) {
     rbs_types_untypedfunction_t *instance = rbs_allocator_alloc(allocator, rbs_types_untypedfunction_t);
 
 
     *instance = (rbs_types_untypedfunction_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_UNTYPEDFUNCTION
+            .type = RBS_TYPES_UNTYPEDFUNCTION,
+            .location = location,
         },
         .return_type = return_type,
     };
@@ -1219,16 +1232,16 @@ rbs_types_untypedfunction_t *rbs_types_untypedfunction_new(rbs_allocator_t *allo
     return instance;
 }
 
-rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_ast_symbol_t *name, rbs_location_t *location) {
+rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name) {
     rbs_types_variable_t *instance = rbs_allocator_alloc(allocator, rbs_types_variable_t);
 
 
     *instance = (rbs_types_variable_t) {
         .base = (rbs_node_t) {
-            .type = RBS_TYPES_VARIABLE
+            .type = RBS_TYPES_VARIABLE,
+            .location = location,
         },
         .name = name,
-        .location = location,
     };
 
     return instance;
