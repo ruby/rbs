@@ -13,6 +13,8 @@
  *    `bar`       | bar
  *    :"baz\\t"   | baz\t
  *    :'baz'      | baz
+ *
+ * @returns A new owned string that needs to be freed with `rbs_string_free()`
  * */
 rbs_string_t rbs_unquote_string(rbs_string_t input);
 

@@ -29,22 +29,6 @@ rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_
     return rbs_string_owned_new(buffer, buffer + length);
 }
 
-void rbs_string_ensure_owned(rbs_string_t *self) {
-    if (self->type == RBS_STRING_OWNED) return;
-
-    char *buffer = (char *)malloc(self->end - self->start + 1);
-    size_t length = self->end - self->start;
-
-    strncpy(buffer, self->start, length);
-    buffer[length] = '\0';
-
-    *self = rbs_string_owned_new(buffer, buffer + length);
-}
-
-rbs_string_t rbs_string_offset(const rbs_string_t self, const size_t offset) {
-    return rbs_string_shared_new(self.start + offset, self.end);
-}
-
 // // Ensure the given string is shared, so that we can slice it without needing to free the old string.
 // static void ensure_shared(rbs_string_t *self) {
 //     if (self->type != RBS_STRING_SHARED) {

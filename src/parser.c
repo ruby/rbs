@@ -112,12 +112,11 @@ static bool parse_simple(parserstate *state, rbs_node_t **type);
 static rbs_string_t rbs_parser_get_current_token(parserstate *state) {
   range rg = state->current_token.range;
 
-  rbs_string_t string = state->lexstate->string;
-  rbs_string_drop_first(&string, rg.start.byte_pos);
-  rbs_string_limit_length(&string, rg.end.byte_pos - rg.start.byte_pos);
-  rbs_string_ensure_owned(&string);
+  size_t start_inset = rg.start.byte_pos;
+  size_t length = rg.end.byte_pos - rg.start.byte_pos;
 
-  return string;
+  // TODO: return a borrowed view into the file, without copying.
+  return rbs_string_copy_slice(&state->lexstate->string, start_inset, length);
 }
 
 static rbs_constant_id_t rbs_constant_pool_insert_string(rbs_constant_pool_t *self, rbs_string_t string) {
@@ -919,16 +918,17 @@ static bool parse_symbol(parserstate *state, rbs_location_t *location, rbs_types
   case tDQSYMBOL:
   case tSQSYMBOL: {
     rbs_location_t *symbolLoc = rbs_location_new(state->current_token.range);
-    rbs_string_t string = rbs_parser_get_current_token(state);
-    rbs_string_drop_first(&string, offset_bytes);
+    rbs_string_t current_token = rbs_parser_get_current_token(state);
 
-    rbs_string_t unquoted_str = rbs_unquote_string(string);
+    rbs_string_t symbol = rbs_string_copy_slice(&current_token, offset_bytes, rbs_string_len(current_token) - offset_bytes);
+
+    rbs_string_t unquoted_symbol = rbs_unquote_string(symbol);
 
     literal = rbs_ast_symbol_new(
       &state->allocator,
       symbolLoc,
       &state->constant_pool,
-      rbs_constant_pool_insert_string(&state->constant_pool, unquoted_str)
+      rbs_constant_pool_insert_string(&state->constant_pool, unquoted_symbol)
     );
     break;
   }
@@ -1108,7 +1108,6 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
 
     rbs_string_t string = rbs_parser_get_current_token(state);
     rbs_string_strip_whitespace(&string);
-    rbs_string_ensure_owned(&string);
 
     rbs_node_t *literal = (rbs_node_t *) rbs_ast_integer_new(&state->allocator, loc, string);
     *type = (rbs_node_t *) rbs_types_literal_new(&state->allocator, loc, literal);
@@ -1585,15 +1584,17 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
   size_t open_bytes = state->lexstate->encoding->char_width((const uint8_t *) &open_char, (size_t) 1);
   size_t close_bytes = state->lexstate->encoding->char_width((const uint8_t *) &close_char, (size_t) 1);
 
-  rbs_string_t string = rbs_parser_get_current_token(state);
-  rbs_string_drop_first(&string, offset_bytes + open_bytes);
-  rbs_string_limit_length(&string, rbs_string_len(string) - close_bytes);
-  rbs_string_strip_whitespace(&string);
-  rbs_string_ensure_owned(&string);
+  rbs_string_t current_token = rbs_parser_get_current_token(state);
+  size_t total_offset = offset_bytes + open_bytes;
 
-  rbs_location_t *loc = rbs_location_new(rg);
+  rbs_string_t annotation_str = rbs_string_copy_slice(
+    &current_token,
+    total_offset,
+    rbs_string_len(current_token) - total_offset - close_bytes
+  );
+  rbs_string_strip_whitespace(&annotation_str);
 
-  *annotation = rbs_ast_annotation_new(&state->allocator, loc, string);
+  *annotation = rbs_ast_annotation_new(&state->allocator, rbs_location_new(rg), annotation_str);
   return true;
 }
 

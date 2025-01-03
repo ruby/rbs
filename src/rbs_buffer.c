@@ -56,7 +56,7 @@ void rbs_buffer_append_string(rbs_buffer_t *buffer, const char *value, size_t le
 }
 
 rbs_string_t rbs_buffer_to_string(rbs_buffer_t *buffer) {
-    return rbs_string_owned_new(buffer->value, buffer->value + buffer->length);
+    return rbs_string_shared_new(buffer->value, buffer->value + buffer->length);
 }
 
 void rbs_buffer_free(rbs_buffer_t *buffer) {

@@ -43,39 +43,6 @@ rbs_string_t rbs_string_owned_new(const char *start, const char *end);
 rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length);
 
 /**
- * Ensures that the given string is owned, so that it manages its own memory, uncoupled from its original source.
- */
-void rbs_string_ensure_owned(rbs_string_t *self);
-
-/**
- * Returns a new `rbs_string_t` with its start shifted forward by the given amount.
- * This returns a shared string which points to the same memory as the original string.
- */
-rbs_string_t rbs_string_offset(const rbs_string_t self, size_t offset);
-
-/**
- * Modifies the given string to drop its first `n` characters.
- */
-void rbs_string_drop_first(rbs_string_t *self, size_t n);
-
-/**
- * Modifies the given string to drop its last `n` characters.
- */
-void rbs_string_drop_last(rbs_string_t *self, size_t n);
-
-/**
- * Modifies the given string to limit its length to the given number of characters.
- */
-void rbs_string_limit_length(rbs_string_t *self, size_t new_length);
-
-/**
- * Copies a portion of the input string into a new owned string.
- * @param start_inset Number of characters to exclude from the start
- * @param length Number of characters to include
- */
-rbs_string_t rbs_string_slice(const rbs_string_t self, size_t start_inset, size_t length);
-
-/**
  * Drops the leading and trailing whitespace from the given string, in-place.
  */
 void rbs_string_strip_whitespace(rbs_string_t *self);

@@ -104,9 +104,7 @@ rbs_string_t unescape_string(const rbs_string_t string, bool is_double_quote) {
         }
     }
     output[j] = '\0';
-    rbs_string_t str = rbs_string_shared_new(output, output + j);
-    rbs_string_ensure_owned(&str);
-    return str;
+    return rbs_string_owned_new(output, output + j);
 }
 
 rbs_string_t rbs_unquote_string(rbs_string_t input) {
@@ -120,7 +118,6 @@ rbs_string_t rbs_unquote_string(rbs_string_t input) {
       byte_length -= 2 * bs;
     }
 
-    rbs_string_t string = rbs_string_offset(input, start_offset);
-    string.end = string.start + byte_length;
+    rbs_string_t string = rbs_string_copy_slice(&input, start_offset, byte_length);
     return unescape_string(string, first_char == '"');
 }
