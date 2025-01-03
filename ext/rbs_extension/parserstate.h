@@ -61,6 +61,7 @@ typedef struct {
 
   rbs_constant_pool_t constant_pool;
   rbs_allocator_t allocator;
+  bool aborted;
 } parserstate;
 
 comment *alloc_comment(rbs_allocator_t *, token comment_token, comment *last_comment);
