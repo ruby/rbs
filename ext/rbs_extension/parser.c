@@ -1031,8 +1031,13 @@ static VALUE parse_simple(parserstate *state) {
     return parse_symbol(state);
   }
   case tUIDENT: {
-    ID name = INTERN_TOKEN(state, state->current_token);
+    const char *name_str = peek_token(state->lexstate, state->current_token);
+    size_t name_len = token_bytes(state->current_token);
+
+    rbs_constant_id_t name = rbs_constant_pool_find(&state->constant_pool, (const uint8_t *) name_str, name_len);
+
     if (parser_typevar_member(state, name)) {
+      ID name = rb_intern3(name_str, name_len, rb_enc_get(state->lexstate->string));
       return rbs_variable(ID2SYM(name), rbs_location_current_token(state));
     }
     // fallthrough for type name
@@ -1190,8 +1195,13 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       parser_advance_assert(state, tUIDENT);
       range name_range = state->current_token.range;
 
-      ID id = INTERN_TOKEN(state, state->current_token);
-      VALUE name = ID2SYM(id);
+      rbs_constant_id_t id = rbs_constant_pool_insert_shared(
+        &state->constant_pool,
+        (const uint8_t *) peek_token(state->lexstate, state->current_token),
+        token_bytes(state->current_token)
+      );
+
+      VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
       parser_insert_typevar(state, id);
 
