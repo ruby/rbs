@@ -324,11 +324,11 @@ module RBS
           )
         when AST::Members::Public
           (
-            ["members:public"] #: members__public__json
+            ["members:public", location_as_json(member.location)] #: members__public__json
           )
         when AST::Members::Private
           (
-            ["members:private"] #: members__private__json
+            ["members:private", location_as_json(member.location)] #: members__private__json
           )
         end
       end
@@ -472,9 +472,10 @@ module RBS
         when Types::Proc
           (
             [
-              "types::proc",
+              "types:proc",
               function_as_json(type.type),
               block_as_json(type.block),
+              type_opt_as_json(type.self_type),
               location_as_json(type.location)
             ] #: types__proc__json
           )

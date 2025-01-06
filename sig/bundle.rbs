@@ -161,9 +161,9 @@ module RBS
     # Members::Attribute::kind
     type members__attribute__kind__json = "instance" | "singleton"
 
-    type members__public__json = ["members:public"]
+    type members__public__json = ["members:public", location]
 
-    type members__private__json = ["members:private"]
+    type members__private__json = ["members:private", location]
 
     # Members::Alias ::= tag * new_name * old_name * kind * annotations * comment * location
     type members__alias__json = ["members:alias", String, String, members__alias__kind__json, Array[annotation__json] , comment__json?, location]
@@ -241,7 +241,7 @@ module RBS
 
     # Types::Record::key
     type types__record__key__json = String
-                                  | Array[String]       # Symbol
+                                  | [String]       # Symbol
                                   | Integer
                                   | bool
 
@@ -254,8 +254,8 @@ module RBS
     # Types::Intersection ::= tag * types * location
     type types__intersection__json = ["types:intersection", Array[type__json], location]
 
-    # Types::Proc ::= tag * type * block? * location
-    type types__proc__json = ["types:proc", types__function__json, types__block__json?, location]
+    # Types::Proc ::= tag * type * block? * self_type? * location
+    type types__proc__json = ["types:proc", types__function__json, types__block__json?, type__json?, location]
 
     # Types::Literal ::= tag * literal * location
     type types__literal__json = ["types:literal", types__literal__literal, location]
@@ -263,7 +263,7 @@ module RBS
     type types__literal__literal = String
                                  | Integer
                                  | bool
-                                 | Array[String]        # Symbol
+                                 | [String]        # Symbol
 
     # Types::Function::Param ::= type * name * location
     type types__function__param__json = [type__json, String?, location]
@@ -405,6 +405,24 @@ module RBS
       def load_module_members: (Array[declarations__module__member__json]) -> Array[AST::Declarations::Module::member]
 
       def load_member: (members__json) -> AST::Members::t
+
+      def load_attribute: (members__attr_accessor__json | members__attr_reader__json | members__attr_writer__json) -> AST::Members::t
+
+      def load_mixin: (members__prepend__json | members__include__json | members__extend__json) -> AST::Members::t
+
+      def load_variable: (members__instance_variable__json | members__class_instance_variable__json | members__class_variable__json) -> AST::Members::t
+
+      def load_method_type: (method_type__json) -> MethodType
+
+      def load_block: (types__block__json?) -> RBS::Types::Block?
+
+      def load_function: (types__function__json) -> Types::function
+
+      def load_param: (types__function__param__json) -> Types::Function::Param
+
+      def load_record_key: (types__record__key__json) -> Types::Record::key
+
+      def load_literal: (types__literal__literal) -> Types::Literal::literal
     end
   end
 end
