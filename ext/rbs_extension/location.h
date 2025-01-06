@@ -3,6 +3,7 @@
 
 #include "ruby.h"
 #include "lexer.h"
+#include "rbs/util/rbs_constant_pool.h"
 
 /**
  * RBS::Location class
@@ -15,7 +16,7 @@ typedef struct {
 } rbs_loc_range;
 
 typedef struct {
-  ID name;
+  rbs_constant_id_t name;
   rbs_loc_range rg;
 } rbs_loc_entry;
 
@@ -58,14 +59,14 @@ void rbs_loc_alloc_children(rbs_loc *loc, unsigned short cap);
  *
  * Allocate memory for children with rbs_loc_alloc_children before calling this function.
  * */
-void rbs_loc_add_required_child(rbs_loc *loc, ID name, range r);
+void rbs_loc_add_required_child(rbs_loc *loc, rbs_constant_id_t name, range r);
 
 /**
  * Add an optional child range with given name.
  *
  * Allocate memory for children with rbs_loc_alloc_children before calling this function.
  * */
-void rbs_loc_add_optional_child(rbs_loc *loc, ID name, range r);
+void rbs_loc_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, range r);
 
 /**
  * Returns RBS::Location object with start/end positions.
