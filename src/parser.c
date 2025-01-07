@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "rbs/defines.h"
 #include "rbs/encoding.h"
 #include "rbs/rbs_string.h"
 #include "ast_translation.h"
@@ -1116,10 +1117,11 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
       *type = (rbs_node_t *) rbs_types_variable_new(&state->allocator, symbol, loc);
       return true;
     }
-    // fallthrough for type name
+
+    RBS_FALLTHROUGH // for type name
   }
-  case tULIDENT: // fallthrough
-  case tLIDENT: // fallthrough
+  case tULIDENT:
+  case tLIDENT:
   case pCOLON2: {
     rbs_node_t *instance_type = NULL;
     CHECK_PARSE(parse_instance_type(state, true, &instance_type));
