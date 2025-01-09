@@ -88,3 +88,22 @@ class EnumeratorYielderTest < Test::Unit::TestCase
     end.next
   end
 end
+
+class EnumeratorChainTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Enumerator::Chain[::Integer]"
+
+  def test_class_new
+    assert_send_type "(*_Each[Integer] enums) -> Enumerator::Chain[Integer]",
+                     Enumerator::Chain, :new, 1..3, [4, 5]
+  end
+
+  def test_each
+    enum = Enumerator::Chain.new 1..3, [4, 5]
+    assert_send_type "() { (Integer) -> nil } -> Enumerator::Chain[Integer]",
+                     enum, :each do end
+    assert_send_type "() -> Enumerator[Integer, Enumerator::Chain[Integer]]",
+                     enum, :each
+  end
+end
