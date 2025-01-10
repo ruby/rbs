@@ -1,4 +1,7 @@
 #include "rbs_extension.h"
+#include "ruby.h"
+#include "rbs_string_bridging.h"
+#include "rbs/encoding.h"
 
 static const char *RBS_TOKENTYPE_NAMES[] = {
   "NullType",
@@ -109,7 +112,12 @@ unsigned int peek(lexstate *state) {
     state->last_char = '\0';
     return 0;
   } else {
-    unsigned int c = rb_enc_mbc_to_codepoint(RSTRING_PTR(state->string) + state->current.byte_pos, RSTRING_END(state->string), rb_enc_get(state->string));
+    rbs_string_t str = {
+      .start = state->string.start + state->current.byte_pos,
+      .end = state->string.end,
+      .type = RBS_STRING_SHARED,
+    };
+    unsigned int c = utf8_to_codepoint(str);
     state->last_char = c;
     return c;
   }
@@ -130,7 +138,7 @@ token next_token(lexstate *state, enum TokenType type) {
 }
 
 token next_eof_token(lexstate *state) {
-  if (state->current.byte_pos == RSTRING_LEN(state->string)+1) {
+  if ((size_t) state->current.byte_pos == rbs_string_len(state->string) + 1) {
     // End of String
     token t;
     t.type = pEOF;
@@ -149,7 +157,15 @@ void rbs_skip(lexstate *state) {
   if (!state->last_char) {
     peek(state);
   }
-  int byte_len = rb_enc_codelen(state->last_char, rb_enc_get(state->string));
+
+  size_t byte_len;
+
+  if (state->last_char == '\0') {
+    byte_len = 1;
+  } else {
+    const char *start = state->string.start + state->current.byte_pos;
+    byte_len = state->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (state->string.end - start));
+  }
 
   state->current.char_pos += 1;
   state->current.byte_pos += byte_len;
@@ -171,5 +187,5 @@ void skipn(lexstate *state, size_t size) {
 }
 
 char *peek_token(lexstate *state, token tok) {
-  return RSTRING_PTR(state->string) + tok.range.start.byte_pos;
+  return (char *) state->string.start + tok.range.start.byte_pos;
 }

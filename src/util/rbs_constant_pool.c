@@ -302,7 +302,7 @@ rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start,
 }
 
 rbs_constant_id_t
-rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, void *encoding) {
+rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, const rbs_encoding_t *encoding) {
     return rbs_constant_pool_insert_shared(pool, start, length);
 }
 

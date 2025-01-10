@@ -2,6 +2,8 @@
 #define RBS__RBS_STRING_BRIDGING_H
 
 #include "ruby.h"
+#include "ruby/encoding.h"
+
 #include "rbs/rbs_string.h"
 
 /**
@@ -12,6 +14,6 @@ rbs_string_t rbs_string_from_ruby_string(VALUE ruby_string);
 /**
  * Returns a new Ruby string from the given rbs_string_t.
  */
-VALUE rbs_string_to_ruby_string(rbs_string_t *self);
+VALUE rbs_string_to_ruby_string(rbs_string_t *self, rb_encoding *encoding);
 
 #endif

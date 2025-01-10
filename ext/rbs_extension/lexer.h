@@ -1,7 +1,7 @@
 #ifndef RBS__LEXER_H
 #define RBS__LEXER_H
 
-#include "ruby.h"
+#include "rbs/rbs_string.h"
 #include "rbs/rbs_encoding.h"
 
 enum TokenType {
@@ -126,7 +126,7 @@ typedef struct {
  * ```
  * */
 typedef struct {
-  VALUE string;
+  rbs_string_t string;
   int start_pos;                  /* The character position that defines the start of the input */
   int end_pos;                    /* The character position that defines the end of the input */
   position current;               /* The current position */

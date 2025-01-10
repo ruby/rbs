@@ -113,7 +113,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             <%- when "rbs_keyword" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.name %>)); // rbs_keyword
             <%- when "rbs_string" -%>
-            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.name %>));
+            rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.name %>, ctx.encoding));
             <%- when "bool" -%>
             rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.name %> ? Qtrue : Qfalse);
             <%- else -%>
@@ -154,10 +154,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             assert(constant != NULL && "constant is NULL");
             assert(constant->start != NULL && "constant->start is NULL");
 
-            // FIXME: Add `rb_encoding` to the `ctx` and use it here.
-            rb_encoding *encoding = rb_usascii_encoding();
-
-            return ID2SYM(rb_intern3((const char *) constant->start, constant->length, encoding));
+            return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
         }
     }
 }

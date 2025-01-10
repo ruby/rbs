@@ -69,7 +69,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rbs_ast_annotation_t *node = (rbs_ast_annotation_t *)instance;
 
             VALUE h = rb_hash_new();
-            rb_hash_aset(h, ID2SYM(rb_intern("string")), rbs_string_to_ruby_string(&node->string));
+            rb_hash_aset(h, ID2SYM(rb_intern("string")), rbs_string_to_ruby_string(&node->string, ctx.encoding));
             rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->location));
 
 
@@ -88,7 +88,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rbs_ast_comment_t *node = (rbs_ast_comment_t *)instance;
 
             VALUE h = rb_hash_new();
-            rb_hash_aset(h, ID2SYM(rb_intern("string")), rbs_string_to_ruby_string(&node->string));
+            rb_hash_aset(h, ID2SYM(rb_intern("string")), rbs_string_to_ruby_string(&node->string, ctx.encoding));
             rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->location));
 
 
@@ -1093,10 +1093,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             assert(constant != NULL && "constant is NULL");
             assert(constant->start != NULL && "constant->start is NULL");
 
-            // FIXME: Add `rb_encoding` to the `ctx` and use it here.
-            rb_encoding *encoding = rb_usascii_encoding();
-
-            return ID2SYM(rb_intern3((const char *) constant->start, constant->length, encoding));
+            return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
         }
     }
 }

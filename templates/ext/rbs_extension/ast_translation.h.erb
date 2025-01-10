@@ -1,7 +1,19 @@
 #ifndef RBS_EXTENSION_AST_TRANSLATION_H
 #define RBS_EXTENSION_AST_TRANSLATION_H
 
+#include "ruby.h"
+#include "ruby/encoding.h"
+
 #include "rbs/ast.h"
+#include "rbs/rbs_encoding.h"
+#include "rbs/rbs_location.h"
+
+/// A bag of values needed when copying RBS C structs into Ruby objects.
+typedef struct rbs_translation_context {
+    rbs_constant_pool_t *constant_pool;
+    VALUE buffer;
+    rb_encoding *encoding;
+} rbs_translation_context_t;
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t, rbs_node_list_t *list);
 VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t, rbs_hash_t *hash);
