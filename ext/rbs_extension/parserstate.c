@@ -337,7 +337,25 @@ parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_
     .constant_pool = {},
   };
 
-  rbs_constant_pool_init(&parser->constant_pool, 0);
+  // The parser's constant pool is mainly used for storing the names of type variables, which usually aren't many.
+  // Below are some statistics gathered from the current test suite. We can see that 56% of parsers never add to their
+  // constant pool at all. The initial capacity needs to be a power of 2. Picking 2 means that we won't need to realloc
+  // in 85% of cases.
+  //
+  // TODO: recalculate these statistics based on a real world codebase, rather than the test suite.
+  //
+  // | Size | Count | Cumulative | % Coverage |
+  // |------|-------|------------|------------|
+  // |   0  | 7,862 |      7,862 |     56%    |
+  // |   1  | 3,196 |     11,058 |     79%    |
+  // |   2  |   778 |     12,719 |     85%    |
+  // |   3  |   883 |     11,941 |     91%    |
+  // |   4  |   478 |     13,197 |     95%    |
+  // |   5  |   316 |     13,513 |     97%    |
+  // |   6  |   288 |     13,801 |     99%    |
+  // |   7  |   144 |     13,945 |    100%    |
+  const size_t initial_pool_capacity = 2;
+  rbs_constant_pool_init(&parser->constant_pool, initial_pool_capacity);
 
   parser_advance(parser);
   parser_advance(parser);

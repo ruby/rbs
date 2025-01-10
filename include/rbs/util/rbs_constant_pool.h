@@ -26,18 +26,124 @@
 /**
  * A constant id is a unique identifier for a constant in the constant pool.
  */
-typedef uintptr_t rbs_constant_id_t;
+typedef uint32_t rbs_constant_id_t;
+
+/**
+ * A list of constant IDs. Usually used to represent a set of locals.
+ */
+typedef struct {
+    /** The number of constant ids in the list. */
+    size_t size;
+
+    /** The number of constant ids that have been allocated in the list. */
+    size_t capacity;
+
+    /** The constant ids in the list. */
+    rbs_constant_id_t *ids;
+} rbs_constant_id_list_t;
+
+/**
+ * Initialize a list of constant ids.
+ *
+ * @param list The list to initialize.
+ */
+void rbs_constant_id_list_init(rbs_constant_id_list_t *list);
+
+/**
+ * Initialize a list of constant ids with a given capacity.
+ *
+ * @param list The list to initialize.
+ * @param capacity The initial capacity of the list.
+ */
+void rbs_constant_id_list_init_capacity(rbs_constant_id_list_t *list, size_t capacity);
+
+/**
+ * Append a constant id to a list of constant ids. Returns false if any
+ * potential reallocations fail.
+ *
+ * @param list The list to append to.
+ * @param id The id to append.
+ * @return Whether the append succeeded.
+ */
+bool rbs_constant_id_list_append(rbs_constant_id_list_t *list, rbs_constant_id_t id);
+
+/**
+ * Insert a constant id into a list of constant ids at the specified index.
+ *
+ * @param list The list to insert into.
+ * @param index The index at which to insert.
+ * @param id The id to insert.
+ */
+void rbs_constant_id_list_insert(rbs_constant_id_list_t *list, size_t index, rbs_constant_id_t id);
+
+/**
+ * Checks if the current constant id list includes the given constant id.
+ *
+ * @param list The list to check.
+ * @param id The id to check for.
+ * @return Whether the list includes the given id.
+ */
+bool rbs_constant_id_list_includes(rbs_constant_id_list_t *list, rbs_constant_id_t id);
+
+/**
+ * Free the memory associated with a list of constant ids.
+ *
+ * @param list The list to free.
+ */
+void rbs_constant_id_list_free(rbs_constant_id_list_t *list);
+
+/**
+ * The type of bucket in the constant pool hash map. This determines how the
+ * bucket should be freed.
+ */
+typedef unsigned int rbs_constant_pool_bucket_type_t;
+
+/** By default, each constant is a slice of the source. */
+static const rbs_constant_pool_bucket_type_t RBS_CONSTANT_POOL_BUCKET_DEFAULT = 0;
+
+/** An owned constant is one for which memory has been allocated. */
+static const rbs_constant_pool_bucket_type_t RBS_CONSTANT_POOL_BUCKET_OWNED = 1;
+
+/** A constant constant is known at compile time. */
+static const rbs_constant_pool_bucket_type_t RBS_CONSTANT_POOL_BUCKET_CONSTANT = 2;
+
+/** A bucket in the hash map. */
+typedef struct {
+    /** The incremental ID used for indexing back into the pool. */
+    unsigned int id: 30;
+
+    /** The type of the bucket, which determines how to free it. */
+    rbs_constant_pool_bucket_type_t type: 2;
+
+    /** The hash of the bucket. */
+    uint32_t hash;
+} rbs_constant_pool_bucket_t;
 
 /** A constant in the pool which effectively stores a string. */
-typedef uintptr_t rbs_constant_t;
+typedef struct {
+    /** A pointer to the start of the string. */
+    const uint8_t *start;
+
+    /** The length of the string. */
+    size_t length;
+} rbs_constant_t;
 
 /** The overall constant pool, which stores constants found while parsing. */
 typedef struct {
-    void *dummy; // Workaround for structs not being allowed to be empty.
+    /** The buckets in the hash map. */
+    rbs_constant_pool_bucket_t *buckets;
+
+    /** The constants that are stored in the buckets. */
+    rbs_constant_t *constants;
+
+    /** The number of buckets in the hash map. */
+    uint32_t size;
+
+    /** The number of buckets that have been allocated in the hash map. */
+    uint32_t capacity;
 } rbs_constant_pool_t;
 
-// A temporary stand-in for the constant pool until start using a real implementation.
-// For now, it just defers to Ruby's ID interning mechanism (`rb_intern3`).
+// A global constant pool for storing permenant keywords, such as the names of location children in `parser.c`.
 extern rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL;
 
 /**
@@ -79,6 +185,18 @@ rbs_constant_id_t rbs_constant_pool_find(const rbs_constant_pool_t *pool, const 
  * @return The id of the constant.
  */
 rbs_constant_id_t rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start, size_t length);
+
+/**
+ * Insert a constant into a constant pool from memory that is now owned by the
+ * constant pool. Returns the id of the constant, or 0 if any potential calls to
+ * resize fail.
+ *
+ * @param pool The pool to insert the constant into.
+ * @param start A pointer to the start of the constant.
+ * @param length The length of the constant.
+ * @return The id of the constant.
+ */
+rbs_constant_id_t rbs_constant_pool_insert_owned(rbs_constant_pool_t *pool, uint8_t *start, size_t length);
 
 /**
  * Insert a constant into a constant pool from memory that is constant. Returns
