@@ -7,12 +7,19 @@
 
 #include "ruby/vm.h"
 
-NORETURN(void) raise_error(parserstate *state, error *error) {
+/**
+ * Raises RBS::ParsingError on `tok` with message constructed with given `fmt`.
+ *
+ * ```
+ * foo.rbs:11:21...11:25: Syntax error: {message}, token=`{tok source}` ({tok type})
+ * ```
+ * */
+static NORETURN(void) raise_error(error *error, VALUE buffer) {
   if (!error->syntax_error) {
     rb_raise(rb_eRuntimeError, "Unexpected error");
   }
 
-  VALUE location = rbs_new_location(state->buffer, error->token.range);
+  VALUE location = rbs_new_location(buffer, error->token.range);
   VALUE type = rb_str_new_cstr(token_type_str(error->token.type));
 
   VALUE rb_error = rb_funcall(
@@ -51,14 +58,14 @@ static VALUE parse_type_try(VALUE a) {
   parse_type(parser, &type);
 
   if (parser->error) {
-    raise_error(parser, parser->error);
+    raise_error(parser->error, arg->buffer);
   }
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
     if (parser->current_token.type != pEOF) {
       set_error(parser, parser->current_token, true, "expected a token `%s`", token_type_str(pEOF));
-      raise_error(parser, parser->error);
+      raise_error(parser->error, arg->buffer);
     }
   }
 
@@ -137,14 +144,14 @@ static VALUE parse_method_type_try(VALUE a) {
   parse_method_type(parser, &method_type);
 
   if (parser->error) {
-    raise_error(parser, parser->error);
+    raise_error(parser->error, arg->buffer);
   }
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
     if (parser->current_token.type != pEOF) {
       set_error(parser, parser->current_token, true, "expected a token `%s`", token_type_str(pEOF));
-      raise_error(parser, parser->error);
+      raise_error(parser->error, arg->buffer);
     }
   }
 
@@ -180,7 +187,7 @@ static VALUE parse_signature_try(VALUE a) {
   parse_signature(parser, &signature);
 
   if (parser->error) {
-    raise_error(parser, parser->error);
+    raise_error(parser->error, arg->buffer);
   }
 
   rbs_translation_context_t ctx = rbs_translation_context_create(
