@@ -751,10 +751,19 @@ module RBS
       end
 
       def to_s(level = 0)
+        strs = types.map do |ty|
+          case ty
+          when Intersection
+            ty.to_s([1, level].max)
+          else
+            ty.to_s
+          end
+        end
+
         if level > 0
-          "(#{types.join(" | ")})"
+          "(#{strs.join(" | ")})"
         else
-          types.join(" | ")
+          strs.join(" | ")
         end
       end
 
