@@ -1,0 +1,118 @@
+// Running these tasks does not trigger a recompile, so you'll need to do that yourself.
+//
+// Make sure you're using a debug build when debugging.
+// Add `append_cflags ['-O0', '-g']` to extconf.rb to enable this.
+//
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug all tests in LLDB",
+            "program": "/opt/rubies/3.3.4/bin/ruby",
+            "args": [
+                "-w",
+                "-Ilib",
+                "-Itest",
+                "/Users/alex/.gem/ruby/3.3.0/gems/rake-13.2.1/lib/rake/rake_test_loader.rb",
+                "test/rbs/ancestor_builder_test.rb",
+                "test/rbs/ancestor_graph_test.rb",
+                "test/rbs/annotate/annotations_test.rb",
+                "test/rbs/annotate/rdoc_annotator_test.rb",
+                "test/rbs/annotate/rdoc_source_test.rb",
+                "test/rbs/ast/type_param_test.rb",
+                "test/rbs/ast/visitor_test.rb",
+                "test/rbs/buffer_test.rb",
+                "test/rbs/cli_test.rb",
+                "test/rbs/collection/cleaner_test.rb",
+                "test/rbs/collection/config_test.rb",
+                "test/rbs/collection/installer_test.rb",
+                "test/rbs/collection/sources/git_test.rb",
+                "test/rbs/collection/sources/local_test.rb",
+                "test/rbs/collection/sources/stdlib_test.rb",
+                "test/rbs/definition_builder_test.rb",
+                "test/rbs/diff_test.rb",
+                "test/rbs/environment_loader_test.rb",
+                "test/rbs/environment_test.rb",
+                "test/rbs/environment_walker_test.rb",
+                "test/rbs/errors_test.rb",
+                "test/rbs/factory_test.rb",
+                "test/rbs/file_finder_test.rb",
+                "test/rbs/location_test.rb",
+                "test/rbs/locator_test.rb",
+                "test/rbs/method_builder_test.rb",
+                "test/rbs/method_type_parsing_test.rb",
+                "test/rbs/node_usage_test.rb",
+                "test/rbs/parser_test.rb",
+                "test/rbs/rb_prototype_test.rb",
+                "test/rbs/rbi_prototype_test.rb",
+                "test/rbs/rdoc/rbs_parser_test.rb",
+                "test/rbs/repository_test.rb",
+                "test/rbs/resolver/constant_resolver_test.rb",
+                "test/rbs/resolver/type_name_resolver_test.rb",
+                "test/rbs/runtime_prototype_test.rb",
+                "test/rbs/schema_test.rb",
+                "test/rbs/signature_parsing_test.rb",
+                "test/rbs/sorter_test.rb",
+                "test/rbs/subtractor_test.rb",
+                "test/rbs/test/hook_test.rb",
+                "test/rbs/test/runtime_test_test.rb",
+                "test/rbs/test/setup_helper_test.rb",
+                "test/rbs/test/tester_test.rb",
+                "test/rbs/test/type_check_test.rb",
+                "test/rbs/type_alias_dependency_test.rb",
+                "test/rbs/type_alias_regulartiry_test.rb",
+                "test/rbs/type_parsing_test.rb",
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug test in LLDB",
+            "program": "/opt/rubies/3.3.4/bin/ruby",
+            "args": [
+                "-Ilib",
+                "-Itest",
+                "${workspaceFolder}/bin/test_runner.rb",
+                "${workspaceFolder}/test/rbs/location_test.rb"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug test/rbs/location_test.rb",
+            "program": "/opt/rubies/3.3.4/bin/ruby",
+            "args": [
+                "-Ilib",
+                "-Itest",
+                "${workspaceFolder}/bin/test_runner.rb",
+                "${workspaceFolder}/test/rbs/location_test.rb"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug test/rbs/ancestor_builder_test.rb",
+            "program": "/opt/rubies/3.3.4/bin/ruby",
+            "args": [
+                "-Ilib",
+                "-Itest",
+                "${workspaceFolder}/bin/test_runner.rb",
+                "${workspaceFolder}/test/rbs/ancestor_builder_test.rb"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+        },
+
+    ]
+}
