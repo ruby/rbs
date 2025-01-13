@@ -5,7 +5,7 @@ require 'singleton'
 module RBS
   module Collection
     module Sources
-      # Signatures that are inclduded in gem package as sig/ directory.
+      # Signatures that are included in gem package as sig/ directory.
       class Rubygems
         include Base
         include Singleton

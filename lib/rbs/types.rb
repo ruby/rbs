@@ -536,7 +536,7 @@ module RBS
             end
           end
         else
-          raise ArgumentError, "only one of `:fields` or `:all_fields` is requireds"
+          raise ArgumentError, "only one of `:fields` or `:all_fields` is required"
         end
 
         @location = location

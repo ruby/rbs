@@ -587,7 +587,7 @@ EOU
             merge = true
           end
           opts.on("--todo", "Generates only undefined methods compared to objects") do
-            Warning.warn("Geneating prototypes with `--todo` option is experimental\n", category: :experimental)
+            Warning.warn("Generating prototypes with `--todo` option is experimental\n", category: :experimental)
             todo = true
           end
           opts.on("--method-owner CLASS", "Generate method prototypes if the owner of the method is [CLASS]") do |klass|
@@ -1155,7 +1155,7 @@ EOB
             # Generate RBS files from the codebase.
             $ rbs prototype rb lib/ > generated.rbs
 
-            # Write more descrictive types by hand.
+            # Write more descriptive types by hand.
             $ $EDITOR handwritten.rbs
 
             # Remove hand-written method definitions from generated.rbs.
@@ -1163,7 +1163,7 @@ EOB
 
           Options:
         HELP
-        opts.on('-w', '--write', 'Overwrite files directry') { write_to_file = true }
+        opts.on('-w', '--write', 'Overwrite files directory') { write_to_file = true }
         opts.on('--subtrahend=PATH', '') { |path| subtrahend_paths << path }
         opts.parse!(args)
       end
