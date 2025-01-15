@@ -23,9 +23,9 @@ class RBS::TypesTest < Test::Unit::TestCase
     assert_equal "(String | bool)?", parse_type("(String | bool)?").to_s
     assert_equal "String & bool?", parse_type("String & bool?").to_s
     assert_equal "(String & bool)?", parse_type("(String & bool)?").to_s
-    assert_equal "Integer | String & bool", parse_type("Integer | String & bool").to_s
+    assert_equal "Integer | (String & bool)", parse_type("Integer | String & bool").to_s
     assert_equal "(Integer | String) & bool", parse_type("(Integer | String) & bool").to_s
-    assert_equal "(Integer | String & bool)?", parse_type("(Integer | String & bool)?").to_s
+    assert_equal "(Integer | (String & bool))?", parse_type("(Integer | String & bool)?").to_s
     assert_equal "((Integer | String) & bool)?", parse_type("((Integer | String) & bool)?").to_s
     assert_equal "^() -> void", parse_type("^() -> void").to_s
     assert_equal "(^() -> void)?", parse_type("(^() -> void)?").to_s
