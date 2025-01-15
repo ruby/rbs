@@ -44,6 +44,8 @@ gem "rbs-amber", path: "test/assets/test-gem"
 # Bundled gems
 gem "net-smtp"
 gem 'csv'
+gem 'ostruct'
+gem 'pstore'
 
 group :minitest do
   gem "minitest"
