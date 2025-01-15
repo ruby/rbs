@@ -123,7 +123,7 @@ GEM
       rubocop (~> 1.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
-    stackprof (0.2.26)
+    stackprof (0.2.27)
     steep (1.9.3)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
