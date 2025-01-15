@@ -9,6 +9,7 @@ require "pp"
 require "ripper"
 require "logger"
 require "tsort"
+require "strscan"
 
 require "rbs/errors"
 require "rbs/buffer"

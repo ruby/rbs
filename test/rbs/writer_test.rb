@@ -331,4 +331,53 @@ class Foo
 end
     SIG
   end
+
+  def test_magic_comment
+    assert_writer <<-SIG
+# resolve-type-names: false
+
+class Foo
+end
+    SIG
+
+    assert_writer <<-SIG
+# resolve-type-names: false
+
+use String as S
+
+type s = S
+    SIG
+  end
+
+  def test_magic_comment_with_additional_new_line
+    result = format(<<-SIG)
+# resolve-type-names: false
+# Class Foo is something...
+class Foo
+end
+    SIG
+
+    assert_equal <<-SIG, result
+# resolve-type-names: false
+
+# Class Foo is something...
+class Foo
+end
+    SIG
+  end
+
+  def test_magic_comment_with_additional_new_line2
+    result = format(<<-SIG)
+# resolve-type-names: false
+class Foo
+end
+    SIG
+
+    assert_equal <<-SIG, result
+# resolve-type-names: false
+
+class Foo
+end
+    SIG
+  end
 end

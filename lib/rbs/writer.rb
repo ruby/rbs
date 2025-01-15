@@ -77,14 +77,19 @@ module RBS
     end
 
     def write(contents)
-      dirs = contents.select {|c| c.is_a?(AST::Directives::Base) } #: Array[AST::Directives::t]
+      resolves = contents.select { _1.is_a?(AST::Directives::ResolveTypeNames) } #: Array[AST::Directives::ResolveTypeNames]
+      uses = contents.select {|c| c.is_a?(AST::Directives::Use) } #: Array[AST::Directives::Use]
       decls = contents.select {|c| c.is_a?(AST::Declarations::Base) } #: Array[AST::Declarations::t]
 
-      dirs.each do |dir|
-        write_directive(dir)
+      if first_resolves = resolves.first
+        puts "# resolve-type-names: #{first_resolves.value}"
+        puts
       end
 
-      puts unless dirs.empty?
+      uses.each do |dir|
+        write_use_directive(dir)
+      end
+      puts unless uses.empty?
 
       [nil, *decls].each_cons(2) do |prev, decl|
         raise unless decl
@@ -94,7 +99,7 @@ module RBS
       end
     end
 
-    def write_directive(dir)
+    def write_use_directive(dir)
       clauses = dir.clauses.map do |clause|
         case clause
         when AST::Directives::Use::SingleClause
