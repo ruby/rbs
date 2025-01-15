@@ -71,6 +71,7 @@ GEM
       ast (~> 2.4.1)
       racc
     power_assert (2.0.5)
+    pstore (0.1.4)
     psych (4.0.6)
       stringio
     public_suffix (6.0.1)
@@ -174,6 +175,7 @@ DEPENDENCIES
   mutex_m
   net-smtp
   nkf
+  pstore
   raap
   rake
   rake-compiler

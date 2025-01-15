@@ -29,6 +29,7 @@ group :libs do
   gem "dbm"
   gem "mutex_m"
   gem "nkf"
+  gem "pstore"
 end
 
 group :profilers do
