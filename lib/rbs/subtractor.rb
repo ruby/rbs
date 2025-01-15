@@ -40,7 +40,7 @@ module RBS
           name = absolute_typename(decl.new_name, context: context)
           decl unless @subtrahend.module_alias?(name) || @subtrahend.module_decl?(name)
         else
-          raise "unknwon decl: #{(_ = decl).class}"
+          raise "unknown decl: #{(_ = decl).class}"
         end
       end.compact
     end
@@ -51,7 +51,7 @@ module RBS
       context = _ = [context, decl.name]
       children = call(decl.each_decl.to_a, context: context) +
         decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
-      children = filter_redundunt_access_modifiers(children)
+      children = filter_redundant_access_modifiers(children)
       return nil if children.empty?
 
       update_decl(decl, members: children)
@@ -145,7 +145,7 @@ module RBS
       end
     end
 
-    private def filter_redundunt_access_modifiers(decls)
+    private def filter_redundant_access_modifiers(decls)
       decls = decls.dup
       decls.pop while access_modifier?(decls.last)
       decls = decls.map.with_index do |decl, i|

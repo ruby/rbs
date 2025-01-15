@@ -1635,8 +1635,8 @@ end
         builder = DefinitionBuilder.new(env: env)
 
         builder.build_instance(type_name("::Hello")).tap do |definition|
-          initalize = definition.methods[:initialize]
-          assert_equal ["(::String, ::Integer) -> void"], initalize.method_types.map(&:to_s)
+          initialize = definition.methods[:initialize]
+          assert_equal ["(::String, ::Integer) -> void"], initialize.method_types.map(&:to_s)
         end
 
         builder.build_singleton(type_name("::Hello")).tap do |definition|
@@ -2687,7 +2687,7 @@ end
     end
   end
 
-  def test_alias__to_module_self_indierect_method
+  def test_alias__to_module_self_indirect_method
     SignatureManager.new(system_builtin: false) do |manager|
       manager.add_file("foo.rbs", <<-EOF)
 module Kernel

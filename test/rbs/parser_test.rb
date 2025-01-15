@@ -225,7 +225,7 @@ class RBS::ParserTest < Test::Unit::TestCase
         module Foo
           type foo = bar
 
-          BAZ: Intger
+          BAZ: Integer
         end
       RBS
 
@@ -733,7 +733,7 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
-  def test_neline_inconsitency
+  def test_newline_inconsistency
     code = "module Test\r\nend"
 
     RBS::Parser.parse_signature(code)

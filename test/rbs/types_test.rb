@@ -91,7 +91,7 @@ class RBS::TypesTest < Test::Unit::TestCase
 
     [
       "^() -> void",
-      "[Ineger, String]",
+      "[Integer, String]",
       "Enumerator[Integer, void]"
     ].each do |str|
       type = parse_type(str)

@@ -27,8 +27,8 @@ module RBS
         :! => "not",
         :<< => "lshift",
         :>> => "rshift",
-        :~ => "tilda",
-        :=~ => "eqtilda",
+        :~ => "tilde",
+        :=~ => "eqtilde",
         :% => "percent",
         :+@ => "unary_plus",
         :-@ => "unary_minus"

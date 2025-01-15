@@ -18,7 +18,7 @@ class RBS::CliTest < Test::Unit::TestCase
   # Run `rbs collection` with fresh bundler environment
   #
   # You need this method to test `rbs collection` features.
-  # `rbs collection` loads gems from Bundler context, so re-using the currenr Bundler context (used to develop rbs gem) causes issues.
+  # `rbs collection` loads gems from Bundler context, so re-using the current Bundler context (used to develop rbs gem) causes issues.
   #
   # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
   # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
@@ -1127,7 +1127,7 @@ Processing `lib`...
           assert_equal <<~EOM, cli.stdout.string
           EOM
 
-          assert_match Regexp.new(Regexp.escape "Geneating prototypes with `--todo` option is experimental"), cli.stderr.string
+          assert_match Regexp.new(Regexp.escape "Generating prototypes with `--todo` option is experimental"), cli.stderr.string
         end
       end
     end
