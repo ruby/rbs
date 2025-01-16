@@ -41,6 +41,9 @@ module RBS
           attr_reader node: Prism::ConstantWriteNode
 
           def initialize: (Prism::ConstantWriteNode) -> void
+
+          # Returns the type of the constant
+          def type: () -> Types::t
         end
 
         class GlobalDecl < Base
