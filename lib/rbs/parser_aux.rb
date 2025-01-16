@@ -17,7 +17,7 @@ module RBS
 
     def self.parse_signature(source)
       buf = buffer(source)
-      dirs, decls = _parse_signature(buf, buf.last_position)
+      dirs, decls = _parse_signature(buf, 0, buf.last_position)
 
       [buf, dirs, decls]
     end
