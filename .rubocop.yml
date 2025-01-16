@@ -54,6 +54,8 @@ RBS/Style/InitializeReturnType:
   Enabled: true
 RBS/Style/OptionalNil:
   Enabled: true
+RBS/Style/RedundantParentheses:
+  Enabled: true
 
 Lint/DuplicateMethods:
   Enabled: true
