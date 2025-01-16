@@ -1,0 +1,92 @@
+module RBS
+  module AST
+    module Ruby
+      module Members
+        class Base
+        end
+
+        type t = DefMember | DefSingletonMember
+               | AliasMember
+               | IncludeMember | ExtendMember | PrependMember
+               | AttrReaderMember | AttrWriterMember | AttrAccessorMember
+               | PublicMember | PrivateMember
+
+        class Overload
+          attr_reader method_type: MethodType
+
+          def initialize: (MethodType) -> void
+        end
+
+        class DefMember < Base
+          attr_reader node: Prism::DefNode
+
+          def initialize: (Prism::DefNode) -> void
+
+          def overloads: () -> Array[Overload]
+        end
+
+        class DefSingletonMember < Base
+          attr_reader node: Prism::DefNode
+
+          def initialize: (Prism::DefNode) -> void
+
+          def overloads: () -> Array[Overload]
+        end
+
+        class AliasMember < Base
+          attr_reader node: Prism::AliasMethodNode
+
+          def initialize: (Prism::AliasMethodNode) -> void
+        end
+
+        class IncludeMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class ExtendMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class PrependMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class AttrReaderMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class AttrWriterMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class AttrAccessorMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class PublicMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+
+        class PrivateMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Prism::CallNode) -> void
+        end
+      end
+    end
+  end
+end

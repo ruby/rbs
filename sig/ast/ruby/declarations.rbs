@@ -1,0 +1,55 @@
+module RBS
+  module AST
+    module Ruby
+      module Declarations
+        type t = ClassDecl | SingletonClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | RBSDecl
+
+        class Base
+        end
+
+        class ClassDecl < Base
+          type member = Members::t | t
+
+          attr_reader node: Prism::ClassNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Prism::ClassNode) -> void
+        end
+
+        class SingletonClassDecl < Base
+          type member = Members::t | t
+
+          attr_reader node: Prism::SingletonClassNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Prism::SingletonClassNode) -> void
+        end
+
+        class ModuleDecl < Base
+          type member = Members::t | t
+
+          attr_reader node: Prism::ModuleNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Prism::ModuleNode) -> void
+        end
+
+        class ConstantDecl < Base
+          attr_reader node: Prism::ConstantWriteNode
+
+          def initialize: (Prism::ConstantWriteNode) -> void
+        end
+
+        class GlobalDecl < Base
+          attr_reader node: Prism::GlobalVariableWriteNode
+        end
+
+        class RBSDecl < Base
+        end
+      end
+    end
+  end
+end

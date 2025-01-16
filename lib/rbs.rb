@@ -10,6 +10,7 @@ require "ripper"
 require "logger"
 require "tsort"
 require "strscan"
+require "prism"
 
 require "rbs/errors"
 require "rbs/buffer"
@@ -24,6 +25,8 @@ require "rbs/ast/declarations"
 require "rbs/ast/members"
 require "rbs/ast/annotation"
 require "rbs/ast/visitor"
+require "rbs/ast/ruby/declarations"
+require "rbs/ast/ruby/members"
 require "rbs/environment"
 require "rbs/environment/use_map"
 require "rbs/environment_loader"
@@ -60,6 +63,8 @@ require "rbs/collection"
 require "rbs_extension"
 require "rbs/parser_aux"
 require "rbs/location_aux"
+
+require "rbs/inline_parser"
 
 module RBS
   class <<self
