@@ -44,6 +44,8 @@ RBS/Style:
   Exclude:
     - 'sig/**/*'
     - 'test/**/*'
+RBS/Style/BlockReturnBoolish:
+  Enabled: true
 RBS/Style/EmptyArgument:
   Enabled: true
 RBS/Style/InitializeReturnType:
