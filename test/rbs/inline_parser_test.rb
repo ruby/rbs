@@ -20,6 +20,8 @@ class RBS::InlineParserTest < Test::Unit::TestCase
 
       class <<self
       end
+
+      FOO = 123
     RUBY
 
     ret = RBS::InlineParser.parse(buffer, result)

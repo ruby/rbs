@@ -41,6 +41,10 @@ module RBS
           def initialize(node)
             @node = node
           end
+
+          def type
+            Types::Bases::Any.new(location: nil)
+          end
         end
       end
     end
