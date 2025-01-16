@@ -1,0 +1,41 @@
+module RBS
+  class InlineParser
+    class Result
+      attr_reader buffer: Buffer
+      attr_reader prism_result: Prism::ParseResult
+      attr_reader declarations: Array[AST::Ruby::Declarations::t]
+
+      def initialize: (Buffer, Prism::ParseResult) -> void
+    end
+
+    def self.parse: (Buffer, Prism::ParseResult) -> Result
+
+    class Parser < Prism::Visitor
+      type decl_context = AST::Ruby::Declarations::ClassDecl
+                        | AST::Ruby::Declarations::SingletonClassDecl
+                        | AST::Ruby::Declarations::ModuleDecl
+
+      attr_reader result: Result
+
+      %a{pure} def current_context: () -> decl_context?
+
+      %a{pure} def current_context!: () -> decl_context
+
+      attr_reader decl_contexts: Array[decl_context]
+
+      def initialize: (Result) -> void
+
+      def parse: () -> void
+
+      def push_decl_context: (decl_context) { () -> void } -> void
+
+      def insert_decl: (decl_context) -> void
+
+      def visit_class_node: ...
+
+      def visit_singleton_class_node: ...
+
+      def visit_def_node: ...
+    end
+  end
+end
