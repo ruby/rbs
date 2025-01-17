@@ -175,7 +175,7 @@ EOB
 
       env = Environment.from_loader(loader).resolve_type_names
 
-      decls = env.declarations.select do |decl|
+      decls = env.each_decl.select do |decl|
         loc = decl.location or raise
         # @type var name: String
         name = loc.buffer.name
@@ -913,7 +913,7 @@ Options:
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
-      bufs << Buffer.new(content: e_code, name: '-e') if e_code
+      bufs << Buffer.new(content: e_code, name: Pathname('-e')) if e_code
 
       bufs.each do |buf|
         RBS.logger.info "Parsing #{buf.name}..."

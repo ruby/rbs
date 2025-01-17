@@ -1,0 +1,13 @@
+module RBS
+  module Source
+    class RBS
+      attr_reader buffer: Buffer
+
+      attr_reader directives: Array[AST::Directives::t]
+
+      attr_reader declarations: Array[AST::Declarations::t]
+
+      def initialize: (Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]) -> void
+    end
+  end
+end

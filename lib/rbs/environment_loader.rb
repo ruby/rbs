@@ -122,7 +122,8 @@ module RBS
         decls.each do |decl|
           loaded << [decl, path, source]
         end
-        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
+        source = Source::RBS.new(buffer, dirs, decls)
+        env.add_signature(source)
       end
 
       loaded
@@ -161,7 +162,7 @@ module RBS
           next if files.include?(path)
 
           files << path
-          buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
+          buffer = Buffer.new(name: path, content: path.read(encoding: "UTF-8"))
 
           _, dirs, decls = Parser.parse_signature(buffer)
 
