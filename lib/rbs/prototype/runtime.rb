@@ -50,8 +50,8 @@ module RBS
           type_name_absolute = type_name.absolute!
           @mixin_decls_cache ||= {} #: Hash[TypeName, Array[AST::Members::Mixin]]
           @mixin_decls_cache.fetch(type_name_absolute) do
-            @mixin_decls_cache[type_name_absolute] = @builder.env.class_decls[type_name_absolute].decls.flat_map do |d|
-              d.decl.members.select { |m| m.kind_of?(AST::Members::Mixin) }
+            @mixin_decls_cache[type_name_absolute] = @builder.env.class_decls[type_name_absolute].each_decl.flat_map do |decl|
+              decl.members.select { |m| m.kind_of?(AST::Members::Mixin) }
             end
           end
         end

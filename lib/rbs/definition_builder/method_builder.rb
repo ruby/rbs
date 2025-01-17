@@ -103,9 +103,9 @@ module RBS
             args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
             type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
             Methods.new(type: type).tap do |methods|
-              entry.decls.each do |d|
-                subst = Substitution.build(d.decl.type_params.each.map(&:name), args)
-                each_member_with_accessibility(d.decl.members) do |member, accessibility|
+              entry.each_decl do |decl|
+                subst = Substitution.build(decl.type_params.each.map(&:name), args)
+                each_member_with_accessibility(decl.members) do |member, accessibility|
                   case member
                   when AST::Members::MethodDefinition
                     case member.kind
@@ -149,8 +149,8 @@ module RBS
             type = Types::ClassSingleton.new(name: type_name, location: nil)
 
             Methods.new(type: type).tap do |methods|
-              entry.decls.each do |d|
-                d.decl.members.each do |member|
+              entry.each_decl do |decl|
+                decl.members.each do |member|
                   case member
                   when AST::Members::MethodDefinition
                     if member.singleton?

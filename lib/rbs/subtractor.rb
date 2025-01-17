@@ -129,7 +129,7 @@ module RBS
 
       entry = @subtrahend.class_decls[owner]
       return unless entry
-      decls = entry.decls.map { |d| d.decl }
+      decls = entry.each_decl.to_a
 
       decls.each { |d| d.members.each { |m| block.call(m) } }
     end
