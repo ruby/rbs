@@ -33,11 +33,15 @@ module RBS
       end
 
       def primary_decl
-        @primary_decl ||= begin
-          each_decl.find {|decl| decl.super_class } ||
-            each_decl.first ||
-            raise("Cannot find primary declaration for #{name}")
-        end
+        @primary_decl ||= nil.tap do
+          # @type break: declaration
+
+          decl = each_decl.find {|decl| decl.super_class }
+          break decl if decl
+
+          decl = each_decl.first
+          break decl if decl
+        end || raise("Cannot find primary declaration for #{name}")
       end
 
       def type_params

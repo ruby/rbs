@@ -420,14 +420,19 @@ module RBS
             entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
           )
 
-          mixin_ancestors0(decl,
-                           type_name,
-                           align_params: align_params,
-                           included_modules: included_modules,
-                           included_interfaces: included_interfaces,
-                           extended_modules: extended_modules,
-                           prepended_modules: prepended_modules,
-                           extended_interfaces: extended_interfaces)
+          case decl
+          when AST::Declarations::Class, AST::Declarations::Module
+            mixin_ancestors0(
+              decl,
+              type_name,
+              align_params: align_params,
+              included_modules: included_modules,
+              included_interfaces: included_interfaces,
+              extended_modules: extended_modules,
+              prepended_modules: prepended_modules,
+              extended_interfaces: extended_interfaces
+            )
+          end
         end
       end
 

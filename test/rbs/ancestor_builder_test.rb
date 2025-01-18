@@ -77,6 +77,39 @@ EOF
     end
   end
 
+  def test_one_ancestors__inline__class
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [], a.params
+
+          assert_equal(
+            Ancestor::Instance.new(name: type_name("::Object"), args: [], source: nil),
+            a.super_class
+          )
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+
+          assert_equal(
+            Ancestor::Singleton.new(name: type_name("::Object")),
+            a.super_class
+          )
+        end
+      end
+    end
+  end
+
   def test_one_ancestors_module
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF

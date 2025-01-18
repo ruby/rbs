@@ -563,4 +563,53 @@ type s = untyped
       assert_equal "::s", alias_decl.decl.type.to_s
     end
   end
+
+  def parse_ruby(source)
+    [
+      RBS::Buffer.new(name: "test.rb", content: source),
+      Prism.parse(source)
+    ]
+  end
+
+  def test_inline__class_decl
+    buf, prism = parse_ruby(<<~RUBY)
+      class Foo
+        class ::Bar
+        end
+
+        class Baz
+        end
+      end
+    RUBY
+    result = RBS::InlineParser.parse(buf, prism)
+
+    env = Environment.new
+    source = RBS::Source::Ruby.new(buf, prism, result.declarations)
+    env.add_signature(source)
+
+    assert_operator env.class_decls, :key?, type_name("::Foo")
+    assert_operator env.class_decls, :key?, type_name("::Bar")
+    assert_operator env.class_decls, :key?, type_name("::Foo::Baz")
+  end
+
+  def test_inline__module_decl
+    buf, prism = parse_ruby(<<~RUBY)
+      module Foo
+        module ::Bar
+        end
+
+        module Baz
+        end
+      end
+    RUBY
+    result = RBS::InlineParser.parse(buf, prism)
+
+    env = Environment.new
+    source = RBS::Source::Ruby.new(buf, prism, result.declarations)
+    env.add_signature(source)
+
+    assert_operator env.class_decls, :key?, type_name("::Foo")
+    assert_operator env.class_decls, :key?, type_name("::Bar")
+    assert_operator env.class_decls, :key?, type_name("::Foo::Baz")
+  end
 end

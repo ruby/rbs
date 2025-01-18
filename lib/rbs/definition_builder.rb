@@ -452,6 +452,8 @@ module RBS
         case decl
         when AST::Declarations::Class
           decl.super_class&.location
+        when AST::Ruby::Declarations::ClassDecl
+          decl.super_class&.location
         end
       else
         source.location
@@ -762,6 +764,64 @@ module RBS
         )
 
         method_definition.annotations.replace(original.annotations)
+      when AST::Ruby::Members::DefMember
+        if duplicated_method = methods[method.name]
+          raise DuplicatedMethodDefinitionError.new(
+            type: definition.self_type,
+            method_name: method.name,
+            members: [original, *duplicated_method.members]
+          )
+        end
+
+        defs = original.overloads.map do |overload|
+          Definition::Method::TypeDef.new(
+            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+            member: original,
+            defined_in: defined_in,
+            implemented_in: implemented_in,
+            overload_annotations: overload.annotations
+          )
+        end
+
+        # @type var accessibility: RBS::Definition::accessibility
+        accessibility =
+          if [:initialize, :initialize_copy, :initialize_clone, :initialize_dup, :respond_to_missing?].include?(method.name)
+            :private
+          else
+            method.accessibility
+          end
+
+        method_definition = Definition::Method.new(
+          super_method: existing_method,
+          defs: defs,
+          accessibility: accessibility,
+          alias_of: nil
+        )
+      when AST::Ruby::Members::DefSingletonMember
+        if duplicated_method = methods[method.name]
+          raise DuplicatedMethodDefinitionError.new(
+            type: definition.self_type,
+            method_name: method.name,
+            members: [original, *duplicated_method.members]
+          )
+        end
+
+        defs = original.overloads.map do |overload|
+          Definition::Method::TypeDef.new(
+            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+            member: original,
+            defined_in: defined_in,
+            implemented_in: implemented_in,
+            overload_annotations: overload.annotations
+          )
+        end
+
+        method_definition = Definition::Method.new(
+          super_method: existing_method,
+          defs: defs,
+          accessibility: method.accessibility,
+          alias_of: nil
+        )
       when nil
         # Overloading method definition only
 

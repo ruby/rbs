@@ -28,6 +28,10 @@ module RBS
       attr_reader :result
       attr_reader :decl_contexts
 
+      def buffer
+        result.buffer
+      end
+
       def current_context
         decl_contexts.last
       end
@@ -62,7 +66,7 @@ module RBS
       end
 
       def visit_class_node(node)
-        decl = AST::Ruby::Declarations::ClassDecl.new(node)
+        decl = AST::Ruby::Declarations::ClassDecl.new(buffer, node)
 
         insert_decl(decl)
         push_decl_context(decl) do
@@ -80,7 +84,7 @@ module RBS
       end
 
       def visit_module_node(node)
-        decl = AST::Ruby::Declarations::ModuleDecl.new(node)
+        decl = AST::Ruby::Declarations::ModuleDecl.new(buffer, node)
 
         insert_decl(decl)
         push_decl_context(decl) do

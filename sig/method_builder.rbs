@@ -15,14 +15,19 @@ module RBS
         # The Definition object allows invalid method definition so that more than one _original_ definitions may exist.
         #
         class Definition
+          # AST members that can be *original* method definition
           type original = AST::Members::MethodDefinition | AST::Members::Alias | AST::Members::AttrAccessor | AST::Members::AttrWriter | AST::Members::AttrReader
+                        | AST::Ruby::Members::DefMember | AST::Ruby::Members::DefSingletonMember
+
+          # AST members that can define overloading methods
+          type overloading = AST::Members::MethodDefinition | AST::Ruby::Members::DefMember
 
           type accessibility = RBS::Definition::accessibility
 
           attr_reader name: Symbol
           attr_reader type: instance_type
           attr_reader originals: Array[original]
-          attr_reader overloads: Array[AST::Members::MethodDefinition]
+          attr_reader overloads: Array[overloading]
           attr_reader accessibilities: Array[accessibility]
 
           def initialize: (name: Symbol, type: instance_type, originals: Array[original], overloads: Array[AST::Members::MethodDefinition], accessibilities: Array[accessibility]) -> void
@@ -70,14 +75,22 @@ module RBS
 
       def build_interface: (TypeName) -> Methods
 
-      def build_alias: (Methods, Methods::instance_type, member: AST::Members::Alias) -> void
+      private def build_alias: (Methods, Methods::instance_type, member: AST::Members::Alias) -> void
 
-      def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Definition::accessibility) -> void
+      private def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Definition::accessibility) -> void
 
-      def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Definition::accessibility) -> void
+      private def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Definition::accessibility) -> void
 
-      def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
+      private def build_ruby_method: (Methods, Methods::instance_type, member: AST::Ruby::Members::DefMember | AST::Ruby::Members::DefSingletonMember, accessibility: Definition::accessibility) -> void
 
+      private def each_ruby_member_with_accessibility: (_Each[AST::Ruby::Members::t], ?accessibility: Definition::accessibility) { (AST::Ruby::Members::DefMember, Definition::accessibility) -> void } -> void
+
+      private def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
+
+      # Returns another MethodBuilder instance with given `env`
+      #
+      # Method definitions already computed are kept, but ones associated with type names which is included in `except` set are deleted.
+      #
       def update: (env: Environment, except: _Each[TypeName]) -> MethodBuilder
     end
   end

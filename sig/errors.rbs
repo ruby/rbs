@@ -224,30 +224,38 @@ module RBS
   # The *overloading* method definition cannot find *non-overloading* method definition
   #
   class InvalidOverloadMethodError < DefinitionError
+    type overloading = DefinitionBuilder::MethodBuilder::Methods::Definition::overloading
+                     
     include DetailedMessageable
 
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
     attr_reader kind: :instance | :singleton
-    attr_reader members: Array[AST::Members::MethodDefinition]
+    attr_reader members: Array[overloading]
 
-    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
+    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[overloading]) -> void
 
-    def location: () -> AST::Members::MethodDefinition::loc?
+    def location: () -> Location[bot, bot]?
   end
 
   class GenericParameterMismatchError < LoadingError
-    attr_reader name: TypeName
-    attr_reader decl: AST::Declarations::Class | AST::Declarations::Module
+    type decl = AST::Declarations::Class | AST::Declarations::Module
+              | AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl
 
-    def initialize: (name: TypeName, decl: AST::Declarations::Class | AST::Declarations::Module) -> void
+    attr_reader name: TypeName
+    attr_reader decl: decl
+
+    def initialize: (name: TypeName, decl: decl) -> void
   end
 
   class DuplicatedDeclarationError < LoadingError
-    attr_reader name: TypeName | Symbol
-    attr_reader decls: Array[AST::Declarations::t]
+    type decl = AST::Declarations::t
+              | AST::Ruby::Declarations::t
 
-    def initialize: (TypeName | Symbol, *AST::Declarations::t) -> void
+    attr_reader name: TypeName | Symbol
+    attr_reader decls: Array[decl]
+
+    def initialize: (TypeName | Symbol, *decl) -> void
   end
 
   class InvalidVarianceAnnotationError < DefinitionError
@@ -296,11 +304,13 @@ module RBS
   # InheritModuleError is raised if a class definition inherits a module (not a class)
   #
   class InheritModuleError < DefinitionError
+    type super_class = AST::Declarations::Class::Super | AST::Ruby::Declarations::ClassDecl::Super
+
     include DetailedMessageable
 
-    attr_reader super_decl: AST::Declarations::Class::Super
+    attr_reader super_decl: super_class
 
-    def initialize: (AST::Declarations::Class::Super) -> void
+    def initialize: (super_class) -> void
 
     def location: () -> Location[untyped, untyped]?
 
@@ -308,7 +318,7 @@ module RBS
     #
     # Automatically normalize the name of super.
     #
-    def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
+    def self.check!: (super_class, env: Environment) -> void
   end
 
   class RecursiveTypeAliasError < BaseError

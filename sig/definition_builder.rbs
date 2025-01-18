@@ -103,7 +103,11 @@ module RBS
 
     def validate_type_params: (Definition, ancestors: AncestorBuilder::OneAncestors, methods: MethodBuilder::Methods) -> void
 
-    def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location[untyped, untyped]?
+    type declaration = Environment::ModuleEntry::declaration | Environment::ClassEntry::declaration | AST::Declarations::Interface
+
+    # Returns a location to report an error on an ancestor
+    #
+    private def source_location: (Definition::Ancestor::Instance::source, declaration) -> Location[untyped, untyped]?
 
     def validate_variable: (Definition::Variable) -> void
 

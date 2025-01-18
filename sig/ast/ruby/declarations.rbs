@@ -5,16 +5,46 @@ module RBS
         type t = ClassDecl | SingletonClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | RBSDecl
 
         class Base
+          attr_reader buffer: Buffer
+
+          def initialize: (Buffer) -> void
+
+          def constant_as_type_name: (Prism::node?) -> TypeName?
+
+          def rbs_location: (Prism::Location) -> Location[bot, bot]
         end
 
         class ClassDecl < Base
+          class Super
+            attr_reader name: TypeName
+
+            attr_reader args: Array[Types::t]
+
+            attr_reader location: Location[bot, bot]?
+
+            def initialize: (TypeName, Array[Types::t], Location[bot, bot]) -> void
+          end
+
           type member = Members::t | t
+
+          type super = [TypeName, Array[Types::t]]
 
           attr_reader node: Prism::ClassNode
 
           attr_reader members: Array[member]
 
-          def initialize: (Prism::ClassNode) -> void
+          def initialize: (Buffer, Prism::ClassNode) -> void
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def super_class: () -> Super?
+
+          def name: () -> TypeName
+
+          def location: () -> Location[bot, bot]
+
+          def each_member: () { (Members::t) -> void } -> void
+                         | () -> Enumerator[Members::t]
         end
 
         class SingletonClassDecl < Base
@@ -34,7 +64,18 @@ module RBS
 
           attr_reader members: Array[member]
 
-          def initialize: (Prism::ModuleNode) -> void
+          def initialize: (Buffer, Prism::ModuleNode) -> void
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def self_types: () -> Array[untyped]
+
+          def name: () -> TypeName
+
+          def location: () -> Location[untyped, untyped]
+
+          def each_member: () { (Members::t) -> void } -> void
+                         | () -> Enumerator[Members::t]
         end
 
         class ConstantDecl < Base

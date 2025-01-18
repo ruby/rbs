@@ -371,7 +371,14 @@ module RBS
     def initialize(name:, entry:)
       @name = name
       @entry = entry
-      super "#{Location.to_string entry.primary_decl.location}: Superclass mismatch: #{name}"
+      loc =
+        case entry.primary_decl
+        when AST::Declarations::Class, AST::Declarations::Module
+          Location.to_string entry.primary_decl.location
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+          entry.primary_decl.node.location.to_s
+        end
+      super "#{loc}: Superclass mismatch: #{name}"
     end
   end
 
@@ -411,7 +418,14 @@ module RBS
     def initialize(name:, decl:)
       @name = name
       @decl = decl
-      super "#{Location.to_string decl.location}: Generic parameters mismatch: #{name}"
+      location =
+        case decl
+        when AST::Declarations::Class, AST::Declarations::Module
+          Location.to_string decl.location
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+          decl.node.location.to_s
+        end
+      super "#{location}: Generic parameters mismatch: #{name}"
     end
   end
 
@@ -424,7 +438,18 @@ module RBS
       @decls = decls
 
       last_decl = decls.last or raise
-      super "#{Location.to_string last_decl.location}: Duplicated declaration: #{name}"
+      loc =
+        case last_decl
+        when AST::Declarations::Base
+          Location.to_string last_decl.location
+        when AST::Ruby::Declarations::Base
+          if last_decl.is_a?(AST::Ruby::Declarations::RBSDecl)
+            raise
+          else
+            last_decl.node.location.to_s
+          end
+        end
+      super "#{loc}: Duplicated declaration: #{name}"
     end
   end
 

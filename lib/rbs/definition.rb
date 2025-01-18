@@ -62,7 +62,11 @@ module RBS
         end
 
         def comment
-          member.comment
+          if member.is_a?(AST::Members::Base)
+            member.comment
+          else
+            nil
+          end
         end
 
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)

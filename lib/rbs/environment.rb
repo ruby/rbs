@@ -268,6 +268,44 @@ module RBS
       @normalize_module_name_cache[name] = normalized_type_name
     end
 
+    def insert_ruby_decl(decl, context: nil, namespace: Namespace.root)
+      case decl
+      when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+        class_name = decl.name.with_prefix(namespace)
+
+        if cdecl = constant_entry(class_name)
+          if cdecl.is_a?(ConstantEntry) || cdecl.is_a?(ModuleAliasEntry) || cdecl.is_a?(ClassAliasEntry)
+            raise DuplicatedDeclarationError.new(class_name, decl, cdecl.decl)
+          end
+        end
+
+        entry = class_decls[class_name] ||=
+          case decl
+          when AST::Ruby::Declarations::ClassDecl
+            ClassEntry.new(class_name)
+          when AST::Ruby::Declarations::ModuleDecl
+            ModuleEntry.new(class_name)
+          end
+
+        case
+        when decl.is_a?(AST::Ruby::Declarations::ModuleDecl) && entry.is_a?(ModuleEntry)
+          entry << [context, decl]
+        when decl.is_a?(AST::Ruby::Declarations::ClassDecl) && entry.is_a?(ClassEntry)
+          entry << [context, decl]
+        else
+          raise DuplicatedDeclarationError.new(class_name, decl, entry.each_decl.first || raise)
+        end
+
+        decl.members.each do |member|
+          if member.is_a?(AST::Ruby::Declarations::Base)
+            insert_ruby_decl(member, context: [context, class_name], namespace: class_name.to_namespace)
+          end
+        end
+      else
+        raise
+      end
+    end
+
     def insert_decl(decl, context: nil, namespace: Namespace.root)
       case decl
       when AST::Declarations::Class, AST::Declarations::Module
@@ -365,8 +403,15 @@ module RBS
 
     def add_signature(source)
       sources << source
-      source.declarations.each do |decl|
-        insert_decl(decl)
+      case source
+      when Source::RBS
+        source.declarations.each do |decl|
+          insert_decl(decl)
+        end
+      when Source::Ruby
+        source.declarations.each do |decl|
+          insert_ruby_decl(decl)
+        end
       end
     end
 
@@ -409,7 +454,7 @@ module RBS
       table.known_types.merge(interface_decls.keys)
       table.compute_children
 
-      sources.each do |source|
+      each_rbs_source do |source|
         resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
 
         if !resolve || resolve.value
@@ -437,7 +482,35 @@ module RBS
         env.add_signature(source)
       end
 
+      each_ruby_source do |source|
+        env.add_signature(source)
+      end
+
       env
+    end
+
+    def each_rbs_source(&block)
+      if block
+        sources.each do |source|
+          if source.is_a?(Source::RBS)
+            yield source
+          end
+        end
+      else
+        enum_for(__method__ || raise)
+      end
+    end
+
+    def each_ruby_source(&block)
+      if block
+        sources.each do |source|
+          if source.is_a?(Source::Ruby)
+            yield source
+          end
+        end
+      else
+        enum_for(__method__ || raise)
+      end
     end
 
     def resolver_context(*nesting)
@@ -732,22 +805,12 @@ module RBS
     def unload(buffers)
       env = Environment.new
 
-      sources.each do |source|
+      each_rbs_source.each do |source|
         next if buffers.include?(source.buffer)
         env.add_signature(source)
       end
 
       env
-    end
-
-    def each_decl(&block)
-      if block
-        sources.each do |source|
-          source.declarations.each(&block)
-        end
-      else
-        enum_for(__method__ || raise)
-      end
     end
   end
 end

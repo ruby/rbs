@@ -3150,4 +3150,42 @@ end
       end
     end
   end
+
+  def test__inline__build_instance__class
+    SignatureManager.new do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+          def puts = "123"
+
+          def hello
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::Foo"), definition.type_name
+          assert_equal parse_type("::Foo"), definition.self_type
+          assert_equal [], definition.type_params
+
+          assert_operator definition.methods, :key?, :puts
+          definition.methods[:puts].tap do |method|
+            assert_method_definition method, ["(?) -> untyped"], accessibility: :public
+            assert_instance_of RBS::Definition::Method, method.super_method
+          end
+
+          assert_operator definition.methods, :key?, :hello
+          definition.methods[:hello].tap do |method|
+            assert_method_definition method, ["(?) -> untyped"], accessibility: :public
+            assert_nil method.super_method
+          end
+
+          assert_empty definition.instance_variables
+        end
+      end
+    end
+  end
 end
