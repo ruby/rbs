@@ -12,9 +12,10 @@ module RBS
                | PublicMember | PrivateMember
 
         class Overload
+          attr_reader annotations: Array[AST::Annotation]
           attr_reader method_type: MethodType
 
-          def initialize: (MethodType) -> void
+          def initialize: (MethodType, Array[AST::Annotation]) -> void
         end
 
         class DefMember < Base
@@ -23,6 +24,10 @@ module RBS
           def initialize: (Prism::DefNode) -> void
 
           def overloads: () -> Array[Overload]
+
+          def name: () -> Symbol
+
+          def annotations: () -> Array[AST::Annotation]
         end
 
         class DefSingletonMember < Base
@@ -31,6 +36,13 @@ module RBS
           def initialize: (Prism::DefNode) -> void
 
           def overloads: () -> Array[Overload]
+
+          def name: () -> Symbol
+
+          # Returns true if the receiver is `self`
+          def self?: () -> bool
+
+          def annotations: () -> Array[AST::Annotation]
         end
 
         class AliasMember < Base

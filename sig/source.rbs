@@ -9,5 +9,15 @@ module RBS
 
       def initialize: (Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]) -> void
     end
+
+    class Ruby
+      attr_reader buffer: Buffer
+
+      attr_reader prism_result: Prism::ParseResult
+
+      attr_reader declarations: Array[AST::Ruby::Declarations::t]
+
+      def initialize: (Buffer, Prism::ParseResult, Array[AST::Ruby::Declarations::t]) -> void
+    end
   end
 end

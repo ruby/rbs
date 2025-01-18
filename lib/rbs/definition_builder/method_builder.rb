@@ -100,40 +100,52 @@ module RBS
         instance_methods[type_name] ||=
           begin
             entry = env.class_decls[type_name]
+
             args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
             type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
+
             Methods.new(type: type).tap do |methods|
               entry.each_decl do |decl|
                 subst = Substitution.build(decl.type_params.each.map(&:name), args)
-                each_member_with_accessibility(decl.members) do |member, accessibility|
-                  case member
-                  when AST::Members::MethodDefinition
-                    case member.kind
-                    when :instance
-                      build_method(
-                        methods,
-                        type,
-                        member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
-                        accessibility: member.visibility || accessibility
-                      )
-                    when :singleton_instance
-                      build_method(
-                        methods,
-                        type,
-                        member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
-                        accessibility: :private
-                      )
+                case decl
+                when AST::Declarations::Class, AST::Declarations::Module
+                  each_member_with_accessibility(decl.members) do |member, accessibility|
+                    case member
+                    when AST::Members::MethodDefinition
+                      case member.kind
+                      when :instance
+                        build_method(
+                          methods,
+                          type,
+                          member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
+                          accessibility: member.visibility || accessibility
+                        )
+                      when :singleton_instance
+                        build_method(
+                          methods,
+                          type,
+                          member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
+                          accessibility: :private
+                        )
+                      end
+                    when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
+                      if member.kind == :instance
+                        build_attribute(methods,
+                                        type,
+                                        member: member.update(type: member.type.sub(subst)),
+                                        accessibility: member.visibility || accessibility)
+                      end
+                    when AST::Members::Alias
+                      if member.kind == :instance
+                        build_alias(methods, type, member: member)
+                      end
                     end
-                  when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
-                    if member.kind == :instance
-                      build_attribute(methods,
-                                      type,
-                                      member: member.update(type: member.type.sub(subst)),
-                                      accessibility: member.visibility || accessibility)
-                    end
-                  when AST::Members::Alias
-                    if member.kind == :instance
-                      build_alias(methods, type, member: member)
+                  end
+                when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+                  each_ruby_member_with_accessibility(decl.each_member) do |member, accessibility|
+                    case member
+                    when AST::Ruby::Members::DefMember
+                      build_ruby_method(methods, type, member: member, accessibility: accessibility)
                     end
                   end
                 end
@@ -150,19 +162,31 @@ module RBS
 
             Methods.new(type: type).tap do |methods|
               entry.each_decl do |decl|
-                decl.members.each do |member|
-                  case member
-                  when AST::Members::MethodDefinition
-                    if member.singleton?
-                      build_method(methods, type, member: member, accessibility: member.visibility || :public)
+                case decl
+                when AST::Declarations::Class, AST::Declarations::Module
+                  decl.members.each do |member|
+                    case member
+                    when AST::Members::MethodDefinition
+                      if member.singleton?
+                        build_method(methods, type, member: member, accessibility: member.visibility || :public)
+                      end
+                    when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
+                      if member.kind == :singleton
+                        build_attribute(methods, type, member: member, accessibility: member.visibility || :public)
+                      end
+                    when AST::Members::Alias
+                      if member.kind == :singleton
+                        build_alias(methods, type, member: member)
+                      end
                     end
-                  when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
-                    if member.kind == :singleton
-                      build_attribute(methods, type, member: member, accessibility: member.visibility || :public)
-                    end
-                  when AST::Members::Alias
-                    if member.kind == :singleton
-                      build_alias(methods, type, member: member)
+                  end
+                when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+                  decl.each_member do |member|
+                    case member
+                    when AST::Ruby::Members::DefSingletonMember
+                      if member.self?
+                        build_ruby_method(methods, type, member: member, accessibility: :public)
+                      end
                     end
                   end
                 end
@@ -223,6 +247,13 @@ module RBS
         end
       end
 
+      def build_ruby_method(methods, type, member:, accessibility:)
+        defn = methods.methods[member.name] ||= Methods::Definition.empty(type: type, name: member.name)
+
+        defn.accessibilities << accessibility
+        defn.originals << member
+      end
+
       def each_member_with_accessibility(members, accessibility: :public)
         members.each do |member|
           case member
@@ -231,6 +262,15 @@ module RBS
           when AST::Members::Private
             accessibility = :private
           else
+            yield member, accessibility
+          end
+        end
+      end
+
+      def each_ruby_member_with_accessibility(members, accessibility: :public)
+        members.each do |member|
+          case member
+          when AST::Ruby::Members::DefMember
             yield member, accessibility
           end
         end

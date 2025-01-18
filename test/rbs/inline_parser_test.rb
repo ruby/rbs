@@ -28,4 +28,15 @@ class RBS::InlineParserTest < Test::Unit::TestCase
 
     pp ret
   end
+
+  def test_parse__class_decl__super
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo < Object
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    pp ret.declarations[0]
+  end
 end

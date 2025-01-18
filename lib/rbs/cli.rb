@@ -160,38 +160,38 @@ Examples:
 EOB
       end.order!(args)
 
-      patterns = args.map do |arg|
-        path = Pathname(arg)
-        if path.exist?
-          # Pathname means a directory or a file
-          path
-        else
-          # String means a `fnmatch` pattern
-          arg
-        end
-      end
+      # patterns = args.map do |arg|
+      #   path = Pathname(arg)
+      #   if path.exist?
+      #     # Pathname means a directory or a file
+      #     path
+      #   else
+      #     # String means a `fnmatch` pattern
+      #     arg
+      #   end
+      # end
 
-      loader = options.loader()
+      # loader = options.loader()
 
-      env = Environment.from_loader(loader).resolve_type_names
+      # env = Environment.from_loader(loader).resolve_type_names
 
-      decls = env.each_decl.select do |decl|
-        loc = decl.location or raise
-        # @type var name: String
-        name = loc.buffer.name
+      # decls = env.each_decl.select do |decl|
+      #   loc = decl.location or raise
+      #   # @type var name: String
+      #   name = loc.buffer.name
 
-        patterns.empty? || patterns.any? do |pat|
-          case pat
-          when Pathname
-            Pathname(name).ascend.any? {|p| p == pat }
-          when String
-            name.end_with?(pat) || File.fnmatch(pat, name, File::FNM_EXTGLOB)
-          end
-        end
-      end
+      #   patterns.empty? || patterns.any? do |pat|
+      #     case pat
+      #     when Pathname
+      #       Pathname(name).ascend.any? {|p| p == pat }
+      #     when String
+      #       name.end_with?(pat) || File.fnmatch(pat, name, File::FNM_EXTGLOB)
+      #     end
+      #   end
+      # end
 
-      stdout.print JSON.generate(decls)
-      stdout.flush
+      # stdout.print JSON.generate(decls)
+      # stdout.flush
     end
 
     def run_list(args, options)

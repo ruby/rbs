@@ -50,6 +50,62 @@ EOF
     end
   end
 
+  def test___inline__instance__def
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+          def hello = 123
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = MethodBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |methods|
+          assert_equal parse_type("::Foo"), methods.type
+
+          methods.methods[:hello].tap do |hello|
+            assert_instance_of MethodBuilder::Methods::Definition, hello
+
+            assert_instance_of AST::Ruby::Members::DefMember, hello.original
+            assert_equal [parse_method_type("(?) -> untyped")], hello.original.overloads.map(&:method_type)
+            assert_empty hello.overloads
+
+            assert_equal :public, hello.accessibility
+          end
+        end
+      end
+    end
+  end
+
+  def test___inline__singleton__def
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+          def self.hello = 123
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = MethodBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Foo")).tap do |methods|
+          assert_equal parse_type("singleton(::Foo)"), methods.type
+
+          methods.methods[:hello].tap do |hello|
+            assert_instance_of MethodBuilder::Methods::Definition, hello
+
+            assert_instance_of AST::Ruby::Members::DefSingletonMember, hello.original
+            assert_equal [parse_method_type("(?) -> untyped")], hello.original.overloads.map(&:method_type)
+            assert_empty hello.overloads
+
+            assert_equal :public, hello.accessibility
+          end
+        end
+      end
+    end
+  end
+
   def test_instance_attributes
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF

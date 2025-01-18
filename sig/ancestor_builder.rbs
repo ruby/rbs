@@ -138,6 +138,8 @@ module RBS
 
       def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
+      # Inserts mixin ancestors from the entry
+      #
       def mixin_ancestors: (Environment::ClassEntry | Environment::ModuleEntry,
                             TypeName,
                             included_modules: Array[Definition::Ancestor::Instance]?,

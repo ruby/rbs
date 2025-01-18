@@ -32,7 +32,7 @@ module RBS
 
     # Array of source objects loaded in the environment
     #
-    attr_reader sources: Array[Source::RBS]
+    attr_reader sources: Array[Source::RBS | Source::Ruby]
 
     # Class declarations
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
@@ -55,20 +55,24 @@ module RBS
 
     def initialize_copy: (Environment) -> void
 
+    def each_rbs_source: () { (Source::RBS) -> void } -> void
+                       | () -> Enumerator[Source::RBS]
+
+    def each_ruby_source: () { (Source::Ruby) -> void } -> void
+                         | () -> Enumerator[Source::Ruby]
+
     # Construct an environment from EnvironmentLoader
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
     def add_signature: (Source::RBS) -> void
-
-    # Enumerate the top level declarations included in the environment
-    #
-    def each_decl: () { (AST::Declarations::t) -> void } -> void
-                 | () -> Enumerator[AST::Declarations::t]
+                     | (Source::Ruby) -> void
 
     # Insert a declaration into the environment
     #
     private def insert_decl: (AST::Declarations::t, ?context: Resolver::context, ?namespace: Namespace) -> void
+
+    private def insert_ruby_decl: (AST::Ruby::Declarations::t, ?context: Resolver::context, ?namespace: Namespace) -> void
 
     # Resolve all type names in the environment to absolute type names.
     # Relative type name will be left if absolute type name cannot be found.

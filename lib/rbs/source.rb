@@ -11,5 +11,17 @@ module RBS
         @declarations = declarations
       end
     end
+
+    class Ruby
+      attr_reader :buffer
+      attr_reader :prism_result
+      attr_reader :declarations
+
+      def initialize(buffer, prism, declarations)
+        @buffer = buffer
+        @prism_result = prism
+        @declarations = declarations
+      end
+    end
   end
 end

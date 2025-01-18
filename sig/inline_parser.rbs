@@ -17,6 +17,8 @@ module RBS
 
       attr_reader result: Result
 
+      def buffer: () -> Buffer
+
       %a{pure} def current_context: () -> decl_context?
 
       %a{pure} def current_context!: () -> decl_context

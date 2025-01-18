@@ -78,9 +78,11 @@ module TestHelper
   class SignatureManager
     attr_reader :files
     attr_reader :system_builtin
+    attr_reader :ruby_files
 
     def initialize(system_builtin: false)
       @files = {}
+      @ruby_files = {}
       @system_builtin = system_builtin
 
       files[Pathname("builtin.rbs")] = BUILTINS unless system_builtin
@@ -179,7 +181,19 @@ SIG
         loader = RBS::EnvironmentLoader.new(core_root: root)
         loader.add(path: tmppath)
 
-        yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
+        env = RBS::Environment.from_loader(loader)
+
+        ruby_files.each do |name, content|
+          buffer = RBS::Buffer.new(name: Pathname(name), content: content)
+          prism = Prism.parse(content, filepath: name)
+
+          result = RBS::InlineParser.parse(buffer, prism)
+          source = RBS::Source::Ruby.new(buffer, prism, result.declarations)
+
+          env.add_signature(source)
+        end
+
+        yield env.resolve_type_names, tmppath
       end
     end
   end
