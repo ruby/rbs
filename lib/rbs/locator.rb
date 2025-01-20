@@ -40,6 +40,8 @@ module RBS
     end
 
     def find_in_directive(pos, dir, array)
+      return false unless dir.is_a?(AST::Directives::Use)
+
       if test_loc(pos, location: dir.location)
         array.unshift(dir)
 

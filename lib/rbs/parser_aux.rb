@@ -17,9 +17,46 @@ module RBS
 
     def self.parse_signature(source)
       buf = buffer(source)
-      dirs, decls = _parse_signature(buf, buf.last_position)
+
+      resolved = magic_comment(buf)
+      start_pos =
+        if resolved
+          (resolved.location || raise).end_pos
+        else
+          0
+        end
+      dirs, decls = _parse_signature(buf, start_pos, buf.last_position)
+
+      if resolved
+        dirs = dirs.dup if dirs.frozen?
+        dirs.unshift(resolved)
+      end
 
       [buf, dirs, decls]
+    end
+
+    def self.magic_comment(buf)
+      start_pos = 0
+
+      while true
+        case
+        when match = /\A#\s*(?<keyword>resolve-type-names)\s*(?<colon>:)\s+(?<value>true|false)$/.match(buf.content, start_pos)
+          value = match[:value] or raise
+
+          kw_offset = match.offset(:keyword) #: [Integer, Integer]
+          colon_offset = match.offset(:colon) #: [Integer, Integer]
+          value_offset = match.offset(:value) #: [Integer, Integer]
+
+          location = Location.new(buf, kw_offset[0], value_offset[1])
+          location.add_required_child(:keyword, kw_offset[0]...kw_offset[1])
+          location.add_required_child(:colon, colon_offset[0]...colon_offset[1])
+          location.add_required_child(:value, value_offset[0]...value_offset[1])
+
+          return AST::Directives::ResolveTypeNames.new(value: value == "true", location: location)
+        else
+          return
+        end
+      end
     end
 
     def self.lex(source)

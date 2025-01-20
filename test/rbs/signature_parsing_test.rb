@@ -2171,4 +2171,53 @@ end
       RBS
     end
   end
+
+  def test_resolved_directive
+    Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
+        # resolve-type-names: false
+
+        module Baz
+        end
+      RBS
+
+      assert_equal 1, dirs.size
+      dirs[0].tap do
+        assert_instance_of RBS::AST::Directives::ResolveTypeNames, _1
+        assert_false _1.value
+        assert_equal "resolve-type-names: false", _1.location.source
+        assert_equal "resolve-type-names", _1.location[:keyword].source
+        assert_equal ":", _1.location[:colon].source
+        assert_equal "false", _1.location[:value].source
+      end
+    end
+
+    Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
+        #resolve-type-names : true
+
+        module Baz
+        end
+      RBS
+
+      assert_equal 1, dirs.size
+      dirs[0].tap do
+        assert_instance_of RBS::AST::Directives::ResolveTypeNames, _1
+        assert_true _1.value
+        assert_equal "resolve-type-names : true", _1.location.source
+        assert_equal "resolve-type-names", _1.location[:keyword].source
+        assert_equal ":", _1.location[:colon].source
+        assert_equal "true", _1.location[:value].source
+      end
+    end
+
+    Parser.parse_signature(<<~RBS).tap do |_, dirs, _|
+        # This is a comment
+        # resolve-type-names: false
+
+        module Baz
+        end
+      RBS
+
+      assert_empty dirs
+    end
+  end
 end

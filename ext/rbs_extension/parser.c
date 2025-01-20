@@ -2935,12 +2935,12 @@ parse_signature_try(VALUE a) {
 }
 
 static VALUE
-rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE end_pos)
+rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos)
 {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-  lexstate *lexer = alloc_lexer(string, 0, FIX2INT(end_pos));
-  parserstate *parser = alloc_parser(buffer, lexer, 0, FIX2INT(end_pos), Qnil);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
@@ -2974,6 +2974,6 @@ void rbs__init_parser(void) {
 
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
-  rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 2);
+  rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
   rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
 }

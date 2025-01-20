@@ -549,4 +549,40 @@ end
       assert_operator env.class_decls, :key?, RBS::TypeName.parse("::OB")
     end
   end
+
+  def test_resolve_type_names_magic_comment
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+# resolve-type-names: false
+
+type t = s
+
+type s = untyped
+    RBS
+
+    env = Environment.new
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
+
+    env.resolve_type_names.tap do |env|
+      alias_decl = env.type_alias_decls[RBS::TypeName.parse("::t")]
+      assert_equal "s", alias_decl.decl.type.to_s
+    end
+  end
+
+  def test_resolve_type_names_magic_comment__true
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+# resolve-type-names: true
+
+type t = s
+
+type s = untyped
+    RBS
+
+    env = Environment.new
+    env.add_signature(buffer: buf, directives: dirs, decls: decls)
+
+    env.resolve_type_names.tap do |env|
+      alias_decl = env.type_alias_decls[RBS::TypeName.parse("::t")]
+      assert_equal "::s", alias_decl.decl.type.to_s
+    end
+  end
 end

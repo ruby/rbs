@@ -96,7 +96,7 @@ module RBS
 
     def format_annotation: (AST::Annotation) -> String
 
-    def write_directive: (AST::Directives::t) -> void
+    def write_use_directive: (AST::Directives::Use) -> void
 
     def write_annotation: (Array[AST::Annotation]) -> void
 

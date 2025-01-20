@@ -486,6 +486,28 @@ module RBS
       end
     end
 
+    def resolve_signature(resolver, table, dirs, decls, only: nil)
+      map = UseMap.new(table: table)
+      dirs.each do |dir|
+        case dir
+        when AST::Directives::Use
+          dir.clauses.each do |clause|
+            map.build_map(clause)
+          end
+        end
+      end
+
+      decls = decls.map do |decl|
+        if only && !only.member?(decl)
+          decl
+        else
+          resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
+        end
+      end
+
+      [dirs, decls]
+    end
+
     def resolve_type_names(only: nil)
       resolver = Resolver::TypeNameResolver.new(self)
       env = Environment.new
@@ -498,21 +520,10 @@ module RBS
       table.compute_children
 
       signatures.each do |buffer, (dirs, decls)|
-        map = UseMap.new(table: table)
-        dirs.each do |dir|
-          dir.clauses.each do |clause|
-            map.build_map(clause)
-          end
+        resolve = dirs.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
+        if !resolve || resolve.value
+          _, decls = resolve_signature(resolver, table, dirs, decls)
         end
-
-        decls = decls.map do |decl|
-          if only && !only.member?(decl)
-            decl
-          else
-            resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
-          end
-        end
-
         env.add_signature(buffer: buffer, directives: dirs, decls: decls)
       end
 

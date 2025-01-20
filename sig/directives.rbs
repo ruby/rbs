@@ -1,7 +1,7 @@
 module RBS
   module AST
     module Directives
-      type t = Use
+      type t = Use | ResolveTypeNames
 
       class Base
       end
@@ -55,6 +55,22 @@ module RBS
         attr_reader location: loc?
 
         def initialize: (clauses: Array[clause], location: loc?) -> void
+      end
+
+      class ResolveTypeNames < Base
+        # ```
+        # # resolve-type-names: false
+        #   ^^^^^^^^^^^^^^^^^^          keyword
+        #                     ^         colon
+        #                       ^^^^^   value
+        # ```
+        type loc = Location[:keyword | :colon | :value, bot]
+
+        attr_reader location: loc?
+
+        attr_reader value: bool
+
+        def initialize: (value: bool, location: loc?) -> void
       end
     end
   end

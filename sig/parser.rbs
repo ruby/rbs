@@ -68,6 +68,10 @@ module RBS
     #
     def self.parse_signature: (Buffer | String) -> [Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]]
 
+    # Returns the magic comment from the buffer
+    #
+    def self.magic_comment: (Buffer) -> AST::Directives::ResolveTypeNames?
+
     # Parse whole RBS file and return result.
     #
     # ```ruby
@@ -86,7 +90,7 @@ module RBS
 
     def self._parse_method_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof) -> MethodType?
 
-    def self._parse_signature: (Buffer, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+    def self._parse_signature: (Buffer, Integer start_pos, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
 
     def self._lex: (Buffer, Integer end_pos) -> Array[[Symbol, Location[untyped, untyped]]]
 

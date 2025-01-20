@@ -34,6 +34,16 @@ module RBS
         end
       end
 
+      class ResolveTypeNames < Base
+        attr_reader :location
+
+        attr_reader :value
+
+        def initialize(value:, location:)
+          @value = value
+          @location = location
+        end
+      end
     end
   end
 end
