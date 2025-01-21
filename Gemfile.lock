@@ -61,7 +61,6 @@ GEM
     logger (1.6.6)
     marcel (1.0.4)
     memory_profiler (1.1.0)
-    mini_portile2 (2.8.8)
     minitest (5.25.5)
     mutex_m (0.3.0)
     net-protocol (0.2.2)
@@ -69,8 +68,7 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
-    nokogiri (1.18.4)
-      mini_portile2 (~> 2.8.2)
+    nokogiri (1.18.4-arm64-darwin)
       racc (~> 1.4)
     ostruct (0.6.1)
     parallel (1.26.3)
