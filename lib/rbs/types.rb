@@ -15,7 +15,7 @@ module RBS
     end
 
     module NoTypeName
-      def map_type_name
+      def map_type_name(&)
         self
       end
     end
@@ -229,7 +229,7 @@ module RBS
 
       include EmptyEachType
 
-      def map_type_name
+      def map_type_name(&)
         ClassSingleton.new(
           name: yield(name, location, self),
           location: location
