@@ -113,6 +113,8 @@ module RBS
       class Any < Base
         @string: String?
 
+        def initialize: (location: Location[bot, bot]?, ?todo: bool) -> void
+
         def todo!: () -> self
       end
 
