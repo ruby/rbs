@@ -156,6 +156,7 @@ module RBS
                     | nil        # Itself
                     | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend  # AST
                     | AST::Declarations::Module::Self
+                    | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::PrependMember
 
         attr_reader name: TypeName
         attr_reader args: Array[Types::t]

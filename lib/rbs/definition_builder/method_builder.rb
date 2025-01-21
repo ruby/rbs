@@ -181,11 +181,18 @@ module RBS
                     end
                   end
                 when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
-                  decl.each_member do |member|
+                  decl.members.each do |member|
                     case member
                     when AST::Ruby::Members::DefSingletonMember
                       if member.self?
                         build_ruby_method(methods, type, member: member, accessibility: :public)
+                      end
+                    when AST::Ruby::Declarations::SingletonClassDecl
+                      each_ruby_member_with_accessibility(member.members) do |member, accessibility|
+                        case member
+                        when AST::Ruby::Members::DefMember
+                          build_ruby_method(methods, type, member: member, accessibility: accessibility)
+                        end
                       end
                     end
                   end

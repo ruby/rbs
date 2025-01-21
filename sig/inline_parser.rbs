@@ -1,3 +1,5 @@
+use RBS::AST::Ruby::Members
+
 module RBS
   class InlineParser
     class Result
@@ -31,7 +33,7 @@ module RBS
 
       def push_decl_context: (decl_context) { () -> void } -> void
 
-      def insert_decl: (decl_context) -> void
+      def insert_class_module_decl: (AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl) -> void
 
       def visit_class_node: ...
 
@@ -40,6 +42,30 @@ module RBS
       def visit_def_node: ...
 
       def visit_constant_write_node: ...
+
+      def private_member?: (Prism::CallNode) -> Members::PrivateMember?
+
+      def public_member?: (Prism::CallNode) -> Members::PublicMember?
+
+      def mixin_member?: (Prism::CallNode) -> (Members::IncludeMember | Members::ExtendMember | Members::PrependMember | nil)
+
+      # Returns true if the receiver is (implicitly/explicitly) a `self` node
+      def self_call?: (Prism::CallNode) -> bool
+
+      # Returns true if the node doesn't have argument
+      #
+      def no_argument?: (Prism::CallNode) -> bool
+
+      # Returns the argument if the call has exactly one argument
+      #
+      def one_argument?: (Prism::CallNode) -> Prism::Node?
+
+      # Returns `true` if the node is a constant node
+      #
+      # * If the node is a simple constant read node `Foo`, or
+      # * If the node is a constant path node that parent is a constant node
+      #
+      def constant_node?: (Prism::Node) -> (Prism::ConstantReadNode | Prism::ConstantPathNode | nil)
     end
   end
 end

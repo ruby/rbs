@@ -63,5 +63,9 @@ module RBS
     def inspect
       "#<RBS::Buffer:#{__id__} @name=#{name}, @content=#{content.bytesize} bytes, @lines=#{lines.size} lines,>"
     end
+
+    def rbs_location(location)
+      Location.new(self, location.start_character_offset, location.end_character_offset)
+    end
   end
 end

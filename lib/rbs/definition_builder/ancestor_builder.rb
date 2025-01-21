@@ -413,6 +413,43 @@ module RBS
         end
       end
 
+      def mixin_rb_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
+        decl.each_member do |member|
+          case member
+          when AST::Ruby::Members::IncludeMember
+            if included_modules
+              module_name = member.module_name
+              module_args = member.type_args.map {|type| align_params ? type.sub(align_params) : type }
+
+              MixinClassError.check!(type_name: type_name, env: env, member: member)
+              NoMixinFoundError.check!(module_name, env: env, member: member)
+
+              module_decl = env.normalized_module_entry(module_name) or raise
+              module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+
+              module_name = env.normalize_module_name(module_name)
+
+              included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+            end
+          when AST::Ruby::Members::PrependMember
+            if prepended_modules
+              module_name = member.module_name
+              module_args = member.type_args.map {|type| align_params ? type.sub(align_params) : type }
+
+              MixinClassError.check!(type_name: type_name, env: env, member: member)
+              NoMixinFoundError.check!(module_name, env: env, member: member)
+
+              module_decl = env.normalized_module_entry(module_name) or raise
+              module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+
+              module_name = env.normalize_module_name(module_name)
+
+              prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+            end
+          end
+        end
+      end
+
       def mixin_ancestors(entry, type_name, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         entry.each_decl.each do |decl|
           align_params = Substitution.build(
@@ -423,6 +460,17 @@ module RBS
           case decl
           when AST::Declarations::Class, AST::Declarations::Module
             mixin_ancestors0(
+              decl,
+              type_name,
+              align_params: align_params,
+              included_modules: included_modules,
+              included_interfaces: included_interfaces,
+              extended_modules: extended_modules,
+              prepended_modules: prepended_modules,
+              extended_interfaces: extended_interfaces
+            )
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            mixin_rb_ancestors0(
               decl,
               type_name,
               align_params: align_params,

@@ -199,6 +199,8 @@ module RBS
           @comment = comment
         end
 
+        alias module_name name
+
         def ==(other)
           other.is_a?(self.class) && other.name == name && other.args == args
         end

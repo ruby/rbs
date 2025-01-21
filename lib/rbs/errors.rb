@@ -499,7 +499,7 @@ module RBS
       @type_name = type_name
       @member = member
 
-      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.module_name}` in the definition of `#{type_name}`"
     end
 
     def location
@@ -507,7 +507,7 @@ module RBS
     end
 
     def self.check!(type_name:, env:, member:)
-      if env.class_decl?(member.name)
+      if env.class_decl?(member.module_name)
         raise new(type_name: type_name, member: member)
       end
     end

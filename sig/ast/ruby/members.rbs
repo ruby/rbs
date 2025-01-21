@@ -3,6 +3,11 @@ module RBS
     module Ruby
       module Members
         class Base
+          attr_reader buffer: Buffer
+
+          def initialize: (Buffer) -> void
+
+          include Helpers::ConstantHelper
         end
 
         type t = DefMember | DefSingletonMember
@@ -51,22 +56,59 @@ module RBS
           def initialize: (Prism::AliasMethodNode) -> void
         end
 
-        class IncludeMember < Base
+        # include, extend, and prepend
+        #
+        # ```rb
+        # include Foo #[Integer, String]
+        # #       ^^^                      module_name_location
+        # #            ^                   open_paran_location
+        # #             ^^^^^^^            (type_args[0])
+        # #                    ^           colon_locations[0]
+        # #                      ^^^^^^    (type_args[1])
+        # #                            ^   close_paren_location
+        # ```
+        #
+        class MixinMember < Base
+          attr_reader location: Location
+
+          attr_reader module_name: TypeName
+
+          attr_reader module_name_location: Location
+
+          attr_reader open_paren_location: Location?
+
+          attr_reader close_paren_location: Location?
+
+          # Type arguments for mixin
+          attr_reader type_args: Array[Types::t]
+
+          # Locations of colons just after type_args[i]
+          attr_reader args_separator_locations: Array[Location]
+
+          def initialize: (
+            Buffer,
+            Prism::CallNode,
+            location: Location,
+            module_name: TypeName,
+            type_args: Array[Types::t],
+            module_name_location: Location,
+            open_paren_location: Location?,
+            args_separator_locations: Array[Location],
+            close_paren_location: Location?
+          ) -> void
+
           attr_reader node: Prism::CallNode
 
-          def initialize: (Prism::CallNode) -> void
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
-        class ExtendMember < Base
-          attr_reader node: Prism::CallNode
-
-          def initialize: (Prism::CallNode) -> void
+        class IncludeMember < MixinMember
         end
 
-        class PrependMember < Base
-          attr_reader node: Prism::CallNode
+        class ExtendMember < MixinMember
+        end
 
-          def initialize: (Prism::CallNode) -> void
+        class PrependMember < MixinMember
         end
 
         class AttrReaderMember < Base
@@ -87,16 +129,18 @@ module RBS
           def initialize: (Prism::CallNode) -> void
         end
 
-        class PublicMember < Base
+        class VisibilityMember < Base
           attr_reader node: Prism::CallNode
 
-          def initialize: (Prism::CallNode) -> void
+          def initialize: (Buffer, Prism::CallNode) -> void
+
+          def location: () -> Location
         end
 
-        class PrivateMember < Base
-          attr_reader node: Prism::CallNode
+        class PublicMember < VisibilityMember
+        end
 
-          def initialize: (Prism::CallNode) -> void
+        class PrivateMember < VisibilityMember
         end
       end
     end

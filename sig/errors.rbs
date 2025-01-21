@@ -115,14 +115,17 @@ module RBS
   class NoMixinFoundError < DefinitionError
     include DetailedMessageable
 
-    attr_reader type_name: TypeName
-    attr_reader member: AST::Members::t
+    type member = AST::Members::t
+                | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::PrependMember
 
-    def initialize: (type_name: TypeName, member: AST::Members::t) -> void
+    attr_reader type_name: TypeName
+    attr_reader member: member
+
+    def initialize: (type_name: TypeName, member: member) -> void
 
     def location: () -> Location[untyped, untyped]?
 
-    def self.check!: (TypeName, env: Environment, member: AST::Members::t) -> void
+    def self.check!: (TypeName, env: Environment, member: member) -> void
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
@@ -225,7 +228,7 @@ module RBS
   #
   class InvalidOverloadMethodError < DefinitionError
     type overloading = DefinitionBuilder::MethodBuilder::Methods::Definition::overloading
-                     
+
     include DetailedMessageable
 
     attr_reader type_name: TypeName
@@ -288,6 +291,7 @@ module RBS
     include DetailedMessageable
 
     type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
+                | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::PrependMember
 
     attr_reader type_name: TypeName
     attr_reader member: member

@@ -2,7 +2,8 @@ module RBS
   module AST
     module Ruby
       module Declarations
-        type t = ClassDecl | SingletonClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | RBSDecl
+        # Possible top level declarations
+        type t = ClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | RBSDecl
 
         class Base
           attr_reader buffer: Buffer
@@ -11,44 +12,82 @@ module RBS
 
           def constant_as_type_name: (Prism::node?) -> TypeName?
 
-          def rbs_location: (Prism::Location) -> Location[bot, bot]
+          def rbs_location: (Prism::Location) -> Location
         end
 
         class ClassDecl < Base
           class Super
-            attr_reader name: TypeName
+            attr_reader class_name: TypeName
 
-            attr_reader args: Array[Types::t]
+            attr_reader class_name_location: Location
 
-            attr_reader location: Location[bot, bot]?
+            attr_reader type_args: Array[Types::t]
 
-            def initialize: (TypeName, Array[Types::t], Location[bot, bot]) -> void
+            attr_reader open_paren_location: Location?
+
+            attr_reader close_paren_location: Location?
+
+            attr_reader args_separator_locations: Array[Location]
+
+            attr_reader location: Location
+
+            def initialize: (
+              class_name: TypeName,
+              type_args: Array[Types::t],
+              location: Location,
+              class_name_location: Location,
+              open_paren_location: Location?,
+              close_paren_location: Location?,
+              args_separator_locations: Array[Location]
+            ) -> void
+
+            def map_type_name: () { (TypeName) -> TypeName } -> self
+
+            alias name class_name
+
+            alias args type_args
           end
 
-          type member = Members::t | t
-
-          type super = [TypeName, Array[Types::t]]
+          type member = Members::t | t | SingletonClassDecl
 
           attr_reader node: Prism::ClassNode
 
+          attr_reader location: Location
+
+          attr_reader class_name: TypeName
+
+          alias name class_name
+
+          attr_reader class_name_location: Location
+
           attr_reader members: Array[member]
 
-          def initialize: (Buffer, Prism::ClassNode) -> void
+          attr_reader super_class: Super?
+
+          def initialize: (
+            Buffer,
+            Prism::ClassNode,
+            location: Location,
+            class_name: TypeName,
+            class_name_location: Location,
+            super_class: Super?,
+          ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
 
-          def super_class: () -> Super?
-
-          def name: () -> TypeName
-
-          def location: () -> Location[bot, bot]
-
           def each_member: () { (Members::t) -> void } -> void
                          | () -> Enumerator[Members::t]
+
+          def each_decl: () { (t | SingletonClassDecl) -> void } -> void
+                       | () -> Enumerator[t | SingletonClassDecl]
         end
 
+        # `class <<self` definition
+        #
+        # This is only allowed inside class or module definition.
+        #
         class SingletonClassDecl < Base
-          type member = Members::t | t
+          type member = Members::t
 
           attr_reader node: Prism::SingletonClassNode
 
@@ -58,24 +97,37 @@ module RBS
         end
 
         class ModuleDecl < Base
-          type member = Members::t | t
+          type member = Members::t | t | SingletonClassDecl
 
           attr_reader node: Prism::ModuleNode
 
+          attr_reader location: Location
+
+          attr_reader module_name: TypeName
+
+          attr_reader module_name_location: Location
+
           attr_reader members: Array[member]
 
-          def initialize: (Buffer, Prism::ModuleNode) -> void
+          alias name module_name
+
+          def initialize: (
+            Buffer,
+            Prism::ModuleNode,
+            location: Location,
+            module_name: TypeName,
+            module_name_location: Location
+          ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
 
           def self_types: () -> Array[untyped]
 
-          def name: () -> TypeName
-
-          def location: () -> Location[untyped, untyped]
-
           def each_member: () { (Members::t) -> void } -> void
                          | () -> Enumerator[Members::t]
+
+          def each_decl: () { (t | SingletonClassDecl) -> void } -> void
+                         | () -> Enumerator[t | SingletonClassDecl]
         end
 
         class ConstantDecl < Base
