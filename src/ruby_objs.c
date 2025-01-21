@@ -501,8 +501,9 @@ VALUE rbs_alias(VALUE name, VALUE args, VALUE location) {
   );
 }
 
-VALUE rbs_bases_any(VALUE location) {
+VALUE rbs_bases_any(VALUE todo, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("todo")), todo);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(

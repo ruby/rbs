@@ -107,6 +107,11 @@ module RBS
       class Bool < Base; end
       class Void < Base; end
       class Any < Base
+        def initialize(location:, todo: false)
+          super(location: location)
+          todo! if todo
+        end
+
         def to_s(level=0)
           @string || "untyped"
         end
