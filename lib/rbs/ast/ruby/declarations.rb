@@ -23,46 +23,58 @@ module RBS
 
         class ClassDecl < Base
           class Super
-            attr_reader :name
-            attr_reader :args
+            attr_reader :class_name
+            attr_reader :type_args
             attr_reader :location
 
-            def initialize(name, args, location)
-              @name = name
-              @args = args
+            def initialize(class_name:, type_args:, location:, class_name_location:, open_paren_location:, close_paren_location:, args_separator_locations:)
+              @class_name = class_name
+              @type_args = type_args
               @location = location
+              @class_name_location = class_name_location
+              @open_paren_location = open_paren_location
+              @close_paren_location = close_paren_location
+              @args_separator_locations = args_separator_locations
             end
+
+            def map_type_name(&block)
+              self.class.new(
+                class_name: yield(class_name),
+                type_args: type_args.map {|type| type.map_type_name { yield(_1) } },
+                location: location,
+                class_name_location: class_name_location,
+                open_paren_location: open_paren_location,
+                close_paren_location: close_paren_location,
+                args_separator_locations: args_separator_locations
+              ) #: self
+            end
+
+            alias name class_name
+
+            alias args type_args
           end
 
           attr_reader :node
+          attr_reader :location
+          attr_reader :class_name
+          attr_reader :class_name_location
           attr_reader :members
+          attr_reader :super_class
 
-          def initialize(buffer, node)
+          def initialize(buffer, node, location:, class_name:, class_name_location:, super_class:)
             super(buffer)
             @node = node
+            @location = location
+            @class_name = class_name
+            @class_name_location = class_name_location
+            @super_class = super_class
             @members = []
           end
 
+          alias name class_name
+
           def type_params
             []
-          end
-
-          def super_class
-            if super_node = node.superclass
-              if typename = constant_as_type_name(super_node)
-                Super.new(typename, [], rbs_location(super_node.location))
-              end
-            end
-          end
-
-          def name
-            path = node.constant_path
-            raise if path.is_a?(Prism::CallNode)
-            TypeName.parse(path.full_name)
-          end
-
-          def location
-            rbs_location(node.location)
           end
 
           def each_member(&block)
@@ -72,6 +84,16 @@ module RBS
               end
             else
               enum_for :each_member
+            end
+          end
+
+          def each_decl(&block)
+            if block
+              members.each do |member|
+                yield member if member.is_a?(Base)
+              end
+            else
+              enum_for :each_decl
             end
           end
         end
@@ -88,13 +110,21 @@ module RBS
 
         class ModuleDecl < Base
           attr_reader :node
+          attr_reader :location
+          attr_reader :module_name
+          attr_reader :module_name_location
           attr_reader :members
 
-          def initialize(buffer, node)
+          def initialize(buffer, node, location:, module_name:, module_name_location:)
             super(buffer)
             @node = node
+            @location = location
+            @module_name = module_name
+            @module_name_location = module_name_location
             @members = []
           end
+
+          alias name module_name
 
           def type_params
             []
@@ -104,16 +134,6 @@ module RBS
             []
           end
 
-          def name
-            path = node.constant_path
-            raise if path.is_a?(Prism::MissingNode)
-            TypeName.parse(path.full_name)
-          end
-
-          def location
-            rbs_location(node.location)
-          end
-
           def each_member(&block)
             if block
               members.each do |member|
@@ -121,6 +141,16 @@ module RBS
               end
             else
               enum_for :each_member
+            end
+          end
+
+          def each_decl(&block)
+            if block
+              members.each do |member|
+                yield member if member.is_a?(Base)
+              end
+            else
+              enum_for :each_decl
             end
           end
         end

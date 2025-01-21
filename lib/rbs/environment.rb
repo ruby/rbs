@@ -296,13 +296,12 @@ module RBS
           raise DuplicatedDeclarationError.new(class_name, decl, entry.each_decl.first || raise)
         end
 
-        decl.members.each do |member|
-          if member.is_a?(AST::Ruby::Declarations::Base)
-            insert_ruby_decl(member, context: [context, class_name], namespace: class_name.to_namespace)
-          end
+        decl.each_decl do |decl|
+          next if decl.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+          insert_ruby_decl(decl, context: [context, class_name], namespace: class_name.to_namespace)
         end
       else
-        raise
+        raise "Unexpected decl: #{decl.class}"
       end
     end
 
@@ -483,6 +482,13 @@ module RBS
       end
 
       each_ruby_source do |source|
+        map = UseMap.new(table: table)
+
+        decls = source.declarations.map do |decl|
+          resolve_ruby_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
+        end
+
+        source = Source::Ruby.new(source.buffer, source.prism_result, decls)
         env.add_signature(source)
       end
 
@@ -525,6 +531,79 @@ module RBS
         [context, last + decl.name]
       else
         [nil, decl.name.absolute!]
+      end
+    end
+
+    def resolve_ruby_declaration(resolver, map, decl, context:, prefix:)
+      case decl
+      when AST::Ruby::Declarations::ClassDecl
+        class_name = decl.class_name.with_prefix(prefix)
+        inner_context = [context, class_name] #: Resolver::context
+
+        AST::Ruby::Declarations::ClassDecl.new(
+          decl.buffer,
+          decl.node,
+          location: decl.location,
+          class_name: class_name,
+          super_class: decl.super_class&.map_type_name {|name| absolute_type_name(resolver, map, name, context: context) },
+          class_name_location: decl.class_name_location,
+        ).tap do |resolved|
+          prefix = class_name.to_namespace
+          decl.members.each do |member|
+            case member
+            when AST::Ruby::Members::Base
+              resolved.members << resolve_ruby_member(resolver, map, member, context: inner_context)
+            when AST::Ruby::Declarations::Base
+              if member.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+                resolved.members << resolve_ruby_member(resolver, map, member, context: inner_context)
+              else
+                resolved.members << resolve_ruby_declaration(resolver, map, member, context: inner_context, prefix: prefix)
+              end
+            end
+          end
+        end
+      when AST::Ruby::Declarations::ModuleDecl
+        module_name = decl.module_name.with_prefix(prefix)
+        inner_context = [context, module_name] #: Resolver::context
+
+        AST::Ruby::Declarations::ModuleDecl.new(
+          decl.buffer,
+          decl.node,
+          location: decl.location,
+          module_name: module_name,
+          module_name_location: decl.module_name_location
+        ).tap do |resolved|
+          prefix = module_name.to_namespace
+          decl.members.each do |member|
+            case member
+            when AST::Ruby::Members::Base
+              resolved.members << resolve_ruby_member(resolver, map, member, context: inner_context)
+            when AST::Ruby::Declarations::Base
+              if member.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+                resolved.members << resolve_ruby_member(resolver, map, member, context: inner_context)
+              else
+                resolved.members << resolve_ruby_declaration(resolver, map, member, context: inner_context, prefix: prefix)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def resolve_ruby_member(resolver, map, member, context:)
+      case member
+      when AST::Ruby::Members::MixinMember
+        member.map_type_name do |name|
+          absolute_type_name(resolver, map, name, context: context)
+        end
+      when AST::Ruby::Declarations::SingletonClassDecl
+        resolved = AST::Ruby::Declarations::SingletonClassDecl.new(member.node)
+        member.members.each do |member|
+          member = resolve_ruby_member(resolver, map, member, context: context) #: AST::Ruby::Members::t
+          resolved.members << member
+        end
+      else
+        member
       end
     end
 

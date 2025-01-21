@@ -135,6 +135,8 @@ module RBS
         def initialize: (name: TypeName, args: Array[Types::t], annotations: Array[Annotation], location: loc?, comment: Comment?) -> void
 
         include _HashEqual
+
+        alias module_name name
       end
 
       class Include < Base

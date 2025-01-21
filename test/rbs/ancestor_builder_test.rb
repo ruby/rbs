@@ -80,7 +80,15 @@ EOF
   def test_one_ancestors__inline__class
     SignatureManager.new(system_builtin: true) do |manager|
       manager.ruby_files["foo.rb"] = <<~RUBY
+        module M
+        end
+
         class Foo
+          module Bar
+          end
+
+          include M
+          prepend Bar
         end
       RUBY
 
@@ -94,6 +102,20 @@ EOF
           assert_equal(
             Ancestor::Instance.new(name: type_name("::Object"), args: [], source: nil),
             a.super_class
+          )
+
+          assert_equal(
+            [
+              Ancestor::Instance.new(name: type_name("::M"), args: [], source: nil)
+            ],
+            a.included_modules
+          )
+
+          assert_equal(
+            [
+              Ancestor::Instance.new(name: type_name("::Foo::Bar"), args: [], source: nil)
+            ],
+            a.prepended_modules
           )
         end
 
