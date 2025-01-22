@@ -94,7 +94,6 @@ end
 class JSON::Pure::Parser
 end
 
-type json_generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
 type json_parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
 type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
@@ -674,6 +673,7 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #
 module JSON
   type options = Hash[Symbol, untyped]
+  type generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -824,9 +824,9 @@ module JSON
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Returns the JSON generator module that is used by JSON.
   #
-  def self.generator: () -> json_generator
+  def self.generator: () -> generator
 
-  def self.generator=: (json_generator generator) -> void
+  def self.generator=: (generator generator) -> void
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
