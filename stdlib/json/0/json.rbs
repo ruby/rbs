@@ -12,14 +12,6 @@ interface _JsonWrite
   def flush: () -> void
 end
 
-interface _JsonReadableIO
-  def to_io: () -> _JsonRead
-end
-
-interface _JsonRead
-  def read: () -> string
-end
-
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # The base exception for JSON errors.
 #
@@ -674,6 +666,14 @@ module JSON
   type parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
   type state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
+  interface _ReadableIO
+    def to_io: () -> _Read
+  end
+
+  interface _Read
+    def read: () -> string
+  end
+
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
   #   - JSON[object] -> new_array or new_string
@@ -971,7 +971,7 @@ module JSON
   #        #<Admin:0x00000000064c41f8
   #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
   #
-  def self?.load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?options options) -> untyped
+  def self?.load: (string | _ReadableIO | _Read source, ?Proc proc, ?options options) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
