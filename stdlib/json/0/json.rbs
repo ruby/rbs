@@ -94,8 +94,6 @@ end
 class JSON::Pure::Parser
 end
 
-type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
-
 # <!-- rdoc-file=ext/json/lib/json.rb -->
 # # JavaScript Object Notation (JSON)
 #
@@ -674,6 +672,7 @@ module JSON
   type options = Hash[Symbol, untyped]
   type generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
   type parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
+  type state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1144,19 +1143,19 @@ module JSON
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
-  def self.state: () -> json_state
+  def self.state: () -> state
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
-  def self.state=: (json_state) -> json_state
+  def self.state=: (state) -> state
 
   alias self.unparse self.generate
 
   alias unparse generate
 end
 
-JSON::FAST_STATE_PROTOTYPE: json_state
+JSON::FAST_STATE_PROTOTYPE: JSON::state
 
 JSON::Infinity: Float
 
@@ -1166,9 +1165,9 @@ JSON::MinusInfinity: Float
 
 JSON::NaN: Float
 
-JSON::PRETTY_STATE_PROTOTYPE: json_state
+JSON::PRETTY_STATE_PROTOTYPE: JSON::state
 
-JSON::SAFE_STATE_PROTOTYPE: json_state
+JSON::SAFE_STATE_PROTOTYPE: JSON::state
 
 JSON::VERSION: String
 
