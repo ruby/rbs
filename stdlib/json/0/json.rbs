@@ -2,16 +2,6 @@ interface _ToJson
   def to_json: (?JSON::State state) -> String
 end
 
-interface _JsonToWritableIO
-  def to_io: () -> _JsonWrite
-end
-
-interface _JsonWrite
-  def write: (String json) -> void
-
-  def flush: () -> void
-end
-
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # The base exception for JSON errors.
 #
@@ -666,6 +656,16 @@ module JSON
   type parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
   type state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
+  interface _WritableIO
+    def to_io: () -> _Write
+  end
+
+  interface _Write
+    def write: (String json) -> void
+
+    def flush: () -> void
+  end
+
   interface _ReadableIO
     def to_io: () -> _Read
   end
@@ -743,8 +743,8 @@ module JSON
   #     {"foo":[0,1],"bar":{"baz":2,"bat":3},"bam":"bad"}
   #
   def self?.dump: (_ToJson obj, ?Integer limit) -> String
-                | (_ToJson obj, _JsonToWritableIO anIO) -> _JsonWrite
-                | (_ToJson obj, _JsonWrite anIO, ?Integer limit) -> _JsonWrite
+                | (_ToJson obj, _WritableIO anIO) -> _Write
+                | (_ToJson obj, _Write anIO, ?Integer limit) -> _Write
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
