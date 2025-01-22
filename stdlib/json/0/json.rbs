@@ -652,8 +652,11 @@ end
 #
 module JSON
   type options = Hash[Symbol, untyped]
+
   type generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
+
   type parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
+
   type state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
   interface _WritableIO
