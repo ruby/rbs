@@ -1907,7 +1907,7 @@ module OpenSSL
     #         negative number.
     #
     def initialize: (instance) -> void
-                  | (int) -> void
+                  | (Integer) -> void
                   | (string) -> void
                   | (string, 0 | 2 | 10 | 16) -> void
 
