@@ -2025,7 +2025,7 @@ module OpenSSL
     #
     # Unlike IO#gets the separator must be provided if a limit is provided.
     #
-    def gets: (?String | Regexp eol, ?Integer limit) -> String?
+    def gets: (?String | Regexp eol, ?Integer limit, ?chomp: boolish) -> String?
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb

@@ -1486,7 +1486,7 @@ module Kernel : BasicObject
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def self?.readline: (?String arg0, ?Integer arg1) -> String
+  def self?.readline: (?String arg0, ?Integer arg1, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c

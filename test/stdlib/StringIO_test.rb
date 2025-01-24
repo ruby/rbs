@@ -59,4 +59,30 @@ class StringIOTypeTest < Test::Unit::TestCase
       io, :truncate, 10
     )
   end
+
+  def test_readline
+    assert_send_type  "() -> ::String",
+                      StringIO.new("\n"), :readline
+    assert_send_type  "(::String sep) -> ::String",
+                      StringIO.new("\n"), :readline, "\n"
+    assert_send_type  "(::String sep, ::Integer limit) -> ::String",
+                      StringIO.new("\n"), :readline, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::String",
+                      StringIO.new("\n"), :readline, chomp: true
+    assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
+                      StringIO.new("\n"), :readline, "\n", 1, chomp: true
+  end
+
+  def test_readlines
+    assert_send_type  "() -> ::Array[::String]",
+                      StringIO.new("\n"), :readlines
+    assert_send_type  "(::String sep) -> ::Array[::String]",
+                      StringIO.new("\n"), :readlines, "\n"
+    assert_send_type  "(::String sep, ::Integer limit) -> ::Array[::String]",
+                      StringIO.new("\n"), :readlines, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::Array[::String]",
+                      StringIO.new("\n"), :readlines, chomp: true
+    assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]",
+                      StringIO.new("\n"), :readlines, "\n", 1, chomp: true
+  end
 end

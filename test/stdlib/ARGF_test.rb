@@ -64,6 +64,10 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(__FILE__), :readline, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::String",
                       ARGF.class.new(__FILE__), :readline, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::String",
+                      ARGF.class.new(__FILE__), :readline, chomp: true
+    assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
+                      ARGF.class.new(__FILE__), :readline, "\n", 1, chomp: true
   end
 
   def test_readlines
@@ -73,6 +77,10 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(__FILE__), :readlines, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::Array[::String]",
                       ARGF.class.new(__FILE__), :readlines, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::Array[::String]",
+                      ARGF.class.new(__FILE__), :readlines, chomp: true
+    assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]",
+                      ARGF.class.new(__FILE__), :readlines, "\n", 1, chomp: true
   end
 
   def test_inspect
