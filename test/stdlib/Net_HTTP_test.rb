@@ -61,7 +61,12 @@ class NetSingletonTest < Test::Unit::TestCase
                      Net::HTTP, :start, 'www.ruby-lang.org', 80 do |net_http| net_http.class end
     assert_send_type "(String, Integer, use_ssl: bool) { (Net::HTTP) -> untyped } -> untyped",
                      Net::HTTP, :start, 'www.ruby-lang.org', 443, use_ssl: true do |net_http| net_http.class end
-  end
+
+    assert_send_type(
+      "(String, Integer, nil, nil, nil, nil, Hash[Symbol, untyped]) { (Net::HTTP) -> Class } -> Class",
+      Net::HTTP, :start, 'www.ruby-lang.org', 443, nil, nil, nil, nil, { use_ssl: true }, &->(net_http) { net_http.class }
+    )
+   end
 end
 
 class NetInstanceTest < Test::Unit::TestCase
