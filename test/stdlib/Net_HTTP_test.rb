@@ -125,6 +125,7 @@ class NetInstanceTest < Test::Unit::TestCase
 
     def finish
       @server.finish
+      super
     end
   end
 
