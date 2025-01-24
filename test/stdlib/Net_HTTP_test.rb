@@ -14,16 +14,19 @@ module WithServer
         loop do
           s = @server.accept
 
-          while (line = s.gets) && !line.chomp.empty?
+          content_length = nil
+          while line = s.gets
+            if line.start_with?('Content-Length:')
+              content_length = line.split(':', 2)[1].strip.to_i
+            end
+            break if line == "\r\n"
+          end
+          if content_length
+            s.read(content_length)
           end
 
           begin
-            s.write "HTTP/1.1 200 OK\r\n"
-            s.write "Content-Type: text/plain\r\n"
-            s.write "Content-Length: 0\r\n"
-            s.write "Connection: close\r\n"
-            s.write "\r\n"
-          rescue
+            s.write "HTTP/1.1 200 OK\r\n\r\n"
           ensure
             s.close
           end
@@ -43,7 +46,6 @@ module WithServer
     res = nil
     begin
       res = yield server.uri
-    rescue
     ensure
       server.finish
     end
@@ -64,24 +66,24 @@ class NetSingletonTest < Test::Unit::TestCase
     with_server("localhost") do |uri|
       assert_send_type "(URI::Generic) -> nil",
                        Net::HTTP, :get_print, uri
-      assert_send_type "(String, String) -> nil",
-                       Net::HTTP, :get_print, "www.ruby-lang.org", "/en"
+      assert_send_type "(String, String, Integer) -> nil",
+                       Net::HTTP, :get_print, uri.host, "/en", uri.port
       assert_send_type "(URI::Generic, Hash[String, String]) -> nil",
                        Net::HTTP, :get_print, uri, { "Accept" => "text/html" }
       assert_send_type "(URI::Generic, Hash[Symbol, String]) -> nil",
                        Net::HTTP, :get_print, uri, { Accept: "text/html" }
       assert_send_type "(URI::Generic) -> String",
                        Net::HTTP, :get, uri
-      assert_send_type "(String, String) -> String",
-                       Net::HTTP, :get, "www.ruby-lang.org", "/en"
+      assert_send_type "(String, String, Integer) -> String",
+                       Net::HTTP, :get, uri.host, "/en", uri.port
       assert_send_type "(URI::Generic, Hash[String, String]) -> String",
                        Net::HTTP, :get, uri, { "Accept" => "text/html" }
       assert_send_type "(URI::Generic, Hash[Symbol, String]) -> String",
                        Net::HTTP, :get, uri, { Accept: "text/html" }
       assert_send_type "(URI::Generic) -> Net::HTTPResponse",
                        Net::HTTP, :get_response, uri
-      assert_send_type "(String, String) -> Net::HTTPResponse",
-                       Net::HTTP, :get_response, "www.ruby-lang.org", "/en"
+      assert_send_type "(String, String, Integer) -> Net::HTTPResponse",
+                       Net::HTTP, :get_response, uri.host, "/en", uri.port
       assert_send_type "(URI::Generic, Hash[String, String]) -> Net::HTTPResponse",
                        Net::HTTP, :get_response, uri, { "Accept" => "text/html" }
       assert_send_type "(URI::Generic, Hash[Symbol, String]) -> Net::HTTPResponse",
