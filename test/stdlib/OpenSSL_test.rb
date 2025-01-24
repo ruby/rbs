@@ -699,7 +699,7 @@ class OpenSSLDHTest < Test::Unit::TestCase
   end
 
   def test_params
-    assert_send_type "() -> Hash[String, OpenSSL::BN]",
+    assert_send_type "() -> Hash[String, OpenSSL::BN?]",
       pkey, :params
   end
 
@@ -914,6 +914,11 @@ class OpenSSLRSATest < Test::Unit::TestCase
 
     assert_send_type "(OpenSSL::Digest, String, String) -> bool",
       pkey, :verify, digest, sig, data
+  end
+
+  def test_params
+    assert_send_type "() -> Hash[String, OpenSSL::BN]",
+      pkey, :params
   end
 
   private
