@@ -24,7 +24,7 @@ GEM
     drb (2.2.1)
     ffi (1.17.1)
     fileutils (1.7.3)
-    i18n (1.14.6)
+    i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     json (2.9.1)
     language_server-protocol (3.17.0.3)
