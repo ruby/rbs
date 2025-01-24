@@ -1,0 +1,8 @@
+D = Steep::Diagnostic
+
+target :test do
+  signature "."
+  check "."
+  library "net-http"
+  configure_code_diagnostics(D::Ruby.all_error)
+end

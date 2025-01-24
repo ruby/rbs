@@ -978,8 +978,8 @@ module Net
     # Note: If `port` is `nil` and `opts[:use_ssl]` is a truthy value, the value
     # passed to `new` is Net::HTTP.https_default_port, not `port`.
     #
-    def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) -> Net::HTTP
-                  | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]? opt) { (Net::HTTP) -> T } -> T
+    def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]?, **untyped opt) -> Net::HTTP
+                  | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]?, **untyped opt) { (Net::HTTP) -> T } -> T
 
     # <!--
     #   rdoc-file=lib/net/http.rb
