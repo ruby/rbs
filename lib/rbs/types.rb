@@ -116,6 +116,7 @@ module RBS
           @string || "untyped"
         end
 
+        # @deprecated: this method is now called from the constructor, do not call it from outside
         def todo!
           @string = '__todo__'
           self
