@@ -1907,7 +1907,7 @@ module OpenSSL
     #         negative number.
     #
     def initialize: (instance) -> void
-                  | (int) -> void
+                  | (Integer) -> void
                   | (string) -> void
                   | (string, 0 | 2 | 10 | 16) -> void
 
@@ -5648,7 +5648,7 @@ module OpenSSL
       # Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN
       # LEAK OUT!!! Don't use :-)) (I's up to you)
       #
-      def params: () -> Hash[String, BN]
+      def params: () -> Hash[String, BN?]
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_dh.c
@@ -5942,7 +5942,7 @@ module OpenSSL
       # Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN
       # LEAK OUT!!! Don't use :-)) (I's up to you)
       #
-      def params: () -> Hash[String, BN]
+      def params: () -> Hash[String, BN?]
 
       def priv_key: () -> BN
 
@@ -7220,7 +7220,7 @@ module OpenSSL
       #
       # Don't use :-)) (It's up to you)
       #
-      def params: () -> Hash[String, BN]
+      def params: () -> Hash[String, BN?]
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
