@@ -2,26 +2,6 @@ interface _ToJson
   def to_json: (?JSON::State state) -> String
 end
 
-interface _JsonToWritableIO
-  def to_io: () -> _JsonWrite
-end
-
-interface _JsonWrite
-  def write: (String json) -> void
-
-  def flush: () -> void
-end
-
-interface _JsonReadableIO
-  def to_io: () -> _JsonRead
-end
-
-interface _JsonRead
-  def read: () -> string
-end
-
-type json_options = Hash[Symbol, untyped]
-
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # The base exception for JSON errors.
 #
@@ -95,10 +75,6 @@ end
 
 class JSON::Pure::Parser
 end
-
-type json_generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
-type json_parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
-type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
 
 # <!-- rdoc-file=ext/json/lib/json.rb -->
 # # JavaScript Object Notation (JSON)
@@ -675,6 +651,32 @@ type json_state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure:
 #       With custom addition:     #<Foo:0x0000000006473bb8 @bar=0, @baz=1> (Foo)
 #
 module JSON
+  type options = Hash[Symbol, untyped]
+
+  type generator = singleton(::JSON::Ext::Generator) | singleton(::JSON::Pure::Generator)
+
+  type parser = singleton(::JSON::Ext::Parser) | singleton(::JSON::Pure::Parser)
+
+  type state = singleton(JSON::Ext::Generator::State) | singleton(JSON::Pure::Generator::State)
+
+  interface _WritableIO
+    def to_io: () -> _Write
+  end
+
+  interface _Write
+    def write: (String json) -> void
+
+    def flush: () -> void
+  end
+
+  interface _ReadableIO
+    def to_io: () -> _Read
+  end
+
+  interface _Read
+    def read: () -> string
+  end
+
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
   #   - JSON[object] -> new_array or new_string
@@ -689,7 +691,7 @@ module JSON
   #     ruby = [0, 1, nil]
   #     JSON[ruby] # => '[0,1,null]'
   #
-  def self.[]: (untyped object, ?json_options opts) -> untyped
+  def self.[]: (untyped object, ?options opts) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -744,22 +746,22 @@ module JSON
   #     {"foo":[0,1],"bar":{"baz":2,"bat":3},"bam":"bad"}
   #
   def self?.dump: (_ToJson obj, ?Integer limit) -> String
-                | (_ToJson obj, _JsonToWritableIO anIO) -> _JsonWrite
-                | (_ToJson obj, _JsonWrite anIO, ?Integer limit) -> _JsonWrite
+                | (_ToJson obj, _WritableIO anIO) -> _Write
+                | (_ToJson obj, _Write anIO, ?Integer limit) -> _Write
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
-  def self.dump_default_options: () -> json_options
+  def self.dump_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns the default options for the JSON.dump method. Initially:
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
-  def self.dump_default_options=: (json_options) -> json_options
+  def self.dump_default_options=: (options) -> options
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -776,7 +778,7 @@ module JSON
   #     # Raises SystemStackError (stack level too deep):
   #     JSON.fast_generate(a)
   #
-  def self?.fast_generate: (_ToJson obj, ?json_options opts) -> String
+  def self?.fast_generate: (_ToJson obj, ?options opts) -> String
 
   alias self.fast_unparse self.fast_generate
 
@@ -819,14 +821,14 @@ module JSON
   #     # Raises JSON::NestingError (nesting of 100 is too deep):
   #     JSON.generate(a)
   #
-  def self?.generate: (_ToJson obj, ?json_options opts) -> String
+  def self?.generate: (_ToJson obj, ?options opts) -> String
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Returns the JSON generator module that is used by JSON.
   #
-  def self.generator: () -> json_generator
+  def self.generator: () -> generator
 
-  def self.generator=: (json_generator generator) -> void
+  def self.generator=: (generator generator) -> void
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -972,7 +974,7 @@ module JSON
   #        #<Admin:0x00000000064c41f8
   #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
   #
-  def self?.load: (string | _JsonReadableIO | _JsonRead source, ?Proc proc, ?json_options options) -> untyped
+  def self?.load: (string | _ReadableIO | _Read source, ?Proc proc, ?options options) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -983,7 +985,7 @@ module JSON
   #
   # See method #parse.
   #
-  def self?.load_file: (string path, ?json_options opts) -> untyped
+  def self?.load_file: (string path, ?options opts) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -994,21 +996,21 @@ module JSON
   #
   # See method #parse!
   #
-  def self?.load_file!: (string path, ?json_options opts) -> untyped
+  def self?.load_file!: (string path, ?options opts) -> untyped
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns default options for the JSON.load method. Initially:
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
-  def self.load_default_options: () -> json_options
+  def self.load_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or returns default options for the JSON.load method. Initially:
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
-  def self.load_default_options=: (json_options) -> json_options
+  def self.load_default_options=: (options) -> options
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1059,7 +1061,7 @@ module JSON
   #     # Raises JSON::ParserError (783: unexpected token at ''):
   #     JSON.parse('')
   #
-  def self?.parse: (string source, ?json_options opts) -> untyped
+  def self?.parse: (string source, ?options opts) -> untyped
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1075,14 +1077,14 @@ module JSON
   #     checking for nesting depth.
   # *   Option `allow_nan`, if not provided, defaults to `true`.
   #
-  def self?.parse!: (string source, ?json_options opts) -> untyped
+  def self?.parse!: (string source, ?options opts) -> untyped
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Returns the JSON parser class that is used by JSON.
   #
-  def self.parser: () -> json_parser
+  def self.parser: () -> parser
 
-  def self.parser=: (json_parser parser) -> void
+  def self.parser=: (parser parser) -> void
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1116,7 +1118,7 @@ module JSON
   #       }
   #     }
   #
-  def self?.pretty_generate: (_ToJson obj, ?json_options opts) -> untyped
+  def self?.pretty_generate: (_ToJson obj, ?options opts) -> untyped
 
   alias self.pretty_unparse self.pretty_generate
 
@@ -1144,19 +1146,19 @@ module JSON
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
-  def self.state: () -> json_state
+  def self.state: () -> state
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
-  def self.state=: (json_state) -> json_state
+  def self.state=: (state) -> state
 
   alias self.unparse self.generate
 
   alias unparse generate
 end
 
-JSON::FAST_STATE_PROTOTYPE: json_state
+JSON::FAST_STATE_PROTOTYPE: JSON::state
 
 JSON::Infinity: Float
 
@@ -1166,9 +1168,9 @@ JSON::MinusInfinity: Float
 
 JSON::NaN: Float
 
-JSON::PRETTY_STATE_PROTOTYPE: json_state
+JSON::PRETTY_STATE_PROTOTYPE: JSON::state
 
-JSON::SAFE_STATE_PROTOTYPE: json_state
+JSON::SAFE_STATE_PROTOTYPE: JSON::state
 
 JSON::VERSION: String
 
@@ -1213,8 +1215,8 @@ module Kernel
   # The *opts* argument is passed through to generate/parse respectively. See
   # generate and parse for their documentation.
   #
-  def JSON: (string source, ?json_options opts) -> untyped
-          | (_ToJson obj, ?json_options opts) -> String
+  def JSON: (string source, ?JSON::options opts) -> untyped
+          | (_ToJson obj, ?JSON::options opts) -> String
 end
 
 %a{annotate:rdoc:skip}
