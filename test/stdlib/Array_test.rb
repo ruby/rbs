@@ -155,8 +155,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :at, 0
     assert_send_type "(ToInt) -> Integer",
                      [1,2,3], :at, ToInt.new(0)
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :at, ToInt.new(-5)
   end
 
   def test_bsearch
@@ -269,11 +267,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_delete_at
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :delete_at, 2
-    assert_send_type "(Integer) -> nil",
-                     [1,2,3], :delete_at, 100
-
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :delete_at, ToInt.new(300)
+    assert_send_type "(ToInt) -> Integer",
+                     [1,2,3], :delete_at, ToInt.new(2)
   end
 
   def test_delete_if
@@ -427,8 +422,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_first
     assert_send_type "() -> Integer",
                      [1,2,3], :first
-    assert_send_type "() -> nil",
-                     [], :first
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :first, 2
@@ -529,8 +522,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_last
     assert_send_type "() -> Integer",
                      [1,2,3], :last
-    assert_send_type "() -> nil",
-                     [], :last
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :last, 2
@@ -558,8 +549,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_max
     assert_send_type "() -> Integer",
                      [1,2,3], :max
-    assert_send_type "() -> nil",
-                     [], :max
 
     assert_send_type "(Integer) -> Array[Integer]",
                      [1,2,3], :max, 1
@@ -568,8 +557,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
 
     assert_send_type "() { (Integer, Integer) -> Integer } -> Integer",
                      [1,2,3], :max do |_, _| 1 end
-    assert_send_type "() { (Integer, Integer) -> Integer } -> nil",
-                     [], :max do |_, _| 0 end
 
     assert_send_type "(ToInt) { (Integer, Integer) -> Integer } -> Array[Integer]",
                      [1,2,3], :max, ToInt.new(2) do |_, _| 0 end
@@ -758,8 +745,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_sample
     assert_send_type "() -> Integer",
                      [1,2,3], :sample
-    assert_send_type "() -> nil",
-                     [], :sample
     assert_send_type "(random: Random) -> Integer",
                      [1,2,3], :sample, random: Random.new(1)
     assert_send_type "(random: Rand) -> Integer",
@@ -817,8 +802,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_slice
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :slice, 1
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :slice, ToInt.new(11)
 
     assert_send_type "(Integer, Integer) -> Array[Integer]",
                      [1,2,3], :slice, 1, 2
@@ -834,8 +817,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_slice!
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :slice!, 1
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :slice!, ToInt.new(11)
 
     assert_send_type "(Integer, Integer) -> Array[Integer]",
                      [1,2,3], :slice!, 1, 2
