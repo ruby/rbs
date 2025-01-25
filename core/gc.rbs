@@ -111,7 +111,7 @@ module GC
     # `:HAVE_FINALIZE`
     # :
     #
-    def self.raw_data: () -> Array[Hash[Symbol, untyped]]
+    def self.raw_data: () -> Array[Hash[Symbol, untyped]]?
 
     # <!--
     #   rdoc-file=gc.c
