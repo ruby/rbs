@@ -20,6 +20,8 @@ module RBS
         attr_reader :object
         attr_reader :method_name
 
+        NO_RETURN = Object.new
+
         def initialize(object:, method_name:)
           @callback = -> (_) { }
           @object = object
@@ -39,7 +41,7 @@ module RBS
             define_method(
               spy.method_name,
               _ = -> (*args, &block) do
-                return_value = nil
+                return_value = NO_RETURN
                 exception = nil
                 block_calls = [] #: Array[Test::ArgumentsReturn]
 
@@ -105,7 +107,7 @@ module RBS
                       arguments: args,
                       exception: exception
                     )
-                  when return_value
+                  when ::RBS::UnitTest::Spy::WrapSpy::NO_RETURN != return_value
                     Test::ArgumentsReturn.return(
                       arguments: args,
                       value: return_value
