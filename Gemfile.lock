@@ -71,6 +71,7 @@ GEM
     parser (3.3.7.0)
       ast (~> 2.4.1)
       racc
+    pathname (0.4.0)
     power_assert (2.0.5)
     pstore (0.1.4)
     psych (4.0.6)
@@ -177,6 +178,7 @@ DEPENDENCIES
   net-smtp
   nkf
   ostruct
+  pathname
   pstore
   raap
   rake
