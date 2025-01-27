@@ -104,6 +104,8 @@ module RBS
       #
       def class_class: () -> Class
 
+      def method_defs: (Symbol) -> Array[Definition::Method::TypeDef]
+
       def method_types: (Symbol) -> Array[MethodType]
 
       def allows_error: (*Exception) { () -> void } -> void
