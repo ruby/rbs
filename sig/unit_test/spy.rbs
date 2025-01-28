@@ -5,6 +5,8 @@ module RBS
                    | [T, S] (untyped object, Symbol method_name) { (WrapSpy[T], T) -> S } -> S
 
       class WrapSpy[T]
+        NO_RETURN: Object
+
         attr_accessor callback: ^(Test::CallTrace) -> void
 
         attr_reader object: T

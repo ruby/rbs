@@ -76,8 +76,8 @@ class ObjectSpace_WeakKeyMapTest < Test::Unit::TestCase
     map["foo"] = 123
 
     assert_send_type(
-      "(::Integer) -> ::String",
-      map, :getkey, 123
+      "(::String) -> ::String",
+      map, :getkey, "foo"
     )
     assert_send_type(
       "(::String) -> nil",

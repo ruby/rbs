@@ -23,23 +23,27 @@ class MatchDataInstanceTest < Test::Unit::TestCase
 
   def test_bytebegin
     if_ruby("3.4"...) do
-      with_backref do |backref|
-        assert_send_type  '(MatchData::capture) -> Integer',
-                          INSTANCE, :bytebegin, backref
-        assert_send_type  '(MatchData::capture) -> Integer',
-                          INSTANCE2, :bytebegin, backref
-      end
+      assert_send_type '(String) -> Integer',
+                       INSTANCE, :bytebegin, 'a'
+      assert_send_type '(Symbol) -> Integer',
+                       INSTANCE, :bytebegin, :a
+      assert_send_type '(Integer) -> Integer',
+                       INSTANCE2, :bytebegin, 0
+      assert_send_type '(Integer) -> nil',
+                       INSTANCE2, :bytebegin, 1
     end
   end
 
   def test_byteend
     if_ruby("3.4"...) do
-      with_backref do |backref|
-        assert_send_type  '(MatchData::capture) -> Integer',
-                          INSTANCE, :byteend, backref
-        assert_send_type  '(MatchData::capture) -> Integer',
-                          INSTANCE2, :byteend, backref
-      end
+      assert_send_type '(String) -> Integer',
+                       INSTANCE, :byteend, 'a'
+      assert_send_type '(Symbol) -> Integer',
+                       INSTANCE, :byteend, :a
+      assert_send_type '(Integer) -> Integer',
+                       INSTANCE2, :byteend, 0
+      assert_send_type '(Integer) -> nil',
+                       INSTANCE2, :byteend, 1
     end
   end
 
