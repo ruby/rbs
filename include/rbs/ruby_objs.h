@@ -44,7 +44,7 @@ VALUE rbs_method_type(VALUE type_params, VALUE type, VALUE block, VALUE location
 VALUE rbs_namespace(VALUE path, VALUE absolute);
 VALUE rbs_type_name(VALUE namespace, VALUE name);
 VALUE rbs_alias(VALUE name, VALUE args, VALUE location);
-VALUE rbs_bases_any(VALUE location);
+VALUE rbs_bases_any(VALUE todo, VALUE location);
 VALUE rbs_bases_bool(VALUE location);
 VALUE rbs_bases_bottom(VALUE location);
 VALUE rbs_bases_class(VALUE location);

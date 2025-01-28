@@ -993,12 +993,10 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_bases_void(rbs_location_current_token(state));
   }
   case kUNTYPED: {
-    return rbs_bases_any(rbs_location_current_token(state));
+    return rbs_bases_any(false, rbs_location_current_token(state));
   }
   case k__TODO__: {
-    VALUE type = rbs_bases_any(rbs_location_current_token(state));
-    rb_funcall(type, rb_intern("todo!"), 0);
-    return type;
+    return rbs_bases_any(true, rbs_location_current_token(state));
   }
   case tINTEGER: {
     VALUE literal = rb_funcall(
