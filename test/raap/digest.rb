@@ -1,8 +1,11 @@
-# Specify the class/module and method names to be executed by RaaP.
-# By prefixing with `!`, you can skip testing a method.
+require 'raap'
 
-puts 'Set[Integer]'
-puts 'Enumerable[Integer]#to_set'
+argv = [
+  '-r', 'digest/bubblebabble',
+  '--library', 'digest',
+  '--size-by', '2',
+  '--allow-private'
+]
 
 %w[
   MD5
@@ -18,7 +21,7 @@ puts 'Enumerable[Integer]#to_set'
     digest
     hexdigest
   ].each do |singleton_method|
-    puts "Digest::#{klass}.#{singleton_method}"
+    argv << "Digest::#{klass}.#{singleton_method}"
   end
 
   %w[
@@ -47,6 +50,8 @@ puts 'Enumerable[Integer]#to_set'
     finish
     initialize_copy
   ].each do |instance_method|
-    puts "Digest::#{klass}##{instance_method}"
+    argv << "Digest::#{klass}##{instance_method}"
   end
 end
+
+RaaP::CLI.new(argv).load.run
