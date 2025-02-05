@@ -141,6 +141,7 @@ end
 task :raap => :compile do
   sh "ruby test/raap/core.rb"
   sh "ruby test/raap/digest.rb"
+  sh "ruby test/raap/openssl.rb"
 end
 
 task :rubocop do
