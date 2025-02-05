@@ -26,6 +26,10 @@ module RBS
             attr_reader :class_name
             attr_reader :type_args
             attr_reader :location
+            attr_reader :class_name_location
+            attr_reader :open_paren_location
+            attr_reader :close_paren_location
+            attr_reader :args_separator_locations
 
             def initialize(class_name:, type_args:, location:, class_name_location:, open_paren_location:, close_paren_location:, args_separator_locations:)
               @class_name = class_name

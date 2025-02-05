@@ -30,5 +30,6 @@ module RBS
     def last_position: () -> Integer
 
     def rbs_location: (Prism::Location) -> Location
+                    | (Prism::Location, Prism::Location) -> Location
   end
 end

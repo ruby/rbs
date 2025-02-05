@@ -485,10 +485,14 @@ module RBS
         map = UseMap.new(table: table)
 
         decls = source.declarations.map do |decl|
-          resolve_ruby_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
+          if only && !only.member?(decl)
+            decl
+          else
+            resolve_ruby_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
+          end
         end
 
-        source = Source::Ruby.new(source.buffer, source.prism_result, decls)
+        source = Source::Ruby.new(source.buffer, source.prism_result, decls, source.diagnostics)
         env.add_signature(source)
       end
 
@@ -873,8 +877,8 @@ module RBS
     end
 
     def inspect
-      ivars = %i[@declarations @class_decls @class_alias_decls @interface_decls @type_alias_decls @constant_decls @global_decls]
-      "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
+      ivars = %i[@sources @class_decls @class_alias_decls @interface_decls @type_alias_decls @constant_decls @global_decls]
+      "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv)&.size || -1} items)"}.join(' ')}>"
     end
 
     def buffers
@@ -885,6 +889,11 @@ module RBS
       env = Environment.new
 
       each_rbs_source.each do |source|
+        next if buffers.include?(source.buffer)
+        env.add_signature(source)
+      end
+
+      each_ruby_source.each do |source|
         next if buffers.include?(source.buffer)
         env.add_signature(source)
       end

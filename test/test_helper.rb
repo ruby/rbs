@@ -188,7 +188,7 @@ SIG
           prism = Prism.parse(content, filepath: name)
 
           result = RBS::InlineParser.parse(buffer, prism)
-          source = RBS::Source::Ruby.new(buffer, prism, result.declarations)
+          source = RBS::Source::Ruby.new(buffer, prism, result.declarations, result.diagnostics)
 
           env.add_signature(source)
         end
