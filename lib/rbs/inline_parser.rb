@@ -6,13 +6,63 @@ module RBS
       attr_reader :buffer
       attr_reader :prism_result
       attr_reader :declarations
+      attr_reader :diagnostics
 
       def initialize(buffer, result)
         @buffer = buffer
         @prism_result = result
 
         @declarations = []
+        @diagnostics = []
       end
+    end
+
+    module Diagnostics
+      class Base
+        attr_reader :location
+        attr_reader :message
+
+        def initialize(location, message)
+          @location = location
+          @message = message
+        end
+      end
+
+      class NonConstantName < Base
+      end
+
+      class ToplevelSingletonClass < Base
+      end
+
+      class DeclarationInsideSingletonClass < Base
+      end
+
+      class NonConstantSuperClass < Base
+      end
+
+      class NonSelfSingletonClass < Base
+      end
+
+      class InvalidVisibilityCall < Base
+      end
+
+      class InvalidMixinCall < Base
+      end
+    end
+
+    def self.enabled?(result, default:)
+      result.comments.each do |comment|
+        if comment.location.start_character_column == 0
+          if comment.location.slice == "# rbs_inline: enabled"
+            return true
+          end
+          if comment.location.slice == "# rbs_inline: disabled"
+            return false
+          end
+        end
+      end
+
+      return default
     end
 
     def self.parse(buffer, prism)
@@ -30,6 +80,10 @@ module RBS
 
       def buffer
         result.buffer
+      end
+
+      def diagnostics
+        result.diagnostics
       end
 
       def current_context
@@ -68,10 +122,21 @@ module RBS
 
       def visit_class_node(node)
         unless class_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(node.constant_path)
-          visit node.body
+          diagnostics << Diagnostics::NonConstantName.new(
+            buffer.rbs_location(node.constant_path.location),
+            "Class name should be constant"
+          )
           return
         end
         class_name_location = buffer.rbs_location(node.constant_path.location)
+
+        if current_context.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+          diagnostics << Diagnostics::DeclarationInsideSingletonClass.new(
+            buffer.rbs_location(node.constant_path.location),
+            "Class definition inside singleton class definition is ignored"
+          )
+          return
+        end
 
         if super_node = node.superclass
           visit super_node
@@ -87,9 +152,13 @@ module RBS
               close_paren_location: nil,
               args_separator_locations: []
             )
+          else
+            diagnostics << Diagnostics::NonConstantSuperClass.new(
+              buffer.rbs_location(super_node.location),
+              "Super class of #{class_name} should be constant"
+            )
           end
         end
-
 
         decl = AST::Ruby::Declarations::ClassDecl.new(
           buffer,
@@ -107,9 +176,27 @@ module RBS
       end
 
       def visit_singleton_class_node(node)
-        return unless node.expression.is_a?(Prism::SelfNode)
-        return unless current_context
-        return if current_context.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+        unless node.expression.is_a?(Prism::SelfNode)
+          diagnostics << Diagnostics::NonSelfSingletonClass.new(
+            buffer.rbs_location(node.expression.location),
+            "Singleton class should be defined with `self` is ignored"
+          )
+          return
+        end
+        unless current_context
+          diagnostics << Diagnostics::ToplevelSingletonClass.new(
+            buffer.rbs_location(node.operator_loc, node.expression.location),
+            "Toplevel singleton class definition is ignored"
+          )
+          return
+        end
+        if current_context.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+          diagnostics << Diagnostics::DeclarationInsideSingletonClass.new(
+            buffer.rbs_location(node.operator_loc, node.expression.location),
+            "Singleton class definition inside another singleton class definition is ignored"
+          )
+          return
+        end
 
         decl = AST::Ruby::Declarations::SingletonClassDecl.new(node)
 
@@ -121,10 +208,21 @@ module RBS
 
       def visit_module_node(node)
         unless module_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(node.constant_path)
-          visit node.body
+          diagnostics << Diagnostics::NonConstantName.new(
+            buffer.rbs_location(node.constant_path.location),
+            "Module name should be constant"
+          )
           return
         end
         module_name_location = buffer.rbs_location(node.constant_path.location)
+
+        if current_context.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+          diagnostics << Diagnostics::DeclarationInsideSingletonClass.new(
+            module_name_location,
+            "Module definition inside singleton class definition is ignored"
+          )
+          return
+        end
 
         decl = AST::Ruby::Declarations::ModuleDecl.new(
           buffer,
@@ -169,7 +267,7 @@ module RBS
 
       def visit_call_node(node)
         member =
-          private_member?(node) || public_member?(node) ||
+          visibility_member?(node) ||
             mixin_member?(node) ||
             nil
 
@@ -178,34 +276,60 @@ module RBS
         end
       end
 
-      def private_member?(node)
-        return unless current_context
-        return unless self_call?(node)
-
-        if node.name == :private
-          if no_argument?(node)
-            AST::Ruby::Members::PrivateMember.new(buffer, node)
+      def visibility_member?(node)
+        if node.name == :private || node.name == :public
+          unless current_context
+            diagnostics << Diagnostics::InvalidVisibilityCall.new(
+              buffer.rbs_location(node.message_loc || raise),
+              "`#{node.name}` call outside of class/module definition is ignored"
+            )
+            return
           end
-        end
-      end
+          unless self_call?(node)
+            receiver = node.receiver or raise
+            diagnostics << Diagnostics::InvalidVisibilityCall.new(
+              buffer.rbs_location(receiver.location),
+              "`#{node.name}` call with non-self receiver is ignored"
+            )
+            return
+          end
 
-      def public_member?(node)
-        return unless current_context
-        return unless self_call?(node)
-
-        if node.name == :public
           if no_argument?(node)
-            AST::Ruby::Members::PublicMember.new(buffer, node)
+            if node.name == :private
+              AST::Ruby::Members::PrivateMember.new(buffer, node)
+            else
+              AST::Ruby::Members::PublicMember.new(buffer, node)
+            end
+          else
+            args = node.arguments or raise
+            diagnostics << Diagnostics::InvalidVisibilityCall.new(
+              buffer.rbs_location(args.location),
+              "`#{node.name}` call with arguments is ignored"
+            )
+            nil
           end
         end
       end
 
       def mixin_member?(node)
-        return unless current_context
-        return unless self_call?(node)
-
         case node.name
         when :include, :prepend, :extend
+          unless current_context
+            diagnostics << Diagnostics::InvalidMixinCall.new(
+              buffer.rbs_location(node.message_loc || raise),
+              "`#{node.name}` call outside of class/module definition is ignored"
+            )
+            return
+          end
+          unless self_call?(node)
+            receiver = node.receiver or raise
+            diagnostics << Diagnostics::InvalidMixinCall.new(
+              buffer.rbs_location(receiver.location),
+              "`#{node.name}` call with non-self receiver is ignored"
+            )
+            return
+          end
+
           if arg = one_argument?(node)
             if const_node = constant_node?(arg)
               module_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(const_node) or return
@@ -254,7 +378,19 @@ module RBS
                   close_paren_location: close_paren_location
                 )
               end
+            else
+              diagnostics << Diagnostics::InvalidMixinCall.new(
+                buffer.rbs_location(arg.location),
+                "`#{node.name}` call with non-constant argument is ignored"
+              )
+              nil
             end
+          else
+            diagnostics << Diagnostics::InvalidMixinCall.new(
+              buffer.rbs_location(node.arguments&.location || node.location),
+              "`#{node.name}` call without argument/with more than one arguments is ignored"
+            )
+            nil
           end
         end
       end

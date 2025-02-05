@@ -6,9 +6,63 @@ module RBS
       attr_reader buffer: Buffer
       attr_reader prism_result: Prism::ParseResult
       attr_reader declarations: Array[AST::Ruby::Declarations::t]
+      attr_reader diagnostics: Array[Diagnostics::t]
 
       def initialize: (Buffer, Prism::ParseResult) -> void
     end
+
+    module Diagnostics
+      type t = NonConstantName
+             | ToplevelSingletonClass
+             | DeclarationInsideSingletonClass
+             | NonConstantSuperClass
+             | NonSelfSingletonClass
+             | InvalidVisibilityCall
+             | InvalidMixinCall
+
+      class Base
+        attr_reader message: String
+
+        attr_reader location: Location
+
+        def initialize: (Location, String) -> void
+      end
+
+      # Module/class definition has non-constant name
+      class NonConstantName < Base
+      end
+
+      # Singleton class definition at the top level
+      class ToplevelSingletonClass < Base
+      end
+
+      # <<self singleton class definition has module/class declaration
+      class DeclarationInsideSingletonClass < Base
+      end
+
+      # Class definition has non-constant superclass
+      class NonConstantSuperClass < Base
+      end
+
+      # Singleton class definition with non-self receiver
+      class NonSelfSingletonClass < Base
+      end
+
+      # public/private call with invalid syntax
+      class InvalidVisibilityCall < Base
+      end
+
+      # prepend/include/extend call with invalid syntax
+      class InvalidMixinCall < Base
+      end
+    end
+
+    # Returns `true` if the source code is enabled for inline-rbs parsing
+    #
+    # - `# rbs_inline: enabled`
+    # - `# rbs_inline: disabled`
+    #
+    def self.enabled?: (Prism::ParseResult, default: bool) -> bool
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
 
@@ -20,6 +74,8 @@ module RBS
       attr_reader result: Result
 
       def buffer: () -> Buffer
+
+      def diagnostics: () -> Array[Diagnostics::t]
 
       %a{pure} def current_context: () -> decl_context?
 
@@ -43,9 +99,7 @@ module RBS
 
       def visit_constant_write_node: ...
 
-      def private_member?: (Prism::CallNode) -> Members::PrivateMember?
-
-      def public_member?: (Prism::CallNode) -> Members::PublicMember?
+      def visibility_member?: (Prism::CallNode) -> (Members::PrivateMember | Members::PublicMember | nil)
 
       def mixin_member?: (Prism::CallNode) -> (Members::IncludeMember | Members::ExtendMember | Members::PrependMember | nil)
 

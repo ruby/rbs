@@ -65,8 +65,7 @@ module RBS
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
-    def add_signature: (Source::RBS) -> void
-                     | (Source::Ruby) -> void
+    def add_signature: (Source::RBS | Source::Ruby) -> void
 
     # Insert a declaration into the environment
     #
@@ -80,7 +79,7 @@ module RBS
     # When `only` is given, it skips other _top-level_ declarations not included in the collection.
     # This helps running resolution faster in the case of _partial updates_.
     #
-    def resolve_type_names: (?only: Set[AST::Declarations::t]?) -> Environment
+    def resolve_type_names: (?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?) -> Environment
 
     def resolve_signature: (Resolver::TypeNameResolver, UseMap::Table, Array[AST::Directives::t], Array[AST::Declarations::t], ?only: Set[AST::Declarations::t]?) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
 

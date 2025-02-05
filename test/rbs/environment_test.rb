@@ -584,7 +584,7 @@ type s = untyped
     result = RBS::InlineParser.parse(buf, prism)
 
     env = Environment.new
-    source = RBS::Source::Ruby.new(buf, prism, result.declarations)
+    source = RBS::Source::Ruby.new(buf, prism, result.declarations, result.diagnostics)
     env.add_signature(source)
 
     assert_operator env.class_decls, :key?, type_name("::Foo")
@@ -605,7 +605,7 @@ type s = untyped
     result = RBS::InlineParser.parse(buf, prism)
 
     env = Environment.new
-    source = RBS::Source::Ruby.new(buf, prism, result.declarations)
+    source = RBS::Source::Ruby.new(buf, prism, result.declarations, result.diagnostics)
     env.add_signature(source)
 
     assert_operator env.class_decls, :key?, type_name("::Foo")

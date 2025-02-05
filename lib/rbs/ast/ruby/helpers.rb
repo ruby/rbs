@@ -10,6 +10,8 @@ module RBS
             when Prism::ConstantPathNode, Prism::ConstantReadNode
               TypeName.parse(node.full_name)
             end
+          rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+            nil
           end
         end
       end
