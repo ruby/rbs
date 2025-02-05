@@ -1527,28 +1527,28 @@ module OpenSSL
     #   - bn % bn2 => aBN
     # -->
     #
-    def %: (int) -> instance
+    def %: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn * bn2 => aBN
     # -->
     #
-    def *: (int) -> instance
+    def *: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn ** bn2 => aBN
     # -->
     #
-    def **: (int) -> instance
+    def **: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn + bn2 => aBN
     # -->
     #
-    def +: (int) -> instance
+    def +: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1562,7 +1562,7 @@ module OpenSSL
     #   - bn - bn2 => aBN
     # -->
     #
-    def -: (int) -> instance
+    def -: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1577,7 +1577,7 @@ module OpenSSL
     # -->
     # Division of OpenSSL::BN instances
     #
-    def /: (int) -> [ instance, instance ]
+    def /: (bn) -> [ instance, instance ]
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1635,7 +1635,7 @@ module OpenSSL
     #   - bn.cmp(bn2) => integer
     # -->
     #
-    def cmp: (Integer) -> Integer
+    def cmp: (bn) -> Integer
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1650,7 +1650,7 @@ module OpenSSL
     #   - copy(p1)
     # -->
     #
-    def copy: (int) -> instance
+    def copy: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1666,7 +1666,7 @@ module OpenSSL
     #   - bn.gcd(bn2) => aBN
     # -->
     #
-    def gcd: (int) -> instance
+    def gcd: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1692,42 +1692,42 @@ module OpenSSL
     #   - bn.mod_add(bn1, bn2) -> aBN
     # -->
     #
-    def mod_add: (int, int) -> instance
+    def mod_add: (bn, bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_exp(bn1, bn2) -> aBN
     # -->
     #
-    def mod_exp: (int, int) -> instance
+    def mod_exp: (bn, bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_inverse(bn2) => aBN
     # -->
     #
-    def mod_inverse: (int) -> instance
+    def mod_inverse: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_mul(bn1, bn2) -> aBN
     # -->
     #
-    def mod_mul: (int, int) -> instance
+    def mod_mul: (bn, bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_sqr(bn2) => aBN
     # -->
     #
-    def mod_sqr: (int) -> instance
+    def mod_sqr: (bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_sub(bn1, bn2) -> aBN
     # -->
     #
-    def mod_sub: (int, int) -> instance
+    def mod_sub: (bn, bn) -> instance
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1868,7 +1868,7 @@ module OpenSSL
     #   - bn.ucmp(bn2) => integer
     # -->
     #
-    def ucmp: (int bn2) -> ::Integer
+    def ucmp: (bn bn2) -> ::Integer
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
