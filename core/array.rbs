@@ -2182,7 +2182,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def include?: (Elem object) -> bool
+  def include?: (untyped object) -> bool
 
   # <!-- rdoc-file=array.c -->
   # Returns the zero-based integer index of a specified element, or `nil`.
