@@ -2279,4 +2279,26 @@ end
       end
     end
   end
+
+  def test_keyword_keyword
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def inherits: (inherits: top inherits) -> void
+
+        def return: (return: top return) -> void
+
+        def override: (override: top override) -> void
+
+        def generic: (generic: top generic) -> void
+
+        def skip: (skip: top skip) -> void
+
+        alias inherits skip
+
+        @rbs: untyped
+
+        self.@rbs: untyped
+      end
+    RBS
+  end
 end

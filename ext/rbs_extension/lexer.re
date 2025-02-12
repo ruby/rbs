@@ -45,6 +45,7 @@ token rbsparser_next_token(lexstate *state) {
       "::"  { return next_token(state, pCOLON2); }
       "<"   { return next_token(state, pLT); }
       "[]"  { return next_token(state, pAREF_OPR); }
+      "--"  { return next_token(state, pMINUS2); }
       operator  { return next_token(state, tOPERATOR); }
 
       number = [0-9] [0-9_]*;
@@ -95,6 +96,12 @@ token rbsparser_next_token(lexstate *state) {
       "use"           { return next_token(state, kUSE); }
       "as"            { return next_token(state, kAS); }
       "__todo__"      { return next_token(state, k__TODO__); }
+      "inherits"      { return next_token(state, kINHERITS); }
+      "return"        { return next_token(state, kRETURN); }
+      "override"      { return next_token(state, kOVERRIDE); }
+      "module-self"   { return next_token(state, kMODULESELF); }
+      "generic"       { return next_token(state, kGENERIC); }
+      "skip"          { return next_token(state, kSKIP); }
 
       unicode_char = "\\u" [0-9a-fA-F]{4};
       oct_char = "\\x" [0-9a-f]{1,2};
@@ -132,6 +139,9 @@ token rbsparser_next_token(lexstate *state) {
       "_"                   { return next_token(state, tULLIDENT); }
       [a-zA-Z_] word* "!"   { return next_token(state, tBANGIDENT); }
       [a-zA-Z_] word* "="   { return next_token(state, tEQIDENT); }
+
+      "@rbs!"               { return next_token(state, kATRBSB); }
+      "@rbs"                { return next_token(state, kATRBS); }
 
       "@" [a-zA-Z_] word*   { return next_token(state, tAIDENT); }
       "@@" [a-zA-Z_] word*  { return next_token(state, tA2IDENT); }
