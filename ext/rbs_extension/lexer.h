@@ -61,7 +61,14 @@ enum TokenType {
   kUSE,             /* use */
   kAS,              /* as */
   k__TODO__,        /* __todo__ */
-
+  kINHERITS,        /* inherits */
+  kRETURN,          /* return */
+  kOVERRIDE,        /* override */
+  kMODULESELF,      /* module-self */
+  kGENERIC,         /* generic */
+  kSKIP,            /* skip */
+  kATRBS,           /* @rbs */
+  kATRBSB,          /* @rbs! */
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */
   tULIDENT,         /* Identifiers starting with `_` followed by upper case */
@@ -73,6 +80,7 @@ enum TokenType {
   tEQIDENT,         /* Identifiers ending with `=` */
   tQIDENT,          /* Quoted identifier */
   pAREF_OPR,        /* [] */
+  pMINUS2,          /* -- */
   tOPERATOR,        /* Operator identifier */
 
   tCOMMENT,         /* Comment */

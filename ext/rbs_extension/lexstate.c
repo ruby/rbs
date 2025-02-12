@@ -60,6 +60,14 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "kUSE",             /* use */
   "kAS",              /* as */
   "k__TODO__",        /* __todo__ */
+  "kINHERITS",        /* inherits */
+  "kRETURN",          /* return */
+  "kOVERRIDE",        /* override */
+  "kMODULESELF",      /* module-self */
+  "kGENERIC",         /* generic */
+  "kSKIP",            /* skip */
+  "kATRBS",           /* @rbs */
+  "kATRBSB",          /* @rbs! */
 
   "tLIDENT",          /* Identifiers starting with lower case */
   "tUIDENT",          /* Identifiers starting with upper case */
@@ -72,6 +80,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tEQIDENT",
   "tQIDENT",          /* Quoted identifier */
   "pAREF_OPR",        /* [] */
+  "pMINUS2",          /* -- */
   "tOPERATOR",        /* Operator identifier */
 
   "tCOMMENT",

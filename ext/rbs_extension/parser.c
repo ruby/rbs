@@ -48,6 +48,11 @@
   case kUSE: \
   case kAS: \
   case k__TODO__: \
+  case kINHERITS: \
+  case kRETURN: \
+  case kOVERRIDE: \
+  case kGENERIC: \
+  case kSKIP: \
   /* nop */
 
 typedef struct {
@@ -1938,7 +1943,9 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
 
   switch (state->current_token.type)
   {
-  case tAIDENT: {
+  case tAIDENT:
+  case kATRBS:
+  {
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1985,7 +1992,15 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     };
 
     parser_advance_assert(state, pDOT);
-    parser_advance_assert(state, tAIDENT);
+    if (state->next_token.type == tAIDENT || state->next_token.type == kATRBS) {
+      parser_advance(state);
+    } else {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "expected a instance variable name"
+      );
+    }
 
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
@@ -2326,6 +2341,7 @@ static VALUE parse_module_members(parserstate *state) {
     }
 
     case tAIDENT:
+    case kATRBS:
     case tA2IDENT:
     case kSELF: {
       member = parse_variable_member(state, annot_pos, annotations);
