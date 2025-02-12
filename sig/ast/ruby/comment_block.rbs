@@ -1,0 +1,41 @@
+use Prism::Comment
+
+module RBS
+  module AST
+    module Ruby
+      class CommentBlock
+        attr_reader name: Pathname
+
+        attr_reader comment_buffer: Buffer
+
+        attr_reader offsets: Array[
+          [
+            Comment,
+            Integer, # -- prefix size
+            Integer, # -- start character index in comment_buffer
+            Integer  # -- end character index in comment_buffer
+          ]
+        ]
+
+        def initialize: (Pathname, Array[Comment]) -> void
+
+        # Translate the location in `comment_buffer` to the locations of Comments
+        #
+        # Note that new lines included in the location are assumed between returned comments.
+        #
+        def translate_comment_location: (Location) -> Array[[Comment, Integer, Integer]]
+
+        # Returns a pair of comment index and character position in the comment
+        def translate_comment_position: (Integer) -> [Integer, Integer]?
+
+        # Test if the index is at the start of the content of a line in `#comment_buffer
+        #
+        # * If the index is before the start of the content of a line, returns the content start index
+        # * Otherwise, it returns `nil`
+        # 
+        def line_start?: (Integer) -> Integer?
+      end
+    end
+  end
+end
+
