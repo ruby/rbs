@@ -1,23 +1,22 @@
 #include "rbs_extension.h"
-#include "rbs/util/rbs_constant_pool.h"
 
 #define RESET_TABLE_P(table) (table->size == 0)
 
-id_table *alloc_empty_table(void) {
-  id_table *table = malloc(sizeof(id_table));
+id_table *alloc_empty_table(rbs_allocator_t *allocator) {
+  id_table *table = rbs_allocator_alloc(allocator, id_table);
 
   *table = (id_table) {
     .size = 10,
     .count = 0,
-    .ids = calloc(10, sizeof(rbs_constant_id_t)),
+    .ids = rbs_allocator_calloc(allocator, 10, rbs_constant_id_t),
     .next = NULL,
   };
 
   return table;
 }
 
-id_table *alloc_reset_table(void) {
-  id_table *table = malloc(sizeof(id_table));
+id_table *alloc_reset_table(rbs_allocator_t *allocator) {
+  id_table *table = rbs_allocator_alloc(allocator, id_table);
 
   *table = (id_table) {
     .size = 0,
@@ -31,12 +30,12 @@ id_table *alloc_reset_table(void) {
 
 id_table *parser_push_typevar_table(parserstate *state, bool reset) {
   if (reset) {
-    id_table *table = alloc_reset_table();
+    id_table *table = alloc_reset_table(&state->allocator);
     table->next = state->vars;
     state->vars = table;
   }
 
-  id_table *table = alloc_empty_table();
+  id_table *table = alloc_empty_table(&state->allocator);
   table->next = state->vars;
   state->vars = table;
 
@@ -49,8 +48,6 @@ void parser_pop_typevar_table(parserstate *state) {
   if (state->vars) {
     table = state->vars;
     state->vars = table->next;
-    free(table->ids);
-    free(table);
   } else {
     rb_raise(rb_eRuntimeError, "Cannot pop empty table");
   }
@@ -58,7 +55,6 @@ void parser_pop_typevar_table(parserstate *state) {
   if (state->vars && RESET_TABLE_P(state->vars)) {
     table = state->vars;
     state->vars = table->next;
-    free(table);
   }
 }
 
@@ -73,9 +69,8 @@ void parser_insert_typevar(parserstate *state, rbs_constant_id_t id) {
     // expand
     rbs_constant_id_t *ptr = table->ids;
     table->size += 10;
-    table->ids = calloc(table->size, sizeof(rbs_constant_id_t));
+    table->ids = rbs_allocator_calloc(&state->allocator, table->size, rbs_constant_id_t);
     memcpy(table->ids, ptr, sizeof(rbs_constant_id_t) * table->count);
-    free(ptr);
   }
 
   table->ids[table->count++] = id;
@@ -174,9 +169,9 @@ void insert_comment_line(parserstate *state, token tok) {
   comment *com = comment_get_comment(state->last_comment, prev_line);
 
   if (com) {
-    comment_insert_new_line(com, tok);
+    comment_insert_new_line(&state->allocator, com, tok);
   } else {
-    state->last_comment = alloc_comment(tok, state->last_comment);
+    state->last_comment = alloc_comment(&state->allocator, tok, state->last_comment);
   }
 }
 
@@ -192,8 +187,8 @@ VALUE get_comment(parserstate *state, int subject_line) {
   }
 }
 
-comment *alloc_comment(token comment_token, comment *last_comment) {
-  comment *new_comment = malloc(sizeof(comment));
+comment *alloc_comment(rbs_allocator_t *allocator, token comment_token, comment *last_comment) {
+  comment *new_comment = rbs_allocator_alloc(allocator, comment);
 
   *new_comment = (comment) {
     .start = comment_token.range.start,
@@ -206,21 +201,12 @@ comment *alloc_comment(token comment_token, comment *last_comment) {
     .next_comment = last_comment,
   };
 
-  comment_insert_new_line(new_comment, comment_token);
+  comment_insert_new_line(allocator, new_comment, comment_token);
 
   return new_comment;
 }
 
-void free_comment(comment *com) {
-  if (com->next_comment) {
-    free_comment(com->next_comment);
-  }
-
-  free(com->tokens);
-  free(com);
-}
-
-void comment_insert_new_line(comment *com, token comment_token) {
+void comment_insert_new_line(rbs_allocator_t *allocator, comment *com, token comment_token) {
   if (com->line_count == 0) {
     com->start = comment_token.range.start;
   }
@@ -230,11 +216,10 @@ void comment_insert_new_line(comment *com, token comment_token) {
 
     if (com->tokens) {
       token *p = com->tokens;
-      com->tokens = calloc(com->line_size, sizeof(token));
+      com->tokens = rbs_allocator_calloc(allocator, com->line_size, token);
       memcpy(com->tokens, p, sizeof(token) * com->line_count);
-      free(p);
     } else {
-      com->tokens = calloc(com->line_size, sizeof(token));
+      com->tokens = rbs_allocator_calloc(allocator, com->line_size, token);
     }
   }
 
@@ -288,12 +273,12 @@ VALUE comment_to_ruby(comment *com, VALUE buffer) {
   );
 }
 
-lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
+lexstate *alloc_lexer(rbs_allocator_t *allocator, VALUE string, int start_pos, int end_pos) {
   if (start_pos < 0 || end_pos < 0) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
 
-  lexstate *lexer = malloc(sizeof(lexstate));
+  lexstate *lexer = rbs_allocator_alloc(allocator, lexstate);
 
   position start_position = (position) {
     .byte_pos = 0,
@@ -320,8 +305,11 @@ lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
 }
 
 parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos, VALUE variables) {
-  lexstate *lexer = alloc_lexer(string, start_pos, end_pos);
-  parserstate *parser = malloc(sizeof(parserstate));
+  rbs_allocator_t allocator;
+  rbs_allocator_init(&allocator);
+
+  lexstate *lexer = alloc_lexer(&allocator, string, start_pos, end_pos);
+  parserstate *parser = rbs_allocator_alloc(&allocator, parserstate);
 
   *parser = (parserstate) {
     .lexstate = lexer,
@@ -336,6 +324,7 @@ parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos
     .last_comment = NULL,
 
     .constant_pool = {},
+    .allocator = allocator,
   };
 
   // The parser's constant pool is mainly used for storing the names of type variables, which usually aren't many.
@@ -389,10 +378,6 @@ parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos
 }
 
 void free_parser(parserstate *parser) {
-  free(parser->lexstate);
-  if (parser->last_comment) {
-    free_comment(parser->last_comment);
-  }
   rbs_constant_pool_free(&parser->constant_pool);
-  free(parser);
+  rbs_allocator_free(&parser->allocator);
 }

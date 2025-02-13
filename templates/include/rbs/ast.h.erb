@@ -1,0 +1,35 @@
+#ifndef RBS__AST_H
+#define RBS__AST_H
+
+#include "ruby.h"
+#include "rbs/util/rbs_allocator.h"
+
+enum rbs_node_type {
+<%- nodes.each_with_index do |node, index| -%>
+    <%= node.c_type_enum_name %> = <%= index + 1 %>,
+<%- end -%>
+};
+
+typedef struct rbs_node {
+    VALUE cached_ruby_value;
+    enum rbs_node_type type;
+} rbs_node_t;
+
+<%- nodes.each do |node| -%>
+typedef struct {
+    rbs_node_t base;
+
+    <%- node.fields.each do |field| -%>
+    VALUE <%= field.name %>;
+    <%- end -%>
+} <%= node.c_type_name %>;
+
+<%- end -%>
+
+<%- nodes.each do |node| -%>
+<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>);
+<%- end -%>
+
+VALUE rbs_struct_to_ruby_value(rbs_node_t *instance);
+
+#endif

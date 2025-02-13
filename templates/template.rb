@@ -7,12 +7,55 @@ require "yaml"
 module RBS
   class Template
     class Field
-      attr_reader :name
-      attr_reader :c_type
+      attr_reader :name, :c_type, :c_name #: String
 
-      def initialize(yaml)
-        @name = yaml["name"]
-        @c_type = "VALUE"
+      def initialize(name:, c_type:, c_name: nil)
+        @name = name
+        @c_type = c_type
+        @c_name = c_name || name
+      end
+
+      def self.from_hash(hash)
+        new(name: hash["name"], c_type: hash.fetch("c_type", "VALUE"), c_name: hash["c_name"])
+      end
+
+      def parameter_decl
+        case @c_type
+        when "VALUE", "bool"
+          "#{@c_type} #{c_name}"
+        when "rbs_string"
+          "rbs_string_t #{c_name}"
+        when ->(c_type) { c_type.include?("_t") }
+          "#{c_type}#{c_name}"
+        else
+          "#{@c_type}_t *#{c_name}"
+        end
+      end
+
+      def stored_field_decl
+        case @c_type
+        when "VALUE"
+          "VALUE #{c_name}"
+        when "bool"
+          "bool #{c_name}"
+        when "rbs_string"
+          "rbs_string_t #{c_name}"
+        else
+          "struct #{@c_type} *#{c_name}"
+        end
+      end
+
+      def ast_node?
+        @c_type == "rbs_node" ||
+          @c_type == "rbs_typename" ||
+          @c_type == "rbs_namespace" ||
+          @c_type.include?("_ast_") ||
+          @c_type.include?("_decl_") ||
+          @c_type.include?("_types_")
+      end
+
+      def needs_to_be_freed?
+        !["VALUE", "bool"].include?(@c_type)
       end
     end
 
@@ -41,6 +84,10 @@ module RBS
       # e.g. `RBS_AST_Declarations`
       attr_reader :c_parent_constant_name #: String
 
+      attr_reader :c_struct_name #: String
+      attr_reader :c_type_enum_name #: String
+
+      attr_reader :constructor_params #: Array[RBS::Template::Field]
       attr_reader :fields #: Array[RBS::Template::Field]
 
       def initialize(yaml)
@@ -52,8 +99,34 @@ module RBS
         @c_function_name.gsub!(/^rbs_ast_declarations_/, 'rbs_ast_decl_')
         @c_constant_name = @ruby_full_name.gsub("::", "_")
         @c_parent_constant_name = @ruby_full_name.split("::")[0..-2].join("::").gsub("::", "_")
+        @c_base_name = @c_constant_name.downcase
+        @c_type_name = @c_base_name + "_t"
 
-        @fields = yaml.fetch("fields", []).map { |field| Field.new(field) }.freeze
+        @c_struct_name = "#{@c_base_name}_t"
+        @c_type_enum_name = @c_base_name.upcase
+
+        @expose_to_ruby = yaml.fetch("expose_to_ruby", true)
+
+        @fields = yaml.fetch("fields", []).map { |field| Field.from_hash(field) }.freeze
+
+        @constructor_params = [
+          Field.new(name: "allocator",  c_type: "rbs_allocator_t *"),
+          Field.new(name: "ruby_value", c_type: "VALUE"),
+        ]
+        @constructor_params.concat @fields
+        @constructor_params.freeze
+      end
+
+      # The name of the C function which constructs new instances of this C structure.
+      # e.g. `rbs_ast_declarations_typealias_new`
+      def c_constructor_function_name #: String
+        "#{@c_base_name}_new"
+      end
+
+      # Every templated type will have a C struct created for it.
+      # If this is true, then we will also create a Ruby class for it, otherwise we'll skip that.
+      def expose_to_ruby?
+        @expose_to_ruby
       end
     end
 

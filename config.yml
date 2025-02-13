@@ -311,3 +311,6 @@ nodes:
     fields:
       - name: name
       - name: location
+  - name: RBS::Types::ZzzTmpNotImplemented
+    expose_to_ruby: false
+    fields: []

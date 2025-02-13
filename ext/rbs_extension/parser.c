@@ -1,5 +1,7 @@
 #include "rbs_extension.h"
 #include "rbs/util/rbs_constant_pool.h"
+#include "rbs/ast.h"
+#include "ast_translation.h"
 
 #define INTERN(str)                  \
   rbs_constant_pool_insert_constant( \
@@ -87,7 +89,7 @@ static VALUE rbs_location_current_token(parserstate *state) {
 }
 
 static VALUE parse_optional(parserstate *state);
-static VALUE parse_simple(parserstate *state);
+static rbs_node_t *parse_simple(parserstate *state);
 
 static VALUE string_of_loc(parserstate *state, position start, position end) {
   return rb_enc_str_new(
@@ -594,8 +596,7 @@ EOP:
 static VALUE parse_optional(parserstate *state) {
   range rg;
   rg.start = state->next_token.range.start;
-
-  VALUE type = parse_simple(state);
+  VALUE type = rbs_struct_to_ruby_value(parse_simple(state));
 
   if (state->next_token.type == pQUESTION) {
     parser_advance(state);
@@ -797,7 +798,7 @@ static VALUE parse_record_attributes(parserstate *state) {
       case tINTEGER:
       case kTRUE:
       case kFALSE: {
-        key = rb_funcall(parse_simple(state), rb_intern("literal"), 0);
+        key = rb_funcall(rbs_struct_to_ruby_value(parse_simple(state)), rb_intern("literal"), 0);
         break;
       }
       default:
@@ -959,74 +960,101 @@ static VALUE parse_singleton_type(parserstate *state) {
            | {} `{` record_attributes <`}`>
            | {} `^` <function>
 */
-static VALUE parse_simple(parserstate *state) {
+static rbs_node_t *parse_simple(parserstate *state) {
   parser_advance(state);
 
   switch (state->current_token.type) {
   case pLPAREN: {
     VALUE type = parse_type(state);
     parser_advance_assert(state, pRPAREN);
-    return type;
+
+    return (rbs_node_t *) rbs_types_zzztmpnotimplemented_new(&state->allocator, type);
   }
   case kBOOL: {
-    return rbs_bases_bool(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_bool(loc);
+    return (rbs_node_t *) rbs_types_bases_bool_new(&state->allocator, value, loc);
   }
   case kBOT: {
-    return rbs_bases_bottom(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_bottom(loc);
+    return (rbs_node_t *) rbs_types_bases_bottom_new(&state->allocator, value, loc);
   }
   case kCLASS: {
-    return rbs_bases_class(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_class(loc);
+    return (rbs_node_t *) rbs_types_bases_class_new(&state->allocator, value, loc);
   }
   case kINSTANCE: {
-    return rbs_bases_instance(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_instance(loc);
+    return (rbs_node_t *) rbs_types_bases_instance_new(&state->allocator, value, loc);
   }
   case kNIL: {
-    return rbs_bases_nil(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_nil(loc);
+    return (rbs_node_t *) rbs_types_bases_nil_new(&state->allocator, value, loc);
   }
   case kSELF: {
-    return rbs_bases_self(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_self(loc);
+    return (rbs_node_t *) rbs_types_bases_self_new(&state->allocator, value, loc);
   }
   case kTOP: {
-    return rbs_bases_top(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_top(loc);
+    return (rbs_node_t *) rbs_types_bases_top_new(&state->allocator, value, loc);
   }
   case kVOID: {
-    return rbs_bases_void(rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_void(loc);
+    return (rbs_node_t *) rbs_types_bases_void_new(&state->allocator, value, loc);
   }
   case kUNTYPED: {
-    return rbs_bases_any(false, rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_any(Qfalse, loc);
+    return (rbs_node_t *) rbs_types_bases_any_new(&state->allocator, value, Qfalse, loc);
   }
   case k__TODO__: {
-    return rbs_bases_any(true, rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_bases_any(Qtrue, loc);
+    return (rbs_node_t *) rbs_types_bases_any_new(&state->allocator, value, Qtrue, loc);
   }
   case tINTEGER: {
+    VALUE loc = rbs_location_current_token(state);
     VALUE literal = rb_funcall(
       string_of_loc(state, state->current_token.range.start, state->current_token.range.end),
       rb_intern("to_i"),
       0
     );
-    return rbs_literal(
-      literal,
-      rbs_location_current_token(state)
-    );
+    VALUE value = rbs_literal(literal, loc);
+    return (rbs_node_t *) rbs_types_literal_new(&state->allocator, value, literal, loc);
   }
   case kTRUE: {
-    return rbs_literal(Qtrue, rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE literal = Qtrue;
+    VALUE value = rbs_literal(literal, loc);
+    return (rbs_node_t *) rbs_types_literal_new(&state->allocator, value, literal, loc);
   }
   case kFALSE: {
-    return rbs_literal(Qfalse, rbs_location_current_token(state));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE literal = Qfalse;
+    VALUE value = rbs_literal(literal, loc);
+    return (rbs_node_t *) rbs_types_literal_new(&state->allocator, value, literal, loc);
   }
   case tSQSTRING:
   case tDQSTRING: {
+    VALUE loc = rbs_location_current_token(state);
     VALUE literal = rbs_unquote_string(state, state->current_token.range, 0);
-    return rbs_literal(
-      literal,
-      rbs_location_current_token(state)
-    );
+    VALUE value = rbs_literal(literal, loc);
+    return (rbs_node_t *) rbs_types_literal_new(&state->allocator, value, literal, loc);
   }
   case tSYMBOL:
   case tSQSYMBOL:
   case tDQSYMBOL: {
-    return parse_symbol(state);
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = parse_symbol(state);
+    return (rbs_node_t *) rbs_types_literal_new(&state->allocator, value, value, loc);
   }
   case tUIDENT: {
     const char *name_str = peek_token(state->lexstate, state->current_token);
@@ -1036,17 +1064,22 @@ static VALUE parse_simple(parserstate *state) {
 
     if (parser_typevar_member(state, name)) {
       ID name = rb_intern3(name_str, name_len, rb_enc_get(state->lexstate->string));
-      return rbs_variable(ID2SYM(name), rbs_location_current_token(state));
+      VALUE loc = rbs_location_current_token(state);
+      VALUE value = rbs_variable(ID2SYM(name), loc);
+      return (rbs_node_t *) rbs_types_variable_new(&state->allocator, value, ID2SYM(name), loc);
     }
     // fallthrough for type name
   }
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
   case pCOLON2: {
-    return parse_instance_type(state, true);
+    VALUE value = parse_instance_type(state, true);
+    return (rbs_node_t *) rbs_types_zzztmpnotimplemented_new(&state->allocator, value);
   }
   case kSINGLETON: {
-    return parse_singleton_type(state);
+    VALUE value = parse_singleton_type(state);
+    VALUE loc = rb_funcall(value, rb_intern("location"), 0);
+    return (rbs_node_t *) rbs_types_classsingleton_new(&state->allocator, value, value, loc);
   }
   case pLBRACKET: {
     range rg;
@@ -1058,21 +1091,27 @@ static VALUE parse_simple(parserstate *state) {
     parser_advance_assert(state, pRBRACKET);
     rg.end = state->current_token.range.end;
 
-    return rbs_tuple(types, rbs_new_location(state->buffer, rg));
+    VALUE location = rbs_new_location(state->buffer, rg);
+    VALUE value = rbs_tuple(types, location);
+    return (rbs_node_t *) rbs_types_tuple_new(&state->allocator, value, types, location);
   }
   case pAREF_OPR: {
-    return rbs_tuple(EMPTY_ARRAY, rbs_new_location(state->buffer, state->current_token.range));
+    VALUE loc = rbs_location_current_token(state);
+    VALUE value = rbs_tuple(EMPTY_ARRAY, loc);
+    return (rbs_node_t *) rbs_types_tuple_new(&state->allocator, value, EMPTY_ARRAY, loc);
   }
   case pLBRACE: {
     position start = state->current_token.range.start;
     VALUE fields = parse_record_attributes(state);
     parser_advance_assert(state, pRBRACE);
     position end = state->current_token.range.end;
-    VALUE location = rbs_location_pp(state->buffer, &start, &end);
-    return rbs_record(fields, location);
+    VALUE loc = rbs_location_pp(state->buffer, &start, &end);
+    VALUE value = rbs_record(fields, loc);
+    return (rbs_node_t *) rbs_types_record_new(&state->allocator, value, fields, loc);
   }
   case pHAT: {
-    return parse_proc_type(state);
+    VALUE value = parse_proc_type(state);
+    return (rbs_node_t *) rbs_types_zzztmpnotimplemented_new(&state->allocator, value);
   }
   default:
     raise_syntax_error(
@@ -2939,9 +2978,12 @@ static VALUE
 rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-  lexstate *lexer = alloc_lexer(string, 0, FIX2INT(end_pos));
-  VALUE results = rb_ary_new();
 
+  rbs_allocator_t allocator;
+  rbs_allocator_init(&allocator);
+  lexstate *lexer = alloc_lexer(&allocator, string, 0, FIX2INT(end_pos));
+
+  VALUE results = rb_ary_new();
   token token = NullToken;
   while (token.type != pEOF) {
     token = rbsparser_next_token(lexer);
@@ -2951,7 +2993,7 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
     rb_ary_push(results, pair);
   }
 
-  free(lexer);
+  rbs_allocator_free(&allocator);
 
   return results;
 }

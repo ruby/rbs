@@ -11,7 +11,7 @@ extern VALUE RBS_Types;
 extern VALUE RBS_Types_Bases;
 extern VALUE RBS_ParsingError;
 
-<%- nodes.each do |node| -%>
+<%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
 extern VALUE <%= node.c_constant_name %>;
 <%- end -%>
 

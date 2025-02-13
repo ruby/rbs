@@ -1,0 +1,26 @@
+#include "rbs/ast.h"
+#include <stdlib.h>
+
+<%- nodes.each do |node| -%>
+<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>) {
+    <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
+
+    rb_gc_register_mark_object(ruby_value);
+    <%- node.fields.each do |field| -%>
+    rb_gc_register_mark_object(<%= field.name %>);
+    <%- end -%>
+
+    *instance = (<%= node.c_type_name %>) {
+        .base = (rbs_node_t) {
+            .cached_ruby_value = ruby_value,
+            .type = <%= node.c_type_enum_name %>
+        },
+        <%- node.fields.each do |field| -%>
+        .<%= field.name %> = <%= field.name %>,
+        <%- end -%>
+    };
+
+    return instance;
+}
+
+<%- end -%>

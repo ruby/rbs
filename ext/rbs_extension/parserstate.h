@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "rbs/util/rbs_allocator.h"
+#include "rbs/util/rbs_constant_pool.h"
 #include "lexer.h"
 #include "location.h"
 
@@ -57,11 +59,11 @@ typedef struct {
   comment *last_comment;  /* Last read comment */
 
   rbs_constant_pool_t constant_pool;
+  rbs_allocator_t allocator;
 } parserstate;
 
-comment *alloc_comment(token comment_token, comment *last_comment);
-void free_comment(comment *com);
-void comment_insert_new_line(comment *com, token comment_token);
+comment *alloc_comment(rbs_allocator_t *, token comment_token, comment *last_comment);
+void comment_insert_new_line(rbs_allocator_t *, comment *com, token comment_token);
 comment *comment_get_comment(comment *com, int line);
 VALUE comment_to_ruby(comment *com, VALUE buffer);
 
@@ -103,7 +105,7 @@ bool parser_typevar_member(parserstate *state, rbs_constant_id_t id);
  * alloc_lexer(string, 0, 31)    // New lexstate with buffer content
  * ```
  * */
-lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos);
+lexstate *alloc_lexer(rbs_allocator_t *, VALUE string, int start_pos, int end_pos);
 
 /**
  * Allocate new parserstate object.

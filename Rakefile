@@ -56,9 +56,16 @@ task :confirm_annotation do
 end
 
 task :templates do
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.h"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.c"
+
+  sh "#{ruby} templates/template.rb include/rbs/ast.h"
+  sh "#{ruby} templates/template.rb src/ast.c"
+
   sh "#{ruby} templates/template.rb include/rbs/constants.h"
-  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
   sh "#{ruby} templates/template.rb src/constants.c"
+
+  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
   sh "#{ruby} templates/template.rb src/ruby_objs.c"
 end
 

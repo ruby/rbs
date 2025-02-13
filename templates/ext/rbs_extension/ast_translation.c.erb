@@ -1,0 +1,44 @@
+#include "ast_translation.h"
+
+
+const char* get_class_name(VALUE o) {
+    VALUE klass = rb_class_of(o);      // Get the class of the object
+    VALUE klass_name = rb_class_name(klass);  // Get the name of the class
+    const char* name = StringValueCStr(klass_name);  // Convert to C string
+    return name;
+}
+
+VALUE rbs_struct_to_ruby_value(rbs_node_t *instance) {
+    if (instance == NULL) {
+        fprintf(stderr, "Tried to call rbs_struct_to_ruby_value(NULL)\n");
+        exit(1);
+    }
+
+    if (instance->type == RBS_TYPES_ZZZTMPNOTIMPLEMENTED) {
+        // Special case: skip assertions/translation below.
+        return instance->cached_ruby_value;
+    }
+
+    VALUE ruby_value = instance->cached_ruby_value;
+
+    if (ruby_value == Qnil || ruby_value == Qundef) {
+        fprintf(stderr, "cached_ruby_value is NULL\n");
+        exit(1);
+    }
+
+    const char *class_name = get_class_name(ruby_value);
+
+    switch (instance->type) {
+        <%- nodes.each do |node| -%>
+        case <%= node.c_type_enum_name %>: {
+            if (strcmp(class_name, "<%= node.ruby_full_name %>") != 0) {
+                fprintf(stderr, "Expected class name: <%= node.ruby_full_name %>, got %s\n", class_name);
+                exit(1);
+            }
+            break;
+        }
+        <%- end -%>
+    }
+
+    return instance->cached_ruby_value;
+}
