@@ -2882,8 +2882,7 @@ rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, V
 {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
-  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -2913,8 +2912,7 @@ rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end
 {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
-  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), variables);
   struct parse_type_arg arg = {
     parser,
     require_eof
@@ -2933,8 +2931,7 @@ rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_p
 {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
-  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
-  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
+  parserstate *parser = alloc_parser(buffer, string, FIX2INT(start_pos), FIX2INT(end_pos), Qnil);
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 

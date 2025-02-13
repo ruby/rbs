@@ -319,7 +319,8 @@ lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos) {
   return lexer;
 }
 
-parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_pos, VALUE variables) {
+parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos, VALUE variables) {
+  lexstate *lexer = alloc_lexer(string, start_pos, end_pos);
   parserstate *parser = malloc(sizeof(parserstate));
 
   *parser = (parserstate) {

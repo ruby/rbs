@@ -109,11 +109,11 @@ lexstate *alloc_lexer(VALUE string, int start_pos, int end_pos);
  * Allocate new parserstate object.
  *
  * ```
- * alloc_parser(buffer, lexer, 0, 1, variables)    // New parserstate with variables
- * alloc_parser(buffer, lexer, 3, 5, Qnil)         // New parserstate without variables
+ * alloc_parser(buffer, VALUE string, 0, 1, variables)    // New parserstate with variables
+ * alloc_parser(buffer, VALUE string, 3, 5, Qnil)         // New parserstate without variables
  * ```
  * */
-parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_pos, VALUE variables);
+parserstate *alloc_parser(VALUE buffer, VALUE string, int start_pos, int end_pos, VALUE variables);
 void free_parser(parserstate *parser);
 /**
  * Advance one token.
