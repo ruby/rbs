@@ -59,6 +59,16 @@ module RBS
       end
     end
 
+    def self.parse_inline(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
+    def self.parse_inline_assertion(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_assertion(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
     def self.lex(source)
       buf = buffer(source)
       list = _lex(buf, buf.last_position)

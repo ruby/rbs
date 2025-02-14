@@ -1,0 +1,334 @@
+module RBS
+  module AST
+    module Ruby
+      module Annotation
+        type leading_annotation = ColonMethodTypeAnnotation
+                                | MethodTypesAnnotation
+                                | ReturnTypeAnnotation
+                                | ParamTypeAnnotation
+                                | SplatParamTypeAnnotation
+                                | DoubleSplatParamTypeAnnotation
+                                | BlockParamTypeAnnotation
+
+        type trailing_annotation = NodeTypeAssertion
+
+        type t = leading_annotation | trailing_annotation
+
+        class Base
+          attr_reader location: Location
+
+          # Location of `@rbs`, `@rbs!`, or `:` prefix
+          #
+          attr_reader prefix_location: Location
+
+          def initialize: (Location location, Location prefix_location) -> void
+        end
+
+        # `: TYPE` annotation attached to nodes
+        #
+        class NodeTypeAssertion < Base
+          attr_reader type: Types::t
+
+          def initialize: (location: Location, prefix_location: Location, type: Types::t) -> void
+        end
+
+        # `[TYPE, ...]` annotation attached to nodes
+        #
+        class NodeApplication < Base
+          attr_reader types: Array[Types::t]
+
+          attr_reader suffix_location: Location
+
+          def initialize: (location: Location, prefix_location: Location, types: Array[Types::t], suffix_location: Location) -> void
+        end
+
+        # `@rbs skip` annotation
+        #
+        # ```
+        # @rbs skip -- Optional comment
+        # ^^^^                                -- prefix_location
+        #      ^^^^                           -- skip_location
+        #           ^^^^^^^^^^^^^^^^^^^       -- comment
+        # ```
+        class SkipAnnotation < Base
+          attr_reader skip_location: Location
+
+          attr_reader comment: Location?
+
+          def initialize: (location: Location, prefix_location: Location, skip_location: Location, comment: Location?) -> void
+        end
+
+        # `: METHOD-TYPE` annotation in leading comments
+        class ColonMethodTypeAnnotation < Base
+          attr_reader annotations: Array[AST::Annotation]
+
+          attr_reader method_type: MethodType
+
+          def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation], method_type: MethodType) -> void
+        end
+
+        # `@rbs METHOD-TYPEs` annotation in leading comments
+        #
+        # ```
+        # @rbs () -> void | %a{foo} () -> String
+        # ^^^^                                     -- prefix_location
+        #                 ^                        -- vertical_bar_locations[0]
+        # ```
+        class MethodTypesAnnotation < Base
+          class Overload
+            attr_reader annotations: Array[AST::Annotation]
+
+            attr_reader method_type: MethodType
+
+            def initialize: (annotations: Array[AST::Annotation], method_type: MethodType) -> void
+          end
+
+          attr_reader overloads: Array[Overload]
+
+          attr_reader vertical_bar_locations: Array[Location]
+
+          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location]) -> void
+        end
+
+        # `@rbs return: T -- COMMENT` annotation in leading comments
+        #
+        # ```
+        # @rbs return: String -- Returns a string
+        # ^^^                                        -- prefix_location
+        #      ^^^^^^                                -- return_location
+        #            ^                               -- colon_location
+        #                     ^^^^^^^^^^^^^^^^^^^    -- comment
+        # ```
+        class ReturnTypeAnnotation < Base
+          attr_reader return_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader return_type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            return_location: Location,
+            colon_location: Location,
+            return_type: Types::t,
+            comment: Location?,
+          ) -> void
+        end
+
+        # `@rbs param: T -- COMMENT` annotation in leading comments
+        #
+        # ```
+        # @rbs x: String -- A string
+        # ^^^^                        -- prefix_location
+        #      ^                      -- param_name_location
+        #       ^                     -- colon_location
+        #                ^^^^^^^^^^^  -- comment
+        # ```
+        class ParamTypeAnnotation < Base
+          attr_reader param_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            param_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs *param: TYPE -- COMMENT` annotation in leading comments
+        #
+        # ```
+        # @rbs *x: String -- A string
+        # ^^^^                         -- prefix_location
+        #      ^                       -- operator_location
+        #       ^                      -- param_name_location (optional)
+        #        ^                     -- colon_location
+        #                 ^^^^^^^^^^^  -- comment
+        # ```
+
+        class SplatParamTypeAnnotation < Base
+          attr_reader operator_location: Location
+
+          attr_reader param_name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            operator_location: Location,
+            param_name_location: Location?,
+            colon_location: Location,
+            type: Types::t,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs **param: TYPE -- COMMENT` annotation in leading comments
+        #
+        # ```
+        # @rbs **x: String -- A string
+        # ^^^^                          -- prefix_location
+        #      ^^                       -- operator_location
+        #        ^                      -- param_name_location?
+        #         ^                     -- colon_location
+        #                  ^^^^^^^^^^^  -- comment
+        # ```
+        class DoubleSplatParamTypeAnnotation < Base
+          attr_reader operator_location: Location
+
+          attr_reader param_name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            operator_location: Location,
+            param_name_location: Location?,
+            colon_location: Location,
+            type: Types::t,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs &block: ? method-type -- COMMENT` annotation in leading comments
+        #
+        # ```
+        # @rbs &x: () -> void -- Yields something
+        # ^^^^                                    -- prefix_location
+        #      ^                                  -- operator_location
+        #       ^                                 -- param_name_location
+        #        ^                                -- colon_location
+        #                     ^^^^^^^^^^^^^^^^^^^ -- comment
+        #
+        # @rbs &: ? () -> void -- Yields something
+        # ^^^^                                     -- prefix_location
+        #      ^                                   -- operator_location
+        #       ^                                  -- colon_location
+        #         ^                                -- question_mark_location
+        #                      ^^^^^^^^^^^         -- comment
+        # ```
+        #
+        class BlockParamTypeAnnotation < Base
+          attr_reader operator_location: Location
+
+          attr_reader param_name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader question_mark_location: Location?
+
+          attr_reader block: Types::Block
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            operator_location: Location,
+            param_name_location: Location?,
+            colon_location: Location,
+            question_mark_location: Location?,
+            block: Types::Block,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs override` annotation in leading comments
+        #
+        # ```
+        # @rbs override
+        # ^^^^          -- prefix_location
+        #      ^^^^^^^^ -- override_location
+        # ```
+        class OverrideAnnotation < Base
+          attr_reader override_location: Location
+
+          def initialize: (location: Location, prefix_location: Location, override_location: Location) -> void
+        end
+
+        # `@rbs generic unchecked out A < String = untyped` annotation in leading comments
+        #
+        # ```
+        # @rbs generic unchecked out A < String = untyped
+        # ^^^^                                            -- prefix_location
+        #      ^^^^^^^                                    -- generic_location
+        #              ^^^^^^^^^                          -- unchecked_location
+        #                        ^^^                      -- variance_location
+        #                            ^                    -- name_location
+        #                              ^                  -- upper_bound_operator_location
+        #                                       ^         -- default_type_operator_location
+        # ```
+        class GenericAnnotation < Base
+          attr_reader generic_location: Location
+
+          attr_reader unchecked_location: Location?
+
+          attr_reader variance_location: Location?
+
+          attr_reader name_location: Location
+
+          attr_reader upper_bound_operator_location: Location?
+
+          attr_reader upper_bound: Types::t?
+
+          attr_reader default_type_operator_location: Location?
+
+          attr_reader default_type: Types::t?
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            generic_location: Location,
+            unchecked_location: Location?,
+            variance_location: Location?,
+            name_location: Location,
+            upper_bound_operator_location: Location?,
+            upper_bound: Types::t?,
+            default_type_operator_location: Location?,
+            default_type: Types::t?,
+            comment: Location?
+          ) -> void
+
+          def unchecked?: () -> bool
+
+          def variance: () -> TypeParam::variance
+
+          def upper_bound_location: () -> Location?
+
+          def default_type_location: () -> Location?
+        end
+
+        # `@rbs %a{annotation} %a{annotation}` annotation in leading comments
+        #
+        class RBSAnnotationAnnotation < Base
+          attr_reader annotations: Array[AST::Annotation]
+
+          def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation]) -> void
+        end
+      end
+    end
+  end
+end

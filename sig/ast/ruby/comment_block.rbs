@@ -19,6 +19,9 @@ module RBS
 
         def initialize: (Pathname, Array[Comment]) -> void
 
+        # Build comment block instances
+        def self.build: (Pathname, Array[Comment]) -> Array[instance]
+
         # Translate the location in `comment_buffer` to the locations of Comments
         #
         # Note that new lines included in the location are assumed between returned comments.
@@ -28,12 +31,67 @@ module RBS
         # Returns a pair of comment index and character position in the comment
         def translate_comment_position: (Integer) -> [Integer, Integer]?
 
-        # Test if the index is at the start of the content of a line in `#comment_buffer
+        # Returns true if the comment block is a *leading* comment, which is attached to the successor node
+        def leading?: () -> bool
+
+        # Returns true if the comment block is a *trailing* comment, which is attached to the predecessor node
+        def trailing?: () -> bool
+
+        # The character index of `#comment_buffer` at the start of the lines
         #
-        # * If the index is before the start of the content of a line, returns the content start index
-        # * Otherwise, it returns `nil`
-        # 
-        def line_start?: (Integer) -> Integer?
+        def line_starts: () -> Array[Integer]
+
+        # Yields paragraph and annotation
+        #
+        # A paragraph is a sequence of lines that are separated by annotations.
+        # An annotation starts with a line starting with `@rbs` or `:`, and may follow lines that has more leading spaces.
+        #
+        # ```
+        # # Line 1         ^ Paragraph 1
+        # #   Line 2       |
+        # #                |
+        # # Line 3         v
+        # # @rbs ...       < Annotation 1
+        # # @rbs ...       ^ Annotation 2
+        # #   ...          |
+        # #                |
+        # #   ...          v
+        # #                ^ Paragraph 2
+        # # Line 4         |
+        # # Line 5         v
+        # ```
+        #
+        def each_paragraph: (Array[Symbol] variables) { (Location | AST::Ruby::Annotation::leading_annotation | AnnotationSyntaxError) -> void } -> void
+                          | (Array[Symbol] variables) -> Enumerator[Location | AST::Ruby::Annotation::leading_annotation | AnnotationSyntaxError]
+
+        # Returns a trailing annotation if it exists
+        #
+        # * Returns `nil` if the block is not a type annotation
+        # * Returns an annotation if the block has a type annotation
+        # * Returns AnnotationSyntaxError if the annotation has a syntax error
+        #
+        def trailing_annotation: (Array[Symbol] variables) -> (AST::Ruby::Annotation::trailing_annotation | AnnotationSyntaxError | nil)
+
+
+        class AnnotationSyntaxError
+          attr_reader location: Location
+
+          attr_reader error: ParsingError
+
+          def initialize: (Location, ParsingError) -> void
+        end
+
+        private def yield_paragraph: (Integer start_line, Integer current_line, Array[Symbol] variables) { (Location | AST::Ruby::Annotation::leading_annotation | AnnotationSyntaxError) -> void } -> void
+
+        private def yield_annotation: (Integer start_line, Integer end_line, Integer current_line, Array[Symbol] variables) { (Location | AST::Ruby::Annotation::leading_annotation | AnnotationSyntaxError) -> void } -> void
+
+        private def parse_annotation_lines: (Integer start_line, Integer end_line, Array[Symbol] variables) -> (AST::Ruby::Annotation::leading_annotation | AnnotationSyntaxError)
+
+        def comments: () -> Array[Comment]
+
+        def line_location: (Integer start_line, Integer end_line) -> Location
+
+        private def leading_annotation?: (Integer index) -> bool
       end
     end
   end
