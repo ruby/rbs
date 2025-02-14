@@ -678,6 +678,13 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
     }
   }
 
+  // Passing `NULL` to `block` means it cannot have block
+  if (!block) {
+    if (state->next_token.type != pARROW) {
+      raise_syntax_error(state, state->next_token2, "Cannot have block");
+    }
+  }
+
   VALUE required = Qtrue;
   if (state->next_token.type == pQUESTION && state->next_token2.type == pLBRACE) {
     // Optional block
@@ -717,7 +724,9 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
       );
     }
 
-    *block = rbs_block(block_function, required, block_self_type);
+    if (block) {
+      *block = rbs_block(block_function, required, block_self_type);
+    }
 
     parser_advance_assert(state, pRBRACE);
   }
@@ -1147,6 +1156,141 @@ VALUE parse_type(parserstate *state) {
 }
 
 /*
+  type_param ::= {} kUNCHECKED? (kIN|kOUT|) <tUIDENT> <upper_bound?> <default_type?>   (module_type_params == true)
+
+  type_param ::= {} <tUIDENT> <upper_bound?> <default_type?>                           (module_type_params == false)
+
+  `ranges` must be 8-array or more to store ranges for:
+
+  0: all range
+  1: unchecked keyword
+  2: variance
+  3: name
+  4: upper_bound_operator
+  5: upper_bound
+  6: default_type_operator
+  7: default_type
+
+  `values` must be 5-array or more to store objects for:
+
+  0: unchecked (Qtrue or Qnil)
+  1: variance (:invariant, :covariant, :contravariant, or Qnil)
+  2: name (Symbol)
+  3: upper_bound (type or Qnil)
+  4: default_type (type or Qnil)
+*/
+static void parse_type_param(parserstate *state, bool module_type_params, bool required_param_allowed, range ranges[], VALUE values[]) {
+  range all_range = NULL_RANGE;
+
+  range unchecked_range = NULL_RANGE;
+  VALUE unchecked = Qnil;
+
+  parser_advance(state);
+
+  if (module_type_params) {
+    if (state->current_token.type == kUNCHECKED) {
+      unchecked_range = state->current_token.range;
+      unchecked = Qtrue;
+      all_range.start = unchecked_range.start;
+      parser_advance(state);
+    }
+  }
+
+  range variance_range = NULL_RANGE;
+  VALUE variance = Qnil;
+  if (module_type_params) {
+    switch (state->current_token.type) {
+      case kIN:
+        variance = ID2SYM(rb_intern("contravariant"));
+        variance_range = state->current_token.range;
+        if (null_position_p(all_range.start)) {
+          all_range.start = variance_range.start;
+        }
+        parser_advance(state);
+        break;
+      case kOUT:
+        variance = ID2SYM(rb_intern("covariant"));
+        variance_range = state->current_token.range;
+        if (null_position_p(all_range.start)) {
+          all_range.start = variance_range.start;
+        }
+        parser_advance(state);
+        break;
+      default:
+        // nop
+        break;
+    }
+  }
+
+  range name_range = state->current_token.range;
+  rbs_constant_id_t id = rbs_constant_pool_insert_shared(
+    &state->constant_pool,
+    (const uint8_t *) peek_token(state->lexstate, state->current_token),
+    token_bytes(state->current_token)
+  );
+
+  if (null_position_p(all_range.start)) {
+    all_range.start = name_range.start;
+  }
+  all_range.end = name_range.end;
+  VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
+  parser_insert_typevar(state, id);
+
+  range upper_bound_range = NULL_RANGE;
+  range upper_bound_operator_range = NULL_RANGE;
+  VALUE upper_bound = Qnil;
+
+  if (state->next_token.type == pLT) {
+    parser_advance(state);
+    upper_bound_operator_range = state->current_token.range;
+    upper_bound = parse_type(state);
+    upper_bound_range = (range) {
+      .start = upper_bound_operator_range.start,
+      .end = state->current_token.range.end
+    };
+    all_range.end = state->current_token.range.end;
+  }
+
+  range default_type_range = NULL_RANGE;
+  range default_type_operator_range = NULL_RANGE;
+  VALUE default_type = Qnil;
+
+  if (state->next_token.type == pEQ) {
+    parser_advance(state);
+    default_type_operator_range = state->current_token.range;
+    default_type = parse_type(state);
+    default_type_range = (range) {
+      .start = default_type_operator_range.start,
+      .end = state->current_token.range.end
+    };
+    all_range.end = state->current_token.range.end;
+  } else {
+    if (!required_param_allowed) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "required type parameter is not allowed after optional type parameter"
+      );
+    }
+  }
+
+  ranges[0] = all_range;
+  ranges[1] = unchecked_range;
+  ranges[2] = variance_range;
+  ranges[3] = name_range;
+  ranges[4] = upper_bound_operator_range;
+  ranges[5] = upper_bound_range;
+  ranges[6] = default_type_operator_range;
+  ranges[7] = default_type_range;
+
+  values[0] = unchecked;
+  values[1] = variance;
+  values[2] = name;
+  values[3] = upper_bound;
+  values[4] = default_type;
+}
+
+/*
   type_params ::= {} `[` type_param `,` ... <`]`>
                 | {<>}
 
@@ -1160,88 +1304,28 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
   bool required_param_allowed = true;
 
   if (state->next_token.type == pLBRACKET) {
+    rg->start = state->next_token.range.start;
+
     parser_advance(state);
 
-    rg->start = state->current_token.range.start;
-
     while (true) {
-      VALUE unchecked = Qfalse;
-      VALUE variance = ID2SYM(rb_intern("invariant"));
-      VALUE upper_bound = Qnil;
-      VALUE default_type = Qnil;
+      range ranges[8];
+      VALUE values[5];
 
-      range param_range;
-      param_range.start = state->next_token.range.start;
+      parse_type_param(state, module_type_params, required_param_allowed, ranges, values);
 
-      range variance_range = NULL_RANGE;
-      range unchecked_range = NULL_RANGE;
-      if (module_type_params) {
-        if (state->next_token.type == kUNCHECKED) {
-          unchecked = Qtrue;
-          parser_advance(state);
-          unchecked_range = state->current_token.range;
-        }
+      range param_range = ranges[0];
+      range unchecked_range = ranges[1];
+      range variance_range = ranges[2];
+      range name_range = ranges[3];
+      range upper_bound_range = ranges[5];
+      range default_type_range = ranges[7];
 
-        if (state->next_token.type == kIN || state->next_token.type == kOUT) {
-          switch (state->next_token.type) {
-          case kIN:
-            variance = ID2SYM(rb_intern("contravariant"));
-            break;
-          case kOUT:
-            variance = ID2SYM(rb_intern("covariant"));
-            break;
-          default:
-            rbs_abort();
-          }
-
-          parser_advance(state);
-          variance_range = state->current_token.range;
-        }
-      }
-
-      parser_advance_assert(state, tUIDENT);
-      range name_range = state->current_token.range;
-
-      rbs_constant_id_t id = rbs_constant_pool_insert_shared(
-        &state->constant_pool,
-        (const uint8_t *) peek_token(state->lexstate, state->current_token),
-        token_bytes(state->current_token)
-      );
-
-      VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
-
-      parser_insert_typevar(state, id);
-
-      range upper_bound_range = NULL_RANGE;
-      if (state->next_token.type == pLT) {
-        parser_advance(state);
-        upper_bound_range.start = state->current_token.range.start;
-        upper_bound = parse_type(state);
-        upper_bound_range.end = state->current_token.range.end;
-      }
-
-      range default_type_range = NULL_RANGE;
-      if (module_type_params) {
-        if (state->next_token.type == pEQ) {
-          parser_advance(state);
-
-          default_type_range.start = state->current_token.range.start;
-          default_type = parse_type(state);
-          default_type_range.end = state->current_token.range.end;
-
-          required_param_allowed = false;
-        } else {
-          if (!required_param_allowed) {
-            raise_syntax_error(
-              state,
-              state->current_token,
-              "required type parameter is not allowed after optional type parameter"
-            );
-          }
-        }
-      }
-
-      param_range.end = state->current_token.range.end;
+      VALUE unchecked = values[0];
+      VALUE variance = RB_TEST(values[1]) ? values[1] : ID2SYM(rb_intern("invariant"));
+      VALUE name = values[2];
+      VALUE upper_bound = values[3];
+      VALUE default_type = values[4];
 
       VALUE location = rbs_new_location(state->buffer, param_range);
       rbs_loc *loc = rbs_check_location(location);
@@ -1253,6 +1337,14 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       rbs_loc_add_optional_child(loc, INTERN("default"), default_type_range);
 
       VALUE param = rbs_ast_type_param(name, variance, upper_bound, default_type, unchecked, location);
+
+      if (RB_TEST(default_type)) {
+        required_param_allowed = false;
+      }
+
+      if (RB_TEST(unchecked)) {
+        rb_funcall(param, rb_intern("unchecked!"), 0);
+      }
 
       melt_array(&params);
       rb_ary_push(params, param);
@@ -2869,6 +2961,444 @@ VALUE parse_signature(parserstate *state) {
   return ret;
 }
 
+/*
+inline_comment ::= {}                  // nil
+                 | {} <`--` any string> // comment
+*/
+VALUE parse_inline_comment(parserstate *state) {
+  if (state->next_token.type != pMINUS2) {
+    return Qnil;
+  }
+
+  parser_advance(state);
+
+  return rbs_new_location(state->buffer, state->current_token.range);
+}
+
+/*
+  annotated_method_type ::= {} annotations <method_type>
+
+  Returns a pair of an array of annotation and method type.
+*/
+VALUE parse_annotated_method_type(parserstate *state) {
+  VALUE annotations = EMPTY_ARRAY;
+  position annot_pos = NullPosition;
+
+  parse_annotations(state, &annotations, &annot_pos);
+
+  VALUE method_type = parse_method_type(state);
+
+  return rbs_ast_ruby_annotation_method_types_annotation_overload(annotations, method_type);
+}
+
+/**
+  inline_skip_annotation ::= {} <`skip`>
+                           | {} `skip` <inline_comment>
+ */
+VALUE parse_inline_skip_annotation(parserstate *state, range rbs_range) {
+  range skip_range = state->next_token.range;
+  parser_advance(state);
+
+  range location_range = {
+    .start = rbs_range.start,
+    .end = skip_range.end
+  };
+  VALUE rbs_location = rbs_new_location(state->buffer, rbs_range);
+  VALUE skip_location = rbs_new_location(state->buffer, skip_range);
+
+  VALUE comment = parse_inline_comment(state);
+
+  return rbs_ast_ruby_annotation_skip_annotation(
+    rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+    comment,
+    rbs_location,
+    skip_location
+  );
+}
+
+/**
+  inline_override_annotation ::= {} <`override`>
+ */
+VALUE parse_override_annotation(parserstate *state, range rbs_range) {
+  range override_range = state->next_token.range;
+  parser_advance(state);
+
+  return rbs_ast_ruby_annotation_override_annotation(
+    rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, override_range)
+  );
+}
+
+/**
+  inline_return_type_annotation ::= {} `return` `:` <type>
+                                  | {} `return` `:` type <inline_comment>
+ */
+VALUE parse_inline_return_type_annotation(parserstate *state, range rbs_range) {
+  range return_range = state->next_token.range;
+  parser_advance(state);
+
+  range colon_range = state->next_token.range;
+  parser_advance(state);
+
+  VALUE type = parse_type(state);
+  VALUE comment = parse_inline_comment(state);
+
+  return rbs_ast_ruby_annotation_return_type_annotation(
+    rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, return_range),
+    rbs_new_location(state->buffer, colon_range),
+    type,
+    comment
+  );
+}
+
+/**
+ * inline_block_param_type_annotation ::= {} `& ident `:` <block>
+ *                                      | {} `& ident `:` block <inline_comment>
+ */
+VALUE parse_inline_block_param_type_annotation(parserstate *state, range rbs_range) {
+  range operator_range = state->next_token.range;
+  parser_advance(state);
+
+  range param_name_range = NULL_RANGE;
+  if (state->next_token.type != pCOLON) {
+    param_name_range = state->next_token.range;
+    parser_advance(state);
+  }
+
+  range colon_range = state->next_token.range;
+  parser_advance(state);
+
+  range question_mark_range = NULL_RANGE;
+  if (state->next_token.type == pQUESTION) {
+    question_mark_range = state->next_token.range;
+    parser_advance(state);
+  }
+
+  VALUE function = Qnil;
+  VALUE function_self_type = Qnil;
+  parse_function(state, &function, NULL, &function_self_type);
+
+  VALUE comment = parse_inline_comment(state);
+
+  position end_pos = state->current_token.range.end;
+
+  return rbs_ast_ruby_annotation_block_param_type_annotation(
+    rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = end_pos }),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, operator_range),
+    null_range_p(param_name_range) ? Qnil : rbs_new_location(state->buffer, param_name_range),
+    rbs_new_location(state->buffer, colon_range),
+    null_range_p(question_mark_range) ? Qnil : rbs_new_location(state->buffer, question_mark_range),
+    rbs_block(function, null_range_p(question_mark_range) ? Qfalse : Qtrue, Qnil),
+    comment
+  );
+}
+
+/**
+  inline-generic-annotation ::= {} `generic` <type_param> <inline_comment?>
+ */
+VALUE parse_generic_annotation(parserstate *state, range rbs_range) {
+  range generic_range = state->next_token.range;
+  parser_advance_assert(state, kGENERIC);
+
+  range ranges[8];
+  VALUE values[5];
+
+  parse_type_param(state, true, true, ranges, values);
+  VALUE comment = parse_inline_comment(state);
+
+  range annotation_range = {
+    .start = rbs_range.start,
+    .end = state->current_token.range.end
+  };
+  range unchecked_range = ranges[1];
+  range variance_range = ranges[2];
+  range name_range = ranges[3];
+  range upper_bound_operator_range = ranges[4];
+  range default_type_operator_range = ranges[6];
+
+  VALUE upper_bound = values[3];
+  VALUE default_type = values[4];
+
+  return rbs_ast_ruby_annotation_generic_annotation(
+    rbs_new_location(state->buffer, annotation_range),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, generic_range),
+    null_range_p(unchecked_range) ? Qnil : rbs_new_location(state->buffer, unchecked_range),
+    null_range_p(variance_range) ? Qnil : rbs_new_location(state->buffer, variance_range),
+    rbs_new_location(state->buffer, name_range),
+    null_range_p(upper_bound_operator_range) ? Qnil : rbs_new_location(state->buffer, upper_bound_operator_range),
+    upper_bound,
+    null_range_p(default_type_operator_range) ? Qnil : rbs_new_location(state->buffer, default_type_operator_range),
+    default_type,
+    comment
+  );
+}
+
+VALUE parse_inline_annotation(parserstate *state) {
+  switch (state->next_token.type) {
+    case kATRBS: {
+      // @rbs
+      range rbs_range = state->next_token.range;
+      parser_advance(state);
+
+      switch (state->next_token.type) {
+        case tLIDENT:
+        KEYWORD_CASES {
+          if (state->next_token.type == kSKIP && state->next_token2.type != pCOLON) {
+            return parse_inline_skip_annotation(state, rbs_range);
+          }
+          if (state->next_token.type == kRETURN && state->next_token2.type == pCOLON) {
+            return parse_inline_return_type_annotation(state, rbs_range);
+          }
+          if (state->next_token.type == kOVERRIDE && state->next_token2.type != pCOLON) {
+            return parse_override_annotation(state, rbs_range);
+          }
+          if (state->next_token.type == kGENERIC && state->next_token2.type != pCOLON) {
+            return parse_generic_annotation(state, rbs_range);
+          }
+
+          // @rbs x: type
+
+          range param_name_range = state->next_token.range;
+          parser_advance(state);
+
+          range colon_range = state->next_token.range;
+          parser_advance_assert(state, pCOLON);
+
+          VALUE type = parse_type(state);
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_param_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, param_name_range),
+            rbs_new_location(state->buffer, colon_range),
+            type,
+            comment
+          );
+        }
+        case pSTAR: {
+          // @rbs *args: String
+          range operator_range = state->next_token.range;
+          parser_advance(state);
+
+          range param_name_range = NULL_RANGE;
+          if (state->next_token.type != pCOLON) {
+            param_name_range = state->next_token.range;
+            parser_advance(state);
+          }
+
+          range colon_range = state->next_token.range;
+          parser_advance_assert(state, pCOLON);
+
+          VALUE type = parse_type(state);
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_splat_param_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, operator_range),
+            null_range_p(param_name_range) ? Qnil : rbs_new_location(state->buffer, param_name_range),
+            rbs_new_location(state->buffer, colon_range),
+            type,
+            comment
+          );
+        }
+        case pSTAR2: {
+          // @rbs **args: String
+          range operator_range = state->next_token.range;
+          parser_advance(state);
+
+          range param_name_range = NULL_RANGE;
+          if (state->next_token.type != pCOLON) {
+            param_name_range = state->next_token.range;
+            parser_advance(state);
+          }
+
+          range colon_range = state->next_token.range;
+          parser_advance_assert(state, pCOLON);
+
+          VALUE type = parse_type(state);
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_double_splat_param_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, operator_range),
+            null_range_p(param_name_range) ? Qnil : rbs_new_location(state->buffer, param_name_range),
+            rbs_new_location(state->buffer, colon_range),
+            type,
+            comment
+          );
+        }
+        case pAMP: {
+          // @rbs &block: type
+          return parse_inline_block_param_type_annotation(state, rbs_range);
+        }
+        case tANNOTATION: {
+          // @rbs %a{foo}
+
+          position annot_pos = NullPosition;
+
+          VALUE annotations = EMPTY_ARRAY;
+          parse_annotations(state, &annotations, &annot_pos);
+
+          if (state->next_token.type == pEOF) {
+            return rbs_ast_ruby_annotation_rbs_annotation_annotation(
+              rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+              rbs_new_location(state->buffer, rbs_range),
+              annotations
+            );
+          } else {
+            VALUE method_type = parse_method_type(state);
+
+            VALUE overloads = rb_ary_new();
+            VALUE bar_locations = rb_ary_new();
+            rb_ary_push(overloads, rbs_ast_ruby_annotation_method_types_annotation_overload(annotations, method_type));
+
+            if (state->next_token.type == pBAR) {
+              rb_ary_push(bar_locations, rbs_new_location(state->buffer, state->next_token.range));
+
+              while (true) {
+                VALUE overload = parse_annotated_method_type(state);
+                rb_ary_push(overloads, overload);
+
+                if (state->next_token.type == pBAR) {
+                  rb_ary_push(bar_locations, rbs_new_location(state->buffer, state->next_token.range));
+                  parser_advance(state);
+                } else {
+                  break;
+                }
+              }
+            }
+
+            position end_pos = state->current_token.range.end;
+
+            return rbs_ast_ruby_annotation_method_types_annotation(
+              rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = end_pos }),
+              rbs_new_location(state->buffer, rbs_range),
+              overloads,
+              bar_locations
+            );
+          }
+        }
+        default: {
+          VALUE overloads = rb_ary_new();
+          VALUE bar_locations = rb_ary_new();
+
+          while (true) {
+            VALUE overload = parse_annotated_method_type(state);
+            rb_ary_push(overloads, overload);
+
+            if (state->next_token.type == pBAR) {
+              rb_ary_push(bar_locations, rbs_new_location(state->buffer, state->next_token.range));
+              parser_advance(state);
+            } else {
+              break;
+            }
+          }
+
+          position end_pos = state->current_token.range.end;
+
+          return rbs_ast_ruby_annotation_method_types_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = end_pos }),
+            rbs_new_location(state->buffer, rbs_range),
+            overloads,
+            bar_locations
+          );
+        }
+      }
+    }
+    case kATRBSB: {
+      // @rbs!
+    }
+    case pCOLON: {
+      // :
+      range colon_range = state->next_token.range;
+      parser_advance(state);
+
+      VALUE annotations = EMPTY_ARRAY;
+      position annot_pos = NullPosition;
+
+      if (state->next_token.type == tANNOTATION) {
+        parse_annotations(state, &annotations, &annot_pos);
+      }
+
+      switch (state->next_token.type) {
+        case pLPAREN:
+        case pLBRACKET:
+        case pLBRACE:
+        case tANNOTATION: {
+          VALUE method_type = parse_method_type(state);
+
+          range location_range = {
+            .start = colon_range.start,
+            .end = state->current_token.range.end
+          };
+
+          return rbs_ast_ruby_annotation_colon_method_type_annotation(
+            rbs_new_location(state->buffer, location_range),
+            rbs_new_location(state->buffer, colon_range),
+            annotations,
+            method_type
+          );
+          default: {
+            raise_syntax_error(
+              state,
+              state->next_token,
+              "unexpected token for method type annotation"
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+static VALUE parse_inline_assertion(parserstate *state) {
+  range prefix_range = state->next_token.range;
+
+  switch (state->next_token.type) {
+    case pCOLON: {
+      parser_advance(state);
+
+      VALUE type = parse_type(state);
+
+      return rbs_ast_ruby_annotation_node_type_assertion(
+        rbs_new_location(state->buffer, (range) { .start = prefix_range.start, .end = state->current_token.range.end }),
+        rbs_new_location(state->buffer, prefix_range),
+        type
+      );
+    }
+    case pLBRACKET: {
+      parser_advance_assert(state, pLBRACKET);
+
+      VALUE types = rb_ary_new();
+      parse_type_list(state, pRBRACKET, &types);
+
+      parser_advance_assert(state, pRBRACKET);
+
+      return rbs_ast_ruby_annotation_node_application(
+        rbs_new_location(state->buffer, (range) { .start = prefix_range.start, .end = state->current_token.range.end }),
+        rbs_new_location(state->buffer, prefix_range),
+        types,
+        rbs_new_location(state->buffer, state->current_token.range)
+      );
+    }
+    default: {
+      raise_syntax_error(
+        state,
+        state->next_token,
+        "unexpected token for inline assertion"
+      );
+    }
+  }
+}
+
 struct parse_type_arg {
   parserstate *parser;
   VALUE require_eof;
@@ -2958,6 +3488,34 @@ rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_p
   return rb_ensure(parse_signature_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
 }
 
+static VALUE parse_inline_try(VALUE a) {
+  parserstate *parser = (parserstate *)a;
+  return parse_inline_annotation(parser);
+}
+
+static VALUE
+rbsparser_parse_inline(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables)
+{
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  return rb_ensure(parse_inline_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
+}
+
+static VALUE parse_inline_assertion_try(VALUE a) {
+  parserstate *parser = (parserstate *)a;
+  return parse_inline_assertion(parser);
+}
+
+static VALUE rbsparser_parse_inline_assertion(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+  return rb_ensure(parse_inline_assertion_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
+}
+
 static VALUE
 rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
@@ -2994,5 +3552,7 @@ void rbs__init_parser(void) {
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline", rbsparser_parse_inline, 4);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline_assertion", rbsparser_parse_inline_assertion, 4);
   rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
 }

@@ -822,14 +822,16 @@ yy82:
 #line 823 "ext/rbs_extension/lexer.c"
 yy83:
 	rbs_skip(state);
+	yych = peek(state);
+	if (yych >= 0x00000001) goto yy83;
 #line 48 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pMINUS2); }
-#line 828 "ext/rbs_extension/lexer.c"
+#line 830 "ext/rbs_extension/lexer.c"
 yy84:
 	rbs_skip(state);
 #line 41 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pARROW); }
-#line 833 "ext/rbs_extension/lexer.c"
+#line 835 "ext/rbs_extension/lexer.c"
 yy85:
 	rbs_skip(state);
 	yych = peek(state);
@@ -843,7 +845,7 @@ yy86:
 yy87:
 #line 133 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 847 "ext/rbs_extension/lexer.c"
+#line 849 "ext/rbs_extension/lexer.c"
 yy88:
 	rbs_skip(state);
 	yych = peek(state);
@@ -929,7 +931,7 @@ yy94:
 	rbs_skip(state);
 #line 45 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pCOLON2); }
-#line 933 "ext/rbs_extension/lexer.c"
+#line 935 "ext/rbs_extension/lexer.c"
 yy95:
 	rbs_skip(state);
 	yych = peek(state);
@@ -985,7 +987,7 @@ yy99:
 yy100:
 #line 129 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 989 "ext/rbs_extension/lexer.c"
+#line 991 "ext/rbs_extension/lexer.c"
 yy101:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1005,7 +1007,7 @@ yy104:
 	rbs_skip(state);
 #line 42 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pFATARROW); }
-#line 1009 "ext/rbs_extension/lexer.c"
+#line 1011 "ext/rbs_extension/lexer.c"
 yy105:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1037,7 +1039,7 @@ yy107:
 yy108:
 #line 146 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tAIDENT); }
-#line 1041 "ext/rbs_extension/lexer.c"
+#line 1043 "ext/rbs_extension/lexer.c"
 yy109:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1047,19 +1049,19 @@ yy110:
 	rbs_skip(state);
 #line 140 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tBANGIDENT); }
-#line 1051 "ext/rbs_extension/lexer.c"
+#line 1053 "ext/rbs_extension/lexer.c"
 yy111:
 	rbs_skip(state);
 #line 141 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tEQIDENT); }
-#line 1056 "ext/rbs_extension/lexer.c"
+#line 1058 "ext/rbs_extension/lexer.c"
 yy112:
 	rbs_skip(state);
 	yych = peek(state);
 	if (yych == '=') goto yy24;
 #line 47 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pAREF_OPR); }
-#line 1063 "ext/rbs_extension/lexer.c"
+#line 1065 "ext/rbs_extension/lexer.c"
 yy113:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1083,7 +1085,7 @@ yy114:
 yy115:
 #line 137 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tULLIDENT); }
-#line 1087 "ext/rbs_extension/lexer.c"
+#line 1089 "ext/rbs_extension/lexer.c"
 yy116:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1106,7 +1108,7 @@ yy116:
 yy117:
 #line 138 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tULIDENT); }
-#line 1110 "ext/rbs_extension/lexer.c"
+#line 1112 "ext/rbs_extension/lexer.c"
 yy118:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1145,7 +1147,7 @@ yy121:
 yy122:
 #line 97 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kAS); }
-#line 1149 "ext/rbs_extension/lexer.c"
+#line 1151 "ext/rbs_extension/lexer.c"
 yy123:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1228,7 +1230,7 @@ yy131:
 yy132:
 #line 78 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kIN); }
-#line 1232 "ext/rbs_extension/lexer.c"
+#line 1234 "ext/rbs_extension/lexer.c"
 yy133:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1379,12 +1381,12 @@ yy157:
 	rbs_skip(state);
 #line 38 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, pDOT3); }
-#line 1383 "ext/rbs_extension/lexer.c"
+#line 1385 "ext/rbs_extension/lexer.c"
 yy158:
 	rbs_skip(state);
 #line 115 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tDQSYMBOL); }
-#line 1388 "ext/rbs_extension/lexer.c"
+#line 1390 "ext/rbs_extension/lexer.c"
 yy159:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1423,7 +1425,7 @@ yy160:
 yy161:
 #line 132 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1427 "ext/rbs_extension/lexer.c"
+#line 1429 "ext/rbs_extension/lexer.c"
 yy162:
 	rbs_skip(state);
 	goto yy161;
@@ -1432,7 +1434,7 @@ yy163:
 yy164:
 #line 116 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSQSYMBOL); }
-#line 1436 "ext/rbs_extension/lexer.c"
+#line 1438 "ext/rbs_extension/lexer.c"
 yy165:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1489,7 +1491,7 @@ yy169:
 yy170:
 #line 130 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1493 "ext/rbs_extension/lexer.c"
+#line 1495 "ext/rbs_extension/lexer.c"
 yy171:
 	rbs_skip(state);
 	goto yy100;
@@ -1511,7 +1513,7 @@ yy172:
 yy173:
 #line 147 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tA2IDENT); }
-#line 1515 "ext/rbs_extension/lexer.c"
+#line 1517 "ext/rbs_extension/lexer.c"
 yy174:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1526,7 +1528,7 @@ yy176:
 	rbs_skip(state);
 #line 40 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tQIDENT); }
-#line 1530 "ext/rbs_extension/lexer.c"
+#line 1532 "ext/rbs_extension/lexer.c"
 yy177:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1564,7 +1566,7 @@ yy180:
 yy181:
 #line 72 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kBOT); }
-#line 1568 "ext/rbs_extension/lexer.c"
+#line 1570 "ext/rbs_extension/lexer.c"
 yy182:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1592,7 +1594,7 @@ yy183:
 yy184:
 #line 74 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kDEF); }
-#line 1596 "ext/rbs_extension/lexer.c"
+#line 1598 "ext/rbs_extension/lexer.c"
 yy185:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1615,7 +1617,7 @@ yy185:
 yy186:
 #line 75 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kEND); }
-#line 1619 "ext/rbs_extension/lexer.c"
+#line 1621 "ext/rbs_extension/lexer.c"
 yy187:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1678,7 +1680,7 @@ yy195:
 yy196:
 #line 83 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kNIL); }
-#line 1682 "ext/rbs_extension/lexer.c"
+#line 1684 "ext/rbs_extension/lexer.c"
 yy197:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1701,7 +1703,7 @@ yy197:
 yy198:
 #line 84 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kOUT); }
-#line 1705 "ext/rbs_extension/lexer.c"
+#line 1707 "ext/rbs_extension/lexer.c"
 yy199:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1764,7 +1766,7 @@ yy207:
 yy208:
 #line 90 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kTOP); }
-#line 1768 "ext/rbs_extension/lexer.c"
+#line 1770 "ext/rbs_extension/lexer.c"
 yy209:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1807,7 +1809,7 @@ yy213:
 yy214:
 #line 96 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kUSE); }
-#line 1811 "ext/rbs_extension/lexer.c"
+#line 1813 "ext/rbs_extension/lexer.c"
 yy215:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1830,27 +1832,27 @@ yy217:
 	rbs_skip(state);
 #line 55 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1834 "ext/rbs_extension/lexer.c"
+#line 1836 "ext/rbs_extension/lexer.c"
 yy218:
 	rbs_skip(state);
 #line 58 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1839 "ext/rbs_extension/lexer.c"
+#line 1841 "ext/rbs_extension/lexer.c"
 yy219:
 	rbs_skip(state);
 #line 56 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1844 "ext/rbs_extension/lexer.c"
+#line 1846 "ext/rbs_extension/lexer.c"
 yy220:
 	rbs_skip(state);
 #line 54 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1849 "ext/rbs_extension/lexer.c"
+#line 1851 "ext/rbs_extension/lexer.c"
 yy221:
 	rbs_skip(state);
 #line 57 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tANNOTATION); }
-#line 1854 "ext/rbs_extension/lexer.c"
+#line 1856 "ext/rbs_extension/lexer.c"
 yy222:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1908,7 +1910,7 @@ yy225:
 yy226:
 #line 131 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, tSYMBOL); }
-#line 1912 "ext/rbs_extension/lexer.c"
+#line 1914 "ext/rbs_extension/lexer.c"
 yy227:
 	rbs_skip(state);
 	goto yy170;
@@ -1934,7 +1936,7 @@ yy228:
 yy229:
 #line 144 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kATRBS); }
-#line 1938 "ext/rbs_extension/lexer.c"
+#line 1940 "ext/rbs_extension/lexer.c"
 yy230:
 	rbs_skip(state);
 	yych = peek(state);
@@ -1972,7 +1974,7 @@ yy233:
 yy234:
 #line 71 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kBOOL); }
-#line 1976 "ext/rbs_extension/lexer.c"
+#line 1978 "ext/rbs_extension/lexer.c"
 yy235:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2065,7 +2067,7 @@ yy249:
 yy250:
 #line 88 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kSELF); }
-#line 2069 "ext/rbs_extension/lexer.c"
+#line 2071 "ext/rbs_extension/lexer.c"
 yy251:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2093,7 +2095,7 @@ yy252:
 yy253:
 #line 104 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kSKIP); }
-#line 2097 "ext/rbs_extension/lexer.c"
+#line 2099 "ext/rbs_extension/lexer.c"
 yy254:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2116,7 +2118,7 @@ yy254:
 yy255:
 #line 91 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kTRUE); }
-#line 2120 "ext/rbs_extension/lexer.c"
+#line 2122 "ext/rbs_extension/lexer.c"
 yy256:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2139,7 +2141,7 @@ yy256:
 yy257:
 #line 92 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kTYPE); }
-#line 2143 "ext/rbs_extension/lexer.c"
+#line 2145 "ext/rbs_extension/lexer.c"
 yy258:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2172,7 +2174,7 @@ yy260:
 yy261:
 #line 95 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kVOID); }
-#line 2176 "ext/rbs_extension/lexer.c"
+#line 2178 "ext/rbs_extension/lexer.c"
 yy262:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2206,7 +2208,7 @@ yy265:
 	rbs_skip(state);
 #line 143 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kATRBSB); }
-#line 2210 "ext/rbs_extension/lexer.c"
+#line 2212 "ext/rbs_extension/lexer.c"
 yy266:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2234,7 +2236,7 @@ yy267:
 yy268:
 #line 67 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kALIAS); }
-#line 2238 "ext/rbs_extension/lexer.c"
+#line 2240 "ext/rbs_extension/lexer.c"
 yy269:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2268,7 +2270,7 @@ yy270:
 yy271:
 #line 73 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kCLASS); }
-#line 2272 "ext/rbs_extension/lexer.c"
+#line 2274 "ext/rbs_extension/lexer.c"
 yy272:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2296,7 +2298,7 @@ yy273:
 yy274:
 #line 77 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kFALSE); }
-#line 2300 "ext/rbs_extension/lexer.c"
+#line 2302 "ext/rbs_extension/lexer.c"
 yy275:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2435,7 +2437,7 @@ yy295:
 yy296:
 #line 76 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kEXTEND); }
-#line 2439 "ext/rbs_extension/lexer.c"
+#line 2441 "ext/rbs_extension/lexer.c"
 yy297:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2487,7 +2489,7 @@ yy302:
 yy303:
 #line 82 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kMODULE); }
-#line 2491 "ext/rbs_extension/lexer.c"
+#line 2493 "ext/rbs_extension/lexer.c"
 yy304:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2525,7 +2527,7 @@ yy307:
 yy308:
 #line 87 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kPUBLIC); }
-#line 2529 "ext/rbs_extension/lexer.c"
+#line 2531 "ext/rbs_extension/lexer.c"
 yy309:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2548,7 +2550,7 @@ yy309:
 yy310:
 #line 100 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kRETURN); }
-#line 2552 "ext/rbs_extension/lexer.c"
+#line 2554 "ext/rbs_extension/lexer.c"
 yy311:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2619,7 +2621,7 @@ yy319:
 yy320:
 #line 103 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kGENERIC); }
-#line 2623 "ext/rbs_extension/lexer.c"
+#line 2625 "ext/rbs_extension/lexer.c"
 yy321:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2642,7 +2644,7 @@ yy321:
 yy322:
 #line 79 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kINCLUDE); }
-#line 2646 "ext/rbs_extension/lexer.c"
+#line 2648 "ext/rbs_extension/lexer.c"
 yy323:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2690,7 +2692,7 @@ yy328:
 yy329:
 #line 85 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kPREPEND); }
-#line 2694 "ext/rbs_extension/lexer.c"
+#line 2696 "ext/rbs_extension/lexer.c"
 yy330:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2713,7 +2715,7 @@ yy330:
 yy331:
 #line 86 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kPRIVATE); }
-#line 2717 "ext/rbs_extension/lexer.c"
+#line 2719 "ext/rbs_extension/lexer.c"
 yy332:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2746,7 +2748,7 @@ yy334:
 yy335:
 #line 94 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kUNTYPED); }
-#line 2750 "ext/rbs_extension/lexer.c"
+#line 2752 "ext/rbs_extension/lexer.c"
 yy336:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2769,7 +2771,7 @@ yy336:
 yy337:
 #line 98 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, k__TODO__); }
-#line 2773 "ext/rbs_extension/lexer.c"
+#line 2775 "ext/rbs_extension/lexer.c"
 yy338:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2807,7 +2809,7 @@ yy341:
 yy342:
 #line 99 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kINHERITS); }
-#line 2811 "ext/rbs_extension/lexer.c"
+#line 2813 "ext/rbs_extension/lexer.c"
 yy343:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2830,7 +2832,7 @@ yy343:
 yy344:
 #line 80 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kINSTANCE); }
-#line 2834 "ext/rbs_extension/lexer.c"
+#line 2836 "ext/rbs_extension/lexer.c"
 yy345:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2863,7 +2865,7 @@ yy347:
 yy348:
 #line 101 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kOVERRIDE); }
-#line 2867 "ext/rbs_extension/lexer.c"
+#line 2869 "ext/rbs_extension/lexer.c"
 yy349:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2911,7 +2913,7 @@ yy354:
 yy355:
 #line 81 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kINTERFACE); }
-#line 2915 "ext/rbs_extension/lexer.c"
+#line 2917 "ext/rbs_extension/lexer.c"
 yy356:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2939,7 +2941,7 @@ yy357:
 yy358:
 #line 89 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kSINGLETON); }
-#line 2943 "ext/rbs_extension/lexer.c"
+#line 2945 "ext/rbs_extension/lexer.c"
 yy359:
 	rbs_skip(state);
 	yych = peek(state);
@@ -2962,7 +2964,7 @@ yy359:
 yy360:
 #line 93 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kUNCHECKED); }
-#line 2966 "ext/rbs_extension/lexer.c"
+#line 2968 "ext/rbs_extension/lexer.c"
 yy361:
 	rbs_skip(state);
 	yych = peek(state);
@@ -3010,7 +3012,7 @@ yy366:
 yy367:
 #line 69 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kATTRREADER); }
-#line 3014 "ext/rbs_extension/lexer.c"
+#line 3016 "ext/rbs_extension/lexer.c"
 yy368:
 	rbs_skip(state);
 	yych = peek(state);
@@ -3033,12 +3035,12 @@ yy368:
 yy369:
 #line 70 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kATTRWRITER); }
-#line 3037 "ext/rbs_extension/lexer.c"
+#line 3039 "ext/rbs_extension/lexer.c"
 yy370:
 	rbs_skip(state);
 #line 102 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kMODULESELF); }
-#line 3042 "ext/rbs_extension/lexer.c"
+#line 3044 "ext/rbs_extension/lexer.c"
 yy371:
 	rbs_skip(state);
 	yych = peek(state);
@@ -3064,7 +3066,7 @@ yy371:
 yy372:
 #line 68 "ext/rbs_extension/lexer.re"
 	{ return next_token(state, kATTRACCESSOR); }
-#line 3068 "ext/rbs_extension/lexer.c"
+#line 3070 "ext/rbs_extension/lexer.c"
 }
 #line 156 "ext/rbs_extension/lexer.re"
 

@@ -1,0 +1,45 @@
+use RBS::AST::Ruby::CommentBlock
+
+module RBS
+  module Inline
+    class AnnotationParser
+      attr_reader block: CommentBlock
+
+      attr_reader diagnostics: Array[untyped]
+
+      def initialize: (CommentBlock) -> void
+
+      def parse_annotation: (Integer) -> (AST::Ruby::Annotation::leading_annotation | AST::Ruby::Annotation::trailing_annotation)?
+
+      private
+
+      class Parser
+        type token = [
+          Symbol, # type of the token
+          String, # value of the token
+          Integer # end position of the token
+        ]
+
+        KEYWORDS: Hash[String, Symbol]
+
+        PUNCTS: Hash[String, Symbol]
+
+        KEYWORDS_RE: Regexp
+
+        PUNCTS_RE: Regexp
+
+        attr_reader scanner: StringScanner
+
+        attr_reader charpos: Integer
+
+        attr_reader current_token: token
+
+        def initialize: (String, Integer) -> void
+
+        def advance_token: () -> void
+
+        def parse: () -> (AST::Ruby::Annotation::leading_annotation | AST::Ruby::Annotation::trailing_annotation)?
+      end
+    end
+  end
+end

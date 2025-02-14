@@ -82,6 +82,10 @@ module RBS
 
     KEYWORDS: Hash[String, bot]
 
+    def self.parse_inline: (Buffer | String, Range[Integer?], ?variables: Array[Symbol]) -> AST::Ruby::Annotation::leading_annotation
+
+    def self.parse_inline_assertion: (Buffer | String, Range[Integer?], ?variables: Array[Symbol]) -> AST::Ruby::Annotation::trailing_annotation
+
     private
 
     def self.buffer: (String | Buffer source) -> Buffer
@@ -91,6 +95,10 @@ module RBS
     def self._parse_method_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof) -> MethodType?
 
     def self._parse_signature: (Buffer, Integer start_pos, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+
+    def self._parse_inline: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables) -> AST::Ruby::Annotation::leading_annotation
+
+    def self._parse_inline_assertion: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables) -> AST::Ruby::Annotation::NodeTypeAssertion
 
     def self._lex: (Buffer, Integer end_pos) -> Array[[Symbol, Location[untyped, untyped]]]
 

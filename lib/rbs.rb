@@ -29,6 +29,7 @@ require "rbs/ast/ruby/comment_block"
 require "rbs/ast/ruby/helpers"
 require "rbs/ast/ruby/declarations"
 require "rbs/ast/ruby/members"
+require "rbs/ast/ruby/annotation"
 require "rbs/source"
 require "rbs/environment"
 require "rbs/environment/class_entry"
@@ -65,11 +66,12 @@ require "rbs/type_alias_dependency"
 require "rbs/type_alias_regularity"
 require "rbs/collection"
 
+require "rbs/inline/annotation_parser"
+require "rbs/inline_parser"
+
 require "rbs_extension"
 require "rbs/parser_aux"
 require "rbs/location_aux"
-
-require "rbs/inline_parser"
 
 module RBS
   class <<self

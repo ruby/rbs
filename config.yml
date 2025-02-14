@@ -315,3 +315,103 @@ nodes:
     fields:
       - name: name
       - name: location
+  - name: RBS::AST::Ruby::Annotation::SkipAnnotation
+    fields:
+      - name: location
+      - name: comment
+      - name: prefix_location
+      - name: skip_location
+  - name: RBS::AST::Ruby::Annotation::ColonMethodTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: annotations
+      - name: method_type
+  - name: RBS::AST::Ruby::Annotation::MethodTypesAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: overloads
+      - name: vertical_bar_locations
+  - name: RBS::AST::Ruby::Annotation::MethodTypesAnnotation::Overload
+    fields:
+      - name: annotations
+      - name: method_type
+  - name: RBS::AST::Ruby::Annotation::ReturnTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: return_location
+      - name: colon_location
+      - name: return_type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::ParamTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: param_name_location
+      - name: colon_location
+      - name: type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::SplatParamTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: operator_location
+      - name: param_name_location
+      - name: colon_location
+      - name: type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::DoubleSplatParamTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: operator_location
+      - name: param_name_location
+      - name: colon_location
+      - name: type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::BlockParamTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: operator_location
+      - name: param_name_location
+      - name: colon_location
+      - name: question_mark_location
+      - name: block
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::OverrideAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: override_location
+  - name: RBS::AST::Ruby::Annotation::GenericAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: generic_location
+      - name: unchecked_location
+      - name: variance_location
+      - name: name_location
+      - name: upper_bound_operator_location
+      - name: upper_bound
+      - name: default_type_operator_location
+      - name: default_type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::RBSAnnotationAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: annotations
+  - name: RBS::AST::Ruby::Annotation::NodeTypeAssertion
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: type
+  - name: RBS::AST::Ruby::Annotation::NodeApplication
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: types
+      - name: suffix_location

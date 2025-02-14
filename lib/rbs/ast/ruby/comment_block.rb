@@ -73,6 +73,16 @@ module RBS
           result
         end
 
+        def leading?
+          comment = offsets[0][0] or raise
+          comment.location.start_line_slice.index(/\S/) ? false : true
+        end
+
+        def trailing?
+          comment = offsets[0][0] or raise
+          comment.location.start_line_slice.index(/\S/) ? true : false
+        end
+
         def translate_comment_position(position)
           start = offsets.bsearch_index { position <= _4 } or return
           offset = offsets[start]
@@ -82,17 +92,164 @@ module RBS
           end
         end
 
-        def line_start?(position)
-          (comment_index, _ = translate_comment_position(position)) or return
-
-          offset = offsets[comment_index]
-          line = comment_buffer.lines[comment_index] or raise
-          leading_spaces = line.index(/\S/) or return
-          content_start_position = leading_spaces + offset[2]
-
-          if position <= content_start_position
-            content_start_position
+        def line_starts
+          offsets.map do |offset|
+            offset[2]
           end
+        end
+
+        def self.build(path, comments)
+          blocks = [] #: Array[CommentBlock]
+
+          until comments.empty?
+            block_comments = [] #: Array[Prism::Comment]
+
+            until comments.empty?
+              comment = comments.first or raise
+              last_comment = block_comments.last
+
+              if last_comment
+                if last_comment.location.end_line + 1 == comment.location.start_line
+                  if last_comment.location.start_column == comment.location.start_column
+                    unless comment.location.start_line_slice.index(/\S/)
+                      block_comments << comments.shift
+                      next
+                    end
+                  end
+                end
+
+                break
+              else
+                block_comments << comments.shift
+              end
+            end
+
+            unless block_comments.empty?
+              blocks << CommentBlock.new(path, block_comments.dup)
+            end
+          end
+
+          blocks
+        end
+
+        AnnotationSyntaxError = _ = Data.define(:location, :error)
+
+        def each_paragraph(variables, &block)
+          if block
+            if leading_annotation?(0)
+              yield_annotation(0, 0, 0, variables, &block)
+            else
+              yield_paragraph(0, 0, variables, &block)
+            end
+          else
+            enum_for :each_paragraph, variables
+          end
+        end
+
+        def yield_paragraph(start_line, current_line, variables, &block)
+          # We already know at start_line..current_line are paragraph.
+            # binding.irb
+
+          while true
+            next_line = current_line + 1
+
+            if next_line >= comment_buffer.lines.size
+              yield line_location(start_line, current_line)
+              return
+            end
+
+            if leading_annotation?(next_line)
+              yield line_location(start_line, current_line)
+              return yield_annotation(next_line, next_line, next_line, variables, &block)
+            else
+              current_line = next_line
+            end
+          end
+        end
+
+        def yield_annotation(start_line, end_line, current_line, variables, &block)
+          # We already know at start_line..end_line are annotation.
+          while true
+            next_line = current_line + 1
+
+            if next_line >= comment_buffer.lines.size
+              annotation = parse_annotation_lines(start_line, end_line, variables)
+              yield annotation
+
+              if end_line > current_line
+                yield_paragraph(end_line + 1, end_line + 1, variables, &block)
+              end
+
+              return
+            end
+
+            line_text = comment_buffer.lines[next_line]
+            if leading_spaces = line_text.index(/\S/)
+              if leading_spaces == 0
+                # End of annotation
+                yield parse_annotation_lines(start_line, end_line, variables)
+
+                if leading_annotation?(end_line + 1)
+                  yield_annotation(end_line + 1, end_line + 1, end_line + 1, variables, &block)
+                else
+                  yield_paragraph(end_line + 1, end_line + 1, variables, &block)
+                end
+
+                return
+              else
+                current_line = next_line
+                end_line = next_line
+              end
+            else
+              current_line = next_line
+            end
+          end
+        end
+
+        def line_location(start_line, end_line)
+          start_offset = offsets[start_line][2]
+          end_offset = offsets[end_line][3]
+          Location.new(comment_buffer, start_offset, end_offset)
+        end
+
+        def parse_annotation_lines(start_line, end_line, variables)
+          start_pos = offsets[start_line][2]
+          end_pos = offsets[end_line][3]
+          begin
+            Parser.parse_inline(comment_buffer, start_pos...end_pos, variables: variables)
+          rescue ParsingError => error
+            AnnotationSyntaxError.new(line_location(start_line, end_line), error)
+          end
+        end
+
+        def trailing_annotation(variables)
+          if trailing?
+            comment = comments[0] or raise
+            if comment.location.slice.start_with?(/#[:\[]/)
+              begin
+                Parser.parse_inline_assertion(comment_buffer, 0...comment_buffer.last_position, variables: variables)
+              rescue ParsingError => error
+                location = line_location(0, offsets.size - 1)
+                AnnotationSyntaxError.new(location, error)
+              end
+            end
+          end
+        end
+
+        def comments
+          offsets.map { _1[0]}
+        end
+
+        def leading_annotation?(index)
+          if index < comment_buffer.lines.size
+            comment_buffer.lines[index].start_with?(/@rbs\b|@rbs!/)
+          else
+            false
+          end
+        end
+
+        def slice_after!(array, &block)
+
         end
       end
     end

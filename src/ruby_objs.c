@@ -439,6 +439,218 @@ VALUE rbs_ast_members_public(VALUE location) {
   );
 }
 
+VALUE rbs_ast_ruby_annotation_block_param_type_annotation(VALUE location, VALUE prefix_location, VALUE operator_location, VALUE param_name_location, VALUE colon_location, VALUE question_mark_location, VALUE block, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("operator_location")), operator_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("param_name_location")), param_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("question_mark_location")), question_mark_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("block")), block);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_BlockParamTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_colon_method_type_annotation(VALUE location, VALUE prefix_location, VALUE annotations, VALUE method_type) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("method_type")), method_type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ColonMethodTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_double_splat_param_type_annotation(VALUE location, VALUE prefix_location, VALUE operator_location, VALUE param_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("operator_location")), operator_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("param_name_location")), param_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_DoubleSplatParamTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_generic_annotation(VALUE location, VALUE prefix_location, VALUE generic_location, VALUE unchecked_location, VALUE variance_location, VALUE name_location, VALUE upper_bound_operator_location, VALUE upper_bound, VALUE default_type_operator_location, VALUE default_type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("generic_location")), generic_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("unchecked_location")), unchecked_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("variance_location")), variance_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name_location")), name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("upper_bound_operator_location")), upper_bound_operator_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("upper_bound")), upper_bound);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("default_type_operator_location")), default_type_operator_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("default_type")), default_type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_GenericAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_method_types_annotation(VALUE location, VALUE prefix_location, VALUE overloads, VALUE vertical_bar_locations) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("overloads")), overloads);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("vertical_bar_locations")), vertical_bar_locations);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_MethodTypesAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_method_types_annotation_overload(VALUE annotations, VALUE method_type) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("method_type")), method_type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_node_application(VALUE location, VALUE prefix_location, VALUE types, VALUE suffix_location) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("types")), types);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("suffix_location")), suffix_location);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_NodeApplication,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_node_type_assertion(VALUE location, VALUE prefix_location, VALUE type) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_NodeTypeAssertion,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_override_annotation(VALUE location, VALUE prefix_location, VALUE override_location) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("override_location")), override_location);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_OverrideAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_param_type_annotation(VALUE location, VALUE prefix_location, VALUE param_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("param_name_location")), param_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ParamTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_rbs_annotation_annotation(VALUE location, VALUE prefix_location, VALUE annotations) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_RBSAnnotationAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_return_type_annotation(VALUE location, VALUE prefix_location, VALUE return_location, VALUE colon_location, VALUE return_type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("return_location")), return_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("return_type")), return_type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ReturnTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_skip_annotation(VALUE location, VALUE comment, VALUE prefix_location, VALUE skip_location) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("skip_location")), skip_location);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_SkipAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_splat_param_type_annotation(VALUE location, VALUE prefix_location, VALUE operator_location, VALUE param_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("operator_location")), operator_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("param_name_location")), param_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_SplatParamTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);

@@ -1,0 +1,26 @@
+use RBS::AST::Ruby::CommentBlock
+
+module RBS
+  module Inline
+    class CommentManager
+      attr_reader blocks: Array[CommentBlock]
+
+      attr_reader prism: Prism::Result
+
+      def self.build: (Prism::Result) -> instance
+
+      def initialize: (Prism::Result) -> void
+
+      # Returns a CommentBlock that is associated to given node
+      #
+      def leading_block: (Prism::Node) -> CommentBlock?
+
+      # Returns a CommentBlock that is enclosed in the given node
+      #
+      def enclosing_blocks: (Prism::Node) -> Array[CommentBlock]
+
+      # Private API to insert a comment block
+      private def add_comment: (CommentBlock) -> void
+    end
+  end
+end
