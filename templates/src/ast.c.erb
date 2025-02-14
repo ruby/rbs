@@ -1,3 +1,4 @@
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
 #include "rbs/ast.h"
 
 #include <stdio.h>
@@ -148,6 +149,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
 }
 
 <%- nodes.each do |node| -%>
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
 <%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>) {
     <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
 
@@ -167,5 +169,43 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
 
     return instance;
 }
-
 <%- end -%>
+
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+void rbs_node_destroy(rbs_node_t *any_node) {
+    switch (any_node->type) {
+    <%- nodes.each do |node| -%>
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+    case <%= node.c_type_enum_name %>: {
+        <%- if node.has_children_to_free? -%>
+        <%= node.c_type_name %> *node = (<%= node.c_type_name %> *)any_node;
+
+        <%- node.fields.each do |field| -%>
+        <%- case field.c_type -%>
+        <%- when "rbs_string" -%>
+        rbs_string_free_if_needed(&node-><%= field.c_name %>);
+        <%- when "rbs_node_list" -%>
+        rbs_node_list_free(node-><%= field.c_name %>);
+        <%- when "rbs_hash" -%>
+        rbs_hash_free(node-><%= field.c_name %>);
+        <%- when "bool" -%>
+        // <%= field.c_name %> is a bool, so we don't need to free it.
+        <%- else -%>
+        if (node-><%= field.c_name %> != NULL) {
+            rbs_node_destroy((rbs_node_t *) node-><%= field.c_name %>);
+        }
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        break;
+    }
+    <%- end -%>
+    case RBS_KEYWORD:
+    case RBS_AST_SYMBOL: {
+        // TODO: Delete symbol from constant pool? Or just free the whole constant pool?
+        break;
+    }
+    }
+
+    // `any_node` will be freed automatically when the arena is freed.
+}

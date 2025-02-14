@@ -57,15 +57,6 @@ module RBS
       def needs_to_be_freed?
         !["VALUE", "bool"].include?(@c_type)
       end
-
-      def ast_node?
-        @c_type == "rbs_node" ||
-          @c_type == "rbs_typename" ||
-          @c_type == "rbs_namespace" ||
-          @c_type.include?("_ast_") ||
-          @c_type.include?("_decl_") ||
-          @c_type.include?("_types_")
-      end
     end
 
     class Type
@@ -135,6 +126,10 @@ module RBS
 
       def expose_location?
         @expose_location
+      end
+
+      def has_children_to_free?
+        @fields.any?(&:needs_to_be_freed?)
       end
     end
 

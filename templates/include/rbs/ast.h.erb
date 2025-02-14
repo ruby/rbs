@@ -98,4 +98,6 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_t *, rbs_co
 <%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>);
 <%- end -%>
 
+void rbs_node_destroy(rbs_node_t *any_node);
+
 #endif
