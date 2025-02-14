@@ -28,6 +28,17 @@ rbs_node_list_t* rbs_node_list_new(rbs_allocator_t *allocator) {
     return list;
 }
 
+void rbs_node_list_free(rbs_node_list_t *list) {
+    rbs_node_list_node_t *current = list->head;
+    while (current != NULL) {
+        rbs_node_list_node_t *next = current->next;
+        rbs_node_destroy(current->node);
+        // `current` is owned by the arena, so it will be freed automatically when the arena is freed.
+        current = next;
+    }
+    // `list` is owned by the arena, so it will be freed automatically when the arena is freed.
+}
+
 void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
     rbs_node_list_node_t *new_node = rbs_allocator_alloc(list->allocator, rbs_node_list_node_t);
     *new_node = (rbs_node_list_node_t) {
@@ -58,6 +69,18 @@ rbs_hash_t* rbs_hash_new(rbs_allocator_t *allocator) {
     };
 
     return hash;
+}
+
+void rbs_hash_free(rbs_hash_t *hash) {
+    rbs_hash_node_t *current = hash->head;
+    while (current != NULL) {
+        rbs_hash_node_t *next = current->next;
+        rbs_node_destroy(current->key);
+        rbs_node_destroy(current->value);
+        // `current` is owned by the arena, so it will be freed automatically when the arena is freed.
+        current = next;
+    }
+    // `hash` is owned by the arena, so it will be freed automatically when the arena is freed.
 }
 
 bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
