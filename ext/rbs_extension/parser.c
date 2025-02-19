@@ -3092,7 +3092,7 @@ VALUE parse_inline_block_param_type_annotation(parserstate *state, range rbs_ran
     null_range_p(param_name_range) ? Qnil : rbs_new_location(state->buffer, param_name_range),
     rbs_new_location(state->buffer, colon_range),
     null_range_p(question_mark_range) ? Qnil : rbs_new_location(state->buffer, question_mark_range),
-    rbs_block(function, null_range_p(question_mark_range) ? Qfalse : Qtrue, Qnil),
+    rbs_block(function, null_range_p(question_mark_range) ? Qtrue : Qfalse, function_self_type),
     comment
   );
 }

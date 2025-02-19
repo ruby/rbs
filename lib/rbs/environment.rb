@@ -549,6 +549,7 @@ module RBS
           decl.node,
           location: decl.location,
           class_name: class_name,
+          generics: decl.generics.map_type_name {|name| absolute_type_name(resolver, map, name, context: inner_context) },
           super_class: decl.super_class&.map_type_name {|name| absolute_type_name(resolver, map, name, context: context) },
           class_name_location: decl.class_name_location,
         ).tap do |resolved|
@@ -605,6 +606,10 @@ module RBS
         member.members.each do |member|
           member = resolve_ruby_member(resolver, map, member, context: context) #: AST::Ruby::Members::t
           resolved.members << member
+        end
+      when AST::Ruby::Members::DefMember
+        member.map_type_name do |name|
+          absolute_type_name(resolver, map, name, context: context)
         end
       else
         member

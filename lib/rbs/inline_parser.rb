@@ -48,6 +48,12 @@ module RBS
 
       class InvalidMixinCall < Base
       end
+
+      class UnusedAnnotation < Base
+      end
+
+      class AnnotationSyntaxError < Base
+      end
     end
 
     def self.enabled?(result, default:)
@@ -67,8 +73,9 @@ module RBS
 
     def self.parse(buffer, prism)
       result = Result.new(buffer, prism)
+      association = Inline::CommentAssociation.build(buffer.name, prism)
 
-      parser = Parser.new(result)
+      parser = Parser.new(result, association)
       parser.parse()
 
       result
@@ -77,6 +84,7 @@ module RBS
     class Parser < Prism::Visitor
       attr_reader :result
       attr_reader :decl_contexts
+      attr_reader :comments
 
       def buffer
         result.buffer
@@ -94,9 +102,11 @@ module RBS
         current_context or raise "No context"
       end
 
-      def initialize(result)
+      def initialize(result, comments)
         @result = result
+        @comments = comments
         @decl_contexts = []
+        @type_params_stack = []
       end
 
       def parse()
@@ -138,40 +148,71 @@ module RBS
           return
         end
 
-        if super_node = node.superclass
-          visit super_node
-
-          if super_class_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(super_node)
-            super_class_name_location = buffer.rbs_location(super_node.location)
-            super_class = AST::Ruby::Declarations::ClassDecl::Super.new(
-              class_name: super_class_name,
-              class_name_location: super_class_name_location,
-              location: class_name_location,
-              type_args: [],
-              open_paren_location: nil,
-              close_paren_location: nil,
-              args_separator_locations: []
-            )
+        leading_block = comments.leading_block(node)
+        leading_comments = [] #: Array[AST::Ruby::Annotation::leading_annotation]
+        leading_block&.each_paragraph([]) do |paragraph|
+          case paragraph
+          when Location
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            report_annotation_syntax_error(leading_block || raise, paragraph)
           else
-            diagnostics << Diagnostics::NonConstantSuperClass.new(
-              buffer.rbs_location(super_node.location),
-              "Super class of #{class_name} should be constant"
-            )
+            leading_comments << paragraph
           end
         end
 
-        decl = AST::Ruby::Declarations::ClassDecl.new(
-          buffer,
-          node,
-          class_name: class_name,
-          location: buffer.rbs_location(node.location),
-          class_name_location: class_name_location,
-          super_class: super_class
-        )
+        generics, leading_comments = AST::Ruby::Declarations::GenericsTypeParams.build(leading_comments)
 
-        insert_class_module_decl(decl)
-        push_decl_context(decl) do
-          visit node.body
+        push_type_params(generics.type_params) do
+          if super_node = node.superclass
+            trailing_block = comments.trailing_block(super_node)
+
+            visit super_node
+
+            if super_class_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(super_node)
+              super_class_name_location = buffer.rbs_location(super_node.location)
+
+              open_paren_location = nil #: Location?
+              type_args = [] #: Array[Types::t]
+              close_paren_location = nil #: Location?
+
+              if trailing_block
+                if (app = trailing_block.trailing_annotation([])).is_a?(AST::Ruby::Annotation::NodeApplication)
+                  open_paren_location = app.prefix_location
+                  type_args = app.types
+                  close_paren_location = app.suffix_location
+                end
+              end
+
+              super_class = AST::Ruby::Declarations::ClassDecl::Super.new(
+                class_name: super_class_name,
+                class_name_location: super_class_name_location,
+                location: class_name_location,
+                type_args: type_args,
+                open_paren_location: open_paren_location,
+                close_paren_location: close_paren_location
+              )
+            else
+              diagnostics << Diagnostics::NonConstantSuperClass.new(
+                buffer.rbs_location(super_node.location),
+                "Super class of #{class_name} should be constant"
+              )
+            end
+          end
+
+          decl = AST::Ruby::Declarations::ClassDecl.new(
+            buffer,
+            node,
+            class_name: class_name,
+            location: buffer.rbs_location(node.location),
+            class_name_location: class_name_location,
+            generics: generics,
+            super_class: super_class
+          )
+
+          insert_class_module_decl(decl)
+          push_decl_context(decl) do
+            visit node.body
+          end
         end
       end
 
@@ -239,11 +280,38 @@ module RBS
       end
 
       def visit_def_node(node)
+        leading_block = comments.leading_block(node)
+        trailing_block = comments.trailing_block(node.parameters ? node.parameters.location : node.name_loc)
+        annotations, unused_annots, unused_trailing_annot = AST::Ruby::Members::DefAnnotations.build(leading_block, trailing_block, current_type_param_names)
+
+        pairs = [] #: Array[[AST::Ruby::CommentBlock, AST::Ruby::Annotation::t | AST::Ruby::CommentBlock::AnnotationSyntaxError]]
+        if leading_block
+          pairs.concat unused_annots.map { [leading_block, _1] }
+        end
+        if trailing_block && unused_trailing_annot
+          pairs << [trailing_block, unused_trailing_annot]
+        end
+
+        pairs.each do |block, annot|
+          case annot
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            report_annotation_syntax_error(block, annot)
+          else
+            if location = block.translate_comment_location(annot.location).first
+              comment, start_pos, end_pos = location
+              start_pos = start_pos + comment.location.start_character_offset
+              end_pos = end_pos + comment.location.start_character_offset
+              loc = Location.new(buffer, start_pos, end_pos)
+              diagnostics << Diagnostics::UnusedAnnotation.new(loc, "Unused annotation")
+            end
+          end
+        end
+
         if node.receiver
           member = AST::Ruby::Members::DefSingletonMember.new(node)
           return unless member.self?
         else
-          member = AST::Ruby::Members::DefMember.new(node)
+          member = AST::Ruby::Members::DefMember.new(node, name: node.name, inline_annotations: annotations)
         end
 
         if current_context
@@ -311,7 +379,46 @@ module RBS
         end
       end
 
+      def pop_type_params
+        @type_params_stack.pop
+      end
+
+      def push_type_params(params, &block)
+        @type_params_stack.push(params)
+
+        if block
+          begin
+            yield
+          ensure
+            pop_type_params
+          end
+        end
+      end
+
+      def current_type_params
+        @type_params_stack.last || []
+      end
+
+      def current_type_param_names
+        current_type_params.map(&:name)
+      end
+
+      def current_type_param_names
+        if context = current_context
+          case context
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            context.type_params.map(&:name)
+          else
+            []
+          end
+        else
+          []
+        end
+      end
+
       def mixin_member?(node)
+        block = comments.trailing_block(node.location)
+
         case node.name
         when :include, :prepend, :extend
           unless current_context
@@ -335,10 +442,17 @@ module RBS
               module_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(const_node) or return
               location = buffer.rbs_location(node.location)
               module_name_location = buffer.rbs_location(const_node.location)
-              open_paren_location = nil
-              close_paren_location = nil
-              type_args = []
-              args_separator_locations = []
+              open_paren_location = nil #: Location?
+              close_paren_location = nil #: Location?
+              type_args = [] #: Array[Types::t]
+
+              if block
+                if (application = block.trailing_annotation([])).is_a?(AST::Ruby::Annotation::NodeApplication)
+                  open_paren_location = application.prefix_location
+                  close_paren_location = application.suffix_location
+                  type_args = application.types
+                end
+              end
 
               case node.name
               when :include
@@ -349,7 +463,6 @@ module RBS
                   module_name: module_name,
                   module_name_location: module_name_location,
                   type_args: type_args,
-                  args_separator_locations: args_separator_locations,
                   open_paren_location: open_paren_location,
                   close_paren_location: close_paren_location
                 )
@@ -361,7 +474,6 @@ module RBS
                   module_name: module_name,
                   module_name_location: module_name_location,
                   type_args: type_args,
-                  args_separator_locations: args_separator_locations,
                   open_paren_location: open_paren_location,
                   close_paren_location: close_paren_location
                 )
@@ -373,7 +485,6 @@ module RBS
                   module_name: module_name,
                   module_name_location: module_name_location,
                   type_args: type_args,
-                  args_separator_locations: args_separator_locations,
                   open_paren_location: open_paren_location,
                   close_paren_location: close_paren_location
                 )
@@ -440,6 +551,16 @@ module RBS
 
       def self_call?(node)
         !node.receiver || node.receiver.is_a?(Prism::SelfNode)
+      end
+
+      def report_annotation_syntax_error(block, error)
+        if location = block.translate_comment_location(error.location).first
+          comment, start_pos, end_pos = location
+          start_pos = start_pos + comment.location.start_character_offset
+          end_pos = end_pos + comment.location.start_character_offset
+          loc = Location.new(buffer, start_pos, end_pos)
+          diagnostics << Diagnostics::AnnotationSyntaxError.new(loc, "Annotation syntax error: #{error.error.message}")
+        end
       end
     end
   end

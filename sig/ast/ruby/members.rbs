@@ -23,16 +23,98 @@ module RBS
           def initialize: (MethodType, Array[AST::Annotation]) -> void
         end
 
+        class DefAnnotations
+          class DocStyleTypeAnnotations
+            type return_type_annotation = Annotation::NodeTypeAssertion | Annotation::ReturnTypeAnnotation
+
+            attr_reader return_type_annotation: return_type_annotation?
+
+            attr_reader param_type_annotations: Hash[Symbol, Annotation::ParamTypeAnnotation]
+
+            attr_reader splat_type_annotation: Annotation::SplatParamTypeAnnotation?
+
+            attr_reader kwsplat_type_annotation: Annotation::DoubleSplatParamTypeAnnotation?
+
+            attr_reader block_type_annotation: Annotation::BlockParamTypeAnnotation?
+
+            def initialize: (
+              return_type_annotation: return_type_annotation?,
+              param_type_annotations: Hash[Symbol, Annotation::ParamTypeAnnotation],
+              splat_type_annotation: Annotation::SplatParamTypeAnnotation?,
+              kwsplat_type_annotation: Annotation::DoubleSplatParamTypeAnnotation?,
+              block_type_annotation: Annotation::BlockParamTypeAnnotation?
+            ) -> void
+
+            def self.empty: () -> DocStyleTypeAnnotations
+
+            def map_type_name: { (TypeName) -> TypeName } -> self
+
+            # In-place update
+            def update!: (
+              ?return_type_annotation: return_type_annotation?,
+              ?splat_type_annotation: Annotation::SplatParamTypeAnnotation?,
+              ?kwsplat_type_annotation: Annotation::DoubleSplatParamTypeAnnotation?,
+              ?block_type_annotation: Annotation::BlockParamTypeAnnotation?
+            ) -> void
+
+            def construct_method_type: (Prism::ParametersNode?) -> MethodType
+          end
+
+          type type_annotations = DocStyleTypeAnnotations | Array[Annotation::ColonMethodTypeAnnotation | Annotation::MethodTypesAnnotation] | nil
+
+          attr_reader type_annotations: type_annotations
+
+          attr_reader annotations: Array[Annotation::RBSAnnotationAnnotation]
+
+          attr_reader override: Annotation::OverrideAnnotation?
+
+          def initialize: (
+            type_annotations: type_annotations,
+            annotations: Array[Annotation::RBSAnnotationAnnotation],
+            override: Annotation::OverrideAnnotation?
+          ) -> void
+
+          def map_type_name: { (TypeName) -> TypeName } -> self
+
+          # Returns the method type annotations from the comment block
+          #
+          # Returns a tuple of `DefAnnotations` object, array of unused leading annotations, and unused trailing annotation.
+          #
+          def self.build: (CommentBlock? leading_block, CommentBlock? trailing_block, Array[Symbol]) -> [
+            DefAnnotations,
+            Array[Annotation::leading_annotation | CommentBlock::AnnotationSyntaxError],
+            Annotation::trailing_annotation | CommentBlock::AnnotationSyntaxError | nil
+          ]
+        end
+
         class DefMember < Base
           attr_reader node: Prism::DefNode
 
-          def initialize: (Prism::DefNode) -> void
+          attr_reader name: Symbol
 
+          attr_reader inline_annotations: DefAnnotations
+
+          def initialize: (Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
+
+          # Returns the overload of the method
+          #
+          # Note that the `#location` of the objects obtained from this method may be `nil`.
+          #
+          # * For types that comes from the source code, the type has `location`
+          # * For types that are inferred, the type does not have `location`
+          # * Other intermediate components doesn't have `location`
+          #
           def overloads: () -> Array[Overload]
 
-          def name: () -> Symbol
+          def override?: () -> bool
 
           def annotations: () -> Array[AST::Annotation]
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def location: () -> Location
+
+          def name_location: () -> Location
         end
 
         class DefSingletonMember < Base
@@ -82,9 +164,6 @@ module RBS
           # Type arguments for mixin
           attr_reader type_args: Array[Types::t]
 
-          # Locations of colons just after type_args[i]
-          attr_reader args_separator_locations: Array[Location]
-
           def initialize: (
             Buffer,
             Prism::CallNode,
@@ -93,7 +172,6 @@ module RBS
             type_args: Array[Types::t],
             module_name_location: Location,
             open_paren_location: Location?,
-            args_separator_locations: Array[Location],
             close_paren_location: Location?
           ) -> void
 

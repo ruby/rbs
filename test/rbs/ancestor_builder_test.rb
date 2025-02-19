@@ -77,6 +77,80 @@ EOF
     end
   end
 
+  def test_one_ancestors__inline__generic_class
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        # @rbs generic A < Integer
+        # @rbs generic B = Array[A]
+        class Foo
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [:A, :B], a.params
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors__inline__module__generic
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        # @rbs generic A < Integer
+        # @rbs generic B = Array[A]
+        module Foo
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [:A, :B], a.params
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors__inline__module__self
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        # @rbs module-self BasicObject
+        module Foo
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [:A, :B], a.params
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+        end
+      end
+    end
+  end
+
   def test_one_ancestors__inline__class
     SignatureManager.new(system_builtin: true) do |manager|
       manager.ruby_files["foo.rb"] = <<~RUBY
@@ -84,11 +158,12 @@ EOF
         end
 
         class Foo
+          # @rbs generic T
           module Bar
           end
 
           include M
-          prepend Bar
+          prepend Bar #[String]
         end
       RUBY
 
@@ -113,7 +188,7 @@ EOF
 
           assert_equal(
             [
-              Ancestor::Instance.new(name: type_name("::Foo::Bar"), args: [], source: nil)
+              Ancestor::Instance.new(name: type_name("::Foo::Bar"), args: [parse_type("::String")], source: nil)
             ],
             a.prepended_modules
           )

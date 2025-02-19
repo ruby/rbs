@@ -15,6 +15,25 @@ module RBS
           def rbs_location: (Prism::Location) -> Location
         end
 
+        # Returns `AST::TypeParam` objects from given `generic` annotations
+        #
+        # Note that `locations` in the returned objects may be `nil`.
+        # You can use the `type_param_annotations` directly for location aware operations.
+        #
+        class GenericsTypeParams
+          attr_reader annotations: Array[Annotation::GenericAnnotation]
+
+          attr_reader type_params: Array[AST::TypeParam]
+
+          def initialize: (Array[Annotation::GenericAnnotation]) -> void
+
+          def self.build: (Array[Annotation::leading_annotation]) -> [instance, Array[Annotation::leading_annotation]]
+
+          def param_names: () -> Array[Symbol]
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
         class ClassDecl < Base
           class Super
             attr_reader class_name: TypeName
@@ -27,8 +46,6 @@ module RBS
 
             attr_reader close_paren_location: Location?
 
-            attr_reader args_separator_locations: Array[Location]
-
             attr_reader location: Location
 
             def initialize: (
@@ -37,8 +54,7 @@ module RBS
               location: Location,
               class_name_location: Location,
               open_paren_location: Location?,
-              close_paren_location: Location?,
-              args_separator_locations: Array[Location]
+              close_paren_location: Location?
             ) -> void
 
             def map_type_name: () { (TypeName) -> TypeName } -> self
@@ -60,6 +76,8 @@ module RBS
 
           attr_reader class_name_location: Location
 
+          attr_reader generics: GenericsTypeParams
+
           attr_reader members: Array[member]
 
           attr_reader super_class: Super?
@@ -70,6 +88,7 @@ module RBS
             location: Location,
             class_name: TypeName,
             class_name_location: Location,
+            generics: GenericsTypeParams,
             super_class: Super?,
           ) -> void
 

@@ -326,4 +326,136 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "c::Bar", _1.location.source
     end
   end
+
+  def test_parse__method_definition__annotated__params
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        # @rbs a: Integer
+        # @rbs b: Integer
+        # @rbs *c: Integer
+        # @rbs d: Integer
+        # @rbs e: Integer?
+        # @rbs **f: Integer
+        # @rbs return: void
+        def foo(a, b = 1, *c, d:, e: nil, **f)
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |defn|
+      assert_equal [[]], defn.overloads.map { _1.annotations.map(&:string) }
+      assert_equal ["(Integer a, ?Integer b, *Integer c, d: Integer, ?e: Integer?, **Integer f) -> void"], defn.overloads.map(&:method_type).map(&:to_s)
+    end
+  end
+
+  def test_parse__method_definition__return_type_assertion
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        def foo() #: Integer
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |defn|
+      assert_equal [[]], defn.overloads.map { _1.annotations.map(&:string) }
+      assert_equal ["() -> Integer"], defn.overloads.map(&:method_type).map(&:to_s)
+    end
+  end
+
+  def test_parse__method_definition__method_types
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        # Hello World
+        #
+        #: () -> Integer
+        #: %a{pure} () -> String?
+        # @rbs () -> Symbol
+        #    | %a{pure} () -> bool?
+        # @rbs %a{pure} () -> Array[String]
+        def foo()
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |defn|
+      assert_equal [[], ["pure"], [], ["pure"], ["pure"]], defn.overloads.map { _1.annotations.map(&:string) }
+      assert_equal ["() -> Integer", "() -> String?", "() -> Symbol", "() -> bool?", "() -> Array[String]"], defn.overloads.map(&:method_type).map(&:to_s)
+    end
+  end
+
+  def test_parse__method_definition__block
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        # @rbs &block: ? (String) -> void -- Block
+        def foo(&block)
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |defn|
+      assert_equal [[]], defn.overloads.map { _1.annotations.map(&:string) }
+      assert_equal ["() ?{ (String) -> void } -> untyped"], defn.overloads.map(&:method_type).map(&:to_s)
+    end
+  end
+
+  def test_unused_annotations
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        # @rbs () -> void
+        # @rbs x: String
+        # @rbs return: untyped
+        # @rbs %a{pure}
+        # @rbs y: (
+        def foo(x)
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |defn|
+      assert_equal [[]], defn.overloads.map { _1.annotations.map(&:string) }
+      assert_equal ["() -> void"], defn.overloads.map(&:method_type).map(&:to_s)
+    end
+
+    assert_equal ["@rbs x: String", "@rbs return: untyped", "@rbs y: ("], ret.diagnostics.map { _1.location.source }
+  end
+
+  def test_mixin__type_args
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        include Bar #[Integer, String]
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].members[0].tap do |mixin|
+      assert_equal ["Integer", "String"], mixin.type_args.map(&:to_s)
+    end
+  end
+
+  def test_class_decl__generic
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs generic A -- type parameter of A
+      # @rbs generic out B < Integer = untyped
+      class Foo
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |klass|
+      assert_equal "A", klass.generics.type_params[0].to_s
+      assert_equal "out B < Integer = untyped", klass.generics.type_params[1].to_s
+    end
+  end
 end

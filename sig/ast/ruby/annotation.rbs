@@ -9,8 +9,12 @@ module RBS
                                 | SplatParamTypeAnnotation
                                 | DoubleSplatParamTypeAnnotation
                                 | BlockParamTypeAnnotation
+                                | OverrideAnnotation
+                                | RBSAnnotationAnnotation
+                                | GenericAnnotation
+                                | SkipAnnotation
 
-        type trailing_annotation = NodeTypeAssertion
+        type trailing_annotation = NodeTypeAssertion | NodeApplication
 
         type t = leading_annotation | trailing_annotation
 
@@ -30,6 +34,8 @@ module RBS
           attr_reader type: Types::t
 
           def initialize: (location: Location, prefix_location: Location, type: Types::t) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `[TYPE, ...]` annotation attached to nodes
@@ -65,6 +71,8 @@ module RBS
           attr_reader method_type: MethodType
 
           def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation], method_type: MethodType) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs METHOD-TYPEs` annotation in leading comments
@@ -88,6 +96,8 @@ module RBS
           attr_reader vertical_bar_locations: Array[Location]
 
           def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location]) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs return: T -- COMMENT` annotation in leading comments
@@ -116,6 +126,8 @@ module RBS
             return_type: Types::t,
             comment: Location?,
           ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs param: T -- COMMENT` annotation in leading comments
@@ -144,6 +156,10 @@ module RBS
             type: Types::t,
             comment: Location?
           ) -> void
+
+          def param_name: () -> Symbol
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs *param: TYPE -- COMMENT` annotation in leading comments
@@ -177,6 +193,8 @@ module RBS
             type: Types::t,
             comment: Location?
           ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs **param: TYPE -- COMMENT` annotation in leading comments
@@ -209,6 +227,8 @@ module RBS
             type: Types::t,
             comment: Location?
           ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs &block: ? method-type -- COMMENT` annotation in leading comments
@@ -252,6 +272,8 @@ module RBS
             block: Types::Block,
             comment: Location?
           ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs override` annotation in leading comments
@@ -319,6 +341,10 @@ module RBS
           def upper_bound_location: () -> Location?
 
           def default_type_location: () -> Location?
+
+          def name: () -> Symbol
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         # `@rbs %a{annotation} %a{annotation}` annotation in leading comments

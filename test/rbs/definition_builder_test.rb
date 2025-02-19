@@ -3155,8 +3155,9 @@ end
     SignatureManager.new do |manager|
       manager.ruby_files["foo.rb"] = <<~RUBY
         class Foo
-          def puts = "123"
+          def puts = "123" #: String
 
+          # @rbs () -> Integer?
           def hello
           end
         end
@@ -3173,13 +3174,13 @@ end
 
           assert_operator definition.methods, :key?, :puts
           definition.methods[:puts].tap do |method|
-            assert_method_definition method, ["(?) -> untyped"], accessibility: :public
+            assert_method_definition method, ["() -> ::String"], accessibility: :public
             assert_instance_of RBS::Definition::Method, method.super_method
           end
 
           assert_operator definition.methods, :key?, :hello
           definition.methods[:hello].tap do |method|
-            assert_method_definition method, ["(?) -> untyped"], accessibility: :public
+            assert_method_definition method, ["() -> ::Integer?"], accessibility: :public
             assert_nil method.super_method
           end
 

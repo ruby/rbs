@@ -66,7 +66,7 @@ require "rbs/type_alias_dependency"
 require "rbs/type_alias_regularity"
 require "rbs/collection"
 
-require "rbs/inline/annotation_parser"
+require "rbs/inline/comment_association"
 require "rbs/inline_parser"
 
 require "rbs_extension"

@@ -167,18 +167,22 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal "&", annot.operator_location.source
       assert_equal "block", annot.param_name_location.source
       assert_equal ":", annot.colon_location.source
+      assert_nil annot.question_mark_location
       assert_instance_of Types::Block, annot.block
+      assert annot.block.required
       assert_equal "-- block", annot.comment.source
     end
 
-    Parser.parse_inline("@rbs &: () [self: instance] -> void -- block", 0...).tap do |annot|
+    Parser.parse_inline("@rbs &: ? () [self: instance] -> void -- block", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotation::BlockParamTypeAnnotation, annot
-      assert_equal "@rbs &: () [self: instance] -> void -- block", annot.location.source
+      assert_equal "@rbs &: ? () [self: instance] -> void -- block", annot.location.source
       assert_equal "@rbs", annot.prefix_location.source
       assert_equal "&", annot.operator_location.source
       assert_nil annot.param_name_location
       assert_equal ":", annot.colon_location.source
+      assert_equal "?", annot.question_mark_location.source
       assert_instance_of Types::Block, annot.block
+      refute annot.block.required
       assert_equal "-- block", annot.comment.source
     end
   end
@@ -287,6 +291,13 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
           end
 
           type world = top
+      RBS
+    end
+  end
+
+  def test_use
+    Parser.parse_inline_uses(<<~RBS, 0...).tap do |uses|
+        use Foo, Bar::*, Baz as B
       RBS
     end
   end

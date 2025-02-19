@@ -19,6 +19,8 @@ module RBS
              | NonSelfSingletonClass
              | InvalidVisibilityCall
              | InvalidMixinCall
+             | UnusedAnnotation
+             | AnnotationSyntaxError
 
       class Base
         attr_reader message: String
@@ -55,6 +57,13 @@ module RBS
       # prepend/include/extend call with invalid syntax
       class InvalidMixinCall < Base
       end
+
+      # `@rbs` inline annotation is not used
+      class UnusedAnnotation < Base
+      end
+
+      class AnnotationSyntaxError < Base
+      end
     end
 
     # Returns `true` if the source code is enabled for inline-rbs parsing
@@ -73,6 +82,8 @@ module RBS
 
       attr_reader result: Result
 
+      attr_reader comments: Inline::CommentAssociation
+
       def buffer: () -> Buffer
 
       def diagnostics: () -> Array[Diagnostics::t]
@@ -83,7 +94,7 @@ module RBS
 
       attr_reader decl_contexts: Array[decl_context]
 
-      def initialize: (Result) -> void
+      def initialize: (Result, Inline::CommentAssociation) -> void
 
       def parse: () -> void
 
@@ -103,6 +114,16 @@ module RBS
 
       def mixin_member?: (Prism::CallNode) -> (Members::IncludeMember | Members::ExtendMember | Members::PrependMember | nil)
 
+      def push_type_params: [T] (Array[AST::TypeParam]) { () -> T } -> T
+                          | (Array[AST::TypeParam]) -> void
+
+      def pop_type_params: () -> void
+
+      @type_params_stack: Array[Array[AST::TypeParam]]
+      def current_type_params: () -> Array[AST::TypeParam]
+
+      def current_type_param_names: () -> Array[Symbol]
+
       # Returns true if the receiver is (implicitly/explicitly) a `self` node
       def self_call?: (Prism::CallNode) -> bool
 
@@ -120,6 +141,8 @@ module RBS
       # * If the node is a constant path node that parent is a constant node
       #
       def constant_node?: (Prism::Node) -> (Prism::ConstantReadNode | Prism::ConstantPathNode | nil)
+
+      def report_annotation_syntax_error: (AST::Ruby::CommentBlock, AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
     end
   end
 end
