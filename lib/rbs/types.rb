@@ -329,6 +329,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(name: name,
                        args: args.map {|ty| ty.sub(s) },
                        location: location)
@@ -371,6 +373,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(name: name,
                        args: args.map {|ty| ty.sub(s) },
                        location: location)
@@ -413,6 +417,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         Alias.new(name: name, args: args.map {|ty| ty.sub(s) }, location: location)
       end
 
@@ -469,6 +475,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(types: types.map {|ty| ty.sub(s) },
                        location: location)
       end
@@ -574,6 +582,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(
           all_fields: all_fields.transform_values {|ty, required| [ty.sub(s), required] },
           location: location
@@ -664,6 +674,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(type: type.sub(s), location: location)
       end
 
@@ -752,6 +764,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(types: types.map {|ty| ty.sub(s) },
                        location: location)
       end
@@ -841,6 +855,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(types: types.map {|ty| ty.sub(s) },
                        location: location)
       end
@@ -1093,6 +1109,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         map_type {|ty| ty.sub(s) }
       end
 
@@ -1272,6 +1290,8 @@ module RBS
       end
 
       def sub(subst)
+        return self if subst.empty?
+
         map_type { _1.sub(subst) }
       end
 
@@ -1346,6 +1366,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(
           type: type.sub(s),
           required: required,
@@ -1415,6 +1437,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(
           type: type.sub(s),
           block: block&.sub(s),
