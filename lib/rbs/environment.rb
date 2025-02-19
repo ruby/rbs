@@ -576,7 +576,8 @@ module RBS
           decl.node,
           location: decl.location,
           module_name: module_name,
-          module_name_location: decl.module_name_location
+          module_name_location: decl.module_name_location,
+          generics: decl.generics.map_type_name {|name| absolute_type_name(resolver, map, name, context: inner_context) },
         ).tap do |resolved|
           prefix = module_name.to_namespace
           decl.members.each do |member|

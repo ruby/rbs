@@ -458,4 +458,21 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "out B < Integer = untyped", klass.generics.type_params[1].to_s
     end
   end
+
+  def test_module_decl__generic
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs generic A -- type parameter of A
+      # @rbs generic out B < Integer = untyped
+      module Foo
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |mod|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, mod
+      assert_equal "A", mod.generics.type_params[0].to_s
+      assert_equal "out B < Integer = untyped", mod.generics.type_params[1].to_s
+    end
+  end
 end

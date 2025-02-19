@@ -126,6 +126,8 @@ module RBS
 
           attr_reader module_name_location: Location
 
+          attr_reader generics: GenericsTypeParams
+
           attr_reader members: Array[member]
 
           alias name module_name
@@ -135,7 +137,8 @@ module RBS
             Prism::ModuleNode,
             location: Location,
             module_name: TypeName,
-            module_name_location: Location
+            module_name_location: Location,
+            generics: GenericsTypeParams,
           ) -> void
 
           def type_params: () -> Array[AST::TypeParam]

@@ -154,21 +154,23 @@ module RBS
           attr_reader :location
           attr_reader :module_name
           attr_reader :module_name_location
+          attr_reader :generics
           attr_reader :members
 
-          def initialize(buffer, node, location:, module_name:, module_name_location:)
+          def initialize(buffer, node, location:, module_name:, module_name_location:, generics:)
             super(buffer)
             @node = node
             @location = location
             @module_name = module_name
             @module_name_location = module_name_location
+            @generics = generics
             @members = []
           end
 
           alias name module_name
 
           def type_params
-            []
+            generics.type_params
           end
 
           def self_types

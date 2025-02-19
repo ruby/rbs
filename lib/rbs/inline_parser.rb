@@ -265,12 +265,27 @@ module RBS
           return
         end
 
+        leading_block = comments.leading_block(node)
+        leading_comments = [] #: Array[AST::Ruby::Annotation::leading_annotation]
+        leading_block&.each_paragraph([]) do |paragraph|
+          case paragraph
+          when Location
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            report_annotation_syntax_error(leading_block || raise, paragraph)
+          else
+            leading_comments << paragraph
+          end
+        end
+
+        generics, leading_comments = AST::Ruby::Declarations::GenericsTypeParams.build(leading_comments)
+
         decl = AST::Ruby::Declarations::ModuleDecl.new(
           buffer,
           node,
           location: buffer.rbs_location(node.location),
           module_name: module_name,
-          module_name_location: module_name_location
+          module_name_location: module_name_location,
+          generics: generics
         )
 
         insert_class_module_decl(decl)
