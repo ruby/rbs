@@ -64,7 +64,7 @@ GEM
     mutex_m (0.3.0)
     net-protocol (0.2.2)
       timeout
-    net-smtp (0.5.0)
+    net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
     ostruct (0.6.1)
