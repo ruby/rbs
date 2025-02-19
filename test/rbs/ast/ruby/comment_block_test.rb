@@ -183,6 +183,34 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
     end
   end
 
+  def test_each_paragraph_colon
+    comments = Prism.parse_comments(<<~RUBY)
+      # : Foo
+      #
+      #: %a{foo}
+      #  () -> Bar
+      #
+      # Bar
+    RUBY
+
+    block = CommentBlock.new(Pathname("a.rb"), comments)
+
+    paragraphs = block.each_paragraph([]).to_a
+
+    paragraphs[0].tap do |paragraph|
+      assert_instance_of RBS::Location, paragraph
+      assert_equal ": Foo\n", paragraph.source
+    end
+    paragraphs[1].tap do |paragraph|
+      assert_instance_of RBS::AST::Ruby::Annotation::ColonMethodTypeAnnotation, paragraph
+      assert_equal ": %a{foo}\n () -> Bar", paragraph.location.source
+    end
+    paragraphs[2].tap do |paragraph|
+      assert_instance_of RBS::Location, paragraph
+      assert_equal "\nBar", paragraph.source
+    end
+  end
+
   def test_trailing_annotation
     comments = Prism.parse_comments(<<~RUBY)
       foo #: String

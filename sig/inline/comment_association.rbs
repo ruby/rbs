@@ -1,0 +1,48 @@
+use RBS::AST::Ruby::CommentBlock
+
+module RBS
+  module Inline
+    # CommentAssociation manages the association between `Prism::Node` and `CommentBlock`
+    #
+    class CommentAssociation
+      attr_reader blocks: Array[CommentBlock]
+
+      attr_reader start_line_map: Hash[Integer, CommentBlock]
+
+      attr_reader end_line_map: Hash[Integer, CommentBlock]
+
+      # CommentBlocks that are already associated to a node, which cannot be associated to another node again
+      #
+      attr_reader associated_blocks: Set[CommentBlock]
+
+      def self.build: (Pathname, Prism::Result) -> instance
+
+      def initialize: (Array[CommentBlock]) -> void
+
+      # Returns a CommentBlock that is associated to given node
+      #
+      # Update association status.
+      #
+      def leading_block: (Prism::Node) -> CommentBlock?
+
+      # Returns a CommentBlock that is associated to given node, or by its location
+      #
+      # Update association status.
+      #
+      def trailing_block: (Prism::Node) -> CommentBlock?
+                        | (Prism::Location) -> CommentBlock?
+
+      # Yields leading CommentBlocks that is enclosed in the given node
+      #
+      # Note that `enclosed_blocks` works only after all of the *leading* blocks inside the node is associated.
+      #
+      # Update association status.
+      #
+      def each_enclosed_block: (Prism::Node) { (CommentBlock) -> void } -> void
+                             | (Prism::Node) -> Enumerator[CommentBlock]
+
+      def each_unassociated_block: () { (CommentBlock) -> void } -> void
+                                 | () -> Enumerator[CommentBlock]
+    end
+  end
+end

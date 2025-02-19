@@ -83,6 +83,14 @@ module RBS
           comment.location.start_line_slice.index(/\S/) ? true : false
         end
 
+        def start_line
+          comments[0].location.start_line
+        end
+
+        def end_line
+          comments[-1].location.end_line
+        end
+
         def translate_comment_position(position)
           start = offsets.bsearch_index { position <= _4 } or return
           offset = offsets[start]
@@ -100,6 +108,8 @@ module RBS
 
         def self.build(path, comments)
           blocks = [] #: Array[CommentBlock]
+
+          comments = comments.filter {|comment| comment.is_a?(Prism::InlineComment) }
 
           until comments.empty?
             block_comments = [] #: Array[Prism::Comment]
@@ -242,10 +252,15 @@ module RBS
 
         def leading_annotation?(index)
           if index < comment_buffer.lines.size
-            comment_buffer.lines[index].start_with?(/@rbs\b|@rbs!/)
-          else
-            false
+            comment_buffer.lines[index].start_with?(/@rbs\b|@rbs!/) and return true
+
+            comment = offsets[index][0]
+            if comment.location.slice.start_with?(/#:/)
+              return true
+            end
           end
+
+          false
         end
 
         def slice_after!(array, &block)

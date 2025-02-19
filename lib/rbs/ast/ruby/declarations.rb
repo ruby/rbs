@@ -21,6 +21,44 @@ module RBS
           end
         end
 
+        class GenericsTypeParams
+          attr_reader :annotations
+
+          def initialize(annotations)
+            @annotations = annotations
+          end
+
+          def param_names
+            type_params.map(&:name)
+          end
+
+          def type_params
+            @type_params ||= annotations.map do |type_param|
+              TypeParam.new(
+                name: type_param.name,
+                variance: type_param.variance,
+                upper_bound: type_param.upper_bound,
+                default_type: type_param.default_type,
+                location: nil
+              )
+            end
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              annotations.map { |annotation| annotation.map_type_name { yield(_1) } }
+            ) #: self
+          end
+
+          def self.build(annotations)
+            generic_annotations, other_annotations = annotations.partition do |annotation|
+              annotation.is_a?(Annotation::GenericAnnotation)
+            end #: [Array[Annotation::GenericAnnotation], Array[Annotation::leading_annotation]]
+
+            [new(generic_annotations), other_annotations]
+          end
+        end
+
         class ClassDecl < Base
           class Super
             attr_reader :class_name
@@ -29,16 +67,14 @@ module RBS
             attr_reader :class_name_location
             attr_reader :open_paren_location
             attr_reader :close_paren_location
-            attr_reader :args_separator_locations
 
-            def initialize(class_name:, type_args:, location:, class_name_location:, open_paren_location:, close_paren_location:, args_separator_locations:)
+            def initialize(class_name:, type_args:, location:, class_name_location:, open_paren_location:, close_paren_location:)
               @class_name = class_name
               @type_args = type_args
               @location = location
               @class_name_location = class_name_location
               @open_paren_location = open_paren_location
               @close_paren_location = close_paren_location
-              @args_separator_locations = args_separator_locations
             end
 
             def map_type_name(&block)
@@ -48,8 +84,7 @@ module RBS
                 location: location,
                 class_name_location: class_name_location,
                 open_paren_location: open_paren_location,
-                close_paren_location: close_paren_location,
-                args_separator_locations: args_separator_locations
+                close_paren_location: close_paren_location
               ) #: self
             end
 
@@ -62,24 +97,22 @@ module RBS
           attr_reader :location
           attr_reader :class_name
           attr_reader :class_name_location
+          attr_reader :generics
           attr_reader :members
           attr_reader :super_class
 
-          def initialize(buffer, node, location:, class_name:, class_name_location:, super_class:)
+          def initialize(buffer, node, location:, class_name:, class_name_location:, generics:, super_class:)
             super(buffer)
             @node = node
             @location = location
             @class_name = class_name
             @class_name_location = class_name_location
+            @generics = generics
             @super_class = super_class
             @members = []
           end
 
           alias name class_name
-
-          def type_params
-            []
-          end
 
           def each_member(&block)
             if block
@@ -89,6 +122,10 @@ module RBS
             else
               enum_for :each_member
             end
+          end
+
+          def type_params
+            generics&.type_params || []
           end
 
           def each_decl(&block)

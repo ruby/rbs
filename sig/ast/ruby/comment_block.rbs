@@ -37,6 +37,12 @@ module RBS
         # Returns true if the comment block is a *trailing* comment, which is attached to the predecessor node
         def trailing?: () -> bool
 
+        # The line number of the first comment in the block
+        def start_line: () -> Integer
+
+        # The line number of the last comment in the block
+        def end_line: () -> Integer
+
         # The character index of `#comment_buffer` at the start of the lines
         #
         def line_starts: () -> Array[Integer]
@@ -71,7 +77,6 @@ module RBS
         # * Returns AnnotationSyntaxError if the annotation has a syntax error
         #
         def trailing_annotation: (Array[Symbol] variables) -> (AST::Ruby::Annotation::trailing_annotation | AnnotationSyntaxError | nil)
-
 
         class AnnotationSyntaxError
           attr_reader location: Location

@@ -18,6 +18,14 @@ module RBS
             super(location, prefix_location)
             @type = type
           end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              type: type.map_type_name { yield(_1) }
+            ) #: self
+          end
         end
 
         class NodeApplication < Base
@@ -48,6 +56,17 @@ module RBS
             @annotations = annotations
             @method_type = method_type
           end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              annotations: annotations,
+              method_type: method_type.map_type do |type|
+                type.map_type_name { yield(_1) }
+              end
+            ) #: self
+          end
         end
 
         class MethodTypesAnnotation < Base
@@ -67,6 +86,22 @@ module RBS
             @overloads = overloads
             @vertical_bar_locations = vertical_bar_locations
           end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              overloads: overloads.map do |overload|
+                Overload.new(
+                  annotations: overload.annotations,
+                  method_type: overload.method_type.map_type do |type|
+                    type.map_type_name { yield(_1) }
+                  end
+                )
+              end,
+              vertical_bar_locations: vertical_bar_locations
+            ) #: self
+          end
         end
 
         class ReturnTypeAnnotation < Base
@@ -79,6 +114,17 @@ module RBS
             @return_location = return_location
             @comment = comment
           end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              colon_location: colon_location,
+              return_type: return_type.map_type_name { yield(_1) },
+              return_location: return_location,
+              comment: comment
+            ) #: self
+          end
         end
 
         class ParamTypeAnnotation < Base
@@ -90,6 +136,21 @@ module RBS
             @colon_location = colon_location
             @type = type
             @comment = comment
+          end
+
+          def param_name
+            param_name_location.source.to_sym
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              param_name_location: param_name_location,
+              colon_location: colon_location,
+              type: type.map_type_name { yield(_1) },
+              comment: comment
+            ) #: self
           end
         end
 
@@ -104,6 +165,18 @@ module RBS
             @type = type
             @comment = comment
           end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              operator_location: operator_location,
+              param_name_location: param_name_location,
+              colon_location: colon_location,
+              type: type.map_type_name { yield(_1) },
+              comment: comment
+            ) #: self
+          end
         end
 
         class DoubleSplatParamTypeAnnotation < Base
@@ -116,6 +189,18 @@ module RBS
             @colon_location = colon_location
             @type = type
             @comment = comment
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              operator_location: operator_location,
+              param_name_location: param_name_location,
+              colon_location: colon_location,
+              type: type.map_type_name { yield(_1) },
+              comment: comment
+            ) #: self
           end
         end
 
@@ -130,6 +215,19 @@ module RBS
             @question_mark_location = question_mark_location
             @block = block
             @comment = comment
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              operator_location: operator_location,
+              param_name_location: param_name_location,
+              colon_location: colon_location,
+              question_mark_location: question_mark_location,
+              block: self.block.map_type {|type| type.map_type_name { yield(_1) } },
+              comment: comment
+            ) #: self
           end
         end
 
@@ -188,6 +286,26 @@ module RBS
             if (op = default_type_operator_location) && (default = default_type&.location)
               Location.new(op.buffer, op.start_pos, default.end_pos)
             end
+          end
+
+          def name
+            name_location.source.to_sym
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location: location,
+              prefix_location: prefix_location,
+              generic_location: generic_location,
+              unchecked_location: unchecked_location,
+              variance_location: variance_location,
+              name_location: name_location,
+              upper_bound_operator_location: upper_bound_operator_location,
+              upper_bound: upper_bound&.map_type_name { yield(_1) },
+              default_type_operator_location: default_type_operator_location,
+              default_type: default_type&.map_type_name { yield(_1) },
+              comment: comment
+            ) #: self
           end
         end
 
