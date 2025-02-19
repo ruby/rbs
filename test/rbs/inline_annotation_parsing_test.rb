@@ -271,7 +271,29 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_module_self_annotation
+    Parser.parse_inline("@rbs module-self _Foo", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::ModuleSelfAnnotation, annot
+
+      assert_equal "@rbs module-self _Foo", annot.location.source
+      assert_equal "module-self", annot.module_self_location.source
+      assert_equal TypeName.parse("_Foo"), annot.type_name
+      assert_equal "_Foo", annot.type_name_location.source
+      assert_nil annot.open_paren_location
+      assert_empty annot.type_args
+      assert_nil annot.close_paren_location
+    end
+
     Parser.parse_inline("@rbs module-self Foo[String?, nil] -- comment", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::ModuleSelfAnnotation, annot
+
+      assert_equal "@rbs module-self Foo[String?, nil] -- comment", annot.location.source
+      assert_equal "module-self", annot.module_self_location.source
+      assert_equal TypeName.parse("Foo"), annot.type_name
+      assert_equal "Foo", annot.type_name_location.source
+      assert_equal "[", annot.open_paren_location.source
+      assert_equal "String?", annot.type_args[0].location.source
+      assert_equal "nil", annot.type_args[1].location.source
+      assert_equal "]", annot.close_paren_location.source
     end
   end
 

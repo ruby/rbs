@@ -2349,6 +2349,38 @@ static VALUE parse_interface_decl(parserstate *state, position comment_pos, VALU
   );
 }
 
+/**
+  module_self_type ::= {} <module_name>
+                     | {} module_name `[` type_list <`]`>
+
+
+ * @param state
+ * @param module_name Pointer to VALUE to store a TypeName object
+ * @param type_args Pointer to an array to store type arguments
+ * @param ranges An array of range to store three ranges: module name, open paren, type args, and the close paren.
+ */
+static void parse_module_self(parserstate *state, VALUE *module_name, VALUE *type_args, range ranges[4]) {
+  parser_advance(state);
+  
+  ranges[0].start = state->current_token.range.start;
+  *module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &ranges[0]);
+  ranges[0].end = state->current_token.range.end;
+
+  if (state->next_token.type == pLBRACKET) {
+    parser_advance(state);
+    ranges[1] = state->current_token.range;
+    ranges[2].start = state->next_token.range.start;
+    parse_type_list(state, pRBRACKET, type_args);
+    ranges[2].end = state->next_token.range.end;
+    parser_advance_assert(state, pRBRACKET);
+    ranges[3] = state->current_token.range;
+  } else {
+    ranges[1] = NULL_RANGE;
+    ranges[2] = NULL_RANGE;
+    ranges[3] = NULL_RANGE;
+  }
+}
+
 /*
   module_self_types ::= {`:`} module_self_type `,` ... `,` <module_self_type>
 
@@ -2359,21 +2391,16 @@ static void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
     parser_advance(state);
 
-    range self_range;
-    self_range.start = state->current_token.range.start;
-    range name_range;
-    VALUE module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &name_range);
-    self_range.end = name_range.end;
+    range ranges[3];
+    VALUE module_name;
+    VALUE type_args = EMPTY_ARRAY;
 
-    VALUE args = EMPTY_ARRAY;
-    range args_range = NULL_RANGE;
-    if (state->next_token.type == pLBRACKET) {
-      parser_advance(state);
-      args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, &args);
-      parser_advance(state);
-      self_range.end = args_range.end = state->current_token.range.end;
-    }
+    range self_range = state->current_token.range;
+    parse_module_self(state, &module_name, &type_args, ranges);
+
+    range name_range = ranges[0];
+    range args_range = ranges[2];
+    self_range.end = state->current_token.range.end;
 
     VALUE location = rbs_new_location(state->buffer, self_range);
     rbs_loc *loc = rbs_check_location(location);
@@ -2381,7 +2408,7 @@ static void parse_module_self_types(parserstate *state, VALUE *array) {
     rbs_loc_add_required_child(loc, INTERN("name"), name_range);
     rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
-    VALUE self_type = rbs_ast_decl_module_self(module_name, args, location);
+    VALUE self_type = rbs_ast_decl_module_self(module_name, type_args, location);
     melt_array(array);
     rb_ary_push(*array, self_type);
 
@@ -3285,6 +3312,37 @@ VALUE parse_inline_annotation(parserstate *state) {
               bar_locations
             );
           }
+        }
+        case kMODULESELF: {
+          // @rbs module-self TypeName `[` args `]` -- comment
+
+          parser_advance_assert(state, kMODULESELF);
+
+          range module_self_range = state->current_token.range;
+
+          VALUE type_name;
+          VALUE type_args = EMPTY_ARRAY;
+          range ranges[4];
+
+          parse_module_self(state, &type_name, &type_args, ranges);
+
+          range module_name_range = ranges[0];
+          range open_paren_range = ranges[1];
+          range close_paren_range = ranges[3];
+
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_module_self_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, module_self_range),
+            type_name,
+            rbs_new_location(state->buffer, module_name_range),
+            null_range_p(open_paren_range) ? Qnil : rbs_new_location(state->buffer, open_paren_range),
+            type_args,
+            null_range_p(close_paren_range) ? Qnil : rbs_new_location(state->buffer, close_paren_range),
+            comment
+          );
         }
         default: {
           VALUE overloads = rb_ary_new();

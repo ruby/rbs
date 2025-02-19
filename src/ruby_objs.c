@@ -535,6 +535,25 @@ VALUE rbs_ast_ruby_annotation_method_types_annotation_overload(VALUE annotations
   );
 }
 
+VALUE rbs_ast_ruby_annotation_module_self_annotation(VALUE location, VALUE prefix_location, VALUE module_self_location, VALUE type_name, VALUE type_name_location, VALUE open_paren_location, VALUE type_args, VALUE close_paren_location, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("module_self_location")), module_self_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type_name")), type_name);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type_name_location")), type_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("open_paren_location")), open_paren_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type_args")), type_args);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("close_paren_location")), close_paren_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ModuleSelfAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_ruby_annotation_node_application(VALUE location, VALUE prefix_location, VALUE types, VALUE suffix_location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);

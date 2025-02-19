@@ -415,3 +415,14 @@ nodes:
       - name: prefix_location
       - name: types
       - name: suffix_location
+  - name: RBS::AST::Ruby::Annotation::ModuleSelfAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: module_self_location
+      - name: type_name
+      - name: type_name_location
+      - name: open_paren_location
+      - name: type_args
+      - name: close_paren_location
+      - name: comment

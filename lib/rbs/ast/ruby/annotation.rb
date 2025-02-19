@@ -317,6 +317,26 @@ module RBS
             @annotations = annotations
           end
         end
+
+        class ModuleSelfAnnotation < Base
+          attr_reader :module_self_location
+          attr_reader :type_name, :type_name_location
+          attr_reader :open_paren_location
+          attr_reader :type_args
+          attr_reader :close_paren_location
+          attr_reader :comment
+
+          def initialize(location:, prefix_location:, module_self_location:, type_name:, type_name_location:, open_paren_location:, type_args:, close_paren_location:, comment:)
+            super(location, prefix_location)
+            @module_self_location = module_self_location
+            @type_name = type_name
+            @type_name_location = type_name_location
+            @open_paren_location = open_paren_location
+            @type_args = type_args
+            @close_paren_location = close_paren_location
+            @comment = comment
+          end
+        end
       end
     end
   end

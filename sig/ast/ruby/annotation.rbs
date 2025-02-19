@@ -13,6 +13,7 @@ module RBS
                                 | RBSAnnotationAnnotation
                                 | GenericAnnotation
                                 | SkipAnnotation
+                                | ModuleSelfAnnotation
 
         type trailing_annotation = NodeTypeAssertion | NodeApplication
 
@@ -353,6 +354,36 @@ module RBS
           attr_reader annotations: Array[AST::Annotation]
 
           def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation]) -> void
+        end
+
+        # `@rbs module-self Foo[Bar] -- comment` annotation in leading comments
+        #
+        class ModuleSelfAnnotation < Base
+          attr_reader module_self_location: Location
+
+          attr_reader type_name: TypeName
+
+          attr_reader type_name_location: Location
+
+          attr_reader open_paren_location: Location?
+
+          attr_reader type_args: Array[Types::t]
+
+          attr_reader close_paren_location: Location?
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            module_self_location: Location,
+            type_name: TypeName,
+            type_name_location: Location,
+            open_paren_location: Location?,
+            type_args: Array[Types::t],
+            close_paren_location: Location?,
+            comment: Location?
+          ) -> void
         end
       end
     end

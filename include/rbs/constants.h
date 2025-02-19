@@ -56,6 +56,7 @@ extern VALUE RBS_AST_Ruby_Annotation_DoubleSplatParamTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotation_GenericAnnotation;
 extern VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation;
 extern VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload;
+extern VALUE RBS_AST_Ruby_Annotation_ModuleSelfAnnotation;
 extern VALUE RBS_AST_Ruby_Annotation_NodeApplication;
 extern VALUE RBS_AST_Ruby_Annotation_NodeTypeAssertion;
 extern VALUE RBS_AST_Ruby_Annotation_OverrideAnnotation;

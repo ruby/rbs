@@ -56,6 +56,7 @@ VALUE RBS_AST_Ruby_Annotation_DoubleSplatParamTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotation_GenericAnnotation;
 VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation;
 VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload;
+VALUE RBS_AST_Ruby_Annotation_ModuleSelfAnnotation;
 VALUE RBS_AST_Ruby_Annotation_NodeApplication;
 VALUE RBS_AST_Ruby_Annotation_NodeTypeAssertion;
 VALUE RBS_AST_Ruby_Annotation_OverrideAnnotation;
@@ -147,6 +148,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_GenericAnnotation, RBS_AST_Ruby_Annotation, "GenericAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_MethodTypesAnnotation, RBS_AST_Ruby_Annotation, "MethodTypesAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload, RBS_AST_Ruby_Annotation_MethodTypesAnnotation, "Overload");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_ModuleSelfAnnotation, RBS_AST_Ruby_Annotation, "ModuleSelfAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_NodeApplication, RBS_AST_Ruby_Annotation, "NodeApplication");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_NodeTypeAssertion, RBS_AST_Ruby_Annotation, "NodeTypeAssertion");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_OverrideAnnotation, RBS_AST_Ruby_Annotation, "OverrideAnnotation");
