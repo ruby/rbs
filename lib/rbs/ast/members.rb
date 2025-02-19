@@ -30,6 +30,8 @@ module RBS
           end
 
           def sub(subst)
+            return self if subst.empty?
+
             update(method_type: self.method_type.sub(subst))
           end
 

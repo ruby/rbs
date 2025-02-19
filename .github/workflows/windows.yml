@@ -20,6 +20,17 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+
+      # ucrt and mswin have the dev version Ruby.
+      # It introduce checksum mismatches for bundled gems. So remove them before `bundle install`
+      - name: Purge gem caches
+        run: |
+          ruby -e '
+            exit if "${{ matrix.ruby }}" != "ucrt" && "${{ matrix.ruby }}" != "mswin"
+            bundled_gems = Dir.glob("D:/ruby-${{ matrix.ruby }}/lib/ruby/gems/*/cache/*.gem")
+              .map { |path| File.basename(path, ".gem")[/^(.+)-[^-]+$/, 1] }
+            system "gem uninstall #{bundled_gems.join(" ")}", exception: true
+          '
       - name: bundle install
         run: |
           bundle config set without profilers libs

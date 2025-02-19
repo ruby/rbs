@@ -20,6 +20,8 @@ jobs:
           bundler: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
+      - name: Set up permission
+        run: chmod -R o-w /opt/hostedtoolcache/Ruby
       - name: Install dependencies
         run: |
           sudo apt-get update
