@@ -391,4 +391,60 @@ end
       end
     end
   end
+
+  def test_validate_type__variable
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+class Foo
+  @foo: Nothing
+  @bar: Integer
+
+  self.@foo: Nothing
+  self.@bar: Integer
+
+  @@foo: Nothing
+  @@bar: Integer
+end
+      EOF
+
+      manager.build do |env|
+        root = nil
+
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        env.class_decls[RBS::TypeName.parse("::Foo")].decls.first.decl.members.tap do |members|
+          members[0].tap do |member|
+            assert_raises(RBS::NoTypeFoundError) do
+              validator.validate_variable(member)
+            end
+          end
+
+          members[1].tap do |member|
+            validator.validate_variable(member)
+          end
+
+          members[2].tap do |member|
+            assert_raises(RBS::NoTypeFoundError) do
+              validator.validate_variable(member)
+            end
+          end
+
+          members[3].tap do |member|
+            validator.validate_variable(member)
+          end
+
+          members[4].tap do |member|
+            assert_raises(RBS::NoTypeFoundError) do
+              validator.validate_variable(member)
+            end
+          end
+
+          members[5].tap do |member|
+            validator.validate_variable(member)
+          end
+        end
+      end
+    end
+  end
 end

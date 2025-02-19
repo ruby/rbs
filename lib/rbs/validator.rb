@@ -151,6 +151,10 @@ module RBS
       end
     end
 
+    def validate_variable(var)
+      validate_type(var.type, context: nil)
+    end
+
     def validate_class_alias(entry:)
       case env.normalize_module_name?(entry.decl.new_name)
       when nil
