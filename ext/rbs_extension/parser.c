@@ -2357,11 +2357,11 @@ static VALUE parse_interface_decl(parserstate *state, position comment_pos, VALU
  * @param state
  * @param module_name Pointer to VALUE to store a TypeName object
  * @param type_args Pointer to an array to store type arguments
- * @param ranges An array of range to store three ranges: module name, open paren, type args, and the close paren.
+ * @param ranges An array of 4-range to store three ranges: module name, open paren, type args, and the close paren.
  */
 static void parse_module_self(parserstate *state, VALUE *module_name, VALUE *type_args, range ranges[4]) {
   parser_advance(state);
-  
+
   ranges[0].start = state->current_token.range.start;
   *module_name = parse_type_name(state, CLASS_NAME | INTERFACE_NAME, &ranges[0]);
   ranges[0].end = state->current_token.range.end;
@@ -2383,15 +2383,10 @@ static void parse_module_self(parserstate *state, VALUE *module_name, VALUE *typ
 
 /*
   module_self_types ::= {`:`} module_self_type `,` ... `,` <module_self_type>
-
-  module_self_type ::= <module_name>
-                     | module_name `[` type_list <`]`>
 */
 static void parse_module_self_types(parserstate *state, VALUE *array) {
   while (true) {
-    parser_advance(state);
-
-    range ranges[3];
+    range ranges[4];
     VALUE module_name;
     VALUE type_args = EMPTY_ARRAY;
 
@@ -2423,7 +2418,8 @@ static void parse_module_self_types(parserstate *state, VALUE *array) {
 static VALUE parse_nested_decl(parserstate *state, const char *nested_in, position annot_pos, VALUE annotations);
 
 /*
-  module_members ::= {} ...<module_member> kEND
+  module_members ::= {} module_member ... <module_member> kEND
+                   | {<>} kEND
 
   module_member ::= def_member
                   | variable_member
@@ -2606,7 +2602,8 @@ static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE a
 
     return rbs_ast_decl_module_alias(module_name, old_name, location, comment, annotations);
   } else {
-    return parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations);
+    VALUE decl = parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations);
+    return decl;
   }
 }
 
