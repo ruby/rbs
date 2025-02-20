@@ -322,6 +322,51 @@ module RBS
     end
   end
 
+  class VariableDuplicationError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :member
+
+    def initialize(member:)
+      @member = member
+
+      super "#{Location.to_string location}: Duplicated variable name #{member.name}"
+    end
+
+    def location
+      loc = @member.location or raise
+      loc[:name]
+    end
+  end
+
+  class InstanceVariableDuplicationError < VariableDuplicationError
+    def self.check!(variables:, member:, type_name:)
+      if old = variables[member.name]
+        if old.declared_in == type_name
+          raise new(member: member)
+        end
+      end
+    end
+  end
+
+  class ClassInstanceVariableDuplicationError < VariableDuplicationError
+    def self.check!(variables:, member:, type_name:)
+      if old = variables[member.name]
+        if old.declared_in == type_name
+          raise new(member: member)
+        end
+      end
+    end
+  end
+
+  class ClassVariableDuplicationError < VariableDuplicationError
+    def self.check!(variables:, member:, type_name:)
+      if old = variables[member.name]
+        raise new(member: member)
+      end
+    end
+  end
+
   class UnknownMethodAliasError < DefinitionError
     include DetailedMessageable
 

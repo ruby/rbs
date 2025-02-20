@@ -49,6 +49,10 @@ module RBS
     #
     def validate_class_alias: (entry: Environment::ClassAliasEntry | Environment::ModuleAliasEntry) -> void
 
+    # Validates instance/class-instance/class variables.
+    #
+    def validate_variable: (AST::Members::Var) -> void
+
     private
 
     # Resolves relative type names to absolute type names in given context.

@@ -151,6 +151,7 @@ module RBS
             end
 
           when AST::Members::InstanceVariable
+            InstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
             insert_variable(
               type_name,
               definition.instance_variables,
@@ -159,6 +160,7 @@ module RBS
             )
 
           when AST::Members::ClassVariable
+            ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
             insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
           end
         end
@@ -287,9 +289,11 @@ module RBS
                 end
 
               when AST::Members::ClassInstanceVariable
+                ClassInstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
                 insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type)
 
               when AST::Members::ClassVariable
+                ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
                 insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
               end
             end

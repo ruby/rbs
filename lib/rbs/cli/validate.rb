@@ -196,6 +196,7 @@ EOU
                   end
                 InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
               when AST::Members::Var
+                @validator.validate_variable(member)
                 void_type_context_validator(member.type)
                 if member.is_a?(AST::Members::ClassVariable)
                   no_self_type_validator(member.type)

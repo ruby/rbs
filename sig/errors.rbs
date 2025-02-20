@@ -182,6 +182,28 @@ module RBS
     def location: () -> AST::Members::Mixin::loc?
   end
 
+  class VariableDuplicationError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader member: AST::Members::Var
+
+    def initialize: (member: AST::Members::Var) -> void
+
+    def location: () -> Location[bot, bot]
+  end
+
+  class InstanceVariableDuplicationError < VariableDuplicationError
+    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::InstanceVariable, type_name: TypeName) -> void
+  end
+
+  class ClassInstanceVariableDuplicationError < VariableDuplicationError
+    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::ClassInstanceVariable, type_name: TypeName) -> void
+  end
+
+  class ClassVariableDuplicationError < VariableDuplicationError
+    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::ClassVariable, type_name: TypeName) -> void
+  end
+
   # The `alias` member declares an alias from unknown method
   #
   class UnknownMethodAliasError < DefinitionError
