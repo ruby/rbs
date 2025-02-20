@@ -139,7 +139,9 @@ task :typecheck_test => :compile do
 end
 
 task :raap => :compile do
-  sh %q[ruby test/raap.rb | xargs bundle exec raap -r digest/bubblebabble --library digest --allow-private]
+  sh "ruby test/raap/core.rb"
+  sh "ruby test/raap/digest.rb"
+  sh "ruby test/raap/openssl.rb"
 end
 
 task :rubocop do

@@ -241,23 +241,25 @@ class OpenSSLBNTest < Test::Unit::TestCase
   library "openssl"
   testing "::OpenSSL::BN"
 
-  def test_operations
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :%, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :*, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :**, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :+, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :-, 2
-    assert_send_type "(::Integer) -> [OpenSSL::BN, OpenSSL::BN]",
-      OpenSSL::BN.new(2), :/, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :<<, 2
-    assert_send_type "(::Integer) -> OpenSSL::BN",
-      OpenSSL::BN.new(2), :>>, 2
+  def test_mod_inverse
+    assert_send_type "(OpenSSL::BN) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :mod_inverse, OpenSSL::BN.new(5)
+    assert_send_type "(Integer) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :mod_inverse, 5
+  end
+
+  def test_lshift
+    assert_send_type "(Integer) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :<<, 1
+    assert_send_type "(_ToInt) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :<<, ToInt.new(1)
+  end
+
+  def test_rshift
+    assert_send_type "(Integer) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :>>, 1
+    assert_send_type "(_ToInt) -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :>>, ToInt.new(1)
   end
 end
 
