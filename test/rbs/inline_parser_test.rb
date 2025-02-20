@@ -96,10 +96,10 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     ret = RBS::InlineParser.parse(buffer, result)
 
     assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::DeclarationInsideSingletonClass, _1
       assert_equal "Bar", _1.location.source
+      assert_equal "Class definition inside singleton class definition is ignored", _1.message
     end
-
-    assert_empty ret.declarations
   end
 
   def test_parse__singleton_class_decl__diagnostics__top_level
@@ -456,6 +456,24 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     ret.declarations[0].tap do |klass|
       assert_equal "A", klass.generics.type_params[0].to_s
       assert_equal "out B < Integer = untyped", klass.generics.type_params[1].to_s
+    end
+  end
+
+  def test_class_decl__super_annotation
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs inherits BasicObject -- inherits super class
+      class Foo
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |klass|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperAnnotation, klass.super_annotation
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperAnnotation, klass.super_class
+
+      assert_equal "BasicObject", klass.super_annotation.name.to_s
+      assert_empty klass.super_annotation.args
     end
   end
 

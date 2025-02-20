@@ -60,7 +60,7 @@ module RBS
         end
 
         class ClassDecl < Base
-          class Super
+          class SuperNode
             attr_reader :class_name
             attr_reader :type_args
             attr_reader :location
@@ -93,26 +93,80 @@ module RBS
             alias args type_args
           end
 
+          class SuperAnnotation
+            attr_reader :class_name
+            attr_reader :type_args
+            attr_reader :annotation
+
+            def initialize(class_name, type_args, annotation)
+              @class_name = class_name
+              @type_args = type_args
+              @annotation = annotation
+            end
+
+            def map_type_name(&block)
+              self.class.new(
+                yield(class_name),
+                type_args.map {|type| type.map_type_name { yield(_1) } },
+                annotation
+              ) #: self
+            end
+
+            alias name class_name
+
+            alias args type_args
+
+            def self.build(annotations)
+              super_annotation = nil #: Annotation::InheritsAnnotation?
+              other_annotations = [] #: Array[Annotation::leading_annotation]
+
+              annotations.each do |annotation|
+                if !super_annotation && annotation.is_a?(Annotation::InheritsAnnotation)
+                  super_annotation = annotation
+                else
+                  other_annotations << annotation
+                end
+              end
+
+              [
+                if super_annotation
+                  SuperAnnotation.new(
+                    super_annotation.type_name,
+                    super_annotation.type_args,
+                    super_annotation
+                  ) #: instance
+                end,
+                other_annotations
+              ]
+            end
+          end
+
           attr_reader :node
           attr_reader :location
           attr_reader :class_name
           attr_reader :class_name_location
           attr_reader :generics
           attr_reader :members
-          attr_reader :super_class
+          attr_reader :super_node
+          attr_reader :super_annotation
 
-          def initialize(buffer, node, location:, class_name:, class_name_location:, generics:, super_class:)
+          def initialize(buffer, node, location:, class_name:, class_name_location:, generics:, super_node:, super_annotation:)
             super(buffer)
             @node = node
             @location = location
             @class_name = class_name
             @class_name_location = class_name_location
             @generics = generics
-            @super_class = super_class
+            @super_node = super_node
+            @super_annotation = super_annotation
             @members = []
           end
 
           alias name class_name
+
+          def super_class
+            super_annotation || super_node
+          end
 
           def each_member(&block)
             if block

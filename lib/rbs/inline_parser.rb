@@ -161,15 +161,16 @@ module RBS
         end
 
         generics, leading_comments = AST::Ruby::Declarations::GenericsTypeParams.build(leading_comments)
+        super_annotation, leading_comments = AST::Ruby::Declarations::ClassDecl::SuperAnnotation.build(leading_comments)
 
         push_type_params(generics.type_params) do
-          if super_node = node.superclass
-            trailing_block = comments.trailing_block(super_node)
+          if super_node_ = node.superclass
+            trailing_block = comments.trailing_block(super_node_)
 
-            visit super_node
+            visit super_node_
 
-            if super_class_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(super_node)
-              super_class_name_location = buffer.rbs_location(super_node.location)
+            if super_class_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(super_node_)
+              super_class_name_location = buffer.rbs_location(super_node_.location)
 
               open_paren_location = nil #: Location?
               type_args = [] #: Array[Types::t]
@@ -183,7 +184,7 @@ module RBS
                 end
               end
 
-              super_class = AST::Ruby::Declarations::ClassDecl::Super.new(
+              super_node = AST::Ruby::Declarations::ClassDecl::SuperNode.new(
                 class_name: super_class_name,
                 class_name_location: super_class_name_location,
                 location: class_name_location,
@@ -192,10 +193,18 @@ module RBS
                 close_paren_location: close_paren_location
               )
             else
-              diagnostics << Diagnostics::NonConstantSuperClass.new(
-                buffer.rbs_location(super_node.location),
-                "Super class of #{class_name} should be constant"
-              )
+              unless super_annotation
+                diagnostics << Diagnostics::NonConstantSuperClass.new(
+                  buffer.rbs_location(super_node_.location),
+                  "Super class of #{class_name} should be constant"
+                )
+              end
+            end
+          end
+
+          if leading_block
+            leading_comments.each do |annotation|
+              report_unused_annotation(leading_block, annotation)
             end
           end
 
@@ -206,7 +215,8 @@ module RBS
             location: buffer.rbs_location(node.location),
             class_name_location: class_name_location,
             generics: generics,
-            super_class: super_class
+            super_node: super_node,
+            super_annotation: super_annotation
           )
 
           insert_class_module_decl(decl)

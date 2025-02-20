@@ -35,7 +35,7 @@ module RBS
         end
 
         class ClassDecl < Base
-          class Super
+          class SuperNode
             attr_reader class_name: TypeName
 
             attr_reader class_name_location: Location
@@ -64,6 +64,24 @@ module RBS
             alias args type_args
           end
 
+          class SuperAnnotation
+            attr_reader class_name: TypeName
+
+            attr_reader type_args: Array[Types::t]
+
+            attr_reader annotation: Annotation::InheritsAnnotation
+
+            def initialize: (TypeName, Array[Types::t], Annotation::InheritsAnnotation) -> void
+
+            def map_type_name: () { (TypeName) -> TypeName } -> self
+
+            alias name class_name
+
+            alias args type_args
+
+            def self.build: (Array[Annotation::leading_annotation]) -> [instance?, Array[Annotation::leading_annotation]]
+          end
+
           type member = Members::t | t | SingletonClassDecl
 
           attr_reader node: Prism::ClassNode
@@ -80,7 +98,9 @@ module RBS
 
           attr_reader members: Array[member]
 
-          attr_reader super_class: Super?
+          attr_reader super_annotation: SuperAnnotation?
+
+          attr_reader super_node: SuperNode?
 
           def initialize: (
             Buffer,
@@ -89,7 +109,8 @@ module RBS
             class_name: TypeName,
             class_name_location: Location,
             generics: GenericsTypeParams,
-            super_class: Super?,
+            super_node: SuperNode?,
+            super_annotation: SuperAnnotation?
           ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
@@ -99,6 +120,8 @@ module RBS
 
           def each_decl: () { (t | SingletonClassDecl) -> void } -> void
                        | () -> Enumerator[t | SingletonClassDecl]
+
+          def super_class: () -> (SuperNode | SuperAnnotation | nil)
         end
 
         # `class <<self` definition
