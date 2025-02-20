@@ -54,6 +54,7 @@ VALUE RBS_AST_Ruby_Annotation_BlockParamTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotation_ColonMethodTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotation_DoubleSplatParamTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotation_GenericAnnotation;
+VALUE RBS_AST_Ruby_Annotation_InheritsAnnotation;
 VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation;
 VALUE RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload;
 VALUE RBS_AST_Ruby_Annotation_ModuleSelfAnnotation;
@@ -146,6 +147,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_ColonMethodTypeAnnotation, RBS_AST_Ruby_Annotation, "ColonMethodTypeAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_DoubleSplatParamTypeAnnotation, RBS_AST_Ruby_Annotation, "DoubleSplatParamTypeAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_GenericAnnotation, RBS_AST_Ruby_Annotation, "GenericAnnotation");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_InheritsAnnotation, RBS_AST_Ruby_Annotation, "InheritsAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_MethodTypesAnnotation, RBS_AST_Ruby_Annotation, "MethodTypesAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_MethodTypesAnnotation_Overload, RBS_AST_Ruby_Annotation_MethodTypesAnnotation, "Overload");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotation_ModuleSelfAnnotation, RBS_AST_Ruby_Annotation, "ModuleSelfAnnotation");

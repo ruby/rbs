@@ -258,11 +258,37 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_inherits_annotation
-    Parser.parse_inline("@rbs inherits Foo[String?, nil]", 0...).tap do |annot|
+    Parser.parse_inline("@rbs inherits Foo", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::InheritsAnnotation, annot
+
+      assert_equal "@rbs inherits Foo", annot.location.source
+      assert_equal "inherits", annot.inherits_location.source
+      assert_equal TypeName.parse("Foo"), annot.type_name
+      assert_equal "Foo", annot.type_name_location.source
+      assert_nil annot.open_paren_location
+      assert_empty annot.type_args
+      assert_nil annot.close_paren_location
+      assert_nil annot.comment
+    end
+
+    Parser.parse_inline("@rbs inherits Foo[_Each[untyped], untyped] -- comment", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::InheritsAnnotation, annot
+
+      assert_equal "@rbs inherits Foo[_Each[untyped], untyped] -- comment", annot.location.source
+      assert_equal "inherits", annot.inherits_location.source
+      assert_equal TypeName.parse("Foo"), annot.type_name
+      assert_equal "Foo", annot.type_name_location.source
+      assert_equal "[", annot.open_paren_location.source
+      assert_equal "_Each[untyped]", annot.type_args[0].location.source
+      assert_equal "untyped", annot.type_args[1].location.source
+      assert_equal "]", annot.close_paren_location.source
+      assert_equal "-- comment", annot.comment.source
     end
   end
 
   def test_class_module_annotation
+    omit("Implement `@rbs class/@rbs module` annotation")
+
     Parser.parse_inline("@rbs class Foo[String?, nil]", 0...).tap do |annot|
     end
 
@@ -294,10 +320,13 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal "String?", annot.type_args[0].location.source
       assert_equal "nil", annot.type_args[1].location.source
       assert_equal "]", annot.close_paren_location.source
+      assert_equal "-- comment", annot.comment.source
     end
   end
 
   def test_instance_variable_annotation
+    omit("Implement `ivar type` annotation")
+
     Parser.parse_inline("@rbs @name: String -- name of something", 0...).tap do |annot|
     end
 
@@ -306,6 +335,7 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_embbed_syntax
+    omit("Implement `@rbs!` annotation")
     Parser.parse_inline(<<~RBS, 0...).tap do |annot|
         @rbs!
           interface _Hello
@@ -318,6 +348,7 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_use
+    omit("Implement `@rbs use` annotation")
     Parser.parse_inline_uses(<<~RBS, 0...).tap do |uses|
         use Foo, Bar::*, Baz as B
       RBS

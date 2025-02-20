@@ -14,6 +14,7 @@ module RBS
                                 | GenericAnnotation
                                 | SkipAnnotation
                                 | ModuleSelfAnnotation
+                                | InheritsAnnotation
 
         type trailing_annotation = NodeTypeAssertion | NodeApplication
 
@@ -377,6 +378,36 @@ module RBS
             location: Location,
             prefix_location: Location,
             module_self_location: Location,
+            type_name: TypeName,
+            type_name_location: Location,
+            open_paren_location: Location?,
+            type_args: Array[Types::t],
+            close_paren_location: Location?,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs inherits Foo[Bar] -- comment` annotation in leading comments
+        #
+        class InheritsAnnotation < Base
+          attr_reader inherits_location: Location
+
+          attr_reader type_name: TypeName
+
+          attr_reader type_name_location: Location
+
+          attr_reader open_paren_location: Location?
+
+          attr_reader type_args: Array[Types::t]
+
+          attr_reader close_paren_location: Location?
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            inherits_location: Location,
             type_name: TypeName,
             type_name_location: Location,
             open_paren_location: Location?,

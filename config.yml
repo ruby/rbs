@@ -426,3 +426,14 @@ nodes:
       - name: type_args
       - name: close_paren_location
       - name: comment
+  - name: RBS::AST::Ruby::Annotation::InheritsAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: inherits_location
+      - name: type_name
+      - name: type_name_location
+      - name: open_paren_location
+      - name: type_args
+      - name: close_paren_location
+      - name: comment

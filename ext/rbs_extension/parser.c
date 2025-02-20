@@ -1861,22 +1861,48 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
  * class_instance_name ::= {} <class_name>
  *                       | {} class_name `[` type args <`]`>
  *
- * @param kind
+ * @param ranges
+ *   An 5-elements array of ranges to store:
+ *   - 0: The range of the whole name.
+ *   - 1: The range of the type name.
+ *   - 2: The range of the open bracket.
+ *   - 3: The range of the close bracket.
+ *   - 4: The range of the type args.
  * */
-void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE *args, range *name_range, range *args_range) {
+void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE *args, range ranges[5]) {
   parser_advance(state);
 
-  *name = parse_type_name(state, kind, name_range);
+  range all_range;
+  range name_range;
+  range open_bracket_range;
+  range close_bracket_range;
+  range args_range;
+
+  *name = parse_type_name(state, kind, &name_range);
+  all_range = name_range;
 
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
-    args_range->start = state->current_token.range.start;
+    open_bracket_range = state->current_token.range;
     parse_type_list(state, pRBRACKET, args);
     parser_advance_assert(state, pRBRACKET);
-    args_range->end = state->current_token.range.end;
+    close_bracket_range = state->current_token.range;
+    args_range = (range) {
+      .start = open_bracket_range.start,
+      .end = close_bracket_range.end,
+    };
+    all_range.end = close_bracket_range.end;
   } else {
-    *args_range = NULL_RANGE;
+    open_bracket_range = NULL_RANGE;
+    close_bracket_range = NULL_RANGE;
+    args_range = NULL_RANGE;
   }
+
+  ranges[0] = all_range;
+  ranges[1] = name_range;
+  ranges[2] = open_bracket_range;
+  ranges[3] = close_bracket_range;
+  ranges[4] = args_range;
 }
 
 /**
@@ -1924,13 +1950,14 @@ static VALUE parse_mixin_member(parserstate *state, bool from_interface, positio
 
   VALUE name;
   VALUE args = EMPTY_ARRAY;
-  range name_range;
-  range args_range = NULL_RANGE;
+  range ranges[5];
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
-    &name, &args, &name_range, &args_range
+    &name, &args, ranges
   );
+  range name_range = ranges[1];
+  range args_range = ranges[4];
 
   parser_pop_typevar_table(state);
 
@@ -2620,8 +2647,10 @@ static VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
 
     VALUE name;
     VALUE args = EMPTY_ARRAY;
-    range name_range, args_range;
-    class_instance_name(state, CLASS_NAME, &name, &args, &name_range, &args_range);
+    range ranges[5];
+    class_instance_name(state, CLASS_NAME, &name, &args, ranges);
+    range name_range = ranges[1];
+    range args_range = ranges[4];
 
     super_range.end = state->current_token.range.end;
 
@@ -3162,6 +3191,40 @@ VALUE parse_generic_annotation(parserstate *state, range rbs_range) {
   );
 }
 
+/**
+ * inherits ::= {} `inherits` <class_instance_name> <inline_comment?>
+ */
+static VALUE parse_inline_inherits_annotation(parserstate *state, range rbs_range) {
+  range annotation_range = rbs_range;
+
+  parser_advance_assert(state, kINHERITS);
+  range inherits_range = state->current_token.range;
+
+  VALUE name;
+  VALUE args = EMPTY_ARRAY;
+  range ranges[5];
+  class_instance_name(state, CLASS_NAME, &name, &args, ranges);
+  range name_range = ranges[1];
+  range open_bracket_range = ranges[2];
+  range close_bracket_range = ranges[3];
+
+  VALUE comment = parse_inline_comment(state);
+
+  annotation_range.end = state->current_token.range.end;
+
+  return rbs_ast_ruby_annotation_inherits_annotation(
+    rbs_new_location(state->buffer, annotation_range),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, inherits_range),
+    name,
+    rbs_new_location(state->buffer, name_range),
+    null_range_p(open_bracket_range) ? Qnil : rbs_new_location(state->buffer, open_bracket_range),
+    args,
+    null_range_p(close_bracket_range) ? Qnil : rbs_new_location(state->buffer, close_bracket_range),
+    comment
+  );
+}
+
 VALUE parse_inline_annotation(parserstate *state) {
   switch (state->next_token.type) {
     case kATRBS: {
@@ -3183,6 +3246,9 @@ VALUE parse_inline_annotation(parserstate *state) {
           }
           if (state->next_token.type == kGENERIC && state->next_token2.type != pCOLON) {
             return parse_generic_annotation(state, rbs_range);
+          }
+          if (state->next_token.type == kINHERITS && state->next_token2.type != pCOLON) {
+            return parse_inline_inherits_annotation(state, rbs_range);
           }
 
           // @rbs x: type
