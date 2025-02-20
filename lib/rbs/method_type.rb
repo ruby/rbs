@@ -33,6 +33,8 @@ module RBS
     def sub(s)
       sub = s.without(*type_param_names)
 
+      return self if sub.empty?
+
       self.class.new(
         type_params: type_params.map do |param|
           param.map_type do |bound|
