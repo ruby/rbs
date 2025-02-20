@@ -116,6 +116,22 @@ module RBS
         end
 
         class ModuleDecl < Base
+          class SelfConstraint
+            attr_reader name: TypeName
+
+            attr_reader args: Array[Types::t]
+
+            attr_reader annotation: Annotation::ModuleSelfAnnotation
+
+            def initialize: (TypeName, Array[Types::t], Annotation::ModuleSelfAnnotation) -> void
+
+            # Note that type names in `annotation` doesn't update
+            #
+            def map_type_name: () { (TypeName) -> TypeName } -> self
+
+            def self.build: (Array[Annotation::leading_annotation]) -> [Array[instance], Array[Annotation::leading_annotation]]
+          end
+
           type member = Members::t | t | SingletonClassDecl
 
           attr_reader node: Prism::ModuleNode
@@ -128,6 +144,8 @@ module RBS
 
           attr_reader generics: GenericsTypeParams
 
+          attr_reader self_constraints: Array[SelfConstraint]
+
           attr_reader members: Array[member]
 
           alias name module_name
@@ -139,11 +157,12 @@ module RBS
             module_name: TypeName,
             module_name_location: Location,
             generics: GenericsTypeParams,
+            self_constraints: Array[SelfConstraint]
           ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
 
-          def self_types: () -> Array[untyped]
+          def self_types: () -> Array[SelfConstraint]
 
           def each_member: () { (Members::t) -> void } -> void
                          | () -> Enumerator[Members::t]

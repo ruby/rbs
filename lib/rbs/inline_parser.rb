@@ -278,19 +278,29 @@ module RBS
         end
 
         generics, leading_comments = AST::Ruby::Declarations::GenericsTypeParams.build(leading_comments)
+        push_type_params(generics.type_params) do
+          self_constraints, leading_comments = AST::Ruby::Declarations::ModuleDecl::SelfConstraint.build(leading_comments)
 
-        decl = AST::Ruby::Declarations::ModuleDecl.new(
-          buffer,
-          node,
-          location: buffer.rbs_location(node.location),
-          module_name: module_name,
-          module_name_location: module_name_location,
-          generics: generics
-        )
+          if leading_block
+            leading_comments.each do |comment|
+              report_unused_annotation(leading_block, comment)
+            end
+          end
 
-        insert_class_module_decl(decl)
-        push_decl_context(decl) do
-          visit node.body
+          decl = AST::Ruby::Declarations::ModuleDecl.new(
+            buffer,
+            node,
+            location: buffer.rbs_location(node.location),
+            module_name: module_name,
+            module_name_location: module_name_location,
+            generics: generics,
+            self_constraints: self_constraints
+          )
+
+          insert_class_module_decl(decl)
+          push_decl_context(decl) do
+            visit node.body
+          end
         end
       end
 
@@ -312,13 +322,7 @@ module RBS
           when AST::Ruby::CommentBlock::AnnotationSyntaxError
             report_annotation_syntax_error(block, annot)
           else
-            if location = block.translate_comment_location(annot.location).first
-              comment, start_pos, end_pos = location
-              start_pos = start_pos + comment.location.start_character_offset
-              end_pos = end_pos + comment.location.start_character_offset
-              loc = Location.new(buffer, start_pos, end_pos)
-              diagnostics << Diagnostics::UnusedAnnotation.new(loc, "Unused annotation")
-            end
+            report_unused_annotation(block, annot)
           end
         end
 
@@ -575,6 +579,16 @@ module RBS
           end_pos = end_pos + comment.location.start_character_offset
           loc = Location.new(buffer, start_pos, end_pos)
           diagnostics << Diagnostics::AnnotationSyntaxError.new(loc, "Annotation syntax error: #{error.error.message}")
+        end
+      end
+
+      def report_unused_annotation(block, annot)
+        if location = block.translate_comment_location(annot.location).first
+          comment, start_pos, end_pos = location
+          start_pos = start_pos + comment.location.start_character_offset
+          end_pos = end_pos + comment.location.start_character_offset
+          loc = Location.new(buffer, start_pos, end_pos)
+          diagnostics << Diagnostics::UnusedAnnotation.new(loc, "Unused annotation")
         end
       end
     end

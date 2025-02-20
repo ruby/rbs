@@ -140,12 +140,12 @@ EOF
 
         builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
           assert_equal type_name("::Foo"), a.type_name
-          assert_equal [:A, :B], a.params
-        end
-
-        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
-          assert_equal type_name("::Foo"), a.type_name
-          assert_nil a.params
+          assert_equal(
+            [
+              Ancestor::Instance.new(name: type_name("::BasicObject"), args: [], source: nil)
+            ],
+            a.self_types
+          )
         end
       end
     end

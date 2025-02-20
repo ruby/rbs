@@ -143,6 +143,8 @@ module RBS
       def constant_node?: (Prism::Node) -> (Prism::ConstantReadNode | Prism::ConstantPathNode | nil)
 
       def report_annotation_syntax_error: (AST::Ruby::CommentBlock, AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
+
+      def report_unused_annotation: (AST::Ruby::CommentBlock, AST::Ruby::Annotation::t) -> void
     end
   end
 end

@@ -43,7 +43,7 @@ module RBS
       #
       def validate_type_params: () -> void
 
-      def self_types: () -> Array[AST::Declarations::Module::Self]
+      def self_types: () -> Array[AST::Declarations::Module::Self | AST::Ruby::Declarations::ModuleDecl::SelfConstraint]
     end
   end
 end

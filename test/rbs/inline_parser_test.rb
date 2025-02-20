@@ -475,4 +475,24 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "out B < Integer = untyped", mod.generics.type_params[1].to_s
     end
   end
+
+  def test_module_decl__self_constraints
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs module-self BasicObject -- type parameter of A
+      module Foo
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |mod|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, mod
+
+      mod.self_constraints[0].tap do |constraint|
+        assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl::SelfConstraint, constraint
+        assert_equal "BasicObject", constraint.type_name.to_s
+        assert_equal [], constraint.type_args
+      end
+    end
+  end
 end

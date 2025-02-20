@@ -150,20 +150,60 @@ module RBS
         end
 
         class ModuleDecl < Base
+          class SelfConstraint
+            attr_reader :name
+            attr_reader :args
+            attr_reader :annotation
+
+            def initialize(name, args, annotation)
+              @name = name
+              @args = args
+              @annotation = annotation
+            end
+
+            def map_type_name
+              SelfConstraint.new(
+                yield(name),
+                args.map { |type| type.map_type_name { yield(_1) } },
+                annotation
+              ) #: self
+            end
+
+            def self.build(annotations)
+              self_annotations = [] #: Array[Annotation::ModuleSelfAnnotation]
+              other_annotations = [] #: Array[Annotation::leading_annotation]
+
+              annotations.each do |annotation|
+                if annotation.is_a?(Annotation::ModuleSelfAnnotation)
+                  self_annotations << annotation
+                else
+                  other_annotations << annotation
+                end
+              end
+
+              [
+                self_annotations.map { new(_1.type_name, _1.type_args, _1) },
+                other_annotations
+              ]
+            end
+          end
+
           attr_reader :node
           attr_reader :location
           attr_reader :module_name
           attr_reader :module_name_location
           attr_reader :generics
           attr_reader :members
+          attr_reader :self_constraints
 
-          def initialize(buffer, node, location:, module_name:, module_name_location:, generics:)
+          def initialize(buffer, node, location:, module_name:, module_name_location:, generics:, self_constraints:)
             super(buffer)
             @node = node
             @location = location
             @module_name = module_name
             @module_name_location = module_name_location
             @generics = generics
+            @self_constraints = self_constraints
             @members = []
           end
 
@@ -174,7 +214,7 @@ module RBS
           end
 
           def self_types
-            []
+            self_constraints
           end
 
           def each_member(&block)

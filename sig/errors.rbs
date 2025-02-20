@@ -102,6 +102,9 @@ module RBS
   class NoSelfTypeFoundError < DefinitionError
     include DetailedMessageable
 
+    type self_constraint = AST::Declarations::Module::Self
+                         | AST::Ruby::Declarations::ModuleDecl::SelfConstraint
+
     attr_reader type_name: TypeName
     attr_reader location: Location[untyped, untyped]?
 
@@ -109,7 +112,7 @@ module RBS
 
     # The type name in `self` is automatically normalized
     #
-    def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
+    def self.check!: (self_constraint, env: Environment) -> void
   end
 
   class NoMixinFoundError < DefinitionError

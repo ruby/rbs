@@ -578,6 +578,7 @@ module RBS
           module_name: module_name,
           module_name_location: decl.module_name_location,
           generics: decl.generics.map_type_name {|name| absolute_type_name(resolver, map, name, context: inner_context) },
+          self_constraints: decl.self_constraints.map { _1.map_type_name {|name| absolute_type_name(resolver, map, name, context: inner_context) } },
         ).tap do |resolved|
           prefix = module_name.to_namespace
           decl.members.each do |member|
