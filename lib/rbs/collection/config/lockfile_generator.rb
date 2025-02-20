@@ -161,11 +161,6 @@ module RBS
           return if lockfile.gems.key?(name)
 
           case name
-          when 'rubygems', 'set'
-            msg = "`#{name}` has been moved to core library, so it is always loaded. Remove explicit loading `#{name}`"
-            msg << " from `#{from_gem}`" if from_gem
-            msg << "."
-            return
           when *ALUMNI_STDLIBS.keys
             version = ALUMNI_STDLIBS.fetch(name)
             if from_gem
