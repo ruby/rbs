@@ -2705,4 +2705,64 @@ end
       end
     end
   end
+
+  def test_duplicated_variable
+    SignatureManager.new do |manager|
+      manager.add_file("instance.rbs", <<-EOF)
+class InstanceVariable
+  @instance: Integer
+  @instance: Integer
+end
+
+class ClassInstanceVariable
+  self.@class_instance: Integer
+  self.@class_instance: Integer
+end
+
+class ClassVariable
+  @@class: Integer
+  @@class: Integer
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises(RBS::InstanceVariableDuplicationError) do
+          builder.build_instance(type_name("::InstanceVariable"))
+        end
+        assert_raises(RBS::ClassInstanceVariableDuplicationError) do
+          builder.build_singleton(type_name("::ClassInstanceVariable"))
+        end
+        assert_raises(RBS::ClassVariableDuplicationError) do
+          builder.build_instance(type_name("::ClassVariable"))
+        end
+      end
+    end
+
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  @instance: Integer
+  self.@class_instance: Integer
+  @@class: Integer
+end
+
+class B < A
+  @instance: Integer
+  self.@class_instance: Integer
+  @@class: Integer
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A"))
+        assert_raises(RBS::ClassVariableDuplicationError) do
+          builder.build_instance(type_name("::B"))
+        end
+      end
+    end
+  end
 end

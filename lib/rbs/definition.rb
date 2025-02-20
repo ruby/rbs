@@ -14,6 +14,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(
           parent_variable: parent_variable,
           type: type.sub(s),
@@ -142,6 +144,8 @@ module RBS
       end
 
       def sub(s)
+        return self if s.empty?
+
         self.class.new(
           super_method: super_method&.sub(s),
           defs: defs.map {|defn| defn.update(type: defn.type.sub(s)) },
@@ -347,6 +351,8 @@ module RBS
     end
 
     def sub(s)
+      return self if s.empty?
+
       definition = self.class.new(type_name: type_name, self_type: _ = self_type.sub(s), ancestors: ancestors, entry: entry)
 
       definition.methods.merge!(methods.transform_values {|method| method.sub(s) })

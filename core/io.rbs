@@ -3251,6 +3251,10 @@ class IO < Object
   #     f.close
   #
   alias to_i fileno
+
+  interface _ForFd[RET]
+    def for_fd: (?) -> RET
+  end
 end
 
 IO::APPEND: Integer

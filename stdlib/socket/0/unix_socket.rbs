@@ -104,7 +104,9 @@ class UNIXSocket < BasicSocket
   #
   # *mode* is the same as the argument passed to IO.for_fd
   #
-  def recv_io: (?singleton(BasicSocket), ?String mode) -> BasicSocket
+  def recv_io: () -> IO
+             | (singleton(Integer)?) -> Integer
+             | [T] (IO::_ForFd[T], ?untyped mode) -> T
 
   # <!--
   #   rdoc-file=ext/socket/unixsocket.c
@@ -151,7 +153,7 @@ class UNIXSocket < BasicSocket
   #
   # *io* may be any kind of IO object or integer file descriptor.
   #
-  def send_io: (BasicSocket | Integer) -> void
+  def send_io: (IO | Integer) -> void
 
   private
 
