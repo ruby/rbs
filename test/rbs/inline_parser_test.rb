@@ -490,8 +490,8 @@ class RBS::InlineParserTest < Test::Unit::TestCase
 
       mod.self_constraints[0].tap do |constraint|
         assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl::SelfConstraint, constraint
-        assert_equal "BasicObject", constraint.type_name.to_s
-        assert_equal [], constraint.type_args
+        assert_equal "BasicObject", constraint.name.to_s
+        assert_equal [], constraint.args
       end
     end
   end
