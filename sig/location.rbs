@@ -97,6 +97,8 @@ module RBS
 
     def key?: (Symbol) -> bool
 
+    def +: (Location?) -> Location
+
     private
 
     def _add_required_child: (RequiredChildKeys name, Integer start_pos, Integer end_pos) -> void

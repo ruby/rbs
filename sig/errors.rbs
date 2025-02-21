@@ -311,7 +311,9 @@ module RBS
   # InheritModuleError is raised if a class definition inherits a module (not a class)
   #
   class InheritModuleError < DefinitionError
-    type super_class = AST::Declarations::Class::Super | AST::Ruby::Declarations::ClassDecl::Super
+    type super_class = AST::Declarations::Class::Super
+                     | AST::Ruby::Declarations::ClassDecl::SuperNode
+                     | AST::Ruby::Declarations::ClassDecl::SuperAnnotation
 
     include DetailedMessageable
 

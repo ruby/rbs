@@ -130,6 +130,8 @@ module RBS
           def self?: () -> bool
 
           def annotations: () -> Array[AST::Annotation]
+
+          def location: () -> Location
         end
 
         class AliasMember < Base

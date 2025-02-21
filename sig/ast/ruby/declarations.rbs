@@ -71,7 +71,11 @@ module RBS
 
             attr_reader annotation: Annotation::InheritsAnnotation
 
-            def initialize: (TypeName, Array[Types::t], Annotation::InheritsAnnotation) -> void
+            def initialize: (
+              TypeName,
+              Array[Types::t],
+              Annotation::InheritsAnnotation
+            ) -> void
 
             def map_type_name: () { (TypeName) -> TypeName } -> self
 
@@ -80,6 +84,12 @@ module RBS
             alias args type_args
 
             def self.build: (Array[Annotation::leading_annotation]) -> [instance?, Array[Annotation::leading_annotation]]
+
+            # Returns the location in the source code
+            #
+            # Calculated based on `#annotation` and `#block`.
+            #
+            def location: () -> Location
           end
 
           type member = Members::t | t | SingletonClassDecl
@@ -145,6 +155,8 @@ module RBS
             attr_reader args: Array[Types::t]
 
             attr_reader annotation: Annotation::ModuleSelfAnnotation
+
+            def location: () -> Location
 
             def initialize: (TypeName, Array[Types::t], Annotation::ModuleSelfAnnotation) -> void
 

@@ -127,6 +127,17 @@ module RBS
       optional_key?(name) || required_key?(name)
     end
 
+    def +(other)
+      if other
+        unless other.buffer == buffer
+          raise "Cannot concat two locations with different buffers"
+        end
+        Location.new(buffer, start_pos, other.end_pos)
+      else
+        self
+      end
+    end
+
     def optional_key?(name)
       _optional_keys.include?(name)
     end

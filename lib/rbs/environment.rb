@@ -550,8 +550,9 @@ module RBS
           location: decl.location,
           class_name: class_name,
           generics: decl.generics.map_type_name {|name| absolute_type_name(resolver, map, name, context: inner_context) },
-          super_class: decl.super_class&.map_type_name {|name| absolute_type_name(resolver, map, name, context: context) },
-          class_name_location: decl.class_name_location,
+          super_node: decl.super_node&.map_type_name {|name| absolute_type_name(resolver, map, name, context: context) },
+          super_annotation: decl.super_annotation&.map_type_name {|name| absolute_type_name(resolver, map, name, context: context) },
+          class_name_location: decl.class_name_location
         ).tap do |resolved|
           prefix = class_name.to_namespace
           decl.members.each do |member|

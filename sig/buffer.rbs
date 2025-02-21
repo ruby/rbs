@@ -30,7 +30,7 @@ module RBS
     # buffer.lines   # => ["123", "abc", ""]
     # ```
     #
-    # def lines: () -> Array[String]
+    def lines: () -> Array[String]
 
     @ranges: Array[Range[Integer]]
     # Array of ranges that stores the ranges of the each line, without the EOL

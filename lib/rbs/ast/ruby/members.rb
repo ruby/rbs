@@ -366,6 +366,10 @@ module RBS
           def annotations
             []
           end
+
+          def location
+            buffer.rbs_location(node.location)
+          end
         end
 
         class MixinMember < Base

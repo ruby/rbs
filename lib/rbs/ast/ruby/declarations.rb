@@ -240,6 +240,10 @@ module RBS
                 other_annotations
               ]
             end
+
+            def location
+              annotation.location + annotation.close_paren_location
+            end
           end
 
           attr_reader :node
