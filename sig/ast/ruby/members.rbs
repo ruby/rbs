@@ -15,6 +15,7 @@ module RBS
                | IncludeMember | ExtendMember | PrependMember
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
                | PublicMember | PrivateMember
+               | InstanceVariableMember | ClassVariableMember | ClassInstanceVariableMember
 
         class Overload
           attr_reader annotations: Array[AST::Annotation]
@@ -224,6 +225,48 @@ module RBS
         end
 
         class PrivateMember < VisibilityMember
+        end
+
+        class InstanceVariableMember < Base
+          attr_reader name: Symbol
+
+          attr_reader type: Types::t
+
+          attr_reader annotation: Annotation::IvarTypeAnnotation
+
+          def initialize: (Buffer, Symbol, Types::t, Annotation::IvarTypeAnnotation) -> void
+
+          def location: () -> Location
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        class ClassVariableMember < Base
+          attr_reader name: Symbol
+
+          attr_reader type: Types::t
+
+          attr_reader annotation: Annotation::ClassVarTypeAnnotation
+
+          def initialize: (Buffer, Symbol, Types::t, Annotation::ClassVarTypeAnnotation) -> void
+
+          def location: () -> Location
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        class ClassInstanceVariableMember < Base
+          attr_reader name: Symbol
+
+          attr_reader type: Types::t
+
+          attr_reader annotation: Annotation::ClassIvarTypeAnnotation
+
+          def initialize: (Buffer, Symbol, Types::t, Annotation::ClassIvarTypeAnnotation) -> void
+
+          def location: () -> Location
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
       end
     end

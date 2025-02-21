@@ -54,6 +54,9 @@ module RBS
 
       class AnnotationSyntaxError < Base
       end
+
+      class VariableAnnotationInSingletonClassError < Base
+      end
     end
 
     def self.enabled?(result, default:)
@@ -223,6 +226,33 @@ module RBS
           push_decl_context(decl) do
             visit node.body
           end
+
+          comments.each_enclosed_block(node) do |block|
+            block.each_paragraph(current_type_param_names) do |paragraph|
+              case paragraph
+              when Location
+                # skip
+              when AST::Ruby::CommentBlock::AnnotationSyntaxError
+                report_annotation_syntax_error(paragraph)
+              when AST::Ruby::Annotation::IvarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::ClassIvarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::ClassInstanceVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::ClassVarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::ClassVariableMember.new(buffer, name, type, paragraph)
+              else
+                report_unused_annotation(paragraph)
+              end
+            end
+          end
+
+          decl.members.sort_by! { _1.location.absolute_location.start_line }
         end
       end
 
@@ -251,9 +281,29 @@ module RBS
 
         decl = AST::Ruby::Declarations::SingletonClassDecl.new(buffer, node)
 
-        current_context.members << decl
-        push_decl_context(decl) do
-          visit node.body
+        push_type_params([]) do
+          current_context.members << decl
+          push_decl_context(decl) do
+            visit node.body
+          end
+
+          comments.each_enclosed_block(node) do |block|
+            block.each_paragraph(current_type_param_names) do |paragraph|
+              case paragraph
+              when Location
+                # skip
+              when AST::Ruby::CommentBlock::AnnotationSyntaxError
+                report_annotation_syntax_error(paragraph)
+              when AST::Ruby::Annotation::IvarTypeAnnotation, AST::Ruby::Annotation::ClassIvarTypeAnnotation, AST::Ruby::Annotation::ClassVarTypeAnnotation
+                diagnostics << Diagnostics::VariableAnnotationInSingletonClassError.new(
+                  paragraph.location,
+                  "Variable type definition cannot be included in singleton class definition",
+                )
+              else
+                report_unused_annotation(paragraph)
+              end
+            end
+          end
         end
       end
 
@@ -311,6 +361,33 @@ module RBS
           push_decl_context(decl) do
             visit node.body
           end
+
+          comments.each_enclosed_block(node) do |block|
+            block.each_paragraph(current_type_param_names) do |paragraph|
+              case paragraph
+              when Location
+                # skip
+              when AST::Ruby::CommentBlock::AnnotationSyntaxError
+                report_annotation_syntax_error(paragraph)
+              when AST::Ruby::Annotation::IvarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::ClassIvarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::ClassInstanceVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::ClassVarTypeAnnotation
+                name = paragraph.var_name_location.source.to_sym
+                type = paragraph.type
+                decl.members << AST::Ruby::Members::ClassVariableMember.new(buffer, name, type, paragraph)
+              else
+                report_unused_annotation(paragraph)
+              end
+            end
+          end
+
+          decl.members.sort_by! { _1.location.absolute_location.start_line }
         end
       end
 

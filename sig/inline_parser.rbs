@@ -21,6 +21,7 @@ module RBS
              | InvalidMixinCall
              | UnusedAnnotation
              | AnnotationSyntaxError
+             | VariableAnnotationInSingletonClassError
 
       class Base
         attr_reader message: String
@@ -62,7 +63,12 @@ module RBS
       class UnusedAnnotation < Base
       end
 
+      # Annotation has syntax error
       class AnnotationSyntaxError < Base
+      end
+
+      # `@rbs @ivar: ...`, `@rbs self.@ivar: ...`, and `@rbs @@var: ...` annotations cannot be written in singleton class definition
+      class VariableAnnotationInSingletonClassError < Base
       end
     end
 

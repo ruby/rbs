@@ -513,4 +513,72 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_ivar_annotation
+    buffer, result = parse_ruby(<<~RUBY)
+      module Foo
+        # @rbs @name: String -- name of something
+
+        def foo = nil
+
+        # @rbs self.@name: String -- name of something else
+        # @rbs @@name: String -- one more name
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |mod|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, mod
+
+      mod.members[0].tap do |ivar|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, ivar
+        assert_equal :@name, ivar.name
+        assert_equal "String", ivar.type.to_s
+        assert_equal "@rbs @name: String -- name of something", ivar.location.source
+      end
+
+      mod.members[2].tap do |ivar|
+        assert_instance_of RBS::AST::Ruby::Members::ClassInstanceVariableMember, ivar
+        assert_equal :@name, ivar.name
+        assert_equal "String", ivar.type.to_s
+        assert_equal "@rbs self.@name: String -- name of something else", ivar.location.source
+      end
+
+      mod.members[3].tap do |ivar|
+        assert_instance_of RBS::AST::Ruby::Members::ClassVariableMember, ivar
+        assert_equal :@@name, ivar.name
+        assert_equal "String", ivar.type.to_s
+        assert_equal "@rbs @@name: String -- one more name", ivar.location.source
+      end
+    end
+  end
+
+  def test_ivar_annotation__singleton_class
+    buffer, result = parse_ruby(<<~RUBY)
+      module Foo
+        class <<self
+          # @rbs @name: String
+          # @rbs self.@name: String
+          # @rbs @@name: String
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_equal 3, ret.diagnostics.size
+    assert_any!(ret.diagnostics) do |diag|
+      assert_instance_of RBS::InlineParser::Diagnostics::VariableAnnotationInSingletonClassError, diag
+      assert_equal "@rbs @name: String", diag.location.source
+    end
+    assert_any!(ret.diagnostics) do |diag|
+      assert_instance_of RBS::InlineParser::Diagnostics::VariableAnnotationInSingletonClassError, diag
+      assert_equal "@rbs self.@name: String", diag.location.source
+    end
+    assert_any!(ret.diagnostics) do |diag|
+      assert_instance_of RBS::InlineParser::Diagnostics::VariableAnnotationInSingletonClassError, diag
+      assert_equal "@rbs @@name: String", diag.location.source
+    end
+  end
 end

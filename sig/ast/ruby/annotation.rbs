@@ -16,6 +16,8 @@ module RBS
                                 | ModuleSelfAnnotation
                                 | InheritsAnnotation
                                 | IvarTypeAnnotation
+                                | ClassIvarTypeAnnotation
+                                | ClassVarTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion | NodeApplication
 

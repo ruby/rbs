@@ -437,6 +437,78 @@ module RBS
 
         class PrivateMember < VisibilityMember
         end
+
+        class InstanceVariableMember < Base
+          attr_reader :name, :type, :annotation
+
+          def initialize(buffer, name, type, annotation)
+            super(buffer)
+            @name = name
+            @type = type
+            @annotation = annotation
+          end
+
+          def location
+            annotation.location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              buffer,
+              name,
+              type.map_type_name { yield(_1) },
+              annotation
+            ) #: self
+          end
+        end
+
+        class ClassVariableMember < Base
+          attr_reader :name, :type, :annotation
+
+          def initialize(buffer, name, type, annotation)
+            super(buffer)
+            @name = name
+            @type = type
+            @annotation = annotation
+          end
+
+          def location
+            annotation.location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              buffer,
+              name,
+              type.map_type_name { yield(_1) },
+              annotation
+            ) #: self
+          end
+        end
+
+        class ClassInstanceVariableMember < Base
+          attr_reader :name, :type, :annotation
+
+          def initialize(buffer, name, type, annotation)
+            super(buffer)
+            @name = name
+            @type = type
+            @annotation = annotation
+          end
+
+          def location
+            annotation.location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              buffer,
+              name,
+              type.map_type_name { yield(_1) },
+              annotation
+            ) #: self
+          end
+        end
       end
     end
   end
