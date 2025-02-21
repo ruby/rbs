@@ -4,7 +4,7 @@ module RBS
       class LockfileGenerator
         # Name of stdlibs that was rbs-bundled stdlib but is now a gem.
         #
-        ALUMNI_STDLIBS: Hash[String, String]
+        ALUMNI_STDLIBS: Hash[String, String?]
 
         class GemfileLockMismatchError < StandardError
           @expected: Pathname
