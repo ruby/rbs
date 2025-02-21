@@ -151,7 +151,7 @@ module RBS
               end
             end
 
-          when AST::Members::InstanceVariable
+          when AST::Members::InstanceVariable, AST::Ruby::Members::InstanceVariableMember
             insert_variable(
               type_name,
               definition.instance_variables,
@@ -160,9 +160,9 @@ module RBS
               source: member
             )
 
-          when AST::Members::ClassVariable
+          when AST::Members::ClassVariable, AST::Ruby::Members::ClassVariableMember
             if define_class_vars
-              insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
+              insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
             end
           end
         end
@@ -289,8 +289,12 @@ module RBS
                   end
                 end
 
-              when AST::Members::ClassInstanceVariable
-                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type, source: member)
+              when AST::Members::ClassInstanceVariable, AST::Ruby::Members::ClassInstanceVariableMember
+                ClassInstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
+                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type)
+
+              when AST::Members::ClassVariable, AST::Ruby::Members::ClassVariableMember
+                insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
               end
             end
           end
@@ -571,11 +575,11 @@ module RBS
       case l.source
       when AST::Members::InstanceVariable
         if r.source.instance_of?(AST::Members::InstanceVariable) && l.declared_in == r.declared_in
-          raise InstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
+          raise InstanceVariableDuplicationError.new(type_name: l.declared_in, member: l.source)
         end
       when AST::Members::ClassInstanceVariable
         if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
-          raise ClassInstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
+          raise ClassInstanceVariableDuplicationError.new(type_name: l.declared_in, member: l.source.name)
         end
       end
     end

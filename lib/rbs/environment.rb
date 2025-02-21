@@ -605,12 +605,16 @@ module RBS
           absolute_type_name(resolver, map, name, context: context)
         end
       when AST::Ruby::Declarations::SingletonClassDecl
-        resolved = AST::Ruby::Declarations::SingletonClassDecl.new(member.node)
+        resolved = AST::Ruby::Declarations::SingletonClassDecl.new(member.buffer, member.node)
         member.members.each do |member|
           member = resolve_ruby_member(resolver, map, member, context: context) #: AST::Ruby::Members::t
           resolved.members << member
         end
       when AST::Ruby::Members::DefMember
+        member.map_type_name do |name|
+          absolute_type_name(resolver, map, name, context: context)
+        end
+      when AST::Ruby::Members::ClassVariableMember, AST::Ruby::Members::InstanceVariableMember, AST::Ruby::Members::ClassInstanceVariableMember
         member.map_type_name do |name|
           absolute_type_name(resolver, map, name, context: context)
         end

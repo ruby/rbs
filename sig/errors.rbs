@@ -191,20 +191,34 @@ module RBS
   class VariableDuplicationError < DefinitionError
     include DetailedMessageable
 
+    type member = AST::Members::InstanceVariable | AST::Members::ClassVariable | AST::Members::ClassInstanceVariable
+                | AST::Ruby::Members::InstanceVariableMember | AST::Ruby::Members::ClassInstanceVariableMember | AST::Ruby::Members::ClassVariableMember
+
+    attr_reader member: member
+
     attr_reader type_name: TypeName
     attr_reader variable_name: Symbol
     attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, variable_name: Symbol, location: Location[untyped, untyped]?) -> void
+    def initialize: (member: member) -> void
+
     def kind: () -> String
   end
 
   class InstanceVariableDuplicationError < VariableDuplicationError
+    type member = AST::Members::InstanceVariable | AST::Ruby::Members::InstanceVariableMember
+
     def kind: () -> String
+
+    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: member, type_name: TypeName) -> void
   end
 
   class ClassInstanceVariableDuplicationError < VariableDuplicationError
+    type member = AST::Members::ClassInstanceVariable | AST::Ruby::Members::ClassInstanceVariableMember
+
     def kind: () -> String
+
+    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: member, type_name: TypeName) -> void
   end
 
   # The `alias` member declares an alias from unknown method

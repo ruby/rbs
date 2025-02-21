@@ -3189,4 +3189,46 @@ end
       end
     end
   end
+
+  def test__inline__build__class__variables
+    SignatureManager.new do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+          # @rbs @name: String
+          # @rbs self.@name: Symbol
+          # @rbs @@name: bool
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::Foo"), definition.type_name
+          assert_equal parse_type("::Foo"), definition.self_type
+
+          definition.instance_variables[:@name].tap do |var|
+            assert_equal parse_type("::String"), var.type
+          end
+          definition.class_variables[:@@name].tap do |var|
+            assert_equal parse_type("bool"), var.type
+          end
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::Foo"), definition.type_name
+          assert_equal parse_type("singleton(::Foo)"), definition.self_type
+
+          definition.instance_variables[:@name].tap do |var|
+            assert_equal parse_type("::Symbol"), var.type
+          end
+          definition.class_variables[:@@name].tap do |var|
+            assert_equal parse_type("bool"), var.type
+          end
+        end
+      end
+    end
+  end
 end

@@ -325,16 +325,24 @@ module RBS
   class VariableDuplicationError < DefinitionError
     include DetailedMessageable
 
+    attr_reader :member
     attr_reader :type_name
-    attr_reader :variable_name
-    attr_reader :location
 
-    def initialize(type_name:, variable_name:, location:)
+    def initialize(type_name:, member:)
+      @member = member
       @type_name = type_name
-      @variable_name = variable_name
-      @location = location
 
-      super "#{Location.to_string location}: Duplicated #{kind} variable name `#{variable_name}` in `#{type_name}`"
+      super "#{Location.to_string location}: Duplicated #{kind} variable name `#{member.name}` in `#{type_name}`"
+    end
+
+    def location
+      case member
+      when AST::Members::Base
+        loc = @member.location or raise
+        loc[:name] || raise
+      when AST::Ruby::Members::Base
+        member.annotation.var_name_location.absolute_location
+      end
     end
   end
 
