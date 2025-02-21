@@ -437,3 +437,29 @@ nodes:
       - name: type_args
       - name: close_paren_location
       - name: comment
+  - name: RBS::AST::Ruby::Annotation::IvarTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: var_name_location
+      - name: colon_location
+      - name: type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::ClassVarTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: var_name_location
+      - name: colon_location
+      - name: type
+      - name: comment
+  - name: RBS::AST::Ruby::Annotation::ClassIvarTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: self_location
+      - name: dot_location
+      - name: var_name_location
+      - name: colon_location
+      - name: type
+      - name: comment

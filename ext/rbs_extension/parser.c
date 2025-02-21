@@ -3052,10 +3052,6 @@ VALUE parse_inline_skip_annotation(parserstate *state, range rbs_range) {
   range skip_range = state->next_token.range;
   parser_advance(state);
 
-  range location_range = {
-    .start = rbs_range.start,
-    .end = skip_range.end
-  };
   VALUE rbs_location = rbs_new_location(state->buffer, rbs_range);
   VALUE skip_location = rbs_new_location(state->buffer, skip_range);
 
@@ -3225,6 +3221,46 @@ static VALUE parse_inline_inherits_annotation(parserstate *state, range rbs_rang
   );
 }
 
+/**
+ * self_ivar_annotation ::= {} `self` `.` ivar_name `:` <type> <inline_comment?>
+ */
+static VALUE parse_inline_self_ivar_annotation(parserstate *state, range rbs_range) {
+  range annotation_range = rbs_range;
+
+  parser_advance_assert(state, kSELF);
+  range self_range = state->current_token.range;
+
+  parser_advance_assert(state, pDOT);
+  range dot_range = state->current_token.range;
+
+  range var_name_range = NULL_RANGE;
+  if (state->next_token.type == tAIDENT || state->next_token.type == kATRBS) {
+    parser_advance(state);
+    var_name_range = state->current_token.range;
+  } else {
+    raise_syntax_error(state, state->next_token, "instance variable name is expected");
+  }
+
+  parser_advance_assert(state, pCOLON);
+  range colon_range = state->current_token.range;
+
+  VALUE type = parse_type(state);
+  VALUE comment = parse_inline_comment(state);
+
+  annotation_range.end = state->current_token.range.end;
+
+  return rbs_ast_ruby_annotation_class_ivar_type_annotation(
+    rbs_new_location(state->buffer, annotation_range),
+    rbs_new_location(state->buffer, rbs_range),
+    rbs_new_location(state->buffer, self_range),
+    rbs_new_location(state->buffer, dot_range),
+    rbs_new_location(state->buffer, var_name_range),
+    rbs_new_location(state->buffer, colon_range),
+    type,
+    comment
+  );
+}
+
 VALUE parse_inline_annotation(parserstate *state) {
   switch (state->next_token.type) {
     case kATRBS: {
@@ -3249,6 +3285,9 @@ VALUE parse_inline_annotation(parserstate *state) {
           }
           if (state->next_token.type == kINHERITS && state->next_token2.type != pCOLON) {
             return parse_inline_inherits_annotation(state, rbs_range);
+          }
+          if (state->next_token.type == kSELF && state->next_token2.type == pDOT) {
+            return parse_inline_self_ivar_annotation(state, rbs_range);
           }
 
           // @rbs x: type
@@ -3404,6 +3443,50 @@ VALUE parse_inline_annotation(parserstate *state) {
             null_range_p(open_paren_range) ? Qnil : rbs_new_location(state->buffer, open_paren_range),
             type_args,
             null_range_p(close_paren_range) ? Qnil : rbs_new_location(state->buffer, close_paren_range),
+            comment
+          );
+        }
+        case tAIDENT:
+        case kATRBS:
+        {
+          // @rbs a: type
+
+          range var_name_range = state->next_token.range;
+          parser_advance(state);
+
+          range colon_range = state->next_token.range;
+          parser_advance_assert(state, pCOLON);
+
+          VALUE type = parse_type(state);
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_ivar_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, var_name_range),
+            rbs_new_location(state->buffer, colon_range),
+            type,
+            comment
+          );
+        }
+        case tA2IDENT: {
+          // @@rbs a: type
+
+          range var_name_range = state->next_token.range;
+          parser_advance(state);
+
+          range colon_range = state->next_token.range;
+          parser_advance_assert(state, pCOLON);
+
+          VALUE type = parse_type(state);
+          VALUE comment = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotation_class_var_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, var_name_range),
+            rbs_new_location(state->buffer, colon_range),
+            type,
             comment
           );
         }

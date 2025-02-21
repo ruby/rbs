@@ -457,6 +457,40 @@ VALUE rbs_ast_ruby_annotation_block_param_type_annotation(VALUE location, VALUE 
   );
 }
 
+VALUE rbs_ast_ruby_annotation_class_ivar_type_annotation(VALUE location, VALUE prefix_location, VALUE self_location, VALUE dot_location, VALUE var_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("self_location")), self_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("dot_location")), dot_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("var_name_location")), var_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ClassIvarTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_class_var_type_annotation(VALUE location, VALUE prefix_location, VALUE var_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("var_name_location")), var_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_ClassVarTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_ruby_annotation_colon_method_type_annotation(VALUE location, VALUE prefix_location, VALUE annotations, VALUE method_type) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
@@ -523,6 +557,22 @@ VALUE rbs_ast_ruby_annotation_inherits_annotation(VALUE location, VALUE prefix_l
 
   return CLASS_NEW_INSTANCE(
     RBS_AST_Ruby_Annotation_InheritsAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotation_ivar_type_annotation(VALUE location, VALUE prefix_location, VALUE var_name_location, VALUE colon_location, VALUE type, VALUE comment) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("var_name_location")), var_name_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("colon_location")), colon_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_IvarTypeAnnotation,
     1,
     &_init_kwargs
   );

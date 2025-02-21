@@ -325,12 +325,63 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_instance_variable_annotation
-    omit("Implement `ivar type` annotation")
-
     Parser.parse_inline("@rbs @name: String -- name of something", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::IvarTypeAnnotation, annot
+
+      assert_equal "@rbs @name: String -- name of something", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@name", annot.var_name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_equal "-- name of something", annot.comment.source
+    end
+
+    Parser.parse_inline("@rbs @rbs: String -- name of something", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::IvarTypeAnnotation, annot
+
+      assert_equal "@rbs @rbs: String -- name of something", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@rbs", annot.var_name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_equal "-- name of something", annot.comment.source
     end
 
     Parser.parse_inline("@rbs self.@name: String -- name of something", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::ClassIvarTypeAnnotation, annot
+
+      assert_equal "@rbs self.@name: String -- name of something", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "self", annot.self_location.source
+      assert_equal ".", annot.dot_location.source
+      assert_equal "@name", annot.var_name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_equal "-- name of something", annot.comment.source
+    end
+
+    Parser.parse_inline("@rbs self.@rbs: String -- name of something", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::ClassIvarTypeAnnotation, annot
+
+      assert_equal "@rbs self.@rbs: String -- name of something", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "self", annot.self_location.source
+      assert_equal ".", annot.dot_location.source
+      assert_equal "@rbs", annot.var_name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_equal "-- name of something", annot.comment.source
+    end
+
+    Parser.parse_inline("@rbs @@name: String -- name of something", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotation::ClassVarTypeAnnotation, annot
+
+      assert_equal "@rbs @@name: String -- name of something", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@@name", annot.var_name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_equal "-- name of something", annot.comment.source
     end
   end
 

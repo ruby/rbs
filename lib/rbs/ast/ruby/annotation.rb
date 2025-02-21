@@ -357,6 +357,44 @@ module RBS
             @comment = comment
           end
         end
+
+        class IvarTypeAnnotation < Base
+          attr_reader :var_name_location, :colon_location, :type, :comment
+
+          def initialize(location:, prefix_location:, var_name_location:, colon_location:, type:, comment:)
+            super(location, prefix_location)
+            @var_name_location = var_name_location
+            @colon_location = colon_location
+            @type = type
+            @comment = comment
+          end
+        end
+
+        class ClassVarTypeAnnotation < Base
+          attr_reader :var_name_location, :colon_location, :type, :comment
+
+          def initialize(location:, prefix_location:, var_name_location:, colon_location:, type:, comment:)
+            super(location, prefix_location)
+            @var_name_location = var_name_location
+            @colon_location = colon_location
+            @type = type
+            @comment = comment
+          end
+        end
+
+        class ClassIvarTypeAnnotation < Base
+          attr_reader :self_location, :dot_location, :var_name_location, :colon_location, :type, :comment
+
+          def initialize(location:, prefix_location:, self_location:, dot_location:, var_name_location:, colon_location:, type:, comment:)
+            super(location, prefix_location)
+            @self_location = self_location
+            @dot_location = dot_location
+            @var_name_location = var_name_location
+            @colon_location = colon_location
+            @type = type
+            @comment = comment
+          end
+        end
       end
     end
   end

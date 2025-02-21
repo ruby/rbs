@@ -15,6 +15,7 @@ module RBS
                                 | SkipAnnotation
                                 | ModuleSelfAnnotation
                                 | InheritsAnnotation
+                                | IvarTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion | NodeApplication
 
@@ -413,6 +414,70 @@ module RBS
             open_paren_location: Location?,
             type_args: Array[Types::t],
             close_paren_location: Location?,
+            comment: Location?
+          ) -> void
+        end
+
+        # `@rbs @ivar: T -- comment` annotation in leading comments
+        class IvarTypeAnnotation < Base
+          attr_reader var_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            var_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
+            comment: Location?
+          ) -> void
+        end
+
+        class ClassVarTypeAnnotation < Base
+          attr_reader var_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            var_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
+            comment: Location?
+          ) -> void
+        end
+
+        class ClassIvarTypeAnnotation < Base
+          attr_reader self_location: Location
+
+          attr_reader dot_location: Location
+
+          attr_reader var_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            self_location: Location,
+            dot_location: Location,
+            var_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
             comment: Location?
           ) -> void
         end
