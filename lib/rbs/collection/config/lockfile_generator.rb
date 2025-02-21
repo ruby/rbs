@@ -161,6 +161,13 @@ module RBS
           return if lockfile.gems.key?(name)
 
           case name
+          when 'bigdecimal-math'
+            # The `bigdecimal-math` is never released as a gem.
+            # Therefore, `assign_gem` should not be called.
+            RBS.logger.info {
+              "`#{name}` is included in the RBS dependencies of `#{from_gem}`, but the type definition as a stdlib in rbs-gem is deprecated. Delete `#{name}` from the RBS dependencies of `#{from_gem}`."
+            }
+            return
           when *ALUMNI_STDLIBS.keys
             version = ALUMNI_STDLIBS.fetch(name)
             if from_gem
