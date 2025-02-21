@@ -197,9 +197,14 @@ module RBS
           attr_reader :node
           attr_reader :members
 
-          def initialize(node)
+          def initialize(buffer, node)
+            super(buffer)
             @node = node
             @members = []
+          end
+
+          def location
+            rbs_location(node.location)
           end
         end
 
@@ -299,7 +304,8 @@ module RBS
         class ConstantDecl < Base
           attr_reader :node
 
-          def initialize(node)
+          def initialize(buffer, node)
+            super(buffer)
             @node = node
           end
 

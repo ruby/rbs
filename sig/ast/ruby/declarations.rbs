@@ -145,7 +145,9 @@ module RBS
 
           attr_reader members: Array[member]
 
-          def initialize: (Prism::SingletonClassNode) -> void
+          def location: () -> Location
+
+          def initialize: (Buffer, Prism::SingletonClassNode) -> void
         end
 
         class ModuleDecl < Base
@@ -209,17 +211,22 @@ module RBS
         class ConstantDecl < Base
           attr_reader node: Prism::ConstantWriteNode
 
-          def initialize: (Prism::ConstantWriteNode) -> void
+          def initialize: (Buffer, Prism::ConstantWriteNode) -> void
 
           # Returns the type of the constant
           def type: () -> Types::t
+
+          def location: () -> Location
         end
 
         class GlobalDecl < Base
           attr_reader node: Prism::GlobalVariableWriteNode
+
+          attr_reader location: Location
         end
 
         class RBSDecl < Base
+          attr_reader location: Location
         end
       end
     end

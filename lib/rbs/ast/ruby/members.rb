@@ -279,7 +279,8 @@ module RBS
         class DefMember < Base
           attr_reader :node, :inline_annotations, :name
 
-          def initialize(node, name:, inline_annotations:)
+          def initialize(buffer, node, name:, inline_annotations:)
+            super(buffer)
             @node = node
             @inline_annotations = inline_annotations
             @name = name
@@ -319,6 +320,7 @@ module RBS
 
           def map_type_name(&block)
             DefMember.new(
+              buffer,
               node,
               name: name,
               inline_annotations: inline_annotations.map_type_name(&block)
@@ -337,7 +339,8 @@ module RBS
         class DefSingletonMember < Base
           attr_reader :node
 
-          def initialize(node)
+          def initialize(buffer, node)
+            super(buffer)
             @node = node
           end
 

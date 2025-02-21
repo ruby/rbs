@@ -94,7 +94,7 @@ module RBS
 
           attr_reader inline_annotations: DefAnnotations
 
-          def initialize: (Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
+          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
 
           # Returns the overload of the method
           #
@@ -118,9 +118,11 @@ module RBS
         end
 
         class DefSingletonMember < Base
+          attr_reader buffer: Buffer
+
           attr_reader node: Prism::DefNode
 
-          def initialize: (Prism::DefNode) -> void
+          def initialize: (Buffer, Prism::DefNode) -> void
 
           def overloads: () -> Array[Overload]
 
@@ -138,6 +140,8 @@ module RBS
           attr_reader node: Prism::AliasMethodNode
 
           def initialize: (Prism::AliasMethodNode) -> void
+
+          def location: () -> Location
         end
 
         # include, extend, and prepend
@@ -191,22 +195,21 @@ module RBS
         class PrependMember < MixinMember
         end
 
-        class AttrReaderMember < Base
+        class AttributeMember < Base
           attr_reader node: Prism::CallNode
 
-          def initialize: (Prism::CallNode) -> void
+          def initialize: (Buffer, Prism::CallNode) -> void
+
+          def location: () -> Location
         end
 
-        class AttrWriterMember < Base
-          attr_reader node: Prism::CallNode
-
-          def initialize: (Prism::CallNode) -> void
+        class AttrReaderMember < AttributeMember
         end
 
-        class AttrAccessorMember < Base
-          attr_reader node: Prism::CallNode
+        class AttrWriterMember < AttributeMember
+        end
 
-          def initialize: (Prism::CallNode) -> void
+        class AttrAccessorMember < AttributeMember
         end
 
         class VisibilityMember < Base

@@ -249,7 +249,7 @@ module RBS
           return
         end
 
-        decl = AST::Ruby::Declarations::SingletonClassDecl.new(node)
+        decl = AST::Ruby::Declarations::SingletonClassDecl.new(buffer, node)
 
         current_context.members << decl
         push_decl_context(decl) do
@@ -337,10 +337,10 @@ module RBS
         end
 
         if node.receiver
-          member = AST::Ruby::Members::DefSingletonMember.new(node)
+          member = AST::Ruby::Members::DefSingletonMember.new(buffer, node)
           return unless member.self?
         else
-          member = AST::Ruby::Members::DefMember.new(node, name: node.name, inline_annotations: annotations)
+          member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations)
         end
 
         if current_context
@@ -349,7 +349,7 @@ module RBS
       end
 
       def visit_constant_write_node(node)
-        decl = AST::Ruby::Declarations::ConstantDecl.new(node)
+        decl = AST::Ruby::Declarations::ConstantDecl.new(buffer, node)
 
         if current_context
           unless current_context.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
