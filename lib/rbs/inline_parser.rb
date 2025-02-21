@@ -73,7 +73,7 @@ module RBS
 
     def self.parse(buffer, prism)
       result = Result.new(buffer, prism)
-      association = Inline::CommentAssociation.build(buffer.name, prism)
+      association = Inline::CommentAssociation.build(buffer, prism)
 
       parser = Parser.new(result, association)
       parser.parse()
@@ -154,7 +154,7 @@ module RBS
           case paragraph
           when Location
           when AST::Ruby::CommentBlock::AnnotationSyntaxError
-            report_annotation_syntax_error(leading_block || raise, paragraph)
+            report_annotation_syntax_error(paragraph)
           else
             leading_comments << paragraph
           end
@@ -204,7 +204,7 @@ module RBS
 
           if leading_block
             leading_comments.each do |annotation|
-              report_unused_annotation(leading_block, annotation)
+              report_unused_annotation(annotation)
             end
           end
 
@@ -281,7 +281,7 @@ module RBS
           case paragraph
           when Location
           when AST::Ruby::CommentBlock::AnnotationSyntaxError
-            report_annotation_syntax_error(leading_block || raise, paragraph)
+            report_annotation_syntax_error(paragraph)
           else
             leading_comments << paragraph
           end
@@ -293,7 +293,7 @@ module RBS
 
           if leading_block
             leading_comments.each do |comment|
-              report_unused_annotation(leading_block, comment)
+              report_unused_annotation(comment)
             end
           end
 
@@ -330,9 +330,9 @@ module RBS
         pairs.each do |block, annot|
           case annot
           when AST::Ruby::CommentBlock::AnnotationSyntaxError
-            report_annotation_syntax_error(block, annot)
+            report_annotation_syntax_error(annot)
           else
-            report_unused_annotation(block, annot)
+            report_unused_annotation(annot)
           end
         end
 
@@ -582,24 +582,12 @@ module RBS
         !node.receiver || node.receiver.is_a?(Prism::SelfNode)
       end
 
-      def report_annotation_syntax_error(block, error)
-        if location = block.translate_comment_location(error.location).first
-          comment, start_pos, end_pos = location
-          start_pos = start_pos + comment.location.start_character_offset
-          end_pos = end_pos + comment.location.start_character_offset
-          loc = Location.new(buffer, start_pos, end_pos)
-          diagnostics << Diagnostics::AnnotationSyntaxError.new(loc, "Annotation syntax error: #{error.error.message}")
-        end
+      def report_annotation_syntax_error(error)
+        diagnostics << Diagnostics::AnnotationSyntaxError.new(error.location, "Annotation syntax error: #{error.error.message}")
       end
 
-      def report_unused_annotation(block, annot)
-        if location = block.translate_comment_location(annot.location).first
-          comment, start_pos, end_pos = location
-          start_pos = start_pos + comment.location.start_character_offset
-          end_pos = end_pos + comment.location.start_character_offset
-          loc = Location.new(buffer, start_pos, end_pos)
-          diagnostics << Diagnostics::UnusedAnnotation.new(loc, "Unused annotation")
-        end
+      def report_unused_annotation(annot)
+        diagnostics << Diagnostics::UnusedAnnotation.new(annot.location, "Unused annotation")
       end
     end
   end

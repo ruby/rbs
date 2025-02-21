@@ -134,5 +134,33 @@ module RBS
     def required_key?(name)
       _required_keys.include?(name)
     end
+
+    def absolute_location()
+      if parent = buffer.parent_buffer
+        top_buffer = parent.top_buffer
+        top_start = buffer.absolute_position(start_pos) or raise
+        top_end = buffer.absolute_position(end_pos) or raise
+
+        Location.new(top_buffer, top_start, top_end).tap do |location|
+          each_optional_key do |key|
+            if loc = self[key]
+              opt_start = buffer.absolute_position(loc.start_pos) or raise
+              opt_end = buffer.absolute_position(loc.end_pos) or raise
+              location.add_optional_child(key, opt_start...opt_end)
+            else
+              location.add_optional_child(key, nil)
+            end
+          end
+          each_required_key do |key|
+            loc = self[key] or raise
+            req_start = buffer.absolute_position(loc.start_pos) or raise
+            req_end = buffer.absolute_position(loc.end_pos) or raise
+            location.add_optional_child(key, req_start...req_end)
+          end
+        end #: self
+      else
+        self
+      end
+    end
   end
 end

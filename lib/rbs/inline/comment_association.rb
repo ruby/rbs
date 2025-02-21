@@ -19,8 +19,8 @@ module RBS
         end
       end
 
-      def self.build(path, result)
-        blocks = AST::Ruby::CommentBlock.build(path, result.comments)
+      def self.build(buffer, result)
+        blocks = AST::Ruby::CommentBlock.build(buffer, result.comments)
         new(blocks)
       end
 

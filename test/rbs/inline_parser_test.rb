@@ -3,7 +3,7 @@ require "test_helper"
 class RBS::InlineParserTest < Test::Unit::TestCase
   def parse_ruby(source)
     [
-      RBS::Buffer.new(name: "test.rb", content: source),
+      RBS::Buffer.new(name: Pathname("test.rb"), content: source),
       Prism.parse(source)
     ]
   end

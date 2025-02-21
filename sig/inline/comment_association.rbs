@@ -15,7 +15,7 @@ module RBS
       #
       attr_reader associated_blocks: Set[CommentBlock]
 
-      def self.build: (Pathname, Prism::Result) -> instance
+      def self.build: (Buffer, Prism::Result) -> instance
 
       def initialize: (Array[CommentBlock]) -> void
 

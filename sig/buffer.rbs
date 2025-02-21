@@ -11,15 +11,39 @@ module RBS
     # The content of the buffer.
     attr_reader content: String
 
-    @lines: Array[String]
-
-    @ranges: Array[Range[Integer]]
+    attr_reader parent: [Buffer, Array[Range[Integer]]]?
 
     def initialize: (name: Pathname name, content: String content) -> void
+                  | (content: String content, parent: [Buffer, Array[Range[Integer]]] parent) -> void
 
-    def lines: () -> Array[String]
+    # Array of lines of the content, without the EOL
+    #
+    # ```rb
+    # buffer = Buffer.new(name: name, content: "123\nabc")
+    # buffer.lines   # => ["123", "abc"]
+    # ```
+    #
+    # If the input has EOL at the end of the file, the `lines` has an empty string at the end.
+    #
+    # ```rb
+    # buffer = Buffer.new(name: name, content: "123\nabc\n")
+    # buffer.lines   # => ["123", "abc", ""]
+    # ```
+    #
+    # def lines: () -> Array[String]
 
+    @ranges: Array[Range[Integer]]
+    # Array of ranges that stores the ranges of the each line, without the EOL
+    #
+    # ```rb
+    # buffer = Buffer.new(name: name, content: "123\nabc\n")
+    # buffer.ranges  # => [0...3, 4...7, 8...8]
+    # ```
+    #
     def ranges: () -> Array[Range[Integer]]
+
+    # Returns the number of the lines
+    def line_count: () -> Integer
 
     # Translate position to location.
     def pos_to_loc: (Integer pos) -> loc
@@ -29,7 +53,36 @@ module RBS
 
     def last_position: () -> Integer
 
+    # Translate `Prism::Location` to `RBS::Location` attached to this buffer
+    #
+    # It assumes the `Prism::Location` has a source which is equivalent to `self`.
+    #
     def rbs_location: (Prism::Location) -> Location
                     | (Prism::Location, Prism::Location) -> Location
+
+    # Construct a buffer from substrings of this buffer.
+    #
+    # The returned buffer contains lines from given ranges.
+    #
+    # ```rb
+    # buffer = Buffer.new(name: name, content: <<TEXT)
+    # 12345
+    # abcde
+    # ABCDE
+    # TEXT
+    #
+    # buffer.sub_buffer(lines: [0...1, 2...3])  # => Buffer with content = 1\n34
+    # buffer.sub_buffer(lines: [5..7])          # => Raises an error because the range contains newline
+    # ```
+    #
+    %a{pure} def sub_buffer: (lines: Array[Range[Integer]]) -> Buffer
+
+    %a{pure} def parent_buffer: () -> Buffer?
+
+    %a{pure} def parent_position: (Integer) -> Integer?
+
+    %a{pure} def absolute_position: (Integer) -> Integer?
+
+    %a{pure} def top_buffer: () -> Buffer
   end
 end

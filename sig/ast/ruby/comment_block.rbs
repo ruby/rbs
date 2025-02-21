@@ -6,30 +6,21 @@ module RBS
       class CommentBlock
         attr_reader name: Pathname
 
+        # Sub buffer of the contents of the comments
+        #
         attr_reader comment_buffer: Buffer
 
         attr_reader offsets: Array[
           [
             Comment,
             Integer, # -- prefix size
-            Integer, # -- start character index in comment_buffer
-            Integer  # -- end character index in comment_buffer
           ]
         ]
 
-        def initialize: (Pathname, Array[Comment]) -> void
+        def initialize: (Buffer source_buffer, Array[Comment]) -> void
 
         # Build comment block instances
-        def self.build: (Pathname, Array[Comment]) -> Array[instance]
-
-        # Translate the location in `comment_buffer` to the locations of Comments
-        #
-        # Note that new lines included in the location are assumed between returned comments.
-        #
-        def translate_comment_location: (Location) -> Array[[Comment, Integer, Integer]]
-
-        # Returns a pair of comment index and character position in the comment
-        def translate_comment_position: (Integer) -> [Integer, Integer]?
+        def self.build: (Buffer, Array[Comment]) -> Array[instance]
 
         # Returns true if the comment block is a *leading* comment, which is attached to the successor node
         def leading?: () -> bool
@@ -46,6 +37,9 @@ module RBS
         # The character index of `#comment_buffer` at the start of the lines
         #
         def line_starts: () -> Array[Integer]
+
+        # Returns the text content of the comment
+        def text: (Integer index) -> String
 
         # Yields paragraph and annotation
         #

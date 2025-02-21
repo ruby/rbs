@@ -4,73 +4,31 @@ module RBS
       class CommentBlock
         attr_reader :name, :offsets, :comment_buffer
 
-        def initialize(name, comments)
-          @name = name
+        def initialize(source_buffer, comments)
+          @name = source_buffer.name
 
           @offsets = []
 
-          string = +""
+          # Assume the comment starts with a prefix whitespace
+          prefix_str = "# "
 
-          first_comment = comments.first or raise
-          first_content = first_comment.location.slice
-
-          if index = first_content.index(/[^#\s]/)
-            if index < first_content.size
-              prefix_size = index
-            else
-              prefix_size = 2
-            end
-          else
-            # Assume other comments has `#` prefix
-            prefix_size = 2
-          end
+          ranges = [] #: Array[Range[Integer]]
 
           comments.each do |comment|
-            tuple = [comment, 0, 0, 0] #: [Prism::Comment, Integer, Integer, Integer]
+            tuple = [comment, 2] #: [Prism::Comment, Integer]
 
-            line = comment.location.slice.dup
-            if line[0, prefix_size] =~ /[^#\s]/
-              line[0] = ""
+            unless comment.location.slice.start_with?(prefix_str)
               tuple[1] = 1
-            else
-              line[0, prefix_size] = ""
-              tuple[1] = prefix_size
             end
-            tuple[2] = string.size
-            string << line
-            tuple[3] = string.size
-            string << "\n"
 
             offsets << tuple
+
+            start_char = comment.location.start_character_offset + tuple[1]
+            end_char = comment.location.end_character_offset
+            ranges << (start_char ... end_char)
           end
 
-          string.chomp!
-
-          @comment_buffer = Buffer.new(name: name, content: string)
-        end
-
-        def translate_comment_location(location)
-          result = [] #: Array[[Prism::Comment, Integer, Integer]]
-
-          (start_index, start_pos = translate_comment_position(location.start_pos)) or return []
-          (end_index, end_pos = translate_comment_position(location.end_pos)) or return []
-
-          if start_index == end_index
-            result << [offsets[start_index][0], start_pos, end_pos]
-          else
-            start_comment, start_prefix, start_start, start_end = offsets[start_index]
-            result << [start_comment, start_pos, start_end - start_start + start_prefix]
-
-            ((start_index+1)...end_index).each do |index|
-              mid_comment, mid_prefix, mid_start, mid_end = offsets[index]
-              result << [mid_comment, mid_prefix, mid_end - mid_start + mid_prefix]
-            end
-
-            end_comment, end_prefix, _, _ = offsets[end_index]
-            result << [end_comment, end_prefix, end_pos]
-          end
-
-          result
+          @comment_buffer = source_buffer.sub_buffer(lines: ranges)
         end
 
         def leading?
@@ -91,22 +49,13 @@ module RBS
           comments[-1].location.end_line
         end
 
-        def translate_comment_position(position)
-          start = offsets.bsearch_index { position <= _4 } or return
-          offset = offsets[start]
-
-          if offset[2] <= position
-            [start, offset[1] + position -  offset[2]]
-          end
-        end
-
         def line_starts
-          offsets.map do |offset|
-            offset[2]
+          offsets.map do |comment, prefix_size|
+            comment.location.start_character_offset + prefix_size
           end
         end
 
-        def self.build(path, comments)
+        def self.build(buffer, comments)
           blocks = [] #: Array[CommentBlock]
 
           comments = comments.filter {|comment| comment.is_a?(Prism::InlineComment) }
@@ -135,7 +84,7 @@ module RBS
             end
 
             unless block_comments.empty?
-              blocks << CommentBlock.new(path, block_comments.dup)
+              blocks << CommentBlock.new(buffer, block_comments.dup)
             end
           end
 
@@ -163,7 +112,7 @@ module RBS
           while true
             next_line = current_line + 1
 
-            if next_line >= comment_buffer.lines.size
+            if next_line >= comment_buffer.line_count
               yield line_location(start_line, current_line)
               return
             end
@@ -182,7 +131,7 @@ module RBS
           while true
             next_line = current_line + 1
 
-            if next_line >= comment_buffer.lines.size
+            if next_line >= comment_buffer.line_count
               annotation = parse_annotation_lines(start_line, end_line, variables)
               yield annotation
 
@@ -193,7 +142,7 @@ module RBS
               return
             end
 
-            line_text = comment_buffer.lines[next_line]
+            line_text = text(next_line)
             if leading_spaces = line_text.index(/\S/)
               if leading_spaces == 0
                 # End of annotation
@@ -216,15 +165,20 @@ module RBS
           end
         end
 
+        def text(comment_index)
+          range = comment_buffer.ranges[comment_index]
+          comment_buffer.content[range] or raise
+        end
+
         def line_location(start_line, end_line)
-          start_offset = offsets[start_line][2]
-          end_offset = offsets[end_line][3]
+          start_offset = comment_buffer.ranges[start_line].begin
+          end_offset = comment_buffer.ranges[end_line].end
           Location.new(comment_buffer, start_offset, end_offset)
         end
 
         def parse_annotation_lines(start_line, end_line, variables)
-          start_pos = offsets[start_line][2]
-          end_pos = offsets[end_line][3]
+          start_pos = comment_buffer.ranges[start_line].begin
+          end_pos = comment_buffer.ranges[end_line].end
           begin
             Parser.parse_inline(comment_buffer, start_pos...end_pos, variables: variables)
           rescue ParsingError => error
@@ -251,20 +205,14 @@ module RBS
         end
 
         def leading_annotation?(index)
-          if index < comment_buffer.lines.size
-            comment_buffer.lines[index].start_with?(/@rbs\b|@rbs!/) and return true
+          if index < comment_buffer.line_count
+            text(index).start_with?(/@rbs\b|@rbs!/) and return true
 
             comment = offsets[index][0]
-            if comment.location.slice.start_with?(/#:/)
-              return true
-            end
+            comment.location.slice.start_with?(/#:/) and return true
           end
 
           false
-        end
-
-        def slice_after!(array, &block)
-
         end
       end
     end

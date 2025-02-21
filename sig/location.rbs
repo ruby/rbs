@@ -106,5 +106,9 @@ module RBS
     def _required_keys: () -> Array[Symbol]
 
     WithChildren: singleton(Location)
+
+    # Returns a location in the top buffer
+    #
+    def absolute_location: () -> self
   end
 end
