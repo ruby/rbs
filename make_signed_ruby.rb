@@ -123,8 +123,6 @@ BEGIN { # Helper methods
 		PLIST
 
 		Tempfile.create("entitlements.plist") do |entitlements_file|
-			entitlements_path = entitlements_file.path
-
 			args = [
 				"/usr/bin/codesign",
 				"--force", # Replace the existing signiture, if any
