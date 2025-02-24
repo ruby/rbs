@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h> // for memset()
+#include <stdint.h>
 
 #ifdef _WIN32
     #include <windows.h>
