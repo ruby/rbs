@@ -376,8 +376,8 @@ class Proc
   #
   def self.new: () { (?) -> untyped } -> instance
 
-  def clone: () -> instance
-  def dup: () -> instance
+  def clone: () -> self
+  def dup: () -> self
 
   # <!-- rdoc-file=proc.c -->
   # Invokes the block, setting the block's parameters to the values in *params*

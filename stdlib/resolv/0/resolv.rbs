@@ -466,7 +466,7 @@ end
 class Resolv::DNS::Message
   def self.decode: (String m) -> instance
 
-  def ==: (instance other) -> bool
+  def ==: (self other) -> bool
 
   def aa: () -> Integer
 
@@ -558,7 +558,7 @@ class Resolv::DNS::Message::MessageDecoder
 
   private
 
-  def initialize: (String data) { (instance) -> void } -> untyped
+  def initialize: (String data) { (self) -> void } -> untyped
 end
 
 class Resolv::DNS::Message::MessageEncoder
@@ -603,7 +603,7 @@ class Resolv::DNS::Name
   #
   def self.create: (Resolv::DNS::dns_name arg) -> untyped
 
-  def ==: (instance other) -> bool
+  def ==: (self other) -> bool
 
   def []: (Integer i) -> Resolv::DNS::Label::Str?
 
@@ -639,7 +639,7 @@ class Resolv::DNS::Name
   #     p Resolv::DNS::Name.create("x.y.z.").subdomain_of?(domain) #=> false
   #     p Resolv::DNS::Name.create("w.z").subdomain_of?(domain) #=> false
   #
-  def subdomain_of?: (instance other) -> bool
+  def subdomain_of?: (self other) -> bool
 
   def to_a: () -> Array[Resolv::DNS::Label::Str]
 
@@ -1491,14 +1491,14 @@ class Resolv::IPv4
   #
   def self.create: (String | instance arg) -> instance
 
-  def ==: (instance other) -> bool
+  def ==: (self other) -> bool
 
   # <!-- rdoc-file=lib/resolv.rb -->
   # The raw IPv4 address as a String.
   #
   def address: () -> String
 
-  def eql?: (instance other) -> bool
+  def eql?: (self other) -> bool
 
   def hash: () -> Integer
 
@@ -1544,14 +1544,14 @@ class Resolv::IPv6
   #
   def self.create: (String | instance arg) -> instance
 
-  def ==: (instance other) -> bool
+  def ==: (self other) -> bool
 
   # <!-- rdoc-file=lib/resolv.rb -->
   # The raw IPv6 address as a String.
   #
   def address: () -> String
 
-  def eql?: (instance other) -> bool
+  def eql?: (self other) -> bool
 
   def hash: () -> Integer
 

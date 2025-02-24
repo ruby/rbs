@@ -54,7 +54,7 @@ class Method
   #
   def hash: () -> Integer
 
-  def dup: () -> instance
+  def dup: () -> self
 
   # <!--
   #   rdoc-file=proc.c
@@ -252,7 +252,7 @@ class Method
   #     m.call # => "bar"
   #     n = m.clone.call # => "bar"
   #
-  def clone: () -> instance
+  def clone: () -> self
 
   # <!--
   #   rdoc-file=proc.c
