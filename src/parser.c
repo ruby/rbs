@@ -9,7 +9,6 @@
 #include "rbs/defines.h"
 #include "rbs/encoding.h"
 #include "rbs/rbs_string.h"
-#include "ast_translation.h"
 #include "rbs/rbs_unescape.h"
 
 #define INTERN(str)                  \
@@ -1315,7 +1314,7 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
       range variance_range = NULL_RANGE;
       if (module_type_params) {
         if (state->next_token.type == kUNCHECKED) {
-          unchecked = Qtrue;
+          unchecked = true;
           parser_advance(state);
           unchecked_range = state->current_token.range;
         }
