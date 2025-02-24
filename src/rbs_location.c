@@ -1,12 +1,14 @@
 #include "rbs/rbs_location.h"
-#include "location.h"
+
+#include <stdio.h>
 
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 
 static void check_children_max(unsigned short n) {
   size_t max = sizeof(rbs_loc_entry_bitmap) * 8;
   if (n > max) {
-    rb_raise(rb_eRuntimeError, "Too many children added to location: %d", n);
+    fprintf(stderr, "Too many children added to location: %d", n);
+    exit(EXIT_FAILURE);
   }
 }
 
