@@ -3,7 +3,7 @@ module RBS
     module Ruby
       module Declarations
         # Possible top level declarations
-        type t = ClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | RBSDecl
+        type t = ClassDecl | ModuleDecl | ConstantDecl | GlobalDecl | EmbeddedRBSDecl
 
         class Base
           attr_reader buffer: Buffer
@@ -225,8 +225,15 @@ module RBS
           attr_reader location: Location
         end
 
-        class RBSDecl < Base
+        # `@rbs!` declaration
+        class EmbeddedRBSDecl < Base
+          type member = AST::Declarations::t | AST::Members::t
+
           attr_reader location: Location
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, Location, Array[member]) -> void
         end
       end
     end

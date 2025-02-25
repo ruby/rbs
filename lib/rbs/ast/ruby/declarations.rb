@@ -313,6 +313,18 @@ module RBS
             Types::Bases::Any.new(location: nil)
           end
         end
+
+        class EmbeddedRBSDecl < Base
+          attr_reader :location
+
+          attr_reader :members
+
+          def initialize(buffer, location, members)
+            super(buffer)
+            @location = location
+            @members = members
+          end
+        end
       end
     end
   end

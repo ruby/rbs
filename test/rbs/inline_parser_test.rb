@@ -581,4 +581,21 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "@rbs @@name: String", diag.location.source
     end
   end
+
+  def test_rbs_embedded_annotation
+    buffer, result = parse_ruby(<<~RUBY)
+      module Foo
+        # @rbs! type t = String | Integer
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::EmbeddedRBSDecl, member
+        assert_instance_of RBS::AST::Declarations::TypeAlias, member.members[0]
+      end
+    end
+  end
 end

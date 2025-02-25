@@ -246,6 +246,12 @@ module RBS
                 name = paragraph.var_name_location.source.to_sym
                 type = paragraph.type
                 decl.members << AST::Ruby::Members::ClassVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::EmbeddedRBSAnnotation
+                decl.members << AST::Ruby::Declarations::EmbeddedRBSDecl.new(
+                  buffer,
+                  paragraph.location.absolute_location,
+                  paragraph.members
+                )
               else
                 report_unused_annotation(paragraph)
               end
@@ -381,6 +387,12 @@ module RBS
                 name = paragraph.var_name_location.source.to_sym
                 type = paragraph.type
                 decl.members << AST::Ruby::Members::ClassVariableMember.new(buffer, name, type, paragraph)
+              when AST::Ruby::Annotation::EmbeddedRBSAnnotation
+                decl.members << AST::Ruby::Declarations::EmbeddedRBSDecl.new(
+                  buffer,
+                  paragraph.location.absolute_location,
+                  paragraph.members
+                )
               else
                 report_unused_annotation(paragraph)
               end
