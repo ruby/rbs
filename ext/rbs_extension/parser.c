@@ -2456,10 +2456,10 @@ static VALUE parse_nested_decl(parserstate *state, const char *nested_in, positi
                   | `public`
                   | `private`
 */
-static VALUE parse_module_members(parserstate *state) {
+static VALUE parse_module_members(parserstate *state, enum TokenType end_token) {
   VALUE members = EMPTY_ARRAY;
 
-  while (state->next_token.type != kEND) {
+  while (state->next_token.type != end_token) {
     VALUE annotations = EMPTY_ARRAY;
     position annot_pos = NullPosition;
     parse_annotations(state, &annotations, &annot_pos);
@@ -2562,7 +2562,7 @@ static VALUE parse_module_decl0(parserstate *state, range keyword_range, VALUE m
     self_types_range = NULL_RANGE;
   }
 
-  VALUE members = parse_module_members(state);
+  VALUE members = parse_module_members(state, kEND);
 
   parser_advance_assert(state, kEND);
   range end_range = state->current_token.range;
@@ -2682,7 +2682,7 @@ static VALUE parse_class_decl0(parserstate *state, range keyword_range, VALUE na
   range lt_range;
   VALUE super = parse_class_decl_super(state, &lt_range);
 
-  VALUE members = parse_module_members(state);
+  VALUE members = parse_module_members(state, kEND);
 
   parser_advance_assert(state, kEND);
 
@@ -3519,6 +3519,16 @@ VALUE parse_inline_annotation(parserstate *state) {
     }
     case kATRBSB: {
       // @rbs!
+      range prefix_range = state->next_token.range;
+      parser_advance_assert(state, kATRBSB);
+
+      VALUE members = parse_module_members(state, pEOF);
+
+      return rbs_ast_ruby_annotation_embedded_rbs_annotation(
+        rbs_new_location(state->buffer, (range) { .start = prefix_range.start, .end = state->current_token.range.end }),
+        rbs_new_location(state->buffer, prefix_range),
+        members
+      );
     }
     case pCOLON: {
       // :

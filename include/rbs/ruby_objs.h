@@ -44,6 +44,7 @@ VALUE rbs_ast_ruby_annotation_class_ivar_type_annotation(VALUE location, VALUE p
 VALUE rbs_ast_ruby_annotation_class_var_type_annotation(VALUE location, VALUE prefix_location, VALUE var_name_location, VALUE colon_location, VALUE type, VALUE comment);
 VALUE rbs_ast_ruby_annotation_colon_method_type_annotation(VALUE location, VALUE prefix_location, VALUE annotations, VALUE method_type);
 VALUE rbs_ast_ruby_annotation_double_splat_param_type_annotation(VALUE location, VALUE prefix_location, VALUE operator_location, VALUE param_name_location, VALUE colon_location, VALUE type, VALUE comment);
+VALUE rbs_ast_ruby_annotation_embedded_rbs_annotation(VALUE location, VALUE prefix_location, VALUE members);
 VALUE rbs_ast_ruby_annotation_generic_annotation(VALUE location, VALUE prefix_location, VALUE generic_location, VALUE unchecked_location, VALUE variance_location, VALUE name_location, VALUE upper_bound_operator_location, VALUE upper_bound, VALUE default_type_operator_location, VALUE default_type, VALUE comment);
 VALUE rbs_ast_ruby_annotation_inherits_annotation(VALUE location, VALUE prefix_location, VALUE inherits_location, VALUE type_name, VALUE type_name_location, VALUE open_paren_location, VALUE type_args, VALUE close_paren_location, VALUE comment);
 VALUE rbs_ast_ruby_annotation_ivar_type_annotation(VALUE location, VALUE prefix_location, VALUE var_name_location, VALUE colon_location, VALUE type, VALUE comment);

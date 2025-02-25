@@ -522,6 +522,19 @@ VALUE rbs_ast_ruby_annotation_double_splat_param_type_annotation(VALUE location,
   );
 }
 
+VALUE rbs_ast_ruby_annotation_embedded_rbs_annotation(VALUE location, VALUE prefix_location, VALUE members) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("members")), members);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotation_EmbeddedRBSAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_ruby_annotation_generic_annotation(VALUE location, VALUE prefix_location, VALUE generic_location, VALUE unchecked_location, VALUE variance_location, VALUE name_location, VALUE upper_bound_operator_location, VALUE upper_bound, VALUE default_type_operator_location, VALUE default_type, VALUE comment) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);

@@ -463,3 +463,8 @@ nodes:
       - name: colon_location
       - name: type
       - name: comment
+  - name: RBS::AST::Ruby::Annotation::EmbeddedRBSAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: members

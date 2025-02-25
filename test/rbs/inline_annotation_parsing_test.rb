@@ -386,7 +386,6 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_embbed_syntax
-    omit("Implement `@rbs!` annotation")
     Parser.parse_inline(<<~RBS, 0...).tap do |annot|
         @rbs!
           interface _Hello
@@ -395,6 +394,20 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
 
           type world = top
       RBS
+
+      assert_instance_of AST::Ruby::Annotation::EmbeddedRBSAnnotation, annot
+
+      assert_equal <<~RBS.chomp, annot.location.source
+        @rbs!
+          interface _Hello
+            def foo: () -> void
+          end
+
+          type world = top
+      RBS
+
+      assert_equal "@rbs!", annot.prefix_location.source
+      assert_equal [AST::Declarations::Interface, AST::Declarations::TypeAlias], annot.members.map(&:class)
     end
   end
 

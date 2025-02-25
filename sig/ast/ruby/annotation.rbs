@@ -483,6 +483,14 @@ module RBS
             comment: Location?
           ) -> void
         end
+
+        class EmbeddedRBSAnnotation < Base
+          type member = AST::Declarations::t | AST::Members::t
+
+          attr_reader members: Array[member]
+
+          def initialize: (location: Location, prefix_location: Location, members: Array[member]) -> void
+        end
       end
     end
   end

@@ -395,6 +395,15 @@ module RBS
             @comment = comment
           end
         end
+
+        class EmbeddedRBSAnnotation < Base
+          attr_reader :members
+
+          def initialize(location:, prefix_location:, members:)
+            super(location, prefix_location)
+            @members = members
+          end
+        end
       end
     end
   end
