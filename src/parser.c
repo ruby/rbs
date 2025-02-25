@@ -207,15 +207,15 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
   switch (state->current_token.type) {
     case tLIDENT:
       if (kind & ALIAS_NAME) goto success;
-      goto error;
+      goto error_handling;
     case tULIDENT:
       if (kind & INTERFACE_NAME) goto success;
-      goto error;
+      goto error_handling;
     case tUIDENT:
       if (kind & CLASS_NAME) goto success;
-      goto error;
+      goto error_handling;
     default:
-      goto error;
+      goto error_handling;
   }
 
   success: {
@@ -230,7 +230,7 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
     return true;
   }
 
-  error: {
+  error_handling: {
     const char *ids;
     if (kind & ALIAS_NAME) {
       ids = "alias name";

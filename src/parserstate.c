@@ -355,7 +355,7 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
   return parser;
 }
 
-void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const char *variables[count]) {
+void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const char **variables) {
   if (variables == NULL) return; // Nothing to do.
 
   parser_push_typevar_table(parser, true);

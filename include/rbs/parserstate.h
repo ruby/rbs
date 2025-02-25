@@ -131,6 +131,11 @@ parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, i
 void free_parser(parserstate *parser);
 
 /**
+ * Declare type variables to be used during parsing.
+ * */
+void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const char **variables);
+
+/**
  * Advance one token.
  * */
 void parser_advance(parserstate *state);
