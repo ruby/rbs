@@ -231,7 +231,7 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
   }
 
   error_handling: {
-    const char *ids;
+    const char *ids = NULL;
     if (kind & ALIAS_NAME) {
       ids = "alias name";
     }
@@ -241,6 +241,8 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
     if (kind & CLASS_NAME) {
       ids = "class/module/constant name";
     }
+
+    assert(ids != NULL && "Unknown kind of type");
 
     set_error(state, state->current_token, true, "expected one of %s", ids);
     return false;
