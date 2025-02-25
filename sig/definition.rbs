@@ -6,8 +6,15 @@ module RBS
       attr_reader parent_variable: Variable?
       attr_reader type: Types::t
       attr_reader declared_in: TypeName
+      type source = AST::Members::AttrAccessor
+                  | AST::Members::AttrReader
+                  | AST::Members::AttrWriter
+                  | AST::Members::InstanceVariable
+                  | AST::Members::ClassVariable
+                  | AST::Members::ClassInstanceVariable
+      attr_reader source: source
 
-      def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName) -> void
+      def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName, source: source) -> void
 
       def sub: (Substitution) -> Variable
     end

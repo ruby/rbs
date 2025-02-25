@@ -145,23 +145,23 @@ module RBS
                   type_name,
                   definition.instance_variables,
                   name: ivar_name,
-                  type: member.type.sub(subst_)
+                  type: member.type.sub(subst_),
+                  source: member
                 )
               end
             end
 
           when AST::Members::InstanceVariable
-            InstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
             insert_variable(
               type_name,
               definition.instance_variables,
               name: member.name,
-              type: member.type.sub(subst_)
+              type: member.type.sub(subst_),
+              source: member
             )
 
           when AST::Members::ClassVariable
-            ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
-            insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
+            insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
           end
         end
       end
@@ -284,17 +284,15 @@ module RBS
                               end
 
                   if ivar_name
-                    insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type)
+                    insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type, source: member)
                   end
                 end
 
               when AST::Members::ClassInstanceVariable
-                ClassInstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
-                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type)
+                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type, source: member)
 
               when AST::Members::ClassVariable
-                ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
-                insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
+                insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
               end
             end
           end
@@ -539,12 +537,46 @@ module RBS
       end
     end
 
-    def insert_variable(type_name, variables, name:, type:)
+    def insert_variable(type_name, variables, name:, type:, source:)
       variables[name] = Definition::Variable.new(
         parent_variable: variables[name],
         type: type,
-        declared_in: type_name
+        declared_in: type_name,
+        source: source
       )
+      validate_variable(variables[name])
+    end
+
+    def validate_variable(var)
+      return unless var.parent_variable
+
+      # Ignore attrs
+      variables = [] #: Array[Definition::Variable]
+      tmp_var = var
+      while tmp_var
+        variables << tmp_var if tmp_var.source.is_a?(AST::Members::Var)
+        tmp_var = tmp_var.parent_variable
+      end
+
+      # Duplicates should be eliminated, so there can't be more than 3.
+      return unless variables.length == 2
+
+      l, r = variables #: [Definition::Variable, Definition::Variable]
+
+      case l.source
+      when AST::Members::InstanceVariable
+        if r.source.instance_of?(AST::Members::InstanceVariable) && l.declared_in == r.declared_in
+          raise InstanceVariableDuplicationError.new(member: l.source)
+        end
+      when AST::Members::ClassInstanceVariable
+        if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
+          raise ClassInstanceVariableDuplicationError.new(member: l.source)
+        end
+      when AST::Members::ClassVariable
+        if r.source.instance_of?(AST::Members::ClassVariable)
+          raise ClassVariableDuplicationError.new(member: l.source)
+        end
+      end
     end
 
     def import_methods(definition, module_name, module_methods, interfaces_methods, subst, self_type_methods)

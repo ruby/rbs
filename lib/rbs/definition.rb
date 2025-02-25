@@ -6,11 +6,13 @@ module RBS
       attr_reader :parent_variable
       attr_reader :type
       attr_reader :declared_in
+      attr_reader :source
 
-      def initialize(parent_variable:, type:, declared_in:)
+      def initialize(parent_variable:, type:, declared_in:, source:)
         @parent_variable = parent_variable
         @type = type
         @declared_in = declared_in
+        @source = source
       end
 
       def sub(s)
@@ -19,7 +21,8 @@ module RBS
         self.class.new(
           parent_variable: parent_variable,
           type: type.sub(s),
-          declared_in: declared_in
+          declared_in: declared_in,
+          source: source
         )
       end
     end
