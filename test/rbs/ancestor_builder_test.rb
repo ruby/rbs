@@ -665,7 +665,18 @@ end
 class C
   extend X
 end
+
+class D
+end
+
+class E < D[Integer]
+end
+
+module F : D[Integer]
+end
 EOF
+
+
       manager.build do |env|
         builder = DefinitionBuilder::AncestorBuilder.new(env: env)
 
@@ -679,6 +690,14 @@ EOF
 
         assert_raises InvalidTypeApplicationError do
           builder.singleton_ancestors(type_name("::C"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::E"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::F"))
         end
       end
     end

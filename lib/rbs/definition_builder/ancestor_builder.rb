@@ -217,6 +217,7 @@ module RBS
             NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
             if super_class
               InheritModuleError.check!(super_class, env: env)
+              InvalidTypeApplicationError.check2!(type_name: super_class.name, args: super_class.args, env: env, location: super_class.location)
             end
 
             super_entry = env.normalized_class_entry(super_name) or raise
@@ -243,6 +244,7 @@ module RBS
           else
             entry.self_types.each do |module_self|
               NoSelfTypeFoundError.check!(module_self, env: env)
+              InvalidTypeApplicationError.check2!(type_name: module_self.name, args: module_self.args, env: env, location: module_self.location)
 
               module_name = module_self.name
               if module_name.class?
