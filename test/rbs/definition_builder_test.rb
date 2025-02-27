@@ -3231,4 +3231,38 @@ end
       end
     end
   end
+
+  def test__inline__build__class__embedded
+    SignatureManager.new do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        class Foo
+          # @rbs!
+          #   def foo: () -> void
+          #   attr_reader bar: untyped
+          #   alias baz foo
+          #   @name: String
+          #
+          #   def self.foo: () -> String
+          #   attr_reader self.bar: String
+          #   alias self.baz self.foo
+          #   self.@size: Integer
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          assert_method_definition definition.methods[:foo], ["() -> void"]
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          assert_instance_of Definition, definition
+
+        end
+      end
+    end
+  end
 end

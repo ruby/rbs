@@ -204,7 +204,7 @@ module RBS
 
     def append_context: (Resolver::context, module_decl) -> Resolver::context
 
-    def resolve_declaration: (Resolver::TypeNameResolver resolver, UseMap map, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
+    def resolve_declaration: (Resolver::TypeNameResolver resolver, UseMap map, AST::Declarations::t decl, context: Resolver::context, prefix: Namespace) -> AST::Declarations::t
 
     def resolve_member: (Resolver::TypeNameResolver, UseMap map, AST::Members::t, context: Resolver::context) -> AST::Members::t
 

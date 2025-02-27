@@ -124,9 +124,14 @@ module RBS
           ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
-
-          def each_member: () { (Members::t) -> void } -> void
-                         | () -> Enumerator[Members::t]
+                         
+          # Yields `AST::Ruby::Members` and `AST::Members` object
+          #
+          # * `AST::Ruby::Members` can be enumerated through the `#members` attribute directly
+          # * `AST::Members` can be enumerated through the `EmbeddedRBSDecl` objects
+          #
+          def each_member: () { (Members::t | AST::Members::t) -> void } -> void
+                         | () -> Enumerator[Members::t | AST::Members::t]
 
           def each_decl: () { (t | SingletonClassDecl) -> void } -> void
                        | () -> Enumerator[t | SingletonClassDecl]
@@ -201,8 +206,13 @@ module RBS
 
           def self_types: () -> Array[SelfConstraint]
 
-          def each_member: () { (Members::t) -> void } -> void
-                         | () -> Enumerator[Members::t]
+          # Yields `AST::Ruby::Members` and `AST::Members` object
+          #
+          # * `AST::Ruby::Members` can be enumerated through the `#members` attribute directly
+          # * `AST::Members` can be enumerated through the `EmbeddedRBSDecl` objects
+          #
+          def each_member: () { (Members::t | AST::Members::t) -> void } -> void
+                         | () -> Enumerator[Members::t | AST::Members::t]
 
           def each_decl: () { (t | SingletonClassDecl) -> void } -> void
                          | () -> Enumerator[t | SingletonClassDecl]

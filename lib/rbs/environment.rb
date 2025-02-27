@@ -439,7 +439,7 @@ module RBS
         if only && !only.member?(decl)
           decl
         else
-          resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
+          resolve_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
         end
       end
 
@@ -474,7 +474,7 @@ module RBS
             if only && !only.member?(decl)
               decl
             else
-              resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
+              resolve_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
             end
           end
         else
@@ -572,6 +572,7 @@ module RBS
             end
           end
         end
+
       when AST::Ruby::Declarations::ModuleDecl
         module_name = decl.module_name.with_prefix(prefix)
         inner_context = [context, module_name] #: Resolver::context
@@ -599,6 +600,17 @@ module RBS
             end
           end
         end
+
+      when AST::Ruby::Declarations::EmbeddedRBSDecl
+        members = decl.members.map do |member|
+          case member
+          when AST::Members::Base
+            resolve_member(resolver, map, member, context: context)
+          when AST::Declarations::Base
+            resolve_declaration(resolver, map, member, context: context, prefix: prefix)
+          end
+        end
+        AST::Ruby::Declarations::EmbeddedRBSDecl.new(decl.buffer,decl.location, members)
       end
     end
 
@@ -614,6 +626,7 @@ module RBS
           member = resolve_ruby_member(resolver, map, member, context: context) #: AST::Ruby::Members::t
           resolved.members << member
         end
+        resolved
       when AST::Ruby::Members::DefMember
         member.map_type_name do |name|
           absolute_type_name(resolver, map, name, context: context)
@@ -627,7 +640,7 @@ module RBS
       end
     end
 
-    def resolve_declaration(resolver, map, decl, outer:, prefix:)
+    def resolve_declaration(resolver, map, decl, context:, prefix:)
       if decl.is_a?(AST::Declarations::Global)
         # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
@@ -639,14 +652,11 @@ module RBS
         )
       end
 
-      context = resolver_context(*outer)
-
       case decl
       when AST::Declarations::Class
         outer_context = context
         inner_context = append_context(outer_context, decl)
 
-        outer_ = outer + [decl]
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
@@ -667,7 +677,7 @@ module RBS
                 resolver,
                 map,
                 member,
-                outer: outer_,
+                context: inner_context,
                 prefix: prefix_
               )
             else
@@ -683,7 +693,6 @@ module RBS
         outer_context = context
         inner_context = append_context(outer_context, decl)
 
-        outer_ = outer + [decl]
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
@@ -704,7 +713,7 @@ module RBS
                 resolver,
                 map,
                 member,
-                outer: outer_,
+                context: inner_context,
                 prefix: prefix_
               )
             else

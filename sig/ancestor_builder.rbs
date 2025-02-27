@@ -148,7 +148,7 @@ module RBS
                             extended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
 
-      def mixin_ancestors0: (AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface,
+      def mixin_ancestors0: (declaration,
                              TypeName,
                              align_params: Substitution?,
                          included_modules: Array[Definition::Ancestor::Instance]?,
@@ -156,17 +156,14 @@ module RBS
                         prepended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_modules: Array[Definition::Ancestor::Instance]?,
                       extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
+      type declaration = AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl
+                       | AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface
 
-      def mixin_rb_ancestors0: (
-        AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl,
-        TypeName,
-        align_params: Substitution?,
-        included_modules: Array[Definition::Ancestor::Instance]?,
-        included_interfaces: Array[Definition::Ancestor::Instance]?,
-        prepended_modules: Array[Definition::Ancestor::Instance]?,
-        extended_modules: Array[Definition::Ancestor::Instance]?,
-        extended_interfaces: Array[Definition::Ancestor::Instance]?
-      ) -> void
+      type mixin = AST::Ruby::Members::IncludeMember | AST::Ruby::Members::ExtendMember | AST::Ruby::Members::PrependMember
+                 | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend
+
+      def each_mixin: (declaration) { (mixin) -> void } -> void
+                    | (declaration) -> Enumerator[mixin]
 
       # Fill `#source` of instance ancestor if `ancestor.name == name` and its `source` is `nil`
       #

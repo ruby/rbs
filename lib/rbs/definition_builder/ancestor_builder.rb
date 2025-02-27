@@ -347,8 +347,28 @@ module RBS
           end
       end
 
+      def each_mixin(decl, &block)
+        if block
+          case decl
+          when AST::Ruby::Declarations::Base
+            decl.each_member do |member|
+              case member
+              when AST::Ruby::Members::MixinMember
+                yield member
+              when AST::Members::Mixin
+                yield member
+              end
+            end
+          when AST::Declarations::Base
+            decl.each_mixin(&block)
+          end
+        else
+          enum_for :each_mixin, decl
+        end
+      end
+
       def mixin_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
-        decl.each_mixin do |member|
+        each_mixin(decl) do |member|
           case member
           when AST::Members::Include
             module_name = member.name
@@ -409,13 +429,7 @@ module RBS
 
               extended_interfaces << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
-          end
-        end
-      end
 
-      def mixin_rb_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
-        decl.each_member do |member|
-          case member
           when AST::Ruby::Members::IncludeMember
             if included_modules
               module_name = member.module_name
@@ -431,6 +445,7 @@ module RBS
 
               included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
             end
+
           when AST::Ruby::Members::PrependMember
             if prepended_modules
               module_name = member.module_name
@@ -470,7 +485,7 @@ module RBS
               extended_interfaces: extended_interfaces
             )
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
-            mixin_rb_ancestors0(
+            mixin_ancestors0(
               decl,
               type_name,
               align_params: align_params,

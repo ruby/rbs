@@ -243,6 +243,59 @@ EOF
     end
   end
 
+  def test_one_ancestors__inline__embedded__include
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files["foo.rb"] = <<~RUBY
+        module Bar
+        end
+
+        class Foo
+          # @rbs!
+          #   include Bar
+          #   extend Bar
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [], a.params
+
+          assert_equal(
+            Ancestor::Instance.new(name: type_name("::Object"), args: [], source: nil),
+            a.super_class
+          )
+
+          assert_equal(
+            [
+              Ancestor::Instance.new(name: type_name("::Bar"), args: [], source: nil)
+            ],
+            a.included_modules
+          )
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+
+          assert_equal(
+            Ancestor::Singleton.new(name: type_name("::Object")),
+            a.super_class
+          )
+
+          assert_equal(
+            [
+              Ancestor::Instance.new(name: type_name("::Bar"), args: [], source: nil)
+            ],
+            a.extended_modules
+          )
+        end
+      end
+    end
+  end
+
   def test_one_ancestors_module
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF

@@ -171,7 +171,12 @@ module RBS
           def each_member(&block)
             if block
               members.each do |member|
-                yield member if member.is_a?(Members::Base)
+                case member
+                when Members::Base
+                  yield member
+                when EmbeddedRBSDecl
+                  member.each_member(&block)
+                end
               end
             else
               enum_for :each_member
@@ -283,7 +288,12 @@ module RBS
           def each_member(&block)
             if block
               members.each do |member|
-                yield member if member.is_a?(Members::Base)
+                case member
+                when Members::Base
+                  yield member
+                when EmbeddedRBSDecl
+                  member.each_member(&block)
+                end
               end
             else
               enum_for :each_member
