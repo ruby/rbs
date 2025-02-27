@@ -639,7 +639,7 @@ module RBS
       # See IO.readlines for details about getline_args.
       #
       %a{annotate:rdoc:copy:ARGF#gets}
-      def gets: (?String sep, ?Integer limit) -> String?
+      def gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
 
       # <!--
       #   rdoc-file=io.c
@@ -1024,7 +1024,7 @@ module RBS
       # An EOFError is raised at the end of the file.
       #
       %a{annotate:rdoc:copy:ARGF#readline}
-      def readline: (?String sep, ?Integer limit) -> String
+      def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
 
       # <!--
       #   rdoc-file=io.c
@@ -1044,7 +1044,7 @@ module RBS
       # See `IO.readlines` for a full description of all options.
       #
       %a{annotate:rdoc:copy:ARGF#readlines}
-      def readlines: (?String sep, ?Integer limit) -> ::Array[String]
+      def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
 
       # <!--
       #   rdoc-file=io.c

@@ -338,7 +338,7 @@ class StringIO
 
   def readchar: () -> String
 
-  def readline: (?String sep, ?Integer limit) -> String
+  def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
