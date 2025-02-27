@@ -191,6 +191,7 @@ nodes:
       - name: variance
       - name: upper_bound
       - name: default_type
+      - name: unchecked
       - name: location
   - name: RBS::MethodType
     fields:
@@ -213,6 +214,7 @@ nodes:
       - name: location
   - name: RBS::Types::Bases::Any
     fields:
+      - name: todo
       - name: location
   - name: RBS::Types::Bases::Bool
     fields:

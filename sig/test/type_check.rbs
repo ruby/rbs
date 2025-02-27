@@ -7,12 +7,12 @@ module RBS
       #
       # Returns an array with detected errors.
       #
-      def method_call: (Symbol, MethodType, CallTrace, errors: Array[Errors::t]) -> Array[Errors::t]
+      def method_call: (Symbol, MethodType, CallTrace, errors: Array[Errors::t], ?annotations: Array[AST::Annotation]) -> Array[Errors::t]
 
       # Test if given `value` is compatible to type
       #
       # Returns `true` if the value has the type.
-      # 
+      #
       def value: (untyped value, Types::t) -> bool
     end
   end

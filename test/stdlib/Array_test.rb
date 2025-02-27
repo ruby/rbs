@@ -88,6 +88,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_aref
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :[], 0
+    assert_send_type "(Integer) -> nil",
+                     [1,2,3], :[], 1000
     assert_send_type "(Float) -> Integer",
                      [1,2,3], :[], 0.1
     assert_send_type "(ToInt) -> Integer",
@@ -794,6 +796,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :shift
     assert_send_type "(ToInt) -> Array[Integer]",
                      [1,2,3], :shift, ToInt.new(1)
+    assert_send_type "() -> nil",
+                     [], :shift
   end
 
   def test_shuffle

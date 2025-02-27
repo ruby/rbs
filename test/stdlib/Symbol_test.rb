@@ -134,17 +134,12 @@ class SymbolInstanceTest < Test::Unit::TestCase
   def test_casecmp?
     %i[a A s S z Z].each do |other|
       assert_send_type '(Symbol) -> bool',
-                       :s, :casecmp?, other
+                        :s, :casecmp?, other
     end
-
-    # invalid encoding
-    assert_send_type '(Symbol) -> nil',
-                     '\u{e4 f6 fc}'.encode('ISO-8859-1').to_sym, :casecmp?, :'\u{c4 d6 dc}'
-
-    with_untyped.and :sym do |other|
-      assert_send_type '(untyped) -> bool?',
-                       :a, :casecmp?, other
-    end
+    assert_send_type '(String) -> nil',
+                     :abc, :casecmp?, "abc"
+    assert_send_type '(Integer) -> nil',
+                     :abc, :casecmp?, 1
   end
 
   def test_downcase
@@ -177,7 +172,7 @@ class SymbolInstanceTest < Test::Unit::TestCase
   def test_end_with?
     assert_send_type '() -> bool',
                      :a, :end_with?
-    
+
     with_string 'a' do |string_a|
       assert_send_type '(string) -> true',
                        :a, :end_with?, string_a

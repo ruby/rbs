@@ -993,12 +993,10 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_bases_void(rbs_location_current_token(state));
   }
   case kUNTYPED: {
-    return rbs_bases_any(rbs_location_current_token(state));
+    return rbs_bases_any(false, rbs_location_current_token(state));
   }
   case k__TODO__: {
-    VALUE type = rbs_bases_any(rbs_location_current_token(state));
-    rb_funcall(type, rb_intern("todo!"), 0);
-    return type;
+    return rbs_bases_any(true, rbs_location_current_token(state));
   }
   case tINTEGER: {
     VALUE literal = rb_funcall(
@@ -1158,7 +1156,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
     rg->start = state->current_token.range.start;
 
     while (true) {
-      bool unchecked = false;
+      VALUE unchecked = Qfalse;
       VALUE variance = ID2SYM(rb_intern("invariant"));
       VALUE upper_bound = Qnil;
       VALUE default_type = Qnil;
@@ -1170,7 +1168,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       range unchecked_range = NULL_RANGE;
       if (module_type_params) {
         if (state->next_token.type == kUNCHECKED) {
-          unchecked = true;
+          unchecked = Qtrue;
           parser_advance(state);
           unchecked_range = state->current_token.range;
         }
@@ -1245,11 +1243,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       rbs_loc_add_optional_child(loc, INTERN("upper_bound"), upper_bound_range);
       rbs_loc_add_optional_child(loc, INTERN("default"), default_type_range);
 
-      VALUE param = rbs_ast_type_param(name, variance, upper_bound, default_type, location);
-
-      if (unchecked) {
-        rb_funcall(param, rb_intern("unchecked!"), 0);
-      }
+      VALUE param = rbs_ast_type_param(name, variance, upper_bound, default_type, unchecked, location);
 
       melt_array(&params);
       rb_ary_push(params, param);

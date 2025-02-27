@@ -22,8 +22,8 @@ module RBS
       end
 
       def overloaded_call(method, method_name, call, errors:)
-        es = method.method_types.map do |method_type|
-          es = method_call(method_name, method_type, call, errors: [])
+        es = method.defs.map do |type_def|
+          es = method_call(method_name, type_def.type, call, errors: [], annotations: type_def.annotations)
 
           if es.empty?
             return errors
@@ -58,11 +58,11 @@ module RBS
         errors
       end
 
-      def method_call(method_name, method_type, call, errors:)
+      def method_call(method_name, method_type, call, errors:, annotations: [])
         return errors if method_type.type.is_a?(Types::UntypedFunction)
 
         args(method_name, method_type, method_type.type, call.method_call, errors, type_error: Errors::ArgumentTypeError, argument_error: Errors::ArgumentError)
-        self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError)
+        self.return(method_name, method_type, method_type.type, call.method_call, errors, return_error: Errors::ReturnTypeError, annotations:)
 
         if method_type.block
           case
@@ -106,8 +106,10 @@ module RBS
         end
       end
 
-      def return(method_name, method_type, fun, call, errors, return_error:)
+      def return(method_name, method_type, fun, call, errors, return_error:, annotations: [])
         if call.return?
+          return if Test.call(call.return_value, IS_AP, NilClass) && annotations.find { |a| a.string == "implicitly-returns-nil" }
+
           unless value(call.return_value, fun.return_type)
             errors << return_error.new(klass: self_class,
                                        method_name: method_name,

@@ -39,12 +39,12 @@ VALUE rbs_ast_members_method_definition_overload(VALUE annotations, VALUE method
 VALUE rbs_ast_members_prepend(VALUE name, VALUE args, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_members_private(VALUE location);
 VALUE rbs_ast_members_public(VALUE location);
-VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE location);
+VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location);
 VALUE rbs_method_type(VALUE type_params, VALUE type, VALUE block, VALUE location);
 VALUE rbs_namespace(VALUE path, VALUE absolute);
 VALUE rbs_type_name(VALUE namespace, VALUE name);
 VALUE rbs_alias(VALUE name, VALUE args, VALUE location);
-VALUE rbs_bases_any(VALUE location);
+VALUE rbs_bases_any(VALUE todo, VALUE location);
 VALUE rbs_bases_bool(VALUE location);
 VALUE rbs_bases_bottom(VALUE location);
 VALUE rbs_bases_class(VALUE location);

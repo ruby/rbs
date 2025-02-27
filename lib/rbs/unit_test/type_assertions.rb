@@ -163,7 +163,7 @@ module RBS
           end
         end
 
-        last_trace = trace.last or raise
+        last_trace = trace.last or raise "empty trace"
 
         yield(mt, last_trace, result, exception)
       end
@@ -182,9 +182,9 @@ module RBS
 
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
 
-          method_types = method_types(method)
-          all_errors = method_types.map {|t| typecheck.method_call(method, t, trace, errors: []) }
-          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_types.join(" | ")}"
+          method_defs = method_defs(method)
+          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.annotations) }
+          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
 
           raise exception if exception
 
@@ -219,28 +219,34 @@ module RBS
           assert_operator exception, :is_a?, ::Exception
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
 
-          method_types = method_types(method)
-          all_errors = method_types.map {|t| typecheck.method_call(method, t, trace, errors: []) }
-          assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.inspect}\n  #{method_types.join(" | ")}"
+          method_defs = method_defs(method)
+          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.annotations) }
+          assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
 
           result
         end
       end
 
-      def method_types(method)
+      def method_defs(method)
         type, definition = target
 
         case type
         when Types::ClassInstance
           subst = RBS::Substitution.build(definition.type_params, type.args)
-          definition.methods[method].method_types.map do |method_type|
-            method_type.sub(subst)
+          definition.methods[method].defs.map do |type_def|
+            type_def.update(
+              type: type_def.type.sub(subst)
+            )
           end
         when Types::ClassSingleton
-          definition.methods[method].method_types
+          definition.methods[method].defs
         else
           raise
         end
+      end
+
+      def method_types(method)
+        method_defs(method).map(&:type)
       end
 
       def allows_error(*errors)

@@ -435,12 +435,13 @@ VALUE rbs_ast_members_public(VALUE location) {
   );
 }
 
-VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE location) {
+VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("variance")), variance);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("upper_bound")), upper_bound);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("default_type")), default_type);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("unchecked")), unchecked);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
@@ -501,8 +502,9 @@ VALUE rbs_alias(VALUE name, VALUE args, VALUE location) {
   );
 }
 
-VALUE rbs_bases_any(VALUE location) {
+VALUE rbs_bases_any(VALUE todo, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("todo")), todo);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
 
   return CLASS_NEW_INSTANCE(
