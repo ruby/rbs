@@ -2714,6 +2714,28 @@ class InstanceVariable
   @instance: Integer
 end
 
+class AttrInstanceVariable
+  attr_accessor instance: Integer
+  @instance: Integer
+end
+
+class InstanceVariableAttr
+  @instance: Integer
+  attr_accessor instance: Integer
+end
+
+class InstanceVariableAttrInstanceVariable
+  @instance: Integer
+  attr_accessor instance: Integer
+  @instance: Integer
+end
+
+class ClassInstanceVariableSingletonAttrClassInstanceVariable
+  self.@class_instance: Integer
+  attr_accessor self.class_instance: Integer
+  self.@class_instance: Integer
+end
+
 class ClassInstanceVariable
   self.@class_instance: Integer
   self.@class_instance: Integer
@@ -2730,6 +2752,18 @@ end
 
         assert_raises(RBS::InstanceVariableDuplicationError) do
           builder.build_instance(type_name("::InstanceVariable"))
+        end
+        assert_nothing_raised do
+          builder.build_instance(type_name("::AttrInstanceVariable"))
+        end
+        assert_nothing_raised do
+          builder.build_instance(type_name("::InstanceVariableAttr"))
+        end
+        assert_raises(RBS::InstanceVariableDuplicationError) do
+          builder.build_instance(type_name("::InstanceVariableAttrInstanceVariable"))
+        end
+        assert_raises(RBS::ClassInstanceVariableDuplicationError) do
+          builder.build_singleton(type_name("::ClassInstanceVariableSingletonAttrClassInstanceVariable"))
         end
         assert_raises(RBS::ClassInstanceVariableDuplicationError) do
           builder.build_singleton(type_name("::ClassInstanceVariable"))

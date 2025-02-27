@@ -340,31 +340,12 @@ module RBS
   end
 
   class InstanceVariableDuplicationError < VariableDuplicationError
-    def self.check!(variables:, member:, type_name:)
-      if old = variables[member.name]
-        if old.declared_in == type_name
-          raise new(member: member)
-        end
-      end
-    end
   end
 
   class ClassInstanceVariableDuplicationError < VariableDuplicationError
-    def self.check!(variables:, member:, type_name:)
-      if old = variables[member.name]
-        if old.declared_in == type_name
-          raise new(member: member)
-        end
-      end
-    end
   end
 
   class ClassVariableDuplicationError < VariableDuplicationError
-    def self.check!(variables:, member:, type_name:)
-      if old = variables[member.name]
-        raise new(member: member)
-      end
-    end
   end
 
   class UnknownMethodAliasError < DefinitionError
