@@ -8,6 +8,8 @@ module RBS
       # Set of methods defined in a type.
       #
       class Methods
+        # The type of the receiver of the method
+        #
         type instance_type = Types::ClassInstance | Types::ClassSingleton | Types::Interface
 
         # Definition of a method in the type
@@ -62,6 +64,10 @@ module RBS
         end
       end
 
+      type member = AST::Members::t | AST::Ruby::Members::t
+
+      type declaration = Environment::ModuleEntry::declaration | Environment::ClassEntry::declaration
+
       attr_reader env: Environment
       attr_reader instance_methods: Hash[TypeName, Methods]
       attr_reader singleton_methods: Hash[TypeName, Methods]
@@ -83,9 +89,14 @@ module RBS
 
       private def build_ruby_method: (Methods, Methods::instance_type, member: AST::Ruby::Members::DefMember | AST::Ruby::Members::DefSingletonMember, accessibility: Definition::accessibility) -> void
 
-      private def each_ruby_member_with_accessibility: (_Each[AST::Ruby::Members::t], ?accessibility: Definition::accessibility) { (AST::Ruby::Members::DefMember, Definition::accessibility) -> void } -> void
-
-      private def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
+      # Enumerates members in declaration with current accessibility
+      #
+      # * Note that this method doesn't yield accessibility specifier members.
+      #
+      private def each_member_with_accessibility: (
+        declaration,
+        ?accessibility: Definition::accessibility
+      ) { (member, Definition::accessibility, AST::Ruby::Declarations::SingletonClassDecl?) -> void } -> void
 
       # Returns another MethodBuilder instance with given `env`
       #
