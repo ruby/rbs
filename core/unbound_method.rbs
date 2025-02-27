@@ -100,7 +100,7 @@ class UnboundMethod
   #     m.call # => "bar"
   #     n = m.clone.call # => "bar"
   #
-  def clone: () -> instance
+  def clone: () -> self
 
   # <!--
   #   rdoc-file=proc.c
