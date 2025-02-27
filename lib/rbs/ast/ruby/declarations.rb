@@ -324,6 +324,30 @@ module RBS
             @location = location
             @members = members
           end
+
+          def each_decl(&block)
+            if block
+              members.each do |member|
+                if member.is_a?(AST::Declarations::Base)
+                  yield member
+                end
+              end
+            else
+              enum_for(:each_decl)
+            end
+          end
+
+          def each_member(&block)
+            if block
+              members.each do |member|
+                if member.is_a?(AST::Members::Base)
+                  yield member
+                end
+              end
+            else
+              enum_for(:each_member)
+            end
+          end
         end
       end
     end

@@ -300,6 +300,10 @@ module RBS
           next if decl.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
           insert_ruby_decl(decl, context: [context, class_name], namespace: class_name.to_namespace)
         end
+      when AST::Ruby::Declarations::EmbeddedRBSDecl
+        decl.each_decl do |decl|
+          insert_decl(decl, context: context, namespace: namespace)
+        end
       else
         raise "Unexpected decl: #{decl.class}"
       end

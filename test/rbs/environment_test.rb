@@ -612,4 +612,21 @@ type s = untyped
     assert_operator env.class_decls, :key?, type_name("::Bar")
     assert_operator env.class_decls, :key?, type_name("::Foo::Baz")
   end
+
+  def test_inline__embedded_rbs
+    buf, prism = parse_ruby(<<~RUBY)
+      module Foo
+        # @rbs!
+        #   type t = String
+      end
+    RUBY
+    result = RBS::InlineParser.parse(buf, prism)
+
+    env = Environment.new
+    source = RBS::Source::Ruby.new(buf, prism, result.declarations, result.diagnostics)
+    env.add_signature(source)
+
+    assert_operator env.class_decls, :key?, type_name("::Foo")
+    assert_operator env.type_alias_decls, :key?, type_name("::Foo::t")
+  end
 end

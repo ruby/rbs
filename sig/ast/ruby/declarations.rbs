@@ -234,6 +234,14 @@ module RBS
           attr_reader members: Array[member]
 
           def initialize: (Buffer, Location, Array[member]) -> void
+
+          # Enumerates `AST::Declarations` object
+          def each_decl: () { (AST::Declarations::t) -> void } -> void
+                              | () -> Enumerator[AST::Declarations::t]
+
+          # Enumerates `AST::Members` object
+          def each_member: () { (AST::Members::t) -> void } -> void
+                            | () -> Enumerator[AST::Members::t]
         end
       end
     end
