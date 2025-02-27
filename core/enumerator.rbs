@@ -613,10 +613,6 @@ end
 # This type of objects can be created by Enumerable#chain and Enumerator#+.
 #
 class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
-  # * `Rubocop: `self` type is not allowed in this context
-  # * {Enumerator::Chain#each} without block doesn't return `self`, unlike {Enumerator#each}.
-  #include Enumerator::_Each[Enum, self] # Workaround: def each:
-
   # <!--
   #   rdoc-file=enumerator.c
   #   - Enumerator::Chain.new(*enums) -> enum
@@ -641,10 +637,12 @@ class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
   #
   # If no block is given, returns an enumerator.
   #
-  def each: () { (Enum) -> void } -> self
-          | () -> Enumerator[E, self]
+  def each: () { (Elem) -> void } -> self
+          | () -> Enumerator[Elem, self]
 
   # wrong argument type chain (expected enumerator) (TypeError)
   def with_index: (?Integer) ?{ (?) -> untyped } -> bot
+
+  # wrong argument type chain (expected enumerator) (TypeError)
   def each_with_index: () ?{ (?) -> untyped } -> bot
 end
