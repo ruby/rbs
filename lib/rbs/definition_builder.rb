@@ -129,26 +129,24 @@ module RBS
       entry.each_decl do |decl|
         subst_ = subst + Substitution.build(decl.type_params.each.map(&:name), args)
 
-        decl.members.each do |member|
+        each_instance_variable_member(decl) do |member|
           case member
           when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-            if member.kind == :instance
-              ivar_name = case member.ivar_name
-                          when false
-                            nil
-                          else
-                            member.ivar_name || :"@#{member.name}"
-                          end
+            ivar_name = case member.ivar_name
+                        when false
+                          nil
+                        else
+                          member.ivar_name || :"@#{member.name}"
+                        end
 
-              if ivar_name
-                insert_variable(
-                  type_name,
-                  definition.instance_variables,
-                  name: ivar_name,
-                  type: member.type.sub(subst_),
-                  source: member
-                )
-              end
+            if ivar_name
+              insert_variable(
+                type_name,
+                definition.instance_variables,
+                name: ivar_name,
+                type: member.type.sub(subst_),
+                source: member
+              )
             end
 
           when AST::Members::InstanceVariable, AST::Ruby::Members::InstanceVariableMember
@@ -273,20 +271,18 @@ module RBS
           import_methods(definition, type_name, methods, interface_methods, Substitution.new, nil)
 
           entry.each_decl do |decl|
-            decl.members.each do |member|
+            each_singleton_variable_member(decl) do |member|
               case member
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-                if member.kind == :singleton
-                  ivar_name = case member.ivar_name
-                              when false
-                                nil
-                              else
-                                member.ivar_name || :"@#{member.name}"
-                              end
+                ivar_name = case member.ivar_name
+                            when false
+                              nil
+                            else
+                              member.ivar_name || :"@#{member.name}"
+                            end
 
-                  if ivar_name
-                    insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type, source: member)
-                  end
+                if ivar_name
+                  insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type, source: member)
                 end
 
               when AST::Members::ClassInstanceVariable, AST::Ruby::Members::ClassInstanceVariableMember
@@ -956,6 +952,70 @@ module RBS
       return if env.type_name?(env.normalize_type_name(name))
 
       raise NoTypeFoundError.new(type_name: name, location: location)
+    end
+
+    def each_instance_variable_member(module_decl)
+      module_decl.members.each do |member|
+        case member
+        when AST::Members::Attribute
+          if member.kind == :instance
+            yield member
+          end
+          yield member
+        when AST::Members::InstanceVariable, AST::Members::ClassVariable
+          yield member
+        # when AST::Ruby::Members::AttributeMember
+        #   yield member
+        when AST::Ruby::Members::InstanceVariableMember, AST::Ruby::Members::ClassVariableMember
+          yield member
+        when AST::Ruby::Declarations::EmbeddedRBSDecl
+          member.members.each do |member|
+            case member
+            when AST::Members::Attribute
+              if member.kind == :instance
+                yield member
+              end
+            when AST::Members::InstanceVariable, AST::Members::ClassVariable
+              yield member
+            end
+          end
+        end
+      end
+    end
+
+    def each_singleton_variable_member(module_decl)
+      module_decl.members.each do |member|
+        case member
+        when AST::Members::Attribute
+          if member.kind == :singleton
+            yield member
+          end
+        when AST::Members::ClassInstanceVariable, AST::Members::ClassVariable
+          yield member
+        # when AST::Ruby::Members::AttributeMember
+        #   yield member
+        when AST::Ruby::Members::ClassInstanceVariableMember, AST::Ruby::Members::ClassVariableMember
+          yield member
+        when AST::Ruby::Declarations::EmbeddedRBSDecl
+          member.members.each do |member|
+            case member
+            when AST::Members::Attribute
+              if member.kind == :singleton
+                yield member
+              end
+            when AST::Members::ClassInstanceVariable, AST::Members::ClassVariable
+              yield member
+            end
+          end
+        when AST::Ruby::Declarations::SingletonClassDecl
+          member.members.each do |member|
+            # case member
+            # when AST::Ruby::Members::AttributeMember
+            #   yield member
+            # end
+          end
+        end
+      end
     end
   end
 end

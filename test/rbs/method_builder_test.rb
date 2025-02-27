@@ -194,7 +194,6 @@ EOF
     end
   end
 
-
   def test__inline__embedded__instance_accessibility
     SignatureManager.new(system_builtin: true) do |manager|
       manager.ruby_files["foo.rb"] = <<~RUBY

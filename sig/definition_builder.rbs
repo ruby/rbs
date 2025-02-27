@@ -179,5 +179,40 @@ module RBS
     # ```
     #
     def tapp_subst: (TypeName, Array[Types::t]) -> Substitution
+
+    type module_decl = Environment::ModuleEntry::declaration | Environment::ClassEntry::declaration
+
+    type instance_variable_member = AST::Members::AttrReader
+                                  | AST::Members::AttrWriter
+                                  | AST::Members::AttrAccessor
+                                  | AST::Members::InstanceVariable
+                                  | AST::Members::ClassVariable
+                                  | AST::Ruby::Members::AttrReaderMember
+                                  | AST::Ruby::Members::AttrWriterMember
+                                  | AST::Ruby::Members::AttrAccessorMember
+                                  | AST::Ruby::Members::InstanceVariableMember
+                                  | AST::Ruby::Members::ClassVariableMember
+
+    type singleton_variable_member = AST::Members::AttrReader
+                                   | AST::Members::AttrWriter
+                                   | AST::Members::AttrAccessor
+                                   | AST::Members::ClassInstanceVariable
+                                   | AST::Members::ClassVariable
+                                   | AST::Ruby::Members::AttrReaderMember
+                                   | AST::Ruby::Members::AttrWriterMember
+                                   | AST::Ruby::Members::AttrAccessorMember
+                                   | AST::Ruby::Members::ClassInstanceVariableMember
+                                   | AST::Ruby::Members::ClassVariableMember
+
+    # Enumerates variable members on instance
+    #
+    # * Yields attribute members with `instance` kind
+    #
+    def each_instance_variable_member: (module_decl) { (instance_variable_member) -> void } -> void
+
+    # Enumerates variable members on singleton
+    #
+    # * Yields attribute members with `singleton` kind
+    def each_singleton_variable_member: (module_decl) { (singleton_variable_member) -> void } -> void
   end
 end

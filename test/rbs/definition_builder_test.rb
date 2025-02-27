@@ -3237,6 +3237,8 @@ end
       manager.ruby_files["foo.rb"] = <<~RUBY
         class Foo
           # @rbs!
+          #   @@instance: Foo
+          #
           #   def foo: () -> void
           #   attr_reader bar: untyped
           #   alias baz foo
@@ -3256,11 +3258,32 @@ end
           assert_instance_of Definition, definition
 
           assert_method_definition definition.methods[:foo], ["() -> void"]
+          assert_method_definition definition.methods[:bar], ["() -> untyped"]
+          assert_method_definition definition.methods[:baz], ["() -> void"]
+
+          definition.instance_variables[:@name].tap do |var|
+            assert_equal parse_type("::String"), var.type
+          end
+
+          definition.class_variables[:@@instance].tap do |var|
+            assert_equal parse_type("::Foo"), var.type
+          end
         end
 
         builder.build_singleton(type_name("::Foo")).tap do |definition|
           assert_instance_of Definition, definition
 
+          assert_method_definition definition.methods[:foo], ["() -> ::String"]
+          assert_method_definition definition.methods[:bar], ["() -> ::String"]
+          assert_method_definition definition.methods[:baz], ["() -> ::String"]
+
+          definition.instance_variables[:@size].tap do |var|
+            assert_equal parse_type("::Integer"), var.type
+          end
+
+          definition.class_variables[:@@instance].tap do |var|
+            assert_equal parse_type("::Foo"), var.type
+          end
         end
       end
     end
