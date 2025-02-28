@@ -7,6 +7,18 @@ class URISingletonTest < Test::Unit::TestCase
   library "uri"
   testing "singleton(::URI)"
 
+  def test_decode_uri_component
+    assert_send_type(
+      "(String) -> String",
+      URI, :decode_uri_component, "Hello%20World%20%E6%97%A5%E6%9C%AC%E8%AA%9E"
+    )
+
+    assert_send_type(
+      "(String, Encoding) -> String",
+      URI, :decode_uri_component, "Hello%20World%20%E6%97%A5%E6%9C%AC%E8%AA%9E", Encoding::UTF_8
+    )
+  end
+
   def test_decode_www_form
     assert_send_type "(String) -> Array[[String, String]]",
                      URI, :decode_www_form, "a=1&a=2&b=3"
@@ -43,6 +55,17 @@ class URISingletonTest < Test::Unit::TestCase
                      URI, :decode_www_form_component, "%A1", Encoding::SJIS
     assert_send_type "(String, String) -> String",
                      URI, :decode_www_form_component, "%A1", "sjis"
+  end
+
+  def test_encode_uri_component
+    assert_send_type(
+      "(String) -> String",
+      URI, :encode_uri_component, "Hello World 日本語"
+    )
+    assert_send_type(
+      "(String, Encoding) -> String",
+      URI, :encode_uri_component, "Hello World 日本語", Encoding::UTF_8
+    )
   end
 
   def test_encode_www_form

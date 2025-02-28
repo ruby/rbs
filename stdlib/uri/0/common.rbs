@@ -117,6 +117,14 @@ module URI
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
+  #   - decode_uri_component(str, enc=Encoding::UTF_8)
+  # -->
+  # Like URI.decode_www_form_component, except that `'+'` is preserved.
+  #
+  def self.decode_uri_component: (String str, ?encoding enc) -> String
+
+  # <!--
+  #   rdoc-file=lib/uri/common.rb
   #   - decode_www_form(str, enc=Encoding::UTF_8, separator: '&', use__charset_: false, isindex: false)
   # -->
   # Returns name/value pairs derived from the given string `str`, which must be an
@@ -188,6 +196,15 @@ module URI
   # Related: URI.decode_uri_component (preserves `'+'`).
   #
   def self.decode_www_form_component: (String str, ?encoding enc) -> String
+
+  # <!--
+  #   rdoc-file=lib/uri/common.rb
+  #   - encode_uri_component(str, enc=nil)
+  # -->
+  # Like URI.encode_www_form_component, except that `' '` (space) is encoded as
+  # `'%20'` (instead of `'+'`).
+  #
+  def self.encode_uri_component: (String str, ?encoding enc) -> String
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
