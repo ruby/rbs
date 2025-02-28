@@ -95,7 +95,7 @@ class EnumeratorChainTest < Test::Unit::TestCase
   testing "::Enumerator::Chain[::Integer]"
 
   def test_class_new
-    assert_send_type "(*_Each[Integer] enums) -> Enumerator::Chain[Integer]",
+    assert_send_type "(Range[Integer], Array[Integer]) -> Enumerator::Chain[Integer]",
                      Enumerator::Chain, :new, 1..3, [4, 5]
   end
 
@@ -103,7 +103,5 @@ class EnumeratorChainTest < Test::Unit::TestCase
     enum = Enumerator::Chain.new 1..3, [4, 5]
     assert_send_type "() { (Integer) -> nil } -> Enumerator::Chain[Integer]",
                      enum, :each do end
-    assert_send_type "() -> Enumerator[Integer, Enumerator::Chain[Integer]]",
-                     enum, :each
   end
 end

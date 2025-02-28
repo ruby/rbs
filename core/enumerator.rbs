@@ -639,10 +639,4 @@ class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
   #
   def each: () { (Elem) -> void } -> self
           | () -> Enumerator[Elem, self]
-
-  # wrong argument type chain (expected enumerator) (TypeError)
-  def with_index: (?Integer) ?{ (?) -> untyped } -> bot
-
-  # wrong argument type chain (expected enumerator) (TypeError)
-  def each_with_index: () ?{ (?) -> untyped } -> bot
 end
