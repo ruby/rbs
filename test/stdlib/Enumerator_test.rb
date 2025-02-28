@@ -89,19 +89,25 @@ class EnumeratorYielderTest < Test::Unit::TestCase
   end
 end
 
-class EnumeratorChainTest < Test::Unit::TestCase
+class EnumeratorChainInstanceTest < Test::Unit::TestCase
   include TestHelper
 
   testing "::Enumerator::Chain[::Integer]"
-
-  def test_class_new
-    assert_send_type "(Range[Integer], Array[Integer]) -> Enumerator::Chain[Integer]",
-                     Enumerator::Chain, :new, 1..3, [4, 5]
-  end
 
   def test_each
     enum = Enumerator::Chain.new 1..3, [4, 5]
     assert_send_type "() { (Integer) -> nil } -> Enumerator::Chain[Integer]",
                      enum, :each do end
+  end
+end
+
+class EnumeratorChainSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "singleton(::Enumerator::Chain)"
+
+  def test_class_new
+    assert_send_type "(Range[Integer], Array[Integer]) -> Enumerator::Chain[Integer]",
+                     Enumerator::Chain, :new, 1..3, [4, 5]
   end
 end
