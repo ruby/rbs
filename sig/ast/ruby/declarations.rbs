@@ -124,7 +124,7 @@ module RBS
           ) -> void
 
           def type_params: () -> Array[AST::TypeParam]
-                         
+
           # Yields `AST::Ruby::Members` and `AST::Members` object
           #
           # * `AST::Ruby::Members` can be enumerated through the `#members` attribute directly
@@ -142,9 +142,13 @@ module RBS
         # `class <<self` definition
         #
         # This is only allowed inside class or module definition.
+        # Limited members are allowed inside singleton class definition.
         #
         class SingletonClassDecl < Base
-          type member = Members::t
+          type member = Members::DefMember
+                      | Members::AliasMember
+                      | Members::PublicMember
+                      | Members::PrivateMember
 
           attr_reader node: Prism::SingletonClassNode
 
