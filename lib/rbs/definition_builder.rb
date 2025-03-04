@@ -82,7 +82,7 @@ module RBS
       AST::TypeParam.application(params, args) || Substitution.new()
     end
 
-    def define_instance(definition, type_name, subst)
+    def define_instance(definition, type_name, subst, define_class_vars:)
       one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
       methods = method_builder.build_instance(type_name)
 
@@ -104,7 +104,7 @@ module RBS
           validate_type_presence(arg)
         end
 
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args))
+        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
       end
 
       all_interfaces = one_ancestors.each_included_interface.flat_map do |interface|
@@ -120,7 +120,7 @@ module RBS
           validate_type_presence(arg)
         end
 
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args))
+        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
       end
 
       entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
@@ -161,7 +161,9 @@ module RBS
             )
 
           when AST::Members::ClassVariable
-            insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
+            if define_class_vars
+              insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
+            end
           end
         end
       end
@@ -216,13 +218,13 @@ module RBS
                 if ans.name.interface?
                   define_interface(definition, ans.name, subst)
                 else
-                  define_instance(definition, ans.name, subst)
+                  define_instance(definition, ans.name, subst, define_class_vars: true)
                 end
               end
             end
           end
 
-          define_instance(definition, type_name, Substitution.new)
+          define_instance(definition, type_name, Substitution.new, define_class_vars: true)
         end
       end
     end
@@ -251,7 +253,6 @@ module RBS
 
             definition.methods.merge!(defn.methods)
             definition.instance_variables.merge!(defn.instance_variables)
-            definition.class_variables.merge!(defn.class_variables)
           end
 
           one_ancestors.each_extended_module do |mod|
@@ -260,7 +261,7 @@ module RBS
             end
 
             subst = tapp_subst(mod.name, mod.args)
-            define_instance(definition, mod.name, subst)
+            define_instance(definition, mod.name, subst, define_class_vars: false)
           end
 
           all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
@@ -290,12 +291,12 @@ module RBS
 
               when AST::Members::ClassInstanceVariable
                 insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type, source: member)
-
-              when AST::Members::ClassVariable
-                insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
               end
             end
           end
+
+          instance_definition = build_instance(type_name)
+          definition.class_variables.replace(instance_definition.class_variables)
         end
       end
     end

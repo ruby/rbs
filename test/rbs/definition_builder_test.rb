@@ -2706,6 +2706,104 @@ end
     end
   end
 
+  def test_class_var__mixin__include_defines_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  include M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+      end
+    end
+  end
+
+  def test_class_var__mixin__extend_no_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  extend M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_nil definition.class_variables[:@@m1]
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          assert_nil definition.class_variables[:@@m1]
+        end
+      end
+    end
+  end
+
+  def test_class_var__mixin__prepend_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  prepend M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+      end
+    end
+  end
+
   def test_duplicated_variable
     SignatureManager.new do |manager|
       manager.add_file("instance.rbs", <<-EOF)
