@@ -3,6 +3,10 @@ require "rake/testtask"
 require "rbconfig"
 require 'rake/extensiontask'
 
+on_windows = /mswin|mingw/ =~ RUBY_PLATFORM
+
+require "ruby_memcheck" if !on_windows
+
 $LOAD_PATH << File.join(__dir__, "test")
 
 ruby = ENV["RUBY"] || RbConfig.ruby
@@ -11,11 +15,19 @@ bin = File.join(__dir__, "bin")
 
 Rake::ExtensionTask.new("rbs_extension")
 
-Rake::TestTask.new(:test => :compile) do |t|
+test_config = lambda do |t|
   t.libs << "test"
   t.libs << "lib"
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
+  end
+end
+
+Rake::TestTask.new(test: :compile, &test_config)
+
+unless on_windows
+  namespace :test do
+    RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
   end
 end
 
