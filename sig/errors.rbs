@@ -198,10 +198,6 @@ module RBS
   class ClassInstanceVariableDuplicationError < VariableDuplicationError
   end
 
-  class ClassVariableDuplicationError < VariableDuplicationError
-    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::ClassVariable, type_name: TypeName) -> void
-  end
-
   # The `alias` member declares an alias from unknown method
   #
   class UnknownMethodAliasError < DefinitionError
