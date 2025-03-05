@@ -1314,7 +1314,7 @@ VALUE parse_method_type(parserstate *state) {
 /*
   global_decl ::= {tGIDENT} `:` <type>
 */
-static VALUE parse_global_decl(parserstate *state) {
+static VALUE parse_global_decl(parserstate *state, VALUE annotations) {
   range decl_range;
   decl_range.start = state->current_token.range.start;
 
@@ -1334,13 +1334,13 @@ static VALUE parse_global_decl(parserstate *state) {
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  return rbs_ast_decl_global(typename, type, location, comment);
+  return rbs_ast_decl_global(typename, type, location, comment, annotations);
 }
 
 /*
   const_decl ::= {const_name} `:` <type>
 */
-static VALUE parse_const_decl(parserstate *state) {
+static VALUE parse_const_decl(parserstate *state, VALUE annotations) {
   range decl_range;
 
   decl_range.start = state->current_token.range.start;
@@ -1361,7 +1361,7 @@ static VALUE parse_const_decl(parserstate *state) {
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  return rbs_ast_decl_constant(typename, type, location, comment);
+  return rbs_ast_decl_constant(typename, type, location, comment, annotations);
 }
 
 /*
@@ -2465,7 +2465,7 @@ static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE a
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    return rbs_ast_decl_module_alias(module_name, old_name, location, comment);
+    return rbs_ast_decl_module_alias(module_name, old_name, location, comment, annotations);
   } else {
     return parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations);
   }
@@ -2582,7 +2582,7 @@ static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE an
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    return rbs_ast_decl_class_alias(class_name, old_name, location, comment);
+    return rbs_ast_decl_class_alias(class_name, old_name, location, comment, annotations);
   } else {
     return parse_class_decl0(state, keyword_range, class_name, class_name_range, comment, annotations);
   }
@@ -2602,11 +2602,11 @@ static VALUE parse_nested_decl(parserstate *state, const char *nested_in, positi
   switch (state->current_token.type) {
   case tUIDENT:
   case pCOLON2: {
-    decl = parse_const_decl(state);
+    decl = parse_const_decl(state, annotations);
     break;
   }
   case tGIDENT: {
-    decl = parse_global_decl(state);
+    decl = parse_global_decl(state, annotations);
     break;
   }
   case kTYPE: {
@@ -2648,10 +2648,10 @@ static VALUE parse_decl(parserstate *state) {
   switch (state->current_token.type) {
   case tUIDENT:
   case pCOLON2: {
-    return parse_const_decl(state);
+    return parse_const_decl(state, annotations);
   }
   case tGIDENT: {
-    return parse_global_decl(state);
+    return parse_global_decl(state, annotations);
   }
   case kTYPE: {
     return parse_type_decl(state, annot_pos, annotations);

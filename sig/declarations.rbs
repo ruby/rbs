@@ -205,8 +205,10 @@ module RBS
         attr_reader type: Types::t
         attr_reader location: loc?
         attr_reader comment: Comment?
+        attr_reader annotations: Array[Annotation]
 
-        def initialize: (name: TypeName, type: Types::t, location: loc?, comment: Comment?) -> void
+        def initialize: (name: TypeName, type: Types::t, location: loc?, comment: Comment?, annotations: Array[Annotation]) -> void
+                      | %a{deprecated} (name: TypeName, type: Types::t, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
@@ -223,8 +225,10 @@ module RBS
         attr_reader type: Types::t
         attr_reader location: loc?
         attr_reader comment: Comment?
+        attr_reader annotations: Array[Annotation]
 
-        def initialize: (name: Symbol, type: Types::t, location: loc?, comment: Comment?) -> void
+        def initialize: (name: Symbol, type: Types::t, location: loc?, comment: Comment?, annotations: Array[Annotation]) -> void
+                      | %a{deprecated} (name: Symbol, type: Types::t, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
         include _ToJson
@@ -250,7 +254,10 @@ module RBS
 
         attr_reader comment: Comment?
 
-        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
+        attr_reader annotations: Array[Annotation]
+
+        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?, annotations: Array[Annotation]) -> void
+                      | %a{deprecated} (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
       end

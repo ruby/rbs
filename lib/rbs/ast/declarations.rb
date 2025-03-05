@@ -349,12 +349,14 @@ module RBS
         attr_reader :type
         attr_reader :location
         attr_reader :comment
+        attr_reader :annotations
 
-        def initialize(name:, type:, location:, comment:)
+        def initialize(name:, type:, location:, comment:, annotations: [])
           @name = name
           @type = type
           @location = location
           @comment = comment
+          @annotations = annotations || []
         end
 
         def ==(other)
@@ -385,12 +387,14 @@ module RBS
         attr_reader :type
         attr_reader :location
         attr_reader :comment
+        attr_reader :annotations
 
-        def initialize(name:, type:, location:, comment:)
+        def initialize(name:, type:, location:, comment:, annotations: [])
           @name = name
           @type = type
           @location = location
           @comment = comment
+          @annotations = annotations
         end
 
         def ==(other)
@@ -417,13 +421,14 @@ module RBS
       end
 
       class AliasDecl < Base
-        attr_reader :new_name, :old_name, :location, :comment
+        attr_reader :new_name, :old_name, :location, :comment, :annotations
 
-        def initialize(new_name:, old_name:, location:, comment:)
+        def initialize(new_name:, old_name:, location:, comment:, annotations: [])
           @new_name = new_name
           @old_name = old_name
           @location = location
           @comment = comment
+          @annotations = annotations
         end
 
         def ==(other)
