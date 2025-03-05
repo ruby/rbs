@@ -27,6 +27,7 @@ nodes:
       - name: old_name
       - name: location
       - name: comment
+      - name: annotations
   - name: RBS::AST::Declarations::Constant
     fields:
       - name: name
@@ -67,6 +68,7 @@ nodes:
       - name: old_name
       - name: location
       - name: comment
+      - name: annotations
   - name: RBS::AST::Declarations::TypeAlias
     fields:
       - name: name

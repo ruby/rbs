@@ -71,12 +71,13 @@ VALUE rbs_ast_decl_class_super(VALUE name, VALUE args, VALUE location) {
   );
 }
 
-VALUE rbs_ast_decl_class_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment) {
+VALUE rbs_ast_decl_class_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment, VALUE annotations) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("new_name")), new_name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("old_name")), old_name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
 
   return CLASS_NEW_INSTANCE(
     RBS_AST_Declarations_ClassAlias,
@@ -159,12 +160,13 @@ VALUE rbs_ast_decl_module_self(VALUE name, VALUE args, VALUE location) {
   );
 }
 
-VALUE rbs_ast_decl_module_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment) {
+VALUE rbs_ast_decl_module_alias(VALUE new_name, VALUE old_name, VALUE location, VALUE comment, VALUE annotations) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("new_name")), new_name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("old_name")), old_name);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment")), comment);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
 
   return CLASS_NEW_INSTANCE(
     RBS_AST_Declarations_ModuleAlias,

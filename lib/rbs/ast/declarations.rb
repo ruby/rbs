@@ -417,13 +417,14 @@ module RBS
       end
 
       class AliasDecl < Base
-        attr_reader :new_name, :old_name, :location, :comment
+        attr_reader :new_name, :old_name, :location, :comment, :annotations
 
-        def initialize(new_name:, old_name:, location:, comment:)
+        def initialize(new_name:, old_name:, location:, comment:, annotations: [])
           @new_name = new_name
           @old_name = old_name
           @location = location
           @comment = comment
+          @annotations = annotations
         end
 
         def ==(other)

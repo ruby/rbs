@@ -250,7 +250,10 @@ module RBS
 
         attr_reader comment: Comment?
 
-        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
+        attr_reader annotations: Array[Annotation]
+
+        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?, annotations: Array[Annotation]) -> void
+                      | %a{deprecated} (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
 
         include _HashEqual
       end

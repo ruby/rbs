@@ -2465,7 +2465,7 @@ static VALUE parse_module_decl(parserstate *state, position comment_pos, VALUE a
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    return rbs_ast_decl_module_alias(module_name, old_name, location, comment);
+    return rbs_ast_decl_module_alias(module_name, old_name, location, comment, annotations);
   } else {
     return parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations);
   }
@@ -2582,7 +2582,7 @@ static VALUE parse_class_decl(parserstate *state, position comment_pos, VALUE an
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    return rbs_ast_decl_class_alias(class_name, old_name, location, comment);
+    return rbs_ast_decl_class_alias(class_name, old_name, location, comment, annotations);
   } else {
     return parse_class_decl0(state, keyword_range, class_name, class_name_range, comment, annotations);
   }
