@@ -1403,7 +1403,7 @@ end
           foo.defs[0].tap do |defn|
             assert_equal parse_method_type("(::String) -> ::String"), defn.type
             assert_equal "doc2\n", defn.comment.string
-            assert_equal ["world"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1411,7 +1411,7 @@ end
           foo.defs[1].tap do |defn|
             assert_equal parse_method_type("() -> ::String"), defn.type
             assert_equal "doc1\n", defn.comment.string
-            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1419,7 +1419,7 @@ end
           foo.defs[2].tap do |defn|
             assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
             assert_equal "doc1\n", defn.comment.string
-            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1460,7 +1460,7 @@ end
           foo.defs[0].tap do |defn|
             assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
             assert_equal "Hello#foo\n", defn.comment.string
-            assert_equal ["Hello#foo"], defn.annotations.map(&:string)
+            assert_equal ["_Hello#foo", "Hello#foo"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1468,7 +1468,7 @@ end
           foo.defs[1].tap do |defn|
             assert_equal parse_method_type("() -> ::String"), defn.type
             assert_equal "_Hello#foo\n", defn.comment.string
-            assert_equal ["_Hello#foo"], defn.annotations.map(&:string)
+            assert_equal ["_Hello#foo", "Hello#foo"], defn.each_annotation.map(&:string)
             assert_equal type_name("::_Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
