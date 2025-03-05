@@ -40,6 +40,7 @@ nodes:
       - name: type
       - name: location
       - name: comment
+      - name: annotations
   - name: RBS::AST::Declarations::Interface
     fields:
       - name: name

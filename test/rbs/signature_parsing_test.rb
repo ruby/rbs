@@ -2240,4 +2240,18 @@ end
       end
     end
   end
+
+  def test_global__annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        %a{annotation}
+        $FOO: String
+      RBS
+
+      assert_equal 1, decls.size
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Global, decl
+        assert_equal ["annotation"], decl.annotations.map(&:string)
+      end
+    end
+  end
 end

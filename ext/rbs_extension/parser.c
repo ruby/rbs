@@ -1314,7 +1314,7 @@ VALUE parse_method_type(parserstate *state) {
 /*
   global_decl ::= {tGIDENT} `:` <type>
 */
-static VALUE parse_global_decl(parserstate *state) {
+static VALUE parse_global_decl(parserstate *state, VALUE annotations) {
   range decl_range;
   decl_range.start = state->current_token.range.start;
 
@@ -1334,7 +1334,7 @@ static VALUE parse_global_decl(parserstate *state) {
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  return rbs_ast_decl_global(typename, type, location, comment);
+  return rbs_ast_decl_global(typename, type, location, comment, annotations);
 }
 
 /*
@@ -2606,7 +2606,7 @@ static VALUE parse_nested_decl(parserstate *state, const char *nested_in, positi
     break;
   }
   case tGIDENT: {
-    decl = parse_global_decl(state);
+    decl = parse_global_decl(state, annotations);
     break;
   }
   case kTYPE: {
@@ -2651,7 +2651,7 @@ static VALUE parse_decl(parserstate *state) {
     return parse_const_decl(state);
   }
   case tGIDENT: {
-    return parse_global_decl(state);
+    return parse_global_decl(state, annotations);
   }
   case kTYPE: {
     return parse_type_decl(state, annot_pos, annotations);

@@ -385,12 +385,14 @@ module RBS
         attr_reader :type
         attr_reader :location
         attr_reader :comment
+        attr_reader :annotations
 
-        def initialize(name:, type:, location:, comment:)
+        def initialize(name:, type:, location:, comment:, annotations: [])
           @name = name
           @type = type
           @location = location
           @comment = comment
+          @annotations = annotations
         end
 
         def ==(other)
