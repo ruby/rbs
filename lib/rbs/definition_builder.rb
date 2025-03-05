@@ -389,12 +389,14 @@ module RBS
                       type: method_type,
                       member: initialize_def.member,
                       defined_in: initialize_def.defined_in,
-                      implemented_in: initialize_def.implemented_in,
-                      overload_annotations: initialize_def.overload_annotations
-                    )
+                      implemented_in: initialize_def.implemented_in
+                    ).tap do |type_def|
+                      type_def.overload_annotations.replace(initialize_def.overload_annotations)
+                    end
                   end,
                   accessibility: :public,
-                  alias_of: nil
+                  alias_of: nil,
+                  alias_member: nil
                 )
 
                 definition.methods[:new] = typed_new
@@ -663,8 +665,11 @@ module RBS
             defn.update(defined_in: defined_in, implemented_in: implemented_in)
           end,
           accessibility: original_method.accessibility,
-          alias_of: original_method
+          alias_of: original_method,
+          alias_member: original
         )
+
+        method_definition.annotations.replace(original.annotations)
       when AST::Members::MethodDefinition
         if duplicated_method = methods[method.name]
           raise DuplicatedMethodDefinitionError.new(
@@ -679,9 +684,11 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: original,
             defined_in: defined_in,
-            implemented_in: implemented_in,
-            overload_annotations: overload.annotations
-          )
+            implemented_in: implemented_in
+          ).tap do |type_def|
+            # Keep the original annotations given to overloads.
+            type_def.overload_annotations.replace(overload.annotations)
+          end
         end
 
         # @type var accessibility: RBS::Definition::accessibility
@@ -701,8 +708,11 @@ module RBS
           super_method: super_method,
           defs: defs,
           accessibility: accessibility,
-          alias_of: nil
+          alias_of: nil,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(original.annotations)
       when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
         if duplicated_method = methods[method.name]
           raise DuplicatedMethodDefinitionError.new(
@@ -751,8 +761,11 @@ module RBS
             )
           ],
           accessibility: method.accessibility,
-          alias_of: nil
+          alias_of: nil,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(original.annotations)
       when nil
         # Overloading method definition only
 
@@ -779,8 +792,11 @@ module RBS
             defn.update(implemented_in: implemented_in)
           end,
           accessibility: existing_method.accessibility,
-          alias_of: existing_method.alias_of
+          alias_of: existing_method.alias_of,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(existing_method.annotations)
       end
 
       method.overloads.each do |overloading_def|
@@ -789,12 +805,19 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: overloading_def,
             defined_in: defined_in,
-            implemented_in: implemented_in,
-            overload_annotations: overload.annotations
+            implemented_in: implemented_in
           )
+
+          type_def.overload_annotations.replace(overload.annotations)
 
           method_definition.defs.unshift(type_def)
         end
+
+        method_definition.annotations.concat(overloading_def.annotations)
+      end
+
+      method_definition.defs.each do |type_def|
+        type_def.member_annotations.replace(method_definition.annotations)
       end
 
       methods[method.name] = method_definition
