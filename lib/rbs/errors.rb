@@ -345,9 +345,6 @@ module RBS
   class ClassInstanceVariableDuplicationError < VariableDuplicationError
   end
 
-  class ClassVariableDuplicationError < VariableDuplicationError
-  end
-
   class UnknownMethodAliasError < DefinitionError
     include DetailedMessageable
 

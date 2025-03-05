@@ -575,10 +575,6 @@ module RBS
         if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
           raise ClassInstanceVariableDuplicationError.new(member: l.source)
         end
-      when AST::Members::ClassVariable
-        if r.source.instance_of?(AST::Members::ClassVariable)
-          raise ClassVariableDuplicationError.new(member: l.source)
-        end
       end
     end
 
