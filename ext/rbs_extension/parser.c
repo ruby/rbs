@@ -1340,7 +1340,7 @@ static VALUE parse_global_decl(parserstate *state, VALUE annotations) {
 /*
   const_decl ::= {const_name} `:` <type>
 */
-static VALUE parse_const_decl(parserstate *state) {
+static VALUE parse_const_decl(parserstate *state, VALUE annotations) {
   range decl_range;
 
   decl_range.start = state->current_token.range.start;
@@ -1361,7 +1361,7 @@ static VALUE parse_const_decl(parserstate *state) {
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  return rbs_ast_decl_constant(typename, type, location, comment);
+  return rbs_ast_decl_constant(typename, type, location, comment, annotations);
 }
 
 /*
@@ -2602,7 +2602,7 @@ static VALUE parse_nested_decl(parserstate *state, const char *nested_in, positi
   switch (state->current_token.type) {
   case tUIDENT:
   case pCOLON2: {
-    decl = parse_const_decl(state);
+    decl = parse_const_decl(state, annotations);
     break;
   }
   case tGIDENT: {
@@ -2648,7 +2648,7 @@ static VALUE parse_decl(parserstate *state) {
   switch (state->current_token.type) {
   case tUIDENT:
   case pCOLON2: {
-    return parse_const_decl(state);
+    return parse_const_decl(state, annotations);
   }
   case tGIDENT: {
     return parse_global_decl(state, annotations);
