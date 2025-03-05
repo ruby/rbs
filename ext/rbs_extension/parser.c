@@ -1092,10 +1092,13 @@ static VALUE parse_intersection(parserstate *state) {
   rg.start = state->next_token.range.start;
 
   VALUE type = parse_optional(state);
-  VALUE intersection_types = rb_ary_new();
+  VALUE intersection_types = EMPTY_ARRAY;
 
-  rb_ary_push(intersection_types, type);
   while (state->next_token.type == pAMP) {
+    if (intersection_types == EMPTY_ARRAY) {
+      melt_array(&intersection_types);
+      rb_ary_push(intersection_types, type);
+    }
     parser_advance(state);
     rb_ary_push(intersection_types, parse_optional(state));
   }
@@ -1119,10 +1122,13 @@ VALUE parse_type(parserstate *state) {
   rg.start = state->next_token.range.start;
 
   VALUE type = parse_intersection(state);
-  VALUE union_types = rb_ary_new();
+  VALUE union_types = EMPTY_ARRAY;
 
-  rb_ary_push(union_types, type);
   while (state->next_token.type == pBAR) {
+    if (union_types == EMPTY_ARRAY) {
+      melt_array(&union_types);
+      rb_ary_push(union_types, type);
+    }
     parser_advance(state);
     rb_ary_push(union_types, parse_intersection(state));
   }
