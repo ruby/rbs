@@ -29,24 +29,6 @@ static rbs_loc_range rbs_new_loc_range(range rg) {
   return r;
 }
 
-rbs_location_t *rbs_location_pp(const position *start_pos, const position *end_pos) {
-  range rg = { *start_pos, *end_pos };
-  rg.start = *start_pos;
-  rg.end = *end_pos;
-
-  return rbs_location_new(rg);
-}
-
-rbs_location_t *rbs_location_new(range rg) {
-    rbs_location_t *location = (rbs_location_t *)malloc(sizeof(rbs_location_t));
-    *location = (rbs_location_t) {
-      .rg = rg,
-      .children = NULL,
-    };
-
-    return location;
-}
-
 void rbs_loc_alloc_children(rbs_location_t *loc, int capacity) {
   check_children_max(capacity);
 
@@ -72,3 +54,14 @@ void rbs_loc_add_optional_child(rbs_location_t *loc, rbs_constant_id_t name, ran
   loc->children->entries[i].name = name;
   loc->children->entries[i].rg = rbs_new_loc_range(r);
 }
+
+rbs_location_t *rbs_location_new(rbs_allocator_t *allocator, range rg) {
+  rbs_location_t *location = rbs_allocator_alloc(allocator, rbs_location_t);
+  *location = (rbs_location_t) {
+    .rg = rg,
+    .children = NULL,
+  };
+
+  return location;
+}
+
