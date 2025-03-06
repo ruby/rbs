@@ -1088,26 +1088,24 @@ static VALUE parse_simple(parserstate *state) {
                  | {} <optional>
 */
 static VALUE parse_intersection(parserstate *state) {
-  range rg;
-  rg.start = state->next_token.range.start;
-
+  position start = state->next_token.range.start;
   VALUE type = parse_optional(state);
-  VALUE intersection_types = rb_ary_new();
+  if (state->next_token.type != pAMP) {
+    return type;
+  }
 
+  VALUE intersection_types = rb_ary_new();
   rb_ary_push(intersection_types, type);
   while (state->next_token.type == pAMP) {
     parser_advance(state);
     rb_ary_push(intersection_types, parse_optional(state));
   }
-
-  rg.end = state->current_token.range.end;
-
-  if (rb_array_len(intersection_types) > 1) {
-    VALUE location = rbs_new_location(state->buffer, rg);
-    type = rbs_intersection(intersection_types, location);
-  }
-
-  return type;
+  range rg = (range) {
+    .start = start,
+    .end = state->current_token.range.end,
+  };
+  VALUE location = rbs_new_location(state->buffer, rg);
+  return rbs_intersection(intersection_types, location);
 }
 
 /*
@@ -1115,26 +1113,24 @@ static VALUE parse_intersection(parserstate *state) {
           | {} <intersection>
 */
 VALUE parse_type(parserstate *state) {
-  range rg;
-  rg.start = state->next_token.range.start;
-
+  position start = state->next_token.range.start;
   VALUE type = parse_intersection(state);
-  VALUE union_types = rb_ary_new();
+  if (state->next_token.type != pBAR) {
+    return type;
+  }
 
+  VALUE union_types = rb_ary_new();
   rb_ary_push(union_types, type);
   while (state->next_token.type == pBAR) {
     parser_advance(state);
     rb_ary_push(union_types, parse_intersection(state));
   }
-
-  rg.end = state->current_token.range.end;
-
-  if (rb_array_len(union_types) > 1) {
-    VALUE location = rbs_new_location(state->buffer, rg);
-    type = rbs_union(union_types, location);
-  }
-
-  return type;
+  range rg = (range) {
+    .start = start,
+    .end = state->current_token.range.end,
+  };
+  VALUE location = rbs_new_location(state->buffer, rg);
+  return rbs_union(union_types, location);
 }
 
 /*
