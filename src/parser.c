@@ -98,11 +98,7 @@ static bool rbs_is_untyped_params(method_params *params) {
 //  * @return New RBS::Location object.
 //  * */
 static rbs_location_t *rbs_location_current_token(parserstate *state) {
-  // TODO: Can this just be simplified to `return rbs_location_new(state->current_token.range);`?
-  return rbs_location_pp(
-    &state->current_token.range.start,
-    &state->current_token.range.end
-  );
+  return rbs_location_new(state->current_token.range);
 }
 
 static bool parse_optional(parserstate *state, rbs_node_t **optional);
