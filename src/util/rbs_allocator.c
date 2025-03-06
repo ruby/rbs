@@ -125,10 +125,6 @@ void rbs_allocator_free(rbs_allocator_t *allocator) {
         free(page);
         page = next;
     }
-
-    *allocator = (rbs_allocator_t) {
-        .page = NULL,
-    };
 }
 
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
