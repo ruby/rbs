@@ -387,11 +387,24 @@ parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_
   return parser;
 }
 
+void free_typevar_tables(id_table *table) {
+  while (table != NULL) {
+    id_table *next = table->next;
+    if (table->ids != NULL) {
+      free(table->ids);
+    }
+    free(table);
+    table = next;
+  }
+}
+
 void free_parser(parserstate *parser) {
   free(parser->lexstate);
   if (parser->last_comment) {
     free_comment(parser->last_comment);
   }
+
+  free_typevar_tables(parser->vars);
   rbs_constant_pool_free(&parser->constant_pool);
   free(parser);
 }
