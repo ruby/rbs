@@ -408,8 +408,6 @@ end
       EOF
 
       manager.build do |env|
-        root = nil
-
         resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
