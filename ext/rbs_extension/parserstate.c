@@ -363,6 +363,7 @@ parserstate *alloc_parser(VALUE buffer, lexstate *lexer, int start_pos, int end_
 
   if (!NIL_P(variables)) {
     if (!RB_TYPE_P(variables, T_ARRAY)) {
+      free_parser(parser);
       rb_raise(rb_eTypeError,
                "wrong argument type %"PRIsVALUE" (must be array or nil)",
                rb_obj_class(variables));
