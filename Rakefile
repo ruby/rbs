@@ -3,10 +3,6 @@ require "rake/testtask"
 require "rbconfig"
 require 'rake/extensiontask'
 
-on_windows = /mswin|mingw/ =~ RUBY_PLATFORM
-
-require "ruby_memcheck" if !on_windows
-
 $LOAD_PATH << File.join(__dir__, "test")
 
 ruby = ENV["RUBY"] || RbConfig.ruby
@@ -25,7 +21,9 @@ end
 
 Rake::TestTask.new(test: :compile, &test_config)
 
-unless on_windows
+unless Gem.win_platform?
+  require "ruby_memcheck"
+
   namespace :test do
     RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
   end
