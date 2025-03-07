@@ -91,12 +91,12 @@ static bool rbs_is_untyped_params(method_params *params) {
   return params->required_positionals == NULL;
 }
 
-// /**
-//  * Returns RBS::Location object of `current_token` of a parser state.
-//  *
-//  * @param state
-//  * @return New RBS::Location object.
-//  * */
+/**
+ * Returns RBS::Location object of `current_token` of a parser state.
+ *
+ * @param state
+ * @return New RBS::Location object.
+ * */
 static rbs_location_t *rbs_location_current_token(parserstate *state) {
   return rbs_location_new(&state->allocator, state->current_token.range);
 }
