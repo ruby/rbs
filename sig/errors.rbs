@@ -187,9 +187,9 @@ module RBS
 
     attr_reader type_name: TypeName
     attr_reader variable_name: Symbol
-    attr_reader location: Location[untyped, untyped]
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (type_name: TypeName, variable_name: Symbol, location: Location[untyped, untyped]) -> void
+    def initialize: (type_name: TypeName, variable_name: Symbol, location: Location[untyped, untyped]?) -> void
     def kind: () -> String
   end
 
