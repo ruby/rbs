@@ -569,11 +569,11 @@ module RBS
       case l.source
       when AST::Members::InstanceVariable
         if r.source.instance_of?(AST::Members::InstanceVariable) && l.declared_in == r.declared_in
-          raise InstanceVariableDuplicationError.new(member: l.source)
+          raise InstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
         end
       when AST::Members::ClassInstanceVariable
         if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
-          raise ClassInstanceVariableDuplicationError.new(member: l.source)
+          raise ClassInstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
         end
       end
     end
