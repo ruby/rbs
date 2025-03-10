@@ -122,9 +122,9 @@ GEM
       rbs (~> 3.5)
       rubocop (~> 1.61)
       zlib
-    rubocop-rubycw (0.2.1)
+    rubocop-rubycw (0.2.2)
       lint_roller (~> 1.1)
-      rubocop (~> 1.72.1)
+      rubocop (~> 1.72, >= 1.72.1)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     stackprof (0.2.27)
