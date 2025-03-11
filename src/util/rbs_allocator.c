@@ -127,6 +127,15 @@ void rbs_allocator_free(rbs_allocator_t *allocator) {
     }
 }
 
+// Allocates `new_size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
+// Copies `old_size` bytes from `ptr` to the new allocation.
+// It always reallocates the memory in new space and thus wastes the old space.
+void *rbs_allocator_realloc_impl(rbs_allocator_t *allocator, void *ptr, size_t old_size, size_t new_size, size_t alignment) {
+    void *p = rbs_allocator_malloc_impl(allocator, new_size, alignment);
+    memcpy(p, ptr, old_size);
+    return p;
+}
+
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
 void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t alignment) {
     assert(size % alignment == 0 && "size must be a multiple of the alignment");
