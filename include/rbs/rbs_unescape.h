@@ -2,6 +2,8 @@
 #define RBS_RBS_UNESCAPE_H
 
 #include <stddef.h>
+#include "rbs/util/rbs_allocator.h"
+#include "rbs/rbs_string.h"
 
 /**
  * Receives `parserstate` and `range`, which represents a string token or symbol token, and returns a string VALUE.
@@ -14,8 +16,8 @@
  *    :"baz\\t"   | baz\t
  *    :'baz'      | baz
  *
- * @returns A new owned string that needs to be freed with `rbs_string_free()`
+ * @returns A new owned string that will be freed when the allocator is freed.
  * */
-rbs_string_t rbs_unquote_string(rbs_string_t input);
+rbs_string_t rbs_unquote_string(rbs_allocator_t *, rbs_string_t input);
 
 #endif // RBS_RBS_UNESCAPE_H

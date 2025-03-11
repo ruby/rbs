@@ -206,7 +206,7 @@ void rbs_node_destroy(rbs_node_t *any_node) {
         <%- node.fields.each do |field| -%>
         <%- case field.c_type -%>
         <%- when "rbs_string" -%>
-        rbs_string_free_if_needed(&node-><%= field.c_name %>);
+        // <%= field.c_name %> is a string, so it will be freed when the allocator is freed.
         <%- when "rbs_node_list" -%>
         rbs_node_list_free(node-><%= field.c_name %>);
         <%- when "rbs_hash" -%>

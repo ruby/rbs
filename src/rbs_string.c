@@ -21,30 +21,15 @@ rbs_string_t rbs_string_owned_new(const char *start, const char *end) {
     };
 }
 
-rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length) {
-    char *buffer = (char *) malloc(length + 1);
+rbs_string_t rbs_string_copy_slice(rbs_allocator_t *allocator, rbs_string_t *self, size_t start_inset, size_t length) {
+    char *buffer = rbs_allocator_calloc(allocator, length + 1, char);
     strncpy(buffer, self->start + start_inset, length);
     buffer[length] = '\0';
 
     return rbs_string_owned_new(buffer, buffer + length);
 }
 
-void rbs_string_free_if_needed(rbs_string_t *self) {
-    if (self->type == RBS_STRING_OWNED) {
-        rbs_string_free(self);
-    }
-}
-
-void rbs_string_free(rbs_string_t *self) {
-    if (self->type != RBS_STRING_OWNED) {
-        fprintf(stderr, "rbs_string_free(%p): not owned\n", self->start);
-        exit(EXIT_FAILURE);
-    }
-
-    free((void *) self->start);
-}
-
-rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
+rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *allocator, rbs_string_t *self) {
     const char *new_start = self->start;
     while (isspace(*new_start) && new_start < self->end) {
         new_start++;
@@ -59,7 +44,7 @@ rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
         new_end--;
     }
 
-    return rbs_string_copy_slice(self, new_start - self->start, new_end - new_start + 1);
+    return rbs_string_copy_slice(allocator, self, new_start - self->start, new_end - new_start + 1);
 }
 
 size_t rbs_string_len(const rbs_string_t self) {

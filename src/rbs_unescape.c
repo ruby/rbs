@@ -1,6 +1,5 @@
 #include "rbs/encoding.h"
 #include "rbs/rbs_unescape.h"
-#include "rbs/rbs_string.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -44,13 +43,13 @@ static int octal_to_int(const char* octal, int length) {
     return result;
 }
 
-rbs_string_t unescape_string(const rbs_string_t string, bool is_double_quote) {
+rbs_string_t unescape_string(rbs_allocator_t *allocator, rbs_string_t string, bool is_double_quote) {
     if (!string.start) return RBS_STRING_NULL;
 
     size_t len = string.end - string.start;
     const char* input = string.start;
 
-    char* output = malloc(len + 1);
+    char* output = rbs_allocator_calloc(allocator, len + 1, char);
     if (!output) return RBS_STRING_NULL;
 
     size_t i = 0, j = 0;
@@ -107,7 +106,7 @@ rbs_string_t unescape_string(const rbs_string_t string, bool is_double_quote) {
     return rbs_string_owned_new(output, output + j);
 }
 
-rbs_string_t rbs_unquote_string(rbs_string_t input) {
+rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) {
     unsigned int first_char = utf8_to_codepoint(input);
     size_t byte_length = rbs_string_len(input);
 
@@ -118,6 +117,6 @@ rbs_string_t rbs_unquote_string(rbs_string_t input) {
       byte_length -= 2 * bs;
     }
 
-    rbs_string_t string = rbs_string_copy_slice(&input, start_offset, byte_length);
-    return unescape_string(string, first_char == '"');
+    rbs_string_t string = rbs_string_copy_slice(allocator, &input, start_offset, byte_length);
+    return unescape_string(allocator, string, first_char == '"');
 }

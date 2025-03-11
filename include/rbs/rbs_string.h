@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include "rbs/util/rbs_allocator.h"
 
 typedef struct {
   const char *start;
@@ -13,7 +14,7 @@ typedef struct {
     RBS_STRING_CONSTANT,
     /** This is a slice of another string, and should not be freed. */
     RBS_STRING_SHARED,
-    /** This string owns its memory, and should be freed using `rbs_string_free`. */
+    /** This string owns its memory, and will be freed when the allocator is freed. */
     RBS_STRING_OWNED,
   } type;
 } rbs_string_t;
@@ -38,31 +39,15 @@ rbs_string_t rbs_string_owned_new(const char *start, const char *end);
  * Copies a portion of the input string into a new owned string.
  * @param start_inset Number of characters to exclude from the start
  * @param length Number of characters to include
- * @return A new owned string that needs to be freed using `rbs_string_free()`.
+ * @return A new owned string that will be freed when the allocator is freed.
  */
-rbs_string_t rbs_string_copy_slice(rbs_string_t *self, size_t start_inset, size_t length);
-
-/**
- * Free the associated memory of the given string if it is owned, otherwise does nothing.
- *
- * @param string The string to free.
- * \public \memberof rbs_string_t
- */
-void rbs_string_free_if_needed(rbs_string_t *self);
-
-/**
- * Free the associated memory of the given string if it is owned, otherwise fails (exits the program).
- *
- * @param string The string to free.
- * \public \memberof rbs_string_t
- */
-void rbs_string_free(rbs_string_t *self);
+rbs_string_t rbs_string_copy_slice(rbs_allocator_t *, rbs_string_t *self, size_t start_inset, size_t length);
 
 /**
  * Drops the leading and trailing whitespace from the given string, in-place.
- * @returns A new owned string that needs to be freed with `rbs_string_free()`
+ * @returns A new owned string that will be freed when the allocator is freed.
  */
-rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self);
+rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *, rbs_string_t *self);
 
 /**
  * Returns the length of the string.
