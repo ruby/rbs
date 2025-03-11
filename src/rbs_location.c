@@ -15,30 +15,17 @@ void rbs_loc_alloc_children(rbs_allocator_t *allocator, rbs_location_t *loc, int
   loc->children->cap = capacity;
 }
 
-void rbs_loc_add_optional_child(rbs_allocator_t *allocator, rbs_location_t *loc, rbs_constant_id_t name, range r) {
-  // If the location has no children, allocate memory for one child.
-  if (loc->children == NULL) {
-    rbs_loc_alloc_children(allocator, loc, 1);
-  } else if (loc->children->len == loc->children->cap) {
-    // If the location has no more capacity, double the capacity.
-    size_t old_size = RBS_LOC_CHILDREN_SIZE(loc->children->cap);
-    size_t new_size = old_size * 2;
-
-    // Reallocate the children array to the new size.
-    rbs_loc_children *new_children = rbs_allocator_realloc(allocator, loc->children, old_size, new_size, rbs_loc_children);
-    new_children->cap = new_size;
-    loc->children = new_children;
-  }
-
-  // Add a new child to the location.
+void rbs_loc_add_optional_child(rbs_location_t *loc, rbs_constant_id_t name, range r) {
+  assert(loc->children != NULL && "All children should have been pre-allocated with rbs_loc_alloc_children()");
+  assert((loc->children->len + 1 <= loc->children->cap) && "Not enough space was pre-allocated for the children.");
+  
   unsigned short i = loc->children->len++;
   loc->children->entries[i].name = name;
   loc->children->entries[i].rg = (rbs_loc_range) { r.start.char_pos, r.end.char_pos };
 }
 
-void rbs_loc_add_required_child(rbs_allocator_t *allocator, rbs_location_t *loc, rbs_constant_id_t name, range r) {
-  rbs_loc_add_optional_child(allocator, loc, name, r);
-
+void rbs_loc_add_required_child(rbs_location_t *loc, rbs_constant_id_t name, range r) {
+  rbs_loc_add_optional_child(loc, name, r);
   unsigned short last_index = loc->children->len - 1;
   loc->children->required_p |= 1 << last_index;
 }

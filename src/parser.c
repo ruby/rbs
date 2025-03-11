@@ -307,7 +307,7 @@ static bool parse_function_param(parserstate *state, rbs_types_function_param_t 
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, param_range);
     rbs_loc_alloc_children(&state->allocator, loc, 1);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("name"), NULL_RANGE);
+    rbs_loc_add_optional_child(loc, INTERN("name"), NULL_RANGE);
 
     *function_param = rbs_types_function_param_new(&state->allocator, loc, type, NULL);
     return true;
@@ -333,7 +333,7 @@ static bool parse_function_param(parserstate *state, rbs_types_function_param_t 
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, param_range);
     rbs_loc_alloc_children(&state->allocator, loc, 1);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("name"), name_range);
+    rbs_loc_add_optional_child(loc, INTERN("name"), name_range);
 
     *function_param = rbs_types_function_param_new(&state->allocator, loc, type, name);
     return true;
@@ -993,8 +993,8 @@ static bool parse_instance_type(parserstate *state, bool parse_alias, rbs_node_t
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, type_range);
     rbs_loc_alloc_children(&state->allocator, loc, 2);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("args"), args_range);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
     if (kind == CLASS_NAME) {
       *type = (rbs_node_t *) rbs_types_classinstance_new(&state->allocator, loc, typename, types);
@@ -1028,7 +1028,7 @@ static bool parse_singleton_type(parserstate *state, rbs_types_classsingleton_t 
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, type_range);
   rbs_loc_alloc_children(&state->allocator, loc, 1);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
 
   *singleton = rbs_types_classsingleton_new(&state->allocator, loc, typename);
   return true;
@@ -1373,11 +1373,11 @@ static bool parse_type_params(parserstate *state, range *rg, bool module_type_pa
 
       rbs_location_t *loc = rbs_location_new(&state->allocator, param_range);
       rbs_loc_alloc_children(&state->allocator, loc, 5);
-      rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-      rbs_loc_add_optional_child(&state->allocator, loc, INTERN("variance"), variance_range);
-      rbs_loc_add_optional_child(&state->allocator, loc, INTERN("unchecked"), unchecked_range);
-      rbs_loc_add_optional_child(&state->allocator, loc, INTERN("upper_bound"), upper_bound_range);
-      rbs_loc_add_optional_child(&state->allocator, loc, INTERN("default"), default_type_range);
+      rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+      rbs_loc_add_optional_child(loc, INTERN("variance"), variance_range);
+      rbs_loc_add_optional_child(loc, INTERN("unchecked"), unchecked_range);
+      rbs_loc_add_optional_child(loc, INTERN("upper_bound"), upper_bound_range);
+      rbs_loc_add_optional_child(loc, INTERN("default"), default_type_range);
 
       rbs_ast_typeparam_t *param = rbs_ast_typeparam_new(&state->allocator, loc, name, variance, upper_bound, default_type, unchecked);
 
@@ -1428,8 +1428,8 @@ bool parse_method_type(parserstate *state, rbs_methodtype_t **method_type) {
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, rg);
   rbs_loc_alloc_children(&state->allocator, loc, 2);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("type"), type_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("type_params"), params_range);
+  rbs_loc_add_required_child(loc, INTERN("type"), type_range);
+  rbs_loc_add_optional_child(loc, INTERN("type_params"), params_range);
 
   *method_type = rbs_methodtype_new(&state->allocator, loc, type_params, result->function, result->block);
   return true;
@@ -1459,8 +1459,8 @@ static bool parse_global_decl(parserstate *state, rbs_ast_declarations_global_t 
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
   rbs_loc_alloc_children(&state->allocator, loc, 2);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
   *global = rbs_ast_declarations_global_new(&state->allocator, loc, typename, type, comment);
   return true;
@@ -1490,8 +1490,8 @@ static bool parse_const_decl(parserstate *state, rbs_ast_declarations_constant_t
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
   rbs_loc_alloc_children(&state->allocator, loc, 2);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
   *constant = rbs_ast_declarations_constant_new(&state->allocator, loc, typename, type, comment);
   return true;
@@ -1530,10 +1530,10 @@ static bool parse_type_decl(parserstate *state, position comment_pos, rbs_node_l
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
   rbs_loc_alloc_children(&state->allocator, loc, 4);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("type_params"), params_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("eq"), eq_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_optional_child(loc, INTERN("type_params"), params_range);
+  rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
 
   CHECK_PARSE(parser_pop_typevar_table(state));
 
@@ -1898,11 +1898,11 @@ static bool parse_member_def(parserstate *state, bool instance_only, bool accept
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
   rbs_loc_alloc_children(&state->allocator, loc, 5);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("kind"), kind_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("overloading"), overloading_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("visibility"), visibility_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
+  rbs_loc_add_optional_child(loc, INTERN("overloading"), overloading_range);
+  rbs_loc_add_optional_child(loc, INTERN("visibility"), visibility_range);
 
   *method_definition = rbs_ast_members_methoddefinition_new(&state->allocator, loc, name, k, overloads, annotations, comment, overloading, visibility);
   return true;
@@ -1993,9 +1993,9 @@ static bool parse_mixin_member(parserstate *state, bool from_interface, position
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
   rbs_loc_alloc_children(&state->allocator, loc, 3);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("args"), args_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
   switch (type)
@@ -2061,11 +2061,11 @@ static bool parse_alias_member(parserstate *state, bool instance_only, position 
   member_range.end = state->current_token.range.end;
   rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
   rbs_loc_alloc_children(&state->allocator, loc, 5);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("new_name"), new_name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("old_name"), old_name_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("new_kind"), new_kind_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("old_kind"), old_kind_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("new_name"), new_name_range);
+  rbs_loc_add_required_child(loc, INTERN("old_name"), old_name_range);
+  rbs_loc_add_optional_child(loc, INTERN("new_kind"), new_kind_range);
+  rbs_loc_add_optional_child(loc, INTERN("old_kind"), old_kind_range);
 
   *alias_member = rbs_ast_members_alias_new(&state->allocator, loc, new_name, old_name, kind, annotations, comment);
   return true;
@@ -2104,9 +2104,9 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
     rbs_loc_alloc_children(&state->allocator, loc, 3);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("kind"), NULL_RANGE);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, INTERN("kind"), NULL_RANGE);
 
     *variable_member = (rbs_node_t *)rbs_ast_members_instancevariable_new(&state->allocator, loc, name, type, comment);
     return true;
@@ -2130,9 +2130,9 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
     rbs_loc_alloc_children(&state->allocator, loc, 3);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("kind"), NULL_RANGE);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, INTERN("kind"), NULL_RANGE);
 
     *variable_member = (rbs_node_t *) rbs_ast_members_classvariable_new(&state->allocator, loc, name, type, comment);
     return true;
@@ -2164,9 +2164,9 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
     rbs_loc_alloc_children(&state->allocator, loc, 3);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("kind"), kind_range);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
+    rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
 
     *variable_member = (rbs_node_t *)rbs_ast_members_classinstancevariable_new(&state->allocator, loc, name, type, comment);
     return true;
@@ -2307,13 +2307,13 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
   rbs_loc_alloc_children(&state->allocator, loc, 7);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("colon"), colon_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("kind"), kind_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("ivar"), ivar_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("ivar_name"), ivar_name_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("visibility"), visibility_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
+  rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
+  rbs_loc_add_optional_child(loc, INTERN("ivar"), ivar_range);
+  rbs_loc_add_optional_child(loc, INTERN("ivar_name"), ivar_name_range);
+  rbs_loc_add_optional_child(loc, INTERN("visibility"), visibility_range);
 
   switch (attr_type)
   {
@@ -2418,10 +2418,10 @@ static bool parse_interface_decl(parserstate *state, position comment_pos, rbs_n
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, member_range);
   rbs_loc_alloc_children(&state->allocator, loc, 4);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("end"), end_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("type_params"), type_params_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("end"), end_range);
+  rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
 
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
@@ -2460,8 +2460,8 @@ static bool parse_module_self_types(parserstate *state, rbs_node_list_t *array) 
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, self_range);
     rbs_loc_alloc_children(&state->allocator, loc, 2);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("args"), args_range);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
     rbs_ast_declarations_module_self_t *self_type = rbs_ast_declarations_module_self_new(&state->allocator, loc, module_name, args);
     rbs_node_list_append(array, (rbs_node_t *)self_type);
@@ -2612,12 +2612,12 @@ static bool parse_module_decl0(parserstate *state, range keyword_range, rbs_type
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
   rbs_loc_alloc_children(&state->allocator, loc, 6);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("end"), end_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("type_params"), type_params_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("colon"), colon_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("self_types"), self_types_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("end"), end_range);
+  rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
+  rbs_loc_add_optional_child(loc, INTERN("colon"), colon_range);
+  rbs_loc_add_optional_child(loc, INTERN("self_types"), self_types_range);
 
   CHECK_PARSE(parser_pop_typevar_table(state));
 
@@ -2659,10 +2659,10 @@ static bool parse_module_decl(parserstate *state, position comment_pos, rbs_node
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
     rbs_loc_alloc_children(&state->allocator, loc, 4);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("new_name"), module_name_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("eq"), eq_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("old_name"), old_name_range);
+    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+    rbs_loc_add_required_child(loc, INTERN("new_name"), module_name_range);
+    rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
+    rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
     *module_decl = (rbs_node_t *) rbs_ast_declarations_modulealias_new(&state->allocator, loc, module_name, old_name, comment);
   } else {
@@ -2695,8 +2695,8 @@ static bool parse_class_decl_super(parserstate *state, range *lt_range, rbs_ast_
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, super_range);
     rbs_loc_alloc_children(&state->allocator, loc, 2);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("args"), args_range);
+    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
 
     *super = rbs_ast_declarations_class_super_new(&state->allocator, loc, name, args);
@@ -2738,11 +2738,11 @@ static bool parse_class_decl0(parserstate *state, range keyword_range, rbs_typen
 
   rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
   rbs_loc_alloc_children(&state->allocator, loc, 5);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("name"), name_range);
-  rbs_loc_add_required_child(&state->allocator, loc, INTERN("end"), end_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("type_params"), type_params_range);
-  rbs_loc_add_optional_child(&state->allocator, loc, INTERN("lt"), lt_range);
+  rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+  rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+  rbs_loc_add_required_child(loc, INTERN("end"), end_range);
+  rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
+  rbs_loc_add_optional_child(loc, INTERN("lt"), lt_range);
 
   *class_decl = rbs_ast_declarations_class_new(&state->allocator, loc, name, type_params, super, members, annotations, comment);
   return true;
@@ -2780,10 +2780,10 @@ static bool parse_class_decl(parserstate *state, position comment_pos, rbs_node_
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, decl_range);
     rbs_loc_alloc_children(&state->allocator, loc, 4);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("new_name"), class_name_range);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("eq"), eq_range);
-    rbs_loc_add_optional_child(&state->allocator, loc, INTERN("old_name"), old_name_range);
+    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
+    rbs_loc_add_required_child(loc, INTERN("new_name"), class_name_range);
+    rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
+    rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
     *class_decl = (rbs_node_t *) rbs_ast_declarations_classalias_new(&state->allocator, loc, class_name, old_name, comment);
   } else {
@@ -2997,9 +2997,9 @@ static bool parse_use_clauses(parserstate *state, rbs_node_list_t *clauses) {
 
         rbs_location_t *loc = rbs_location_new(&state->allocator, clause_range);
         rbs_loc_alloc_children(&state->allocator, loc, 3);
-        rbs_loc_add_required_child(&state->allocator, loc, INTERN("type_name"), type_name_range);
-        rbs_loc_add_optional_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
-        rbs_loc_add_optional_child(&state->allocator, loc, INTERN("new_name"), new_name_range);
+        rbs_loc_add_required_child(loc, INTERN("type_name"), type_name_range);
+        rbs_loc_add_optional_child(loc, INTERN("keyword"), keyword_range);
+        rbs_loc_add_optional_child(loc, INTERN("new_name"), new_name_range);
 
         rbs_ast_directives_use_singleclause_t *clause = rbs_ast_directives_use_singleclause_new(&state->allocator, loc, type_name, new_name);
         rbs_node_list_append(clauses, (rbs_node_t *)clause);
@@ -3016,8 +3016,8 @@ static bool parse_use_clauses(parserstate *state, rbs_node_list_t *clauses) {
 
         rbs_location_t *loc = rbs_location_new(&state->allocator, clause_range);
         rbs_loc_alloc_children(&state->allocator, loc, 2);
-        rbs_loc_add_required_child(&state->allocator, loc, INTERN("namespace"), namespace_range);
-        rbs_loc_add_required_child(&state->allocator, loc, INTERN("star"), star_range);
+        rbs_loc_add_required_child(loc, INTERN("namespace"), namespace_range);
+        rbs_loc_add_required_child(loc, INTERN("star"), star_range);
 
         rbs_ast_directives_use_wildcardclause_t *clause = rbs_ast_directives_use_wildcardclause_new(&state->allocator, loc, namespace);
         rbs_node_list_append(clauses, (rbs_node_t *)clause);
@@ -3057,7 +3057,7 @@ static bool parse_use_directive(parserstate *state, rbs_ast_directives_use_t **u
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, directive_range);
     rbs_loc_alloc_children(&state->allocator, loc, 1);
-    rbs_loc_add_required_child(&state->allocator, loc, INTERN("keyword"), keyword_range);
+    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
 
     *use_directive = rbs_ast_directives_use_new(&state->allocator, loc, clauses);
   }
