@@ -37,6 +37,7 @@ group :profilers do
   gem 'stackprof'
   gem 'memory_profiler'
   gem 'benchmark-ips'
+  gem "ruby_memcheck", platform: :ruby
 end
 
 # Test gems

@@ -278,6 +278,14 @@ class IPAddr
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
+  #   - netmask()
+  # -->
+  # Returns the netmask in string format e.g. 255.255.0.0
+  #
+  def netmask: () -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
   #   - prefix()
   # -->
   # Returns the prefix length in bits for the ipaddr.
