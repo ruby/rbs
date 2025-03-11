@@ -113,7 +113,7 @@ static rbs_string_t rbs_parser_peek_current_token(parserstate *state) {
   const char *start = state->lexstate->string.start + rg.start.byte_pos;
   size_t length = rg.end.byte_pos - rg.start.byte_pos;
 
-  return rbs_string_shared_new(start, start + length);
+  return rbs_string_new(start, start + length);
 }
 
 static rbs_constant_id_t rbs_constant_pool_insert_string(rbs_constant_pool_t *self, rbs_string_t string) {
@@ -1545,11 +1545,10 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
     state->lexstate->encoding->char_width((const uint8_t *) "%", (size_t) 1) +
     state->lexstate->encoding->char_width((const uint8_t *) "a", (size_t) 1);
 
-  rbs_string_t str = {
-    .start = state->lexstate->string.start + rg.start.byte_pos + offset_bytes,
-    .end = state->lexstate->string.end,
-    .type = RBS_STRING_SHARED,
-  };
+  rbs_string_t str = rbs_string_new(
+    state->lexstate->string.start + rg.start.byte_pos + offset_bytes,
+    state->lexstate->string.end
+  );
   unsigned int open_char = utf8_to_codepoint(str);
 
   unsigned int close_char;

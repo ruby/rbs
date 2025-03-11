@@ -186,11 +186,10 @@ static rbs_ast_comment_t *parse_comment_lines(parserstate *state, comment *com) 
     const char *comment_start = state->lexstate->string.start + tok.range.start.byte_pos + hash_bytes;
     size_t comment_bytes = RANGE_BYTES(tok.range) - hash_bytes;
 
-    rbs_string_t str = {
-      .start = comment_start,
-      .end = state->lexstate->string.end,
-      .type = RBS_STRING_SHARED,
-    };
+    rbs_string_t str = rbs_string_new(
+      comment_start,
+      state->lexstate->string.end
+    );
     unsigned char c = utf8_to_codepoint(str);
 
     if (c == ' ') {

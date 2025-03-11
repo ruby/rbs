@@ -5,19 +5,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
-rbs_string_t rbs_string_shared_new(const char *start, const char *end) {
+rbs_string_t rbs_string_new(const char *start, const char *end) {
     return (rbs_string_t) {
         .start = start,
         .end = end,
-        .type = RBS_STRING_SHARED,
-    };
-}
-
-rbs_string_t rbs_string_owned_new(const char *start, const char *end) {
-    return (rbs_string_t) {
-        .start = start,
-        .end = end,
-        .type = RBS_STRING_OWNED,
     };
 }
 
@@ -26,7 +17,7 @@ rbs_string_t rbs_string_copy_slice(rbs_allocator_t *allocator, rbs_string_t *sel
     strncpy(buffer, self->start + start_inset, length);
     buffer[length] = '\0';
 
-    return rbs_string_owned_new(buffer, buffer + length);
+    return rbs_string_new(buffer, buffer + length);
 }
 
 rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *allocator, rbs_string_t *self) {
@@ -36,7 +27,7 @@ rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *allocator, rbs_string_
     }
 
     if (new_start == self->end) { // Handle empty string case
-        return rbs_string_shared_new(new_start, new_start);
+        return rbs_string_new(new_start, new_start);
     }
 
     const char *new_end = self->end - 1;

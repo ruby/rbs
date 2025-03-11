@@ -8,32 +8,17 @@
 typedef struct {
   const char *start;
   const char *end;
-
-  enum rbs_string_type {
-    /** This string is a constant string, and should not be freed. */
-    RBS_STRING_CONSTANT,
-    /** This is a slice of another string, and should not be freed. */
-    RBS_STRING_SHARED,
-    /** This string owns its memory, and will be freed when the allocator is freed. */
-    RBS_STRING_OWNED,
-  } type;
 } rbs_string_t;
 
 #define RBS_STRING_NULL ((rbs_string_t) { \
     .start = NULL,                        \
     .end = NULL,                          \
-    .type = RBS_STRING_CONSTANT,          \
   })
 
 /**
- * Returns a new `rbs_string_t` struct that points to the given C string without owning it.
+ * Returns a new `rbs_string_t` struct
  */
-rbs_string_t rbs_string_shared_new(const char *start, const char *end);
-
-/**
- * Returns a new `rbs_string_t` struct that owns its memory.
- */
-rbs_string_t rbs_string_owned_new(const char *start, const char *end);
+rbs_string_t rbs_string_new(const char *start, const char *end);
 
 /**
  * Copies a portion of the input string into a new owned string.

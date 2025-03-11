@@ -103,7 +103,7 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, rbs_string_t string, bo
         }
     }
     output[j] = '\0';
-    return rbs_string_owned_new(output, output + j);
+    return rbs_string_new(output, output + j);
 }
 
 rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) {
