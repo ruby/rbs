@@ -11,11 +11,21 @@ bin = File.join(__dir__, "bin")
 
 Rake::ExtensionTask.new("rbs_extension")
 
-Rake::TestTask.new(:test => :compile) do |t|
+test_config = lambda do |t|
   t.libs << "test"
   t.libs << "lib"
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
+  end
+end
+
+Rake::TestTask.new(test: :compile, &test_config)
+
+unless Gem.win_platform?
+  require "ruby_memcheck"
+
+  namespace :test do
+    RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
   end
 end
 
