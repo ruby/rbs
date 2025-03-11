@@ -205,7 +205,7 @@ class Ripper
     # The return value of this method is passed to the next event handler (as of
     # Enumerable#inject).
     #
-    def on_default: (untyped event, untyped token, untyped data) -> untyped
+    def on_default: (untyped event, String token, untyped data) -> untyped
   end
 
   class Lexer < Ripper
@@ -441,7 +441,7 @@ class Ripper
 
     private
 
-    def _push_token: (untyped tok) -> Lexer::Elem
+    def _push_token: (String tok) -> Lexer::Elem
 
     def on_error1: (untyped mesg) -> Array[Lexer::Elem]
 
@@ -460,11 +460,11 @@ class Ripper
     alias compile_error on_error
     def on_BEGIN: (*untyped args) -> Array[untyped]
 
-    def on_CHAR: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_CHAR: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_END: (*untyped args) -> Array[untyped]
 
-    def on___end__: (untyped tok) -> [Symbol, String, [int, int]]
+    def on___end__: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_alias: (*untyped args) -> Array[untyped]
 
@@ -502,9 +502,9 @@ class Ripper
 
     def on_assoclist_from_args: (*untyped args) -> Array[untyped]
 
-    def on_backref: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_backref: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_backtick: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_backtick: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_bare_assoc_hash: (*untyped args) -> Array[untyped]
 
@@ -530,15 +530,15 @@ class Ripper
 
     def on_class_name_error: (*untyped args) -> Array[untyped]
 
-    def on_comma: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_comma: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_command: (*untyped args) -> Array[untyped]
 
     def on_command_call: (*untyped args) -> Array[untyped]
 
-    def on_comment: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_comment: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_const: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_const: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_const_path_field: (*untyped args) -> Array[untyped]
 
@@ -546,7 +546,7 @@ class Ripper
 
     def on_const_ref: (*untyped args) -> Array[untyped]
 
-    def on_cvar: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_cvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_def: (*untyped args) -> Array[untyped]
 
@@ -566,17 +566,17 @@ class Ripper
 
     def on_elsif: (*untyped args) -> Array[untyped]
 
-    def on_embdoc: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embdoc: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embdoc_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embdoc_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embdoc_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embdoc_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embexpr_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embexpr_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embexpr_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embexpr_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embvar: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_embvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_ensure: (*untyped args) -> Array[untyped]
 
@@ -586,23 +586,23 @@ class Ripper
 
     def on_field: (*untyped args) -> Array[untyped]
 
-    def on_float: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_float: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_fndptn: (*untyped args) -> Array[untyped]
 
     def on_for: (*untyped args) -> Array[untyped]
 
-    def on_gvar: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_gvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_hash: (*untyped args) -> Array[untyped]
 
-    def on_heredoc_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_heredoc_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_heredoc_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_heredoc_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_hshptn: (*untyped args) -> Array[untyped]
 
-    def on_ident: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_ident: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_if: (*untyped args) -> Array[untyped]
 
@@ -610,33 +610,33 @@ class Ripper
 
     def on_ifop: (*untyped args) -> Array[untyped]
 
-    def on_ignored_nl: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_ignored_nl: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_ignored_sp: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_ignored_sp: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_imaginary: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_imaginary: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_in: (*untyped args) -> Array[untyped]
 
-    def on_int: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_int: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_ivar: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_ivar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_kw: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_kw: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_kwrest_param: (*untyped args) -> Array[untyped]
 
-    def on_label: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_label: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_label_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_label_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_lambda: (*untyped args) -> Array[untyped]
 
-    def on_lbrace: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_lbrace: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_lbracket: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_lbracket: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_lparen: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_lparen: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_magic_comment: (*untyped args) -> Array[untyped]
 
@@ -668,11 +668,11 @@ class Ripper
 
     def on_next: (*untyped args) -> Array[untyped]
 
-    def on_nl: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_nl: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_nokw_param: (*untyped args) -> Array[untyped]
 
-    def on_op: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_op: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_opassign: (*untyped args) -> Array[untyped]
 
@@ -685,35 +685,35 @@ class Ripper
     def on_paren: (*untyped args) -> Array[untyped]
 
     alias on_parse_error on_error
-    def on_period: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_period: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_program: (*untyped args) -> Array[untyped]
 
     def on_qsymbols_add: (*untyped args) -> Array[untyped]
 
-    def on_qsymbols_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_qsymbols_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_qsymbols_new: (*untyped args) -> Array[untyped]
 
     def on_qwords_add: (*untyped args) -> Array[untyped]
 
-    def on_qwords_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_qwords_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_qwords_new: (*untyped args) -> Array[untyped]
 
-    def on_rational: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_rational: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_rbrace: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_rbrace: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_rbracket: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_rbracket: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_redo: (*untyped args) -> Array[untyped]
 
     def on_regexp_add: (*untyped args) -> Array[untyped]
 
-    def on_regexp_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_regexp_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_regexp_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_regexp_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_regexp_literal: (*untyped args) -> Array[untyped]
 
@@ -731,13 +731,13 @@ class Ripper
 
     def on_return0: (*untyped args) -> Array[untyped]
 
-    def on_rparen: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_rparen: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_sclass: (*untyped args) -> Array[untyped]
 
-    def on_semicolon: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_semicolon: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_sp: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_sp: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_stmts_add: (*untyped args) -> Array[untyped]
 
@@ -757,7 +757,7 @@ class Ripper
 
     def on_super: (*untyped args) -> Array[untyped]
 
-    def on_symbeg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_symbeg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_symbol: (*untyped args) -> Array[untyped]
 
@@ -765,23 +765,23 @@ class Ripper
 
     def on_symbols_add: (*untyped args) -> Array[untyped]
 
-    def on_symbols_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_symbols_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_symbols_new: (*untyped args) -> Array[untyped]
 
-    def on_tlambda: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_tlambda: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tlambeg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_tlambeg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_top_const_field: (*untyped args) -> Array[untyped]
 
     def on_top_const_ref: (*untyped args) -> Array[untyped]
 
-    def on_tstring_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_tstring_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tstring_content: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_tstring_content: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tstring_end: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_tstring_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_unary: (*untyped args) -> Array[untyped]
 
@@ -817,11 +817,11 @@ class Ripper
 
     def on_words_add: (*untyped args) -> Array[untyped]
 
-    def on_words_beg: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_words_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_words_new: (*untyped args) -> Array[untyped]
 
-    def on_words_sep: (untyped tok) -> [Symbol, String, [int, int]]
+    def on_words_sep: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
     def on_xstring_add: (*untyped args) -> Array[untyped]
 
