@@ -178,7 +178,7 @@ static rbs_ast_comment_t *parse_comment_lines(parserstate *state, comment *com) 
   size_t space_bytes = state->lexstate->encoding->char_width((const uint8_t *) " ", (size_t) 1);
 
   rbs_buffer_t rbs_buffer;
-  rbs_buffer_init(&rbs_buffer);
+  rbs_buffer_init(&state->allocator, &rbs_buffer);
 
   for (size_t i = 0; i < com->line_count; i++) {
     token tok = com->tokens[i];
@@ -197,8 +197,8 @@ static rbs_ast_comment_t *parse_comment_lines(parserstate *state, comment *com) 
       comment_bytes -= space_bytes;
     }
 
-    rbs_buffer_append_string(&rbs_buffer, comment_start, comment_bytes);
-    rbs_buffer_append_cstr(&rbs_buffer, "\n");
+    rbs_buffer_append_string(&state->allocator, &rbs_buffer, comment_start, comment_bytes);
+    rbs_buffer_append_cstr(&state->allocator, &rbs_buffer, "\n");
   }
 
   return rbs_ast_comment_new(
