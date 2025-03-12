@@ -131,7 +131,7 @@ void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt
   int length = vsnprintf(NULL, 0, fmt, args);
   va_end(args);
 
-  char *message = rbs_allocator_calloc(&state->allocator, length + 1, char);
+  char *message = rbs_allocator_alloc_many(&state->allocator, length + 1, char);
 
   va_start(args, fmt);
   vsnprintf(message, length + 1, fmt, args);

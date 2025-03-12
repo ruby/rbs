@@ -183,8 +183,12 @@ void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t 
 // Note: This will eagerly fill with zeroes, unlike `calloc()` which can map a page in a page to be zeroed lazily.
 //       It's assumed that callers to this function will immediately write to the allocated memory, anyway.
 void *rbs_allocator_calloc_impl(rbs_allocator_t *allocator, size_t count, size_t size, size_t alignment) {
-    void *p = rbs_allocator_malloc_impl(allocator, count * size, alignment);
+    void *p = rbs_allocator_malloc_many_impl(allocator, count, size, alignment);
     memset(p, 0, count * size);
     return p;
 }
 
+// Similar to `rbs_allocator_malloc_impl()`, but allocates `count` instances of `size` bytes, aligned to an `alignment`-byte boundary.
+void *rbs_allocator_malloc_many_impl(rbs_allocator_t *allocator, size_t count, size_t size, size_t alignment) {
+    return rbs_allocator_malloc_impl(allocator, count * size, alignment);
+}

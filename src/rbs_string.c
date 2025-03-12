@@ -13,7 +13,7 @@ rbs_string_t rbs_string_new(const char *start, const char *end) {
 }
 
 rbs_string_t rbs_string_copy_slice(rbs_allocator_t *allocator, rbs_string_t *self, size_t start_inset, size_t length) {
-    char *buffer = rbs_allocator_calloc(allocator, length + 1, char);
+    char *buffer = rbs_allocator_alloc_many(allocator, length + 1, char);
     strncpy(buffer, self->start + start_inset, length);
     buffer[length] = '\0';
 

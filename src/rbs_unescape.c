@@ -49,7 +49,7 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, rbs_string_t string, bo
     size_t len = string.end - string.start;
     const char* input = string.start;
 
-    char* output = rbs_allocator_calloc(allocator, len + 1, char);
+    char* output = rbs_allocator_alloc_many(allocator, len + 1, char);
     if (!output) return RBS_STRING_NULL;
 
     size_t i = 0, j = 0;
