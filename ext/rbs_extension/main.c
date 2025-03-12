@@ -51,6 +51,7 @@ static void declare_type_variables(parserstate *parser, VALUE variables, VALUE b
   if (NIL_P(variables)) return; // Nothing to do.
 
   if (!RB_TYPE_P(variables, T_ARRAY)) {
+    free_parser(parser);
     rb_raise(rb_eTypeError,
       "wrong argument type %"PRIsVALUE" (must be an Array of Symbols or nil)",
       rb_obj_class(variables));
@@ -62,6 +63,7 @@ static void declare_type_variables(parserstate *parser, VALUE variables, VALUE b
     VALUE symbol = rb_ary_entry(variables, i);
 
     if (!RB_TYPE_P(symbol, T_SYMBOL)) {
+      free_parser(parser);
       rb_raise(rb_eTypeError,
         "Type variables Array contains invalid value %"PRIsVALUE" of type %"PRIsVALUE" (must be an Array of Symbols or nil)",
         rb_inspect(symbol), rb_obj_class(symbol));
