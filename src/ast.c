@@ -1277,9 +1277,6 @@ void rbs_node_destroy(rbs_node_t *any_node) {
     switch (any_node->type) {
 #line 202 "prism/templates/src/ast.c.erb"
     case RBS_AST_ANNOTATION: {
-        rbs_ast_annotation_t *node = (rbs_ast_annotation_t *)any_node;
-
-        // node->string is a `rbs_string_t` that will be freed by the arena allocator.
         break;
     }
 #line 202 "prism/templates/src/ast.c.erb"
@@ -1288,9 +1285,6 @@ void rbs_node_destroy(rbs_node_t *any_node) {
     }
 #line 202 "prism/templates/src/ast.c.erb"
     case RBS_AST_COMMENT: {
-        rbs_ast_comment_t *node = (rbs_ast_comment_t *)any_node;
-
-        // node->string is a `rbs_string_t` that will be freed by the arena allocator.
         break;
     }
 #line 202 "prism/templates/src/ast.c.erb"
@@ -1469,9 +1463,6 @@ void rbs_node_destroy(rbs_node_t *any_node) {
     }
 #line 202 "prism/templates/src/ast.c.erb"
     case RBS_AST_INTEGER: {
-        rbs_ast_integer_t *node = (rbs_ast_integer_t *)any_node;
-
-        // node->string_representation is a `rbs_string_t` that will be freed by the arena allocator.
         break;
     }
 #line 202 "prism/templates/src/ast.c.erb"
@@ -1696,9 +1687,6 @@ void rbs_node_destroy(rbs_node_t *any_node) {
     }
 #line 202 "prism/templates/src/ast.c.erb"
     case RBS_AST_STRING: {
-        rbs_ast_string_t *node = (rbs_ast_string_t *)any_node;
-
-        // node->string is a `rbs_string_t` that will be freed by the arena allocator.
         break;
     }
 #line 202 "prism/templates/src/ast.c.erb"

@@ -55,7 +55,7 @@ module RBS
       end
 
       def needs_to_be_freed?
-        !["VALUE", "bool"].include?(@c_type)
+        !["VALUE", "bool", "rbs_string"].include?(@c_type)
       end
     end
 
