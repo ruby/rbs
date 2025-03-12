@@ -131,13 +131,13 @@ void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt
   int length = vsnprintf(NULL, 0, fmt, args);
   va_end(args);
 
-  char *message = (char *) malloc(length + 1);
+  char *message = rbs_allocator_calloc(&state->allocator, length + 1, char);
 
   va_start(args, fmt);
   vsnprintf(message, length + 1, fmt, args);
   va_end(args);
 
-  state->error = (error *)malloc(sizeof(error));
+  state->error = rbs_allocator_alloc(&state->allocator, error);
   state->error->token = tok;
   state->error->message = message;
   state->error->syntax_error = syntax_error;
@@ -783,13 +783,6 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
     );
   }
 
-  *result = malloc(sizeof(parse_function_result));
-  // *result = (parse_function_result) {
-  //   .function = function,
-  //   .block = block,
-  //   .function_self_type = function_self_type,
-  // };
-
   (*result)->function = function;
   (*result)->block = block;
   (*result)->function_self_type = function_self_type;
@@ -802,7 +795,7 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
 NODISCARD
 static bool parse_proc_type(parserstate *state, rbs_types_proc_t **proc) {
   position start = state->current_token.range.start;
-  parse_function_result *result = NULL;
+  parse_function_result *result = rbs_allocator_alloc(&state->allocator, parse_function_result);
   CHECK_PARSE(parse_function(state, true, &result));
 
   position end = state->current_token.range.end;
@@ -1418,7 +1411,7 @@ bool parse_method_type(parserstate *state, rbs_methodtype_t **method_type) {
   range type_range;
   type_range.start = state->next_token.range.start;
 
-  parse_function_result *result;
+  parse_function_result *result = rbs_allocator_alloc(&state->allocator, parse_function_result);
   CHECK_PARSE(parse_function(state, false, &result));
 
   rg.end = state->current_token.range.end;
