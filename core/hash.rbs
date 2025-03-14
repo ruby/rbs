@@ -1845,8 +1845,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # be resized.
   #
   def initialize: (?capacity: int) -> void
-                | [V] (V default, ?capacity: int) -> void
-                | [A, B] (?capacity: int) { (Hash[A, B] hash, A key) -> B } -> void
+                | (V default, ?capacity: int) -> void
+                | (?capacity: int) { (Hash[K, V] hash, K key) -> V } -> void
 
   # <!--
   #   rdoc-file=hash.c
