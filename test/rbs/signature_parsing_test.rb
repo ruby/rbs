@@ -2268,4 +2268,15 @@ end
       end
     end
   end
+
+  def test__method_type__untyped_function_and_block
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+          class Foo
+            def foo: (?) { () -> void } -> void
+          end
+        RBS
+      end
+    end
+  end
 end

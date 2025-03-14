@@ -661,16 +661,16 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
     parser_advance_assert(state, pRPAREN);
   }
 
-  // Untyped method parameter means it cannot have block
-  if (rbs_is_untyped_params(&params)) {
-    if (state->next_token.type != pARROW) {
-      raise_syntax_error(state, state->next_token2, "A method type with untyped method parameter cannot have block");
-    }
-  }
-
   // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
   if (function_self_type) {
     *function_self_type = parse_self_type_binding(state);
+  } else {
+    // Parsing method type. untyped_params means it cannot have a block
+    if (rbs_is_untyped_params(&params)) {
+      if (state->next_token.type != pARROW) {
+        raise_syntax_error(state, state->next_token2, "A method type with untyped method parameter cannot have block");
+      }
+    }
   }
 
   VALUE required = Qtrue;
