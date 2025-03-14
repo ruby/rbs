@@ -2297,7 +2297,7 @@ module Kernel : BasicObject
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
   def define_singleton_method: (interned name, Method | UnboundMethod | Proc method) -> Symbol
-                             | (interned name) { (?) -> untyped } -> Symbol
+                             | (interned name) { (?) [self: self] -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
