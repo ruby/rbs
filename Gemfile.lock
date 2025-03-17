@@ -68,7 +68,7 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
-    nokogiri (1.18.3)
+    nokogiri (1.18.4)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     ostruct (0.6.1)
