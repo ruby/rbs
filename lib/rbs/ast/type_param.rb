@@ -56,16 +56,6 @@ module RBS
         }.to_json(state)
       end
 
-      def rename(name)
-        TypeParam.new(
-          name: name,
-          variance: variance,
-          upper_bound: upper_bound_type,
-          location: location,
-          default_type: default_type
-        ).unchecked!(unchecked?)
-      end
-
       def map_type(&block)
         if b = upper_bound_type
           _upper_bound_type = yield(b)
