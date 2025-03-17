@@ -25,6 +25,8 @@ module RBS
                      | (TypeName, singleton_method: Symbol) -> Array[RDoc::AnyMethod]?
 
       def find_attribute: (TypeName, Symbol, singleton: bool) -> Array[RDoc::Attr]?
+
+      def class_docs: (TypeName) -> Array[::RDoc::Markup::Document | ::RDoc::Comment | ::String]?
     end
   end
 end
