@@ -931,6 +931,11 @@ class CGI
     #
     def escapeURIComponent: (string) -> String
 
+    # <!-- rdoc-file=ext/cgi/escape/escape.c -->
+    # Returns URL-escaped string following RFC 3986.
+    #
+    alias escape_uri_component escapeURIComponent
+
     # <!--
     #   rdoc-file=ext/cgi/escape/escape.c
     #   - CGI.unescape(string, encoding=@@accept_charset) -> string
@@ -954,6 +959,11 @@ class CGI
     # Returns URL-unescaped string following RFC 3986.
     #
     def unescapeURIComponent: (string) -> String
+
+    # <!-- rdoc-file=ext/cgi/escape/escape.c -->
+    # Returns URL-unescaped string following RFC 3986.
+    #
+    alias unescape_uri_component unescapeURIComponent
   end
 
   # <!-- rdoc-file=lib/cgi/core.rb -->

@@ -270,7 +270,7 @@ class Exception
   #     x0..equal?(x1)            # => false
   #
   def exception: (?self) -> self
-               | (string | _ToS message) -> instance
+               | (string | _ToS message) -> self
 
   # <!--
   #   rdoc-file=error.c

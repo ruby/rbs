@@ -173,6 +173,7 @@ typedef struct rbs_ast_declarations_classalias {
     struct rbs_typename *new_name;
     struct rbs_typename *old_name;
     struct rbs_ast_comment *comment;
+    struct rbs_node_list *annotations;
 } rbs_ast_declarations_classalias_t;
 
 typedef struct rbs_ast_declarations_constant {
@@ -181,6 +182,7 @@ typedef struct rbs_ast_declarations_constant {
     struct rbs_typename *name;
     struct rbs_node *type;
     struct rbs_ast_comment *comment;
+    struct rbs_node_list *annotations;
 } rbs_ast_declarations_constant_t;
 
 typedef struct rbs_ast_declarations_global {
@@ -189,6 +191,7 @@ typedef struct rbs_ast_declarations_global {
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
     struct rbs_ast_comment *comment;
+    struct rbs_node_list *annotations;
 } rbs_ast_declarations_global_t;
 
 typedef struct rbs_ast_declarations_interface {
@@ -225,6 +228,7 @@ typedef struct rbs_ast_declarations_modulealias {
     struct rbs_typename *new_name;
     struct rbs_typename *old_name;
     struct rbs_ast_comment *comment;
+    struct rbs_node_list *annotations;
 } rbs_ast_declarations_modulealias_t;
 
 typedef struct rbs_ast_declarations_typealias {
@@ -622,13 +626,13 @@ rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_t *loc
 rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string);
 rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
 rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args);
-rbs_ast_declarations_classalias_t *rbs_ast_declarations_classalias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment);
-rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_t *type, rbs_ast_comment_t *comment);
-rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment);
+rbs_ast_declarations_classalias_t *rbs_ast_declarations_classalias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
+rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
+rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
 rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
 rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
 rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *args);
-rbs_ast_declarations_modulealias_t *rbs_ast_declarations_modulealias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment);
+rbs_ast_declarations_modulealias_t *rbs_ast_declarations_modulealias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *new_name, rbs_typename_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
 rbs_ast_declarations_typealias_t *rbs_ast_declarations_typealias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
 rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *clauses);
 rbs_ast_directives_use_singleclause_t *rbs_ast_directives_use_singleclause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_typename_t *type_name, rbs_ast_symbol_t *new_name);

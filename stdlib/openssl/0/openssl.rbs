@@ -1527,49 +1527,49 @@ module OpenSSL
     #   - bn % bn2 => aBN
     # -->
     #
-    def %: (bn) -> instance
+    def %: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn * bn2 => aBN
     # -->
     #
-    def *: (bn) -> instance
+    def *: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn ** bn2 => aBN
     # -->
     #
-    def **: (bn) -> instance
+    def **: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn + bn2 => aBN
     # -->
     #
-    def +: (bn) -> instance
+    def +: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - +bn -> aBN
     # -->
     #
-    def +@: () -> instance
+    def +@: () -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn - bn2 => aBN
     # -->
     #
-    def -: (bn) -> instance
+    def -: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - -bn -> aBN
     # -->
     #
-    def -@: () -> instance
+    def -@: () -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1577,14 +1577,14 @@ module OpenSSL
     # -->
     # Division of OpenSSL::BN instances
     #
-    def /: (bn) -> [ instance, instance ]
+    def /: (bn) -> [ self, self ]
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn << bits -> aBN
     # -->
     #
-    def <<: (int) -> instance
+    def <<: (int) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1650,7 +1650,7 @@ module OpenSSL
     #   - copy(p1)
     # -->
     #
-    def copy: (bn) -> instance
+    def copy: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1666,7 +1666,7 @@ module OpenSSL
     #   - bn.gcd(bn2) => aBN
     # -->
     #
-    def gcd: (bn) -> instance
+    def gcd: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1692,42 +1692,42 @@ module OpenSSL
     #   - bn.mod_add(bn1, bn2) -> aBN
     # -->
     #
-    def mod_add: (bn, bn) -> instance
+    def mod_add: (bn, bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_exp(bn1, bn2) -> aBN
     # -->
     #
-    def mod_exp: (bn, bn) -> instance
+    def mod_exp: (bn, bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_inverse(bn2) => aBN
     # -->
     #
-    def mod_inverse: (bn) -> instance
+    def mod_inverse: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_mul(bn1, bn2) -> aBN
     # -->
     #
-    def mod_mul: (bn, bn) -> instance
+    def mod_mul: (bn, bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_sqr(bn2) => aBN
     # -->
     #
-    def mod_sqr: (bn) -> instance
+    def mod_sqr: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.mod_sub(bn1, bn2) -> aBN
     # -->
     #
-    def mod_sub: (bn, bn) -> instance
+    def mod_sub: (bn, bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1815,7 +1815,7 @@ module OpenSSL
     #   - bn.sqr => aBN
     # -->
     #
-    def sqr: () -> instance
+    def sqr: () -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1906,7 +1906,7 @@ module OpenSSL
     #     *   `16` - Hexadecimal number representation, with a leading '-' for a
     #         negative number.
     #
-    def initialize: (instance) -> void
+    def initialize: (self) -> void
                   | (Integer) -> void
                   | (string) -> void
                   | (string, 0 | 2 | 10 | 16) -> void
@@ -1916,7 +1916,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance other) -> instance
+    def initialize_copy: (self other) -> self
   end
 
   # <!-- rdoc-file=ext/openssl/ossl_bn.c -->
@@ -2025,7 +2025,7 @@ module OpenSSL
     #
     # Unlike IO#gets the separator must be provided if a limit is provided.
     #
-    def gets: (?String | Regexp eol, ?Integer limit) -> String?
+    def gets: (?String | Regexp eol, ?Integer limit, ?chomp: boolish) -> String?
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
@@ -3069,7 +3069,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance other) -> void
+    def initialize_copy: (self other) -> void
 
     # <!-- rdoc-file=ext/openssl/ossl_config.c -->
     # The default system configuration file for OpenSSL.
@@ -3287,7 +3287,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance) -> void
+    def initialize_copy: (self) -> void
 
     class Digest < OpenSSL::Digest
     end
@@ -3700,7 +3700,7 @@ module OpenSSL
     # -->
     # Securely compare with another HMAC instance in constant time.
     #
-    def ==: (instance other) -> bool
+    def ==: (self other) -> bool
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_hmac.c
@@ -3835,7 +3835,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance) -> void
+    def initialize_copy: (self) -> void
   end
 
   # <!-- rdoc-file=ext/openssl/ossl_hmac.c -->
@@ -4168,7 +4168,7 @@ module OpenSSL
       # instance should be used, in addition to a digest algorithm in the form of an
       # OpenSSL::Digest. The private key should be an instance of OpenSSL::PKey.
       #
-      def sign: (PKey::PKey key, Digest digest) -> instance
+      def sign: (PKey::PKey key, Digest digest) -> self
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ns_spki.c
@@ -4632,7 +4632,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_ocsp.c -->
@@ -4647,7 +4647,7 @@ module OpenSSL
       # Compares this certificate id with *other* and returns `true` if they are the
       # same.
       #
-      def cmp: (instance other) -> bool
+      def cmp: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
@@ -4656,7 +4656,7 @@ module OpenSSL
       # Compares this certificate id's issuer with *other* and returns `true` if they
       # are the same.
       #
-      def cmp_issuer: (instance other) -> bool
+      def cmp_issuer: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ocsp.c
@@ -4726,7 +4726,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_ocsp.c -->
@@ -4864,7 +4864,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_ocsp.c -->
@@ -4929,7 +4929,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_ocsp.c -->
@@ -5037,7 +5037,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
   end
 
@@ -5110,7 +5110,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance) -> void
+    def initialize_copy: (self) -> void
 
     class PKCS12Error < OpenSSL::OpenSSLError
     end
@@ -5357,7 +5357,7 @@ module OpenSSL
     #   - initialize_copy(p1)
     # -->
     #
-    def initialize_copy: (instance) -> untyped
+    def initialize_copy: (self) -> untyped
 
     BINARY: Integer
 
@@ -5706,7 +5706,7 @@ module OpenSSL
       #     dhcopy = dh1.public_key
       #     p dhcopy.priv_key #=> nil
       #
-      def public_key: () -> instance
+      def public_key: () -> self
 
       def q: () -> BN
 
@@ -5837,7 +5837,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_pkey_dh.c -->
@@ -5979,7 +5979,7 @@ module OpenSSL
       # For the purpose of serializing the public key, to PEM or DER encoding of X.509
       # SubjectPublicKeyInfo format, check PKey#public_to_pem and PKey#public_to_der.
       #
-      def public_key: () -> instance
+      def public_key: () -> self
 
       def q: () -> BN
 
@@ -6226,7 +6226,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     # <!-- rdoc-file=ext/openssl/ossl_pkey_dsa.c -->
@@ -6574,7 +6574,7 @@ module OpenSSL
       # Creates a new EC object from given arguments.
       #
       def initialize: () -> void
-                    | (instance ec_key) -> void
+                    | (self ec_key) -> void
                     | (Group group) -> void
                     | (String pem_or_der_or_curve, ?String pass) -> void
 
@@ -6583,7 +6583,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
 
       EXPLICIT_CURVE: Integer
 
@@ -6662,7 +6662,7 @@ module OpenSSL
         # Returns `true` if the two groups use the same curve and have the same
         # parameters, `false` otherwise.
         #
-        def eql?: (instance other) -> bool
+        def eql?: (self other) -> bool
 
         # <!--
         #   rdoc-file=ext/openssl/ossl_pkey_ec.c
@@ -6783,7 +6783,7 @@ module OpenSSL
         # If the first argument is :GFp or :GF2m, creates a new curve with given
         # parameters.
         #
-        def initialize: (instance group) -> void
+        def initialize: (self group) -> void
                       | (String pem_or_der_encoded) -> void
                       | (ec_method ec_method) -> void
                       | (:GFp | :GF2m ec_method, Integer bignum_p, Integer bignum_a, Integer bignum_b) -> void
@@ -6793,7 +6793,7 @@ module OpenSSL
         #   - initialize_copy(p1)
         # -->
         #
-        def initialize_copy: (instance) -> void
+        def initialize_copy: (self) -> void
 
         class Error < OpenSSL::OpenSSLError
         end
@@ -6813,7 +6813,7 @@ module OpenSSL
         # -->
         # Performs elliptic curve point addition.
         #
-        def add: (instance point) -> instance
+        def add: (self point) -> self
 
         # <!--
         #   rdoc-file=ext/openssl/ossl_pkey_ec.c
@@ -6821,7 +6821,7 @@ module OpenSSL
         #   - point1 == point2 => true | false
         # -->
         #
-        def eql?: (instance other) -> bool
+        def eql?: (self other) -> bool
 
         def group: () -> Group
 
@@ -6863,8 +6863,8 @@ module OpenSSL
         # of OpenSSL::BN. *points* must be an array of OpenSSL::PKey::EC::Point. Please
         # note that `points[0]` is not multiplied by `bns[0]`, but `bns[1]`.
         #
-        def mul: (bn bn1, ?bn bn2) -> instance
-               | (Array[bn] bns, Array[instance], ?bn bn2) -> instance
+        def mul: (bn bn1, ?bn bn2) -> self
+               | (Array[bn] bns, Array[self], ?bn bn2) -> self
 
         # <!--
         #   rdoc-file=ext/openssl/ossl_pkey_ec.c
@@ -6922,7 +6922,7 @@ module OpenSSL
         # *encoded_point* is the octet string representation of the point. This must be
         # either a String or an OpenSSL::BN.
         #
-        def initialize: (instance point) -> void
+        def initialize: (self point) -> void
                       | (Group group, ?String | BN encoded_point) -> void
 
         # <!--
@@ -6930,7 +6930,7 @@ module OpenSSL
         #   - initialize_copy(p1)
         # -->
         #
-        def initialize_copy: (instance) -> void
+        def initialize_copy: (self) -> void
 
         class Error < OpenSSL::OpenSSLError
         end
@@ -7307,7 +7307,7 @@ module OpenSSL
       # For the purpose of serializing the public key, to PEM or DER encoding of X.509
       # SubjectPublicKeyInfo format, check PKey#public_to_pem and PKey#public_to_der.
       #
-      def public_key: () -> instance
+      def public_key: () -> self
 
       def q: () -> BN?
 
@@ -7575,7 +7575,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
 
       NO_PADDING: Integer
 
@@ -9279,7 +9279,7 @@ module OpenSSL
       # -->
       # Returns `true` if the two Session is the same, `false` if not.
       #
-      def ==: (instance other) -> bool
+      def ==: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl_session.c
@@ -9364,7 +9364,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
 
       class SessionError < OpenSSL::OpenSSLError
       end
@@ -9867,7 +9867,7 @@ module OpenSSL
       #     it is not conformant to the Request, or if validation of the timestamp
       #     certificate chain fails.
       #
-      def verify: (Request request, X509::Store store, ?X509::Certificate intermediate_cert) -> instance
+      def verify: (Request request, X509::Store store, ?X509::Certificate intermediate_cert) -> self
 
       private
 
@@ -10301,7 +10301,7 @@ module OpenSSL
       #   - ==(other)
       # -->
       #
-      def ==: (instance other) -> bool
+      def ==: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509attr.c
@@ -10353,7 +10353,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     class AttributeError < OpenSSL::OpenSSLError
@@ -10371,7 +10371,7 @@ module OpenSSL
       #   - ==(other)
       # -->
       #
-      def ==: (instance other) -> bool
+      def ==: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509crl.c
@@ -10536,7 +10536,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     class CRLError < OpenSSL::OpenSSLError
@@ -10649,7 +10649,7 @@ module OpenSSL
       # Compares the two certificates. Note that this takes into account all fields,
       # not just the issuer name and the serial number.
       #
-      def ==: (instance other) -> bool
+      def ==: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509cert.c
@@ -10859,7 +10859,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     class CertificateError < OpenSSL::OpenSSLError
@@ -10875,7 +10875,7 @@ module OpenSSL
       #   - ==(other)
       # -->
       #
-      def ==: (instance other) -> bool
+      def ==: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509ext.c
@@ -10976,7 +10976,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
 
       module AuthorityInfoAccess
         include OpenSSL::X509::Extension::Helpers
@@ -11278,7 +11278,7 @@ module OpenSSL
       # -->
       # Returns true if *name* and *other* refer to the same hash key.
       #
-      def eql?: (instance other) -> bool
+      def eql?: (self other) -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509name.c
@@ -11385,7 +11385,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
 
       # <!-- rdoc-file=ext/openssl/ossl_x509name.c -->
       # A flag for #to_s.
@@ -11630,7 +11630,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     class RequestError < OpenSSL::OpenSSLError
@@ -11716,7 +11716,7 @@ module OpenSSL
       #   - initialize_copy(p1)
       # -->
       #
-      def initialize_copy: (instance) -> void
+      def initialize_copy: (self) -> void
     end
 
     class RevokedError < OpenSSL::OpenSSLError

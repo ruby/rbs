@@ -221,7 +221,7 @@ module Gem
     #
     # Pre-release (alpha) parts, e.g, 5.3.1.b.2 => 5.4, are ignored.
     #
-    def bump: () -> instance
+    def bump: () -> self
 
     # <!--
     #   rdoc-file=lib/rubygems/version.rb
@@ -274,7 +274,7 @@ module Gem
     # The release for this version (e.g. 1.2.0.a -> 1.2.0). Non-prerelease versions
     # return themselves.
     #
-    def release: () -> instance
+    def release: () -> self
 
     # <!--
     #   rdoc-file=lib/rubygems/version.rb

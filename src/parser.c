@@ -697,17 +697,16 @@ static bool parse_function(parserstate *state, bool accept_type_binding, parse_f
     ADVANCE_ASSERT(state, pRPAREN);
   }
 
-  // Untyped method parameter means it cannot have block
-  if (rbs_is_untyped_params(&params)) {
-    if (state->next_token.type != pARROW) {
-      set_error(state, state->next_token2, true, "A method type with untyped method parameter cannot have block");
-      return false;
-    }
-  }
-
   // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
   if (accept_type_binding) {
     CHECK_PARSE(parse_self_type_binding(state, &function_self_type));
+  } else {
+    if (rbs_is_untyped_params(&params)) {
+      if (state->next_token.type != pARROW) {
+        set_error(state, state->next_token2, true, "A method type with untyped method parameter cannot have block");
+        return false;
+      }
+    }
   }
 
   bool required = true;
@@ -1430,7 +1429,7 @@ bool parse_method_type(parserstate *state, rbs_methodtype_t **method_type) {
   global_decl ::= {tGIDENT} `:` <type>
 */
 NODISCARD
-static bool parse_global_decl(parserstate *state, rbs_ast_declarations_global_t **global) {
+static bool parse_global_decl(parserstate *state, rbs_node_list_t *annotations, rbs_ast_declarations_global_t **global) {
   range decl_range;
   decl_range.start = state->current_token.range.start;
 
@@ -1453,7 +1452,7 @@ static bool parse_global_decl(parserstate *state, rbs_ast_declarations_global_t 
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  *global = rbs_ast_declarations_global_new(&state->allocator, loc, typename, type, comment);
+  *global = rbs_ast_declarations_global_new(&state->allocator, loc, typename, type, comment, annotations);
   return true;
 }
 
@@ -1461,7 +1460,7 @@ static bool parse_global_decl(parserstate *state, rbs_ast_declarations_global_t 
   const_decl ::= {const_name} `:` <type>
 */
 NODISCARD
-static bool parse_const_decl(parserstate *state, rbs_ast_declarations_constant_t **constant) {
+static bool parse_const_decl(parserstate *state, rbs_node_list_t *annotations, rbs_ast_declarations_constant_t **constant) {
   range decl_range;
 
   decl_range.start = state->current_token.range.start;
@@ -1484,7 +1483,7 @@ static bool parse_const_decl(parserstate *state, rbs_ast_declarations_constant_t
   rbs_loc_add_required_child(loc, INTERN("name"), name_range);
   rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-  *constant = rbs_ast_declarations_constant_new(&state->allocator, loc, typename, type, comment);
+  *constant = rbs_ast_declarations_constant_new(&state->allocator, loc, typename, type, comment, annotations);
   return true;
 }
 
@@ -2654,7 +2653,7 @@ static bool parse_module_decl(parserstate *state, position comment_pos, rbs_node
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    *module_decl = (rbs_node_t *) rbs_ast_declarations_modulealias_new(&state->allocator, loc, module_name, old_name, comment);
+    *module_decl = (rbs_node_t *) rbs_ast_declarations_modulealias_new(&state->allocator, loc, module_name, old_name, comment, annotations);
   } else {
     rbs_ast_declarations_module_t *module_decl0 = NULL;
     CHECK_PARSE(parse_module_decl0(state, keyword_range, module_name, module_name_range, comment, annotations, &module_decl0));
@@ -2775,7 +2774,7 @@ static bool parse_class_decl(parserstate *state, position comment_pos, rbs_node_
     rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
     rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-    *class_decl = (rbs_node_t *) rbs_ast_declarations_classalias_new(&state->allocator, loc, class_name, old_name, comment);
+    *class_decl = (rbs_node_t *) rbs_ast_declarations_classalias_new(&state->allocator, loc, class_name, old_name, comment, annotations);
   } else {
     rbs_ast_declarations_class_t *class_decl0 = NULL;
     CHECK_PARSE(parse_class_decl0(state, keyword_range, class_name, class_name_range, comment, annotations, &class_decl0));
@@ -2800,13 +2799,13 @@ static bool parse_nested_decl(parserstate *state, const char *nested_in, positio
   case tUIDENT:
   case pCOLON2: {
     rbs_ast_declarations_constant_t *constant = NULL;
-    CHECK_PARSE(parse_const_decl(state, &constant));
+    CHECK_PARSE(parse_const_decl(state, annotations, &constant));
     *decl = (rbs_node_t *) constant;
     break;
   }
   case tGIDENT: {
     rbs_ast_declarations_global_t *global = NULL;
-    CHECK_PARSE(parse_global_decl(state, &global));
+    CHECK_PARSE(parse_global_decl(state, annotations, &global));
     *decl = (rbs_node_t *) global;
     break;
   }
@@ -2856,13 +2855,13 @@ static bool parse_decl(parserstate *state, rbs_node_t **decl) {
   case tUIDENT:
   case pCOLON2: {
     rbs_ast_declarations_constant_t *constant = NULL;
-    CHECK_PARSE(parse_const_decl(state, &constant));
+    CHECK_PARSE(parse_const_decl(state, annotations, &constant));
     *decl = (rbs_node_t *) constant;
     return true;
   }
   case tGIDENT: {
     rbs_ast_declarations_global_t *global = NULL;
-    CHECK_PARSE(parse_global_decl(state, &global));
+    CHECK_PARSE(parse_global_decl(state, annotations, &global));
     *decl = (rbs_node_t *) global;
     return true;
   }

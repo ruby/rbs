@@ -6,8 +6,15 @@ module RBS
       attr_reader parent_variable: Variable?
       attr_reader type: Types::t
       attr_reader declared_in: TypeName
+      type source = AST::Members::AttrAccessor
+                  | AST::Members::AttrReader
+                  | AST::Members::AttrWriter
+                  | AST::Members::InstanceVariable
+                  | AST::Members::ClassVariable
+                  | AST::Members::ClassInstanceVariable
+      attr_reader source: source
 
-      def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName) -> void
+      def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName, source: source) -> void
 
       def sub: (Substitution) -> Variable
     end
@@ -21,22 +28,50 @@ module RBS
         attr_reader defined_in: TypeName
         attr_reader implemented_in: TypeName?
 
-        # Annotations given to `#member`
+        # Annotations given to the method definition syntax
+        #
+        # If the method have multiple syntaxes, union of the annotations to the member will be included, without dedup.
+        #
+        # The value should be updated during setup.
+        #
         attr_reader member_annotations: Array[AST::Annotation]
 
         # Annotations given to the overload associated to the method type
+        #
+        # The value should be updated during setup.
+        #
         attr_reader overload_annotations: Array[AST::Annotation]
 
-        # Concatenation of `member_annotations` and `overload_annotations`
-        attr_reader annotations: Array[AST::Annotation]
+        # Always returns an empty array
+        %a{deprecated} attr_reader annotations: Array[AST::Annotation]
 
-        def initialize: (type: MethodType, member: method_member, defined_in: TypeName, implemented_in: TypeName?, ?overload_annotations: Array[AST::Annotation]) -> void
+        # `overload_annotations` is ignored.
+        def initialize: (
+            type: MethodType,
+            member: method_member,
+            defined_in: TypeName,
+            implemented_in: TypeName?
+          ) -> void
+        | %a{deprecated} (
+            type: MethodType,
+            member: method_member,
+            defined_in: TypeName,
+            implemented_in: TypeName?,
+            overload_annotations: nil
+          ) -> void
 
         def comment: () -> AST::Comment?
 
         def update: (?type: MethodType, ?member: method_member, ?defined_in: TypeName, ?implemented_in: TypeName?) -> TypeDef
 
         def overload?: () -> bool
+
+        # Yields member and overload annotations, without dedup
+        #
+        # Member annotation yields first.
+        #
+        def each_annotation: () { (AST::Annotation) -> void } -> void
+                           | () -> Enumerator[AST::Annotation]
       end
 
       attr_reader super_method: Method?
@@ -49,21 +84,38 @@ module RBS
       attr_reader comments: Array[AST::Comment]
 
       attr_reader members: Array[method_member]
+
+      # The original method when the method is defined with `alias` syntax
       attr_reader alias_of: Method?
 
-      # Unused, always returns empty array
-      attr_reader extra_annotations: Array[AST::Annotation]
+      # Present if the method is defined with `alias` syntax
+      attr_reader alias_member: AST::Members::Alias?
 
-      # Union of annotations given to `defs`, not contains annotations given to each overload
+      # Unused, always returns empty array
+      %a{deprecated} attr_reader extra_annotations: Array[AST::Annotation]
+
+      # Union of annotations given to `def`s and `alias`, not contains annotations given to each overload
+      #
+      # The elements will be updated during `Method` object setup.
+      #
       attr_reader annotations: Array[AST::Annotation]
 
       # Note that the annotations given through `annotations:` keyword is ignored.
       #
-      def initialize: (super_method: Method?,
-                       defs: Array[TypeDef],
-                       accessibility: accessibility,
-                       alias_of: Method?,
-                       ?annotations: Array[AST::Annotation]) -> void
+      def initialize: (
+          super_method: Method?,
+          defs: Array[TypeDef],
+          accessibility: accessibility,
+          alias_of: Method?,
+          alias_member: AST::Members::Alias?
+        ) -> void
+      | %a{deprecated} (
+          super_method: Method?,
+          defs: Array[TypeDef],
+          accessibility: accessibility,
+          alias_of: Method?,
+          annotations: Array[AST::Annotation]
+        ) -> void
 
       def public?: () -> bool
 
@@ -90,7 +142,8 @@ module RBS
         ?defs: Array[TypeDef],
         ?accessibility: accessibility,
         ?alias_of: Method?,
-        ?annotations: Array[AST::Annotation]
+        ?annotations: Array[AST::Annotation],
+        ?alias_member: AST::Members::Alias?
       ) -> Method
     end
 

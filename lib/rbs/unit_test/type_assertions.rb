@@ -183,7 +183,7 @@ module RBS
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
 
           method_defs = method_defs(method)
-          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.annotations) }
+          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
           assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
 
           raise exception if exception
@@ -220,7 +220,7 @@ module RBS
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }
 
           method_defs = method_defs(method)
-          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.annotations) }
+          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
           assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
 
           result

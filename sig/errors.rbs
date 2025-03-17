@@ -185,23 +185,20 @@ module RBS
   class VariableDuplicationError < DefinitionError
     include DetailedMessageable
 
-    attr_reader member: AST::Members::Var
+    attr_reader type_name: TypeName
+    attr_reader variable_name: Symbol
+    attr_reader location: Location[untyped, untyped]?
 
-    def initialize: (member: AST::Members::Var) -> void
-
-    def location: () -> Location[bot, bot]
+    def initialize: (type_name: TypeName, variable_name: Symbol, location: Location[untyped, untyped]?) -> void
+    def kind: () -> String
   end
 
   class InstanceVariableDuplicationError < VariableDuplicationError
-    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::InstanceVariable, type_name: TypeName) -> void
+    def kind: () -> String
   end
 
   class ClassInstanceVariableDuplicationError < VariableDuplicationError
-    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::ClassInstanceVariable, type_name: TypeName) -> void
-  end
-
-  class ClassVariableDuplicationError < VariableDuplicationError
-    def self.check!: (variables: Hash[Symbol, Definition::Variable], member: AST::Members::ClassVariable, type_name: TypeName) -> void
+    def kind: () -> String
   end
 
   # The `alias` member declares an alias from unknown method

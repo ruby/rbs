@@ -46,11 +46,15 @@ RBS/Style:
     - 'test/**/*'
 RBS/Style/BlockReturnBoolish:
   Enabled: true
+RBS/Style/ClassWithSingleton:
+  Enabled: true
 RBS/Style/DuplicatedType:
   Enabled: true
 RBS/Style/EmptyArgument:
   Enabled: true
 RBS/Style/InitializeReturnType:
+  Enabled: true
+RBS/Style/InstanceWithInstance:
   Enabled: true
 RBS/Style/OptionalNil:
   Enabled: true

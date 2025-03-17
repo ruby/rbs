@@ -552,7 +552,8 @@ module RBS
           name: decl.name,
           type: absolute_type(resolver, map, decl.type, context: nil),
           location: decl.location,
-          comment: decl.comment
+          comment: decl.comment,
+          annotations: decl.annotations
         )
       end
 
@@ -660,7 +661,8 @@ module RBS
           name: decl.name.with_prefix(prefix),
           type: absolute_type(resolver, map, decl.type, context: context),
           location: decl.location,
-          comment: decl.comment
+          comment: decl.comment,
+          annotations: decl.annotations
         )
 
       when AST::Declarations::ClassAlias
@@ -668,7 +670,8 @@ module RBS
           new_name: decl.new_name.with_prefix(prefix),
           old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
-          comment: decl.comment
+          comment: decl.comment,
+          annotations: decl.annotations
         )
 
       when AST::Declarations::ModuleAlias
@@ -676,7 +679,8 @@ module RBS
           new_name: decl.new_name.with_prefix(prefix),
           old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
-          comment: decl.comment
+          comment: decl.comment,
+          annotations: decl.annotations
         )
       end
     end

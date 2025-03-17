@@ -820,12 +820,6 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
-  def test_proc__untyped_function_parse_error
-    assert_raises(RBS::ParsingError) do
-      RBS::Parser.parse_type("^(?) { (?) -> void } -> Integer")
-    end
-  end
-
   def test__lex
     content = <<~RBS
       # LineComment

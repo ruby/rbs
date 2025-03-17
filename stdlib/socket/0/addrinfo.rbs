@@ -541,7 +541,7 @@ class Addrinfo
 
   def marshal_dump: () -> String
 
-  def marshal_load: (String) -> instance
+  def marshal_load: (String) -> self
 
   # <!--
   #   rdoc-file=ext/socket/raddrinfo.c
