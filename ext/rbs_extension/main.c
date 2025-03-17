@@ -1,4 +1,5 @@
 #include "rbs_extension.h"
+#include "rbs/util/rbs_assert.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
 #include "ast_translation.h"
@@ -15,7 +16,7 @@
  * ```
  * */
 static NORETURN(void) raise_error(error *error, VALUE buffer) {
-  assert(error != NULL && "raise_error() called with NULL error");
+  rbs_assert(error != NULL, "raise_error() called with NULL error");
 
   if (!error->syntax_error) {
     rb_raise(rb_eRuntimeError, "Unexpected error");

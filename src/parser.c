@@ -10,6 +10,7 @@
 #include "rbs/encoding.h"
 #include "rbs/rbs_string.h"
 #include "rbs/rbs_unescape.h"
+#include "rbs/util/rbs_assert.h"
 
 #define INTERN(str)                  \
   rbs_constant_pool_insert_constant( \
@@ -237,7 +238,7 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
       ids = "class/module/constant name";
     }
 
-    assert(ids != NULL && "Unknown kind of type");
+    rbs_assert(ids != NULL, "Unknown kind of type: %i", kind);
 
     set_error(state, state->current_token, true, "expected one of %s", ids);
     return false;

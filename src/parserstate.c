@@ -3,6 +3,7 @@
 #include "rbs/parser.h"
 #include "rbs/encoding.h"
 #include "rbs/rbs_buffer.h"
+#include "rbs/util/rbs_assert.h"
 
 #include <stdio.h>
 
@@ -367,8 +368,7 @@ void rbs_parser_declare_type_variables(parserstate *parser, size_t count, const 
     );
 
     if (!parser_insert_typevar(parser, name)) {
-      fprintf(stderr, "RuntimeError: %s\n", parser->error->message);
-      exit(1);
+      rbs_assert(false, "Failed to insert type variable. Message: %s", parser->error->message);
     }
   }
 }

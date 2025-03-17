@@ -15,9 +15,9 @@
  */
 
 #include "rbs/util/rbs_allocator.h"
+#include "rbs/util/rbs_assert.h"
 
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h> // for memset()
 #include <stdint.h>
 
@@ -138,7 +138,7 @@ void *rbs_allocator_realloc_impl(rbs_allocator_t *allocator, void *ptr, size_t o
 
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
 void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t alignment) {
-    assert(size % alignment == 0 && "size must be a multiple of the alignment");
+    rbs_assert(size % alignment == 0, "size must be a multiple of the alignment. size: %zu, alignment: %zu", size, alignment);
 
     if (default_page_payload_size < size) { // Big allocation, give it its own page.
         // How much we need to pad the new page's payload in order to get an aligned pointer
@@ -176,7 +176,7 @@ void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t 
     allocator->page = new_page;
 
     p = rbs_allocator_page_attempt_alloc(new_page, size, alignment);
-    assert(p != NULL && "Failed to allocate a new allocator page");
+    rbs_assert(p != NULL, "Failed to allocate a new allocator page");
     return p;
 }
 
