@@ -3574,10 +3574,10 @@ class String
   def valid_encoding?: () -> bool
 end
 
-%a{steep:deprecated}
+%a{deprecated}
 interface _ArefFromStringToString
   def []: (String) -> String
 end
 
-%a{steep:deprecated}
+%a{deprecated}
 type String::encode_fallback = Hash[String, String] | Proc | Method | _ArefFromStringToString

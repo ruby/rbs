@@ -106,5 +106,5 @@ class Object < BasicObject
 end
 
 # A previous incarnation of `interned` for backward-compatibility (see #1499)
-%a{steep:deprecated}
+%a{deprecated: Use `interned` instead}
 type Object::name = interned
