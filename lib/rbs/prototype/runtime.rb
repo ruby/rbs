@@ -462,6 +462,7 @@ module RBS
             name: to_type_name(name.to_s),
             type: type,
             location: nil,
+            annotations: [],
             comment: nil
           )
         end

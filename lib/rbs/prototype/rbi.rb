@@ -257,7 +257,8 @@ module RBS
               name: name,
               type: type,
               location: nil,
-              comment: nil
+              comment: nil,
+              annotations: []
             )
           end
         when :ALIAS
