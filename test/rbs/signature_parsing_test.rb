@@ -2370,4 +2370,545 @@ end
       end
     RBS
   end
+
+  def test_context_syntax_error_method
+    assert_nothing_raised do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          def foo: () -> void
+          def foo: (Array[void]) -> void
+          def foo: (self) -> self
+          def foo: (class) -> class
+          def foo: (instance) -> instance
+        end
+      RBS
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          def foo: (void) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:12...2:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          def foo: ([void]) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:13...2:17: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          def foo: () -> ^(void) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:19...2:23: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          def foo: () { () -> ^(void) -> void } -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:24...2:28: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+  end
+
+  def test_context_syntax_error_interface
+    assert_nothing_raised do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> void
+          def foo: () { () -> void } -> ^() -> void
+          def foo: (Array[void]) -> void
+          def foo: (self) -> self
+        end
+      RBS
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: (void) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:12...2:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () { (void) -> void } -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:17...2:21: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: ([void]) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:13...2:17: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> ^(void) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:19...2:23: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> class
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:17...2:22: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> ^() -> class
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:24...2:29: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> instance
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:17...2:25: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () { () -> instance } -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:22...2:30: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_attribute
+    assert_nothing_raised do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          attr_reader foo: ^() -> void
+          attr_reader foo: self
+          attr_reader foo: class
+          attr_reader foo: instance
+          attr_reader self.foo: self
+          attr_reader self.foo: class
+          attr_reader self.foo: instance
+        end
+      RBS
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          attr_reader foo: void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:19...2:23: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        class Foo
+          attr_reader foo: ^(void) -> void
+        end
+      RBS
+    end
+    assert_equal "a.rbs:2:21...2:25: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+  end
+
+  def test_context_syntax_error_super_class
+    assert_nothing_raised do
+      Parser.parse_signature("class Foo < Array[void] end")
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[[void]] end")
+    end
+    assert_equal "a.rbs:1:19...1:23: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[self] end")
+    end
+    assert_equal "a.rbs:1:18...1:22: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[class] end")
+    end
+    assert_equal "a.rbs:1:18...1:23: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[instance] end")
+    end
+    assert_equal "a.rbs:1:18...1:26: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_module_self_type
+    assert_nothing_raised do
+      Parser.parse_signature("module Foo : Array[void] end")
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[[void]] end")
+    end
+    assert_equal "a.rbs:1:20...1:24: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[self] end")
+    end
+    assert_equal "a.rbs:1:19...1:23: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[class] end")
+    end
+    assert_equal "a.rbs:1:19...1:24: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[instance] end")
+    end
+    assert_equal "a.rbs:1:19...1:27: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_global
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: void")
+    end
+    assert_equal "a.rbs:1:7...1:11: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: self")
+    end
+    assert_equal "a.rbs:1:7...1:11: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: class")
+    end
+    assert_equal "a.rbs:1:7...1:12: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: instance")
+    end
+    assert_equal "a.rbs:1:7...1:15: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_constant
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: void")
+    end
+    assert_equal "a.rbs:1:7...1:11: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: self")
+    end
+    assert_equal "a.rbs:1:7...1:11: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: class")
+    end
+    assert_equal "a.rbs:1:7...1:12: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: instance")
+    end
+    assert_equal "a.rbs:1:7...1:15: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_type_alias
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = void")
+    end
+    assert_equal "a.rbs:1:9...1:13: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = self")
+    end
+    assert_equal "a.rbs:1:9...1:13: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = class")
+    end
+    assert_equal "a.rbs:1:9...1:14: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = instance")
+    end
+    assert_equal "a.rbs:1:9...1:17: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_mixin
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class C
+          include M[void]
+          include M[class]
+          include M[instance]
+        end
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C include M[self] end")
+    end
+    assert_equal "a.rbs:1:18...1:22: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C include M[[void]] end")
+    end
+    assert_equal "a.rbs:1:19...1:23: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+  end
+
+  def test_context_syntax_error_variable
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class Foo
+          @s: self
+          @c: class
+          @i: instance
+          self.@s: self
+          self.@c: class
+          self.@i: instance
+          @@c: class
+          @@i: instance
+        end
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo @foo: void end")
+    end
+    assert_equal "a.rbs:1:16...1:20: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo self.@foo: void end")
+    end
+    assert_equal "a.rbs:1:21...1:25: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo @@foo: self end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo @@foo: void end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+  end
+
+  def test_context_syntax_error_upper_bound
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class C[T < Array[void]]
+        end
+        module M[T < Array[void]]
+        end
+        interface _I[T < Array[void]]
+        end
+        type a[T < Array[void]] = 1
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < void] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < self] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < class] end")
+    end
+    assert_equal "a.rbs:1:12...1:17: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < instance] end")
+    end
+    assert_equal "a.rbs:1:12...1:20: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < void] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < self] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < class] end")
+    end
+    assert_equal "a.rbs:1:13...1:18: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < instance] end")
+    end
+    assert_equal "a.rbs:1:13...1:21: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < void] end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < self] end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < class] end")
+    end
+    assert_equal "a.rbs:1:17...1:22: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < instance] end")
+    end
+    assert_equal "a.rbs:1:17...1:25: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < void] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:15: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < self] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:15: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < class] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:16: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < instance] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:19: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_default_type
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class C[T = void]
+        end
+        class CA[T = Array[void]]
+        end
+        module M[T = void]
+        end
+        module MA[T = Array[void]]
+        end
+        interface _I[T = void]
+        end
+        interface _IA[T = Array[void]]
+        end
+        type a[T = void] = 1
+        type aa[T = Array[void]] = 1
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = [void]] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = self] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = class] end")
+    end
+    assert_equal "a.rbs:1:12...1:17: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = instance] end")
+    end
+    assert_equal "a.rbs:1:12...1:20: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = [void]] end")
+    end
+    assert_equal "a.rbs:1:14...1:18: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = self] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = class] end")
+    end
+    assert_equal "a.rbs:1:13...1:18: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = instance] end")
+    end
+    assert_equal "a.rbs:1:13...1:21: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = [void]] end")
+    end
+    assert_equal "a.rbs:1:18...1:22: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = self] end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = class] end")
+    end
+    assert_equal "a.rbs:1:17...1:22: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = instance] end")
+    end
+    assert_equal "a.rbs:1:17...1:25: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = [void]] = 1")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = self] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:15: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = class] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:16: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = instance] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:19: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
 end
