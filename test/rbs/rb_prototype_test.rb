@@ -174,7 +174,7 @@ class Hello
 
   def hash4: () -> ::Hash[:foo | untyped, 1 | untyped]
 
-  def self1: () -> self
+  def self1: () -> untyped
 end
     EOF
   end
@@ -763,7 +763,7 @@ G: ::Array[1 | 2 | 3]
 
 H: { id: 123 }
 
-I: self
+I: untyped
     EOF
   end
 

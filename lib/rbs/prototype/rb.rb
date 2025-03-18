@@ -671,7 +671,7 @@ module RBS
             BuiltinNames::Hash.instance_type(key_type, value_type)
           end
         when :SELF
-          Types::Bases::Self.new(location: nil)
+          Types::Bases::Any.new(location: nil)
         when :CALL
           receiver, method_name, * = node.children
           case method_name
