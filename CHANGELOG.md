@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.9.0 (2025-03-18)
+
+### Miscellaneous
+
+* Update steep ([#2328](https://github.com/ruby/rbs/pull/2328))
+
 ## 3.9.0.pre.2 (2025-03-14)
 
 ### Signature updates
