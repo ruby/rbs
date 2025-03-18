@@ -112,9 +112,6 @@ EOU
             entry.each_decl do |decl|
               if super_class = decl.super_class
                 super_class.args.each do |arg|
-                  void_type_context_validator(arg, true)
-                  no_self_type_validator(arg)
-                  no_classish_type_validator(arg)
                   @validator.validate_type(arg, context: nil)
                 end
               end
@@ -123,9 +120,6 @@ EOU
             entry.each_decl do |decl|
               decl.self_types.each do |self_type|
                 self_type.args.each do |arg|
-                  void_type_context_validator(arg, true)
-                  no_self_type_validator(arg)
-                  no_classish_type_validator(arg)
                   @validator.validate_type(arg, context: nil)
                 end
 
@@ -153,9 +147,6 @@ EOU
 
           d.type_params.each do |param|
             if ub = param.upper_bound_type
-              void_type_context_validator(ub)
-              no_self_type_validator(ub)
-              no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
@@ -167,9 +158,6 @@ EOU
             end
 
             if dt = param.default_type
-              void_type_context_validator(dt, true)
-              no_self_type_validator(dt)
-              no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
           end
@@ -183,18 +171,7 @@ EOU
                 case member
                 when AST::Members::MethodDefinition
                   @validator.validate_method_definition(member, type_name: name)
-                  member.overloads.each do |ov|
-                    void_type_context_validator(ov.method_type)
-                  end
-                when AST::Members::Attribute
-                  void_type_context_validator(member.type)
                 when AST::Members::Mixin
-                  member.args.each do |arg|
-                    no_self_type_validator(arg)
-                    unless arg.is_a?(Types::Bases::Void)
-                      void_type_context_validator(arg, true)
-                    end
-                  end
                   params =
                     if member.name.class?
                       module_decl = @env.normalized_module_entry(member.name) or raise
@@ -206,10 +183,6 @@ EOU
                   InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
                 when AST::Members::Var
                   @validator.validate_variable(member)
-                  void_type_context_validator(member.type)
-                  if member.is_a?(AST::Members::ClassVariable)
-                    no_self_type_validator(member.type)
-                  end
                 end
               end
             else
@@ -245,9 +218,6 @@ EOU
 
           decl.decl.type_params.each do |param|
             if ub = param.upper_bound_type
-              void_type_context_validator(ub)
-              no_self_type_validator(ub)
-              no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
@@ -259,9 +229,6 @@ EOU
             end
 
             if dt = param.default_type
-              void_type_context_validator(dt, true)
-              no_self_type_validator(dt)
-              no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
           end
@@ -272,10 +239,6 @@ EOU
             case member
             when AST::Members::MethodDefinition
               @validator.validate_method_definition(member, type_name: name)
-              member.overloads.each do |ov|
-                void_type_context_validator(ov.method_type)
-                no_classish_type_validator(ov.method_type)
-              end
             end
           end
         rescue BaseError => error
@@ -288,9 +251,6 @@ EOU
           RBS.logger.info "Validating constant: `#{name}`..."
           @validator.validate_type const.decl.type, context: const.context
           @builder.ensure_namespace!(name.namespace, location: const.decl.location)
-          no_self_type_validator(const.decl.type)
-          no_classish_type_validator(const.decl.type)
-          void_type_context_validator(const.decl.type)
         rescue BaseError => error
           @errors.add(error)
         end
@@ -300,9 +260,6 @@ EOU
         @env.global_decls.each do |name, global|
           RBS.logger.info "Validating global: `#{name}`..."
           @validator.validate_type global.decl.type, context: nil
-          no_self_type_validator(global.decl.type)
-          no_classish_type_validator(global.decl.type)
-          void_type_context_validator(global.decl.type)
         rescue BaseError => error
           @errors.add(error)
         end
@@ -325,9 +282,6 @@ EOU
 
           decl.decl.type_params.each do |param|
             if ub = param.upper_bound_type
-              void_type_context_validator(ub)
-              no_self_type_validator(ub)
-              no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
@@ -339,43 +293,13 @@ EOU
             end
 
             if dt = param.default_type
-              void_type_context_validator(dt, true)
-              no_self_type_validator(dt)
-              no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
           end
 
           TypeParamDefaultReferenceError.check!(decl.decl.type_params)
-
-          no_self_type_validator(decl.decl.type)
-          no_classish_type_validator(decl.decl.type)
-          void_type_context_validator(decl.decl.type)
         rescue BaseError => error
           @errors.add(error)
-        end
-      end
-
-      private
-
-      def no_self_type_validator(type)
-        if type.has_self_type?
-          @errors.add WillSyntaxError.new("`self` type is not allowed in this context", location: type.location)
-        end
-      end
-
-      def no_classish_type_validator(type)
-        if type.has_classish_type?
-          @errors.add WillSyntaxError.new("`instance` or `class` type is not allowed in this context", location: type.location)
-        end
-      end
-
-      def void_type_context_validator(type, allowed_here = false)
-        if allowed_here
-          return if type.is_a?(Types::Bases::Void)
-        end
-        if type.with_nonreturn_void?
-          @errors.add WillSyntaxError.new("`void` type is only allowed in return type or generics parameter", location: type.location)
         end
       end
     end
