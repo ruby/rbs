@@ -1729,7 +1729,7 @@ module Kernel : BasicObject
   def self?.sleep: (?nil) -> bot
                  | (Time::_Timeout duration) -> Integer
 
-  %a{steep:deprecated}
+  %a{deprecated}
   interface _Divmod
     def divmod: (Numeric) -> [ Numeric, Numeric ]
   end

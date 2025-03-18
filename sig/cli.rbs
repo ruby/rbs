@@ -80,6 +80,8 @@ module RBS
 
     def run_subtract: (Array[String], top) -> void
 
+    def run_diff: (Array[String], LibraryOptions) -> void
+
     def test_opt: (LibraryOptions) -> String?
 
     def collection_options: (Array[String]) -> OptionParser

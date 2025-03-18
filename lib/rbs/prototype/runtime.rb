@@ -250,6 +250,8 @@ module RBS
               method = builder.build_singleton(module_name.absolute!).methods[singleton]
               method_name = singleton
               kind = :singleton
+            else
+              raise
             end
 
             if method
@@ -462,6 +464,7 @@ module RBS
             name: to_type_name(name.to_s),
             type: type,
             location: nil,
+            annotations: [],
             comment: nil
           )
         end

@@ -382,7 +382,8 @@ module RBS
             name: const_name,
             type: type,
             location: nil,
-            comment: comments[node.first_lineno - 1]
+            comment: comments[node.first_lineno - 1],
+            annotations: []
           )
 
         when :IASGN

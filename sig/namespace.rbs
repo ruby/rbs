@@ -142,5 +142,5 @@ end
 
 module Kernel
   # Deprecated: Use `RBS::Namespace.parse` instead
-  %a{steep:deprecated} def Namespace: (String) -> RBS::Namespace
+  %a{deprecated} def Namespace: (String) -> RBS::Namespace
 end

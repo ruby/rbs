@@ -109,17 +109,13 @@ module RBS
       class Any < Base
         def initialize(location:, todo: false)
           super(location: location)
-          todo! if todo
+          if todo
+            @string = "__todo__"
+          end
         end
 
         def to_s(level=0)
           @string || "untyped"
-        end
-
-        # @deprecated: this method is now called from the constructor, do not call it from outside
-        def todo!
-          @string = '__todo__'
-          self
         end
       end
       class Nil < Base; end
