@@ -3,11 +3,9 @@ module RBS
     class Validate
       class Errors
         @limit: Integer?
-        @exit_error: boolish
-        @has_syntax_error: bool
         @errors: Array[BaseError]
 
-        def initialize: (limit: Integer?, exit_error: boolish) -> void
+        def initialize: (limit: Integer?) -> void
 
         def add: (BaseError) -> void
 
