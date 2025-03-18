@@ -4,31 +4,18 @@ module RBS
   class CLI
     class Validate
       class Errors
-        def initialize(limit:, exit_error:)
+        def initialize(limit:)
           @limit = limit
-          @exit_error = exit_error
           @errors = []
-          @has_syntax_error = false
         end
 
         def add(error)
-          if error.instance_of?(WillSyntaxError)
-            RBS.logger.warn(build_message(error))
-            @has_syntax_error = true
-          else
-            @errors << error
-          end
+          @errors << error
           finish if @limit == 1
         end
 
         def finish
-          if @errors.empty?
-            if @exit_error && @has_syntax_error
-              exit 1
-            else
-              # success
-            end
-          else
+          unless @errors.empty?
             @errors.each do |error|
               RBS.logger.error(build_message(error))
             end
@@ -53,7 +40,6 @@ module RBS
         @env = Environment.from_loader(loader).resolve_type_names
         @builder = DefinitionBuilder.new(env: @env)
         @validator = Validator.new(env: @env)
-        exit_error = false
         limit = nil #: Integer?
         OptionParser.new do |opts|
           opts.banner = <<EOU
@@ -70,14 +56,14 @@ EOU
             RBS.print_warning { "`--silent` option is deprecated because it's silent by default. You can use --log-level option of rbs command to display more information." }
           end
           opts.on("--[no-]exit-error-on-syntax-error", "exit(1) if syntax error is detected") {|bool|
-            exit_error = bool
+            RBS.print_warning { "`--[no-]exit-error-on-syntax-error` option is deprecated because it's built in during parsing." }
           }
           opts.on("--fail-fast", "Exit immediately as soon as a validation error is found.") do |arg|
             limit = 1
           end
         end.parse!(args)
 
-        @errors = Errors.new(limit: limit, exit_error: exit_error)
+        @errors = Errors.new(limit: limit)
       end
 
       def run
