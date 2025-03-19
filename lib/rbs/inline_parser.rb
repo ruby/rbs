@@ -57,6 +57,21 @@ module RBS
 
       class VariableAnnotationInSingletonClassError < Base
       end
+
+      class TopLevelAliasError < Base
+      end
+
+      class MethodNameAliasNonLiteralError < Base
+      end
+
+      class UnexpectedSingletonClassMemberError < Base
+      end
+
+      class TopLevelMethodDefinition < Base
+      end
+
+      class TopLevelMixinError < Base
+      end
     end
 
     def self.enabled?(result, default:)
@@ -425,15 +440,32 @@ module RBS
           end
         end
 
-        if node.receiver
-          member = AST::Ruby::Members::DefSingletonMember.new(buffer, node)
-          return unless member.self?
-        else
+        case context = current_context
+        when AST::Ruby::Declarations::SingletonClassDecl
+          if node.receiver
+            diagnostics << Diagnostics::UnexpectedSingletonClassMemberError.new(
+              buffer.rbs_location(node.location),
+              "Singleton class cannot have singleton method definition"
+            )
+            return
+          end
           member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations)
-        end
-
-        if current_context
-          current_context.members << member
+          context.members << member
+        when AST::Ruby::Declarations::ModuleDecl, AST::Ruby::Declarations::ClassDecl
+          if node.receiver
+            member = AST::Ruby::Members::DefSingletonMember.new(buffer, node)
+            if member.self?
+              context.members << member
+            end
+          else
+            member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations)
+            current_context.members << member
+          end
+        else
+          diagnostics << Diagnostics::TopLevelMethodDefinition.new(
+            buffer.rbs_location(node.location),
+            "Method definition outside of class/module definition is ignored"
+          )
         end
       end
 
@@ -452,14 +484,52 @@ module RBS
       end
 
       def visit_call_node(node)
-        member =
-          visibility_member?(node) ||
-            mixin_member?(node) ||
-            nil
-
-        if member
+        case
+        when member = visibility_member?(node)
           current_context!.members << member
+        when member = mixin_member?(node)
+          case context = current_context
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            context.members << member
+          when AST::Ruby::Declarations::SingletonClassDecl
+            diagnostics << Diagnostics::UnexpectedSingletonClassMemberError.new(
+              buffer.rbs_location(node.location),
+              "Singleton class cannot have mixin definition"
+            )
+          else
+            # mixin_member? confirms if the context present
+            raise
+          end
         end
+      end
+
+      def visit_alias_method_node(node)
+        unless current_context
+          diagnostics << Diagnostics::TopLevelAliasError.new(
+            buffer.rbs_location(node.location),
+            "Alias definition outside of class/module definition is ignored"
+          )
+          return
+        end
+
+        unless node.old_name.is_a?(Prism::SymbolNode)
+          diagnostics << Diagnostics::MethodNameAliasNonLiteralError.new(
+            buffer.rbs_location(node.old_name.location),
+            "Method alias cannot have non-literal name"
+          )
+          return
+        end
+
+        unless node.new_name.is_a?(Prism::SymbolNode)
+          diagnostics << Diagnostics::MethodNameAliasNonLiteralError.new(
+            buffer.rbs_location(node.new_name.location),
+            "Method alias cannot have non-literal name"
+          )
+          return
+        end
+
+        member = AST::Ruby::Members::AliasMember.new(buffer, node)
+        current_context!.members << member
       end
 
       def visibility_member?(node)

@@ -22,6 +22,11 @@ module RBS
              | UnusedAnnotation
              | AnnotationSyntaxError
              | VariableAnnotationInSingletonClassError
+             | TopLevelAliasError
+             | MethodNameAliasNonLiteralError
+             | UnexpectedSingletonClassMemberError
+             | TopLevelMethodDefinition
+             | TopLevelMixinError
 
       class Base
         attr_reader message: String
@@ -69,6 +74,26 @@ module RBS
 
       # `@rbs @ivar: ...`, `@rbs self.@ivar: ...`, and `@rbs @@var: ...` annotations cannot be written in singleton class definition
       class VariableAnnotationInSingletonClassError < Base
+      end
+
+      # `alias method method` syntax is not allowed at the top level
+      class TopLevelAliasError < Base
+      end
+
+      # Method name alias with non-literal value
+      class MethodNameAliasNonLiteralError < Base
+      end
+
+      # Unexpected member in singleton class definition
+      class UnexpectedSingletonClassMemberError < Base
+      end
+
+      # `def` syntax at top level
+      class TopLevelMethodDefinition < Base
+      end
+
+      # include/prepend/extend call at top level
+      class TopLevelMixinError < Base
       end
     end
 

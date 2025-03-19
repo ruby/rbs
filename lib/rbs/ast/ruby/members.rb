@@ -375,6 +375,37 @@ module RBS
           end
         end
 
+        class AliasMember < Base
+          attr_reader :node
+
+          def initialize(buffer, node)
+            @node = node
+            super(buffer)
+          end
+
+          def location
+            buffer.rbs_location(node.location)
+          end
+
+          def old_name
+            case old_name = node.old_name
+            when Prism::SymbolNode
+              (old_name.value || "").to_sym
+            else
+              raise
+            end
+          end
+
+          def new_name
+            case new_name = node.new_name
+            when Prism::SymbolNode
+              (new_name.value || "").to_sym
+            else
+              raise
+            end
+          end
+        end
+
         class MixinMember < Base
           attr_reader :node
 

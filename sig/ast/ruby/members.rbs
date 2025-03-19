@@ -140,9 +140,13 @@ module RBS
         class AliasMember < Base
           attr_reader node: Prism::AliasMethodNode
 
-          def initialize: (Prism::AliasMethodNode) -> void
+          def initialize: (Buffer, Prism::AliasMethodNode) -> void
 
           def location: () -> Location
+
+          def new_name: () -> Symbol
+
+          def old_name: () -> Symbol
         end
 
         # include, extend, and prepend

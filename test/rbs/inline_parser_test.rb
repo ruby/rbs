@@ -151,6 +151,183 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_equal 1, ret.declarations.size
   end
 
+  def test_parse__singleton_class_decl__possible_members
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        class <<self
+          def foo = 123
+
+          alias bar foo
+
+          public
+
+          private
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_empty ret.diagnostics
+
+    assert_equal 1, ret.declarations.size
+    ret.declarations[0].tap do |klass|
+      klass.members[0].tap do |sclass|
+        assert_instance_of RBS::AST::Ruby::Declarations::SingletonClassDecl, sclass
+
+        assert_equal 4, sclass.members.size
+      end
+    end
+  end
+
+  def test_error__singleton_class_decl__singleton_def
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        class <<self
+          def self.foo = 123
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::UnexpectedSingletonClassMemberError, _1
+      assert_equal "def self.foo = 123", _1.location.source
+    end
+
+    ret.declarations[0].tap do |klass|
+      klass.members[0].tap do |sclass|
+        assert_instance_of RBS::AST::Ruby::Declarations::SingletonClassDecl, sclass
+        assert_empty sclass.members
+      end
+    end
+  end
+
+  def test_error__singleton_class_decl__mixin
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        class <<self
+          include Bar
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::UnexpectedSingletonClassMemberError, _1
+      assert_equal "include Bar", _1.location.source
+    end
+
+    ret.declarations[0].tap do |klass|
+      klass.members[0].tap do |sclass|
+        assert_instance_of RBS::AST::Ruby::Declarations::SingletonClassDecl, sclass
+        assert_empty sclass.members
+      end
+    end
+  end
+
+  def test_error__singleton_class_decl__ivar_annotation
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        class <<self
+          # @rbs @foo: String
+          # @rbs! @bar: String
+        end
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::VariableAnnotationInSingletonClassError, _1
+      assert_equal "@rbs @foo: String", _1.location.source
+    end
+
+    ret.declarations[0].tap do |klass|
+      klass.members[0].tap do |sclass|
+        assert_instance_of RBS::AST::Ruby::Declarations::SingletonClassDecl, sclass
+        assert_empty sclass.members
+      end
+    end
+  end
+
+  def test_error__method_def__toplevel
+    buffer, result = parse_ruby(<<~RUBY)
+      def foo = 123
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::TopLevelMethodDefinition, _1
+      assert_equal "def foo = 123", _1.location.source
+    end
+
+    assert_empty ret.declarations
+  end
+
+  def test_parse__alias__class_module
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        alias foo :bar
+      end
+
+      module Bar
+        alias :foo bar
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_empty ret.diagnostics
+
+    ret.declarations[0].tap do |klass|
+      assert_any!(klass.members) do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AliasMember, member
+        assert_equal "alias foo :bar", member.location.source
+        assert_equal :foo, member.new_name
+        assert_equal :bar, member.old_name
+      end
+    end
+
+    ret.declarations[1].tap do |klass|
+      assert_any!(klass.members) do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AliasMember, member
+        assert_equal "alias :foo bar", member.location.source
+        assert_equal :foo, member.new_name
+        assert_equal :bar, member.old_name
+      end
+    end
+  end
+
+  def test_error__alias__class_module__non_literal
+    buffer, result = parse_ruby(<<~'RUBY')
+      class Foo
+        alias :"foo#{1+2}" bar
+
+        alias foo :"bar#{1+2}"
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::MethodNameAliasNonLiteralError, _1
+      assert_equal ':"foo#{1+2}"', _1.location.source
+    end
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::MethodNameAliasNonLiteralError, _1
+      assert_equal ':"bar#{1+2}"', _1.location.source
+    end
+
+    ret.declarations[0].tap do |klass|
+      assert_empty klass.members
+    end
+  end
+
   def test_parse__module_decl__no_const_name
     buffer, result = parse_ruby(<<~RUBY)
       module c::Foo
