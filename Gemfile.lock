@@ -27,7 +27,7 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    ast (2.4.2)
+    ast (2.4.3)
     base64 (0.2.0)
     benchmark (0.4.0)
     benchmark-ips (2.14.0)
@@ -73,7 +73,7 @@ GEM
       racc (~> 1.4)
     ostruct (0.6.1)
     parallel (1.26.3)
-    parser (3.3.7.1)
+    parser (3.3.7.2)
       ast (~> 2.4.1)
       racc
     pathname (0.4.0)
