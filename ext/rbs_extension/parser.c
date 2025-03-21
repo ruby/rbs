@@ -93,8 +93,8 @@ static VALUE rbs_location_current_token(parserstate *state) {
   );
 }
 
-static VALUE parse_optional(parserstate *state);
-static VALUE parse_simple(parserstate *state);
+static VALUE parse_optional(parserstate *state, ValidationContext vc);
+static VALUE parse_simple(parserstate *state, ValidationContext vc);
 
 static VALUE string_of_loc(parserstate *state, position start, position end) {
   return rb_enc_str_new(
@@ -235,10 +235,10 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   type_list ::= {} type `,` ... <`,`> eol
               | {} type `,` ... `,` <type> eol
 */
-static void parse_type_list(parserstate *state, enum TokenType eol, VALUE *types) {
+static void parse_type_list(parserstate *state, enum TokenType eol, VALUE *types, ValidationContext vc) {
   while (true) {
     melt_array(types);
-    rb_ary_push(*types, parse_type(state));
+    rb_ary_push(*types, parse_type(state, vc));
 
     if (state->next_token.type == pCOMMA) {
       parser_advance(state);
@@ -280,10 +280,10 @@ static bool is_keyword_token(enum TokenType type) {
   function_param ::= {} <type>
                    | {} type <param>
 */
-static VALUE parse_function_param(parserstate *state) {
+static VALUE parse_function_param(parserstate *state, ValidationContext vc) {
   range type_range;
   type_range.start = state->next_token.range.start;
-  VALUE type = parse_type(state);
+  VALUE type = parse_type(state, vc);
   type_range.end = state->current_token.range.end;
 
   if (state->next_token.type == pCOMMA || state->next_token.type == pRPAREN) {
@@ -364,7 +364,7 @@ static void parse_keyword(parserstate *state, VALUE *keywords, VALUE memo) {
   }
 
   parser_advance_assert(state, pCOLON);
-  VALUE param = parse_function_param(state);
+  VALUE param = parse_function_param(state, vcNull);
 
   melt_hash(keywords);
   rb_hash_aset(*keywords, key, param);
@@ -423,7 +423,7 @@ static bool is_keyword(parserstate *state) {
              | {} `?` <optional_keyword>
              | {} `**` <function_param>
 */
-static void parse_params(parserstate *state, method_params *params) {
+static void parse_params(parserstate *state, method_params *params, ValidationContext vc) {
   if (state->next_token.type == pQUESTION && state->next_token2.type == pRPAREN) {
     params->required_positionals = Qnil;
     parser_advance(state);
@@ -453,7 +453,7 @@ static void parse_params(parserstate *state, method_params *params) {
           goto PARSE_KEYWORDS;
         }
 
-        param = parse_function_param(state);
+        param = parse_function_param(state, vc);
         melt_array(&params->required_positionals);
         rb_ary_push(params->required_positionals, param);
 
@@ -479,7 +479,7 @@ PARSE_OPTIONAL_PARAMS:
           goto PARSE_KEYWORDS;
         }
 
-        param = parse_function_param(state);
+        param = parse_function_param(state, vc);
         melt_array(&params->optional_positionals);
         rb_ary_push(params->optional_positionals, param);
 
@@ -496,7 +496,7 @@ PARSE_OPTIONAL_PARAMS:
 PARSE_REST_PARAM:
   if (state->next_token.type == pSTAR) {
     parser_advance(state);
-    params->rest_positionals = parse_function_param(state);
+    params->rest_positionals = parse_function_param(state, vc);
 
     if (!parser_advance_if(state, pCOMMA)) {
       goto EOP;
@@ -523,7 +523,7 @@ PARSE_TRAILING_PARAMS:
           goto PARSE_KEYWORDS;
         }
 
-        param = parse_function_param(state);
+        param = parse_function_param(state, vc);
         melt_array(&params->trailing_positionals);
         rb_ary_push(params->trailing_positionals, param);
 
@@ -553,7 +553,7 @@ PARSE_KEYWORDS:
 
     case pSTAR2:
       parser_advance(state);
-      params->rest_keywords = parse_function_param(state);
+      params->rest_keywords = parse_function_param(state, vc);
       break;
 
     case tUIDENT:
@@ -599,11 +599,11 @@ EOP:
   optional ::= {} <simple_type>
              | {} simple_type <`?`>
 */
-static VALUE parse_optional(parserstate *state) {
+static VALUE parse_optional(parserstate *state, ValidationContext vc) {
   range rg;
   rg.start = state->next_token.range.start;
 
-  VALUE type = parse_simple(state);
+  VALUE type = parse_simple(state, vc);
 
   if (state->next_token.type == pQUESTION) {
     parser_advance(state);
@@ -631,12 +631,12 @@ static void initialize_method_params(method_params *params){
   self_type_binding ::= {} <>
                       | {} `[` `self` `:` type <`]`>
 */
-static VALUE parse_self_type_binding(parserstate *state) {
+static VALUE parse_self_type_binding(parserstate *state, ValidationContext vc) {
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
     parser_advance_assert(state, kSELF);
     parser_advance_assert(state, pCOLON);
-    VALUE type = parse_type(state);
+    VALUE type = parse_type(state, vc);
     parser_advance_assert(state, pRBRACKET);
     return type;
   } else {
@@ -651,19 +651,21 @@ static VALUE parse_self_type_binding(parserstate *state) {
              | {} self_type_binding? `{` self_type_binding `->` optional `}` `->` <optional>
              | {} self_type_binding? `->` <optional>
 */
-static void parse_function(parserstate *state, VALUE *function, VALUE *block, VALUE *function_self_type) {
+static void parse_function(parserstate *state, VALUE *function, VALUE *block, VALUE *function_self_type, ValidationContext vc) {
+  ValidationContext vc_no_void_allowed_here = vc;
+  vc_no_void_allowed_here |= vcNoVoidAllowedHere;
   method_params params;
   initialize_method_params(&params);
 
   if (state->next_token.type == pLPAREN) {
     parser_advance(state);
-    parse_params(state, &params);
+    parse_params(state, &params, vc);
     parser_advance_assert(state, pRPAREN);
   }
 
   // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
   if (function_self_type) {
-    *function_self_type = parse_self_type_binding(state);
+    *function_self_type = parse_self_type_binding(state, vc);
   } else {
     // Parsing method type. untyped_params means it cannot have a block
     if (rbs_is_untyped_params(&params)) {
@@ -687,14 +689,14 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
 
     if (state->next_token.type == pLPAREN) {
       parser_advance(state);
-      parse_params(state, &block_params);
+      parse_params(state, &block_params, vc);
       parser_advance_assert(state, pRPAREN);
     }
 
-    VALUE block_self_type = parse_self_type_binding(state);
+    VALUE block_self_type = parse_self_type_binding(state, vc);
 
     parser_advance_assert(state, pARROW);
-    VALUE block_return_type = parse_optional(state);
+    VALUE block_return_type = parse_optional(state, vc_no_void_allowed_here);
 
     VALUE block_function = Qnil;
     if (rbs_is_untyped_params(&block_params)) {
@@ -718,7 +720,7 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
   }
 
   parser_advance_assert(state, pARROW);
-  VALUE type = parse_optional(state);
+  VALUE type = parse_optional(state, vc_no_void_allowed_here);
 
   if (rbs_is_untyped_params(&params)) {
     *function = rbs_untyped_function(type);
@@ -739,12 +741,13 @@ static void parse_function(parserstate *state, VALUE *function, VALUE *block, VA
 /*
   proc_type ::= {`^`} <function>
 */
-static VALUE parse_proc_type(parserstate *state) {
+static VALUE parse_proc_type(parserstate *state, ValidationContext vc) {
   position start = state->current_token.range.start;
   VALUE function = Qnil;
   VALUE block = Qnil;
   VALUE proc_self = Qnil;
-  parse_function(state, &function, &block, &proc_self);
+
+  parse_function(state, &function, &block, &proc_self, vc);
   position end = state->current_token.range.end;
   VALUE loc = rbs_location_pp(state->buffer, &start, &end);
 
@@ -771,7 +774,7 @@ static void check_key_duplication(parserstate *state, VALUE fields, VALUE key) {
   record_attribute ::= {} keyword_token `:` <type>
                      | {} literal_type `=>` <type>
 */
-static VALUE parse_record_attributes(parserstate *state) {
+static VALUE parse_record_attributes(parserstate *state, ValidationContext vc) {
   VALUE fields = rb_hash_new();
 
   if (state->next_token.type == pRBRACE) {
@@ -805,7 +808,7 @@ static VALUE parse_record_attributes(parserstate *state) {
       case tINTEGER:
       case kTRUE:
       case kFALSE: {
-        key = rb_funcall(parse_simple(state), rb_intern("literal"), 0);
+        key = rb_funcall(parse_simple(state, vc), rb_intern("literal"), 0);
         break;
       }
       default:
@@ -818,7 +821,7 @@ static VALUE parse_record_attributes(parserstate *state) {
       check_key_duplication(state, fields, key);
       parser_advance_assert(state, pFATARROW);
     }
-    type = parse_type(state);
+    type = parse_type(state, vc);
     rb_ary_push(value, type);
     rb_ary_push(value, required);
     rb_hash_aset(fields, key, value);
@@ -903,7 +906,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, &types);
+      parse_type_list(state, pRBRACKET, &types, vcNoVoidAllowedHere);
       parser_advance_assert(state, pRBRACKET);
       args_range.end = state->current_token.range.end;
     } else {
@@ -967,12 +970,17 @@ static VALUE parse_singleton_type(parserstate *state) {
            | {} `{` record_attributes <`}`>
            | {} `^` <function>
 */
-static VALUE parse_simple(parserstate *state) {
+static VALUE parse_simple(parserstate *state, ValidationContext vc) {
   parser_advance(state);
+
+  if (state->current_token.type != kVOID) {
+    vc &= ~vcNoVoidAllowedHere;
+  }
+  // vc = vcNull;
 
   switch (state->current_token.type) {
   case pLPAREN: {
-    VALUE type = parse_type(state);
+    VALUE type = parse_type(state, vc);
     parser_advance_assert(state, pRPAREN);
     return type;
   }
@@ -983,21 +991,50 @@ static VALUE parse_simple(parserstate *state) {
     return rbs_bases_bottom(rbs_location_current_token(state));
   }
   case kCLASS: {
+    if ((vc & vcNoClassish) == vcNoClassish) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "`class` type is not allowed in this context"
+      );
+    }
     return rbs_bases_class(rbs_location_current_token(state));
   }
   case kINSTANCE: {
+    if ((vc & vcNoClassish) == vcNoClassish) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "`instance` type is not allowed in this context"
+      );
+    }
     return rbs_bases_instance(rbs_location_current_token(state));
   }
   case kNIL: {
     return rbs_bases_nil(rbs_location_current_token(state));
   }
   case kSELF: {
+    if ((vc & vcNoSelf) == vcNoSelf) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "`self` type is not allowed in this context"
+      );
+    }
     return rbs_bases_self(rbs_location_current_token(state));
   }
   case kTOP: {
     return rbs_bases_top(rbs_location_current_token(state));
   }
   case kVOID: {
+    if (((vc & vcNoVoid) == vcNoVoid) &&
+        ((vc & vcNoVoidAllowedHere) == 0)) {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "`void` type is only allowed in return type or generics parameter"
+      );
+    }
     return rbs_bases_void(rbs_location_current_token(state));
   }
   case kUNTYPED: {
@@ -1061,7 +1098,7 @@ static VALUE parse_simple(parserstate *state) {
     rg.start = state->current_token.range.start;
     VALUE types = EMPTY_ARRAY;
     if (state->next_token.type != pRBRACKET) {
-      parse_type_list(state, pRBRACKET, &types);
+      parse_type_list(state, pRBRACKET, &types, vc);
     }
     parser_advance_assert(state, pRBRACKET);
     rg.end = state->current_token.range.end;
@@ -1073,14 +1110,14 @@ static VALUE parse_simple(parserstate *state) {
   }
   case pLBRACE: {
     position start = state->current_token.range.start;
-    VALUE fields = parse_record_attributes(state);
+    VALUE fields = parse_record_attributes(state, vc);
     parser_advance_assert(state, pRBRACE);
     position end = state->current_token.range.end;
     VALUE location = rbs_location_pp(state->buffer, &start, &end);
     return rbs_record(fields, location);
   }
   case pHAT: {
-    return parse_proc_type(state);
+    return parse_proc_type(state, vc);
   }
   default:
     raise_syntax_error(
@@ -1095,9 +1132,9 @@ static VALUE parse_simple(parserstate *state) {
   intersection ::= {} optional `&` ... '&' <optional>
                  | {} <optional>
 */
-static VALUE parse_intersection(parserstate *state) {
+static VALUE parse_intersection(parserstate *state, ValidationContext vc) {
   position start = state->next_token.range.start;
-  VALUE type = parse_optional(state);
+  VALUE type = parse_optional(state, vc);
   if (state->next_token.type != pAMP) {
     return type;
   }
@@ -1106,7 +1143,7 @@ static VALUE parse_intersection(parserstate *state) {
   rb_ary_push(intersection_types, type);
   while (state->next_token.type == pAMP) {
     parser_advance(state);
-    rb_ary_push(intersection_types, parse_optional(state));
+    rb_ary_push(intersection_types, parse_optional(state, vc));
   }
   range rg = (range) {
     .start = start,
@@ -1120,9 +1157,9 @@ static VALUE parse_intersection(parserstate *state) {
   union ::= {} intersection '|' ... '|' <intersection>
           | {} <intersection>
 */
-VALUE parse_type(parserstate *state) {
+VALUE parse_type(parserstate *state, ValidationContext vc) {
   position start = state->next_token.range.start;
-  VALUE type = parse_intersection(state);
+  VALUE type = parse_intersection(state, vc);
   if (state->next_token.type != pBAR) {
     return type;
   }
@@ -1131,7 +1168,7 @@ VALUE parse_type(parserstate *state) {
   rb_ary_push(union_types, type);
   while (state->next_token.type == pBAR) {
     parser_advance(state);
-    rb_ary_push(union_types, parse_intersection(state));
+    rb_ary_push(union_types, parse_intersection(state, vc));
   }
   range rg = (range) {
     .start = start,
@@ -1211,7 +1248,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
       if (state->next_token.type == pLT) {
         parser_advance(state);
         upper_bound_range.start = state->current_token.range.start;
-        upper_bound = parse_type(state);
+        upper_bound = parse_type(state, vcNoVoid|vcNoSelf|vcNoClassish);
         upper_bound_range.end = state->current_token.range.end;
       }
 
@@ -1221,7 +1258,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
           parser_advance(state);
 
           default_type_range.start = state->current_token.range.start;
-          default_type = parse_type(state);
+          default_type = parse_type(state, vcNoVoid|vcNoVoidAllowedHere|vcNoSelf|vcNoClassish);
           default_type_range.end = state->current_token.range.end;
 
           required_param_allowed = false;
@@ -1280,7 +1317,7 @@ static VALUE parse_type_params(parserstate *state, range *rg, bool module_type_p
 /*
   method_type ::= {} type_params <function>
   */
-VALUE parse_method_type(parserstate *state) {
+VALUE parse_method_type(parserstate *state, ValidationContext vc) {
   parser_push_typevar_table(state, false);
 
   range rg;
@@ -1294,7 +1331,7 @@ VALUE parse_method_type(parserstate *state) {
 
   VALUE function = Qnil;
   VALUE block = Qnil;
-  parse_function(state, &function, &block, NULL);
+  parse_function(state, &function, &block, NULL, vc);
 
   rg.end = state->current_token.range.end;
   type_range.end = rg.end;
@@ -1329,7 +1366,7 @@ static VALUE parse_global_decl(parserstate *state, VALUE annotations) {
   parser_advance_assert(state, pCOLON);
   range colon_range = state->current_token.range;
 
-  VALUE type = parse_type(state);
+  VALUE type = parse_type(state, vcNoVoid|vcNoSelf|vcNoClassish);
   decl_range.end = state->current_token.range.end;
 
   VALUE location = rbs_new_location(state->buffer, decl_range);
@@ -1356,7 +1393,7 @@ static VALUE parse_const_decl(parserstate *state, VALUE annotations) {
   parser_advance_assert(state, pCOLON);
   range colon_range = state->current_token.range;
 
-  VALUE type = parse_type(state);
+  VALUE type = parse_type(state, vcNoVoid|vcNoSelf|vcNoClassish);
   decl_range.end = state->current_token.range.end;
 
   VALUE location = rbs_new_location(state->buffer, decl_range);
@@ -1391,7 +1428,7 @@ static VALUE parse_type_decl(parserstate *state, position comment_pos, VALUE ann
   parser_advance_assert(state, pEQ);
   range eq_range = state->current_token.range;
 
-  VALUE type = parse_type(state);
+  VALUE type = parse_type(state, vcNoVoid|vcNoSelf|vcNoClassish);
   decl_range.end = state->current_token.range.end;
 
   VALUE location = rbs_new_location(state->buffer, decl_range);
@@ -1685,7 +1722,7 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
     case pLBRACKET:
     case pQUESTION:
       {
-        VALUE method_type = parse_method_type(state);
+        VALUE method_type = parse_method_type(state, instance_only ? vcNoVoid|vcNoClassish : vcNoVoid);
         rb_ary_push(overloads, rbs_ast_members_method_definition_overload(annotations, method_type));
         member_range.end = state->current_token.range.end;
         break;
@@ -1766,7 +1803,7 @@ static VALUE parse_member_def(parserstate *state, bool instance_only, bool accep
  *
  * @param kind
  * */
-void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VALUE *args, range *name_range, range *args_range) {
+void class_instance_name(parserstate *state, TypeNameKind kind, ValidationContext vc, VALUE *name, VALUE *args, range *name_range, range *args_range) {
   parser_advance(state);
 
   *name = parse_type_name(state, kind, name_range);
@@ -1774,7 +1811,7 @@ void class_instance_name(parserstate *state, TypeNameKind kind, VALUE *name, VAL
   if (state->next_token.type == pLBRACKET) {
     parser_advance(state);
     args_range->start = state->current_token.range.start;
-    parse_type_list(state, pRBRACKET, args);
+    parse_type_list(state, pRBRACKET, args, vc);
     parser_advance_assert(state, pRBRACKET);
     args_range->end = state->current_token.range.end;
   } else {
@@ -1832,6 +1869,7 @@ static VALUE parse_mixin_member(parserstate *state, bool from_interface, positio
   class_instance_name(
     state,
     from_interface ? INTERFACE_NAME : (INTERFACE_NAME | CLASS_NAME),
+    vcNoVoid|vcNoVoidAllowedHere|vcNoSelf,
     &name, &args, &name_range, &args_range
   );
 
@@ -1926,7 +1964,7 @@ static VALUE parse_alias_member(parserstate *state, bool instance_only, position
                     | {kSELF} `.` tAIDENT `:` <type>
                     | {tA2IDENT} `:` <type>
 */
-static VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE annotations) {
+static VALUE parse_variable_member(parserstate *state, position comment_pos, VALUE annotations, ValidationContext vc) {
   if (rb_array_len(annotations) > 0) {
     raise_syntax_error(
       state,
@@ -1949,7 +1987,7 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     parser_advance_assert(state, pCOLON);
     range colon_range = state->current_token.range;
 
-    VALUE type = parse_type(state);
+    VALUE type = parse_type(state, vc);
     member_range.end = state->current_token.range.end;
 
     VALUE location = rbs_new_location(state->buffer, member_range);
@@ -1969,7 +2007,7 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
-    VALUE type = parse_type(state);
+    VALUE type = parse_type(state, vc);
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
@@ -1998,7 +2036,7 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     range colon_range = state->current_token.range;
 
     parser_push_typevar_table(state, true);
-    VALUE type = parse_type(state);
+    VALUE type = parse_type(state, vc);
     parser_pop_typevar_table(state);
     member_range.end = state->current_token.range.end;
 
@@ -2118,7 +2156,7 @@ static VALUE parse_attribute_member(parserstate *state, position comment_pos, VA
   range colon_range = state->current_token.range;
 
   parser_push_typevar_table(state, is_kind == SINGLETON_KIND);
-  VALUE type = parse_type(state);
+  VALUE type = parse_type(state, vcNoVoid);
   parser_pop_typevar_table(state);
   member_range.end = state->current_token.range.end;
 
@@ -2263,7 +2301,7 @@ static void parse_module_self_types(parserstate *state, VALUE *array) {
     if (state->next_token.type == pLBRACKET) {
       parser_advance(state);
       args_range.start = state->current_token.range.start;
-      parse_type_list(state, pRBRACKET, &args);
+      parse_type_list(state, pRBRACKET, &args, vcNoVoid|vcNoVoidAllowedHere|vcNoSelf|vcNoClassish);
       parser_advance(state);
       self_range.end = args_range.end = state->current_token.range.end;
     }
@@ -2332,7 +2370,11 @@ static VALUE parse_module_members(parserstate *state) {
     case tAIDENT:
     case tA2IDENT:
     case kSELF: {
-      member = parse_variable_member(state, annot_pos, annotations);
+      ValidationContext vc = vcNoVoid;
+      if (state->current_token.type == tA2IDENT) {
+        vc |= vcNoSelf;
+      }
+      member = parse_variable_member(state, annot_pos, annotations, vc);
       break;
     }
 
@@ -2489,7 +2531,12 @@ static VALUE parse_class_decl_super(parserstate *state, range *lt_range) {
     VALUE name;
     VALUE args = EMPTY_ARRAY;
     range name_range, args_range;
-    class_instance_name(state, CLASS_NAME, &name, &args, &name_range, &args_range);
+    class_instance_name(
+      state,
+      CLASS_NAME,
+      vcNoVoid|vcNoVoidAllowedHere|vcNoSelf|vcNoClassish,
+      &name, &args, &name_range, &args_range
+    );
 
     super_range.end = state->current_token.range.end;
 
@@ -2872,7 +2919,7 @@ parse_type_try(VALUE a) {
     return Qnil;
   }
 
-  VALUE type = parse_type(arg->parser);
+  VALUE type = parse_type(arg->parser, vcNull);
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance_assert(arg->parser, pEOF);
@@ -2903,7 +2950,7 @@ parse_method_type_try(VALUE a) {
     return Qnil;
   }
 
-  VALUE method_type = parse_method_type(arg->parser);
+  VALUE method_type = parse_method_type(arg->parser, vcNull);
 
   if (RB_TEST(arg->require_eof)) {
     parser_advance_assert(arg->parser, pEOF);
