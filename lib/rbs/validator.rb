@@ -158,8 +158,17 @@ module RBS
     def validate_class_alias(entry:)
       case env.normalize_module_name?(entry.decl.new_name)
       when nil
+        # Unreachable?
         raise NoTypeFoundError.new(type_name: entry.decl.old_name, location: entry.decl.location&.[](:old_name))
       when false
+        raise CyclicClassAliasDefinitionError.new(entry)
+      end
+
+      case env.normalize_module_name?(entry.decl.old_name)
+      when nil
+        raise NoTypeFoundError.new(type_name: entry.decl.old_name, location: entry.decl.location&.[](:old_name))
+      when false
+        # Unreachable?
         raise CyclicClassAliasDefinitionError.new(entry)
       end
 

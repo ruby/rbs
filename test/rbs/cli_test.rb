@@ -839,6 +839,38 @@ singleton(::BasicObject)
     end
   end
 
+  # https://github.com/ruby/rbs/issues/2293
+  def test_nested_module_alias
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          module Foo
+            module Bar
+              module M
+              end
+              module M2 = M
+            end
+
+            module Baz = Bar
+
+            module Bar::N = Bar::M
+
+            module X = Nothing
+          end
+
+          module Foo::Qux = Foo::Baz
+
+          module Foo::Y = Foo::Nothing
+        RBS
+        assert_raises SystemExit do
+          cli.run(["-I", dir, "validate"])
+        end
+        assert_include stdout.string, "a.rbs:12:13...12:20: Could not find Nothing (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:17:16...17:28: Could not find Foo::Nothing (RBS::NoTypeFoundError)"
+      end
+    end
+  end
+
   def test_constant
     with_cli do |cli|
       cli.run(%w(constant Pathname))

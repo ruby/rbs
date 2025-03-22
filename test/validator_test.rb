@@ -277,6 +277,65 @@ class Baz = Baz
     end
   end
 
+  # https://github.com/ruby/rbs/issues/2293
+  def test_validate_class_alias_in_namespace
+    SignatureManager.new do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module Foo
+  module Bar
+    module M
+    end
+    module M2 = M
+  end
+
+  module Baz = Bar
+
+  module Bar::N = Bar::M
+
+  module X = Nothing
+end
+
+module Foo::Qux = Foo::Baz
+
+module Foo::Y = Foo::Nothing
+EOF
+
+      manager.build do |env|
+        validator = RBS::Validator.new(env: env)
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::Baz")].tap do |entry|
+          assert_nothing_raised do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::Bar::N")].tap do |entry|
+          assert_nothing_raised do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::Bar::M2")].tap do |entry|
+          assert_nothing_raised do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::Qux")].tap do |entry|
+          assert_nothing_raised do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::X")].tap do |entry|
+          assert_raises RBS::NoTypeFoundError do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+        env.class_alias_decls[RBS::TypeName.parse("::Foo::Y")].tap do |entry|
+          assert_raises RBS::NoTypeFoundError do
+            validator.validate_class_alias(entry: entry)
+          end
+        end
+      end
+    end
+  end
+
   def test_validate_type__presence__module_alias_instance
     SignatureManager.new do |manager|
       manager.add_file("foo.rbs", <<-EOF)
