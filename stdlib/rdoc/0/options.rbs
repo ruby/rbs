@@ -1,0 +1,6 @@
+%a{annotate:rdoc:skip}
+module RDoc
+  class Options
+    def initialize: (?untyped loaded_options) -> void
+  end
+end
