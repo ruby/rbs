@@ -22,10 +22,14 @@ end
 Rake::TestTask.new(test: :compile, &test_config)
 
 unless Gem.win_platform?
-  require "ruby_memcheck"
+  begin
+    require "ruby_memcheck"
 
-  namespace :test do
-    RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
+    namespace :test do
+      RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
+    end
+  rescue LoadError => exn
+    STDERR.puts "🚨🚨🚨🚨 Skipping RubyMemcheck: #{exn.inspect} 🚨🚨🚨🚨"
   end
 end
 
