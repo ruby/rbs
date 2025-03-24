@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 3.9.1 (2025-03-24)
+
+### Miscellaneous
+
+* `did_you_mean` is a default gem ([#2348](https://github.com/ruby/rbs/pull/2348))
+* Skip loading ruby_memcheck ([#2347](https://github.com/ruby/rbs/pull/2347))
+
 ## 3.9.0 (2025-03-18)
 
 ### Miscellaneous
