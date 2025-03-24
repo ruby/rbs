@@ -453,7 +453,7 @@ module RBS
           context.members << member
         when AST::Ruby::Declarations::ModuleDecl, AST::Ruby::Declarations::ClassDecl
           if node.receiver
-            member = AST::Ruby::Members::DefSingletonMember.new(buffer, node)
+            member = AST::Ruby::Members::DefSingletonMember.new(buffer, node, name: node.name, inline_annotations: annotations)
             if member.self?
               context.members << member
             end

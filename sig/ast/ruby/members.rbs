@@ -59,6 +59,8 @@ module RBS
             ) -> void
 
             def construct_method_type: (Prism::ParametersNode?) -> MethodType
+
+            def empty?: () -> bool
           end
 
           type type_annotations = DocStyleTypeAnnotations | Array[Annotation::ColonMethodTypeAnnotation | Annotation::MethodTypesAnnotation] | nil
@@ -86,6 +88,9 @@ module RBS
             Array[Annotation::leading_annotation | CommentBlock::AnnotationSyntaxError],
             Annotation::trailing_annotation | CommentBlock::AnnotationSyntaxError | nil
           ]
+
+          # Returns `true` if it doesn't have any annotation
+          def empty?: () -> bool
         end
 
         class DefMember < Base
@@ -121,13 +126,17 @@ module RBS
         class DefSingletonMember < Base
           attr_reader buffer: Buffer
 
+          attr_reader name: Symbol
+
           attr_reader node: Prism::DefNode
 
-          def initialize: (Buffer, Prism::DefNode) -> void
+          attr_reader inline_annotations: DefAnnotations
+
+          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
 
           def overloads: () -> Array[Overload]
 
-          def name: () -> Symbol
+          def override?: () -> bool
 
           # Returns true if the receiver is `self`
           def self?: () -> bool
@@ -135,6 +144,8 @@ module RBS
           def annotations: () -> Array[AST::Annotation]
 
           def location: () -> Location
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
 
         class AliasMember < Base

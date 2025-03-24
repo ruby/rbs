@@ -153,6 +153,14 @@ module RBS
                 location: nil
               )
             end
+
+            def empty?
+              !return_type_annotation &&
+                param_type_annotations.empty? &&
+                !splat_type_annotation &&
+                !kwsplat_type_annotation &&
+                !block_type_annotation
+            end
           end
 
           attr_reader :type_annotations, :annotations, :override
@@ -274,6 +282,12 @@ module RBS
               unused_trailing_annotation
             ]
           end
+
+          def empty?
+            annotations.empty? && override.nil? && (
+              type_annotations.nil? || type_annotations.empty?
+            )
+          end
         end
 
         class DefMember < Base
@@ -337,41 +351,62 @@ module RBS
         end
 
         class DefSingletonMember < Base
-          attr_reader :node
+          attr_reader :node, :name, :inline_annotations
 
-          def initialize(buffer, node)
+          def initialize(buffer, node, name:, inline_annotations:)
             super(buffer)
             @node = node
+            @name = name
+            @inline_annotations = inline_annotations
           end
 
           def overloads
-            [
-              Overload.new(
-                MethodType.new(
-                  type_params: [],
-                  type: Types::UntypedFunction.new(return_type: Types::Bases::Any.new(location: nil)),
-                  block: nil,
-                  location: nil
-                ),
-                []
-              )
-            ]
-          end
-
-          def name
-            node.name
+            case inline_annotations.type_annotations
+            when DefAnnotations::DocStyleTypeAnnotations, nil
+              annots = inline_annotations.type_annotations || DefAnnotations::DocStyleTypeAnnotations.empty
+              method_type = annots.construct_method_type(node.parameters)
+              [
+                Overload.new(method_type, [])
+              ]
+            when Array
+              inline_annotations.type_annotations.flat_map do |annotation|
+                case annotation
+                when Annotation::ColonMethodTypeAnnotation
+                  [Overload.new(annotation.method_type.update(location: nil), annotation.annotations)]
+                when Annotation::MethodTypesAnnotation
+                  annotation.overloads.map do
+                    Overload.new(_1.method_type.update(location: nil), _1.annotations)
+                  end
+                end
+              end
+            end
           end
 
           def self?
             node.receiver.is_a?(Prism::SelfNode)
           end
 
+          def override?
+            inline_annotations.override ? true : false
+          end
+
           def annotations
-            []
+            inline_annotations.annotations.flat_map do |annotation|
+              annotation.annotations
+            end
           end
 
           def location
             buffer.rbs_location(node.location)
+          end
+
+          def map_type_name(&block)
+            DefSingletonMember.new(
+              buffer,
+              node,
+              name: name,
+              inline_annotations: inline_annotations.map_type_name(&block)
+            ) #: self
           end
         end
 
