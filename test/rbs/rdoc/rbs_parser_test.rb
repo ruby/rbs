@@ -5,7 +5,7 @@ require "rdoc_plugin/parser"
 class RDocPluginParserTest < Test::Unit::TestCase
   def parser(content)
     top_level = RDoc::TopLevel.new("a.rbs")
-    top_level.store = RDoc::Store.new()
+    top_level.store = RDoc::Store.new(RDoc::Options.new)
 
     RBS::RDocPlugin::Parser.new(top_level, content)
   end

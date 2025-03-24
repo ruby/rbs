@@ -26,7 +26,7 @@ module RDoc
     # -->
     # Creates a new Store of `type` that will load or save to `path`
     #
-    def initialize: (?String? path, ?Symbol? type) -> void
+    def initialize: (Options, ?path: String? , ?type: Symbol?) -> void
 
     # <!--
     #   rdoc-file=lib/rdoc/store.rb
