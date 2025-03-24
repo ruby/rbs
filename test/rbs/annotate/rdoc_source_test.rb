@@ -57,10 +57,10 @@ end
       assert_equal 1, klss.size
       klss[0].tap do |klass|
         assert_predicate klass, :documented?
-        assert_equal 1, klass.comment.parts.size
+        assert_equal 1, klass.comment.parse.parts.size
 
         assert_nil RBS::Annotate::Formatter.translate(klass.comment)
-        assert_equal "Document for Hello1", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
+        assert_equal "Document for Hello1", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
       end
     end
 
@@ -72,7 +72,7 @@ end
         refute_predicate klass, :documented?
 
         assert_nil RBS::Annotate::Formatter.translate(klass.comment)
-        assert_equal "", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
+        assert_equal "", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
       end
     end
 
@@ -82,10 +82,10 @@ end
       assert_equal 1, klss.size
       klss[0].tap do |klass|
         assert_predicate klass, :documented?
-        assert_equal 2, klass.comment.parts.size
+        assert_equal 2, klass.comment.parse.parts.size
 
-        assert_equal "Document (1) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
-        assert_equal "Document (2) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parts[1])
+        assert_equal "Document (1) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
+        assert_equal "Document (2) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[1])
       end
     end
   end

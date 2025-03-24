@@ -81,10 +81,17 @@ module RBS
         end
       end
 
-      def self.translate(doc)
-        if doc.file
+      def self.translate(doc_or_comment)
+        if doc_or_comment.file
           formatter = RDoc::Markup::ToMarkdown.new
-          doc.accept(formatter).strip.lines.map(&:rstrip).join("\n")
+          case doc_or_comment
+          when RDoc::Markup::Document
+            doc_or_comment
+          when RDoc::Comment
+            doc_or_comment.parse
+          else
+            raise "Unexpected comment class: #{doc_or_comment.class}"
+          end.accept(formatter).strip.lines.map(&:rstrip).join("\n")
         end
       end
     end
