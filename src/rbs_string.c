@@ -20,7 +20,7 @@ rbs_string_t rbs_string_copy_slice(rbs_allocator_t *allocator, rbs_string_t *sel
     return rbs_string_new(buffer, buffer + length);
 }
 
-rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *allocator, rbs_string_t *self) {
+rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     const char *new_start = self->start;
     while (isspace(*new_start) && new_start < self->end) {
         new_start++;
@@ -35,7 +35,7 @@ rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *allocator, rbs_string_
         new_end--;
     }
 
-    return rbs_string_copy_slice(allocator, self, new_start - self->start, new_end - new_start + 1);
+    return rbs_string_new(new_start, new_end + 1);
 }
 
 size_t rbs_string_len(const rbs_string_t self) {

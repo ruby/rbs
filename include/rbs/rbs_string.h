@@ -30,9 +30,9 @@ rbs_string_t rbs_string_copy_slice(rbs_allocator_t *, rbs_string_t *self, size_t
 
 /**
  * Drops the leading and trailing whitespace from the given string, in-place.
- * @returns A new owned string that will be freed when the allocator is freed.
+ * @returns A new string that provides a view into the original string `self`.
  */
-rbs_string_t rbs_string_strip_whitespace(rbs_allocator_t *, rbs_string_t *self);
+rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self);
 
 /**
  * Returns the length of the string.
