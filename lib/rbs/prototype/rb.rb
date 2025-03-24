@@ -372,8 +372,8 @@ module RBS
                        end
 
           value_node = node.children.last
-          type = if value_node.nil?
-                  # Give up type prediction when node is MASGN.
+          type = if value_node.nil? || value_node.type == :SELF
+                  # Give up type prediction when node is MASGN or SELF.
                   Types::Bases::Any.new(location: nil)
                 else
                   literal_to_type(value_node)
@@ -671,7 +671,7 @@ module RBS
             BuiltinNames::Hash.instance_type(key_type, value_type)
           end
         when :SELF
-          Types::Bases::Any.new(location: nil)
+          Types::Bases::Self.new(location: nil)
         when :CALL
           receiver, method_name, * = node.children
           case method_name
