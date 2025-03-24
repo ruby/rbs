@@ -6,11 +6,13 @@ module RBS
       attr_reader :parent_variable
       attr_reader :type
       attr_reader :declared_in
+      attr_reader :source
 
-      def initialize(parent_variable:, type:, declared_in:)
+      def initialize(parent_variable:, type:, declared_in:, source:)
         @parent_variable = parent_variable
         @type = type
         @declared_in = declared_in
+        @source = source
       end
 
       def sub(s)
@@ -19,7 +21,8 @@ module RBS
         self.class.new(
           parent_variable: parent_variable,
           type: type.sub(s),
-          declared_in: declared_in
+          declared_in: declared_in,
+          source: source
         )
       end
     end
@@ -39,9 +42,9 @@ module RBS
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
-          @member_annotations = member.annotations
-          @overload_annotations = overload_annotations
-          @annotations = member.annotations + overload_annotations
+          @member_annotations = []
+          @overload_annotations = []
+          @annotations = []
         end
 
         def ==(other)
@@ -63,7 +66,10 @@ module RBS
         end
 
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
-          TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in, overload_annotations: overload_annotations)
+          TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in).tap do |type_def|
+            type_def.overload_annotations.replace(self.overload_annotations)
+            type_def.member_annotations.replace(self.member_annotations)
+          end
         end
 
         def overload?
@@ -74,20 +80,33 @@ module RBS
             false
           end
         end
+
+        def each_annotation(&block)
+          if block
+            member_annotations.each(&block)
+            overload_annotations.each(&block)
+          else
+            enum_for :each_annotation
+          end
+        end
       end
 
       attr_reader :super_method
       attr_reader :defs
       attr_reader :accessibility
       attr_reader :extra_annotations
+      attr_reader :annotations
       attr_reader :alias_of
+      attr_reader :alias_member
 
-      def initialize(super_method:, defs:, accessibility:, annotations: [], alias_of:)
+      def initialize(super_method:, defs:, accessibility:, annotations: [], alias_of:, alias_member: nil)
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
         @extra_annotations = []
+        @annotations = []
         @alias_of = alias_of
+        @alias_member = alias_member
       end
 
       def ==(other)
@@ -96,7 +115,8 @@ module RBS
           other.defs == defs &&
           other.accessibility == accessibility &&
           other.annotations == annotations &&
-          other.alias_of == alias_of
+          other.alias_of == alias_of &&
+          other.alias_member == alias_member
       end
 
       alias eql? ==
@@ -127,10 +147,6 @@ module RBS
         @comments ||= defs.map(&:comment).compact.uniq
       end
 
-      def annotations
-        @annotations ||= defs.flat_map {|d| d.member_annotations }
-      end
-
       def members
         @members ||= defs.map(&:member).uniq
       end
@@ -146,49 +162,42 @@ module RBS
       def sub(s)
         return self if s.empty?
 
-        self.class.new(
+        update(
           super_method: super_method&.sub(s),
-          defs: defs.map {|defn| defn.update(type: defn.type.sub(s)) },
-          accessibility: @accessibility,
-          alias_of: alias_of
+          defs: defs.map {|defn| defn.update(type: defn.type.sub(s)) }
         )
       end
 
       def map_type(&block)
-        self.class.new(
+        update(
           super_method: super_method&.map_type(&block),
-          defs: defs.map {|defn| defn.update(type: defn.type.map_type(&block)) },
-          accessibility: @accessibility,
-          alias_of: alias_of
+          defs: defs.map {|defn| defn.update(type: defn.type.map_type(&block)) }
         )
       end
 
       def map_type_bound(&block)
-        self.class.new(
+        update(
           super_method: super_method&.map_type_bound(&block),
-          defs: defs.map {|defn| defn.update(type: defn.type.map_type_bound(&block)) },
-          accessibility: @accessibility,
-          alias_of: alias_of
+          defs: defs.map {|defn| defn.update(type: defn.type.map_type_bound(&block)) }
         )
       end
 
       def map_method_type(&block)
-        self.class.new(
-          super_method: super_method,
+        update(
           defs: defs.map {|defn| defn.update(type: yield(defn.type)) },
-          accessibility: @accessibility,
-          alias_of: alias_of
         )
       end
 
-      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations)
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations, alias_member: self.alias_member)
         self.class.new(
           super_method: super_method,
           defs: defs,
           accessibility: accessibility,
           alias_of: alias_of,
-          annotations: annotations
-        )
+          alias_member: alias_member
+        ).tap do |method|
+          method.annotations.replace(annotations)
+        end
       end
     end
 

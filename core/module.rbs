@@ -731,8 +731,8 @@ class Module < Object
   #     I'm Dino!
   #     #<B:0x401b39e8>
   #
-  def define_method: (interned symbol, ^() [self: instance] -> untyped | Method | UnboundMethod method) -> Symbol
-                   | (interned symbol) { () [self: instance] -> untyped } -> Symbol
+  def define_method: (interned symbol, ^(?) [self: top] -> untyped | Method | UnboundMethod method) -> Symbol
+                   | (interned symbol) { (?) [self: top] -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=object.c
@@ -1164,7 +1164,7 @@ class Module < Object
   # -->
   # Returns the name of the module *mod*.  Returns `nil` for anonymous modules.
   #
-  def name: () -> String?
+  def name: %a{implicitly-returns-nil} () -> String
 
   # <!--
   #   rdoc-file=eval.c

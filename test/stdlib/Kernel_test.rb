@@ -561,4 +561,25 @@ class KernelInstanceTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_readlines
+    $stdin = File.open(__FILE__)
+
+    assert_send_type(
+      "() -> Array[String]",
+      JustKernel.new, :readlines
+    )
+
+    with_int(3) do |limit|
+      with_string(",") do |separator|
+        $stdin = File.open(__FILE__)
+        assert_send_type(
+          "(string, int, chomp: bool) -> Array[String]",
+          JustKernel.new, :readlines, ",", 3, chomp: true
+        )
+      end
+    end
+  ensure
+    $stdin = STDIN
+  end
 end

@@ -1936,7 +1936,7 @@ class String
     ?crlf_newline: boolish,
     ?lf_newline: boolish,
     ?fallback: ^(String) -> string? | Method | _EncodeFallbackAref
-  ) -> instance
+  ) -> self
 
   interface _EncodeFallbackAref
     def []: (String) -> string?

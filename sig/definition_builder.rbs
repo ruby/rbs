@@ -105,7 +105,15 @@ module RBS
 
     def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location[untyped, untyped]?
 
-    def insert_variable: (TypeName, Hash[Symbol, Definition::Variable], name: Symbol, type: Types::t) -> void
+    def validate_variable: (Definition::Variable) -> void
+
+    def insert_variable: (
+      TypeName,
+      Hash[Symbol, Definition::Variable],
+      name: Symbol,
+      type: Types::t,
+      source: Definition::Variable::source
+    ) -> void
 
     # Add method definition to `methods`, which will be merged to `class_definition` after defining all methods at this *level* -- class, module, or interface
     #
@@ -142,11 +150,17 @@ module RBS
       Hash[Symbol, Definition::Method]? self_type_methods,
     ) -> void
 
-    # Updates `definition` with methods and variables of `type_name` that can be a module or a class
+    # Updates `definition` with methods and instance variables of `type_name` that can be a module or a class
     #
     # It processes includes and prepends recursively.
+    # If `define_class_vars:` is falsy, it skips inserting class variables.
     #
-    def define_instance: (Definition definition, TypeName type_name, Substitution subst) -> void
+    def define_instance: (
+      Definition definition,
+      TypeName type_name,
+      Substitution subst,
+      define_class_vars: bool
+    ) -> void
 
     # Updates `definition` with methods defined in an interface `type_name`
     #

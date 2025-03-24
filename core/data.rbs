@@ -411,5 +411,5 @@ class Data
   #     out = origin.with(z: 1) # ArgumentError: unknown keyword: :z
   #     some_point = origin.with(1, 2) # ArgumentError: expected keyword arguments, got positional arguments
   #
-  def with: (**untyped) -> instance
+  def with: (**untyped) -> self
 end

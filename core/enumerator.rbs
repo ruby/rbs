@@ -613,7 +613,18 @@ end
 # This type of objects can be created by Enumerable#chain and Enumerator#+.
 #
 class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
-  include Enumerable[Elem]
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - Enumerator::Chain.new(*enums) -> enum
+  # -->
+  # Generates a new enumerator object that iterates over the elements of given
+  # enumerable objects in sequence.
+  #
+  #     e = Enumerator::Chain.new(1..3, [4, 5])
+  #     e.to_a #=> [1, 2, 3, 4, 5]
+  #     e.size #=> 5
+  #
+  def initialize: (*_Each[Elem] enums) -> void
 
   # <!--
   #   rdoc-file=enumerator.c
@@ -626,5 +637,6 @@ class Enumerator::Chain[out Elem] < Enumerator[Elem, void]
   #
   # If no block is given, returns an enumerator.
   #
-  def each: () { (Elem) -> void } -> void
+  def each: () { (Elem) -> void } -> self
+          | () -> Enumerator[Elem, self]
 end

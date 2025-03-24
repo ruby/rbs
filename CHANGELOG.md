@@ -1,5 +1,66 @@
 # CHANGELOG
 
+## 3.9.0.pre.2 (2025-03-14)
+
+### Signature updates
+
+* `Hash.new` type ([#2323](https://github.com/ruby/rbs/pull/2323))
+* `Module#define_method` ([#2325](https://github.com/ruby/rbs/pull/2325))
+* `Object#define_singleton_method` ([#2324](https://github.com/ruby/rbs/pull/2324))
+
+### Language updates
+
+* Fix `define_method` method block self type ([#2325](https://github.com/ruby/rbs/pull/2325))
+
+## 3.9.0.pre.1 (2025-03-11)
+
+### Signature updates
+
+* `CGI.escape/unescape_uri_component` ([#2299](https://github.com/ruby/rbs/pull/2299))
+* `Enumerator::Chain` ([#2220](https://github.com/ruby/rbs/pull/2220))
+* `IO.read` ([#2216](https://github.com/ruby/rbs/pull/2216))
+* `IPAddr#netmask` ([#2311](https://github.com/ruby/rbs/pull/2311))
+* `Kernel#gets`, `Kernel#readline`, `Kernel#readlines` ([#2212](https://github.com/ruby/rbs/pull/2212))
+* `Net::HTTP.start` ([#2225](https://github.com/ruby/rbs/pull/2225))
+* `OpenSSL::BN` ([#2267](https://github.com/ruby/rbs/pull/2267))
+* `OpenSSL::PKey::{RSA,DSA,DH}#params` ([#2255](https://github.com/ruby/rbs/pull/2255))
+* `UNIXSocket#send_io`, `UNIXSocket#recv_io` ([#2264](https://github.com/ruby/rbs/pull/2264))
+* `URI.encode/decode_uri_component` ([#2299](https://github.com/ruby/rbs/pull/2299))
+* Rename to reduce top-level interface and type alias ([#2250](https://github.com/ruby/rbs/pull/2250))
+
+### Language updates
+
+* Let class/module alias decls, global decls, and constant decls be annotated ([#2302](https://github.com/ruby/rbs/pull/2302))
+* Add `resolve-type-names: false` magic comment ([#2234](https://github.com/ruby/rbs/pull/2234))
+
+### Library changes
+
+* Remove unused root variable ([#2307](https://github.com/ruby/rbs/pull/2307))
+* Run Valgrind on CI and fix memory leaks ([#2309](https://github.com/ruby/rbs/pull/2309))
+* Add information for VariableDuplicationError ([#2310](https://github.com/ruby/rbs/pull/2310))
+* Reduce Array object allocation during parsing ([#2304](https://github.com/ruby/rbs/pull/2304))
+* No class variable duplication validation ([#2305](https://github.com/ruby/rbs/pull/2305))
+* Keep annotations during type name resolution ([#2303](https://github.com/ruby/rbs/pull/2303))
+* Fix method annotations ([#2301](https://github.com/ruby/rbs/pull/2301))
+* Fix class variable ([#2300](https://github.com/ruby/rbs/pull/2300))
+* Add bundled gems to alumnus  ([#2288](https://github.com/ruby/rbs/pull/2288))
+* Exclude `attr_*` methods from duplicate checks. ([#2294](https://github.com/ruby/rbs/pull/2294))
+* Validate superclass and module-self-type ([#2289](https://github.com/ruby/rbs/pull/2289))
+* Remove case when `rubygems` and `set` ([#2279](https://github.com/ruby/rbs/pull/2279))
+* Check variable duplication ([#2241](https://github.com/ruby/rbs/pull/2241))
+* Validate variable types ([#2237](https://github.com/ruby/rbs/pull/2237))
+* Remove call to `TypeParam#unchecked!` from C parser ([#2256](https://github.com/ruby/rbs/pull/2256))
+* Remove call to `Any#todo!` from C parser ([#2249](https://github.com/ruby/rbs/pull/2249))
+* [rbs/unit_test] Treat nil as a return value ([#2257](https://github.com/ruby/rbs/pull/2257))
+
+### Miscellaneous
+
+* Apply rubocop style to RBS ([#2292](https://github.com/ruby/rbs/pull/2292))
+* Eliminate external HTTP requests on test ([#2253](https://github.com/ruby/rbs/pull/2253))
+* Prevent a warning: the block passed to 'map_type_name' .. may be ignored ([#2248](https://github.com/ruby/rbs/pull/2248))
+* Update ruby version for rubocop ([#2251](https://github.com/ruby/rbs/pull/2251))
+* Drop templates from package ([#2214](https://github.com/ruby/rbs/pull/2214))
+
 ## 3.8.1 (2024-12-27)
 
 ### Signature updates

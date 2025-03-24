@@ -41,6 +41,8 @@ nodes:
         c_type: rbs_typename
       - name: comment
         c_type: rbs_ast_comment
+      - name: annotations
+        c_type: rbs_node_list
   - name: RBS::AST::Declarations::Constant
     fields:
       - name: name
@@ -49,6 +51,8 @@ nodes:
         c_type: rbs_node
       - name: comment
         c_type: rbs_ast_comment
+      - name: annotations
+        c_type: rbs_node_list
   - name: RBS::AST::Declarations::Global
     fields:
       - name: name
@@ -57,6 +61,8 @@ nodes:
         c_type: rbs_node
       - name: comment
         c_type: rbs_ast_comment
+      - name: annotations
+        c_type: rbs_node_list
   - name: RBS::AST::Declarations::Interface
     fields:
       - name: name
@@ -97,6 +103,8 @@ nodes:
         c_type: rbs_typename
       - name: comment
         c_type: rbs_ast_comment
+      - name: annotations
+        c_type: rbs_node_list
   - name: RBS::AST::Declarations::TypeAlias
     fields:
       - name: name

@@ -2220,4 +2220,63 @@ end
       assert_empty dirs
     end
   end
+
+  def test_class_module_alias__annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        %a{module}
+        module Foo = Kernel
+
+        %a{class} class Bar = Object
+      RBS
+
+      assert_equal 2, decls.size
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::ModuleAlias, decl
+        assert_equal ["module"], decl.annotations.map(&:string)
+      end
+      decls[1].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::ClassAlias, decl
+        assert_equal ["class"], decl.annotations.map(&:string)
+      end
+    end
+  end
+
+  def test_global__annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        %a{annotation}
+        $FOO: String
+      RBS
+
+      assert_equal 1, decls.size
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Global, decl
+        assert_equal ["annotation"], decl.annotations.map(&:string)
+      end
+    end
+  end
+
+  def test_constant__annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        %a{annotation}
+        FOO: String
+      RBS
+
+      assert_equal 1, decls.size
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal ["annotation"], decl.annotations.map(&:string)
+      end
+    end
+  end
+
+  def test__method_type__untyped_function_and_block
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+          class Foo
+            def foo: (?) { () -> void } -> void
+          end
+        RBS
+      end
+    end
+  end
 end

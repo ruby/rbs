@@ -149,6 +149,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_typename
             rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_typename
             rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
 
 
             return CLASS_NEW_INSTANCE(
@@ -165,6 +166,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_typename
             rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
             rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
 
 
             return CLASS_NEW_INSTANCE(
@@ -181,6 +183,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
             rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
             rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
 
 
             return CLASS_NEW_INSTANCE(
@@ -261,6 +264,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_typename
             rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_typename
             rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
 
 
             return CLASS_NEW_INSTANCE(

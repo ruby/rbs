@@ -1403,7 +1403,7 @@ end
           foo.defs[0].tap do |defn|
             assert_equal parse_method_type("(::String) -> ::String"), defn.type
             assert_equal "doc2\n", defn.comment.string
-            assert_equal ["world"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1411,7 +1411,7 @@ end
           foo.defs[1].tap do |defn|
             assert_equal parse_method_type("() -> ::String"), defn.type
             assert_equal "doc1\n", defn.comment.string
-            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1419,7 +1419,7 @@ end
           foo.defs[2].tap do |defn|
             assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
             assert_equal "doc1\n", defn.comment.string
-            assert_equal ["hello"], defn.annotations.map(&:string)
+            assert_equal ["hello", "world"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1460,7 +1460,7 @@ end
           foo.defs[0].tap do |defn|
             assert_equal parse_method_type("(::Integer) -> ::String"), defn.type
             assert_equal "Hello#foo\n", defn.comment.string
-            assert_equal ["Hello#foo"], defn.annotations.map(&:string)
+            assert_equal ["_Hello#foo", "Hello#foo"], defn.each_annotation.map(&:string)
             assert_equal type_name("::Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -1468,7 +1468,7 @@ end
           foo.defs[1].tap do |defn|
             assert_equal parse_method_type("() -> ::String"), defn.type
             assert_equal "_Hello#foo\n", defn.comment.string
-            assert_equal ["_Hello#foo"], defn.annotations.map(&:string)
+            assert_equal ["_Hello#foo", "Hello#foo"], defn.each_annotation.map(&:string)
             assert_equal type_name("::_Hello"), defn.defined_in
             assert_equal type_name("::Hello"), defn.implemented_in
           end
@@ -2706,6 +2706,104 @@ end
     end
   end
 
+  def test_class_var__mixin__include_defines_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  include M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+      end
+    end
+  end
+
+  def test_class_var__mixin__extend_no_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  extend M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_nil definition.class_variables[:@@m1]
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          assert_nil definition.class_variables[:@@m1]
+        end
+      end
+    end
+  end
+
+  def test_class_var__mixin__prepend_class_var
+    SignatureManager.new() do |manager|
+      manager.add_file("foo.rbs", <<-EOF)
+module M1
+  @@m1: Integer
+end
+
+class Foo
+  prepend M1
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          definition.class_variables[:@@m1].tap do |var|
+            assert_instance_of Definition::Variable, var
+            assert_equal type_name("::M1"), var.declared_in
+            assert_nil var.parent_variable
+            assert_equal "@@m1: Integer", var.source.location.source
+          end
+        end
+      end
+    end
+  end
+
   def test_duplicated_variable
     SignatureManager.new do |manager|
       manager.add_file("instance.rbs", <<-EOF)
@@ -2714,14 +2812,31 @@ class InstanceVariable
   @instance: Integer
 end
 
-class ClassInstanceVariable
+class AttrInstanceVariable
+  attr_accessor instance: Integer
+  @instance: Integer
+end
+
+class InstanceVariableAttr
+  @instance: Integer
+  attr_accessor instance: Integer
+end
+
+class InstanceVariableAttrInstanceVariable
+  @instance: Integer
+  attr_accessor instance: Integer
+  @instance: Integer
+end
+
+class ClassInstanceVariableSingletonAttrClassInstanceVariable
   self.@class_instance: Integer
+  attr_accessor self.class_instance: Integer
   self.@class_instance: Integer
 end
 
-class ClassVariable
-  @@class: Integer
-  @@class: Integer
+class ClassInstanceVariable
+  self.@class_instance: Integer
+  self.@class_instance: Integer
 end
       EOF
 
@@ -2731,36 +2846,306 @@ end
         assert_raises(RBS::InstanceVariableDuplicationError) do
           builder.build_instance(type_name("::InstanceVariable"))
         end
+        assert_nothing_raised do
+          builder.build_instance(type_name("::AttrInstanceVariable"))
+        end
+        assert_nothing_raised do
+          builder.build_instance(type_name("::InstanceVariableAttr"))
+        end
+        assert_raises(RBS::InstanceVariableDuplicationError) do
+          builder.build_instance(type_name("::InstanceVariableAttrInstanceVariable"))
+        end
+        assert_raises(RBS::ClassInstanceVariableDuplicationError) do
+          builder.build_singleton(type_name("::ClassInstanceVariableSingletonAttrClassInstanceVariable"))
+        end
         assert_raises(RBS::ClassInstanceVariableDuplicationError) do
           builder.build_singleton(type_name("::ClassInstanceVariable"))
         end
-        assert_raises(RBS::ClassVariableDuplicationError) do
-          builder.build_instance(type_name("::ClassVariable"))
-        end
       end
     end
+  end
 
+  def test_annotations__method_def
     SignatureManager.new do |manager|
       manager.add_file("inherited.rbs", <<-EOF)
 class A
-  @instance: Integer
-  self.@class_instance: Integer
-  @@class: Integer
+  %a{method} def foo: %a{overload1} () -> void
+                    | %a{overload2} (Integer) -> String
 end
 
 class B < A
-  @instance: Integer
-  self.@class_instance: Integer
-  @@class: Integer
 end
       EOF
 
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        builder.build_instance(type_name("::A"))
-        assert_raises(RBS::ClassVariableDuplicationError) do
-          builder.build_instance(type_name("::B"))
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload1"], overload.each_annotation.map(&:string)
+            end
+            method.defs[1].tap do |overload|
+              assert_equal ["overload2"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload2"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload1"], overload.each_annotation.map(&:string)
+            end
+            method.defs[1].tap do |overload|
+              assert_equal ["overload2"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload2"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_annotations__method_attribute
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  %a{attribute} attr_accessor foo: String
+end
+
+class B < A
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["attribute"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal [], overload.overload_annotations.map(&:string)
+              assert_equal ["attribute"], overload.each_annotation.map(&:string)
+            end
+          end
+          definition.methods[:foo=].tap do |method|
+            assert_equal ["attribute"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal [], overload.overload_annotations.map(&:string)
+              assert_equal ["attribute"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["attribute"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal [], overload.overload_annotations.map(&:string)
+              assert_equal ["attribute"], overload.each_annotation.map(&:string)
+            end
+          end
+          definition.methods[:foo=].tap do |method|
+            assert_equal ["attribute"], method.annotations.map(&:string)
+            method.defs[0].tap do |overload|
+              assert_equal [], overload.overload_annotations.map(&:string)
+              assert_equal ["attribute"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_annotations__method_def_overloading
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  %a{method1} def foo: %a{overload1} () -> void
+
+  %a{method2} def foo: %a{overload2} (Integer) -> void
+                     | ...
+end
+
+class B < A
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method1", "method2"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload2"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload2"], overload.each_annotation.map(&:string)
+            end
+            method.defs[1].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload1"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method1", "method2"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload2"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload2"], overload.each_annotation.map(&:string)
+            end
+            method.defs[1].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload1"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_annotations__method_def_overloading_super
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  %a{method1} def foo: %a{overload1} () -> void
+end
+
+class B < A
+  %a{method2} def foo: %a{overload2} () -> void
+                     | ...
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method1"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "overload1"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method1", "method2"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload2"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload2"], overload.each_annotation.map(&:string)
+            end
+            method.defs[1].tap do |overload|
+              assert_equal ["overload1"], overload.overload_annotations.map(&:string)
+              assert_equal ["method1", "method2", "overload1"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_annotations__method_alias
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  %a{method} def foo: %a{overload} () -> void
+
+  %a{alias1} alias bar foo
+end
+
+class B < A
+  %a{alias2} alias baz bar
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload"], overload.each_annotation.map(&:string)
+            end
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["alias1"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["alias1", "overload"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+
+        builder.build_instance(type_name("::B")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["method"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["method", "overload"], overload.each_annotation.map(&:string)
+            end
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["alias1"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["alias1", "overload"], overload.each_annotation.map(&:string)
+            end
+          end
+
+          definition.methods[:baz].tap do |method|
+            assert_equal ["alias2"], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["alias2", "overload"], overload.each_annotation.map(&:string)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_annotations__new_method
+    SignatureManager.new do |manager|
+      manager.add_file("inherited.rbs", <<-EOF)
+class A
+  %a{method} def initialize: %a{overload} () -> void
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          definition.methods[:new].tap do |method|
+            assert_equal [], method.annotations.map(&:string)
+
+            method.defs[0].tap do |overload|
+              assert_equal ["overload"], overload.overload_annotations.map(&:string)
+              assert_equal ["overload"], overload.each_annotation.map(&:string)
+            end
+          end
         end
       end
     end

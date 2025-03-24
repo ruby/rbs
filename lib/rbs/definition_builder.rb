@@ -82,7 +82,7 @@ module RBS
       AST::TypeParam.application(params, args) || Substitution.new()
     end
 
-    def define_instance(definition, type_name, subst)
+    def define_instance(definition, type_name, subst, define_class_vars:)
       one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
       methods = method_builder.build_instance(type_name)
 
@@ -104,7 +104,7 @@ module RBS
           validate_type_presence(arg)
         end
 
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args))
+        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
       end
 
       all_interfaces = one_ancestors.each_included_interface.flat_map do |interface|
@@ -120,7 +120,7 @@ module RBS
           validate_type_presence(arg)
         end
 
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args))
+        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
       end
 
       entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
@@ -145,23 +145,25 @@ module RBS
                   type_name,
                   definition.instance_variables,
                   name: ivar_name,
-                  type: member.type.sub(subst_)
+                  type: member.type.sub(subst_),
+                  source: member
                 )
               end
             end
 
           when AST::Members::InstanceVariable
-            InstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
             insert_variable(
               type_name,
               definition.instance_variables,
               name: member.name,
-              type: member.type.sub(subst_)
+              type: member.type.sub(subst_),
+              source: member
             )
 
           when AST::Members::ClassVariable
-            ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
-            insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
+            if define_class_vars
+              insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
+            end
           end
         end
       end
@@ -216,13 +218,13 @@ module RBS
                 if ans.name.interface?
                   define_interface(definition, ans.name, subst)
                 else
-                  define_instance(definition, ans.name, subst)
+                  define_instance(definition, ans.name, subst, define_class_vars: true)
                 end
               end
             end
           end
 
-          define_instance(definition, type_name, Substitution.new)
+          define_instance(definition, type_name, Substitution.new, define_class_vars: true)
         end
       end
     end
@@ -251,7 +253,6 @@ module RBS
 
             definition.methods.merge!(defn.methods)
             definition.instance_variables.merge!(defn.instance_variables)
-            definition.class_variables.merge!(defn.class_variables)
           end
 
           one_ancestors.each_extended_module do |mod|
@@ -260,7 +261,7 @@ module RBS
             end
 
             subst = tapp_subst(mod.name, mod.args)
-            define_instance(definition, mod.name, subst)
+            define_instance(definition, mod.name, subst, define_class_vars: false)
           end
 
           all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
@@ -284,20 +285,18 @@ module RBS
                               end
 
                   if ivar_name
-                    insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type)
+                    insert_variable(type_name, definition.instance_variables, name: ivar_name, type: member.type, source: member)
                   end
                 end
 
               when AST::Members::ClassInstanceVariable
-                ClassInstanceVariableDuplicationError.check!(variables: definition.instance_variables, member: member, type_name: type_name)
-                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type)
-
-              when AST::Members::ClassVariable
-                ClassVariableDuplicationError.check!(variables: definition.class_variables, member: member, type_name: type_name)
-                insert_variable(type_name, definition.class_variables, name: member.name, type: member.type)
+                insert_variable(type_name, definition.instance_variables, name: member.name, type: member.type, source: member)
               end
             end
           end
+
+          instance_definition = build_instance(type_name)
+          definition.class_variables.replace(instance_definition.class_variables)
         end
       end
     end
@@ -390,12 +389,14 @@ module RBS
                       type: method_type,
                       member: initialize_def.member,
                       defined_in: initialize_def.defined_in,
-                      implemented_in: initialize_def.implemented_in,
-                      overload_annotations: initialize_def.overload_annotations
-                    )
+                      implemented_in: initialize_def.implemented_in
+                    ).tap do |type_def|
+                      type_def.overload_annotations.replace(initialize_def.overload_annotations)
+                    end
                   end,
                   accessibility: :public,
-                  alias_of: nil
+                  alias_of: nil,
+                  alias_member: nil
                 )
 
                 definition.methods[:new] = typed_new
@@ -539,12 +540,42 @@ module RBS
       end
     end
 
-    def insert_variable(type_name, variables, name:, type:)
+    def insert_variable(type_name, variables, name:, type:, source:)
       variables[name] = Definition::Variable.new(
         parent_variable: variables[name],
         type: type,
-        declared_in: type_name
+        declared_in: type_name,
+        source: source
       )
+      validate_variable(variables[name])
+    end
+
+    def validate_variable(var)
+      return unless var.parent_variable
+
+      # Ignore attrs
+      variables = [] #: Array[Definition::Variable]
+      tmp_var = var
+      while tmp_var
+        variables << tmp_var if tmp_var.source.is_a?(AST::Members::Var)
+        tmp_var = tmp_var.parent_variable
+      end
+
+      # Duplicates should be eliminated, so there can't be more than 3.
+      return unless variables.length == 2
+
+      l, r = variables #: [Definition::Variable, Definition::Variable]
+
+      case l.source
+      when AST::Members::InstanceVariable
+        if r.source.instance_of?(AST::Members::InstanceVariable) && l.declared_in == r.declared_in
+          raise InstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
+        end
+      when AST::Members::ClassInstanceVariable
+        if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
+          raise ClassInstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
+        end
+      end
     end
 
     def import_methods(definition, module_name, module_methods, interfaces_methods, subst, self_type_methods)
@@ -630,8 +661,11 @@ module RBS
             defn.update(defined_in: defined_in, implemented_in: implemented_in)
           end,
           accessibility: original_method.accessibility,
-          alias_of: original_method
+          alias_of: original_method,
+          alias_member: original
         )
+
+        method_definition.annotations.replace(original.annotations)
       when AST::Members::MethodDefinition
         if duplicated_method = methods[method.name]
           raise DuplicatedMethodDefinitionError.new(
@@ -646,9 +680,11 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: original,
             defined_in: defined_in,
-            implemented_in: implemented_in,
-            overload_annotations: overload.annotations
-          )
+            implemented_in: implemented_in
+          ).tap do |type_def|
+            # Keep the original annotations given to overloads.
+            type_def.overload_annotations.replace(overload.annotations)
+          end
         end
 
         # @type var accessibility: RBS::Definition::accessibility
@@ -668,8 +704,11 @@ module RBS
           super_method: super_method,
           defs: defs,
           accessibility: accessibility,
-          alias_of: nil
+          alias_of: nil,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(original.annotations)
       when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
         if duplicated_method = methods[method.name]
           raise DuplicatedMethodDefinitionError.new(
@@ -718,8 +757,11 @@ module RBS
             )
           ],
           accessibility: method.accessibility,
-          alias_of: nil
+          alias_of: nil,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(original.annotations)
       when nil
         # Overloading method definition only
 
@@ -746,8 +788,11 @@ module RBS
             defn.update(implemented_in: implemented_in)
           end,
           accessibility: existing_method.accessibility,
-          alias_of: existing_method.alias_of
+          alias_of: existing_method.alias_of,
+          alias_member: nil
         )
+
+        method_definition.annotations.replace(existing_method.annotations)
       end
 
       method.overloads.each do |overloading_def|
@@ -756,12 +801,19 @@ module RBS
             type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
             member: overloading_def,
             defined_in: defined_in,
-            implemented_in: implemented_in,
-            overload_annotations: overload.annotations
+            implemented_in: implemented_in
           )
+
+          type_def.overload_annotations.replace(overload.annotations)
 
           method_definition.defs.unshift(type_def)
         end
+
+        method_definition.annotations.concat(overloading_def.annotations)
+      end
+
+      method_definition.defs.each do |type_def|
+        type_def.member_annotations.replace(method_definition.annotations)
       end
 
       methods[method.name] = method_definition

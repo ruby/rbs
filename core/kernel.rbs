@@ -1163,7 +1163,7 @@ module Kernel : BasicObject
   # The style of programming using `$_` as an implicit parameter is gradually
   # losing favor in the Ruby community.
   #
-  def self?.gets: (?String arg0, ?Integer arg1) -> String?
+  def self?.gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=eval.c
@@ -1486,7 +1486,7 @@ module Kernel : BasicObject
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def self?.readline: (?String arg0, ?Integer arg1) -> String
+  def self?.readline: (?String arg0, ?Integer arg1, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2297,7 +2297,7 @@ module Kernel : BasicObject
   #     chris.greet("Hi") #=> "Hi, I'm Chris!"
   #
   def define_singleton_method: (interned name, Method | UnboundMethod | Proc method) -> Symbol
-                             | (interned name) { (?) -> untyped } -> Symbol
+                             | (interned name) { (?) [self: self] -> untyped } -> Symbol
 
   # <!--
   #   rdoc-file=io.c
