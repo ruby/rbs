@@ -33,7 +33,7 @@ jobs:
 
             res = URI.parse("https://stdgems.org/bundled_gems.json").read
             bundled_gems = JSON.parse(res)["gems"].map{_1["gem"]}
-            system "gem uninstall #{bundled_gems.join(" ")}", exception: true
+            system "gem uninstall #{bundled_gems.join(" ")} --force", exception: true
           '
       - name: bundle install
         run: |
