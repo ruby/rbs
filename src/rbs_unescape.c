@@ -43,7 +43,7 @@ static int octal_to_int(const char* octal, int length) {
     return result;
 }
 
-rbs_string_t unescape_string(rbs_allocator_t *allocator, rbs_string_t string, bool is_double_quote) {
+rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t string, bool is_double_quote) {
     if (!string.start) return RBS_STRING_NULL;
 
     size_t len = string.end - string.start;
@@ -117,6 +117,7 @@ rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) 
       byte_length -= 2 * bs;
     }
 
-    rbs_string_t string = rbs_string_copy_slice(allocator, &input, start_offset, byte_length);
+    const char *new_start = input.start + start_offset;
+    rbs_string_t string = rbs_string_new(new_start, new_start + byte_length);
     return unescape_string(allocator, string, first_char == '"');
 }

@@ -12,14 +12,6 @@ rbs_string_t rbs_string_new(const char *start, const char *end) {
     };
 }
 
-rbs_string_t rbs_string_copy_slice(rbs_allocator_t *allocator, rbs_string_t *self, size_t start_inset, size_t length) {
-    char *buffer = rbs_allocator_alloc_many(allocator, length + 1, char);
-    strncpy(buffer, self->start + start_inset, length);
-    buffer[length] = '\0';
-
-    return rbs_string_new(buffer, buffer + length);
-}
-
 rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     const char *new_start = self->start;
     while (isspace(*new_start) && new_start < self->end) {

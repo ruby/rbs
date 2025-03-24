@@ -918,7 +918,7 @@ static bool parse_symbol(parserstate *state, rbs_location_t *location, rbs_types
     rbs_location_t *symbolLoc = rbs_location_current_token(state);
     rbs_string_t current_token = rbs_parser_peek_current_token(state);
 
-    rbs_string_t symbol = rbs_string_copy_slice(&state->allocator, &current_token, offset_bytes, rbs_string_len(current_token) - offset_bytes);
+    rbs_string_t symbol = rbs_string_new(current_token.start + offset_bytes, current_token.end);
 
     rbs_string_t unquoted_symbol = rbs_unquote_string(&state->allocator, symbol);
 
@@ -1581,11 +1581,9 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
   rbs_string_t current_token = rbs_parser_peek_current_token(state);
   size_t total_offset = offset_bytes + open_bytes;
 
-  rbs_string_t annotation_str = rbs_string_copy_slice(
-    &state->allocator,
-    &current_token,
-    total_offset,
-    rbs_string_len(current_token) - total_offset - close_bytes
+  rbs_string_t annotation_str = rbs_string_new(
+    current_token.start + total_offset,
+    current_token.end - close_bytes
   );
 
   rbs_string_t stripped_annotation_str = rbs_string_strip_whitespace(&annotation_str);

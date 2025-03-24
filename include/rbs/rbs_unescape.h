@@ -18,6 +18,6 @@
  *
  * @returns A new owned string that will be freed when the allocator is freed.
  * */
-rbs_string_t rbs_unquote_string(rbs_allocator_t *, rbs_string_t input);
+rbs_string_t rbs_unquote_string(rbs_allocator_t *, const rbs_string_t input);
 
 #endif // RBS_RBS_UNESCAPE_H
