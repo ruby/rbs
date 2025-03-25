@@ -195,7 +195,8 @@ module RBS
               close_paren_location = nil #: Location?
 
               if trailing_block
-                if (app = trailing_block.trailing_annotation([])).is_a?(AST::Ruby::Annotation::NodeApplication)
+                type_param_names = generics.type_params.map(&:name)
+                if (app = trailing_block.trailing_annotation(type_param_names)).is_a?(AST::Ruby::Annotation::NodeApplication)
                   open_paren_location = app.prefix_location
                   type_args = app.types
                   close_paren_location = app.suffix_location
@@ -625,6 +626,13 @@ module RBS
             return
           end
 
+          type_param_names =
+            if node.name == :extend
+              [] #: Array[Symbol]
+            else
+              current_type_param_names
+            end
+
           if arg = one_argument?(node)
             if const_node = constant_node?(arg)
               module_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(const_node) or return
@@ -635,7 +643,7 @@ module RBS
               type_args = [] #: Array[Types::t]
 
               if block
-                if (application = block.trailing_annotation([])).is_a?(AST::Ruby::Annotation::NodeApplication)
+                if (application = block.trailing_annotation(type_param_names)).is_a?(AST::Ruby::Annotation::NodeApplication)
                   open_paren_location = application.prefix_location
                   close_paren_location = application.suffix_location
                   type_args = application.types

@@ -343,7 +343,7 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_empty ret.declarations
   end
 
-  def test_parse__module_decl__inside_singleton_class
+  def test_error__module_decl__inside_singleton_class
     buffer, result = parse_ruby(<<~RUBY)
       class Foo
         class <<self
@@ -357,6 +357,48 @@ class RBS::InlineParserTest < Test::Unit::TestCase
 
     assert_any!(ret.diagnostics) do
       assert_equal "Foo", _1.location.source
+    end
+  end
+
+  def test_parse__mixin_type_params
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs generic T -- type of the element
+      class Foo
+        include Bar #[T]
+        extend Baz #[T]
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |klass|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, klass
+      klass.members[0].tap do |mixin|
+        assert_instance_of RBS::AST::Ruby::Members::IncludeMember, mixin
+        assert_equal ["T"], mixin.type_args.map(&:to_s)
+        assert_instance_of RBS::Types::Variable, mixin.type_args[0]
+      end
+      klass.members[1].tap do |mixin|
+        assert_instance_of RBS::AST::Ruby::Members::ExtendMember, mixin
+        assert_equal ["T"], mixin.type_args.map(&:to_s)
+        assert_instance_of RBS::Types::ClassInstance, mixin.type_args[0]
+      end
+    end
+  end
+
+  def test_parse__super_class__type_params
+    buffer, result = parse_ruby(<<~RUBY)
+      # @rbs generic T -- type of the element
+      class Foo < Bar #[T]
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |klass|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, klass
+      assert_equal ["T"], klass.super_class.type_args.map(&:to_s)
+      assert_instance_of RBS::Types::Variable, klass.super_class.type_args[0]
     end
   end
 
