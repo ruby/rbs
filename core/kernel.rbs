@@ -1669,6 +1669,15 @@ module Kernel : BasicObject
   def self?.throw: (untyped tag, ?untyped obj) -> bot
 
   # <!--
+  #   rdoc-file=eval.c
+  #   - using(module)    -> self
+  # -->
+  #  Import class refinements from *module* into the scope where
+  #  #using is called.
+  #
+  def self?.using: (Module) -> self
+
+  # <!--
   #   rdoc-file=warning.rb
   #   - warn(*msgs, uplevel: nil, category: nil)   -> nil
   # -->
