@@ -48,6 +48,27 @@ class CSVSingletonTest < Test::Unit::TestCase
                      CSV, :foreach, path, headers: true, encoding: 'UTF-8'
   end
 
+  def test_open
+    tmpdir = Dir.mktmpdir
+    path = File.join(tmpdir, "example.csv")
+    File.write(path, "a,b,c\n1,2,3\n")
+
+    block = ->(csv) { csv }
+    assert_send_type "(String filename_or_io) { (CSV) -> void } -> CSV",
+                     CSV, :open, path, &block
+    assert_send_type "(IO filename_or_io) { (CSV) -> void } -> CSV",
+                     CSV,:open, File.open(path), &block
+    assert_send_type "(String filename_or_io, invalid: :replace, undef: :replace) { (CSV) -> void } -> CSV",
+                     CSV, :open, path, invalid: :replace, undef: :replace, &block
+
+    assert_send_type "(String filename_or_io) -> CSV",
+                     CSV, :open, path
+    assert_send_type "(IO filename_or_io) -> CSV",
+                     CSV, :open, File.open(path)
+    assert_send_type "(String filename_or_io, invalid: :replace, undef: :replace) -> CSV",
+                     CSV, :open, path, invalid: :replace, undef: :replace
+  end
+
   def test_read
     tmpdir = Dir.mktmpdir
     path = File.join(tmpdir, "example.csv")
