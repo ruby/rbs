@@ -1802,8 +1802,8 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def reopen: (IO other_IO_or_path) -> IO
-            | (String other_IO_or_path, ?String mode_str) -> IO
+  def reopen: (IO other_IO_or_path, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: Strin) -> IO
+            | (String other_IO_or_path, ?string | int mode_str, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: Strin) -> IO
 
   # <!--
   #   rdoc-file=io.c
