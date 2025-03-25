@@ -1702,6 +1702,108 @@ class CSV < Object
 
   # <!--
   #   rdoc-file=lib/csv.rb
+  #   - open(path_or_io, mode = "rb", **options ) -> new_csv
+  #   - open(path_or_io, mode = "rb", **options ) { |csv| ... } -> object
+  # -->
+  # possible options elements:
+  #   keyword form:
+  #     :invalid => nil      # raise error on invalid byte sequence (default)
+  #     :invalid => :replace # replace invalid byte sequence
+  #     :undef => :replace   # replace undefined conversion
+  #     :replace => string   # replacement string ("?" or "\uFFFD" if not specified)
+  #
+  # * Argument +path_or_io+, must be a file path or an \IO stream.
+  # * Argument +io+ should be an IO object that is:
+  #   * Open for reading; on return, the IO object will be closed.
+  #   * Positioned at the beginning.
+  #     To position at the end, for appending, use method CSV.generate.
+  #     For any other positioning, pass a preset \StringIO object instead.
+  # * Argument +mode+, if given, must be a \File mode.
+  #   See {Access Modes}[https://docs.ruby-lang.org/en/master/File.html#class-File-label-Access+Modes].
+  # * Arguments <tt>**options</tt> must be keyword options.
+  #   See {Options for Generating}[#class-CSV-label-Options+for+Generating].
+  # * This method optionally accepts an additional <tt>:encoding</tt> option
+  #   that you can use to specify the Encoding of the data read from +path+ or +io+.
+  #   You must provide this unless your data is in the encoding
+  #   given by <tt>Encoding::default_external</tt>.
+  #   Parsing will use this to determine how to parse the data.
+  #   You may provide a second Encoding to
+  #   have the data transcoded as it is read. For example,
+  #     encoding: 'UTF-32BE:UTF-8'
+  #   would read +UTF-32BE+ data from the file
+  #   but transcode it to +UTF-8+ before parsing.
+  #
+  # ---
+  #
+  # These examples assume prior execution of:
+  #   string = "foo,0\nbar,1\nbaz,2\n"
+  #   path = 't.csv'
+  #   File.write(path, string)
+  #
+  #   string_io = StringIO.new
+  #   string_io << "foo,0\nbar,1\nbaz,2\n"
+  #
+  # ---
+  #
+  # With no block given, returns a new \CSV object.
+  #
+  # Create a \CSV object using a file path:
+  #   csv = CSV.open(path)
+  #   csv # => #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  #
+  # Create a \CSV object using an open \File:
+  #   csv = CSV.open(File.open(path))
+  #   csv # => #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  #
+  # Create a \CSV object using a \StringIO:
+  #   csv = CSV.open(string_io)
+  #   csv # => #<CSV io_type:StringIO encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  # ---
+  #
+  # With a block given, calls the block with the created \CSV object;
+  # returns the block's return value:
+  #
+  # Using a file path:
+  #   csv = CSV.open(path) {|csv| p csv}
+  #   csv # => #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  # Output:
+  #   #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  #
+  # Using an open \File:
+  #   csv = CSV.open(File.open(path)) {|csv| p csv}
+  #   csv # => #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  # Output:
+  #   #<CSV io_type:File io_path:"t.csv" encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  #
+  # Using a \StringIO:
+  #   csv = CSV.open(string_io) {|csv| p csv}
+  #   csv # => #<CSV io_type:StringIO encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  # Output:
+  #   #<CSV io_type:StringIO encoding:UTF-8 lineno:0 col_sep:"," row_sep:"\n" quote_char:"\"">
+  # ---
+  #
+  # Raises an exception if the argument is not a \String object or \IO object:
+  #   # Raises TypeError (no implicit conversion of Symbol into String)
+  #   CSV.open(:foo)
+  #
+  def self.open: (String | _ToPath | IO filename_or_io,
+                  ?String mode,
+                  ?newline: untyped,
+                  ?invalid: nil | :replace,
+                  ?undef: :replace,
+                  ?replace: String,
+                  ?encoding: Encoding | String,
+                  **untyped options) { (instance) -> void } -> instance
+               | (String | _ToPath | IO filename_or_io,
+                  ?String mode,
+                  ?newline: untyped,
+                  ?invalid: nil | :replace,
+                  ?undef: :replace,
+                  ?replace: String,
+                  ?encoding: Encoding | String,
+                  **untyped options) -> instance
+  # <!--
+  #   rdoc-file=lib/csv.rb
   #   - CSV.new(string)
   #   - CSV.new(io)
   #   - CSV.new(string, **options)
