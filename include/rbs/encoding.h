@@ -3,7 +3,7 @@
 
 #include "rbs_string.h"
 
-unsigned int utf8_to_codepoint(const rbs_string_t string);
+unsigned int rbs_utf8_to_codepoint(const rbs_string_t string);
 int utf8_codelen(unsigned int c);
 
 #endif // RBS_ENCODING_H

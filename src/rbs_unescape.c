@@ -107,7 +107,7 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
 }
 
 rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) {
-    unsigned int first_char = utf8_to_codepoint(input);
+    unsigned int first_char = rbs_utf8_to_codepoint(input);
     size_t byte_length = rbs_string_len(input);
 
     ptrdiff_t start_offset = 0;

@@ -4,7 +4,7 @@
 #include "rbs_string.h"
 #include "rbs_encoding.h"
 
-enum TokenType {
+enum RBSTokenType {
   NullType,         /* (Nothing) */
   pEOF,             /* EOF */
   ErrorToken,       /* Error */
@@ -111,7 +111,7 @@ typedef struct {
 } range;
 
 typedef struct {
-  enum TokenType type;
+  enum RBSTokenType type;
   range range;
 } token;
 
@@ -140,21 +140,21 @@ extern token NullToken;
 extern position NullPosition;
 extern range NULL_RANGE;
 
-char *peek_token(lexstate *state, token tok);
-int token_chars(token tok);
-int token_bytes(token tok);
+char *rbs_peek_token(lexstate *state, token tok);
+int rbs_token_chars(token tok);
+int rbs_token_bytes(token tok);
 
-#define null_position_p(pos) (pos.byte_pos == -1)
-#define null_range_p(range) (range.start.byte_pos == -1)
-#define nonnull_pos_or(pos1, pos2) (null_position_p(pos1) ? pos2 : pos1)
-#define RANGE_BYTES(range) (range.end.byte_pos - range.start.byte_pos)
+#define rbs_null_position_p(pos) (pos.byte_pos == -1)
+#define rbs_null_range_p(range) (range.start.byte_pos == -1)
+#define rbs_nonnull_pos_or(pos1, pos2) (rbs_null_position_p(pos1) ? pos2 : pos1)
+#define RBS_RANGE_BYTES(range) (range.end.byte_pos - range.start.byte_pos)
 
-const char *token_type_str(enum TokenType type);
+const char *token_type_str(enum RBSTokenType type);
 
 /**
  * Read next character.
  * */
-unsigned int peek(lexstate *state);
+unsigned int rbs_peek(lexstate *state);
 
 /**
  * Skip one character.
@@ -164,20 +164,20 @@ void rbs_skip(lexstate *state);
 /**
  * Skip n characters.
  * */
-void skipn(lexstate *state, size_t size);
+void rbs_skipn(lexstate *state, size_t size);
 
 /**
  * Return new token with given type.
  * */
-token next_token(lexstate *state, enum TokenType type);
+token rbs_next_token(lexstate *state, enum RBSTokenType type);
 
 /**
  * Return new token with EOF type.
  * */
-token next_eof_token(lexstate *state);
+token rbs_next_eof_token(lexstate *state);
 
 token rbsparser_next_token(lexstate *state);
 
-void print_token(token tok);
+void rbs_print_token(token tok);
 
 #endif

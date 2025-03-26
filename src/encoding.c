@@ -1,6 +1,6 @@
 #include "rbs/encoding.h"
 
-unsigned int utf8_to_codepoint(const rbs_string_t string) {
+unsigned int rbs_utf8_to_codepoint(const rbs_string_t string) {
     unsigned int codepoint = 0;
     int remaining_bytes = 0;
 

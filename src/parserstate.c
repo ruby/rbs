@@ -144,7 +144,7 @@ void parser_advance(parserstate *state) {
  *
  * @returns true if token advances, false otherwise.
  **/
-bool parser_advance_if(parserstate *state, enum TokenType type) {
+bool parser_advance_if(parserstate *state, enum RBSTokenType type) {
   if (state->next_token.type == type) {
     parser_advance(state);
     return true;
@@ -153,7 +153,7 @@ bool parser_advance_if(parserstate *state, enum TokenType type) {
   }
 }
 
-void print_token(token tok) {
+void rbs_print_token(token tok) {
   printf(
     "%s char=%d...%d\n",
     token_type_str(tok.type),
@@ -185,13 +185,13 @@ static rbs_ast_comment_t *parse_comment_lines(parserstate *state, comment *com) 
     token tok = com->tokens[i];
 
     const char *comment_start = state->lexstate->string.start + tok.range.start.byte_pos + hash_bytes;
-    size_t comment_bytes = RANGE_BYTES(tok.range) - hash_bytes;
+    size_t comment_bytes = RBS_RANGE_BYTES(tok.range) - hash_bytes;
 
     rbs_string_t str = rbs_string_new(
       comment_start,
       state->lexstate->string.end
     );
-    unsigned char c = utf8_to_codepoint(str);
+    unsigned char c = rbs_utf8_to_codepoint(str);
 
     if (c == ' ') {
       comment_start += space_bytes;
@@ -298,7 +298,7 @@ lexstate *alloc_lexer(rbs_allocator_t *allocator, rbs_string_t string, const rbs
     .encoding = encoding,
   };
 
-  skipn(lexer, start_pos);
+  rbs_skipn(lexer, start_pos);
   lexer->start = lexer->current;
   lexer->first_token_of_line = lexer->current.column == 0;
 

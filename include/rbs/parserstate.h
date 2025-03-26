@@ -143,7 +143,7 @@ void parser_advance(parserstate *state);
 /**
  * Advance one token if the next_token is a token of the type.
  * */
-bool parser_advance_if(parserstate *state, enum TokenType type);
+bool parser_advance_if(parserstate *state, enum RBSTokenType type);
 void print_parser(parserstate *state);
 
 /**

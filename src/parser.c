@@ -22,8 +22,8 @@
 #define INTERN_TOKEN(parserstate, tok)                       \
   rbs_constant_pool_insert_shared_with_encoding(             \
     &parserstate->constant_pool,                             \
-    (const uint8_t *) peek_token(parserstate->lexstate, tok),\
-    token_bytes(tok),                                        \
+    (const uint8_t *) rbs_peek_token(parserstate->lexstate, tok),\
+    rbs_token_bytes(tok),                                        \
     (void *) parserstate->lexstate->encoding                 \
   )
 
@@ -250,7 +250,7 @@ static bool parse_type_name(parserstate *state, TypeNameKind kind, range *rg, rb
               | {} type `,` ... `,` <type> eol
 */
 NODISCARD
-static bool parse_type_list(parserstate *state, enum TokenType eol, rbs_node_list_t *types) {
+static bool parse_type_list(parserstate *state, enum RBSTokenType eol, rbs_node_list_t *types) {
   while (true) {
     rbs_node_t *type;
     CHECK_PARSE(parse_type(state, &type));
@@ -275,7 +275,7 @@ static bool parse_type_list(parserstate *state, enum TokenType eol, rbs_node_lis
   return true;
 }
 
-static bool is_keyword_token(enum TokenType type) {
+static bool is_keyword_token(enum RBSTokenType type) {
   switch (type)
   {
   case tLIDENT:
@@ -344,7 +344,7 @@ static bool parse_function_param(parserstate *state, rbs_types_function_param_t 
 static rbs_constant_id_t intern_token_start_end(parserstate *state, token start_token, token end_token) {
   return rbs_constant_pool_insert_shared_with_encoding(
     &state->constant_pool,
-    (const uint8_t *) peek_token(state->lexstate, start_token),
+    (const uint8_t *) rbs_peek_token(state->lexstate, start_token),
     end_token.range.end.byte_pos - start_token.range.start.byte_pos,
     state->lexstate->encoding
   );
@@ -894,7 +894,7 @@ static bool parse_record_attributes(parserstate *state, rbs_hash_t **fields) {
 NODISCARD
 static bool parse_symbol(parserstate *state, rbs_location_t *location, rbs_types_literal_t **symbol) {
   size_t offset_bytes = state->lexstate->encoding->char_width((const uint8_t *) ":", (size_t) 1);
-  size_t bytes = token_bytes(state->current_token) - offset_bytes;
+  size_t bytes = rbs_token_bytes(state->current_token) - offset_bytes;
 
   rbs_ast_symbol_t *literal;
 
@@ -903,7 +903,7 @@ static bool parse_symbol(parserstate *state, rbs_location_t *location, rbs_types
   case tSYMBOL: {
     rbs_location_t *symbolLoc = rbs_location_current_token(state);
 
-    char *buffer = peek_token(state->lexstate, state->current_token);
+    char *buffer = rbs_peek_token(state->lexstate, state->current_token);
     rbs_constant_id_t constant_id = rbs_constant_pool_insert_shared(
       &state->constant_pool,
       (const uint8_t *) buffer+offset_bytes,
@@ -979,7 +979,7 @@ static bool parse_instance_type(parserstate *state, bool parse_alias, rbs_node_t
 
     range type_range = {
       .start = name_range.start,
-      .end = nonnull_pos_or(args_range.end, name_range.end),
+      .end = rbs_nonnull_pos_or(args_range.end, name_range.end),
     };
 
     rbs_location_t *loc = rbs_location_new(&state->allocator, type_range);
@@ -1136,8 +1136,8 @@ static bool parse_simple(parserstate *state, rbs_node_t **type) {
     return true;
   }
   case tUIDENT: {
-    const char *name_str = peek_token(state->lexstate, state->current_token);
-    size_t name_len = token_bytes(state->current_token);
+    const char *name_str = rbs_peek_token(state->lexstate, state->current_token);
+    size_t name_len = rbs_token_bytes(state->current_token);
 
     rbs_constant_id_t name = rbs_constant_pool_find(&state->constant_pool, (const uint8_t *) name_str, name_len);
 
@@ -1497,7 +1497,7 @@ static bool parse_type_decl(parserstate *state, position comment_pos, rbs_node_l
 
   range decl_range;
   decl_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, decl_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, decl_range.start);
 
   range keyword_range = state->current_token.range;
 
@@ -1549,7 +1549,7 @@ static bool parse_annotation(parserstate *state, rbs_ast_annotation_t **annotati
     state->lexstate->string.start + rg.start.byte_pos + offset_bytes,
     state->lexstate->string.end
   );
-  unsigned int open_char = utf8_to_codepoint(str);
+  unsigned int open_char = rbs_utf8_to_codepoint(str);
 
   unsigned int close_char;
 
@@ -1603,7 +1603,7 @@ static bool parse_annotations(parserstate *state, rbs_node_list_t *annotations, 
     if (state->next_token.type == tANNOTATION) {
       parser_advance(state);
 
-      if (null_position_p((*annot_pos))) {
+      if (rbs_null_position_p((*annot_pos))) {
         *annot_pos = state->current_token.range.start;
       }
 
@@ -1751,7 +1751,7 @@ NODISCARD
 static bool parse_member_def(parserstate *state, bool instance_only, bool accept_overload, position comment_pos, rbs_node_list_t *annotations, rbs_ast_members_methoddefinition_t **method_definition) {
   range member_range;
   member_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
 
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
@@ -1934,9 +1934,9 @@ NODISCARD
 static bool parse_mixin_member(parserstate *state, bool from_interface, position comment_pos, rbs_node_list_t *annotations, rbs_node_t **mixin_member) {
   range member_range;
   member_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
 
-  enum TokenType type = state->current_token.type;
+  enum RBSTokenType type = state->current_token.type;
   range keyword_range = state->current_token.range;
 
   bool reset_typevar_scope;
@@ -2017,7 +2017,7 @@ static bool parse_alias_member(parserstate *state, bool instance_only, position 
   member_range.start = state->current_token.range.start;
   range keyword_range = state->current_token.range;
 
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
   rbs_keyword_t *kind;
@@ -2073,7 +2073,7 @@ static bool parse_variable_member(parserstate *state, position comment_pos, rbs_
 
   range member_range;
   member_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
   switch (state->current_token.type)
@@ -2213,7 +2213,7 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
   range member_range;
 
   member_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
   range visibility_range;
@@ -2238,7 +2238,7 @@ static bool parse_attribute_member(parserstate *state, position comment_pos, rbs
     break;
   }
 
-  enum TokenType attr_type = state->current_token.type;
+  enum RBSTokenType attr_type = state->current_token.type;
   range keyword_range = state->current_token.range;
 
   range kind_range;
@@ -2381,7 +2381,7 @@ static bool parse_interface_decl(parserstate *state, position comment_pos, rbs_n
 
   range member_range;
   member_range.start = state->current_token.range.start;
-  comment_pos = nonnull_pos_or(comment_pos, member_range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
 
   range keyword_range = state->current_token.range;
 
@@ -2622,7 +2622,7 @@ NODISCARD
 static bool parse_module_decl(parserstate *state, position comment_pos, rbs_node_list_t *annotations, rbs_node_t **module_decl) {
   range keyword_range = state->current_token.range;
 
-  comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, state->current_token.range.start);
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
   parser_advance(state);
@@ -2744,7 +2744,7 @@ NODISCARD
 static bool parse_class_decl(parserstate *state, position comment_pos, rbs_node_list_t *annotations, rbs_node_t **class_decl) {
   range keyword_range = state->current_token.range;
 
-  comment_pos = nonnull_pos_or(comment_pos, state->current_token.range.start);
+  comment_pos = rbs_nonnull_pos_or(comment_pos, state->current_token.range.start);
   rbs_ast_comment_t *comment = get_comment(state, comment_pos.line);
 
   parser_advance(state);
@@ -2919,7 +2919,7 @@ static bool parse_namespace(parserstate *state, range *rg, rbs_namespace_t **nam
       rbs_location_t *symbolLoc = rbs_location_new(&state->allocator, state->next_token.range);
       rbs_ast_symbol_t *symbol = rbs_ast_symbol_new(&state->allocator, symbolLoc, &state->constant_pool, INTERN_TOKEN(state, state->next_token));
       rbs_node_list_append(path, (rbs_node_t *)symbol);
-      if (null_position_p(rg->start)) {
+      if (rbs_null_position_p(rg->start)) {
         rg->start = state->next_token.range.start;
       }
       rg->end = state->next_token2.range.end;
@@ -2955,9 +2955,9 @@ static bool parse_use_clauses(parserstate *state, rbs_node_list_t *clauses) {
       case tUIDENT: {
         parser_advance(state);
 
-        enum TokenType ident_type = state->current_token.type;
+        enum RBSTokenType ident_type = state->current_token.type;
 
-        range type_name_range = null_range_p(namespace_range)
+        range type_name_range = rbs_null_range_p(namespace_range)
           ? state->current_token.range
           : (range) { .start = namespace_range.start, .end = state->current_token.range.end };
 
