@@ -362,7 +362,26 @@ module RBS
         when ClassEntry, ModuleEntry
           type_name
         when ClassAliasEntry, ModuleAliasEntry
-          normalize_module_name?(entry.decl.old_name)
+          i = 0
+          outer_paths = entry.outer.map { |outer| outer.name.to_namespace.path }
+          old_name_namespace = entry.decl.old_name.namespace
+          old_name_bottom = entry.decl.old_name.name
+          n = nil #: ::RBS::TypeName | nil | false
+          loop do
+            outer_path = outer_paths[-i, i] or raise
+            t = TypeName.new(
+              namespace: Namespace.new(
+                absolute: false,
+                path: outer_path.flatten
+              ) + old_name_namespace,
+              name: old_name_bottom
+            )
+            n = normalize_module_name?(t)
+            break if n
+            i += 1
+            break if outer_paths.length < i
+          end
+          n
         else
           nil
         end
