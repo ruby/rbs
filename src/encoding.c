@@ -48,7 +48,7 @@ unsigned int rbs_utf8_to_codepoint(const rbs_string_t string) {
     return codepoint;
 }
 
-int utf8_codelen(unsigned int c) {
+int rbs_utf8_codelen(unsigned int c) {
     if (c <= 0x7F) return 1;
     if (c <= 0x7FF) return 2;
     if (c <= 0xFFFF) return 3;

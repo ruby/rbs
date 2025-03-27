@@ -112,7 +112,7 @@ rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) 
 
     ptrdiff_t start_offset = 0;
     if (first_char == '"' || first_char == '\'' || first_char == '`') {
-      int bs = utf8_codelen(first_char);
+      int bs = rbs_utf8_codelen(first_char);
       start_offset += bs;
       byte_length -= 2 * bs;
     }
