@@ -125,6 +125,7 @@ module RBS
         @comments = comments
         @decl_contexts = []
         @type_params_stack = []
+        @method_visibility_stack = []
       end
 
       def parse()
@@ -450,16 +451,16 @@ module RBS
             )
             return
           end
-          member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations)
+          member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations, visibility: current_method_visibility)
           context.members << member
         when AST::Ruby::Declarations::ModuleDecl, AST::Ruby::Declarations::ClassDecl
           if node.receiver
-            member = AST::Ruby::Members::DefSingletonMember.new(buffer, node, name: node.name, inline_annotations: annotations)
+            member = AST::Ruby::Members::DefSingletonMember.new(buffer, node, name: node.name, inline_annotations: annotations, visibility: current_method_visibility)
             if member.self?
               context.members << member
             end
           else
-            member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations)
+            member = AST::Ruby::Members::DefMember.new(buffer, node, name: node.name, inline_annotations: annotations, visibility: current_method_visibility)
             current_context.members << member
           end
         else
@@ -488,6 +489,10 @@ module RBS
         case
         when member = visibility_member?(node)
           current_context!.members << member
+        when visibility = visibility_modifier?(node)
+          push_method_visibility(visibility) do
+            visit_child_nodes(node)
+          end
         when member = mixin_member?(node)
           case context = current_context
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
@@ -531,6 +536,23 @@ module RBS
 
         member = AST::Ruby::Members::AliasMember.new(buffer, node)
         current_context!.members << member
+      end
+
+      def visibility_modifier?(node)
+        if node.name == :private || node.name == :public
+          if self_call?(node)
+            unless no_argument?(node)
+              if current_context
+                case node.name
+                when :private
+                  :private
+                when :public
+                  :public
+                end
+              end
+            end
+          end
+        end
       end
 
       def visibility_member?(node)
@@ -755,6 +777,17 @@ module RBS
 
       def report_unused_annotation(annot)
         diagnostics << Diagnostics::UnusedAnnotation.new(annot.location, "Unused annotation")
+      end
+
+      def push_method_visibility(visibility)
+        @method_visibility_stack.push(visibility)
+        yield
+      ensure
+        @method_visibility_stack.pop
+      end
+
+      def current_method_visibility
+        @method_visibility_stack.last
       end
     end
   end

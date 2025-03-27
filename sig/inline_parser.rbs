@@ -145,6 +145,8 @@ module RBS
 
       def mixin_member?: (Prism::CallNode) -> (Members::IncludeMember | Members::ExtendMember | Members::PrependMember | nil)
 
+      def visibility_modifier?: (Prism::CallNode) -> Members::visibility
+
       def push_type_params: [T] (Array[AST::TypeParam]) { () -> T } -> T
                           | (Array[AST::TypeParam]) -> void
 
@@ -154,6 +156,11 @@ module RBS
       def current_type_params: () -> Array[AST::TypeParam]
 
       def current_type_param_names: () -> Array[Symbol]
+
+      def push_method_visibility: (AST::Ruby::Members::visibility) { () -> void } -> void
+
+      @method_visibility_stack: Array[AST::Ruby::Members::visibility]
+      def current_method_visibility: () -> AST::Ruby::Members::visibility
 
       # Returns true if the receiver is (implicitly/explicitly) a `self` node
       def self_call?: (Prism::CallNode) -> bool

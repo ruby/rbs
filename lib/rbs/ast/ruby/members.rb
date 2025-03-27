@@ -291,13 +291,14 @@ module RBS
         end
 
         class DefMember < Base
-          attr_reader :node, :inline_annotations, :name
+          attr_reader :node, :inline_annotations, :name, :visibility
 
-          def initialize(buffer, node, name:, inline_annotations:)
+          def initialize(buffer, node, name:, inline_annotations:, visibility:)
             super(buffer)
             @node = node
             @inline_annotations = inline_annotations
             @name = name
+            @visibility = visibility
           end
 
           def overloads
@@ -337,7 +338,8 @@ module RBS
               buffer,
               node,
               name: name,
-              inline_annotations: inline_annotations.map_type_name(&block)
+              inline_annotations: inline_annotations.map_type_name(&block),
+              visibility: visibility
             ) #: self
           end
 
@@ -351,13 +353,14 @@ module RBS
         end
 
         class DefSingletonMember < Base
-          attr_reader :node, :name, :inline_annotations
+          attr_reader :node, :name, :inline_annotations, :visibility
 
-          def initialize(buffer, node, name:, inline_annotations:)
+          def initialize(buffer, node, name:, inline_annotations:, visibility:)
             super(buffer)
             @node = node
             @name = name
             @inline_annotations = inline_annotations
+            @visibility = visibility
           end
 
           def overloads
@@ -405,7 +408,8 @@ module RBS
               buffer,
               node,
               name: name,
-              inline_annotations: inline_annotations.map_type_name(&block)
+              inline_annotations: inline_annotations.map_type_name(&block),
+              visibility: visibility
             ) #: self
           end
         end

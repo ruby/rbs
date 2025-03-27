@@ -817,4 +817,29 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__private_on_def
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        # @rbs () -> Integer
+        private def foo = 123
+
+        public def self.baz = 123 #: Integer
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :private, member.visibility
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefSingletonMember, member
+        assert_equal :public, member.visibility
+      end
+    end
+  end
 end

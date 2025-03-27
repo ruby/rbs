@@ -93,6 +93,8 @@ module RBS
           def empty?: () -> bool
         end
 
+        type visibility = :public | :private | nil
+
         class DefMember < Base
           attr_reader node: Prism::DefNode
 
@@ -100,7 +102,9 @@ module RBS
 
           attr_reader inline_annotations: DefAnnotations
 
-          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
+          attr_reader visibility: visibility
+
+          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations, visibility: visibility) -> void
 
           # Returns the overload of the method
           #
@@ -132,7 +136,9 @@ module RBS
 
           attr_reader inline_annotations: DefAnnotations
 
-          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations) -> void
+          attr_reader visibility: visibility
+
+          def initialize: (Buffer, Prism::DefNode, name: Symbol, inline_annotations: DefAnnotations, visibility: visibility) -> void
 
           def overloads: () -> Array[Overload]
 
@@ -214,7 +220,11 @@ module RBS
         class AttributeMember < Base
           attr_reader node: Prism::CallNode
 
-          def initialize: (Buffer, Prism::CallNode) -> void
+          attr_reader name: Symbol
+
+          attr_reader annotation: Annotation::NodeTypeAssertion?
+
+          def initialize: (Buffer, Prism::CallNode, Symbol name, Annotation::NodeTypeAssertion?) -> void
 
           def location: () -> Location
         end
