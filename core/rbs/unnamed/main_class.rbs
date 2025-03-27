@@ -1,6 +1,8 @@
 module RBS
   module Unnamed
     class TopLevelSelfClass
+      private
+
       # <!--
       #   rdoc-file=eval.c
       #   - include(module, ...)    -> self
