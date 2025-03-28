@@ -15,10 +15,10 @@ module RBS
 
       def format: (newline_at_end: bool) -> String
 
-      def self.translate: (RDoc::Markup::Document | RDoc::Comment) -> String?
+      def self.translate: (RDoc::Markup::Document) -> String?
 
-      def self.each_part: (RDoc::Markup::Document | RDoc::Comment | String) { (RDoc::Markup::Document) -> void } -> void
-                        | (RDoc::Markup::Document | RDoc::Comment | String) -> Enumerator[RDoc::Markup::Document, void]
+      def self.each_part: (RDoc::Markup::Document) { (RDoc::Markup::Document) -> void } -> void
+                        | (RDoc::Markup::Document) -> Enumerator[RDoc::Markup::Document, void]
     end
   end
 end
