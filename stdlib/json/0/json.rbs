@@ -1116,10 +1116,6 @@ module JSON
   #
   def self?.pretty_generate: (_ToJson obj, ?options opts) -> untyped
 
-  alias self.pretty_unparse self.pretty_generate
-
-  alias pretty_unparse pretty_generate
-
   # Recursively calls passed *Proc* if the parsed data structure is an *Array* or
   # *Hash*
   #
