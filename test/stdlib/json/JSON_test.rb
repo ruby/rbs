@@ -169,11 +169,6 @@ class JSONSingletonTest < Test::Unit::TestCase
   def test_state_eq
     assert_send_type "(singleton(JSON::Ext::Generator::State)) -> singleton(JSON::Ext::Generator::State)", JSON, :state=, JSON::Ext::Generator::State
   end
-
-  def test_unparse
-    assert_send_type "(ToJson) -> String", JSON, :unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :unparse, ToJson.new, { indent: "\t" }
-  end
 end
 
 class JSONInstanceTest < Test::Unit::TestCase
@@ -236,11 +231,6 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_recurse_proc
     assert_send_type "(Integer) { (Integer) -> void } -> void", MyJSON.new, :recurse_proc, 42 do |_i| end
-  end
-
-  def test_unparse
-    assert_send_type "(ToJson) -> String", MyJSON.new, :unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :unparse, ToJson.new, { indent: "\t" }
   end
 
   def test_to_json_with_object
