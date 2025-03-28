@@ -754,6 +754,7 @@ module JSON
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
+  %a{deprecated}
   def self.dump_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
@@ -761,6 +762,7 @@ module JSON
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
+  %a{deprecated}
   def self.dump_default_options=: (options) -> options
 
   # <!--
