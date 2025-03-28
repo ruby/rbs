@@ -780,6 +780,7 @@ module JSON
   #     # Raises SystemStackError (stack level too deep):
   #     JSON.fast_generate(a)
   #
+  %a{deprecated}
   def self?.fast_generate: (_ToJson obj, ?options opts) -> String
 
   # <!--

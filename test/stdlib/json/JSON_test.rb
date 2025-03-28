@@ -61,11 +61,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new, 100
   end
 
-  def test_fast_generate
-    assert_send_type "(ToJson) -> String", JSON, :fast_generate, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :fast_generate, ToJson.new, { indent: "\t" }
-  end
-
   def test_generate
     assert_send_type "(ToJson) -> String", JSON, :generate, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", JSON, :generate, ToJson.new, { indent: "\t" }
@@ -172,11 +167,6 @@ class JSONInstanceTest < Test::Unit::TestCase
     assert_send_type "(ToJson, JsonToWritableIO) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonToWritableIO.new
     assert_send_type "(ToJson, JsonWrite) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new
     assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new, 100
-  end
-
-  def test_fast_generate
-    assert_send_type "(ToJson) -> String", MyJSON.new, :fast_generate, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :fast_generate, ToJson.new, { indent: "\t" }
   end
 
   def test_generate
