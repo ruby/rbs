@@ -14,9 +14,6 @@ end
 class JSON::GeneratorError < JSON::JSONError
 end
 
-class JSON::UnparserError < JSON::GeneratorError
-end
-
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # This exception is raised if a parser error occurs.
 #
