@@ -5,6 +5,7 @@ module RBS
     module Convertibles
       class BlankSlate < BasicObject
         instance_methods.each do |im|
+          next if im == :__id__
           next if im == :__send__
           undef_method im
         end
