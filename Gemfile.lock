@@ -57,7 +57,7 @@ GEM
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    logger (1.6.6)
+    logger (1.7.0)
     marcel (1.0.4)
     memory_profiler (1.1.0)
     mini_portile2 (2.8.8)
