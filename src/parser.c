@@ -91,6 +91,17 @@ typedef struct {
   rbs_node_t *rest_keywords;
 } method_params;
 
+/**
+ * id_table represents a set of RBS constant IDs.
+ * This is used to manage the set of bound variables.
+ * */
+typedef struct id_table {
+  size_t size;
+  size_t count;
+  rbs_constant_id_t *ids;
+  struct id_table *next;
+} id_table;
+
 static bool rbs_is_untyped_params(method_params *params) {
   return params->required_positionals == NULL;
 }
@@ -3250,7 +3261,7 @@ id_table *alloc_reset_table(rbs_allocator_t *allocator) {
   return table;
 }
 
-id_table *parser_push_typevar_table(parserstate *state, bool reset) {
+void parser_push_typevar_table(parserstate *state, bool reset) {
   if (reset) {
     id_table *table = alloc_reset_table(&state->allocator);
     table->next = state->vars;
@@ -3260,8 +3271,6 @@ id_table *parser_push_typevar_table(parserstate *state, bool reset) {
   id_table *table = alloc_empty_table(&state->allocator);
   table->next = state->vars;
   state->vars = table;
-
-  return table;
 }
 
 NODISCARD

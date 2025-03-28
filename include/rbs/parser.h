@@ -11,17 +11,6 @@
 #include <stddef.h>
 
 /**
- * id_table represents a set of RBS constant IDs.
- * This is used to manage the set of bound variables.
- * */
-typedef struct id_table {
-  size_t size;
-  size_t count;
-  rbs_constant_id_t *ids;
-  struct id_table *next;
-} id_table;
-
-/**
  * comment represents a sequence of comment lines.
  *
  *     # Comment for the method.
@@ -62,7 +51,7 @@ typedef struct {
   token next_token2;      /* The second lookahead token */
   token next_token3;      /* The third lookahead token */
 
-  id_table *vars;         /* Known type variables */
+  struct id_table *vars;  /* Known type variables */
   comment *last_comment;  /* Last read comment */
 
   rbs_constant_pool_t constant_pool;
@@ -86,7 +75,7 @@ typedef struct {
  * end
  * ```
  * */
-id_table *parser_push_typevar_table(parserstate *state, bool reset);
+void parser_push_typevar_table(parserstate *state, bool reset);
 
 /**
  * Insert new type variable into the latest table.
