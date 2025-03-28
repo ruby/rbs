@@ -79,8 +79,8 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(_ToStr) -> 42", JSON, :load, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", JSON, :load, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", JSON, :load, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { }, { alllow_nan: true }
+    assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { |a| a }
+    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { |a| a }, { alllow_nan: true }
   end
 
   def test_load_file
@@ -128,10 +128,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(ToJson, indent: String) -> String", JSON, :pretty_generate, ToJson.new, { indent: "\t" }
   end
 
-  def test_recurse_proc
-    assert_send_type "(Integer) { (Integer) -> void } -> void", JSON, :recurse_proc, 42 do |_i| end
-  end
-
   def test_state
     assert_send_type "() -> singleton(JSON::Ext::Generator::State)", JSON, :state
   end
@@ -168,15 +164,6 @@ class JSONInstanceTest < Test::Unit::TestCase
     assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :generate, ToJson.new, { indent: "\t" }
   end
 
-  def test_load
-    assert_send_type "(String) -> 42", MyJSON.new, :load, "42"
-    assert_send_type "(_ToStr) -> 42", MyJSON.new, :load, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :load, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", MyJSON.new, :load, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", MyJSON.new, :load, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", MyJSON.new, :load, "42", proc { }, { alllow_nan: true }
-  end
-
   def test_parse
     assert_send_type "(String) -> 42", MyJSON.new, :parse, "42"
     assert_send_type "(_ToStr) -> 42", MyJSON.new, :parse, JsonToStr.new("42")
@@ -192,10 +179,6 @@ class JSONInstanceTest < Test::Unit::TestCase
   def test_pretty_generate
     assert_send_type "(ToJson) -> String", MyJSON.new, :pretty_generate, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :pretty_generate, ToJson.new, { indent: "\t" }
-  end
-
-  def test_recurse_proc
-    assert_send_type "(Integer) { (Integer) -> void } -> void", MyJSON.new, :recurse_proc, 42 do |_i| end
   end
 
   def test_to_json_with_object
