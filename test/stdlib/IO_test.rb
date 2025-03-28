@@ -11,6 +11,8 @@ class IOSingletonTest < Test::Unit::TestCase
   def test_binread
     assert_send_type "(String) -> String",
                      IO, :binread, File.expand_path(__FILE__)
+    assert_send_type "(Pathname) -> String",
+                     IO, :binread, Pathname(File.expand_path(__FILE__))
     assert_send_type "(String, Integer) -> String",
                      IO, :binread, File.expand_path(__FILE__), 3
     assert_send_type "(String, Integer, Integer) -> String",
@@ -26,6 +28,8 @@ class IOSingletonTest < Test::Unit::TestCase
 
       assert_send_type "(String, String) -> Integer",
                        IO, :binwrite, filename, content
+      assert_send_type "(Pathname, String) -> Integer",
+                       IO, :binwrite, Pathname(filename), content
       assert_send_type "(String, String, Integer) -> Integer",
                        IO, :binwrite, filename, content, 0
       assert_send_type "(String, String, mode: String) -> Integer",
@@ -38,6 +42,8 @@ class IOSingletonTest < Test::Unit::TestCase
   def test_read
     assert_send_type "(String) -> String",
                      IO, :read, File.expand_path(__FILE__)
+    assert_send_type "(Pathname) -> String",
+                     IO, :read, Pathname(File.expand_path(__FILE__))
     assert_send_type "(String, Integer) -> String",
                      IO, :read, File.expand_path(__FILE__), 3
     assert_send_type "(String, Integer, Integer) -> String",
@@ -51,6 +57,8 @@ class IOSingletonTest < Test::Unit::TestCase
 
       assert_send_type "(String, String) -> Integer",
                        IO, :write, filename, content
+      assert_send_type "(Pathname, String) -> Integer",
+                       IO, :write, Pathname(filename), content
       assert_send_type "(String, String, Integer) -> Integer",
                        IO, :write, filename, content, 0
       assert_send_type "(String, String, mode: String) -> Integer",
