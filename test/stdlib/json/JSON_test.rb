@@ -114,14 +114,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     end
   end
 
-  def test_load_default_options
-    assert_send_type "() -> Hash[untyped, untyped]", JSON, :load_default_options
-  end
-
-  def test_load_default_options_eq
-    assert_send_type "(allow_nan: true) -> Hash[untyped, untyped]", JSON, :load_default_options=, { allow_nan: true }
-  end
-
   def test_parse
     assert_send_type "(String) -> 42", JSON, :parse, "42"
     assert_send_type "(_ToStr) -> 42", JSON, :parse, JsonToStr.new("42")

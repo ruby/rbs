@@ -1001,6 +1001,7 @@ module JSON
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
+  %a{deprecated}
   def self.load_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
@@ -1008,6 +1009,7 @@ module JSON
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
+  %a{deprecated}
   def self.load_default_options=: (options) -> options
 
   # <!--
