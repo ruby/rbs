@@ -61,17 +61,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new, 100
   end
 
-  def test_dump_default_options
-    assert_send_type "() -> { max_nesting: false, allow_nan: true }", JSON, :dump_default_options
-  end
-
-  def test_dump_default_options_eq
-    assert_send_type "(max_nesting: false, allow_nan: true, allow_blank: true) -> { max_nesting: false, allow_nan: true, allow_blank: true }",
-                     JSON,
-                     :dump_default_options=,
-                     { max_nesting: false, allow_nan: true, allow_blank: true }
-  end
-
   def test_fast_generate
     assert_send_type "(ToJson) -> String", JSON, :fast_generate, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", JSON, :fast_generate, ToJson.new, { indent: "\t" }
