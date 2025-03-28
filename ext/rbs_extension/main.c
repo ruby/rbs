@@ -23,7 +23,7 @@ static NORETURN(void) raise_error(rbs_error_t *error, VALUE buffer) {
   }
 
   VALUE location = rbs_new_location(buffer, error->token.range);
-  VALUE type = rb_str_new_cstr(token_type_str(error->token.type));
+  VALUE type = rb_str_new_cstr(rbs_token_type_str(error->token.type));
 
   VALUE rb_error = rb_funcall(
     RBS_ParsingError,
@@ -112,7 +112,7 @@ static VALUE parse_type_try(VALUE a) {
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
     if (parser->current_token.type != pEOF) {
-      set_error(parser, parser->current_token, true, "expected a token `%s`", token_type_str(pEOF));
+      set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
       raise_error(parser->error, arg->buffer);
     }
   }
@@ -202,7 +202,7 @@ static VALUE parse_method_type_try(VALUE a) {
   if (RB_TEST(arg->require_eof)) {
     parser_advance(parser);
     if (parser->current_token.type != pEOF) {
-      set_error(parser, parser->current_token, true, "expected a token `%s`", token_type_str(pEOF));
+      set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
       raise_error(parser->error, arg->buffer);
     }
   }
@@ -289,10 +289,10 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   lexstate *lexer = alloc_lexer_from_buffer(&allocator, string, encoding, 0, FIX2INT(end_pos));
 
   VALUE results = rb_ary_new();
-  token token = NullToken;
+  rbs_token_t token = NullToken;
   while (token.type != pEOF) {
     token = rbsparser_next_token(lexer);
-    VALUE type = ID2SYM(rb_intern(token_type_str(token.type)));
+    VALUE type = ID2SYM(rb_intern(rbs_token_type_str(token.type)));
     VALUE location = rbs_new_location(buffer, token.range);
     VALUE pair = rb_ary_new3(2, type, location);
     rb_ary_push(results, pair);

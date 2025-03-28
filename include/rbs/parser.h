@@ -24,19 +24,19 @@
  * A comment object represents the six lines of comments.
  * */
 typedef struct rbs_comment_t {
-  position start;
-  position end;
+  rbs_position_t start;
+  rbs_position_t end;
 
   size_t line_size;
   size_t line_count;
-  token *tokens;
+  rbs_token_t *tokens;
 
   struct rbs_comment_t *next_comment;
 } rbs_comment_t;
 
 typedef struct rbs_error_t {
   char *message;
-  token token;
+  rbs_token_t token;
   bool syntax_error;
 } rbs_error_t;
 
@@ -46,10 +46,10 @@ typedef struct rbs_error_t {
 typedef struct {
   lexstate *lexstate;
 
-  token current_token;
-  token next_token;       /* The first lookahead token */
-  token next_token2;      /* The second lookahead token */
-  token next_token3;      /* The third lookahead token */
+  rbs_token_t current_token;
+  rbs_token_t next_token;       /* The first lookahead token */
+  rbs_token_t next_token2;      /* The second lookahead token */
+  rbs_token_t next_token3;      /* The third lookahead token */
 
   struct id_table *vars;  /* Known type variables */
   rbs_comment_t *last_comment;  /* Last read comment */
@@ -124,7 +124,7 @@ void print_parser(rbs_parser_t *parser);
  * */
 rbs_ast_comment_t *get_comment(rbs_parser_t *parser, int subject_line);
 
-void set_error(rbs_parser_t *parser, token tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
+void set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
 bool parse_type(rbs_parser_t *parser, rbs_node_t **type);
 bool parse_method_type(rbs_parser_t *parser, rbs_methodtype_t **method_type);

@@ -89,19 +89,19 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tANNOTATION",      /* Annotation */
 };
 
-token NullToken = { .type = NullType, .range = {} };
-position NullPosition = { -1, -1, -1, -1 };
-range NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
+rbs_token_t NullToken = { .type = NullType, .range = {} };
+rbs_position_t NullPosition = { -1, -1, -1, -1 };
+rbs_range_t NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
 
-const char *token_type_str(enum RBSTokenType type) {
+const char *rbs_token_type_str(enum RBSTokenType type) {
   return RBS_TOKENTYPE_NAMES[type];
 }
 
-int rbs_token_chars(token tok) {
+int rbs_token_chars(rbs_token_t tok) {
   return tok.range.end.char_pos - tok.range.start.char_pos;
 }
 
-int rbs_token_bytes(token tok) {
+int rbs_token_bytes(rbs_token_t tok) {
   return RBS_RANGE_BYTES(tok.range);
 }
 
@@ -120,8 +120,8 @@ unsigned int rbs_peek(lexstate *state) {
   }
 }
 
-token rbs_next_token(lexstate *state, enum RBSTokenType type) {
-  token t;
+rbs_token_t rbs_next_token(lexstate *state, enum RBSTokenType type) {
+  rbs_token_t t;
 
   t.type = type;
   t.range.start = state->start;
@@ -134,10 +134,10 @@ token rbs_next_token(lexstate *state, enum RBSTokenType type) {
   return t;
 }
 
-token rbs_next_eof_token(lexstate *state) {
+rbs_token_t rbs_next_eof_token(lexstate *state) {
   if ((size_t) state->current.byte_pos == rbs_string_len(state->string) + 1) {
     // End of String
-    token t;
+    rbs_token_t t;
     t.type = pEOF;
     t.range.start = state->start;
     t.range.end = state->start;
@@ -183,6 +183,6 @@ void rbs_skipn(lexstate *state, size_t size) {
   }
 }
 
-char *rbs_peek_token(lexstate *state, token tok) {
+char *rbs_peek_token(lexstate *state, rbs_token_t tok) {
   return (char *) state->string.start + tok.range.start.byte_pos;
 }

@@ -2,7 +2,7 @@
 #line 1 "src/lexer.re"
 #include "rbs/lexer.h"
 
-token rbsparser_next_token(lexstate *state) {
+rbs_token_t rbsparser_next_token(lexstate *state) {
   lexstate backup;
 
   backup = *state;

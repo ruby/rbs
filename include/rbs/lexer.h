@@ -103,17 +103,17 @@ typedef struct {
   int char_pos;
   int line;
   int column;
-} position;
+} rbs_position_t;
 
 typedef struct {
-  position start;
-  position end;
-} range;
+  rbs_position_t start;
+  rbs_position_t end;
+} rbs_range_t;
 
 typedef struct {
   enum RBSTokenType type;
-  range range;
-} token;
+  rbs_range_t range;
+} rbs_token_t;
 
 /**
  * The lexer state is the curren token.
@@ -129,27 +129,27 @@ typedef struct {
   rbs_string_t string;
   int start_pos;                  /* The character position that defines the start of the input */
   int end_pos;                    /* The character position that defines the end of the input */
-  position current;               /* The current position */
-  position start;                 /* The start position of the current token */
+  rbs_position_t current;               /* The current position */
+  rbs_position_t start;                 /* The start position of the current token */
   bool first_token_of_line;       /* This flag is used for tLINECOMMENT */
   unsigned int last_char;         /* Last peeked character */
   const rbs_encoding_t *encoding;
 } lexstate;
 
-extern token NullToken;
-extern position NullPosition;
-extern range NULL_RANGE;
+extern rbs_token_t NullToken;
+extern rbs_position_t NullPosition;
+extern rbs_range_t NULL_RANGE;
 
-char *rbs_peek_token(lexstate *state, token tok);
-int rbs_token_chars(token tok);
-int rbs_token_bytes(token tok);
+char *rbs_peek_token(lexstate *state, rbs_token_t tok);
+int rbs_token_chars(rbs_token_t tok);
+int rbs_token_bytes(rbs_token_t tok);
 
 #define rbs_null_position_p(pos) (pos.byte_pos == -1)
 #define rbs_null_range_p(range) (range.start.byte_pos == -1)
 #define rbs_nonnull_pos_or(pos1, pos2) (rbs_null_position_p(pos1) ? pos2 : pos1)
 #define RBS_RANGE_BYTES(range) (range.end.byte_pos - range.start.byte_pos)
 
-const char *token_type_str(enum RBSTokenType type);
+const char *rbs_token_type_str(enum RBSTokenType type);
 
 /**
  * Read next character.
@@ -167,17 +167,17 @@ void rbs_skip(lexstate *state);
 void rbs_skipn(lexstate *state, size_t size);
 
 /**
- * Return new token with given type.
+ * Return new rbs_token_t with given type.
  * */
-token rbs_next_token(lexstate *state, enum RBSTokenType type);
+rbs_token_t rbs_next_token(lexstate *state, enum RBSTokenType type);
 
 /**
- * Return new token with EOF type.
+ * Return new rbs_token_t with EOF type.
  * */
-token rbs_next_eof_token(lexstate *state);
+rbs_token_t rbs_next_eof_token(lexstate *state);
 
-token rbsparser_next_token(lexstate *state);
+rbs_token_t rbsparser_next_token(lexstate *state);
 
-void rbs_print_token(token tok);
+void rbs_print_token(rbs_token_t tok);
 
 #endif
