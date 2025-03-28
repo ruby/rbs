@@ -1130,10 +1130,6 @@ module JSON
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
   def self.state=: (state) -> state
-
-  alias self.unparse self.generate
-
-  alias unparse generate
 end
 
 JSON::FAST_STATE_PROTOTYPE: JSON::state
