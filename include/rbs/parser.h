@@ -23,7 +23,7 @@
  *
  * A comment object represents the six lines of comments.
  * */
-typedef struct comment {
+typedef struct rbs_comment_t {
   position start;
   position end;
 
@@ -31,14 +31,14 @@ typedef struct comment {
   size_t line_count;
   token *tokens;
 
-  struct comment *next_comment;
-} comment;
+  struct rbs_comment_t *next_comment;
+} rbs_comment_t;
 
-typedef struct error {
+typedef struct rbs_error_t {
   char *message;
   token token;
   bool syntax_error;
-} error;
+} rbs_error_t;
 
 /**
  * An RBS parser is a LL(3) parser.
@@ -52,12 +52,12 @@ typedef struct {
   token next_token3;      /* The third lookahead token */
 
   struct id_table *vars;  /* Known type variables */
-  comment *last_comment;  /* Last read comment */
+  rbs_comment_t *last_comment;  /* Last read comment */
 
   rbs_constant_pool_t constant_pool;
   rbs_allocator_t allocator;
-  error *error;
-} parserstate;
+  rbs_error_t *error;
+} rbs_parser_t;
 
 /**
  * Insert new table entry.
@@ -75,12 +75,12 @@ typedef struct {
  * end
  * ```
  * */
-void parser_push_typevar_table(parserstate *state, bool reset);
+void parser_push_typevar_table(rbs_parser_t *parser, bool reset);
 
 /**
  * Insert new type variable into the latest table.
  * */
-NODISCARD bool parser_insert_typevar(parserstate *state, rbs_constant_id_t id);
+NODISCARD bool parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
 
 /**
  * Allocate new lexstate object.
@@ -93,21 +93,21 @@ NODISCARD bool parser_insert_typevar(parserstate *state, rbs_constant_id_t id);
 lexstate *alloc_lexer(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 
 /**
- * Allocate new parserstate object.
+ * Allocate new rbs_parser_t object.
  *
  * ```
  * alloc_parser(buffer, string, encoding, 0, 1);
  * ```
  * */
-parserstate *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
-void free_parser(parserstate *parser);
+rbs_parser_t *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+void free_parser(rbs_parser_t *parser);
 
 /**
  * Advance one token.
  * */
-void parser_advance(parserstate *state);
+void parser_advance(rbs_parser_t *parser);
 
-void print_parser(parserstate *state);
+void print_parser(rbs_parser_t *parser);
 
 /**
  * Returns a RBS::Comment object associated with an subject at `subject_line`.
@@ -122,12 +122,12 @@ void print_parser(parserstate *state);
  * end
  * ```
  * */
-rbs_ast_comment_t *get_comment(parserstate *state, int subject_line);
+rbs_ast_comment_t *get_comment(rbs_parser_t *parser, int subject_line);
 
-void set_error(parserstate *state, token tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
+void set_error(rbs_parser_t *parser, token tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
-bool parse_type(parserstate *state, rbs_node_t **type);
-bool parse_method_type(parserstate *state, rbs_methodtype_t **method_type);
-bool parse_signature(parserstate *state, rbs_signature_t **signature);
+bool parse_type(rbs_parser_t *parser, rbs_node_t **type);
+bool parse_method_type(rbs_parser_t *parser, rbs_methodtype_t **method_type);
+bool parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 #endif

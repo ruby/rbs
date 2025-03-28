@@ -15,7 +15,7 @@
  * foo.rbs:11:21...11:25: Syntax error: {message}, token=`{tok source}` ({tok type})
  * ```
  * */
-static NORETURN(void) raise_error(error *error, VALUE buffer) {
+static NORETURN(void) raise_error(rbs_error_t *error, VALUE buffer) {
   rbs_assert(error != NULL, "raise_error() called with NULL error");
 
   if (!error->syntax_error) {
@@ -37,7 +37,7 @@ static NORETURN(void) raise_error(error *error, VALUE buffer) {
   rb_exc_raise(rb_error);
 }
 
-void raise_error_if_any(parserstate *parser, VALUE buffer) {
+void raise_error_if_any(rbs_parser_t *parser, VALUE buffer) {
   if (parser->error != NULL) {
     raise_error(parser->error, buffer);
   }
@@ -48,7 +48,7 @@ void raise_error_if_any(parserstate *parser, VALUE buffer) {
  * @param parser
  * @param variables A Ruby Array of Symbols, or nil.
  */
-static void declare_type_variables(parserstate *parser, VALUE variables, VALUE buffer) {
+static void declare_type_variables(rbs_parser_t *parser, VALUE variables, VALUE buffer) {
   if (NIL_P(variables)) return; // Nothing to do.
 
   if (!RB_TYPE_P(variables, T_ARRAY)) {
@@ -87,18 +87,18 @@ static void declare_type_variables(parserstate *parser, VALUE variables, VALUE b
 struct parse_type_arg {
   VALUE buffer;
   rb_encoding *encoding;
-  parserstate *parser;
+  rbs_parser_t *parser;
   VALUE require_eof;
 };
 
 static VALUE ensure_free_parser(VALUE parser) {
-  free_parser((parserstate *)parser);
+  free_parser((rbs_parser_t *)parser);
   return Qnil;
 }
 
 static VALUE parse_type_try(VALUE a) {
   struct parse_type_arg *arg = (struct parse_type_arg *)a;
-  parserstate *parser = arg->parser;
+  rbs_parser_t *parser = arg->parser;
 
   if (parser->next_token.type == pEOF) {
     return Qnil;
@@ -145,7 +145,7 @@ static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE strin
   );
 }
 
-static parserstate *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
+static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
   if (start_pos < 0 || end_pos < 0) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
@@ -170,7 +170,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
   StringValue(string);
   rb_encoding *encoding = rb_enc_get(string);
 
-  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
   declare_type_variables(parser, variables, buffer);
   struct parse_type_arg arg = {
     .buffer = buffer,
@@ -188,7 +188,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
 
 static VALUE parse_method_type_try(VALUE a) {
   struct parse_type_arg *arg = (struct parse_type_arg *)a;
-  parserstate *parser = arg->parser;
+  rbs_parser_t *parser = arg->parser;
 
   if (parser->next_token.type == pEOF) {
     return Qnil;
@@ -223,7 +223,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
   StringValue(string);
   rb_encoding *encoding = rb_enc_get(string);
 
-  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
   declare_type_variables(parser, variables, buffer);
   struct parse_type_arg arg = {
     .buffer = buffer,
@@ -241,7 +241,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
 
 static VALUE parse_signature_try(VALUE a) {
   struct parse_type_arg *arg = (struct parse_type_arg *)a;
-  parserstate *parser = arg->parser;
+  rbs_parser_t *parser = arg->parser;
 
   rbs_signature_t *signature = NULL;
   parse_signature(parser, &signature);
@@ -264,7 +264,7 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
   StringValue(string);
   rb_encoding *encoding = rb_enc_get(string);
 
-  parserstate *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
   struct parse_type_arg arg = {
     .buffer = buffer,
     .encoding = encoding,
