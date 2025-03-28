@@ -828,14 +828,6 @@ module JSON
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
-  #   - iconv(to, from, string)
-  # -->
-  # Encodes string using String.encode.
-  #
-  def self.iconv: (encoding to, encoding from, String string) -> String
-
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
   #   - JSON.load(source, proc = nil, options = {}) -> object
   # -->
   # Returns the Ruby objects created by parsing the given `source`.

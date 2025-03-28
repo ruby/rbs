@@ -74,12 +74,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(singleton(JSON::Ext::Generator)) -> void", JSON, :generator=, JSON::Ext::Generator
   end
 
-  def test_iconv
-    assert_send_type "(Encoding, Encoding, String) -> String", JSON, :iconv, Encoding::UTF_8, Encoding::UTF_16, "".encode(Encoding::UTF_16)
-    assert_send_type "(String, String, String) -> String", JSON, :iconv, 'UTF-8', 'UTF-16', "".encode(Encoding::UTF_16)
-    assert_send_type "(_ToStr, _ToStr, String) -> String", JSON, :iconv, JsonToStr.new('UTF-8'), JsonToStr.new('UTF-16'), "".encode(Encoding::UTF_16)
-  end
-
   def test_load
     assert_send_type "(String) -> 42", JSON, :load, "42"
     assert_send_type "(_ToStr) -> 42", JSON, :load, JsonToStr.new("42")
