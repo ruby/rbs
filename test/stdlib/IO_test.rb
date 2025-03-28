@@ -35,6 +35,31 @@ class IOSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_read
+    assert_send_type "(String) -> String",
+                     IO, :read, File.expand_path(__FILE__)
+    assert_send_type "(String, Integer) -> String",
+                     IO, :read, File.expand_path(__FILE__), 3
+    assert_send_type "(String, Integer, Integer) -> String",
+                     IO, :read, File.expand_path(__FILE__), 3, 0
+  end
+
+  def test_write
+    Dir.mktmpdir do |dir|
+      filename = File.join(dir, "some_file")
+      content = "foo"
+
+      assert_send_type "(String, String) -> Integer",
+                       IO, :write, filename, content
+      assert_send_type "(String, String, Integer) -> Integer",
+                       IO, :write, filename, content, 0
+      assert_send_type "(String, String, mode: String) -> Integer",
+                       IO, :write, filename, content, mode: "a"
+      assert_send_type "(String, String, Integer, mode: String) -> Integer",
+                       IO, :write, filename, content, 0, mode: "a"
+    end
+  end
+
   def test_open
     Dir.mktmpdir do |dir|
       assert_send_type "(Integer) -> IO",
