@@ -780,10 +780,6 @@ module JSON
   #
   def self?.fast_generate: (_ToJson obj, ?options opts) -> String
 
-  alias self.fast_unparse self.fast_generate
-
-  alias fast_unparse fast_generate
-
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
   #   - JSON.generate(obj, opts = nil) -> new_string
