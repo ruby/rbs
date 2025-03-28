@@ -1121,20 +1121,6 @@ module JSON
   #
   def self?.recurse_proc: (untyped result) { (*untyped) -> void } -> void
 
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = nil)
-  # -->
-  #
-  alias self.restore self.load
-
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = nil)
-  # -->
-  #
-  alias restore load
-
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #

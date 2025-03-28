@@ -162,15 +162,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(Integer) { (Integer) -> void } -> void", JSON, :recurse_proc, 42 do |_i| end
   end
 
-  def test_restore
-    assert_send_type "(String) -> 42", JSON, :restore, "42"
-    assert_send_type "(_ToStr) -> 42", JSON, :restore, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", JSON, :restore, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", JSON, :restore, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", JSON, :restore, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :restore, "42", proc { }, { alllow_nan: true }
-  end
-
   def test_state
     assert_send_type "() -> singleton(JSON::Ext::Generator::State)", JSON, :state
   end
@@ -245,15 +236,6 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_recurse_proc
     assert_send_type "(Integer) { (Integer) -> void } -> void", MyJSON.new, :recurse_proc, 42 do |_i| end
-  end
-
-  def test_restore
-    assert_send_type "(String) -> 42", MyJSON.new, :restore, "42"
-    assert_send_type "(_ToStr) -> 42", MyJSON.new, :restore, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :restore, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", MyJSON.new, :restore, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", MyJSON.new, :restore, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", MyJSON.new, :restore, "42", proc { }, { alllow_nan: true }
   end
 
   def test_unparse
