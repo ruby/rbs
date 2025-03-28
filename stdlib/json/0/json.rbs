@@ -962,7 +962,8 @@ module JSON
   #        #<Admin:0x00000000064c41f8
   #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
   #
-  def self?.load: (string | _ReadableIO | _Read source, ?Proc proc, ?options options) -> untyped
+  def self?.load: (string | _ReadableIO | _Read source, ?options options) -> untyped
+                | [T] (string | _ReadableIO | _Read source, ^(?) -> T, ?options options) -> T
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1109,11 +1110,6 @@ module JSON
   #     }
   #
   def self?.pretty_generate: (_ToJson obj, ?options opts) -> untyped
-
-  # Recursively calls passed *Proc* if the parsed data structure is an *Array* or
-  # *Hash*
-  #
-  def self?.recurse_proc: (untyped result) { (*untyped) -> void } -> void
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
