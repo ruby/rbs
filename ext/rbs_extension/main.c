@@ -52,19 +52,19 @@ static void declare_type_variables(rbs_parser_t *parser, VALUE variables, VALUE 
   if (NIL_P(variables)) return; // Nothing to do.
 
   if (!RB_TYPE_P(variables, T_ARRAY)) {
-    free_parser(parser);
+    rbs_parser_free(parser);
     rb_raise(rb_eTypeError,
       "wrong argument type %"PRIsVALUE" (must be an Array of Symbols or nil)",
       rb_obj_class(variables));
   }
 
-  parser_push_typevar_table(parser, true);
+  rbs_parser_push_typevar_table(parser, true);
 
   for (long i = 0; i < rb_array_len(variables); i++) {
     VALUE symbol = rb_ary_entry(variables, i);
 
     if (!RB_TYPE_P(symbol, T_SYMBOL)) {
-      free_parser(parser);
+      rbs_parser_free(parser);
       rb_raise(rb_eTypeError,
         "Type variables Array contains invalid value %"PRIsVALUE" of type %"PRIsVALUE" (must be an Array of Symbols or nil)",
         rb_inspect(symbol), rb_obj_class(symbol));
@@ -78,7 +78,7 @@ static void declare_type_variables(rbs_parser_t *parser, VALUE variables, VALUE 
       RSTRING_LEN(name_str)
     );
 
-    if (!parser_insert_typevar(parser, id)) {
+    if (!rbs_parser_insert_typevar(parser, id)) {
       raise_error(parser->error, buffer);
     }
   }
@@ -92,7 +92,7 @@ struct parse_type_arg {
 };
 
 static VALUE ensure_free_parser(VALUE parser) {
-  free_parser((rbs_parser_t *)parser);
+  rbs_parser_free((rbs_parser_t *)parser);
   return Qnil;
 }
 
@@ -105,14 +105,14 @@ static VALUE parse_type_try(VALUE a) {
   }
 
   rbs_node_t *type;
-  parse_type(parser, &type);
+  rbs_parse_type(parser, &type);
 
   raise_error_if_any(parser, arg->buffer);
 
   if (RB_TEST(arg->require_eof)) {
-    parser_advance(parser);
+    rbs_parser_advance(parser);
     if (parser->current_token.type != pEOF) {
-      set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+      rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
       raise_error(parser->error, arg->buffer);
     }
   }
@@ -136,7 +136,7 @@ static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE strin
 
   const char *encoding_name = rb_enc_name(encoding);
 
-  return alloc_lexer(
+  return rbs_lexer_new(
     allocator,
     rbs_string_from_ruby_string(string),
     rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
@@ -156,7 +156,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
   rb_encoding *encoding = rb_enc_get(string);
   const char *encoding_name = rb_enc_name(encoding);
 
-  return alloc_parser(
+  return rbs_parser_new(
     rbs_string_from_ruby_string(string),
     rbs_encoding_find((const uint8_t *) encoding_name,
     (const uint8_t *) (encoding_name + strlen(encoding_name))),
@@ -195,14 +195,14 @@ static VALUE parse_method_type_try(VALUE a) {
   }
 
   rbs_methodtype_t *method_type = NULL;
-  parse_method_type(parser, &method_type);
+  rbs_parse_method_type(parser, &method_type);
 
   raise_error_if_any(parser, arg->buffer);
 
   if (RB_TEST(arg->require_eof)) {
-    parser_advance(parser);
+    rbs_parser_advance(parser);
     if (parser->current_token.type != pEOF) {
-      set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+      rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
       raise_error(parser->error, arg->buffer);
     }
   }
@@ -244,7 +244,7 @@ static VALUE parse_signature_try(VALUE a) {
   rbs_parser_t *parser = arg->parser;
 
   rbs_signature_t *signature = NULL;
-  parse_signature(parser, &signature);
+  rbs_parse_signature(parser, &signature);
 
   raise_error_if_any(parser, arg->buffer);
 

@@ -75,39 +75,39 @@ typedef struct {
  * end
  * ```
  * */
-void parser_push_typevar_table(rbs_parser_t *parser, bool reset);
+void rbs_parser_push_typevar_table(rbs_parser_t *parser, bool reset);
 
 /**
  * Insert new type variable into the latest table.
  * */
-NODISCARD bool parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
+NODISCARD bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
 
 /**
  * Allocate new lexstate object.
  *
  * ```
  * VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
- * alloc_lexer(string, 0, 31)    // New lexstate with buffer content
+ * rbs_lexer_new(string, 0, 31)    // New lexstate with buffer content
  * ```
  * */
-lexstate *alloc_lexer(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+lexstate *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 
 /**
  * Allocate new rbs_parser_t object.
  *
  * ```
- * alloc_parser(buffer, string, encoding, 0, 1);
+ * rbs_parser_new(buffer, string, encoding, 0, 1);
  * ```
  * */
-rbs_parser_t *alloc_parser(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
-void free_parser(rbs_parser_t *parser);
+rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+void rbs_parser_free(rbs_parser_t *parser);
 
 /**
  * Advance one token.
  * */
-void parser_advance(rbs_parser_t *parser);
+void rbs_parser_advance(rbs_parser_t *parser);
 
-void print_parser(rbs_parser_t *parser);
+void rbs_parser_print(rbs_parser_t *parser);
 
 /**
  * Returns a RBS::Comment object associated with an subject at `subject_line`.
@@ -122,12 +122,12 @@ void print_parser(rbs_parser_t *parser);
  * end
  * ```
  * */
-rbs_ast_comment_t *get_comment(rbs_parser_t *parser, int subject_line);
+rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line);
 
-void set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
+void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
-bool parse_type(rbs_parser_t *parser, rbs_node_t **type);
-bool parse_method_type(rbs_parser_t *parser, rbs_methodtype_t **method_type);
-bool parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
+bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type);
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_methodtype_t **method_type);
+bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 #endif
