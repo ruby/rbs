@@ -154,7 +154,7 @@ GEM
       strscan (>= 1.0.0)
       terminal-table (>= 2, < 5)
       uri (>= 0.12.0)
-    stringio (3.1.5)
+    stringio (3.1.6)
     strong_json (2.1.2)
     strscan (3.1.2)
     tempfile (0.3.1)
