@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.9.2 (2025-03-31)
+
+### Library changes
+
+* Change `{}` to `{ 0 }` ([#2354](https://github.com/ruby/rbs/pull/2354))
+
 ## 3.9.1 (2025-03-24)
 
 ### Miscellaneous
