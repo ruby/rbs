@@ -149,6 +149,9 @@ module RBS
                       | Members::AliasMember
                       | Members::PublicMember
                       | Members::PrivateMember
+                      | Members::AttrReaderMember
+                      | Members::AttrWriterMember
+                      | Members::AttrAccessorMember
 
           attr_reader node: Prism::SingletonClassNode
 

@@ -72,6 +72,9 @@ module RBS
 
       class TopLevelMixinError < Base
       end
+
+      class AttributeDefinitionError < Base
+      end
     end
 
     def self.enabled?(result, default:)
@@ -506,6 +509,8 @@ module RBS
             # mixin_member? confirms if the context present
             raise
           end
+        when member = attribute_member?(node)
+          current_context!.members << member
         end
       end
 
@@ -590,6 +595,64 @@ module RBS
         end
       end
 
+      def attribute_member?(node)
+        case node.name
+        when :attr_reader, :attr_writer, :attr_accessor
+          unless current_context
+            diagnostics << Diagnostics::AttributeDefinitionError.new(
+              buffer.rbs_location(node.message_loc || raise),
+              "`#{node.name}` call outside of class/module definition is ignored"
+            )
+            return
+          end
+          unless self_call?(node)
+            diagnostics << Diagnostics::AttributeDefinitionError.new(
+              buffer.rbs_location(node.message_loc || raise),
+              "`#{node.name}` call with receiver other than `self` is ignored"
+            )
+            return
+          end
+
+          attr_names = [] #: Array[Symbol]
+          if node.arguments
+            node.arguments.child_nodes.each do |arg|
+              if arg.is_a?(Prism::SymbolNode)
+                if value = arg.value
+                  attr_names << value.to_sym
+                end
+              else
+                if arg
+                  diagnostics << Diagnostics::AttributeDefinitionError.new(
+                    buffer.rbs_location(arg.location),
+                    "`#{node.name}` call argument other than symbol literal is ignored"
+                  )
+                end
+              end
+            end
+          end
+
+          if attr_names.empty?
+            return
+          end
+
+          if trailing_block = comments.trailing_block(node)
+            case annotation = trailing_block.trailing_annotation(current_type_param_names)
+            when AST::Ruby::Annotation::NodeTypeAssertion
+              assertion = annotation
+            end
+          end
+
+          case node.name
+          when :attr_reader
+            AST::Ruby::Members::AttrReaderMember.new(buffer, node, attr_names, assertion, current_method_visibility)
+          when :attr_accessor
+            AST::Ruby::Members::AttrAccessorMember.new(buffer, node, attr_names, assertion, current_method_visibility)
+          when :attr_writer
+            AST::Ruby::Members::AttrWriterMember.new(buffer, node, attr_names, assertion, current_method_visibility)
+          end
+        end
+      end
+
       def pop_type_params
         @type_params_stack.pop
       end
@@ -628,8 +691,6 @@ module RBS
       end
 
       def mixin_member?(node)
-        block = comments.trailing_block(node.location)
-
         case node.name
         when :include, :prepend, :extend
           unless current_context
@@ -657,6 +718,8 @@ module RBS
 
           if arg = one_argument?(node)
             if const_node = constant_node?(arg)
+              block = comments.trailing_block(node.location)
+
               module_name = AST::Ruby::Helpers::ConstantHelper.constant_as_type_name(const_node) or return
               location = buffer.rbs_location(node.location)
               module_name_location = buffer.rbs_location(const_node.location)

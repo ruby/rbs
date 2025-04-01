@@ -27,6 +27,7 @@ module RBS
              | UnexpectedSingletonClassMemberError
              | TopLevelMethodDefinition
              | TopLevelMixinError
+             | AttributeDefinitionError
 
       class Base
         attr_reader message: String
@@ -95,6 +96,10 @@ module RBS
       # include/prepend/extend call at top level
       class TopLevelMixinError < Base
       end
+
+      # `attr_*` family is ignored
+      class AttributeDefinitionError < Base
+      end
     end
 
     # Returns `true` if the source code is enabled for inline-rbs parsing
@@ -144,6 +149,8 @@ module RBS
       def visibility_member?: (Prism::CallNode) -> (Members::PrivateMember | Members::PublicMember | nil)
 
       def mixin_member?: (Prism::CallNode) -> (Members::IncludeMember | Members::ExtendMember | Members::PrependMember | nil)
+
+      def attribute_member?: (Prism::CallNode) -> (Members::AttrReaderMember | Members::AttrWriterMember | Members::AttrAccessorMember | nil)
 
       def visibility_modifier?: (Prism::CallNode) -> Members::visibility
 

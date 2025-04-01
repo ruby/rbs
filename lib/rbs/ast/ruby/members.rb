@@ -489,6 +489,49 @@ module RBS
         class PrependMember < MixinMember
         end
 
+        class AttributeMember < Base
+          attr_reader :node, :names, :annotation, :visibility
+
+          def initialize(buffer, node, names, annotation, visibility)
+            super(buffer)
+            @node = node
+            @names = names
+            @annotation = annotation
+            @visibility = visibility
+          end
+
+          def map_type_name(&block)
+            if annotation
+              self.class.new(
+                buffer,
+                node,
+                names,
+                annotation.map_type_name { yield(_1) },
+                visibility
+              ) #: self
+            else
+              self
+            end
+          end
+
+          def location
+            buffer.rbs_location(node.location)
+          end
+
+          def type
+            annotation&.type
+          end
+        end
+
+        class AttrReaderMember < AttributeMember
+        end
+
+        class AttrWriterMember < AttributeMember
+        end
+
+        class AttrAccessorMember < AttributeMember
+        end
+
         class VisibilityMember < Base
           attr_reader :node
 

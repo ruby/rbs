@@ -220,13 +220,20 @@ module RBS
         class AttributeMember < Base
           attr_reader node: Prism::CallNode
 
-          attr_reader name: Symbol
+          attr_reader names: Array[Symbol]
 
           attr_reader annotation: Annotation::NodeTypeAssertion?
 
-          def initialize: (Buffer, Prism::CallNode, Symbol name, Annotation::NodeTypeAssertion?) -> void
+          attr_reader visibility: visibility
 
+          def initialize: (Buffer, Prism::CallNode, Array[Symbol] names, Annotation::NodeTypeAssertion?, visibility) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          # Location that covers the attribute definition
           def location: () -> Location
+
+          def type: () -> Types::t?
         end
 
         class AttrReaderMember < AttributeMember

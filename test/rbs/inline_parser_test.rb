@@ -842,4 +842,74 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__attribute
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        attr_reader :foo
+
+        attr_writer :bar #: String
+
+        attr_accessor(:baz1, :baz2, "baz3") #: Integer
+      end
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    ret.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+        assert_equal [:foo], member.names
+        assert_nil member.type
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+        assert_equal [:bar], member.names
+        assert_equal "String", member.type.to_s
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+        assert_equal [:baz1, :baz2], member.names
+        assert_equal "Integer", member.type.to_s
+      end
+    end
+  end
+
+  def test_error__attribute
+    buffer, result = parse_ruby(<<~RUBY)
+      class Foo
+        Kernel.attr_reader :foo
+
+        attr_writer "foo" #: String
+      end
+
+      attr_accessor :hello
+    RUBY
+
+    ret = RBS::InlineParser.parse(buffer, result)
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::AttributeDefinitionError, _1
+      assert_equal "`attr_reader` call with receiver other than `self` is ignored", _1.message
+      assert_equal "attr_reader", _1.location.source
+    end
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::AttributeDefinitionError, _1
+      assert_equal "`attr_writer` call argument other than symbol literal is ignored", _1.message
+      assert_equal '"foo"', _1.location.source
+    end
+
+    assert_any!(ret.diagnostics) do
+      assert_instance_of RBS::InlineParser::Diagnostics::AttributeDefinitionError, _1
+      assert_equal "`attr_accessor` call outside of class/module definition is ignored", _1.message
+      assert_equal "attr_accessor", _1.location.source
+    end
+
+    ret.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
 end
