@@ -29,16 +29,20 @@ class BasicObjectSingletonTest < Test::Unit::TestCase
   end
 
   def test___id__
-    assert_send_type  '() -> Integer',
-                      BOBJ, :__id__
+    suppress_warning do
+      assert_send_type  '() -> Integer',
+                        BOBJ, :__id__
+    end
   end
 
   def test___send__
-    with_interned :__send__ do |name|
-      assert_send_type  '(interned, *untyped, **untyped) -> untyped',
-                        BOBJ, :__send__, name, :__id__
-      assert_send_type  '(interned, *untyped, **untyped) { (*untyped, **untyped) -> untyped} -> untyped',
-                        BOBJ, :__send__, name, :instance_exec do _1 end
+    suppress_warning do
+      with_interned :__send__ do |name|
+        assert_send_type  '(interned, *untyped, **untyped) -> untyped',
+                          BOBJ, :__send__, name, :__id__
+        assert_send_type  '(interned, *untyped, **untyped) { (*untyped, **untyped) -> untyped} -> untyped',
+                          BOBJ, :__send__, name, :instance_exec do _1 end
+      end
     end
   end
 
@@ -69,5 +73,15 @@ class BasicObjectSingletonTest < Test::Unit::TestCase
   def test_instance_exec
     assert_send_type  '(*String) { (*String) [self: BasicObject] -> Integer } -> Integer',
                       BOBJ, :instance_exec, '1', '2' do |*x| x.join.to_i end
+  end
+
+  def suppress_warning
+    origstderr = $stderr
+    begin
+      $stderr = StringIO.new
+      yield
+    ensure
+      $stderr = origstderr
+    end
   end
 end
