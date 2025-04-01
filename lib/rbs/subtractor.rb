@@ -107,7 +107,9 @@ module RBS
       each_member(owner).any? do |m|
         case m
         when AST::Members::InstanceVariable
-          m.name == name
+          m.name == name && kind == :instance
+        when AST::Members::ClassInstanceVariable
+          m.name == name && kind == :singleton
         when AST::Members::Attribute
           ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
           ivar_name == name && m.kind == kind
