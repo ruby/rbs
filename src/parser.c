@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "rbs/defines.h"
-#include "rbs/rbs_string.h"
+#include "rbs/string.h"
 #include "rbs/util/rbs_unescape.h"
 #include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"

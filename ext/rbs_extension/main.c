@@ -3,7 +3,7 @@
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
 #include "ast_translation.h"
-#include "location.h"
+#include "legacy_location.h"
 #include "rbs_string_bridging.h"
 
 #include "ruby/vm.h"

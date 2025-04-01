@@ -1,7 +1,7 @@
 #ifndef RBS__LEXER_H
 #define RBS__LEXER_H
 
-#include "rbs_string.h"
+#include "string.h"
 #include "util/rbs_encoding.h"
 
 enum RBSTokenType {

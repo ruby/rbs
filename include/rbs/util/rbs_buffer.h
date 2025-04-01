@@ -2,7 +2,7 @@
 #define RBS__RBS_BUFFER_H
 
 #include "rbs/util/rbs_allocator.h"
-#include "rbs/rbs_string.h"
+#include "rbs/string.h"
 
 #include <stdbool.h>
 #include <stdlib.h>

@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include "rbs/util/rbs_allocator.h"
-#include "rbs/rbs_string.h"
+#include "rbs/string.h"
 
 /**
  * Receives `rbs_parser_t` and `range`, which represents a string token or symbol token, and returns a string VALUE.

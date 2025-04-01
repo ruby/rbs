@@ -1,4 +1,4 @@
-#include "rbs/rbs_location.h"
+#include "rbs/location.h"
 #include "rbs/util/rbs_assert.h"
 
 #include <stdio.h>

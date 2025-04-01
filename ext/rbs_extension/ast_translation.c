@@ -9,7 +9,7 @@
 
 #include "class_constants.h"
 #include "rbs_string_bridging.h"
-#include "location.h"
+#include "legacy_location.h"
 
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 

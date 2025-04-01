@@ -10,8 +10,8 @@
 
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
-#include "rbs_string.h"
-#include "rbs_location.h"
+#include "string.h"
+#include "location.h"
 
 enum rbs_node_type {
     RBS_AST_ANNOTATION = 1,

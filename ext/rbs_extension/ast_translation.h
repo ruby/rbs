@@ -12,7 +12,7 @@
 #include "ruby/encoding.h"
 
 #include "rbs/ast.h"
-#include "rbs/rbs_location.h"
+#include "rbs/location.h"
 
 /// A bag of values needed when copying RBS C structs into Ruby objects.
 typedef struct rbs_translation_context {

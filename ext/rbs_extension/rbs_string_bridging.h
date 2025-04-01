@@ -4,7 +4,7 @@
 #include "ruby.h"
 #include "ruby/encoding.h"
 
-#include "rbs/rbs_string.h"
+#include "rbs/string.h"
 
 /**
  * @returns A new shared rbs_string_t from the given Ruby string, which points into the given Ruby String's memory,

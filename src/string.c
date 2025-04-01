@@ -1,4 +1,4 @@
-#include "rbs/rbs_string.h"
+#include "rbs/string.h"
 
 #include <stdlib.h>
 #include <string.h>
