@@ -16,7 +16,7 @@ nodes:
   - name: RBS::AST::Declarations::Class
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: type_params
         c_type: rbs_node_list
       - name: super_class
@@ -30,15 +30,15 @@ nodes:
   - name: RBS::AST::Declarations::Class::Super
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::ClassAlias
     fields:
       - name: new_name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: old_name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: comment
         c_type: rbs_ast_comment
       - name: annotations
@@ -46,7 +46,7 @@ nodes:
   - name: RBS::AST::Declarations::Constant
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: type
         c_type: rbs_node
       - name: comment
@@ -66,7 +66,7 @@ nodes:
   - name: RBS::AST::Declarations::Interface
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: type_params
         c_type: rbs_node_list
       - name: members
@@ -78,7 +78,7 @@ nodes:
   - name: RBS::AST::Declarations::Module
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: type_params
         c_type: rbs_node_list
       - name: self_types
@@ -92,15 +92,15 @@ nodes:
   - name: RBS::AST::Declarations::Module::Self
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::ModuleAlias
     fields:
       - name: new_name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: old_name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: comment
         c_type: rbs_ast_comment
       - name: annotations
@@ -108,7 +108,7 @@ nodes:
   - name: RBS::AST::Declarations::TypeAlias
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: type_params
         c_type: rbs_node_list
       - name: type
@@ -124,7 +124,7 @@ nodes:
   - name: RBS::AST::Directives::Use::SingleClause
     fields:
       - name: type_name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: new_name
         c_type: rbs_ast_symbol
   - name: RBS::AST::Directives::Use::WildcardClause
@@ -211,7 +211,7 @@ nodes:
   - name: RBS::AST::Members::Extend
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
       - name: annotations
@@ -221,7 +221,7 @@ nodes:
   - name: RBS::AST::Members::Include
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
       - name: annotations
@@ -262,7 +262,7 @@ nodes:
   - name: RBS::AST::Members::Prepend
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
       - name: annotations
@@ -329,7 +329,7 @@ nodes:
   - name: RBS::Types::Alias
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::Bases::Any
@@ -356,13 +356,13 @@ nodes:
   - name: RBS::Types::ClassInstance
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::ClassSingleton
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
   - name: RBS::Types::Function
     expose_location: false
     fields:
@@ -391,7 +391,7 @@ nodes:
   - name: RBS::Types::Interface
     fields:
       - name: name
-        c_type: rbs_typename
+        c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::Intersection

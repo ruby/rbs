@@ -47,7 +47,7 @@ module RBS
 
       def ast_node?
         @c_type == "rbs_node" ||
-          @c_type == "rbs_typename" ||
+          @c_type == "rbs_type_name" ||
           @c_type == "rbs_namespace" ||
           @c_type.include?("_ast_") ||
           @c_type.include?("_decl_") ||
@@ -69,11 +69,11 @@ module RBS
       attr_reader :ruby_class_name #: String
 
       # The base name of the auto-generated C struct for this type.
-      # e.g. `rbs_ast_declarations_typealias`
+      # e.g. `rbs_ast_declarations_type_alias`
       attr_reader :c_base_name #: String
 
       # The name of the typedef of the auto-generated C struct for this type,
-      # e.g. `rbs_ast_declarations_typealias_t`
+      # e.g. `rbs_ast_declarations_type_alias_t`
       attr_reader :c_type_name #: String
 
       # The name of the C constant which stores the Ruby VALUE pointing to the generated class.
@@ -92,10 +92,13 @@ module RBS
       def initialize(yaml)
         @ruby_full_name = yaml["name"]
         @ruby_class_name = @ruby_full_name[/[^:]+\z/] # demodulize-like
+
+        @c_base_name = @ruby_full_name.split("::").map { |part| camel_to_snake(part) }.join("_")
+        @c_type_name = @c_base_name + "_t"
+
+        # For compatibility with existing code, use the original approach for constant naming
         @c_constant_name = @ruby_full_name.gsub("::", "_")
         @c_parent_constant_name = @ruby_full_name.split("::")[0..-2].join("::").gsub("::", "_")
-        @c_base_name = @c_constant_name.downcase
-        @c_type_name = @c_base_name + "_t"
 
         @c_type_enum_name = @c_base_name.upcase
 
@@ -113,7 +116,7 @@ module RBS
       end
 
       # The name of the C function which constructs new instances of this C structure.
-      # e.g. `rbs_ast_declarations_typealias_new`
+      # e.g. `rbs_ast_declarations_type_alias_new`
       def c_constructor_function_name #: String
         "#{@c_base_name}_new"
       end
@@ -131,6 +134,13 @@ module RBS
       def has_children_to_free?
         @fields.any?(&:needs_to_be_freed?)
       end
+
+      # Convert CamelCase to snake_case
+      # e.g. "FooBarBaz" -> "foo_bar_baz"
+      def camel_to_snake(str)
+        str.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase
+      end
+
     end
 
     class << self

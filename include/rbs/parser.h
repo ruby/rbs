@@ -127,7 +127,7 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
 void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
 bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type);
-bool rbs_parse_method_type(rbs_parser_t *parser, rbs_methodtype_t **method_type);
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type);
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 #endif

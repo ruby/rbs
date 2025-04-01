@@ -194,7 +194,7 @@ static VALUE parse_method_type_try(VALUE a) {
     return Qnil;
   }
 
-  rbs_methodtype_t *method_type = NULL;
+  rbs_method_type_t *method_type = NULL;
   rbs_parse_method_type(parser, &method_type);
 
   raise_error_if_any(parser, arg->buffer);

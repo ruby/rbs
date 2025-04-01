@@ -83,7 +83,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             return rb_enc_str_new(s.start, rbs_string_len(s), rb_utf8_encoding());
 
             <%- when "RBS::Types::Record::FieldType" -%>
-            rbs_types_record_fieldtype_t *record_fieldtype = (rbs_types_record_fieldtype_t *) instance;
+            rbs_types_record_field_type_t *record_fieldtype = (rbs_types_record_field_type_t *) instance;
 
             VALUE array = rb_ary_new();
             rb_ary_push(array, rbs_struct_to_ruby_value(ctx, record_fieldtype->type));
