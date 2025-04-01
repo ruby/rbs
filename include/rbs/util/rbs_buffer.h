@@ -1,14 +1,12 @@
 #ifndef RBS__RBS_BUFFER_H
 #define RBS__RBS_BUFFER_H
 
-#include "rbs_string.h"
 #include "rbs/util/rbs_allocator.h"
+#include "rbs/rbs_string.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-
 
 /**
  * The default capacity of a rbs_buffer_t.

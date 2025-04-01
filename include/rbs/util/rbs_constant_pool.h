@@ -10,7 +10,7 @@
 #ifndef RBS_CONSTANT_POOL_H
 #define RBS_CONSTANT_POOL_H
 
-#include "rbs/rbs_encoding.h"
+#include "rbs/util/rbs_encoding.h"
 
 #include <assert.h>
 #include <stdbool.h>

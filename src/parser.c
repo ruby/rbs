@@ -7,10 +7,9 @@
 #include <string.h>
 
 #include "rbs/defines.h"
-#include "rbs/encoding.h"
 #include "rbs/rbs_string.h"
-#include "rbs/rbs_buffer.h"
-#include "rbs/rbs_unescape.h"
+#include "rbs/util/rbs_unescape.h"
+#include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"
 
 #define INTERN(str)                  \
@@ -1596,7 +1595,7 @@ static bool parse_annotation(rbs_parser_t *parser, rbs_ast_annotation_t **annota
     parser->lexstate->string.start + rg.start.byte_pos + offset_bytes,
     parser->lexstate->string.end
   );
-  unsigned int open_char = rbs_utf8_to_codepoint(str);
+  unsigned int open_char = rbs_utf8_string_to_codepoint(str);
 
   unsigned int close_char;
 
@@ -3117,7 +3116,7 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
       comment_start,
       parser->lexstate->string.end
     );
-    unsigned char c = rbs_utf8_to_codepoint(str);
+    unsigned char c = rbs_utf8_string_to_codepoint(str);
 
     if (c == ' ') {
       comment_start += space_bytes;

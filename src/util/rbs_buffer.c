@@ -1,4 +1,4 @@
-#include "rbs/rbs_buffer.h"
+#include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"
 
 bool rbs_buffer_init(rbs_allocator_t *allocator, rbs_buffer_t *buffer) {

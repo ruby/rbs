@@ -2,7 +2,7 @@
 #define RBS__LEXER_H
 
 #include "rbs_string.h"
-#include "rbs_encoding.h"
+#include "util/rbs_encoding.h"
 
 enum RBSTokenType {
   NullType,         /* (Nothing) */

@@ -1,5 +1,4 @@
-#include "rbs/encoding.h"
-#include "rbs/rbs_unescape.h"
+#include "rbs/util/rbs_unescape.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -41,6 +40,14 @@ static int octal_to_int(const char* octal, int length) {
         result = result * 8 + (octal[i] - '0');
     }
     return result;
+}
+
+int rbs_utf8_codelen(unsigned int c) {
+    if (c <= 0x7F) return 1;
+    if (c <= 0x7FF) return 2;
+    if (c <= 0xFFFF) return 3;
+    if (c <= 0x10FFFF) return 4;
+    return 1; // Invalid Unicode codepoint, treat as 1 byte
 }
 
 rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t string, bool is_double_quote) {
@@ -107,7 +114,7 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
 }
 
 rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) {
-    unsigned int first_char = rbs_utf8_to_codepoint(input);
+    unsigned int first_char = rbs_utf8_string_to_codepoint(input);
     size_t byte_length = rbs_string_len(input);
 
     ptrdiff_t start_offset = 0;
