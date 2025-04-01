@@ -22,9 +22,9 @@
 #define INTERN_TOKEN(parser, tok)                       \
   rbs_constant_pool_insert_shared_with_encoding(             \
     &parser->constant_pool,                             \
-    (const uint8_t *) rbs_peek_token(parser->lexstate, tok),\
+    (const uint8_t *) rbs_peek_token(parser->rbs_lexer_t, tok),\
     rbs_token_bytes(tok),                                        \
-    (void *) parser->lexstate->encoding                 \
+    (void *) parser->rbs_lexer_t->encoding                 \
   )
 
 #define KEYWORD_CASES \
@@ -124,7 +124,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type);
 static rbs_string_t rbs_parser_peek_current_token(rbs_parser_t *parser) {
   rbs_range_t rg = parser->current_token.range;
 
-  const char *start = parser->lexstate->string.start + rg.start.byte_pos;
+  const char *start = parser->rbs_lexer_t->string.start + rg.start.byte_pos;
   size_t length = rg.end.byte_pos - rg.start.byte_pos;
 
   return rbs_string_new(start, start + length);
@@ -334,9 +334,9 @@ static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_
 static rbs_constant_id_t intern_token_start_end(rbs_parser_t *parser, rbs_token_t start_token, rbs_token_t end_token) {
   return rbs_constant_pool_insert_shared_with_encoding(
     &parser->constant_pool,
-    (const uint8_t *) rbs_peek_token(parser->lexstate, start_token),
+    (const uint8_t *) rbs_peek_token(parser->rbs_lexer_t, start_token),
     end_token.range.end.byte_pos - start_token.range.start.byte_pos,
-    parser->lexstate->encoding
+    parser->rbs_lexer_t->encoding
   );
 }
 
@@ -898,7 +898,7 @@ static bool parse_record_attributes(rbs_parser_t *parser, rbs_hash_t **fields) {
 */
 NODISCARD
 static bool parse_symbol(rbs_parser_t *parser, rbs_location_t *location, rbs_types_literal_t **symbol) {
-  size_t offset_bytes = parser->lexstate->encoding->char_width((const uint8_t *) ":", (size_t) 1);
+  size_t offset_bytes = parser->rbs_lexer_t->encoding->char_width((const uint8_t *) ":", (size_t) 1);
   size_t bytes = rbs_token_bytes(parser->current_token) - offset_bytes;
 
   rbs_ast_symbol_t *literal;
@@ -908,7 +908,7 @@ static bool parse_symbol(rbs_parser_t *parser, rbs_location_t *location, rbs_typ
   case tSYMBOL: {
     rbs_location_t *symbolLoc = rbs_location_current_token(parser);
 
-    char *buffer = rbs_peek_token(parser->lexstate, parser->current_token);
+    char *buffer = rbs_peek_token(parser->rbs_lexer_t, parser->current_token);
     rbs_constant_id_t constant_id = rbs_constant_pool_insert_shared(
       &parser->constant_pool,
       (const uint8_t *) buffer+offset_bytes,
@@ -1162,7 +1162,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type) {
     return true;
   }
   case tUIDENT: {
-    const char *name_str = rbs_peek_token(parser->lexstate, parser->current_token);
+    const char *name_str = rbs_peek_token(parser->rbs_lexer_t, parser->current_token);
     size_t name_len = rbs_token_bytes(parser->current_token);
 
     rbs_constant_id_t name = rbs_constant_pool_find(&parser->constant_pool, (const uint8_t *) name_str, name_len);
@@ -1588,12 +1588,12 @@ static bool parse_annotation(rbs_parser_t *parser, rbs_ast_annotation_t **annota
   rbs_range_t rg = parser->current_token.range;
 
   size_t offset_bytes =
-    parser->lexstate->encoding->char_width((const uint8_t *) "%", (size_t) 1) +
-    parser->lexstate->encoding->char_width((const uint8_t *) "a", (size_t) 1);
+    parser->rbs_lexer_t->encoding->char_width((const uint8_t *) "%", (size_t) 1) +
+    parser->rbs_lexer_t->encoding->char_width((const uint8_t *) "a", (size_t) 1);
 
   rbs_string_t str = rbs_string_new(
-    parser->lexstate->string.start + rg.start.byte_pos + offset_bytes,
-    parser->lexstate->string.end
+    parser->rbs_lexer_t->string.start + rg.start.byte_pos + offset_bytes,
+    parser->rbs_lexer_t->string.end
   );
   unsigned int open_char = rbs_utf8_string_to_codepoint(str);
 
@@ -1620,8 +1620,8 @@ static bool parse_annotation(rbs_parser_t *parser, rbs_ast_annotation_t **annota
     return false;
   }
 
-  size_t open_bytes = parser->lexstate->encoding->char_width((const uint8_t *) &open_char, (size_t) 1);
-  size_t close_bytes = parser->lexstate->encoding->char_width((const uint8_t *) &close_char, (size_t) 1);
+  size_t open_bytes = parser->rbs_lexer_t->encoding->char_width((const uint8_t *) &open_char, (size_t) 1);
+  size_t close_bytes = parser->rbs_lexer_t->encoding->char_width((const uint8_t *) &close_char, (size_t) 1);
 
   rbs_string_t current_token = rbs_parser_peek_current_token(parser);
   size_t total_offset = offset_bytes + open_bytes;
@@ -1686,9 +1686,9 @@ static bool parse_method_name(rbs_parser_t *parser, rbs_range_t *range, rbs_ast_
 
       rbs_constant_id_t constant_id = rbs_constant_pool_insert_shared_with_encoding(
         &parser->constant_pool,
-        (const uint8_t *) parser->lexstate->string.start + range->start.byte_pos,
+        (const uint8_t *) parser->rbs_lexer_t->string.start + range->start.byte_pos,
         range->end.byte_pos - range->start.byte_pos,
-        parser->lexstate->encoding
+        parser->rbs_lexer_t->encoding
       );
 
       rbs_location_t *symbolLoc = rbs_location_new(&parser->allocator, *range);
@@ -3100,8 +3100,8 @@ static bool parse_use_directive(rbs_parser_t *parser, rbs_ast_directives_use_t *
 }
 
 static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_t *com) {
-  size_t hash_bytes = parser->lexstate->encoding->char_width((const uint8_t *) "#", (size_t) 1);
-  size_t space_bytes = parser->lexstate->encoding->char_width((const uint8_t *) " ", (size_t) 1);
+  size_t hash_bytes = parser->rbs_lexer_t->encoding->char_width((const uint8_t *) "#", (size_t) 1);
+  size_t space_bytes = parser->rbs_lexer_t->encoding->char_width((const uint8_t *) " ", (size_t) 1);
 
   rbs_buffer_t rbs_buffer;
   rbs_buffer_init(&parser->allocator, &rbs_buffer);
@@ -3109,12 +3109,12 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
   for (size_t i = 0; i < com->line_count; i++) {
     rbs_token_t tok = com->tokens[i];
 
-    const char *comment_start = parser->lexstate->string.start + tok.range.start.byte_pos + hash_bytes;
+    const char *comment_start = parser->rbs_lexer_t->string.start + tok.range.start.byte_pos + hash_bytes;
     size_t comment_bytes = RBS_RANGE_BYTES(tok.range) - hash_bytes;
 
     rbs_string_t str = rbs_string_new(
       comment_start,
-      parser->lexstate->string.end
+      parser->rbs_lexer_t->string.end
     );
     unsigned char c = rbs_utf8_string_to_codepoint(str);
 
@@ -3311,7 +3311,7 @@ void rbs_parser_advance(rbs_parser_t *parser) {
       break;
     }
 
-    parser->next_token3 = rbsparser_next_token(parser->lexstate);
+    parser->next_token3 = rbs_lexer_next_token(parser->rbs_lexer_t);
 
     if (parser->next_token3.type == tCOMMENT) {
       // skip
@@ -3346,8 +3346,8 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
   }
 }
 
-lexstate *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
-  lexstate *lexer = rbs_allocator_alloc(allocator, lexstate);
+rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
+  rbs_lexer_t *lexer = rbs_allocator_alloc(allocator, rbs_lexer_t);
 
   rbs_position_t start_position = (rbs_position_t) {
     .byte_pos = 0,
@@ -3356,7 +3356,7 @@ lexstate *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, const r
     .column = 0,
   };
 
-  *lexer = (lexstate) {
+  *lexer = (rbs_lexer_t) {
     .string = string,
     .start_pos = start_pos,
     .end_pos = end_pos,
@@ -3378,11 +3378,11 @@ rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
 
-  lexstate *lexer = rbs_lexer_new(&allocator, string, encoding, start_pos, end_pos);
+  rbs_lexer_t *lexer = rbs_lexer_new(&allocator, string, encoding, start_pos, end_pos);
   rbs_parser_t *parser = rbs_allocator_alloc(&allocator, rbs_parser_t);
 
   *parser = (rbs_parser_t) {
-    .lexstate = lexer,
+    .rbs_lexer_t = lexer,
 
     .current_token = NullToken,
     .next_token = NullToken,

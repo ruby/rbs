@@ -134,13 +134,13 @@ typedef struct {
   bool first_token_of_line;       /* This flag is used for tLINECOMMENT */
   unsigned int last_char;         /* Last peeked character */
   const rbs_encoding_t *encoding;
-} lexstate;
+} rbs_lexer_t;
 
 extern rbs_token_t NullToken;
 extern rbs_position_t NullPosition;
 extern rbs_range_t NULL_RANGE;
 
-char *rbs_peek_token(lexstate *state, rbs_token_t tok);
+char *rbs_peek_token(rbs_lexer_t *lexer, rbs_token_t tok);
 int rbs_token_chars(rbs_token_t tok);
 int rbs_token_bytes(rbs_token_t tok);
 
@@ -154,29 +154,29 @@ const char *rbs_token_type_str(enum RBSTokenType type);
 /**
  * Read next character.
  * */
-unsigned int rbs_peek(lexstate *state);
+unsigned int rbs_peek(rbs_lexer_t *lexer);
 
 /**
  * Skip one character.
  * */
-void rbs_skip(lexstate *state);
+void rbs_skip(rbs_lexer_t *lexer);
 
 /**
  * Skip n characters.
  * */
-void rbs_skipn(lexstate *state, size_t size);
+void rbs_skipn(rbs_lexer_t *lexer, size_t size);
 
 /**
  * Return new rbs_token_t with given type.
  * */
-rbs_token_t rbs_next_token(lexstate *state, enum RBSTokenType type);
+rbs_token_t rbs_next_token(rbs_lexer_t *lexer, enum RBSTokenType type);
 
 /**
  * Return new rbs_token_t with EOF type.
  * */
-rbs_token_t rbs_next_eof_token(lexstate *state);
+rbs_token_t rbs_next_eof_token(rbs_lexer_t *lexer);
 
-rbs_token_t rbsparser_next_token(lexstate *state);
+rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer);
 
 void rbs_print_token(rbs_token_t tok);
 

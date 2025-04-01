@@ -129,7 +129,7 @@ static VALUE parse_type_try(VALUE a) {
   return ruby_ast;
 }
 
-static lexstate *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
+static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
   if (start_pos < 0 || end_pos < 0) {
     rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
   }
@@ -286,12 +286,12 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 
   rbs_allocator_t allocator;
   rbs_allocator_init(&allocator);
-  lexstate *lexer = alloc_lexer_from_buffer(&allocator, string, encoding, 0, FIX2INT(end_pos));
+  rbs_lexer_t *lexer = alloc_lexer_from_buffer(&allocator, string, encoding, 0, FIX2INT(end_pos));
 
   VALUE results = rb_ary_new();
   rbs_token_t token = NullToken;
   while (token.type != pEOF) {
-    token = rbsparser_next_token(lexer);
+    token = rbs_lexer_next_token(lexer);
     VALUE type = ID2SYM(rb_intern(rbs_token_type_str(token.type)));
     VALUE location = rbs_new_location(buffer, token.range);
     VALUE pair = rb_ary_new3(2, type, location);

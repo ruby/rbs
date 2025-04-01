@@ -44,7 +44,7 @@ typedef struct rbs_error_t {
  * An RBS parser is a LL(3) parser.
  * */
 typedef struct {
-  lexstate *lexstate;
+  rbs_lexer_t *rbs_lexer_t;
 
   rbs_token_t current_token;
   rbs_token_t next_token;       /* The first lookahead token */
@@ -83,14 +83,14 @@ void rbs_parser_push_typevar_table(rbs_parser_t *parser, bool reset);
 NODISCARD bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
 
 /**
- * Allocate new lexstate object.
+ * Allocate new rbs_lexer_t object.
  *
  * ```
  * VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
- * rbs_lexer_new(string, 0, 31)    // New lexstate with buffer content
+ * rbs_lexer_new(string, 0, 31)    // New rbs_lexer_t with buffer content
  * ```
  * */
-lexstate *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 
 /**
  * Allocate new rbs_parser_t object.
