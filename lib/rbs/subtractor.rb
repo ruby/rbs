@@ -129,9 +129,9 @@ module RBS
 
       entry = @subtrahend.class_decls[owner]
       return unless entry
-      decls = entry.decls.map { |d| d.decl }
-
-      decls.each { |d| d.members.each { |m| block.call(m) } }
+      entry.each_decl do |d|
+        d.members.each { |m| block.call(m) }
+      end
     end
 
     private def mixin_exist?(owner, mixin, context:)

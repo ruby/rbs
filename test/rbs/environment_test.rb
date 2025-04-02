@@ -84,13 +84,13 @@ EOF
 
     env.class_decls[type_name("::Foo")].tap do |entry|
       assert_instance_of Environment::ClassEntry, entry
-      assert_equal 2, entry.decls.size
-      assert_equal type_name("String"), entry.primary.decl.super_class.name
+      assert_equal 2, entry.each_decl.count
+      assert_equal type_name("String"), entry.primary_decl.super_class.name
     end
 
     env.class_decls[type_name("::Foo::Bar")].tap do |entry|
       assert_instance_of Environment::ModuleEntry, entry
-      assert_equal 2, entry.decls.size
+      assert_equal 2, entry.each_decl.count
     end
   end
 
@@ -225,15 +225,15 @@ end
 EOF
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], context: nil)
-      entry.insert(decl: decls[1], context: nil)
+      entry << [nil, decls[0]]
+      entry << [nil, decls[1]]
 
       assert_instance_of Array, entry.type_params
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], context: nil)
-      entry.insert(decl: decls[2], context: nil)
+      entry << [nil, decls[0]]
+      entry << [nil, decls[2]]
 
       assert_raises RBS::GenericParameterMismatchError do
         entry.type_params
@@ -241,8 +241,8 @@ EOF
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], context: nil)
-      entry.insert(decl: decls[3], context: nil)
+      entry << [nil, decls[0]]
+      entry << [nil, decls[3]]
 
       assert_raises RBS::GenericParameterMismatchError do
         entry.type_params
@@ -290,7 +290,7 @@ EOF
 
       foo = env.class_decls[type_name("::Foo")]
 
-      assert_equal decls[1], foo.primary.decl
+      assert_equal decls[1], foo.primary_decl
       assert_equal [
                      RBS::AST::Declarations::Module::Self.new(
                        name: type_name("_Animal"),
@@ -312,7 +312,7 @@ EOF
 
       foo = env.class_decls[type_name("::Bar")]
 
-      assert_equal decls[3], foo.primary.decl
+      assert_equal decls[3], foo.primary_decl
     end
   end
 
@@ -440,7 +440,7 @@ end
 
     env.resolve_type_names.tap do |env|
       class_decl = env.class_decls[RBS::TypeName.parse("::A::B")]
-      assert_equal RBS::TypeName.parse("::A::C"), class_decl.primary.decl.super_class.name
+      assert_equal RBS::TypeName.parse("::A::C"), class_decl.primary_decl.super_class.name
     end
   end
 
@@ -521,7 +521,7 @@ end
 
     env.resolve_type_names.tap do |env|
       class_decl = env.class_decls[RBS::TypeName.parse("::Foo")]
-      assert_equal RBS::TypeName.parse("::Object"), class_decl.primary.decl.super_class.name
+      assert_equal RBS::TypeName.parse("::Object"), class_decl.primary_decl.super_class.name
 
       assert_operator env.class_decls, :key?, RBS::TypeName.parse("::OB")
     end

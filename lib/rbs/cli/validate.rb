@@ -109,8 +109,8 @@ EOU
 
           case entry
           when Environment::ClassEntry
-            entry.decls.each do |decl|
-              if super_class = decl.decl.super_class
+            entry.each_decl do |decl|
+              if super_class = decl.super_class
                 super_class.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
@@ -120,8 +120,8 @@ EOU
               end
             end
           when Environment::ModuleEntry
-            entry.decls.each do |decl|
-              decl.decl.self_types.each do |self_type|
+            entry.each_decl do |decl|
+              decl.self_types.each do |self_type|
                 self_type.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
@@ -143,7 +143,7 @@ EOU
             end
           end
 
-          d = entry.primary.decl
+          d = entry.primary_decl
 
           @validator.validate_type_params(
             d.type_params,
@@ -169,8 +169,8 @@ EOU
 
           TypeParamDefaultReferenceError.check!(d.type_params)
 
-          entry.decls.each do |d|
-            d.decl.each_member do |member|
+          entry.each_decl do |decl|
+            decl.each_member do |member|
               case member
               when AST::Members::MethodDefinition
                 @validator.validate_method_definition(member, type_name: name)

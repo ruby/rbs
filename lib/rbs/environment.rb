@@ -13,78 +13,6 @@ module RBS
 
     attr_reader :signatures
 
-    class MultiEntry
-      D = _ = Struct.new(:decl, :context, keyword_init: true)
-
-      attr_reader :name
-      attr_reader :decls
-
-      def initialize(name:)
-        @name = name
-        @decls = []
-      end
-
-      def insert(decl:, context:)
-        decls << D.new(decl: decl, context: context)
-        @primary = nil
-      end
-
-      def validate_type_params
-        unless decls.empty?
-          hd_decl, *tl_decls = decls
-          raise unless hd_decl
-
-          hd_params = hd_decl.decl.type_params
-
-          tl_decls.each do |tl_decl|
-            tl_params = tl_decl.decl.type_params
-
-            unless compatible_params?(hd_params, tl_params)
-              raise GenericParameterMismatchError.new(name: name, decl: _ = tl_decl.decl)
-            end
-          end
-        end
-      end
-
-      def compatible_params?(ps1, ps2)
-        if ps1.size == ps2.size
-          ps1 == AST::TypeParam.rename(ps2, new_names: ps1.map(&:name))
-        end
-      end
-
-      def type_params
-        primary.decl.type_params
-      end
-
-      def primary
-        raise "Not implemented"
-      end
-    end
-
-    class ModuleEntry < MultiEntry
-      def self_types
-        decls.flat_map do |d|
-          d.decl.self_types
-        end.uniq
-      end
-
-      def primary
-        @primary ||= begin
-                       validate_type_params
-                       decls.first or raise("decls cannot be empty")
-                     end
-      end
-    end
-
-    class ClassEntry < MultiEntry
-      def primary
-        @primary ||= begin
-                       validate_type_params
-                       decls.find {|d| d.decl.super_class } || decls.first or raise("decls cannot be empty")
-                     end
-      end
-    end
-
     class SingleEntry
       attr_reader :name
       attr_reader :context
@@ -357,9 +285,9 @@ module RBS
         unless class_decls.key?(name)
           case decl
           when AST::Declarations::Class
-            class_decls[name] ||= ClassEntry.new(name: name)
+            class_decls[name] ||= ClassEntry.new(name)
           when AST::Declarations::Module
-            class_decls[name] ||= ModuleEntry.new(name: name)
+            class_decls[name] ||= ModuleEntry.new(name)
           end
         end
 
@@ -367,11 +295,11 @@ module RBS
 
         case
         when decl.is_a?(AST::Declarations::Module) && existing_entry.is_a?(ModuleEntry)
-          existing_entry.insert(decl: decl, context: context)
+          existing_entry << [context, decl]
         when decl.is_a?(AST::Declarations::Class) && existing_entry.is_a?(ClassEntry)
-          existing_entry.insert(decl: decl, context: context)
+          existing_entry << [context, decl]
         else
-          raise DuplicatedDeclarationError.new(name, decl, existing_entry.decls[0].decl)
+          raise DuplicatedDeclarationError.new(name, decl, existing_entry.primary_decl)
         end
 
         inner_context = [context, name] #: Resolver::context
@@ -406,7 +334,7 @@ module RBS
           when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
             raise DuplicatedDeclarationError.new(name, decl, entry.decl)
           when ClassEntry, ModuleEntry
-            raise DuplicatedDeclarationError.new(name, decl, *entry.decls.map(&:decl))
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
         end
 
@@ -427,7 +355,7 @@ module RBS
           when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
             raise DuplicatedDeclarationError.new(name, decl, entry.decl)
           when ClassEntry, ModuleEntry
-            raise DuplicatedDeclarationError.new(name, decl, *entry.decls.map(&:decl))
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
         end
 
@@ -455,7 +383,7 @@ module RBS
 
     def validate_type_params
       class_decls.each_value do |decl|
-        decl.primary
+        decl.validate_type_params
       end
     end
 

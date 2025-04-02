@@ -371,7 +371,7 @@ module RBS
     def initialize(name:, entry:)
       @name = name
       @entry = entry
-      super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
+      super "#{Location.to_string entry.primary_decl.location}: Superclass mismatch: #{name}"
     end
   end
 
