@@ -13,29 +13,8 @@ module RBS
 
     attr_reader :signatures
 
-    module ContextUtil
-      def calculate_context(decls)
-        decls.inject(nil) do |context, decl| #$ Resolver::context
-          if (_, last = context)
-            last or raise
-            [context, last + decl.name]
-          else
-            [nil, decl.name.absolute!]
-          end
-        end
-      end
-    end
-
     class MultiEntry
-      D = _ = Struct.new(:decl, :outer, keyword_init: true) do
-        # @implements D[M]
-
-        include ContextUtil
-
-        def context
-          @context ||= calculate_context(outer + [decl])
-        end
-      end
+      D = _ = Struct.new(:decl, :context, keyword_init: true)
 
       attr_reader :name
       attr_reader :decls
@@ -45,8 +24,8 @@ module RBS
         @decls = []
       end
 
-      def insert(decl:, outer:)
-        decls << D.new(decl: decl, outer: outer)
+      def insert(decl:, context:)
+        decls << D.new(decl: decl, context: context)
         @primary = nil
       end
 
@@ -108,19 +87,13 @@ module RBS
 
     class SingleEntry
       attr_reader :name
-      attr_reader :outer
+      attr_reader :context
       attr_reader :decl
 
-      def initialize(name:, decl:, outer:)
+      def initialize(name:, decl:, context:)
         @name = name
         @decl = decl
-        @outer = outer
-      end
-
-      include ContextUtil
-
-      def context
-        @context ||= calculate_context(outer)
+        @context = context
       end
     end
 
@@ -370,7 +343,7 @@ module RBS
       @normalize_module_name_cache[name] = normalized_type_name
     end
 
-    def insert_decl(decl, outer:, namespace:)
+    def insert_decl(decl, context:, namespace:)
       case decl
       when AST::Declarations::Class, AST::Declarations::Module
         name = decl.name.with_prefix(namespace)
@@ -394,17 +367,17 @@ module RBS
 
         case
         when decl.is_a?(AST::Declarations::Module) && existing_entry.is_a?(ModuleEntry)
-          existing_entry.insert(decl: decl, outer: outer)
+          existing_entry.insert(decl: decl, context: context)
         when decl.is_a?(AST::Declarations::Class) && existing_entry.is_a?(ClassEntry)
-          existing_entry.insert(decl: decl, outer: outer)
+          existing_entry.insert(decl: decl, context: context)
         else
           raise DuplicatedDeclarationError.new(name, decl, existing_entry.decls[0].decl)
         end
 
-        prefix = outer + [decl]
-        ns = name.to_namespace
+        inner_context = [context, name] #: Resolver::context
+        inner_namespace = name.to_namespace
         decl.each_decl do |d|
-          insert_decl(d, outer: prefix, namespace: ns)
+          insert_decl(d, context: inner_context, namespace: inner_namespace)
         end
 
       when AST::Declarations::Interface
@@ -414,7 +387,7 @@ module RBS
           raise DuplicatedDeclarationError.new(name, decl, interface_entry.decl)
         end
 
-        interface_decls[name] = InterfaceEntry.new(name: name, decl: decl, outer: outer)
+        interface_decls[name] = InterfaceEntry.new(name: name, decl: decl, context: context)
 
       when AST::Declarations::TypeAlias
         name = decl.name.with_prefix(namespace)
@@ -423,7 +396,7 @@ module RBS
           raise DuplicatedDeclarationError.new(name, decl, entry.decl)
         end
 
-        type_alias_decls[name] = TypeAliasEntry.new(name: name, decl: decl, outer: outer)
+        type_alias_decls[name] = TypeAliasEntry.new(name: name, decl: decl, context: context)
 
       when AST::Declarations::Constant
         name = decl.name.with_prefix(namespace)
@@ -437,14 +410,14 @@ module RBS
           end
         end
 
-        constant_decls[name] = ConstantEntry.new(name: name, decl: decl, outer: outer)
+        constant_decls[name] = ConstantEntry.new(name: name, decl: decl, context: context)
 
       when AST::Declarations::Global
         if entry = global_decls[decl.name]
           raise DuplicatedDeclarationError.new(decl.name, decl, entry.decl)
         end
 
-        global_decls[decl.name] = GlobalEntry.new(name: decl.name, decl: decl, outer: outer)
+        global_decls[decl.name] = GlobalEntry.new(name: decl.name, decl: decl, context: context)
 
       when AST::Declarations::ClassAlias, AST::Declarations::ModuleAlias
         name = decl.new_name.with_prefix(namespace)
@@ -460,16 +433,16 @@ module RBS
 
         case decl
         when AST::Declarations::ClassAlias
-          class_alias_decls[name] = ClassAliasEntry.new(name: name, decl: decl, outer: outer)
+          class_alias_decls[name] = ClassAliasEntry.new(name: name, decl: decl, context: context)
         when AST::Declarations::ModuleAlias
-          class_alias_decls[name] = ModuleAliasEntry.new(name: name, decl: decl, outer: outer)
+          class_alias_decls[name] = ModuleAliasEntry.new(name: name, decl: decl, context: context)
         end
       end
     end
 
     def <<(decl)
       declarations << decl
-      insert_decl(decl, outer: [], namespace: Namespace.root)
+      insert_decl(decl, context: nil, namespace: Namespace.root)
       self
     end
 
@@ -501,7 +474,7 @@ module RBS
         if only && !only.member?(decl)
           decl
         else
-          resolve_declaration(resolver, map, decl, outer: [], prefix: Namespace.root)
+          resolve_declaration(resolver, map, decl, context: nil, prefix: Namespace.root)
         end
       end
 
@@ -545,7 +518,7 @@ module RBS
       end
     end
 
-    def resolve_declaration(resolver, map, decl, outer:, prefix:)
+    def resolve_declaration(resolver, map, decl, context:, prefix:)
       if decl.is_a?(AST::Declarations::Global)
         # @type var decl: AST::Declarations::Global
         return AST::Declarations::Global.new(
@@ -557,14 +530,11 @@ module RBS
         )
       end
 
-      context = resolver_context(*outer)
-
       case decl
       when AST::Declarations::Class
         outer_context = context
         inner_context = append_context(outer_context, decl)
 
-        outer_ = outer + [decl]
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Class.new(
           name: decl.name.with_prefix(prefix),
@@ -585,7 +555,7 @@ module RBS
                 resolver,
                 map,
                 member,
-                outer: outer_,
+                context: inner_context,
                 prefix: prefix_
               )
             else
@@ -601,7 +571,6 @@ module RBS
         outer_context = context
         inner_context = append_context(outer_context, decl)
 
-        outer_ = outer + [decl]
         prefix_ = prefix + decl.name.to_namespace
         AST::Declarations::Module.new(
           name: decl.name.with_prefix(prefix),
@@ -622,7 +591,7 @@ module RBS
                 resolver,
                 map,
                 member,
-                outer: outer_,
+                context: inner_context,
                 prefix: prefix_
               )
             else

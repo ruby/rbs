@@ -7,29 +7,6 @@ class RBS::EnvironmentTest < Test::Unit::TestCase
   Namespace = RBS::Namespace
   InvalidTypeApplicationError = RBS::InvalidTypeApplicationError
 
-  def test_entry_context
-    _, _, decls = RBS::Parser.parse_signature(<<EOF)
-class Foo
-  module Bar
-    module Baz
-    end
-  end
-end
-EOF
-
-    entry = Environment::SingleEntry.new(
-      name: type_name("::Foo::Bar::Baz"),
-      decl: decls[0].members[0].members[0],
-      outer: [
-        decls[0],
-        decls[0].members[0],
-      ]
-    )
-
-    assert_equal [[nil, type_name("::Foo")], type_name("::Foo::Bar")],
-                 entry.context
-  end
-
   def test_insert_decl_nested_modules
     env = Environment.new
 
@@ -248,15 +225,15 @@ end
 EOF
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], outer: [])
-      entry.insert(decl: decls[1], outer: [])
+      entry.insert(decl: decls[0], context: nil)
+      entry.insert(decl: decls[1], context: nil)
 
       assert_instance_of Array, entry.type_params
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], outer: [])
-      entry.insert(decl: decls[2], outer: [])
+      entry.insert(decl: decls[0], context: nil)
+      entry.insert(decl: decls[2], context: nil)
 
       assert_raises RBS::GenericParameterMismatchError do
         entry.type_params
@@ -264,8 +241,8 @@ EOF
     end
 
     Environment::ModuleEntry.new(name: type_name("::Foo")).tap do |entry|
-      entry.insert(decl: decls[0], outer: [])
-      entry.insert(decl: decls[3], outer: [])
+      entry.insert(decl: decls[0], context: nil)
+      entry.insert(decl: decls[3], context: nil)
 
       assert_raises RBS::GenericParameterMismatchError do
         entry.type_params
