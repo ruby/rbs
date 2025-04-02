@@ -23,7 +23,7 @@ module RBS
         @stores.clear()
 
         RDoc::RI::Paths.each(with_system_dir, with_site_dir, with_home_dir, with_gems_dir ? :latest : false, *extra_dirs.map(&:to_s)) do |path, type|
-          store = RDoc::Store.new(path, type)
+          store = RDoc::Store.new(RDoc::Options.new, path:, type:)
           store.load_all
 
           @stores << store
