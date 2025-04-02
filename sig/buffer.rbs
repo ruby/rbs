@@ -6,7 +6,7 @@ module RBS
     type loc = [Integer, Integer]
 
     # Name to identify Buffer.
-    attr_reader name: untyped
+    attr_reader name: Pathname
 
     # The content of the buffer.
     attr_reader content: String
@@ -15,7 +15,7 @@ module RBS
 
     @ranges: Array[Range[Integer]]
 
-    def initialize: (name: untyped name, content: String content) -> void
+    def initialize: (name: Pathname name, content: String content) -> void
 
     def lines: () -> Array[String]
 

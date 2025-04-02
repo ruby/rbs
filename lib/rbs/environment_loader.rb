@@ -161,7 +161,7 @@ module RBS
           next if files.include?(path)
 
           files << path
-          buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
+          buffer = Buffer.new(name: path, content: path.read(encoding: "UTF-8"))
 
           _, dirs, decls = Parser.parse_signature(buffer)
 

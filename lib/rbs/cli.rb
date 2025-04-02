@@ -913,7 +913,7 @@ Options:
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
-      bufs << Buffer.new(content: e_code, name: '-e') if e_code
+      bufs << Buffer.new(content: e_code, name: Pathname('-e')) if e_code
 
       bufs.each do |buf|
         RBS.logger.info "Parsing #{buf.name}..."
