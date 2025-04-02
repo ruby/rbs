@@ -37,12 +37,9 @@ next_power_of_two(uint32_t v) {
     return v;
 }
 
-#ifndef NDEBUG
-static bool
-is_power_of_two(uint32_t size) {
+static bool is_power_of_two(uint32_t size) {
     return (size & (size - 1)) == 0;
 }
-#endif
 
 /**
  * Resize a constant pool to a given capacity.
