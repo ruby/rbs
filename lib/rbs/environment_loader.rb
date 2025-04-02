@@ -122,7 +122,7 @@ module RBS
         decls.each do |decl|
           loaded << [decl, path, source]
         end
-        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
+        env.add_source(Source::RBS.new(buffer, dirs, decls))
       end
 
       loaded

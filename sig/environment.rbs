@@ -30,8 +30,9 @@ module RBS
     class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]
     end
 
-    # Top level declarations
-    attr_reader declarations: Array[AST::Declarations::t]
+    # Array of source objects loaded in the environment
+    #
+    attr_reader sources: Array[Source::RBS]
 
     # Class declarations
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
@@ -50,10 +51,6 @@ module RBS
     # Global declarations
     attr_reader global_decls: Hash[Symbol, GlobalEntry]
 
-    # A hash from Buffer to it's contents
-    #
-    attr_reader signatures: Hash[Buffer, [Array[AST::Directives::t], Array[AST::Declarations::t]]]
-
     def initialize: () -> void
 
     def initialize_copy: (Environment) -> void
@@ -62,11 +59,10 @@ module RBS
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
-    def add_signature: (buffer: Buffer, directives: Array[AST::Directives::t], decls: Array[AST::Declarations::t]) -> void
+    def add_source: (Source::RBS) -> void
 
-    # Insert a toplevel declaration into the environment
-    #
-    def <<: (AST::Declarations::t decl) -> self
+    def each_rbs_source: () { (Source::RBS) -> void } -> void
+                      | () -> Enumerator[Source::RBS]
 
     # Insert a declaration into the environment
     #

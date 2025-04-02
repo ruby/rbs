@@ -2,8 +2,6 @@
 
 module RBS
   class Environment
-    attr_reader :declarations
-
     attr_reader :class_decls
     attr_reader :interface_decls
     attr_reader :type_alias_decls
@@ -11,7 +9,7 @@ module RBS
     attr_reader :global_decls
     attr_reader :class_alias_decls
 
-    attr_reader :signatures
+    attr_reader :sources
 
     class SingleEntry
       attr_reader :name
@@ -44,9 +42,7 @@ module RBS
     end
 
     def initialize
-      @signatures = {}
-      @declarations = []
-
+      @sources = []
       @class_decls = {}
       @interface_decls = {}
       @type_alias_decls = {}
@@ -57,9 +53,7 @@ module RBS
     end
 
     def initialize_copy(other)
-      @signatures = other.signatures.dup
-      @declarations = other.declarations.dup
-
+      @sources = other.sources.dup
       @class_decls = other.class_decls.dup
       @interface_decls = other.interface_decls.dup
       @type_alias_decls = other.type_alias_decls.dup
@@ -368,16 +362,21 @@ module RBS
       end
     end
 
-    def <<(decl)
-      declarations << decl
-      insert_decl(decl, context: nil, namespace: Namespace.root)
-      self
+    def add_source(source)
+      sources << source
+
+      source.declarations.each do |decl|
+        insert_decl(decl, context: nil, namespace: Namespace.root)
+      end
     end
 
-    def add_signature(buffer:, directives:, decls:)
-      signatures[buffer] = [directives, decls]
-      decls.each do |decl|
-        self << decl
+    def each_rbs_source(&block)
+      if block
+        sources.each do |source|
+          yield source
+        end
+      else
+        enum_for(:each_rbs_source)
       end
     end
 
@@ -420,12 +419,14 @@ module RBS
       table.known_types.merge(interface_decls.keys)
       table.compute_children
 
-      signatures.each do |buffer, (dirs, decls)|
-        resolve = dirs.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
+      each_rbs_source do |source|
+        resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
         if !resolve || resolve.value
-          _, decls = resolve_signature(resolver, table, dirs, decls)
+          _, decls = resolve_signature(resolver, table, source.directives, source.declarations)
+        else
+          decls = source.declarations
         end
-        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
+        env.add_source(Source::RBS.new(source.buffer, source.directives, decls))
       end
 
       env
@@ -713,15 +714,16 @@ module RBS
     end
 
     def buffers
-      signatures.keys
+      sources.map(&:buffer)
     end
 
     def unload(buffers)
       env = Environment.new
+      bufs = buffers.to_set
 
-      signatures.each do |buf, (dirs, decls)|
-        next if buffers.include?(buf)
-        env.add_signature(buffer: buf, directives: dirs, decls: decls)
+      each_rbs_source do |source|
+        next if bufs.include?(source.buffer)
+        env.add_source(source)
       end
 
       env
