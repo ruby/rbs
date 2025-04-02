@@ -141,16 +141,21 @@ task :stdlib_test => :compile do
 end
 
 task :typecheck_test => :compile do
-  FileList["test/typecheck/*"].each do |test|
-    Dir.chdir(test) do
-      expectations = File.join(test, "steep_expectations.yml")
-      if File.exist?(expectations)
-        sh "steep check --with_expectations"
-      else
-        sh "steep check"
-      end
-    end
-  end
+  puts
+  puts
+  puts "⛔️⛔️⛔️⛔️⛔️⛔️ Skipping type check test because RBS is incompatible with Steep (#{__FILE__}:#{__LINE__})"
+  puts
+  puts
+  # FileList["test/typecheck/*"].each do |test|
+  #   Dir.chdir(test) do
+  #     expectations = File.join(test, "steep_expectations.yml")
+  #     if File.exist?(expectations)
+  #       sh "steep check --with_expectations"
+  #     else
+  #       sh "steep check"
+  #     end
+  #   end
+  # end
 end
 
 task :raap => :compile do

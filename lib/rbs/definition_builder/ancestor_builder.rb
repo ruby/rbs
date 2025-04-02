@@ -173,12 +173,12 @@ module RBS
       end
 
       def validate_super_class!(type_name, entry)
-        with_super_classes = entry.decls.select {|d| d.decl.super_class }
+        with_super_classes = entry.each_decl.select {|decl| decl.super_class }
 
         return if with_super_classes.size <= 1
 
-        super_types = with_super_classes.map do |d|
-          super_class = d.decl.super_class or raise
+        super_types = with_super_classes.map do |decl|
+          super_class = decl.super_class or raise
           Types::ClassInstance.new(name: super_class.name, args: super_class.args, location: nil)
         end
 
@@ -200,8 +200,8 @@ module RBS
         case entry
         when Environment::ClassEntry
           validate_super_class!(type_name, entry)
-          primary = entry.primary
-          super_class = primary.decl.super_class
+          primary = entry.primary_decl
+          super_class = primary.super_class
 
           if type_name != BuiltinNames::BasicObject.name
             if super_class
@@ -214,7 +214,7 @@ module RBS
 
             super_name = env.normalize_module_name(super_name)
 
-            NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+            NoSuperclassFoundError.check!(super_name, env: env, location: primary.location)
             if super_class
               InheritModuleError.check!(super_class, env: env)
               InvalidTypeApplicationError.check2!(type_name: super_class.name, args: super_class.args, env: env, location: super_class.location)
@@ -283,8 +283,8 @@ module RBS
         case entry
         when Environment::ClassEntry
           validate_super_class!(type_name, entry)
-          primary = entry.primary
-          super_class = primary.decl.super_class
+          primary = entry.primary_decl
+          super_class = primary.super_class
 
           if type_name != BuiltinNames::BasicObject.name
             if super_class
@@ -295,7 +295,7 @@ module RBS
 
             super_name = env.normalize_module_name(super_name)
 
-            NoSuperclassFoundError.check!(super_name, env: env, location: primary.decl.location)
+            NoSuperclassFoundError.check!(super_name, env: env, location: primary.location)
             if super_class
               InheritModuleError.check!(super_class, env: env)
             end
@@ -414,9 +414,7 @@ module RBS
       end
 
       def mixin_ancestors(entry, type_name, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
-        entry.decls.each do |d|
-          decl = d.decl
-
+        entry.each_decl do |decl|
           align_params = Substitution.build(
             decl.type_params.each.map(&:name),
             entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
@@ -445,7 +443,7 @@ module RBS
 
         RecursiveAncestorError.check!(self_ancestor,
                                       ancestors: building_ancestors,
-                                      location: entry.primary.decl.location)
+                                      location: entry.primary_decl.location)
         building_ancestors.push self_ancestor
 
         one_ancestors = one_instance_ancestors(type_name)
@@ -462,7 +460,7 @@ module RBS
 
             super_ancestors =
               instance_ancestors(super_name, building_ancestors: building_ancestors)
-                .apply(super_args, env: env, location: entry.primary.decl.super_class&.location)
+                .apply(super_args, env: env, location: entry.primary_decl.super_class&.location)
             super_ancestors.map! {|ancestor| fill_ancestor_source(ancestor, name: super_name, source: :super) }
             ancestors.unshift(*super_ancestors)
           end
@@ -522,7 +520,7 @@ module RBS
 
         RecursiveAncestorError.check!(self_ancestor,
                                       ancestors: building_ancestors,
-                                      location: entry.primary.decl.location)
+                                      location: entry.primary_decl.location)
         building_ancestors.push self_ancestor
 
         one_ancestors = one_singleton_ancestors(type_name)

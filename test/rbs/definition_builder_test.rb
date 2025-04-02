@@ -2323,7 +2323,7 @@ class Foo
 end
       DEF
       RBS::Parser.parse_signature(rbs).tap do |buf, dirs, decls|
-        env.add_signature(buffer: buf, directives: dirs, decls: decls)
+        env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
       end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
       definition_builder.build_instance(RBS::TypeName.parse("::Foo")).tap do |defn|
