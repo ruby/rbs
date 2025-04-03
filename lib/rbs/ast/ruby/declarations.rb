@@ -7,15 +7,10 @@ module RBS
         class Base
           attr_reader :buffer
 
+          include Helpers::ConstantHelper
+
           def initialize(buffer)
             @buffer = buffer
-          end
-
-          def constant_as_type_name(node)
-            case node
-            when Prism::ConstantPathNode, Prism::ConstantReadNode
-              TypeName.parse(node.full_name)
-            end
           end
 
           def rbs_location(location)

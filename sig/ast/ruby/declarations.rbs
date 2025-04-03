@@ -7,9 +7,9 @@ module RBS
         class Base
           attr_reader buffer: Buffer
 
-          def initialize: (Buffer) -> void
+          include Helpers::ConstantHelper
 
-          def constant_as_type_name: (Prism::node?) -> TypeName?
+          def initialize: (Buffer) -> void
 
           def rbs_location: (Prism::Location) -> Location
         end
