@@ -80,7 +80,7 @@
 
 #define RESET_TABLE_P(table) (table->size == 0)
 
-#define ALLOCATOR() &parser->allocator
+#define ALLOCATOR() parser->allocator
 
 typedef struct {
   rbs_node_list_t *required_positionals;
@@ -3377,11 +3377,10 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
 }
 
 rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
-  rbs_allocator_t allocator;
-  rbs_allocator_init(&allocator);
+  rbs_allocator_t *allocator = rbs_allocator_init();
 
-  rbs_lexer_t *lexer = rbs_lexer_new(&allocator, string, encoding, start_pos, end_pos);
-  rbs_parser_t *parser = rbs_allocator_alloc(&allocator, rbs_parser_t);
+  rbs_lexer_t *lexer = rbs_lexer_new(allocator, string, encoding, start_pos, end_pos);
+  rbs_parser_t *parser = rbs_allocator_alloc(allocator, rbs_parser_t);
 
   *parser = (rbs_parser_t) {
     .rbs_lexer_t = lexer,

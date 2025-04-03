@@ -284,9 +284,8 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   StringValue(string);
   rb_encoding *encoding = rb_enc_get(string);
 
-  rbs_allocator_t allocator;
-  rbs_allocator_init(&allocator);
-  rbs_lexer_t *lexer = alloc_lexer_from_buffer(&allocator, string, encoding, 0, FIX2INT(end_pos));
+  rbs_allocator_t *allocator = rbs_allocator_init();
+  rbs_lexer_t *lexer = alloc_lexer_from_buffer(allocator, string, encoding, 0, FIX2INT(end_pos));
 
   VALUE results = rb_ary_new();
   rbs_token_t token = NullToken;
@@ -298,7 +297,7 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
     rb_ary_push(results, pair);
   }
 
-  rbs_allocator_free(&allocator);
+  rbs_allocator_free(allocator);
   RB_GC_GUARD(string);
 
   return results;
@@ -327,7 +326,6 @@ Init_rbs_extension(void)
 #ifdef HAVE_RB_EXT_RACTOR_SAFE
   rb_ext_ractor_safe(true);
 #endif
-  rbs__init_arena_allocator();
   rbs__init_constants();
   rbs__init_location();
   rbs__init_parser();

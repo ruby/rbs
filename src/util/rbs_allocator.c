@@ -3,14 +3,6 @@
  *
  *  A simple arena allocator that can be freed all at once.
  *
- *  This allocator maintains a linked list of pages, which come in two flavours:
- *      1. Small allocation pages, which are the same size as the system page size.
- *      2. Large allocation pages, which are the exact size requested, for sizes greater than the small page size.
- *
- *  Small allocations always fit into the unused space at the end of the "head" page. If there isn't enough room, a new
- *  page is allocated, and the small allocation is placed at its start. This approach wastes that unused slack at the
- *  end of the previous page, but it means that allocations are instant and never scan the linked list to find a gap.
- *
  *  This allocator doesn't support freeing individual allocations. Only the whole arena can be freed at once at the end.
  */
 
@@ -20,34 +12,27 @@
 #include <stdlib.h>
 #include <string.h> // for memset()
 #include <stdint.h>
+#include <inttypes.h>
 
 #ifdef _WIN32
     #include <windows.h>
 #else
     #include <unistd.h>
     #include <sys/types.h>
+    #include <sys/mman.h>
 #endif
 
-typedef struct rbs_allocator_page {
-    uint32_t payload_size;
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
+#define MAP_ANONYMOUS MAP_ANON
+#endif
 
-    // The offset of the next available byte.
-    uint32_t offset;
 
-    // The previously allocated page, or NULL if this is the first page.
-    struct rbs_allocator_page *next;
+struct rbs_allocator {
+    uintptr_t heap_ptr;
+    uintptr_t size;
+};
 
-    // The variably-sized payload of the page.
-    char payload[];
-} rbs_allocator_page_t;
-
-// This allocator's normal pages have the same size as the system memory pages, consisting of a fixed-size header
-// (sizeof(rbs_allocator_page_t)) followed `default_page_payload_size`  bytes of payload.
-// TODO: When we have real-world usage data, we can tune this to use a smaller number of larger pages.
-static size_t default_page_payload_size = 0;
-static uint32_t large_page_flag = UINT32_MAX;
-
-static size_t get_system_page_size() {
+static size_t get_system_page_size(void) {
 #ifdef _WIN32
     SYSTEM_INFO si;
     GetSystemInfo(&si);
@@ -59,72 +44,74 @@ static size_t get_system_page_size() {
 #endif
 }
 
-void rbs__init_arena_allocator(void) {
-    const size_t system_page_size = get_system_page_size();
-
-    // The size of a struct that ends with a flexible array member is the size of the struct without the
-    // flexible array member. https://en.wikipedia.org/wiki/Flexible_array_member#Effect_on_struct_size_and_padding
-    const size_t page_header_size = sizeof(rbs_allocator_page_t);
-    default_page_payload_size = system_page_size - page_header_size;
+static void *map_memory(size_t size) {
+#ifdef _WIN32
+    LPVOID result = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    rbs_assert(result != NULL, "VirtualAlloc failed");
+#else
+    void *result = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    rbs_assert(result != MAP_FAILED, "mmap failed");
+#endif
+    return result;
 }
 
-// Returns the number of bytes needed to pad the given pointer up to the nearest multiple of the given `alignment`.
-static size_t needed_padding(void *ptr, size_t alignment) {
-    const uintptr_t addr = (uintptr_t) ptr;
-    const uintptr_t aligned_addr = (addr + (alignment - 1)) & -alignment;
-    return (aligned_addr - addr);
+static void destroy_memory(void *memory, size_t size) {
+#ifdef _WIN32
+    VirtualFree(memory, 0, MEM_RELEASE);
+#else
+    munmap(memory, size);
+#endif
 }
 
-static rbs_allocator_page_t *rbs_allocator_page_new(size_t payload_size) {
-    const size_t page_header_size = sizeof(rbs_allocator_page_t);
+static void guard_page(void *memory, size_t page_size) {
+#ifdef _WIN32
+    DWORD old_protect_;
+    BOOL result = VirtualProtect(memory, page_size, PAGE_NOACCESS, &old_protect_);
+    rbs_assert(result != 0, "VirtualProtect failed");
+#else
+    int result = mprotect(memory, page_size, PROT_NONE);
+    rbs_assert(result == 0, "mprotect failed");
+#endif
+}
 
-    rbs_allocator_page_t *page = calloc(1, page_header_size + payload_size);
-    *page = (rbs_allocator_page_t) {
-        .payload_size = (uint32_t) payload_size,
-        .offset = page_header_size,
-        .next = NULL,
+static size_t rbs_allocator_default_mem(void) {
+    size_t kib = 1024;
+    size_t mib = kib * 1024;
+    size_t gib = mib * 1024;
+    return 4 * gib;
+}
+
+static inline bool is_power_of_two(uintptr_t value) {
+    return value > 0 && (value & (value - 1)) == 0;
+}
+
+// Align `val' to nearest multiple of `alignment'.
+static uintptr_t align(uintptr_t size, uintptr_t alignment) {
+    rbs_assert(is_power_of_two(alignment), "alignment is not a power of two");
+    return (size + alignment - 1) & ~(alignment - 1);
+}
+
+rbs_allocator_t *rbs_allocator_init(void) {
+    size_t size = rbs_allocator_default_mem();
+    size_t page_size = get_system_page_size();
+    size = align(size, page_size);
+    void *mem = map_memory(size + page_size);
+    // Guard page; remove range checks in alloc fast path and hard fail if we
+    // consume all memory
+    void *last_page = (char *) mem + size;
+    guard_page(last_page, page_size);
+    uintptr_t start = (uintptr_t) mem;
+    rbs_allocator_t header = (rbs_allocator_t) {
+      .heap_ptr = start + sizeof header,
+      .size = size + page_size,
     };
-    return page;
-}
-
-static rbs_allocator_page_t *rbs_allocator_page_new_default(void) {
-    return rbs_allocator_page_new(default_page_payload_size);
-}
-
-static rbs_allocator_page_t *rbs_allocator_page_new_large(size_t payload_size) {
-    rbs_allocator_page_t *page = rbs_allocator_page_new(payload_size);
-
-    page->offset = large_page_flag;
-
-    return page;
-}
-
-// Attempts to allocate `size` bytes from `page`, returning NULL if there is insufficient space.
-static void *rbs_allocator_page_attempt_alloc(rbs_allocator_page_t *page, size_t size, size_t alignment) {
-    const size_t alignment_padding = needed_padding(page->payload + page->offset, alignment);
-
-    const size_t remaining_size = page->payload_size - page->offset;
-    const size_t needed_size = alignment_padding + size;
-    if (remaining_size < needed_size) return NULL; // Not enough space in this page.
-
-    void *ptr = page->payload + page->offset + alignment_padding;
-    page->offset += needed_size;
-    return ptr;
-}
-
-void rbs_allocator_init(rbs_allocator_t *allocator) {
-    *allocator = (rbs_allocator_t) {
-        .page = rbs_allocator_page_new_default(),
-    };
+    memcpy(mem, &header, sizeof header);
+    return (rbs_allocator_t *) mem;
 }
 
 void rbs_allocator_free(rbs_allocator_t *allocator) {
-    rbs_allocator_page_t *page = allocator->page;
-    while (page) {
-        rbs_allocator_page_t *next = page->next;
-        free(page);
-        page = next;
-    }
+    destroy_memory((void *) allocator, allocator->size);
 }
 
 // Allocates `new_size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
@@ -139,52 +126,20 @@ void *rbs_allocator_realloc_impl(rbs_allocator_t *allocator, void *ptr, size_t o
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
 void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t alignment) {
     rbs_assert(size % alignment == 0, "size must be a multiple of the alignment. size: %zu, alignment: %zu", size, alignment);
-
-    if (default_page_payload_size < size) { // Big allocation, give it its own page.
-        // How much we need to pad the new page's payload in order to get an aligned pointer
-        // hack?
-        const size_t alignment_padding = needed_padding((void *) (sizeof(rbs_allocator_page_t) + size), alignment);
-
-        rbs_allocator_page_t *new_page = rbs_allocator_page_new_large(alignment_padding + size);
-
-        // This simple allocator can only put small allocations into the head page.
-        // Naively prepending this large allocation page to the head of the allocator before the previous head page
-        // would waste the remaining space in the head page.
-        // So instead, we'll splice in the large page *after* the head page.
-        //
-        // +-------+    +-----------+        +-----------+
-        // | arena |    | head page |        | new_page  |
-        // |-------|    |-----------+        |-----------+
-        // | *page |--->|  size     |   +--->|  size     |   +---> ... previous tail
-        // +-------+    |  offset   |   |    |  offset   |   |
-        //              | *next ----+---+    | *next ----+---+
-        //              |    ...    |        |    ...    |
-        //              +-----------+        +-----------+
-        //
-        new_page->next = allocator->page->next;
-        allocator->page->next = new_page;
-
-        return new_page->payload + alignment_padding;
-    }
-
-    void *p = rbs_allocator_page_attempt_alloc(allocator->page, size, alignment);
-    if (p != NULL) return p;
-
-    // Not enough space. Allocate a new page and prepend it to the allocator's linked list.
-    rbs_allocator_page_t *new_page = rbs_allocator_page_new_default();
-    new_page->next = allocator->page;
-    allocator->page = new_page;
-
-    p = rbs_allocator_page_attempt_alloc(new_page, size, alignment);
-    rbs_assert(p != NULL, "Failed to allocate a new allocator page");
-    return p;
+    uintptr_t aligned = align(allocator->heap_ptr, alignment);
+    allocator->heap_ptr = aligned + size;
+    return (void *) aligned;
 }
 
 // Note: This will eagerly fill with zeroes, unlike `calloc()` which can map a page in a page to be zeroed lazily.
 //       It's assumed that callers to this function will immediately write to the allocated memory, anyway.
 void *rbs_allocator_calloc_impl(rbs_allocator_t *allocator, size_t count, size_t size, size_t alignment) {
     void *p = rbs_allocator_malloc_many_impl(allocator, count, size, alignment);
+#if defined(__linux__)
+    // mmap with MAP_ANONYMOUS gives zero-filled pages.
+#else
     memset(p, 0, count * size);
+#endif
     return p;
 }
 

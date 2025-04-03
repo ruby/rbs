@@ -55,7 +55,7 @@ typedef struct {
   rbs_comment_t *last_comment;  /* Last read comment */
 
   rbs_constant_pool_t constant_pool;
-  rbs_allocator_t allocator;
+  rbs_allocator_t *allocator;
   rbs_error_t *error;
 } rbs_parser_t;
 
