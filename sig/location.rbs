@@ -4,7 +4,7 @@ module RBS
   #
   # A location can have _child_ locations.
   #
-  class Location[in RequiredChildKeys, in OptionalChildKeys]
+  class Location[in RequiredChildKeys = untyped, in OptionalChildKeys = untyped]
     # The buffer this location points on.
     attr_reader buffer (): Buffer
 
