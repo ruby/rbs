@@ -8,13 +8,10 @@ module RBS
           attr_reader :buffer
 
           include Helpers::ConstantHelper
+          include Helpers::LocationHelper
 
           def initialize(buffer)
             @buffer = buffer
-          end
-
-          def rbs_location(location)
-            Location.new(buffer, location.start_character_offset, location.end_character_offset)
           end
         end
 

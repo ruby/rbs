@@ -8,10 +8,9 @@ module RBS
           attr_reader buffer: Buffer
 
           include Helpers::ConstantHelper
+          include Helpers::LocationHelper
 
           def initialize: (Buffer) -> void
-
-          def rbs_location: (Prism::Location) -> Location
         end
 
         class ClassDecl < Base
