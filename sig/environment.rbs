@@ -214,6 +214,8 @@ module RBS
 
     def resolve_type_params: (Resolver::TypeNameResolver resolver, UseMap map, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
 
+    def resolve_ruby_decl: (Resolver::TypeNameResolver, AST::Ruby::Declarations::t, context: Resolver::context, prefix: Namespace) -> AST::Ruby::Declarations::t
+
     def absolute_type: (Resolver::TypeNameResolver, UseMap map, Types::t, context: Resolver::context) -> Types::t
 
     def absolute_type_name: (Resolver::TypeNameResolver, UseMap map, TypeName, context: Resolver::context) -> TypeName

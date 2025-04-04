@@ -20,6 +20,8 @@ module RBS
 
           attr_reader :members
 
+          attr_reader :node
+
           def initialize(buffer, name, node)
             super(buffer)
             @class_name = name
@@ -50,6 +52,8 @@ module RBS
           attr_reader :module_name
 
           attr_reader :members
+
+          attr_reader :node
 
           def initialize(buffer, name, node)
             super(buffer)

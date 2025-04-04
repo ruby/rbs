@@ -584,4 +584,28 @@ type s = untyped
     assert_operator env.class_decls, :key?, type_name("::Hello")
     assert_operator env.class_decls, :key?, type_name("::Hello::World")
   end
+
+  def test__ruby__absolute_class_module_name
+    result = parse_inline(<<~RUBY)
+      class Hello
+        module World
+        end
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::Hello")]
+      class_decl.each_decl do |decl|
+        assert_equal RBS::TypeName.parse("::Hello"), decl.class_name
+      end
+
+      module_decl = env.class_decls[RBS::TypeName.parse("::Hello::World")]
+      module_decl.each_decl do |decl|
+        assert_equal RBS::TypeName.parse("::Hello::World"), decl.module_name
+      end
+    end
+  end
 end
