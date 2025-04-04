@@ -130,6 +130,7 @@ module RBS
       entry = @subtrahend.class_decls[owner]
       return unless entry
       entry.each_decl do |d|
+        next unless d.is_a?(AST::Declarations::Base)
         d.members.each { |m| block.call(m) }
       end
     end
