@@ -208,6 +208,8 @@ SIG
       end
 
       yield last
+    else
+      assert_block("assert_any! cannot hold for empty collection") { false }
     end
   end
 
