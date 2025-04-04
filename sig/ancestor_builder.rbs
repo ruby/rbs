@@ -146,7 +146,7 @@ module RBS
                             extended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
 
-      def mixin_ancestors0: (AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface,
+      def mixin_ancestors0: (AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface | AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl,
                              TypeName,
                              align_params: Substitution?,
                          included_modules: Array[Definition::Ancestor::Instance]?,

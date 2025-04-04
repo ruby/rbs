@@ -1115,4 +1115,48 @@ EOF
       end
     end
   end
+
+  def test__one_ancestors__class__ruby
+    SignatureManager.new(system_builtin: true) do |manager|
+
+      manager.ruby_files[Pathname("lib/foo.rb")] = <<~EOF
+        class Foo
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_equal [], a.params
+
+          assert_equal Ancestor::Instance.new(name: type_name("::Object"), args: [], source: :super), a.super_class
+          assert_equal [],
+                       a.included_modules
+          assert_equal [],
+                       a.included_interfaces
+          assert_equal [], a.prepended_modules
+          assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
+          assert_nil a.self_types
+        end
+
+        builder.one_singleton_ancestors(type_name("::Foo")).tap do |a|
+          assert_equal type_name("::Foo"), a.type_name
+          assert_nil a.params
+
+          assert_equal Ancestor::Singleton.new(name: type_name("::Object")), a.super_class
+          assert_nil a.included_modules
+          assert_nil a.included_interfaces
+          assert_nil a.prepended_modules
+          assert_equal [],
+                       a.extended_modules
+          assert_equal [],
+                       a.extended_interfaces
+          assert_nil a.self_types
+        end
+      end
+    end
+  end
 end

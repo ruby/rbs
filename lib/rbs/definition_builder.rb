@@ -452,6 +452,10 @@ module RBS
         case decl
         when AST::Declarations::Class
           decl.super_class&.location
+        when AST::Ruby::Declarations::ClassDecl
+          nil
+        else
+          raise "Unexpected `:super` source location with #{decl.class}"
         end
       else
         source.location
