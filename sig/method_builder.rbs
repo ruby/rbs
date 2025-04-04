@@ -76,7 +76,7 @@ module RBS
 
       def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Definition::accessibility) -> void
 
-      def each_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
+      def each_rbs_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
 
       def update: (env: Environment, except: _Each[TypeName]) -> MethodBuilder
     end

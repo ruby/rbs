@@ -36,6 +36,14 @@ module RBS
               end
             end
           end
+
+          def super_class = nil
+
+          def type_params = []
+
+          def location
+            rbs_location(node.location)
+          end
         end
 
         class ModuleDecl < Base
@@ -58,6 +66,14 @@ module RBS
                 yield member
               end
             end
+          end
+
+          def type_params = []
+
+          def self_types = []
+
+          def location
+            rbs_location(node.location)
           end
         end
       end

@@ -265,7 +265,7 @@ module RBS
       @normalize_module_name_cache[name] = normalized_type_name
     end
 
-    def insert_decl(decl, context:, namespace:)
+    def insert_rbs_decl(decl, context:, namespace:)
       case decl
       when AST::Declarations::Class, AST::Declarations::Module
         name = decl.name.with_prefix(namespace)
@@ -299,7 +299,7 @@ module RBS
         inner_context = [context, name] #: Resolver::context
         inner_namespace = name.to_namespace
         decl.each_decl do |d|
-          insert_decl(d, context: inner_context, namespace: inner_namespace)
+          insert_rbs_decl(d, context: inner_context, namespace: inner_namespace)
         end
 
       when AST::Declarations::Interface
@@ -362,21 +362,91 @@ module RBS
       end
     end
 
+    def insert_ruby_decl(decl, context:, namespace:)
+      case decl
+      when AST::Ruby::Declarations::ClassDecl
+        name = decl.class_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          if entry.is_a?(ConstantEntry) || entry.is_a?(ModuleAliasEntry) || entry.is_a?(ClassAliasEntry)
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          end
+          if entry.is_a?(ModuleEntry)
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        entry = ClassEntry.new(name)
+        class_decls[name] = entry
+
+        entry << [context, decl]
+
+        inner_context = [context, name] #: Resolver::context
+        decl.each_decl do |member|
+          insert_ruby_decl(member, context: inner_context, namespace: name.to_namespace)
+        end
+
+      when AST::Ruby::Declarations::ModuleDecl
+        name = decl.module_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          if entry.is_a?(ConstantEntry) || entry.is_a?(ModuleAliasEntry) || entry.is_a?(ClassAliasEntry)
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          end
+          if entry.is_a?(ClassEntry)
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        entry = ModuleEntry.new(name)
+        class_decls[name] = entry
+
+        entry << [context, decl]
+
+        inner_context = [context, name] #: Resolver::context
+        decl.each_decl do |member|
+          insert_ruby_decl(member, context: inner_context, namespace: name.to_namespace)
+        end
+
+      end
+    end
+
     def add_source(source)
       sources << source
 
-      source.declarations.each do |decl|
-        insert_decl(decl, context: nil, namespace: Namespace.root)
+      case source
+      when Source::RBS
+        source.declarations.each do |decl|
+          insert_rbs_decl(decl, context: nil, namespace: Namespace.root)
+        end
+      when Source::Ruby
+        source.declarations.each do |dir|
+          insert_ruby_decl(dir, context: nil, namespace: Namespace.root)
+        end
       end
     end
 
     def each_rbs_source(&block)
       if block
         sources.each do |source|
-          yield source
+          if source.is_a?(Source::RBS)
+            yield source
+          end
         end
       else
         enum_for(:each_rbs_source)
+      end
+    end
+
+    def each_ruby_source(&block)
+      if block
+        sources.each do |source|
+          if source.is_a?(Source::Ruby)
+            yield source
+          end
+        end
+      else
+        enum_for(:each_ruby_source)
       end
     end
 

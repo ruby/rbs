@@ -20,7 +20,7 @@ class Foo
 end
 EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
 
     assert_operator env.class_decls, :key?, type_name("::Foo")
     assert_operator env.class_decls, :key?, type_name("::Foo::Bar")
@@ -39,7 +39,7 @@ end
 EOF
 
     decls.each do |decl|
-      env.insert_decl(decl, context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
     end
 
     env.class_alias_decls[RBS::TypeName.parse("::RBS::Kernel")].tap do |decl|
@@ -57,10 +57,10 @@ EOF
       end
     EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -79,8 +79,8 @@ class Foo < String
 end
 EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-    env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
 
     env.class_decls[type_name("::Foo")].tap do |entry|
       assert_instance_of Environment::ClassEntry, entry
@@ -109,15 +109,15 @@ class Bar
 end
 EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-    env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
     end
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -133,8 +133,8 @@ end
 EOF
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -147,8 +147,8 @@ Foo: String
 EOF
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -161,8 +161,8 @@ type foo = Integer
 EOF
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -177,8 +177,8 @@ end
 EOF
 
     assert_raises RBS::DuplicatedDeclarationError do
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
     end
   end
 
@@ -199,10 +199,10 @@ module Foo[X, in Y]      # Variance mismatch
 end
 EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-    env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
-    env.insert_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
-    env.insert_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
 
     assert_raises RBS::GenericParameterMismatchError do
       env.validate_type_params()
@@ -257,7 +257,7 @@ EOF
 $VERSION: String
 EOF
 
-    env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+    env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
 
     assert_operator env.global_decls, :key?, :$VERSION
   end
@@ -284,9 +284,9 @@ end
 EOF
 
     Environment.new.tap do |env|
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[1], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[2], context: nil, namespace: RBS::Namespace.root)
 
       foo = env.class_decls[type_name("::Foo")]
 
@@ -306,9 +306,9 @@ EOF
     end
 
     Environment.new.tap do |env|
-      env.insert_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
-      env.insert_decl(decls[4], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[0], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[3], context: nil, namespace: RBS::Namespace.root)
+      env.insert_rbs_decl(decls[4], context: nil, namespace: RBS::Namespace.root)
 
       foo = env.class_decls[type_name("::Bar")]
 
@@ -561,5 +561,27 @@ type s = untyped
       alias_decl = env.type_alias_decls[RBS::TypeName.parse("::t")]
       assert_equal "::s", alias_decl.decl.type.to_s
     end
+  end
+
+  def parse_inline(src)
+    buffer = RBS::Buffer.new(name: Pathname("a.rb"), content: src)
+    prism = Prism.parse(src)
+
+    RBS::InlineParser.parse(buffer, prism)
+  end
+
+  def test__ruby__insert_decl_class
+    result = parse_inline(<<~RUBY)
+      class Hello
+        module World
+        end
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    assert_operator env.class_decls, :key?, type_name("::Hello")
+    assert_operator env.class_decls, :key?, type_name("::Hello::World")
   end
 end

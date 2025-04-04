@@ -26,6 +26,12 @@ module RBS
 
           def each_decl: () { (t) -> void } -> void
                         | () -> Enumerator[t]
+
+          def super_class: () -> nil
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
         end
 
         class ModuleDecl < Base
@@ -41,6 +47,12 @@ module RBS
 
           def each_decl: () { (t) -> void } -> void
                         | () -> Enumerator[t]
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
+
+          def self_types: () -> Array[AST::Declarations::Module::Self]
         end
       end
     end
