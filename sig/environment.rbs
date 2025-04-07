@@ -2,75 +2,14 @@ module RBS
   class Environment
     type module_decl = AST::Declarations::Class | AST::Declarations::Module
 
-    interface _ModuleOrClass
-      def name: () -> TypeName
-
-      def type_params: () -> Array[AST::TypeParam]
-    end
-
-    interface _NamedDecl
-      def name: () -> TypeName
-    end
-
-    module ContextUtil
-      def calculate_context: (Array[_NamedDecl]) -> Resolver::context
-    end
-
-    # Name of object, it's (multiple) declarations with the outer module declarations
-    #
-    class MultiEntry[M < _ModuleOrClass]
-      class D[M < _ModuleOrClass]
-        attr_reader decl: M
-        attr_reader outer: Array[module_decl]
-
-        def initialize: (decl: M, outer: Array[module_decl]) -> void
-
-        include ContextUtil
-
-        @context: Resolver::context
-
-        def context: () -> Resolver::context
-      end
-
-      attr_reader name: TypeName
-      attr_reader decls: Array[D[M]]
-
-      @primary: D[M]?
-
-      def initialize: (name: TypeName) -> void
-
-      def insert: (decl: M, outer: Array[module_decl]) -> void
-
-      def validate_type_params: () -> void
-
-      def compatible_params?: (Array[AST::TypeParam], Array[AST::TypeParam]) -> boolish
-
-      def type_params: () -> Array[AST::TypeParam]
-
-      def primary: () -> D[M]
-    end
-
-    class ModuleEntry < MultiEntry[AST::Declarations::Module]
-      def self_types: () -> Array[AST::Declarations::Module::Self]
-    end
-
-    class ClassEntry < MultiEntry[AST::Declarations::Class]
-    end
-
     # Name of object, it's (single) declaration, and the outer module declarations
     #
     class SingleEntry[N, D]
       attr_reader name: N
       attr_reader decl: D
-      attr_reader outer: Array[module_decl]
+      attr_reader context: Resolver::context
 
-      def initialize: (name: N, decl: D, outer: Array[module_decl]) -> void
-
-      include ContextUtil
-
-      @context: Resolver::context
-
-      def context: () -> Resolver::context
+      def initialize: (name: N, decl: D, context: Resolver::context) -> void
     end
 
     class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias]
@@ -91,8 +30,9 @@ module RBS
     class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]
     end
 
-    # Top level declarations
-    attr_reader declarations: Array[AST::Declarations::t]
+    # Array of source objects loaded in the environment
+    #
+    attr_reader sources: Array[Source::t]
 
     # Class declarations
     attr_reader class_decls: Hash[TypeName, ModuleEntry | ClassEntry]
@@ -111,10 +51,6 @@ module RBS
     # Global declarations
     attr_reader global_decls: Hash[Symbol, GlobalEntry]
 
-    # A hash from Buffer to it's contents
-    #
-    attr_reader signatures: Hash[Buffer, [Array[AST::Directives::t], Array[AST::Declarations::t]]]
-
     def initialize: () -> void
 
     def initialize_copy: (Environment) -> void
@@ -123,15 +59,21 @@ module RBS
     #
     def self.from_loader: (EnvironmentLoader) -> Environment
 
-    def add_signature: (buffer: Buffer, directives: Array[AST::Directives::t], decls: Array[AST::Declarations::t]) -> void
+    def add_source: (Source::t) -> void
 
-    # Insert a toplevel declaration into the environment
-    #
-    def <<: (AST::Declarations::t decl) -> self
+    def each_rbs_source: () { (Source::RBS) -> void } -> void
+                      | () -> Enumerator[Source::RBS]
+
+    def each_ruby_source: () { (Source::Ruby) -> void } -> void
+                        | () -> Enumerator[Source::Ruby]
 
     # Insert a declaration into the environment
     #
-    private def insert_decl: (AST::Declarations::t, outer: Array[module_decl], namespace: Namespace) -> void
+    private def insert_rbs_decl: (AST::Declarations::t, context: Resolver::context, namespace: Namespace) -> void
+
+    # Insert a declaration into the environment
+    #
+    private def insert_ruby_decl: (AST::Ruby::Declarations::t, context: Resolver::context, namespace: Namespace) -> void
 
     # Resolve all type names in the environment to absolute type names.
     # Relative type name will be left if absolute type name cannot be found.
@@ -264,13 +206,15 @@ module RBS
 
     def append_context: (Resolver::context, module_decl) -> Resolver::context
 
-    def resolve_declaration: (Resolver::TypeNameResolver resolver, UseMap map, AST::Declarations::t decl, outer: Array[module_decl], prefix: Namespace) -> AST::Declarations::t
+    def resolve_declaration: (Resolver::TypeNameResolver resolver, UseMap map, AST::Declarations::t decl, context: Resolver::context, prefix: Namespace) -> AST::Declarations::t
 
     def resolve_member: (Resolver::TypeNameResolver, UseMap map, AST::Members::t, context: Resolver::context) -> AST::Members::t
 
     def resolve_method_type: (Resolver::TypeNameResolver, UseMap map, RBS::MethodType, context: Resolver::context) -> RBS::MethodType
 
     def resolve_type_params: (Resolver::TypeNameResolver resolver, UseMap map, Array[AST::TypeParam], context: Resolver::context) ->  Array[AST::TypeParam]
+
+    def resolve_ruby_decl: (Resolver::TypeNameResolver, AST::Ruby::Declarations::t, context: Resolver::context, prefix: Namespace) -> AST::Ruby::Declarations::t
 
     def absolute_type: (Resolver::TypeNameResolver, UseMap map, Types::t, context: Resolver::context) -> Types::t
 

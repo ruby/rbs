@@ -71,7 +71,7 @@ module RBS
     def self.buffer(source)
       case source
       when String
-        Buffer.new(content: source, name: "a.rbs")
+        Buffer.new(content: source, name: Pathname("a.rbs"))
       when Buffer
         source
       end

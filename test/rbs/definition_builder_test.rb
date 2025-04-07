@@ -2323,7 +2323,7 @@ class Foo
 end
       DEF
       RBS::Parser.parse_signature(rbs).tap do |buf, dirs, decls|
-        env.add_signature(buffer: buf, directives: dirs, decls: decls)
+        env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
       end
       definition_builder = RBS::DefinitionBuilder.new(env: env.resolve_type_names)
       definition_builder.build_instance(RBS::TypeName.parse("::Foo")).tap do |defn|
@@ -3145,6 +3145,56 @@ end
               assert_equal ["overload"], overload.overload_annotations.map(&:string)
               assert_equal ["overload"], overload.each_annotation.map(&:string)
             end
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__class
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("inherited.rbs", <<~RUBY)
+        class A
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:__id__].tap do |method|
+            assert_equal type_name("::Object"), method.defined_in
+          end
+        end
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          definition.methods[:new].tap do |method|
+            assert_equal type_name("::BasicObject"), method.defined_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__module
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("inherited.rbs", <<~RUBY)
+        module A
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:__id__].tap do |method|
+            assert_equal type_name("::Object"), method.defined_in
+          end
+        end
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          definition.methods[:__id__].tap do |method|
+            assert_equal type_name("::Object"), method.defined_in
           end
         end
       end

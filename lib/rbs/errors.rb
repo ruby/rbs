@@ -371,7 +371,7 @@ module RBS
     def initialize(name:, entry:)
       @name = name
       @entry = entry
-      super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
+      super "#{Location.to_string entry.primary_decl.location}: Superclass mismatch: #{name}"
     end
   end
 
@@ -408,10 +408,11 @@ module RBS
     attr_reader :name
     attr_reader :decl
 
-    def initialize(name:, decl:)
+    def initialize(name:, decl:, location: nil)
       @name = name
       @decl = decl
-      super "#{Location.to_string decl.location}: Generic parameters mismatch: #{name}"
+      location ||= decl.location
+      super "#{Location.to_string location}: Generic parameters mismatch: #{name}"
     end
   end
 

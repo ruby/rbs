@@ -126,10 +126,10 @@ module RBS
       entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
       args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
 
-      entry.decls.each do |d|
-        subst_ = subst + Substitution.build(d.decl.type_params.each.map(&:name), args)
+      entry.each_decl do |decl|
+        subst_ = subst + Substitution.build(decl.type_params.each.map(&:name), args)
 
-        d.decl.members.each do |member|
+        decl.members.each do |member|
           case member
           when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
             if member.kind == :instance
@@ -174,7 +174,7 @@ module RBS
 
       try_cache(type_name, cache: instance_cache) do
         entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
-        ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
+        ensure_namespace!(type_name.namespace, location: entry.primary_decl.location)
 
         ancestors = ancestor_builder.instance_ancestors(type_name)
         args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
@@ -234,7 +234,7 @@ module RBS
     def build_singleton0(type_name)
       try_cache type_name, cache: singleton0_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_singleton0: #{type_name}"
-        ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
+        ensure_namespace!(type_name.namespace, location: entry.primary_decl.location)
 
         ancestors = ancestor_builder.singleton_ancestors(type_name)
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
@@ -272,8 +272,8 @@ module RBS
           interface_methods = interface_methods(all_interfaces)
           import_methods(definition, type_name, methods, interface_methods, Substitution.new, nil)
 
-          entry.decls.each do |d|
-            d.decl.members.each do |member|
+          entry.each_decl do |decl|
+            decl.members.each do |member|
               case member
               when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
                 if member.kind == :singleton
@@ -306,7 +306,7 @@ module RBS
 
       try_cache type_name, cache: singleton_cache do
         entry = env.class_decls[type_name] or raise "Unknown name for build_singleton: #{type_name}"
-        ensure_namespace!(type_name.namespace, location: entry.decls[0].decl.location)
+        ensure_namespace!(type_name.namespace, location: entry.primary_decl.location)
 
         ancestors = ancestor_builder.singleton_ancestors(type_name)
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
@@ -452,6 +452,10 @@ module RBS
         case decl
         when AST::Declarations::Class
           decl.super_class&.location
+        when AST::Ruby::Declarations::ClassDecl
+          nil
+        else
+          raise "Unexpected `:super` source location with #{decl.class}"
         end
       else
         source.location
@@ -471,7 +475,7 @@ module RBS
           validate_params_with(type_params, result: result) do |param|
             decl = case entry = definition.entry
                    when Environment::ModuleEntry, Environment::ClassEntry
-                     entry.primary.decl
+                     entry.primary_decl
                    when Environment::SingleEntry
                      entry.decl
                    end

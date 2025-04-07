@@ -1,0 +1,60 @@
+module RBS
+  module AST
+    module Ruby
+      module Declarations
+        type t = ClassDecl | ModuleDecl
+
+        class Base
+          attr_reader buffer: Buffer
+
+          include Helpers::ConstantHelper
+          include Helpers::LocationHelper
+
+          def initialize: (Buffer) -> void
+        end
+
+        class ClassDecl < Base
+          type member = t
+
+          attr_reader class_name: TypeName
+
+          attr_reader node: Prism::ClassNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, TypeName, Prism::ClassNode) -> void
+
+          def each_decl: () { (t) -> void } -> void
+                        | () -> Enumerator[t]
+
+          def super_class: () -> nil
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
+        end
+
+        class ModuleDecl < Base
+          type member = t
+
+          attr_reader module_name: TypeName
+
+          attr_reader node: Prism::ModuleNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, TypeName, Prism::ModuleNode) -> void
+
+          def each_decl: () { (t) -> void } -> void
+                        | () -> Enumerator[t]
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
+
+          def self_types: () -> Array[AST::Declarations::Module::Self]
+        end
+      end
+    end
+  end
+end

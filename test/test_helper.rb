@@ -77,10 +77,12 @@ module TestHelper
 
   class SignatureManager
     attr_reader :files
+    attr_reader :ruby_files
     attr_reader :system_builtin
 
     def initialize(system_builtin: false)
       @files = {}
+      @ruby_files = {}
       @system_builtin = system_builtin
 
       files[Pathname("builtin.rbs")] = BUILTINS unless system_builtin
@@ -159,6 +161,10 @@ SIG
       files[Pathname(path)] = content
     end
 
+    def add_ruby_file(path, content)
+      ruby_files[Pathname(path)] = content
+    end
+
     def build
       Dir.mktmpdir do |tmpdir|
         tmppath = Pathname(tmpdir)
@@ -179,7 +185,19 @@ SIG
         loader = RBS::EnvironmentLoader.new(core_root: root)
         loader.add(path: tmppath)
 
-        yield RBS::Environment.from_loader(loader).resolve_type_names, tmppath
+        env = RBS::Environment.from_loader(loader)
+
+        ruby_files.each do |path, content|
+          buffer = RBS::Buffer.new(name: path, content: content)
+          prism = Prism.parse(content)
+          result = RBS::InlineParser.parse(buffer, prism)
+          source = RBS::Source::Ruby.new(buffer, prism, result.declarations, result.diagnostics)
+          env.add_source(source)
+        end
+
+        env = env.resolve_type_names
+
+        yield env, tmppath
       end
     end
   end
@@ -208,6 +226,8 @@ SIG
       end
 
       yield last
+    else
+      assert_block("assert_any! cannot hold for empty collection") { false }
     end
   end
 

@@ -1,0 +1,60 @@
+use RBS::AST::Ruby::Declarations
+
+module RBS
+  class InlineParser
+    class Result
+      attr_reader buffer: Buffer
+      attr_reader prism_result: Prism::ParseResult
+      attr_reader declarations: Array[AST::Ruby::Declarations::t]
+      attr_reader diagnostics: Array[Diagnostic::t]
+
+      def initialize: (Buffer, Prism::ParseResult) -> void
+    end
+
+    module Diagnostic
+      class Base
+        attr_reader message: String
+
+        attr_reader location: Location
+
+        def initialize: (Location, String) -> void
+      end
+
+      class NonConstantClassName < Base
+      end
+
+      class NonConstantModuleName < Base
+      end
+
+      type t = NonConstantClassName | NonConstantModuleName
+    end
+
+    def self.parse: (Buffer, Prism::ParseResult) -> Result
+
+    class Parser < Prism::Visitor
+      type module_context = Declarations::ClassDecl | Declarations::ModuleDecl
+
+      include AST::Ruby::Helpers::ConstantHelper
+
+      include AST::Ruby::Helpers::LocationHelper
+
+      attr_reader result: Result
+
+      attr_reader module_nesting: Array[module_context]
+
+      def initialize: (Result) -> void
+
+      def buffer: () -> Buffer
+
+      %a{pure} def current_module: () -> module_context?
+
+      %a{pure} def current_module!: () -> module_context
+
+      def diagnostics: () -> Array[Diagnostic::t]
+
+      def push_module_nesting: [T] (module_context) { () -> T } -> T
+
+      def insert_declaration: (module_context) -> void
+    end
+  end
+end

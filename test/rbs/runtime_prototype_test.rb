@@ -371,7 +371,7 @@ end
 
   def test_for_yield
     omit "Ruby 3.4 uses Prism and needs migration" if RUBY_VERSION >= "3.4"
-    
+
     SignatureManager.new do |manager|
       manager.build do |env|
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForYield"], env: env, merge: true)
@@ -414,7 +414,7 @@ end
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForEnv"], env: env, merge: true)
         assert_equal(p.decls.length, 1)
         p.decls.each do |decl|
-          env << decl
+          env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
         end
         env.resolve_type_names
         assert(true) # nothing raised above
@@ -428,7 +428,7 @@ end
         p = Runtime.new(patterns: ["BasicObject"], env: env, merge: true)
         assert_equal(p.decls.length, 1)
         p.decls.each do |decl|
-          env << decl
+          env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
         end
         env.resolve_type_names
         assert(true) # nothing raised above
