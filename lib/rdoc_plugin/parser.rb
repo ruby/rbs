@@ -86,7 +86,7 @@ module RBS
       end
 
       def parse_method_alias_decl(decl:, context:, outer_name: nil)
-        alias_def = RDoc::Alias.new(nil, decl.old_name.to_s, decl.new_name.to_s, nil, decl.kind == :singleton)
+        alias_def = RDoc::Alias.new(nil, decl.old_name.to_s, decl.new_name.to_s, nil, singleton: decl.kind == :singleton)
         alias_def.comment = construct_comment(context: context, comment: comment_string(decl)) if decl.comment
         context.add_alias(alias_def)
       end
@@ -100,7 +100,7 @@ module RBS
              when ::RBS::AST::Members::AttrAccessor
                'RW'
              end
-        attribute = RDoc::Attr.new(nil, decl.name.to_s, rw, nil, decl.kind == :singleton)
+        attribute = RDoc::Attr.new(nil, decl.name.to_s, rw, nil, singleton: decl.kind == :singleton)
         attribute.visibility = decl.visibility
         attribute.comment = construct_comment(context: context, comment: comment_string(decl)) if decl.comment
         context.add_attribute(attribute)
