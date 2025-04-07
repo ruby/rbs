@@ -237,17 +237,22 @@ module RBS
   end
 
   class GenericParameterMismatchError < LoadingError
-    attr_reader name: TypeName
-    attr_reader decl: AST::Declarations::Class | AST::Declarations::Module
+    type decl = AST::Declarations::Class | AST::Declarations::Module
+              | AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl
 
-    def initialize: (name: TypeName, decl: AST::Declarations::Class | AST::Declarations::Module) -> void
+    attr_reader name: TypeName
+    attr_reader decl: decl
+
+    def initialize: (name: TypeName, decl: decl, ?location: Location) -> void
   end
 
   class DuplicatedDeclarationError < LoadingError
-    attr_reader name: TypeName | Symbol
-    attr_reader decls: Array[AST::Declarations::t]
+    type declaration = AST::Declarations::t | AST::Ruby::Declarations::t
 
-    def initialize: (TypeName | Symbol, *AST::Declarations::t) -> void
+    attr_reader name: TypeName | Symbol
+    attr_reader decls: Array[declaration]
+
+    def initialize: (TypeName | Symbol, *declaration) -> void
   end
 
   class InvalidVarianceAnnotationError < DefinitionError

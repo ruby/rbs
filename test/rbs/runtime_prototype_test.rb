@@ -414,7 +414,7 @@ end
         p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::TestForEnv"], env: env, merge: true)
         assert_equal(p.decls.length, 1)
         p.decls.each do |decl|
-          env.insert_decl(decl, context: nil, namespace: RBS::Namespace.root)
+          env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
         end
         env.resolve_type_names
         assert(true) # nothing raised above
@@ -428,7 +428,7 @@ end
         p = Runtime.new(patterns: ["BasicObject"], env: env, merge: true)
         assert_equal(p.decls.length, 1)
         p.decls.each do |decl|
-          env.insert_decl(decl, context: nil, namespace: RBS::Namespace.root)
+          env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
         end
         env.resolve_type_names
         assert(true) # nothing raised above

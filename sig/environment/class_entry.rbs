@@ -10,7 +10,7 @@ module RBS
     class ClassEntry
       attr_reader name: TypeName
 
-      type declaration = AST::Declarations::Class
+      type declaration = AST::Declarations::Class | AST::Ruby::Declarations::ClassDecl
 
       type context_decl = [Resolver::context, declaration]
 

@@ -51,6 +51,8 @@ class RBS::CliTest < Test::Unit::TestCase
   def bundle_install(*gems)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
+        gems << 'prism' unless gems.include?('prism')
+        
         gems = gems.map do |gem|
           if gem == :gemspec
             "gemspec"

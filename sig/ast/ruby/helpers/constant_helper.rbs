@@ -1,0 +1,11 @@
+module RBS
+  module AST
+    module Ruby
+      module Helpers
+        module ConstantHelper
+          def self?.constant_as_type_name: (Prism::node?) -> TypeName?
+        end
+      end
+    end
+  end
+end

@@ -170,38 +170,43 @@ EOU
           TypeParamDefaultReferenceError.check!(d.type_params)
 
           entry.each_decl do |decl|
-            decl.each_member do |member|
-              case member
-              when AST::Members::MethodDefinition
-                @validator.validate_method_definition(member, type_name: name)
-                member.overloads.each do |ov|
-                  void_type_context_validator(ov.method_type)
-                end
-              when AST::Members::Attribute
-                void_type_context_validator(member.type)
-              when AST::Members::Mixin
-                member.args.each do |arg|
-                  no_self_type_validator(arg)
-                  unless arg.is_a?(Types::Bases::Void)
-                    void_type_context_validator(arg, true)
+            case decl
+            when AST::Declarations::Base
+              decl.each_member do |member|
+                case member
+                when AST::Members::MethodDefinition
+                  @validator.validate_method_definition(member, type_name: name)
+                  member.overloads.each do |ov|
+                    void_type_context_validator(ov.method_type)
                   end
-                end
-                params =
-                  if member.name.class?
-                    module_decl = @env.normalized_module_entry(member.name) or raise
-                    module_decl.type_params
-                  else
-                    interface_decl = @env.interface_decls.fetch(member.name)
-                    interface_decl.decl.type_params
+                when AST::Members::Attribute
+                  void_type_context_validator(member.type)
+                when AST::Members::Mixin
+                  member.args.each do |arg|
+                    no_self_type_validator(arg)
+                    unless arg.is_a?(Types::Bases::Void)
+                      void_type_context_validator(arg, true)
+                    end
                   end
-                InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
-              when AST::Members::Var
-                @validator.validate_variable(member)
-                void_type_context_validator(member.type)
-                if member.is_a?(AST::Members::ClassVariable)
-                  no_self_type_validator(member.type)
+                  params =
+                    if member.name.class?
+                      module_decl = @env.normalized_module_entry(member.name) or raise
+                      module_decl.type_params
+                    else
+                      interface_decl = @env.interface_decls.fetch(member.name)
+                      interface_decl.decl.type_params
+                    end
+                  InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
+                when AST::Members::Var
+                  @validator.validate_variable(member)
+                  void_type_context_validator(member.type)
+                  if member.is_a?(AST::Members::ClassVariable)
+                    no_self_type_validator(member.type)
+                  end
                 end
               end
+            else
+              raise "Unknown declaration: #{decl.class}"
             end
           end
         rescue BaseError => error
