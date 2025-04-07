@@ -161,7 +161,7 @@ GEM
     tempfile (0.3.1)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
-    test-unit (3.6.7)
+    test-unit (3.6.8)
       power_assert
     timeout (0.4.3)
     tzinfo (2.0.6)
