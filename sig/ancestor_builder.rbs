@@ -138,6 +138,8 @@ module RBS
 
       def validate_super_class!: (TypeName, Environment::ClassEntry) -> void
 
+      def auto_extended_modules: (TypeName, Resolver::TypeNameResolver) -> Array[Definition::Ancestor::Instance]
+
       def mixin_ancestors: (Environment::ClassEntry | Environment::ModuleEntry,
                             TypeName,
                             included_modules: Array[Definition::Ancestor::Instance]?,
