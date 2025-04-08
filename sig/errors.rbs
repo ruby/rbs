@@ -226,12 +226,14 @@ module RBS
   class InvalidOverloadMethodError < DefinitionError
     include DetailedMessageable
 
+    type member = AST::Members::MethodDefinition | AST::Ruby::Members::DefMember
+
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
     attr_reader kind: :instance | :singleton
-    attr_reader members: Array[AST::Members::MethodDefinition]
+    attr_reader members: Array[member]
 
-    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
+    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[member]) -> void
 
     def location: () -> AST::Members::MethodDefinition::loc?
   end

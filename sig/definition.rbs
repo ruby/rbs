@@ -21,6 +21,7 @@ module RBS
 
     class Method
       type method_member = AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrAccessor | AST::Members::AttrWriter
+                         | AST::Ruby::Members::DefMember
 
       class TypeDef
         attr_reader type: MethodType

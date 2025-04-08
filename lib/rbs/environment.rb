@@ -672,6 +672,8 @@ module RBS
             case member
             when AST::Ruby::Declarations::Base
               resolved.members << resolve_ruby_decl(resolver, member, context: inner_context, prefix: inner_prefix)
+            when AST::Ruby::Members::Base
+              resolved.members << member
             else
               raise "Unknown member type: #{member.class}"
             end

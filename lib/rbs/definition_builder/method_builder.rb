@@ -105,7 +105,8 @@ module RBS
             Methods.new(type: type).tap do |methods|
               entry.each_decl do |decl|
                 subst = Substitution.build(decl.type_params.each.map(&:name), args)
-                if decl.is_a?(AST::Declarations::Base)
+                case decl
+                when AST::Declarations::Base
                   each_rbs_member_with_accessibility(decl.members) do |member, accessibility|
                     case member
                     when AST::Members::MethodDefinition
@@ -136,6 +137,18 @@ module RBS
                       if member.kind == :instance
                         build_alias(methods, type, member: member)
                       end
+                    end
+                  end
+                when AST::Ruby::Declarations::Base
+                  decl.members.each do |member|
+                    case member
+                    when AST::Ruby::Members::DefMember
+                      build_method(
+                        methods,
+                        type,
+                        member: member,
+                        accessibility: :public
+                      )
                     end
                   end
                 end
