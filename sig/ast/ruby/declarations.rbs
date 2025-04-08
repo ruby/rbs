@@ -14,7 +14,7 @@ module RBS
         end
 
         class ClassDecl < Base
-          type member = t
+          type member = t | Members::t
 
           attr_reader class_name: TypeName
 
@@ -35,7 +35,7 @@ module RBS
         end
 
         class ModuleDecl < Base
-          type member = t
+          type member = t | Members::t
 
           attr_reader module_name: TypeName
 
