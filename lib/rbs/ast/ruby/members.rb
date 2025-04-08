@@ -37,10 +37,18 @@ module RBS
               block: nil,
               location: nil
             )
-            
+
             [
               Overload.new(method_type: method_type, annotations: [])
             ]
+          end
+
+          def overloading?
+            false
+          end
+
+          def annotations
+            []
           end
         end
       end

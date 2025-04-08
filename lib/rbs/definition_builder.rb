@@ -766,6 +766,37 @@ module RBS
         )
 
         method_definition.annotations.replace(original.annotations)
+      when AST::Ruby::Members::DefMember
+        if duplicated_method = methods[method.name]
+          raise DuplicatedMethodDefinitionError.new(
+            type: definition.self_type,
+            method_name: method.name,
+            members: [original, *duplicated_method.members]
+          )
+        end
+
+        defs = original.overloads.map do |overload|
+          Definition::Method::TypeDef.new(
+            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+            member: original,
+            defined_in: defined_in,
+            implemented_in: implemented_in
+          ).tap do |type_def|
+            # Keep the original annotations given to overloads.
+            type_def.overload_annotations.replace(overload.annotations)
+          end
+        end
+
+        method_definition = Definition::Method.new(
+          super_method: existing_method,
+          defs: defs,
+          accessibility: :public,
+          alias_of: nil,
+          alias_member: nil
+        )
+
+        method_definition.annotations.replace([])
+
       when nil
         # Overloading method definition only
 

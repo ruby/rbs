@@ -16,16 +16,19 @@ module RBS
         #
         class Definition
           type original = AST::Members::MethodDefinition | AST::Members::Alias | AST::Members::AttrAccessor | AST::Members::AttrWriter | AST::Members::AttrReader
+                        | AST::Ruby::Members::DefMember
+
+          type overloading_definition = AST::Members::MethodDefinition | AST::Ruby::Members::DefMember
 
           type accessibility = RBS::Definition::accessibility
 
           attr_reader name: Symbol
           attr_reader type: instance_type
           attr_reader originals: Array[original]
-          attr_reader overloads: Array[AST::Members::MethodDefinition]
+          attr_reader overloads: Array[overloading_definition]
           attr_reader accessibilities: Array[accessibility]
 
-          def initialize: (name: Symbol, type: instance_type, originals: Array[original], overloads: Array[AST::Members::MethodDefinition], accessibilities: Array[accessibility]) -> void
+          def initialize: (name: Symbol, type: instance_type, originals: Array[original], overloads: Array[overloading_definition], accessibilities: Array[accessibility]) -> void
 
           def original: () -> original?
 
@@ -74,7 +77,7 @@ module RBS
 
       def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Definition::accessibility) -> void
 
-      def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition, accessibility: Definition::accessibility) -> void
+      def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition | AST::Ruby::Members::DefMember, accessibility: Definition::accessibility) -> void
 
       def each_rbs_member_with_accessibility: (Array[AST::Members::t | AST::Declarations::t], ?accessibility: Definition::accessibility) { (AST::Members::t | AST::Declarations::t, Definition::accessibility) -> void } -> void
 

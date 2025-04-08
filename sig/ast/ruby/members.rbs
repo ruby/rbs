@@ -23,6 +23,10 @@ module RBS
           def location: () -> Location
 
           def overloads: () -> Array[Overload]
+
+          def overloading?: () -> bool
+
+          def annotations: () -> Array[AST::Annotation]
         end
       end
     end
