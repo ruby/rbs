@@ -31,7 +31,7 @@ module RBS
     end
 
     # Top level declarations
-    attr_reader declarations: Array[AST::Declarations::t]
+    def declarations: () -> Array[AST::Ruby::Declarations::t | AST::Declarations::t]
 
     # Array of source objects loaded in the environment
     #
