@@ -20,13 +20,21 @@ module RBS
         def initialize: (Location, String) -> void
       end
 
+      class NotImplementedYet < Base
+      end
+
       class NonConstantClassName < Base
       end
 
       class NonConstantModuleName < Base
       end
 
-      type t = NonConstantClassName | NonConstantModuleName
+      class TopLevelMethodDefinition < Base
+      end
+
+      type t = NotImplementedYet
+             | NonConstantClassName | NonConstantModuleName
+             | TopLevelMethodDefinition
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result

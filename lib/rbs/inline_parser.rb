@@ -23,8 +23,10 @@ module RBS
         end
       end
 
+      NotImplementedYet = _ = Class.new(Base)
       NonConstantClassName = _ = Class.new(Base)
       NonConstantModuleName = _ = Class.new(Base)
+      TopLevelMethodDefinition = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -98,6 +100,27 @@ module RBS
         insert_declaration(module_decl)
         push_module_nesting(module_decl) do
           visit_child_nodes(node)
+        end
+      end
+
+      def visit_def_node(node)
+        if node.receiver
+          diagnostics << Diagnostic::NotImplementedYet.new(
+            rbs_location(node.receiver.location),
+            "Singleton method definition is not supported yet"
+          )
+          return
+        end
+
+        case current = current_module
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node)
+          current.members << defn
+        else
+          diagnostics << Diagnostic::TopLevelMethodDefinition.new(
+            rbs_location(node.name_loc),
+            "Top-level method definition is not supported"
+          )
         end
       end
 
