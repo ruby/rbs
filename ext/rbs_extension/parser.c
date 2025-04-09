@@ -1942,7 +1942,8 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
 
   switch (state->current_token.type)
   {
-  case tAIDENT: {
+  case tAIDENT:
+  case kATRBS: {
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1989,7 +1990,15 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     };
 
     parser_advance_assert(state, pDOT);
-    parser_advance_assert(state, tAIDENT);
+    if (state->next_token.type == tAIDENT || state->next_token.type == kATRBS) {
+      parser_advance(state);
+    } else {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "expected a instance variable name"
+      );
+    }
 
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
@@ -2098,7 +2107,7 @@ static VALUE parse_attribute_member(parserstate *state, position comment_pos, VA
     parser_advance_assert(state, pLPAREN);
     ivar_range.start = state->current_token.range.start;
 
-    if (parser_advance_if(state, tAIDENT)) {
+    if (parser_advance_if(state, tAIDENT) || parser_advance_if(state, kATRBS)) {
       ivar_name = ID2SYM(INTERN_TOKEN(state, state->current_token));
       ivar_name_range = state->current_token.range;
     } else {
@@ -2331,6 +2340,7 @@ static VALUE parse_module_members(parserstate *state) {
 
     case tAIDENT:
     case tA2IDENT:
+    case kATRBS:
     case kSELF: {
       member = parse_variable_member(state, annot_pos, annotations);
       break;

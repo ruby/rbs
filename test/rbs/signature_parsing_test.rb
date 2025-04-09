@@ -2279,4 +2279,16 @@ end
       end
     end
   end
+
+  def test_inline_keyword__rbs
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        @rbs: untyped
+        self.@rbs: untyped
+
+        attr_reader rbs (@rbs): untyped
+        attr_reader self.rbs (@rbs): untyped
+      end
+    RBS
+  end
 end

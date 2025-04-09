@@ -95,6 +95,7 @@ token rbsparser_next_token(lexstate *state) {
       "use"           { return next_token(state, kUSE); }
       "as"            { return next_token(state, kAS); }
       "__todo__"      { return next_token(state, k__TODO__); }
+      "@rbs"          { return next_token(state, kATRBS); }
 
       unicode_char = "\\u" [0-9a-fA-F]{4};
       oct_char = "\\x" [0-9a-f]{1,2};
