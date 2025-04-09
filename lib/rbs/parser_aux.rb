@@ -111,6 +111,11 @@ module RBS
         hash[keyword] = _ = nil
       end
 
+    def self.parse_inline_leading_annotation(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_leading_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
     def self.parse_inline_trailing_annotation(source, range, variables: [])
       buf = buffer(source)
       _parse_inline_trailing_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)

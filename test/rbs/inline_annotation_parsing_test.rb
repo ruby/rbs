@@ -27,4 +27,22 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       Parser.parse_inline_trailing_annotation(": String is a ", 0...)
     end
   end
+
+  def test_parse__colon_method_type_annotation
+    Parser.parse_inline_leading_annotation(": (String) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ColonMethodTypeAnnotation, annot
+      assert_equal ": (String) -> void", annot.location.source
+      assert_equal ":", annot.prefix_location.source
+      assert_equal "(String) -> void", annot.method_type.location.source
+      assert_empty annot.annotations
+    end
+
+    Parser.parse_inline_leading_annotation(": %a{a} %a{b} (String) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ColonMethodTypeAnnotation, annot
+      assert_equal ": %a{a} %a{b} (String) -> void", annot.location.source
+      assert_equal ":", annot.prefix_location.source
+      assert_equal "(String) -> void", annot.method_type.location.source
+      assert_equal ["a", "b"], annot.annotations.map(&:string)
+    end
+  end
 end

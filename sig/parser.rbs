@@ -86,6 +86,12 @@ module RBS
     #
     # Raises an exception if the source text contains a syntax error.
     #
+    def self.parse_inline_leading_annotation: (Buffer | String, Range[Integer?], ?variables: Array[Symbol]) -> AST::Ruby::Annotations::leading_annotation
+
+    # Parse a leading annotation and return it
+    #
+    # Raises an exception if the source text contains a syntax error.
+    #
     def self.parse_inline_trailing_annotation: (Buffer | String, Range[Integer?], ?variables: Array[Symbol]) -> AST::Ruby::Annotations::trailing_annotation
 
     private
@@ -99,6 +105,8 @@ module RBS
     def self._parse_signature: (Buffer, Integer start_pos, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
 
     def self._lex: (Buffer, Integer end_pos) -> Array[[Symbol, Location[untyped, untyped]]]
+
+    def self._parse_inline_leading_annotation: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables) -> AST::Ruby::Annotations::leading_annotation
 
     def self._parse_inline_trailing_annotation: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables) -> AST::Ruby::Annotations::trailing_annotation
 
