@@ -14,6 +14,8 @@ VALUE RBS_AST;
 VALUE RBS_AST_Declarations;
 VALUE RBS_AST_Directives;
 VALUE RBS_AST_Members;
+VALUE RBS_AST_Ruby;
+VALUE RBS_AST_Ruby_Annotations;
 VALUE RBS_Parser;
 VALUE RBS_Types;
 VALUE RBS_Types_Bases;
@@ -47,6 +49,9 @@ VALUE RBS_AST_Members_MethodDefinition_Overload;
 VALUE RBS_AST_Members_Prepend;
 VALUE RBS_AST_Members_Private;
 VALUE RBS_AST_Members_Public;
+VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
+VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
+VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
 VALUE RBS_AST_TypeParam;
 VALUE RBS_MethodType;
 VALUE RBS_Namespace;
@@ -89,6 +94,8 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Declarations, RBS_AST, "Declarations");
   IMPORT_CONSTANT(RBS_AST_Directives, RBS_AST, "Directives");
   IMPORT_CONSTANT(RBS_AST_Members, RBS_AST, "Members");
+  IMPORT_CONSTANT(RBS_AST_Ruby, RBS_AST, "Ruby");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations, RBS_AST_Ruby, "Annotations");
   IMPORT_CONSTANT(RBS_Types, RBS, "Types");
   IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
 
@@ -121,6 +128,9 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Members_Prepend, RBS_AST_Members, "Prepend");
   IMPORT_CONSTANT(RBS_AST_Members_Private, RBS_AST_Members, "Private");
   IMPORT_CONSTANT(RBS_AST_Members_Public, RBS_AST_Members, "Public");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation, RBS_AST_Ruby_Annotations, "ColonMethodTypeAnnotation");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_MethodTypesAnnotation, RBS_AST_Ruby_Annotations, "MethodTypesAnnotation");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_NodeTypeAssertion, RBS_AST_Ruby_Annotations, "NodeTypeAssertion");
   IMPORT_CONSTANT(RBS_AST_TypeParam, RBS_AST, "TypeParam");
   IMPORT_CONSTANT(RBS_MethodType, RBS, "MethodType");
   IMPORT_CONSTANT(RBS_Namespace, RBS, "Namespace");

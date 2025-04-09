@@ -7,6 +7,8 @@ VALUE RBS_AST;
 VALUE RBS_AST_Declarations;
 VALUE RBS_AST_Directives;
 VALUE RBS_AST_Members;
+VALUE RBS_AST_Ruby;
+VALUE RBS_AST_Ruby_Annotations;
 VALUE RBS_Parser;
 VALUE RBS_Types;
 VALUE RBS_Types_Bases;
@@ -27,6 +29,8 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Declarations, RBS_AST, "Declarations");
   IMPORT_CONSTANT(RBS_AST_Directives, RBS_AST, "Directives");
   IMPORT_CONSTANT(RBS_AST_Members, RBS_AST, "Members");
+  IMPORT_CONSTANT(RBS_AST_Ruby, RBS_AST, "Ruby");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations, RBS_AST_Ruby, "Annotations");
   IMPORT_CONSTANT(RBS_Types, RBS, "Types");
   IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
 

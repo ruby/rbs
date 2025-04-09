@@ -315,3 +315,20 @@ nodes:
     fields:
       - name: name
       - name: location
+  - name: RBS::AST::Ruby::Annotations::NodeTypeAssertion
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: type
+  - name: RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: annotations
+      - name: method_type
+  - name: RBS::AST::Ruby::Annotations::MethodTypesAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: overloads
+      - name: vertical_bar_locations

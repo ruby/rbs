@@ -39,6 +39,9 @@ VALUE rbs_ast_members_method_definition_overload(VALUE annotations, VALUE method
 VALUE rbs_ast_members_prepend(VALUE name, VALUE args, VALUE annotations, VALUE location, VALUE comment);
 VALUE rbs_ast_members_private(VALUE location);
 VALUE rbs_ast_members_public(VALUE location);
+VALUE rbs_ast_ruby_annotations_colon_method_type_annotation(VALUE location, VALUE prefix_location, VALUE annotations, VALUE method_type);
+VALUE rbs_ast_ruby_annotations_method_types_annotation(VALUE location, VALUE prefix_location, VALUE overloads, VALUE vertical_bar_locations);
+VALUE rbs_ast_ruby_annotations_node_type_assertion(VALUE location, VALUE prefix_location, VALUE type);
 VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location);
 VALUE rbs_method_type(VALUE type_params, VALUE type, VALUE block, VALUE location);
 VALUE rbs_namespace(VALUE path, VALUE absolute);

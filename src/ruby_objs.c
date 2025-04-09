@@ -439,6 +439,47 @@ VALUE rbs_ast_members_public(VALUE location) {
   );
 }
 
+VALUE rbs_ast_ruby_annotations_colon_method_type_annotation(VALUE location, VALUE prefix_location, VALUE annotations, VALUE method_type) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("annotations")), annotations);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("method_type")), method_type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotations_method_types_annotation(VALUE location, VALUE prefix_location, VALUE overloads, VALUE vertical_bar_locations) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("overloads")), overloads);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("vertical_bar_locations")), vertical_bar_locations);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotations_MethodTypesAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
+VALUE rbs_ast_ruby_annotations_node_type_assertion(VALUE location, VALUE prefix_location, VALUE type) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("type")), type);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotations_NodeTypeAssertion,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);
