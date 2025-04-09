@@ -205,7 +205,7 @@ class Ripper
     # The return value of this method is passed to the next event handler (as of
     # Enumerable#inject).
     #
-    def on_default: (untyped event, untyped token, untyped data) -> untyped
+    def on_default: (untyped event, String token, untyped data) -> untyped
   end
 
   class Lexer < Ripper
@@ -441,7 +441,7 @@ class Ripper
 
     private
 
-    def _push_token: (untyped tok) -> Lexer::Elem
+    def _push_token: (String tok) -> Lexer::Elem
 
     def on_error1: (untyped mesg) -> Array[Lexer::Elem]
 
@@ -458,382 +458,382 @@ class Ripper
     attr_reader error: untyped
 
     alias compile_error on_error
-    def on_BEGIN: (*untyped args) -> untyped
+    def on_BEGIN: (*untyped args) -> Array[untyped]
 
-    def on_CHAR: (untyped tok) -> untyped
+    def on_CHAR: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_END: (*untyped args) -> untyped
+    def on_END: (*untyped args) -> Array[untyped]
 
-    def on___end__: (untyped tok) -> untyped
+    def on___end__: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_alias: (*untyped args) -> untyped
+    def on_alias: (*untyped args) -> Array[untyped]
 
-    def on_alias_error: (*untyped args) -> untyped
+    def on_alias_error: (*untyped args) -> Array[untyped]
 
-    def on_aref: (*untyped args) -> untyped
+    def on_aref: (*untyped args) -> Array[untyped]
 
-    def on_aref_field: (*untyped args) -> untyped
+    def on_aref_field: (*untyped args) -> Array[untyped]
 
-    def on_arg_ambiguous: (*untyped args) -> untyped
+    def on_arg_ambiguous: (*untyped args) -> Array[untyped]
 
-    def on_arg_paren: (*untyped args) -> untyped
+    def on_arg_paren: (*untyped args) -> Array[untyped]
 
-    def on_args_add: (*untyped args) -> untyped
+    def on_args_add: (*untyped args) -> Array[untyped]
 
-    def on_args_add_block: (*untyped args) -> untyped
+    def on_args_add_block: (*untyped args) -> Array[untyped]
 
-    def on_args_add_star: (*untyped args) -> untyped
+    def on_args_add_star: (*untyped args) -> Array[untyped]
 
-    def on_args_forward: (*untyped args) -> untyped
+    def on_args_forward: (*untyped args) -> Array[untyped]
 
-    def on_args_new: (*untyped args) -> untyped
+    def on_args_new: (*untyped args) -> Array[untyped]
 
-    def on_array: (*untyped args) -> untyped
+    def on_array: (*untyped args) -> Array[untyped]
 
-    def on_aryptn: (*untyped args) -> untyped
+    def on_aryptn: (*untyped args) -> Array[untyped]
 
-    def on_assign: (*untyped args) -> untyped
+    def on_assign: (*untyped args) -> Array[untyped]
 
-    def on_assign_error: (*untyped args) -> untyped
+    def on_assign_error: (*untyped args) -> Array[untyped]
 
-    def on_assoc_new: (*untyped args) -> untyped
+    def on_assoc_new: (*untyped args) -> Array[untyped]
 
-    def on_assoc_splat: (*untyped args) -> untyped
+    def on_assoc_splat: (*untyped args) -> Array[untyped]
 
-    def on_assoclist_from_args: (*untyped args) -> untyped
+    def on_assoclist_from_args: (*untyped args) -> Array[untyped]
 
-    def on_backref: (untyped tok) -> untyped
+    def on_backref: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_backtick: (untyped tok) -> untyped
+    def on_backtick: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_bare_assoc_hash: (*untyped args) -> untyped
+    def on_bare_assoc_hash: (*untyped args) -> Array[untyped]
 
-    def on_begin: (*untyped args) -> untyped
+    def on_begin: (*untyped args) -> Array[untyped]
 
-    def on_binary: (*untyped args) -> untyped
+    def on_binary: (*untyped args) -> Array[untyped]
 
-    def on_block_var: (*untyped args) -> untyped
+    def on_block_var: (*untyped args) -> Array[untyped]
 
-    def on_blockarg: (*untyped args) -> untyped
+    def on_blockarg: (*untyped args) -> Array[untyped]
 
-    def on_bodystmt: (*untyped args) -> untyped
+    def on_bodystmt: (*untyped args) -> Array[untyped]
 
-    def on_brace_block: (*untyped args) -> untyped
+    def on_brace_block: (*untyped args) -> Array[untyped]
 
-    def on_break: (*untyped args) -> untyped
+    def on_break: (*untyped args) -> Array[untyped]
 
-    def on_call: (*untyped args) -> untyped
+    def on_call: (*untyped args) -> Array[untyped]
 
-    def on_case: (*untyped args) -> untyped
+    def on_case: (*untyped args) -> Array[untyped]
 
-    def on_class: (*untyped args) -> untyped
+    def on_class: (*untyped args) -> Array[untyped]
 
-    def on_class_name_error: (*untyped args) -> untyped
+    def on_class_name_error: (*untyped args) -> Array[untyped]
 
-    def on_comma: (untyped tok) -> untyped
+    def on_comma: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_command: (*untyped args) -> untyped
+    def on_command: (*untyped args) -> Array[untyped]
 
-    def on_command_call: (*untyped args) -> untyped
+    def on_command_call: (*untyped args) -> Array[untyped]
 
-    def on_comment: (untyped tok) -> untyped
+    def on_comment: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_const: (untyped tok) -> untyped
+    def on_const: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_const_path_field: (*untyped args) -> untyped
+    def on_const_path_field: (*untyped args) -> Array[untyped]
 
-    def on_const_path_ref: (*untyped args) -> untyped
+    def on_const_path_ref: (*untyped args) -> Array[untyped]
 
-    def on_const_ref: (*untyped args) -> untyped
+    def on_const_ref: (*untyped args) -> Array[untyped]
 
-    def on_cvar: (untyped tok) -> untyped
+    def on_cvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_def: (*untyped args) -> untyped
+    def on_def: (*untyped args) -> Array[untyped]
 
-    def on_defined: (*untyped args) -> untyped
+    def on_defined: (*untyped args) -> Array[untyped]
 
-    def on_defs: (*untyped args) -> untyped
+    def on_defs: (*untyped args) -> Array[untyped]
 
-    def on_do_block: (*untyped args) -> untyped
+    def on_do_block: (*untyped args) -> Array[untyped]
 
-    def on_dot2: (*untyped args) -> untyped
+    def on_dot2: (*untyped args) -> Array[untyped]
 
-    def on_dot3: (*untyped args) -> untyped
+    def on_dot3: (*untyped args) -> Array[untyped]
 
-    def on_dyna_symbol: (*untyped args) -> untyped
+    def on_dyna_symbol: (*untyped args) -> Array[untyped]
 
-    def on_else: (*untyped args) -> untyped
+    def on_else: (*untyped args) -> Array[untyped]
 
-    def on_elsif: (*untyped args) -> untyped
+    def on_elsif: (*untyped args) -> Array[untyped]
 
-    def on_embdoc: (untyped tok) -> untyped
+    def on_embdoc: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embdoc_beg: (untyped tok) -> untyped
+    def on_embdoc_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embdoc_end: (untyped tok) -> untyped
+    def on_embdoc_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embexpr_beg: (untyped tok) -> untyped
+    def on_embexpr_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embexpr_end: (untyped tok) -> untyped
+    def on_embexpr_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_embvar: (untyped tok) -> untyped
+    def on_embvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_ensure: (*untyped args) -> untyped
+    def on_ensure: (*untyped args) -> Array[untyped]
 
-    def on_excessed_comma: (*untyped args) -> untyped
+    def on_excessed_comma: (*untyped args) -> Array[untyped]
 
-    def on_fcall: (*untyped args) -> untyped
+    def on_fcall: (*untyped args) -> Array[untyped]
 
-    def on_field: (*untyped args) -> untyped
+    def on_field: (*untyped args) -> Array[untyped]
 
-    def on_float: (untyped tok) -> untyped
+    def on_float: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_fndptn: (*untyped args) -> untyped
+    def on_fndptn: (*untyped args) -> Array[untyped]
 
-    def on_for: (*untyped args) -> untyped
+    def on_for: (*untyped args) -> Array[untyped]
 
-    def on_gvar: (untyped tok) -> untyped
+    def on_gvar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_hash: (*untyped args) -> untyped
+    def on_hash: (*untyped args) -> Array[untyped]
 
-    def on_heredoc_beg: (untyped tok) -> untyped
+    def on_heredoc_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_heredoc_end: (untyped tok) -> untyped
+    def on_heredoc_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_hshptn: (*untyped args) -> untyped
+    def on_hshptn: (*untyped args) -> Array[untyped]
 
-    def on_ident: (untyped tok) -> untyped
+    def on_ident: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_if: (*untyped args) -> untyped
+    def on_if: (*untyped args) -> Array[untyped]
 
-    def on_if_mod: (*untyped args) -> untyped
+    def on_if_mod: (*untyped args) -> Array[untyped]
 
-    def on_ifop: (*untyped args) -> untyped
+    def on_ifop: (*untyped args) -> Array[untyped]
 
-    def on_ignored_nl: (untyped tok) -> untyped
+    def on_ignored_nl: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_ignored_sp: (untyped tok) -> untyped
+    def on_ignored_sp: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_imaginary: (untyped tok) -> untyped
+    def on_imaginary: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_in: (*untyped args) -> untyped
+    def on_in: (*untyped args) -> Array[untyped]
 
-    def on_int: (untyped tok) -> untyped
+    def on_int: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_ivar: (untyped tok) -> untyped
+    def on_ivar: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_kw: (untyped tok) -> untyped
+    def on_kw: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_kwrest_param: (*untyped args) -> untyped
+    def on_kwrest_param: (*untyped args) -> Array[untyped]
 
-    def on_label: (untyped tok) -> untyped
+    def on_label: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_label_end: (untyped tok) -> untyped
+    def on_label_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_lambda: (*untyped args) -> untyped
+    def on_lambda: (*untyped args) -> Array[untyped]
 
-    def on_lbrace: (untyped tok) -> untyped
+    def on_lbrace: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_lbracket: (untyped tok) -> untyped
+    def on_lbracket: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_lparen: (untyped tok) -> untyped
+    def on_lparen: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_magic_comment: (*untyped args) -> untyped
+    def on_magic_comment: (*untyped args) -> Array[untyped]
 
-    def on_massign: (*untyped args) -> untyped
+    def on_massign: (*untyped args) -> Array[untyped]
 
-    def on_method_add_arg: (*untyped args) -> untyped
+    def on_method_add_arg: (*untyped args) -> Array[untyped]
 
-    def on_method_add_block: (*untyped args) -> untyped
+    def on_method_add_block: (*untyped args) -> Array[untyped]
 
-    def on_mlhs_add: (*untyped args) -> untyped
+    def on_mlhs_add: (*untyped args) -> Array[untyped]
 
-    def on_mlhs_add_post: (*untyped args) -> untyped
+    def on_mlhs_add_post: (*untyped args) -> Array[untyped]
 
-    def on_mlhs_add_star: (*untyped args) -> untyped
+    def on_mlhs_add_star: (*untyped args) -> Array[untyped]
 
-    def on_mlhs_new: (*untyped args) -> untyped
+    def on_mlhs_new: (*untyped args) -> Array[untyped]
 
-    def on_mlhs_paren: (*untyped args) -> untyped
+    def on_mlhs_paren: (*untyped args) -> Array[untyped]
 
-    def on_module: (*untyped args) -> untyped
+    def on_module: (*untyped args) -> Array[untyped]
 
-    def on_mrhs_add: (*untyped args) -> untyped
+    def on_mrhs_add: (*untyped args) -> Array[untyped]
 
-    def on_mrhs_add_star: (*untyped args) -> untyped
+    def on_mrhs_add_star: (*untyped args) -> Array[untyped]
 
-    def on_mrhs_new: (*untyped args) -> untyped
+    def on_mrhs_new: (*untyped args) -> Array[untyped]
 
-    def on_mrhs_new_from_args: (*untyped args) -> untyped
+    def on_mrhs_new_from_args: (*untyped args) -> Array[untyped]
 
-    def on_next: (*untyped args) -> untyped
+    def on_next: (*untyped args) -> Array[untyped]
 
-    def on_nl: (untyped tok) -> untyped
+    def on_nl: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_nokw_param: (*untyped args) -> untyped
+    def on_nokw_param: (*untyped args) -> Array[untyped]
 
-    def on_op: (untyped tok) -> untyped
+    def on_op: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_opassign: (*untyped args) -> untyped
+    def on_opassign: (*untyped args) -> Array[untyped]
 
-    def on_operator_ambiguous: (*untyped args) -> untyped
+    def on_operator_ambiguous: (*untyped args) -> Array[untyped]
 
-    def on_param_error: (*untyped args) -> untyped
+    def on_param_error: (*untyped args) -> Array[untyped]
 
-    def on_params: (*untyped args) -> untyped
+    def on_params: (*untyped args) -> Array[untyped]
 
-    def on_paren: (*untyped args) -> untyped
+    def on_paren: (*untyped args) -> Array[untyped]
 
     alias on_parse_error on_error
-    def on_period: (untyped tok) -> untyped
+    def on_period: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_program: (*untyped args) -> untyped
+    def on_program: (*untyped args) -> Array[untyped]
 
-    def on_qsymbols_add: (*untyped args) -> untyped
+    def on_qsymbols_add: (*untyped args) -> Array[untyped]
 
-    def on_qsymbols_beg: (untyped tok) -> untyped
+    def on_qsymbols_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_qsymbols_new: (*untyped args) -> untyped
+    def on_qsymbols_new: (*untyped args) -> Array[untyped]
 
-    def on_qwords_add: (*untyped args) -> untyped
+    def on_qwords_add: (*untyped args) -> Array[untyped]
 
-    def on_qwords_beg: (untyped tok) -> untyped
+    def on_qwords_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_qwords_new: (*untyped args) -> untyped
+    def on_qwords_new: (*untyped args) -> Array[untyped]
 
-    def on_rational: (untyped tok) -> untyped
+    def on_rational: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_rbrace: (untyped tok) -> untyped
+    def on_rbrace: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_rbracket: (untyped tok) -> untyped
+    def on_rbracket: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_redo: (*untyped args) -> untyped
+    def on_redo: (*untyped args) -> Array[untyped]
 
-    def on_regexp_add: (*untyped args) -> untyped
+    def on_regexp_add: (*untyped args) -> Array[untyped]
 
-    def on_regexp_beg: (untyped tok) -> untyped
+    def on_regexp_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_regexp_end: (untyped tok) -> untyped
+    def on_regexp_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_regexp_literal: (*untyped args) -> untyped
+    def on_regexp_literal: (*untyped args) -> Array[untyped]
 
-    def on_regexp_new: (*untyped args) -> untyped
+    def on_regexp_new: (*untyped args) -> Array[untyped]
 
-    def on_rescue: (*untyped args) -> untyped
+    def on_rescue: (*untyped args) -> Array[untyped]
 
-    def on_rescue_mod: (*untyped args) -> untyped
+    def on_rescue_mod: (*untyped args) -> Array[untyped]
 
-    def on_rest_param: (*untyped args) -> untyped
+    def on_rest_param: (*untyped args) -> Array[untyped]
 
-    def on_retry: (*untyped args) -> untyped
+    def on_retry: (*untyped args) -> Array[untyped]
 
-    def on_return: (*untyped args) -> untyped
+    def on_return: (*untyped args) -> Array[untyped]
 
-    def on_return0: (*untyped args) -> untyped
+    def on_return0: (*untyped args) -> Array[untyped]
 
-    def on_rparen: (untyped tok) -> untyped
+    def on_rparen: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_sclass: (*untyped args) -> untyped
+    def on_sclass: (*untyped args) -> Array[untyped]
 
-    def on_semicolon: (untyped tok) -> untyped
+    def on_semicolon: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_sp: (untyped tok) -> untyped
+    def on_sp: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_stmts_add: (*untyped args) -> untyped
+    def on_stmts_add: (*untyped args) -> Array[untyped]
 
-    def on_stmts_new: (*untyped args) -> untyped
+    def on_stmts_new: (*untyped args) -> Array[untyped]
 
-    def on_string_add: (*untyped args) -> untyped
+    def on_string_add: (*untyped args) -> Array[untyped]
 
-    def on_string_concat: (*untyped args) -> untyped
+    def on_string_concat: (*untyped args) -> Array[untyped]
 
-    def on_string_content: (*untyped args) -> untyped
+    def on_string_content: (*untyped args) -> Array[untyped]
 
-    def on_string_dvar: (*untyped args) -> untyped
+    def on_string_dvar: (*untyped args) -> Array[untyped]
 
-    def on_string_embexpr: (*untyped args) -> untyped
+    def on_string_embexpr: (*untyped args) -> Array[untyped]
 
-    def on_string_literal: (*untyped args) -> untyped
+    def on_string_literal: (*untyped args) -> Array[untyped]
 
-    def on_super: (*untyped args) -> untyped
+    def on_super: (*untyped args) -> Array[untyped]
 
-    def on_symbeg: (untyped tok) -> untyped
+    def on_symbeg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_symbol: (*untyped args) -> untyped
+    def on_symbol: (*untyped args) -> Array[untyped]
 
-    def on_symbol_literal: (*untyped args) -> untyped
+    def on_symbol_literal: (*untyped args) -> Array[untyped]
 
-    def on_symbols_add: (*untyped args) -> untyped
+    def on_symbols_add: (*untyped args) -> Array[untyped]
 
-    def on_symbols_beg: (untyped tok) -> untyped
+    def on_symbols_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_symbols_new: (*untyped args) -> untyped
+    def on_symbols_new: (*untyped args) -> Array[untyped]
 
-    def on_tlambda: (untyped tok) -> untyped
+    def on_tlambda: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tlambeg: (untyped tok) -> untyped
+    def on_tlambeg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_top_const_field: (*untyped args) -> untyped
+    def on_top_const_field: (*untyped args) -> Array[untyped]
 
-    def on_top_const_ref: (*untyped args) -> untyped
+    def on_top_const_ref: (*untyped args) -> Array[untyped]
 
-    def on_tstring_beg: (untyped tok) -> untyped
+    def on_tstring_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tstring_content: (untyped tok) -> untyped
+    def on_tstring_content: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_tstring_end: (untyped tok) -> untyped
+    def on_tstring_end: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_unary: (*untyped args) -> untyped
+    def on_unary: (*untyped args) -> Array[untyped]
 
-    def on_undef: (*untyped args) -> untyped
+    def on_undef: (*untyped args) -> Array[untyped]
 
-    def on_unless: (*untyped args) -> untyped
+    def on_unless: (*untyped args) -> Array[untyped]
 
-    def on_unless_mod: (*untyped args) -> untyped
+    def on_unless_mod: (*untyped args) -> Array[untyped]
 
-    def on_until: (*untyped args) -> untyped
+    def on_until: (*untyped args) -> Array[untyped]
 
-    def on_until_mod: (*untyped args) -> untyped
+    def on_until_mod: (*untyped args) -> Array[untyped]
 
-    def on_var_alias: (*untyped args) -> untyped
+    def on_var_alias: (*untyped args) -> Array[untyped]
 
-    def on_var_field: (*untyped args) -> untyped
+    def on_var_field: (*untyped args) -> Array[untyped]
 
-    def on_var_ref: (*untyped args) -> untyped
+    def on_var_ref: (*untyped args) -> Array[untyped]
 
-    def on_vcall: (*untyped args) -> untyped
+    def on_vcall: (*untyped args) -> Array[untyped]
 
-    def on_void_stmt: (*untyped args) -> untyped
+    def on_void_stmt: (*untyped args) -> Array[untyped]
 
-    def on_when: (*untyped args) -> untyped
+    def on_when: (*untyped args) -> Array[untyped]
 
-    def on_while: (*untyped args) -> untyped
+    def on_while: (*untyped args) -> Array[untyped]
 
-    def on_while_mod: (*untyped args) -> untyped
+    def on_while_mod: (*untyped args) -> Array[untyped]
 
-    def on_word_add: (*untyped args) -> untyped
+    def on_word_add: (*untyped args) -> Array[untyped]
 
-    def on_word_new: (*untyped args) -> untyped
+    def on_word_new: (*untyped args) -> Array[untyped]
 
-    def on_words_add: (*untyped args) -> untyped
+    def on_words_add: (*untyped args) -> Array[untyped]
 
-    def on_words_beg: (untyped tok) -> untyped
+    def on_words_beg: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_words_new: (*untyped args) -> untyped
+    def on_words_new: (*untyped args) -> Array[untyped]
 
-    def on_words_sep: (untyped tok) -> untyped
+    def on_words_sep: (String tok) -> [Symbol, String, [Integer?, Integer?]]
 
-    def on_xstring_add: (*untyped args) -> untyped
+    def on_xstring_add: (*untyped args) -> Array[untyped]
 
-    def on_xstring_literal: (*untyped args) -> untyped
+    def on_xstring_literal: (*untyped args) -> Array[untyped]
 
-    def on_xstring_new: (*untyped args) -> untyped
+    def on_xstring_new: (*untyped args) -> Array[untyped]
 
-    def on_yield: (*untyped args) -> untyped
+    def on_yield: (*untyped args) -> Array[untyped]
 
-    def on_yield0: (*untyped args) -> untyped
+    def on_yield0: (*untyped args) -> Array[untyped]
 
-    def on_zsuper: (*untyped args) -> untyped
+    def on_zsuper: (*untyped args) -> Array[untyped]
 
     private
 
