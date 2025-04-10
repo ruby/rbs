@@ -73,4 +73,10 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal ["|"], annot.vertical_bar_locations.map(&:source)
     end
   end
+
+  def test_error__unknown_annotation
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs super String", 0...)
+    end
+  end
 end
