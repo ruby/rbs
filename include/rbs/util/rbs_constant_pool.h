@@ -10,6 +10,8 @@
 #ifndef RBS_CONSTANT_POOL_H
 #define RBS_CONSTANT_POOL_H
 
+#include "rbs/util/rbs_encoding.h"
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,70 +29,6 @@
  * A constant id is a unique identifier for a constant in the constant pool.
  */
 typedef uint32_t rbs_constant_id_t;
-
-/**
- * A list of constant IDs. Usually used to represent a set of locals.
- */
-typedef struct {
-    /** The number of constant ids in the list. */
-    size_t size;
-
-    /** The number of constant ids that have been allocated in the list. */
-    size_t capacity;
-
-    /** The constant ids in the list. */
-    rbs_constant_id_t *ids;
-} rbs_constant_id_list_t;
-
-/**
- * Initialize a list of constant ids.
- *
- * @param list The list to initialize.
- */
-void rbs_constant_id_list_init(rbs_constant_id_list_t *list);
-
-/**
- * Initialize a list of constant ids with a given capacity.
- *
- * @param list The list to initialize.
- * @param capacity The initial capacity of the list.
- */
-void rbs_constant_id_list_init_capacity(rbs_constant_id_list_t *list, size_t capacity);
-
-/**
- * Append a constant id to a list of constant ids. Returns false if any
- * potential reallocations fail.
- *
- * @param list The list to append to.
- * @param id The id to append.
- * @return Whether the append succeeded.
- */
-bool rbs_constant_id_list_append(rbs_constant_id_list_t *list, rbs_constant_id_t id);
-
-/**
- * Insert a constant id into a list of constant ids at the specified index.
- *
- * @param list The list to insert into.
- * @param index The index at which to insert.
- * @param id The id to insert.
- */
-void rbs_constant_id_list_insert(rbs_constant_id_list_t *list, size_t index, rbs_constant_id_t id);
-
-/**
- * Checks if the current constant id list includes the given constant id.
- *
- * @param list The list to check.
- * @param id The id to check for.
- * @return Whether the list includes the given id.
- */
-bool rbs_constant_id_list_includes(rbs_constant_id_list_t *list, rbs_constant_id_t id);
-
-/**
- * Free the memory associated with a list of constant ids.
- *
- * @param list The list to free.
- */
-void rbs_constant_id_list_free(rbs_constant_id_list_t *list);
 
 /**
  * The type of bucket in the constant pool hash map. This determines how the
@@ -185,6 +123,7 @@ rbs_constant_id_t rbs_constant_pool_find(const rbs_constant_pool_t *pool, const 
  * @return The id of the constant.
  */
 rbs_constant_id_t rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start, size_t length);
+rbs_constant_id_t rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, const rbs_encoding_t *encoding);
 
 /**
  * Insert a constant into a constant pool from memory that is now owned by the

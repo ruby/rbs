@@ -36,12 +36,12 @@ end
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
-  sh "re2c -W --no-generation-date -o ext/rbs_extension/lexer.c ext/rbs_extension/lexer.re"
+  sh "re2c -W --no-generation-date -o src/lexer.c src/lexer.re"
 end
 
 task :confirm_lexer => :lexer do
   puts "Testing if lexer.c is updated with respect to lexer.re"
-  sh "git diff --exit-code ext/rbs_extension/lexer.c"
+  sh "git diff --exit-code src/lexer.c"
 end
 
 task :confirm_templates => :templates do
@@ -70,17 +70,19 @@ task :confirm_annotation do
 end
 
 task :templates do
-  sh "#{ruby} templates/template.rb include/rbs/constants.h"
-  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
-  sh "#{ruby} templates/template.rb src/constants.c"
-  sh "#{ruby} templates/template.rb src/ruby_objs.c"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.h"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.c"
+
+  sh "#{ruby} templates/template.rb ext/rbs_extension/class_constants.h"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/class_constants.c"
+
+  sh "#{ruby} templates/template.rb include/rbs/ast.h"
+  sh "#{ruby} templates/template.rb src/ast.c"
 end
 
-task :compile => "ext/rbs_extension/lexer.c"
-task :compile => "include/rbs/constants.h"
-task :compile => "include/rbs/ruby_objs.h"
-task :compile => "src/constants.c"
-task :compile => "src/ruby_objs.c"
+task :compile => "ext/rbs_extension/class_constants.h"
+task :compile => "ext/rbs_extension/class_constants.c"
+task :compile => "src/lexer.c"
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
