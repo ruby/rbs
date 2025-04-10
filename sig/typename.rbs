@@ -75,5 +75,5 @@ end
 
 module Kernel
   # Deprecated: Use `RBS::TypeName.parse` instead
-  %a{steep:deprecated} def TypeName: (String name) -> RBS::TypeName
+  %a{deprecated: Use `RBS::TypeName.parse` instead} def TypeName: (String name) -> RBS::TypeName
 end

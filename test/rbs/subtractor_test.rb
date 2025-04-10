@@ -667,14 +667,15 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
   private def to_decls(rbs)
     # It ignores directives, is it ok?
-    RBS::Parser.parse_signature(rbs).last
+    _, _, decls = RBS::Parser.parse_signature(rbs)
+    decls
   end
 
   private def to_env(rbs)
     RBS::Environment.new.tap do |env|
-      to_decls(rbs).each do |decl|
-        env << decl
-      end
+      buf, dirs, decls = RBS::Parser.parse_signature(rbs)
+      source = RBS::Source::RBS.new(buf, dirs, decls)
+      env.add_source(source)
     end
   end
 

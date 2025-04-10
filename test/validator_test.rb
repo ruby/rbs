@@ -411,7 +411,7 @@ end
         resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        env.class_decls[RBS::TypeName.parse("::Foo")].decls.first.decl.members.tap do |members|
+        env.class_decls[RBS::TypeName.parse("::Foo")].primary_decl.members.tap do |members|
           members[0].tap do |member|
             assert_raises(RBS::NoTypeFoundError) do
               validator.validate_variable(member)

@@ -175,10 +175,9 @@ EOB
 
       env = Environment.from_loader(loader).resolve_type_names
 
-      decls = env.declarations.select do |decl|
-        loc = decl.location or raise
+      decls = env.sources.select do |source|
         # @type var name: String
-        name = loc.buffer.name
+        name = source.buffer.name.to_s
 
         patterns.empty? || patterns.any? do |pat|
           case pat
@@ -188,7 +187,7 @@ EOB
             name.end_with?(pat) || File.fnmatch(pat, name, File::FNM_EXTGLOB)
           end
         end
-      end
+      end.flat_map { _1.declarations }
 
       stdout.print JSON.generate(decls)
       stdout.flush
@@ -913,7 +912,7 @@ Options:
           Buffer.new(content: file_path.read, name: file_path)
         end
       end
-      bufs << Buffer.new(content: e_code, name: '-e') if e_code
+      bufs << Buffer.new(content: e_code, name: Pathname('-e')) if e_code
 
       bufs.each do |buf|
         RBS.logger.info "Parsing #{buf.name}..."

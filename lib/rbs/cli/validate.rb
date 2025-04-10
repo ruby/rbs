@@ -109,8 +109,8 @@ EOU
 
           case entry
           when Environment::ClassEntry
-            entry.decls.each do |decl|
-              if super_class = decl.decl.super_class
+            entry.each_decl do |decl|
+              if super_class = decl.super_class
                 super_class.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
@@ -120,8 +120,8 @@ EOU
               end
             end
           when Environment::ModuleEntry
-            entry.decls.each do |decl|
-              decl.decl.self_types.each do |self_type|
+            entry.each_decl do |decl|
+              decl.self_types.each do |self_type|
                 self_type.args.each do |arg|
                   void_type_context_validator(arg, true)
                   no_self_type_validator(arg)
@@ -143,7 +143,7 @@ EOU
             end
           end
 
-          d = entry.primary.decl
+          d = entry.primary_decl
 
           @validator.validate_type_params(
             d.type_params,
@@ -169,39 +169,44 @@ EOU
 
           TypeParamDefaultReferenceError.check!(d.type_params)
 
-          entry.decls.each do |d|
-            d.decl.each_member do |member|
-              case member
-              when AST::Members::MethodDefinition
-                @validator.validate_method_definition(member, type_name: name)
-                member.overloads.each do |ov|
-                  void_type_context_validator(ov.method_type)
-                end
-              when AST::Members::Attribute
-                void_type_context_validator(member.type)
-              when AST::Members::Mixin
-                member.args.each do |arg|
-                  no_self_type_validator(arg)
-                  unless arg.is_a?(Types::Bases::Void)
-                    void_type_context_validator(arg, true)
+          entry.each_decl do |decl|
+            case decl
+            when AST::Declarations::Base
+              decl.each_member do |member|
+                case member
+                when AST::Members::MethodDefinition
+                  @validator.validate_method_definition(member, type_name: name)
+                  member.overloads.each do |ov|
+                    void_type_context_validator(ov.method_type)
                   end
-                end
-                params =
-                  if member.name.class?
-                    module_decl = @env.normalized_module_entry(member.name) or raise
-                    module_decl.type_params
-                  else
-                    interface_decl = @env.interface_decls.fetch(member.name)
-                    interface_decl.decl.type_params
+                when AST::Members::Attribute
+                  void_type_context_validator(member.type)
+                when AST::Members::Mixin
+                  member.args.each do |arg|
+                    no_self_type_validator(arg)
+                    unless arg.is_a?(Types::Bases::Void)
+                      void_type_context_validator(arg, true)
+                    end
                   end
-                InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
-              when AST::Members::Var
-                @validator.validate_variable(member)
-                void_type_context_validator(member.type)
-                if member.is_a?(AST::Members::ClassVariable)
-                  no_self_type_validator(member.type)
+                  params =
+                    if member.name.class?
+                      module_decl = @env.normalized_module_entry(member.name) or raise
+                      module_decl.type_params
+                    else
+                      interface_decl = @env.interface_decls.fetch(member.name)
+                      interface_decl.decl.type_params
+                    end
+                  InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
+                when AST::Members::Var
+                  @validator.validate_variable(member)
+                  void_type_context_validator(member.type)
+                  if member.is_a?(AST::Members::ClassVariable)
+                    no_self_type_validator(member.type)
+                  end
                 end
               end
+            else
+              raise "Unknown declaration: #{decl.class}"
             end
           end
         rescue BaseError => error

@@ -1,0 +1,34 @@
+module RBS
+  module AST
+    module Ruby
+      module Members
+        class Base
+          attr_reader buffer: Buffer
+
+          def initialize: (Buffer) -> void
+
+          include Helpers::LocationHelper
+        end
+
+        type t = DefMember
+
+        class DefMember < Base
+          class Overload = AST::Members::MethodDefinition::Overload
+
+          attr_reader name: Symbol
+          attr_reader node: Prism::DefNode
+
+          def initialize: (Buffer, Symbol name, Prism::DefNode node) -> void
+
+          def location: () -> Location
+
+          def overloads: () -> Array[Overload]
+
+          def overloading?: () -> bool
+
+          def annotations: () -> Array[AST::Annotation]
+        end
+      end
+    end
+  end
+end

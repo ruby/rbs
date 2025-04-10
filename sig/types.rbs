@@ -114,9 +114,6 @@ module RBS
         @string: String?
 
         def initialize: (location: Location[bot, bot]?, ?todo: bool) -> void
-
-        %a{steep:deprecated}
-        def todo!: () -> self
       end
 
       class Nil < Base

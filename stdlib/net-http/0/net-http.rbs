@@ -2404,7 +2404,7 @@ module Net
     alias length size
 
     # A previous incarnation of `interned` for backward-compatibility (see #1499)
-    %a{steep:deprecated}
+    %a{deprecated: Use `interned` instead}
     type key = interned
 
     # <!--

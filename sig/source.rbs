@@ -1,0 +1,48 @@
+module RBS
+  module Source
+    type t = RBS | Ruby
+           
+    class RBS
+      attr_reader buffer: Buffer
+
+      attr_reader directives: Array[AST::Directives::t]
+
+      attr_reader declarations: Array[AST::Declarations::t]
+
+      def initialize: (Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]) -> void
+
+      # Enumerates defined type names in the source
+      #
+      # The order is undefined. Deduplicated per source object.
+      #
+      def each_type_name: () { (TypeName) -> void } -> void
+                        | () -> Enumerator[TypeName]
+
+      private def each_declaration_type_name: (Set[TypeName], AST::Declarations::t) { (TypeName) -> void } -> void
+    end
+
+    class Ruby
+      attr_reader buffer: Buffer
+
+      attr_reader prism_result: Prism::ParseResult
+
+      attr_reader declarations: Array[AST::Ruby::Declarations::t]
+
+      attr_reader diagnostics: Array[untyped]
+
+      def initialize: (Buffer, Prism::ParseResult, Array[AST::Ruby::Declarations::t], Array[untyped]) -> void
+
+      def each_type_name: () { (TypeName) -> void } -> void
+                        | () -> Enumerator[TypeName]
+
+      private def each_declaration_type_name: (Set[TypeName], AST::Ruby::Declarations::t) { (TypeName) -> void } -> void
+
+      # Compares the type declaration between `self` and `other`
+      #
+      # The comparison is based on the AST structure.
+      # Differences on Ruby code implementation may be ignored.
+      #
+      def ==: (other: Ruby) -> bool
+    end
+  end
+end

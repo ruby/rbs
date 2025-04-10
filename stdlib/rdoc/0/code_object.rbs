@@ -30,7 +30,7 @@ module RDoc
     # <!-- rdoc-file=lib/rdoc/code_object.rb -->
     # Our comment
     #
-    attr_reader comment: Markup::Document | Comment | String
+    attr_reader comment: Comment | String
 
     # <!--
     #   rdoc-file=lib/rdoc/code_object.rb
@@ -46,6 +46,6 @@ module RDoc
     # -->
     # Replaces our comment with `comment`, unless it is empty.
     #
-    def comment=: (Markup::Document | Comment | String | nil) -> (Markup::Document | Comment | String)
+    def comment=: (Comment | String | nil) -> (Comment | String | nil)
   end
 end
