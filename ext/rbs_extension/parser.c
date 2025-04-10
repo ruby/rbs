@@ -2874,6 +2874,39 @@ static void parse_method_overload(parserstate *state, VALUE *annotations, VALUE 
   *method_type = parse_method_type(state);
 }
 
+/**
+ * @brief Parses inline method overload definitions and updates `overloads` and `bar_locations`
+ *
+ * inline_method_overloads ::= {} <overload>                        -- returns true
+ *                           | {} overload `|` ... `|` overload     -- returns true
+ *                           | {<>}                                 -- returns false
+ *
+ *
+ * @param state
+ * @param overloads
+ * @param bar_location
+ */
+static void parse_inline_method_overloads(parserstate *state, VALUE *overloads, VALUE *bar_locations) {
+  while (true) {
+    VALUE annotations = EMPTY_ARRAY;
+    VALUE method_type;
+
+    parse_method_overload(state, &annotations, &method_type);
+
+    VALUE overload = rbs_ast_members_method_definition_overload(annotations, method_type);
+
+    rb_ary_push(*overloads, overload);
+
+    if (state->next_token.type == pBAR) {
+      parser_advance(state);
+      melt_array(bar_locations);
+      rb_ary_push(*bar_locations, rbs_new_location(state->buffer, state->current_token.range));
+    } else {
+      return;
+    }
+  }
+}
+
 static VALUE parse_inline_leading_annotation(parserstate *state) {
   switch (state->next_token.type) {
     case pCOLON: {
@@ -2892,6 +2925,36 @@ static VALUE parse_inline_leading_annotation(parserstate *state) {
         annotations,
         method_type
       );
+    }
+    case kATRBS: {
+      range rbs_range = state->next_token.range;
+      parser_advance(state);
+
+      switch (state->next_token.type) {
+        case pLPAREN:
+        case pLBRACKET:
+        case pLBRACE:
+        case tANNOTATION: {
+          VALUE overloads = rb_ary_new();
+          VALUE bar_locations = EMPTY_ARRAY;
+
+          parse_inline_method_overloads(state, &overloads, &bar_locations);
+
+          return rbs_ast_ruby_annotations_method_types_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            overloads,
+            bar_locations
+          );
+        }
+        default: {
+          raise_syntax_error(
+            state,
+            state->next_token,
+            "unexpected token for @rbs annotation"
+          );
+        }
+      }
     }
     default: {
       raise_syntax_error(
