@@ -2291,4 +2291,17 @@ end
       end
     RBS
   end
+
+  def test_inline_keyword__skip
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def skip: (untyped skip) -> void
+        attr_reader skip: untyped
+
+        type skip = untyped
+
+        @foo: Array[skip]
+      end
+    RBS
+  end
 end
