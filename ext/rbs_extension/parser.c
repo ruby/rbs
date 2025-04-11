@@ -2922,6 +2922,19 @@ static void parse_inline_method_overloads(parserstate *state, VALUE *overloads, 
   }
 }
 
+static VALUE parse_inline_comment(parserstate *state) {
+  VALUE comment = Qnil;
+
+  if (state->next_token.type == tCOMMENT) {
+    range comment_range = state->next_token.range;
+    parser_advance(state);
+
+    comment = rbs_new_location(state->buffer, comment_range);
+  }
+
+  return comment;
+}
+
 static VALUE parse_inline_leading_annotation(parserstate *state) {
   switch (state->next_token.type) {
     case pCOLON: {
@@ -2960,6 +2973,19 @@ static VALUE parse_inline_leading_annotation(parserstate *state) {
             rbs_new_location(state->buffer, rbs_range),
             overloads,
             bar_locations
+          );
+        }
+        case kSKIP: {
+          parser_advance(state);
+
+          range skip_loc = state->current_token.range;
+          VALUE comment_loc = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotations_skip_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, skip_loc),
+            comment_loc
           );
         }
         default: {
