@@ -48,6 +48,7 @@
   case kUSE: \
   case kAS: \
   case k__TODO__: \
+  case kSKIP: \
   /* nop */
 
 typedef struct {
@@ -188,6 +189,7 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
 
   switch (state->current_token.type) {
     case tLIDENT:
+    case kSKIP:
       if (kind & ALIAS_NAME) goto success;
       goto error;
     case tULIDENT:
@@ -889,14 +891,26 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     VALUE types = EMPTY_ARRAY;
 
     TypeNameKind kind;
-    if (state->current_token.type == tUIDENT) {
-      kind = CLASS_NAME;
-    } else if (state->current_token.type == tULIDENT) {
-      kind = INTERFACE_NAME;
-    } else if (state->current_token.type == tLIDENT) {
-      kind = ALIAS_NAME;
-    } else {
-      rbs_abort();
+    switch (state->current_token.type) {
+      case tUIDENT: {
+        kind = CLASS_NAME;
+        break;
+      }
+      case tULIDENT: {
+        kind = INTERFACE_NAME;
+        break;
+      }
+      case kSKIP:
+      case tLIDENT: {
+        kind = ALIAS_NAME;
+        break;
+      }
+      default:
+        raise_syntax_error(
+          state,
+          state->current_token,
+          "unexpected token for type name"
+        );
     }
 
     range args_range;
@@ -1050,6 +1064,7 @@ static VALUE parse_simple(parserstate *state) {
   }
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
+  case kSKIP: // fallthrough
   case pCOLON2: {
     return parse_instance_type(state, true);
   }
