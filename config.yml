@@ -332,3 +332,9 @@ nodes:
       - name: prefix_location
       - name: overloads
       - name: vertical_bar_locations
+  - name: RBS::AST::Ruby::Annotations::SkipAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: skip_location
+      - name: comment_location
