@@ -63,6 +63,15 @@ module RBS
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
         end
+
+        # `@rbs skip -- comment` annotation in leading comments
+        #
+        class SkipAnnotation < Base
+          attr_reader skip_location: Location
+          attr_reader comment_location: Location?
+
+          def initialize: (location: Location, prefix_location: Location, skip_location: Location, comment_location: Location?) -> void
+        end
       end
     end
   end
