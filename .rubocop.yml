@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rubycw
   - rubocop-on-rbs
 
