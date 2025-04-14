@@ -27,6 +27,8 @@ module RBS
       NonConstantClassName = _ = Class.new(Base)
       NonConstantModuleName = _ = Class.new(Base)
       TopLevelMethodDefinition = _ = Class.new(Base)
+      UnusedInlineAnnotation = _ = Class.new(Base)
+      AnnotationSyntaxError = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -38,7 +40,7 @@ module RBS
     end
 
     class Parser < Prism::Visitor
-      attr_reader :module_nesting, :result
+      attr_reader :module_nesting, :result, :comments
 
       include AST::Ruby::Helpers::ConstantHelper
       include AST::Ruby::Helpers::LocationHelper
@@ -46,6 +48,7 @@ module RBS
       def initialize(result)
         @result = result
         @module_nesting = []
+        @comments = CommentAssociation.build(result.buffer, result.prism_result)
       end
 
       def buffer
@@ -85,6 +88,10 @@ module RBS
         push_module_nesting(class_decl) do
           visit_child_nodes(node)
         end
+
+        comments.each_enclosed_block(node) do |block|
+          report_unused_block(block)
+        end
       end
 
       def visit_module_node(node)
@@ -101,6 +108,10 @@ module RBS
         push_module_nesting(module_decl) do
           visit_child_nodes(node)
         end
+
+        comments.each_enclosed_block(node) do |block|
+          report_unused_block(block)
+        end
       end
 
       def visit_def_node(node)
@@ -114,8 +125,24 @@ module RBS
 
         case current = current_module
         when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
-          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node)
+          leading_block = comments.leading_block!(node)
+
+          if node.end_keyword_loc
+            # Not an end-less def
+            end_loc = node.rparen_loc || node.parameters&.location || node.name_loc
+            trailing_block = comments.trailing_block!(end_loc)
+          end
+
+          method_type, leading_unuseds, trailing_unused = AST::Ruby::Members::MethodTypeAnnotation.build(leading_block, trailing_block, [])
+          report_unused_annotation(trailing_unused, *leading_unuseds)
+
+          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type)
           current.members << defn
+
+          # Skip other comments in `def` node
+          comments.each_enclosed_block(node) do |block|
+            comments.associated_blocks << block
+          end
         else
           diagnostics << Diagnostic::TopLevelMethodDefinition.new(
             rbs_location(node.name_loc),
@@ -129,6 +156,32 @@ module RBS
           current_module.members << decl
         else
           result.declarations << decl
+        end
+      end
+
+      def report_unused_annotation(*annotations)
+        annotations.each do |annotation|
+          case annotation
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            diagnostics << Diagnostic::AnnotationSyntaxError.new(
+              annotation.location, "Syntax error: " + annotation.error.error_message
+            )
+          when AST::Ruby::Annotations::Base
+            diagnostics << Diagnostic::UnusedInlineAnnotation.new(
+              annotation.location, "Unused inline rbs annotation"
+            )
+          end
+        end
+      end
+
+      def report_unused_block(block)
+        block.each_paragraph([]) do |paragraph|
+          case paragraph
+          when Location
+            # noop
+          else
+            report_unused_annotation(paragraph)
+          end
         end
       end
     end

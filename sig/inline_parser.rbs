@@ -32,9 +32,16 @@ module RBS
       class TopLevelMethodDefinition < Base
       end
 
+      class UnusedInlineAnnotation < Base
+      end
+
+      class AnnotationSyntaxError < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName
              | TopLevelMethodDefinition
+             | UnusedInlineAnnotation | AnnotationSyntaxError
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
@@ -45,6 +52,8 @@ module RBS
       include AST::Ruby::Helpers::ConstantHelper
 
       include AST::Ruby::Helpers::LocationHelper
+
+      attr_reader comments: CommentAssociation
 
       attr_reader result: Result
 
@@ -63,6 +72,10 @@ module RBS
       def push_module_nesting: [T] (module_context) { () -> T } -> T
 
       def insert_declaration: (module_context) -> void
+
+      def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
+
+      def report_unused_block: (AST::Ruby::CommentBlock) -> void
     end
   end
 end

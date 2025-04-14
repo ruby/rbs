@@ -1,0 +1,69 @@
+module RBS
+  module AST
+    module Ruby
+      module Annotations
+        type leading_annotation = ColonMethodTypeAnnotation
+                                | MethodTypesAnnotation
+
+        type trailing_annotation = NodeTypeAssertion
+
+        type t = leading_annotation | trailing_annotation
+
+        class Base
+          # Location that covers all of the annotation
+          #
+          attr_reader location: Location
+
+          # Location of `@rbs`, `@rbs!`, or `:` prefix
+          #
+          attr_reader prefix_location: Location
+
+          def initialize: (Location location, Location prefix_location) -> void
+
+          def buffer: () -> Buffer
+        end
+
+        # `: TYPE` annotation attached to nodes
+        #
+        class NodeTypeAssertion < Base
+          attr_reader type: Types::t
+
+          def initialize: (location: Location, prefix_location: Location, type: Types::t) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `: METHOD-TYPE` annotation in leading comments
+        #
+        class ColonMethodTypeAnnotation < Base
+          attr_reader annotations: Array[AST::Annotation]
+
+          attr_reader method_type: MethodType
+
+          def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation], method_type: MethodType) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `@rbs METHOD-TYPEs` annotation in leading comments
+        #
+        # ```
+        # @rbs () -> void | %a{foo} () -> String
+        # ^^^^                                     -- prefix_location
+        #                 ^                        -- vertical_bar_locations[0]
+        # ```
+        class MethodTypesAnnotation < Base
+          class Overload = AST::Members::MethodDefinition::Overload
+
+          attr_reader overloads: Array[Overload]
+
+          attr_reader vertical_bar_locations: Array[Location]
+
+          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location]) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+      end
+    end
+  end
+end

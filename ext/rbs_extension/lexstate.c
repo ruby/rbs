@@ -60,6 +60,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "kUSE",             /* use */
   "kAS",              /* as */
   "k__TODO__",        /* __todo__ */
+  "kATRBS",           /* @rbs */
 
   "tLIDENT",          /* Identifiers starting with lower case */
   "tUIDENT",          /* Identifiers starting with upper case */

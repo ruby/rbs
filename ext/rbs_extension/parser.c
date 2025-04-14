@@ -1942,7 +1942,8 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
 
   switch (state->current_token.type)
   {
-  case tAIDENT: {
+  case tAIDENT:
+  case kATRBS: {
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
 
@@ -1989,7 +1990,15 @@ static VALUE parse_variable_member(parserstate *state, position comment_pos, VAL
     };
 
     parser_advance_assert(state, pDOT);
-    parser_advance_assert(state, tAIDENT);
+    if (state->next_token.type == tAIDENT || state->next_token.type == kATRBS) {
+      parser_advance(state);
+    } else {
+      raise_syntax_error(
+        state,
+        state->current_token,
+        "expected a instance variable name"
+      );
+    }
 
     range name_range = state->current_token.range;
     VALUE name = ID2SYM(INTERN_TOKEN(state, state->current_token));
@@ -2098,7 +2107,7 @@ static VALUE parse_attribute_member(parserstate *state, position comment_pos, VA
     parser_advance_assert(state, pLPAREN);
     ivar_range.start = state->current_token.range.start;
 
-    if (parser_advance_if(state, tAIDENT)) {
+    if (parser_advance_if(state, tAIDENT) || parser_advance_if(state, kATRBS)) {
       ivar_name = ID2SYM(INTERN_TOKEN(state, state->current_token));
       ivar_name_range = state->current_token.range;
     } else {
@@ -2331,6 +2340,7 @@ static VALUE parse_module_members(parserstate *state) {
 
     case tAIDENT:
     case tA2IDENT:
+    case kATRBS:
     case kSELF: {
       member = parse_variable_member(state, annot_pos, annotations);
       break;
@@ -2853,6 +2863,134 @@ VALUE parse_signature(parserstate *state) {
   return ret;
 }
 
+/**
+ * @brief
+  * overload ::= {} annotations <method_type>
+ */
+static void parse_method_overload(parserstate *state, VALUE *annotations, VALUE *method_type) {
+  position pos;
+
+  parse_annotations(state, annotations, &pos);
+  *method_type = parse_method_type(state);
+}
+
+/**
+ * @brief Parses inline method overload definitions and updates `overloads` and `bar_locations`
+ *
+ * inline_method_overloads ::= {} <overload>                        -- returns true
+ *                           | {} overload `|` ... `|` overload     -- returns true
+ *                           | {<>}                                 -- returns false
+ *
+ *
+ * @param state
+ * @param overloads
+ * @param bar_location
+ */
+static void parse_inline_method_overloads(parserstate *state, VALUE *overloads, VALUE *bar_locations) {
+  while (true) {
+    VALUE annotations = EMPTY_ARRAY;
+    VALUE method_type;
+
+    parse_method_overload(state, &annotations, &method_type);
+
+    VALUE overload = rbs_ast_members_method_definition_overload(annotations, method_type);
+
+    rb_ary_push(*overloads, overload);
+
+    if (state->next_token.type == pBAR) {
+      parser_advance(state);
+      melt_array(bar_locations);
+      rb_ary_push(*bar_locations, rbs_new_location(state->buffer, state->current_token.range));
+    } else {
+      return;
+    }
+  }
+}
+
+static VALUE parse_inline_leading_annotation(parserstate *state) {
+  switch (state->next_token.type) {
+    case pCOLON: {
+      // :
+      range colon_range = state->next_token.range;
+      parser_advance(state);
+
+      VALUE annotations = EMPTY_ARRAY;
+      VALUE method_type;
+
+      parse_method_overload(state, &annotations, &method_type);
+
+      return rbs_ast_ruby_annotations_colon_method_type_annotation(
+        rbs_new_location(state->buffer, (range) { .start = colon_range.start, .end = state->current_token.range.end }),
+        rbs_new_location(state->buffer, colon_range),
+        annotations,
+        method_type
+      );
+    }
+    case kATRBS: {
+      range rbs_range = state->next_token.range;
+      parser_advance(state);
+
+      switch (state->next_token.type) {
+        case pLPAREN:
+        case pLBRACKET:
+        case pLBRACE:
+        case tANNOTATION: {
+          VALUE overloads = rb_ary_new();
+          VALUE bar_locations = EMPTY_ARRAY;
+
+          parse_inline_method_overloads(state, &overloads, &bar_locations);
+
+          return rbs_ast_ruby_annotations_method_types_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            overloads,
+            bar_locations
+          );
+        }
+        default: {
+          raise_syntax_error(
+            state,
+            state->next_token,
+            "unexpected token for @rbs annotation"
+          );
+        }
+      }
+    }
+    default: {
+      raise_syntax_error(
+        state,
+        state->next_token,
+        "unexpected token for inline leading annotation"
+      );
+    }
+  }
+}
+
+static VALUE parse_inline_trailing_annotation(parserstate *state) {
+  range prefix_range = state->next_token.range;
+
+  switch (state->next_token.type) {
+    case pCOLON: {
+      parser_advance(state);
+
+      VALUE type = parse_type(state);
+
+      return rbs_ast_ruby_annotations_node_type_assertion(
+        rbs_new_location(state->buffer, (range) { .start = prefix_range.start, .end = state->current_token.range.end }),
+        rbs_new_location(state->buffer, prefix_range),
+        type
+      );
+    }
+    default: {
+      raise_syntax_error(
+        state,
+        state->next_token,
+        "unexpected token for inline trailing annotation"
+      );
+    }
+  }
+}
+
 struct parse_type_arg {
   parserstate *parser;
   VALUE require_eof;
@@ -2963,6 +3101,42 @@ rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   return results;
 }
 
+static VALUE parse_inline_leading_try(VALUE a) {
+  parserstate *parser = (parserstate *)a;
+  VALUE annotation = parse_inline_leading_annotation(parser);
+
+  parser_advance_assert(parser, pEOF);
+
+  return annotation;
+}
+
+static VALUE rbsparser_parse_inline_leading_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+
+  return rb_ensure(parse_inline_leading_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
+}
+
+static VALUE parse_inline_trailing_try(VALUE a) {
+  parserstate *parser = (parserstate *)a;
+  VALUE annotation = parse_inline_trailing_annotation(parser);
+
+  parser_advance_assert(parser, pEOF);
+
+  return annotation;
+}
+
+static VALUE rbsparser_parse_inline_trailing_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  lexstate *lexer = alloc_lexer(string, FIX2INT(start_pos), FIX2INT(end_pos));
+  parserstate *parser = alloc_parser(buffer, lexer, FIX2INT(start_pos), FIX2INT(end_pos), variables);
+
+  return rb_ensure(parse_inline_trailing_try, (VALUE)parser, ensure_free_parser, (VALUE)parser);
+}
+
 void rbs__init_parser(void) {
   RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
   rb_gc_register_mark_object(RBS_Parser);
@@ -2978,5 +3152,7 @@ void rbs__init_parser(void) {
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);
   rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
 }
