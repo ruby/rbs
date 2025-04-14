@@ -93,7 +93,7 @@ module RBS
           blocks
         end
 
-        AnnotationSyntaxError = _ = Data.define(:location, :error)
+        AnnotationSyntaxError = _ = Struct.new(:location, :error)
 
         def each_paragraph(variables, &block)
           if block
