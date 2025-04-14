@@ -79,4 +79,20 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       Parser.parse_inline_leading_annotation("@rbs super String", 0...)
     end
   end
+
+  def test_parse__skip
+    Parser.parse_inline_leading_annotation("@rbs skip", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SkipAnnotation, annot
+      assert_equal "@rbs skip", annot.location.source
+      assert_equal "skip", annot.skip_location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs skip -- some comment here", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SkipAnnotation, annot
+      assert_equal "@rbs skip -- some comment here", annot.location.source
+      assert_equal "skip", annot.skip_location.source
+      assert_equal "-- some comment here", annot.comment_location.source
+    end
+  end
 end

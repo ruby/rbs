@@ -46,6 +46,7 @@ token rbsparser_next_token(lexstate *state) {
       "<"   { return next_token(state, pLT); }
       "[]"  { return next_token(state, pAREF_OPR); }
       operator  { return next_token(state, tOPERATOR); }
+      "--" [^\x00]* { return next_token(state, tINLINECOMMENT); }
 
       number = [0-9] [0-9_]*;
       ("-"|"+")? number    { return next_token(state, tINTEGER); }

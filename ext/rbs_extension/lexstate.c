@@ -78,6 +78,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
 
   "tCOMMENT",
   "tLINECOMMENT",
+  "tINLINECOMMENT",
 
   "tTRIVIA",
 

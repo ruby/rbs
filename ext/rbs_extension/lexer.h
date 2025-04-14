@@ -79,6 +79,7 @@ enum TokenType {
 
   tCOMMENT,         /* Comment */
   tLINECOMMENT,     /* Comment of all line */
+  tINLINECOMMENT,   /* Comment in inline decl starting with -- */
 
   tTRIVIA,          /* Trivia tokens -- space and new line */
 
