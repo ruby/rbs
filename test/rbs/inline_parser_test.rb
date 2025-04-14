@@ -235,4 +235,36 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__skip_class_module
+    result = parse(<<~RUBY)
+      # @rbs skip -- not a constant
+      class (c::)Foo
+      end
+
+      # @rbs skip
+      module Bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    assert_empty result.declarations
+  end
+
+  def test_parse__skip_def
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        def foo
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
 end

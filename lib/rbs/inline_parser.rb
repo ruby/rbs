@@ -74,7 +74,20 @@ module RBS
         module_nesting.pop()
       end
 
+      def skip_node?(node)
+        if ref = comments.leading_block(node)
+          if ref.block.each_paragraph([]).any? { _1.is_a?(AST::Ruby::Annotations::SkipAnnotation) }
+            ref.associate!
+            return true
+          end
+        end
+
+        false
+      end
+
       def visit_class_node(node)
+        return if skip_node?(node)
+
         unless class_name = constant_as_type_name(node.constant_path)
           diagnostics << Diagnostic::NonConstantClassName.new(
             rbs_location(node.constant_path.location),
@@ -95,6 +108,8 @@ module RBS
       end
 
       def visit_module_node(node)
+        return if skip_node?(node)
+
         unless module_name = constant_as_type_name(node.constant_path)
           diagnostics << Diagnostic::NonConstantModuleName.new(
             rbs_location(node.constant_path.location),
@@ -115,6 +130,8 @@ module RBS
       end
 
       def visit_def_node(node)
+        return if skip_node?(node)
+
         if node.receiver
           diagnostics << Diagnostic::NotImplementedYet.new(
             rbs_location(node.receiver.location),
