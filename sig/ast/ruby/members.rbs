@@ -33,6 +33,10 @@ module RBS
 
           # Returns `true` if it doesn't have any annotation
           def empty?: () -> bool
+
+          # Returns the method type overloads
+          #
+          def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
         end
 
         class DefMember < Base
@@ -40,8 +44,9 @@ module RBS
 
           attr_reader name: Symbol
           attr_reader node: Prism::DefNode
+          attr_reader method_type: MethodTypeAnnotation
 
-          def initialize: (Buffer, Symbol name, Prism::DefNode node) -> void
+          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation) -> void
 
           def location: () -> Location
 

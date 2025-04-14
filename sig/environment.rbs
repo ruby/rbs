@@ -216,8 +216,10 @@ module RBS
 
     def resolve_ruby_decl: (Resolver::TypeNameResolver, AST::Ruby::Declarations::t, context: Resolver::context, prefix: Namespace) -> AST::Ruby::Declarations::t
 
-    def absolute_type: (Resolver::TypeNameResolver, UseMap map, Types::t, context: Resolver::context) -> Types::t
+    def resolve_ruby_member: (Resolver::TypeNameResolver, AST::Ruby::Members::t, context: Resolver::context) -> AST::Ruby::Members::t
 
-    def absolute_type_name: (Resolver::TypeNameResolver, UseMap map, TypeName, context: Resolver::context) -> TypeName
+    def absolute_type: (Resolver::TypeNameResolver, UseMap? map, Types::t, context: Resolver::context) -> Types::t
+
+    def absolute_type_name: (Resolver::TypeNameResolver, UseMap? map, TypeName, context: Resolver::context) -> TypeName
   end
 end

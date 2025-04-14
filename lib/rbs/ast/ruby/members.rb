@@ -83,6 +83,47 @@ module RBS
           def empty?
             type_annotations.nil?
           end
+
+          def overloads
+            case type_annotations
+            when Annotations::NodeTypeAssertion
+              method_type = MethodType.new(
+                type_params: [],
+                type: Types::Function.empty(type_annotations.type),
+                block: nil,
+                location: nil
+              )
+
+              [
+                AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type)
+              ]
+            when Array
+              type_annotations.flat_map do |annotation|
+                case annotation
+                when Annotations::ColonMethodTypeAnnotation
+                  [
+                    AST::Members::MethodDefinition::Overload.new(
+                      annotations: annotation.annotations,
+                      method_type: annotation.method_type
+                    )
+                  ]
+                when Annotations::MethodTypesAnnotation
+                  annotation.overloads
+                end
+              end
+            when nil
+              method_type = MethodType.new(
+                type_params: [],
+                type: Types::UntypedFunction.new(return_type: Types::Bases::Any.new(location: nil)),
+                block: nil,
+                location: nil
+              )
+
+              [
+                AST::Members::MethodDefinition::Overload.new(method_type: method_type, annotations: [])
+              ]
+            end
+          end
         end
 
         class DefMember < Base
@@ -90,11 +131,13 @@ module RBS
 
           attr_reader :name
           attr_reader :node
+          attr_reader :method_type
 
-          def initialize(buffer, name, node)
+          def initialize(buffer, name, node, method_type)
             super(buffer)
             @name = name
             @node = node
+            @method_type = method_type
           end
 
           def location
@@ -102,16 +145,7 @@ module RBS
           end
 
           def overloads
-            method_type = MethodType.new(
-              type_params: [],
-              type: Types::UntypedFunction.new(return_type: Types::Bases::Any.new(location: nil)),
-              block: nil,
-              location: nil
-            )
-
-            [
-              Overload.new(method_type: method_type, annotations: [])
-            ]
+            method_type.overloads
           end
 
           def overloading?
