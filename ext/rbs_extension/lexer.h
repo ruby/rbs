@@ -62,6 +62,7 @@ enum TokenType {
   kAS,              /* as */
   k__TODO__,        /* __todo__ */
   kATRBS,           /* @rbs */
+  kSKIP,            /* skip */
 
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */
@@ -78,6 +79,7 @@ enum TokenType {
 
   tCOMMENT,         /* Comment */
   tLINECOMMENT,     /* Comment of all line */
+  tINLINECOMMENT,   /* Comment in inline decl starting with -- */
 
   tTRIVIA,          /* Trivia tokens -- space and new line */
 

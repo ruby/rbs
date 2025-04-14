@@ -71,6 +71,12 @@ module RBS
 
       def push_module_nesting: [T] (module_context) { () -> T } -> T
 
+      # Returns `true` if the node is a comment block including `@rbs skip` annotation
+      #
+      # Doesn't update the `association` flag if returning `false`.
+      #
+      def skip_node?: (Prism::Node) -> bool
+
       def insert_declaration: (module_context) -> void
 
       def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void

@@ -61,6 +61,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "kAS",              /* as */
   "k__TODO__",        /* __todo__ */
   "kATRBS",           /* @rbs */
+  "kSKIP",            /* skip */
 
   "tLIDENT",          /* Identifiers starting with lower case */
   "tUIDENT",          /* Identifiers starting with upper case */
@@ -77,6 +78,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
 
   "tCOMMENT",
   "tLINECOMMENT",
+  "tINLINECOMMENT",
 
   "tTRIVIA",
 

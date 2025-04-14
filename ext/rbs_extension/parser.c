@@ -48,6 +48,7 @@
   case kUSE: \
   case kAS: \
   case k__TODO__: \
+  case kSKIP: \
   /* nop */
 
 typedef struct {
@@ -188,6 +189,7 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
 
   switch (state->current_token.type) {
     case tLIDENT:
+    case kSKIP:
       if (kind & ALIAS_NAME) goto success;
       goto error;
     case tULIDENT:
@@ -889,14 +891,26 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
     VALUE types = EMPTY_ARRAY;
 
     TypeNameKind kind;
-    if (state->current_token.type == tUIDENT) {
-      kind = CLASS_NAME;
-    } else if (state->current_token.type == tULIDENT) {
-      kind = INTERFACE_NAME;
-    } else if (state->current_token.type == tLIDENT) {
-      kind = ALIAS_NAME;
-    } else {
-      rbs_abort();
+    switch (state->current_token.type) {
+      case tUIDENT: {
+        kind = CLASS_NAME;
+        break;
+      }
+      case tULIDENT: {
+        kind = INTERFACE_NAME;
+        break;
+      }
+      case kSKIP:
+      case tLIDENT: {
+        kind = ALIAS_NAME;
+        break;
+      }
+      default:
+        raise_syntax_error(
+          state,
+          state->current_token,
+          "unexpected token for type name"
+        );
     }
 
     range args_range;
@@ -1050,6 +1064,7 @@ static VALUE parse_simple(parserstate *state) {
   }
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
+  case kSKIP: // fallthrough
   case pCOLON2: {
     return parse_instance_type(state, true);
   }
@@ -2907,6 +2922,19 @@ static void parse_inline_method_overloads(parserstate *state, VALUE *overloads, 
   }
 }
 
+static VALUE parse_inline_comment(parserstate *state) {
+  VALUE comment = Qnil;
+
+  if (state->next_token.type == tINLINECOMMENT) {
+    range comment_range = state->next_token.range;
+    parser_advance(state);
+
+    comment = rbs_new_location(state->buffer, comment_range);
+  }
+
+  return comment;
+}
+
 static VALUE parse_inline_leading_annotation(parserstate *state) {
   switch (state->next_token.type) {
     case pCOLON: {
@@ -2945,6 +2973,19 @@ static VALUE parse_inline_leading_annotation(parserstate *state) {
             rbs_new_location(state->buffer, rbs_range),
             overloads,
             bar_locations
+          );
+        }
+        case kSKIP: {
+          parser_advance(state);
+
+          range skip_loc = state->current_token.range;
+          VALUE comment_loc = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotations_skip_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, skip_loc),
+            comment_loc
           );
         }
         default: {

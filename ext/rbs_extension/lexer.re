@@ -46,6 +46,7 @@ token rbsparser_next_token(lexstate *state) {
       "<"   { return next_token(state, pLT); }
       "[]"  { return next_token(state, pAREF_OPR); }
       operator  { return next_token(state, tOPERATOR); }
+      "--" [^\x00]* { return next_token(state, tINLINECOMMENT); }
 
       number = [0-9] [0-9_]*;
       ("-"|"+")? number    { return next_token(state, tINTEGER); }
@@ -96,6 +97,7 @@ token rbsparser_next_token(lexstate *state) {
       "as"            { return next_token(state, kAS); }
       "__todo__"      { return next_token(state, k__TODO__); }
       "@rbs"          { return next_token(state, kATRBS); }
+      "skip"          { return next_token(state, kSKIP); }
 
       unicode_char = "\\u" [0-9a-fA-F]{4};
       oct_char = "\\x" [0-9a-f]{1,2};

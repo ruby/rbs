@@ -480,6 +480,20 @@ VALUE rbs_ast_ruby_annotations_node_type_assertion(VALUE location, VALUE prefix_
   );
 }
 
+VALUE rbs_ast_ruby_annotations_skip_annotation(VALUE location, VALUE prefix_location, VALUE skip_location, VALUE comment_location) {
+  VALUE _init_kwargs = rb_hash_new();
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("location")), location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("prefix_location")), prefix_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("skip_location")), skip_location);
+  rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("comment_location")), comment_location);
+
+  return CLASS_NEW_INSTANCE(
+    RBS_AST_Ruby_Annotations_SkipAnnotation,
+    1,
+    &_init_kwargs
+  );
+}
+
 VALUE rbs_ast_type_param(VALUE name, VALUE variance, VALUE upper_bound, VALUE default_type, VALUE unchecked, VALUE location) {
   VALUE _init_kwargs = rb_hash_new();
   rb_hash_aset(_init_kwargs, ID2SYM(rb_intern("name")), name);

@@ -74,6 +74,16 @@ module RBS
             self.class.new(location:, prefix_location:, overloads: ovs, vertical_bar_locations:) #: self
           end
         end
+
+        class SkipAnnotation < Base
+          attr_reader :skip_location, :comment_location
+
+          def initialize(location:, prefix_location:, skip_location:, comment_location:)
+            super(location, prefix_location)
+            @skip_location = skip_location
+            @comment_location = comment_location
+          end
+        end
       end
     end
   end
