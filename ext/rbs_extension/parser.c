@@ -2992,6 +2992,26 @@ static VALUE parse_inline_leading_annotation(parserstate *state) {
             comment_loc
           );
         }
+        case kRETURN: {
+          parser_advance(state);
+
+          range return_loc = state->current_token.range;
+          parser_advance_assert(state, pCOLON);
+          range colon_loc = state->current_token.range;
+
+          VALUE return_type = parse_type(state);
+
+          VALUE comment_loc = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotations_return_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, return_loc),
+            rbs_new_location(state->buffer, colon_loc),
+            return_type,
+            comment_loc
+          );
+        }
         default: {
           raise_syntax_error(
             state,
