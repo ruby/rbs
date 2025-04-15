@@ -52,6 +52,7 @@ extern VALUE RBS_AST_Members_Public;
 extern VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
+extern VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
 extern VALUE RBS_AST_TypeParam;
 extern VALUE RBS_MethodType;

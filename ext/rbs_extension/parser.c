@@ -49,6 +49,7 @@
   case kAS: \
   case k__TODO__: \
   case kSKIP: \
+  case kRETURN: \
   /* nop */
 
 typedef struct {
@@ -190,6 +191,7 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   switch (state->current_token.type) {
     case tLIDENT:
     case kSKIP:
+    case kRETURN:
       if (kind & ALIAS_NAME) goto success;
       goto error;
     case tULIDENT:
@@ -901,6 +903,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
         break;
       }
       case kSKIP:
+      case kRETURN:
       case tLIDENT: {
         kind = ALIAS_NAME;
         break;
@@ -1065,6 +1068,7 @@ static VALUE parse_simple(parserstate *state) {
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
   case kSKIP: // fallthrough
+  case kRETURN: // fallthrough
   case pCOLON2: {
     return parse_instance_type(state, true);
   }
@@ -2985,6 +2989,26 @@ static VALUE parse_inline_leading_annotation(parserstate *state) {
             rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
             rbs_new_location(state->buffer, rbs_range),
             rbs_new_location(state->buffer, skip_loc),
+            comment_loc
+          );
+        }
+        case kRETURN: {
+          parser_advance(state);
+
+          range return_loc = state->current_token.range;
+          parser_advance_assert(state, pCOLON);
+          range colon_loc = state->current_token.range;
+
+          VALUE return_type = parse_type(state);
+
+          VALUE comment_loc = parse_inline_comment(state);
+
+          return rbs_ast_ruby_annotations_return_type_annotation(
+            rbs_new_location(state->buffer, (range) { .start = rbs_range.start, .end = state->current_token.range.end }),
+            rbs_new_location(state->buffer, rbs_range),
+            rbs_new_location(state->buffer, return_loc),
+            rbs_new_location(state->buffer, colon_loc),
+            return_type,
             comment_loc
           );
         }

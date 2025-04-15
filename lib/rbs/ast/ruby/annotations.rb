@@ -84,6 +84,35 @@ module RBS
             @comment_location = comment_location
           end
         end
+
+        class ReturnTypeAnnotation < Base
+          attr_reader :return_location
+
+          attr_reader :colon_location
+
+          attr_reader :return_type
+
+          attr_reader :comment_location
+
+          def initialize(location:, prefix_location:, return_location:, colon_location:, return_type:, comment_location:)
+            super(location, prefix_location)
+            @return_location = return_location
+            @colon_location = colon_location
+            @return_type = return_type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              return_location: return_location,
+              colon_location: colon_location,
+              return_type: return_type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+        end
       end
     end
   end

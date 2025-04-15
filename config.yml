@@ -338,3 +338,11 @@ nodes:
       - name: prefix_location
       - name: skip_location
       - name: comment_location
+  - name: RBS::AST::Ruby::Annotations::ReturnTypeAnnotation
+    fields:
+      - name: location
+      - name: prefix_location
+      - name: return_location
+      - name: colon_location
+      - name: return_type
+      - name: comment_location

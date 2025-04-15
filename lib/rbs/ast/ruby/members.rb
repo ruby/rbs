@@ -15,6 +15,50 @@ module RBS
         end
 
         class MethodTypeAnnotation
+          class DocStyle
+            attr_accessor :return_type_annotation
+
+            def initialize
+              @return_type_annotation = nil
+            end
+
+            def map_type_name(&block)
+              DocStyle.new.tap do |new|
+                new.return_type_annotation = return_type_annotation&.map_type_name(&block)
+              end #: self
+            end
+
+            def method_type
+              return_type =
+                case return_type_annotation
+                when Annotations::NodeTypeAssertion
+                  return_type_annotation.type
+                when Annotations::ReturnTypeAnnotation
+                  return_type_annotation.return_type
+                else
+                  Types::Bases::Any.new(location: nil)
+                end
+
+              type = Types::Function.new(
+                required_positionals: [],
+                optional_positionals: [],
+                rest_positionals: nil,
+                trailing_positionals: [],
+                required_keywords: {},
+                optional_keywords: {},
+                rest_keywords: nil,
+                return_type: return_type
+              )
+
+              MethodType.new(
+                type_params: [],
+                type: type,
+                block: nil,
+                location: nil
+              )
+            end
+          end
+
           attr_reader :type_annotations
 
           def initialize(type_annotations:)
@@ -27,7 +71,7 @@ module RBS
               updated_annots = type_annotations.map do |annotation|
                 annotation.map_type_name(&block)
               end
-            when Annotations::NodeTypeAssertion
+            when DocStyle
               updated_annots = type_annotations.map_type_name(&block)
             end
 
@@ -43,7 +87,8 @@ module RBS
             if trailing_block
               case annotation = trailing_block.trailing_annotation(variables)
               when Annotations::NodeTypeAssertion
-                type_annotations = annotation
+                type_annotations = DocStyle.new()
+                type_annotations.return_type_annotation = annotation
               else
                 unused_trailing_annotation = annotation
               end
@@ -64,6 +109,17 @@ module RBS
                   if type_annotations.is_a?(Array)
                     type_annotations << paragraph
                     next
+                  end
+                when Annotations::ReturnTypeAnnotation
+                  unless type_annotations
+                    type_annotations = DocStyle.new()
+                  end
+
+                  if type_annotations.is_a?(DocStyle)
+                    unless type_annotations.return_type_annotation
+                      type_annotations.return_type_annotation = paragraph
+                      next
+                    end
                   end
                 end
 
@@ -86,13 +142,8 @@ module RBS
 
           def overloads
             case type_annotations
-            when Annotations::NodeTypeAssertion
-              method_type = MethodType.new(
-                type_params: [],
-                type: Types::Function.empty(type_annotations.type),
-                block: nil,
-                location: nil
-              )
+            when DocStyle
+              method_type = type_annotations.method_type
 
               [
                 AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type)
