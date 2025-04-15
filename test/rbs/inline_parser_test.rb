@@ -267,4 +267,24 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_empty decl.members
     end
   end
+
+  def test_parse__return_type
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs return: void
+        def foo
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
 end

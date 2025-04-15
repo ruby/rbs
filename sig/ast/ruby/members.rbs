@@ -13,7 +13,17 @@ module RBS
         type t = DefMember
 
         class MethodTypeAnnotation
-          type type_annotations = Annotations::NodeTypeAssertion | Array[Annotations::ColonMethodTypeAnnotation | Annotations::MethodTypesAnnotation] | nil
+          class DocStyle
+            attr_accessor return_type_annotation: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
+
+            def initialize: () -> void
+
+            def map_type_name: () { (TypeName) -> TypeName } -> self
+
+            def method_type: () -> MethodType
+          end
+
+          type type_annotations = DocStyle | Array[Annotations::ColonMethodTypeAnnotation | Annotations::MethodTypesAnnotation] | nil
 
           attr_reader type_annotations: type_annotations
 
