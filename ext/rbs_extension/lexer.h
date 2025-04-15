@@ -63,6 +63,7 @@ enum TokenType {
   k__TODO__,        /* __todo__ */
   kATRBS,           /* @rbs */
   kSKIP,            /* skip */
+  kRETURN,          /* return */
 
   tLIDENT,          /* Identifiers starting with lower case */
   tUIDENT,          /* Identifiers starting with upper case */

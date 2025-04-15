@@ -49,6 +49,7 @@
   case kAS: \
   case k__TODO__: \
   case kSKIP: \
+  case kRETURN: \
   /* nop */
 
 typedef struct {
@@ -190,6 +191,7 @@ static VALUE parse_type_name(parserstate *state, TypeNameKind kind, range *rg) {
   switch (state->current_token.type) {
     case tLIDENT:
     case kSKIP:
+    case kRETURN:
       if (kind & ALIAS_NAME) goto success;
       goto error;
     case tULIDENT:
@@ -901,6 +903,7 @@ static VALUE parse_instance_type(parserstate *state, bool parse_alias) {
         break;
       }
       case kSKIP:
+      case kRETURN:
       case tLIDENT: {
         kind = ALIAS_NAME;
         break;
@@ -1065,6 +1068,7 @@ static VALUE parse_simple(parserstate *state) {
   case tULIDENT: // fallthrough
   case tLIDENT: // fallthrough
   case kSKIP: // fallthrough
+  case kRETURN: // fallthrough
   case pCOLON2: {
     return parse_instance_type(state, true);
   }

@@ -2304,4 +2304,17 @@ end
       end
     RBS
   end
+
+  def test_inline_keyword__return
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def return: (untyped return) -> void
+        attr_reader return: untyped
+
+        type return = untyped
+
+        @foo: Array[return]
+      end
+    RBS
+  end
 end
