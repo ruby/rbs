@@ -34,7 +34,7 @@ GEM
     logger (1.7.0)
     minitest (5.25.5)
     mutex_m (0.3.0)
-    parser (3.3.7.4)
+    parser (3.3.8.0)
       ast (~> 2.4.1)
       racc
     power_assert (2.0.5)
