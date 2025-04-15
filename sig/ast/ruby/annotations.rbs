@@ -5,6 +5,7 @@ module RBS
         type leading_annotation = ColonMethodTypeAnnotation
                                 | MethodTypesAnnotation
                                 | SkipAnnotation
+                                | ReturnTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
 
@@ -72,6 +73,36 @@ module RBS
           attr_reader comment_location: Location?
 
           def initialize: (location: Location, prefix_location: Location, skip_location: Location, comment_location: Location?) -> void
+        end
+
+        # `@rbs return: T -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs return: String -- Returns a string
+        # ^^^                                        -- prefix_location
+        #      ^^^^^^                                -- return_location
+        #            ^                               -- colon_location
+        #                     ^^^^^^^^^^^^^^^^^^^    -- comment
+        # ```
+        class ReturnTypeAnnotation < Base
+          attr_reader return_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader return_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            return_location: Location,
+            colon_location: Location,
+            return_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
         end
       end
     end
