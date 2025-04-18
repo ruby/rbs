@@ -60,21 +60,15 @@ module RBS
         end
       end
 
-      def trailing_block(node)
-        location =
-          if node.is_a?(Prism::Node)
-            node.location
-          else
-            node
-          end #: Prism::Location
+      def trailing_block(location)
         end_line = location.end_line
         if block = start_line_map.fetch(end_line, nil)
           Reference.new(block, associated_blocks)
         end
       end
 
-      def trailing_block!(node)
-        if ref = trailing_block(node)
+      def trailing_block!(location)
+        if ref = trailing_block(location)
           unless ref.associated?
             ref.associate!.block
           end
