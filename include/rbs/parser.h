@@ -130,4 +130,22 @@ bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type);
 bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type);
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
+/**
+ * Parse an inline leading annotation from a string.
+ *
+ * @param parser The parser to use
+ * @param annotation Pointer to store the resulting annotation
+ * @return true if parsing succeeded, false otherwise
+ */
+bool rbs_parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation);
+
+/**
+ * Parse an inline trailing annotation from a string.
+ *
+ * @param parser The parser to use
+ * @param annotation Pointer to store the resulting annotation
+ * @return true if parsing succeeded, false otherwise
+ */
+bool rbs_parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation);
+
 #endif

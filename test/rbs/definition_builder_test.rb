@@ -3201,7 +3201,7 @@ end
     end
   end
 
-  def test_inline_decl__class_def
+  def test_inline_decl__class_def__untyped
     SignatureManager.new do |manager|
       manager.add_ruby_file("inherited.rbs", <<~RUBY)
         class A
@@ -3219,6 +3219,33 @@ end
 
             assert_equal [parse_method_type("(?) -> untyped")], method.method_types
             assert_equal [parse_method_type("(?) -> untyped")], method.defs.map(&:type)
+
+            assert_equal [], method.annotations
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__class_def__typed
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("inherited.rbs", <<~RUBY)
+        class A
+          # @rbs (String) -> Integer
+          def hello(x) = 123
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          definition.methods[:hello].tap do |method|
+            assert_equal type_name("::A"), method.defined_in
+            assert_equal type_name("::A"), method.implemented_in
+
+            assert_equal [parse_method_type("(::String) -> ::Integer")], method.method_types
+            assert_equal [parse_method_type("(::String) -> ::Integer")], method.defs.map(&:type)
 
             assert_equal [], method.annotations
           end

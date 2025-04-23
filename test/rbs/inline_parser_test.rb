@@ -139,4 +139,152 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "Singleton method definition is not supported yet", diagnostic.message
     end
   end
+
+  def test_parse__def_return_type_assertion
+    result = parse(<<~RUBY)
+      class Foo
+        def foo #: void
+          ""
+        end
+
+        def bar = "" #: void
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["(?) -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_error__def_return_type_assertion
+    result = parse(<<~RUBY)
+      class Foo
+        def foo #: void[
+          ""
+        end
+      end
+    RUBY
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal ": void[", diagnostic.location.source
+      assert_equal "Syntax error: expected a token `pEOF`", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["(?) -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_colon_method_type
+    result = parse(<<~RUBY)
+      class Foo
+        #: () -> void
+        #
+        def foo
+          ""
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_types
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs () -> void
+        #    | (String) -> bot
+        def foo(x = nil)
+          ""
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["() -> void", "(String) -> bot"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__skip_class_module
+    result = parse(<<~RUBY)
+      # @rbs skip -- not a constant
+      class (c::)Foo
+      end
+
+      # @rbs skip
+      module Bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    assert_empty result.declarations
+  end
+
+  def test_parse__skip_def
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        def foo
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_parse__return_type
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs return: void
+        def foo
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_instance_of Array, member.annotations
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
 end

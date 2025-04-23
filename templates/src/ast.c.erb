@@ -207,6 +207,8 @@ void rbs_node_destroy(rbs_node_t *any_node) {
         <%- case field.c_type -%>
         <%- when "rbs_node_list" -%>
         rbs_node_list_free(node-><%= field.c_name %>);
+        <%- when "rbs_location_list" -%>
+        // We don't need to free locations as they're owned by the arena.
         <%- when "rbs_hash" -%>
         rbs_hash_free(node-><%= field.c_name %>);
         <%- when "bool" -%>

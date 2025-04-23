@@ -1,0 +1,71 @@
+use RBS::AST::Ruby::CommentBlock
+
+module RBS
+  class InlineParser
+    # CommentAssociation manages the association between `Prism::Node` and `CommentBlock`
+    #
+    class CommentAssociation
+      attr_reader blocks: Array[CommentBlock]
+
+      attr_reader start_line_map: Hash[Integer, CommentBlock]
+
+      attr_reader end_line_map: Hash[Integer, CommentBlock]
+
+      # CommentBlocks that are already associated to a node, which cannot be associated to another node again
+      #
+      attr_reader associated_blocks: Set[CommentBlock]
+
+      def self.build: (Buffer, Prism::Result) -> instance
+
+      def initialize: (Array[CommentBlock]) -> void
+
+      class Reference
+        attr_reader block: CommentBlock
+
+        @associated_blocks: Set[CommentBlock]
+
+        def initialize: (CommentBlock, Set[CommentBlock]) -> void
+
+        def associate!: () -> self
+
+        def associated?: () -> bool
+      end
+
+      # Returns an unassociated CommentBlock that can be associated to given node
+      #
+      # Automatically updates association status.
+      #
+      def leading_block!: (Prism::Node) -> CommentBlock?
+
+      # Returns a Reference that is associated to given node
+      #
+      # Updates association explicitly through the reference.
+      #
+      def leading_block: (Prism::Node) -> Reference?
+
+      # Returns a CommentBlock that is associated to given node, or by its location
+      #
+      # Update association status.
+      #
+      def trailing_block!: (Prism::Node | Prism::Location) -> CommentBlock?
+
+      # Returns a Reference that is associated to given node, or by its location
+      #
+      # Updates association explicitly through the reference.
+      #
+      def trailing_block: (Prism::Node | Prism::Location) -> Reference?
+
+      # Yields leading CommentBlocks that is enclosed in the given node
+      #
+      # Note that `enclosed_blocks` works only after all of the *leading* blocks inside the node is associated.
+      #
+      # Update association status.
+      #
+      def each_enclosed_block: (Prism::Node) { (CommentBlock) -> void } -> void
+                             | (Prism::Node) -> Enumerator[CommentBlock]
+
+      def each_unassociated_block: () { (CommentBlock) -> void } -> void
+                                 | () -> Enumerator[CommentBlock]
+    end
+  end
+end

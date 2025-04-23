@@ -62,7 +62,7 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_type_error_for_content
-    buffer = RBS::Buffer.new(content: 1, name: nil)
+    buffer = RBS::Buffer.new(content: 1, name: Pathname("a.rbs"))
     assert_raises TypeError do
       RBS::Parser.parse_signature(buffer)
     end

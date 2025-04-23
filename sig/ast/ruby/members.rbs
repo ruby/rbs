@@ -12,13 +12,51 @@ module RBS
 
         type t = DefMember
 
+        class MethodTypeAnnotation
+          class DocStyle
+            attr_accessor return_type_annotation: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
+
+            def initialize: () -> void
+
+            def map_type_name: () { (TypeName) -> TypeName } -> self
+
+            def method_type: () -> MethodType
+          end
+
+          type type_annotations = DocStyle | Array[Annotations::ColonMethodTypeAnnotation | Annotations::MethodTypesAnnotation] | nil
+
+          attr_reader type_annotations: type_annotations
+
+          def initialize: (type_annotations: type_annotations) -> void
+
+          def map_type_name: { (TypeName) -> TypeName } -> self
+
+          # Returns the method type annotations from the comment block
+          #
+          # Returns a tuple of `DefAnnotations` object, array of unused leading annotations, and unused trailing annotation.
+          #
+          def self.build: (CommentBlock? leading_block, CommentBlock? trailing_block, Array[Symbol]) -> [
+            MethodTypeAnnotation,
+            Array[Annotations::leading_annotation | CommentBlock::AnnotationSyntaxError],
+            Annotations::trailing_annotation | CommentBlock::AnnotationSyntaxError | nil
+          ]
+
+          # Returns `true` if it doesn't have any annotation
+          def empty?: () -> bool
+
+          # Returns the method type overloads
+          #
+          def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
+        end
+
         class DefMember < Base
           class Overload = AST::Members::MethodDefinition::Overload
 
           attr_reader name: Symbol
           attr_reader node: Prism::DefNode
+          attr_reader method_type: MethodTypeAnnotation
 
-          def initialize: (Buffer, Symbol name, Prism::DefNode node) -> void
+          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation) -> void
 
           def location: () -> Location
 

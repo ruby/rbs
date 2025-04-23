@@ -443,3 +443,45 @@ nodes:
     fields:
       - name: name
         c_type: rbs_ast_symbol
+  - name: RBS::AST::Ruby::Annotations::NodeTypeAssertion
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: type
+        c_type: rbs_node
+  - name: RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: annotations
+        c_type: rbs_node_list
+      - name: method_type
+        c_type: rbs_node
+  - name: RBS::AST::Ruby::Annotations::MethodTypesAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: overloads
+        c_type: rbs_node_list
+      - name: vertical_bar_locations
+        c_type: rbs_location_list
+  - name: RBS::AST::Ruby::Annotations::SkipAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: skip_location
+        c_type: rbs_location
+      - name: comment_location
+        c_type: rbs_location
+  - name: RBS::AST::Ruby::Annotations::ReturnTypeAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: return_location
+        c_type: rbs_location
+      - name: colon_location
+        c_type: rbs_location
+      - name: return_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location

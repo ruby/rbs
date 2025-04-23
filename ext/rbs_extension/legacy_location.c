@@ -305,8 +305,8 @@ void rbs__init_location(void) {
   rb_define_private_method(RBS_Location, "initialize", location_initialize, 3);
   rb_define_private_method(RBS_Location, "initialize_copy", location_initialize_copy, 1);
   rb_define_method(RBS_Location, "buffer", location_buffer, 0);
-  rb_define_method(RBS_Location, "start_pos", location_start_pos, 0);
-  rb_define_method(RBS_Location, "end_pos", location_end_pos, 0);
+  rb_define_method(RBS_Location, "_start_pos", location_start_pos, 0);
+  rb_define_method(RBS_Location, "_end_pos", location_end_pos, 0);
   rb_define_method(RBS_Location, "_add_required_child", location_add_required_child, 3);
   rb_define_method(RBS_Location, "_add_optional_child", location_add_optional_child, 3);
   rb_define_method(RBS_Location, "_add_optional_no_child", location_add_optional_no_child, 1);
