@@ -53,10 +53,6 @@ module RBS
           @c_type.include?("_decl_") ||
           @c_type.include?("_types_")
       end
-
-      def needs_to_be_freed?
-        !["VALUE", "bool", "rbs_string"].include?(@c_type)
-      end
     end
 
     class Type
@@ -129,10 +125,6 @@ module RBS
 
       def expose_location?
         @expose_location
-      end
-
-      def has_children_to_free?
-        @fields.any?(&:needs_to_be_freed?)
       end
 
       # Convert CamelCase to snake_case

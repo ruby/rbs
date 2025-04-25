@@ -685,6 +685,4 @@ rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_
 rbs_types_untyped_function_t *rbs_types_untyped_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *return_type);
 rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name);
 
-void rbs_node_destroy(rbs_node_t *any_node);
-
 #endif
