@@ -3258,6 +3258,26 @@ bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature) {
   return true;
 }
 
+bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params) {
+  if (parser->next_token.type != pLBRACKET) {
+    rbs_parser_set_error(parser, parser->next_token, true, "expected a token `pLBRACKET`");
+    return false;
+  }
+
+  rbs_range_t rg = NULL_RANGE;
+  rbs_parser_push_typevar_table(parser, true);
+  bool res = parse_type_params(parser, &rg, module_type_params, params);
+  rbs_parser_push_typevar_table(parser, false);
+
+  rbs_parser_advance(parser);
+  if (parser->current_token.type != pEOF) {
+    rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+    return false;
+  }
+
+  return res;
+}
+
 id_table *alloc_empty_table(rbs_allocator_t *allocator) {
   id_table *table = rbs_allocator_alloc(allocator, id_table);
 
