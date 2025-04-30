@@ -3529,15 +3529,15 @@ static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t 
 
 NODISCARD
 static bool parse_inline_comment(rbs_parser_t *parser, rbs_location_t **comment) {
-  if (parser->next_token.type == tINLINECOMMENT) {
-    rbs_range_t comment_range = parser->next_token.range;
-    rbs_parser_advance(parser);
-
-    *comment = rbs_location_new(ALLOCATOR(), comment_range);
+  if (parser->next_token.type != tINLINECOMMENT) {
+    *comment = NULL;
     return true;
   }
 
-  *comment = NULL;
+  rbs_range_t comment_range = parser->next_token.range;
+  rbs_parser_advance(parser);
+
+  *comment = rbs_location_new(ALLOCATOR(), comment_range);
   return true;
 }
 
