@@ -3545,7 +3545,6 @@ NODISCARD
 static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
   switch (parser->next_token.type) {
     case pCOLON: {
-      // :
       rbs_range_t colon_range = parser->next_token.range;
       rbs_parser_advance(parser);
 
