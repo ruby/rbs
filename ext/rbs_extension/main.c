@@ -273,7 +273,7 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
 }
 
 static VALUE parse_inline_leading_annotation_try(VALUE a) {
-  struct parse_type_arg *arg = (struct parse_type_arg *)a;
+  struct parse_type_arg *arg = (struct parse_type_arg *) a;
   rbs_parser_t *parser = arg->parser;
 
   rbs_ast_ruby_annotations_t *annotation = NULL;
@@ -291,7 +291,7 @@ static VALUE parse_inline_leading_annotation_try(VALUE a) {
     arg->encoding
   );
 
-  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *)annotation);
+  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) annotation);
 }
 
 static VALUE rbsparser_parse_inline_leading_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
@@ -316,7 +316,7 @@ static VALUE rbsparser_parse_inline_leading_annotation(VALUE self, VALUE buffer,
 }
 
 static VALUE parse_inline_trailing_annotation_try(VALUE a) {
-  struct parse_type_arg *arg = (struct parse_type_arg *)a;
+  struct parse_type_arg *arg = (struct parse_type_arg *) a;
   rbs_parser_t *parser = arg->parser;
 
   rbs_ast_ruby_annotations_t *annotation = NULL;
@@ -334,7 +334,7 @@ static VALUE parse_inline_trailing_annotation_try(VALUE a) {
     arg->encoding
   );
 
-  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *)annotation);
+  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) annotation);
 }
 
 static VALUE rbsparser_parse_inline_trailing_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
@@ -351,7 +351,7 @@ static VALUE rbsparser_parse_inline_trailing_annotation(VALUE self, VALUE buffer
     .require_eof = Qfalse
   };
 
-  VALUE result = rb_ensure(parse_inline_trailing_annotation_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+  VALUE result = rb_ensure(parse_inline_trailing_annotation_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
 
   RB_GC_GUARD(string);
 
