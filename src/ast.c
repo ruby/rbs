@@ -44,6 +44,11 @@ const char* rbs_node_type_name(rbs_node_t *node) {
         case RBS_AST_MEMBERS_PREPEND: return "RBS::AST::Members::Prepend";
         case RBS_AST_MEMBERS_PRIVATE: return "RBS::AST::Members::Private";
         case RBS_AST_MEMBERS_PUBLIC: return "RBS::AST::Members::Public";
+        case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION: return "RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation";
+        case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION: return "RBS::AST::Ruby::Annotations::MethodTypesAnnotation";
+        case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION: return "RBS::AST::Ruby::Annotations::NodeTypeAssertion";
+        case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION: return "RBS::AST::Ruby::Annotations::ReturnTypeAnnotation";
+        case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION: return "RBS::AST::Ruby::Annotations::SkipAnnotation";
         case RBS_AST_STRING: return "RBS::AST::String";
         case RBS_AST_TYPE_PARAM: return "RBS::AST::TypeParam";
         case RBS_METHOD_TYPE: return "RBS::MethodType";
@@ -751,6 +756,92 @@ rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator,
             .type = RBS_AST_MEMBERS_PUBLIC,
             .location = location,
         },
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type) {
+    rbs_ast_ruby_annotations_colon_method_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_colon_method_type_annotation_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_colon_method_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .annotations = annotations,
+        .method_type = method_type,
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *overloads, rbs_location_list_t *vertical_bar_locations) {
+    rbs_ast_ruby_annotations_method_types_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_method_types_annotation_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_method_types_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .overloads = overloads,
+        .vertical_bar_locations = vertical_bar_locations,
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_t *type) {
+    rbs_ast_ruby_annotations_node_type_assertion_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_node_type_assertion_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_node_type_assertion_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .type = type,
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *return_location, rbs_location_t *colon_location, rbs_node_t *return_type, rbs_location_t *comment_location) {
+    rbs_ast_ruby_annotations_return_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_return_type_annotation_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_return_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .return_location = return_location,
+        .colon_location = colon_location,
+        .return_type = return_type,
+        .comment_location = comment_location,
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *skip_location, rbs_location_t *comment_location) {
+    rbs_ast_ruby_annotations_skip_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_skip_annotation_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_skip_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .skip_location = skip_location,
+        .comment_location = comment_location,
     };
 
     return instance;

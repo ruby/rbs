@@ -272,6 +272,92 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
   return result;
 }
 
+static VALUE parse_inline_leading_annotation_try(VALUE a) {
+  struct parse_type_arg *arg = (struct parse_type_arg *) a;
+  rbs_parser_t *parser = arg->parser;
+
+  rbs_ast_ruby_annotations_t *annotation = NULL;
+  bool success = rbs_parse_inline_leading_annotation(parser, &annotation);
+
+  raise_error_if_any(parser, arg->buffer);
+
+  if (!success || annotation == NULL) {
+    return Qnil;
+  }
+
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    arg->buffer,
+    arg->encoding
+  );
+
+  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) annotation);
+}
+
+static VALUE rbsparser_parse_inline_leading_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  declare_type_variables(parser, variables, buffer);
+  struct parse_type_arg arg = {
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .require_eof = Qfalse
+  };
+
+  VALUE result = rb_ensure(parse_inline_leading_annotation_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
+}
+
+static VALUE parse_inline_trailing_annotation_try(VALUE a) {
+  struct parse_type_arg *arg = (struct parse_type_arg *) a;
+  rbs_parser_t *parser = arg->parser;
+
+  rbs_ast_ruby_annotations_t *annotation = NULL;
+  bool success = rbs_parse_inline_trailing_annotation(parser, &annotation);
+
+  raise_error_if_any(parser, arg->buffer);
+
+  if (!success || annotation == NULL) {
+    return Qnil;
+  }
+
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    arg->buffer,
+    arg->encoding
+  );
+
+  return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) annotation);
+}
+
+static VALUE rbsparser_parse_inline_trailing_annotation(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  declare_type_variables(parser, variables, buffer);
+  struct parse_type_arg arg = {
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .require_eof = Qfalse
+  };
+
+  VALUE result = rb_ensure(parse_inline_trailing_annotation_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
+}
+
 static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
   VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
   StringValue(string);
@@ -305,6 +391,8 @@ void rbs__init_parser(void) {
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
+  rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);
   rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
 }
 

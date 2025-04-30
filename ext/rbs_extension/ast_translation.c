@@ -44,6 +44,10 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
 }
 
 VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *source_loc) {
+  if (source_loc == NULL) {
+    return Qnil;
+  }
+
   VALUE new_loc = rbs_new_location(ctx.buffer, source_loc->rg);
   rbs_loc *new_loc_struct = rbs_check_location(new_loc);
 
@@ -53,6 +57,20 @@ VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *so
   }
 
   return new_loc;
+}
+
+VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_list_t *list) {
+    VALUE ruby_array = rb_ary_new();
+
+    if (list == NULL) {
+        return ruby_array;
+    }
+
+    for (rbs_location_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_loc_to_ruby_location(ctx, n->loc));
+    }
+
+    return ruby_array;
 }
 
 #ifdef RB_PASS_KEYWORDS
@@ -582,6 +600,87 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
             return CLASS_NEW_INSTANCE(
                 RBS_AST_Members_Public,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION: {
+            rbs_ast_ruby_annotations_colon_method_type_annotation_t *node = (rbs_ast_ruby_annotations_colon_method_type_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
+            rb_hash_aset(h, ID2SYM(rb_intern("method_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->method_type)); // rbs_node
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION: {
+            rbs_ast_ruby_annotations_method_types_annotation_t *node = (rbs_ast_ruby_annotations_method_types_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(ctx, node->overloads));
+            rb_hash_aset(h, ID2SYM(rb_intern("vertical_bar_locations")), rbs_location_list_to_ruby_array(ctx, node->vertical_bar_locations));
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_MethodTypesAnnotation,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION: {
+            rbs_ast_ruby_annotations_node_type_assertion_t *node = (rbs_ast_ruby_annotations_node_type_assertion_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_NodeTypeAssertion,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION: {
+            rbs_ast_ruby_annotations_return_type_annotation_t *node = (rbs_ast_ruby_annotations_return_type_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("return_location")), rbs_loc_to_ruby_location(ctx, node->return_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), rbs_loc_to_ruby_location(ctx, node->colon_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("return_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->return_type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), rbs_loc_to_ruby_location(ctx, node->comment_location));
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_ReturnTypeAnnotation,
+                1,
+                &h
+            );
+        }
+        case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION: {
+            rbs_ast_ruby_annotations_skip_annotation_t *node = (rbs_ast_ruby_annotations_skip_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("skip_location")), rbs_loc_to_ruby_location(ctx, node->skip_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), rbs_loc_to_ruby_location(ctx, node->comment_location));
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_SkipAnnotation,
                 1,
                 &h
             );

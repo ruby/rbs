@@ -46,6 +46,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "<"   { return rbs_next_token(lexer, pLT); }
       "[]"  { return rbs_next_token(lexer, pAREF_OPR); }
       operator  { return rbs_next_token(lexer, tOPERATOR); }
+      "--" [^\x00]* { return rbs_next_token(lexer, tINLINECOMMENT); }
 
       number = [0-9] [0-9_]*;
       ("-"|"+")? number    { return rbs_next_token(lexer, tINTEGER); }
@@ -95,6 +96,9 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "use"           { return rbs_next_token(lexer, kUSE); }
       "as"            { return rbs_next_token(lexer, kAS); }
       "__todo__"      { return rbs_next_token(lexer, k__TODO__); }
+      "@rbs"          { return rbs_next_token(lexer, kATRBS); }
+      "skip"          { return rbs_next_token(lexer, kSKIP); }
+      "return"        { return rbs_next_token(lexer, kRETURN); }
 
       unicode_char = "\\u" [0-9a-fA-F]{4};
       oct_char = "\\x" [0-9a-f]{1,2};

@@ -89,6 +89,78 @@ class RBS::LocationTest < Test::Unit::TestCase
     assert_include loc.inspect, "source=\"class Foo\""
   end
 
+  def test_sub_buffer_location
+    buffer = buffer()
+    # 01
+    # bc
+    buffer = buffer.sub_buffer(lines: [0...2, 5...7])
+
+    loc = Location.new(buffer, 0, 5)
+
+    # Raw positions
+    assert_equal 0, loc._start_pos
+    assert_equal 5, loc._end_pos
+
+    # Absolute positions
+    assert_equal 0, loc.start_pos
+    assert_equal 7, loc.end_pos
+    assert_equal [1, 0], loc.start_loc
+    assert_equal [2, 3], loc.end_loc
+
+    assert_equal "123\nabc", loc.source
+
+    loc.add_optional_child(:opt, 0...2)
+    loc[:opt].tap do |loc|
+      assert_equal 0, loc.start_pos
+      assert_equal 2, loc.end_pos
+      assert_equal "12", loc.source
+    end
+
+    loc.add_required_child(:req, 1...4)
+    loc[:req].tap do |loc|
+      assert_equal 1, loc.start_pos
+      assert_equal 6, loc.end_pos
+      assert_equal "23\nab", loc.source
+    end
+  end
+
+  def test_sub_buffer_local_location
+    buffer = buffer()
+    # 01
+    # bc
+    buffer = buffer.sub_buffer(lines: [0...2, 5...7])
+
+    loc = Location.new(buffer, 0, 5)
+    loc.add_optional_child(:opt, 0...2)
+    loc.add_required_child(:req, 1...4)
+
+    loc = loc.local_location
+
+    # Raw positions
+    assert_equal 0, loc._start_pos
+    assert_equal 5, loc._end_pos
+
+    # Absolute positions in sub buffer
+    assert_equal 0, loc.start_pos
+    assert_equal 5, loc.end_pos
+    assert_equal [1, 0], loc.start_loc
+    assert_equal [2, 2], loc.end_loc
+
+    assert_equal "12\nbc", loc.source
+
+    loc[:opt].tap do |loc|
+      assert_equal 0, loc.start_pos
+      assert_equal 2, loc.end_pos
+      assert_equal "12", loc.source
+    end
+
+    loc[:req].tap do |loc|
+      assert_equal 1, loc.start_pos
+      assert_equal 4, loc.end_pos
+      assert_equal "2\nb", loc.source
+    end
+  end
+
   private
 
   def buffer(content: nil)

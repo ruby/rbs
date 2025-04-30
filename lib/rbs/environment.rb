@@ -673,7 +673,7 @@ module RBS
             when AST::Ruby::Declarations::Base
               resolved.members << resolve_ruby_decl(resolver, member, context: inner_context, prefix: inner_prefix)
             when AST::Ruby::Members::Base
-              resolved.members << member
+              resolved.members << resolve_ruby_member(resolver, member, context: inner_context)
             else
               raise "Unknown member type: #{member.class}"
             end
@@ -698,6 +698,20 @@ module RBS
 
       else
         raise "Unknown declaration type: #{decl.class}"
+      end
+    end
+
+    def resolve_ruby_member(resolver, member, context:)
+      case member
+      when AST::Ruby::Members::DefMember
+        AST::Ruby::Members::DefMember.new(
+          member.buffer,
+          member.name,
+          member.node,
+          member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        )
+      else
+        raise "Unknown member type: #{member.class}"
       end
     end
 
@@ -816,7 +830,7 @@ module RBS
     end
 
     def absolute_type_name(resolver, map, type_name, context:)
-      type_name = map.resolve(type_name)
+      type_name = map.resolve(type_name) if map
       resolver.resolve(type_name, context: context) || type_name
     end
 

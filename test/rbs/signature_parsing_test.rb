@@ -2279,4 +2279,42 @@ end
       end
     end
   end
+
+  def test_inline_keyword__rbs
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        @rbs: untyped
+        self.@rbs: untyped
+
+        attr_reader rbs (@rbs): untyped
+        attr_reader self.rbs (@rbs): untyped
+      end
+    RBS
+  end
+
+  def test_inline_keyword__skip
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def skip: (untyped skip) -> void
+        attr_reader skip: untyped
+
+        type skip = untyped
+
+        @foo: Array[skip]
+      end
+    RBS
+  end
+
+  def test_inline_keyword__return
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def return: (untyped return) -> void
+        attr_reader return: untyped
+
+        type return = untyped
+
+        @foo: Array[return]
+      end
+    RBS
+  end
 end
