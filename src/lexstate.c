@@ -1,4 +1,4 @@
-#include "rbs_extension.h"
+#include "rbs/lexer.h"
 
 static const char *RBS_TOKENTYPE_NAMES[] = {
   "NullType",
@@ -92,88 +92,100 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tANNOTATION",      /* Annotation */
 };
 
-token NullToken = { NullType };
-position NullPosition = { -1, -1, -1, -1 };
-range NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
+rbs_token_t NullToken = { .type = NullType, .range = {} };
+rbs_position_t NullPosition = { -1, -1, -1, -1 };
+rbs_range_t NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
 
-const char *token_type_str(enum TokenType type) {
+const char *rbs_token_type_str(enum RBSTokenType type) {
   return RBS_TOKENTYPE_NAMES[type];
 }
 
-int token_chars(token tok) {
+int rbs_token_chars(rbs_token_t tok) {
   return tok.range.end.char_pos - tok.range.start.char_pos;
 }
 
-int token_bytes(token tok) {
-  return RANGE_BYTES(tok.range);
+int rbs_token_bytes(rbs_token_t tok) {
+  return RBS_RANGE_BYTES(tok.range);
 }
 
-unsigned int peek(lexstate *state) {
-  if (state->current.char_pos == state->end_pos) {
-    state->last_char = '\0';
+unsigned int rbs_peek(rbs_lexer_t *lexer) {
+  if (lexer->current.char_pos == lexer->end_pos) {
+    lexer->last_char = '\0';
     return 0;
   } else {
-    unsigned int c = rb_enc_mbc_to_codepoint(RSTRING_PTR(state->string) + state->current.byte_pos, RSTRING_END(state->string), rb_enc_get(state->string));
-    state->last_char = c;
+    rbs_string_t str = rbs_string_new(
+      lexer->string.start + lexer->current.byte_pos,
+      lexer->string.end
+    );
+    unsigned int c = rbs_utf8_string_to_codepoint(str);
+    lexer->last_char = c;
     return c;
   }
 }
 
-token next_token(lexstate *state, enum TokenType type) {
-  token t;
+rbs_token_t rbs_next_token(rbs_lexer_t *lexer, enum RBSTokenType type) {
+  rbs_token_t t;
 
   t.type = type;
-  t.range.start = state->start;
-  t.range.end = state->current;
-  state->start = state->current;
+  t.range.start = lexer->start;
+  t.range.end = lexer->current;
+  lexer->start = lexer->current;
   if (type != tTRIVIA) {
-    state->first_token_of_line = false;
+    lexer->first_token_of_line = false;
   }
 
   return t;
 }
 
-token next_eof_token(lexstate *state) {
-  if (state->current.byte_pos == RSTRING_LEN(state->string)+1) {
+rbs_token_t rbs_next_eof_token(rbs_lexer_t *lexer) {
+  if ((size_t) lexer->current.byte_pos == rbs_string_len(lexer->string) + 1) {
     // End of String
-    token t;
+    rbs_token_t t;
     t.type = pEOF;
-    t.range.start = state->start;
-    t.range.end = state->start;
-    state->start = state->current;
+    t.range.start = lexer->start;
+    t.range.end = lexer->start;
+    lexer->start = lexer->current;
 
     return t;
   } else {
     // NULL byte in the middle of the string
-    return next_token(state, pEOF);
+    return rbs_next_token(lexer, pEOF);
   }
 }
 
-void rbs_skip(lexstate *state) {
-  if (!state->last_char) {
-    peek(state);
+void rbs_skip(rbs_lexer_t *lexer) {
+  if (!lexer->last_char) {
+    rbs_peek(lexer);
   }
-  int byte_len = rb_enc_codelen(state->last_char, rb_enc_get(state->string));
 
-  state->current.char_pos += 1;
-  state->current.byte_pos += byte_len;
+  size_t byte_len;
 
-  if (state->last_char == '\n') {
-    state->current.line += 1;
-    state->current.column = 0;
-    state->first_token_of_line = true;
+  if (lexer->last_char == '\0') {
+    byte_len = 1;
   } else {
-    state->current.column += 1;
+    const char *start = lexer->string.start + lexer->current.byte_pos;
+    byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
+  }
+
+  lexer->current.char_pos += 1;
+  lexer->current.byte_pos += byte_len;
+
+  if (lexer->last_char == '\n') {
+    lexer->current.line += 1;
+    lexer->current.column = 0;
+    lexer->first_token_of_line = true;
+  } else {
+    lexer->current.column += 1;
   }
 }
 
-void skipn(lexstate *state, size_t size) {
+void rbs_skipn(rbs_lexer_t *lexer, size_t size) {
   for (size_t i = 0; i < size; i ++) {
-    peek(state);
-    rbs_skip(state);
+    rbs_peek(lexer);
+    rbs_skip(lexer);
   }
 }
 
-char *peek_token(lexstate *state, token tok) {
-  return RSTRING_PTR(state->string) + tok.range.start.byte_pos;
+char *rbs_peek_token(rbs_lexer_t *lexer, rbs_token_t tok) {
+  return (char *) lexer->string.start + tok.range.start.byte_pos;
 }
