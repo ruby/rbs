@@ -767,25 +767,22 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     RUBY
 
-    # The @rbs annotations should be reported as syntax errors (invalid format)
+    # The @rbs annotations should be reported as unused (ParamTypeAnnotation is valid but not applicable to attr_*)
     assert_equal 3, result.diagnostics.size
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs name: String", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs age: Integer", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs data: Array[Hash[Symbol, untyped]]", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     result.declarations[0].tap do |decl|
