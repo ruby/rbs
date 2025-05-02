@@ -3684,32 +3684,36 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
           return true;
         }
         case kSKIP: {
-          rbs_parser_advance(parser);
+          if (parser->next_token2.type == pCOLON) {
+            return parse_inline_param_type_annotation(parser, annotation, rbs_range);
+          } else {
+            rbs_parser_advance(parser);
 
-          rbs_range_t skip_range = parser->current_token.range;
-          rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
+            rbs_range_t skip_range = parser->current_token.range;
+            rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
 
-          rbs_location_t *comment_loc = NULL;
-          if (!parse_inline_comment(parser, &comment_loc)) {
-            return false;
+            rbs_location_t *comment_loc = NULL;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+              return false;
+            }
+
+            rbs_range_t full_range = {
+              .start = rbs_range.start,
+              .end = parser->current_token.range.end
+            };
+
+            rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
+              ALLOCATOR(),
+              full_loc,
+              rbs_loc,
+              skip_loc,
+              comment_loc
+            );
+            return true;
           }
-
-          rbs_range_t full_range = {
-            .start = rbs_range.start,
-            .end = parser->current_token.range.end
-          };
-
-          rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-          rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
-
-          *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
-            ALLOCATOR(),
-            full_loc,
-            rbs_loc,
-            skip_loc,
-            comment_loc
-          );
-          return true;
         }
         case kRETURN: {
           rbs_parser_advance(parser);
