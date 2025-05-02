@@ -92,7 +92,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
   "tANNOTATION",      /* Annotation */
 };
 
-rbs_token_t NullToken = { .type = NullType, .range = {} };
+rbs_token_t NullToken = { .type = NullType, .range = {0} };
 rbs_position_t NullPosition = { -1, -1, -1, -1 };
 rbs_range_t NULL_RANGE = { { -1, -1, -1, -1 }, { -1, -1, -1, -1 } };
 

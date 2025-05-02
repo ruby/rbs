@@ -3415,7 +3415,7 @@ rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding
     .vars = NULL,
     .last_comment = NULL,
 
-    .constant_pool = {},
+    .constant_pool = {0},
     .allocator = allocator,
     .error = NULL,
   };
