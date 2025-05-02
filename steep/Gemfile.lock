@@ -46,7 +46,7 @@ GEM
       ffi (~> 1.0)
     rbs (3.9.0)
       logger
-    ruby-lsp (0.23.14)
+    ruby-lsp (0.23.16)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 4)
