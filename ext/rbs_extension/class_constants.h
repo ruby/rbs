@@ -61,6 +61,7 @@ extern VALUE RBS_AST_Ruby_Annotations_InstanceVariableAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_ModuleAliasAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
+extern VALUE RBS_AST_Ruby_Annotations_ParamTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_TypeApplicationAnnotation;
