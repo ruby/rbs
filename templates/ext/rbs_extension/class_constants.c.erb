@@ -11,7 +11,7 @@ VALUE RBS_Parser;
 VALUE RBS_Types;
 VALUE RBS_Types_Bases;
 
-<%- nodes.each do |node| -%>
+<%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
 VALUE <%= node.c_constant_name %>;
 <%- end -%>
 
@@ -30,7 +30,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_Types, RBS, "Types");
   IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
 
-  <%- nodes.each do |node| -%>
+  <%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
   IMPORT_CONSTANT(<%= node.c_constant_name %>, <%= node.c_parent_constant_name %>, "<%= node.ruby_class_name %>");
   <%- end -%>
 }

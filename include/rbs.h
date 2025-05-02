@@ -1,7 +1,6 @@
 #ifndef RBS_H
 #define RBS_H
 
-#include "rbs/constants.h"
-#include "rbs/ruby_objs.h"
+#include "rbs/parser.h"
 
 #endif
