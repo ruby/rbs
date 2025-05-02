@@ -44,7 +44,7 @@ GEM
     rb-fsevent (0.11.2)
     rb-inotify (0.11.1)
       ffi (~> 1.0)
-    rbs (3.9.0)
+    rbs (3.9.2)
       logger
     ruby-lsp (0.23.16)
       language_server-protocol (~> 3.17.0)
@@ -86,7 +86,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rbs (~> 3.9.pre)
+  rbs (~> 3.9)
   ruby-lsp
   steep (~> 1.10)
   test-unit
