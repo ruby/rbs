@@ -1,0 +1,62 @@
+name: C Code Formatting Check
+
+on:
+  push:
+    paths:
+      - '**.c'
+      - '**.h'
+      - '.clang-format'
+      - '.github/workflows/clang-format.yml'
+  pull_request:
+    paths:
+      - '**.c'
+      - '**.h'
+      - '.clang-format'
+      - '.github/workflows/clang-format.yml'
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: none
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
+      - name: Set up permission
+        run: chmod -R o-w /opt/hostedtoolcache/Ruby
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool
+      - name: Install clang-format from LLVM
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main"
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+          clang-format --version
+      - name: Install Re2c
+        run: |
+          cd /tmp
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
+          tar xf re2c-3.1.tar.gz
+          cd re2c-3.1
+          autoreconf -i -W all
+          ./configure
+          make
+          sudo make install
+      - name: Update rubygems & bundler
+        run: |
+          ruby -v
+          gem update --system
+      - name: bin/setup
+        run: |
+          bin/setup
+      - name: Check C code formatting
+        run: |
+          clang-format --version
+          bundle exec rake templates
+          bundle exec rake format:c_check

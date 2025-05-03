@@ -49,6 +49,87 @@ task :confirm_templates => :templates do
   sh "git diff --exit-code -- include src"
 end
 
+# Task to format C code using clang-format
+namespace :format do
+  dirs = ["src", "ext", "include"]
+  excluded_files = ["ext/rbs_extension/lexer.c", "src/constants.c", "src/ruby_objs.c"]
+
+  # Find all C source and header files, then filter out excluded files
+  files = `find #{dirs.join(" ")} -type f -name "*.c" -o -name "*.h"`.split("\n").reject do |file|
+    excluded_files.include?(file)
+  end
+
+  desc "Format C source files using clang-format"
+  task :c do
+    puts "Formatting C files..."
+
+    # Check if clang-format is installed
+    unless system("which clang-format > /dev/null 2>&1")
+      abort "Error: clang-format not found. Please install clang-format first."
+    end
+
+    if files.empty?
+      puts "No C files found to format"
+      next
+    end
+
+    puts "Found #{files.length} files to format (excluding generated files)"
+
+    exit_status = 0
+    files.each do |file|
+      puts "Formatting #{file}"
+      unless system("clang-format -i -style=file #{file}")
+        puts "❌ Error formatting #{file}"
+        exit_status = 1
+      end
+    end
+
+    exit exit_status unless exit_status == 0
+    puts "✅ All files formatted successfully"
+  end
+
+  desc "Check if C source files are properly formatted"
+  task :c_check do
+    puts "Checking C file formatting..."
+
+    # Check if clang-format is installed
+    unless system("which clang-format > /dev/null 2>&1")
+      abort "Error: clang-format not found. Please install clang-format first."
+    end
+
+    if files.empty?
+      puts "No C files found to check"
+      next
+    end
+
+    puts "Found #{files.length} files to check (excluding generated files)"
+
+    needs_format = false
+    files.each do |file|
+      formatted = `clang-format -style=file #{file}`
+      original = File.read(file)
+
+      if formatted != original
+        puts "❌ #{file} needs formatting"
+        puts "Diff:"
+        # Save formatted version to temp file and run diff
+        temp_file = "#{file}.formatted"
+        File.write(temp_file, formatted)
+        system("diff -u #{file} #{temp_file}")
+        File.unlink(temp_file)
+        needs_format = true
+      end
+    end
+
+    if needs_format
+      warn "Some files need formatting. Run 'rake format:c' to format them."
+      exit 1
+    else
+      puts "✅ All files are properly formatted"
+    end
+  end
+end
+
 rule ".c" => ".re" do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake lexer` ⚠️⚠️⚠️"
 end
