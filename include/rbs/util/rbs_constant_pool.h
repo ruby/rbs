@@ -48,10 +48,10 @@ static const rbs_constant_pool_bucket_type_t RBS_CONSTANT_POOL_BUCKET_CONSTANT =
 /** A bucket in the hash map. */
 typedef struct {
     /** The incremental ID used for indexing back into the pool. */
-    unsigned int id: 30;
+    unsigned int id : 30;
 
     /** The type of the bucket, which determines how to free it. */
-    rbs_constant_pool_bucket_type_t type: 2;
+    rbs_constant_pool_bucket_type_t type : 2;
 
     /** The hash of the bucket. */
     uint32_t hash;
@@ -100,7 +100,7 @@ bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity);
  * @param constant_id The id of the constant to get.
  * @return A pointer to the constant.
  */
-rbs_constant_t * rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_id_t constant_id);
+rbs_constant_t *rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_id_t constant_id);
 
 /**
  * Find a constant in a constant pool. Returns the id of the constant, or 0 if
