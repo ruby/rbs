@@ -1,18 +1,9 @@
-name: C Code Formatting Check
+name: C Code Generation and Formatting Check
 
 on:
   push:
-    paths:
-      - '**.c'
-      - '**.h'
-      - '.clang-format'
-      - '.github/workflows/clang-format.yml'
-  pull_request:
-    paths:
-      - '**.c'
-      - '**.h'
-      - '.clang-format'
-      - '.github/workflows/clang-format.yml'
+  pull_request: {}
+  merge_group: {}
 
 jobs:
   format-check:
@@ -55,8 +46,8 @@ jobs:
       - name: bin/setup
         run: |
           bin/setup
-      - name: Check C code formatting
+      - name: Check C code generation and formatting
         run: |
           clang-format --version
-          bundle exec rake templates
+          bundle exec rake lexer templates compile confirm_lexer confirm_templates
           bundle exec rake format:c_check
