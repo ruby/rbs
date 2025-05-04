@@ -134,7 +134,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             1,
             rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
         );
-
         return CLASS_NEW_INSTANCE(
             RBS_AST_Declarations_Class,
             1,
@@ -220,7 +219,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             1,
             rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
         );
-
         return CLASS_NEW_INSTANCE(
             RBS_AST_Declarations_Interface,
             1,
@@ -245,7 +243,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             1,
             rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
         );
-
         return CLASS_NEW_INSTANCE(
             RBS_AST_Declarations_Module,
             1,
@@ -299,7 +296,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             1,
             rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
         );
-
         return CLASS_NEW_INSTANCE(
             RBS_AST_Declarations_TypeAlias,
             1,
@@ -691,7 +687,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             1,
             rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
         );
-
         return CLASS_NEW_INSTANCE(
             RBS_MethodType,
             1,

@@ -52,12 +52,9 @@ end
 # Task to format C code using clang-format
 namespace :format do
   dirs = ["src", "ext", "include"]
-  excluded_files = ["ext/rbs_extension/lexer.c", "src/constants.c", "src/ruby_objs.c"]
 
-  # Find all C source and header files, then filter out excluded files
-  files = `find #{dirs.join(" ")} -type f \\( -name "*.c" -o -name "*.h" \\)`.split("\n").reject do |file|
-    excluded_files.include?(file)
-  end
+  # Find all C source and header files
+  files = `find #{dirs.join(" ")} -type f \\( -name "*.c" -o -name "*.h" \\)`.split("\n")
 
   desc "Format C source files using clang-format"
   task :c do
@@ -159,6 +156,9 @@ task :templates do
 
   sh "#{ruby} templates/template.rb include/rbs/ast.h"
   sh "#{ruby} templates/template.rb src/ast.c"
+
+  # Format the generated files
+  Rake::Task["format:c"].invoke
 end
 
 task :compile => "ext/rbs_extension/class_constants.h"
