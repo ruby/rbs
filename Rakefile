@@ -37,6 +37,7 @@ multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate
 
 task :lexer do
   sh "re2c -W --no-generation-date -o src/lexer.c src/lexer.re"
+  sh "clang-format -i -style=file src/lexer.c"
 end
 
 task :confirm_lexer => :lexer do
