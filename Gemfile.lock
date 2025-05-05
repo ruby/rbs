@@ -157,7 +157,7 @@ GEM
       uri (>= 0.12.0)
     stringio (3.1.7)
     strong_json (2.1.2)
-    strscan (3.1.4)
+    strscan (3.1.5)
     tempfile (0.3.1)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
