@@ -830,7 +830,7 @@ class Thread < Object
   def self.each_caller_location: () { (Backtrace::Location) -> void } -> nil
 
   # Wraps the block in a single, VM-global
-  # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
+  # [Thread::Mutex\#synchronize](https://docs.ruby-lang.org/en/master/Thread/Mutex.html#method-i-synchronize)
   # , returning the value of the block. A thread executing inside the
   # exclusive section will only block other threads which also use the
   # [::exclusive](Thread.downloaded.ruby_doc#method-c-exclusive) mechanism.
