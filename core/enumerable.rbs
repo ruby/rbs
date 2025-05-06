@@ -192,6 +192,11 @@
 #     find exactly one of each Hash entry.
 #
 module Enumerable[unchecked out Elem] : _Each[Elem]
+  %a{private}
+  interface _Pattern
+    def ===: (untyped) -> bool
+  end
+
   # <!--
   #   rdoc-file=enum.c
   #   - all?                  -> true or false
@@ -234,6 +239,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Related: #any?, #none? #one?.
   #
   def all?: () -> bool
+          | (_Pattern) -> bool
           | () { (Elem) -> boolish } -> bool
 
   # <!--
@@ -277,6 +283,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Related: #all?, #none?, #one?.
   #
   def any?: () -> bool
+          | (_Pattern) -> bool
           | () { (Elem) -> boolish } -> bool
 
   # <!--
@@ -1167,6 +1174,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Related: #one?, #all?, #any?.
   #
   def none?: () -> bool
+           | (_Pattern) -> bool
            | () { (Elem) -> boolish } -> bool
 
   # <!--
@@ -1210,6 +1218,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Related: #none?, #all?, #any?.
   #
   def one?: () -> bool
+          | (_Pattern) -> bool
           | () { (Elem) -> boolish } -> bool
 
   # <!--
