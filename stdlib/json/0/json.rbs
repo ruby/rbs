@@ -1157,6 +1157,7 @@ module Kernel
   # Outputs *objs* to STDOUT as JSON strings in the shortest form, that is in one
   # line.
   #
+  %a{deprecated}
   def j: (*_ToJson) -> nil
 
   # <!--
@@ -1166,6 +1167,7 @@ module Kernel
   # Outputs *objs* to STDOUT as JSON strings in a pretty format, with indentation
   # and over many lines.
   #
+  %a{deprecated}
   def jj: (*_ToJson) -> nil
 
   # <!--
