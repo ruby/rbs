@@ -272,6 +272,58 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
   return result;
 }
 
+
+struct parse_type_params_arg {
+  VALUE buffer;
+  rb_encoding *encoding;
+  rbs_parser_t *parser;
+  VALUE module_type_params;
+};
+
+static VALUE parse_type_params_try(VALUE a) {
+  struct parse_type_params_arg *arg = (struct parse_type_params_arg *)a;
+  rbs_parser_t *parser = arg->parser;
+
+  if (parser->next_token.type == pEOF) {
+    return Qnil;
+  }
+
+  rbs_node_list_t *params = NULL;
+  rbs_parse_type_params(parser, arg->module_type_params, &params);
+
+  raise_error_if_any(parser, arg->buffer);
+
+  rbs_translation_context_t ctx = rbs_translation_context_create(
+    &parser->constant_pool,
+    arg->buffer,
+    arg->encoding
+  );
+
+  return rbs_node_list_to_ruby_array(ctx, params);
+}
+
+
+static VALUE rbsparser_parse_type_params(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE module_type_params) {
+  VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+  StringValue(string);
+  rb_encoding *encoding = rb_enc_get(string);
+
+  rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+  struct parse_type_params_arg arg = {
+    .buffer = buffer,
+    .encoding = encoding,
+    .parser = parser,
+    .module_type_params = module_type_params
+  };
+
+  VALUE result = rb_ensure(parse_type_params_try, (VALUE)&arg, ensure_free_parser, (VALUE)parser);
+
+  RB_GC_GUARD(string);
+
+  return result;
+}
+
+
 static VALUE parse_inline_leading_annotation_try(VALUE a) {
   struct parse_type_arg *arg = (struct parse_type_arg *) a;
   rbs_parser_t *parser = arg->parser;
@@ -391,6 +443,7 @@ void rbs__init_parser(void) {
   rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
   rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+  rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);
   rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
   rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);
   rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
