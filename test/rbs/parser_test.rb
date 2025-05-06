@@ -820,6 +820,60 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse_type_params
+    RBS::Parser.parse_type_params(buffer("[T]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_nil params[0].upper_bound
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T < Integer, U = String]")).tap do |params|
+      assert_equal 2, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].upper_bound.to_s
+      assert_equal :U, params[1].name
+      assert_equal "String", params[1].default_type.to_s
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T, in U, out V]")).tap do |params|
+      assert_equal 3, params.size
+      assert_equal :T, params[0].name
+      assert_equal "invariant", params[0].variance.to_s
+      assert_equal :U, params[1].name
+      assert_equal "contravariant", params[1].variance.to_s
+      assert_equal :V, params[2].name
+      assert_equal "covariant", params[2].variance.to_s
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T, unchecked U, unchecked out V = Integer]")).tap do |params|
+      assert_equal 3, params.size
+      assert_equal :T, params[0].name
+      refute params[0].unchecked?
+      assert_equal :U, params[1].name
+      assert params[1].unchecked?
+      assert_equal :V, params[2].name
+      assert params[2].unchecked?
+      assert_equal "covariant", params[2].variance.to_s
+      assert_equal "Integer", params[2].default_type.to_s
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T]A"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[in T]"), module_type_params: false)
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[unchecked T]"), module_type_params: false)
+    end
+  end
+
   def test__lex
     content = <<~RBS
       # LineComment
