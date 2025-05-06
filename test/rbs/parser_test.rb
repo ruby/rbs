@@ -733,6 +733,20 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse_method_type_block
+    RBS::Parser.parse_method_type(buffer("{ -> void } -> void")).tap do |method_type|
+      assert_equal "{ -> void }", method_type.block.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("(Integer) { (Integer) -> void } -> void")).tap do |method_type|
+      assert_equal "{ (Integer) -> void }", method_type.block.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("() ?{ () -> void } -> void")).tap do |method_type|
+      assert_equal "?{ () -> void }", method_type.block.location.source
+    end
+  end
+
   def test_newline_inconsistency
     code = "module Test\r\nend"
 
