@@ -905,6 +905,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             rbs_types_block_t *node = (rbs_types_block_t *)instance;
 
             VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
             rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
             rb_hash_aset(h, ID2SYM(rb_intern("required")), node->required ? Qtrue : Qfalse);
             rb_hash_aset(h, ID2SYM(rb_intern("self_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->self_type)); // rbs_node

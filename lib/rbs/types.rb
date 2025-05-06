@@ -1339,8 +1339,10 @@ module RBS
       attr_reader :type
       attr_reader :required
       attr_reader :self_type
+      attr_reader :location
 
-      def initialize(type:, required:, self_type: nil)
+      def initialize(location: nil, type:, required:, self_type: nil)
+        @location = location
         @type = type
         @required = required ? true : false
         @self_type = self_type
