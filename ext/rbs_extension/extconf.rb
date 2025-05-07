@@ -13,5 +13,9 @@ $srcs = Dir.glob("#{root_dir}/src/**/*.c") +
 
 append_cflags ['-std=gnu99', '-Wimplicit-fallthrough', '-Wunused-result']
 append_cflags ['-O0', '-g'] if ENV['DEBUG']
+if ENV["TEST_NO_C23"]
+  puts "Adding -Wc2x-extensions to CFLAGS"
+  $CFLAGS << " -Werror -Wc2x-extensions"
+end
 
 create_makefile 'rbs_extension'
