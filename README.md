@@ -198,6 +198,43 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
+### C Code Formatting
+
+This project uses `clang-format` to enforce consistent formatting of C code with a `.clang-format` configuration in the root directory.
+
+#### Setup
+
+First, install clang-format:
+
+```bash
+# macOS
+brew install clang-format
+
+# Ubuntu/Debian
+sudo apt-get install clang-format
+
+# Windows
+choco install llvm
+```
+
+#### Usage
+
+Format all C source files:
+
+```bash
+rake format:c
+```
+
+Check formatting without making changes:
+
+```bash
+rake format:c_check
+```
+
+#### Editor Integration
+
+For VS Code users, install the "clangd" extension which will automatically use the project's `.clang-format` file.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/ruby/rbs.

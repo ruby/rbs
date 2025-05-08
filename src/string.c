@@ -12,7 +12,7 @@ unsigned int rbs_utf8_string_to_codepoint(const rbs_string_t string) {
     const char *s = string.start;
     const char *end = string.end;
 
-    if (s >= end) return 0;  // End of string
+    if (s >= end) return 0; // End of string
 
     if ((*s & 0x80) == 0) {
         // Single byte character (0xxxxxxx)
@@ -31,7 +31,7 @@ unsigned int rbs_utf8_string_to_codepoint(const rbs_string_t string) {
         remaining_bytes = 3;
     } else {
         // Invalid UTF-8 sequence
-        return 0xFFFD;  // Unicode replacement character
+        return 0xFFFD; // Unicode replacement character
     }
 
     s++;

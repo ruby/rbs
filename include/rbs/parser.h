@@ -24,39 +24,39 @@
  * A comment object represents the six lines of comments.
  * */
 typedef struct rbs_comment_t {
-  rbs_position_t start;
-  rbs_position_t end;
+    rbs_position_t start;
+    rbs_position_t end;
 
-  size_t line_size;
-  size_t line_count;
-  rbs_token_t *tokens;
+    size_t line_size;
+    size_t line_count;
+    rbs_token_t *tokens;
 
-  struct rbs_comment_t *next_comment;
+    struct rbs_comment_t *next_comment;
 } rbs_comment_t;
 
 typedef struct rbs_error_t {
-  char *message;
-  rbs_token_t token;
-  bool syntax_error;
+    char *message;
+    rbs_token_t token;
+    bool syntax_error;
 } rbs_error_t;
 
 /**
  * An RBS parser is a LL(3) parser.
  * */
 typedef struct {
-  rbs_lexer_t *rbs_lexer_t;
+    rbs_lexer_t *rbs_lexer_t;
 
-  rbs_token_t current_token;
-  rbs_token_t next_token;       /* The first lookahead token */
-  rbs_token_t next_token2;      /* The second lookahead token */
-  rbs_token_t next_token3;      /* The third lookahead token */
+    rbs_token_t current_token;
+    rbs_token_t next_token;  /* The first lookahead token */
+    rbs_token_t next_token2; /* The second lookahead token */
+    rbs_token_t next_token3; /* The third lookahead token */
 
-  struct id_table *vars;  /* Known type variables */
-  rbs_comment_t *last_comment;  /* Last read comment */
+    struct id_table *vars;       /* Known type variables */
+    rbs_comment_t *last_comment; /* Last read comment */
 
-  rbs_constant_pool_t constant_pool;
-  rbs_allocator_t *allocator;
-  rbs_error_t *error;
+    rbs_constant_pool_t constant_pool;
+    rbs_allocator_t *allocator;
+    rbs_error_t *error;
 } rbs_parser_t;
 
 /**

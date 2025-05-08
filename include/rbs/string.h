@@ -6,14 +6,14 @@
 #include "rbs/util/rbs_allocator.h"
 
 typedef struct {
-  const char *start;
-  const char *end;
+    const char *start;
+    const char *end;
 } rbs_string_t;
 
 #define RBS_STRING_NULL ((rbs_string_t) { \
     .start = NULL,                        \
     .end = NULL,                          \
-  })
+})
 
 /**
  * Returns a new `rbs_string_t` struct

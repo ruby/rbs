@@ -58,7 +58,7 @@ rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
     if (next == NULL) return false;
 
     rbs_constant_pool_bucket_t *next_buckets = next;
-    rbs_constant_t *next_constants = (void *)(((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
+    rbs_constant_t *next_constants = (void *) (((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
 
     // For each bucket in the current constant pool, find the index in the
     // next constant pool, and insert it.
@@ -102,8 +102,7 @@ rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL = &RBS_GLOBAL_CONSTANT_POOL_STORAG
 /**
  * Initialize a new constant pool with a given capacity.
  */
-bool
-rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
+bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
     const uint32_t maximum = (~((uint32_t) 0));
     if (capacity >= ((maximum / 2) + 1)) return false;
 
@@ -113,7 +112,7 @@ rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
     if (memory == NULL) return false;
 
     pool->buckets = memory;
-    pool->constants = (void *)(((char *)memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
+    pool->constants = (void *) (((char *) memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
     pool->size = 0;
     pool->capacity = capacity;
     return true;
@@ -256,8 +255,7 @@ rbs_constant_pool_insert_constant(rbs_constant_pool_t *pool, const uint8_t *star
 /**
  * Free the memory associated with a constant pool.
  */
-void
-rbs_constant_pool_free(rbs_constant_pool_t *pool) {
+void rbs_constant_pool_free(rbs_constant_pool_t *pool) {
     // For each constant in the current constant pool, free the contents if the
     // contents are owned.
     for (uint32_t index = 0; index < pool->capacity; index++) {
