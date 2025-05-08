@@ -1146,4 +1146,6 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
         }
     }
+
+    rb_raise(rb_eRuntimeError, "Unknown node type: %d", instance->type);
 }
