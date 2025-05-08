@@ -106,3 +106,31 @@ jobs:
       - run: bundle exec rake test:valgrind
         env:
           RUBY_FREE_AT_EXIT: 1
+  C99_compile:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.4', head]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          brew install ruby-build
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
+      - name: Update rubygems & bundler
+        run: |
+          ruby -v
+          gem update --system
+      - name: clang version
+        run: clang --version
+      - name: bin/setup
+        run: |
+          bin/setup
+      - run: bundle exec rake clean compile_c99
+
