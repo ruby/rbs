@@ -83,7 +83,7 @@ GEM
     pstore (0.2.0)
     psych (4.0.6)
       stringio
-    public_suffix (6.0.1)
+    public_suffix (6.0.2)
     raap (1.2.0)
       rbs (~> 3.0)
       timeout (~> 0.4)
