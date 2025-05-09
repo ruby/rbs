@@ -437,3 +437,11 @@ task :changelog do
     puts "  (🤑 There is no *unreleased* pull request associated to the milestone.)"
   end
 end
+
+desc "Compile extension without C23 extensions"
+task :compile_c99 do
+  ENV["TEST_NO_C23"] = "true"
+  Rake::Task[:"compile"].invoke
+ensure
+  ENV.delete("TEST_NO_C23")
+end
