@@ -11,6 +11,10 @@ module RBS
 
     attr_reader :sources
 
+    def declarations
+      sources.flat_map(&:declarations)
+    end
+
     class SingleEntry
       attr_reader :name
       attr_reader :context

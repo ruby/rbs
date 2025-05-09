@@ -30,6 +30,9 @@ module RBS
     class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]
     end
 
+    # Top level declarations
+    def declarations: () -> Array[AST::Ruby::Declarations::t | AST::Declarations::t]
+
     # Array of source objects loaded in the environment
     #
     attr_reader sources: Array[Source::t]
