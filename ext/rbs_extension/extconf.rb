@@ -11,7 +11,13 @@ root_dir = File.expand_path('../../../', __FILE__)
 $srcs = Dir.glob("#{root_dir}/src/**/*.c") +
         Dir.glob("#{root_dir}/ext/rbs_extension/*.c")
 
-append_cflags ['-std=gnu99', '-Wimplicit-fallthrough', '-Wunused-result']
+append_cflags [
+  '-std=gnu99',
+  '-Wimplicit-fallthrough',
+  '-Wunused-result',
+  '-Wc++-compat',
+]
+
 append_cflags ['-O0', '-g'] if ENV['DEBUG']
 if ENV["TEST_NO_C23"]
   puts "Adding -Wc2x-extensions to CFLAGS"
