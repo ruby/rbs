@@ -518,7 +518,10 @@ module RBS
 
       attr_reader self_type: t?
 
-      def initialize: (type: function, ?self_type: t?, required: boolish) -> void
+      type loc = Location[bot, bot]
+      attr_reader location: loc?
+
+      def initialize: (?location: loc?, type: function, ?self_type: t?, required: boolish) -> void
 
       def ==: (untyped other) -> bool
 
