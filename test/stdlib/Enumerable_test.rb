@@ -224,6 +224,13 @@ class EnumerableTest2 < Test::Unit::TestCase
                      TestEnumerable.new, :grep_v, '0' do 0 end
   end
 
+  def test_include?
+    assert_send_type "(String) -> bool",
+                     TestEnumerable.new, :include?, ''
+    assert_send_type "(Integer) -> bool",
+                     TestEnumerable.new, :include?, 1
+  end
+
   def test_inject
     assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, +'', :<<
     assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
