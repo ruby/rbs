@@ -68,6 +68,24 @@ module RBS
     #
     def self.parse_signature: (Buffer | String) -> [Buffer, Array[AST::Directives::t], Array[AST::Declarations::t]]
 
+    # Parse a list of type parameters and return it
+    #
+    # ```ruby
+    # RBS::Parser.parse_type_params("")                          # => nil
+    # RBS::Parser.parse_type_params("[U, V]")                    # => `[:U, :V]`
+    # RBS::Parser.parse_type_params("[in U, V < Integer]")       # => `[:U, :V]`
+    # ```
+    #
+    # When `module_type_params` is `false`, an error is raised if `unchecked`, `in` or `out` are used.
+    #
+    # ```ruby
+    # RBS::Parser.parse_type_params("[unchecked U]", module_type_params: false)   # => Raises an error
+    # RBS::Parser.parse_type_params("[out U]", module_type_params: false)         # => Raises an error
+    # RBS::Parser.parse_type_params("[in U]", module_type_params: false)          # => Raises an error
+    # ```
+    #
+    def self.parse_type_params: (Buffer | String, ?module_type_params: bool) -> Array[AST::TypeParam]
+
     # Returns the magic comment from the buffer
     #
     def self.magic_comment: (Buffer) -> AST::Directives::ResolveTypeNames?
@@ -103,6 +121,8 @@ module RBS
     def self._parse_method_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof) -> MethodType?
 
     def self._parse_signature: (Buffer, Integer start_pos, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+
+    def self._parse_type_params: (Buffer, Integer start_pos, Integer end_pos, bool module_type_params) -> Array[AST::TypeParam]
 
     def self._lex: (Buffer, Integer end_pos) -> Array[[Symbol, Location[untyped, untyped]]]
 

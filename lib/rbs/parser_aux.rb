@@ -35,6 +35,11 @@ module RBS
       [buf, dirs, decls]
     end
 
+    def self.parse_type_params(source, module_type_params: true)
+      buf = buffer(source)
+      _parse_type_params(buf, 0, buf.last_position, module_type_params)
+    end
+
     def self.magic_comment(buf)
       start_pos = 0
 

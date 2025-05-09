@@ -130,6 +130,8 @@ bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type);
 bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type);
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
+bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params);
+
 /**
  * Parse an inline leading annotation from a string.
  *
