@@ -1,7 +1,12 @@
 #ifndef RBS_LOCATION_H
 #define RBS_LOCATION_H
 
+#include "compat.h"
+
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_BEGIN
 #include "ruby.h"
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
+
 #include "rbs.h"
 
 /**

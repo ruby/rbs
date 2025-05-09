@@ -136,9 +136,9 @@ typedef struct {
   const rbs_encoding_t *encoding;
 } rbs_lexer_t;
 
-extern rbs_token_t NullToken;
-extern rbs_position_t NullPosition;
-extern rbs_range_t NULL_RANGE;
+extern const rbs_token_t NullToken;
+extern const rbs_position_t NullPosition;
+extern const rbs_range_t NULL_RANGE;
 
 char *rbs_peek_token(rbs_lexer_t *lexer, rbs_token_t tok);
 int rbs_token_chars(rbs_token_t tok);

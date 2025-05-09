@@ -8,7 +8,11 @@
 #ifndef RBS__CONSTANTS_H
 #define RBS__CONSTANTS_H
 
+#include "compat.h"
+
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_BEGIN
 #include "ruby.h"
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
 
 extern VALUE RBS;
 

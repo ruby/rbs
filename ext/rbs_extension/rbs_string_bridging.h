@@ -1,8 +1,12 @@
 #ifndef RBS__RBS_STRING_BRIDGING_H
 #define RBS__RBS_STRING_BRIDGING_H
 
+#include "compat.h"
+
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_BEGIN
 #include "ruby.h"
 #include "ruby/encoding.h"
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
 
 #include "rbs/string.h"
 
