@@ -115,4 +115,35 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal "-- some comment here", annot.comment_location.source
     end
   end
+
+  def test_parse__param_type
+    Parser.parse_inline_leading_annotation("@rbs x: untyped", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs x: untyped", annot.location.source
+      assert_equal "x", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs abc: untyped -- some comment here", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs abc: untyped -- some comment here", annot.location.source
+      assert_equal "abc", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_equal "-- some comment here", annot.comment_location.source
+    end
+  end
+
+  def test_parse__param_type__skip
+    Parser.parse_inline_leading_annotation("@rbs skip: untyped", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs skip: untyped", annot.location.source
+      assert_equal "skip", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
 end

@@ -52,6 +52,7 @@ VALUE RBS_AST_Members_Public;
 VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
+VALUE RBS_AST_Ruby_Annotations_ParamTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
 VALUE RBS_AST_TypeParam;
@@ -133,6 +134,7 @@ void rbs__init_constants(void) {
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation, RBS_AST_Ruby_Annotations, "ColonMethodTypeAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_MethodTypesAnnotation, RBS_AST_Ruby_Annotations, "MethodTypesAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_NodeTypeAssertion, RBS_AST_Ruby_Annotations, "NodeTypeAssertion");
+  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ParamTypeAnnotation, RBS_AST_Ruby_Annotations, "ParamTypeAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ReturnTypeAnnotation, RBS_AST_Ruby_Annotations, "ReturnTypeAnnotation");
   IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_SkipAnnotation, RBS_AST_Ruby_Annotations, "SkipAnnotation");
   IMPORT_CONSTANT(RBS_AST_TypeParam, RBS_AST, "TypeParam");

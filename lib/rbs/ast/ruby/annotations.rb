@@ -113,6 +113,29 @@ module RBS
             ) #: self
           end
         end
+
+        class ParamTypeAnnotation < Base
+          attr_reader :name_location, :colon_location, :param_type, :comment_location
+
+          def initialize(location:, prefix_location:, name_location:, colon_location:, param_type:, comment_location:)
+            super(location, prefix_location)
+            @name_location = name_location
+            @colon_location = colon_location
+            @param_type = param_type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              name_location: name_location,
+              colon_location: colon_location,
+              param_type: param_type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+        end
       end
     end
   end
