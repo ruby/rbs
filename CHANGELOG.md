@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.9.3 (2025-05-09)
+
+### Miscellaneous
+
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
 ## 3.9.2 (2025-03-31)
 
 ### Library changes
