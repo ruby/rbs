@@ -485,3 +485,15 @@ nodes:
         c_type: rbs_node
       - name: comment_location
         c_type: rbs_location
+  - name: RBS::AST::Ruby::Annotations::ParamTypeAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: name_location
+        c_type: rbs_location
+      - name: colon_location
+        c_type: rbs_location
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location

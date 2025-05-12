@@ -47,6 +47,7 @@ const char* rbs_node_type_name(rbs_node_t *node) {
         case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION: return "RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation";
         case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION: return "RBS::AST::Ruby::Annotations::MethodTypesAnnotation";
         case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION: return "RBS::AST::Ruby::Annotations::NodeTypeAssertion";
+        case RBS_AST_RUBY_ANNOTATIONS_PARAM_TYPE_ANNOTATION: return "RBS::AST::Ruby::Annotations::ParamTypeAnnotation";
         case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION: return "RBS::AST::Ruby::Annotations::ReturnTypeAnnotation";
         case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION: return "RBS::AST::Ruby::Annotations::SkipAnnotation";
         case RBS_AST_STRING: return "RBS::AST::String";
@@ -806,6 +807,25 @@ rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_ty
         },
         .prefix_location = prefix_location,
         .type = type,
+    };
+
+    return instance;
+}
+#line 153 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_param_type_annotation_t *rbs_ast_ruby_annotations_param_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *name_location, rbs_location_t *colon_location, rbs_node_t *param_type, rbs_location_t *comment_location) {
+    rbs_ast_ruby_annotations_param_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_param_type_annotation_t);
+
+
+    *instance = (rbs_ast_ruby_annotations_param_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_PARAM_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .name_location = name_location,
+        .colon_location = colon_location,
+        .param_type = param_type,
+        .comment_location = comment_location,
     };
 
     return instance;

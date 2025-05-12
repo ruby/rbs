@@ -651,6 +651,24 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
                 &h
             );
         }
+        case RBS_AST_RUBY_ANNOTATIONS_PARAM_TYPE_ANNOTATION: {
+            rbs_ast_ruby_annotations_param_type_annotation_t *node = (rbs_ast_ruby_annotations_param_type_annotation_t *)instance;
+
+            VALUE h = rb_hash_new();
+            rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("name_location")), rbs_loc_to_ruby_location(ctx, node->name_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), rbs_loc_to_ruby_location(ctx, node->colon_location));
+            rb_hash_aset(h, ID2SYM(rb_intern("param_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->param_type)); // rbs_node
+            rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), rbs_loc_to_ruby_location(ctx, node->comment_location));
+
+
+            return CLASS_NEW_INSTANCE(
+                RBS_AST_Ruby_Annotations_ParamTypeAnnotation,
+                1,
+                &h
+            );
+        }
         case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION: {
             rbs_ast_ruby_annotations_return_type_annotation_t *node = (rbs_ast_ruby_annotations_return_type_annotation_t *)instance;
 

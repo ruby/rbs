@@ -64,6 +64,41 @@
   case kRETURN: \
   /* nop */
 
+#define PARAM_NAME_CASES \
+case kBOOL:\
+case kBOT: \
+case kCLASS: \
+case kFALSE: \
+case kINSTANCE: \
+case kINTERFACE: \
+case kNIL: \
+case kSELF: \
+case kSINGLETON: \
+case kTOP: \
+case kTRUE: \
+case kVOID: \
+case kTYPE: \
+case kUNCHECKED: \
+case kIN: \
+case kOUT: \
+case kEND: \
+case kDEF: \
+case kINCLUDE: \
+case kEXTEND: \
+case kPREPEND: \
+case kALIAS: \
+case kMODULE: \
+case kATTRREADER: \
+case kATTRWRITER: \
+case kATTRACCESSOR: \
+case kPUBLIC: \
+case kPRIVATE: \
+case kUNTYPED: \
+case kUSE: \
+case kAS: \
+case k__TODO__: \
+/* nop */
+
 #define CHECK_PARSE(call) \
   if (!call) { \
     return false; \
@@ -3569,6 +3604,49 @@ static bool parse_inline_comment(rbs_parser_t *parser, rbs_location_t **comment)
 }
 
 NODISCARD
+static bool parse_inline_param_type_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation, rbs_range_t rbs_range) {
+  rbs_parser_advance(parser);
+
+  rbs_range_t name_range = parser->current_token.range;
+  rbs_location_t *name_loc = rbs_location_new(ALLOCATOR(), name_range);
+
+  ADVANCE_ASSERT(parser, pCOLON);
+
+  rbs_range_t colon_range = parser->current_token.range;
+  rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
+
+  rbs_node_t *param_type = NULL;
+  if (!rbs_parse_type(parser, &param_type)) {
+    return false;
+  }
+
+  rbs_location_t *comment_loc = NULL;
+  if (!parse_inline_comment(parser, &comment_loc)) {
+    return false;
+  }
+
+  rbs_range_t full_range = {
+    .start = rbs_range.start,
+    .end = parser->current_token.range.end
+  };
+
+  rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+  rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
+
+  *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_param_type_annotation_new(
+    ALLOCATOR(),
+    full_loc,
+    rbs_loc,
+    name_loc,
+    colon_loc,
+    param_type,
+    comment_loc
+  );
+
+  return true;
+}
+
+NODISCARD
 static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
   switch (parser->next_token.type) {
     case pCOLON: {
@@ -3633,32 +3711,36 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
           return true;
         }
         case kSKIP: {
-          rbs_parser_advance(parser);
+          if (parser->next_token2.type == pCOLON) {
+            return parse_inline_param_type_annotation(parser, annotation, rbs_range);
+          } else {
+            rbs_parser_advance(parser);
 
-          rbs_range_t skip_range = parser->current_token.range;
-          rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
+            rbs_range_t skip_range = parser->current_token.range;
+            rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
 
-          rbs_location_t *comment_loc = NULL;
-          if (!parse_inline_comment(parser, &comment_loc)) {
-            return false;
+            rbs_location_t *comment_loc = NULL;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+              return false;
+            }
+
+            rbs_range_t full_range = {
+              .start = rbs_range.start,
+              .end = parser->current_token.range.end
+            };
+
+            rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
+              ALLOCATOR(),
+              full_loc,
+              rbs_loc,
+              skip_loc,
+              comment_loc
+            );
+            return true;
           }
-
-          rbs_range_t full_range = {
-            .start = rbs_range.start,
-            .end = parser->current_token.range.end
-          };
-
-          rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-          rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
-
-          *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
-            ALLOCATOR(),
-            full_loc,
-            rbs_loc,
-            skip_loc,
-            comment_loc
-          );
-          return true;
         }
         case kRETURN: {
           rbs_parser_advance(parser);
@@ -3699,6 +3781,11 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             comment_loc
           );
           return true;
+        }
+        case tLIDENT:
+        PARAM_NAME_CASES
+        {
+          return parse_inline_param_type_annotation(parser, annotation, rbs_range);
         }
         default: {
           rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for @rbs annotation");

@@ -6,6 +6,7 @@ module RBS
                                 | MethodTypesAnnotation
                                 | SkipAnnotation
                                 | ReturnTypeAnnotation
+                                | ParamTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
 
@@ -99,6 +100,27 @@ module RBS
             return_location: Location,
             colon_location: Location,
             return_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        class ParamTypeAnnotation < Base
+          attr_reader name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            name_location: Location,
+            colon_location: Location,
+            param_type: Types::t,
             comment_location: Location?,
           ) -> void
 
