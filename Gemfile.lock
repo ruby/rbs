@@ -37,7 +37,7 @@ GEM
     connection_pool (2.5.3)
     csv (3.3.4)
     dbm (1.1.0)
-    diff-lcs (1.6.1)
+    diff-lcs (1.6.2)
     digest (3.2.0)
     drb (2.2.1)
     ffi (1.17.2)
