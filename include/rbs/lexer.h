@@ -30,6 +30,7 @@ enum RBSTokenType {
     pBANG,     /* ! */
     pQUESTION, /* ? */
     pLT,       /* < */
+    pGT,       /* > */
     pEQ,       /* = */
 
     kALIAS,        /* alias */

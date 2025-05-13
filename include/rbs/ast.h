@@ -450,6 +450,7 @@ typedef struct rbs_ast_type_param {
     struct rbs_ast_symbol *name;
     struct rbs_keyword *variance;
     struct rbs_node *upper_bound;
+    struct rbs_node *lower_bound;
     struct rbs_node *default_type;
     bool unchecked;
 } rbs_ast_type_param_t;
@@ -712,7 +713,7 @@ rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_ty
 rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *return_location, rbs_location_t *colon_location, rbs_node_t *return_type, rbs_location_t *comment_location);
 rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *skip_location, rbs_location_t *comment_location);
 rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string);
-rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *default_type, bool unchecked);
+rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *lower_bound, rbs_node_t *default_type, bool unchecked);
 rbs_method_type_t *rbs_method_type_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block);
 rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *path, bool absolute);
 rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *directives, rbs_node_list_t *declarations);

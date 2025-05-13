@@ -10,7 +10,10 @@
 #define alignof(type) __alignof(type)
 #else
 // Fallback using offset trick
-#define alignof(type) offsetof(struct { char c; type member; }, member)
+#define alignof(type) offsetof( \
+    struct { char c; type member; },                 \
+    member                      \
+)
 #endif
 #endif
 

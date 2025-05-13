@@ -895,7 +895,7 @@ rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t 
     return instance;
 }
 #line 156 "prism/templates/src/ast.c.erb"
-rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *default_type, bool unchecked) {
+rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *lower_bound, rbs_node_t *default_type, bool unchecked) {
     rbs_ast_type_param_t *instance = rbs_allocator_alloc(allocator, rbs_ast_type_param_t);
 
     *instance = (rbs_ast_type_param_t) {
@@ -906,6 +906,7 @@ rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_loc
         .name = name,
         .variance = variance,
         .upper_bound = upper_bound,
+        .lower_bound = lower_bound,
         .default_type = default_type,
         .unchecked = unchecked,
     };

@@ -159,6 +159,13 @@ EOU
               @validator.validate_type(ub, context: nil)
             end
 
+            if lb = param.lower_bound_type
+              void_type_context_validator(lb)
+              no_self_type_validator(lb)
+              no_classish_type_validator(lb)
+              @validator.validate_type(lb, context: nil)
+            end
+
             if dt = param.default_type
               void_type_context_validator(dt, true)
               no_self_type_validator(dt)
@@ -244,6 +251,13 @@ EOU
               @validator.validate_type(ub, context: nil)
             end
 
+            if lb = param.lower_bound_type
+              void_type_context_validator(lb)
+              no_self_type_validator(lb)
+              no_classish_type_validator(lb)
+              @validator.validate_type(lb, context: nil)
+            end
+
             if dt = param.default_type
               void_type_context_validator(dt, true)
               no_self_type_validator(dt)
@@ -315,6 +329,13 @@ EOU
               no_self_type_validator(ub)
               no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
+            end
+
+            if lb = param.lower_bound_type
+              void_type_context_validator(lb)
+              no_self_type_validator(lb)
+              no_classish_type_validator(lb)
+              @validator.validate_type(lb, context: nil)
             end
 
             if dt = param.default_type
