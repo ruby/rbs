@@ -44,6 +44,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":"   { return rbs_next_token(lexer, pCOLON); }
       "::"  { return rbs_next_token(lexer, pCOLON2); }
       "<"   { return rbs_next_token(lexer, pLT); }
+      ">"   { return rbs_next_token(lexer, pGT); }
       "[]"  { return rbs_next_token(lexer, pAREF_OPR); }
       operator  { return rbs_next_token(lexer, tOPERATOR); }
       "--" [^\x00]* { return rbs_next_token(lexer, tINLINECOMMENT); }

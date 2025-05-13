@@ -26,6 +26,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "pBANG",     /* ! */
     "pQUESTION", /* ? */
     "pLT",       /* < */
+    "pGT",       /* > */
     "pEQ",       /* = */
 
     "kALIAS",        /* alias */

@@ -663,6 +663,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));                 // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("variance")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->variance));         // rbs_keyword
         rb_hash_aset(h, ID2SYM(rb_intern("upper_bound")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->upper_bound));   // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("lower_bound")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->lower_bound));   // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("default_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->default_type)); // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("unchecked")), node->unchecked ? Qtrue : Qfalse);
 

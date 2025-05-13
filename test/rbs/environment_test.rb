@@ -482,6 +482,44 @@ end
 RBS
   end
 
+  def test_absolute_type_generics_lower_bound
+    env = Environment.new
+
+    buf, dirs, decls = RBS::Parser.parse_signature(<<RBS)
+interface _Equatable
+  def ==: (untyped) -> bool
+end
+
+module Bar[A]
+end
+
+class Foo[A > _Equatable]
+  def test: [B > Bar[_Equatable]] (A, B) -> bool
+end
+RBS
+
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env_ = env.resolve_type_names
+
+    writer = RBS::Writer.new(out: StringIO.new)
+
+    writer.write(env_.each_rbs_source.flat_map { _1.declarations })
+
+    assert_equal(<<RBS, writer.out.string)
+interface ::_Equatable
+  def ==: (untyped) -> bool
+end
+
+module ::Bar[A]
+end
+
+class ::Foo[A > ::_Equatable]
+  def test: [B > ::Bar[::_Equatable]] (A, B) -> bool
+end
+RBS
+  end
+
   def test_normalize_module_name
     buf, dirs, decls = RBS::Parser.parse_signature(<<~EOF)
       class Foo

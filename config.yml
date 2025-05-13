@@ -279,6 +279,8 @@ nodes:
         c_type: rbs_keyword
       - name: upper_bound
         c_type: rbs_node
+      - name: lower_bound
+        c_type: rbs_node
       - name: default_type
         c_type: rbs_node
       - name: unchecked
