@@ -139,8 +139,3 @@ module RBS
               | () -> Enumerator[Namespace, void]
   end
 end
-
-module Kernel
-  # Deprecated: Use `RBS::Namespace.parse` instead
-  %a{deprecated} def Namespace: (String) -> RBS::Namespace
-end
