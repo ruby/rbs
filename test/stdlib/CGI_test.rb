@@ -72,6 +72,7 @@ class CGITest < Test::Unit::TestCase
   testing "::CGI"
 
   def setup
+    super
     ARGV.replace(%w(abc=001 def=002))
   end
 
