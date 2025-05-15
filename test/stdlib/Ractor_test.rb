@@ -132,6 +132,8 @@ class RactorInstanceTest < Test::Unit::TestCase
   testing "::Ractor"
 
   def test_aref
+    omit "Accessing ractor local storage" if RUBY_VERSION >= "3.5"
+
     r = Ractor.new {}
     r['foo'] = 'bar'
     assert_send_type "(String) -> untyped",
@@ -141,6 +143,8 @@ class RactorInstanceTest < Test::Unit::TestCase
   end
 
   def test_aset
+    omit "Accessing ractor local storage" if RUBY_VERSION >= "3.5"
+
     r = Ractor.new {}
     assert_send_type "(String, String) -> String",
                      r, :[]=, 'foo', 'bar'
