@@ -51,9 +51,10 @@ class MinitestTestLifecycleHooksTest < Test::Unit::TestCase
 
   class LifecycleSetup < Minitest::Test
     def setup
+      super
       @foo = 123
     end
-  end  
+  end
 
   def test_setup_return_type_void
     test = LifecycleSetup.new("setup")
