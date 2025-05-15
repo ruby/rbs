@@ -15,9 +15,9 @@ SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
 extern VALUE RBS_Location;
 
 typedef struct {
-  VALUE buffer;
-  rbs_loc_range rg;
-  rbs_loc_children *children; // NULL when no children is allocated
+    VALUE buffer;
+    rbs_loc_range rg;
+    rbs_loc_children *children; // NULL when no children is allocated
 } rbs_loc;
 
 /**

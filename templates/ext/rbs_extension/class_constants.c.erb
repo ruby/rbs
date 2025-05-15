@@ -19,22 +19,26 @@ VALUE <%= node.c_constant_name %>;
 
 VALUE RBS_ParsingError;
 
-#define IMPORT_CONSTANT(var, parent, name) { var = rb_const_get(parent, rb_intern(name)); rb_gc_register_mark_object(var); }
+#define IMPORT_CONSTANT(var, parent, name)           \
+    {                                                \
+        var = rb_const_get(parent, rb_intern(name)); \
+        rb_gc_register_mark_object(var);             \
+    }
 
 void rbs__init_constants(void) {
-  IMPORT_CONSTANT(RBS, rb_cObject, "RBS");
-  IMPORT_CONSTANT(RBS_ParsingError, RBS, "ParsingError");
+    IMPORT_CONSTANT(RBS, rb_cObject, "RBS");
+    IMPORT_CONSTANT(RBS_ParsingError, RBS, "ParsingError");
 
-  IMPORT_CONSTANT(RBS_AST, RBS, "AST");
-  IMPORT_CONSTANT(RBS_AST_Declarations, RBS_AST, "Declarations");
-  IMPORT_CONSTANT(RBS_AST_Directives, RBS_AST, "Directives");
-  IMPORT_CONSTANT(RBS_AST_Members, RBS_AST, "Members");
-  IMPORT_CONSTANT(RBS_AST_Ruby, RBS_AST, "Ruby");
-  IMPORT_CONSTANT(RBS_AST_Ruby_Annotations, RBS_AST_Ruby, "Annotations");
-  IMPORT_CONSTANT(RBS_Types, RBS, "Types");
-  IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
+    IMPORT_CONSTANT(RBS_AST, RBS, "AST");
+    IMPORT_CONSTANT(RBS_AST_Declarations, RBS_AST, "Declarations");
+    IMPORT_CONSTANT(RBS_AST_Directives, RBS_AST, "Directives");
+    IMPORT_CONSTANT(RBS_AST_Members, RBS_AST, "Members");
+    IMPORT_CONSTANT(RBS_AST_Ruby, RBS_AST, "Ruby");
+    IMPORT_CONSTANT(RBS_AST_Ruby_Annotations, RBS_AST_Ruby, "Annotations");
+    IMPORT_CONSTANT(RBS_Types, RBS, "Types");
+    IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
 
-  <%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
-  IMPORT_CONSTANT(<%= node.c_constant_name %>, <%= node.c_parent_constant_name %>, "<%= node.ruby_class_name %>");
-  <%- end -%>
+    <%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
+    IMPORT_CONSTANT(<%= node.c_constant_name %>, <%= node.c_parent_constant_name %>, "<%= node.ruby_class_name %>");
+    <%- end -%>
 }
