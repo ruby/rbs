@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 3.9.4 (2025-05-15)
+
+### Miscellaneous
+
+* Backport test/CI fixes to 3.9 ([#2487](https://github.com/ruby/rbs/pull/2487))
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
 ## 3.9.3 (2025-05-09)
 
 ### Miscellaneous
