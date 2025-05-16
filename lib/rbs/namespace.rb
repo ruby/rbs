@@ -116,10 +116,3 @@ module RBS
     end
   end
 end
-
-module Kernel
-  def Namespace(name)
-    warn "Kernel#Namespace() is deprecated. Use RBS::Namespace.parse instead.", category: :deprecated
-    RBS::Namespace.parse(name)
-  end
-end

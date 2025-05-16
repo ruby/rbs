@@ -100,10 +100,3 @@ module RBS
     end
   end
 end
-
-module Kernel
-  def TypeName(string)
-    warn "Kernel#TypeName() is deprecated. Use RBS::TypeName.parse instead.", category: :deprecated
-    RBS::TypeName.parse(string)
-  end
-end
