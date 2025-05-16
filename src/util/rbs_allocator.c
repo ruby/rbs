@@ -15,17 +15,16 @@
 #include <inttypes.h>
 
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #else
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <sys/mman.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 #endif
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
 #define MAP_ANONYMOUS MAP_ANON
 #endif
-
 
 struct rbs_allocator {
     uintptr_t heap_ptr;
@@ -49,8 +48,7 @@ static void *map_memory(size_t size) {
     LPVOID result = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     rbs_assert(result != NULL, "VirtualAlloc failed");
 #else
-    void *result = mmap(NULL, size, PROT_READ | PROT_WRITE,
-                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void *result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     rbs_assert(result != MAP_FAILED, "mmap failed");
 #endif
     return result;
@@ -103,8 +101,8 @@ rbs_allocator_t *rbs_allocator_init(void) {
     guard_page(last_page, page_size);
     uintptr_t start = (uintptr_t) mem;
     rbs_allocator_t header = (rbs_allocator_t) {
-      .heap_ptr = start + sizeof header,
-      .size = size + page_size,
+        .heap_ptr = start + sizeof header,
+        .size = size + page_size,
     };
     memcpy(mem, &header, sizeof header);
     return (rbs_allocator_t *) mem;

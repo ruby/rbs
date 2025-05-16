@@ -37,9 +37,10 @@ GEM
     connection_pool (2.5.3)
     csv (3.3.4)
     dbm (1.1.0)
-    diff-lcs (1.6.1)
+    diff-lcs (1.6.2)
     digest (3.2.0)
     drb (2.2.1)
+    extconf_compile_commands_json (0.0.7)
     ffi (1.17.2)
     fileutils (1.7.3)
     goodcheck (3.1.0)
@@ -49,11 +50,11 @@ GEM
       strong_json (>= 1.1, < 2.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    json (2.10.2)
+    json (2.12.0)
     json-schema (5.1.1)
       addressable (~> 2.8)
       bigdecimal (~> 3.1)
-    language_server-protocol (3.17.0.4)
+    language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -184,6 +185,7 @@ DEPENDENCIES
   csv
   dbm
   digest
+  extconf_compile_commands_json
   fileutils
   goodcheck
   json

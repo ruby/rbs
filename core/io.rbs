@@ -2278,7 +2278,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  def self.binread: (String name, ?Integer? length, ?Integer offset) -> String
+  def self.binread: (path name, ?Integer? length, ?Integer offset) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2291,7 +2291,7 @@ class IO < Object
   # potential security vulnerabilities if called with untrusted input; see
   # [Command Injection](rdoc-ref:command_injection.rdoc).
   #
-  def self.binwrite: (String name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
+  def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2716,7 +2716,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (String name, ?Integer? length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
+  def self.read: (path name, ?Integer? length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2986,7 +2986,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.write: (String path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> Integer
+  def self.write: (path path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> Integer
 
   # <!--
   #   rdoc-file=io.c
