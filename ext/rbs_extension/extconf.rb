@@ -25,3 +25,7 @@ if ENV["TEST_NO_C23"]
 end
 
 create_makefile 'rbs_extension'
+
+require 'extconf_compile_commands_json'
+ExtconfCompileCommandsJson.generate!
+ExtconfCompileCommandsJson.symlink!

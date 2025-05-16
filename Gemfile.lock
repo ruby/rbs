@@ -39,6 +39,7 @@ GEM
     diff-lcs (1.6.1)
     digest (3.2.0)
     drb (2.2.1)
+    extconf_compile_commands_json (0.0.7)
     ffi (1.17.2)
     fileutils (1.7.3)
     goodcheck (3.1.0)
@@ -183,6 +184,7 @@ DEPENDENCIES
   csv
   dbm
   digest
+  extconf_compile_commands_json
   fileutils
   goodcheck
   json (~> 2.10.2)
