@@ -461,6 +461,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_include?
     assert_send_type "(Integer) -> bool",
                      [1,2,3], :include?, 1
+    assert_send_type "(Float) -> bool",
+                     [1,2,3], :include?, 1.0
   end
 
   def test_index
