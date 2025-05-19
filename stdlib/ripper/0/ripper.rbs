@@ -911,6 +911,7 @@ class Ripper
 
     class CompileError < Error
     end
+
     class Error < StandardError
     end
 
@@ -927,6 +928,7 @@ class Ripper
 
       def match: (?untyped n) -> untyped
     end
+
     class MatchError < Error
     end
     alias self.compile self.new
@@ -949,6 +951,7 @@ class Ripper
 
     def map_tokens: (untyped tokens) -> untyped
   end
+
   interface _Gets
     def gets: (?String sep, ?Integer limit) -> String?
   end
