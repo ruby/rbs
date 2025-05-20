@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <fcntl.h>
 #endif
 
 struct rbs_allocator {
@@ -30,17 +31,14 @@ struct rbs_allocator {
 static void *portable_mmap_anon(size_t size) {
     void *ptr;
 
-#ifdef _WIN32
-    ptr = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    if (ptr == NULL) return NULL;
-#elif defined(MAP_ANONYMOUS)
+#if defined(MAP_ANONYMOUS)
     ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 #elif defined(MAP_ANON)
     ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 #else
     /* Fallback to /dev/zero for systems without anonymous mapping */
     int fd = open("/dev/zero", O_RDWR);
-    if (fd == -1) return MAP_FAILED;
+    rbs_assert(fd != -1, "open('/dev/zero') failed");
 
     ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
     close(fd); /* Can close fd after mapping */
