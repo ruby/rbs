@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module RBS
-  VERSION = "4.0.0.dev.3"
+  VERSION = "4.0.0.dev.4"
 end
