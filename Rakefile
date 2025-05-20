@@ -11,6 +11,14 @@ bin = File.join(__dir__, "bin")
 
 Rake::ExtensionTask.new("rbs_extension")
 
+compile_task = Rake::Task[:compile]
+
+task :setup_extconf_compile_commands_json do
+  ENV["COMPILE_COMMANDS_JSON"] = "1"
+end
+
+compile_task.prerequisites.unshift(:setup_extconf_compile_commands_json)
+
 test_config = lambda do |t|
   t.libs << "test"
   t.libs << "lib"
