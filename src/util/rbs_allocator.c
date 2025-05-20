@@ -29,6 +29,10 @@ struct rbs_allocator {
 };
 
 static void *portable_mmap_anon(size_t size) {
+#ifdef _WIN32
+    /* Windows doesn't use this function - VirtualAlloc is used instead */
+    return NULL;
+#else
     void *ptr;
 
 #if defined(MAP_ANONYMOUS)
@@ -45,6 +49,7 @@ static void *portable_mmap_anon(size_t size) {
 #endif
 
     return ptr;
+#endif
 }
 
 static size_t get_system_page_size(void) {
