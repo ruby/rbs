@@ -1042,10 +1042,10 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
 }
 
 /*
-  singleton_type ::= {`singleton`} `(` type_name <`)`>
+  singleton_type ::= {`singleton`} `(` type_name <`)`> type_args?
 */
 NODISCARD
-static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton_t **singleton) {
+static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton_t **singleton, bool self_allowed, bool classish_allowed) {
     ASSERT_TOKEN(parser, kSINGLETON);
 
     rbs_range_t type_range;
@@ -1058,9 +1058,26 @@ static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton
     CHECK_PARSE(parse_type_name(parser, CLASS_NAME, &name_range, &type_name));
 
     ADVANCE_ASSERT(parser, pRPAREN);
-    type_range.end = parser->current_token.range.end;
 
-    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), RBS_RANGE_LEX2AST(type_range), type_name, RBS_RANGE_LEX2AST(name_range));
+    rbs_node_list_t *types = rbs_node_list_new(ALLOCATOR());
+
+    rbs_location_range args_range = RBS_LOCATION_NULL_RANGE;
+    if (parser->next_token.type == pLBRACKET) {
+        rbs_parser_advance(parser);
+        args_range.start_byte = parser->current_token.range.start.byte_pos;
+        args_range.start_char = parser->current_token.range.start.char_pos;
+        CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, true, self_allowed, classish_allowed));
+        ADVANCE_ASSERT(parser, pRBRACKET);
+        args_range.end_byte = parser->current_token.range.end.byte_pos;
+        args_range.end_char = parser->current_token.range.end.char_pos;
+    }
+
+    type_range.end = parser->current_token.range.end;
+    rbs_location_range loc = RBS_RANGE_LEX2AST(type_range);
+
+    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name, types, RBS_RANGE_LEX2AST(name_range));
+    (*singleton)->args_range = args_range;
+
     return true;
 }
 
@@ -1242,7 +1259,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     }
     case kSINGLETON: {
         rbs_types_class_singleton_t *singleton = NULL;
-        CHECK_PARSE(parse_singleton_type(parser, &singleton));
+        CHECK_PARSE(parse_singleton_type(parser, &singleton, self_allowed, classish_allowed));
         *type = (rbs_node_t *) singleton;
         return true;
     }

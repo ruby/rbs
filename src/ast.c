@@ -1303,7 +1303,7 @@ rbs_types_class_instance_t *rbs_types_class_instance_new(rbs_allocator_t *alloca
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
-rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_location_range name_range) {
+rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range) {
     rbs_types_class_singleton_t *instance = rbs_allocator_alloc(allocator, rbs_types_class_singleton_t);
 
     *instance = (rbs_types_class_singleton_t) {
@@ -1312,7 +1312,9 @@ rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allo
             .location = location,
         },
         .name = name,
+        .args = args,
         .name_range = name_range,
+        .args_range = RBS_LOCATION_NULL_RANGE,
     };
 
     return instance;
