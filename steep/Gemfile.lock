@@ -52,7 +52,7 @@ GEM
       rbs (>= 3, < 4)
       sorbet-runtime (>= 0.5.10782)
     securerandom (0.4.1)
-    sorbet-runtime (0.5.12117)
+    sorbet-runtime (0.5.12119)
     steep (1.10.0)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
