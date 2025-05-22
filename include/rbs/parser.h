@@ -127,7 +127,7 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
 void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
 /**
- * TypeValidation represents the validation rules for type parsing.
+ * rbs_type_validation_t represents the validation rules for type parsing.
  * It controls whether certain types are allowed in specific contexts.
  * */
 typedef struct {
@@ -135,15 +135,15 @@ typedef struct {
     bool no_void_allowed_here; /* If true, `void` type is not allowed, but it's allowed in one depth.*/
     bool no_self;              /* If true, `self` type is not allowed.*/
     bool no_classish;          /* If true, `class` or `instance` types are not allowed.*/
-} TypeValidation;
+} rbs_type_validation_t;
 
 /**
- * SkipValidation is a TypeValidation that allows all types.
+ * SkipValidation is a rbs_type_validation_t that allows all types.
  * */
-extern const TypeValidation SkipValidation;
+extern const rbs_type_validation_t SkipValidation;
 
-bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, TypeValidation validation);
-bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, TypeValidation validation);
+bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, rbs_type_validation_t validation);
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, rbs_type_validation_t validation);
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params);
