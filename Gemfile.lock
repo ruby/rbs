@@ -39,7 +39,7 @@ GEM
     dbm (1.1.0)
     diff-lcs (1.6.2)
     digest (3.2.0)
-    drb (2.2.1)
+    drb (2.2.3)
     erb (5.0.1)
     extconf_compile_commands_json (0.0.7)
     ffi (1.17.2)
