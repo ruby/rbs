@@ -235,6 +235,7 @@ module RBS
                 variance: variance || :invariant,
                 location: nil,
                 upper_bound: nil,
+                lower_bound: nil,
                 default_type: nil
               )
             end
@@ -332,6 +333,7 @@ module RBS
                   name: name,
                   variance: :invariant,
                   upper_bound: nil,
+                  lower_bound: nil,
                   location: nil,
                   default_type: nil
                 )

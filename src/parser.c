@@ -1316,9 +1316,9 @@ bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type) {
   type_params ::= {} `[` type_param `,` ... <`]`>
                 | {<>}
 
-  type_param ::= kUNCHECKED? (kIN|kOUT|) tUIDENT upper_bound? default_type?   (module_type_params == true)
+  type_param ::= kUNCHECKED? (kIN|kOUT|) tUIDENT upper_bound? lower_bound? default_type?   (module_type_params == true)
 
-  type_param ::= tUIDENT upper_bound? default_type?                           (module_type_params == false)
+  type_param ::= tUIDENT upper_bound? lower_bound? default_type?                           (module_type_params == false)
 */
 NODISCARD
 static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module_type_params, rbs_node_list_t **params) {
@@ -1335,6 +1335,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
             bool unchecked = false;
             rbs_keyword_t *variance = rbs_keyword_new(ALLOCATOR(), rbs_location_current_token(parser), INTERN("invariant"));
             rbs_node_t *upper_bound = NULL;
+            rbs_node_t *lower_bound = NULL;
             rbs_node_t *default_type = NULL;
 
             rbs_range_t param_range;
@@ -1378,11 +1379,37 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
             CHECK_PARSE(rbs_parser_insert_typevar(parser, id));
 
             rbs_range_t upper_bound_range = NULL_RANGE;
-            if (parser->next_token.type == pLT) {
-                rbs_parser_advance(parser);
-                upper_bound_range.start = parser->current_token.range.start;
-                CHECK_PARSE(rbs_parse_type(parser, &upper_bound));
-                upper_bound_range.end = parser->current_token.range.end;
+            rbs_range_t lower_bound_range = NULL_RANGE;
+
+            for (int bound_parse_attempt = 0; bound_parse_attempt < 2; bound_parse_attempt++) {
+                switch (parser->next_token.type) {
+                case pLT:
+                    if (upper_bound != NULL) {
+                        rbs_parser_set_error(parser, parser->next_token, true, "duplicate upper bound ('<') for type parameter");
+                        return false;
+                    }
+
+                    rbs_parser_advance(parser);
+                    upper_bound_range.start = parser->current_token.range.start;
+                    CHECK_PARSE(rbs_parse_type(parser, &upper_bound));
+                    upper_bound_range.end = parser->current_token.range.end;
+                    break;
+
+                case pGT:
+                    if (lower_bound != NULL) {
+                        rbs_parser_set_error(parser, parser->next_token, true, "duplicate lower bound ('>') for type parameter");
+                        return false;
+                    }
+
+                    rbs_parser_advance(parser);
+                    lower_bound_range.start = parser->current_token.range.start;
+                    CHECK_PARSE(rbs_parse_type(parser, &lower_bound));
+                    lower_bound_range.end = parser->current_token.range.end;
+                    break;
+
+                default:
+                    break;
+                }
             }
 
             rbs_range_t default_type_range = NULL_RANGE;
@@ -1406,23 +1433,25 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
             param_range.end = parser->current_token.range.end;
 
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), param_range);
-            rbs_loc_alloc_children(ALLOCATOR(), loc, 5);
+            rbs_loc_alloc_children(ALLOCATOR(), loc, 6);
             rbs_loc_add_required_child(loc, INTERN("name"), name_range);
             rbs_loc_add_optional_child(loc, INTERN("variance"), variance_range);
             rbs_loc_add_optional_child(loc, INTERN("unchecked"), unchecked_range);
             rbs_loc_add_optional_child(loc, INTERN("upper_bound"), upper_bound_range);
+            rbs_loc_add_optional_child(loc, INTERN("lower_bound"), lower_bound_range);
             rbs_loc_add_optional_child(loc, INTERN("default"), default_type_range);
 
-            rbs_ast_type_param_t *param = rbs_ast_type_param_new(ALLOCATOR(), loc, name, variance, upper_bound, default_type, unchecked);
+            rbs_ast_type_param_t *param = rbs_ast_type_param_new(ALLOCATOR(), loc, name, variance, upper_bound, lower_bound, default_type, unchecked);
 
             rbs_node_list_append(*params, (rbs_node_t *) param);
 
             if (parser->next_token.type == pCOMMA) {
                 rbs_parser_advance(parser);
-            }
-
-            if (parser->next_token.type == pRBRACKET) {
+            } else if (parser->next_token.type == pRBRACKET) {
                 break;
+            } else {
+                rbs_parser_set_error(parser, parser->next_token, true, "expected ',' or ']' after type parameter, got %s", rbs_token_type_str(parser->next_token.type));
+                return false;
             }
         }
 
@@ -1738,6 +1767,7 @@ static bool parse_method_name(rbs_parser_t *parser, rbs_range_t *range, rbs_ast_
     case pSTAR:
     case pSTAR2:
     case pLT:
+    case pGT:
     case pAREF_OPR:
     case tOPERATOR: {
         *range = parser->current_token.range;

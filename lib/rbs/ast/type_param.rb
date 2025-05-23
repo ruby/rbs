@@ -3,12 +3,13 @@
 module RBS
   module AST
     class TypeParam
-      attr_reader :name, :variance, :location, :upper_bound_type, :default_type
+      attr_reader :name, :variance, :location, :upper_bound_type, :lower_bound_type, :default_type
 
-      def initialize(name:, variance:, upper_bound:, location:, default_type: nil, unchecked: false)
+      def initialize(name:, variance:, upper_bound:, lower_bound:, location:, default_type: nil, unchecked: false)
         @name = name
         @variance = variance
         @upper_bound_type = upper_bound
+        @lower_bound_type = lower_bound
         @location = location
         @default_type = default_type
         @unchecked = unchecked
@@ -18,6 +19,13 @@ module RBS
         case upper_bound_type
         when Types::ClassInstance, Types::ClassSingleton, Types::Interface
           upper_bound_type
+        end
+      end
+
+      def lower_bound
+        case lower_bound_type
+        when Types::ClassInstance, Types::ClassSingleton, Types::Interface
+          lower_bound_type
         end
       end
 
@@ -35,6 +43,7 @@ module RBS
           other.name == name &&
           other.variance == variance &&
           other.upper_bound_type == upper_bound_type &&
+          other.lower_bound_type == lower_bound_type &&
           other.default_type == default_type &&
           other.unchecked? == unchecked?
       end
@@ -42,7 +51,7 @@ module RBS
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash ^ variance.hash ^ upper_bound_type.hash ^ unchecked?.hash ^ default_type.hash
+        self.class.hash ^ name.hash ^ variance.hash ^ upper_bound_type.hash ^ lower_bound_type.hash ^ unchecked?.hash ^ default_type.hash
       end
 
       def to_json(state = JSON::State.new)
@@ -52,6 +61,7 @@ module RBS
           unchecked: unchecked?,
           location: location,
           upper_bound: upper_bound_type,
+          lower_bound: lower_bound_type,
           default_type: default_type
         }.to_json(state)
       end
@@ -59,6 +69,10 @@ module RBS
       def map_type(&block)
         if b = upper_bound_type
           _upper_bound_type = yield(b)
+        end
+
+        if b = lower_bound_type
+          _lower_bound_type = yield(b)
         end
 
         if dt = default_type
@@ -69,6 +83,7 @@ module RBS
           name: name,
           variance: variance,
           upper_bound: _upper_bound_type,
+          lower_bound: _lower_bound_type,
           location: location,
           default_type: _default_type
         ).unchecked!(unchecked?)
@@ -108,6 +123,7 @@ module RBS
             name: new_name,
             variance: param.variance,
             upper_bound: param.upper_bound_type&.map_type {|type| type.sub(subst) },
+            lower_bound: param.lower_bound_type&.map_type {|type| type.sub(subst) },
             location: param.location,
             default_type: param.default_type&.map_type {|type| type.sub(subst) }
           ).unchecked!(param.unchecked?)
@@ -134,6 +150,10 @@ module RBS
 
         if type = upper_bound_type
           s << " < #{type}"
+        end
+
+        if type = lower_bound_type
+          s << " > #{type}"
         end
 
         if dt = default_type

@@ -177,6 +177,10 @@ module RBS
           find_in_type(pos, type: upper_bound, array: array) and return true
         end
 
+        if lower_bound = type_param.lower_bound_type
+          find_in_type(pos, type: lower_bound, array: array) and return true
+        end
+
         if default_type = type_param.default_type
           find_in_type(pos, type: default_type, array: array) and return true
         end
