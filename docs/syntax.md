@@ -236,7 +236,7 @@ We have contextual limitations on some types:
 
 These contextual limitation is introduced at RBS 3.3.
 The parser accepts those types even if it doesn't satisfy contextual limitation, but warning is reported with `rbs validate` command.
-We plan to change the parser to reject those types if it breaks the contextual limitations in next release -- `3.4`.
+Since RBS 4.0, it is reported during parsing.
 
 #### Limitations on `void` types
 
