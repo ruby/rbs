@@ -176,6 +176,7 @@ GEM
     zlib (3.2.1)
 
 PLATFORMS
+  ruby
 
 DEPENDENCIES
   abbrev
