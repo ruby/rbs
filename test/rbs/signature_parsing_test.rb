@@ -2811,6 +2811,134 @@ end
     assert_equal "a.rbs:1:11...1:19: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
   end
 
+  def test_context_syntax_error_lower_bound
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class C[T > Array[void]]
+        end
+        module M[T > Array[void]]
+        end
+        interface _I[T > Array[void]]
+        end
+        type a[T > Array[void]] = 1
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > void] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > self] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > class] end")
+    end
+    assert_equal "a.rbs:1:12...1:17: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > instance] end")
+    end
+    assert_equal "a.rbs:1:12...1:20: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > void] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > self] end")
+    end
+    assert_equal "a.rbs:1:13...1:17: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > class] end")
+    end
+    assert_equal "a.rbs:1:13...1:18: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > instance] end")
+    end
+    assert_equal "a.rbs:1:13...1:21: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > void] end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > self] end")
+    end
+    assert_equal "a.rbs:1:17...1:21: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > class] end")
+    end
+    assert_equal "a.rbs:1:17...1:22: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > instance] end")
+    end
+    assert_equal "a.rbs:1:17...1:25: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > void] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:15: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > self] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:15: Syntax error: `self` type is not allowed in this context, token=`self` (kSELF)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > class] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:16: Syntax error: `class` type is not allowed in this context, token=`class` (kCLASS)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > instance] = 1")
+    end
+    assert_equal "a.rbs:1:11...1:19: Syntax error: `instance` type is not allowed in this context, token=`instance` (kINSTANCE)", ex.message
+  end
+
+  def test_context_syntax_error_upper_and_lower_bound
+    assert_nothing_raised do
+      Parser.parse_signature(<<~SIG)
+        class C[T < Array[void] > Array[void]]
+        end
+        module M[T > Array[void] < Array[void]]
+        end
+        interface _I[T < Array[void] > Array[void]]
+        end
+        type a[T < Array[void] > Array[void]] = 1
+      SIG
+    end
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < void > Integer] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > Integer < void] end")
+    end
+    assert_equal "a.rbs:1:22...1:26: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < Integer > void] end")
+    end
+    assert_equal "a.rbs:1:22...1:26: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > void < Integer] end")
+    end
+    assert_equal "a.rbs:1:12...1:16: Syntax error: `void` type is only allowed in return type or generics parameter, token=`void` (kVOID)", ex.message
+  end
+
   def test_context_syntax_error_default_type
     assert_nothing_raised do
       Parser.parse_signature(<<~SIG)
