@@ -495,7 +495,7 @@ module RBS
       each_rbs_source do |source|
         resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
         if !resolve || resolve.value
-          _, decls = resolve_signature(resolver, table, source.directives, source.declarations)
+          _, decls = resolve_signature(resolver, table, source.directives, source.declarations, only: only)
         else
           decls = source.declarations
         end
@@ -504,7 +504,15 @@ module RBS
 
       each_ruby_source do |source|
         decls = source.declarations.map do |decl|
-          resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
+          if only
+            if only.include?(decl)
+              resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
+            else
+              decl
+            end
+          else
+            resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
+          end
         end
 
         env.add_source(Source::Ruby.new(source.buffer, source.prism_result, decls, source.diagnostics))
@@ -845,7 +853,7 @@ module RBS
     end
 
     def inspect
-      ivars = %i[@declarations @class_decls @class_alias_decls @interface_decls @type_alias_decls @constant_decls @global_decls]
+      ivars = %i[@sources @class_decls @class_alias_decls @interface_decls @type_alias_decls @constant_decls @global_decls]
       "\#<RBS::Environment #{ivars.map { |iv| "#{iv}=(#{instance_variable_get(iv).size} items)"}.join(' ')}>"
     end
 
@@ -853,12 +861,25 @@ module RBS
       sources.map(&:buffer)
     end
 
-    def unload(buffers)
-      env = Environment.new
-      bufs = buffers.to_set
+    def unload(paths)
+      ps = Set[]
+      paths.each do |path|
+        if path.is_a?(Buffer)
+          ps << path.name
+        else
+          ps << path
+        end
+      end
+
+      env = Environment.new()
 
       each_rbs_source do |source|
-        next if bufs.include?(source.buffer)
+        next if ps.include?(source.buffer.name)
+        env.add_source(source)
+      end
+
+      each_ruby_source do |source|
+        next if ps.include?(source.buffer.name)
         env.add_source(source)
       end
 

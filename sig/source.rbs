@@ -1,7 +1,7 @@
 module RBS
   module Source
     type t = RBS | Ruby
-           
+
     class RBS
       attr_reader buffer: Buffer
 
@@ -28,9 +28,9 @@ module RBS
 
       attr_reader declarations: Array[AST::Ruby::Declarations::t]
 
-      attr_reader diagnostics: Array[untyped]
+      attr_reader diagnostics: Array[InlineParser::Diagnostic::t]
 
-      def initialize: (Buffer, Prism::ParseResult, Array[AST::Ruby::Declarations::t], Array[untyped]) -> void
+      def initialize: (Buffer, Prism::ParseResult, Array[AST::Ruby::Declarations::t], Array[InlineParser::Diagnostic::t]) -> void
 
       def each_type_name: () { (TypeName) -> void } -> void
                         | () -> Enumerator[TypeName]

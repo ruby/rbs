@@ -84,9 +84,15 @@ module RBS
     # When `only` is given, it skips other _top-level_ declarations not included in the collection.
     # This helps running resolution faster in the case of _partial updates_.
     #
-    def resolve_type_names: (?only: Set[AST::Declarations::t]?) -> Environment
+    def resolve_type_names: (?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?) -> Environment
 
-    def resolve_signature: (Resolver::TypeNameResolver, UseMap::Table, Array[AST::Directives::t], Array[AST::Declarations::t], ?only: Set[AST::Declarations::t]?) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+    def resolve_signature: (
+      Resolver::TypeNameResolver,
+      UseMap::Table,
+      Array[AST::Directives::t],
+      Array[AST::Declarations::t],
+      ?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?
+    ) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
 
     def inspect: () -> String
 
@@ -94,7 +100,8 @@ module RBS
 
     # Remove declarations and directives that are loaded from `buffers`
     #
-    def unload: (Set[Buffer] buffers) -> Environment
+    def unload: (Set[Pathname] paths) -> Environment
+              | %a{deprecated: Use pathname version} (Set[Buffer] buffers) -> Environment
 
     # Returns true if an interface with the type name is defined
     #
