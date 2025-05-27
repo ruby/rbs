@@ -767,9 +767,6 @@ _generics-bound_ ::=                 (No type bound)
                    | `<` _type_      (The generics parameter has an upper bound)
                    | '>' _type_      (The generics parameter has a lower bound)
 
-# A type parameter can have both upper and lower bounds, which can be specified in either order:
-# `[T < UpperBound > LowerBound]` or `[T > LowerBound < UpperBound]`
-
 _default-type_ ::=                    (No default type)
                  | `=` _type_         (The generics parameter has default type)
 
@@ -780,6 +777,9 @@ _generics-variance_ ::=               (Invariant)
 _generics-unchecked_ ::=              (Empty)
                        | `unchecked`  (Skips variance annotation validation)
 ```
+
+A type parameter can have both upper and lower bounds, which can be specified in either order:
+`[T < UpperBound > LowerBound]` or `[T > LowerBound < UpperBound]`.
 
 RBS allows class/module/interface/type alias definitions and methods to be generic.
 
