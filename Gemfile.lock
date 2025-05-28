@@ -101,19 +101,19 @@ GEM
       erb
       psych (>= 4.0.0)
     regexp_parser (2.10.0)
-    rspec (3.13.0)
+    rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
       rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.3)
+    rspec-core (3.13.4)
       rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.4)
+    rspec-expectations (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.4)
+    rspec-mocks (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.3)
+    rspec-support (3.13.4)
     rubocop (1.75.7)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -176,7 +176,6 @@ GEM
     zlib (3.2.1)
 
 PLATFORMS
-  ruby
 
 DEPENDENCIES
   abbrev
