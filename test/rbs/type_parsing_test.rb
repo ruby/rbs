@@ -257,6 +257,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::ClassSingleton, type
 
       assert_equal TypeName.new(namespace: Namespace.empty, name: :Object), type.name
+      assert_equal [], type.args
 
       assert_equal "singleton(Object)", type.location.source
     end
@@ -265,8 +266,20 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::ClassSingleton, type
 
       assert_equal TypeName.new(namespace: Namespace.root, name: :Object), type.name
+      assert_equal [], type.args
 
       assert_equal "singleton(::Object)", type.location.source
+    end
+
+    Parser.parse_type("singleton(Array)[String]").yield_self do |type|
+      assert_instance_of Types::ClassSingleton, type
+
+      assert_equal TypeName.new(namespace: Namespace.empty, name: :Array), type.name
+      assert_equal 1, type.args.size
+      assert_instance_of Types::ClassInstance, type.args[0]
+      assert_equal TypeName.new(namespace: Namespace.empty, name: :String), type.args[0].name
+
+      assert_equal "singleton(Array)[String]", type.location.source
     end
 
     assert_raises RBS::ParsingError do
