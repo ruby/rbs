@@ -556,32 +556,6 @@ singleton(::BasicObject)
     end
   end
 
-  def test_validate__generics_default_self
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          module A[T = self]
-          end
-
-          class B[S = self]
-          end
-
-          interface _C[T = self]
-          end
-
-          type t[T = self] = untyped
-        RBS
-
-        cli.run(["-I", dir, "validate"])
-
-        assert_include stdout.string, "/a.rbs:1:13...1:17: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:4:12...4:16: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:7:17...7:21: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:10:11...10:15: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-      end
-    end
-  end
-
   def test_validate__generics_default_ref
     with_cli do |cli|
       Dir.mktmpdir do |dir|
@@ -615,15 +589,20 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            def foo: () -> Nothing
+          end
+
+          class Bar
+            def bar: () -> Nothing
           end
         RBS
 
-        cli.run(["-I", dir, "--log-level=warn", "validate"])
+        assert_raises SystemExit do
+          cli.run(["-I", dir, "--log-level=warn", "validate"])
+        end
 
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:17...2:24: Could not find Nothing (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:6:17...6:24: Could not find Nothing (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -633,52 +612,20 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            def foo: () -> Nothing
           end
-        RBS
 
-        cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-      end
-    end
-  end
-
-  def test_validate_multiple_with_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+          class Bar
+            def bar: () -> Nothing
           end
         RBS
 
         assert_raises SystemExit do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
+          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
         end
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-      end
-    end
-  end
 
-  def test_validate_multiple_with_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
-          end
-        RBS
-
-        assert_raises SystemExit do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_not_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:17...2:24: Could not find Nothing (RBS::NoTypeFoundError)"
+        assert_not_include stdout.string, "a.rbs:6:17...6:24: Could not find Nothing (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -688,7 +635,6 @@ singleton(::BasicObject)
       assert_raise SystemExit do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate))
       end
-      assert_include(stdout.string, "`void` type is only allowed in return type or generics parameter")
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
       assert_include(stdout.string, "test/multiple_error.rbs:8:0...9:3: Detected recursive ancestors: ::RecursiveAncestor < ::RecursiveAncestor (RBS::RecursiveAncestorError)")
       assert_include(stdout.string, "test/multiple_error.rbs:11:15...11:22: Could not find Nothing (RBS::NoTypeFoundError)")
@@ -718,78 +664,7 @@ singleton(::BasicObject)
       assert_raise SystemExit do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
-      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
-      assert_include(stdout.string, "test/multiple_error.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
-    end
-  end
-
-  def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      assert_raise SystemExit do
-        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
-      end
-      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
-    end
-  end
-
-  def test_context_validation
-    tests = [
-      <<~RBS,
-        class Foo
-          def foo: (void) -> untyped
-        end
-      RBS
-      <<~RBS,
-        class Bar[A]
-        end
-        class Foo < Bar[instance]
-        end
-      RBS
-      <<~RBS,
-        module Bar : _Each[instance]
-        end
-      RBS
-      <<~RBS,
-        module Foo[A < _Each[self]]
-        end
-      RBS
-      <<~RBS,
-        class Foo
-          @@bar: self
-        end
-      RBS
-      <<~RBS,
-        type foo = instance
-      RBS
-      <<~RBS,
-        BAR: instance
-      RBS
-      <<~RBS,
-        class Foo
-          include Enumerable[self]
-        end
-      RBS
-      <<~RBS,
-        $FOO: instance
-      RBS
-    ]
-
-    tests.each do |rbs|
-      with_cli do |cli|
-        Dir.mktmpdir do |dir|
-          (Pathname(dir) + 'a.rbs').write(rbs)
-
-          cli.run(["-I", dir, "validate"])
-
-          assert_match(/void|self|instance|class/, stdout.string)
-
-          cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
-          assert_raises SystemExit do
-            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
-          end
-        end
-      end
     end
   end
 
