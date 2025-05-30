@@ -20,16 +20,37 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>
-#endif
-
-#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
-#define MAP_ANONYMOUS MAP_ANON
+#include <fcntl.h>
 #endif
 
 struct rbs_allocator {
     uintptr_t heap_ptr;
     uintptr_t size;
 };
+
+static void *portable_mmap_anon(size_t size) {
+#ifdef _WIN32
+    /* Windows doesn't use this function - VirtualAlloc is used instead */
+    return NULL;
+#else
+    void *ptr;
+
+#if defined(MAP_ANONYMOUS)
+    ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+#elif defined(MAP_ANON)
+    ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+#else
+    /* Fallback to /dev/zero for systems without anonymous mapping */
+    int fd = open("/dev/zero", O_RDWR);
+    rbs_assert(fd != -1, "open('/dev/zero') failed");
+
+    ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    close(fd); /* Can close fd after mapping */
+#endif
+
+    return ptr;
+#endif
+}
 
 static size_t get_system_page_size(void) {
 #ifdef _WIN32
@@ -48,7 +69,7 @@ static void *map_memory(size_t size) {
     LPVOID result = VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     rbs_assert(result != NULL, "VirtualAlloc failed");
 #else
-    void *result = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void *result = portable_mmap_anon(size);
     rbs_assert(result != MAP_FAILED, "mmap failed");
 #endif
     return result;
