@@ -74,14 +74,18 @@ class RactorSingletonTest < Test::Unit::TestCase
   end
 
   def test_receive_if
+    omit "Ractor.receive_if is not implemented" if RUBY_VERSION >= "3.5"
+
     Ractor.current.send 42
     assert_send_type "() { (Integer) -> bool } -> Integer",
                      Ractor, :receive_if do |n| n == 42 end
   end
 
   def test_select
-    r1 = Ractor.new { loop { Ractor.yield 42 } }
-    r2 = Ractor.new { loop { Ractor.yield 43 } }
+    omit "Ractor#yield is not implemented" if RUBY_VERSION >= "3.5"
+
+    r1 = Ractor.new {|r| loop { Ractor.yield 42 } }
+    r2 = Ractor.new {|r| loop { Ractor.yield 43 } }
 
     assert_send_type "(Ractor) -> [Ractor, Integer]",
                      Ractor, :select, r1
@@ -115,6 +119,8 @@ class RactorSingletonTest < Test::Unit::TestCase
   end
 
   def test_yield
+    omit "Ractor#yield is not implemented" if RUBY_VERSION >= "3.5"
+
     Ractor.new(Ractor.current) { |r| loop { r.take } }
 
     assert_send_type "(Integer) -> untyped",
@@ -153,12 +159,16 @@ class RactorInstanceTest < Test::Unit::TestCase
   end
 
   def test_close_incoming
+    omit "Ractor#close_incoming is not implemented" if RUBY_VERSION >= "3.5"
+    
     r = Ractor.new {}
     assert_send_type "() -> bool",
                      r, :close_incoming
   end
 
   def test_close_outgoing
+    omit "Ractor#close_outgoing is not implemented" if RUBY_VERSION >= "3.5"
+
     r = Ractor.new {}
     assert_send_type "() -> bool",
                      r, :close_outgoing
@@ -190,6 +200,8 @@ class RactorInstanceTest < Test::Unit::TestCase
   end
 
   def test_take
+    omit "Ractor#take is not implemented" if RUBY_VERSION >= "3.5"
+
     r = Ractor.new { 42 }
 
     assert_send_type "() -> Integer",
