@@ -912,7 +912,7 @@ module URI
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
-    #   - uri + "/main.rbx?page=1"
+    #   - +(oth)
     # -->
     #
     alias + merge
