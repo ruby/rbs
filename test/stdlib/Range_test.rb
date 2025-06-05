@@ -80,20 +80,6 @@ class RangeTest < StdlibTest
     ('A'...'Z').last
   end
 
-  def test_max
-    (1..10).max
-    (1..10).max(3)
-    (1..10).max { |i, j| i <=> j }
-    (1..10).max(3) { |i, j| i <=> j }
-  end
-
-  def test_min
-    (1..10).min
-    (1..10).min(3)
-    (1..10).min { |i, j| i <=> j }
-    (1..10).min(3) { |i, j| i <=> j }
-  end
-
   def test_percent
     (1..10).%(2)
     if_ruby(..."3.4.0", skip: false) do
@@ -151,5 +137,23 @@ class RangeInstanceTest < Test::Unit::TestCase
       "(::Range[::Integer]) -> bool",
       (2..5), :overlap?, (3..4)
     )
+  end
+
+  def test_min
+    assert_send_type "() -> ::Integer", (1..4), :min
+    assert_send_type "() -> nil", (4..1), :min
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> ::Integer", (1..4), :min do |a, b| a <=> b end
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> nil", (4..1), :min do |a, b| a <=> b end
+    assert_send_type "(::Integer) -> ::Array[::Integer]", (1..4), :min, 2
+    assert_send_type "(::Integer) { (::Integer, ::Integer) -> ::Integer } -> ::Array[::Integer]", (1..4), :min, 0 do |a, b| a <=> b end
+  end
+
+  def test_max
+    assert_send_type "() -> ::Integer", (1..4), :max
+    assert_send_type "() -> nil", (4..1), :max
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> ::Integer", (1..4), :max do |a, b| a <=> b end
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> nil", (4..1), :max do |a, b| a <=> b end
+    assert_send_type "(::Integer) -> ::Array[::Integer]", (1..4), :max, 2
+    assert_send_type "(::Integer) { (::Integer, ::Integer) -> ::Integer } -> ::Array[::Integer]", (4..1), :max, 0 do |a, b| a <=> b end
   end
 end
