@@ -27,6 +27,10 @@ module RBS
           method_definition = @builder.build_singleton(module_name.absolute!).methods[method.name]
           return false unless method_definition
 
+          return false unless method_definition.defs.any? do |type_def|
+            type_def.implemented_in&.relative!.to_s == method.owner.to_s.delete_prefix("#<Class:").delete_suffix(">")
+          end
+
           method_definition.accessibility == accessibility
         end
 
@@ -35,6 +39,10 @@ module RBS
 
           method_definition = @builder.build_instance(module_name.absolute!).methods[method.name]
           return false unless method_definition
+
+          return false unless method_definition.defs.any? do |type_def|
+            type_def.implemented_in&.relative!.to_s == method.owner.to_s
+          end
 
           method_definition.accessibility == accessibility
         end
