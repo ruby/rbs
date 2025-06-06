@@ -584,11 +584,19 @@ end
 
     CONST_DEFINED = 1
     CONST_TODO = 1
+
+    def self.singleton_inherited; end
+    def public_inherited; end
   end
 
   module TodoModule
     def public_defined; end
     def public_todo; end
+  end
+
+  class InheritedTodoClass < TodoClass
+    def self.singleton_inherited; end
+    def public_inherited; end
   end
 
   def test_todo
@@ -605,9 +613,13 @@ end
               def self.singleton_defined: () -> void
               def accessibility_mismatch: () -> void
               CONST_DEFINED: Integer
+              def self.singleton_inherited: () -> void
+              def public_inherited: () -> void
             end
             module TodoModule
               def public_defined: () -> void
+            end
+            class InheritedTodoClass < TodoClass
             end
           end
         end
@@ -643,6 +655,19 @@ end
             class RuntimePrototypeTest < ::Test::Unit::TestCase
               module TodoModule
                 def public_todo: () -> untyped
+              end
+            end
+          end
+        RBS
+
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::InheritedTodoClass"], env: env, merge: false, todo: true)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class InheritedTodoClass < ::RBS::RuntimePrototypeTest::TodoClass
+                def self.singleton_inherited: () -> untyped
+
+                def public_inherited: () -> untyped
               end
             end
           end
