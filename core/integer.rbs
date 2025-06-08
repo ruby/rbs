@@ -1015,8 +1015,6 @@ class Integer < Numeric
   #
   def nobits?: (int mask) -> bool
 
-  def nonzero?: () -> self?
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - numerator -> self
