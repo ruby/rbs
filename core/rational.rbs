@@ -336,8 +336,6 @@ class Rational < Numeric
   #
   def negative?: () -> bool
 
-  def nonzero?: () -> self?
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.numerator  ->  integer

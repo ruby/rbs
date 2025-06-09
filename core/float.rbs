@@ -737,8 +737,6 @@ class Float < Numeric
   #
   def next_float: () -> Float
 
-  def nonzero?: () -> self?
-
   # <!--
   #   rdoc-file=rational.c
   #   - flo.numerator  ->  integer
