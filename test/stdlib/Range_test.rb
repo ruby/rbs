@@ -156,4 +156,11 @@ class RangeInstanceTest < Test::Unit::TestCase
     assert_send_type "(::Integer) -> ::Array[::Integer]", (1..4), :max, 2
     assert_send_type "(::Integer) { (::Integer, ::Integer) -> ::Integer } -> ::Array[::Integer]", (4..1), :max, 0 do |a, b| a <=> b end
   end
+
+  def test_minmax
+    assert_send_type "() -> [::Integer, ::Integer]", (1..4), :minmax
+    assert_send_type "() -> [nil, nil]", [], :minmax
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> [::Integer, ::Integer]", (1..4), :minmax do |a, b| a.size <=> b.size end
+    assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> [nil, nil]", [], :minmax do |a, b| a <=> b end
+  end
 end
