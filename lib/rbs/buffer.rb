@@ -29,19 +29,24 @@ module RBS
 
     def ranges
       @ranges ||= begin
-        lines = content.lines
-        lines << "" if content.end_with?("\n")
+        if content.empty? 
+          ranges = [0...0] #: Array[Range[Integer]]
+          lines = [""]
+        else
+          lines = content.lines
+          lines << "" if content.end_with?("\n")
 
-        ranges = [] #: Array[Range[Integer]]
-        offset = 0
+          ranges = [] #: Array[Range[Integer]]
+          offset = 0
 
-        lines.each do |line|
-          size0 = line.size
-          line = line.chomp
-          range = offset...(offset+line.size)
-          ranges << range
+          lines.each do |line|
+            size0 = line.size
+            line = line.chomp
+            range = offset...(offset+line.size)
+            ranges << range
 
-          offset += size0
+            offset += size0
+          end
         end
 
         ranges
