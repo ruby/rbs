@@ -112,6 +112,10 @@ jobs:
           gem update --system
       - name: clang version
         run: clang --version
+      - name: bundle config set force_ruby_platform true if head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: |
+          bundle config set force_ruby_platform true
       - name: bin/setup
         run: |
           bin/setup
