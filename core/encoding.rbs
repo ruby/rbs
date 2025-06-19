@@ -923,8 +923,7 @@ class Encoding::Converter < Object
   #     p ec.primitive_convert(src, dst, nil, 1)             #=> :destination_buffer_full
   #     p ec.last_error      #=> nil
   #
-  def last_error: () -> Encoding::InvalidByteSequenceError?
-                | () -> Encoding::UndefinedConversionError?
+  def last_error: () -> (InvalidByteSequenceError | UndefinedConversionError | nil)
 
   # <!--
   #   rdoc-file=transcode.c
