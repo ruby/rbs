@@ -785,7 +785,7 @@ class Encoding::Converter < Object
   #   - ec == other        -> true or false
   # -->
   #
-  def ==: (self) -> bool
+  def ==: (untyped) -> bool
 
   # <!--
   #   rdoc-file=transcode.c

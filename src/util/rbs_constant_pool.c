@@ -1,75 +1,5 @@
 #include "rbs/util/rbs_constant_pool.h"
-
-/**
- * Initialize a list of constant ids.
- */
-void
-rbs_constant_id_list_init(rbs_constant_id_list_t *list) {
-    list->ids = NULL;
-    list->size = 0;
-    list->capacity = 0;
-}
-
-/**
- * Initialize a list of constant ids with a given capacity.
- */
-void
-rbs_constant_id_list_init_capacity(rbs_constant_id_list_t *list, size_t capacity) {
-    list->ids = calloc(capacity, sizeof(rbs_constant_id_t));
-    if (list->ids == NULL) abort();
-
-    list->size = 0;
-    list->capacity = capacity;
-}
-
-/**
- * Append a constant id to a list of constant ids. Returns false if any
- * potential reallocations fail.
- */
-bool
-rbs_constant_id_list_append(rbs_constant_id_list_t *list, rbs_constant_id_t id) {
-    if (list->size >= list->capacity) {
-        list->capacity = list->capacity == 0 ? 8 : list->capacity * 2;
-        list->ids = (rbs_constant_id_t *) realloc(list->ids, sizeof(rbs_constant_id_t) * list->capacity);
-        if (list->ids == NULL) return false;
-    }
-
-    list->ids[list->size++] = id;
-    return true;
-}
-
-/**
- * Insert a constant id into a list of constant ids at the specified index.
- */
-void
-rbs_constant_id_list_insert(rbs_constant_id_list_t *list, size_t index, rbs_constant_id_t id) {
-    assert(index < list->capacity);
-    assert(list->ids[index] == RBS_CONSTANT_ID_UNSET);
-
-    list->ids[index] = id;
-    list->size++;
-}
-
-/**
- * Checks if the current constant id list includes the given constant id.
- */
-bool
-rbs_constant_id_list_includes(rbs_constant_id_list_t *list, rbs_constant_id_t id) {
-    for (size_t index = 0; index < list->size; index++) {
-        if (list->ids[index] == id) return true;
-    }
-    return false;
-}
-
-/**
- * Free the memory associated with a list of constant ids.
- */
-void
-rbs_constant_id_list_free(rbs_constant_id_list_t *list) {
-    if (list->ids != NULL) {
-        free(list->ids);
-    }
-}
+#include "rbs/util/rbs_assert.h"
 
 /**
  * A relatively simple hash function (djb2) that is used to hash strings. We are
@@ -107,19 +37,16 @@ next_power_of_two(uint32_t v) {
     return v;
 }
 
-#ifndef NDEBUG
-static bool
-is_power_of_two(uint32_t size) {
+static bool is_power_of_two(uint32_t size) {
     return (size & (size - 1)) == 0;
 }
-#endif
 
 /**
  * Resize a constant pool to a given capacity.
  */
 static inline bool
 rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
-    assert(is_power_of_two(pool->capacity));
+    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
 
     uint32_t next_capacity = pool->capacity * 2;
     if (next_capacity < pool->capacity) return false;
@@ -131,7 +58,7 @@ rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
     if (next == NULL) return false;
 
     rbs_constant_pool_bucket_t *next_buckets = next;
-    rbs_constant_t *next_constants = (void *)(((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
+    rbs_constant_t *next_constants = (void *) (((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
 
     // For each bucket in the current constant pool, find the index in the
     // next constant pool, and insert it.
@@ -169,14 +96,13 @@ rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
 }
 
 // This storage is initialized by `Init_rbs_extension()` in `main.c`.
-static rbs_constant_pool_t RBS_GLOBAL_CONSTANT_POOL_STORAGE = {};
+static rbs_constant_pool_t RBS_GLOBAL_CONSTANT_POOL_STORAGE = { 0 };
 rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL = &RBS_GLOBAL_CONSTANT_POOL_STORAGE;
 
 /**
  * Initialize a new constant pool with a given capacity.
  */
-bool
-rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
+bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
     const uint32_t maximum = (~((uint32_t) 0));
     if (capacity >= ((maximum / 2) + 1)) return false;
 
@@ -186,7 +112,7 @@ rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
     if (memory == NULL) return false;
 
     pool->buckets = memory;
-    pool->constants = (void *)(((char *)memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
+    pool->constants = (void *) (((char *) memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
     pool->size = 0;
     pool->capacity = capacity;
     return true;
@@ -197,7 +123,7 @@ rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
  */
 rbs_constant_t *
 rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_id_t constant_id) {
-    assert(constant_id != RBS_CONSTANT_ID_UNSET && constant_id <= pool->size);
+    rbs_assert(constant_id != RBS_CONSTANT_ID_UNSET && constant_id <= pool->size, "constant_id is not valid. Got %i, pool->size: %i", constant_id, pool->size);
     return &pool->constants[constant_id - 1];
 }
 
@@ -207,7 +133,7 @@ rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_i
  */
 rbs_constant_id_t
 rbs_constant_pool_find(const rbs_constant_pool_t *pool, const uint8_t *start, size_t length) {
-    assert(is_power_of_two(pool->capacity));
+    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
     const uint32_t mask = pool->capacity - 1;
 
     uint32_t hash = rbs_constant_pool_hash(start, length);
@@ -235,7 +161,7 @@ rbs_constant_pool_insert(rbs_constant_pool_t *pool, const uint8_t *start, size_t
         if (!rbs_constant_pool_resize(pool)) return RBS_CONSTANT_ID_UNSET;
     }
 
-    assert(is_power_of_two(pool->capacity));
+    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
     const uint32_t mask = pool->capacity - 1;
 
     uint32_t hash = rbs_constant_pool_hash(start, length);
@@ -276,7 +202,7 @@ rbs_constant_pool_insert(rbs_constant_pool_t *pool, const uint8_t *start, size_t
     // IDs are allocated starting at 1, since the value 0 denotes a non-existent
     // constant.
     uint32_t id = ++pool->size;
-    assert(pool->size < ((uint32_t) (1 << 30)));
+    rbs_assert(pool->size < ((uint32_t) (1 << 30)), "pool->size is too large. Got %i", pool->size);
 
     *bucket = (rbs_constant_pool_bucket_t) {
         .id = (unsigned int) (id & 0x3fffffff),
@@ -299,6 +225,11 @@ rbs_constant_pool_insert(rbs_constant_pool_t *pool, const uint8_t *start, size_t
 rbs_constant_id_t
 rbs_constant_pool_insert_shared(rbs_constant_pool_t *pool, const uint8_t *start, size_t length) {
     return rbs_constant_pool_insert(pool, start, length, RBS_CONSTANT_POOL_BUCKET_DEFAULT);
+}
+
+rbs_constant_id_t
+rbs_constant_pool_insert_shared_with_encoding(rbs_constant_pool_t *pool, const uint8_t *start, size_t length, const rbs_encoding_t *encoding) {
+    return rbs_constant_pool_insert_shared(pool, start, length);
 }
 
 /**
@@ -324,8 +255,7 @@ rbs_constant_pool_insert_constant(rbs_constant_pool_t *pool, const uint8_t *star
 /**
  * Free the memory associated with a constant pool.
  */
-void
-rbs_constant_pool_free(rbs_constant_pool_t *pool) {
+void rbs_constant_pool_free(rbs_constant_pool_t *pool) {
     // For each constant in the current constant pool, free the contents if the
     // contents are owned.
     for (uint32_t index = 0; index < pool->capacity; index++) {

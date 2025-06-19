@@ -380,4 +380,32 @@ EOF
       end
     end
   end
+
+  def test_methods__inline
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files[Pathname("foo.rb")] = <<EOF
+class Foo
+  def foo(x, y)
+    return x + y
+  end
+end
+EOF
+      manager.build do |env|
+        builder = MethodBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |methods|
+          assert_equal parse_type("::Foo"), methods.type
+
+          methods.methods[:foo].tap do |foo|
+            assert_instance_of MethodBuilder::Methods::Definition, foo
+
+            assert_instance_of AST::Ruby::Members::DefMember, foo.original
+            assert_equal [parse_method_type("(?) -> untyped")], foo.original.overloads.map(&:method_type)
+
+            assert_equal :public, foo.accessibility
+          end
+        end
+      end
+    end
+  end
 end

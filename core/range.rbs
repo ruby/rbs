@@ -741,10 +741,7 @@ class Range[out Elem] < Object
   #
   # Related: Range#min, Range#minmax.
   #
-  def max: () -> Elem
-         | () { (Elem a, Elem b) -> Integer } -> Elem
-         | (Integer n) -> ::Array[Elem]
-         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
+  def max: ...
 
   # <!--
   #   rdoc-file=range.c
@@ -826,10 +823,7 @@ class Range[out Elem] < Object
   #
   # Related: Range#max, Range#minmax.
   #
-  def min: () -> Elem
-         | () { (Elem a, Elem b) -> Integer } -> Elem
-         | (Integer n) -> ::Array[Elem]
-         | (Integer n) { (Elem a, Elem b) -> Integer } -> ::Array[Elem]
+  def min: ...
 
   # <!--
   #   rdoc-file=range.c

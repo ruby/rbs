@@ -910,6 +910,13 @@ module URI
     #
     def merge: (URI::Generic | string oth) -> URI::Generic
 
+    # <!--
+    #   rdoc-file=lib/uri/generic.rb
+    #   - +(oth)
+    # -->
+    #
+    alias + merge
+
     # :stopdoc:
     def route_from_path: (String src, String dst) -> String
 

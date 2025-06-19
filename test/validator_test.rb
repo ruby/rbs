@@ -157,7 +157,7 @@ type baz[out T] = ^(T) -> void
     end
   end
 
-  def test_generic_type_bound
+  def test_generic_type_upper_bound
     SignatureManager.new do |manager|
       manager.add_file("test.rbs", <<-EOF)
 type foo[T < String, S < Array[T]] = [T, S]
@@ -181,6 +181,36 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
           #{error.message} (RBS::CyclicTypeParameterBound)
 
             type bar[T < _Foo[S], S < _Bar[T]] = nil
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        DETAILED_MESSAGE
+      end
+    end
+  end
+
+  def test_generic_type_lower_bound
+    SignatureManager.new do |manager|
+      manager.add_file("test.rbs", <<-EOF)
+type foo[T > String, S > Array[T]] = [T, S]
+
+type bar[T > _Foo[S], S > _Bar[T]] = nil
+      EOF
+
+      manager.build do |env|
+        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        validator = RBS::Validator.new(env: env, resolver: resolver)
+
+        validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
+
+        error = assert_raises(RBS::CyclicTypeParameterBound) do
+          validator.validate_type_alias(entry: env.type_alias_decls[type_name("::bar")])
+        end
+
+        assert_equal error.type_name, RBS::TypeName.parse("::bar")
+        assert_equal "[T > _Foo[S], S > _Bar[T]]", error.location.source
+        assert_equal <<~DETAILED_MESSAGE, error.detailed_message if Exception.method_defined?(:detailed_message)
+          #{error.message} (RBS::CyclicTypeParameterBound)
+
+            type bar[T > _Foo[S], S > _Bar[T]] = nil
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
         DETAILED_MESSAGE
       end
@@ -411,7 +441,7 @@ end
         resolver = RBS::Resolver::TypeNameResolver.new(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
-        env.class_decls[RBS::TypeName.parse("::Foo")].decls.first.decl.members.tap do |members|
+        env.class_decls[RBS::TypeName.parse("::Foo")].primary_decl.members.tap do |members|
           members[0].tap do |member|
             assert_raises(RBS::NoTypeFoundError) do
               validator.validate_variable(member)

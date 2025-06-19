@@ -28,6 +28,14 @@ module RBS
 
     WithChildren = self
 
+    def start_pos
+      buffer.absolute_position(_start_pos) || raise
+    end
+
+    def end_pos
+      buffer.absolute_position(_end_pos) || raise
+    end
+
     def name
       buffer.name
     end
@@ -49,11 +57,11 @@ module RBS
     end
 
     def start_loc
-      @start_loc ||= buffer.pos_to_loc(start_pos)
+      @start_loc ||= buffer.top_buffer.pos_to_loc(start_pos)
     end
 
     def end_loc
-      @end_loc ||= buffer.pos_to_loc(end_pos)
+      @end_loc ||= buffer.top_buffer.pos_to_loc(end_pos)
     end
 
     def range
@@ -61,7 +69,7 @@ module RBS
     end
 
     def source
-      @source ||= (buffer.content[range] || raise)
+      @source ||= (buffer.top_buffer.content[range] || raise)
     end
 
     def to_s
@@ -133,6 +141,30 @@ module RBS
 
     def required_key?(name)
       _required_keys.include?(name)
+    end
+
+    def local_location
+      loc = Location.new(buffer.detach, _start_pos, _end_pos)
+
+      each_optional_key do |key|
+        value = self[key]
+        if value
+          loc.add_optional_child(key, value._start_pos...value._end_pos)
+        else
+          loc.add_optional_child(key, nil)
+        end
+      end
+
+      each_required_key do |key|
+        value = self[key] or raise
+        loc.add_required_child(key, value._start_pos...value._end_pos)
+      end
+
+      loc #: self
+    end
+
+    def local_source
+      local_location.source
     end
   end
 end

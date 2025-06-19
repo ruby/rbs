@@ -11,8 +11,8 @@ class RBS::AST::TypeParamTest < Test::Unit::TestCase
 
   def test_application1
     params = [
-      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, location: nil),
-      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, default_type: parse_type("::String"), location: nil),
+      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, lower_bound: nil, location: nil),
+      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, lower_bound: nil, default_type: parse_type("::String"), location: nil),
     ]
 
     TypeParam.application(params, []).tap do |s|
@@ -33,9 +33,9 @@ class RBS::AST::TypeParamTest < Test::Unit::TestCase
 
   def test_application2
     params = [
-      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, location: nil),
-      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, default_type: parse_type("::Array[A]"), location: nil),
-      TypeParam.new(name: :C, variance: :inout, upper_bound: nil, default_type: parse_type("::Array[B]"), location: nil),
+      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, lower_bound: nil, location: nil),
+      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, lower_bound: nil, default_type: parse_type("::Array[A]"), location: nil),
+      TypeParam.new(name: :C, variance: :inout, upper_bound: nil, lower_bound: nil, default_type: parse_type("::Array[B]"), location: nil),
     ]
 
     TypeParam.application(params, []).tap do |s|
@@ -53,9 +53,9 @@ class RBS::AST::TypeParamTest < Test::Unit::TestCase
 
   def test_normalize_args
     params = [
-      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, location: nil),
-      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, default_type: parse_type("::Array[A]"), location: nil),
-      TypeParam.new(name: :C, variance: :inout, upper_bound: nil, default_type: parse_type("::Array[B]"), location: nil),
+      TypeParam.new(name: :A, variance: :inout, upper_bound: nil, lower_bound: nil, location: nil),
+      TypeParam.new(name: :B, variance: :inout, upper_bound: nil, lower_bound: nil, default_type: parse_type("::Array[A]"), location: nil),
+      TypeParam.new(name: :C, variance: :inout, upper_bound: nil, lower_bound: nil, default_type: parse_type("::Array[B]"), location: nil),
     ]
 
     TypeParam.normalize_args(params, []).tap do |args|

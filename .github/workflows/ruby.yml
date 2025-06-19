@@ -29,8 +29,6 @@ jobs:
             job: stdlib_test
             rubyopt: "--enable-frozen-string-literal"
           - ruby: "3.4"
-            job: lexer templates compile confirm_lexer confirm_templates
-          - ruby: "3.4"
             job: rubocop validate test_doc build test_generate_stdlib raap
           - ruby: "3.4"
             job: typecheck_test
@@ -44,23 +42,10 @@ jobs:
           bundler: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
-      - name: Set up permission
-        run: chmod -R o-w /opt/hostedtoolcache/Ruby
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3
-      - name: Install Re2c
-        if: ${{ contains(matrix.job, 'lexer') }}
-        run: |
-          cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
-          tar xf re2c-3.1.tar.gz
-          cd re2c-3.1
-          autoreconf -i -W all
-          ./configure
-          make
-          sudo make install
       - name: Update rubygems & bundler
         run: |
           ruby -v
@@ -80,29 +65,35 @@ jobs:
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
-  valgrind:
-    runs-on: ubuntu-latest
+  C99_compile:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.4', head]
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-          bundler-cache: none
-      - name: Set working directory as safe
-        run: git config --global --add safe.directory $(pwd)
-      - name: Set up permission
-        run: chmod -R o-w /opt/hostedtoolcache/Ruby
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3 valgrind
+          brew install ruby-build
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
       - name: Update rubygems & bundler
         run: |
           ruby -v
           gem update --system
+      - name: clang version
+        run: clang --version
+      - name: bundle config set force_ruby_platform true if head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: |
+          bundle config set force_ruby_platform true
       - name: bin/setup
         run: |
           bin/setup
-      - run: bundle exec rake test:valgrind
-        env:
-          RUBY_FREE_AT_EXIT: 1
+      - run: bundle exec rake clean compile_c99
+

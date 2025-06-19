@@ -28,9 +28,25 @@
         }
       ]
     },
+    "lower_bound": {
+      "oneOf": [
+        {
+          "$ref": "types.json#/definitions/classInstance"
+        },
+        {
+          "$ref": "types.json#/definitions/classSingleton"
+        },
+        {
+          "$ref": "types.json#/definitions/interface"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "location": {
       "$ref": "location.json"
     }
   },
-  "required": ["name", "variance", "unchecked", "upper_bound", "location"]
+  "required": ["name", "variance", "unchecked", "upper_bound", "lower_bound", "location"]
 }

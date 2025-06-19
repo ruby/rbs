@@ -205,7 +205,7 @@ RBS
           assert_equal "(untyped) -> Integer", o2.method_type.location.source
 
           assert_equal(
-            [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, location: nil)],
+            [AST::TypeParam.new(name: :X, variance: :invariant, upper_bound: nil, lower_bound: nil, default_type: nil, unchecked: false, location: nil)],
             o3.method_type.type_params
           )
           assert_instance_of Types::Block, o3.method_type.block
@@ -2009,7 +2009,7 @@ end
     end
   end
 
-  def test_generics_bound
+  def test_generics_upper_bound
     Parser.parse_signature(<<-EOF).tap do |_, _, decls|
 class Foo[X < _Each[Y]?, Y]
   def foo: [X < Array[Y]] (X) -> X
@@ -2025,13 +2025,18 @@ end
           refute_predicate param, :unchecked?
           assert_nil param.upper_bound
           assert_equal parse_type("_Each[Y]?", variables: [:Y]), param.upper_bound_type
+          assert_nil param.lower_bound
+          assert_nil param.lower_bound_type
         end
 
         decl.type_params[1].tap do |param|
           assert_equal :Y, param.name
           assert_equal :invariant, param.variance
           refute_predicate param, :unchecked?
+          assert_nil param.upper_bound
           assert_nil param.upper_bound_type
+          assert_nil param.lower_bound
+          assert_nil param.lower_bound_type
         end
 
         decl.members[0].tap do |member|
@@ -2041,11 +2046,59 @@ end
             refute_predicate param, :unchecked?
             assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound
             assert_equal parse_type("Array[Y]", variables: [:Y]), param.upper_bound_type
+            assert_nil param.lower_bound
+            assert_nil param.lower_bound_type
           end
         end
       end
     end
   end
+
+  def test_generics_lower_bound
+    Parser.parse_signature(<<-EOF).tap do |_, _, decls|
+class Foo[X > _Each[Y]?, Y]
+  def foo: [X > Array[Y]] (X) -> X
+end
+    EOF
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 2, decl.type_params.size
+        decl.type_params[0].tap do |param|
+          assert_equal :X, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.lower_bound
+          assert_equal parse_type("_Each[Y]?", variables: [:Y]), param.lower_bound_type
+          assert_nil param.upper_bound
+          assert_nil param.upper_bound_type
+        end
+
+        decl.type_params[1].tap do |param|
+          assert_equal :Y, param.name
+          assert_equal :invariant, param.variance
+          refute_predicate param, :unchecked?
+          assert_nil param.lower_bound
+          assert_nil param.lower_bound_type
+          assert_nil param.upper_bound
+          assert_nil param.upper_bound_type
+        end
+
+        decl.members[0].tap do |member|
+          member.overloads[0].method_type.type_params[0].tap do |param|
+            assert_equal :X, param.name
+            assert_equal :invariant, param.variance
+            refute_predicate param, :unchecked?
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.lower_bound
+            assert_equal parse_type("Array[Y]", variables: [:Y]), param.lower_bound_type
+            assert_nil param.upper_bound
+            assert_nil param.upper_bound_type
+          end
+        end
+      end
+    end
+  end
+
 
   def test_generics_default
     Parser.parse_signature(<<-EOF).tap do |_, _, decls|
@@ -2278,5 +2331,43 @@ end
         RBS
       end
     end
+  end
+
+  def test_inline_keyword__rbs
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        @rbs: untyped
+        self.@rbs: untyped
+
+        attr_reader rbs (@rbs): untyped
+        attr_reader self.rbs (@rbs): untyped
+      end
+    RBS
+  end
+
+  def test_inline_keyword__skip
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def skip: (untyped skip) -> void
+        attr_reader skip: untyped
+
+        type skip = untyped
+
+        @foo: Array[skip]
+      end
+    RBS
+  end
+
+  def test_inline_keyword__return
+    Parser.parse_signature(<<~RBS)
+      class Foo
+        def return: (untyped return) -> void
+        attr_reader return: untyped
+
+        type return = untyped
+
+        @foo: Array[return]
+      end
+    RBS
   end
 end

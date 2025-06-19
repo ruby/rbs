@@ -35,6 +35,11 @@ module RBS
       [buf, dirs, decls]
     end
 
+    def self.parse_type_params(source, module_type_params: true)
+      buf = buffer(source)
+      _parse_type_params(buf, 0, buf.last_position, module_type_params)
+    end
+
     def self.magic_comment(buf)
       start_pos = 0
 
@@ -71,7 +76,7 @@ module RBS
     def self.buffer(source)
       case source
       when String
-        Buffer.new(content: source, name: "a.rbs")
+        Buffer.new(content: source, name: Pathname("a.rbs"))
       when Buffer
         source
       end
@@ -110,5 +115,15 @@ module RBS
       ).each_with_object({}) do |keyword, hash| #$ Hash[String, bot]
         hash[keyword] = _ = nil
       end
+
+    def self.parse_inline_leading_annotation(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_leading_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
+    def self.parse_inline_trailing_annotation(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_trailing_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
   end
 end

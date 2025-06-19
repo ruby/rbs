@@ -62,7 +62,12 @@ module RBS
         end
 
         def comment
-          member.comment
+          case member
+          when AST::Members::Base
+            member.comment
+          when AST::Ruby::Members::Base
+            nil
+          end
         end
 
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
