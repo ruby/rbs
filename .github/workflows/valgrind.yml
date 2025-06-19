@@ -8,7 +8,11 @@ on:
       - "ext/**"
       - "include/**"
       - "src/**"
-  pull_request: {}
+  pull_request:
+    paths:
+      - "ext/**"
+      - "include/**"
+      - "src/**"
   merge_group: {}
 
 jobs:
