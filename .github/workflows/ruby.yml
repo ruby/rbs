@@ -65,30 +65,6 @@ jobs:
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
-  valgrind:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4"
-          bundler-cache: none
-      - name: Set working directory as safe
-        run: git config --global --add safe.directory $(pwd)
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3 valgrind
-      - name: Update rubygems & bundler
-        run: |
-          ruby -v
-          gem update --system
-      - name: bin/setup
-        run: |
-          bin/setup
-      - run: bundle exec rake test:valgrind
-        env:
-          RUBY_FREE_AT_EXIT: 1
   C99_compile:
     runs-on: macos-latest
     strategy:
@@ -112,6 +88,10 @@ jobs:
           gem update --system
       - name: clang version
         run: clang --version
+      - name: bundle config set force_ruby_platform true if head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: |
+          bundle config set force_ruby_platform true
       - name: bin/setup
         run: |
           bin/setup

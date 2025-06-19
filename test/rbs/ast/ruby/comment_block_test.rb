@@ -144,6 +144,21 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
     end
   end
 
+  def test_each_paragraph__empty
+    buffer, comments = parse_comments(<<~RUBY)
+      #
+    RUBY
+
+    block = CommentBlock.new(buffer, comments)
+
+    paragraphs = block.each_paragraph([]).to_a
+
+    paragraphs[0].tap do |paragraph|
+      assert_instance_of RBS::Location, paragraph
+      assert_equal "", paragraph.local_source
+    end
+  end
+
   def test_each_paragraph_colon
     buffer, comments = parse_comments(<<~RUBY)
       # : Foo
