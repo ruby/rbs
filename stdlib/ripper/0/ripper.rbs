@@ -247,8 +247,8 @@ class Ripper
       #   - to_a()
       # -->
       #
-      def to_a: () -> [ [ Integer, Integer ], Symbol, String, Ripper::Lexer::State, String ]
-              | () -> [ [ Integer, Integer ], Symbol, String, Ripper::Lexer::State ]
+      def to_a: () -> ( [ [ Integer, Integer ], Symbol, String, Ripper::Lexer::State, String ]
+                      | [ [ Integer, Integer ], Symbol, String, Ripper::Lexer::State ] )
     end
 
     class State
