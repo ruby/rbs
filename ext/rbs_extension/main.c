@@ -7,6 +7,7 @@
 #include "rbs_string_bridging.h"
 
 #include "ruby/vm.h"
+#include "rbs/parser.h"
 
 /**
  * Raises `RBS::ParsingError` or `RuntimeError` on `tok` with message constructed with given `fmt`.
@@ -101,7 +102,7 @@ static VALUE parse_type_try(VALUE a) {
     }
 
     rbs_node_t *type;
-    rbs_parse_type(parser, &type);
+    rbs_parse_type(parser, &type, SkipValidation);
 
     raise_error_if_any(parser, arg->buffer);
 
@@ -187,7 +188,7 @@ static VALUE parse_method_type_try(VALUE a) {
     }
 
     rbs_method_type_t *method_type = NULL;
-    rbs_parse_method_type(parser, &method_type);
+    rbs_parse_method_type(parser, &method_type, SkipValidation);
 
     raise_error_if_any(parser, arg->buffer);
 
