@@ -1178,4 +1178,27 @@ class Range[out Elem] < Object
   # Related: Range#cover?.
   #
   def member?: (untyped obj) -> bool
+
+  # <!--
+  #   rdoc-file=range.c
+  #   - to_a -> array
+  # -->
+  # Returns an array containing the elements in `self`, if a finite collection;
+  # raises an exception otherwise.
+  #
+  #     (1..4).to_a     # => [1, 2, 3, 4]
+  #     (1...4).to_a    # => [1, 2, 3]
+  #     ('a'..'d').to_a # => ["a", "b", "c", "d"]
+  #
+  def to_a: ...
+
+  # <!-- rdoc-file=range.c -->
+  # Returns an array containing the elements in `self`, if a finite collection;
+  # raises an exception otherwise.
+  #
+  #     (1..4).to_a     # => [1, 2, 3, 4]
+  #     (1...4).to_a    # => [1, 2, 3]
+  #     ('a'..'d').to_a # => ["a", "b", "c", "d"]
+  #
+  alias entries to_a
 end

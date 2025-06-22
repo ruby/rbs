@@ -170,4 +170,8 @@ class RangeInstanceTest < Test::Unit::TestCase
     assert_send_type "(::Integer) -> ::Integer", (1..4), :count, 2
     assert_send_type "() { (::Integer) -> boolish } -> ::Integer", (1..4), :count do |element| element < 3 end
   end
+
+  def test_to_a
+    assert_send_type "() -> ::Array[::Integer]", (1..4), :to_a
+  end
 end
