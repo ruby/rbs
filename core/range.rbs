@@ -979,6 +979,42 @@ class Range[out Elem] < Object
 
   # <!--
   #   rdoc-file=range.c
+  #   - count -> integer
+  #   - count(object) -> integer
+  #   - count {|element| ... } -> integer
+  # -->
+  # Returns the count of elements, based on an argument or block criterion, if
+  # given.
+  #
+  # With no argument and no block given, returns the number of elements:
+  #
+  #     (1..4).count      # => 4
+  #     (1...4).count     # => 3
+  #     ('a'..'d').count  # => 4
+  #     ('a'...'d').count # => 3
+  #     (1..).count       # => Infinity
+  #     (..4).count       # => Infinity
+  #
+  # With argument `object`, returns the number of `object` found in `self`, which
+  # will usually be zero or one:
+  #
+  #     (1..4).count(2)   # => 1
+  #     (1..4).count(5)   # => 0
+  #     (1..4).count('a')  # => 0
+  #
+  # With a block given, calls the block with each element; returns the number of
+  # elements for which the block returns a truthy value:
+  #
+  #     (1..4).count {|element| element < 3 } # => 2
+  #
+  # Related: Range#size.
+  #
+  def count: () -> (Integer | Float)
+           | (untyped) -> Integer
+           | () { (Elem) -> boolish } -> Integer
+
+  # <!--
+  #   rdoc-file=range.c
   #   - step(s = 1) {|element| ... } -> self
   #   - step(s = 1)                  -> enumerator/arithmetic_sequence
   # -->

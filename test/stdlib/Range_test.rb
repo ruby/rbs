@@ -163,4 +163,11 @@ class RangeInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> [::Integer, ::Integer]", (1..4), :minmax do |a, b| a.size <=> b.size end
     assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> [nil, nil]", [], :minmax do |a, b| a <=> b end
   end
+
+  def test_count
+    assert_send_type "() -> ::Integer", (1..4), :count
+    assert_send_type "() -> ::Float", (1..), :count
+    assert_send_type "(::Integer) -> ::Integer", (1..4), :count, 2
+    assert_send_type "() { (::Integer) -> boolish } -> ::Integer", (1..4), :count do |element| element < 3 end
+  end
 end
