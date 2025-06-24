@@ -49,6 +49,7 @@ EOF
         assert typecheck.value(String, parse_type("singleton(::String)"))
         assert typecheck.value(String, parse_type("singleton(::Object)"))
         refute typecheck.value(String, parse_type("singleton(::Integer)"))
+        refute typecheck.value(BasicObject.new, parse_type("singleton(::BasicObject)"))
 
         assert typecheck.value(3, parse_type("::M::t"))
         assert typecheck.value(3, parse_type("::M::s"))
@@ -65,6 +66,7 @@ EOF
         assert typecheck.value(false, parse_type("bool"))
         refute typecheck.value(nil, parse_type("bool"))
         refute typecheck.value("", parse_type("bool"))
+        refute typecheck.value(BasicObject.new, parse_type("bool"))
       end
     end
   end
