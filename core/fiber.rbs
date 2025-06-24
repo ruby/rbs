@@ -103,6 +103,17 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
+  #   - Fiber.blocking{|fiber| ...} -> result
+  # -->
+  # Forces the fiber to be blocking for the duration of the block. Returns the
+  # result of the block.
+  #
+  # See the "Non-blocking fibers" section in class docs for details.
+  #
+  def self.blocking: [T] () { (Fiber) -> T } -> T
+
+  # <!--
+  #   rdoc-file=cont.c
   #   - Fiber.blocking? -> false or 1
   # -->
   # Returns `false` if the current fiber is non-blocking. Fiber is non-blocking if
