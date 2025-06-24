@@ -245,7 +245,7 @@ module RBS
         when Types::Bases::Any
           true
         when Types::Bases::Bool
-          val.is_a?(TrueClass) || val.is_a?(FalseClass)
+          Test.call(val, IS_AP, TrueClass) || Test.call(val, IS_AP, FalseClass)
         when Types::Bases::Top
           true
         when Types::Bases::Bottom
@@ -323,7 +323,7 @@ module RBS
                             rescue TypeError
                               return false
                             end
-          val.is_a?(singleton_class)
+          Test.call(val, IS_AP, singleton_class)
         when Types::Interface
           if (definition = builder.build_interface(type.name.absolute!))
             definition.methods.each.all? do |method_name, method|
