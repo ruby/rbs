@@ -488,6 +488,15 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
+  #   - flatten!()
+  # -->
+  # Equivalent to Set#flatten, but replaces the receiver with the
+  # result in place. Returns nil if no modifications were made.
+  #
+  def flatten!: () -> self?
+
+  # <!--
+  #   rdoc-file=lib/set.rb
   #   - intersect?(set)
   # -->
   # Returns true if the set and the given enumerable have at least one
