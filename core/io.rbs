@@ -3404,3 +3404,9 @@ end
 #
 module IO::WaitWritable
 end
+
+# <!-- rdoc-file=io.c -->
+# Can be raised by IO operations when IO#timeout= is set.
+#
+class IO::TimeoutError < IOError
+end
