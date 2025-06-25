@@ -647,6 +647,15 @@ class Set[unchecked out A]
   #     Set[1, 'c', :s].to_a              #=> [1, "c", :s]
   #
   def to_a: () -> Array[A]
+
+  # <!--
+  #   rdoc-file=lib/set.rb
+  #   - join(separator=nil)
+  # -->
+  # Returns a string created by converting each element of the set to a string
+  # See also: Array#join
+  #
+  def join: (?string separator) -> String
 end
 
 %a{annotate:rdoc:skip}
