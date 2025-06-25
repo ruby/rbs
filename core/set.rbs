@@ -534,11 +534,25 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
+  #   - <=(set)
+  # -->
+  #
+  alias <= subset?
+
+  # <!--
+  #   rdoc-file=lib/set.rb
   #   - proper_subset?(set)
   # -->
   # Returns true if the set is a proper subset of the given set.
   #
   def proper_subset?: (self) -> bool
+
+  # <!--
+  #   rdoc-file=lib/set.rb
+  #   - <(set)
+  # -->
+  #
+  alias < proper_subset?
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -550,11 +564,25 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
+  #   - >=(set)
+  # -->
+  #
+  alias >= superset?
+
+  # <!--
+  #   rdoc-file=lib/set.rb
   #   - proper_superset?(set)
   # -->
   # Returns true if the set is a proper superset of the given set.
   #
   def proper_superset?: (self) -> bool
+
+  # <!--
+  #   rdoc-file=lib/set.rb
+  #   - >(set)
+  # -->
+  #
+  alias > proper_superset?
 
   # <!--
   #   rdoc-file=lib/set.rb
@@ -586,6 +614,11 @@ class Set[unchecked out A]
   # made. Returns an enumerator if no block is given.
   #
   def select!: () { (A) -> untyped } -> self?
+
+  # <!-- rdoc-file=lib/set.rb -->
+  # Equivalent to Set#select!
+  #
+  alias filter! select!
 
   # <!--
   #   rdoc-file=lib/set.rb
