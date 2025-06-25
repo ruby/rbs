@@ -17,6 +17,13 @@ class FiberSingletonTest < Test::Unit::TestCase
     )
   end
 
+  def test_blocking
+    if_ruby("3.2"...) do
+      assert_send_type "() { (Fiber) -> 42 } -> 42",
+                        Fiber, :blocking do 42 end
+    end
+  end
+
   def test_blocking?
     assert_send_type "() -> 1",
                      Fiber, :blocking?
