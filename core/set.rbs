@@ -416,6 +416,15 @@ class Set[unchecked out A]
 
   # <!--
   #   rdoc-file=lib/set.rb
+  #   - compare_by_identity?()
+  # -->
+  # Returns true if the set will compare its elements by their
+  # identity. Also see Set#compare_by_identity.
+  #
+  def compare_by_identity?: () -> bool
+
+  # <!--
+  #   rdoc-file=lib/set.rb
   #   - disjoint?(set)
   # -->
   # Returns true if the set and the given enumerable have
