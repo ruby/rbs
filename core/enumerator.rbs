@@ -450,6 +450,18 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
 
   # <!--
   #   rdoc-file=enumerator.c
+  #   - e + enum -> enumerator
+  # -->
+  # Returns an enumerator object generated from this enumerator and a given
+  # enumerable.
+  #
+  #     e = (1..3).each + [4, 5]
+  #     e.to_a #=> [1, 2, 3, 4, 5]
+  #
+  def +: [Elem2] (::_Each[Elem2]) -> ::Enumerator::Chain[Elem | Elem2]
+
+  # <!--
+  #   rdoc-file=enumerator.c
   #   - e.with_index(offset = 0) {|(*args), idx| ... }
   #   - e.with_index(offset = 0)
   # -->
