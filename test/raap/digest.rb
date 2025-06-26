@@ -54,4 +54,6 @@ argv = [
   end
 end
 
+argv << 'Digest::SHA2'
+
 RaaP::CLI.new(argv).load.run
