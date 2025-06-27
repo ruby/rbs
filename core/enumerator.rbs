@@ -590,6 +590,14 @@ class Enumerator::Lazy[out Elem, out Return = void] < Enumerator[Elem, Return]
   # Like Enumerable#compact, but chains operation to be lazy-evaluated.
   #
   def compact: () -> Enumerator::Lazy[Elem, Return]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lzy.eager -> enum
+  # -->
+  # Returns a non-lazy Enumerator converted from the lazy enumerator.
+  #
+  def eager: () -> ::Enumerator[Elem, Return]
 end
 
 # <!-- rdoc-file=enumerator.c -->

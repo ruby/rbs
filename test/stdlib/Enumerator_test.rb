@@ -93,6 +93,16 @@ class EnumeratorYielderTest < Test::Unit::TestCase
   end
 end
 
+class EnumeratorLazyInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Enumerator::Lazy[::Integer, ::Range[Integer]]"
+
+  def test_eager
+    assert_send_type "() -> Enumerator[Integer, Range[Integer]]", (1..3).lazy, :eager
+  end
+end
+
 class EnumeratorChainInstanceTest < Test::Unit::TestCase
   include TestHelper
 
