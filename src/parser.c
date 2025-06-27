@@ -3180,12 +3180,20 @@ static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *c
   }
 
   if (com->line_count == com->line_size) {
-    com->line_size += 10;
+    if (com->line_size == 0) com->line_size = 1; // Don't get stuck multiplying by 0 forever
 
     if (com->tokens) {
-      rbs_token_t *p = com->tokens;
-      com->tokens = rbs_allocator_calloc(allocator, com->line_size, rbs_token_t);
-      memcpy(com->tokens, p, sizeof(rbs_token_t) * com->line_count);
+      size_t old_size = com->line_size;
+      size_t new_size = old_size * 2;
+      com->line_size = new_size;
+
+      com->tokens = rbs_allocator_realloc(
+        allocator,
+        com->tokens,
+        sizeof(rbs_token_t) * old_size,
+        sizeof(rbs_token_t) * new_size,
+        rbs_token_t
+      );
     } else {
       com->tokens = rbs_allocator_calloc(allocator, com->line_size, rbs_token_t);
     }
