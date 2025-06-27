@@ -3175,28 +3175,18 @@ static rbs_comment_t *comment_get_comment(rbs_comment_t *com, int line) {
 }
 
 static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *com, rbs_token_t comment_token) {
-  if (com->line_count == 0) {
-    com->start = comment_token.range.start;
-  }
-
   if (com->line_count == com->line_size) {
-    if (com->line_size == 0) com->line_size = 1; // Don't get stuck multiplying by 0 forever
+    size_t old_size = com->line_size;
+    size_t new_size = old_size * 2;
+    com->line_size = new_size;
 
-    if (com->tokens) {
-      size_t old_size = com->line_size;
-      size_t new_size = old_size * 2;
-      com->line_size = new_size;
-
-      com->tokens = rbs_allocator_realloc(
-        allocator,
-        com->tokens,
-        sizeof(rbs_token_t) * old_size,
-        sizeof(rbs_token_t) * new_size,
-        rbs_token_t
-      );
-    } else {
-      com->tokens = rbs_allocator_calloc(allocator, com->line_size, rbs_token_t);
-    }
+    com->tokens = rbs_allocator_realloc(
+      allocator,
+      com->tokens,
+      sizeof(rbs_token_t) * old_size,
+      sizeof(rbs_token_t) * new_size,
+      rbs_token_t
+    );
   }
 
   com->tokens[com->line_count++] = comment_token;
@@ -3206,18 +3196,21 @@ static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *c
 static rbs_comment_t *alloc_comment(rbs_allocator_t *allocator, rbs_token_t comment_token, rbs_comment_t *last_comment) {
   rbs_comment_t *new_comment = rbs_allocator_alloc(allocator, rbs_comment_t);
 
+  size_t initial_line_size = 10;
+
+  rbs_token_t *tokens = rbs_allocator_calloc(allocator, initial_line_size, rbs_token_t);
+  tokens[0] = comment_token;
+
   *new_comment = (rbs_comment_t) {
     .start = comment_token.range.start,
     .end = comment_token.range.end,
 
-    .line_size = 0,
-    .line_count = 0,
-    .tokens = NULL,
+    .line_size = initial_line_size,
+    .line_count = 1,
+    .tokens = tokens,
 
     .next_comment = last_comment,
   };
-
-  comment_insert_new_line(allocator, new_comment, comment_token);
 
   return new_comment;
 }
