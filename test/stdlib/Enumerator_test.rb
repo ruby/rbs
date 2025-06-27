@@ -24,6 +24,10 @@ class EnumeratorTest < Test::Unit::TestCase
     assert_send_type "() { (Integer) -> nil } -> [1,2,3]",
                      enum, :each do end
   end
+
+  def test_plus
+    assert_send_type "(Array[Integer]) -> Enumerator::Chain[Integer]", (1..3).each, :+, [4, 5]
+  end
 end
 
 class EnumeratorSingletonTest < Test::Unit::TestCase
