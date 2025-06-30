@@ -83,6 +83,34 @@ end
 # :   Tanaka Akira <akr@m17n.org>
 #
 module OpenURI
+  class HTTPError < StandardError
+    # <!--
+    #   rdoc-file=lib/open-uri.rb
+    #   - new(message, io)
+    # -->
+    #
+    def initialize: (String message, (StringIO & OpenURI::Meta) io) -> void
+
+    attr_reader io: StringIO & OpenURI::Meta
+  end
+
+  # <!-- rdoc-file=lib/open-uri.rb -->
+  # Raised on redirection, only occurs when `redirect` option for HTTP is `false`.
+  #
+  class HTTPRedirect < HTTPError
+    # <!--
+    #   rdoc-file=lib/open-uri.rb
+    #   - new(message, io, uri)
+    # -->
+    #
+    def initialize: (String message, (StringIO & OpenURI::Meta) io, URI uri) -> void
+
+    attr_reader uri: URI
+  end
+
+  class TooManyRedirects < HTTPError
+  end
+
   # <!-- rdoc-file=lib/open-uri.rb -->
   # Mixin for holding meta-information.
   #
