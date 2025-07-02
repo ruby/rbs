@@ -1,6 +1,12 @@
 #include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"
 
+/**
+ * The default capacity of a rbs_buffer_t.
+ * If the buffer needs to grow beyond this capacity, it will be doubled.
+ */
+#define RBS_BUFFER_DEFAULT_CAPACITY 128
+
 bool rbs_buffer_init(rbs_allocator_t *allocator, rbs_buffer_t *buffer) {
     *buffer = (rbs_buffer_t) {
         .length = 0,
