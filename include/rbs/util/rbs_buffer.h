@@ -76,4 +76,29 @@ void rbs_buffer_append_string(rbs_allocator_t *, rbs_buffer_t *buffer, const cha
  */
 rbs_string_t rbs_buffer_to_string(rbs_buffer_t *buffer);
 
+/**
+ * Append a value to the buffer.
+ *
+ * @param allocator The allocator to use.
+ * @param buffer The buffer to append to.
+ * @param value The value to append.
+ * @param type The type of the value to append, which determines how many bytes to append.
+ */
+#define rbs_buffer_append_value(allocator, buffer, value, type) \
+    rbs_buffer_append_string((allocator), (buffer), (char *) (value), sizeof(type))
+
+/**
+ * Returns a copy of a `type` from the `buffer` at the given `index`.
+ *
+ * This cast is unchecked, so it's up to caller to ensure the type is correct.
+ *
+ * @param buffer The buffer to get the value from.
+ * @param index The index of the element to retrieve.
+ * @param type The element type that the data will be cast to.
+ * @returns The value at the specified index, cast to the specified type.
+ */
+#define rbs_buffer_get(buffer, index, type) ( \
+    ((type *) (buffer).value)[index]          \
+)
+
 #endif
