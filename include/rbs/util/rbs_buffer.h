@@ -31,6 +31,8 @@ typedef struct {
  */
 bool rbs_buffer_init(rbs_allocator_t *, rbs_buffer_t *buffer);
 
+bool rbs_buffer_init_with_capacity(rbs_allocator_t *allocator, rbs_buffer_t *buffer, size_t capacity);
+
 /**
  * Return the value of the buffer.
  *

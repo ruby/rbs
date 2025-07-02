@@ -8,10 +8,14 @@
 #define RBS_BUFFER_DEFAULT_CAPACITY 128
 
 bool rbs_buffer_init(rbs_allocator_t *allocator, rbs_buffer_t *buffer) {
+    return rbs_buffer_init_with_capacity(allocator, buffer, RBS_BUFFER_DEFAULT_CAPACITY);
+}
+
+bool rbs_buffer_init_with_capacity(rbs_allocator_t *allocator, rbs_buffer_t *buffer, size_t capacity) {
     *buffer = (rbs_buffer_t) {
         .length = 0,
-        .capacity = RBS_BUFFER_DEFAULT_CAPACITY,
-        .value = rbs_allocator_calloc(allocator, RBS_BUFFER_DEFAULT_CAPACITY, char),
+        .capacity = capacity,
+        .value = rbs_allocator_calloc(allocator, capacity, char),
     };
 
     return buffer->value != NULL;
