@@ -3195,12 +3195,20 @@ static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *c
     }
 
     if (com->line_tokens_count == com->line_tokens_capacity) {
-        com->line_tokens_capacity += 10;
+        if (com->line_tokens_capacity == 0) com->line_tokens_capacity = 10; // Don't get stuck multiplying by 0 forever
 
         if (com->line_tokens) {
-            rbs_token_t *p = com->line_tokens;
-            com->line_tokens = rbs_allocator_calloc(allocator, com->line_tokens_capacity, rbs_token_t);
-            memcpy(com->line_tokens, p, sizeof(rbs_token_t) * com->line_tokens_count);
+            size_t old_size = com->line_tokens_capacity;
+            size_t new_size = old_size * 2;
+            com->line_tokens_capacity = new_size;
+
+            com->line_tokens = rbs_allocator_realloc(
+                allocator,
+                com->line_tokens,
+                sizeof(rbs_token_t) * old_size,
+                sizeof(rbs_token_t) * new_size,
+                rbs_token_t
+            );
         } else {
             com->line_tokens = rbs_allocator_calloc(allocator, com->line_tokens_capacity, rbs_token_t);
         }
