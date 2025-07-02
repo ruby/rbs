@@ -105,9 +105,11 @@ void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
     }
 
     rbs_hash_node_t *new_node = rbs_alloc(hash->allocator, rbs_hash_node_t);
-    new_node->key = key;
-    new_node->value = value;
-    new_node->next = NULL;
+    *new_node = (rbs_hash_node_t) {
+        .key = key,
+        .value = value,
+        .next = NULL,
+    };
 
     if (hash->tail == NULL) {
         hash->head = new_node;
