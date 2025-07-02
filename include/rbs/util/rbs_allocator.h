@@ -26,13 +26,11 @@ void *rbs_allocator_calloc_impl(rbs_allocator_t *, size_t count, size_t size, si
 void *rbs_allocator_realloc_impl(rbs_allocator_t *, void *ptr, size_t old_size, size_t new_size, size_t alignment);
 
 // Use this when allocating memory for a single instance of a type.
-#define rbs_allocator_alloc(allocator, type) ((type *) rbs_allocator_malloc_impl((allocator), sizeof(type), alignof(type)))
-// Use this when allocating memory that will be immediately written to in full.
-// Such as allocating strings
-#define rbs_allocator_alloc_many(allocator, count, type) ((type *) rbs_allocator_malloc_many_impl((allocator), (count), sizeof(type), alignof(type)))
-// Use this when allocating memory that will NOT be immediately written to in full.
-// Such as allocating buffers
-#define rbs_allocator_calloc(allocator, count, type) ((type *) rbs_allocator_calloc_impl((allocator), (count), sizeof(type), alignof(type)))
-#define rbs_allocator_realloc(allocator, ptr, old_size, new_size, type) ((type *) rbs_allocator_realloc_impl((allocator), (ptr), (old_size), (new_size), alignof(type)))
+#define rbs_alloc(allocator, type) ((type *) rbs_allocator_malloc_impl((allocator), sizeof(type), alignof(type)))
+// Use this when allocating memory that will be immediately written to in full, such as allocating strings
+#define rbs_alloc_many(allocator, count, type) ((type *) rbs_allocator_malloc_many_impl((allocator), (count), sizeof(type), alignof(type)))
+// Use this when allocating memory that will NOT be immediately written to in full, such as allocating buffers
+#define rbs_calloc(allocator, count, type) ((type *) rbs_allocator_calloc_impl((allocator), (count), sizeof(type), alignof(type)))
+#define rbs_realloc(allocator, ptr, old_size, new_size, type) ((type *) rbs_allocator_realloc_impl((allocator), (ptr), (old_size), (new_size), alignof(type)))
 
 #endif

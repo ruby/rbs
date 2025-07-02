@@ -15,7 +15,7 @@ bool rbs_buffer_init_with_capacity(rbs_allocator_t *allocator, rbs_buffer_t *buf
     *buffer = (rbs_buffer_t) {
         .length = 0,
         .capacity = capacity,
-        .value = rbs_allocator_calloc(allocator, capacity, char),
+        .value = rbs_calloc(allocator, capacity, char),
     };
 
     return buffer->value != NULL;
@@ -43,7 +43,7 @@ void rbs_buffer_append_string(rbs_allocator_t *allocator, rbs_buffer_t *buffer, 
             new_capacity *= 2;
         }
 
-        char *new_value = rbs_allocator_realloc(allocator, buffer->value, old_capacity, new_capacity, char);
+        char *new_value = rbs_realloc(allocator, buffer->value, old_capacity, new_capacity, char);
         rbs_assert(new_value != NULL, "Failed to append to buffer. Old capacity: %zu, new capacity: %zu", old_capacity, new_capacity);
 
         buffer->value = new_value;

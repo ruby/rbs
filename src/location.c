@@ -31,7 +31,7 @@ void rbs_loc_add_required_child(rbs_location_t *loc, rbs_constant_id_t name, rbs
 }
 
 rbs_location_t *rbs_location_new(rbs_allocator_t *allocator, rbs_range_t rg) {
-    rbs_location_t *location = rbs_allocator_alloc(allocator, rbs_location_t);
+    rbs_location_t *location = rbs_alloc(allocator, rbs_location_t);
     *location = (rbs_location_t) {
         .rg = rg,
         .children = NULL,
@@ -41,7 +41,7 @@ rbs_location_t *rbs_location_new(rbs_allocator_t *allocator, rbs_range_t rg) {
 }
 
 rbs_location_list_t *rbs_location_list_new(rbs_allocator_t *allocator) {
-    rbs_location_list_t *list = rbs_allocator_alloc(allocator, rbs_location_list_t);
+    rbs_location_list_t *list = rbs_alloc(allocator, rbs_location_list_t);
     *list = (rbs_location_list_t) {
         .allocator = allocator,
         .head = NULL,
@@ -53,7 +53,7 @@ rbs_location_list_t *rbs_location_list_new(rbs_allocator_t *allocator) {
 }
 
 void rbs_location_list_append(rbs_location_list_t *list, rbs_location_t *loc) {
-    rbs_location_list_node_t *node = rbs_allocator_alloc(list->allocator, rbs_location_list_node_t);
+    rbs_location_list_node_t *node = rbs_alloc(list->allocator, rbs_location_list_node_t);
     *node = (rbs_location_list_node_t) {
         .loc = loc,
         .next = NULL,
