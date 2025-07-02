@@ -2,12 +2,12 @@
 #include "rbs/util/rbs_assert.h"
 
 bool rbs_buffer_init(rbs_allocator_t *allocator, rbs_buffer_t *buffer) {
-    size_t capacity = RBS_BUFFER_DEFAULT_CAPACITY;
+    *buffer = (rbs_buffer_t) {
+        .length = 0,
+        .capacity = RBS_BUFFER_DEFAULT_CAPACITY,
+        .value = rbs_allocator_calloc(allocator, RBS_BUFFER_DEFAULT_CAPACITY, char),
+    };
 
-    buffer->length = 0;
-    buffer->capacity = capacity;
-
-    buffer->value = rbs_allocator_calloc(allocator, capacity, char);
     return buffer->value != NULL;
 }
 
