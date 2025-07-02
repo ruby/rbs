@@ -3145,8 +3145,8 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
     rbs_buffer_t rbs_buffer;
     rbs_buffer_init(ALLOCATOR(), &rbs_buffer);
 
-    for (size_t i = 0; i < com->line_count; i++) {
-        rbs_token_t tok = com->tokens[i];
+    for (size_t i = 0; i < com->line_tokens_count; i++) {
+        rbs_token_t tok = com->line_tokens[i];
 
         const char *comment_start = parser->rbs_lexer_t->string.start + tok.range.start.byte_pos + hash_bytes;
         size_t comment_bytes = RBS_RANGE_BYTES(tok.range) - hash_bytes;
@@ -3190,23 +3190,23 @@ static rbs_comment_t *comment_get_comment(rbs_comment_t *com, int line) {
 }
 
 static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *com, rbs_token_t comment_token) {
-    if (com->line_count == 0) {
+    if (com->line_tokens_count == 0) {
         com->start = comment_token.range.start;
     }
 
-    if (com->line_count == com->line_size) {
-        com->line_size += 10;
+    if (com->line_tokens_count == com->line_tokens_capacity) {
+        com->line_tokens_capacity += 10;
 
-        if (com->tokens) {
-            rbs_token_t *p = com->tokens;
-            com->tokens = rbs_allocator_calloc(allocator, com->line_size, rbs_token_t);
-            memcpy(com->tokens, p, sizeof(rbs_token_t) * com->line_count);
+        if (com->line_tokens) {
+            rbs_token_t *p = com->line_tokens;
+            com->line_tokens = rbs_allocator_calloc(allocator, com->line_tokens_capacity, rbs_token_t);
+            memcpy(com->line_tokens, p, sizeof(rbs_token_t) * com->line_tokens_count);
         } else {
-            com->tokens = rbs_allocator_calloc(allocator, com->line_size, rbs_token_t);
+            com->line_tokens = rbs_allocator_calloc(allocator, com->line_tokens_capacity, rbs_token_t);
         }
     }
 
-    com->tokens[com->line_count++] = comment_token;
+    com->line_tokens[com->line_tokens_count++] = comment_token;
     com->end = comment_token.range.end;
 }
 
@@ -3217,9 +3217,9 @@ static rbs_comment_t *alloc_comment(rbs_allocator_t *allocator, rbs_token_t comm
         .start = comment_token.range.start,
         .end = comment_token.range.end,
 
-        .line_size = 0,
-        .line_count = 0,
-        .tokens = NULL,
+        .line_tokens_capacity = 0,
+        .line_tokens_count = 0,
+        .line_tokens = NULL,
 
         .next_comment = last_comment,
     };
