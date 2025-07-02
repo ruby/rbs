@@ -837,9 +837,12 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
         );
     }
 
-    (*result)->function = function;
-    (*result)->block = block;
-    (*result)->function_self_type = function_self_type;
+    **result = (parse_function_result) {
+        .function = function,
+        .block = block,
+        .function_self_type = function_self_type,
+    };
+
     return true;
 }
 
@@ -1787,8 +1790,10 @@ static bool parse_method_name(rbs_parser_t *parser, rbs_range_t *range, rbs_ast_
     case tULLIDENT:
         KEYWORD_CASES
         if (parser->next_token.type == pQUESTION && parser->current_token.range.end.byte_pos == parser->next_token.range.start.byte_pos) {
-            range->start = parser->current_token.range.start;
-            range->end = parser->next_token.range.end;
+            *range = (rbs_range_t) {
+                .start = parser->current_token.range.start,
+                .end = parser->next_token.range.end,
+            };
             rbs_parser_advance(parser);
 
             rbs_constant_id_t constant_id = rbs_constant_pool_insert_shared_with_encoding(
@@ -3554,9 +3559,11 @@ void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_err
     va_end(args);
 
     parser->error = rbs_alloc(ALLOCATOR(), rbs_error_t);
-    parser->error->token = tok;
-    parser->error->message = message;
-    parser->error->syntax_error = syntax_error;
+    *parser->error = (rbs_error_t) {
+        .message = message,
+        .token = tok,
+        .syntax_error = syntax_error,
+    };
 }
 
 /*
