@@ -849,7 +849,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 NODISCARD
 static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed) {
     rbs_position_t start = parser->current_token.range.start;
-    parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
+    parse_function_result *result = rbs_alloc(ALLOCATOR(), parse_function_result);
     CHECK_PARSE(parse_function(parser, true, &result, self_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
@@ -1563,7 +1563,7 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     rbs_range_t type_range;
     type_range.start = parser->next_token.range.start;
 
-    parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
+    parse_function_result *result = rbs_alloc(ALLOCATOR(), parse_function_result);
     CHECK_PARSE(parse_function(parser, false, &result, true));
 
     rg.end = parser->current_token.range.end;
@@ -3259,7 +3259,7 @@ static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *c
 }
 
 static rbs_comment_t *alloc_comment(rbs_allocator_t *allocator, rbs_token_t comment_token, rbs_comment_t *last_comment) {
-    rbs_comment_t *new_comment = rbs_allocator_alloc(allocator, rbs_comment_t);
+    rbs_comment_t *new_comment = rbs_alloc(allocator, rbs_comment_t);
 
     *new_comment = (rbs_comment_t) {
         .start = comment_token.range.start,
@@ -3343,12 +3343,12 @@ bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_no
 }
 
 id_table *alloc_empty_table(rbs_allocator_t *allocator) {
-    id_table *table = rbs_allocator_alloc(allocator, id_table);
+    id_table *table = rbs_alloc(allocator, id_table);
 
     *table = (id_table) {
         .size = 10,
         .count = 0,
-        .ids = rbs_allocator_calloc(allocator, 10, rbs_constant_id_t),
+        .ids = rbs_calloc(allocator, 10, rbs_constant_id_t),
         .next = NULL,
     };
 
@@ -3356,7 +3356,7 @@ id_table *alloc_empty_table(rbs_allocator_t *allocator) {
 }
 
 id_table *alloc_reset_table(rbs_allocator_t *allocator) {
-    id_table *table = rbs_allocator_alloc(allocator, id_table);
+    id_table *table = rbs_alloc(allocator, id_table);
 
     *table = (id_table) {
         .size = 0,
@@ -3393,7 +3393,7 @@ bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id) {
         // expand
         rbs_constant_id_t *ptr = table->ids;
         table->size += 10;
-        table->ids = rbs_allocator_calloc(ALLOCATOR(), table->size, rbs_constant_id_t);
+        table->ids = rbs_calloc(ALLOCATOR(), table->size, rbs_constant_id_t);
         memcpy(table->ids, ptr, sizeof(rbs_constant_id_t) * table->count);
     }
 
@@ -3455,7 +3455,7 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
 }
 
 rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
-    rbs_lexer_t *lexer = rbs_allocator_alloc(allocator, rbs_lexer_t);
+    rbs_lexer_t *lexer = rbs_alloc(allocator, rbs_lexer_t);
 
     rbs_position_t start_position = (rbs_position_t) {
         .byte_pos = 0,
@@ -3486,7 +3486,7 @@ rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding
     rbs_allocator_t *allocator = rbs_allocator_init();
 
     rbs_lexer_t *lexer = rbs_lexer_new(allocator, string, encoding, start_pos, end_pos);
-    rbs_parser_t *parser = rbs_allocator_alloc(allocator, rbs_parser_t);
+    rbs_parser_t *parser = rbs_alloc(allocator, rbs_parser_t);
 
     *parser = (rbs_parser_t) {
         .rbs_lexer_t = lexer,
@@ -3547,13 +3547,13 @@ void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_err
     int length = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
 
-    char *message = rbs_allocator_alloc_many(ALLOCATOR(), length + 1, char);
+    char *message = rbs_alloc_many(ALLOCATOR(), length + 1, char);
 
     va_start(args, fmt);
     vsnprintf(message, length + 1, fmt, args);
     va_end(args);
 
-    parser->error = rbs_allocator_alloc(ALLOCATOR(), rbs_error_t);
+    parser->error = rbs_alloc(ALLOCATOR(), rbs_error_t);
     parser->error->token = tok;
     parser->error->message = message;
     parser->error->syntax_error = syntax_error;
