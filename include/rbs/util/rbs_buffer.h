@@ -9,12 +9,6 @@
 #include <string.h>
 
 /**
- * The default capacity of a rbs_buffer_t.
- * If the buffer needs to grow beyond this capacity, it will be doubled.
- */
-#define RBS_BUFFER_DEFAULT_CAPACITY 128
-
-/**
  * A rbs_buffer_t is a simple memory buffer that stores data in a contiguous block of memory.
  */
 typedef struct {
