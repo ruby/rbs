@@ -37,8 +37,6 @@ module RBS
     #
     def find2: (line: Integer, column: Integer) -> [Symbol?, Array[component]]?
 
-    private
-
     def find_in_directive: (Integer pos, AST::Directives::t, Array[component]) -> bool
 
     def find_in_decl: (Integer pos, decl: AST::Declarations::t, array: Array[component]) -> bool
