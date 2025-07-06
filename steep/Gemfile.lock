@@ -73,7 +73,7 @@ GEM
     strscan (3.1.5)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
-    test-unit (3.6.8)
+    test-unit (3.7.0)
       power_assert
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
