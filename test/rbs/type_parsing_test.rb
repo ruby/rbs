@@ -170,14 +170,13 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_tuple
-    Parser.parse_type("[untyped, nil, void]").yield_self do |type|
+    Parser.parse_type("[untyped, nil]").yield_self do |type|
       assert_instance_of Types::Tuple, type
       assert_equal [
                      Types::Bases::Any.new(location: nil),
-                     Types::Bases::Nil.new(location: nil),
-                     Types::Bases::Void.new(location: nil)
+                     Types::Bases::Nil.new(location: nil)
                    ], type.types
-      assert_equal "[untyped, nil, void]", type.location.source
+      assert_equal "[untyped, nil]", type.location.source
     end
 
     Parser.parse_type("[untyped]").yield_self do |type|
@@ -206,49 +205,48 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_union_intersection
-    Parser.parse_type("untyped | void | nil").yield_self do |type|
+    Parser.parse_type("untyped | nil").yield_self do |type|
       assert_instance_of Types::Union, type
 
       assert_equal [
                      Types::Bases::Any.new(location: nil),
-                     Types::Bases::Void.new(location: nil),
                      Types::Bases::Nil.new(location: nil)
                    ], type.types
 
-      assert_equal "untyped | void | nil", type.location.source
+      assert_equal "untyped | nil", type.location.source
     end
 
-    Parser.parse_type("untyped & void & nil").yield_self do |type|
+    Parser.parse_type("untyped & top & nil").yield_self do |type|
       assert_instance_of Types::Intersection, type
 
       assert_equal [
                      Types::Bases::Any.new(location: nil),
-                     Types::Bases::Void.new(location: nil),
+                     Types::Bases::Top.new(location: nil),
                      Types::Bases::Nil.new(location: nil)
                    ], type.types
 
-      assert_equal "untyped & void & nil", type.location.source
+      assert_equal "untyped & top & nil", type.location.source
     end
 
-    Parser.parse_type("untyped | void & nil").yield_self do |type|
+    Parser.parse_type("untyped | top & nil").yield_self do |type|
       assert_instance_of Types::Union, type
       assert_instance_of Types::Intersection, type.types[1]
 
-      assert_equal "untyped | void & nil", type.location.source
+      assert_equal "untyped | top & nil", type.location.source
     end
 
-    Parser.parse_type("untyped & void | nil").yield_self do |type|
+    Parser.parse_type("untyped & top | nil").yield_self do |type|
       assert_instance_of Types::Union, type
       assert_instance_of Types::Intersection, type.types[0]
 
-      assert_equal "untyped & void | nil", type.location.source
+      assert_equal "untyped & top | nil", type.location.source
     end
 
-    Parser.parse_type("untyped & (void | nil)").yield_self do |type|
+    Parser.parse_type("untyped & (top | nil)").yield_self do |type|
       assert_instance_of Types::Intersection, type
       assert_instance_of Types::Union, type.types[1]
 
-      assert_equal "untyped & (void | nil)", type.location.source
+      assert_equal "untyped & (top | nil)", type.location.source
     end
   end
 
@@ -303,14 +301,14 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "^(untyped) -> void", type.location.source
     end
 
-    Parser.parse_type("^(untyped, void) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped, top) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
 
       assert_equal [
                      Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: nil),
-                     Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: nil),
+                     Types::Function::Param.new(type: Types::Bases::Top.new(location: nil), name: nil),
                    ], fun.required_positionals
       assert_equal [], fun.optional_positionals
       assert_nil fun.rest_positionals
@@ -319,17 +317,17 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(untyped, void) -> void", type.location.source
+      assert_equal "^(untyped, top) -> void", type.location.source
     end
 
-    Parser.parse_type("^(untyped x, void _y, bool `type`) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, top _y, bool `type`) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
 
       assert_equal [
                      Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: :x),
-                     Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: :_y),
+                     Types::Function::Param.new(type: Types::Bases::Top.new(location: nil), name: :_y),
                      Types::Function::Param.new(type: Types::Bases::Bool.new(location: nil), name: :type),
                    ], fun.required_positionals
       assert_equal [], fun.optional_positionals
@@ -339,10 +337,10 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(untyped x, void _y, bool `type`) -> void", type.location.source
+      assert_equal "^(untyped x, top _y, bool `type`) -> void", type.location.source
     end
 
-    Parser.parse_type("^(untyped x, ?void, ?nil y) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, ?top, ?nil y) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -351,7 +349,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
                      Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: :x),
                    ], fun.required_positionals
       assert_equal [
-                     Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: nil),
+                     Types::Function::Param.new(type: Types::Bases::Top.new(location: nil), name: nil),
                      Types::Function::Param.new(type: Types::Bases::Nil.new(location: nil), name: :y),
                    ], fun.optional_positionals
       assert_nil fun.rest_positionals
@@ -360,10 +358,10 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(untyped x, ?void, ?nil y) -> void", type.location.source
+      assert_equal "^(untyped x, ?top, ?nil y) -> void", type.location.source
     end
 
-    Parser.parse_type("^(untyped x, ?void, ?nil y, *untyped a) -> void").yield_self do |type|
+    Parser.parse_type("^(untyped x, ?top, ?nil y, *untyped a) -> void").yield_self do |type|
       assert_instance_of Types::Proc, type
 
       fun = type.type
@@ -372,7 +370,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
                      Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: :x),
                    ], fun.required_positionals
       assert_equal [
-                     Types::Function::Param.new(type: Types::Bases::Void.new(location: nil), name: nil),
+                     Types::Function::Param.new(type: Types::Bases::Top.new(location: nil), name: nil),
                      Types::Function::Param.new(type: Types::Bases::Nil.new(location: nil), name: :y),
                    ], fun.optional_positionals
       assert_equal Types::Function::Param.new(type: Types::Bases::Any.new(location: nil), name: :a),
@@ -382,7 +380,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal({}, fun.optional_keywords)
       assert_nil fun.rest_keywords
 
-      assert_equal "^(untyped x, ?void, ?nil y, *untyped a) -> void", type.location.source
+      assert_equal "^(untyped x, ?top, ?nil y, *untyped a) -> void", type.location.source
     end
 
     Parser.parse_type("^(untyped x, *untyped a, nil z) -> void").yield_self do |type|
@@ -518,7 +516,7 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::Proc, type
     end
 
-    Parser.parse_type("untyped | void?").yield_self do |type|
+    Parser.parse_type("untyped | top").yield_self do |type|
       assert_instance_of Types::Union, type
     end
 
@@ -881,6 +879,56 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "\u0000", type.types[0].literal
       assert_equal "\00", type.types[1].literal
       assert_equal "\x00", type.types[2].literal
+    end
+  end
+
+  def test_parse__void__top_level
+    Parser.parse_type("void").tap do |type|
+      assert_instance_of Types::Bases::Void, type
+      assert_equal "void", type.location.source
+    end
+
+    Parser.parse_type("void", void_allowed: true).tap do |type|
+      assert_instance_of Types::Bases::Void, type
+      assert_equal "void", type.location.source
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_type("void", void_allowed: false)
+    end
+  end
+
+  def test_parse__void__generics_params
+    Parser.parse_type("Array[void]").tap do |type|
+      assert_instance_of Types::ClassInstance, type
+    end
+  end
+
+  def test_parse__void__return_types
+    Parser.parse_type("^() -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+    end
+
+    Parser.parse_type("^() { () -> void } -> void").tap do |type|
+      assert_instance_of Types::Proc, type
+    end
+  end
+
+  def test_parse__void__prohibited
+    assert_raises RBS::ParsingError do
+      Parser.parse_type("void?")
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_type("void | true")
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_type("void & true")
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_type("[void]")
     end
   end
 end
