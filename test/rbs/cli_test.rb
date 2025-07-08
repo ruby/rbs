@@ -655,8 +655,8 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            type foo = self
+            type bar = instance
           end
         RBS
 
@@ -664,8 +664,8 @@ singleton(::BasicObject)
           cli.run(["-I", dir, "--log-level=warn", "validate"])
         end
 
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
       end
     end
   end
@@ -675,16 +675,16 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            type foo = self
+            type bar = instance
           end
         RBS
 
         assert_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
         end
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
       end
     end
   end
@@ -694,16 +694,16 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            type foo = self
+            type bar = instance
           end
         RBS
 
         refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
         end
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
       end
     end
   end
@@ -713,16 +713,16 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            def foo: (void) -> void
-            def bar: (void) -> void
+            def foo: (T) -> void
+            def bar: (T) -> void
           end
         RBS
 
         refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
         end
-        assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
-        assert_not_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
+        assert_include stdout.string, "/a.rbs:2:12...2:13: Could not find T (RBS::NoTypeFoundError)"
+        assert_not_include stdout.string, "/a.rbs:3:12...3:13: Could not find T (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -732,7 +732,6 @@ singleton(::BasicObject)
       refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate))
       end
-      assert_include(stdout.string, "`void` type is only allowed in return type or generics parameter")
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
       assert_include(stdout.string, "test/multiple_error.rbs:8:0...9:3: Detected recursive ancestors: ::RecursiveAncestor < ::RecursiveAncestor (RBS::RecursiveAncestorError)")
       assert_include(stdout.string, "test/multiple_error.rbs:11:15...11:22: Could not find Nothing (RBS::NoTypeFoundError)")
@@ -762,8 +761,6 @@ singleton(::BasicObject)
       refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
-      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
-      assert_include(stdout.string, "test/multiple_error.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
     end
   end
@@ -773,17 +770,12 @@ singleton(::BasicObject)
       refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
       end
-      assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
+      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
     end
   end
 
   def test_context_validation
     tests = [
-      <<~RBS,
-        class Foo
-          def foo: (void) -> untyped
-        end
-      RBS
       <<~RBS,
         class Bar[A]
         end
