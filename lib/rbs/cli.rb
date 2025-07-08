@@ -136,10 +136,12 @@ module RBS
       case command
       when :version
         stdout.puts opts.ver
+        0
       when *COMMANDS
         __send__ :"run_#{command}", args, options
       else
         stdout.puts opts.help
+        0
       end
     end
 
@@ -191,6 +193,8 @@ EOB
 
       stdout.print JSON.generate(decls)
       stdout.flush
+
+      0
     end
 
     def run_list(args, options)
@@ -254,6 +258,8 @@ EOB
           stdout.puts "#{name} (interface)"
         end
       end
+
+      0
     end
 
     def run_ancestors(args, options)
@@ -279,7 +285,7 @@ EOU
 
       unless args.size == 1
         stdout.puts "Expected one argument."
-        return
+        return 1
       end
 
       loader = options.loader()
@@ -317,6 +323,8 @@ EOU
       else
         stdout.puts "Cannot find class: #{type_name}"
       end
+
+      0
     end
 
     def run_methods(args, options)
@@ -344,7 +352,7 @@ EOU
 
       unless args.size == 1
         stdout.puts "Expected one argument."
-        return
+        return 1
       end
 
       loader = options.loader()
@@ -373,6 +381,8 @@ EOU
       else
         stdout.puts "Cannot find class: #{type_name}"
       end
+
+      0
     end
 
     def run_method(args, options)
@@ -398,7 +408,7 @@ EOU
 
       unless args.size == 2
         stdout.puts "Expected two arguments, but given #{args.size}."
-        return
+        return 1
       end
 
       loader = options.loader()
@@ -410,7 +420,7 @@ EOU
 
       unless env.module_name?(type_name)
         stdout.puts "Cannot find class: #{type_name}"
-        return
+        return 1
       end
 
       definition = case kind
@@ -426,7 +436,7 @@ EOU
 
       unless method
         stdout.puts "Cannot find method: #{method_name}"
-        return
+        return 1
       end
 
       stdout.puts "#{type_name}#{kind == :instance ? "#" : "."}#{method_name}"
@@ -440,6 +450,8 @@ EOU
         stdout.puts format("    %s %-#{length_max}s   at %s", separator, type, type.location)
         separator = "|"
       end
+
+      0
     end
 
     def run_validate(args, options)
@@ -469,7 +481,7 @@ EOU
 
       unless args.size == 1
         stdout.puts "Expected one argument."
-        return
+        return 1
       end
 
       loader = options.loader()
@@ -502,6 +514,8 @@ EOU
       else
         stdout.puts " => [no constant]"
       end
+
+      0
     end
 
     def run_paths(args, options)
@@ -544,6 +558,8 @@ EOU
           stdout.puts "#{dir} (#{kind_of[dir]}, library, name=#{source.name})"
         end
       end
+
+      0
     end
 
     def run_prototype(args, options)
@@ -647,6 +663,8 @@ EOU
 
         writer = Writer.new(out: stdout)
         writer.write decls
+
+        0
       else
         stdout.puts <<EOU
 Usage: rbs prototype [generator...] [args...]
@@ -660,7 +678,7 @@ Examples:
   $ rbs prototype rbi foo.rbi
   $ rbs prototype runtime String
 EOU
-        exit 1
+        1
       end
     end
 
@@ -712,12 +730,12 @@ EOU
 
       unless has_parser?
         stdout.puts "Not supported on this interpreter (#{RUBY_ENGINE})."
-        exit 1
+        return 1
       end
 
       if args.empty?
         stdout.puts opts
-        return nil
+        return 1
       end
 
       new_parser = -> do
@@ -827,6 +845,8 @@ EOU
         writer = Writer.new(out: stdout)
         writer.write parser.decls
       end
+
+      0
     end
 
     def run_vendor(args, options)
@@ -880,6 +900,8 @@ Options:
 
       stdout.puts "  Copying RBS files..."
       vendorer.copy!
+
+      0
     end
 
     def run_parse(args, options)
@@ -927,7 +949,11 @@ Options:
         syntax_error = true
       end
 
-      exit 1 if syntax_error
+      if syntax_error
+        1
+      else
+        0
+      end
     end
 
     def run_annotate(args, options)
@@ -975,6 +1001,8 @@ Options:
           annotator.annotate_file(path, preserve: preserve)
         end
       end
+
+      0
     end
 
     def test_opt options
@@ -1028,7 +1056,7 @@ EOB
 
       if args.length.zero?
         stdout.puts opts.help
-        exit 1
+        return 1
       end
 
       # @type var env_hash: Hash[String, String?]
@@ -1044,11 +1072,12 @@ EOB
 
       # @type var out: String
       # @type var err: String
+      # @type var status: Process::Status
       out, err, status = __skip__ = Open3.capture3(env_hash, *args)
       stdout.print(out)
       stderr.print(err)
 
-      status
+      status.to_i
     end
 
     def run_collection(args, options)
@@ -1073,7 +1102,7 @@ EOB
       when 'init'
         if config_path.exist?
           puts "#{config_path} already exists"
-          exit 1
+          return 1
         end
 
         config_path.write(<<~'YAML')
@@ -1101,15 +1130,17 @@ EOB
       when 'clean'
         unless lock_path.exist?
           puts "#{lock_path} should exist to clean"
-          exit 1
+          return 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
       when 'help', 'hel', 'he', 'h'
         puts opts.help
       else
         puts opts.help
-        exit 1
+        return 1
       end
+
+      0
     end
 
     def collection_options(args)
@@ -1171,7 +1202,7 @@ EOB
         *minuend_paths, subtrahend_path = args
         unless subtrahend_path
           stdout.puts opts.help
-          exit 1
+          return 1
         end
         subtrahend_paths << subtrahend_path
       else
@@ -1180,7 +1211,7 @@ EOB
 
       if minuend_paths.empty?
         stdout.puts opts.help
-        exit 1
+        return 1
       end
 
       subtrahend = Environment.new.tap do |env|
@@ -1213,10 +1244,12 @@ EOB
           end
         end
       end
+
+      0
     end
 
     def run_diff(argv, library_options)
-      Diff.new(argv: argv, library_options: library_options, stdout: stdout, stderr: stderr).run
+      Diff.new(stdout: stdout, stderr: stderr).run(argv: argv, library_options: library_options)
     end
   end
 end

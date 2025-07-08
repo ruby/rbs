@@ -46,41 +46,41 @@ module RBS
 
     def has_parser?: () -> bool
 
-    def run: (Array[String] args) -> void
+    def run: (Array[String] args) -> Integer
 
-    def run_ast: (Array[String], LibraryOptions) -> void
+    def run_ast: (Array[String], LibraryOptions) -> Integer
 
-    def run_list: (Array[String], LibraryOptions) -> void
+    def run_list: (Array[String], LibraryOptions) -> Integer
 
-    def run_ancestors: (Array[String], LibraryOptions) -> void
+    def run_ancestors: (Array[String], LibraryOptions) -> Integer
 
-    def run_methods: (Array[String], LibraryOptions) -> void
+    def run_methods: (Array[String], LibraryOptions) -> Integer
 
-    def run_method: (Array[String], LibraryOptions) -> void
+    def run_method: (Array[String], LibraryOptions) -> Integer
 
-    def run_validate: (Array[String], LibraryOptions) -> void
+    def run_validate: (Array[String], LibraryOptions) -> Integer
 
-    def run_constant: (Array[String], LibraryOptions) -> void
+    def run_constant: (Array[String], LibraryOptions) -> Integer
 
-    def run_paths: (Array[String], LibraryOptions) -> void
+    def run_paths: (Array[String], LibraryOptions) -> Integer
 
-    def run_prototype: (Array[String], LibraryOptions) -> void
+    def run_prototype: (Array[String], LibraryOptions) -> Integer
 
-    def run_prototype_file: (String format, Array[String]) -> void
+    def run_prototype_file: (String format, Array[String]) -> Integer
 
-    def run_vendor: (Array[String], LibraryOptions) -> void
+    def run_vendor: (Array[String], LibraryOptions) -> Integer
 
-    def run_parse: (Array[String], LibraryOptions) -> void
+    def run_parse: (Array[String], LibraryOptions) -> Integer
 
-    def run_test: (Array[String], LibraryOptions) -> void
+    def run_test: (Array[String], LibraryOptions) -> Integer
 
-    def run_collection: (Array[String], LibraryOptions) -> void
+    def run_collection: (Array[String], LibraryOptions) -> Integer
 
-    def run_annotate: (Array[String], top) -> void
+    def run_annotate: (Array[String], top) -> Integer
 
-    def run_subtract: (Array[String], top) -> void
+    def run_subtract: (Array[String], top) -> Integer
 
-    def run_diff: (Array[String], LibraryOptions) -> void
+    def run_diff: (Array[String], LibraryOptions) -> Integer
 
     def test_opt: (LibraryOptions) -> String?
 

@@ -15,6 +15,18 @@ class RBS::CliTest < Test::Unit::TestCase
     @stderr ||= StringIO.new
   end
 
+  def assert_cli_success(exit_status = nil, &)
+    exit_status ||= yield
+    assert_instance_of Integer, exit_status
+    assert_predicate exit_status, :zero?, "Expected CLI to succeed, but it failed with status: #{exit_status.inspect}"
+  end
+
+  def refute_cli_success(exit_status = nil, &)
+    exit_status ||= yield
+    assert_instance_of Integer, exit_status
+    assert_predicate exit_status, :nonzero?, "Expected CLI to succeed, but it failed with status: #{exit_status.inspect}"
+  end
+
   # Run `rbs collection` with fresh bundler environment
   #
   # You need this method to test `rbs collection` features.
@@ -52,7 +64,7 @@ class RBS::CliTest < Test::Unit::TestCase
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         gems << 'prism' unless gems.include?('prism')
-        
+
         gems = gems.map do |gem|
           if gem == :gemspec
             "gemspec"
@@ -91,7 +103,9 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_ast
     with_cli do |cli|
-      cli.run(%w(ast))
+      assert_cli_success do
+        cli.run(%w(ast))
+      end
 
       # Outputs a JSON
       JSON.parse stdout.string
@@ -100,7 +114,9 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_no_stdlib_option
     with_cli do |cli|
-      cli.run(%w(--no-stdlib ast))
+      assert_cli_success do
+        cli.run(%w(--no-stdlib ast))
+      end
 
       assert_equal '[]', stdout.string
     end
@@ -108,28 +124,34 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_list
     with_cli do |cli|
-      cli.run(%w(-r pathname list))
+      assert_cli_success { cli.run(%w(-r pathname list)) }
       assert_match %r{^::Pathname \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
-      cli.run(%w(-r pathname list --class))
+      assert_cli_success do
+        cli.run(%w(-r pathname list --class))
+      end
       assert_match %r{^::Pathname \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
-      cli.run(%w(-r pathname list --module))
+      assert_cli_success do
+        cli.run(%w(-r pathname list --module))
+      end
       refute_match %r{^::Pathname \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
-      cli.run(%w(-r pathname list --interface))
+      assert_cli_success do
+        cli.run(%w(-r pathname list --interface))
+      end
       refute_match %r{^::Pathname \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
@@ -145,7 +167,9 @@ class RBS::CliTest < Test::Unit::TestCase
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(-I. list))
+          assert_cli_success do
+            cli.run(%w(-I. list))
+          end
 
           assert_match %r{^::Foo \(class alias\)$}, stdout.string
           assert_match %r{^::Bar \(module alias\)$}, stdout.string
@@ -156,7 +180,9 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_ancestors
     with_cli do |cli|
-      cli.run(%w(ancestors ::Set))
+      assert_cli_success do
+        cli.run(%w(ancestors ::Set))
+      end
       assert_equal <<-EOF, stdout.string
 ::Set[A]
 ::Enumerable[A]
@@ -167,7 +193,9 @@ class RBS::CliTest < Test::Unit::TestCase
     end
 
     with_cli do |cli|
-      cli.run(%w(ancestors --instance ::Set))
+      assert_cli_success do
+        cli.run(%w(ancestors --instance ::Set))
+      end
       assert_equal <<-EOF, stdout.string
 ::Set[A]
 ::Enumerable[A]
@@ -178,7 +206,10 @@ class RBS::CliTest < Test::Unit::TestCase
     end
 
     with_cli do |cli|
-      cli.run(%w(ancestors --singleton ::Set))
+      assert_cli_success do
+        cli.run(%w(ancestors --singleton ::Set))
+      end
+
       assert_equal <<-EOF, stdout.string
 singleton(::Set)
 singleton(::Object)
@@ -202,7 +233,9 @@ singleton(::BasicObject)
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(-I. ancestors ::Foo))
+          assert_cli_success do
+            cli.run(%w(-I. ancestors ::Foo))
+          end
 
           assert_equal <<~EOF, stdout.string
             ::String
@@ -218,9 +251,9 @@ singleton(::BasicObject)
 
   def test_methods
     with_cli do |cli|
-      cli.run(%w(methods ::Set))
-      cli.run(%w(methods --instance ::Set))
-      cli.run(%w(methods --singleton ::Set))
+      assert_cli_success { cli.run(%w(methods ::Set)) }
+      assert_cli_success { cli.run(%w(methods --instance ::Set)) }
+      assert_cli_success { cli.run(%w(methods --singleton ::Set)) }
     end
 
     Dir.mktmpdir do |dir|
@@ -233,12 +266,16 @@ singleton(::BasicObject)
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(-I. methods ::Foo))
+          assert_cli_success do
+            cli.run(%w(-I. methods ::Foo))
+          end
           assert_match %r{^puts \(private\)$}, stdout.string
         end
 
         with_cli do |cli|
-          cli.run(%w(-I. methods --singleton ::Bar))
+          assert_cli_success do
+            cli.run(%w(-I. methods --singleton ::Bar))
+          end
           assert_match %r{^puts \(public\)$}, stdout.string
         end
       end
@@ -247,7 +284,7 @@ singleton(::BasicObject)
 
   def test_method
     with_cli do |cli|
-      cli.run(%w(method ::Object yield_self))
+      assert_cli_success { cli.run(%w(method ::Object yield_self)) }
       assert_includes stdout.string, '::Object#yield_self'
       assert_includes stdout.string, 'defined_in: ::Kernel'
       assert_includes stdout.string, 'implementation: ::Kernel'
@@ -269,12 +306,12 @@ singleton(::BasicObject)
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(-I. method ::Foo puts))
+          assert_cli_success { cli.run(%w(-I. method ::Foo puts)) }
           assert_match %r{^::Foo#puts$}, stdout.string
         end
 
         with_cli do |cli|
-          cli.run(%w(-I. method --singleton ::Bar puts))
+          assert_cli_success { cli.run(%w(-I. method --singleton ::Bar puts)) }
           assert_match %r{^::Bar\.puts$}, stdout.string
         end
       end
@@ -284,12 +321,12 @@ singleton(::BasicObject)
 
   def test_validate
     with_cli do |cli|
-      cli.run(%w(--log-level=info validate))
+      assert_cli_success cli.run(%w(--log-level=info validate))
       assert_match(/Validating/, stdout.string)
     end
 
     with_cli do |cli|
-      cli.run(%w(--log-level=warn validate --silent))
+      assert_cli_success cli.run(%w(--log-level=warn validate --silent))
       assert_match(/`--silent` option is deprecated because it's silent by default\. You can use --log-level option of rbs command to display more information\.$/, stdout.string)
     end
   end
@@ -302,7 +339,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -318,7 +355,7 @@ singleton(::BasicObject)
         Hello::World: Integer
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -334,7 +371,7 @@ singleton(::BasicObject)
         type Hello::t = Integer
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -355,7 +392,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -372,7 +409,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -395,7 +432,7 @@ singleton(::BasicObject)
           end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -412,7 +449,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -432,7 +469,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -473,7 +510,9 @@ singleton(::BasicObject)
           end
         RBS
 
-        cli.run(["-I", dir, "validate"])
+        assert_cli_success do
+          cli.run(["-I", dir, "validate"])
+        end
       end
     end
   end
@@ -539,8 +578,7 @@ singleton(::BasicObject)
           end
         RBS
 
-
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir.to_s, "validate"])
         end
 
@@ -572,7 +610,9 @@ singleton(::BasicObject)
           type t[T = self] = untyped
         RBS
 
-        cli.run(["-I", dir, "validate"])
+        assert_cli_success do
+          cli.run(["-I", dir, "validate"])
+        end
 
         assert_include stdout.string, "/a.rbs:1:13...1:17: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
         assert_include stdout.string, "/a.rbs:4:12...4:16: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
@@ -598,7 +638,7 @@ singleton(::BasicObject)
           type t[A, B = A, C = B?] = untyped
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
 
@@ -620,7 +660,9 @@ singleton(::BasicObject)
           end
         RBS
 
-        cli.run(["-I", dir, "--log-level=warn", "validate"])
+        assert_cli_success do
+          cli.run(["-I", dir, "--log-level=warn", "validate"])
+        end
 
         assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
         assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
@@ -638,7 +680,9 @@ singleton(::BasicObject)
           end
         RBS
 
-        cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
+        assert_cli_success do
+          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
+        end
         assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
         assert_include stdout.string, "a.rbs:3:11...3:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
       end
@@ -655,7 +699,7 @@ singleton(::BasicObject)
           end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
         end
         assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
@@ -674,7 +718,7 @@ singleton(::BasicObject)
           end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
         end
         assert_include stdout.string, "a.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)"
@@ -685,7 +729,7 @@ singleton(::BasicObject)
 
   def test_validate_multiple_with_many_errors
     with_cli do |cli|
-      assert_raise SystemExit do
+      refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate))
       end
       assert_include(stdout.string, "`void` type is only allowed in return type or generics parameter")
@@ -715,7 +759,7 @@ singleton(::BasicObject)
 
   def test_validate_multiple_fail_fast
     with_cli do |cli|
-      assert_raise SystemExit do
+      refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
       assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
@@ -726,7 +770,7 @@ singleton(::BasicObject)
 
   def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
     with_cli do |cli|
-      assert_raise SystemExit do
+      refute_cli_success do
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
       end
       assert_include(stdout.string, "test/multiple_error.rbs:2:11...2:25: `void` type is only allowed in return type or generics parameter (RBS::WillSyntaxError)")
@@ -780,12 +824,16 @@ singleton(::BasicObject)
         Dir.mktmpdir do |dir|
           (Pathname(dir) + 'a.rbs').write(rbs)
 
-          cli.run(["-I", dir, "validate"])
+          assert_cli_success do
+            cli.run(["-I", dir, "validate"])
+          end
 
           assert_match(/void|self|instance|class/, stdout.string)
 
-          cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
-          assert_raises SystemExit do
+          assert_cli_success do
+            cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
+          end
+          refute_cli_success do
             cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
           end
         end
@@ -802,7 +850,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        cli.run(["-I", dir, "validate"])
+        assert_cli_success cli.run(["-I", dir, "validate"])
       end
     end
   end
@@ -816,7 +864,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
         assert_match %r{a.rbs:2:18...2:23: Could not find _Void \(.*RBS::NoTypeFoundError.*\)}, stdout.string
@@ -833,7 +881,7 @@ singleton(::BasicObject)
         end
         RBS
 
-        assert_raises SystemExit do
+        refute_cli_success do
           cli.run(["-I", dir, "validate"])
         end
         assert_match %r{a.rbs:2:18...2:23: Could not find voida \(.*RBS::NoTypeFoundError.*\)}, stdout.string
@@ -843,20 +891,20 @@ singleton(::BasicObject)
 
   def test_constant
     with_cli do |cli|
-      cli.run(%w(constant Pathname))
-      cli.run(%w(constant --context File IO))
+      assert_cli_success cli.run(%w(constant Pathname))
+      assert_cli_success cli.run(%w(constant --context File IO))
     end
   end
 
   def test_version
     with_cli do |cli|
-      cli.run(%w(version))
+      assert_cli_success cli.run(%w(version))
     end
   end
 
   def test_paths
     with_cli do |cli|
-      cli.run(%w(-r pathname -I no-such-dir paths))
+      assert_cli_success cli.run(%w(-r pathname -I no-such-dir paths))
       assert_match %r{/core \(dir, core\)$}, stdout.string
       assert_match %r{/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
       assert_match %r{^no-such-dir \(absent\)$}, stdout.string
@@ -867,7 +915,7 @@ singleton(::BasicObject)
     omit unless has_gem?("rbs-amber")
 
     with_cli do |cli|
-      cli.run(%w(-r rbs-amber paths))
+      assert_cli_success cli.run(%w(-r rbs-amber paths))
       assert_match %r{/core \(dir, core\)$}, stdout.string
       assert_match %r{/sig \(dir, library, name=rbs-amber\)$}, stdout.string
     end
@@ -877,7 +925,7 @@ singleton(::BasicObject)
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(vendor --vendor-dir=dir1))
+          assert_cli_success cli.run(%w(vendor --vendor-dir=dir1))
 
           assert_predicate Pathname(d) + "dir1/core", :directory?
         end
@@ -891,7 +939,7 @@ singleton(::BasicObject)
     Dir.mktmpdir do |d|
       Dir.chdir(d) do
         with_cli do |cli|
-          cli.run(%w(-r rbs-amber vendor --vendor-dir=dir1))
+          assert_cli_success cli.run(%w(-r rbs-amber vendor --vendor-dir=dir1))
 
           assert_predicate Pathname(d) + "dir1/rbs-amber-1.0.0", :directory?
         end
@@ -919,7 +967,7 @@ singleton(::BasicObject)
       RBS
 
       with_cli do |cli|
-        assert_raises(SystemExit) { cli.run(%W(parse #{dir})) }
+        refute_cli_success { cli.run(%W(parse #{dir})) }
 
         assert_equal [
           "#{dir}/semantics_error.rbs:2:10...2:11: Syntax error: expected a token `pCOLON`, token=`.` (pDOT) (RBS::ParsingError)",
@@ -937,10 +985,10 @@ singleton(::BasicObject)
 
   def test_parse_e
     with_cli do |cli|
-      cli.run(['parse', '-e', 'class C end'])
+      assert_cli_success cli.run(['parse', '-e', 'class C end'])
       assert_empty stdout.string
 
-      assert_raises(SystemExit) { cli.run(['parse', '-e', 'class C en']) }
+      refute_cli_success { cli.run(['parse', '-e', 'class C en']) }
       assert_equal [
         "-e:1:8...1:10: Syntax error: unexpected token for class/module declaration member, token=`en` (tLIDENT) (RBS::ParsingError)",
         "",
@@ -952,10 +1000,10 @@ singleton(::BasicObject)
 
   def test_parse_type
     with_cli do |cli|
-      cli.run(['parse', '--type', '-e', 'bool'])
+      assert_cli_success cli.run(['parse', '--type', '-e', 'bool'])
       assert_empty stdout.string
 
-      assert_raises(SystemExit) { cli.run(['parse', '--type', '-e', '?']) }
+      refute_cli_success { cli.run(['parse', '--type', '-e', '?']) }
       assert_equal [
         "-e:1:0...1:1: Syntax error: unexpected token for simple type, token=`?` (pQUESTION) (RBS::ParsingError)",
         "",
@@ -967,10 +1015,10 @@ singleton(::BasicObject)
 
   def test_parse_method_type
     with_cli do |cli|
-      cli.run(['parse', '--method-type', '-e', '() -> void'])
+      assert_cli_success cli.run(['parse', '--method-type', '-e', '() -> void'])
       assert_empty stdout.string
 
-      assert_raises(SystemExit) { cli.run(['parse', '--method-type', '-e', '()']) }
+      refute_cli_success cli.run(['parse', '--method-type', '-e', '()'])
       assert_equal [
         "-e:1:2...1:2: Syntax error: expected a token `pARROW`, token=`` (pEOF) (RBS::ParsingError)",
         "",
@@ -987,13 +1035,8 @@ singleton(::BasicObject)
           false
         end
 
-        assert_raises SystemExit do
-          cli.run(%w(prototype rb))
-        end
-
-        assert_raises SystemExit do
-          cli.run(%w(prototype rbi))
-        end
+        refute_cli_success cli.run(%w(prototype rb))
+        refute_cli_success cli.run(%w(prototype rbi))
 
         assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[0]
         assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[1]
@@ -1035,7 +1078,7 @@ end
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(prototype rb --out_dir=sig lib Gemfile))
+          assert_cli_success cli.run(%w(prototype rb --out_dir=sig lib Gemfile))
 
           assert_equal <<-EOM, cli.stdout.string
 Processing `lib`...
@@ -1074,7 +1117,7 @@ end
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(prototype rb --out_dir=sig --base_dir=lib test/a_test.rb))
+          assert_cli_success cli.run(%w(prototype rb --out_dir=sig --base_dir=lib test/a_test.rb))
 
           assert_equal <<-EOM, cli.stdout.string
 Processing `test/a_test.rb`...
@@ -1094,13 +1137,13 @@ Processing `test/a_test.rb`...
 
       (dir + "lib").mkdir
       (dir + "lib/a.rb").write(<<-RUBY)
-class A < <%= @superclass %>
+class A < {{SUPER_CLASS}}
 end
       RUBY
 
       Dir.chdir(dir) do
         with_cli do |cli|
-          cli.run(%w(prototype rb --out_dir=sig lib))
+          assert_cli_success cli.run(%w(prototype rb --out_dir=sig lib))
 
           assert_equal <<-EOM, cli.stdout.string
 Processing `lib`...
@@ -1121,7 +1164,7 @@ Processing `lib`...
           begin
             old = $stderr
             $stderr = cli.stderr
-            cli.run(%w(prototype runtime --todo ::Object))
+            assert_cli_success cli.run(%w(prototype runtime --todo ::Object))
           ensure
             $stderr = old
           end
@@ -1155,9 +1198,9 @@ Processing `lib`...
         # `exit` is a common shell built-in command.
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo exit))
 
-        assert_raises(SystemExit) { cli.run(%w(test)) }
-        assert_raises(SystemExit) { cli.run(%W(-I #{dir} test)) }
-        assert_raises(SystemExit) { cli.run(%W(-I #{dir} test --target ::Foo)) }
+        refute_cli_success cli.run(%w(test))
+        refute_cli_success cli.run(%W(-I #{dir} test))
+        refute_cli_success cli.run(%W(-I #{dir} test --target ::Foo))
       end
     end
   end
@@ -1568,7 +1611,7 @@ Processing `lib`...
       RBS
 
       with_cli do |cli|
-        cli.run(['subtract', minuend.to_s, subtrahend.to_s])
+        assert_cli_success cli.run(['subtract', minuend.to_s, subtrahend.to_s])
         assert_empty stderr.string
         assert_equal <<~RBS, stdout.string
           use A::B
@@ -1608,7 +1651,9 @@ Processing `lib`...
       RBS
 
       with_cli do |cli|
-        cli.run(['subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s])
+        assert_cli_success {
+          cli.run(['subtract', minuend.to_s, '--subtrahend', subtrahend_1.to_s, '--subtrahend', subtrahend_2.to_s])
+        }
         assert_empty stderr.string
         assert_equal <<~RBS, stdout.string
           use A::B
@@ -1641,7 +1686,7 @@ Processing `lib`...
       RBS
 
       with_cli do |cli|
-        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_cli_success cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
         assert_empty stderr.string
         assert_empty stdout.string
         assert_equal minuend.read, <<~RBS
@@ -1674,7 +1719,7 @@ Processing `lib`...
       RBS
 
       with_cli do |cli|
-        cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
+        assert_cli_success cli.run(['subtract', '--write', minuend.to_s, subtrahend.to_s])
         assert_empty stderr.string
         assert_empty stdout.string
         refute_predicate minuend, :exist?
@@ -1684,7 +1729,9 @@ Processing `lib`...
 
   def assert_rbs_test_no_errors cli, dir, arg_array
     args = ['-I', dir.to_s, 'test', *arg_array]
-    assert_instance_of Process::Status, cli.run(args)
+    exit_status = cli.run(args)
+    assert_instance_of Integer, exit_status
+    assert_predicate exit_status, :zero?
   end
 
   def mktmp_diff_case
@@ -1730,7 +1777,9 @@ Processing `lib`...
   def test_diff_markdown
     mktmp_diff_case do |dir1, dir2|
       with_cli do |cli|
-        cli.run(['diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+        assert_cli_success {
+          cli.run(['diff', '--format', 'markdown', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+        }
 
         assert_equal <<~MARKDOWN, stdout.string
           | before | after |
@@ -1747,7 +1796,9 @@ Processing `lib`...
   def test_diff_diff
     mktmp_diff_case do |dir1, dir2|
       with_cli do |cli|
-        cli.run(['diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+        assert_cli_success do
+          cli.run(['diff', '--format', 'diff', '--type-name', 'Foo', '--before', dir1.to_s, '--after', dir2.to_s])
+        end
 
         assert_equal <<~DIFF, stdout.string
           - def qux: (untyped) -> untyped
