@@ -7,11 +7,20 @@ module RBS
         @has_syntax_error: bool
         @errors: Array[BaseError]
 
+        # The tag that will be thrown in #finish method
+        @tag: top
+
         def initialize: (limit: Integer?, exit_error: boolish) -> void
 
         def add: (BaseError) -> void
 
-        def finish: () -> void
+        # Throws the `@tag` with 0 or 1
+        #
+        # Must be called from the block passed to `#try` method.
+        #
+        def finish: () -> Integer
+
+        def try: () { () -> void } -> Integer
 
         private
 
@@ -25,7 +34,7 @@ module RBS
 
       def initialize: (args: Array[String], options: LibraryOptions) -> void
 
-      def run: () -> void
+      def run: () -> Integer
 
       private
 

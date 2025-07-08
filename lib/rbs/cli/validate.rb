@@ -21,10 +21,18 @@ module RBS
           finish if @limit == 1
         end
 
+        def try(&block)
+          catch(:finish) do |tag|
+            @tag = tag
+            yield
+            finish()
+          end
+        end
+
         def finish
           if @errors.empty?
             if @exit_error && @has_syntax_error
-              exit 1
+              throw @tag, 1
             else
               # success
             end
@@ -32,8 +40,10 @@ module RBS
             @errors.each do |error|
               RBS.logger.error(build_message(error))
             end
-            exit 1
+            throw @tag, 1
           end
+
+          0
         end
 
         private
@@ -81,14 +91,14 @@ EOU
       end
 
       def run
-        validate_class_module_definition
-        validate_class_module_alias_definition
-        validate_interface
-        validate_constant
-        validate_global
-        validate_type_alias
-
-        @errors.finish
+        @errors.try do
+          validate_class_module_definition
+          validate_class_module_alias_definition
+          validate_interface
+          validate_constant
+          validate_global
+          validate_type_alias
+        end
       end
 
       private
