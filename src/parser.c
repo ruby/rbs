@@ -1475,7 +1475,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
                     rbs_parser_advance(parser);
 
                     default_type_range.start = parser->current_token.range.start;
-                    CHECK_PARSE(rbs_parse_type(parser, &default_type, false));
+                    CHECK_PARSE(rbs_parse_type(parser, &default_type, true));
                     default_type_range.end = parser->current_token.range.end;
 
                     required_param_allowed = false;

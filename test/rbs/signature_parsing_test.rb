@@ -2370,4 +2370,11 @@ end
       end
     RBS
   end
+
+  def test_generics__default_type_void
+    Parser.parse_signature(<<~RBS)
+      class Foo[T = void]
+      end
+    RBS
+  end
 end
