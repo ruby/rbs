@@ -206,6 +206,10 @@ module RBS
           def annotations
             []
           end
+
+          def name_location
+            rbs_location(node.name_loc)
+          end
         end
       end
     end
