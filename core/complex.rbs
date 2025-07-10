@@ -221,8 +221,6 @@ class Complex < Numeric
   #
   def +: (Numeric) -> Complex
 
-  def +@: () -> Complex
-
   # <!--
   #   rdoc-file=complex.c
   #   - complex - numeric -> new_complex
