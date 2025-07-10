@@ -88,6 +88,20 @@ struct parse_type_arg {
     VALUE void_allowed;
 };
 
+struct parse_method_type_arg {
+    VALUE buffer;
+    rb_encoding *encoding;
+    rbs_parser_t *parser;
+    VALUE require_eof;
+};
+
+struct parse_signature_arg {
+    VALUE buffer;
+    rb_encoding *encoding;
+    rbs_parser_t *parser;
+    VALUE require_eof;
+};
+
 static VALUE ensure_free_parser(VALUE parser) {
     rbs_parser_free((rbs_parser_t *) parser);
     return Qnil;
@@ -183,7 +197,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
 }
 
 static VALUE parse_method_type_try(VALUE a) {
-    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    struct parse_method_type_arg *arg = (struct parse_method_type_arg *) a;
     rbs_parser_t *parser = arg->parser;
 
     if (parser->next_token.type == pEOF) {
@@ -219,7 +233,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
 
     rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
     declare_type_variables(parser, variables, buffer);
-    struct parse_type_arg arg = {
+    struct parse_method_type_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
         .parser = parser,
@@ -234,7 +248,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
 }
 
 static VALUE parse_signature_try(VALUE a) {
-    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    struct parse_signature_arg *arg = (struct parse_signature_arg *) a;
     rbs_parser_t *parser = arg->parser;
 
     rbs_signature_t *signature = NULL;
@@ -257,7 +271,7 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
     rb_encoding *encoding = rb_enc_get(string);
 
     rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-    struct parse_type_arg arg = {
+    struct parse_signature_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
         .parser = parser,
