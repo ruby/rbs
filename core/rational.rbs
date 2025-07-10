@@ -244,8 +244,6 @@ class Rational < Numeric
   def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
 
-  def dup: () -> self
-
   def eql?: (untyped) -> bool
 
   # <!--
