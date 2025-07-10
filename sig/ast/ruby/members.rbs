@@ -65,6 +65,8 @@ module RBS
           def overloading?: () -> bool
 
           def annotations: () -> Array[AST::Annotation]
+
+          def name_location: () -> Location
         end
       end
     end

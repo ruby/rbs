@@ -32,6 +32,8 @@ module RBS
           def type_params: () -> Array[AST::TypeParam]
 
           def location: () -> Location
+
+          def name_location: () -> Location
         end
 
         class ModuleDecl < Base
@@ -53,6 +55,8 @@ module RBS
           def location: () -> Location
 
           def self_types: () -> Array[AST::Declarations::Module::Self]
+
+          def name_location: () -> Location
         end
       end
     end

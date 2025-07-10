@@ -46,6 +46,10 @@ module RBS
           def location
             rbs_location(node.location)
           end
+
+          def name_location
+            rbs_location(node.constant_path.location)
+          end
         end
 
         class ModuleDecl < Base
@@ -78,6 +82,10 @@ module RBS
 
           def location
             rbs_location(node.location)
+          end
+
+          def name_location
+            rbs_location(node.constant_path.location)
           end
         end
       end
