@@ -10,11 +10,6 @@ class BindingInstanceTest < Test::Unit::TestCase
                       binding, :clone
   end
 
-  def test_dup
-    assert_send_type  '() -> Binding',
-                      binding, :dup
-  end
-
   def test_eval
     with_string '123' do |src|
       assert_send_type  '(string) -> untyped',

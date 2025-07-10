@@ -32,8 +32,6 @@
 class Binding
   def clone: () -> self
 
-  def dup: () -> self
-
   # <!--
   #   rdoc-file=proc.c
   #   - binding.eval(string [, filename [,lineno]])  -> obj

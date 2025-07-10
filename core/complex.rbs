@@ -411,8 +411,6 @@ class Complex < Numeric
 
   def divmod: (Numeric) -> bot
 
-  def dup: () -> self
-
   def eql?: (untyped) -> bool
 
   # <!--
