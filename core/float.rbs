@@ -153,8 +153,6 @@ class Float < Numeric
   def +: (Complex) -> Complex
        | (Numeric) -> Float
 
-  def +@: () -> Float
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self - other -> numeric

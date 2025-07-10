@@ -246,8 +246,6 @@ class Integer < Numeric
        | (Rational) -> Rational
        | (Complex) -> Complex
 
-  def +@: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.c
   #   - self - numeric -> numeric_result
