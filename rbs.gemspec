@@ -38,7 +38,7 @@ Gem::Specification.new do |spec|
   spec.extensions = %w{ext/rbs_extension/extconf.rb}
 
   if false
-    spec.required_ruby_version = ">= 3.3"
+    spec.required_ruby_version = ">= 3.4"
   end
 
   spec.bindir        = "exe"
