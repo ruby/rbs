@@ -749,9 +749,9 @@ class Numeric
   # where *n = (limit - self)/step*.
   #
   def step: (?Numeric limit, ?Numeric step) { (Numeric) -> void } -> self
-          | (?Numeric limit, ?Numeric step) -> Enumerator[Numeric, self]
+          | (?Numeric limit, ?Numeric step) -> Enumerator::ArithmeticSequence
           | (?by: Numeric, ?to: Numeric) { (Numeric) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) -> Enumerator[Numeric, self]
+          | (?by: Numeric, ?to: Numeric) -> Enumerator::ArithmeticSequence
 
   # <!--
   #   rdoc-file=complex.c
