@@ -3,6 +3,7 @@ PATH
   specs:
     rbs (3.10.2)
       logger
+      tsort
 
 PATH
   remote: test/assets/test-gem
