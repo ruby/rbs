@@ -55,6 +55,10 @@ jobs:
           echo "NO_MINITEST=true" >> $GITHUB_ENV
           bundle config set --local without 'minitest'
         if: ${{ contains(matrix.ruby, 'head') }}
+      - name: bundle config set force_ruby_platform true if head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: |
+          bundle config set force_ruby_platform true
       - name: Skip installing type checkers
         if: ${{ ! contains(matrix.job, 'typecheck_test') }}
         run: |
