@@ -10,7 +10,7 @@ module RBS
           include Helpers::LocationHelper
         end
 
-        type t = DefMember
+        type t = DefMember | IncludeMember | ExtendMember | PrependMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -67,6 +67,31 @@ module RBS
           def annotations: () -> Array[AST::Annotation]
 
           def name_location: () -> Location
+        end
+
+        class MixinMember < Base
+          attr_reader node: Prism::CallNode
+
+          attr_reader module_name: TypeName
+
+          attr_reader annotation: Annotations::TypeApplicationAnnotation | nil
+
+          def initialize: (Buffer, Prism::CallNode, TypeName, Annotations::TypeApplicationAnnotation | nil) -> void
+
+          def location: () -> Location
+
+          def name_location: () -> Location
+
+          def type_args: () -> Array[Types::t]
+        end
+
+        class IncludeMember < MixinMember
+        end
+
+        class ExtendMember < MixinMember
+        end
+
+        class PrependMember < MixinMember
         end
       end
     end

@@ -211,6 +211,43 @@ module RBS
             rbs_location(node.name_loc)
           end
         end
+
+        class MixinMember < Base
+          attr_reader :node
+          attr_reader :module_name
+          attr_reader :annotation
+
+          def initialize(buffer, node, module_name, annotation)
+            super(buffer)
+            @node = node
+            @module_name = module_name
+            @annotation = annotation
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_location
+            args = node.arguments or raise
+            first_arg = args.arguments.first or raise
+
+            rbs_location(first_arg.location)
+          end
+
+          def type_args
+            annotation&.type_args || []
+          end
+        end
+
+        class IncludeMember < MixinMember
+        end
+
+        class ExtendMember < MixinMember
+        end
+
+        class PrependMember < MixinMember
+        end
       end
     end
   end
