@@ -54,7 +54,7 @@ jobs:
           GH_TOKEN: ${{ secrets.DEPENDABOT_MERGE_GH_TOKEN }}
         run: |
           gh pr create \
-            --title 'bundle update' \
+            --title "bundle update ($(date +'%Y%m%d'))" \
             --body "Automated weekly bundle update" \
             --head "$(git rev-parse --abbrev-ref HEAD)" \
             --base "${{ github.event.repository.default_branch }}"
