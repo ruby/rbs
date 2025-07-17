@@ -44,6 +44,7 @@ GEM
     erb (5.0.2)
     extconf_compile_commands_json (0.0.7)
     ffi (1.17.2)
+    ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     fileutils (1.7.3)
     goodcheck (3.1.0)
@@ -72,6 +73,8 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
+    nokogiri (1.18.8-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-gnu)
       racc (~> 1.4)
     ostruct (0.6.2)
@@ -177,6 +180,7 @@ GEM
     zlib (3.2.1)
 
 PLATFORMS
+  arm64-darwin
   x86_64-linux
 
 DEPENDENCIES
