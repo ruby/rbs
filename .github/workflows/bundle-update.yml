@@ -35,7 +35,7 @@ jobs:
           bundle lock --update
           git add Gemfile.lock
 
-          if git diff --cached --quiet; then
+          if git diff --cached --exit-code; then
             echo "No changes to commit, exiting."
             exit 0
           fi
