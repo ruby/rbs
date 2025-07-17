@@ -1295,4 +1295,43 @@ EOF
       end
     end
   end
+
+  def test__ruby__invalid_ancestor_args
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<-EOF
+module X
+end
+      EOF
+
+      manager.ruby_files[Pathname("lib/test.rb")] = <<-RUBY
+class A
+  include X #[bool]
+end
+
+class B
+  extend X #[untyped]
+end
+
+class C
+  prepend X #[void]
+end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::A"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.singleton_ancestors(type_name("::B"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::C"))
+        end
+      end
+    end
+  end
 end

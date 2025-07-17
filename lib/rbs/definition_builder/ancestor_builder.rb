@@ -537,7 +537,7 @@ module RBS
           included_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod.source.is_a?(AST::Members::Include) or raise
+            (mod.source.is_a?(AST::Members::Include) || mod.source.is_a?(AST::Ruby::Members::IncludeMember)) or raise
             mod_ancestors =
               instance_ancestors(name, building_ancestors: building_ancestors)
                 .apply(arg_types, env: env, location: mod.source.location)
@@ -552,7 +552,7 @@ module RBS
           prepended_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod.source.is_a?(AST::Members::Prepend) or raise
+            (mod.source.is_a?(AST::Members::Prepend) || mod.source.is_a?(AST::Ruby::Members::PrependMember)) or raise
             mod_ancestors =
               instance_ancestors(name, building_ancestors: building_ancestors)
                 .apply(arg_types, env: env, location: mod.source.location)
@@ -607,7 +607,7 @@ module RBS
         extended_modules.each do |mod|
           name = mod.name
           args = mod.args
-          mod.source.is_a?(AST::Members::Extend) or raise
+          (mod.source.is_a?(AST::Members::Extend) || mod.source.is_a?(AST::Ruby::Members::ExtendMember)) or raise
           mod_ancestors =
             instance_ancestors(name, building_ancestors: building_ancestors)
               .apply(args, env: env, location: mod.source.location)
