@@ -60,6 +60,7 @@ extern VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
 extern VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
+extern VALUE RBS_AST_Ruby_Annotations_TypeApplicationAnnotation;
 extern VALUE RBS_AST_TypeParam;
 extern VALUE RBS_MethodType;
 extern VALUE RBS_Namespace;

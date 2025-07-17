@@ -8,6 +8,7 @@ module RBS
                                 | ReturnTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
+                                 | TypeApplicationAnnotation
 
         type t = leading_annotation | trailing_annotation
 
@@ -100,6 +101,33 @@ module RBS
             colon_location: Location,
             return_type: Types::t,
             comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `[T1, T2, ...]` annotation in trailing comments
+        #
+        # ```
+        # #[String, Integer]
+        #  ^                     -- prefix_location
+        #         ^              -- comma_locations[0]
+        #                  ^     -- close_bracket_location
+        # ```
+        #
+        class TypeApplicationAnnotation < Base
+          attr_reader type_args: Array[Types::t]
+
+          attr_reader close_bracket_location: Location
+
+          attr_reader comma_locations: Array[Location]
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            type_args: Array[Types::t],
+            close_bracket_location: Location,
+            comma_locations: Array[Location],
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self

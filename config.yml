@@ -487,3 +487,13 @@ nodes:
         c_type: rbs_node
       - name: comment_location
         c_type: rbs_location
+  - name: RBS::AST::Ruby::Annotations::TypeApplicationAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: type_args
+        c_type: rbs_node_list
+      - name: close_bracket_location
+        c_type: rbs_location
+      - name: comma_locations
+        c_type: rbs_location_list

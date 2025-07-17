@@ -649,6 +649,22 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             &h
         );
     }
+    case RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION: {
+        rbs_ast_ruby_annotations_type_application_annotation_t *node = (rbs_ast_ruby_annotations_type_application_annotation_t *) instance;
+
+        VALUE h = rb_hash_new();
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_loc_to_ruby_location(ctx, node->prefix_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("type_args")), rbs_node_list_to_ruby_array(ctx, node->type_args));
+        rb_hash_aset(h, ID2SYM(rb_intern("close_bracket_location")), rbs_loc_to_ruby_location(ctx, node->close_bracket_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("comma_locations")), rbs_location_list_to_ruby_array(ctx, node->comma_locations));
+
+        return CLASS_NEW_INSTANCE(
+            RBS_AST_Ruby_Annotations_TypeApplicationAnnotation,
+            1,
+            &h
+        );
+    }
     case RBS_AST_STRING: {
         rbs_ast_string_t *string_node = (rbs_ast_string_t *) instance;
         rbs_string_t s = string_node->string;

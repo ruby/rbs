@@ -113,6 +113,29 @@ module RBS
             ) #: self
           end
         end
+
+        class TypeApplicationAnnotation < Base
+          attr_reader :type_args, :close_bracket_location, :comma_locations
+
+          def initialize(location:, prefix_location:, type_args:, close_bracket_location:, comma_locations:)
+            super(location, prefix_location)
+            @type_args = type_args
+            @close_bracket_location = close_bracket_location
+            @comma_locations = comma_locations
+          end
+
+          def map_type_name(&block)
+            mapped_type_args = type_args.map { |type| type.map_type_name { yield _1 } }
+            
+            self.class.new(
+              location:,
+              prefix_location:,
+              type_args: mapped_type_args,
+              close_bracket_location:,
+              comma_locations:
+            ) #: self
+          end
+        end
       end
     end
   end
