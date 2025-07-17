@@ -50,7 +50,7 @@ jobs:
       - name: Create Pull Request
         if: env.has_update == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ ${{ secrets.DEPENDABOT_MERGE_GH_TOKEN }} }}
         run: |
           gh pr create \
             --title 'bundle update (`/Gemfile`)' \
