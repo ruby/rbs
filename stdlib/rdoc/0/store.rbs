@@ -22,7 +22,7 @@ module RDoc
   class Store
     # <!--
     #   rdoc-file=lib/rdoc/store.rb
-    #   - new(path = nil, type = nil)
+    #   - new(options, path: nil, type: nil)
     # -->
     # Creates a new Store of `type` that will load or save to `path`
     #

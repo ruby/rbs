@@ -535,6 +535,9 @@ URI::ABS_URI: Regexp
 
 URI::ABS_URI_REF: Regexp
 
+# <!-- rdoc-file=lib/uri/common.rb -->
+# The default parser instance.
+#
 URI::DEFAULT_PARSER: URI::RFC2396_Parser
 
 URI::ESCAPED: Regexp
@@ -557,6 +560,9 @@ URI::REL_URI: Regexp
 
 URI::REL_URI_REF: Regexp
 
+# <!-- rdoc-file=lib/uri/common.rb -->
+# The default parser instance for RFC 3986.
+#
 URI::RFC3986_PARSER: URI::RFC3986_Parser
 
 URI::SCHEME: Regexp
