@@ -287,4 +287,230 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__include
+    result = parse(<<~RUBY)
+      class Foo
+        include Bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::IncludeMember, member
+        assert_equal RBS::TypeName.parse("Bar"), member.module_name
+        assert_equal "include Bar", member.location.source
+        assert_equal "Bar", member.name_location.source
+      end
+    end
+  end
+
+  def test_parse__extend
+    result = parse(<<~RUBY)
+      class Foo
+        extend Bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::ExtendMember, member
+        assert_equal RBS::TypeName.parse("Bar"), member.module_name
+        assert_equal "extend Bar", member.location.source
+        assert_equal "Bar", member.name_location.source
+      end
+    end
+  end
+
+  def test_parse__prepend
+    result = parse(<<~RUBY)
+      class Foo
+        prepend Bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrependMember, member
+        assert_equal RBS::TypeName.parse("Bar"), member.module_name
+        assert_equal "prepend Bar", member.location.source
+        assert_equal "Bar", member.name_location.source
+      end
+    end
+  end
+
+  def test_error__include_multiple_arguments
+    result = parse(<<~RUBY)
+      class Foo
+        include Bar, Baz
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "include Bar, Baz", diagnostic.location.source
+      assert_equal "Mixing multiple modules with one call is not supported", diagnostic.message
+    end
+  end
+
+  def test_error__extend_multiple_arguments
+    result = parse(<<~RUBY)
+      class Foo
+        extend Bar, Baz
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "extend Bar, Baz", diagnostic.location.source
+      assert_equal "Mixing multiple modules with one call is not supported", diagnostic.message
+    end
+  end
+
+  def test_error__prepend_multiple_arguments
+    result = parse(<<~RUBY)
+      class Foo
+        prepend Bar, Baz
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "prepend Bar, Baz", diagnostic.location.source
+      assert_equal "Mixing multiple modules with one call is not supported", diagnostic.message
+    end
+  end
+
+  def test_error__include_non_constant
+    result = parse(<<~RUBY)
+      class Foo
+        include bar
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "bar", diagnostic.location.source
+      assert_equal "Module name must be a constant", diagnostic.message
+    end
+  end
+
+  def test_error__extend_non_constant
+    result = parse(<<~RUBY)
+      class Foo
+        extend bar
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "bar", diagnostic.location.source
+      assert_equal "Module name must be a constant", diagnostic.message
+    end
+  end
+
+  def test_error__prepend_non_constant
+    result = parse(<<~RUBY)
+      class Foo
+        prepend bar
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_equal "bar", diagnostic.location.source
+      assert_equal "Module name must be a constant", diagnostic.message
+    end
+  end
+
+  def test_parse__include_with_type_application
+    result = parse(<<~RUBY)
+      class Foo
+        include Bar #[String]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::IncludeMember, member
+        assert_equal RBS::TypeName.parse("Bar"), member.module_name
+        assert_equal "include Bar", member.location.source
+        assert_equal "Bar", member.name_location.source
+        assert_equal 1, member.type_args.size
+        assert_equal "String", member.type_args[0].to_s
+      end
+    end
+  end
+
+  def test_parse__extend_with_type_application
+    result = parse(<<~RUBY)
+      class Foo
+        extend(
+          Enumerable
+        ) #[Integer, void]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::ExtendMember, member
+        assert_equal RBS::TypeName.parse("Enumerable"), member.module_name
+        assert_equal "extend(\n    Enumerable\n  )", member.location.source
+        assert_equal "Enumerable", member.name_location.source
+        assert_equal 2, member.type_args.size
+        assert_equal "Integer", member.type_args[0].to_s
+        assert_equal "void", member.type_args[1].to_s
+      end
+    end
+  end
+
+  def test_parse__prepend_with_type_application
+    result = parse(<<~RUBY)
+      class Foo
+        prepend Bar #[String, Integer]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrependMember, member
+        assert_equal RBS::TypeName.parse("Bar"), member.module_name
+        assert_equal "prepend Bar", member.location.source
+        assert_equal "Bar", member.name_location.source
+        assert_equal 2, member.type_args.size
+        assert_equal "String", member.type_args[0].to_s
+        assert_equal "Integer", member.type_args[1].to_s
+      end
+    end
+  end
 end
