@@ -1,0 +1,59 @@
+name: Scheduled Bundle Update PR
+
+on:
+  schedule:
+    - cron: '0 0 * * 2'
+  workflow_dispatch:
+
+jobs:
+  bundle-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+
+      - name: Set up git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Switch branch
+        run: |
+          git switch -c bundle-update-$(date +'%Y%m%d')-$(uuidgen | cut -c1-8)
+
+      - name: Install bundler
+        run: gem install bundler
+
+      - name: Run bundle update
+        run: |
+          bundle lock --update
+          git add Gemfile.lock
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit, exiting."
+            exit 0
+          fi
+
+          git commit -m "bundle update"
+          echo "has_update=true" >> $GITHUB_ENV
+
+      - name: Push branch
+        if: env.has_update == 'true'
+        run: git push origin HEAD
+
+      - name: Create Pull Request
+        if: env.has_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --title "bundle update `/Gemfile`" \
+            --body "Automated bundle update" \
+            --head "$(git rev-parse --abbrev-ref HEAD)" \
+            --base "main"
