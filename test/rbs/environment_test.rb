@@ -646,4 +646,77 @@ type s = untyped
       end
     end
   end
+
+  def test__ruby__resolve_type_names_mixin_members
+    result = parse_inline(<<~RUBY)
+      module M
+      end
+
+      class String
+      end
+
+      class Integer
+      end
+
+      class A
+        include M #[String]
+      end
+
+      class B
+        extend M #[String, Integer]
+      end
+
+      class C
+        prepend M #[Integer]
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    env.resolve_type_names.tap do |env|
+      # Test A include
+      a_decl = env.class_decls[RBS::TypeName.parse("::A")]
+      a_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::IncludeMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 1, member.type_args.size
+            # Type argument should be resolved to absolute TypeName
+            assert_equal RBS::TypeName.parse("::String"), member.type_args[0].name
+          end
+        end
+      end
+
+      # Test B extend
+      b_decl = env.class_decls[RBS::TypeName.parse("::B")]
+      b_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::ExtendMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 2, member.type_args.size
+            # Both type arguments should be resolved to absolute TypeNames
+            assert_equal RBS::TypeName.parse("::String"), member.type_args[0].name
+            assert_equal RBS::TypeName.parse("::Integer"), member.type_args[1].name
+          end
+        end
+      end
+
+      # Test C prepend
+      c_decl = env.class_decls[RBS::TypeName.parse("::C")]
+      c_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::PrependMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 1, member.type_args.size
+            # Type argument should be resolved to absolute TypeName
+            assert_equal RBS::TypeName.parse("::Integer"), member.type_args[0].name
+          end
+        end
+      end
+    end
+  end
 end
