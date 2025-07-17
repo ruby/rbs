@@ -33,7 +33,8 @@ jobs:
       - name: Run bundle update
         run: |
           bundle lock --update
-          git add Gemfile.lock
+          bundle lock --update --gemfile=steep/Gemfile
+          git add Gemfile.lock steep/Gemfile.lock
 
           if git diff --cached --exit-code; then
             echo "No changes to commit, exiting."
@@ -53,7 +54,7 @@ jobs:
           GH_TOKEN: ${{ secrets.DEPENDABOT_MERGE_GH_TOKEN }}
         run: |
           gh pr create \
-            --title 'bundle update (`/Gemfile`)' \
-            --body "Automated bundle update" \
+            --title 'bundle update' \
+            --body "Automated weekly bundle update" \
             --head "$(git rev-parse --abbrev-ref HEAD)" \
             --base "${{ github.event.repository.default_branch }}"
