@@ -155,6 +155,7 @@ module RBS
         type source = :super     # Inheritance
                     | nil        # Itself
                     | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend  # AST
+                    | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::ExtendMember | AST::Ruby::Members::PrependMember  # Ruby AST
                     | AST::Declarations::Module::Self
 
         attr_reader name: TypeName

@@ -1214,4 +1214,85 @@ EOF
       end
     end
   end
+
+  def test__one_ancestors__ruby_include_extend_prepend
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("mixin.rbs")] = <<~EOF
+        module TestMixin
+        end
+      EOF
+
+      manager.ruby_files[Pathname("lib/test.rb")] = <<~EOF
+        module TestMixin
+        end
+
+        class TestClass
+          include TestMixin
+        end
+
+        class TestExtendClass
+          extend TestMixin
+        end
+
+        class TestPrependClass
+          prepend TestMixin
+        end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        # Test include
+        builder.one_instance_ancestors(type_name("::TestClass")).tap do |a|
+          assert_equal type_name("::TestClass"), a.type_name
+          assert_equal [], a.params
+
+          assert_equal Ancestor::Instance.new(name: type_name("::Object"), args: [], source: :super), a.super_class
+          assert_equal 1, a.included_modules.size
+          assert_equal type_name("::TestMixin"), a.included_modules[0].name
+          assert_equal [], a.included_modules[0].args
+          assert_instance_of AST::Ruby::Members::IncludeMember, a.included_modules[0].source
+          assert_equal [], a.included_interfaces
+          assert_equal [], a.prepended_modules
+          assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
+          assert_nil a.self_types
+        end
+
+        # Test extend
+        builder.one_singleton_ancestors(type_name("::TestExtendClass")).tap do |a|
+          assert_equal type_name("::TestExtendClass"), a.type_name
+          assert_nil a.params
+
+          assert_equal Ancestor::Singleton.new(name: type_name("::Object")), a.super_class
+          assert_nil a.included_modules
+          assert_nil a.included_interfaces
+          assert_nil a.prepended_modules
+          assert_equal 1, a.extended_modules.size
+          assert_equal type_name("::TestMixin"), a.extended_modules[0].name
+          assert_equal [], a.extended_modules[0].args
+          assert_instance_of AST::Ruby::Members::ExtendMember, a.extended_modules[0].source
+          assert_equal [], a.extended_interfaces
+          assert_nil a.self_types
+        end
+
+        # Test prepend
+        builder.one_instance_ancestors(type_name("::TestPrependClass")).tap do |a|
+          assert_equal type_name("::TestPrependClass"), a.type_name
+          assert_equal [], a.params
+
+          assert_equal Ancestor::Instance.new(name: type_name("::Object"), args: [], source: :super), a.super_class
+          assert_equal [], a.included_modules
+          assert_equal [], a.included_interfaces
+          assert_equal 1, a.prepended_modules.size
+          assert_equal type_name("::TestMixin"), a.prepended_modules[0].name
+          assert_equal [], a.prepended_modules[0].args
+          assert_instance_of AST::Ruby::Members::PrependMember, a.prepended_modules[0].source
+          assert_nil a.extended_modules
+          assert_nil a.extended_interfaces
+          assert_nil a.self_types
+        end
+      end
+    end
+  end
 end
