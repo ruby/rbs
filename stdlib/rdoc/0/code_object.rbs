@@ -22,9 +22,10 @@ module RDoc
   #         *   RDoc::MetaMethod
   # *   RDoc::Alias
   # *   RDoc::Constant
+  # *   RDoc::Require
   # *   RDoc::Mixin
-  #     *   RDoc::Require
   #     *   RDoc::Include
+  #     *   RDoc::Extend
   #
   class CodeObject
     # <!-- rdoc-file=lib/rdoc/code_object.rb -->

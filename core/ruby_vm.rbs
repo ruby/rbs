@@ -686,7 +686,7 @@ module RubyVM::YJIT
   #   - enable(stats: false, log: false)
   # -->
   # Enable YJIT compilation. `stats` option decides whether to enable YJIT stats
-  # or not. `compilation_log` decides
+  # or not. `log` decides
   # whether to enable YJIT compilation logging or not.
   # *   `stats`:
   #     *   `false`: Don't enable stats.

@@ -1814,10 +1814,10 @@ module Kernel : BasicObject
   #      and returns a `true` or `false`;
   #      returns `false` if either entity does not exist:
   #  Character  |Test
-  # ------------|---------------------------------------------------------------
-  # <tt>'<'</tt>|Whether the `mtime` at `path0` is less than that at `path1`.
-  # <tt>'='</tt>|Whether the `mtime` at `path0` is equal to that at `path1`.
-  # <tt>'>'</tt>|Whether the `mtime` at `path0` is greater than that at `path1`.
+  # ------------|------------------------------------------------------------------------------------------------
+  # <tt>'<'</tt>|Whether the <code>mtime</code> at <code>path0</code> is less than that at <code>path1</code>.
+  # <tt>'='</tt>|Whether the <code>mtime</code> at <code>path0</code> is equal to that at <code>path1</code>.
+  # <tt>'>'</tt>|Whether the <code>mtime</code> at <code>path0</code> is greater than that at <code>path1</code>.
   # *   This test operates on the content of each of the entities at `path0` and
   #     `path1`,
   #      and returns a `true` or `false`;

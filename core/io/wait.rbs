@@ -24,7 +24,7 @@ class IO
   # <!--
   #   rdoc-file=ext/io/wait/wait.c
   #   - io.wait(events, timeout) -> event mask, false or nil
-  #   - io.wait(timeout = nil, mode = :read) -> self, true, or false
+  #   - io.wait(*event_symbols[, timeout]) -> self, true, or false
   # -->
   # Waits until the IO becomes ready for the specified events and returns the
   # subset of events that become ready, or a falsy value when times out.
@@ -32,9 +32,14 @@ class IO
   # The events can be a bit mask of `IO::READABLE`, `IO::WRITABLE` or
   # `IO::PRIORITY`.
   #
-  # Returns a truthy value immediately when buffered data is available.
+  # Returns an event mask (truthy value) immediately when buffered data is
+  # available.
   #
-  # Optional parameter `mode` is one of `:read`, `:write`, or `:read_write`.
+  # The second form: if one or more event symbols (`:read`, `:write`, or
+  # `:read_write`) are passed, the event mask is the bit OR of the bitmask
+  # corresponding to those symbols.  In this form, `timeout` is optional, the
+  # order of the arguments is arbitrary, and returns `io` if any of the events is
+  # ready.
   #
   # You must require 'io/wait' to use this method.
   #
