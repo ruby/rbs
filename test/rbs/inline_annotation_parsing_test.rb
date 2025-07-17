@@ -115,4 +115,45 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal "-- some comment here", annot.comment_location.source
     end
   end
+
+  def test_parse__type_application
+    Parser.parse_inline_trailing_annotation("[String]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::TypeApplicationAnnotation, annot
+      assert_equal "[String]", annot.location.source
+      assert_equal "[", annot.prefix_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal 1, annot.type_args.size
+      assert_equal "String", annot.type_args[0].location.source
+      assert_empty annot.comma_locations
+    end
+
+    Parser.parse_inline_trailing_annotation("[String, Integer]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::TypeApplicationAnnotation, annot
+      assert_equal "[String, Integer]", annot.location.source
+      assert_equal "[", annot.prefix_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal 2, annot.type_args.size
+      assert_equal "String", annot.type_args[0].location.source
+      assert_equal "Integer", annot.type_args[1].location.source
+      assert_equal [","], annot.comma_locations.map(&:source)
+    end
+  end
+
+  def test_error__type_application
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_trailing_annotation("[String", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_trailing_annotation("[]", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_trailing_annotation("[String,]", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_trailing_annotation("[,String]", 0...)
+    end
+  end
 end
