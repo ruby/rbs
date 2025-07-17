@@ -56,4 +56,4 @@ jobs:
             --title "bundle update `/Gemfile`" \
             --body "Automated bundle update" \
             --head "$(git rev-parse --abbrev-ref HEAD)" \
-            --base "main"
+            --base "${{ github.event.repository.default_branch }}"
