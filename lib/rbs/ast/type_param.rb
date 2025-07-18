@@ -196,7 +196,7 @@ module RBS
       end
 
       def self.normalize_args(params, args)
-        app = application(params, args) or return []
+        app = application(params, args) or return args
 
         min_count = params.count { _1.default_type.nil? }
         unless min_count <= args.size && args.size <= params.size

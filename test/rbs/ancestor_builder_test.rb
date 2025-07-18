@@ -703,6 +703,61 @@ EOF
     end
   end
 
+  def test_invalid_ancestor_args
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module X
+end
+
+class Y
+end
+
+class A < Y[top]
+end
+
+class B
+  include X[bool]
+end
+
+class C
+  extend X[untyped]
+end
+
+class D
+  prepend X[void]
+end
+
+module E : X[untyped]
+end
+EOF
+
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::A"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::B"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.singleton_ancestors(type_name("::C"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::D"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.instance_ancestors(type_name("::E"))
+        end
+      end
+    end
+  end
+
   def test_invalid_mixin_include
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
