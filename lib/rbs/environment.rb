@@ -702,6 +702,8 @@ module RBS
             case member
             when AST::Ruby::Declarations::Base
               resolved.members << resolve_ruby_decl(resolver, member, context: inner_context, prefix: inner_prefix)
+            when AST::Ruby::Members::Base
+              resolved.members << resolve_ruby_member(resolver, member, context: inner_context)
             else
               raise "Unknown member type: #{member.class}"
             end
@@ -721,6 +723,30 @@ module RBS
           member.name,
           member.node,
           member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        )
+      when AST::Ruby::Members::IncludeMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::IncludeMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
+        )
+      when AST::Ruby::Members::ExtendMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::ExtendMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
+        )
+      when AST::Ruby::Members::PrependMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::PrependMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
         )
       else
         raise "Unknown member type: #{member.class}"

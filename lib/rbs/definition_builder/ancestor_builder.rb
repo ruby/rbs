@@ -414,7 +414,60 @@ module RBS
             end
           end
         when AST::Ruby::Declarations::Base
-          # noop
+          decl.members.each do |member|
+            case member
+            when AST::Ruby::Members::IncludeMember
+              if included_modules
+                module_name = member.module_name
+                module_args = member.type_args
+
+                # Check if mixing in a class (not allowed)
+                if env.class_decl?(module_name)
+                  raise MixinClassError.new(type_name: type_name, member: member)
+                end
+
+                # Check if module exists
+                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+                module_name = env.normalize_module_name(module_name)
+                included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              end
+
+            when AST::Ruby::Members::ExtendMember
+              if extended_modules
+                module_name = member.module_name
+                module_args = member.type_args
+
+                # Check if mixing in a class (not allowed)
+                if env.class_decl?(module_name)
+                  raise MixinClassError.new(type_name: type_name, member: member)
+                end
+
+                # Check if module exists
+                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+                module_name = env.normalize_module_name(module_name)
+                extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              end
+
+            when AST::Ruby::Members::PrependMember
+              if prepended_modules
+                module_name = member.module_name
+                module_args = member.type_args
+
+                # Check if mixing in a class (not allowed)
+                if env.class_decl?(module_name)
+                  raise MixinClassError.new(type_name: type_name, member: member)
+                end
+
+                # Check if module exists
+                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
+                module_name = env.normalize_module_name(module_name)
+                prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
+              end
+            end
+          end
         end
       end
 
@@ -484,7 +537,7 @@ module RBS
           included_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod.source.is_a?(AST::Members::Include) or raise
+            (mod.source.is_a?(AST::Members::Include) || mod.source.is_a?(AST::Ruby::Members::IncludeMember)) or raise
             mod_ancestors =
               instance_ancestors(name, building_ancestors: building_ancestors)
                 .apply(arg_types, env: env, location: mod.source.location)
@@ -499,7 +552,7 @@ module RBS
           prepended_modules.each do |mod|
             name = mod.name
             arg_types = mod.args
-            mod.source.is_a?(AST::Members::Prepend) or raise
+            (mod.source.is_a?(AST::Members::Prepend) || mod.source.is_a?(AST::Ruby::Members::PrependMember)) or raise
             mod_ancestors =
               instance_ancestors(name, building_ancestors: building_ancestors)
                 .apply(arg_types, env: env, location: mod.source.location)
@@ -554,7 +607,7 @@ module RBS
         extended_modules.each do |mod|
           name = mod.name
           args = mod.args
-          mod.source.is_a?(AST::Members::Extend) or raise
+          (mod.source.is_a?(AST::Members::Extend) || mod.source.is_a?(AST::Ruby::Members::ExtendMember)) or raise
           mod_ancestors =
             instance_ancestors(name, building_ancestors: building_ancestors)
               .apply(args, env: env, location: mod.source.location)

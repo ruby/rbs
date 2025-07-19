@@ -54,6 +54,7 @@ VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
 VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
+VALUE RBS_AST_Ruby_Annotations_TypeApplicationAnnotation;
 VALUE RBS_AST_TypeParam;
 VALUE RBS_MethodType;
 VALUE RBS_Namespace;
@@ -139,6 +140,7 @@ void rbs__init_constants(void) {
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_NodeTypeAssertion, RBS_AST_Ruby_Annotations, "NodeTypeAssertion");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ReturnTypeAnnotation, RBS_AST_Ruby_Annotations, "ReturnTypeAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_SkipAnnotation, RBS_AST_Ruby_Annotations, "SkipAnnotation");
+    IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_TypeApplicationAnnotation, RBS_AST_Ruby_Annotations, "TypeApplicationAnnotation");
     IMPORT_CONSTANT(RBS_AST_TypeParam, RBS_AST, "TypeParam");
     IMPORT_CONSTANT(RBS_MethodType, RBS, "MethodType");
     IMPORT_CONSTANT(RBS_Namespace, RBS, "Namespace");

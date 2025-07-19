@@ -475,7 +475,7 @@ module RBS
       @type_name = type_name
       @member = member
 
-      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member_name(member)}` in the definition of `#{type_name}`"
     end
 
     def location
@@ -483,23 +483,43 @@ module RBS
     end
 
     def self.check!(type_name:, env:, member:)
-      if env.class_decl?(member.name)
+      name = case member
+             when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
+               member.name
+             when AST::Ruby::Members::IncludeMember, AST::Ruby::Members::ExtendMember, AST::Ruby::Members::PrependMember
+               member.module_name
+             else
+               raise "Unknown member type: #{member.class}"
+             end
+      
+      if env.class_decl?(name)
         raise new(type_name: type_name, member: member)
       end
     end
 
     private
 
+    def member_name(member)
+      case member
+      when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
+        member.name
+      when AST::Ruby::Members::IncludeMember, AST::Ruby::Members::ExtendMember, AST::Ruby::Members::PrependMember
+        member.module_name
+      else
+        raise "Unknown member type: #{member.class}"
+      end
+    end
+
     def mixin_name
       case member
-      when AST::Members::Prepend
+      when AST::Members::Prepend, AST::Ruby::Members::PrependMember
         "prepend"
-      when AST::Members::Include
+      when AST::Members::Include, AST::Ruby::Members::IncludeMember
         "include"
-      when AST::Members::Extend
+      when AST::Members::Extend, AST::Ruby::Members::ExtendMember
         "extend"
       else
-        raise
+        raise "Unknown member type: #{member.class}"
       end
     end
   end

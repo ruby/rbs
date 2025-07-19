@@ -38,10 +38,17 @@ module RBS
       class AnnotationSyntaxError < Base
       end
 
+      class MixinMultipleArguments < Base
+      end
+
+      class MixinNonConstantModule < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName
              | TopLevelMethodDefinition
              | UnusedInlineAnnotation | AnnotationSyntaxError
+             | MixinMultipleArguments | MixinNonConstantModule
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
@@ -82,6 +89,10 @@ module RBS
       def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
 
       def report_unused_block: (AST::Ruby::CommentBlock) -> void
+
+      private
+
+      def parse_mixin_call: (Prism::CallNode) -> void
     end
   end
 end

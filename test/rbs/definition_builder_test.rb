@@ -3253,4 +3253,59 @@ end
       end
     end
   end
+
+  def test_ruby_mixin_members
+    SignatureManager.new do |manager|
+      manager.files[Pathname("modules.rbs")] = <<EOF
+module M1[T]
+  def m1_method: [U] () { (T) -> U } -> Hash[T, U]
+end
+
+module M2
+  def m2_method: (untyped) -> bool
+end
+
+module M3
+  def m3_method: () -> String
+end
+EOF
+
+      manager.add_ruby_file("mixin_test.rb", <<~RUBY)
+        class A
+          include M1 #[String]
+          extend M2
+          prepend M3
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          # Test include: should have m1_method from M1[String]
+          definition.methods[:m1_method].tap do |method|
+            assert_equal type_name("::M1"), method.defined_in
+            assert_equal type_name("::M1"), method.implemented_in
+            assert_equal [parse_method_type("[U] () { (::String) -> U } -> ::Hash[::String, U]")], method.method_types
+          end
+
+          # Test prepend: should have m3_method from M3
+          definition.methods[:m3_method].tap do |method|
+            assert_equal type_name("::M3"), method.defined_in
+            assert_equal type_name("::M3"), method.implemented_in
+            assert_equal [parse_method_type("() -> ::String")], method.method_types
+          end
+        end
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          # Test extend: should have m2_method from M2
+          definition.methods[:m2_method].tap do |method|
+            assert_equal type_name("::M2"), method.defined_in
+            assert_equal type_name("::M2"), method.implemented_in
+            assert_equal [parse_method_type("(untyped) -> bool")], method.method_types
+          end
+        end
+      end
+    end
+  end
 end

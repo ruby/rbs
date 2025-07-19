@@ -269,6 +269,43 @@ static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_nod
     return true;
 }
 
+/*
+  type_list_with_commas ::= {} type `,` ... <`,`> eol
+                          | {} type `,` ... `,` <type> eol
+*/
+NODISCARD
+static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations) {
+    while (true) {
+        rbs_node_t *type;
+        CHECK_PARSE(rbs_parse_type(parser, &type));
+        rbs_node_list_append(types, type);
+
+        if (parser->next_token.type == pCOMMA) {
+            rbs_location_t *comma_loc = rbs_location_new(ALLOCATOR(), parser->next_token.range);
+            rbs_location_list_append(comma_locations, comma_loc);
+            rbs_parser_advance(parser);
+
+            if (parser->next_token.type == eol) {
+                // Handle trailing comma - for type applications, this is an error
+                if (eol == pRBRACKET) {
+                    rbs_parser_set_error(parser, parser->next_token, true, "unexpected trailing comma");
+                    return false;
+                }
+                break;
+            }
+        } else {
+            if (parser->next_token.type == eol) {
+                break;
+            } else {
+                rbs_parser_set_error(parser, parser->next_token, true, "comma delimited type list is expected");
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 static bool is_keyword_token(enum RBSTokenType type) {
     switch (type) {
     case tLIDENT:
@@ -3747,6 +3784,43 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
             full_loc,
             prefix_loc,
             type
+        );
+        return true;
+    }
+    case pLBRACKET: {
+        rbs_parser_advance(parser);
+
+        rbs_node_list_t *type_args = rbs_node_list_new(ALLOCATOR());
+        rbs_location_list_t *comma_locations = rbs_location_list_new(ALLOCATOR());
+
+        // Check for empty type args
+        if (parser->next_token.type == pRBRACKET) {
+            rbs_parser_set_error(parser, parser->next_token, true, "type application cannot be empty");
+            return false;
+        }
+
+        // Parse type list with comma tracking
+        CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations));
+
+        rbs_range_t close_bracket_range = parser->next_token.range;
+        rbs_location_t *close_bracket_loc = rbs_location_new(ALLOCATOR(), close_bracket_range);
+        rbs_parser_advance(parser); // consume ]
+
+        rbs_range_t full_range = {
+            .start = prefix_range.start,
+            .end = close_bracket_range.end
+        };
+
+        rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+        rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
+
+        *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_type_application_annotation_new(
+            ALLOCATOR(),
+            full_loc,
+            prefix_loc,
+            type_args,
+            close_bracket_loc,
+            comma_locations
         );
         return true;
     }

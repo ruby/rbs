@@ -606,7 +606,7 @@ module RBS
 
         methods.each do |method|
           if interface_method_duplicates.include?(method.name)
-            member.is_a?(AST::Members::Include) || member.is_a?(AST::Members::Extend) or raise
+            (member.is_a?(AST::Members::Include) || member.is_a?(AST::Members::Extend)) or raise
 
             raise DuplicatedInterfaceMethodDefinitionError.new(
               type: definition.self_type,

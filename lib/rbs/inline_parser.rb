@@ -29,6 +29,8 @@ module RBS
       TopLevelMethodDefinition = _ = Class.new(Base)
       UnusedInlineAnnotation = _ = Class.new(Base)
       AnnotationSyntaxError = _ = Class.new(Base)
+      MixinMultipleArguments = _ = Class.new(Base)
+      MixinNonConstantModule = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -166,6 +168,80 @@ module RBS
             "Top-level method definition is not supported"
           )
         end
+      end
+
+      def visit_call_node(node)
+        return unless node.receiver.nil? # Only handle top-level calls like include, extend, prepend
+
+        case node.name
+        when :include, :extend, :prepend
+          return if skip_node?(node)
+
+          case current = current_module
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            parse_mixin_call(node)
+          end
+        else
+          visit_child_nodes(node)
+        end
+      end
+
+      private
+
+      def parse_mixin_call(node)
+        # Check for multiple arguments
+        if node.arguments && node.arguments.arguments.length > 1
+          diagnostics << Diagnostic::MixinMultipleArguments.new(
+            rbs_location(node.location),
+            "Mixing multiple modules with one call is not supported"
+          )
+          return
+        end
+
+        # Check for missing arguments
+        unless node.arguments && node.arguments.arguments.length == 1
+          # This shouldn't happen in valid Ruby code, but handle it gracefully
+          return
+        end
+
+        first_arg = node.arguments.arguments.first
+
+        # Check if the argument is a constant
+        unless module_name = constant_as_type_name(first_arg)
+          diagnostics << Diagnostic::MixinNonConstantModule.new(
+            rbs_location(first_arg.location),
+            "Module name must be a constant"
+          )
+          return
+        end
+
+        # Look for type application annotation in trailing comments
+        # For single-line calls like "include Bar #[String]", the annotation is trailing
+        trailing_block = comments.trailing_block!(node.location)
+        annotation = nil
+
+        if trailing_block
+          case trailing_annotation = trailing_block.trailing_annotation([])
+          when AST::Ruby::Annotations::TypeApplicationAnnotation
+            annotation = trailing_annotation
+          else
+            report_unused_annotation(trailing_annotation)
+          end
+        end
+
+        # Create the appropriate member based on the method name
+        member = case node.name
+        when :include
+          AST::Ruby::Members::IncludeMember.new(buffer, node, module_name, annotation)
+        when :extend
+          AST::Ruby::Members::ExtendMember.new(buffer, node, module_name, annotation)
+        when :prepend
+          AST::Ruby::Members::PrependMember.new(buffer, node, module_name, annotation)
+        else
+          raise "Unexpected mixin method: #{node.name}"
+        end
+
+        current_module!.members << member
       end
 
       def insert_declaration(decl)

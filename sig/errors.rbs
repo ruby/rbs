@@ -115,14 +115,16 @@ module RBS
   class NoMixinFoundError < DefinitionError
     include DetailedMessageable
 
-    attr_reader type_name: TypeName
-    attr_reader member: AST::Members::t
+    type member = AST::Members::t | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::ExtendMember | AST::Ruby::Members::PrependMember
 
-    def initialize: (type_name: TypeName, member: AST::Members::t) -> void
+    attr_reader type_name: TypeName
+    attr_reader member: member
+
+    def initialize: (type_name: TypeName, member: member) -> void
 
     def location: () -> Location[untyped, untyped]?
 
-    def self.check!: (TypeName, env: Environment, member: AST::Members::t) -> void
+    def self.check!: (TypeName, env: Environment, member: member) -> void
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
@@ -287,6 +289,7 @@ module RBS
     include DetailedMessageable
 
     type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
+                | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::PrependMember | AST::Ruby::Members::ExtendMember
 
     attr_reader type_name: TypeName
     attr_reader member: member
@@ -296,6 +299,8 @@ module RBS
     def location: () -> Location[untyped, untyped]?
 
     def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
+
+    def member_name: (member) -> TypeName
 
     def mixin_name: () -> String
   end

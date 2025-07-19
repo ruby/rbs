@@ -85,6 +85,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Ruby::Annotations::ReturnTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::SkipAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::TypeApplicationAnnotation";
     case RBS_AST_STRING:
         return "RBS::AST::String";
     case RBS_AST_TYPE_PARAM:
@@ -876,6 +878,23 @@ rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annota
         .prefix_location = prefix_location,
         .skip_location = skip_location,
         .comment_location = comment_location,
+    };
+
+    return instance;
+}
+#line 156 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *type_args, rbs_location_t *close_bracket_location, rbs_location_list_t *comma_locations) {
+    rbs_ast_ruby_annotations_type_application_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_type_application_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_type_application_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .type_args = type_args,
+        .close_bracket_location = close_bracket_location,
+        .comma_locations = comma_locations,
     };
 
     return instance;

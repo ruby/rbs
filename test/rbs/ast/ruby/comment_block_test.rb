@@ -216,4 +216,52 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
       assert_nil annotation
     end
   end
+
+  def test_trailing_annotation_type_application
+    buffer, comments = parse_comments(<<~RUBY)
+      foo #[String]
+
+      foo #[String, Integer]
+
+      foo #[String, Integer, void]
+
+      foo #[String[
+
+      foo #[String, Integer] # Extra comment
+    RUBY
+
+    blocks = CommentBlock.build(buffer, comments)
+
+    blocks[0].trailing_annotation([]).tap do |annotation|
+      assert_instance_of RBS::AST::Ruby::Annotations::TypeApplicationAnnotation, annotation
+      assert_equal 1, annotation.type_args.size
+      assert_equal "String", annotation.type_args[0].to_s
+    end
+
+    blocks[1].trailing_annotation([]).tap do |annotation|
+      assert_instance_of RBS::AST::Ruby::Annotations::TypeApplicationAnnotation, annotation
+      assert_equal 2, annotation.type_args.size
+      assert_equal "String", annotation.type_args[0].to_s
+      assert_equal "Integer", annotation.type_args[1].to_s
+    end
+
+    blocks[2].trailing_annotation([]).tap do |annotation|
+      assert_instance_of RBS::AST::Ruby::Annotations::TypeApplicationAnnotation, annotation
+      assert_equal 3, annotation.type_args.size
+      assert_equal "String", annotation.type_args[0].to_s
+      assert_equal "Integer", annotation.type_args[1].to_s
+      assert_equal "void", annotation.type_args[2].to_s
+    end
+
+    blocks[3].trailing_annotation([]).tap do |annotation|
+      assert_instance_of CommentBlock::AnnotationSyntaxError, annotation
+    end
+
+    blocks[4].trailing_annotation([]).tap do |annotation|
+      assert_instance_of RBS::AST::Ruby::Annotations::TypeApplicationAnnotation, annotation
+      assert_equal 2, annotation.type_args.size
+      assert_equal "String", annotation.type_args[0].to_s
+      assert_equal "Integer", annotation.type_args[1].to_s
+    end
+  end
 end
