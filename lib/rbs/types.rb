@@ -303,7 +303,7 @@ module RBS
             # `void` in immediate generics parameter is allowed
             false
           else
-            type.with_nonreturn_void?
+            type.with_nonreturn_void? # steep:ignore DeprecatedReference
           end
         end
       end
@@ -520,7 +520,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -638,7 +638,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -724,7 +724,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -815,7 +815,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -898,7 +898,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -1226,13 +1226,13 @@ module RBS
       end
 
       def with_nonreturn_void?
-        if each_param.any? {|param| param.type.with_nonreturn_void? }
+        if each_param.any? {|param| param.type.with_nonreturn_void? } # steep:ignore DeprecatedReference
           true
         else
           if return_type.is_a?(Bases::Void)
             false
           else
-            return_type.with_nonreturn_void?
+            return_type.with_nonreturn_void? # steep:ignore DeprecatedReference
           end
         end
       end
@@ -1505,11 +1505,11 @@ module RBS
       end
 
       def with_nonreturn_void?
-        if type.with_nonreturn_void? || self_type&.with_nonreturn_void?
+        if type.with_nonreturn_void? || self_type&.with_nonreturn_void? # steep:ignore DeprecatedReference
           true
         else
           if block = block()
-            block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false
+            block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false # steep:ignore DeprecatedReference
           else
             false
           end

@@ -77,25 +77,4 @@ class RBS::TypesTest < Test::Unit::TestCase
       refute_predicate type, :has_classish_type?
     end
   end
-
-  def test_with_nonreturn_void?
-    [
-      "void",
-      "[void]",
-      "void?",
-      "^() [self: void] -> void"
-    ].each do |str|
-      type = parse_type(str)
-      assert_predicate type, :with_nonreturn_void?
-    end
-
-    [
-      "^() -> void",
-      "[Integer, String]",
-      "Enumerator[Integer, void]"
-    ].each do |str|
-      type = parse_type(str)
-      refute_predicate type, :with_nonreturn_void?
-    end
-  end
 end

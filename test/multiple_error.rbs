@@ -1,6 +1,6 @@
 class TypeArg[T]
-  def foo: (void) -> void
-  def bar: (void) -> void
+  def foo: () -> void
+  def bar: () -> void
 end
 class InvalidTypeApplication
   def foo: () -> TypeArg
@@ -76,3 +76,4 @@ interface _CyclicTypeParameterBound[A]
 end
 class InconsistentClassModuleAlias = Nothing
 class CyclicClassAliasDefinition = CyclicClassAliasDefinition
+type unknownTypeName = UNKNOWN_TYPE_NAME

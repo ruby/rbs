@@ -1005,7 +1005,7 @@ end
     assert_valid_signature do
       <<-EOS
 class X
-  def foo: (type: untyped, class: untyped, module: untyped, if: untyped, include: untyped, yield: untyped, def: untyped, self: untyped, instance: untyped, any: untyped, void: void) -> untyped
+  def foo: (type: untyped, class: untyped, module: untyped, if: untyped, include: untyped, yield: untyped, def: untyped, self: untyped, instance: untyped, any: untyped, void: untyped) -> untyped
   def bar: (untyped `type`, void: untyped `void`) -> untyped
 end
       EOS
@@ -2367,6 +2367,13 @@ end
         type return = untyped
 
         @foo: Array[return]
+      end
+    RBS
+  end
+
+  def test_generics__default_type_void
+    Parser.parse_signature(<<~RBS)
+      class Foo[T = void]
       end
     RBS
   end
