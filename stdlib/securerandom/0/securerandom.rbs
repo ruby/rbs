@@ -36,13 +36,4 @@
 #
 module SecureRandom
   extend Random::Formatter
-
-  # <!--
-  #   rdoc-file=lib/securerandom.rb
-  #   - alphanumeric(n = nil, chars: ALPHANUMERIC)
-  # -->
-  # Compatibility methods for Ruby 3.2, we can remove this after dropping to
-  # support Ruby 3.2
-  #
-  def self.alphanumeric: (?Integer?) -> String
 end
