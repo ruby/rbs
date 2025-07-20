@@ -99,8 +99,6 @@ class Rational < Numeric
        | (Complex) -> Complex
        | (Numeric) -> Rational
 
-  def +@: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat - numeric  ->  numeric

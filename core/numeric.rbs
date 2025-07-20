@@ -201,7 +201,7 @@ class Numeric
   # -->
   # Returns `self`.
   #
-  def +@: () -> Numeric
+  def +@: () -> self
 
   # Performs subtraction: the class of the resulting object depends on the class
   # of `numeric`.
@@ -214,7 +214,7 @@ class Numeric
   # -->
   # Unary Minus---Returns the receiver, negated.
   #
-  def -@: () -> Numeric
+  def -@: () -> self
 
   # <!--
   #   rdoc-file=numeric.c
