@@ -799,8 +799,6 @@ class Integer < Numeric
   def downto: (Numeric limit) { (Integer) -> void } -> Integer
             | (Numeric limit) -> ::Enumerator[Integer, self]
 
-  def eql?: (untyped) -> bool
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - even? -> true or false

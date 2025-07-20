@@ -242,8 +242,6 @@ class Rational < Numeric
   def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
 
-  def eql?: (untyped) -> bool
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.fdiv(numeric)  ->  float

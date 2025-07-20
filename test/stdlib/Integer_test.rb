@@ -213,11 +213,6 @@ class IntegerTest < StdlibTest
     30.downto(4.2)
   end
 
-  def test_eql?
-    1.eql?("")
-    3.eql?(1.0)
-  end
-
   def test_even?
     30.even?
   end

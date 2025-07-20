@@ -409,8 +409,6 @@ class Complex < Numeric
 
   def divmod: (Numeric) -> bot
 
-  def eql?: (untyped) -> bool
-
   # <!--
   #   rdoc-file=complex.c
   #   - fdiv(numeric) -> new_complex

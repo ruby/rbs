@@ -753,8 +753,6 @@ class Module < Object
   #
   def deprecate_constant: (*interned) -> self
 
-  def eql?: (untyped other) -> bool
-
   def equal?: (untyped other) -> bool
 
   # <!--
