@@ -462,8 +462,6 @@ class Float < Numeric
   def divmod: (Integer | Float | Rational) -> [ Integer, Float ]
             | (Numeric) -> [ Numeric, Numeric ]
 
-  def dup: () -> self
-
   # <!--
   #   rdoc-file=numeric.c
   #   - eql?(other) -> true or false

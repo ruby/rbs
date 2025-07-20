@@ -54,8 +54,6 @@ class Method
   #
   def hash: () -> Integer
 
-  def dup: () -> self
-
   # <!--
   #   rdoc-file=proc.c
   #   - meth.to_s      ->  string
