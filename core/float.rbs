@@ -584,10 +584,6 @@ class Float < Numeric
 
   def i: () -> Complex
 
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.c
   #   - infinite? -> -1, 1, or nil

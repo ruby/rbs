@@ -445,18 +445,18 @@ class Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - imag()
-  # -->
-  #
-  def imag: () -> Numeric
-
-  # <!--
-  #   rdoc-file=numeric.rb
   #   - imag -> 0
   # -->
   # Returns zero.
   #
-  def imaginary: () -> Numeric
+  def imaginary: () -> 0
+
+  # <!--
+  #   rdoc-file=numeric.rb
+  #   - imag()
+  # -->
+  #
+  alias imag imaginary
 
   # <!--
   #   rdoc-file=numeric.rb

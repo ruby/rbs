@@ -293,10 +293,6 @@ class Rational < Numeric
 
   def i: () -> Complex
 
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
-
   def infinite?: () -> Integer?
 
   # <!--
