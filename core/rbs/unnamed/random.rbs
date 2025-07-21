@@ -288,6 +288,36 @@ module RBS
       #
       %a{annotate:rdoc:copy:Random::Formatter#uuid}
       def uuid: () -> String
+
+      # <!--
+      #   rdoc-file=lib/random/formatter.rb
+      #   - alphanumeric(n = nil, chars: ALPHANUMERIC)
+      # -->
+      # Generate a random alphanumeric string.
+      #
+      # The argument *n* specifies the length, in characters, of the alphanumeric
+      # string to be generated. The argument *chars* specifies the character list
+      # which the result is consist of.
+      #
+      # If *n* is not specified or is nil, 16 is assumed. It may be larger in the
+      # future.
+      #
+      # The result may contain A-Z, a-z and 0-9, unless *chars* is specified.
+      #
+      #     require 'random/formatter'
+      #
+      #     Random.alphanumeric     #=> "2BuBuLf3WfSKyQbR"
+      #     # or
+      #     prng = Random.new
+      #     prng.alphanumeric(10) #=> "i6K93NdqiH"
+      #
+      #     Random.alphanumeric(4, chars: [*"0".."9"]) #=> "2952"
+      #     # or
+      #     prng = Random.new
+      #     prng.alphanumeric(10, chars: [*"!".."/"]) #=> ",.,++%/''."
+      #
+      %a{annotate:rdoc:copy:Random::Formatter#alphanumeric}
+      def alphanumeric: (?Numeric?, ?chars: Array[String]) -> String
     end
   end
 end

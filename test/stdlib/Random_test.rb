@@ -38,6 +38,15 @@ class RandomSingletonTest < Test::Unit::TestCase
     assert_send_type  "(::Integer) -> ::String",
                       Random, :urandom, 0
   end
+
+  def test_alphanumeric
+    assert_send_type  "() -> ::String",
+                      Random, :alphanumeric
+    assert_send_type  "(::Integer) -> ::String",
+                      Random, :alphanumeric, 10
+    assert_send_type  "(::Integer, chars: Array[::String]) -> ::String",
+                      Random, :alphanumeric, 10, chars: ["a", "b", "c"]
+  end
 end
 
 class RandomTest < Test::Unit::TestCase
@@ -72,5 +81,14 @@ class RandomTest < Test::Unit::TestCase
   def test_seed
     assert_send_type  "() -> ::Integer",
                       Random.new, :seed
+  end
+
+  def test_alphanumeric
+    assert_send_type  "() -> ::String",
+                      Random.new, :alphanumeric
+    assert_send_type  "(::Integer) -> ::String",
+                      Random.new, :alphanumeric, 10
+    assert_send_type  "(::Integer, chars: Array[::String]) -> ::String",
+                      Random.new, :alphanumeric, 10, chars: ["a", "b", "c"]
   end
 end
