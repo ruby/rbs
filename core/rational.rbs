@@ -291,8 +291,6 @@ class Rational < Numeric
   #
   def hash: () -> Integer
 
-  def i: () -> Complex
-
   def infinite?: () -> Integer?
 
   # <!--

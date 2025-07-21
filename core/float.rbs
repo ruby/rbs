@@ -582,8 +582,6 @@ class Float < Numeric
   #
   def hash: () -> Integer
 
-  def i: () -> Complex
-
   # <!--
   #   rdoc-file=numeric.c
   #   - infinite? -> -1, 1, or nil

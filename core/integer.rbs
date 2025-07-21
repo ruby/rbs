@@ -897,8 +897,6 @@ class Integer < Numeric
   #
   def gcdlcm: (Integer) -> [ Integer, Integer ]
 
-  def i: () -> Complex
-
   def infinite?: () -> Integer?
 
   # <!-- rdoc-file=numeric.c -->

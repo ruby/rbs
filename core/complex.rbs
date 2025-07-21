@@ -450,6 +450,19 @@ class Complex < Numeric
   #
   def hash: () -> Integer
 
+  # <!--
+  #   rdoc-file=numeric.c
+  #   - i -> complex
+  # -->
+  # Returns `Complex(0, self)`:
+  #
+  #     2.i              # => (0+2i)
+  #     -2.i             # => (0-2i)
+  #     2.0.i            # => (0+2.0i)
+  #     Rational(1, 2).i # => (0+(1/2)*i)
+  #     Complex(3, 4).i  # Raises NoMethodError.
+  #
+  %a{annotate:rdoc:copy:Numeric#i}
   def i: () -> bot
 
   # <!-- rdoc-file=complex.c -->
