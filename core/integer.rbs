@@ -895,12 +895,6 @@ class Integer < Numeric
   #
   def gcdlcm: (Integer) -> [ Integer, Integer ]
 
-  def i: () -> Complex
-
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
-
   def infinite?: () -> Integer?
 
   # <!-- rdoc-file=numeric.c -->
