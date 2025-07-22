@@ -250,8 +250,6 @@ class Rational < Numeric
   #
   def fdiv: (Numeric) -> Float
 
-  def finite?: () -> bool
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.floor([ndigits])  ->  integer or rational
@@ -284,8 +282,6 @@ class Rational < Numeric
   # -->
   #
   def hash: () -> Integer
-
-  def infinite?: () -> Integer?
 
   # <!--
   #   rdoc-file=rational.c

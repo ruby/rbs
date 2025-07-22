@@ -237,10 +237,6 @@ class IntegerTest < StdlibTest
     30.gcdlcm(31)
   end
 
-  def test_infinite?
-    30.infinite?
-  end
-
   def test_lcm
     30.lcm(50)
   end

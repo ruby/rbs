@@ -819,8 +819,6 @@ class Integer < Numeric
   #
   def fdiv: (Numeric) -> Float
 
-  def finite?: () -> bool
-
   # <!--
   #   rdoc-file=numeric.c
   #   - floor(ndigits = 0) -> integer
@@ -890,8 +888,6 @@ class Integer < Numeric
   #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
   #
   def gcdlcm: (Integer) -> [ Integer, Integer ]
-
-  def infinite?: () -> Integer?
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing the place-value representation of `self` in radix
