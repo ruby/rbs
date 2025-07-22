@@ -295,8 +295,6 @@ class Rational < Numeric
   #
   def inspect: () -> String
 
-  def integer?: () -> bool
-
   # <!-- rdoc-file=rational.c -->
   # Returns the absolute value of `rat`.
   #

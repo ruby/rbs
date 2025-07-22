@@ -522,8 +522,6 @@ class Complex < Numeric
   #
   def inspect: () -> String
 
-  def integer?: () -> bool
-
   # <!-- rdoc-file=complex.c -->
   # Returns the absolute value (magnitude) for `self`; see [polar
   # coordinates](rdoc-ref:Complex@Polar+Coordinates):

@@ -622,8 +622,6 @@ class Float < Numeric
   #
   alias inspect to_s
 
-  def integer?: () -> bool
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - magnitude()
