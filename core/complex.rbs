@@ -377,7 +377,7 @@ class Complex < Numeric
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
-  def conj: () -> Complex
+  def conj: () -> self
 
   # <!--
   #   rdoc-file=complex.c
@@ -387,7 +387,7 @@ class Complex < Numeric
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
-  def conjugate: () -> Complex
+  def conjugate: () -> self
 
   # <!--
   #   rdoc-file=complex.c

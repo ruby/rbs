@@ -79,13 +79,6 @@ class FloatTest < StdlibTest
     2.5.coerce(1.1)
   end
 
-  def test_conj
-    a = 31.4
-
-    a.conj
-    a.conjugate
-  end
-
   def test_denominator
     a = 13.3
 

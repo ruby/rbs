@@ -417,10 +417,6 @@ class Float < Numeric
   #
   def coerce: (Numeric) -> [ Float, Float ]
 
-  def conj: () -> Float
-
-  def conjugate: () -> Float
-
   # <!--
   #   rdoc-file=rational.c
   #   - flo.denominator  ->  integer

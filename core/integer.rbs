@@ -704,10 +704,6 @@ class Integer < Numeric
   #
   def coerce: (Numeric) -> [ Numeric, Numeric ]
 
-  def conj: () -> Integer
-
-  def conjugate: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - denominator -> 1

@@ -310,18 +310,18 @@ class Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - conj()
-  # -->
-  #
-  def conj: () -> Numeric
-
-  # <!--
-  #   rdoc-file=numeric.rb
   #   - conj -> self
   # -->
   # Returns `self`.
   #
-  def conjugate: () -> Numeric
+  def conjugate: () -> self
+
+  # <!--
+  #   rdoc-file=numeric.rb
+  #   - conj()
+  # -->
+  #
+  alias conj conjugate
 
   # <!--
   #   rdoc-file=rational.c

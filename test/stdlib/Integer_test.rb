@@ -182,10 +182,6 @@ class IntegerTest < StdlibTest
     3.conj
   end
 
-  def test_conjugate
-    3.conjugate
-  end
-
   def test_denominator
     3.denominator
   end

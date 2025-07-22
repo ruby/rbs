@@ -220,10 +220,6 @@ class Rational < Numeric
 
   def coerce: (Numeric) -> [ Numeric, Numeric ]
 
-  def conj: () -> Rational
-
-  def conjugate: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.denominator  ->  integer
