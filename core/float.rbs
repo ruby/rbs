@@ -817,10 +817,6 @@ class Float < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Float
-
-  def real?: () -> true
-
   def rect: () -> [ Float, Numeric ]
 
   alias rectangular rect

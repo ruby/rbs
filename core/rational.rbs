@@ -367,10 +367,6 @@ class Rational < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Rational
-
-  def real?: () -> true
-
   def rect: () -> [ Rational, Numeric ]
 
   alias rectangular rect

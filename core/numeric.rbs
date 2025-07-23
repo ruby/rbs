@@ -590,7 +590,7 @@ class Numeric
   # -->
   # Returns `self`.
   #
-  def real: () -> Numeric
+  def real: () -> self
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -598,7 +598,7 @@ class Numeric
   # -->
   # Returns `true` if `self` is a real number (i.e. not Complex).
   #
-  def real?: () -> bool
+  def real?: () -> true
 
   # <!-- rdoc-file=complex.c -->
   # Returns array `[self, 0]`.

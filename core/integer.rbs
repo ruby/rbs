@@ -1069,10 +1069,6 @@ class Integer < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> self
-
-  def real?: () -> true
-
   def rect: () -> [ Integer, Numeric ]
 
   alias rectangular rect

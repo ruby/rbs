@@ -130,3 +130,17 @@ class ComplexTest < StdlibTest
     a.rationalize(3.11)
   end
 end
+
+class ComplexInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing 'Complex'
+
+  def test_real
+    assert_send_type '() -> Integer', Complex(1, 2), :real
+  end
+
+  def test_real?
+    assert_send_type '() -> false', Complex(1, 2), :real?
+  end
+end
