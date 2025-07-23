@@ -186,8 +186,6 @@ class Rational < Numeric
   #
   def abs: () -> Rational
 
-  def abs2: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.ceil([ndigits])  ->  integer or rational

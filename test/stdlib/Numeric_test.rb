@@ -27,4 +27,10 @@ class NumericInstanceTest < Test::Unit::TestCase
     assert_send_type '() -> Float', -1, :angle
     assert_send_type '() -> Float', Float::NAN, :angle
   end
+
+  def test_abs2
+    assert_send_type '() -> Integer', 1, :abs2
+    assert_send_type '() -> Float', 1.0, :abs2
+    assert_send_type '() -> Rational', 1r, :abs2
+  end
 end

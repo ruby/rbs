@@ -513,8 +513,6 @@ class Integer < Numeric
   #
   def abs: () -> Integer
 
-  def abs2: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.c
   #   - allbits?(mask) -> true or false

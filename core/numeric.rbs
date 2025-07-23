@@ -244,7 +244,7 @@ class Numeric
   # -->
   # Returns the square of `self`.
   #
-  def abs2: () -> Numeric
+  def abs2: () -> self
 
   # <!-- rdoc-file=complex.c -->
   # Returns zero if `self` is positive, Math::PI otherwise.

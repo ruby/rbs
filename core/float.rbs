@@ -324,8 +324,6 @@ class Float < Numeric
   #
   def abs: () -> Float
 
-  def abs2: () -> Float
-
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
