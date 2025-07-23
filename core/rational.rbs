@@ -498,6 +498,4 @@ class Rational < Numeric
   #
   def truncate: () -> Integer
               | (Integer ndigits) -> (Integer | Rational)
-
-  def zero?: () -> bool
 end
