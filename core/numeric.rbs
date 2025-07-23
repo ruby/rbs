@@ -249,7 +249,7 @@ class Numeric
   # <!-- rdoc-file=complex.c -->
   # Returns zero if `self` is positive, Math::PI otherwise.
   #
-  def angle: () -> Numeric
+  def angle: () -> (0 | Float)
 
   # <!--
   #   rdoc-file=complex.c

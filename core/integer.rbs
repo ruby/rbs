@@ -538,8 +538,6 @@ class Integer < Numeric
   #
   def allbits?: (int mask) -> bool
 
-  def angle: () -> (Integer | Float)
-
   # <!--
   #   rdoc-file=numeric.c
   #   - anybits?(mask) -> true or false
@@ -1018,8 +1016,6 @@ class Integer < Numeric
   # Returns `self`; intended for compatibility to character literals in Ruby 1.9.
   #
   def ord: () -> Integer
-
-  alias phase angle
 
   def polar: () -> [ Integer, Integer | Float ]
 

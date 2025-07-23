@@ -188,10 +188,6 @@ class Rational < Numeric
 
   def abs2: () -> Rational
 
-  def angle: () -> (Integer | Float)
-
-  alias arg angle
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.ceil([ndigits])  ->  integer or rational
@@ -326,8 +322,6 @@ class Rational < Numeric
   #     Rational(-2, -10).numerator  #=> 1
   #
   def numerator: () -> Integer
-
-  alias phase angle
 
   def polar: () -> [ Rational, Integer | Float ]
 
