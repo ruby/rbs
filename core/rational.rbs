@@ -227,8 +227,6 @@ class Rational < Numeric
   #
   def denominator: () -> Integer
 
-  def div: (Numeric) -> Integer
-
   def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
 

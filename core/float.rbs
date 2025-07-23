@@ -425,8 +425,6 @@ class Float < Numeric
   #
   def denominator: () -> Integer
 
-  def div: (Numeric) -> Integer
-
   # <!--
   #   rdoc-file=numeric.c
   #   - divmod(other) -> array
