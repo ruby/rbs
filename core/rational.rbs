@@ -448,8 +448,6 @@ class Rational < Numeric
   #
   def to_i: () -> Integer
 
-  alias to_int to_i
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_r  ->  self
