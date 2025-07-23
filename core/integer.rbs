@@ -1195,8 +1195,6 @@ class Integer < Numeric
   def times: () { (Integer) -> void } -> self
            | () -> ::Enumerator[Integer, self]
 
-  def to_c: () -> Complex
-
   # <!--
   #   rdoc-file=numeric.c
   #   - to_f -> float

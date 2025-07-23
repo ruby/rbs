@@ -405,8 +405,6 @@ class Rational < Numeric
           | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
           | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
 
-  def to_c: () -> Complex
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_f  ->  float

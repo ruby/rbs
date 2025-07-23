@@ -33,4 +33,10 @@ class NumericInstanceTest < Test::Unit::TestCase
     assert_send_type '() -> Float', 1.0, :abs2
     assert_send_type '() -> Rational', 1r, :abs2
   end
+
+  def test_to_c
+    assert_send_type '() -> Complex', 1, :to_c
+    assert_send_type '() -> Complex', 1.0, :to_c
+    assert_send_type '() -> Complex', 1r, :to_c
+  end
 end

@@ -877,8 +877,6 @@ class Float < Numeric
           | (?by: Numeric, ?to: Numeric) { (Float) -> void } -> self
           | (?by: Numeric, ?to: Numeric) -> Enumerator[Float, self]
 
-  def to_c: () -> Complex
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - to_f -> self
