@@ -819,8 +819,6 @@ class Float < Numeric
 
   def rect: () -> [ Float, Numeric ]
 
-  alias rectangular rect
-
   def remainder: (Numeric) -> Float
 
   # <!--

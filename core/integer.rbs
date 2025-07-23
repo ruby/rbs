@@ -1071,8 +1071,6 @@ class Integer < Numeric
 
   def rect: () -> [ Integer, Numeric ]
 
-  alias rectangular rect
-
   # <!--
   #   rdoc-file=numeric.c
   #   - remainder(other) -> real_number
