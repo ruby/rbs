@@ -10,7 +10,9 @@ module RBS
           include Helpers::LocationHelper
         end
 
-        type t = DefMember | IncludeMember | ExtendMember | PrependMember | AttributeMember
+        type t = DefMember
+               | IncludeMember | ExtendMember | PrependMember
+               | AttrReaderMember | AttrWriterMember | AttrAccessorMember
 
         class MethodTypeAnnotation
           class DocStyle
