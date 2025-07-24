@@ -27,10 +27,12 @@ module RBS
       NonConstantClassName = _ = Class.new(Base)
       NonConstantModuleName = _ = Class.new(Base)
       TopLevelMethodDefinition = _ = Class.new(Base)
+      TopLevelAttributeDefinition = _ = Class.new(Base)
       UnusedInlineAnnotation = _ = Class.new(Base)
       AnnotationSyntaxError = _ = Class.new(Base)
       MixinMultipleArguments = _ = Class.new(Base)
       MixinNonConstantModule = _ = Class.new(Base)
+      AttributeNonSymbolName = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -171,7 +173,7 @@ module RBS
       end
 
       def visit_call_node(node)
-        return unless node.receiver.nil? # Only handle top-level calls like include, extend, prepend
+        return unless node.receiver.nil? # Only handle top-level calls like include, extend, prepend, attr_*
 
         case node.name
         when :include, :extend, :prepend
@@ -180,6 +182,19 @@ module RBS
           case current = current_module
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
             parse_mixin_call(node)
+          end
+        when :attr_reader, :attr_writer, :attr_accessor
+          return if skip_node?(node)
+
+          case current = current_module
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            parse_attribute_call(node)
+          when nil
+            # Top-level attribute definition
+            diagnostics << Diagnostic::TopLevelAttributeDefinition.new(
+              rbs_location(node.message_loc || node.location),
+              "Top-level attribute definition is not supported"
+            )
           end
         else
           visit_child_nodes(node)
@@ -239,6 +254,66 @@ module RBS
           AST::Ruby::Members::PrependMember.new(buffer, node, module_name, annotation)
         else
           raise "Unexpected mixin method: #{node.name}"
+        end
+
+        current_module!.members << member
+      end
+
+      def parse_attribute_call(node)
+        # Get the name nodes (arguments to attr_*)
+        unless node.arguments && !node.arguments.arguments.empty?
+          return # No arguments, nothing to do
+        end
+
+        name_nodes = [] #: Array[Prism::SymbolNode]
+        node.arguments.arguments.each do |arg|
+          case arg
+          when Prism::SymbolNode
+            name_nodes << arg
+          else
+            # Non-symbol argument, report error
+            diagnostics << Diagnostic::AttributeNonSymbolName.new(
+              rbs_location(arg.location),
+              "Attribute name must be a symbol"
+            )
+          end
+        end
+
+        return if name_nodes.empty?
+
+        # Look for leading comment block
+        leading_block = comments.leading_block!(node)
+
+        # Look for trailing type annotation (#: Type)
+        trailing_block = comments.trailing_block!(node.location)
+        type_annotation = nil
+
+        if trailing_block
+          case annotation = trailing_block.trailing_annotation([])
+          when AST::Ruby::Annotations::NodeTypeAssertion
+            type_annotation = annotation
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            diagnostics << Diagnostic::AnnotationSyntaxError.new(
+              annotation.location, "Syntax error: " + annotation.error.error_message
+            )
+          end
+        end
+
+        # Report unused leading annotations since @rbs annotations are not used for attributes
+        if leading_block
+          report_unused_block(leading_block)
+        end
+
+        # Create the appropriate member type
+        member = case node.name
+        when :attr_reader
+          AST::Ruby::Members::AttrReaderMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+        when :attr_writer
+          AST::Ruby::Members::AttrWriterMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+        when :attr_accessor
+          AST::Ruby::Members::AttrAccessorMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+        else
+          raise "Unexpected attribute method: #{node.name}"
         end
 
         current_module!.members << member
