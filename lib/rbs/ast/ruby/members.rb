@@ -248,6 +248,50 @@ module RBS
 
         class PrependMember < MixinMember
         end
+
+        class AttributeMember < Base
+          attr_reader :node
+          attr_reader :name_nodes
+          attr_reader :type_annotation
+          attr_reader :leading_comment
+
+          def initialize(buffer, node, name_nodes, leading_comment, type_annotation)
+            super(buffer)
+            @node = node
+            @name_nodes = name_nodes
+            @leading_comment = leading_comment
+            @type_annotation = type_annotation
+          end
+
+          def names
+            name_nodes.map do |node|
+              node.unescaped.to_sym
+            end
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_locations
+            name_nodes.map do |name_node|
+              rbs_location(name_node.location)
+            end
+          end
+
+          def type
+            type_annotation&.type
+          end
+        end
+
+        class AttrReaderMember < AttributeMember
+        end
+
+        class AttrWriterMember < AttributeMember
+        end
+
+        class AttrAccessorMember < AttributeMember
+        end
       end
     end
   end
