@@ -149,6 +149,8 @@ module RBS
                         member: member,
                         accessibility: :public
                       )
+                    when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
+                      build_ruby_attribute(methods, type, member: member, accessibility: :public)
                     end
                   end
                 end
@@ -224,6 +226,24 @@ module RBS
 
           defn.accessibilities << accessibility
           defn.originals << member
+        end
+      end
+
+      def build_ruby_attribute(methods, type, member:, accessibility:)
+        member.names.each do |name|
+          if member.is_a?(AST::Ruby::Members::AttrReaderMember) || member.is_a?(AST::Ruby::Members::AttrAccessorMember)
+            defn = methods.methods[name] ||= Methods::Definition.empty(type: type, name: name)
+
+            defn.accessibilities << accessibility
+            defn.originals << member
+          end
+
+          if member.is_a?(AST::Ruby::Members::AttrWriterMember) || member.is_a?(AST::Ruby::Members::AttrAccessorMember)
+            defn = methods.methods[:"#{name}="] ||= Methods::Definition.empty(type: type, name: :"#{name}=")
+
+            defn.accessibilities << accessibility
+            defn.originals << member
+          end
         end
       end
 

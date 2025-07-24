@@ -3308,4 +3308,101 @@ EOF
       end
     end
   end
+
+  def test_ruby_attribute_members_untyped
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("attributes.rb", <<~RUBY)
+        class AttributeTest
+          attr_reader :name
+          attr_writer :age
+          attr_accessor :email
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::AttributeTest")).tap do |definition|
+          # Test attr_reader generates reader method
+          assert_method_definition definition.methods[:name], ["() -> untyped"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@name], "untyped"
+
+          # Test attr_writer generates writer method
+          assert_method_definition definition.methods[:age=], ["(untyped age) -> untyped"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@age], "untyped"
+
+          # Test attr_accessor generates both reader and writer methods
+          assert_method_definition definition.methods[:email], ["() -> untyped"], accessibility: :public
+          assert_method_definition definition.methods[:email=], ["(untyped email) -> untyped"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@email], "untyped"
+        end
+      end
+    end
+  end
+
+  def test_ruby_attribute_members_typed
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("typed_attributes.rb", <<~RUBY)
+        class TypedAttributeTest
+          attr_reader :name #: String
+
+          attr_writer :age #: Integer
+
+          attr_accessor :email #: String
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::TypedAttributeTest")).tap do |definition|
+          # Test typed attr_reader
+          assert_method_definition definition.methods[:name], ["() -> ::String"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@name], "::String"
+
+          # Test typed attr_writer
+          assert_method_definition definition.methods[:age=], ["(::Integer age) -> ::Integer"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@age], "::Integer"
+
+          # Test typed attr_accessor
+          assert_method_definition definition.methods[:email], ["() -> ::String"], accessibility: :public
+          assert_method_definition definition.methods[:email=], ["(::String email) -> ::String"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@email], "::String"
+        end
+      end
+    end
+  end
+
+
+  def test_ruby_attribute_members_multiple_names
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("multiple_attributes.rb", <<~RUBY)
+        class MultipleAttributeTest
+          attr_reader :first_name, :last_name #: String
+
+          attr_accessor :x, :y #: Integer
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::MultipleAttributeTest")).tap do |definition|
+          # Test multiple attr_reader names
+          assert_method_definition definition.methods[:first_name], ["() -> ::String"], accessibility: :public
+          assert_method_definition definition.methods[:last_name], ["() -> ::String"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@first_name], "::String"
+          assert_ivar_definition definition.instance_variables[:@last_name], "::String"
+
+          # Test multiple attr_accessor names
+          assert_method_definition definition.methods[:x], ["() -> ::Integer"], accessibility: :public
+          assert_method_definition definition.methods[:x=], ["(::Integer x) -> ::Integer"], accessibility: :public
+          assert_method_definition definition.methods[:y], ["() -> ::Integer"], accessibility: :public
+          assert_method_definition definition.methods[:y=], ["(::Integer y) -> ::Integer"], accessibility: :public
+          assert_ivar_definition definition.instance_variables[:@x], "::Integer"
+          assert_ivar_definition definition.instance_variables[:@y], "::Integer"
+        end
+      end
+    end
+  end
 end

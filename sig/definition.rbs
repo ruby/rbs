@@ -12,6 +12,9 @@ module RBS
                   | AST::Members::InstanceVariable
                   | AST::Members::ClassVariable
                   | AST::Members::ClassInstanceVariable
+                  | AST::Ruby::Members::AttrReaderMember
+                  | AST::Ruby::Members::AttrWriterMember
+                  | AST::Ruby::Members::AttrAccessorMember
       attr_reader source: source
 
       def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName, source: source) -> void
@@ -21,7 +24,7 @@ module RBS
 
     class Method
       type method_member = AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrAccessor | AST::Members::AttrWriter
-                         | AST::Ruby::Members::DefMember
+                         | AST::Ruby::Members::DefMember | AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember
 
       class TypeDef
         attr_reader type: MethodType
