@@ -274,10 +274,10 @@ static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_nod
                           | {} type `,` ... `,` <type> eol
 */
 NODISCARD
-static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations) {
+static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations, bool void_allowed) {
     while (true) {
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type));
+        CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed));
         rbs_node_list_append(types, type);
 
         if (parser->next_token.type == pCOMMA) {
@@ -3820,7 +3820,7 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         }
 
         // Parse type list with comma tracking
-        CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations));
+        CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations, true));
 
         rbs_range_t close_bracket_range = parser->next_token.range;
         rbs_location_t *close_bracket_loc = rbs_location_new(ALLOCATOR(), close_bracket_range);
