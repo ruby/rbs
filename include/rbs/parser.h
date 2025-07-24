@@ -27,9 +27,9 @@ typedef struct rbs_comment_t {
     rbs_position_t start;
     rbs_position_t end;
 
-    size_t line_size;
-    size_t line_count;
-    rbs_token_t *tokens;
+    size_t line_tokens_capacity;
+    size_t line_tokens_count;
+    rbs_token_t *line_tokens;
 
     struct rbs_comment_t *next_comment;
 } rbs_comment_t;
