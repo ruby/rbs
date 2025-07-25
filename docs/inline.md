@@ -12,3 +12,51 @@ class Calculator
   end
 end
 ```
+
+## Classes
+
+Inline RBS supports class definitions from your Ruby code. When you define a class in Ruby, the library recognizes it and the corresponding class definition is generated in RBS.
+
+```ruby
+class App
+end
+```
+
+The `::App` class is defined in RBS and you can use it as a type.
+
+### Non-constant class paths
+
+Only classes with constant names are imported. Dynamic or non-constant class definitions are ignored:
+
+```ruby
+# This class is imported
+class MyClass
+end
+
+# This is ignored - dynamic class definition
+MyClass = Class.new do
+end
+
+# This is also ignored - non-constant class name
+object = Object
+class object::MyClass
+end
+```
+
+### Class Nesting
+
+Nested classes work as expected:
+
+```ruby
+class Client
+  class Error
+  end
+end
+```
+
+This creates the types `::Client` and `::Client::Error`.
+
+### Current Limitations
+
+- Inheritance is not supported
+- Generic class definitions are not supported
