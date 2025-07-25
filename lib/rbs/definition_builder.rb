@@ -151,6 +151,20 @@ module RBS
               end
             end
 
+          when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
+            member.names.each do |name|
+              ivar_name = :"@#{name}"
+              attr_type = member.type || Types::Bases::Any.new(location: nil)
+              
+              insert_variable(
+                type_name,
+                definition.instance_variables,
+                name: ivar_name,
+                type: attr_type,
+                source: member
+              )
+            end
+
           when AST::Members::InstanceVariable
             insert_variable(
               type_name,
@@ -766,6 +780,59 @@ module RBS
         )
 
         method_definition.annotations.replace(original.annotations)
+      when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
+        if duplicated_method = methods[method.name]
+          raise DuplicatedMethodDefinitionError.new(
+            type: definition.self_type,
+            method_name: method.name,
+            members: [*duplicated_method.members, original]
+          )
+        end
+
+        attr_type = original.type || Types::Bases::Any.new(location: nil)
+        method_type =
+          if method.name.to_s.end_with?("=")
+            # setter
+            MethodType.new(
+              type_params: [],
+              type: Types::Function.empty(attr_type).update(
+                required_positionals: [
+                  Types::Function::Param.new(type: attr_type, name: method.name.to_s.chomp("=").to_sym)
+                ]
+              ),
+              block: nil,
+              location: original.location
+            )
+          else
+            # getter
+            MethodType.new(
+              type_params: [],
+              type: Types::Function.empty(attr_type),
+              block: nil,
+              location: original.location
+            )
+          end
+
+        if implemented_in
+          super_method = existing_method
+        end
+
+        method_definition = Definition::Method.new(
+          super_method: super_method,
+          defs: [
+            Definition::Method::TypeDef.new(
+              type: method_type,
+              member: original,
+              defined_in: defined_in,
+              implemented_in: implemented_in
+            )
+          ],
+          accessibility: method.accessibility,
+          alias_of: nil,
+          alias_member: nil
+        )
+
+        method_definition.annotations.replace([])
       when AST::Ruby::Members::DefMember
         if duplicated_method = methods[method.name]
           raise DuplicatedMethodDefinitionError.new(

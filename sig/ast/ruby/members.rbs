@@ -10,7 +10,9 @@ module RBS
           include Helpers::LocationHelper
         end
 
-        type t = DefMember | IncludeMember | ExtendMember | PrependMember
+        type t = DefMember
+               | IncludeMember | ExtendMember | PrependMember
+               | AttrReaderMember | AttrWriterMember | AttrAccessorMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -92,6 +94,35 @@ module RBS
         end
 
         class PrependMember < MixinMember
+        end
+
+        class AttributeMember < Base
+          attr_reader node: Prism::CallNode
+
+          attr_reader name_nodes: Array[Prism::SymbolNode]
+
+          attr_reader type_annotation: Annotations::NodeTypeAssertion?
+
+          attr_reader leading_comment: CommentBlock?
+
+          def initialize: (Buffer, Prism::CallNode, Array[Prism::SymbolNode] name_nodes, RBS::AST::Ruby::CommentBlock? leading_comment, Annotations::NodeTypeAssertion? type_annotation) -> void
+
+          def names: () -> Array[Symbol]
+
+          def location: () -> Location
+
+          def name_locations: () -> Array[Location]
+
+          def type: () -> Types::t?
+        end
+
+        class AttrReaderMember < AttributeMember
+        end
+
+        class AttrWriterMember < AttributeMember
+        end
+
+        class AttrAccessorMember < AttributeMember
         end
       end
     end

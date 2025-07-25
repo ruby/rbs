@@ -513,4 +513,434 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__attr_reader
+    result = parse(<<~RUBY)
+      class Foo
+        attr_reader :name
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        assert_equal "attr_reader :name", member.location.source
+
+        assert_nil member.type_annotation
+        assert_nil member.type
+      end
+    end
+  end
+
+  def test_parse__attr_writer
+    result = parse(<<~RUBY)
+      class Foo
+        attr_writer :name
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        assert_equal "attr_writer :name", member.location.source
+
+        assert_nil member.type_annotation
+        assert_nil member.type
+      end
+    end
+  end
+
+  def test_parse__attr_accessor
+    result = parse(<<~RUBY)
+      class Foo
+        attr_accessor :name
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        assert_equal "attr_accessor :name", member.location.source
+
+        assert_nil member.type_annotation
+        assert_nil member.type
+      end
+    end
+  end
+
+  def test_parse__attr_reader_with_type
+    result = parse(<<~RUBY)
+      class Foo
+        attr_reader :name #: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        assert_equal "attr_reader :name", member.location.source
+
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
+  def test_parse__attr_writer_with_type
+    result = parse(<<~RUBY)
+      class Foo
+        attr_writer :count #: Integer
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+
+        assert_equal [:count], member.names
+        assert_equal [":count"], member.name_locations.map(&:source)
+
+        assert_equal "attr_writer :count", member.location.source
+
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+        assert_equal "Integer", member.type.to_s
+      end
+    end
+  end
+
+  def test_parse__attr_accessor_with_type
+    result = parse(<<~RUBY)
+      class Foo
+        attr_accessor :data #: Array[String]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+
+        assert_equal [:data], member.names
+        assert_equal [":data"], member.name_locations.map(&:source)
+
+        assert_equal "attr_accessor :data", member.location.source
+
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+        assert_equal "Array[String]", member.type.to_s
+      end
+    end
+  end
+
+  def test_parse__attr_multiple_args
+    result = parse(<<~RUBY)
+      class Foo
+        attr_reader :name, :age
+        attr_writer :x, :y, :z
+        attr_accessor :foo, :bar
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      # attr_reader :name, :age should create one member with multiple names
+      assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, decl.members[0]
+      assert_equal [:name, :age], decl.members[0].names
+      assert_equal [":name", ":age"], decl.members[0].name_locations.map(&:source)
+      assert_nil decl.members[0].type_annotation
+      assert_nil decl.members[0].type
+
+      # attr_writer :x, :y, :z should create one member with multiple names
+      assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, decl.members[1]
+      assert_equal [:x, :y, :z], decl.members[1].names
+      assert_equal [":x", ":y", ":z"], decl.members[1].name_locations.map(&:source)
+      assert_nil decl.members[1].type_annotation
+      assert_nil decl.members[1].type
+
+      # attr_accessor :foo, :bar should create one member with multiple names
+      assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, decl.members[2]
+      assert_equal [:foo, :bar], decl.members[2].names
+      assert_equal [":foo", ":bar"], decl.members[2].name_locations.map(&:source)
+      assert_nil decl.members[2].type_annotation
+      assert_nil decl.members[2].type
+    end
+  end
+
+  def test_parse__attr_with_comment_annotation
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs name: String
+        attr_reader :name
+
+        # @rbs age: Integer
+        attr_writer :age
+
+        # @rbs data: Array[Hash[Symbol, untyped]]
+        attr_accessor :data
+      end
+    RUBY
+
+    # The @rbs annotations should be reported as syntax errors (invalid format)
+    assert_equal 3, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal "@rbs name: String", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal "@rbs age: Integer", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal "@rbs data: Array[Hash[Symbol, untyped]]", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        # The @rbs annotation should be ignored
+        assert_nil member.type_annotation
+        assert_nil member.type
+
+        # The comment block should be attached
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal ["@rbs name: String"], member.leading_comment.comment_buffer.lines
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+
+        assert_equal [:age], member.names
+        assert_equal [":age"], member.name_locations.map(&:source)
+
+        # The @rbs annotation should be ignored
+        assert_nil member.type_annotation
+        assert_nil member.type
+
+        # The comment block should be attached
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal ["@rbs age: Integer"], member.leading_comment.comment_buffer.lines
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+
+        assert_equal [:data], member.names
+        assert_equal [":data"], member.name_locations.map(&:source)
+
+        # The @rbs annotation should be ignored
+        assert_nil member.type_annotation
+        assert_nil member.type
+
+        # The comment block should be attached
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal ["@rbs data: Array[Hash[Symbol, untyped]]"], member.leading_comment.comment_buffer.lines
+      end
+    end
+  end
+
+  def test_error__attr_toplevel
+    result = parse(<<~RUBY)
+      attr_reader :name
+      attr_writer :age
+      attr_accessor :data
+    RUBY
+
+    # Should have errors for toplevel attribute definitions
+    assert_equal 3, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelAttributeDefinition, diagnostic
+      assert_equal "attr_reader", diagnostic.location.source
+      assert_equal "Top-level attribute definition is not supported", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelAttributeDefinition, diagnostic
+      assert_equal "attr_writer", diagnostic.location.source
+      assert_equal "Top-level attribute definition is not supported", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelAttributeDefinition, diagnostic
+      assert_equal "attr_accessor", diagnostic.location.source
+      assert_equal "Top-level attribute definition is not supported", diagnostic.message
+    end
+
+    assert_empty result.declarations
+  end
+
+  def test_parse__attr_skip
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        attr_reader :ignored
+
+        attr_accessor :name #: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      # Only one member should be present (the skipped one should be ignored)
+      assert_equal 1, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
+  def test_error__attr_non_symbol
+    result = parse(<<~RUBY)
+      class Foo
+        attr_reader "name"
+        attr_writer 123
+        attr_accessor foo()
+      end
+    RUBY
+
+    # Should have errors for non-symbol attribute names
+    assert_equal 3, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AttributeNonSymbolName, diagnostic
+      assert_equal '"name"', diagnostic.location.source
+      assert_equal "Attribute name must be a symbol", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AttributeNonSymbolName, diagnostic
+      assert_equal '123', diagnostic.location.source
+      assert_equal "Attribute name must be a symbol", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AttributeNonSymbolName, diagnostic
+      assert_equal 'foo()', diagnostic.location.source
+      assert_equal "Attribute name must be a symbol", diagnostic.message
+    end
+  end
+
+  def test_error__attr_type_syntax_error
+    result = parse(<<~RUBY)
+      class Foo
+        attr_reader :name #: String[
+        attr_writer :age #: Integer)
+      end
+    RUBY
+
+    # Should have syntax errors for malformed type annotations
+    assert_equal 2, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal ": String[", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal ": Integer)", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+
+        assert_equal [:name], member.names
+        assert_equal [":name"], member.name_locations.map(&:source)
+
+        # The invalid type annotation should be ignored
+        assert_nil member.type_annotation
+        assert_nil member.type
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+
+        assert_equal [:age], member.names
+        assert_equal [":age"], member.name_locations.map(&:source)
+
+        # The invalid type annotation should be ignored
+        assert_nil member.type_annotation
+        assert_nil member.type
+      end
+    end
+  end
 end

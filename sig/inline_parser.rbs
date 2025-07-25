@@ -32,6 +32,9 @@ module RBS
       class TopLevelMethodDefinition < Base
       end
 
+      class TopLevelAttributeDefinition < Base
+      end
+
       class UnusedInlineAnnotation < Base
       end
 
@@ -44,11 +47,15 @@ module RBS
       class MixinNonConstantModule < Base
       end
 
+      class AttributeNonSymbolName < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName
-             | TopLevelMethodDefinition
+             | TopLevelMethodDefinition | TopLevelAttributeDefinition
              | UnusedInlineAnnotation | AnnotationSyntaxError
              | MixinMultipleArguments | MixinNonConstantModule
+             | AttributeNonSymbolName
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
@@ -93,6 +100,8 @@ module RBS
       private
 
       def parse_mixin_call: (Prism::CallNode) -> void
+
+      def parse_attribute_call: (Prism::CallNode) -> void
     end
   end
 end

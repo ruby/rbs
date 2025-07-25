@@ -748,6 +748,33 @@ module RBS
           absolute_type_name(resolver, nil, member.module_name, context: context),
           resolved_annotation
         )
+      when AST::Ruby::Members::AttrReaderMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrReaderMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
+      when AST::Ruby::Members::AttrWriterMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrWriterMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
+      when AST::Ruby::Members::AttrAccessorMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrAccessorMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
       else
         raise "Unknown member type: #{member.class}"
       end
