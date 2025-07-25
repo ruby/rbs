@@ -65,6 +65,29 @@ module RBS
           case member
           when AST::Members::Base
             member.comment
+          when AST::Ruby::Members::AttributeMember
+            # For Ruby attr_* members, extract comment from leading_comment
+            if member.leading_comment
+              lines = [] #: Array[String]
+
+              member.leading_comment.each_paragraph([]) do |paragraph|
+                case paragraph
+                when Location
+                  lines << paragraph.local_source
+                end
+              end
+
+              AST::Comment.new(
+                string: lines.join("\n"),
+                location: member.leading_comment.location
+              )
+            else
+              nil
+            end
+          when AST::Ruby::Members::DefMember
+            # DefMember doesn't currently store leading comments directly
+            # The comments are processed for type annotations only
+            nil
           when AST::Ruby::Members::Base
             nil
           end
