@@ -60,3 +60,54 @@ This creates the types `::Client` and `::Client::Error`.
 
 - Inheritance is not supported
 - Generic class definitions are not supported
+
+## Modules
+
+Inline RBS supports module definitions from your Ruby code. When you define a module in Ruby, the library recognizes it and the corresponding module definition is generated in RBS.
+
+```ruby
+module Helper
+end
+```
+
+The `::Helper` module is defined in RBS and you can use it as a type.
+
+### Non-constant module paths
+
+Only modules with constant names are imported. Dynamic or non-constant module definitions are ignored:
+
+```ruby
+# This module is imported
+module MyModule
+end
+
+# This is ignored - dynamic module definition
+MyModule = Module.new do
+end
+
+# This is also ignored - non-constant module name
+object = Object
+module object::MyModule
+end
+```
+
+### Module Nesting
+
+Nested modules work as expected:
+
+```ruby
+module API
+  module V1
+    module Resources
+    end
+  end
+end
+```
+
+This creates the types `::API`, `::API::V1`, and `::API::V1::Resources`.
+
+### Current Limitations
+
+- Generic module definitions are not supported
+- Module self-type constraints are not supported
+
