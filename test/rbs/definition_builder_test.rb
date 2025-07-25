@@ -3373,7 +3373,6 @@ EOF
     end
   end
 
-
   def test_ruby_attribute_members_multiple_names
     SignatureManager.new do |manager|
       manager.add_ruby_file("multiple_attributes.rb", <<~RUBY)
@@ -3401,6 +3400,83 @@ EOF
           assert_method_definition definition.methods[:y=], ["(::Integer y) -> ::Integer"], accessibility: :public
           assert_ivar_definition definition.instance_variables[:@x], "::Integer"
           assert_ivar_definition definition.instance_variables[:@y], "::Integer"
+        end
+      end
+    end
+  end
+
+  def test_ruby_attribute_members_docs
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        class MultipleAttributeTest
+          # This is a document for attribute
+          #
+          # @rbs () -> String
+          attr_reader :test #: String
+
+          # Line 1
+          #
+          # Line 2
+          # @rbs () -> String -- this is ignored
+          #
+          # Line 3
+          attr_reader :test2 #: untyped
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::MultipleAttributeTest")).tap do |definition|
+          definition.methods[:test].tap do |method|
+            assert_equal ["This is a document for attribute\n"], method.comments.map(&:string)
+          end
+
+          definition.methods[:test2].tap do |method|
+            assert_equal ["Line 1\n\nLine 2\n\nLine 3"], method.comments.map(&:string)
+          end
+        end
+      end
+    end
+  end
+
+  def test_ruby_def_members_docs
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        class MultipleAttributeTest
+          # This is a document for foo method
+          #
+          # @rbs return: String?
+          def foo = nil
+
+          # Line 1
+          #
+          # Line 2
+          # @rbs () -> Integer
+          #
+          # Line 3
+          def bar = 123
+
+          # @rbs return: untyped
+          def baz = nil
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::MultipleAttributeTest")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["This is a document for foo method\n"], method.comments.map(&:string)
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["Line 1\n\nLine 2\n\nLine 3"], method.comments.map(&:string)
+          end
+
+          definition.methods[:baz].tap do |method|
+            assert_equal [], method.comments
+          end
         end
       end
     end

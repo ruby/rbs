@@ -66,7 +66,25 @@ module RBS
           when AST::Members::Base
             member.comment
           when AST::Ruby::Members::Base
-            nil
+            if member.leading_comment
+              lines = [] #: Array[String]
+
+              member.leading_comment.each_paragraph([]) do |paragraph|
+                case paragraph
+                when Location
+                  lines << paragraph.local_source
+                end
+              end
+
+              string = lines.join("\n")
+              
+              unless string.strip.empty?
+                AST::Comment.new(
+                  string: string,
+                  location: member.leading_comment.location
+                )
+              end
+            end
           end
         end
 

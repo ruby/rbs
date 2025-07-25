@@ -112,6 +112,8 @@ module RBS
 
         def line_location: (Integer start_line, Integer end_line) -> Location
 
+        def location: () -> Location
+
         private def leading_annotation?: (Integer index) -> bool
       end
     end
