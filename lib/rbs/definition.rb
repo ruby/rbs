@@ -65,8 +65,7 @@ module RBS
           case member
           when AST::Members::Base
             member.comment
-          when AST::Ruby::Members::AttributeMember
-            # For Ruby attr_* members, extract comment from leading_comment
+          when AST::Ruby::Members::Base
             if member.leading_comment
               lines = [] #: Array[String]
 
@@ -77,19 +76,15 @@ module RBS
                 end
               end
 
-              AST::Comment.new(
-                string: lines.join("\n"),
-                location: member.leading_comment.location
-              )
-            else
-              nil
+              string = lines.join("\n")
+              
+              unless string.strip.empty?
+                AST::Comment.new(
+                  string: string,
+                  location: member.leading_comment.location
+                )
+              end
             end
-          when AST::Ruby::Members::DefMember
-            # DefMember doesn't currently store leading comments directly
-            # The comments are processed for type annotations only
-            nil
-          when AST::Ruby::Members::Base
-            nil
           end
         end
 

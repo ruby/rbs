@@ -3439,4 +3439,46 @@ EOF
       end
     end
   end
+
+  def test_ruby_def_members_docs
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        class MultipleAttributeTest
+          # This is a document for foo method
+          #
+          # @rbs return: String?
+          def foo = nil
+
+          # Line 1
+          #
+          # Line 2
+          # @rbs () -> Integer
+          #
+          # Line 3
+          def bar = 123
+
+          # @rbs return: untyped
+          def baz = nil
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::MultipleAttributeTest")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["This is a document for foo method\n"], method.comments.map(&:string)
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["Line 1\n\nLine 2\n\nLine 3"], method.comments.map(&:string)
+          end
+
+          definition.methods[:baz].tap do |method|
+            assert_equal [], method.comments
+          end
+        end
+      end
+    end
+  end
 end

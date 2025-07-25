@@ -722,7 +722,8 @@ module RBS
           member.buffer,
           member.name,
           member.node,
-          member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+          member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) },
+          member.leading_comment
         )
       when AST::Ruby::Members::IncludeMember
         resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }

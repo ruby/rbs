@@ -183,12 +183,14 @@ module RBS
           attr_reader :name
           attr_reader :node
           attr_reader :method_type
+          attr_reader :leading_comment
 
-          def initialize(buffer, name, node, method_type)
+          def initialize(buffer, name, node, method_type, leading_comment)
             super(buffer)
             @name = name
             @node = node
             @method_type = method_type
+            @leading_comment = leading_comment
           end
 
           def location
