@@ -189,3 +189,80 @@ end
 - Class methods and singleton methods are not supported
 - Parameter types are not supported with doc-style syntax
 - Method visibility declaration is not supported yet
+
+## Attributes
+
+Inline RBS supports Ruby's attribute methods: `attr_reader`, `attr_writer`, and `attr_accessor`.
+
+```ruby
+class Person
+  attr_reader :name #: String
+  attr_writer :age #: Integer
+  attr_accessor :email #: String?
+end
+```
+
+It detects these attribute declarations and generates the corresponding getter and setter methods.
+
+The accessor methods and instance variables are defined.
+
+### Unannotated attributes
+
+Attributes defined without type annotations are treated as `untyped`:
+
+```ruby
+class Person
+  attr_reader :name
+  attr_writer :age
+  attr_accessor :email
+end
+```
+
+### Type annotations for attributes
+
+You can add type annotations to attributes using the `#:` syntax in trailing comments:
+
+```ruby
+class Person
+  attr_reader :name #: String
+  attr_writer :age #: Integer
+  attr_accessor :email #: String?
+end
+```
+
+This generates the following typed methods:
+- `name: () -> String`
+- `age=: (Integer) -> Integer`
+- `email: () -> String?` and `email=: (String?) -> String?`
+
+### Multiple attributes
+
+When declaring multiple attributes in one line, the type annotation applies to all attributes:
+
+```ruby
+class Person
+  attr_reader :first_name, :last_name #: String
+  attr_accessor :age, :height #: Integer
+end
+```
+
+All attributes in each declaration share the same type.
+
+### Non-symbol attribute names
+
+Attribute names must be symbol literals.
+
+```ruby
+class Person
+  attr_reader "name" #: String
+
+  age = :age
+  attr_writer age #: Integer
+end
+```
+
+The attribute definitions are ignored because the names are given by string literals and local variables.
+
+### Current Limitations
+
+- Attribute visibility is not supported yet. All attributes are _public_
