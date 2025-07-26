@@ -266,3 +266,80 @@ The attribute definitions are ignored because the names are given by string lite
 ### Current Limitations
 
 - Attribute visibility is not supported yet. All attributes are _public_
+
+## Mixin
+
+Inline RBS supports Ruby's mixin methods: `include`, `extend`, and `prepend`.
+
+```ruby
+module Printable
+  # @rbs () -> String
+  def to_print
+    to_s
+  end
+end
+
+class Document
+  include Printable
+  extend Enumerable #[String]
+  prepend Trackable
+end
+```
+
+It detects these mixin declarations and adds them to the class or module definition.
+
+### Basic mixin usage
+
+Mixins work just like in regular RBS files:
+
+```ruby
+module Helper
+end
+
+class MyClass
+  include Helper
+  extend Helper
+  prepend Helper
+end
+```
+
+### Type arguments for generic modules
+
+You can specify type arguments for generic modules using the `#[...]` syntax:
+
+```ruby
+class TodoList
+  include Enumerable #[String]
+
+  # @rbs () { (String) -> void } -> void
+  def each(&block)
+    @items.each(&block)
+  end
+end
+```
+
+### Module name requirements
+
+Only constant module names are supported. Dynamic module references are not allowed:
+
+```ruby
+class MyClass
+  include Helper         # ✓ Works - constant name
+
+  mod = Helper
+  include mod           # ✗ Ignored - non-constant module reference
+
+  include Helper.new    # ✗ Ignored - not a simple constant
+end
+```
+
+### Module name resolution
+
+The module name resolution is based on the nesting of the class/module definitions, unlike Ruby.
+
+Modules accessible through ancestors (super-class/included modules) are not supported.
+
+### Current Limitations
+
+- Only single module arguments are supported (no `include A, B` syntax)
+- Module names must be constants
