@@ -186,12 +186,6 @@ class Rational < Numeric
   #
   def abs: () -> Rational
 
-  def abs2: () -> Rational
-
-  def angle: () -> (Integer | Float)
-
-  alias arg angle
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.ceil([ndigits])  ->  integer or rational
@@ -220,10 +214,6 @@ class Rational < Numeric
 
   def coerce: (Numeric) -> [ Numeric, Numeric ]
 
-  def conj: () -> Rational
-
-  def conjugate: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.denominator  ->  integer
@@ -236,8 +226,6 @@ class Rational < Numeric
   #     Rational(-2, -10).denominator       #=> 5
   #
   def denominator: () -> Integer
-
-  def div: (Numeric) -> Integer
 
   def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
@@ -253,8 +241,6 @@ class Rational < Numeric
   #     Rational(2).fdiv(3)          #=> 0.6666666666666666
   #
   def fdiv: (Numeric) -> Float
-
-  def finite?: () -> bool
 
   # <!--
   #   rdoc-file=rational.c
@@ -289,8 +275,6 @@ class Rational < Numeric
   #
   def hash: () -> Integer
 
-  def infinite?: () -> Integer?
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.inspect  ->  string
@@ -302,8 +286,6 @@ class Rational < Numeric
   #     Rational('1/2').inspect  #=> "(1/2)"
   #
   def inspect: () -> String
-
-  def integer?: () -> bool
 
   # <!-- rdoc-file=rational.c -->
   # Returns the absolute value of `rat`.
@@ -336,8 +318,6 @@ class Rational < Numeric
   #     Rational(-2, -10).numerator  #=> 1
   #
   def numerator: () -> Integer
-
-  alias phase angle
 
   def polar: () -> [ Rational, Integer | Float ]
 
@@ -377,13 +357,7 @@ class Rational < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Rational
-
-  def real?: () -> true
-
   def rect: () -> [ Rational, Numeric ]
-
-  alias rectangular rect
 
   def remainder: (Float) -> Float
                | (Numeric) -> Rational
@@ -431,8 +405,6 @@ class Rational < Numeric
           | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
           | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
 
-  def to_c: () -> Complex
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_f  ->  float
@@ -461,8 +433,6 @@ class Rational < Numeric
   #     Rational(-31, 2).to_i  #=> -15
   #
   def to_i: () -> Integer
-
-  alias to_int to_i
 
   # <!--
   #   rdoc-file=rational.c
@@ -512,6 +482,4 @@ class Rational < Numeric
   #
   def truncate: () -> Integer
               | (Integer ndigits) -> (Integer | Rational)
-
-  def zero?: () -> bool
 end

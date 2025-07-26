@@ -324,12 +324,10 @@ class Float < Numeric
   #
   def abs: () -> Float
 
-  def abs2: () -> Float
-
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
-  def angle: () -> (Integer | Float)
+  def angle: ...
 
   # <!--
   #   rdoc-file=complex.c
@@ -417,10 +415,6 @@ class Float < Numeric
   #
   def coerce: (Numeric) -> [ Float, Float ]
 
-  def conj: () -> Float
-
-  def conjugate: () -> Float
-
   # <!--
   #   rdoc-file=rational.c
   #   - flo.denominator  ->  integer
@@ -430,8 +424,6 @@ class Float < Numeric
   # See also Float#numerator.
   #
   def denominator: () -> Integer
-
-  def div: (Numeric) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -625,8 +617,6 @@ class Float < Numeric
   #         (0.0/0.0).to_s    # => "NaN"
   #
   alias inspect to_s
-
-  def integer?: () -> bool
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -823,13 +813,7 @@ class Float < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Float
-
-  def real?: () -> true
-
   def rect: () -> [ Float, Numeric ]
-
-  alias rectangular rect
 
   def remainder: (Numeric) -> Float
 
@@ -892,8 +876,6 @@ class Float < Numeric
           | (?Numeric limit, ?Numeric step) -> Enumerator[Float, self]
           | (?by: Numeric, ?to: Numeric) { (Float) -> void } -> self
           | (?by: Numeric, ?to: Numeric) -> Enumerator[Float, self]
-
-  def to_c: () -> Complex
 
   # <!--
   #   rdoc-file=numeric.rb

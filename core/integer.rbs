@@ -513,8 +513,6 @@ class Integer < Numeric
   #
   def abs: () -> Integer
 
-  def abs2: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.c
   #   - allbits?(mask) -> true or false
@@ -537,8 +535,6 @@ class Integer < Numeric
   # Related: Integer#anybits?, Integer#nobits?.
   #
   def allbits?: (int mask) -> bool
-
-  def angle: () -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -704,10 +700,6 @@ class Integer < Numeric
   #
   def coerce: (Numeric) -> [ Numeric, Numeric ]
 
-  def conj: () -> Integer
-
-  def conjugate: () -> Integer
-
   # <!--
   #   rdoc-file=numeric.rb
   #   - denominator -> 1
@@ -823,8 +815,6 @@ class Integer < Numeric
   #
   def fdiv: (Numeric) -> Float
 
-  def finite?: () -> bool
-
   # <!--
   #   rdoc-file=numeric.c
   #   - floor(ndigits = 0) -> integer
@@ -894,8 +884,6 @@ class Integer < Numeric
   #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
   #
   def gcdlcm: (Integer) -> [ Integer, Integer ]
-
-  def infinite?: () -> Integer?
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing the place-value representation of `self` in radix
@@ -1027,8 +1015,6 @@ class Integer < Numeric
   #
   def ord: () -> Integer
 
-  alias phase angle
-
   def polar: () -> [ Integer, Integer | Float ]
 
   def positive?: () -> bool
@@ -1077,13 +1063,7 @@ class Integer < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> self
-
-  def real?: () -> true
-
   def rect: () -> [ Integer, Numeric ]
-
-  alias rectangular rect
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1214,8 +1194,6 @@ class Integer < Numeric
   #
   def times: () { (Integer) -> void } -> self
            | () -> ::Enumerator[Integer, self]
-
-  def to_c: () -> Complex
 
   # <!--
   #   rdoc-file=numeric.c

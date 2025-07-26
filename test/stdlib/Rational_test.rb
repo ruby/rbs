@@ -72,13 +72,6 @@ class RationalTest < StdlibTest
     # a.ceil(ToInt.new) # does not accept to_int
   end
 
-  def test_conj
-    a = 312r
-
-    a.conj
-    a.conjugate
-  end
-
   def test_denominator
     a = 133r
 

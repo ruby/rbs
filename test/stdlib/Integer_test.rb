@@ -182,10 +182,6 @@ class IntegerTest < StdlibTest
     3.conj
   end
 
-  def test_conjugate
-    3.conjugate
-  end
-
   def test_denominator
     3.denominator
   end
@@ -239,10 +235,6 @@ class IntegerTest < StdlibTest
 
   def test_gcdlcm
     30.gcdlcm(31)
-  end
-
-  def test_infinite?
-    30.infinite?
   end
 
   def test_lcm
