@@ -2589,7 +2589,7 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
         if (parser->next_token.type == pLBRACKET) {
             rbs_parser_advance(parser);
             args_range.start = parser->current_token.range.start;
-            CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, false));
+            CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, true));
             rbs_parser_advance(parser);
             self_range.end = args_range.end = parser->current_token.range.end;
         }
