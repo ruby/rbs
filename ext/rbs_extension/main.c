@@ -86,6 +86,7 @@ struct parse_type_arg {
     rbs_parser_t *parser;
     VALUE require_eof;
     VALUE void_allowed;
+    VALUE self_allowed;
 };
 
 struct parse_method_type_arg {
@@ -116,9 +117,10 @@ static VALUE parse_type_try(VALUE a) {
     }
 
     bool void_allowed = RTEST(arg->void_allowed);
+    bool self_allowed = RTEST(arg->self_allowed);
 
     rbs_node_t *type;
-    rbs_parse_type(parser, &type, void_allowed);
+    rbs_parse_type(parser, &type, void_allowed, self_allowed);
 
     raise_error_if_any(parser, arg->buffer);
 
@@ -174,7 +176,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     );
 }
 
-static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed) {
+static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
@@ -186,7 +188,8 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
         .encoding = encoding,
         .parser = parser,
         .require_eof = require_eof,
-        .void_allowed = void_allowed
+        .void_allowed = void_allowed,
+        .self_allowed = self_allowed
     };
 
     VALUE result = rb_ensure(parse_type_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
@@ -450,7 +453,7 @@ void rbs__init_parser(void) {
     VALUE empty_array = rb_obj_freeze(rb_ary_new());
     rb_gc_register_mark_object(empty_array);
 
-    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 6);
+    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
     rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);

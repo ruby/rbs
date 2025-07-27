@@ -763,7 +763,7 @@ G: ::Array[1 | 2 | 3]
 
 H: { id: 123 }
 
-I: self
+I: untyped
     EOF
   end
 

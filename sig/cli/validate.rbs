@@ -44,8 +44,8 @@ module RBS
       def validate_constant: () -> void
       def validate_global: () -> void
       def validate_type_alias: () -> void
-      def no_self_type_validator: (::RBS::Types::t | ::RBS::MethodType type) -> void
       def no_classish_type_validator: (::RBS::Types::t | ::RBS::MethodType type) -> void
+      def no_self_type_validator: (::RBS::Types::t | ::RBS::MethodType type) -> void
       %a{deprecated} def void_type_context_validator: (::RBS::Types::t | ::RBS::MethodType type, ?bool allowed_here) -> void
     end
   end
