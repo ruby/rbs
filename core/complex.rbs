@@ -377,7 +377,7 @@ class Complex < Numeric
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
-  def conj: () -> Complex
+  def conj: () -> self
 
   # <!--
   #   rdoc-file=complex.c
@@ -387,7 +387,7 @@ class Complex < Numeric
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
-  def conjugate: () -> Complex
+  def conjugate: () -> self
 
   # <!--
   #   rdoc-file=complex.c
@@ -521,8 +521,6 @@ class Complex < Numeric
   #     Complex.rect(Float::NAN, Float::NAN).inspect # => "(NaN+NaN*i)"
   #
   def inspect: () -> String
-
-  def integer?: () -> bool
 
   # <!-- rdoc-file=complex.c -->
   # Returns the absolute value (magnitude) for `self`; see [polar
@@ -745,8 +743,6 @@ class Complex < Numeric
   #
   def to_i: () -> Integer
 
-  alias to_int to_i
-
   # <!--
   #   rdoc-file=complex.c
   #   - to_r -> rational
@@ -779,8 +775,6 @@ class Complex < Numeric
   def to_s: () -> String
 
   def truncate: (?Integer) -> bot
-
-  def zero?: () -> bool
 end
 
 # <!-- rdoc-file=complex.c -->

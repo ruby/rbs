@@ -244,12 +244,12 @@ class Numeric
   # -->
   # Returns the square of `self`.
   #
-  def abs2: () -> Numeric
+  def abs2: () -> self
 
   # <!-- rdoc-file=complex.c -->
   # Returns zero if `self` is positive, Math::PI otherwise.
   #
-  def angle: () -> Numeric
+  def angle: () -> (0 | Float)
 
   # <!--
   #   rdoc-file=complex.c
@@ -310,18 +310,18 @@ class Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - conj()
-  # -->
-  #
-  def conj: () -> Numeric
-
-  # <!--
-  #   rdoc-file=numeric.rb
   #   - conj -> self
   # -->
   # Returns `self`.
   #
-  def conjugate: () -> Numeric
+  def conjugate: () -> self
+
+  # <!--
+  #   rdoc-file=numeric.rb
+  #   - conj()
+  # -->
+  #
+  alias conj conjugate
 
   # <!--
   #   rdoc-file=rational.c
@@ -590,7 +590,7 @@ class Numeric
   # -->
   # Returns `self`.
   #
-  def real: () -> Numeric
+  def real: () -> self
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -598,7 +598,7 @@ class Numeric
   # -->
   # Returns `true` if `self` is a real number (i.e. not Complex).
   #
-  def real?: () -> bool
+  def real?: () -> true
 
   # <!-- rdoc-file=complex.c -->
   # Returns array `[self, 0]`.
