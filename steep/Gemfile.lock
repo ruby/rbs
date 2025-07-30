@@ -26,7 +26,7 @@ GEM
     fileutils (1.7.3)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    json (2.13.0)
+    json (2.13.2)
     language_server-protocol (3.17.0.5)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -34,7 +34,7 @@ GEM
     logger (1.7.0)
     minitest (5.25.5)
     mutex_m (0.3.0)
-    parser (3.3.8.0)
+    parser (3.3.9.0)
       ast (~> 2.4.1)
       racc
     power_assert (2.0.5)
@@ -46,7 +46,7 @@ GEM
       ffi (~> 1.0)
     rbs (3.9.4)
       logger
-    ruby-lsp (0.26.0)
+    ruby-lsp (0.26.1)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
