@@ -16,17 +16,60 @@ module RBS
         end
 
         class ClassDecl < Base
+          class SuperClass
+            attr_reader :type_name_location
+
+            attr_reader :operator_location
+
+            attr_reader :type_name
+
+            attr_reader :type_annotation
+
+            def initialize(type_name_location, operator_location, type_name, type_annotation)
+              @type_name_location = type_name_location
+              @operator_location = operator_location
+              @type_name = type_name
+              @type_annotation = type_annotation
+            end
+
+            def type_args
+              if type_annotation
+                type_annotation.type_args
+              else
+                []
+              end
+            end
+
+            def location
+              if type_annotation
+                Location.new(
+                  type_name_location.buffer,
+                  type_name_location.start_pos,
+                  type_annotation.location.end_pos
+                )
+              else
+                type_name_location
+              end
+            end
+
+            alias name type_name
+            alias args type_args
+          end
+
           attr_reader :class_name
 
           attr_reader :members
 
           attr_reader :node
 
-          def initialize(buffer, name, node)
+          attr_reader :super_class
+
+          def initialize(buffer, name, node, super_class)
             super(buffer)
             @class_name = name
             @node = node
             @members = []
+            @super_class = super_class
           end
 
           def each_decl(&block)
@@ -38,8 +81,6 @@ module RBS
               end
             end
           end
-
-          def super_class = nil
 
           def type_params = []
 

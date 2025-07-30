@@ -308,11 +308,13 @@ module RBS
   # InheritModuleError is raised if a class definition inherits a module (not a class)
   #
   class InheritModuleError < DefinitionError
+    type super_class = AST::Declarations::Class::Super | AST::Ruby::Declarations::ClassDecl::SuperClass
+
     include DetailedMessageable
 
-    attr_reader super_decl: AST::Declarations::Class::Super
+    attr_reader super_decl: super_class
 
-    def initialize: (AST::Declarations::Class::Super) -> void
+    def initialize: (super_class) -> void
 
     def location: () -> Location[untyped, untyped]?
 
@@ -320,7 +322,7 @@ module RBS
     #
     # Automatically normalize the name of super.
     #
-    def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
+    def self.check!: (super_class, env: Environment) -> void
   end
 
   class RecursiveTypeAliasError < BaseError

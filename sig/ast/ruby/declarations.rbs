@@ -14,20 +14,40 @@ module RBS
         end
 
         class ClassDecl < Base
+          class SuperClass
+            attr_reader operator_location: Location
+
+            attr_reader type_name_location: Location
+
+            attr_reader type_name: TypeName
+
+            attr_reader type_annotation: Annotations::TypeApplicationAnnotation?
+
+            def type_args: () -> Array[Types::t]
+
+            alias name type_name
+
+            alias args type_args
+
+            def initialize: (Location type_name_location, Location operator_location, TypeName, RBS::AST::Ruby::Annotations::TypeApplicationAnnotation?) -> void
+
+            def location: () -> Location
+          end
+
           type member = t | Members::t
 
           attr_reader class_name: TypeName
 
           attr_reader node: Prism::ClassNode
 
+          attr_reader super_class: SuperClass?
+
           attr_reader members: Array[member]
 
-          def initialize: (Buffer, TypeName, Prism::ClassNode) -> void
+          def initialize: (Buffer, TypeName, Prism::ClassNode, SuperClass?) -> void
 
           def each_decl: () { (t) -> void } -> void
                         | () -> Enumerator[t]
-
-          def super_class: () -> nil
 
           def type_params: () -> Array[AST::TypeParam]
 

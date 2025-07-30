@@ -100,7 +100,7 @@ module RBS
           return
         end
 
-        class_decl = AST::Ruby::Declarations::ClassDecl.new(buffer, class_name, node)
+        class_decl = AST::Ruby::Declarations::ClassDecl.new(buffer, class_name, node, nil)
         insert_declaration(class_decl)
         push_module_nesting(class_decl) do
           visit_child_nodes(node)
