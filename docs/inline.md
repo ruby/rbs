@@ -56,9 +56,26 @@ end
 
 This creates the types `::Client` and `::Client::Error`.
 
+### Inheritance
+
+Class declarations can have a super class.
+
+```ruby
+class UsersController < ApplicationController
+end
+```
+
+The super class specification must be a constant.
+
+The super class specification allows type applications.
+
+```ruby
+class StringArray < Array #[String]
+end
+```
+
 ### Current Limitations
 
-- Inheritance is not supported
 - Generic class definitions are not supported
 
 ## Modules
