@@ -26,6 +26,7 @@ module RBS
       NotImplementedYet = _ = Class.new(Base)
       NonConstantClassName = _ = Class.new(Base)
       NonConstantModuleName = _ = Class.new(Base)
+      NonConstantSuperClassName = _ = Class.new(Base)
       TopLevelMethodDefinition = _ = Class.new(Base)
       TopLevelAttributeDefinition = _ = Class.new(Base)
       UnusedInlineAnnotation = _ = Class.new(Base)
@@ -100,7 +101,13 @@ module RBS
           return
         end
 
-        class_decl = AST::Ruby::Declarations::ClassDecl.new(buffer, class_name, node)
+        # Parse super class if present
+        super_class = if node.superclass
+          node.inheritance_operator_loc or raise
+          parse_super_class(node.superclass, node.inheritance_operator_loc)
+        end
+
+        class_decl = AST::Ruby::Declarations::ClassDecl.new(buffer, class_name, node, super_class)
         insert_declaration(class_decl)
         push_module_nesting(class_decl) do
           visit_child_nodes(node)
@@ -351,6 +358,39 @@ module RBS
             report_unused_annotation(paragraph)
           end
         end
+      end
+
+      def parse_super_class(super_class_expr, inheritance_operator_loc)
+        # Check if the superclass is a constant
+        unless super_class_name = constant_as_type_name(super_class_expr)
+          diagnostics << Diagnostic::NonConstantSuperClassName.new(
+            rbs_location(super_class_expr.location),
+            "Super class name must be a constant"
+          )
+          return nil
+        end
+
+        # Look for type application annotation in trailing comments
+        # For example: class StringArray < Array #[String]
+        trailing_block = comments.trailing_block!(super_class_expr.location)
+        type_annotation = nil
+
+        if trailing_block
+          case annotation = trailing_block.trailing_annotation([])
+          when AST::Ruby::Annotations::TypeApplicationAnnotation
+            type_annotation = annotation
+          else
+            report_unused_annotation(annotation)
+          end
+        end
+
+        # Create SuperClass object
+        AST::Ruby::Declarations::ClassDecl::SuperClass.new(
+          rbs_location(super_class_expr.location),
+          rbs_location(inheritance_operator_loc),
+          super_class_name,
+          type_annotation
+        )
       end
     end
   end

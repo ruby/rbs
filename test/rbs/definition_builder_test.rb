@@ -3254,6 +3254,88 @@ end
     end
   end
 
+  def test_inline_decl__class_with_super
+    SignatureManager.new do |manager|
+      manager.add_ruby_file(Pathname("a.rb"), <<~RUBY)
+        class Parent
+          # @rbs () -> String
+          def parent_method = ""
+        end
+
+        class Child < Parent
+          def child_method
+            "child"
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          # Should have methods from both Child and Parent
+          assert_equal Set[:child_method, :parent_method], Set.new(definition.methods.keys) & Set[:child_method, :parent_method]
+
+          definition.methods[:parent_method].tap do |method|
+            assert_equal type_name("::Parent"), method.defined_in
+            assert_equal type_name("::Parent"), method.implemented_in
+            assert_equal [parse_method_type("() -> ::String")], method.method_types
+          end
+
+          definition.methods[:child_method].tap do |method|
+            assert_equal type_name("::Child"), method.defined_in
+            assert_equal type_name("::Child"), method.implemented_in
+            assert_equal [parse_method_type("(?) -> untyped")], method.method_types
+          end
+        end
+
+        # Check ancestors
+        ancestors = builder.ancestor_builder.instance_ancestors(type_name("::Child"))
+        assert_equal type_name("::Parent"), ancestors.ancestors[1].name
+      end
+    end
+  end
+
+  def test_inline_decl__class_with_super_type_args
+    SignatureManager.new do |manager|
+      manager.files[Pathname("generics.rbs")] = <<~RBS
+        class MyArray[T]
+          def first: () -> T
+        end
+      RBS
+
+      manager.add_ruby_file("string_array.rb", <<~RUBY)
+        class StringArray < MyArray #[String]
+          def last
+            "last"
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::StringArray")).tap do |definition|
+          # Should have methods from both StringArray and MyArray
+          assert_equal Set[:last, :first], Set.new(definition.methods.keys) & Set[:last, :first]
+
+          definition.methods[:first].tap do |method|
+            assert_equal type_name("::MyArray"), method.defined_in
+            assert_equal type_name("::MyArray"), method.implemented_in
+            # Type should be substituted with String
+            assert_equal [parse_method_type("() -> ::String")], method.method_types
+          end
+
+          definition.methods[:last].tap do |method|
+            assert_equal type_name("::StringArray"), method.defined_in
+            assert_equal type_name("::StringArray"), method.implemented_in
+            assert_equal [parse_method_type("(?) -> untyped")], method.method_types
+          end
+        end
+      end
+    end
+  end
+
   def test_ruby_mixin_members
     SignatureManager.new do |manager|
       manager.files[Pathname("modules.rbs")] = <<EOF

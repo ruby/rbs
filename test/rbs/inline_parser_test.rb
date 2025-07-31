@@ -943,4 +943,181 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_parse__class_with_super_class
+    result = parse(<<~RUBY)
+      class Child < Parent
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Child"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("Parent"), decl.super_class.name
+      assert_empty decl.super_class.args
+    end
+  end
+
+  def test_parse__class_with_super_class_nested
+    result = parse(<<~RUBY)
+      class UsersController < ApplicationController
+        class Error < StandardError
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("UsersController"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("ApplicationController"), decl.super_class.name
+      assert_empty decl.super_class.args
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, member
+        assert_equal RBS::TypeName.parse("Error"), member.class_name
+        assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, member.super_class
+        assert_equal RBS::TypeName.parse("StandardError"), member.super_class.name
+        assert_empty member.super_class.args
+      end
+    end
+  end
+
+  def test_parse__class_with_super_class_type_application
+    result = parse(<<~RUBY)
+      class StringArray < Array #[String]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("StringArray"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("Array"), decl.super_class.name
+      assert_equal 1, decl.super_class.args.size
+      assert_equal "String", decl.super_class.args[0].to_s
+    end
+  end
+
+  def test_parse__class_with_super_class_complex_type_application
+    result = parse(<<~RUBY)
+      class MyHash < Hash #[Symbol, Array[Integer]]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("MyHash"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("Hash"), decl.super_class.name
+      assert_equal 2, decl.super_class.args.size
+      assert_equal "Symbol", decl.super_class.args[0].to_s
+      assert_equal "Array[Integer]", decl.super_class.args[1].to_s
+    end
+  end
+
+  def test_parse__class_with_qualified_super_class
+    result = parse(<<~RUBY)
+      class MyError < ActiveRecord::RecordNotFound
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("MyError"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("ActiveRecord::RecordNotFound"), decl.super_class.name
+      assert_empty decl.super_class.args
+    end
+  end
+
+  def test_error__class_with_non_constant_super_class
+    result = parse(<<~RUBY)
+      class Child < parent
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantSuperClassName, diagnostic
+      assert_equal "parent", diagnostic.location.source
+      assert_equal "Super class name must be a constant", diagnostic.message
+    end
+
+    # The class should still be created but without super class
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Child"), decl.class_name
+      assert_nil decl.super_class
+    end
+  end
+
+  def test_error__class_with_dynamic_super_class
+    result = parse(<<~RUBY)
+      Parent = Class.new
+      class Child < Parent.new
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantSuperClassName, diagnostic
+      assert_equal "Parent.new", diagnostic.location.source
+      assert_equal "Super class name must be a constant", diagnostic.message
+    end
+
+    # The class should still be created but without super class
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Child"), decl.class_name
+      assert_nil decl.super_class
+    end
+  end
+
+  def test_parse__class_with_super_class_and_members
+    result = parse(<<~RUBY)
+      class Person < ActiveRecord::Base #[Person]
+        attr_reader :name #: String
+        
+        def age
+          25
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Person"), decl.class_name
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl::SuperClass, decl.super_class
+      assert_equal RBS::TypeName.parse("ActiveRecord::Base"), decl.super_class.name
+      assert_equal 1, decl.super_class.args.size
+      assert_equal "Person", decl.super_class.args[0].to_s
+
+      assert_equal 2, decl.members.size
+      
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+        assert_equal [:name], member.names
+        assert_equal "String", member.type.to_s
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :age, member.name
+      end
+    end
+  end
 end

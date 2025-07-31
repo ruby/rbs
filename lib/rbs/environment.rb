@@ -679,7 +679,16 @@ module RBS
         inner_context = [context, full_name] #: Resolver::context
         inner_prefix = full_name.to_namespace
 
-        AST::Ruby::Declarations::ClassDecl.new(decl.buffer, full_name, decl.node).tap do |resolved|
+        super_class = decl.super_class&.yield_self do |super_class|
+          AST::Ruby::Declarations::ClassDecl::SuperClass.new(
+            super_class.type_name_location,
+            super_class.operator_location,
+            absolute_type_name(resolver, nil, super_class.name, context: context),
+            super_class.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+          )
+        end
+
+        AST::Ruby::Declarations::ClassDecl.new(decl.buffer, full_name, decl.node, super_class).tap do |resolved|
           decl.members.each do |member|
             case member
             when AST::Ruby::Declarations::Base
