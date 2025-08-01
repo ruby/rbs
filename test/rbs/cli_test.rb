@@ -594,34 +594,6 @@ singleton(::BasicObject)
     end
   end
 
-  def test_validate__generics_default_self
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          module A[T = self]
-          end
-
-          class B[S = self]
-          end
-
-          interface _C[T = self]
-          end
-
-          type t[T = self] = untyped
-        RBS
-
-        assert_cli_success do
-          cli.run(["-I", dir, "validate"])
-        end
-
-        assert_include stdout.string, "/a.rbs:1:13...1:17: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:4:12...4:16: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:7:17...7:21: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-        assert_include stdout.string, "/a.rbs:10:11...10:15: `self` type is not allowed in this context (RBS::WillSyntaxError)\n"
-      end
-    end
-  end
-
   def test_validate__generics_default_ref
     with_cli do |cli|
       Dir.mktmpdir do |dir|
@@ -655,17 +627,20 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            type foo = self
-            type bar = instance
+            def foo: () -> Nothing
+          end
+
+          class Bar
+            def bar: () -> Nothing
           end
         RBS
 
-        assert_cli_success do
+        refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate"])
         end
 
-        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
+        assert_include stdout.string, "a.rbs:2:17...2:24: Could not find Nothing (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:6:17...6:24: Could not find Nothing (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -675,54 +650,17 @@ singleton(::BasicObject)
       Dir.mktmpdir do |dir|
         (Pathname(dir) + 'a.rbs').write(<<~RBS)
           class Foo
-            type foo = self
-            type bar = instance
+            def foo: () -> Nothing
+          end
+          class Bar
+            def bar: () -> Nothing
           end
         RBS
 
-        assert_cli_success do
+        refute_cli_success do
           cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast"])
         end
-        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
-      end
-    end
-  end
-
-  def test_validate_multiple_with_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            type foo = self
-            type bar = instance
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "a.rbs:2:13...2:17: `self` type is not allowed in this context (RBS::WillSyntaxError)"
-        assert_include stdout.string, "a.rbs:3:13...3:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
-      end
-    end
-  end
-
-  def test_validate_multiple_with_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            def foo: (T) -> void
-            def bar: (T) -> void
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "/a.rbs:2:12...2:13: Could not find T (RBS::NoTypeFoundError)"
-        assert_not_include stdout.string, "/a.rbs:3:12...3:13: Could not find T (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:2:17...2:24: Could not find Nothing (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -762,74 +700,6 @@ singleton(::BasicObject)
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
-    end
-  end
-
-  def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      refute_cli_success do
-        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
-      end
-      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
-    end
-  end
-
-  def test_context_validation
-    tests = [
-      <<~RBS,
-        class Bar[A]
-        end
-        class Foo < Bar[instance]
-        end
-      RBS
-      <<~RBS,
-        module Bar : _Each[instance]
-        end
-      RBS
-      <<~RBS,
-        module Foo[A < _Each[self]]
-        end
-      RBS
-      <<~RBS,
-        class Foo
-          @@bar: self
-        end
-      RBS
-      <<~RBS,
-        type foo = instance
-      RBS
-      <<~RBS,
-        BAR: instance
-      RBS
-      <<~RBS,
-        class Foo
-          include Enumerable[self]
-        end
-      RBS
-      <<~RBS,
-        $FOO: instance
-      RBS
-    ]
-
-    tests.each do |rbs|
-      with_cli do |cli|
-        Dir.mktmpdir do |dir|
-          (Pathname(dir) + 'a.rbs').write(rbs)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate"])
-          end
-
-          assert_match(/void|self|instance|class/, stdout.string)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
-          end
-          refute_cli_success do
-            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
-          end
-        end
-      end
     end
   end
 

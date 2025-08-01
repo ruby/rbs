@@ -290,7 +290,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -512,7 +512,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -630,7 +630,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -716,7 +716,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -807,7 +807,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -890,7 +890,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -1218,7 +1218,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -1304,7 +1304,7 @@ module RBS
       end
 
       def has_self_type?
-        return_type.has_self_type?
+        return_type.has_self_type? # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?
@@ -1497,7 +1497,7 @@ module RBS
       end
 
       def has_self_type?
-        each_type.any? {|type| type.has_self_type? }
+        each_type.any? {|type| type.has_self_type? } # steep:ignore DeprecatedReference
       end
 
       def has_classish_type?

@@ -49,7 +49,7 @@ module RBS
 
     def type_param_names: () -> Array[Symbol]
 
-    def has_self_type?: () -> bool
+    %a{deprecated} def has_self_type?: () -> bool
 
     def has_classish_type?: () -> bool
 
