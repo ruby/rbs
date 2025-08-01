@@ -136,6 +136,31 @@ module RBS
             ) #: self
           end
         end
+
+        class InstanceVariableAnnotation < Base
+          attr_reader :ivar_name, :ivar_name_location, :colon_location, :type, :comment_location
+
+          def initialize(location:, prefix_location:, ivar_name:, ivar_name_location:, colon_location:, type:, comment_location:)
+            super(location, prefix_location)
+            @ivar_name = ivar_name
+            @ivar_name_location = ivar_name_location
+            @colon_location = colon_location
+            @type = type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              ivar_name:,
+              ivar_name_location:,
+              colon_location:,
+              type: type.map_type_name { yield _1 },
+              comment_location:
+            ) #: self
+          end
+        end
       end
     end
   end
