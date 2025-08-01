@@ -360,3 +360,31 @@ Modules accessible through ancestors (super-class/included modules) are not supp
 
 - Only single module arguments are supported (no `include A, B` syntax)
 - Module names must be constants
+
+## Instance Variables
+
+Inline RBS declaration allows defining instance variables.
+
+```ruby
+class Person
+  # @rbs @name: String
+  # @rbs @age: Integer? --
+  #   how old is the person?
+  #   `nil` means it's unspecified.
+
+  # @rbs (String name, Integer? age) -> void
+  def initialize(name, age)
+    @name = name
+    @age = age
+  end
+end
+```
+
+The `@rbs @VAR-NAME: TYPE` syntax enclosed in `class`/`module` syntax declares instance variables.
+You can add the documentation of the variable followed by two hyphones (`--`).
+
+Instance variable declarations must be under the `class`/`module` syntax, and they are ignored if written inside method definitions.
+
+### Current Limitations
+
+- Only instance variables of class/module instances are allowed
