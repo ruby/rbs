@@ -122,7 +122,6 @@ EOU
             entry.each_decl do |decl|
               if super_class = decl.super_class
                 super_class.args.each do |arg|
-                  no_self_type_validator(arg)
                   no_classish_type_validator(arg)
                   @validator.validate_type(arg, context: nil)
                 end
@@ -132,7 +131,6 @@ EOU
             entry.each_decl do |decl|
               decl.self_types.each do |self_type|
                 self_type.args.each do |arg|
-                  no_self_type_validator(arg)
                   no_classish_type_validator(arg)
                   @validator.validate_type(arg, context: nil)
                 end
@@ -161,19 +159,16 @@ EOU
 
           d.type_params.each do |param|
             if ub = param.upper_bound_type
-              no_self_type_validator(ub)
               no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
             if lb = param.lower_bound_type
-              no_self_type_validator(lb)
               no_classish_type_validator(lb)
               @validator.validate_type(lb, context: nil)
             end
 
             if dt = param.default_type
-              no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
@@ -189,9 +184,6 @@ EOU
                 when AST::Members::MethodDefinition
                   @validator.validate_method_definition(member, type_name: name)
                 when AST::Members::Mixin
-                  member.args.each do |arg|
-                    no_self_type_validator(arg)
-                  end
                   params =
                     if member.name.class?
                       module_decl = @env.normalized_module_entry(member.name) or raise
@@ -203,9 +195,6 @@ EOU
                   InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
                 when AST::Members::Var
                   @validator.validate_variable(member)
-                  if member.is_a?(AST::Members::ClassVariable)
-                    no_self_type_validator(member.type)
-                  end
                 end
               end
             else
@@ -241,19 +230,16 @@ EOU
 
           decl.decl.type_params.each do |param|
             if ub = param.upper_bound_type
-              no_self_type_validator(ub)
               no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
             if lb = param.lower_bound_type
-              no_self_type_validator(lb)
               no_classish_type_validator(lb)
               @validator.validate_type(lb, context: nil)
             end
 
             if dt = param.default_type
-              no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
@@ -280,7 +266,6 @@ EOU
           RBS.logger.info "Validating constant: `#{name}`..."
           @validator.validate_type const.decl.type, context: const.context
           @builder.ensure_namespace!(name.namespace, location: const.decl.location)
-          no_self_type_validator(const.decl.type)
           no_classish_type_validator(const.decl.type)
         rescue BaseError => error
           @errors.add(error)
@@ -291,7 +276,6 @@ EOU
         @env.global_decls.each do |name, global|
           RBS.logger.info "Validating global: `#{name}`..."
           @validator.validate_type global.decl.type, context: nil
-          no_self_type_validator(global.decl.type)
           no_classish_type_validator(global.decl.type)
         rescue BaseError => error
           @errors.add(error)
@@ -315,19 +299,16 @@ EOU
 
           decl.decl.type_params.each do |param|
             if ub = param.upper_bound_type
-              no_self_type_validator(ub)
               no_classish_type_validator(ub)
               @validator.validate_type(ub, context: nil)
             end
 
             if lb = param.lower_bound_type
-              no_self_type_validator(lb)
               no_classish_type_validator(lb)
               @validator.validate_type(lb, context: nil)
             end
 
             if dt = param.default_type
-              no_self_type_validator(dt)
               no_classish_type_validator(dt)
               @validator.validate_type(dt, context: nil)
             end
@@ -335,7 +316,6 @@ EOU
 
           TypeParamDefaultReferenceError.check!(decl.decl.type_params)
 
-          no_self_type_validator(decl.decl.type)
           no_classish_type_validator(decl.decl.type)
         rescue BaseError => error
           @errors.add(error)

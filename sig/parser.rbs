@@ -69,7 +69,14 @@ module RBS
     # RBS::Parser.parse_type("void", void_allowed: false)         # => Raises an syntax error
     # ```
     #
-    def self.parse_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool, ?void_allowed: bool) -> Types::t?
+    # The `self_allowed` keyword controls whether `self` is allowed as a type.
+    #
+    # ```ruby
+    # RBS::Parser.parse_type("self", self_allowed: true)          # => `self`
+    # RBS::Parser.parse_type("self", self_allowed: false)         # => Raises an syntax error
+    # ```
+    #
+    def self.parse_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool, ?void_allowed: bool, ?self_allowed: bool) -> Types::t?
 
     # Parse whole RBS file and return an array of declarations
     #
@@ -123,7 +130,7 @@ module RBS
 
     def self.buffer: (String | Buffer source) -> Buffer
 
-    def self._parse_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof, bool void_allowed) -> Types::t?
+    def self._parse_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof, bool void_allowed, bool self_allowed) -> Types::t?
 
     def self._parse_method_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof) -> MethodType?
 
