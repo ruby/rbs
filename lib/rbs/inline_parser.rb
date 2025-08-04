@@ -39,7 +39,11 @@ module RBS
     def self.parse(buffer, prism)
       result = Result.new(buffer, prism)
 
-      Parser.new(result).visit(prism.value)
+      parser = Parser.new(result)
+      parser.visit(prism.value)
+      parser.comments.each_unassociated_block do |block|
+        parser.report_unused_block(block)
+      end
 
       result
     end
@@ -111,11 +115,36 @@ module RBS
         insert_declaration(class_decl)
         push_module_nesting(class_decl) do
           visit_child_nodes(node)
+
+          node.child_nodes.each do |child_node|
+            if child_node
+              comments.each_enclosed_block(child_node) do |block|
+                report_unused_block(block)
+              end
+            end
+          end
         end
 
         comments.each_enclosed_block(node) do |block|
-          report_unused_block(block)
+          unused_annotations = [] #: Array[AST::Ruby::CommentBlock::AnnotationSyntaxError | AST::Ruby::Annotations::leading_annotation]
+
+          block.each_paragraph([]) do |paragraph|
+            case paragraph
+            when AST::Ruby::Annotations::InstanceVariableAnnotation
+              class_decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, paragraph)
+            when Location
+              # Skip
+            when AST::Ruby::CommentBlock::AnnotationSyntaxError
+              unused_annotations << paragraph
+            else
+              unused_annotations << paragraph
+            end
+          end
+
+          report_unused_annotation(*unused_annotations)
         end
+
+        class_decl.members.sort_by! { _1.location.start_line }
       end
 
       def visit_module_node(node)
@@ -169,7 +198,7 @@ module RBS
 
           # Skip other comments in `def` node
           comments.each_enclosed_block(node) do |block|
-            comments.associated_blocks << block
+            report_unused_block(block)
           end
         else
           diagnostics << Diagnostic::TopLevelMethodDefinition.new(
@@ -207,8 +236,6 @@ module RBS
           visit_child_nodes(node)
         end
       end
-
-      private
 
       def parse_mixin_call(node)
         # Check for multiple arguments
@@ -350,6 +377,8 @@ module RBS
       end
 
       def report_unused_block(block)
+        return unless block.leading?
+
         block.each_paragraph([]) do |paragraph|
           case paragraph
           when Location

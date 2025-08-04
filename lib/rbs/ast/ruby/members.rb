@@ -294,6 +294,27 @@ module RBS
 
         class AttrAccessorMember < AttributeMember
         end
+
+        class InstanceVariableMember < Base
+          attr_reader :annotation
+
+          def initialize(buffer, annotation)
+            super(buffer)
+            @annotation = annotation
+          end
+
+          def name
+            annotation.ivar_name
+          end
+
+          def type
+            annotation.type
+          end
+
+          def location
+            annotation.location
+          end
+        end
       end
     end
   end
