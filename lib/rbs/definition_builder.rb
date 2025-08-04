@@ -165,6 +165,15 @@ module RBS
               )
             end
 
+          when AST::Ruby::Members::InstanceVariableMember
+            insert_variable(
+              type_name,
+              definition.instance_variables,
+              name: member.name,
+              type: member.type,
+              source: member
+            )
+
           when AST::Members::InstanceVariable
             insert_variable(
               type_name,

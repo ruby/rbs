@@ -785,6 +785,12 @@ module RBS
           member.leading_comment,
           resolved_type_annotation
         )
+      when AST::Ruby::Members::InstanceVariableMember
+        resolved_annotation = member.annotation.map_type_name {|name| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::InstanceVariableMember.new(
+          member.buffer,
+          resolved_annotation
+        )
       else
         raise "Unknown member type: #{member.class}"
       end
