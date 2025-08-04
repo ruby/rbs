@@ -719,4 +719,31 @@ type s = untyped
       end
     end
   end
+
+  def test__ruby__multiple_decls
+    result = parse_inline(<<~RUBY)
+      class Hello
+      end
+
+      class Hello
+      end
+
+      module World
+      end
+
+      module World
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::Hello")]
+      assert_equal 2, class_decl.context_decls.size
+
+      module_decl = env.class_decls[RBS::TypeName.parse("::World")]
+      assert_equal 2, module_decl.context_decls.size
+    end
+  end
 end
