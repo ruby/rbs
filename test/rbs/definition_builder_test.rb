@@ -3645,4 +3645,28 @@ EOF
       end
     end
   end
+
+  def test_inline_instance_variable_declarations_duplicates
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("person.rb", <<~RUBY)
+        class Person
+          # @rbs @name: String
+          # @rbs @name: Integer
+
+          def initialize(name, age)
+            @name = name
+            @age = age
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::InstanceVariableDuplicationError do
+          builder.build_instance(type_name("::Person"))
+        end
+      end
+    end
+  end
 end
