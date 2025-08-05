@@ -388,3 +388,67 @@ Instance variable declarations must be under the `class`/`module` syntax, and th
 ### Current Limitations
 
 - Only instance variables of class/module instances are allowed
+
+## Constants
+
+Constants are supported by inline RBS declaration.
+
+```ruby
+Foo = 123
+
+module Bar
+  Baz = [1, ""] #: [Integer, String]
+end
+
+# Version of the library
+#
+VERSION = "1.2.3".freeze #: String
+```
+
+### Type Inference for Literal Constants
+
+The types of constants may be automatically inferred when the right-hand side consists of literals:
+
+- **Integers**: `COUNT = 42` → `Integer`
+- **Floats**: `RATE = 3.14` → `Float`
+- **Booleans**: `ENABLED = true` → `bool`
+- **Strings**: `NAME = "test"` → `String`
+- **Symbols**: `STATUS = :ready` → `:ready`
+
+```ruby
+MAX_SIZE = 100           # Inferred as Integer
+PI = 3.14159            # Inferred as Float
+DEBUG = false           # Inferred as bool
+APP_NAME = "MyApp"      # Inferred as String
+DEFAULT_MODE = :strict  # Inferred as :strict
+```
+
+### Explicit Type Annotations
+
+For more complex types or when you want to override inference, use the `#:` syntax:
+
+```ruby
+ITEMS = [1, "hello"] #: [Integer, String]
+CONFIG = { name: "app", version: 1 } #: { name: String, version: Integer }
+CALLBACK = -> { puts "done" } #: ^() -> void
+```
+
+### Documentation Comments
+
+Comments above constant declarations become part of the constant's documentation:
+
+```ruby
+# The maximum number of retries allowed
+# before giving up on the operation
+MAX_RETRIES = 3
+
+# Application configuration loaded from environment
+#
+# This hash contains all the runtime configuration
+# settings for the application.
+CONFIG = load_config() #: Hash[String, untyped]
+```
+
+### Current Limitations
+
+- Module/class aliases are not supported
