@@ -53,12 +53,16 @@ module RBS
       class AttributeNonSymbolName < Base
       end
 
+      class NonConstantConstantDeclaration < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
              | TopLevelMethodDefinition | TopLevelAttributeDefinition
              | UnusedInlineAnnotation | AnnotationSyntaxError
              | MixinMultipleArguments | MixinNonConstantModule
              | AttributeNonSymbolName
+             | NonConstantConstantDeclaration
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
@@ -105,6 +109,8 @@ module RBS
       def parse_mixin_call: (Prism::CallNode) -> void
 
       def parse_attribute_call: (Prism::CallNode) -> void
+
+      def parse_constant_declaration: (Prism::ConstantWriteNode | Prism::ConstantPathWriteNode) -> void
 
       def parse_super_class: (Prism::node, Prism::Location) -> Declarations::ClassDecl::SuperClass?
     end

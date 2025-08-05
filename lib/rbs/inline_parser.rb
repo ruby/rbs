@@ -29,6 +29,7 @@ module RBS
       NonConstantSuperClassName = _ = Class.new(Base)
       TopLevelMethodDefinition = _ = Class.new(Base)
       TopLevelAttributeDefinition = _ = Class.new(Base)
+      NonConstantConstantDeclaration = _ = Class.new(Base)
       UnusedInlineAnnotation = _ = Class.new(Base)
       AnnotationSyntaxError = _ = Class.new(Base)
       MixinMultipleArguments = _ = Class.new(Base)
@@ -237,6 +238,19 @@ module RBS
         end
       end
 
+      def visit_constant_write_node(node)
+        return if skip_node?(node)
+
+        # Parse constant declaration (both top-level and in classes/modules)
+        parse_constant_declaration(node)
+      end
+
+      def visit_constant_path_write_node(node)
+        return if skip_node?(node)
+
+        parse_constant_declaration(node)
+      end
+
       def parse_mixin_call(node)
         # Check for multiple arguments
         if node.arguments && node.arguments.arguments.length > 1
@@ -351,6 +365,60 @@ module RBS
         end
 
         current_module!.members << member
+      end
+
+      def parse_constant_declaration(node)
+        # Create TypeName for the constant
+        unless constant_name = constant_as_type_name(node)
+          location =
+            case node
+            when Prism::ConstantWriteNode
+              node.name_loc
+            when Prism::ConstantPathWriteNode
+              node.target.location
+            end
+
+          diagnostics << Diagnostic::NonConstantConstantDeclaration.new(
+            rbs_location(location),
+            "Constant name must be a constant"
+          )
+          return
+        end
+
+        # Look for leading comment block
+        leading_block = comments.leading_block!(node)
+        report_unused_block(leading_block) if leading_block
+
+        # Look for trailing type annotation (#: Type)
+        trailing_block = comments.trailing_block!(node.location)
+        type_annotation = nil
+
+        if trailing_block
+          case annotation = trailing_block.trailing_annotation([])
+          when AST::Ruby::Annotations::NodeTypeAssertion
+            type_annotation = annotation
+          when AST::Ruby::CommentBlock::AnnotationSyntaxError
+            diagnostics << Diagnostic::AnnotationSyntaxError.new(
+              annotation.location, "Syntax error: " + annotation.error.error_message
+            )
+          end
+        end
+
+        # Create the constant declaration
+        constant_decl = AST::Ruby::Declarations::ConstantDecl.new(
+          buffer,
+          constant_name,
+          node,
+          leading_block,
+          type_annotation
+        )
+
+        # Insert the constant declaration appropriately
+        if current_module
+          current_module.members << constant_decl
+        else
+          result.declarations << constant_decl
+        end
       end
 
       def insert_declaration(decl)
