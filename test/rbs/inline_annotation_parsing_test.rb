@@ -204,5 +204,13 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     assert_raises RBS::ParsingError do
       Parser.parse_inline_leading_annotation("@rbs name: String", 0...)
     end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name: void", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name: self", 0...)
+    end
   end
 end
