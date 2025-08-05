@@ -24,7 +24,7 @@ module RBS
     class TypeAliasEntry < SingleEntry[TypeName, AST::Declarations::TypeAlias]
     end
 
-    class ConstantEntry < SingleEntry[TypeName, AST::Declarations::Constant]
+    class ConstantEntry < SingleEntry[TypeName, AST::Declarations::Constant | AST::Ruby::Declarations::ConstantDecl]
     end
 
     class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]

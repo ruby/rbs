@@ -409,6 +409,23 @@ module RBS
         decl.each_decl do |member|
           insert_ruby_decl(member, context: inner_context, namespace: name.to_namespace)
         end
+
+      when AST::Ruby::Declarations::ConstantDecl
+        name = decl.constant_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          case entry
+          when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          when ClassEntry, ModuleEntry
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        constant_decls[name] = ConstantEntry.new(name: name, decl: decl, context: context)
+
+      else
+        raise "Unknown Ruby declaration type: #{decl.class}"
       end
     end
 
@@ -716,6 +733,17 @@ module RBS
             end
           end
         end
+
+      when AST::Ruby::Declarations::ConstantDecl
+        full_name = decl.constant_name.with_prefix(prefix)
+
+        AST::Ruby::Declarations::ConstantDecl.new(
+          decl.buffer,
+          full_name,
+          decl.node,
+          decl.leading_comment,
+          decl.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        )
 
       else
         raise "Unknown declaration type: #{decl.class}"
