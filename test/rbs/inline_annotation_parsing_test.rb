@@ -156,4 +156,53 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       Parser.parse_inline_trailing_annotation("[,String]", 0...)
     end
   end
+
+  def test_parse__instance_variable
+    Parser.parse_inline_leading_annotation("@rbs @name: String", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::InstanceVariableAnnotation, annot
+      assert_equal "@rbs @name: String", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@name", annot.ivar_name_location.source
+      assert_equal :@name, annot.ivar_name
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs @age: Integer? -- person's age", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::InstanceVariableAnnotation, annot
+      assert_equal "@rbs @age: Integer? -- person's age", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@age", annot.ivar_name_location.source
+      assert_equal :@age, annot.ivar_name
+      assert_equal ":", annot.colon_location.source
+      assert_equal "Integer?", annot.type.location.source
+      assert_equal "-- person's age", annot.comment_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs @items: Array[String]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::InstanceVariableAnnotation, annot
+      assert_equal "@rbs @items: Array[String]", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "@items", annot.ivar_name_location.source
+      assert_equal :@items, annot.ivar_name
+      assert_equal ":", annot.colon_location.source
+      assert_equal "Array[String]", annot.type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
+  def test_error__instance_variable
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name:", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs name: String", 0...)
+    end
+  end
 end

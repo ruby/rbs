@@ -77,6 +77,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Members::Public";
     case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::InstanceVariableAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::MethodTypesAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION:
@@ -813,6 +815,25 @@ rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotation
         .prefix_location = prefix_location,
         .annotations = annotations,
         .method_type = method_type,
+    };
+
+    return instance;
+}
+#line 156 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_t *ivar_name_location, rbs_location_t *colon_location, rbs_node_t *type, rbs_location_t *comment_location) {
+    rbs_ast_ruby_annotations_instance_variable_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_instance_variable_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_instance_variable_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .ivar_name = ivar_name,
+        .ivar_name_location = ivar_name_location,
+        .colon_location = colon_location,
+        .type = type,
+        .comment_location = comment_location,
     };
 
     return instance;

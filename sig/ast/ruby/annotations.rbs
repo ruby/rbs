@@ -6,6 +6,7 @@ module RBS
                                 | MethodTypesAnnotation
                                 | SkipAnnotation
                                 | ReturnTypeAnnotation
+                                | InstanceVariableAnnotation
 
         type trailing_annotation = NodeTypeAssertion
                                  | TypeApplicationAnnotation
@@ -128,6 +129,39 @@ module RBS
             type_args: Array[Types::t],
             close_bracket_location: Location,
             comma_locations: Array[Location],
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `@rbs IVAR-NAME : TYPE` annotation in leading comments
+        #
+        # ```
+        # @rbs @foo : String -- comment
+        # ^^^^                             -- prefix_location
+        #      ^^^^                        -- ivar_name_location
+        #           ^                      -- colon_location
+        #                    ^^^^^^^^^^    -- comment_location
+        # ```
+        class InstanceVariableAnnotation < Base
+          attr_reader ivar_name: Symbol
+
+          attr_reader ivar_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            ivar_name: Symbol,
+            ivar_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
+            comment_location: Location?,
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self

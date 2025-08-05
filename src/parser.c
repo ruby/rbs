@@ -3771,6 +3771,53 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             );
             return true;
         }
+        case tAIDENT: {
+            // Parse instance variable annotation: @rbs @name: Type
+            rbs_parser_advance(parser);
+
+            rbs_range_t ivar_name_range = parser->current_token.range;
+            rbs_location_t *ivar_name_loc = rbs_location_new(ALLOCATOR(), ivar_name_range);
+
+            // Extract the instance variable name as a symbol
+            rbs_string_t ivar_string = rbs_parser_peek_current_token(parser);
+            rbs_constant_id_t ivar_id = rbs_constant_pool_insert_string(&parser->constant_pool, ivar_string);
+            rbs_ast_symbol_t *ivar_name = rbs_ast_symbol_new(ALLOCATOR(), ivar_name_loc, &parser->constant_pool, ivar_id);
+
+            ADVANCE_ASSERT(parser, pCOLON);
+
+            rbs_range_t colon_range = parser->current_token.range;
+            rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
+
+            rbs_node_t *type = NULL;
+            if (!rbs_parse_type(parser, &type, false)) {
+                return false;
+            }
+
+            rbs_location_t *comment_loc = NULL;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_instance_variable_annotation_new(
+                ALLOCATOR(),
+                full_loc,
+                rbs_loc,
+                ivar_name,
+                ivar_name_loc,
+                colon_loc,
+                type,
+                comment_loc
+            );
+            return true;
+        }
         default: {
             rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for @rbs annotation");
             return false;

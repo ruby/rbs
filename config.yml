@@ -497,3 +497,17 @@ nodes:
         c_type: rbs_location
       - name: comma_locations
         c_type: rbs_location_list
+  - name: RBS::AST::Ruby::Annotations::InstanceVariableAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: ivar_name
+        c_type: rbs_ast_symbol
+      - name: ivar_name_location
+        c_type: rbs_location
+      - name: colon_location
+        c_type: rbs_location
+      - name: type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location

@@ -56,6 +56,7 @@ extern VALUE RBS_AST_Members_Prepend;
 extern VALUE RBS_AST_Members_Private;
 extern VALUE RBS_AST_Members_Public;
 extern VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
+extern VALUE RBS_AST_Ruby_Annotations_InstanceVariableAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
 extern VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
