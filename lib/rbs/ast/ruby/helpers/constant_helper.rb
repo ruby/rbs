@@ -15,6 +15,10 @@ module RBS
               rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
                 nil
               end
+            when Prism::ConstantWriteNode
+              TypeName.new(name: node.name, namespace: Namespace.empty)
+            when Prism::ConstantPathWriteNode
+              constant_as_type_name(node.target)
             end
           end
         end
