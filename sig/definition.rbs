@@ -15,6 +15,7 @@ module RBS
                   | AST::Ruby::Members::AttrReaderMember
                   | AST::Ruby::Members::AttrWriterMember
                   | AST::Ruby::Members::AttrAccessorMember
+                  | AST::Ruby::Members::InstanceVariableMember
       attr_reader source: source
 
       def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName, source: source) -> void

@@ -155,7 +155,7 @@ module RBS
             member.names.each do |name|
               ivar_name = :"@#{name}"
               attr_type = member.type || Types::Bases::Any.new(location: nil)
-              
+
               insert_variable(
                 type_name,
                 definition.instance_variables,
@@ -164,6 +164,15 @@ module RBS
                 source: member
               )
             end
+
+          when AST::Ruby::Members::InstanceVariableMember
+            insert_variable(
+              type_name,
+              definition.instance_variables,
+              name: member.name,
+              type: member.type,
+              source: member
+            )
 
           when AST::Members::InstanceVariable
             insert_variable(
@@ -565,6 +574,7 @@ module RBS
         declared_in: type_name,
         source: source
       )
+
       validate_variable(variables[name])
     end
 
@@ -575,7 +585,15 @@ module RBS
       variables = [] #: Array[Definition::Variable]
       tmp_var = var
       while tmp_var
-        variables << tmp_var if tmp_var.source.is_a?(AST::Members::Var)
+        case tmp_var.source
+        when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
+          # nop
+        when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
+          # nop
+        else
+          variables << tmp_var
+        end
+
         tmp_var = tmp_var.parent_variable
       end
 
@@ -592,6 +610,10 @@ module RBS
       when AST::Members::ClassInstanceVariable
         if r.source.instance_of?(AST::Members::ClassInstanceVariable) && l.declared_in == r.declared_in
           raise ClassInstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
+        end
+      when AST::Ruby::Members::InstanceVariableMember
+        if l.declared_in == r.declared_in
+          raise InstanceVariableDuplicationError.new(type_name: l.declared_in, variable_name: l.source.name, location: l.source.location)
         end
       end
     end

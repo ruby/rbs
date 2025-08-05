@@ -378,10 +378,9 @@ module RBS
           if entry.is_a?(ModuleEntry)
             raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
+        else
+          entry = class_decls[name] = ClassEntry.new(name)
         end
-
-        entry = ClassEntry.new(name)
-        class_decls[name] = entry
 
         entry << [context, decl]
 
@@ -400,10 +399,9 @@ module RBS
           if entry.is_a?(ClassEntry)
             raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
+        else
+          entry = class_decls[name] = ModuleEntry.new(name)
         end
-
-        entry = ModuleEntry.new(name)
-        class_decls[name] = entry
 
         entry << [context, decl]
 
@@ -784,6 +782,12 @@ module RBS
           member.name_nodes,
           member.leading_comment,
           resolved_type_annotation
+        )
+      when AST::Ruby::Members::InstanceVariableMember
+        resolved_annotation = member.annotation.map_type_name {|name| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::InstanceVariableMember.new(
+          member.buffer,
+          resolved_annotation
         )
       else
         raise "Unknown member type: #{member.class}"

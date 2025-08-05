@@ -1089,7 +1089,7 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     result = parse(<<~RUBY)
       class Person < ActiveRecord::Base #[Person]
         attr_reader :name #: String
-        
+
         def age
           25
         end
@@ -1107,7 +1107,7 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       assert_equal "Person", decl.super_class.args[0].to_s
 
       assert_equal 2, decl.members.size
-      
+
       decl.members[0].tap do |member|
         assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
         assert_equal [:name], member.names
@@ -1118,6 +1118,89 @@ class RBS::InlineParserTest < Test::Unit::TestCase
         assert_instance_of RBS::AST::Ruby::Members::DefMember, member
         assert_equal :age, member.name
       end
+    end
+  end
+
+  def test_parse__instance_variable
+    result = parse(<<~RUBY)
+      class Person
+        # @rbs @name: String
+        # @rbs @age: Integer?
+
+        def initialize(name, age)
+          @name = name
+          @age = age
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Person"), decl.class_name
+
+      # Should have 3 members: 2 instance variable members + 1 def member
+      assert_equal 3, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@name, member.name
+        assert_equal "String", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::Annotations::InstanceVariableAnnotation, member.annotation
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@age, member.name
+        assert_equal "Integer?", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::Annotations::InstanceVariableAnnotation, member.annotation
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :initialize, member.name
+      end
+    end
+  end
+
+  def test_error__instance_variable_ignored
+    result = parse(<<~RUBY)
+      # @rbs @global_decl: String
+
+      class Foo
+        def initialize
+          # @rbs @method_decl: Integer
+        end
+
+        tap do
+          # @rbs @block_decl: String
+        end
+
+        # @rbs @method_decl2: untyped
+        def foo
+        end
+      end
+    RUBY
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs @global_decl: String", diagnostic.location.source
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs @method_decl: Integer", diagnostic.location.source
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs @method_decl2: untyped", diagnostic.location.source
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs @block_decl: String", diagnostic.location.source
     end
   end
 end

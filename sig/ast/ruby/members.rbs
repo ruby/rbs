@@ -13,6 +13,7 @@ module RBS
         type t = DefMember
                | IncludeMember | ExtendMember | PrependMember
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
+               | InstanceVariableMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -124,6 +125,18 @@ module RBS
         end
 
         class AttrAccessorMember < AttributeMember
+        end
+
+        class InstanceVariableMember < Base
+          attr_reader annotation: Annotations::InstanceVariableAnnotation
+
+          def initialize: (Buffer, Annotations::InstanceVariableAnnotation) -> void
+
+          def name: () -> Symbol
+
+          def type: () -> Types::t
+
+          def location: () -> Location
         end
       end
     end

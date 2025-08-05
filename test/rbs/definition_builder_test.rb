@@ -3563,4 +3563,110 @@ EOF
       end
     end
   end
+
+  def test_inline_instance_variable_declarations
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("person.rb", <<~RUBY)
+        class Person
+          # @rbs @name: String
+          # @rbs @age: Integer?
+          
+          def initialize(name, age)
+            @name = name
+            @age = age
+          end
+        end
+      RUBY
+      
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        
+        builder.build_instance(type_name("::Person")).tap do |definition|
+          assert_instance_of Definition, definition
+          
+          # Verify instance variables are present
+          assert_equal [:@name, :@age].sort, definition.instance_variables.keys.sort
+          
+          # Check @name type
+          definition.instance_variables[:@name].tap do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::String"), variable.type
+            assert_equal type_name("::Person"), variable.declared_in
+          end
+          
+          # Check @age type
+          definition.instance_variables[:@age].tap do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::Integer?"), variable.type
+            assert_equal type_name("::Person"), variable.declared_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_instance_variable_with_complex_types
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("container.rb", <<~RUBY)
+        class Container
+          # @rbs @items: Array[String]
+          # @rbs @metadata: Integer
+          
+          def initialize
+            @items = ""
+            @metadata = 42
+          end
+        end
+      RUBY
+      
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        
+        builder.build_instance(type_name("::Container")).tap do |definition|
+          assert_instance_of Definition, definition
+          
+          # Verify instance variables are present
+          assert_equal [:@items, :@metadata].sort, definition.instance_variables.keys.sort
+          
+          # Check @items type
+          definition.instance_variables[:@items].tap do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal "Array[::String]", variable.type.to_s
+            assert_equal type_name("::Container"), variable.declared_in
+          end
+          
+          # Check @metadata type
+          definition.instance_variables[:@metadata].tap do |variable|
+            assert_instance_of Definition::Variable, variable
+            assert_equal parse_type("::Integer"), variable.type
+            assert_equal type_name("::Container"), variable.declared_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_instance_variable_declarations_duplicates
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("person.rb", <<~RUBY)
+        class Person
+          # @rbs @name: String
+          # @rbs @name: Integer
+
+          def initialize(name, age)
+            @name = name
+            @age = age
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::InstanceVariableDuplicationError do
+          builder.build_instance(type_name("::Person"))
+        end
+      end
+    end
+  end
 end
