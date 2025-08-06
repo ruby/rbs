@@ -97,21 +97,21 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
   end
 
   def test_parse__return
-    Parser.parse_inline_leading_annotation("@rbs return: untyped", 0...).tap do |annot|
+    Parser.parse_inline_leading_annotation("@rbs return: void", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotations::ReturnTypeAnnotation, annot
-      assert_equal "@rbs return: untyped", annot.location.source
+      assert_equal "@rbs return: void", annot.location.source
       assert_equal "return", annot.return_location.source
       assert_equal ":", annot.colon_location.source
-      assert_equal "untyped", annot.return_type.location.source
+      assert_equal "void", annot.return_type.location.source
       assert_nil annot.comment_location
     end
 
-    Parser.parse_inline_leading_annotation("@rbs return: untyped -- some comment here", 0...).tap do |annot|
+    Parser.parse_inline_leading_annotation("@rbs return: self -- some comment here", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotations::ReturnTypeAnnotation, annot
-      assert_equal "@rbs return: untyped -- some comment here", annot.location.source
+      assert_equal "@rbs return: self -- some comment here", annot.location.source
       assert_equal "return", annot.return_location.source
       assert_equal ":", annot.colon_location.source
-      assert_equal "untyped", annot.return_type.location.source
+      assert_equal "self", annot.return_type.location.source
       assert_equal "-- some comment here", annot.comment_location.source
     end
   end
@@ -203,6 +203,14 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
 
     assert_raises RBS::ParsingError do
       Parser.parse_inline_leading_annotation("@rbs name: String", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name: void", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs @name: self", 0...)
     end
   end
 end
