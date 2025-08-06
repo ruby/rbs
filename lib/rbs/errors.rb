@@ -491,7 +491,7 @@ module RBS
              else
                raise "Unknown member type: #{member.class}"
              end
-      
+
       if env.class_decl?(name)
         raise new(type_name: type_name, member: member)
       end
@@ -608,17 +608,6 @@ module RBS
 
     def location
       @alias_entry.decl.location
-    end
-  end
-
-  class WillSyntaxError < DefinitionError
-    include DetailedMessageable
-
-    attr_reader :location
-
-    def initialize(message, location:)
-      super "#{Location.to_string(location)}: #{message}"
-      @location = location
     end
   end
 

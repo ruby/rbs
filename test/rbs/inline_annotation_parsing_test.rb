@@ -12,6 +12,20 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal ":", annot.prefix_location.source
       assert_equal "String", annot.type.location.source
     end
+
+    Parser.parse_inline_trailing_annotation(": void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::NodeTypeAssertion, annot
+      assert_equal ": void", annot.location.source
+      assert_equal ":", annot.prefix_location.source
+      assert_equal "void", annot.type.location.source
+    end
+
+    Parser.parse_inline_trailing_annotation(": self | class | instance", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::NodeTypeAssertion, annot
+      assert_equal ": self | class | instance", annot.location.source
+      assert_equal ":", annot.prefix_location.source
+      assert_equal "self | class | instance", annot.type.location.source
+    end
   end
 
   def test_error__trailing_assertion
@@ -106,12 +120,12 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_nil annot.comment_location
     end
 
-    Parser.parse_inline_leading_annotation("@rbs return: self -- some comment here", 0...).tap do |annot|
+    Parser.parse_inline_leading_annotation("@rbs return: self | class | instance -- some comment here", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotations::ReturnTypeAnnotation, annot
-      assert_equal "@rbs return: self -- some comment here", annot.location.source
+      assert_equal "@rbs return: self | class | instance -- some comment here", annot.location.source
       assert_equal "return", annot.return_location.source
       assert_equal ":", annot.colon_location.source
-      assert_equal "self", annot.return_type.location.source
+      assert_equal "self | class | instance", annot.return_type.location.source
       assert_equal "-- some comment here", annot.comment_location.source
     end
   end
@@ -191,14 +205,14 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_nil annot.comment_location
     end
 
-    Parser.parse_inline_leading_annotation("@rbs @self: self", 0...).tap do |annot|
+    Parser.parse_inline_leading_annotation("@rbs @sci: self | class | instance", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotations::InstanceVariableAnnotation, annot
-      assert_equal "@rbs @self: self", annot.location.source
+      assert_equal "@rbs @sci: self | class | instance", annot.location.source
       assert_equal "@rbs", annot.prefix_location.source
-      assert_equal "@self", annot.ivar_name_location.source
-      assert_equal :@self, annot.ivar_name
+      assert_equal "@sci", annot.ivar_name_location.source
+      assert_equal :@sci, annot.ivar_name
       assert_equal ":", annot.colon_location.source
-      assert_equal "self", annot.type.location.source
+      assert_equal "self | class | instance", annot.type.location.source
       assert_nil annot.comment_location
     end
   end
