@@ -3789,7 +3789,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
             rbs_node_t *type = NULL;
-            if (!rbs_parse_type(parser, &type, false, false)) {
+            if (!rbs_parse_type(parser, &type, false, true)) {
                 return false;
             }
 
