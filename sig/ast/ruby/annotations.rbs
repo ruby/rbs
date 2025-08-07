@@ -10,6 +10,8 @@ module RBS
 
         type trailing_annotation = NodeTypeAssertion
                                  | TypeApplicationAnnotation
+                                 | ClassAliasAnnotation
+                                 | ModuleAliasAnnotation
 
         type t = leading_annotation | trailing_annotation
 
@@ -35,6 +37,47 @@ module RBS
           def initialize: (location: Location, prefix_location: Location, type: Types::t) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        class AliasAnnotation < Base
+          attr_reader keyword_location: Location
+
+          attr_reader type_name_location: Location?
+
+          # The name of the module that will be the target of the alias
+          #
+          # - May be infered from the right hand side of the assignment, or
+          # - Read from the type_name_location
+          #
+          attr_reader type_name: TypeName
+
+          def initialize: (location: Location, prefix_location: Location, keyword_location: Location, type_name: TypeName, type_name_location: Location?) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `: class-alias` annotation
+        #
+        # ```
+        # : class-alias Foo::Bar
+        # ^                        -- prefix_location
+        #   ^^^^^^^^^^^^           -- keyword_location
+        #                ^^^^^^^^  -- type_name_location
+        # ```
+        #
+        class ClassAliasAnnotation < AliasAnnotation
+        end
+
+        # `: module-alias` annotation
+        #
+        # ```
+        # : module-alias Foo::Bar
+        # ^                        -- prefix_location
+        #   ^^^^^^^^^^^^           -- keyword_location
+        #                ^^^^^^^^  -- type_name_location
+        # ```
+        #
+        class ModuleAliasAnnotation < AliasAnnotation
         end
 
         # `: METHOD-TYPE` annotation in leading comments
