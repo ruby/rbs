@@ -48,7 +48,7 @@ module RBS
               location:,
               prefix_location:,
               keyword_location:,
-              type_name: yield(type_name),
+              type_name: type_name ? yield(type_name) : nil,
               type_name_location:
             ) #: self
           end
@@ -153,7 +153,7 @@ module RBS
 
           def map_type_name(&block)
             mapped_type_args = type_args.map { |type| type.map_type_name { yield _1 } }
-            
+
             self.class.new(
               location:,
               prefix_location:,

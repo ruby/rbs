@@ -46,12 +46,12 @@ module RBS
 
           # The name of the module that will be the target of the alias
           #
-          # - May be infered from the right hand side of the assignment, or
-          # - Read from the type_name_location
+          # - `nil` if the module/class name is unspecified
+          # - `TypeName` object if the module/class name is specified
           #
-          attr_reader type_name: TypeName
+          attr_reader type_name: TypeName?
 
-          def initialize: (location: Location, prefix_location: Location, keyword_location: Location, type_name: TypeName, type_name_location: Location?) -> void
+          def initialize: (location: Location, prefix_location: Location, keyword_location: Location, type_name: TypeName?, type_name_location: Location?) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
         end
