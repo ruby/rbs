@@ -36,6 +36,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "kBOOL",         /* bool */
     "kBOT",          /* bot */
     "kCLASS",        /* class */
+    "kCLASSALIAS",   /* class-alias */
     "kDEF",          /* def */
     "kEND",          /* end */
     "kEXTEND",       /* extend */
@@ -45,6 +46,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "kINSTANCE",     /* instance */
     "kINTERFACE",    /* interface */
     "kMODULE",       /* module */
+    "kMODULEALIAS",  /* module-alias */
     "kNIL",          /* nil */
     "kOUT",          /* out */
     "kPREPEND",      /* prepend */

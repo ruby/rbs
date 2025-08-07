@@ -72,6 +72,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "bool"          { return rbs_next_token(lexer, kBOOL); }
       "bot"           { return rbs_next_token(lexer, kBOT); }
       "class"         { return rbs_next_token(lexer, kCLASS); }
+      "class-alias"   { return rbs_next_token(lexer, kCLASSALIAS); }
       "def"           { return rbs_next_token(lexer, kDEF); }
       "end"           { return rbs_next_token(lexer, kEND); }
       "extend"        { return rbs_next_token(lexer, kEXTEND); }
@@ -81,6 +82,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "instance"      { return rbs_next_token(lexer, kINSTANCE); }
       "interface"     { return rbs_next_token(lexer, kINTERFACE); }
       "module"        { return rbs_next_token(lexer, kMODULE); }
+      "module-alias"  { return rbs_next_token(lexer, kMODULEALIAS); }
       "nil"           { return rbs_next_token(lexer, kNIL); }
       "out"           { return rbs_next_token(lexer, kOUT); }
       "prepend"       { return rbs_next_token(lexer, kPREPEND); }

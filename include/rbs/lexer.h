@@ -40,6 +40,7 @@ enum RBSTokenType {
     kBOOL,         /* bool */
     kBOT,          /* bot */
     kCLASS,        /* class */
+    kCLASSALIAS,   /* class-alias */
     kDEF,          /* def */
     kEND,          /* end */
     kEXTEND,       /* extend */
@@ -49,6 +50,7 @@ enum RBSTokenType {
     kINSTANCE,     /* instance */
     kINTERFACE,    /* interface */
     kMODULE,       /* module */
+    kMODULEALIAS,  /* module-alias */
     kNIL,          /* nil */
     kOUT,          /* out */
     kPREPEND,      /* prepend */
