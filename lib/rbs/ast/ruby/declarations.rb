@@ -182,6 +182,52 @@ module RBS
             leading_comment&.as_comment
           end
         end
+
+        class ClassModuleAliasDecl < Base
+          attr_reader :node
+          attr_reader :leading_comment
+          attr_reader :new_name
+          attr_reader :infered_old_name
+          attr_reader :annotation
+
+          def initialize(buffer, node, new_name, infered_old_name, leading_comment, annotation)
+            super(buffer)
+            @node = node
+            @new_name = new_name
+            @infered_old_name = infered_old_name
+            @leading_comment = leading_comment
+            @annotation = annotation
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_location
+            case node
+            when Prism::ConstantWriteNode
+              rbs_location(node.name_loc)
+            when Prism::ConstantPathWriteNode
+              rbs_location(node.target.location)
+            end
+          end
+
+          def old_name
+            # Return explicit type name from annotation if provided, otherwise use inferred name
+            case
+            when annotation.type_name
+              annotation.type_name
+            when infered_old_name
+              infered_old_name
+            else
+              raise "No old name available"
+            end
+          end
+
+          def comment
+            leading_comment&.as_comment
+          end
+        end
       end
     end
   end
