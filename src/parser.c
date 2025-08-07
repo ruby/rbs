@@ -3839,6 +3839,61 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
     case pCOLON: {
         rbs_parser_advance(parser);
 
+        // Check for class-alias or module-alias keywords
+        if (parser->next_token.type == kCLASSALIAS || parser->next_token.type == kMODULEALIAS) {
+            bool is_class_alias = (parser->next_token.type == kCLASSALIAS);
+            rbs_range_t keyword_range = parser->next_token.range;
+            rbs_location_t *keyword_loc = rbs_location_new(ALLOCATOR(), keyword_range);
+            rbs_parser_advance(parser);
+
+            rbs_type_name_t *type_name = NULL;
+            rbs_location_t *type_name_loc = NULL;
+            rbs_range_t full_range;
+
+            // Check if a type name is provided
+            if (parser->next_token.type == tUIDENT || parser->next_token.type == pCOLON2) {
+                rbs_parser_advance(parser);
+
+                rbs_range_t type_name_range;
+                if (!parse_type_name(parser, CLASS_NAME, &type_name_range, &type_name)) {
+                    return false;
+                }
+                // parse_type_name leaves current_token at the last identifier, don't advance
+                type_name_loc = rbs_location_new(ALLOCATOR(), type_name_range);
+                full_range.start = prefix_range.start;
+                full_range.end = type_name_range.end;
+            } else {
+                // No type name provided - will be inferred
+                full_range.start = prefix_range.start;
+                full_range.end = keyword_range.end;
+            }
+
+            rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
+            rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
+
+            if (is_class_alias) {
+                *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_class_alias_annotation_new(
+                    ALLOCATOR(),
+                    full_loc,
+                    prefix_loc,
+                    keyword_loc,
+                    type_name,
+                    type_name_loc
+                );
+            } else {
+                *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_module_alias_annotation_new(
+                    ALLOCATOR(),
+                    full_loc,
+                    prefix_loc,
+                    keyword_loc,
+                    type_name,
+                    type_name_loc
+                );
+            }
+            return true;
+        }
+
+        // Otherwise, parse as regular type assertion
         rbs_node_t *type = NULL;
         if (!rbs_parse_type(parser, &type, true, true)) {
             return false;
