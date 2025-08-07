@@ -177,6 +177,10 @@ module RBS
               Types::Bases::Any.new(location: nil)
             end
           end
+
+          def comment
+            leading_comment&.as_comment
+          end
         end
       end
     end

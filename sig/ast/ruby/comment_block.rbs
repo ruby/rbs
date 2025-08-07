@@ -115,6 +115,12 @@ module RBS
         def location: () -> Location
 
         private def leading_annotation?: (Integer index) -> bool
+
+        # Returns an comment object that contains the docs of from the comment block
+        #
+        # It ignores type annotations and syntax errors.
+        # 
+        def as_comment: () -> AST::Comment?
       end
     end
   end

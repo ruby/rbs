@@ -101,7 +101,12 @@ module RBS
           # - When type_anntoation is given, it returns the type from the annotation.
           # - When type_annotation is not given, it returns infered type from the right-hand-side of the constant assignment
           # - Or it returns `untyped` type
+          #
           def type: () -> Types::t
+
+          # Returns the comment content extracted from the leading comment block
+          # 
+          def comment: () -> AST::Comment?
         end
       end
     end
