@@ -12,10 +12,10 @@ module RBS
       def initialize: (name: N, decl: D, context: Resolver::context) -> void
     end
 
-    class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias]
+    class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias | AST::Ruby::Declarations::ClassModuleAliasDecl]
     end
 
-    class ClassAliasEntry < SingleEntry[TypeName, AST::Declarations::ClassAlias]
+    class ClassAliasEntry < SingleEntry[TypeName, AST::Declarations::ClassAlias | AST::Ruby::Declarations::ClassModuleAliasDecl]
     end
 
     class InterfaceEntry < SingleEntry[TypeName, AST::Declarations::Interface]
