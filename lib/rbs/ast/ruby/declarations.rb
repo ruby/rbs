@@ -129,6 +129,59 @@ module RBS
             rbs_location(node.constant_path.location)
           end
         end
+
+        class ConstantDecl < Base
+          attr_reader :leading_comment
+          attr_reader :constant_name
+          attr_reader :node
+          attr_reader :type_annotation
+
+          def initialize(buffer, constant_name, node, leading_comment, type_annotation)
+            super(buffer)
+            @constant_name = constant_name
+            @node = node
+            @leading_comment = leading_comment
+            @type_annotation = type_annotation
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_location
+            case node
+            when Prism::ConstantWriteNode
+              rbs_location(node.name_loc)
+            when Prism::ConstantPathWriteNode
+              rbs_location(node.target.location)
+            end
+          end
+
+          def type
+            return type_annotation.type if type_annotation
+
+            case node.value
+            when Prism::IntegerNode
+              BuiltinNames::Integer.instance_type
+            when Prism::FloatNode
+              BuiltinNames::Float.instance_type
+            when Prism::StringNode
+              BuiltinNames::String.instance_type
+            when Prism::TrueNode, Prism::FalseNode
+              Types::Bases::Bool.new(location: nil)
+            when Prism::SymbolNode
+              BuiltinNames::Symbol.instance_type
+            when Prism::NilNode
+              Types::Bases::Nil.new(location: nil)
+            else
+              Types::Bases::Any.new(location: nil)
+            end
+          end
+
+          def comment
+            leading_comment&.as_comment
+          end
+        end
       end
     end
   end

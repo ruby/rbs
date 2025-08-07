@@ -29,7 +29,7 @@ module RBS
 
     def ranges
       @ranges ||= begin
-        if content.empty? 
+        if content.empty?
           ranges = [0...0] #: Array[Range[Integer]]
           lines = [""]
         else
@@ -89,9 +89,9 @@ module RBS
 
     def rbs_location(location, loc2=nil)
       if loc2
-        Location.new(self, location.start_character_offset, loc2.end_character_offset)
+        Location.new(self.top_buffer, location.start_character_offset, loc2.end_character_offset)
       else
-        Location.new(self, location.start_character_offset, location.end_character_offset)
+        Location.new(self.top_buffer, location.start_character_offset, location.end_character_offset)
       end
     end
 

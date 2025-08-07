@@ -1078,7 +1078,7 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
 
     # The class should still be created but without super class
-    result.declarations[0].tap do |decl|
+    result.declarations[1].tap do |decl|
       assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
       assert_equal RBS::TypeName.parse("Child"), decl.class_name
       assert_nil decl.super_class
@@ -1201,6 +1201,374 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_any!(result.diagnostics) do |diagnostic|
       assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs @block_decl: String", diagnostic.location.source
+    end
+  end
+
+  def test_parse__constant_declaration_basic
+    result = parse(<<~RUBY)
+      class Example
+        FOO = 42
+        BAR = "hello"
+        BAZ = true
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Example"), decl.class_name
+
+      assert_equal 3, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("FOO"), member.constant_name
+        assert_equal "FOO = 42", member.location.source
+        assert_equal "FOO", member.name_location.source
+        assert_equal "::Integer", member.type.to_s
+        assert_nil member.type_annotation
+        assert_nil member.leading_comment
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("BAR"), member.constant_name
+        assert_equal "BAR = \"hello\"", member.location.source
+        assert_equal "BAR", member.name_location.source
+        assert_equal "::String", member.type.to_s
+        assert_nil member.type_annotation
+        assert_nil member.leading_comment
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("BAZ"), member.constant_name
+        assert_equal "BAZ = true", member.location.source
+        assert_equal "BAZ", member.name_location.source
+        assert_equal "bool", member.type.to_s
+        assert_nil member.type_annotation
+        assert_nil member.leading_comment
+      end
+    end
+  end
+
+  def test_parse__constant_declaration_with_type_annotation
+    result = parse(<<~RUBY)
+      class TypedConstants
+        ITEMS = [] #: Array[String]
+        COUNT = 0 #: Float
+        CONFIG = {} #: Hash[Symbol, untyped]
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("TypedConstants"), decl.class_name
+
+      assert_equal 3, decl.members.size
+
+      # Test ITEMS with Array[String] annotation
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("ITEMS"), member.constant_name
+        assert_equal "Array[String]", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+      end
+
+      # Test COUNT with Float annotation (overriding inferred Integer)
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("COUNT"), member.constant_name
+        assert_equal "Float", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+      end
+
+      # Test CONFIG with Hash[Symbol, untyped] annotation
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("CONFIG"), member.constant_name
+        assert_equal "Hash[Symbol, untyped]", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::Annotations::NodeTypeAssertion, member.type_annotation
+      end
+    end
+  end
+
+  def test_parse__constant_declaration_with_leading_comment
+    result = parse(<<~RUBY)
+      class DocumentedConstants
+        # This is a port number
+        PORT = 8080
+
+        # @deprecated Use NEW_API instead
+        OLD_API_URL = "http://old.example.com"
+
+        # Multiple line comment
+        # explaining the purpose
+        # of this constant
+        VERSION = "1.0.0"
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("DocumentedConstants"), decl.class_name
+
+      assert_equal 3, decl.members.size
+
+      # Test PORT with single line comment
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("PORT"), member.constant_name
+        assert_equal "::Integer", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal "# This is a port number", member.leading_comment.location.source
+      end
+
+      # Test OLD_API_URL with @deprecated comment
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("OLD_API_URL"), member.constant_name
+        assert_equal "::String", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal "# @deprecated Use NEW_API instead", member.leading_comment.location.source
+      end
+
+      # Test VERSION with multi-line comment
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("VERSION"), member.constant_name
+        assert_equal "::String", member.type.to_s
+        assert_instance_of RBS::AST::Ruby::CommentBlock, member.leading_comment
+        assert_equal <<-COMMENT.chomp, member.leading_comment.location.source
+# Multiple line comment
+  # explaining the purpose
+  # of this constant
+COMMENT
+      end
+    end
+  end
+
+  def test_parse__constant_declaration_skip
+    result = parse(<<~RUBY)
+      class SkipTest
+        # @rbs skip
+        SKIPPED_CONSTANT = "ignored"
+
+        NORMAL_CONSTANT = 42
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("SkipTest"), decl.class_name
+
+      # Only one member should be present (the skipped one should be ignored)
+      assert_equal 1, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("NORMAL_CONSTANT"), member.constant_name
+        assert_equal "::Integer", member.type.to_s
+      end
+    end
+  end
+
+  def test_parse__constant_declaration_toplevel
+    result = parse(<<~RUBY)
+      GLOBAL_CONSTANT = "allowed"
+      ANOTHER_GLOBAL = 123
+    RUBY
+
+    # Top-level constant definitions should be allowed
+    assert_empty result.diagnostics
+
+    # Should have 2 top-level constant declarations
+    assert_equal 2, result.declarations.size
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, decl
+      assert_equal RBS::TypeName.parse("GLOBAL_CONSTANT"), decl.constant_name
+      assert_equal "GLOBAL_CONSTANT = \"allowed\"", decl.location.source
+      assert_equal "GLOBAL_CONSTANT", decl.name_location.source
+      assert_equal "::String", decl.type.to_s
+      assert_nil decl.type_annotation
+      assert_nil decl.leading_comment
+    end
+
+    result.declarations[1].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, decl
+      assert_equal RBS::TypeName.parse("ANOTHER_GLOBAL"), decl.constant_name
+      assert_equal "ANOTHER_GLOBAL = 123", decl.location.source
+      assert_equal "ANOTHER_GLOBAL", decl.name_location.source
+      assert_equal "::Integer", decl.type.to_s
+      assert_nil decl.type_annotation
+      assert_nil decl.leading_comment
+    end
+  end
+
+  def test_error__constant_declaration_type_annotation_syntax_error
+    result = parse(<<~RUBY)
+      class SyntaxErrorTest
+        MALFORMED_TYPE = [] #: Array[
+        INVALID_TYPE = {} #: Hash}
+      end
+    RUBY
+
+    # Should have syntax errors for malformed type annotations
+    assert_equal 2, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal ": Array[", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_equal ": Hash}", diagnostic.location.source
+      assert_match(/Syntax error:/, diagnostic.message)
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("SyntaxErrorTest"), decl.class_name
+
+      assert_equal 2, decl.members.size
+
+      # Both constants should be present but with fallback types
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("MALFORMED_TYPE"), member.constant_name
+        assert_equal "untyped", member.type.to_s # fallback for array literal
+        assert_nil member.type_annotation # invalid annotation should be ignored
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("INVALID_TYPE"), member.constant_name
+        assert_equal "untyped", member.type.to_s # fallback for hash literal
+        assert_nil member.type_annotation # invalid annotation should be ignored
+      end
+    end
+  end
+
+  def test_parse__constant_declaration_various_name_formats
+    result = parse(<<~RUBY)
+      class NameFormats
+        # Various valid Ruby constant name formats
+        SCREAMING_SNAKE_CASE = 1
+        CamelCase = 2
+        PascalCase = 3
+        XMLParser = 4
+        HTTPClient = 5
+        HTML5Parser = 6
+        A = 7
+        Z9 = 8
+        MixedCASE_123 = 9
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("NameFormats"), decl.class_name
+
+      # All 9 constant declarations should be parsed successfully
+      assert_equal 9, decl.members.size
+
+      expected_names = [
+        "SCREAMING_SNAKE_CASE", "CamelCase", "PascalCase",
+        "XMLParser", "HTTPClient", "HTML5Parser",
+        "A", "Z9", "MixedCASE_123"
+      ]
+
+      decl.members.each_with_index do |member, i|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse(expected_names[i]), member.constant_name
+        assert_equal "::Integer", member.type.to_s
+      end
+    end
+  end
+
+  def test_error__constant_declaration_non_constant_path
+    result = parse(<<~RUBY)
+      class TestClass
+        # Dynamic constant path assignments should generate diagnostics
+        (c = Object)::FOO = 123
+        self::BAR = "hello"
+        variable::BAZ = true
+        method_call()::QUX = nil
+      end
+    RUBY
+
+    # Should have diagnostics for each non-constant path
+    assert_equal 4, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantConstantDeclaration, diagnostic
+      assert_equal "(c = Object)::FOO", diagnostic.location.source
+      assert_equal "Constant name must be a constant", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantConstantDeclaration, diagnostic
+      assert_equal "self::BAR", diagnostic.location.source
+      assert_equal "Constant name must be a constant", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantConstantDeclaration, diagnostic
+      assert_equal "variable::BAZ", diagnostic.location.source
+      assert_equal "Constant name must be a constant", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonConstantConstantDeclaration, diagnostic
+      assert_equal "method_call()::QUX", diagnostic.location.source
+      assert_equal "Constant name must be a constant", diagnostic.message
+    end
+  end
+
+  def test_parse__constant_path_write_node
+    result = parse(<<~RUBY)
+      module Outer
+        Foo::BAR = 123
+        ::TopLevel::VALUE = true
+      end
+    RUBY
+
+    # Should have no diagnostics for valid constant paths
+    assert_equal 0, result.diagnostics.size
+
+    # Should parse the module
+    assert_equal 1, result.declarations.size
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+      assert_equal RBS::TypeName.parse("Outer"), decl.module_name
+
+      assert_equal 2, decl.members.size
+
+      # Check first constant: Foo::BAR = 123 #: Integer
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("Foo::BAR"), member.constant_name
+        assert_equal "::Integer", member.type.to_s
+      end
+
+      # Check third constant: ::TopLevel::VALUE = true #: bool
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal RBS::TypeName.parse("::TopLevel::VALUE"), member.constant_name
+        assert_equal "bool", member.type.to_s
+      end
     end
   end
 end

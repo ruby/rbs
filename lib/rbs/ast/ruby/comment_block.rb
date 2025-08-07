@@ -222,6 +222,23 @@ module RBS
 
           false
         end
+
+        def as_comment
+          lines = [] #: Array[String]
+
+          each_paragraph([]) do |paragraph|
+            case paragraph
+            when Location
+              lines << paragraph.local_source
+            end
+          end
+
+          string = lines.join("\n")
+
+          unless string.strip.empty?
+            AST::Comment.new(string: string, location: location)
+          end
+        end
       end
     end
   end

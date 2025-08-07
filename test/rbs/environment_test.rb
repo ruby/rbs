@@ -746,4 +746,51 @@ type s = untyped
       assert_equal 2, module_decl.context_decls.size
     end
   end
+
+  def test__ruby__constant_declarations
+    result = parse_inline(<<~RUBY)
+      A = "123"
+      B = [1, 2] #: Object
+      Object::FOO = :FOO
+
+      class Object
+        BAR = "BAR"
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+    resolved_env = env.resolve_type_names
+
+    # Check top-level constant A with inferred type
+    assert_operator resolved_env.constant_decls, :key?, type_name("::A")
+    resolved_env.constant_decls[type_name("::A")].tap do |entry|
+      assert_equal type_name("::A"), entry.name
+      assert_equal "::String", entry.decl.type.to_s
+    end
+
+    # Check top-level constant B with type annotation
+    assert_operator resolved_env.constant_decls, :key?, type_name("::B")
+    resolved_env.constant_decls[type_name("::B")].tap do |entry|
+      assert_equal type_name("::B"), entry.name
+      assert_equal "::Object", entry.decl.type.to_s
+    end
+
+    # Check constant path Object::FOO
+    assert_operator resolved_env.constant_decls, :key?, type_name("::Object::FOO")
+    resolved_env.constant_decls[type_name("::Object::FOO")].tap do |entry|
+      assert_equal type_name("::Object::FOO"), entry.name
+      assert_equal "::Symbol", entry.decl.type.to_s
+    end
+
+    # Check constant inside class Object
+    assert_operator resolved_env.constant_decls, :key?, type_name("::Object::BAR")
+    resolved_env.constant_decls[type_name("::Object::BAR")].tap do |entry|
+      assert_equal type_name("::Object::BAR"), entry.name
+      assert_equal "::String", entry.decl.type.to_s
+    end
+
+    # Verify that Object class is created
+    assert_operator resolved_env.class_decls, :key?, type_name("::Object")
+  end
 end

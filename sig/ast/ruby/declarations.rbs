@@ -2,7 +2,7 @@ module RBS
   module AST
     module Ruby
       module Declarations
-        type t = ClassDecl | ModuleDecl
+        type t = ClassDecl | ModuleDecl | ConstantDecl
 
         class Base
           attr_reader buffer: Buffer
@@ -77,6 +77,36 @@ module RBS
           def self_types: () -> Array[AST::Declarations::Module::Self]
 
           def name_location: () -> Location
+        end
+
+        class ConstantDecl < Base
+          type node = Prism::ConstantWriteNode | Prism::ConstantPathWriteNode
+
+          attr_reader leading_comment: CommentBlock?
+
+          attr_reader constant_name: TypeName
+
+          attr_reader node: node
+
+          attr_reader type_annotation: Annotations::NodeTypeAssertion?
+
+          def initialize: (Buffer, TypeName, node, CommentBlock?, Annotations::NodeTypeAssertion?) -> void
+
+          def location: () -> Location
+
+          def name_location: () -> Location
+
+          # Returns the type of the constant
+          #
+          # - When type_anntoation is given, it returns the type from the annotation.
+          # - When type_annotation is not given, it returns infered type from the right-hand-side of the constant assignment
+          # - Or it returns `untyped` type
+          #
+          def type: () -> Types::t
+
+          # Returns the comment content extracted from the leading comment block
+          # 
+          def comment: () -> AST::Comment?
         end
       end
     end
