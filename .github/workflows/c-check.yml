@@ -31,9 +31,9 @@ jobs:
       - name: Install Re2c
         run: |
           cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
-          tar xf re2c-3.1.tar.gz
-          cd re2c-3.1
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
+          tar xf re2c-4.3.tar.gz
+          cd re2c-4.3
           autoreconf -i -W all
           ./configure
           make
