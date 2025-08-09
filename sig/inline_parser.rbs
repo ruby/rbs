@@ -56,6 +56,9 @@ module RBS
       class NonConstantConstantDeclaration < Base
       end
 
+      class ClassModuleAliasDeclarationMissingTypeName < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
              | TopLevelMethodDefinition | TopLevelAttributeDefinition
@@ -63,6 +66,7 @@ module RBS
              | MixinMultipleArguments | MixinNonConstantModule
              | AttributeNonSymbolName
              | NonConstantConstantDeclaration
+             | ClassModuleAliasDeclarationMissingTypeName
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result

@@ -33,6 +33,33 @@ module RBS
           end
         end
 
+        class AliasAnnotation < Base
+          attr_reader :keyword_location, :type_name_location, :type_name
+
+          def initialize(location:, prefix_location:, keyword_location:, type_name:, type_name_location:)
+            super(location, prefix_location)
+            @keyword_location = keyword_location
+            @type_name = type_name
+            @type_name_location = type_name_location
+          end
+
+          def map_type_name
+            self.class.new(
+              location:,
+              prefix_location:,
+              keyword_location:,
+              type_name: type_name ? yield(type_name) : nil,
+              type_name_location:
+            ) #: self
+          end
+        end
+
+        class ClassAliasAnnotation < AliasAnnotation
+        end
+
+        class ModuleAliasAnnotation < AliasAnnotation
+        end
+
         class ColonMethodTypeAnnotation < Base
           attr_reader :annotations, :method_type
 
@@ -126,7 +153,7 @@ module RBS
 
           def map_type_name(&block)
             mapped_type_args = type_args.map { |type| type.map_type_name { yield _1 } }
-            
+
             self.class.new(
               location:,
               prefix_location:,

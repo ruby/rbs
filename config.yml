@@ -511,3 +511,23 @@ nodes:
         c_type: rbs_node
       - name: comment_location
         c_type: rbs_location
+  - name: RBS::AST::Ruby::Annotations::ClassAliasAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: keyword_location
+        c_type: rbs_location
+      - name: type_name
+        c_type: rbs_type_name
+      - name: type_name_location
+        c_type: rbs_location
+  - name: RBS::AST::Ruby::Annotations::ModuleAliasAnnotation
+    fields:
+      - name: prefix_location
+        c_type: rbs_location
+      - name: keyword_location
+        c_type: rbs_location
+      - name: type_name
+        c_type: rbs_type_name
+      - name: type_name_location
+        c_type: rbs_location

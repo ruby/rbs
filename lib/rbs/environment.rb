@@ -424,6 +424,24 @@ module RBS
 
         constant_decls[name] = ConstantEntry.new(name: name, decl: decl, context: context)
 
+      when AST::Ruby::Declarations::ClassModuleAliasDecl
+        name = decl.new_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          case entry
+          when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          when ClassEntry, ModuleEntry
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        case decl.annotation
+        when AST::Ruby::Annotations::ClassAliasAnnotation
+          class_alias_decls[name] = ClassAliasEntry.new(name: name, decl: decl, context: context)
+        when AST::Ruby::Annotations::ModuleAliasAnnotation
+          class_alias_decls[name] = ModuleAliasEntry.new(name: name, decl: decl, context: context)
+        end
       else
         raise "Unknown Ruby declaration type: #{decl.class}"
       end
@@ -743,6 +761,20 @@ module RBS
           decl.node,
           decl.leading_comment,
           decl.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        )
+
+      when AST::Ruby::Declarations::ClassModuleAliasDecl
+        full_name = decl.new_name.with_prefix(prefix)
+        resolved_annotation = decl.annotation.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        resolved_infered_name = decl.infered_old_name&.yield_self {|name| absolute_type_name(resolver, nil, name, context: context) }
+
+        AST::Ruby::Declarations::ClassModuleAliasDecl.new(
+          decl.buffer,
+          decl.node,
+          full_name,
+          resolved_infered_name,
+          decl.leading_comment,
+          resolved_annotation
         )
 
       else

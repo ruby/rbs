@@ -2,7 +2,7 @@ module RBS
   module AST
     module Ruby
       module Declarations
-        type t = ClassDecl | ModuleDecl | ConstantDecl
+        type t = ClassDecl | ModuleDecl | ConstantDecl | ClassModuleAliasDecl
 
         class Base
           attr_reader buffer: Buffer
@@ -105,8 +105,40 @@ module RBS
           def type: () -> Types::t
 
           # Returns the comment content extracted from the leading comment block
-          # 
+          #
           def comment: () -> AST::Comment?
+        end
+
+        class ClassModuleAliasDecl < Base
+          type node = Prism::ConstantWriteNode | Prism::ConstantPathWriteNode
+
+          type annotation = Annotations::ClassAliasAnnotation | Annotations::ModuleAliasAnnotation
+
+          attr_reader node: node
+
+          attr_reader leading_comment: CommentBlock?
+
+          attr_reader new_name: TypeName
+
+          # The infered old name from the right-hand side of the constant declaration
+          #
+          # - `nil` if the annotation has the type name
+          #
+          attr_reader infered_old_name: TypeName?
+
+          attr_reader annotation: annotation
+
+          def initialize: (Buffer, node, TypeName, TypeName?, CommentBlock?, annotation) -> void
+
+          def name_location: () -> Location
+
+          def location: () -> Location
+
+          # Returns the old name of the class/module alias
+          #
+          def old_name: () -> TypeName
+
+          def comment: () -> Comment?
         end
       end
     end
