@@ -3,14 +3,12 @@ module RBS
     class Validate
       class Errors
         @limit: Integer?
-        @exit_error: boolish
-        @has_syntax_error: bool
         @errors: Array[BaseError]
 
         # The tag that will be thrown in #finish method
         @tag: top
 
-        def initialize: (limit: Integer?, exit_error: boolish) -> void
+        def initialize: (limit: Integer?) -> void
 
         def add: (BaseError) -> void
 
@@ -44,9 +42,6 @@ module RBS
       def validate_constant: () -> void
       def validate_global: () -> void
       def validate_type_alias: () -> void
-      def no_classish_type_validator: (::RBS::Types::t | ::RBS::MethodType type) -> void
-      def no_self_type_validator: (::RBS::Types::t | ::RBS::MethodType type) -> void
-      %a{deprecated} def void_type_context_validator: (::RBS::Types::t | ::RBS::MethodType type, ?bool allowed_here) -> void
     end
   end
 end
