@@ -1155,17 +1155,6 @@ class Integer < Numeric
   #
   def size: () -> Integer
 
-  def step: () { (Integer) -> void } -> void
-          | (Numeric limit, ?Integer step) { (Integer) -> void } -> void
-          | (Numeric limit, ?Numeric step) { (Numeric) -> void } -> void
-          | (to: Numeric, ?by: Integer) { (Integer) -> void } -> void
-          | (by: Numeric, ?to: Numeric) { (Numeric) -> void } -> void
-          | () -> Enumerator[Integer, bot]
-          | (Numeric limit, ?Integer step) -> Enumerator[Integer]
-          | (Numeric limit, ?Numeric step) -> Enumerator[Numeric]
-          | (to: Numeric, ?by: Integer) -> Enumerator[Integer]
-          | (by: Numeric, ?to: Numeric) -> Enumerator[Numeric]
-
   # <!--
   #   rdoc-file=numeric.c
   #   - succ -> next_integer

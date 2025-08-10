@@ -400,11 +400,6 @@ class Rational < Numeric
   def round: (?half: :up | :down | :even) -> Integer
            | (Integer digits, ?half: :up | :down | :even) -> (Integer | Rational)
 
-  def step: (?Numeric limit, ?Numeric step) { (Rational) -> void } -> self
-          | (?Numeric limit, ?Numeric step) -> Enumerator[Rational, self]
-          | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_f  ->  float
