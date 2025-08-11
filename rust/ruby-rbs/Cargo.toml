@@ -1,0 +1,7 @@
+[package]
+name = "ruby-rbs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ruby-rbs-sys = { path = "../ruby-rbs-sys" }
