@@ -35,7 +35,7 @@ jobs:
     env:
       RANDOMIZE_STDLIB_TEST_ORDER: "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -76,7 +76,7 @@ jobs:
       matrix:
         ruby: ['3.4', head]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: |
           brew install ruby-build
