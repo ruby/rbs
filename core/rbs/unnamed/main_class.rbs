@@ -1,0 +1,123 @@
+module RBS
+  module Unnamed
+    class TopLevelSelfClass
+      private
+
+      # <!--
+      #   rdoc-file=eval.c
+      #   - include(module, ...)    -> self
+      # -->
+      # Invokes Module.append_features on each parameter in reverse order.
+      #
+      %a{annotate:rdoc:copy:Module#include}
+      def include: (Module, *Module arg0) -> self
+
+      # <!--
+      #   rdoc-file=eval.c
+      #   - using(module)    -> self
+      # -->
+      # Import class refinements from *module* into the current class or module
+      # definition.
+      #
+      %a{annotate:rdoc:copy:Module#using}
+      def using: (Module arg0) -> self
+
+      # <!--
+      #   rdoc-file=proc.c
+      #   - define_method(symbol, method)     -> symbol
+      #   - define_method(symbol) { block }   -> symbol
+      # -->
+      # Defines an instance method in the receiver. The *method* parameter can be a
+      # `Proc`, a `Method` or an `UnboundMethod` object. If a block is specified, it
+      # is used as the method body. If a block or the *method* parameter has
+      # parameters, they're used as method parameters. This block is evaluated using
+      # #instance_eval.
+      #
+      #     class A
+      #       def fred
+      #         puts "In Fred"
+      #       end
+      #       def create_method(name, &block)
+      #         self.class.define_method(name, &block)
+      #       end
+      #       define_method(:wilma) { puts "Charge it!" }
+      #       define_method(:flint) {|name| puts "I'm #{name}!"}
+      #     end
+      #     class B < A
+      #       define_method(:barney, instance_method(:fred))
+      #     end
+      #     a = B.new
+      #     a.barney
+      #     a.wilma
+      #     a.flint('Dino')
+      #     a.create_method(:betty) { p self }
+      #     a.betty
+      #
+      # *produces:*
+      #
+      #     In Fred
+      #     Charge it!
+      #     I'm Dino!
+      #     #<B:0x401b39e8>
+      #
+      %a{annotate:rdoc:copy:Module#define_method}
+      def define_method: (interned symbol, ^(?) [self: top] -> untyped | Method | UnboundMethod method) -> Symbol
+                       | (interned symbol) { (?) [self: top] -> untyped } -> Symbol
+
+      # <!--
+      #   rdoc-file=vm_method.c
+      #   - public                                -> nil
+      #   - public(method_name)                   -> method_name
+      #   - public(method_name, method_name, ...) -> array
+      #   - public(array)                         -> array
+      # -->
+      # With no arguments, sets the default visibility for subsequently defined
+      # methods to public. With arguments, sets the named methods to have public
+      # visibility. String arguments are converted to symbols. An Array of Symbols
+      # and/or Strings is also accepted. If a single argument is passed, it is
+      # returned. If no argument is passed, nil is returned. If multiple arguments are
+      # passed, the arguments are returned as an array.
+      #
+      %a{annotate:rdoc:copy:Module#public}
+      def public: () -> nil
+                | (Symbol method_name) -> Symbol
+                | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                | (string method_name) -> string
+                | (interned, interned, *interned method_name) -> Array[interned]
+                | (Array[interned]) -> Array[interned]
+
+      # <!--
+      #   rdoc-file=vm_method.c
+      #   - private                                -> nil
+      #   - private(method_name)                   -> method_name
+      #   - private(method_name, method_name, ...) -> array
+      #   - private(array)                         -> array
+      # -->
+      # With no arguments, sets the default visibility for subsequently defined
+      # methods to private. With arguments, sets the named methods to have private
+      # visibility. String arguments are converted to symbols. An Array of Symbols
+      # and/or Strings is also accepted. If a single argument is passed, it is
+      # returned. If no argument is passed, nil is returned. If multiple arguments are
+      # passed, the arguments are returned as an array.
+      #
+      #     module Mod
+      #       def a()  end
+      #       def b()  end
+      #       private
+      #       def c()  end
+      #       private :a
+      #     end
+      #     Mod.private_instance_methods   #=> [:a, :c]
+      #
+      # Note that to show a private method on RDoc, use `:doc:`.
+      #
+      %a{annotate:rdoc:copy:Module#private}
+      def private: () -> nil
+                 | (Symbol method_name) -> Symbol
+                 | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                 | (string method_name) -> string
+                 | (interned, interned, *interned method_name) -> Array[interned]
+                 | (Array[interned]) -> Array[interned]
+    end
+  end
+end
