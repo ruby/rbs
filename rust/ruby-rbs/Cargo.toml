@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 ruby-rbs-sys = { path = "../ruby-rbs-sys" }
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
