@@ -8,6 +8,8 @@ module RBS
           def initialize: (Buffer) -> void
 
           include Helpers::LocationHelper
+
+          def type_fingerprint: () -> untyped
         end
 
         type t = DefMember
@@ -24,6 +26,8 @@ module RBS
             def map_type_name: () { (TypeName) -> TypeName } -> self
 
             def method_type: () -> MethodType
+
+            def type_fingerprint: () -> untyped
           end
 
           type type_annotations = DocStyle | Array[Annotations::ColonMethodTypeAnnotation | Annotations::MethodTypesAnnotation] | nil
@@ -50,6 +54,8 @@ module RBS
           # Returns the method type overloads
           #
           def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
+
+          def type_fingerprint: () -> untyped
         end
 
         class DefMember < Base
@@ -71,6 +77,8 @@ module RBS
           def annotations: () -> Array[AST::Annotation]
 
           def name_location: () -> Location
+
+          def type_fingerprint: () -> untyped
         end
 
         class MixinMember < Base
@@ -87,6 +95,8 @@ module RBS
           def name_location: () -> Location
 
           def type_args: () -> Array[Types::t]
+
+          def type_fingerprint: () -> untyped
         end
 
         class IncludeMember < MixinMember
@@ -116,6 +126,8 @@ module RBS
           def name_locations: () -> Array[Location]
 
           def type: () -> Types::t?
+
+          def type_fingerprint: () -> untyped
         end
 
         class AttrReaderMember < AttributeMember
@@ -137,6 +149,8 @@ module RBS
           def type: () -> Types::t
 
           def location: () -> Location
+
+          def type_fingerprint: () -> untyped
         end
       end
     end

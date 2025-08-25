@@ -28,6 +28,10 @@ module RBS
               end #: self
             end
 
+            def type_fingerprint
+              return_type_annotation&.type_fingerprint
+            end
+
             def method_type
               return_type =
                 case return_type_annotation
@@ -175,6 +179,17 @@ module RBS
               ]
             end
           end
+
+          def type_fingerprint
+            case type_annotations
+            when DocStyle
+              type_annotations.type_fingerprint
+            when Array
+              type_annotations.map(&:type_fingerprint)
+            when nil
+              nil
+            end
+          end
         end
 
         class DefMember < Base
@@ -212,6 +227,15 @@ module RBS
           def name_location
             rbs_location(node.name_loc)
           end
+
+          def type_fingerprint
+            [
+              "members/def",
+              name.to_s,
+              method_type.type_fingerprint,
+              leading_comment&.as_comment&.string
+            ]
+          end
         end
 
         class MixinMember < Base
@@ -239,6 +263,15 @@ module RBS
 
           def type_args
             annotation&.type_args || []
+          end
+
+          def type_fingerprint
+            [
+              "members/mixin",
+              self.class.name,
+              module_name.to_s,
+              annotation&.type_fingerprint
+            ]
           end
         end
 
@@ -284,6 +317,16 @@ module RBS
           def type
             type_annotation&.type
           end
+
+          def type_fingerprint
+            [
+              "members/attribute",
+              self.class.name,
+              names.map(&:to_s),
+              type_annotation&.type_fingerprint,
+              leading_comment&.as_comment&.string
+            ]
+          end
         end
 
         class AttrReaderMember < AttributeMember
@@ -313,6 +356,13 @@ module RBS
 
           def location
             annotation.location
+          end
+
+          def type_fingerprint
+            [
+              "members/instance_variable",
+              annotation.type_fingerprint
+            ]
           end
         end
       end

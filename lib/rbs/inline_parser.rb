@@ -11,6 +11,10 @@ module RBS
         @declarations = []
         @diagnostics = []
       end
+
+      def type_fingerprint
+        declarations.map(&:type_fingerprint)
+      end
     end
 
     module Diagnostic
