@@ -152,6 +152,22 @@ module RBS
 
           def type_fingerprint: () -> untyped
         end
+
+        class VisibilityMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Buffer, Prism::CallNode) -> void
+
+          def location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class PublicMember < VisibilityMember
+        end
+
+        class PrivateMember < VisibilityMember
+        end
       end
     end
   end

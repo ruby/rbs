@@ -365,6 +365,32 @@ module RBS
             ]
           end
         end
+
+        class VisibilityMember < Base
+          attr_reader :node
+
+          def initialize(buffer, node)
+            super(buffer)
+            @node = node
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def type_fingerprint
+            [
+              "members/visibility",
+              self.class.name
+            ]
+          end
+        end
+
+        class PublicMember < VisibilityMember
+        end
+
+        class PrivateMember < VisibilityMember
+        end
       end
     end
   end
