@@ -61,6 +61,12 @@ module RBS
       class ClassModuleAliasDeclarationMissingTypeName < Base
       end
 
+      class TopLevelVisibilityDeclaration < Base
+      end
+
+      class VisibilityCallWithArguments < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
              | TopLevelMethodDefinition | TopLevelAttributeDefinition
@@ -69,6 +75,8 @@ module RBS
              | AttributeNonSymbolName
              | NonConstantConstantDeclaration
              | ClassModuleAliasDeclarationMissingTypeName
+             | TopLevelVisibilityDeclaration
+             | VisibilityCallWithArguments
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result

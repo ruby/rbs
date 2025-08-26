@@ -1686,4 +1686,106 @@ COMMENT
 
     assert_empty result.declarations
   end
+
+  def test_parse__visibility_public_private
+    result = parse(<<~RUBY)
+      class Foo
+        private
+
+        def private_method
+        end
+
+        public
+
+        def public_method
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      assert_equal 4, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrivateMember, member
+        assert_equal "private", member.location.source
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :private_method, member.name
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PublicMember, member
+        assert_equal "public", member.location.source
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :public_method, member.name
+      end
+    end
+  end
+
+  def test_error__visibility_toplevel
+    result = parse(<<~RUBY)
+      private
+
+      public
+    RUBY
+
+    # Should have errors for top-level visibility declarations
+    assert_equal 2, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelVisibilityDeclaration, diagnostic
+      assert_equal "private", diagnostic.location.source
+      assert_equal "Top-level visibility declaration is not supported", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelVisibilityDeclaration, diagnostic
+      assert_equal "public", diagnostic.location.source
+      assert_equal "Top-level visibility declaration is not supported", diagnostic.message
+    end
+
+    assert_empty result.declarations
+  end
+
+  def test_error__visibility_with_arguments
+    result = parse(<<~RUBY)
+      class Foo
+        private :method1
+
+        public :method2
+      end
+    RUBY
+
+    # This should generate diagnostics because visibility with arguments is not supported
+    assert_equal 2, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::VisibilityCallWithArguments, diagnostic
+      assert_equal ":method1", diagnostic.location.source
+      assert_equal "Visibility methods with arguments are not supported", diagnostic.message
+    end
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::VisibilityCallWithArguments, diagnostic
+      assert_equal ":method2", diagnostic.location.source
+      assert_equal "Visibility methods with arguments are not supported", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      assert_empty decl.members
+    end
+  end
 end

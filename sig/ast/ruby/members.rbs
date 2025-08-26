@@ -16,6 +16,7 @@ module RBS
                | IncludeMember | ExtendMember | PrependMember
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
                | InstanceVariableMember
+               | PublicMember | PrivateMember
 
         class MethodTypeAnnotation
           class DocStyle

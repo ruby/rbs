@@ -40,6 +40,8 @@ module RBS
       MixinNonConstantModule = _ = Class.new(Base)
       AttributeNonSymbolName = _ = Class.new(Base)
       ClassModuleAliasDeclarationMissingTypeName = _ = Class.new(Base)
+      TopLevelVisibilityDeclaration = _ = Class.new(Base)
+      VisibilityCallWithArguments = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -215,7 +217,7 @@ module RBS
       end
 
       def visit_call_node(node)
-        return unless node.receiver.nil? # Only handle top-level calls like include, extend, prepend, attr_*
+        return unless node.receiver.nil? # Only handle top-level calls like include, extend, prepend, attr_*, public, private
 
         case node.name
         when :include, :extend, :prepend
@@ -236,6 +238,37 @@ module RBS
             diagnostics << Diagnostic::TopLevelAttributeDefinition.new(
               rbs_location(node.message_loc || node.location),
               "Top-level attribute definition is not supported"
+            )
+          end
+        when :public, :private
+          return if skip_node?(node)
+
+          # Check if visibility call has arguments
+          if node.arguments && !node.arguments.arguments.empty?
+            diagnostics << Diagnostic::VisibilityCallWithArguments.new(
+              rbs_location(node.arguments.location),
+              "Visibility methods with arguments are not supported"
+            )
+            return
+          end
+
+          case current = current_module
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            # Create the appropriate visibility member
+            member = case node.name
+            when :public
+              AST::Ruby::Members::PublicMember.new(buffer, node)
+            when :private
+              AST::Ruby::Members::PrivateMember.new(buffer, node)
+            else
+              raise "Unexpected visibility method: #{node.name}"
+            end
+            current.members << member
+          when nil
+            # Top-level visibility declaration
+            diagnostics << Diagnostic::TopLevelVisibilityDeclaration.new(
+              rbs_location(node.message_loc || node.location),
+              "Top-level visibility declaration is not supported"
             )
           end
         else
