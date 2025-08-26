@@ -489,6 +489,38 @@ end
 
 The `hello` method is *private*, and `world` method is *public*.
 
+The `public` and `private` calls can also include method definitions directly using `def` syntax:
+
+```ruby
+class Foo
+  private def hello = "hello"
+  
+  public def world = "world"
+  
+  # @rbs (String) -> String
+  private def greet(name) = "Hello #{name}!"
+end
+```
+
+This is equivalent to:
+
+```ruby
+class Foo
+  private
+  
+  def hello = "hello"
+  
+  public
+  
+  def world = "world"
+  
+  # @rbs (String) -> String
+  def greet(name) = "Hello #{name}!"
+end
+```
+
+The methods defined with `private def` or `public def` have the specified visibility.
+
 ### Current Limitations
 
-- `public`/`private` calls with arguments are ignored
+- `public`/`private` calls with arguments other than `def` syntax are ignored
