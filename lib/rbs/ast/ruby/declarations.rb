@@ -54,6 +54,13 @@ module RBS
 
             alias name type_name
             alias args type_args
+
+            def type_fingerprint
+              [
+                type_name.to_s,
+                type_annotation&.type_fingerprint
+              ]
+            end
           end
 
           attr_reader :class_name
@@ -91,6 +98,17 @@ module RBS
           def name_location
             rbs_location(node.constant_path.location)
           end
+
+          def type_fingerprint
+            result = [] #: Array[untyped]
+
+            result << "decls/class"
+            result << class_name.to_s
+            result << super_class&.type_fingerprint
+            result << members.map { _1.type_fingerprint }
+
+            result
+          end
         end
 
         class ModuleDecl < Base
@@ -127,6 +145,16 @@ module RBS
 
           def name_location
             rbs_location(node.constant_path.location)
+          end
+
+          def type_fingerprint
+            result = [] #: Array[untyped]
+
+            result << "decls/module"
+            result << module_name.to_s
+            result << members.map { _1.type_fingerprint}
+
+            result
           end
         end
 
@@ -181,6 +209,15 @@ module RBS
           def comment
             leading_comment&.as_comment
           end
+
+          def type_fingerprint
+            [
+              "decls/constant",
+              constant_name.to_s,
+              type.to_s,
+              leading_comment&.as_comment&.string
+            ]
+          end
         end
 
         class ClassModuleAliasDecl < Base
@@ -226,6 +263,16 @@ module RBS
 
           def comment
             leading_comment&.as_comment
+          end
+
+          def type_fingerprint
+            [
+              "decls/class_module_alias",
+              annotation.type_fingerprint,
+              new_name.to_s,
+              old_name.to_s,
+              leading_comment&.as_comment&.string
+            ]
           end
         end
       end

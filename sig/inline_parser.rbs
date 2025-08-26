@@ -9,6 +9,8 @@ module RBS
       attr_reader diagnostics: Array[Diagnostic::t]
 
       def initialize: (Buffer, Prism::ParseResult) -> void
+
+      def type_fingerprint: () -> untyped
     end
 
     module Diagnostic
