@@ -17,6 +17,7 @@ module RBS
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
                | InstanceVariableMember
                | PublicMember | PrivateMember
+               | PublicDefMember | PrivateDefMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -168,6 +169,24 @@ module RBS
         end
 
         class PrivateMember < VisibilityMember
+        end
+
+        class VisibilityDefMember < Base
+          attr_reader node: Prism::CallNode
+
+          attr_reader member: DefMember
+
+          def initialize: (Buffer, Prism::CallNode, DefMember) -> void
+
+          def location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class PublicDefMember < VisibilityDefMember
+        end
+
+        class PrivateDefMember < VisibilityDefMember
         end
       end
     end
