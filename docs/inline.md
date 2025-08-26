@@ -468,3 +468,27 @@ MyObject = object #: class-alias Object
 
 MyKernel = kernel #: module-alias Kernel
 ```
+
+## Visibility
+
+Inline RBS supports `public` and `private` visibilities for methods.
+
+```ruby
+class Foo
+  private
+
+  # @rbs () -> String
+  def hello = "hello"
+
+  public
+
+  # @rbs () -> String
+  def world = "world"
+end
+```
+
+The `hello` method is *private*, and `world` method is *public*.
+
+### Current Limitations
+
+- `public`/`private` calls with arguments are ignored
