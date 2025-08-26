@@ -849,6 +849,9 @@ module RBS
           member.buffer,
           resolved_annotation
         )
+      when AST::Ruby::Members::PublicMember, AST::Ruby::Members::PrivateMember
+        # Visibility members don't need resolution, just return them as-is
+        member
       else
         raise "Unknown member type: #{member.class}"
       end

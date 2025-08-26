@@ -140,17 +140,17 @@ module RBS
                     end
                   end
                 when AST::Ruby::Declarations::Base
-                  decl.members.each do |member|
+                  each_ruby_member_with_accessibility(decl.members) do |member, accessibility|
                     case member
                     when AST::Ruby::Members::DefMember
                       build_method(
                         methods,
                         type,
                         member: member,
-                        accessibility: :public
+                        accessibility: accessibility
                       )
                     when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
-                      build_ruby_attribute(methods, type, member: member, accessibility: :public)
+                      build_ruby_attribute(methods, type, member: member, accessibility: accessibility)
                     end
                   end
                 end
@@ -264,6 +264,19 @@ module RBS
           when AST::Members::Public
             accessibility = :public
           when AST::Members::Private
+            accessibility = :private
+          else
+            yield member, accessibility
+          end
+        end
+      end
+
+      def each_ruby_member_with_accessibility(members, accessibility: :public)
+        members.each do |member|
+          case member
+          when AST::Ruby::Members::PublicMember
+            accessibility = :public
+          when AST::Ruby::Members::PrivateMember
             accessibility = :private
           else
             yield member, accessibility

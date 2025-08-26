@@ -408,4 +408,56 @@ EOF
       end
     end
   end
+
+  def test_methods__inline_visibility
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files[Pathname("foo.rb")] = <<EOF
+class Foo
+  # Default visibility is public
+  def public_method1
+  end
+
+  # Change visibility to private
+  private
+
+  def private_method1
+  end
+
+  # Change visibility back to public
+  public
+
+  def public_method2
+  end
+end
+EOF
+      manager.build do |env|
+        builder = MethodBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |methods|
+          assert_equal parse_type("::Foo"), methods.type
+
+          # Test default visibility is public
+          methods.methods[:public_method1].tap do |method|
+            assert_instance_of MethodBuilder::Methods::Definition, method
+            assert_instance_of AST::Ruby::Members::DefMember, method.original
+            assert_equal :public, method.accessibility
+          end
+
+          # Test visibility after private call
+          methods.methods[:private_method1].tap do |method|
+            assert_instance_of MethodBuilder::Methods::Definition, method
+            assert_instance_of AST::Ruby::Members::DefMember, method.original
+            assert_equal :private, method.accessibility
+          end
+
+          # Test visibility after public call
+          methods.methods[:public_method2].tap do |method|
+            assert_instance_of MethodBuilder::Methods::Definition, method
+            assert_instance_of AST::Ruby::Members::DefMember, method.original
+            assert_equal :public, method.accessibility
+          end
+        end
+      end
+    end
+  end
 end
