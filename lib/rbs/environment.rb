@@ -852,6 +852,10 @@ module RBS
       when AST::Ruby::Members::PublicMember, AST::Ruby::Members::PrivateMember
         # Visibility members don't need resolution, just return them as-is
         member
+      when AST::Ruby::Members::PublicDefMember, AST::Ruby::Members::PrivateDefMember
+        # Resolve the inner DefMember and create new VisibilityDefMember
+        resolved_def_member = resolve_ruby_member(resolver, member.member, context: context) #: AST::Ruby::Members::DefMember
+        member.class.new(member.buffer, member.node, resolved_def_member)
       else
         raise "Unknown member type: #{member.class}"
       end

@@ -127,6 +127,14 @@ module RBS
       def parse_constant_declaration: (Prism::ConstantWriteNode | Prism::ConstantPathWriteNode) -> void
 
       def parse_super_class: (Prism::node, Prism::Location) -> Declarations::ClassDecl::SuperClass?
+
+      # The `CallNode` for `public`/`private` call
+      #
+      # Present while processing the arguments of the call node.
+      #
+      @visibility_call_node: Prism::CallNode?
+
+      def push_visibility_call_node: (Prism::CallNode) { () -> void } -> void
     end
   end
 end

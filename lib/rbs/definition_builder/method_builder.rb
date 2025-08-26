@@ -278,6 +278,10 @@ module RBS
             accessibility = :public
           when AST::Ruby::Members::PrivateMember
             accessibility = :private
+          when AST::Ruby::Members::PublicDefMember
+            yield member.member, :public
+          when AST::Ruby::Members::PrivateDefMember
+            yield member.member, :private
           else
             yield member, accessibility
           end

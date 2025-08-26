@@ -1788,4 +1788,53 @@ COMMENT
       assert_empty decl.members
     end
   end
+
+  def test_parse__visibility_def_syntax
+    result = parse(<<~RUBY)
+      class Foo
+        private def hello = "hello"
+        
+        public def world = "world"
+        
+        # @rbs (String) -> String
+        private def greet(name) = "Hello \#{name}!"
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+      assert_equal RBS::TypeName.parse("Foo"), decl.class_name
+
+      assert_equal 3, decl.members.size
+
+      # private def hello
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrivateDefMember, member
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member.member
+        assert_equal :hello, member.member.name
+        assert_equal "hello", member.member.name_location.source
+      end
+
+      # public def world
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PublicDefMember, member
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member.member
+        assert_equal :world, member.member.name
+        assert_equal "world", member.member.name_location.source
+      end
+
+      # private def greet with type annotation
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrivateDefMember, member
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member.member
+        assert_equal :greet, member.member.name
+        assert_equal "greet", member.member.name_location.source
+        
+        # Check that the method has type annotation
+        refute member.member.method_type.empty?
+      end
+    end
+  end
 end

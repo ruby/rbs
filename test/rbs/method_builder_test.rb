@@ -460,4 +460,35 @@ EOF
       end
     end
   end
+
+  def test_methods__visibility_def_syntax
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.ruby_files[Pathname("foo.rb")] = <<EOF
+class Foo
+  private def hello = "hello"
+  
+  public def world = "world"
+end
+EOF
+      manager.build do |env|
+        builder = MethodBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |methods|
+          assert_equal parse_type("::Foo"), methods.type
+
+          methods.methods[:hello].tap do |method|
+            assert_instance_of MethodBuilder::Methods::Definition, method
+            assert_instance_of AST::Ruby::Members::DefMember, method.original
+            assert_equal :private, method.accessibility
+          end
+
+          methods.methods[:world].tap do |method|
+            assert_instance_of MethodBuilder::Methods::Definition, method
+            assert_instance_of AST::Ruby::Members::DefMember, method.original
+            assert_equal :public, method.accessibility
+          end
+        end
+      end
+    end
+  end
 end

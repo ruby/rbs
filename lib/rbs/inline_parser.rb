@@ -202,7 +202,19 @@ module RBS
           report_unused_annotation(trailing_unused, *leading_unuseds)
 
           defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block)
-          current.members << defn
+
+          if call_node = @visibility_call_node
+            case call_node.name
+            when :public
+              current.members << AST::Ruby::Members::PublicDefMember.new(buffer, call_node, defn)
+            when :private
+              current.members << AST::Ruby::Members::PrivateDefMember.new(buffer, call_node, defn)
+            else
+              raise "Unexpected visibility method: #{call_node.name}"
+            end
+          else
+            current.members << defn
+          end
 
           # Skip other comments in `def` node
           comments.each_enclosed_block(node) do |block|
@@ -244,12 +256,22 @@ module RBS
           return if skip_node?(node)
 
           # Check if visibility call has arguments
-          if node.arguments && !node.arguments.arguments.empty?
-            diagnostics << Diagnostic::VisibilityCallWithArguments.new(
-              rbs_location(node.arguments.location),
-              "Visibility methods with arguments are not supported"
-            )
-            return
+          if node.arguments
+            unless node.arguments.arguments.empty?
+              node.arguments.arguments.each do |arg|
+                if arg.is_a?(Prism::DefNode) || arg.is_a?(Prism::CallNode)
+                  push_visibility_call_node(node) do
+                    visit(arg)
+                  end
+                else
+                  diagnostics << Diagnostic::VisibilityCallWithArguments.new(
+                    rbs_location(node.arguments.location),
+                    "Visibility methods with arguments are not supported"
+                  )
+                end
+              end
+              return
+            end
           end
 
           case current = current_module
@@ -569,6 +591,16 @@ module RBS
           super_class_name,
           type_annotation
         )
+      end
+
+      def push_visibility_call_node(node, &block)
+        old_node = @visibility_call_node
+        begin
+          @visibility_call_node = node
+          yield
+        ensure
+          @visibility_call_node = old_node
+        end
       end
     end
   end
