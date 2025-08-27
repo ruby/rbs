@@ -484,6 +484,40 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :readline, "\n", 100, chomp: true
     end
   end
+
+  def test_pwrite
+    Dir.mktmpdir do |dir|
+      File.open(File.join(dir, "io-pwrite"), "w") do |io|
+        with_int(0) do |offset|
+          assert_send_type "(String, int) -> Integer",
+                          io, :pwrite, "hello", offset
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
+
+  def test_pread
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      with_int(10) do |maxlen|
+        with_int(0) do |offset|
+          assert_send_type(
+            "(int, int) -> String",
+            io, :pread, maxlen, offset
+          )
+          with_string(+"buffer") do |buffer|
+            assert_send_type(
+              "(int, int, string) -> String",
+              io, :pread, maxlen, offset, buffer
+            )
+          end
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
