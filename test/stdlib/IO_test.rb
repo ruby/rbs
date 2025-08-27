@@ -484,6 +484,28 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :readline, "\n", 100, chomp: true
     end
   end
+
+  def test_pwrite
+    Dir.mktmpdir do |dir|
+      File.open(File.join(dir, "io-pwrite"), "w") do |io|
+        assert_send_type "(String, Integer) -> Integer",
+                         io, :pwrite, "hello", 0
+      end
+    end
+  end
+
+  def test_pread
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type(
+        "(Integer, Integer) -> String",
+        io, :pread, 10, 0
+      )
+      assert_send_type(
+        "(Integer, Integer, String) -> String",
+        io, :pread, 10, 0, +"buffer"
+      )
+    end
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
