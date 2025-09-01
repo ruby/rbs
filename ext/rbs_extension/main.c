@@ -6,6 +6,7 @@
 #include "legacy_location.h"
 #include "rbs_string_bridging.h"
 
+#include "ruby/internal/gc.h"
 #include "ruby/vm.h"
 
 /**
@@ -452,6 +453,9 @@ void rbs__init_parser(void) {
     rb_gc_register_mark_object(RBS_Parser);
     VALUE empty_array = rb_obj_freeze(rb_ary_new());
     rb_gc_register_mark_object(empty_array);
+
+    EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+    rb_gc_register_mark_object(EMPTY_ARRAY);
 
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
