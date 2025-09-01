@@ -1445,6 +1445,61 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
+  #   - pread(maxlen, offset)             -> string
+  #   - pread(maxlen, offset, out_string) -> string
+  # -->
+  # Behaves like IO#readpartial, except that it:
+  #
+  # *   Reads at the given `offset` (in bytes).
+  # *   Disregards, and does not modify, the stream's position (see
+  #     [Position](rdoc-ref:IO@Position)).
+  # *   Bypasses any user space buffering in the stream.
+  #
+  # Because this method does not disturb the stream's state (its position, in
+  # particular), `pread` allows multiple threads and processes to use the same IO
+  # object for reading at various offsets.
+  #
+  #     f = File.open('t.txt')
+  #     f.read # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     f.pos  # => 52
+  #     # Read 12 bytes at offset 0.
+  #     f.pread(12, 0) # => "First line\n"
+  #     # Read 9 bytes at offset 8.
+  #     f.pread(9, 8)  # => "ne\nSecon"
+  #     f.close
+  #
+  # Not available on some platforms.
+  #
+  def pread: (int maxlen, int offset, ?string out_string) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - pwrite(object, offset) -> integer
+  # -->
+  # Behaves like IO#write, except that it:
+  #
+  # *   Writes at the given `offset` (in bytes).
+  # *   Disregards, and does not modify, the stream's position (see
+  #     [Position](rdoc-ref:IO@Position)).
+  # *   Bypasses any user space buffering in the stream.
+  #
+  # Because this method does not disturb the stream's state (its position, in
+  # particular), `pwrite` allows multiple threads and processes to use the same IO
+  # object for writing at various offsets.
+  #
+  #     f = File.open('t.tmp', 'w+')
+  #     # Write 6 bytes at offset 3.
+  #     f.pwrite('ABCDEF', 3) # => 6
+  #     f.rewind
+  #     f.read # => "\u0000\u0000\u0000ABCDEF"
+  #     f.close
+  #
+  # Not available on some platforms.
+  #
+  def pwrite: (_ToS object, int offset) -> Integer
+
+  # <!--
+  #   rdoc-file=io.c
   #   - read(maxlen = nil, out_string = nil) -> new_string, out_string, or nil
   # -->
   # Reads bytes from the stream; the stream must be opened for reading (see
