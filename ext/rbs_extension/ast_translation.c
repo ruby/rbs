@@ -11,6 +11,8 @@
 #include "rbs_string_bridging.h"
 #include "legacy_location.h"
 
+VALUE EMPTY_ARRAY;
+
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
@@ -22,6 +24,10 @@ rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *co
 }
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
+    if (!list->head) {
+        return EMPTY_ARRAY;
+    }
+
     VALUE ruby_array = rb_ary_new();
 
     for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
