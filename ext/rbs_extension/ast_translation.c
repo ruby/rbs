@@ -29,10 +29,14 @@ VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t
     }
 
     VALUE ruby_array = rb_ary_new();
+    VALUE *values = ALLOCA_N(VALUE, list->length);
 
-    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
-        rb_ary_push(ruby_array, rbs_struct_to_ruby_value(ctx, n->node));
+    size_t i = 0;
+    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next, i++) {
+        values[i] = rbs_struct_to_ruby_value(ctx, n->node);
     }
+
+    rb_ary_cat(ruby_array, values, list->length);
 
     return ruby_array;
 }
