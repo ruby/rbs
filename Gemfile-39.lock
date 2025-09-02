@@ -1,0 +1,20 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    benchmark-ips (2.14.0)
+    csv (3.3.5)
+    logger (1.7.0)
+    rbs (3.9.4)
+      logger
+
+PLATFORMS
+  arm64-darwin-23
+  ruby
+
+DEPENDENCIES
+  benchmark-ips
+  csv
+  rbs (~> 3.9)
+
+BUNDLED WITH
+   2.6.3
