@@ -457,6 +457,9 @@ void rbs__init_parser(void) {
     EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
     rb_gc_register_mark_object(EMPTY_ARRAY);
 
+    EMPTY_HASH = rb_obj_freeze(rb_hash_new());
+    rb_gc_register_mark_object(EMPTY_HASH);
+
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
     rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);

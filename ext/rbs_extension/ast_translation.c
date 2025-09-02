@@ -12,6 +12,7 @@
 #include "legacy_location.h"
 
 VALUE EMPTY_ARRAY;
+VALUE EMPTY_HASH;
 
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 
@@ -42,6 +43,14 @@ VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t
 }
 
 VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash) {
+    if (rbs_hash->length > 0) {
+        printf("Size of hash: %zu\n", rbs_hash->length);
+    }
+
+    if (!rbs_hash->head) {
+        return EMPTY_HASH;
+    }
+
     VALUE ruby_hash = rb_hash_new();
 
     for (rbs_hash_node_t *n = rbs_hash->head; n != NULL; n = n->next) {
