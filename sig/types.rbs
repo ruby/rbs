@@ -174,15 +174,16 @@ module RBS
       #           ^^^^^  => name
       type loc = Location[:name, bot]
 
-      def initialize: (name: TypeName, location: loc?) -> void
+      def initialize: (name: TypeName, location: loc?, ?args: Array[t]) -> void
 
       attr_reader name: TypeName
 
       attr_reader location: loc?
 
+      attr_reader args: Array[t]
+
       include _TypeBase
       include NoFreeVariables
-      include NoSubst
       include EmptyEachType
 
       def ==: (untyped other) -> bool

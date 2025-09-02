@@ -231,15 +231,17 @@ module RBS
         type, definition = target
 
         case type
-        when Types::ClassInstance
-          subst = RBS::Substitution.build(definition.type_params, type.args)
-          definition.methods[method].defs.map do |type_def|
-            type_def.update(
-              type: type_def.type.sub(subst)
-            )
+        when Types::ClassInstance, Types::ClassSingleton
+          if type.is_a?(Types::ClassSingleton) && type.args.empty?
+            definition.methods[method].defs
+          else
+            subst = RBS::Substitution.build(definition.type_params, type.args)
+            definition.methods[method].defs.map do |type_def|
+              type_def.update(
+                type: type_def.type.sub(subst)
+              )
+            end
           end
-        when Types::ClassSingleton
-          definition.methods[method].defs
         else
           raise
         end
