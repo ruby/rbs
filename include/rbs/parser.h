@@ -99,7 +99,7 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_enc
  * rbs_parser_new(buffer, string, encoding, 0, 1);
  * ```
  * */
-rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+rbs_parser_t *rbs_parser_new(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 void rbs_parser_free(rbs_parser_t *parser);
 
 /**

@@ -129,6 +129,10 @@ rbs_allocator_t *rbs_allocator_init(void) {
     return (rbs_allocator_t *) mem;
 }
 
+void rbs_allocator_reset(rbs_allocator_t *allocator) {
+    allocator->heap_ptr = (uintptr_t)allocator + sizeof(rbs_allocator_t);
+}
+
 void rbs_allocator_free(rbs_allocator_t *allocator) {
     destroy_memory((void *) allocator, allocator->size);
 }
@@ -154,11 +158,7 @@ void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t 
 //       It's assumed that callers to this function will immediately write to the allocated memory, anyway.
 void *rbs_allocator_calloc_impl(rbs_allocator_t *allocator, size_t count, size_t size, size_t alignment) {
     void *p = rbs_allocator_malloc_many_impl(allocator, count, size, alignment);
-#if defined(__linux__)
-    // mmap with MAP_ANONYMOUS gives zero-filled pages.
-#else
     memset(p, 0, count * size);
-#endif
     return p;
 }
 

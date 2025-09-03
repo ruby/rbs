@@ -42,6 +42,8 @@ void *rbs_allocator_calloc_impl(rbs_allocator_t *, size_t count, size_t size, si
 
 void *rbs_allocator_realloc_impl(rbs_allocator_t *, void *ptr, size_t old_size, size_t new_size, size_t alignment);
 
+void rbs_allocator_reset(rbs_allocator_t *);
+
 // Use this when allocating memory for a single instance of a type.
 #define rbs_allocator_alloc(allocator, type) ((type *) rbs_allocator_malloc_impl((allocator), sizeof(type), rbs_alignof(type)))
 // Use this when allocating memory that will be immediately written to in full.
