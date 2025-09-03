@@ -9,6 +9,8 @@
 #include "ruby/internal/gc.h"
 #include "ruby/vm.h"
 
+rbs_allocator_t *shared_allocator;
+
 /**
  * Raises `RBS::ParsingError` or `RuntimeError` on `tok` with message constructed with given `fmt`.
  *
@@ -170,6 +172,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     const char *encoding_name = rb_enc_name(encoding);
 
     return rbs_parser_new(
+        shared_allocator,
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
@@ -470,10 +473,13 @@ void rbs__init_parser(void) {
 }
 
 static void Deinit_rbs_extension(ruby_vm_t *_) {
+    rbs_allocator_free(shared_allocator);
     rbs_constant_pool_free(RBS_GLOBAL_CONSTANT_POOL);
 }
 
 void Init_rbs_extension(void) {
+    shared_allocator = rbs_allocator_init();
+
 #ifdef HAVE_RB_EXT_RACTOR_SAFE
     rb_ext_ractor_safe(true);
 #endif
