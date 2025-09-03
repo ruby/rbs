@@ -4,10 +4,11 @@ require "csv"
 
 results = []
 
-ARGV.each do |file|
+total = ARGV.size
+ARGV.each_with_index do |file, index|
   GC.start
-  
-  STDERR.puts "Benchmarking with #{file}..."
+
+  STDERR.puts "#{index}/#{total}\tBenchmarking with #{file}..."
   content = File.read(file)
 
   benchmark = Benchmark.ips do |x|
