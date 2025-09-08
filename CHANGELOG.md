@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 3.9.5 (2025-09-08)
+
+### Signature updates
+
+* Merge pull request #2655 from ruby/silence-string-deprecation ([#2656](https://github.com/ruby/rbs/pull/2656))
+
+### Miscellaneous
+
+* Allows the use of a path list as RBS_SKIP_TESTS ([#2641](https://github.com/ruby/rbs/pull/2641))
+* Suppress to GCC warning with multi-line comment ([#2646](https://github.com/ruby/rbs/pull/2646))
+* Backport to 3.9 ([#2487](https://github.com/ruby/rbs/pull/2487))
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
 ## 3.9.4 (2025-05-15)
 
 ### Miscellaneous

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbs (3.9.4)
+    rbs (3.9.5)
       logger
 
 PATH
