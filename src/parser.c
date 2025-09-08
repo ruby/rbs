@@ -3254,7 +3254,7 @@ static rbs_comment_t *comment_get_comment(rbs_comment_t *com, int line) {
 static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *com, rbs_token_t comment_token) {
     rbs_buffer_append_value(allocator, &com->line_tokens, &comment_token, rbs_token_t);
 
-    com->line_tokens_count++;
+    com->line_tokens_count = com->line_tokens.length / sizeof(rbs_token_t);
     com->end = comment_token.range.end;
 }
 

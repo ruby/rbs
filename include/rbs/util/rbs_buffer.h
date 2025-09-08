@@ -91,6 +91,7 @@ rbs_string_t rbs_buffer_to_string(rbs_buffer_t *buffer);
  * Returns a copy of a `type` from the `buffer` at the given `index`.
  *
  * This cast is unchecked, so it's up to caller to ensure the type is correct.
+ * Note: This assumes the buffer contains only elements of the specified type.
  *
  * @param buffer The buffer to get the value from.
  * @param index The index of the element to retrieve.
