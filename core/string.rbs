@@ -3580,4 +3580,15 @@ interface _ArefFromStringToString
 end
 
 %a{deprecated}
-type String::encode_fallback = Hash[String, String] | Proc | Method | _ArefFromStringToString
+type String::encode_fallback = Hash[String, String] | Proc | Method | String::_ArefFromStringToString
+
+# Don't use this interface directly
+#
+# This is a copy of `::_ArefFromStringToString` but without deprecated attribute.
+# This is a workaround to avoid deprecation warnings in `String::encode_fallback` type.
+#
+# This type will be deprecated soon once `::_ArefFromStringToString` and `String::encode_fallback` are removed.
+#
+interface String::_ArefFromStringToString
+  def []: (String) -> String
+end
