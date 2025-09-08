@@ -28,6 +28,8 @@ jobs:
           sudo apt-get install -y clang-format-20
           sudo ln -sf /usr/bin/clang-format-20 /usr/local/bin/clang-format
           clang-format --version
+      - name: Count processors
+        run: nproc
       - name: Install Re2c
         run: |
           cd /tmp
@@ -36,7 +38,7 @@ jobs:
           cd re2c-4.3
           autoreconf -i -W all
           ./configure
-          make
+          make -j"$(nproc)" -l"$(nproc)"
           sudo make install
       - name: Update rubygems & bundler
         run: |
