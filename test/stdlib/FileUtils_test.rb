@@ -319,10 +319,14 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :ln_s, "src", "dest"
       assert_send_type  "(ToStr, ToStr, noop: bool) -> void",
                         FileUtils, :ln_s, ToStr.new("src"), ToStr.new("dest"), noop: true
+      assert_send_type  "(ToPath, ToPath, noop: bool) -> void",
+                        FileUtils, :ln_sr, ToPath.new("src"), ToPath.new("dest"), noop: true
       assert_send_type  "(Array[String | ToStr | ToPath], String, noop: bool) -> void",
                         FileUtils, :ln_s, ["src", ToStr.new("src"), ToPath.new("src")], "dest_dir", noop: true
       assert_send_type  "(ToPath, ToPath, force: nil, noop: bool, verbose: bool, target_directory: bool, relative: bool) -> void",
                         FileUtils, :ln_s, ToPath.new("src"), ToPath.new("dest"), force: nil, noop: true, verbose: false, relative: false, target_directory: false
+      assert_send_type  "(ToPath, ToPath, force: nil, noop: bool, verbose: bool, target_directory: bool, relative: bool) -> void",
+                        FileUtils, :ln_s, ToPath.new("src"), ToPath.new("dest"), force: nil, noop: true, verbose: false, relative: true, target_directory: false
     end
   end
 
@@ -360,8 +364,8 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :ln_sr, ToStr.new("src"), ToStr.new("dest"), noop: true
       assert_send_type  "(ToPath, ToPath, noop: bool) -> void",
                         FileUtils, :ln_sr, ToPath.new("src"), ToPath.new("dest"), noop: true
-      assert_send_type  "(Array[String | ToStr | ToPath], String, noop: bool, verbose: bool, target_directory: false) -> void",
-                        FileUtils, :ln_sr, ["src", ToStr.new("src"), ToStr.new("src")], "dest_dir", noop: true, verbose: false, target_directory: false
+      assert_send_type  "(Array[String | ToStr | ToPath], String, noop: bool, verbose: bool) -> void",
+                        FileUtils, :ln_sr, ["src", ToStr.new("src"), ToStr.new("src")], "dest_dir", noop: true, verbose: false
     end
   end
 
