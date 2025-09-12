@@ -31,4 +31,7 @@ VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t, rbs_node_list_t *li
 VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t, rbs_hash_t *hash);
 VALUE rbs_struct_to_ruby_value(rbs_translation_context_t, rbs_node_t *instance);
 
+extern VALUE EMPTY_ARRAY;
+extern VALUE EMPTY_HASH;
+
 #endif
