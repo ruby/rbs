@@ -1,13 +1,23 @@
 #include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"
 
+/**
+ * The default capacity of a rbs_buffer_t.
+ * If the buffer needs to grow beyond this capacity, it will be doubled.
+ */
+#define RBS_BUFFER_DEFAULT_CAPACITY 128
+
 bool rbs_buffer_init(rbs_allocator_t *allocator, rbs_buffer_t *buffer) {
-    size_t capacity = RBS_BUFFER_DEFAULT_CAPACITY;
+    return rbs_buffer_init_with_capacity(allocator, buffer, RBS_BUFFER_DEFAULT_CAPACITY);
+}
 
-    buffer->length = 0;
-    buffer->capacity = capacity;
+bool rbs_buffer_init_with_capacity(rbs_allocator_t *allocator, rbs_buffer_t *buffer, size_t capacity) {
+    *buffer = (rbs_buffer_t) {
+        .length = 0,
+        .capacity = capacity,
+        .value = rbs_calloc(allocator, capacity, char),
+    };
 
-    buffer->value = rbs_allocator_calloc(allocator, capacity, char);
     return buffer->value != NULL;
 }
 
@@ -33,7 +43,7 @@ void rbs_buffer_append_string(rbs_allocator_t *allocator, rbs_buffer_t *buffer, 
             new_capacity *= 2;
         }
 
-        char *new_value = rbs_allocator_realloc(allocator, buffer->value, old_capacity, new_capacity, char);
+        char *new_value = rbs_realloc(allocator, buffer->value, old_capacity, new_capacity, char);
         rbs_assert(new_value != NULL, "Failed to append to buffer. Old capacity: %zu, new capacity: %zu", old_capacity, new_capacity);
 
         buffer->value = new_value;

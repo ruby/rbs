@@ -20,7 +20,7 @@ const char *rbs_node_type_name(rbs_node_t *node) {
 /* rbs_node_list */
 
 rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
-    rbs_node_list_t *list = rbs_allocator_alloc(allocator, rbs_node_list_t);
+    rbs_node_list_t *list = rbs_alloc(allocator, rbs_node_list_t);
     *list = (rbs_node_list_t) {
         .allocator = allocator,
         .head = NULL,
@@ -32,7 +32,7 @@ rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
 }
 
 void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
-    rbs_node_list_node_t *new_node = rbs_allocator_alloc(list->allocator, rbs_node_list_node_t);
+    rbs_node_list_node_t *new_node = rbs_alloc(list->allocator, rbs_node_list_node_t);
     *new_node = (rbs_node_list_node_t) {
         .node = node,
         .next = NULL,
@@ -52,7 +52,7 @@ void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
 /* rbs_hash */
 
 rbs_hash_t *rbs_hash_new(rbs_allocator_t *allocator) {
-    rbs_hash_t *hash = rbs_allocator_alloc(allocator, rbs_hash_t);
+    rbs_hash_t *hash = rbs_alloc(allocator, rbs_hash_t);
     *hash = (rbs_hash_t) {
         .allocator = allocator,
         .head = NULL,
@@ -104,10 +104,12 @@ void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
         return;
     }
 
-    rbs_hash_node_t *new_node = rbs_allocator_alloc(hash->allocator, rbs_hash_node_t);
-    new_node->key = key;
-    new_node->value = value;
-    new_node->next = NULL;
+    rbs_hash_node_t *new_node = rbs_alloc(hash->allocator, rbs_hash_node_t);
+    *new_node = (rbs_hash_node_t) {
+        .key = key,
+        .value = value,
+        .next = NULL,
+    };
 
     if (hash->tail == NULL) {
         hash->head = new_node;
@@ -124,7 +126,7 @@ rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
 }
 
 rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
-    rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
+    rbs_keyword_t *instance = rbs_alloc(allocator, rbs_keyword_t);
 
     *instance = (rbs_keyword_t) {
         .base = (rbs_node_t) {
@@ -138,7 +140,7 @@ rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *locat
 }
 
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
-    rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
+    rbs_ast_symbol_t *instance = rbs_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
         .base = (rbs_node_t) {
@@ -154,7 +156,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
 <%- nodes.each do |node| -%>
 #line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
 <%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>) {
-    <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
+    <%= node.c_type_name %> *instance = rbs_alloc(allocator, <%= node.c_type_name %>);
     <%- node.fields.filter { |f| f.c_type == "VALUE" }.each do |f| -%>
     rb_gc_register_mark_object(<%= f.c_name %>);
     <%- end -%>
