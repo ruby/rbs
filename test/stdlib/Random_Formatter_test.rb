@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "random/formatter"
 
 class RandomSingletonTest < Test::Unit::TestCase
   include TestHelper
