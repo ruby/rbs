@@ -1,7 +1,7 @@
 require_relative "test_helper"
 require "random/formatter"
 
-class RandomSingletonTest < Test::Unit::TestCase
+class RandomFormatterSingletonTest < Test::Unit::TestCase
   include TestHelper
 
   library "random-formatter"
@@ -52,7 +52,7 @@ class RandomSingletonTest < Test::Unit::TestCase
   end
 end
 
-class RandomTest < Test::Unit::TestCase
+class RandomFormatterTest < Test::Unit::TestCase
   include TestHelper
 
   library "random-formatter"
