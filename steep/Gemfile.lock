@@ -38,7 +38,7 @@ GEM
       ast (~> 2.4.1)
       racc
     power_assert (2.0.5)
-    prism (1.4.0)
+    prism (1.5.1)
     racc (1.8.1)
     rainbow (3.1.1)
     rb-fsevent (0.11.2)
@@ -75,9 +75,9 @@ GEM
       power_assert
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    unicode-display_width (3.1.5)
-      unicode-emoji (~> 4.0, >= 4.0.4)
-    unicode-emoji (4.0.4)
+    unicode-display_width (3.2.0)
+      unicode-emoji (~> 4.1)
+    unicode-emoji (4.1.0)
     uri (1.0.3)
 
 PLATFORMS
