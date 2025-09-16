@@ -130,7 +130,7 @@ rbs_allocator_t *rbs_allocator_init(void) {
 }
 
 void rbs_allocator_reset(rbs_allocator_t *allocator) {
-    allocator->heap_ptr = (uintptr_t)allocator + sizeof(rbs_allocator_t);
+    allocator->heap_ptr = (uintptr_t) allocator + sizeof(rbs_allocator_t);
 }
 
 void rbs_allocator_free(rbs_allocator_t *allocator) {
