@@ -452,6 +452,53 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
     return results;
 }
 
+VALUE rbsparser_parse_signatures(VALUE self, VALUE files) {
+    Check_Type(files, T_HASH);
+
+    VALUE result_hash = rb_hash_new();
+    VALUE keys = rb_funcall(files, rb_intern("keys"), 0);
+
+    for (long i = 0; i < RARRAY_LEN(keys); i++) {
+        VALUE file_path = rb_ary_entry(keys, i);
+        VALUE buffer = rb_hash_aref(files, file_path);
+
+        VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+        StringValue(string);
+        rb_encoding *encoding = rb_enc_get(string);
+
+        // Prepare parser
+        rbs_parser_t *parser = alloc_parser_from_buffer(buffer, 0, RSTRING_LEN(string));
+        struct parse_signature_arg arg = {
+            .buffer = buffer,
+            .encoding = encoding,
+            .parser = parser,
+            .require_eof = false
+        };
+
+        VALUE entry = rb_hash_new();
+
+        int state = 0;
+        VALUE ast = rb_protect(parse_signature_try, (VALUE) &arg, &state);
+
+        if (state == 0) {
+            // Success: store AST
+            rb_hash_aset(entry, ID2SYM(rb_intern("ast")), ast);
+        } else {
+            // Error: store exception
+            VALUE err = rb_errinfo();
+            rb_set_errinfo(Qnil); // Clear the error info
+            rb_hash_aset(entry, ID2SYM(rb_intern("error")), err);
+        }
+
+        rb_hash_aset(result_hash, file_path, entry);
+
+        ensure_free_parser((VALUE) parser);
+        RB_GC_GUARD(string);
+    }
+
+    return result_hash;
+}
+
 void rbs__init_parser(void) {
     RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
     rb_gc_register_mark_object(RBS_Parser);
@@ -471,6 +518,7 @@ void rbs__init_parser(void) {
     rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
+    rb_define_singleton_method(RBS_Parser, "_parse_signatures", rbsparser_parse_signatures, 1);
 }
 
 static void Deinit_rbs_extension(ruby_vm_t *_) {
