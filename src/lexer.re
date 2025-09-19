@@ -14,7 +14,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       re2c:define:YYSKIP = "rbs_skip(lexer);";
       re2c:define:YYBACKUP = "backup = *lexer;";
       re2c:define:YYRESTORE = "*lexer = backup;";
-      re2c:yyfill:enable  = 0;
+      re2c:yyfill:enable = 0;
 
       word = [a-zA-Z0-9_];
 

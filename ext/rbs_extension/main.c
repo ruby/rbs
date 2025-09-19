@@ -1,3 +1,4 @@
+#include "rbs/lexer.h"
 #include "rbs_extension.h"
 #include "rbs/util/rbs_assert.h"
 #include "rbs/util/rbs_allocator.h"
@@ -6,7 +7,10 @@
 #include "legacy_location.h"
 #include "rbs_string_bridging.h"
 
+#include "ruby/internal/gc.h"
 #include "ruby/vm.h"
+
+rbs_allocator_t *shared_allocator;
 
 /**
  * Raises `RBS::ParsingError` or `RuntimeError` on `tok` with message constructed with given `fmt`.
@@ -169,6 +173,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     const char *encoding_name = rb_enc_name(encoding);
 
     return rbs_parser_new(
+        shared_allocator,
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
@@ -447,11 +452,64 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
     return results;
 }
 
+VALUE rbsparser_parse_signatures(VALUE self, VALUE files) {
+    Check_Type(files, T_HASH);
+
+    VALUE result_hash = rb_hash_new();
+    VALUE keys = rb_funcall(files, rb_intern("keys"), 0);
+
+    for (long i = 0; i < RARRAY_LEN(keys); i++) {
+        VALUE file_path = rb_ary_entry(keys, i);
+        VALUE buffer = rb_hash_aref(files, file_path);
+
+        VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+        StringValue(string);
+        rb_encoding *encoding = rb_enc_get(string);
+
+        // Prepare parser
+        rbs_parser_t *parser = alloc_parser_from_buffer(buffer, 0, RSTRING_LEN(string));
+        struct parse_signature_arg arg = {
+            .buffer = buffer,
+            .encoding = encoding,
+            .parser = parser,
+            .require_eof = false
+        };
+
+        VALUE entry = rb_hash_new();
+
+        int state = 0;
+        VALUE ast = rb_protect(parse_signature_try, (VALUE) &arg, &state);
+
+        if (state == 0) {
+            // Success: store AST
+            rb_hash_aset(entry, ID2SYM(rb_intern("ast")), ast);
+        } else {
+            // Error: store exception
+            VALUE err = rb_errinfo();
+            rb_set_errinfo(Qnil); // Clear the error info
+            rb_hash_aset(entry, ID2SYM(rb_intern("error")), err);
+        }
+
+        rb_hash_aset(result_hash, file_path, entry);
+
+        ensure_free_parser((VALUE) parser);
+        RB_GC_GUARD(string);
+    }
+
+    return result_hash;
+}
+
 void rbs__init_parser(void) {
     RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
     rb_gc_register_mark_object(RBS_Parser);
     VALUE empty_array = rb_obj_freeze(rb_ary_new());
     rb_gc_register_mark_object(empty_array);
+
+    EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+    rb_gc_register_mark_object(EMPTY_ARRAY);
+
+    EMPTY_HASH = rb_obj_freeze(rb_hash_new());
+    rb_gc_register_mark_object(EMPTY_HASH);
 
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
@@ -460,13 +518,17 @@ void rbs__init_parser(void) {
     rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_lex", rbsparser_lex, 2);
+    rb_define_singleton_method(RBS_Parser, "_parse_signatures", rbsparser_parse_signatures, 1);
 }
 
 static void Deinit_rbs_extension(ruby_vm_t *_) {
+    rbs_allocator_free(shared_allocator);
     rbs_constant_pool_free(RBS_GLOBAL_CONSTANT_POOL);
 }
 
 void Init_rbs_extension(void) {
+    shared_allocator = rbs_allocator_init();
+
 #ifdef HAVE_RB_EXT_RACTOR_SAFE
     rb_ext_ractor_safe(true);
 #endif

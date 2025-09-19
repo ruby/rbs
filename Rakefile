@@ -537,3 +537,11 @@ task :compile_c99 do
 ensure
   ENV.delete("TEST_NO_C23")
 end
+
+
+task :prepare_bench do
+  ENV.delete("DEBUG")
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
+end
