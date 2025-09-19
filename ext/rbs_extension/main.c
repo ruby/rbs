@@ -1,3 +1,4 @@
+#include "rbs/lexer.h"
 #include "rbs_extension.h"
 #include "rbs/util/rbs_assert.h"
 #include "rbs/util/rbs_allocator.h"
