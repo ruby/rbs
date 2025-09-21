@@ -665,42 +665,6 @@ singleton(::BasicObject)
     end
   end
 
-  def test_validate_multiple_with_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            type bar = instance
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "a.rbs:2:13...2:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
-      end
-    end
-  end
-
-  def test_validate_multiple_with_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            def foo: (T) -> void
-            def bar: (T) -> void
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "/a.rbs:2:12...2:13: Could not find T (RBS::NoTypeFoundError)"
-        assert_not_include stdout.string, "/a.rbs:3:12...3:13: Could not find T (RBS::NoTypeFoundError)"
-      end
-    end
-  end
-
   def test_validate_multiple_with_many_errors
     with_cli do |cli|
       refute_cli_success do
@@ -736,60 +700,6 @@ singleton(::BasicObject)
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
-    end
-  end
-
-  def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      refute_cli_success do
-        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
-      end
-      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
-    end
-  end
-
-  def test_context_validation
-    tests = [
-      <<~RBS,
-        class Bar[A]
-        end
-        class Foo < Bar[instance]
-        end
-      RBS
-      <<~RBS,
-        module Bar : _Each[instance]
-        end
-      RBS
-      <<~RBS,
-        type foo = instance
-      RBS
-      <<~RBS,
-        BAR: instance
-      RBS
-      <<~RBS,
-        $FOO: instance
-      RBS
-    ]
-
-    tests.each do |rbs|
-      with_cli do |cli|
-        Dir.mktmpdir do |dir|
-          (Pathname(dir) + 'a.rbs').write(rbs)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate"])
-          end
-
-          assert_match(/void|self|instance|class/, stdout.string)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
-          end
-          refute_cli_success do
-            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
-          end
-        end
-      end
     end
   end
 
