@@ -365,6 +365,8 @@ nodes:
     fields:
       - name: name
         c_type: rbs_type_name
+      - name: args
+        c_type: rbs_node_list
   - name: RBS::Types::Function
     expose_location: false
     fields:
