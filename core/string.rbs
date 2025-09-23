@@ -1547,6 +1547,7 @@ class String
   # hashing algorithms, install the string-crypt gem and `require 'string/crypt'`
   # to continue using it.
   #
+  %a{deprecated}
   def crypt: (string salt_str) -> String
 
   # <!-- rdoc-file=string.c -->
