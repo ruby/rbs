@@ -167,7 +167,7 @@ const char *rbs_node_type_name(rbs_node_t *node) {
 /* rbs_node_list */
 
 rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
-    rbs_node_list_t *list = rbs_allocator_alloc(allocator, rbs_node_list_t);
+    rbs_node_list_t *list = rbs_alloc(allocator, rbs_node_list_t);
     *list = (rbs_node_list_t) {
         .allocator = allocator,
         .head = NULL,
@@ -179,7 +179,7 @@ rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
 }
 
 void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
-    rbs_node_list_node_t *new_node = rbs_allocator_alloc(list->allocator, rbs_node_list_node_t);
+    rbs_node_list_node_t *new_node = rbs_alloc(list->allocator, rbs_node_list_node_t);
     *new_node = (rbs_node_list_node_t) {
         .node = node,
         .next = NULL,
@@ -199,7 +199,7 @@ void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
 /* rbs_hash */
 
 rbs_hash_t *rbs_hash_new(rbs_allocator_t *allocator) {
-    rbs_hash_t *hash = rbs_allocator_alloc(allocator, rbs_hash_t);
+    rbs_hash_t *hash = rbs_alloc(allocator, rbs_hash_t);
     *hash = (rbs_hash_t) {
         .allocator = allocator,
         .head = NULL,
@@ -251,10 +251,12 @@ void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
         return;
     }
 
-    rbs_hash_node_t *new_node = rbs_allocator_alloc(hash->allocator, rbs_hash_node_t);
-    new_node->key = key;
-    new_node->value = value;
-    new_node->next = NULL;
+    rbs_hash_node_t *new_node = rbs_alloc(hash->allocator, rbs_hash_node_t);
+    *new_node = (rbs_hash_node_t) {
+        .key = key,
+        .value = value,
+        .next = NULL,
+    };
 
     if (hash->tail == NULL) {
         hash->head = new_node;
@@ -271,7 +273,7 @@ rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
 }
 
 rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
-    rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
+    rbs_keyword_t *instance = rbs_alloc(allocator, rbs_keyword_t);
 
     *instance = (rbs_keyword_t) {
         .base = (rbs_node_t) {
@@ -285,7 +287,7 @@ rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *locat
 }
 
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
-    rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
+    rbs_ast_symbol_t *instance = rbs_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
         .base = (rbs_node_t) {
@@ -300,7 +302,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
 
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
-    rbs_ast_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_annotation_t);
+    rbs_ast_annotation_t *instance = rbs_alloc(allocator, rbs_ast_annotation_t);
 
     *instance = (rbs_ast_annotation_t) {
         .base = (rbs_node_t) {
@@ -314,7 +316,7 @@ rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_loc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_t *location, bool value) {
-    rbs_ast_bool_t *instance = rbs_allocator_alloc(allocator, rbs_ast_bool_t);
+    rbs_ast_bool_t *instance = rbs_alloc(allocator, rbs_ast_bool_t);
 
     *instance = (rbs_ast_bool_t) {
         .base = (rbs_node_t) {
@@ -328,7 +330,7 @@ rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_t *loc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
-    rbs_ast_comment_t *instance = rbs_allocator_alloc(allocator, rbs_ast_comment_t);
+    rbs_ast_comment_t *instance = rbs_alloc(allocator, rbs_ast_comment_t);
 
     *instance = (rbs_ast_comment_t) {
         .base = (rbs_node_t) {
@@ -342,7 +344,7 @@ rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_declarations_class_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_class_t);
+    rbs_ast_declarations_class_t *instance = rbs_alloc(allocator, rbs_ast_declarations_class_t);
 
     *instance = (rbs_ast_declarations_class_t) {
         .base = (rbs_node_t) {
@@ -361,7 +363,7 @@ rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *al
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args) {
-    rbs_ast_declarations_class_super_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_class_super_t);
+    rbs_ast_declarations_class_super_t *instance = rbs_alloc(allocator, rbs_ast_declarations_class_super_t);
 
     *instance = (rbs_ast_declarations_class_super_t) {
         .base = (rbs_node_t) {
@@ -376,7 +378,7 @@ rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_all
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_class_alias_t *rbs_ast_declarations_class_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations) {
-    rbs_ast_declarations_class_alias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_class_alias_t);
+    rbs_ast_declarations_class_alias_t *instance = rbs_alloc(allocator, rbs_ast_declarations_class_alias_t);
 
     *instance = (rbs_ast_declarations_class_alias_t) {
         .base = (rbs_node_t) {
@@ -393,7 +395,7 @@ rbs_ast_declarations_class_alias_t *rbs_ast_declarations_class_alias_new(rbs_all
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations) {
-    rbs_ast_declarations_constant_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_constant_t);
+    rbs_ast_declarations_constant_t *instance = rbs_alloc(allocator, rbs_ast_declarations_constant_t);
 
     *instance = (rbs_ast_declarations_constant_t) {
         .base = (rbs_node_t) {
@@ -410,7 +412,7 @@ rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations) {
-    rbs_ast_declarations_global_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_global_t);
+    rbs_ast_declarations_global_t *instance = rbs_alloc(allocator, rbs_ast_declarations_global_t);
 
     *instance = (rbs_ast_declarations_global_t) {
         .base = (rbs_node_t) {
@@ -427,7 +429,7 @@ rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_declarations_interface_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_interface_t);
+    rbs_ast_declarations_interface_t *instance = rbs_alloc(allocator, rbs_ast_declarations_interface_t);
 
     *instance = (rbs_ast_declarations_interface_t) {
         .base = (rbs_node_t) {
@@ -445,7 +447,7 @@ rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocat
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_declarations_module_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_t);
+    rbs_ast_declarations_module_t *instance = rbs_alloc(allocator, rbs_ast_declarations_module_t);
 
     *instance = (rbs_ast_declarations_module_t) {
         .base = (rbs_node_t) {
@@ -464,7 +466,7 @@ rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args) {
-    rbs_ast_declarations_module_self_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_self_t);
+    rbs_ast_declarations_module_self_t *instance = rbs_alloc(allocator, rbs_ast_declarations_module_self_t);
 
     *instance = (rbs_ast_declarations_module_self_t) {
         .base = (rbs_node_t) {
@@ -479,7 +481,7 @@ rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_all
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_module_alias_t *rbs_ast_declarations_module_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations) {
-    rbs_ast_declarations_module_alias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_alias_t);
+    rbs_ast_declarations_module_alias_t *instance = rbs_alloc(allocator, rbs_ast_declarations_module_alias_t);
 
     *instance = (rbs_ast_declarations_module_alias_t) {
         .base = (rbs_node_t) {
@@ -496,7 +498,7 @@ rbs_ast_declarations_module_alias_t *rbs_ast_declarations_module_alias_new(rbs_a
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_declarations_type_alias_t *rbs_ast_declarations_type_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_declarations_type_alias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_type_alias_t);
+    rbs_ast_declarations_type_alias_t *instance = rbs_alloc(allocator, rbs_ast_declarations_type_alias_t);
 
     *instance = (rbs_ast_declarations_type_alias_t) {
         .base = (rbs_node_t) {
@@ -514,7 +516,7 @@ rbs_ast_declarations_type_alias_t *rbs_ast_declarations_type_alias_new(rbs_alloc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *clauses) {
-    rbs_ast_directives_use_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_t);
+    rbs_ast_directives_use_t *instance = rbs_alloc(allocator, rbs_ast_directives_use_t);
 
     *instance = (rbs_ast_directives_use_t) {
         .base = (rbs_node_t) {
@@ -528,7 +530,7 @@ rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator,
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_directives_use_single_clause_t *rbs_ast_directives_use_single_clause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *type_name, rbs_ast_symbol_t *new_name) {
-    rbs_ast_directives_use_single_clause_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_single_clause_t);
+    rbs_ast_directives_use_single_clause_t *instance = rbs_alloc(allocator, rbs_ast_directives_use_single_clause_t);
 
     *instance = (rbs_ast_directives_use_single_clause_t) {
         .base = (rbs_node_t) {
@@ -543,7 +545,7 @@ rbs_ast_directives_use_single_clause_t *rbs_ast_directives_use_single_clause_new
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_directives_use_wildcard_clause_t *rbs_ast_directives_use_wildcard_clause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace) {
-    rbs_ast_directives_use_wildcard_clause_t *instance = rbs_allocator_alloc(allocator, rbs_ast_directives_use_wildcard_clause_t);
+    rbs_ast_directives_use_wildcard_clause_t *instance = rbs_alloc(allocator, rbs_ast_directives_use_wildcard_clause_t);
 
     *instance = (rbs_ast_directives_use_wildcard_clause_t) {
         .base = (rbs_node_t) {
@@ -557,7 +559,7 @@ rbs_ast_directives_use_wildcard_clause_t *rbs_ast_directives_use_wildcard_clause
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string_representation) {
-    rbs_ast_integer_t *instance = rbs_allocator_alloc(allocator, rbs_ast_integer_t);
+    rbs_ast_integer_t *instance = rbs_alloc(allocator, rbs_ast_integer_t);
 
     *instance = (rbs_ast_integer_t) {
         .base = (rbs_node_t) {
@@ -571,7 +573,7 @@ rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_members_alias_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_alias_t);
+    rbs_ast_members_alias_t *instance = rbs_alloc(allocator, rbs_ast_members_alias_t);
 
     *instance = (rbs_ast_members_alias_t) {
         .base = (rbs_node_t) {
@@ -589,7 +591,7 @@ rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, r
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
-    rbs_ast_members_attr_accessor_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_accessor_t);
+    rbs_ast_members_attr_accessor_t *instance = rbs_alloc(allocator, rbs_ast_members_attr_accessor_t);
 
     *instance = (rbs_ast_members_attr_accessor_t) {
         .base = (rbs_node_t) {
@@ -609,7 +611,7 @@ rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
-    rbs_ast_members_attr_reader_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_reader_t);
+    rbs_ast_members_attr_reader_t *instance = rbs_alloc(allocator, rbs_ast_members_attr_reader_t);
 
     *instance = (rbs_ast_members_attr_reader_t) {
         .base = (rbs_node_t) {
@@ -629,7 +631,7 @@ rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility) {
-    rbs_ast_members_attr_writer_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_writer_t);
+    rbs_ast_members_attr_writer_t *instance = rbs_alloc(allocator, rbs_ast_members_attr_writer_t);
 
     *instance = (rbs_ast_members_attr_writer_t) {
         .base = (rbs_node_t) {
@@ -649,7 +651,7 @@ rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_class_instance_variable_t *rbs_ast_members_class_instance_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
-    rbs_ast_members_class_instance_variable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_class_instance_variable_t);
+    rbs_ast_members_class_instance_variable_t *instance = rbs_alloc(allocator, rbs_ast_members_class_instance_variable_t);
 
     *instance = (rbs_ast_members_class_instance_variable_t) {
         .base = (rbs_node_t) {
@@ -665,7 +667,7 @@ rbs_ast_members_class_instance_variable_t *rbs_ast_members_class_instance_variab
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_class_variable_t *rbs_ast_members_class_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
-    rbs_ast_members_class_variable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_class_variable_t);
+    rbs_ast_members_class_variable_t *instance = rbs_alloc(allocator, rbs_ast_members_class_variable_t);
 
     *instance = (rbs_ast_members_class_variable_t) {
         .base = (rbs_node_t) {
@@ -681,7 +683,7 @@ rbs_ast_members_class_variable_t *rbs_ast_members_class_variable_new(rbs_allocat
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_members_extend_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_extend_t);
+    rbs_ast_members_extend_t *instance = rbs_alloc(allocator, rbs_ast_members_extend_t);
 
     *instance = (rbs_ast_members_extend_t) {
         .base = (rbs_node_t) {
@@ -698,7 +700,7 @@ rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator,
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_members_include_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_include_t);
+    rbs_ast_members_include_t *instance = rbs_alloc(allocator, rbs_ast_members_include_t);
 
     *instance = (rbs_ast_members_include_t) {
         .base = (rbs_node_t) {
@@ -715,7 +717,7 @@ rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocato
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_instance_variable_t *rbs_ast_members_instance_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment) {
-    rbs_ast_members_instance_variable_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_instance_variable_t);
+    rbs_ast_members_instance_variable_t *instance = rbs_alloc(allocator, rbs_ast_members_instance_variable_t);
 
     *instance = (rbs_ast_members_instance_variable_t) {
         .base = (rbs_node_t) {
@@ -731,7 +733,7 @@ rbs_ast_members_instance_variable_t *rbs_ast_members_instance_variable_new(rbs_a
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_method_definition_t *rbs_ast_members_method_definition_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *kind, rbs_node_list_t *overloads, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, bool overloading, rbs_keyword_t *visibility) {
-    rbs_ast_members_method_definition_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_method_definition_t);
+    rbs_ast_members_method_definition_t *instance = rbs_alloc(allocator, rbs_ast_members_method_definition_t);
 
     *instance = (rbs_ast_members_method_definition_t) {
         .base = (rbs_node_t) {
@@ -751,7 +753,7 @@ rbs_ast_members_method_definition_t *rbs_ast_members_method_definition_new(rbs_a
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_method_definition_overload_t *rbs_ast_members_method_definition_overload_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *annotations, rbs_node_t *method_type) {
-    rbs_ast_members_method_definition_overload_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_method_definition_overload_t);
+    rbs_ast_members_method_definition_overload_t *instance = rbs_alloc(allocator, rbs_ast_members_method_definition_overload_t);
 
     *instance = (rbs_ast_members_method_definition_overload_t) {
         .base = (rbs_node_t) {
@@ -766,7 +768,7 @@ rbs_ast_members_method_definition_overload_t *rbs_ast_members_method_definition_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment) {
-    rbs_ast_members_prepend_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_prepend_t);
+    rbs_ast_members_prepend_t *instance = rbs_alloc(allocator, rbs_ast_members_prepend_t);
 
     *instance = (rbs_ast_members_prepend_t) {
         .base = (rbs_node_t) {
@@ -783,7 +785,7 @@ rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocato
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_ast_members_private_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_private_t);
+    rbs_ast_members_private_t *instance = rbs_alloc(allocator, rbs_ast_members_private_t);
 
     *instance = (rbs_ast_members_private_t) {
         .base = (rbs_node_t) {
@@ -796,7 +798,7 @@ rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocato
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_ast_members_public_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_public_t);
+    rbs_ast_members_public_t *instance = rbs_alloc(allocator, rbs_ast_members_public_t);
 
     *instance = (rbs_ast_members_public_t) {
         .base = (rbs_node_t) {
@@ -809,7 +811,7 @@ rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator,
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location) {
-    rbs_ast_ruby_annotations_class_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_class_alias_annotation_t);
+    rbs_ast_ruby_annotations_class_alias_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_class_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_class_alias_annotation_t) {
         .base = (rbs_node_t) {
@@ -826,7 +828,7 @@ rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_clas
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type) {
-    rbs_ast_ruby_annotations_colon_method_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_colon_method_type_annotation_t);
+    rbs_ast_ruby_annotations_colon_method_type_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_colon_method_type_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_colon_method_type_annotation_t) {
         .base = (rbs_node_t) {
@@ -842,7 +844,7 @@ rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotation
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_t *ivar_name_location, rbs_location_t *colon_location, rbs_node_t *type, rbs_location_t *comment_location) {
-    rbs_ast_ruby_annotations_instance_variable_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_instance_variable_annotation_t);
+    rbs_ast_ruby_annotations_instance_variable_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_instance_variable_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_instance_variable_annotation_t) {
         .base = (rbs_node_t) {
@@ -861,7 +863,7 @@ rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotation
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *overloads, rbs_location_list_t *vertical_bar_locations) {
-    rbs_ast_ruby_annotations_method_types_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_method_types_annotation_t);
+    rbs_ast_ruby_annotations_method_types_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_method_types_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_method_types_annotation_t) {
         .base = (rbs_node_t) {
@@ -877,7 +879,7 @@ rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_met
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location) {
-    rbs_ast_ruby_annotations_module_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_module_alias_annotation_t);
+    rbs_ast_ruby_annotations_module_alias_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_module_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_module_alias_annotation_t) {
         .base = (rbs_node_t) {
@@ -894,7 +896,7 @@ rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_mod
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_t *type) {
-    rbs_ast_ruby_annotations_node_type_assertion_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_node_type_assertion_t);
+    rbs_ast_ruby_annotations_node_type_assertion_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_node_type_assertion_t);
 
     *instance = (rbs_ast_ruby_annotations_node_type_assertion_t) {
         .base = (rbs_node_t) {
@@ -909,7 +911,7 @@ rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_ty
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *return_location, rbs_location_t *colon_location, rbs_node_t *return_type, rbs_location_t *comment_location) {
-    rbs_ast_ruby_annotations_return_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_return_type_annotation_t);
+    rbs_ast_ruby_annotations_return_type_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_return_type_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_return_type_annotation_t) {
         .base = (rbs_node_t) {
@@ -927,7 +929,7 @@ rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_retu
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *skip_location, rbs_location_t *comment_location) {
-    rbs_ast_ruby_annotations_skip_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_skip_annotation_t);
+    rbs_ast_ruby_annotations_skip_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_skip_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_skip_annotation_t) {
         .base = (rbs_node_t) {
@@ -943,7 +945,7 @@ rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annota
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *type_args, rbs_location_t *close_bracket_location, rbs_location_list_t *comma_locations) {
-    rbs_ast_ruby_annotations_type_application_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_type_application_annotation_t);
+    rbs_ast_ruby_annotations_type_application_annotation_t *instance = rbs_alloc(allocator, rbs_ast_ruby_annotations_type_application_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_type_application_annotation_t) {
         .base = (rbs_node_t) {
@@ -960,7 +962,7 @@ rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string) {
-    rbs_ast_string_t *instance = rbs_allocator_alloc(allocator, rbs_ast_string_t);
+    rbs_ast_string_t *instance = rbs_alloc(allocator, rbs_ast_string_t);
 
     *instance = (rbs_ast_string_t) {
         .base = (rbs_node_t) {
@@ -974,7 +976,7 @@ rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t 
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *lower_bound, rbs_node_t *default_type, bool unchecked) {
-    rbs_ast_type_param_t *instance = rbs_allocator_alloc(allocator, rbs_ast_type_param_t);
+    rbs_ast_type_param_t *instance = rbs_alloc(allocator, rbs_ast_type_param_t);
 
     *instance = (rbs_ast_type_param_t) {
         .base = (rbs_node_t) {
@@ -993,7 +995,7 @@ rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_loc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_method_type_t *rbs_method_type_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block) {
-    rbs_method_type_t *instance = rbs_allocator_alloc(allocator, rbs_method_type_t);
+    rbs_method_type_t *instance = rbs_alloc(allocator, rbs_method_type_t);
 
     *instance = (rbs_method_type_t) {
         .base = (rbs_node_t) {
@@ -1009,7 +1011,7 @@ rbs_method_type_t *rbs_method_type_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *path, bool absolute) {
-    rbs_namespace_t *instance = rbs_allocator_alloc(allocator, rbs_namespace_t);
+    rbs_namespace_t *instance = rbs_alloc(allocator, rbs_namespace_t);
 
     *instance = (rbs_namespace_t) {
         .base = (rbs_node_t) {
@@ -1024,7 +1026,7 @@ rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_t *l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *directives, rbs_node_list_t *declarations) {
-    rbs_signature_t *instance = rbs_allocator_alloc(allocator, rbs_signature_t);
+    rbs_signature_t *instance = rbs_alloc(allocator, rbs_signature_t);
 
     *instance = (rbs_signature_t) {
         .base = (rbs_node_t) {
@@ -1039,7 +1041,7 @@ rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_t *l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_type_name_t *rbs_type_name_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace, rbs_ast_symbol_t *name) {
-    rbs_type_name_t *instance = rbs_allocator_alloc(allocator, rbs_type_name_t);
+    rbs_type_name_t *instance = rbs_alloc(allocator, rbs_type_name_t);
 
     *instance = (rbs_type_name_t) {
         .base = (rbs_node_t) {
@@ -1054,7 +1056,7 @@ rbs_type_name_t *rbs_type_name_new(rbs_allocator_t *allocator, rbs_location_t *l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args) {
-    rbs_types_alias_t *instance = rbs_allocator_alloc(allocator, rbs_types_alias_t);
+    rbs_types_alias_t *instance = rbs_alloc(allocator, rbs_types_alias_t);
 
     *instance = (rbs_types_alias_t) {
         .base = (rbs_node_t) {
@@ -1069,7 +1071,7 @@ rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, rbs_location_t *location, bool todo) {
-    rbs_types_bases_any_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_any_t);
+    rbs_types_bases_any_t *instance = rbs_alloc(allocator, rbs_types_bases_any_t);
 
     *instance = (rbs_types_bases_any_t) {
         .base = (rbs_node_t) {
@@ -1083,7 +1085,7 @@ rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, rbs_l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_bool_t *rbs_types_bases_bool_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_bool_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_bool_t);
+    rbs_types_bases_bool_t *instance = rbs_alloc(allocator, rbs_types_bases_bool_t);
 
     *instance = (rbs_types_bases_bool_t) {
         .base = (rbs_node_t) {
@@ -1096,7 +1098,7 @@ rbs_types_bases_bool_t *rbs_types_bases_bool_new(rbs_allocator_t *allocator, rbs
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_bottom_t *rbs_types_bases_bottom_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_bottom_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_bottom_t);
+    rbs_types_bases_bottom_t *instance = rbs_alloc(allocator, rbs_types_bases_bottom_t);
 
     *instance = (rbs_types_bases_bottom_t) {
         .base = (rbs_node_t) {
@@ -1109,7 +1111,7 @@ rbs_types_bases_bottom_t *rbs_types_bases_bottom_new(rbs_allocator_t *allocator,
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_class_t *rbs_types_bases_class_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_class_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_class_t);
+    rbs_types_bases_class_t *instance = rbs_alloc(allocator, rbs_types_bases_class_t);
 
     *instance = (rbs_types_bases_class_t) {
         .base = (rbs_node_t) {
@@ -1122,7 +1124,7 @@ rbs_types_bases_class_t *rbs_types_bases_class_new(rbs_allocator_t *allocator, r
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_instance_t *rbs_types_bases_instance_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_instance_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_instance_t);
+    rbs_types_bases_instance_t *instance = rbs_alloc(allocator, rbs_types_bases_instance_t);
 
     *instance = (rbs_types_bases_instance_t) {
         .base = (rbs_node_t) {
@@ -1135,7 +1137,7 @@ rbs_types_bases_instance_t *rbs_types_bases_instance_new(rbs_allocator_t *alloca
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_nil_t *rbs_types_bases_nil_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_nil_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_nil_t);
+    rbs_types_bases_nil_t *instance = rbs_alloc(allocator, rbs_types_bases_nil_t);
 
     *instance = (rbs_types_bases_nil_t) {
         .base = (rbs_node_t) {
@@ -1148,7 +1150,7 @@ rbs_types_bases_nil_t *rbs_types_bases_nil_new(rbs_allocator_t *allocator, rbs_l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_self_t *rbs_types_bases_self_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_self_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_self_t);
+    rbs_types_bases_self_t *instance = rbs_alloc(allocator, rbs_types_bases_self_t);
 
     *instance = (rbs_types_bases_self_t) {
         .base = (rbs_node_t) {
@@ -1161,7 +1163,7 @@ rbs_types_bases_self_t *rbs_types_bases_self_new(rbs_allocator_t *allocator, rbs
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_top_t *rbs_types_bases_top_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_top_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_top_t);
+    rbs_types_bases_top_t *instance = rbs_alloc(allocator, rbs_types_bases_top_t);
 
     *instance = (rbs_types_bases_top_t) {
         .base = (rbs_node_t) {
@@ -1174,7 +1176,7 @@ rbs_types_bases_top_t *rbs_types_bases_top_new(rbs_allocator_t *allocator, rbs_l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_bases_void_t *rbs_types_bases_void_new(rbs_allocator_t *allocator, rbs_location_t *location) {
-    rbs_types_bases_void_t *instance = rbs_allocator_alloc(allocator, rbs_types_bases_void_t);
+    rbs_types_bases_void_t *instance = rbs_alloc(allocator, rbs_types_bases_void_t);
 
     *instance = (rbs_types_bases_void_t) {
         .base = (rbs_node_t) {
@@ -1187,7 +1189,7 @@ rbs_types_bases_void_t *rbs_types_bases_void_new(rbs_allocator_t *allocator, rbs
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required, rbs_node_t *self_type) {
-    rbs_types_block_t *instance = rbs_allocator_alloc(allocator, rbs_types_block_t);
+    rbs_types_block_t *instance = rbs_alloc(allocator, rbs_types_block_t);
 
     *instance = (rbs_types_block_t) {
         .base = (rbs_node_t) {
@@ -1203,7 +1205,7 @@ rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_class_instance_t *rbs_types_class_instance_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args) {
-    rbs_types_class_instance_t *instance = rbs_allocator_alloc(allocator, rbs_types_class_instance_t);
+    rbs_types_class_instance_t *instance = rbs_alloc(allocator, rbs_types_class_instance_t);
 
     *instance = (rbs_types_class_instance_t) {
         .base = (rbs_node_t) {
@@ -1218,7 +1220,7 @@ rbs_types_class_instance_t *rbs_types_class_instance_new(rbs_allocator_t *alloca
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name) {
-    rbs_types_class_singleton_t *instance = rbs_allocator_alloc(allocator, rbs_types_class_singleton_t);
+    rbs_types_class_singleton_t *instance = rbs_alloc(allocator, rbs_types_class_singleton_t);
 
     *instance = (rbs_types_class_singleton_t) {
         .base = (rbs_node_t) {
@@ -1232,7 +1234,7 @@ rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allo
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *required_positionals, rbs_node_list_t *optional_positionals, rbs_node_t *rest_positionals, rbs_node_list_t *trailing_positionals, rbs_hash_t *required_keywords, rbs_hash_t *optional_keywords, rbs_node_t *rest_keywords, rbs_node_t *return_type) {
-    rbs_types_function_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_t);
+    rbs_types_function_t *instance = rbs_alloc(allocator, rbs_types_function_t);
 
     *instance = (rbs_types_function_t) {
         .base = (rbs_node_t) {
@@ -1253,7 +1255,7 @@ rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_loc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_ast_symbol_t *name) {
-    rbs_types_function_param_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_param_t);
+    rbs_types_function_param_t *instance = rbs_alloc(allocator, rbs_types_function_param_t);
 
     *instance = (rbs_types_function_param_t) {
         .base = (rbs_node_t) {
@@ -1268,7 +1270,7 @@ rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *alloca
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args) {
-    rbs_types_interface_t *instance = rbs_allocator_alloc(allocator, rbs_types_interface_t);
+    rbs_types_interface_t *instance = rbs_alloc(allocator, rbs_types_interface_t);
 
     *instance = (rbs_types_interface_t) {
         .base = (rbs_node_t) {
@@ -1283,7 +1285,7 @@ rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_l
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
-    rbs_types_intersection_t *instance = rbs_allocator_alloc(allocator, rbs_types_intersection_t);
+    rbs_types_intersection_t *instance = rbs_alloc(allocator, rbs_types_intersection_t);
 
     *instance = (rbs_types_intersection_t) {
         .base = (rbs_node_t) {
@@ -1297,7 +1299,7 @@ rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator,
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *literal) {
-    rbs_types_literal_t *instance = rbs_allocator_alloc(allocator, rbs_types_literal_t);
+    rbs_types_literal_t *instance = rbs_alloc(allocator, rbs_types_literal_t);
 
     *instance = (rbs_types_literal_t) {
         .base = (rbs_node_t) {
@@ -1311,7 +1313,7 @@ rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_locat
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type) {
-    rbs_types_optional_t *instance = rbs_allocator_alloc(allocator, rbs_types_optional_t);
+    rbs_types_optional_t *instance = rbs_alloc(allocator, rbs_types_optional_t);
 
     *instance = (rbs_types_optional_t) {
         .base = (rbs_node_t) {
@@ -1325,7 +1327,7 @@ rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_loc
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_types_block_t *block, rbs_node_t *self_type) {
-    rbs_types_proc_t *instance = rbs_allocator_alloc(allocator, rbs_types_proc_t);
+    rbs_types_proc_t *instance = rbs_alloc(allocator, rbs_types_proc_t);
 
     *instance = (rbs_types_proc_t) {
         .base = (rbs_node_t) {
@@ -1341,7 +1343,7 @@ rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_location_t 
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_hash_t *all_fields) {
-    rbs_types_record_t *instance = rbs_allocator_alloc(allocator, rbs_types_record_t);
+    rbs_types_record_t *instance = rbs_alloc(allocator, rbs_types_record_t);
 
     *instance = (rbs_types_record_t) {
         .base = (rbs_node_t) {
@@ -1355,7 +1357,7 @@ rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_locatio
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_record_field_type_t *rbs_types_record_field_type_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required) {
-    rbs_types_record_field_type_t *instance = rbs_allocator_alloc(allocator, rbs_types_record_field_type_t);
+    rbs_types_record_field_type_t *instance = rbs_alloc(allocator, rbs_types_record_field_type_t);
 
     *instance = (rbs_types_record_field_type_t) {
         .base = (rbs_node_t) {
@@ -1370,7 +1372,7 @@ rbs_types_record_field_type_t *rbs_types_record_field_type_new(rbs_allocator_t *
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
-    rbs_types_tuple_t *instance = rbs_allocator_alloc(allocator, rbs_types_tuple_t);
+    rbs_types_tuple_t *instance = rbs_alloc(allocator, rbs_types_tuple_t);
 
     *instance = (rbs_types_tuple_t) {
         .base = (rbs_node_t) {
@@ -1384,7 +1386,7 @@ rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types) {
-    rbs_types_union_t *instance = rbs_allocator_alloc(allocator, rbs_types_union_t);
+    rbs_types_union_t *instance = rbs_alloc(allocator, rbs_types_union_t);
 
     *instance = (rbs_types_union_t) {
         .base = (rbs_node_t) {
@@ -1398,7 +1400,7 @@ rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_untyped_function_t *rbs_types_untyped_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *return_type) {
-    rbs_types_untyped_function_t *instance = rbs_allocator_alloc(allocator, rbs_types_untyped_function_t);
+    rbs_types_untyped_function_t *instance = rbs_alloc(allocator, rbs_types_untyped_function_t);
 
     *instance = (rbs_types_untyped_function_t) {
         .base = (rbs_node_t) {
@@ -1412,7 +1414,7 @@ rbs_types_untyped_function_t *rbs_types_untyped_function_new(rbs_allocator_t *al
 }
 #line 156 "prism/templates/src/ast.c.erb"
 rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name) {
-    rbs_types_variable_t *instance = rbs_allocator_alloc(allocator, rbs_types_variable_t);
+    rbs_types_variable_t *instance = rbs_alloc(allocator, rbs_types_variable_t);
 
     *instance = (rbs_types_variable_t) {
         .base = (rbs_node_t) {
