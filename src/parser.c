@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "rbs/defines.h"
+#include "rbs/lexer.h"
 #include "rbs/string.h"
 #include "rbs/util/rbs_unescape.h"
 #include "rbs/util/rbs_buffer.h"
@@ -3456,6 +3457,14 @@ void rbs_print_token(rbs_token_t tok) {
     );
 }
 
+void rbs_print_lexer(rbs_lexer_t *lexer) {
+    printf("Lexer: (range = %d...%d, encoding = %s\n", lexer->start_pos, lexer->end_pos, lexer->encoding->name);
+    printf("  start = { char_pos = %d, byte_pos = %d }\n", lexer->start.char_pos, lexer->start.byte_pos);
+    printf("  current = { char_pos = %d, byte_pos = %d }\n", lexer->current.char_pos, lexer->current.byte_pos);
+    printf("  character = { code_point = %d (%c), bytes = %zu }\n", lexer->current_code_point, lexer->current_code_point < 256 ? lexer->current_code_point : '?', lexer->current_character_bytes);
+    printf("  first_token_of_line = %s\n", lexer->first_token_of_line ? "true" : "false");
+}
+
 rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line) {
     int comment_line = subject_line - 1;
 
@@ -3484,14 +3493,28 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
         .end_pos = end_pos,
         .current = start_position,
         .start = { 0 },
-        .first_token_of_line = false,
-        .last_char = 0,
+        .first_token_of_line = true,
+        .current_character_bytes = 0,
+        .current_code_point = '\0',
         .encoding = encoding,
     };
 
-    rbs_skipn(lexer, start_pos);
+    unsigned int codepoint;
+    size_t bytes;
+
+    if (rbs_next_char(lexer, &codepoint, &bytes)) {
+        lexer->current_code_point = codepoint;
+        lexer->current_character_bytes = bytes;
+    } else {
+        lexer->current_code_point = '\0';
+        lexer->current_character_bytes = 1;
+    }
+
+    if (start_pos > 0) {
+        rbs_skipn(lexer, start_pos);
+    }
+
     lexer->start = lexer->current;
-    lexer->first_token_of_line = lexer->current.column == 0;
 
     return lexer;
 }

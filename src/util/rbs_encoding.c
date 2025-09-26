@@ -4620,6 +4620,7 @@ rbs_unicode_codepoint_match(rbs_unicode_codepoint_t codepoint, const rbs_unicode
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+// clang-format off
 static const uint8_t rbs_utf_8_dfa[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00..1f
     0,
@@ -4991,6 +4992,7 @@ static const uint8_t rbs_utf_8_dfa[] = {
     1,
     1, // s7..s8
 };
+// clang-format on
 
 /**
  * Given a pointer to a string and the number of bytes remaining in the string,
@@ -4999,7 +5001,7 @@ static const uint8_t rbs_utf_8_dfa[] = {
  */
 static rbs_unicode_codepoint_t
 rbs_utf_8_codepoint(const uint8_t *b, ptrdiff_t n, size_t *width) {
-    rbs_assert(n >= 0, "n must be greater than or equal to 0. Got %ti", n);
+    rbs_assert(n >= 0, "[rbs_unicode_codepoint_t] n must be greater than or equal to 0. Got %ti", n);
 
     size_t maximum = (n > 4) ? 4 : ((size_t) n);
     uint32_t codepoint;
@@ -5029,7 +5031,7 @@ rbs_utf_8_codepoint(const uint8_t *b, ptrdiff_t n, size_t *width) {
  */
 size_t
 rbs_encoding_utf_8_char_width(const uint8_t *b, ptrdiff_t n) {
-    rbs_assert(n >= 0, "n must be greater than or equal to 0. Got %ti", n);
+    rbs_assert(n >= 0, "[rbs_encoding_utf_8_char_width] n must be greater than or equal to 0. Got %ti", n);
 
     size_t maximum = (n > 4) ? 4 : ((size_t) n);
     uint32_t state = 0;
