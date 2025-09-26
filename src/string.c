@@ -1,4 +1,5 @@
 #include "rbs/string.h"
+#include "rbs/defines.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ unsigned int rbs_utf8_string_to_codepoint(const rbs_string_t string) {
 
     if (s >= end) return 0; // End of string
 
-    if ((*s & 0x80) == 0) {
+    if (RBS_LIKELY((*s & 0x80) == 0)) {
         // Single byte character (0xxxxxxx)
         return *s;
     } else if ((*s & 0xE0) == 0xC0) {
