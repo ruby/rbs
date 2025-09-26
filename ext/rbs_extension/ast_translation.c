@@ -11,6 +11,9 @@
 #include "rbs_string_bridging.h"
 #include "legacy_location.h"
 
+VALUE EMPTY_ARRAY;
+VALUE EMPTY_HASH;
+
 #define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
@@ -32,6 +35,10 @@ VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t
 }
 
 VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash) {
+    if (!rbs_hash->head) {
+        return EMPTY_HASH;
+    }
+
     VALUE ruby_hash = rb_hash_new();
 
     for (rbs_hash_node_t *n = rbs_hash->head; n != NULL; n = n->next) {
@@ -60,11 +67,11 @@ VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *so
 }
 
 VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_list_t *list) {
-    VALUE ruby_array = rb_ary_new();
-
     if (list == NULL) {
-        return ruby_array;
+        return EMPTY_ARRAY;
     }
+
+    VALUE ruby_array = rb_ary_new();
 
     for (rbs_location_list_node_t *n = list->head; n != NULL; n = n->next) {
         rb_ary_push(ruby_array, rbs_loc_to_ruby_location(ctx, n->loc));
