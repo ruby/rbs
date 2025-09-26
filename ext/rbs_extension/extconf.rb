@@ -18,7 +18,7 @@ append_cflags [
   '-Wc++-compat',
 ]
 
-append_cflags ['-O0', '-g'] if ENV['DEBUG']
+append_cflags ['-O0', '-pg'] if ENV['DEBUG']
 if ENV["TEST_NO_C23"]
   puts "Adding -Wc2x-extensions to CFLAGS"
   $CFLAGS << " -Werror -Wc2x-extensions"

@@ -1,4 +1,6 @@
+#include "rbs/defines.h"
 #include "rbs/lexer.h"
+#include "rbs/util/rbs_assert.h"
 
 static const char *RBS_TOKENTYPE_NAMES[] = {
     "NullType",
@@ -105,17 +107,60 @@ int rbs_token_bytes(rbs_token_t tok) {
 }
 
 unsigned int rbs_peek(rbs_lexer_t *lexer) {
-    if (lexer->current.char_pos == lexer->end_pos) {
-        lexer->last_char = '\0';
-        return 0;
+    return lexer->current_code_point;
+}
+
+bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len) {
+    if (RBS_UNLIKELY(lexer->current.char_pos == lexer->end_pos)) {
+        return false;
+    }
+
+    const char *start = lexer->string.start + lexer->current.byte_pos;
+
+    // Fast path for ASCII (single-byte) characters
+    if ((unsigned int) *start < 128) {
+        *codepoint = (unsigned int) *start;
+        *byte_len = 1;
+        return true;
+    }
+
+    *byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
+
+    if (*byte_len == 1) {
+        *codepoint = (unsigned int) *start;
     } else {
-        rbs_string_t str = rbs_string_new(
-            lexer->string.start + lexer->current.byte_pos,
-            lexer->string.end
-        );
-        unsigned int c = rbs_utf8_string_to_codepoint(str);
-        lexer->last_char = c;
-        return c;
+        *codepoint = 12523; // Dummy data for "ル" from "ルビー" (Ruby) in Unicode
+    }
+
+    return true;
+}
+
+void rbs_skip(rbs_lexer_t *lexer) {
+    rbs_assert(lexer->current_character_bytes > 0, "rbs_skip called with current_character_bytes == 0");
+
+    if (RBS_UNLIKELY(lexer->current_code_point == '\0')) {
+        return;
+    }
+
+    unsigned int codepoint;
+    size_t byte_len;
+
+    lexer->current.byte_pos += lexer->current_character_bytes;
+    lexer->current.char_pos += 1;
+    if (lexer->current_code_point == '\n') {
+        lexer->current.line += 1;
+        lexer->current.column = 0;
+        lexer->first_token_of_line = true;
+    } else {
+        lexer->current.column += 1;
+    }
+
+    if (rbs_next_char(lexer, &codepoint, &byte_len)) {
+        lexer->current_code_point = codepoint;
+        lexer->current_character_bytes = byte_len;
+    } else {
+        lexer->current_character_bytes = 1;
+        lexer->current_code_point = '\0';
     }
 }
 
@@ -149,35 +194,8 @@ rbs_token_t rbs_next_eof_token(rbs_lexer_t *lexer) {
     }
 }
 
-void rbs_skip(rbs_lexer_t *lexer) {
-    if (!lexer->last_char) {
-        rbs_peek(lexer);
-    }
-
-    size_t byte_len;
-
-    if (lexer->last_char == '\0') {
-        byte_len = 1;
-    } else {
-        const char *start = lexer->string.start + lexer->current.byte_pos;
-        byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
-    }
-
-    lexer->current.char_pos += 1;
-    lexer->current.byte_pos += byte_len;
-
-    if (lexer->last_char == '\n') {
-        lexer->current.line += 1;
-        lexer->current.column = 0;
-        lexer->first_token_of_line = true;
-    } else {
-        lexer->current.column += 1;
-    }
-}
-
 void rbs_skipn(rbs_lexer_t *lexer, size_t size) {
     for (size_t i = 0; i < size; i++) {
-        rbs_peek(lexer);
         rbs_skip(lexer);
     }
 }
