@@ -795,6 +795,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             version: "0.3.0"
             source:
               type: rubygems
+          - name: random-formatter
+            version: "0"
+            source:
+              type: stdlib
           - name: securerandom
             version: "0"
             source:
