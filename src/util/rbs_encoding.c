@@ -4620,6 +4620,7 @@ rbs_unicode_codepoint_match(rbs_unicode_codepoint_t codepoint, const rbs_unicode
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+// clang-format off
 static const uint8_t rbs_utf_8_dfa[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00..1f
     0,
@@ -4991,6 +4992,7 @@ static const uint8_t rbs_utf_8_dfa[] = {
     1,
     1, // s7..s8
 };
+// clang-format on
 
 /**
  * Given a pointer to a string and the number of bytes remaining in the string,
