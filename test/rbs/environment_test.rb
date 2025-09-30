@@ -601,6 +601,34 @@ type s = untyped
     end
   end
 
+  def test_resolve_type_names_module_alias
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+module M
+  module N
+  end
+
+  module N2 = N
+end
+
+class C
+  include M::N2
+end
+    RBS
+
+    env = Environment.new
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::C")]
+      class_decl.each_decl do |decl|
+        decl.members[0].tap do |member|
+          assert_instance_of RBS::AST::Members::Include, member
+          assert_equal RBS::TypeName.parse("::M::N"), member.name
+        end
+      end
+    end
+  end
+
   def parse_inline(src)
     buffer = RBS::Buffer.new(name: Pathname("a.rb"), content: src)
     prism = Prism.parse(src)
@@ -802,7 +830,7 @@ type s = untyped
       end
       class Array
       end
-      
+
       # Basic class alias without explicit type name
       MyString = String #: class-alias
 

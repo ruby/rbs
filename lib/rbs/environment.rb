@@ -515,7 +515,7 @@ module RBS
     end
 
     def resolve_type_names(only: nil)
-      resolver = Resolver::TypeNameResolver.new(self)
+      resolver = Resolver::TypeNameResolver.build(self)
       env = Environment.new
 
       table = UseMap::Table.new()

@@ -27,7 +27,7 @@ type ty = String | Integer
       manager.build do |env|
         root = nil
 
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("::Foo"), context: root)
@@ -83,7 +83,7 @@ type u_2 = string & u & Numeric
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
         env.type_alias_decls.each do |name, decl|
           assert_raises RBS::RecursiveTypeAliasError do
@@ -113,7 +113,7 @@ type proc = ^(proc) -> proc
 type record = { foo: record }
       EOF
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         env.type_alias_decls.each do |name, entry|
@@ -134,7 +134,7 @@ type baz[out T] = ^(T) -> void
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -166,7 +166,7 @@ type bar[T < _Foo[S], S < _Bar[T]] = nil
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -196,7 +196,7 @@ type bar[T > _Foo[S], S > _Bar[T]] = nil
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -227,7 +227,7 @@ type foo[unchecked out A, unchecked in B] = Foo[A, B]
       RBS
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")])
@@ -242,7 +242,7 @@ type foo = bar
       RBS
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         # No error is raised.
@@ -251,7 +251,7 @@ type foo = bar
         # Passing a block and validating the given type raises an error.
         assert_raises RBS::NoTypeFoundError do
           validator.validate_type_alias(entry: env.type_alias_decls[type_name("::foo")]) do |type|
-            validator.validate_type(type, context: [])
+            validator.validate_type(type, context: nil)
           end
         end
       end
@@ -269,7 +269,7 @@ class Baz = Baz
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         env.class_alias_decls[RBS::TypeName.parse("::Foo")].tap do |entry|
@@ -323,7 +323,7 @@ type foo = Bar::Baz
       manager.build do |env|
         root = nil
 
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("Bar::Baz"), context: root)
@@ -345,7 +345,7 @@ class Foo::Baz = Integer
       manager.build do |env|
         root = nil
 
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("singleton(Bar::Baz)"), context: root)
@@ -366,7 +366,7 @@ module Bar = Foo
       manager.build do |env|
         root = nil
 
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("Bar::list[Bar]"), context: root)
@@ -388,7 +388,7 @@ type Foo::list[T < Baz] = nil | [T, Bar::list[T]]
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type_alias(entry: env.type_alias_decls[RBS::TypeName.parse("::Foo::list")])
@@ -410,7 +410,7 @@ end
       manager.build do |env|
         root = nil
 
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         validator.validate_type(parse_type("::A"), context: root)
@@ -438,7 +438,7 @@ end
       EOF
 
       manager.build do |env|
-        resolver = RBS::Resolver::TypeNameResolver.new(env)
+        resolver = RBS::Resolver::TypeNameResolver.build(env)
         validator = RBS::Validator.new(env: env, resolver: resolver)
 
         env.class_decls[RBS::TypeName.parse("::Foo")].primary_decl.members.tap do |members|
