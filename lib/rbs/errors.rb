@@ -93,7 +93,7 @@ module RBS
       params =
         case
         when type_name.class?
-          decl = env.normalized_module_class_entry(type_name) or raise
+          decl = env.module_class_entry(type_name, normalized: true) or raise
           decl.type_params
         when type_name.interface?
           env.interface_decls.fetch(type_name).decl.type_params
@@ -491,7 +491,7 @@ module RBS
              else
                raise "Unknown member type: #{member.class}"
              end
-      
+
       if env.class_decl?(name)
         raise new(type_name: type_name, member: member)
       end

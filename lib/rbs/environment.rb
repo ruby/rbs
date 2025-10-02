@@ -122,21 +122,17 @@ module RBS
       end
     end
 
-    def class_entry(type_name)
-      case
-      when (class_entry = class_decls[type_name]).is_a?(ClassEntry)
-        class_entry
-      when (class_alias = class_alias_decls[type_name]).is_a?(ClassAliasEntry)
-        class_alias
+    def class_entry(type_name, normalized: false)
+      case entry = constant_entry(type_name, normalized: normalized || false)
+      when ClassEntry, ClassAliasEntry
+        entry
       end
     end
 
-    def module_entry(type_name)
-      case
-      when (module_entry = class_decls[type_name]).is_a?(ModuleEntry)
-        module_entry
-      when (module_alias = class_alias_decls[type_name]).is_a?(ModuleAliasEntry)
-        module_alias
+    def module_entry(type_name, normalized: false)
+      case entry = constant_entry(type_name, normalized: normalized || false)
+      when ModuleEntry, ModuleAliasEntry
+        entry
       end
     end
 
@@ -152,26 +148,40 @@ module RBS
     end
 
     def normalized_module_entry(type_name)
-      if name = normalize_module_name?(type_name)
-        case entry = module_entry(name)
-        when ModuleEntry, nil
-          entry
-        when ModuleAliasEntry
-          raise
-        end
+      module_entry(type_name, normalized: true)
+    end
+
+    def module_class_entry(type_name, normalized: false)
+      entry = constant_entry(type_name, normalized: normalized || false)
+      if entry.is_a?(ConstantEntry)
+        nil
+      else
+        entry
       end
     end
 
-    def module_class_entry(type_name)
-      class_entry(type_name) || module_entry(type_name)
-    end
-
     def normalized_module_class_entry(type_name)
-      normalized_class_entry(type_name) || normalized_module_entry(type_name)
+      module_class_entry(type_name, normalized: true)
     end
 
-    def constant_entry(type_name)
-      class_entry(type_name) || module_entry(type_name) || constant_decls[type_name]
+    def constant_entry(type_name, normalized: false)
+      if normalized
+        if normalized_name = normalize_module_name?(type_name)
+          class_decls.fetch(normalized_name, nil)
+        else
+          # The type_name may be declared with constant declaration
+          unless type_name.namespace.empty?
+            parent = type_name.namespace.to_type_name
+            normalized_parent = normalize_module_name?(parent) or return
+            constant_name = TypeName.new(name: type_name.name, namespace: normalized_parent.to_namespace)
+            constant_decls.fetch(constant_name, nil)
+          end
+        end
+      else
+        class_decls.fetch(type_name, nil) ||
+          class_alias_decls.fetch(type_name, nil) ||
+          constant_decls.fetch(type_name, nil)
+      end
     end
 
     def normalize_type_name?(name)
@@ -206,6 +216,10 @@ module RBS
       end
     end
 
+    def normalize_type_name(name)
+      normalize_type_name?(name) || name
+    end
+
     def normalized_type_name?(type_name)
       case
       when type_name.interface?
@@ -220,53 +234,44 @@ module RBS
     end
 
     def normalized_type_name!(name)
-      normalized_type_name?(name) or raise "Normalized type name is expected but given `#{name}`, which is normalized to `#{normalize_type_name?(name)}`"
+      normalized_type_name?(name) or raise "Normalized type name is expected but given `#{name}`"
       name
-    end
-
-    def normalize_type_name(name)
-      normalize_type_name?(name) || name
-    end
-
-    def normalize_module_name(name)
-      normalize_module_name?(name) or name
     end
 
     def normalize_module_name?(name)
       raise "Class/module name is expected: #{name}" unless name.class?
       name = name.absolute! unless name.absolute?
 
-      if @normalize_module_name_cache.key?(name)
-        return @normalize_module_name_cache[name]
+      original_name = name
+
+      if @normalize_module_name_cache.key?(original_name)
+        return @normalize_module_name_cache[original_name]
       end
 
-      unless name.namespace.empty?
-        parent = name.namespace.to_type_name
-        if normalized_parent = normalize_module_name?(parent)
-          type_name = TypeName.new(namespace: normalized_parent.to_namespace, name: name.name)
-        else
-          @normalize_module_name_cache[name] = nil
-          return
+      if alias_entry = class_alias_decls.fetch(name, nil)
+        unless alias_entry.decl.old_name.absolute?
+          # Having relative old_name means the type name resolution was failed.
+          # Run TypeNameResolver for failure reason
+          resolver = Resolver::TypeNameResolver.build(self)
+          name = resolver.resolve_namespace(name, context: nil)
+          @normalize_module_name_cache[original_name] = name
+          return name
         end
-      else
-        type_name = name
+
+        name = alias_entry.decl.old_name
       end
 
-      @normalize_module_name_cache[name] = false
+      if class_decls.key?(name)
+        @normalize_module_name_cache[original_name] = name
+      end
+    end
 
-      entry = constant_entry(type_name)
+    def normalize_module_name(name)
+      normalize_module_name?(name) || name
+    end
 
-      normalized_type_name =
-        case entry
-        when ClassEntry, ModuleEntry
-          type_name
-        when ClassAliasEntry, ModuleAliasEntry
-          normalize_module_name?(entry.decl.old_name)
-        else
-          nil
-        end
-
-      @normalize_module_name_cache[name] = normalized_type_name
+    def normalize_module_name!(name)
+      normalize_module_name?(name) or raise "Module name `#{name}` cannot be normalized"
     end
 
     def insert_rbs_decl(decl, context:, namespace:)
