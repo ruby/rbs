@@ -75,15 +75,6 @@ typedef struct <%= node.c_base_name %> {
 
 <%- end -%>
 
-typedef union rbs_ast_ruby_annotations {
-  rbs_node_t base;
-  rbs_ast_ruby_annotations_colon_method_type_annotation_t colon_method_type_annotation;
-  rbs_ast_ruby_annotations_method_types_annotation_t method_types_annotation;
-  rbs_ast_ruby_annotations_node_type_assertion_t node_type_assertion;
-  rbs_ast_ruby_annotations_return_type_annotation_t return_type_annotation;
-  rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
-} rbs_ast_ruby_annotations_t;
-
 /// `rbs_keyword_t` models RBS keywords like "private", "instance", "covariant", etc.
 /// These are stored in the global constant pool, and get surfaced to Ruby as `Symbol`s,
 /// just like `rbs_ast_symbol_t`s.

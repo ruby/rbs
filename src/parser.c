@@ -60,8 +60,6 @@
   case kUSE: \
   case kAS: \
   case k__TODO__: \
-  case kSKIP: \
-  case kRETURN: \
   /* nop */
 
 #define CHECK_PARSE(call) \
@@ -196,8 +194,6 @@ static bool parse_type_name(rbs_parser_t *parser, TypeNameKind kind, rbs_range_t
 
   switch (parser->current_token.type) {
     case tLIDENT:
-    case kSKIP:
-    case kRETURN:
       if (kind & ALIAS_NAME) goto success;
       goto error_handling;
     case tULIDENT:
@@ -975,8 +971,6 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
         kind = INTERFACE_NAME;
         break;
       }
-      case kSKIP:
-      case kRETURN:
       case tLIDENT: {
         kind = ALIAS_NAME;
         break;
@@ -1193,8 +1187,6 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type) {
   }
   case tULIDENT:
   case tLIDENT:
-  case kSKIP:
-  case kRETURN:
   case pCOLON2: {
     rbs_node_t *instance_type = NULL;
     CHECK_PARSE(parse_instance_type(parser, true, &instance_type));
@@ -2141,8 +2133,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
 
   switch (parser->current_token.type)
   {
-  case tAIDENT:
-  case kATRBS: {
+  case tAIDENT: {
     rbs_range_t name_range = parser->current_token.range;
     rbs_location_t *symbolLoc = rbs_location_new(ALLOCATOR(), name_range);
     rbs_ast_symbol_t *name = rbs_ast_symbol_new(ALLOCATOR(), symbolLoc, &parser->constant_pool, INTERN_TOKEN(parser, parser->current_token));
@@ -2196,7 +2187,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
     };
 
     ADVANCE_ASSERT(parser, pDOT);
-    if (parser->next_token.type == tAIDENT || parser->next_token.type == kATRBS) {
+    if (parser->next_token.type == tAIDENT) {
       rbs_parser_advance(parser);
     } else {
       rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
@@ -2329,7 +2320,7 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     ADVANCE_ASSERT(parser, pLPAREN);
     ivar_range.start = parser->current_token.range.start;
 
-    if (parser_advance_if(parser, tAIDENT) || parser_advance_if(parser, kATRBS)) {
+    if (parser_advance_if(parser, tAIDENT)) {
       rbs_location_t *symbolLoc = rbs_location_current_token(parser);
       ivar_name = (rbs_node_t *) rbs_ast_symbol_new(ALLOCATOR(), symbolLoc, &parser->constant_pool, INTERN_TOKEN(parser, parser->current_token));
       ivar_name_range = parser->current_token.range;
@@ -2582,7 +2573,6 @@ static bool parse_module_members(rbs_parser_t *parser, rbs_node_list_t **members
     }
     case tAIDENT:
     case tA2IDENT:
-    case kATRBS:
     case kSELF: {
       CHECK_PARSE(parse_variable_member(parser, annot_pos, annotations, &member));
       break;
@@ -3473,267 +3463,4 @@ void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_err
   parser->error->token = tok;
   parser->error->message = message;
   parser->error->syntax_error = syntax_error;
-}
-
-/*
-  parse_method_overload ::= {} annotations <method_type>
- */
-NODISCARD
-static bool parse_method_overload(rbs_parser_t *parser, rbs_node_list_t *annotations, rbs_method_type_t **method_type) {
-  rbs_position_t pos = NullPosition;
-
-  if (!parse_annotations(parser, annotations, &pos)) {
-    return false;
-  }
-
-  return rbs_parse_method_type(parser, method_type);
-}
-
-/*
-  inline_method_overloads ::= {} <overload>                        -- returns true
-                           | {} overload `|` ... `|` overload     -- returns true
-                           | {<>}                                 -- returns false
-*/
-NODISCARD
-static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_list_t *bar_locations) {
-  while (true) {
-    rbs_node_list_t *annotations = rbs_node_list_new(ALLOCATOR());
-    rbs_method_type_t *method_type = NULL;
-
-    if (!parse_method_overload(parser, annotations, &method_type)) {
-      return false;
-    }
-
-    rbs_location_t *location = rbs_location_new(ALLOCATOR(), parser->current_token.range);
-    rbs_ast_members_method_definition_overload_t *overload = rbs_ast_members_method_definition_overload_new(
-      ALLOCATOR(),
-      location,
-      annotations,
-      (rbs_node_t *) method_type
-    );
-    rbs_node_list_append(overloads, (rbs_node_t *) overload);
-
-    if (parser->next_token.type == pBAR) {
-      rbs_location_t *bar_location = rbs_location_new(ALLOCATOR(), parser->next_token.range);
-
-      rbs_parser_advance(parser);
-
-      rbs_location_list_append(bar_locations, bar_location);
-
-      continue;
-    }
-
-    return true;
-  }
-}
-
-NODISCARD
-static bool parse_inline_comment(rbs_parser_t *parser, rbs_location_t **comment) {
-  if (parser->next_token.type != tINLINECOMMENT) {
-    *comment = NULL;
-    return true;
-  }
-
-  rbs_range_t comment_range = parser->next_token.range;
-  rbs_parser_advance(parser);
-
-  *comment = rbs_location_new(ALLOCATOR(), comment_range);
-  return true;
-}
-
-NODISCARD
-static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
-  switch (parser->next_token.type) {
-    case pCOLON: {
-      rbs_range_t colon_range = parser->next_token.range;
-      rbs_parser_advance(parser);
-
-      rbs_node_list_t *annotations = rbs_node_list_new(ALLOCATOR());
-      rbs_method_type_t *method_type = NULL;
-
-      if (!parse_method_overload(parser, annotations, &method_type)) {
-        return false;
-      }
-
-      rbs_range_t full_range = {
-        .start = colon_range.start,
-        .end = parser->current_token.range.end
-      };
-
-      rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-      rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
-
-      *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_colon_method_type_annotation_new(
-        ALLOCATOR(),
-        full_loc,
-        colon_loc,
-        annotations,
-        (rbs_node_t *) method_type
-      );
-      return true;
-    }
-    case kATRBS: {
-      rbs_range_t rbs_range = parser->next_token.range;
-      rbs_parser_advance(parser);
-
-      switch (parser->next_token.type) {
-        case pLPAREN:
-        case pLBRACKET:
-        case pLBRACE:
-        case tANNOTATION: {
-          rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
-          rbs_location_list_t *bar_locations = rbs_location_list_new(ALLOCATOR());
-
-          if (!parse_inline_method_overloads(parser, overloads, bar_locations)) {
-            return false;
-          }
-
-          rbs_range_t full_range = {
-            .start = rbs_range.start,
-            .end = parser->current_token.range.end
-          };
-
-          rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-          rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
-
-          *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_method_types_annotation_new(
-            ALLOCATOR(),
-            full_loc,
-            rbs_loc,
-            overloads,
-            bar_locations
-          );
-          return true;
-        }
-        case kSKIP: {
-          rbs_parser_advance(parser);
-
-          rbs_range_t skip_range = parser->current_token.range;
-          rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
-
-          rbs_location_t *comment_loc = NULL;
-          if (!parse_inline_comment(parser, &comment_loc)) {
-            return false;
-          }
-
-          rbs_range_t full_range = {
-            .start = rbs_range.start,
-            .end = parser->current_token.range.end
-          };
-
-          rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-          rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
-
-          *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
-            ALLOCATOR(),
-            full_loc,
-            rbs_loc,
-            skip_loc,
-            comment_loc
-          );
-          return true;
-        }
-        case kRETURN: {
-          rbs_parser_advance(parser);
-
-          rbs_range_t return_range = parser->current_token.range;
-          rbs_location_t *return_loc = rbs_location_new(ALLOCATOR(), return_range);
-
-          ADVANCE_ASSERT(parser, pCOLON);
-
-          rbs_range_t colon_range = parser->current_token.range;
-          rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
-
-          rbs_node_t *return_type = NULL;
-          if (!rbs_parse_type(parser, &return_type)) {
-            return false;
-          }
-
-          rbs_location_t *comment_loc = NULL;
-          if (!parse_inline_comment(parser, &comment_loc)) {
-            return false;
-          }
-
-          rbs_range_t full_range = {
-            .start = rbs_range.start,
-            .end = parser->current_token.range.end
-          };
-
-          rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-          rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
-
-          *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_return_type_annotation_new(
-            ALLOCATOR(),
-            full_loc,
-            rbs_loc,
-            return_loc,
-            colon_loc,
-            return_type,
-            comment_loc
-          );
-          return true;
-        }
-        default: {
-          rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for @rbs annotation");
-          return false;
-        }
-      }
-    }
-    default: {
-      rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for inline leading annotation");
-      return false;
-    }
-  }
-}
-
-NODISCARD
-static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
-  rbs_range_t prefix_range = parser->next_token.range;
-
-  switch (parser->next_token.type) {
-    case pCOLON: {
-      rbs_parser_advance(parser);
-
-      rbs_node_t *type = NULL;
-      if (!rbs_parse_type(parser, &type)) {
-        return false;
-      }
-
-      rbs_range_t full_range = {
-        .start = prefix_range.start,
-        .end = parser->current_token.range.end
-      };
-
-      rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-      rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
-
-      *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_node_type_assertion_new(
-        ALLOCATOR(),
-        full_loc,
-        prefix_loc,
-        type
-      );
-      return true;
-    }
-    default: {
-      rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for inline trailing annotation");
-      return false;
-    }
-  }
-}
-
-bool rbs_parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
-  bool success = parse_inline_leading_annotation(parser, annotation);
-
-  ADVANCE_ASSERT(parser, pEOF);
-
-  return success;
-}
-
-bool rbs_parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation) {
-  bool success = parse_inline_trailing_annotation(parser, annotation);
-
-  ADVANCE_ASSERT(parser, pEOF);
-
-  return success;
 }
