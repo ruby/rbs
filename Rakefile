@@ -17,6 +17,12 @@ test_config = lambda do |t|
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
   end
+  if defined?(RubyMemcheck)
+    if t.is_a?(RubyMemcheck::TestTask)
+      t.verbose = true
+      t.options = '-v'
+    end
+  end
 end
 
 Rake::TestTask.new(test: :compile, &test_config)
