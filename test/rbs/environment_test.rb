@@ -543,6 +543,39 @@ RBS
     assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name(type_name("::N"))
   end
 
+  def test_normalize_module_name_q
+    buf, dirs, decls = RBS::Parser.parse_signature(<<~EOF)
+      class Foo
+        module Bar
+          module Baz
+          end
+        end
+      end
+
+      module M = Foo::Bar
+      module N = M::Baz
+
+      module C = D
+      module D = C
+
+      module E = F
+    EOF
+
+    env = Environment.new()
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env = env.resolve_type_names
+
+    assert_equal type_name("::Foo::Bar"), env.normalize_module_name?(type_name("::M"))
+    assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name?(type_name("::N"))
+
+    assert_equal false, env.normalize_module_name?(type_name("::C"))
+    assert_equal false, env.normalize_module_name?(type_name("::D"))
+
+    assert_nil env.normalize_module_name?(type_name("::E"))
+  end
+
+
   def test_use_resolve
     buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
 use Object as OB
@@ -598,6 +631,34 @@ type s = untyped
     env.resolve_type_names.tap do |env|
       alias_decl = env.type_alias_decls[RBS::TypeName.parse("::t")]
       assert_equal "::s", alias_decl.decl.type.to_s
+    end
+  end
+
+  def test_resolve_type_names_module_alias
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+module M
+  module N
+  end
+
+  module N2 = N
+end
+
+class C
+  include M::N2
+end
+    RBS
+
+    env = Environment.new
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::C")]
+      class_decl.each_decl do |decl|
+        decl.members[0].tap do |member|
+          assert_instance_of RBS::AST::Members::Include, member
+          assert_equal RBS::TypeName.parse("::M::N"), member.name
+        end
+      end
     end
   end
 
@@ -802,7 +863,7 @@ type s = untyped
       end
       class Array
       end
-      
+
       # Basic class alias without explicit type name
       MyString = String #: class-alias
 
