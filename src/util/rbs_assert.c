@@ -6,14 +6,14 @@
 #include <stdbool.h>
 
 void rbs_assert(bool condition, const char *fmt, ...) {
-  if (condition) {
-    return;
-  }
+    if (condition) {
+        return;
+    }
 
-  va_list args;
-  va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
-  va_end(args);
-  fprintf(stderr, "\n");
-  exit(EXIT_FAILURE);
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+    exit(EXIT_FAILURE);
 }

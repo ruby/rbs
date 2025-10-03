@@ -86,7 +86,7 @@ typedef struct rbs_node {
     rbs_location_t *location;
 } rbs_node_t;
 
-const char* rbs_node_type_name(rbs_node_t *node);
+const char *rbs_node_type_name(rbs_node_t *node);
 
 /* rbs_node_list_node */
 
@@ -102,7 +102,7 @@ typedef struct rbs_node_list {
     size_t length;
 } rbs_node_list_t;
 
-rbs_node_list_t* rbs_node_list_new(rbs_allocator_t *);
+rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *);
 
 void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node);
 
@@ -121,13 +121,13 @@ typedef struct rbs_hash {
     size_t length;
 } rbs_hash_t;
 
-rbs_hash_t* rbs_hash_new(rbs_allocator_t *);
+rbs_hash_t *rbs_hash_new(rbs_allocator_t *);
 
 void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value);
 
-rbs_hash_node_t* rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key);
+rbs_hash_node_t *rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key);
 
-rbs_node_t* rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key);
+rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key);
 
 /* rbs_ast_node */
 
@@ -600,7 +600,6 @@ typedef struct rbs_types_variable {
 
     struct rbs_ast_symbol *name;
 } rbs_types_variable_t;
-
 
 /// `rbs_keyword_t` models RBS keywords like "private", "instance", "covariant", etc.
 /// These are stored in the global constant pool, and get surfaced to Ruby as `Symbol`s,
