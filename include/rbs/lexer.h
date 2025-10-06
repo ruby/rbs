@@ -126,20 +126,26 @@ typedef struct {
  * The lexer state is the curren token.
  *
  * ```
- * ... "a string token"
- *    ^                      start position
- *          ^                current position
- *     ~~~~~~                Token => "a str
+ #.   0.1.2.3.4.5.6.7.8.9.0.1.2.3.4.5.6
+ * ... " a   s t r i n g   t o k e n "
+ *    ^                                   start position (0)
+ *                ^                       current position (6)
+ *                 ^                      current character ('i', bytes = 1)
+ *     ~~~~~~~~~~~                        Token => "a str
  * ```
  * */
 typedef struct {
     rbs_string_t string;
-    int start_pos;            /* The character position that defines the start of the input */
-    int end_pos;              /* The character position that defines the end of the input */
-    rbs_position_t current;   /* The current position */
-    rbs_position_t start;     /* The start position of the current token */
+    int start_pos;          /* The character position that defines the start of the input */
+    int end_pos;            /* The character position that defines the end of the input */
+    rbs_position_t current; /* The current position: just before the current_character */
+    rbs_position_t start;   /* The start position of the current token */
+
+    unsigned int current_code_point; /* Current character code point */
+    size_t current_character_bytes;  /* Current character byte length (0 or 1~4) */
+
     bool first_token_of_line; /* This flag is used for tLINECOMMENT */
-    unsigned int last_char;   /* Last peeked character */
+
     const rbs_encoding_t *encoding;
 } rbs_lexer_t;
 
@@ -159,14 +165,22 @@ int rbs_token_bytes(rbs_token_t tok);
 const char *rbs_token_type_str(enum RBSTokenType type);
 
 /**
- * Read next character.
+ * Returns the next character.
  * */
 unsigned int rbs_peek(rbs_lexer_t *lexer);
 
 /**
- * Skip one character.
+ * Advances the current position by one character.
  * */
 void rbs_skip(rbs_lexer_t *lexer);
+
+/**
+ * Read next character and store the codepoint and byte length to the given pointers.
+ * 
+ * This doesn't update the lexer state.
+ * Returns `true` if succeeded, or `false` if reached to EOF.
+ * */
+bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *bytes);
 
 /**
  * Skip n characters.
@@ -186,5 +200,7 @@ rbs_token_t rbs_next_eof_token(rbs_lexer_t *lexer);
 rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer);
 
 void rbs_print_token(rbs_token_t tok);
+
+void rbs_print_lexer(rbs_lexer_t *lexer);
 
 #endif

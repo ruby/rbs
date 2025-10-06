@@ -25,8 +25,12 @@ test_config = lambda do |t|
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
   end
-  t.verbose = true
-  t.options = '-v'
+  if defined?(RubyMemcheck)
+    if t.is_a?(RubyMemcheck::TestTask)
+      t.verbose = true
+      t.options = '-v'
+    end
+  end
 end
 
 Rake::TestTask.new(test: :compile, &test_config)
@@ -536,4 +540,18 @@ task :compile_c99 do
   Rake::Task[:"compile"].invoke
 ensure
   ENV.delete("TEST_NO_C23")
+end
+
+task :prepare_bench do
+  ENV.delete("DEBUG")
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
+end
+
+task :prepare_profiling do
+  ENV["DEBUG"] = "1"
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
 end

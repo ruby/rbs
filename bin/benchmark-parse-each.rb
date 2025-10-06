@@ -1,0 +1,42 @@
+require "rbs"
+require "benchmark/ips"
+require "csv"
+
+if ARGV.empty?
+  STDERR.puts "Usage: #{$0} FILE..."
+  STDERR.puts ""
+  STDERR.puts "Benchmark parsing each file separately and output the result as CSV."
+  exit 1
+end
+
+results = []
+
+total = ARGV.size
+ARGV.each_with_index do |file, index|
+  GC.start
+
+  STDERR.puts "#{index}/#{total}\tBenchmarking with #{file}..."
+  content = File.read(file)
+
+  benchmark = Benchmark.ips do |x|
+    x.report(file) do
+      RBS::Parser.parse_signature(content)
+    end
+
+    x.quiet = true
+  end
+
+  results << {
+    file: file,
+    size: content.bytesize,
+    ips: benchmark.entries[0].ips,
+    sd: benchmark.entries[0].ips_sd
+  }
+end
+
+puts CSV.generate {|csv|
+  csv << ["File", "Size", "IPS", "SD"]
+  results.each do |result|
+    csv << [result[:file], result[:size], result[:ips], result[:sd]]
+  end
+}

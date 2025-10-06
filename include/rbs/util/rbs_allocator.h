@@ -31,8 +31,12 @@
 )
 #endif
 
-struct rbs_allocator;
-typedef struct rbs_allocator rbs_allocator_t;
+typedef struct rbs_allocator {
+    // The head of a linked list of pages, starting with the most recently allocated page.
+    struct rbs_allocator_page *page;
+
+    size_t default_page_payload_size;
+} rbs_allocator_t;
 
 rbs_allocator_t *rbs_allocator_init(void);
 void rbs_allocator_free(rbs_allocator_t *);
