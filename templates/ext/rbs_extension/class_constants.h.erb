@@ -1,6 +1,12 @@
 #ifndef RBS__CONSTANTS_H
 #define RBS__CONSTANTS_H
 
+#include "compat.h"
+
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_BEGIN
+#include "ruby.h"
+SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
+
 extern VALUE RBS;
 
 extern VALUE RBS_AST;
@@ -11,7 +17,7 @@ extern VALUE RBS_Types;
 extern VALUE RBS_Types_Bases;
 extern VALUE RBS_ParsingError;
 
-<%- nodes.each do |node| -%>
+<%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
 extern VALUE <%= node.c_constant_name %>;
 <%- end -%>
 

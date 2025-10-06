@@ -1,0 +1,174 @@
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+#include "rbs/ast.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+const char *rbs_node_type_name(rbs_node_t *node) {
+    switch (node->type) {
+    <%- nodes.each do |node| -%>
+    case <%= node.c_type_enum_name %>:
+        return "<%= node.ruby_full_name %>";
+    <%- end -%>
+    case RBS_AST_SYMBOL:
+        return "Symbol";
+    default:
+        return "Unknown";
+    }
+}
+
+/* rbs_node_list */
+
+rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
+    rbs_node_list_t *list = rbs_allocator_alloc(allocator, rbs_node_list_t);
+    *list = (rbs_node_list_t) {
+        .allocator = allocator,
+        .head = NULL,
+        .tail = NULL,
+        .length = 0,
+    };
+
+    return list;
+}
+
+void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
+    rbs_node_list_node_t *new_node = rbs_allocator_alloc(list->allocator, rbs_node_list_node_t);
+    *new_node = (rbs_node_list_node_t) {
+        .node = node,
+        .next = NULL,
+    };
+
+    if (list->tail == NULL) {
+        list->head = new_node;
+        list->tail = new_node;
+    } else {
+        list->tail->next = new_node;
+        list->tail = new_node;
+    }
+
+    list->length++;
+}
+
+/* rbs_hash */
+
+rbs_hash_t *rbs_hash_new(rbs_allocator_t *allocator) {
+    rbs_hash_t *hash = rbs_allocator_alloc(allocator, rbs_hash_t);
+    *hash = (rbs_hash_t) {
+        .allocator = allocator,
+        .head = NULL,
+        .tail = NULL,
+        .length = 0,
+    };
+
+    return hash;
+}
+
+bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
+    if (lhs == rhs) return true;
+    if (lhs->type != rhs->type) return false;
+
+    switch (lhs->type) {
+    case RBS_AST_SYMBOL:
+        return ((rbs_ast_symbol_t *) lhs)->constant_id == ((rbs_ast_symbol_t *) rhs)->constant_id;
+    case RBS_KEYWORD:
+        return ((rbs_keyword_t *) lhs)->constant_id == ((rbs_keyword_t *) rhs)->constant_id;
+    case RBS_AST_BOOL:
+        return ((rbs_ast_bool_t *) lhs)->value == ((rbs_ast_bool_t *) rhs)->value;
+    case RBS_AST_INTEGER:
+        return rbs_string_equal(((rbs_ast_integer_t *) lhs)->string_representation, ((rbs_ast_integer_t *) rhs)->string_representation);
+    case RBS_AST_STRING:
+        return rbs_string_equal(((rbs_ast_string_t *) lhs)->string, ((rbs_ast_string_t *) rhs)->string);
+    default:
+        printf("Unhandled node type: %d\n", lhs->type);
+        return false;
+    }
+}
+
+rbs_hash_node_t *rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key) {
+    rbs_hash_node_t *current = hash->head;
+
+    while (current != NULL) {
+        if (rbs_node_equal(key, current->key)) {
+            return current;
+        }
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
+    rbs_hash_node_t *existing_node = rbs_hash_find(hash, key);
+    if (existing_node != NULL) {
+        existing_node->value = value;
+        return;
+    }
+
+    rbs_hash_node_t *new_node = rbs_allocator_alloc(hash->allocator, rbs_hash_node_t);
+    new_node->key = key;
+    new_node->value = value;
+    new_node->next = NULL;
+
+    if (hash->tail == NULL) {
+        hash->head = new_node;
+        hash->tail = new_node;
+    } else {
+        hash->tail->next = new_node;
+        hash->tail = new_node;
+    }
+}
+
+rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
+    rbs_hash_node_t *node = rbs_hash_find(hash, key);
+    return node ? node->value : NULL;
+}
+
+rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
+    rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
+
+    *instance = (rbs_keyword_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_KEYWORD,
+            .location = location,
+        },
+        .constant_id = constant_id,
+    };
+
+    return instance;
+}
+
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+    rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
+
+    *instance = (rbs_ast_symbol_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_SYMBOL,
+            .location = location,
+        },
+        .constant_id = constant_id,
+    };
+
+    return instance;
+}
+
+<%- nodes.each do |node| -%>
+#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>) {
+    <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
+    <%- node.fields.filter { |f| f.c_type == "VALUE" }.each do |f| -%>
+    rb_gc_register_mark_object(<%= f.c_name %>);
+    <%- end -%>
+
+    *instance = (<%= node.c_type_name %>) {
+        .base = (rbs_node_t) {
+            .type = <%= node.c_type_enum_name %>,
+            .location = location,
+        },
+        <%- node.fields.each do |field| -%>
+        .<%= field.c_name %> = <%= field.c_name %>,
+        <%- end -%>
+    };
+
+    return instance;
+}
+<%- end -%>
