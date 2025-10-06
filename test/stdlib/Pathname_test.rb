@@ -28,6 +28,8 @@ class PathnameSingletonTest < Test::Unit::TestCase
   end
 
   def test_initialize
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     assert_send_type '(String) -> Pathname',
                      Pathname, :new, 'foo'
     assert_send_type '(ToStr) -> Pathname',
@@ -43,6 +45,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
   testing '::Pathname'
 
   def test_plus
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     assert_send_type '(Pathname) -> Pathname',
                      Pathname('foo'), :+, Pathname('bar')
     assert_send_type '(String) -> Pathname',
@@ -52,6 +56,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_slash
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     assert_send_type '(Pathname) -> Pathname',
                      Pathname('foo'), :/, Pathname('bar')
     assert_send_type '(String) -> Pathname',
@@ -380,6 +386,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_join
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     assert_send_type '() -> Pathname',
                      Pathname('.'), :join
     assert_send_type '(String) -> Pathname',
@@ -602,6 +610,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_relative_path_from
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     assert_send_type '(Pathname) -> Pathname',
                      Pathname('.'), :relative_path_from, Pathname('.')
     assert_send_type '(String) -> Pathname',
@@ -824,6 +834,8 @@ class PathnameKernelTest < Test::Unit::TestCase
   testing '::Kernel'
 
   def test_Pathname
+    omit "Pathname is developing in head" if RUBY_VERSION >= '3.5'
+
     with_string("Gemfile") do
       assert_send_type(
         "(::string) -> ::Pathname",
