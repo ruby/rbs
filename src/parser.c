@@ -1704,7 +1704,9 @@ static bool parse_annotation(rbs_parser_t *parser, rbs_ast_annotation_t **annota
         parser->rbs_lexer_t->string.start + rg.start.byte_pos + offset_bytes,
         parser->rbs_lexer_t->string.end
     );
-    unsigned int open_char = rbs_utf8_string_to_codepoint(str);
+
+    // Assumes the input is ASCII compatible
+    unsigned int open_char = str.start[0];
 
     unsigned int close_char;
 
@@ -3218,7 +3220,9 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
             comment_start,
             parser->rbs_lexer_t->string.end
         );
-        unsigned char c = rbs_utf8_string_to_codepoint(str);
+
+        // Assumes the input is ASCII compatible
+        unsigned char c = str.start[0];
 
         if (c == ' ') {
             comment_start += space_bytes;

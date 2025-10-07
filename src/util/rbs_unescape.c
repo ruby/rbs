@@ -160,17 +160,16 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
 }
 
 rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input, const rbs_encoding_t *encoding) {
-    unsigned int first_char = rbs_utf8_string_to_codepoint(input);
-    size_t byte_length = rbs_string_len(input);
+    unsigned int first_char = input.start[0];
 
-    ptrdiff_t start_offset = 0;
+    const char *new_start = input.start;
+    const char *new_end = input.end;
+
     if (first_char == '"' || first_char == '\'' || first_char == '`') {
-        int bs = rbs_utf8_codelen(first_char);
-        start_offset += bs;
-        byte_length -= 2 * bs;
+        new_start += 1;
+        new_end -= 1;
     }
 
-    const char *new_start = input.start + start_offset;
-    rbs_string_t string = rbs_string_new(new_start, new_start + byte_length);
+    rbs_string_t string = rbs_string_new(new_start, new_end);
     return unescape_string(allocator, string, first_char == '"', encoding == RBS_ENCODING_UTF_8_ENTRY);
 }
