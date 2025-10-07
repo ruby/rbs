@@ -9,7 +9,7 @@ end
 # A type that's convertible to a `Rational`.
 #
 interface _ToR
-  # Convert `self` to a `Complex`.
+  # Convert `self` to a `Rational`.
   #
   def to_r: () -> Rational
 end
