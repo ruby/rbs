@@ -931,4 +931,31 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       Parser.parse_type("[void]")
     end
   end
+
+  def test_parse__string_octal_escape
+    Parser.parse_type('"\100"').yield_self do |type|
+      assert_equal "\100", type.literal
+    end
+    Parser.parse_type('"\400"').yield_self do |type|
+      assert_equal "\400", type.literal
+    end
+  end
+
+  def test_parse__string_hex_escape
+    Parser.parse_type('"\x10"').yield_self do |type|
+      assert_equal "\x10", type.literal
+    end
+    Parser.parse_type('"\x40"').yield_self do |type|
+      assert_equal "\x40", type.literal
+    end
+  end
+
+  def test_parse__string_unicode_escape
+    Parser.parse_type('"\u005a"').yield_self do |type|
+      assert_equal "Z", type.literal
+    end
+    Parser.parse_type('"[\u30eb]"').yield_self do |type|
+      assert_equal "[ル]", type.literal
+    end
+  end
 end

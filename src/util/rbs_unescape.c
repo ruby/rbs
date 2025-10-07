@@ -50,12 +50,44 @@ int rbs_utf8_codelen(unsigned int c) {
     return 1; // Invalid Unicode codepoint, treat as 1 byte
 }
 
+// Fills buf starting at index 'start' with the UTF-8 encoding of 'codepoint'.
+// Returns the number of bytes written, or 0 when the output is not changed.
+//
+int rbs_utf8_fill_codepoint(char *buf, int start, int end, unsigned int codepoint) {
+    if (start + 4 > end) {
+        return 0;
+    }
+
+    if (codepoint <= 0x7F) {
+        buf[start] = codepoint & 0x7F;
+        return 1;
+    } else if (codepoint <= 0x7FF) {
+        buf[start + 0] = 0xC0 | ((codepoint >> 6) & 0x1F);
+        buf[start + 1] = 0x80 | (codepoint & 0x3F);
+        return 2;
+    } else if (codepoint <= 0xFFFF) {
+        buf[start + 0] = 0xE0 | ((codepoint >> 12) & 0x0F);
+        buf[start + 1] = 0x80 | ((codepoint >> 6) & 0x3F);
+        buf[start + 2] = 0x80 | (codepoint & 0x3F);
+        return 3;
+    } else if (codepoint <= 0x10FFFF) {
+        buf[start + 0] = 0xF0 | ((codepoint >> 18) & 0x07);
+        buf[start + 1] = 0x80 | ((codepoint >> 12) & 0x3F);
+        buf[start + 2] = 0x80 | ((codepoint >> 6) & 0x3F);
+        buf[start + 3] = 0x80 | (codepoint & 0x3F);
+        return 4;
+    } else {
+        return 0;
+    }
+}
+
 rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t string, bool is_double_quote) {
     if (!string.start) return RBS_STRING_NULL;
 
     size_t len = string.end - string.start;
     const char *input = string.start;
 
+    // The output cannot be longer than the input even after unescaping.
     char *output = rbs_allocator_alloc_many(allocator, len + 1, char);
     if (!output) return RBS_STRING_NULL;
 
@@ -79,8 +111,9 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
                     i += hex_len + 2;
                 } else if (input[i + 1] == 'u' && i + 5 < len) {
                     // Unicode escape
+                    // The UTF-8 representation is at most 4 bytes, shorter than the input length.
                     int value = hex_to_int(input + i + 2, 4);
-                    output[j++] = (char) value;
+                    j += rbs_utf8_fill_codepoint(output, j, len + 1, value);
                     i += 6;
                 } else {
                     // Other escapes
