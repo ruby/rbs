@@ -1,4 +1,5 @@
 #include "rbs/util/rbs_unescape.h"
+#include "rbs/util/rbs_encoding.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -53,7 +54,7 @@ int rbs_utf8_codelen(unsigned int c) {
 // Fills buf starting at index 'start' with the UTF-8 encoding of 'codepoint'.
 // Returns the number of bytes written, or 0 when the output is not changed.
 //
-int rbs_utf8_fill_codepoint(char *buf, int start, int end, unsigned int codepoint) {
+size_t rbs_utf8_fill_codepoint(char *buf, size_t start, size_t end, unsigned int codepoint) {
     if (start + 4 > end) {
         return 0;
     }
@@ -81,7 +82,7 @@ int rbs_utf8_fill_codepoint(char *buf, int start, int end, unsigned int codepoin
     }
 }
 
-rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t string, bool is_double_quote) {
+rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t string, bool is_double_quote, bool is_unicode) {
     if (!string.start) return RBS_STRING_NULL;
 
     size_t len = string.end - string.start;
@@ -111,10 +112,21 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
                     i += hex_len + 2;
                 } else if (input[i + 1] == 'u' && i + 5 < len) {
                     // Unicode escape
-                    // The UTF-8 representation is at most 4 bytes, shorter than the input length.
-                    int value = hex_to_int(input + i + 2, 4);
-                    j += rbs_utf8_fill_codepoint(output, j, len + 1, value);
-                    i += 6;
+
+                    if (is_unicode) {
+                        // The UTF-8 representation is at most 4 bytes, shorter than the input length.
+                        int value = hex_to_int(input + i + 2, 4);
+                        j += rbs_utf8_fill_codepoint(output, j, len + 1, value);
+                        i += 6;
+                    } else {
+                        // Copy the escape sequence as-is
+                        output[j++] = input[i++];
+                        output[j++] = input[i++];
+                        output[j++] = input[i++];
+                        output[j++] = input[i++];
+                        output[j++] = input[i++];
+                        output[j++] = input[i++];
+                    }
                 } else {
                     // Other escapes
                     int found = 0;
@@ -147,7 +159,7 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
     return rbs_string_new(output, output + j);
 }
 
-rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) {
+rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input, const rbs_encoding_t *encoding) {
     unsigned int first_char = rbs_utf8_string_to_codepoint(input);
     size_t byte_length = rbs_string_len(input);
 
@@ -160,5 +172,5 @@ rbs_string_t rbs_unquote_string(rbs_allocator_t *allocator, rbs_string_t input) 
 
     const char *new_start = input.start + start_offset;
     rbs_string_t string = rbs_string_new(new_start, new_start + byte_length);
-    return unescape_string(allocator, string, first_char == '"');
+    return unescape_string(allocator, string, first_char == '"', encoding == RBS_ENCODING_UTF_8_ENTRY);
 }

@@ -958,4 +958,13 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "[ル]", type.literal
     end
   end
+
+  def test_parse__string_unicode_escape__non_unicode
+    Parser.parse_type('"\u005a"'.encode(Encoding::ASCII)).yield_self do |type|
+      assert_equal "\\u005a", type.literal
+    end
+    Parser.parse_type('"[\u30eb]"'.encode(Encoding::Shift_JIS)).yield_self do |type|
+      assert_equal "[\\u30eb]", type.literal
+    end
+  end
 end

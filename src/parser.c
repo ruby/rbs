@@ -358,7 +358,7 @@ static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_
             return false;
         }
 
-        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), rbs_parser_peek_current_token(parser));
+        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), rbs_parser_peek_current_token(parser), parser->rbs_lexer_t->encoding);
         rbs_location_t *symbolLoc = rbs_location_current_token(parser);
         rbs_constant_id_t constant_id = rbs_constant_pool_insert_string(&parser->constant_pool, unquoted_str);
         rbs_ast_symbol_t *name = rbs_ast_symbol_new(ALLOCATOR(), symbolLoc, &parser->constant_pool, constant_id);
@@ -973,7 +973,7 @@ static bool parse_symbol(rbs_parser_t *parser, rbs_location_t *location, rbs_typ
 
         rbs_string_t symbol = rbs_string_new(current_token.start + offset_bytes, current_token.end);
 
-        rbs_string_t unquoted_symbol = rbs_unquote_string(ALLOCATOR(), symbol);
+        rbs_string_t unquoted_symbol = rbs_unquote_string(ALLOCATOR(), symbol, parser->rbs_lexer_t->encoding);
 
         rbs_constant_id_t constant_id = rbs_constant_pool_insert_string(&parser->constant_pool, unquoted_symbol);
 
@@ -1215,7 +1215,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     case tDQSTRING: {
         rbs_location_t *loc = rbs_location_current_token(parser);
 
-        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), rbs_parser_peek_current_token(parser));
+        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), rbs_parser_peek_current_token(parser), parser->rbs_lexer_t->encoding);
         rbs_node_t *literal = (rbs_node_t *) rbs_ast_string_new(ALLOCATOR(), loc, unquoted_str);
         *type = (rbs_node_t *) rbs_types_literal_new(ALLOCATOR(), loc, literal);
         return true;
@@ -1817,7 +1817,7 @@ static bool parse_method_name(rbs_parser_t *parser, rbs_range_t *range, rbs_ast_
     }
     case tQIDENT: {
         rbs_string_t string = rbs_parser_peek_current_token(parser);
-        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), string);
+        rbs_string_t unquoted_str = rbs_unquote_string(ALLOCATOR(), string, parser->rbs_lexer_t->encoding);
         rbs_constant_id_t constant_id = rbs_constant_pool_insert_string(&parser->constant_pool, unquoted_str);
         rbs_location_t *symbolLoc = rbs_location_current_token(parser);
         *symbol = rbs_ast_symbol_new(ALLOCATOR(), symbolLoc, &parser->constant_pool, constant_id);
