@@ -43,14 +43,6 @@ static int octal_to_int(const char *octal, int length) {
     return result;
 }
 
-int rbs_utf8_codelen(unsigned int c) {
-    if (c <= 0x7F) return 1;
-    if (c <= 0x7FF) return 2;
-    if (c <= 0xFFFF) return 3;
-    if (c <= 0x10FFFF) return 4;
-    return 1; // Invalid Unicode codepoint, treat as 1 byte
-}
-
 // Fills buf starting at index 'start' with the UTF-8 encoding of 'codepoint'.
 // Returns the number of bytes written, or 0 when the output is not changed.
 //

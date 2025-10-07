@@ -44,6 +44,4 @@ size_t rbs_string_len(const rbs_string_t self);
  */
 bool rbs_string_equal(const rbs_string_t lhs, const rbs_string_t rhs);
 
-unsigned int rbs_utf8_string_to_codepoint(const rbs_string_t string);
-
 #endif
