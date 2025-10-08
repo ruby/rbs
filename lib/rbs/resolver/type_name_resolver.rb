@@ -13,6 +13,14 @@ module RBS
         @cache = {}
       end
 
+      def self.new(*args)
+        if args.size == 1 && args[0].is_a?(Environment)
+          build(args[0])
+        else
+          super
+        end
+      end
+
       def self.build(env)
         all_names = Set.new #: Set[TypeName]
 

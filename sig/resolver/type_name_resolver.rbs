@@ -10,6 +10,9 @@ module RBS
 
       def initialize: (Set[TypeName] all_names, Hash[TypeName, [TypeName, context]] aliases) -> void
 
+      def self.new: %a{deprecated: Use `build` to build TypeNameResolver from Environment} (Environment) -> instance
+                  | (Set[TypeName] all_names, Hash[TypeName, [TypeName, context]] aliases) -> instance
+
       def self.build: (Environment) -> instance
 
       # Translates given type name to absolute type name
