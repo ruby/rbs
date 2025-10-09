@@ -62,8 +62,8 @@ module Zlib
     # GzipReader object associated with that file.  Further details of this method
     # are in Zlib::GzipReader.new and ZLib::GzipFile.wrap.
     #
-    def self.open: (String | _ToPath filename) -> instance
-                 | (String | _ToPath filename) { (instance gz) -> void } -> void
+    def self.open: (path filename) -> instance
+                 | (path filename) { (instance gz) -> void } -> void
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c

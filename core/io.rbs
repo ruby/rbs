@@ -2649,8 +2649,8 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
@@ -2824,7 +2824,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
-  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (path name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c

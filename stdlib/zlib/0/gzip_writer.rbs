@@ -83,7 +83,7 @@ module Zlib
     # compression started. Setting a value of 0 indicates no time stamp is
     # available.
     #
-    def mtime=: (string | _ToPath | IO file_name) -> Time
+    def mtime=: (path | IO file_name) -> Time
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c

@@ -443,7 +443,7 @@ module RubyVM::AbstractSyntaxTree
   #
   # See ::parse for explanation of keyword argument meaning and usage.
   #
-  def self.parse_file: (String | ::_ToPath string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
+  def self.parse_file: (path string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
 
   # <!--
   #   rdoc-file=ast.rb
