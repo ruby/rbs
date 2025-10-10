@@ -345,7 +345,7 @@ nodes:
   - name: RBS::Types::Bases::Top
   - name: RBS::Types::Bases::Void
   - name: RBS::Types::Block
-    expose_location: false
+    expose_location: true
     fields:
       - name: type
         c_type: rbs_node

@@ -20,6 +20,7 @@ gem "rdoc", "~> 6.11.0"
 gem "fileutils"
 gem "raap"
 gem "activesupport", "~> 7.0"
+gem "extconf_compile_commands_json"
 
 group :libs do
   # Libraries required for stdlib test
