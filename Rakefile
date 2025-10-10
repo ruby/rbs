@@ -17,6 +17,12 @@ test_config = lambda do |t|
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
   end
+  if defined?(RubyMemcheck)
+    if t.is_a?(RubyMemcheck::TestTask)
+      t.verbose = true
+      t.options = '-v'
+    end
+  end
 end
 
 Rake::TestTask.new(test: :compile, &test_config)
@@ -225,13 +231,15 @@ task :stdlib_test => :compile do
 end
 
 task :typecheck_test => :compile do
-  FileList["test/typecheck/*"].each do |test|
-    Dir.chdir(test) do
-      expectations = File.join(test, "steep_expectations.yml")
-      if File.exist?(expectations)
-        sh "steep check --with_expectations"
-      else
-        sh "steep check"
+  Bundler.with_unbundled_env do
+    FileList["test/typecheck/*"].each do |test|
+      Dir.chdir(test) do
+        expectations = File.join(test, "steep_expectations.yml")
+        if File.exist?(expectations)
+          sh "#{__dir__}/bin/steep check --with_expectations"
+        else
+          sh "#{__dir__}/bin/steep check"
+        end
       end
     end
   end
