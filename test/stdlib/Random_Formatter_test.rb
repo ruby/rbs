@@ -42,6 +42,13 @@ class RandomFormatterSingletonTest < Test::Unit::TestCase
                      Random, :uuid
   end
 
+  def test_uuid_v7
+    assert_send_type "() -> ::String",
+                     Random, :uuid_v7
+    assert_send_type "(extra_timestamp_bits: ::Integer) -> ::String",
+                     Random, :uuid_v7, extra_timestamp_bits: 12
+  end
+
   def test_alphanumeric
     assert_send_type "() -> ::String",
                      Random, :alphanumeric
@@ -93,6 +100,13 @@ class RandomFormatterTest < Test::Unit::TestCase
                      Random.new, :uuid
   end
 
+  def test_uuid_v7
+    assert_send_type "() -> ::String",
+                     Random.new, :uuid_v7
+    assert_send_type "(extra_timestamp_bits: ::Integer) -> ::String",
+                     Random.new, :uuid_v7, extra_timestamp_bits: 12
+  end
+
   def test_alphanumeric
     assert_send_type "() -> ::String",
                      Random.new, :alphanumeric
@@ -100,5 +114,15 @@ class RandomFormatterTest < Test::Unit::TestCase
                      Random.new, :alphanumeric, 10
     assert_send_type "(::Integer, chars: Array[::String]) -> ::String",
                      Random.new, :alphanumeric, 10, chars: ["a", "b", "c"]
+  end
+
+  def test_gen_random
+    assert_send_type "(::Integer) -> ::String",
+                     Random.new, :gen_random, 10
+  end
+
+  def test_choose
+    assert_send_type "(Array[::String], ::Integer) -> ::String",
+                     Random.new, :choose, ["a", "b", "c"], 3
   end
 end
