@@ -308,7 +308,7 @@ module Psych
   # `fallback` return value, which defaults to `nil`. See load for options.
   #
   %a{annotate:rdoc:copy:Psych.load_file}
-  def self.load_file: (string | _ToPath, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb

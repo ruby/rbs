@@ -184,7 +184,8 @@ module FileUtils
 
   type mode = Integer | String
 
-  type path = string | _ToPath
+  %a{deprecated: Use top-level `path` instead}
+  type path = ::path
 
   type pathlist = path | Array[path]
 
