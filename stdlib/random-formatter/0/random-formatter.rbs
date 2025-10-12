@@ -104,6 +104,7 @@ module RBS
       #
       # See RFC 3548 for the definition of URL-safe base64.
       #
+      %a{annotate:rdoc:copy:Random::Formatter#urlsafe_base64}
       def urlsafe_base64: (?Integer? n, ?boolish padding) -> String
 
       # <!--
@@ -127,7 +128,91 @@ module RBS
       #
       # See [RFC9562](https://www.rfc-editor.org/rfc/rfc9562) for details of UUIDv4.
       #
+      %a{annotate:rdoc:copy:Random::Formatter#uuid}
       def uuid: () -> String
+
+      # <!--
+      #   rdoc-file=lib/random/formatter.rb
+      #   - uuid_v4()
+      # -->
+      #
+      %a{annotate:rdoc:copy:Random::Formatter#uuid_v4}
+      alias uuid_v4 uuid
+
+      # <!--
+      #   rdoc-file=lib/random/formatter.rb
+      #   - uuid_v7(extra_timestamp_bits: 0)
+      # -->
+      # Generate a random v7 UUID (Universally Unique IDentifier).
+      #
+      #     require 'random/formatter'
+      #
+      #     Random.uuid_v7 # => "0188d4c3-1311-7f96-85c7-242a7aa58f1e"
+      #     Random.uuid_v7 # => "0188d4c3-16fe-744f-86af-38fa04c62bb5"
+      #     Random.uuid_v7 # => "0188d4c3-1af8-764f-b049-c204ce0afa23"
+      #     Random.uuid_v7 # => "0188d4c3-1e74-7085-b14f-ef6415dc6f31"
+      #     #                    |<--sorted-->| |<----- random ---->|
+      #
+      #     # or
+      #     prng = Random.new
+      #     prng.uuid_v7 # => "0188ca51-5e72-7950-a11d-def7ff977c98"
+      #
+      # The version 7 UUID starts with the least significant 48 bits of a 64 bit Unix
+      # timestamp (milliseconds since the epoch) and fills the remaining bits with
+      # random data, excluding the version and variant bits.
+      #
+      # This allows version 7 UUIDs to be sorted by creation time.  Time ordered UUIDs
+      # can be used for better database index locality of newly inserted records,
+      # which may have a significant performance benefit compared to random data
+      # inserts.
+      #
+      # The result contains 74 random bits (9.25 random bytes).
+      #
+      # Note that this method cannot be made reproducible because its output includes
+      # not only random bits but also timestamp.
+      #
+      # See [RFC9562](https://www.rfc-editor.org/rfc/rfc9562) for details of UUIDv7.
+      #
+      # #### Monotonicity
+      #
+      # UUIDv7 has millisecond precision by default, so multiple UUIDs created within
+      # the same millisecond are not issued in monotonically increasing order.  To
+      # create UUIDs that are time-ordered with sub-millisecond precision, up to 12
+      # bits of additional timestamp may added with `extra_timestamp_bits`.  The extra
+      # timestamp precision comes at the expense of random bits.  Setting
+      # `extra_timestamp_bits: 12` provides ~244ns of precision, but only 62 random
+      # bits (7.75 random bytes).
+      #
+      #     prng = Random.new
+      #     Array.new(4) { prng.uuid_v7(extra_timestamp_bits: 12) }
+      #     # =>
+      #     ["0188d4c7-13da-74f9-8b53-22a786ffdd5a",
+      #      "0188d4c7-13da-753b-83a5-7fb9b2afaeea",
+      #      "0188d4c7-13da-754a-88ea-ac0baeedd8db",
+      #      "0188d4c7-13da-7557-83e1-7cad9cda0d8d"]
+      #     # |<--- sorted --->| |<-- random --->|
+      #
+      #     Array.new(4) { prng.uuid_v7(extra_timestamp_bits: 8) }
+      #     # =>
+      #     ["0188d4c7-3333-7a95-850a-de6edb858f7e",
+      #      "0188d4c7-3333-7ae8-842e-bc3a8b7d0cf9",  # <- out of order
+      #      "0188d4c7-3333-7ae2-995a-9f135dc44ead",  # <- out of order
+      #      "0188d4c7-3333-7af9-87c3-8f612edac82e"]
+      #     # |<--- sorted -->||<---- random --->|
+      #
+      # Any rollbacks of the system clock will break monotonicity.  UUIDv7 is based on
+      # UTC, which excludes leap seconds and can rollback the clock.  To avoid this,
+      # the system clock can synchronize with an NTP server configured to use a "leap
+      # smear" approach.  NTP or PTP will also be needed to synchronize across
+      # distributed nodes.
+      #
+      # Counters and other mechanisms for stronger guarantees of monotonicity are not
+      # implemented.  Applications with stricter requirements should follow [Section
+      # 6.2](https://www.rfc-editor.org/rfc/rfc9562.html#name-monotonicity-and-counter
+      # s) of the specification.
+      #
+      %a{annotate:rdoc:copy:Random::Formatter#uuid_v7}
+      def uuid_v7: (?extra_timestamp_bits: Integer) -> String
 
       # <!--
       #   rdoc-file=lib/random/formatter.rb
@@ -156,7 +241,37 @@ module RBS
       #     prng = Random.new
       #     prng.alphanumeric(10, chars: [*"!".."/"]) #=> ",.,++%/''."
       #
+      %a{annotate:rdoc:copy:Random::Formatter#alphanumeric}
       def alphanumeric: (?Numeric?, ?chars: Array[String]) -> String
+
+      # <!--
+      #   rdoc-file=lib/random/formatter.rb
+      #   - gen_random(n)
+      # -->
+      # Internal interface to Random; Generate random data *n* bytes.
+      #
+      %a{annotate:rdoc:copy:Random::Formatter#gen_random}
+      private def gen_random: (Integer n) -> String
+
+      # <!--
+      #   rdoc-file=lib/random/formatter.rb
+      #   - choose(source, n)
+      # -->
+      # Generate a string that randomly draws from a source array of characters.
+      #
+      # The argument *source* specifies the array of characters from which to generate
+      # the string. The argument *n* specifies the length, in characters, of the
+      # string to be generated.
+      #
+      # The result may contain whatever characters are in the source array.
+      #
+      #     require 'random/formatter'
+      #
+      #     prng.choose([*'l'..'r'], 16) #=> "lmrqpoonmmlqlron"
+      #     prng.choose([*'0'..'9'], 5)  #=> "27309"
+      #
+      %a{annotate:rdoc:copy:Random::Formatter#choose}
+      private def choose: (Array[String] source, Integer n) -> String
     end
   end
 end
