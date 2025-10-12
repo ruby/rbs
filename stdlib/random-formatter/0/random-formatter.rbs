@@ -104,6 +104,7 @@ module RBS
       #
       # See RFC 3548 for the definition of URL-safe base64.
       #
+      %a{annotate:rdoc:copy:Random::Formatter#urlsafe_base64}
       def urlsafe_base64: (?Integer? n, ?boolish padding) -> String
 
       # <!--
@@ -127,6 +128,7 @@ module RBS
       #
       # See [RFC9562](https://www.rfc-editor.org/rfc/rfc9562) for details of UUIDv4.
       #
+      %a{annotate:rdoc:copy:Random::Formatter#uuid}
       def uuid: () -> String
 
       # <!--
@@ -239,6 +241,7 @@ module RBS
       #     prng = Random.new
       #     prng.alphanumeric(10, chars: [*"!".."/"]) #=> ",.,++%/''."
       #
+      %a{annotate:rdoc:copy:Random::Formatter#alphanumeric}
       def alphanumeric: (?Numeric?, ?chars: Array[String]) -> String
 
       # <!--
