@@ -1,19 +1,23 @@
 nodes:
   - name: RBS::AST::Annotation
+    rust_name: AnnotationNode
     fields:
       - name: string
         c_type: rbs_string
   - name: RBS::AST::Bool
+    rust_name: BoolNode
     expose_to_ruby: false
     expose_location: false
     fields:
       - name: value
         c_type: bool
   - name: RBS::AST::Comment
+    rust_name: CommentNode
     fields:
       - name: string
         c_type: rbs_string
   - name: RBS::AST::Declarations::Class
+    rust_name: ClassNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -28,12 +32,14 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Class::Super
+    rust_name: ClassSuperNode
     fields:
       - name: name
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::ClassAlias
+    rust_name: ClassAliasNode
     fields:
       - name: new_name
         c_type: rbs_type_name
@@ -44,6 +50,7 @@ nodes:
       - name: annotations
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::Constant
+    rust_name: ConstantNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -54,6 +61,7 @@ nodes:
       - name: annotations
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::Global
+    rust_name: GlobalNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -64,6 +72,7 @@ nodes:
       - name: annotations
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::Interface
+    rust_name: InterfaceNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -76,6 +85,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module
+    rust_name: ModuleNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -90,12 +100,14 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Declarations::Module::Self
+    rust_name: ModuleSelfNode
     fields:
       - name: name
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::ModuleAlias
+    rust_name: ModuleAliasNode
     fields:
       - name: new_name
         c_type: rbs_type_name
@@ -106,6 +118,7 @@ nodes:
       - name: annotations
         c_type: rbs_node_list
   - name: RBS::AST::Declarations::TypeAlias
+    rust_name: TypeAliasNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -118,21 +131,25 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Directives::Use
+    rust_name: UseNode
     fields:
       - name: clauses
         c_type: rbs_node_list
   - name: RBS::AST::Directives::Use::SingleClause
+    rust_name: UseSingleClauseNode
     fields:
       - name: type_name
         c_type: rbs_type_name
       - name: new_name
         c_type: rbs_ast_symbol
   - name: RBS::AST::Directives::Use::WildcardClause
+    rust_name: UseWildcardClauseNode
     fields:
       - name: namespace
         c_type: rbs_namespace
         c_name: rbs_namespace
   - name: RBS::AST::Members::Alias
+    rust_name: AliasNode
     fields:
       - name: new_name
         c_type: rbs_ast_symbol
@@ -145,6 +162,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::AttrAccessor
+    rust_name: AttrAccessorNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -161,6 +179,7 @@ nodes:
       - name: visibility
         c_type: rbs_keyword
   - name: RBS::AST::Members::AttrReader
+    rust_name: AttrReaderNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -177,6 +196,7 @@ nodes:
       - name: visibility
         c_type: rbs_keyword
   - name: RBS::AST::Members::AttrWriter
+    rust_name: AttrWriterNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -193,6 +213,7 @@ nodes:
       - name: visibility
         c_type: rbs_keyword
   - name: RBS::AST::Members::ClassInstanceVariable
+    rust_name: ClassInstanceVariableNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -201,6 +222,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::ClassVariable
+    rust_name: ClassVariableNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -209,6 +231,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Extend
+    rust_name: ExtendNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -219,6 +242,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Include
+    rust_name: IncludeNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -229,6 +253,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::InstanceVariable
+    rust_name: InstanceVariableNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -237,6 +262,7 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::MethodDefinition
+    rust_name: MethodDefinitionNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -253,6 +279,7 @@ nodes:
       - name: visibility
         c_type: rbs_keyword
   - name: RBS::AST::Members::MethodDefinition::Overload
+    rust_name: MethodDefinitionOverloadNode
     expose_location: false
     fields:
       - name: annotations
@@ -260,6 +287,7 @@ nodes:
       - name: method_type
         c_type: rbs_node
   - name: RBS::AST::Members::Prepend
+    rust_name: PrependNode
     fields:
       - name: name
         c_type: rbs_type_name
@@ -270,8 +298,11 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
   - name: RBS::AST::Members::Private
+    rust_name: PrivateNode
   - name: RBS::AST::Members::Public
+    rust_name: PublicNode
   - name: RBS::AST::TypeParam
+    rust_name: TypeParamNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
@@ -286,18 +317,21 @@ nodes:
       - name: unchecked
         c_type: bool
   - name: RBS::AST::Integer
+    rust_name: IntegerNode
     expose_to_ruby: false
     expose_location: false
     fields:
       - name: string_representation
         c_type: rbs_string
   - name: RBS::AST::String
+    rust_name: StringNode
     expose_to_ruby: false
     expose_location: false
     fields:
       - name: string
         c_type: rbs_string
   - name: RBS::MethodType
+    rust_name: MethodTypeNode
     fields:
       - name: type_params
         c_type: rbs_node_list
@@ -306,6 +340,7 @@ nodes:
       - name: block
         c_type: rbs_types_block
   - name: RBS::Namespace
+    rust_name: NamespaceNode
     expose_location: false
     fields:
       - name: path
@@ -313,6 +348,7 @@ nodes:
       - name: absolute
         c_type: bool
   - name: RBS::Signature
+    rust_name: SignatureNode
     expose_to_ruby: false
     expose_location: false
     fields:
@@ -321,6 +357,7 @@ nodes:
       - name: declarations
         c_type: rbs_node_list
   - name: RBS::TypeName
+    rust_name: TypeNameNode
     expose_location: false
     fields:
       - name: namespace
@@ -329,24 +366,35 @@ nodes:
       - name: name
         c_type: rbs_ast_symbol
   - name: RBS::Types::Alias
+    rust_name: AliasTypeNode
     fields:
       - name: name
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::Bases::Any
+    rust_name: AnyTypeNode
     fields:
       - name: todo
         c_type: bool
   - name: RBS::Types::Bases::Bool
+    rust_name: BoolTypeNode
   - name: RBS::Types::Bases::Bottom
+    rust_name: BottomTypeNode
   - name: RBS::Types::Bases::Class
+    rust_name: ClassTypeNode
   - name: RBS::Types::Bases::Instance
+    rust_name: InstanceTypeNode
   - name: RBS::Types::Bases::Nil
+    rust_name: NilTypeNode
   - name: RBS::Types::Bases::Self
+    rust_name: SelfTypeNode
   - name: RBS::Types::Bases::Top
+    rust_name: TopTypeNode
   - name: RBS::Types::Bases::Void
+    rust_name: VoidTypeNode
   - name: RBS::Types::Block
+    rust_name: BlockTypeNode
     expose_location: true
     fields:
       - name: type
@@ -356,16 +404,19 @@ nodes:
       - name: self_type
         c_type: rbs_node
   - name: RBS::Types::ClassInstance
+    rust_name: ClassInstanceTypeNode
     fields:
       - name: name
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::ClassSingleton
+    rust_name: ClassSingletonTypeNode
     fields:
       - name: name
         c_type: rbs_type_name
   - name: RBS::Types::Function
+    rust_name: FunctionTypeNode
     expose_location: false
     fields:
       - name: required_positionals
@@ -385,30 +436,36 @@ nodes:
       - name: return_type
         c_type: rbs_node
   - name: RBS::Types::Function::Param
+    rust_name: FunctionParamNode
     fields:
       - name: type
         c_type: rbs_node
       - name: name
         c_type: rbs_ast_symbol
   - name: RBS::Types::Interface
+    rust_name: InterfaceTypeNode
     fields:
       - name: name
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
   - name: RBS::Types::Intersection
+    rust_name: IntersectionTypeNode
     fields:
       - name: types
         c_type: rbs_node_list
   - name: RBS::Types::Literal
+    rust_name: LiteralTypeNode
     fields:
       - name: literal
         c_type: rbs_node
   - name: RBS::Types::Optional
+    rust_name: OptionalTypeNode
     fields:
       - name: type
         c_type: rbs_node
   - name: RBS::Types::Proc
+    rust_name: ProcTypeNode
     fields:
       - name: type
         c_type: rbs_node
@@ -417,10 +474,12 @@ nodes:
       - name: self_type
         c_type: rbs_node
   - name: RBS::Types::Record
+    rust_name: RecordTypeNode
     fields:
       - name: all_fields
         c_type: rbs_hash
   - name: RBS::Types::Record::FieldType
+    rust_name: RecordFieldTypeNode
     expose_to_ruby: false
     expose_location: false
     fields:
@@ -429,29 +488,35 @@ nodes:
       - name: required
         c_type: bool
   - name: RBS::Types::Tuple
+    rust_name: TupleTypeNode
     fields:
       - name: types
         c_type: rbs_node_list
   - name: RBS::Types::Union
+    rust_name: UnionTypeNode
     fields:
       - name: types
         c_type: rbs_node_list
   - name: RBS::Types::UntypedFunction
+    rust_name: UntypedFunctionTypeNode
     expose_location: false
     fields:
       - name: return_type
         c_type: rbs_node
   - name: RBS::Types::Variable
+    rust_name: VariableTypeNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
   - name: RBS::AST::Ruby::Annotations::NodeTypeAssertion
+    rust_name: NodeTypeAssertionNode
     fields:
       - name: prefix_location
         c_type: rbs_location
       - name: type
         c_type: rbs_node
   - name: RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation
+    rust_name: ColonMethodTypeAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -460,6 +525,7 @@ nodes:
       - name: method_type
         c_type: rbs_node
   - name: RBS::AST::Ruby::Annotations::MethodTypesAnnotation
+    rust_name: MethodTypesAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -468,6 +534,7 @@ nodes:
       - name: vertical_bar_locations
         c_type: rbs_location_list
   - name: RBS::AST::Ruby::Annotations::SkipAnnotation
+    rust_name: SkipAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -476,6 +543,7 @@ nodes:
       - name: comment_location
         c_type: rbs_location
   - name: RBS::AST::Ruby::Annotations::ReturnTypeAnnotation
+    rust_name: ReturnTypeAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location

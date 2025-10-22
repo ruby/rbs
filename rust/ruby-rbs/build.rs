@@ -9,6 +9,7 @@ struct Config {
 #[derive(Debug, Deserialize)]
 struct Node {
     name: String,
+    rust_name: String,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -27,40 +28,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn replace_reserved_keyword(name: &str) -> &str {
-    match name {
-        "Use" => "UseDirective",
-        "Self" => "SelfType",
-        _ => name,
-    }
-}
-
-fn safe_module_name(name: &str) -> String {
-    let name = replace_reserved_keyword(name);
-
-    let chars: Vec<char> = name.chars().collect();
-    let mut result = String::new();
-
-    for (i, &ch) in chars.iter().enumerate() {
-        // Insert underscore before uppercase if:
-        // - Not at the start
-        // - Previous char was lowercase OR
-        // - Previous was uppercase but next is lowercase
-        //   e.g., "RBSTypes" -> "RBS_Types" -> "rbs_types"
-        if i > 0 && ch.is_uppercase() {
-            let prev_was_lower = chars[i - 1].is_lowercase();
-            let next_is_lower = chars.get(i + 1).is_some_and(|c| c.is_lowercase());
-
-            if prev_was_lower || (chars[i - 1].is_uppercase() && next_is_lower) {
-                result.push('_');
-            }
-        }
-        result.push(ch);
-    }
-
-    result.to_lowercase()
-}
-
 fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     let out_dir = env::var("OUT_DIR")?;
     let dest_path = Path::new(&out_dir).join("bindings.rs");
@@ -71,62 +38,22 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file, "// Nodes to generate: {}", config.nodes.len())?;
     writeln!(file)?;
 
-    let mut current_path: Vec<String> = Vec::new();
-    let mut first_in_module = true;
-
+    // TODO: Go through all of the nodes and generate the structs to back them up
     for node in &config.nodes {
-        // Parse node path (skip "RBS" prefix)
-        let parts: Vec<_> = node.name.split("::").skip(1).collect();
-        let (modules, struct_name) = parts.split_at(parts.len() - 1);
-
-        // Transform module and struct names
-        let modules: Vec<String> = modules.iter().map(|s| safe_module_name(s)).collect();
-        let struct_name = {
-            let name = struct_name[0];
-            replace_reserved_keyword(name).to_string()
-        };
-
-        // Find where paths diverge
-        let common_len = current_path
-            .iter()
-            .zip(&modules)
-            .take_while(|(a, b)| a == b)
-            .count();
-
-        // Close old modules
-        for depth in (common_len..current_path.len()).rev() {
-            writeln!(file, "{}}}", "  ".repeat(depth))?;
-            first_in_module = false;
-        }
-
-        // Open new modules
-        for (depth, module) in modules.iter().enumerate().skip(common_len) {
-            if !first_in_module {
-                writeln!(file)?;
-            }
-            writeln!(file, "{}pub mod {} {{", "  ".repeat(depth), module)?;
-            first_in_module = true;
-        }
-
-        // Write struct (with spacing if not first in module)
-        if !first_in_module {
-            writeln!(file)?;
-        }
-        writeln!(
-            file,
-            "{}pub struct {} {{}}",
-            "  ".repeat(modules.len()),
-            struct_name
-        )?;
-        first_in_module = false;
-
-        current_path = modules;
+        writeln!(file, "pub struct {} {{}}\n", node.rust_name)?;
     }
 
-    // Close remaining modules
-    for depth in (0..current_path.len()).rev() {
-        writeln!(file, "{}}}", "  ".repeat(depth))?;
+    // Generate the Node enum to wrap all of the structs
+    writeln!(file, "pub enum Node {{")?;
+    for node in &config.nodes {
+        let variant_name = node
+            .rust_name
+            .strip_suffix("Node")
+            .unwrap_or(&node.rust_name);
+
+        writeln!(file, "    {}({}),", variant_name, node.rust_name)?;
     }
+    writeln!(file, "}}")?;
 
     Ok(())
 }
