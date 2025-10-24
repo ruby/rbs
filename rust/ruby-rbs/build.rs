@@ -7,9 +7,16 @@ struct Config {
 }
 
 #[derive(Debug, Deserialize)]
+struct NodeField {
+    name: String,
+    c_type: String,
+}
+
+#[derive(Debug, Deserialize)]
 struct Node {
     name: String,
     rust_name: String,
+    fields: Option<Vec<NodeField>>,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -40,7 +47,31 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
     // TODO: Go through all of the nodes and generate the structs to back them up
     for node in &config.nodes {
-        writeln!(file, "pub struct {} {{}}\n", node.rust_name)?;
+        writeln!(file, "pub struct {} {{", node.rust_name)?;
+        if let Some(fields) = &node.fields {
+            for field in fields {
+                match field.c_type.as_str() {
+                    "rbs_string" => writeln!(file, "    {}: *const rbs_string_t,", field.name)?,
+                    _ => eprintln!("Unknown field type: {}", field.c_type),
+                }
+            }
+        }
+        writeln!(file, "}}\n")?;
+
+        writeln!(file, "impl {} {{", node.rust_name)?;
+        if let Some(fields) = &node.fields {
+            for field in fields {
+                match field.c_type.as_str() {
+                    "rbs_string" => {
+                        writeln!(file, "    pub fn {}(&self) -> RBSString {{", field.name)?;
+                        writeln!(file, "        RBSString::new(self.{})", field.name)?;
+                        writeln!(file, "    }}")?;
+                    }
+                    _ => eprintln!("Unknown field type: {}", field.c_type),
+                }
+            }
+        }
+        writeln!(file, "}}\n")?;
     }
 
     // Generate the Node enum to wrap all of the structs
