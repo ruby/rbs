@@ -4,15 +4,15 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "ext/**"
-      - "include/**"
-      - "src/**"
-  pull_request:
-    paths:
-      - "ext/**"
-      - "include/**"
-      - "src/**"
+#   paths:
+#     - "ext/**"
+#     - "include/**"
+#     - "src/**"
+# pull_request:
+#   paths:
+#     - "ext/**"
+#     - "include/**"
+#     - "src/**"
   merge_group: {}
 
 jobs:
@@ -20,6 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Configure Ruby build for debug symbols
+        run: |
+          {
+            echo 'RUBY_CONFIGURE_OPTS=--disable-install-doc --disable-install-strip --with-valgrind optflags=-O0 debugflags=-ggdb3'
+          } >> "$GITHUB_ENV"
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
@@ -36,7 +41,7 @@ jobs:
           gem update --system
       - name: bin/setup
         run: |
-          bin/setup
+          DEBUG=1 bin/setup
       - run: bundle exec rake test:valgrind
         env:
           RUBY_FREE_AT_EXIT: 1
