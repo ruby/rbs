@@ -39,6 +39,7 @@ group :profilers do
   gem 'memory_profiler'
   gem 'benchmark-ips'
   gem "ruby_memcheck", platform: :ruby
+  gem "nokogiri", platform: :ruby
 end
 
 # Test gems

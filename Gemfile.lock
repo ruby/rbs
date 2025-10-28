@@ -206,6 +206,7 @@ DEPENDENCIES
   mutex_m
   net-smtp
   nkf
+  nokogiri
   ostruct
   pathname
   pstore
