@@ -20,14 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Configure Ruby build for debug symbols
-        run: |
-          {
-            echo 'RUBY_CONFIGURE_OPTS=--disable-install-doc --disable-install-strip --with-valgrind optflags=-O0 debugflags=-ggdb3'
-          } >> "$GITHUB_ENV"
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: debug
           bundler-cache: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
@@ -41,7 +36,7 @@ jobs:
           gem update --system
       - name: bin/setup
         run: |
-          DEBUG=1 bin/setup
+          bin/setup
       - run: bundle exec rake test:valgrind
         env:
           RUBY_FREE_AT_EXIT: 1
