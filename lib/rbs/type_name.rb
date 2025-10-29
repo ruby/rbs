@@ -36,7 +36,7 @@ module RBS
       "#{namespace.to_s}#{name}"
     end
 
-    def to_json(state = _ = nil)
+    def to_json(state = nil)
       to_s.to_json(state)
     end
 

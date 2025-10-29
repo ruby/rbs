@@ -35,7 +35,7 @@ module RBS
             update(method_type: self.method_type.sub(subst))
           end
 
-          def to_json(state = _ = nil)
+          def to_json(state = nil)
             {
               annotations: annotations,
               method_type: method_type
@@ -103,7 +103,7 @@ module RBS
           )
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :method_definition,
             name: name,
@@ -145,7 +145,7 @@ module RBS
       class InstanceVariable < Base
         include Var
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :instance_variable,
             name: name,
@@ -159,7 +159,7 @@ module RBS
       class ClassInstanceVariable < Base
         include Var
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :class_instance_variable,
             name: name,
@@ -173,7 +173,7 @@ module RBS
       class ClassVariable < Base
         include Var
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :class_variable,
             name: name,
@@ -215,7 +215,7 @@ module RBS
       class Include < Base
         include Mixin
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :include,
             name: name,
@@ -230,7 +230,7 @@ module RBS
       class Extend < Base
         include Mixin
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :extend,
             name: name,
@@ -245,7 +245,7 @@ module RBS
       class Prepend < Base
         include Mixin
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :prepend,
             name: name,
@@ -311,7 +311,7 @@ module RBS
       class AttrReader < Base
         include Attribute
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :attr_reader,
             name: name,
@@ -329,7 +329,7 @@ module RBS
       class AttrAccessor < Base
         include Attribute
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :attr_accessor,
             name: name,
@@ -347,7 +347,7 @@ module RBS
       class AttrWriter < Base
         include Attribute
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :attr_writer,
             name: name,
@@ -383,7 +383,7 @@ module RBS
       class Public < Base
         include LocationOnly
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           { member: :public, location: location }.to_json(state)
         end
       end
@@ -391,7 +391,7 @@ module RBS
       class Private < Base
         include LocationOnly
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           { member: :private, location: location }.to_json(state)
         end
       end
@@ -426,7 +426,7 @@ module RBS
           new_name.hash ^ old_name.hash ^ kind.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             member: :alias,
             new_name: new_name,
