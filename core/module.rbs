@@ -1694,7 +1694,8 @@ class Module < Object
   # `attr_reader(name)` but deprecated. Returns an array of defined method names
   # as symbols.
   #
-  def attr: (*interned arg0) -> Array[Symbol]
+  def attr: %a{deprecated} (interned, bool) -> Array[Symbol]
+          | (*interned arg0) -> Array[Symbol]
 
   # A previous incarnation of `interned` for backward-compatibility (see #1499)
   %a{deprecated: Use `interned`}
