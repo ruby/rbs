@@ -48,6 +48,8 @@
 #     Options](rdoc-ref:Process@Execution+Options).
 #
 module Open3
+  type env = Hash[String, String]
+
   # <!--
   #   rdoc-file=lib/open3.rb
   #   - Open3.capture2([env, ] command_line, options = {}) -> [stdout_s, status]
@@ -144,6 +146,7 @@ module Open3
   #     # => ["hello world\n", #<Process::Status: pid 2326299 exit 0>]
   #
   def self?.capture2: (*String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
+                    | (env, *String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
 
   # <!--
   #   rdoc-file=lib/open3.rb
@@ -241,4 +244,5 @@ module Open3
   #     # => ["hello world\n", #<Process::Status: pid 2371894 exit 0>]
   #
   def self?.capture2e: (*String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
+                     | (env, *String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
 end

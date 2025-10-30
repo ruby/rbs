@@ -13,6 +13,8 @@ class Open3SingletonTest < Test::Unit::TestCase
                      Open3, :capture2, 'echo "Foo"', binmode: true
     assert_send_type "(*::String, stdin_data: ::String) -> [ ::String, ::Process::Status ]",
                      Open3, :capture2, "#{RUBY_EXECUTABLE} -e 'puts STDIN.read'", stdin_data: 'Foo'
+    assert_send_type "(::Hash[::String, ::String], *::String) -> [ ::String, ::Process::Status ]",
+                     Open3, :capture2, { 'FOO' => 'BAR' }, "echo $FOO"
   end
 
   def test_capture2e
@@ -22,6 +24,8 @@ class Open3SingletonTest < Test::Unit::TestCase
                      Open3, :capture2e, 'echo "Foo"', binmode: true
     assert_send_type "(*::String, stdin_data: ::String) -> [ ::String, ::Process::Status ]",
                      Open3, :capture2e, "#{RUBY_EXECUTABLE} -e 'puts STDIN.read'", stdin_data: 'Foo'
+    assert_send_type "(::Hash[::String, ::String], *::String) -> [ ::String, ::Process::Status ]",
+                     Open3, :capture2e, { 'FOO' => 'BAR' }, "echo $FOO"
   end
 end
 
