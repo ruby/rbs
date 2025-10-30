@@ -143,5 +143,5 @@ module Open3
   #     Open3.capture2e('echo', 'hello', 'world')
   #     # => ["hello world\n", #<Process::Status: pid 2371894 exit 0>]
   #
-  def self.capture2e: (*String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
+  def self?.capture2e: (*String, ?stdin_data: String, ?binmode: boolish) -> [String, Process::Status]
 end

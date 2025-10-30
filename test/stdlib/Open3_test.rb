@@ -15,3 +15,19 @@ class Open3SingletonTest < Test::Unit::TestCase
                      Open3, :capture2e, "#{RUBY_EXECUTABLE} -e 'puts STDIN.read'", stdin_data: 'Foo'
   end
 end
+
+class Open3InstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "open3"
+  testing "::Open3"
+
+  class CustomOpen3
+    include Open3
+  end
+
+  def test_capture2e
+    assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
+                     CustomOpen3.new, :capture2e, 'echo "Foo"'
+  end
+end
