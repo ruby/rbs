@@ -6,6 +6,15 @@ class Open3SingletonTest < Test::Unit::TestCase
   library "open3"
   testing "singleton(::Open3)"
 
+  def test_capture2
+    assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
+                     Open3, :capture2, 'echo "Foo"'
+    assert_send_type "(*::String, binmode: boolish) -> [ ::String, ::Process::Status ]",
+                     Open3, :capture2, 'echo "Foo"', binmode: true
+    assert_send_type "(*::String, stdin_data: ::String) -> [ ::String, ::Process::Status ]",
+                     Open3, :capture2, "#{RUBY_EXECUTABLE} -e 'puts STDIN.read'", stdin_data: 'Foo'
+  end
+
   def test_capture2e
     assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
                      Open3, :capture2e, 'echo "Foo"'
@@ -24,6 +33,11 @@ class Open3InstanceTest < Test::Unit::TestCase
 
   class CustomOpen3
     include Open3
+  end
+
+  def test_capture2
+    assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
+                     CustomOpen3.new, :capture2, 'echo "Foo"'
   end
 
   def test_capture2e
