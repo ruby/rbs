@@ -52,6 +52,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
             for field in fields {
                 match field.c_type.as_str() {
                     "rbs_string" => writeln!(file, "    {}: *const rbs_string_t,", field.name)?,
+                    "bool" => writeln!(file, "    {}: bool,", field.name)?,
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
@@ -65,6 +66,11 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                     "rbs_string" => {
                         writeln!(file, "    pub fn {}(&self) -> RBSString {{", field.name)?;
                         writeln!(file, "        RBSString::new(self.{})", field.name)?;
+                        writeln!(file, "    }}")?;
+                    }
+                    "bool" => {
+                        writeln!(file, "    pub fn {}(&self) -> bool {{", field.name)?;
+                        writeln!(file, "        self.{}", field.name)?;
                         writeln!(file, "    }}")?;
                     }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
