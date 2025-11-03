@@ -25,3 +25,11 @@ if ENV["TEST_NO_C23"]
 end
 
 create_makefile 'rbs_extension'
+
+# Only generate compile_commands.json when compiling through Rake tasks
+# This is to avoid adding extconf_compile_commands_json as a runtime dependency
+if ENV["COMPILE_COMMANDS_JSON"]
+  require 'extconf_compile_commands_json'
+  ExtconfCompileCommandsJson.generate!
+  ExtconfCompileCommandsJson.symlink!
+end

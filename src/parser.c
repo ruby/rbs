@@ -713,11 +713,17 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
     }
 
     bool required = true;
+    rbs_range_t block_range;
+
     if (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE) {
         // Optional block
+        block_range.start = parser->next_token.range.start;
         required = false;
         rbs_parser_advance(parser);
+    } else if (parser->next_token.type == pLBRACE) {
+        block_range.start = parser->next_token.range.start;
     }
+
     if (parser->next_token.type == pLBRACE) {
         rbs_parser_advance(parser);
 
@@ -737,9 +743,12 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
         rbs_node_t *block_return_type = NULL;
         CHECK_PARSE(parse_optional(parser, &block_return_type));
 
+        ADVANCE_ASSERT(parser, pRBRACE);
+
+        block_range.end = parser->current_token.range.end;
+        rbs_location_t *loc = rbs_location_new(ALLOCATOR(), block_range);
+
         rbs_node_t *block_function = NULL;
-        function_range.end = parser->current_token.range.end;
-        rbs_location_t *loc = rbs_location_new(ALLOCATOR(), function_range);
         if (rbs_is_untyped_params(&block_params)) {
             block_function = (rbs_node_t *) rbs_types_untyped_function_new(ALLOCATOR(), loc, block_return_type);
         } else {
@@ -758,8 +767,6 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
         }
 
         block = rbs_types_block_new(ALLOCATOR(), loc, block_function, required, self_type);
-
-        ADVANCE_ASSERT(parser, pRBRACE);
     }
 
     ADVANCE_ASSERT(parser, pARROW);
@@ -3226,6 +3233,26 @@ bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature) {
     signature_range.end = parser->current_token.range.end;
     *signature = rbs_signature_new(ALLOCATOR(), rbs_location_new(ALLOCATOR(), signature_range), dirs, decls);
     return true;
+}
+
+bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params) {
+    if (parser->next_token.type != pLBRACKET) {
+        rbs_parser_set_error(parser, parser->next_token, true, "expected a token `pLBRACKET`");
+        return false;
+    }
+
+    rbs_range_t rg = NULL_RANGE;
+    rbs_parser_push_typevar_table(parser, true);
+    bool res = parse_type_params(parser, &rg, module_type_params, params);
+    rbs_parser_push_typevar_table(parser, false);
+
+    rbs_parser_advance(parser);
+    if (parser->current_token.type != pEOF) {
+        rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+        return false;
+    }
+
+    return res;
 }
 
 id_table *alloc_empty_table(rbs_allocator_t *allocator) {
