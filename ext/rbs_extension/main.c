@@ -187,17 +187,9 @@ static VALUE parse_method_type_try(VALUE a) {
     }
 
     rbs_method_type_t *method_type = NULL;
-    rbs_parse_method_type(parser, &method_type);
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof));
 
     raise_error_if_any(parser, arg->buffer);
-
-    if (RB_TEST(arg->require_eof)) {
-        rbs_parser_advance(parser);
-        if (parser->current_token.type != pEOF) {
-            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
-            raise_error(parser->error, arg->buffer);
-        }
-    }
 
     rbs_translation_context_t ctx = rbs_translation_context_create(
         &parser->constant_pool,

@@ -1452,7 +1452,7 @@ static bool parser_pop_typevar_table(rbs_parser_t *parser) {
   method_type ::= {} type_params <function>
   */
 // TODO: Should this be NODISCARD?
-bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type) {
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, bool require_eof) {
     rbs_parser_push_typevar_table(parser, false);
 
     rbs_range_t rg;
@@ -1468,10 +1468,18 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
     CHECK_PARSE(parse_function(parser, false, &result));
 
+    CHECK_PARSE(parser_pop_typevar_table(parser));
+
     rg.end = parser->current_token.range.end;
     type_range.end = rg.end;
 
-    CHECK_PARSE(parser_pop_typevar_table(parser));
+    if (require_eof) {
+        rbs_parser_advance(parser);
+        if (parser->current_token.type != pEOF) {
+            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+            return false;
+        }
+    }
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), rg);
     rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
@@ -1881,7 +1889,7 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
         case pLBRACKET:
         case pQUESTION: {
             rbs_method_type_t *method_type = NULL;
-            CHECK_PARSE(rbs_parse_method_type(parser, &method_type));
+            CHECK_PARSE(rbs_parse_method_type(parser, &method_type, false));
 
             overload_range.end = parser->current_token.range.end;
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), overload_range);
