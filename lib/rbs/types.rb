@@ -200,40 +200,53 @@ module RBS
     end
 
     class ClassSingleton
+      include NoFreeVariables
+      include EmptyEachType
+
       attr_reader :name
       attr_reader :location
+      attr_reader :args
 
-      def initialize(name:, location:)
+      def initialize(name:, location:, args: [])
         @name = name
         @location = location
+        @args = args
       end
 
       def ==(other)
-        other.is_a?(ClassSingleton) && other.name == name
+        other.is_a?(ClassSingleton) && other.name == name && other.args == args
       end
 
       alias eql? ==
 
       def hash
-        self.class.hash ^ name.hash
+        self.class.hash ^ name.hash ^ args.hash
       end
 
-      include NoFreeVariables
-      include NoSubst
+      def sub(s)
+        return self if s.empty?
+
+        self.class.new(name: name,
+                       args: args.map {|ty| ty.sub(s) },
+                       location: location)
+      end
 
       def to_json(state = _ = nil)
-        { class: :class_singleton, name: name, location: location }.to_json(state)
+        { class: :class_singleton, name: name, args: args, location: location }.to_json(state)
       end
 
       def to_s(level = 0)
-        "singleton(#{name})"
+        if args.empty?
+          "singleton(#{name})"
+        else
+          "singleton(#{name})[#{args.join(", ")}]"
+        end
       end
 
-      include EmptyEachType
-
-      def map_type_name(&)
+      def map_type_name(&block)
         ClassSingleton.new(
           name: yield(name, location, self),
+          args: args.map {|type| type.map_type_name(&block) },
           location: location
         )
       end

@@ -1062,7 +1062,7 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
 }
 
 /*
-  singleton_type ::= {`singleton`} `(` type_name <`)`>
+  singleton_type ::= {`singleton`} `(` type_name <`)`> type_args?
 */
 NODISCARD
 static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton_t **singleton) {
@@ -1078,13 +1078,29 @@ static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton
     CHECK_PARSE(parse_type_name(parser, CLASS_NAME, &name_range, &type_name));
 
     ADVANCE_ASSERT(parser, pRPAREN);
-    type_range.end = parser->current_token.range.end;
+
+    rbs_node_list_t *types = rbs_node_list_new(ALLOCATOR());
+
+    rbs_range_t args_range;
+    if (parser->next_token.type == pLBRACKET) {
+        rbs_parser_advance(parser);
+        args_range.start = parser->current_token.range.start;
+        CHECK_PARSE(parse_type_list(parser, pRBRACKET, types));
+        ADVANCE_ASSERT(parser, pRBRACKET);
+        args_range.end = parser->current_token.range.end;
+        type_range.end = parser->current_token.range.end;
+    } else {
+        args_range = NULL_RANGE;
+        type_range.end = parser->current_token.range.end;
+    }
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), type_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 1);
+    rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
     rbs_loc_add_required_child(loc, INTERN("name"), name_range);
+    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
-    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name);
+    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name, types);
+
     return true;
 }
 
