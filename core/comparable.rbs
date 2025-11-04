@@ -167,5 +167,13 @@ interface Comparable::_WithSpaceshipOperator
   # If `other` is less than `self`, it returns a positive Integer.
   # If no comparison is defined with `other` and `self`, it returns `nil`.
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (untyped other) -> Comparable::_CompareToZero?
+end
+
+# This interface indicates a type is comparable against zero.
+#
+interface Comparable::_CompareToZero
+  def <: (0) -> boolish
+
+  def >: (0) -> boolish
 end
