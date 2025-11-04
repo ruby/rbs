@@ -646,7 +646,7 @@ class Hash[unchecked out K, unchecked out V]
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h[:nosuch] # => nil
   #
-  def []: (_Key key) -> V?
+  def []: %a{implicitly-returns-nil} (_Key key) -> V
 
   # <!--
   #   rdoc-file=hash.c
