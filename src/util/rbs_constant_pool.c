@@ -37,7 +37,7 @@ next_power_of_two(uint32_t v) {
     return v;
 }
 
-static bool is_power_of_two(uint32_t size) {
+__attribute__((unused)) static bool is_power_of_two(uint32_t size) {
     return (size & (size - 1)) == 0;
 }
 
@@ -46,7 +46,7 @@ static bool is_power_of_two(uint32_t size) {
  */
 static inline bool
 rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
-    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
+    RBS_ASSERT(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
 
     uint32_t next_capacity = pool->capacity * 2;
     if (next_capacity < pool->capacity) return false;
@@ -123,7 +123,7 @@ bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
  */
 rbs_constant_t *
 rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_id_t constant_id) {
-    rbs_assert(constant_id != RBS_CONSTANT_ID_UNSET && constant_id <= pool->size, "constant_id is not valid. Got %i, pool->size: %i", constant_id, pool->size);
+    RBS_ASSERT(constant_id != RBS_CONSTANT_ID_UNSET && constant_id <= pool->size, "constant_id is not valid. Got %i, pool->size: %i", constant_id, pool->size);
     return &pool->constants[constant_id - 1];
 }
 
@@ -133,7 +133,7 @@ rbs_constant_pool_id_to_constant(const rbs_constant_pool_t *pool, rbs_constant_i
  */
 rbs_constant_id_t
 rbs_constant_pool_find(const rbs_constant_pool_t *pool, const uint8_t *start, size_t length) {
-    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
+    RBS_ASSERT(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
     const uint32_t mask = pool->capacity - 1;
 
     uint32_t hash = rbs_constant_pool_hash(start, length);
@@ -161,7 +161,7 @@ rbs_constant_pool_insert(rbs_constant_pool_t *pool, const uint8_t *start, size_t
         if (!rbs_constant_pool_resize(pool)) return RBS_CONSTANT_ID_UNSET;
     }
 
-    rbs_assert(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
+    RBS_ASSERT(is_power_of_two(pool->capacity), "pool->capacity is not a power of two. Got %i", pool->capacity);
     const uint32_t mask = pool->capacity - 1;
 
     uint32_t hash = rbs_constant_pool_hash(start, length);
@@ -202,7 +202,7 @@ rbs_constant_pool_insert(rbs_constant_pool_t *pool, const uint8_t *start, size_t
     // IDs are allocated starting at 1, since the value 0 denotes a non-existent
     // constant.
     uint32_t id = ++pool->size;
-    rbs_assert(pool->size < ((uint32_t) (1 << 30)), "pool->size is too large. Got %i", pool->size);
+    RBS_ASSERT(pool->size < ((uint32_t) (1 << 30)), "pool->size is too large. Got %i", pool->size);
 
     *bucket = (rbs_constant_pool_bucket_t) {
         .id = (unsigned int) (id & 0x3fffffff),

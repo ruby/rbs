@@ -98,7 +98,7 @@ void *rbs_allocator_realloc_impl(rbs_allocator_t *allocator, void *ptr, size_t o
 
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
 void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t alignment) {
-    rbs_assert(size % alignment == 0, "size must be a multiple of the alignment. size: %zu, alignment: %zu", size, alignment);
+    RBS_ASSERT(size % alignment == 0, "size must be a multiple of the alignment. size: %zu, alignment: %zu", size, alignment);
 
     if (allocator->default_page_payload_size < size) { // Big allocation, give it its own page.
         rbs_allocator_page_t *new_page = rbs_allocator_page_new(size);
