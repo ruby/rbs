@@ -46,7 +46,7 @@ GEM
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
-    fileutils (1.7.3)
+    fileutils (1.8.0)
     goodcheck (3.1.0)
       marcel (>= 1.0, < 2.0)
       psych (>= 3.1, < 5.0)
