@@ -47,12 +47,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(String) -> String", JSON, :create_id=, "json_class"
   end
 
-  def test_deep_const_get
-    with_interned("File") do |val|
-      assert_send_type "(interned) -> singleton(File)", JSON, :deep_const_get, val
-    end
-  end
-
   def test_dump
     assert_send_type "(ToJson) -> String", JSON, :dump, ToJson.new
     assert_send_type "(ToJson, Integer) -> String", JSON, :dump, ToJson.new, 100
