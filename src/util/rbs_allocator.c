@@ -64,7 +64,7 @@ static rbs_allocator_page_t *rbs_allocator_page_new(size_t payload_size) {
     return page;
 }
 
-rbs_allocator_t *rbs_allocator_init() {
+rbs_allocator_t *rbs_allocator_init(void) {
     rbs_allocator_t *allocator = malloc(sizeof(rbs_allocator_t));
 
     const size_t system_page_size = get_system_page_size();
