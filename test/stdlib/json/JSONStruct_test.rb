@@ -32,6 +32,8 @@ class JSONStructInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      Foo.new(1), :to_json
+    assert_send_type "(nil) -> String",
+                     Foo.new(1), :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      Foo.new(1), :to_json, JSON::State.new
   end

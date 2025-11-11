@@ -61,7 +61,7 @@ module RBS
         include EmptyEachType
         include NoTypeName
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           klass = to_s.to_sym
           { class: klass, location: location }.to_json(state)
         end
@@ -157,7 +157,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :variable, name: name, location: location }.to_json(state)
       end
 
@@ -221,7 +221,7 @@ module RBS
       include NoFreeVariables
       include NoSubst
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :class_singleton, name: name, location: location }.to_json(state)
       end
 
@@ -320,7 +320,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :interface, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -364,7 +364,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :class_instance, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -408,7 +408,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :alias, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -466,7 +466,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :tuple, types: types, location: location }.to_json(state)
       end
 
@@ -573,7 +573,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :record, fields: fields, optional_fields: optional_fields, location: location }.to_json(state)
       end
 
@@ -665,7 +665,7 @@ module RBS
         type.free_variables(set)
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :optional, type: type, location: location }.to_json(state)
       end
 
@@ -755,7 +755,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :union, types: types, location: location }.to_json(state)
       end
 
@@ -846,7 +846,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :intersection, types: types, location: location }.to_json(state)
       end
 
@@ -932,7 +932,7 @@ module RBS
           end
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           { type: type, name: name }.to_json(state)
         end
 
@@ -1091,7 +1091,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -1279,7 +1279,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           return_type: return_type
         }.to_json(state)
@@ -1355,7 +1355,7 @@ module RBS
           other.self_type == self_type
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           type: type,
           required: required,
@@ -1424,7 +1424,7 @@ module RBS
         set
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           class: :proc,
           type: type,
@@ -1541,7 +1541,7 @@ module RBS
       include EmptyEachType
       include NoTypeName
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :literal, literal: literal.inspect, location: location }.to_json(state)
       end
 

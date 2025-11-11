@@ -1,5 +1,5 @@
 interface _ToJson
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
@@ -1191,28 +1191,28 @@ class Object
   # it to a JSON string, and returns the result. This is a fallback, if no
   # special method #to_json was defined for some object.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
 class NilClass
   # Returns a JSON string for nil: 'null'.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
 class TrueClass
   # Returns a JSON string for true: 'true'.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
 class FalseClass
   # Returns a JSON string for false: 'false'.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1221,21 +1221,21 @@ class String
   # returns a JSON string encoded with UTF16 big endian characters as
   # \u????.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
 class Integer
   # Returns a JSON string representation for this Integer number.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
 class Float
   # Returns a JSON string representation for this Float number.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1245,7 +1245,7 @@ class Hash[unchecked out K, unchecked out V]
   # _state_ is a JSON::State object, that can also be used to configure the
   # produced JSON string output further.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1255,7 +1255,7 @@ class Array[unchecked out Elem]
   # _state_ is a JSON::State object, that can also be used to configure the
   # produced JSON string output further.
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1309,7 +1309,7 @@ class BigDecimal
   #     {"json_class":"BigDecimal","b":"36:0.2e1"}
   #     {"json_class":"BigDecimal","b":"27:0.2e1"}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1358,7 +1358,7 @@ class Complex
   #     {"json_class":"Complex","r":2,"i":0}
   #     {"json_class":"Complex","r":2.0,"i":4}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1405,7 +1405,7 @@ class Date
   #
   #     {"json_class":"Date","y":2023,"m":11,"d":21,"sg":2299161.0}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1451,7 +1451,7 @@ class DateTime
   #
   #     {"json_class":"DateTime","y":2023,"m":11,"d":21,"sg":2299161.0}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1496,7 +1496,7 @@ class Exception
   #
   #     {"json_class":"Exception","m":"Foo","b":null}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1544,7 +1544,7 @@ class OpenStruct
   #
   #     {"json_class":"OpenStruct","t":{'name':'Rowdy',"age":null}}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1597,7 +1597,7 @@ class Range[out Elem]
   #     {"json_class":"Range","a":[1,4,true]}
   #     {"json_class":"Range","a":["a","d",false]}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1644,7 +1644,7 @@ class Rational
   #
   #     {"json_class":"Rational","n":2,"d":3}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1690,7 +1690,7 @@ class Regexp
   #
   #     {"json_class":"Regexp","o":0,"s":"foo"}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1736,7 +1736,7 @@ class Set[unchecked out A]
   #
   #     {"json_class":"Set","a":["foo","bar","baz"]}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1785,7 +1785,7 @@ class Struct[Elem]
   #
   #     {"json_class":"Struct","t":{'name':'Rowdy',"age":null}}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1831,7 +1831,7 @@ class Symbol
   #
   #     # {"json_class":"Symbol","s":"foo"}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
 
 %a{annotate:rdoc:skip}
@@ -1878,5 +1878,5 @@ class Time
   #
   #     {"json_class":"Time","s":1700931678,"n":980650786}
   #
-  def to_json: (?JSON::State state) -> String
+  def to_json: (?JSON::State? state) -> String
 end
