@@ -42,7 +42,7 @@ class RBS::RepositoryTest < Test::Unit::TestCase
   def test_repository_stdlib
     repo = Repository.new
 
-    refute_nil repo.lookup("pathname", nil)
+    refute_nil repo.lookup("logger", nil)
   end
 
   def test_repository
