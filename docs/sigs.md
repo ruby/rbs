@@ -131,10 +131,10 @@ You may need to specify `-r` or `-I` to load signatures.
 The default is `-I sig`.
 
 ```shell
-RBS_TEST_OPT='-r pathname -I sig'
+RBS_TEST_OPT='-r logger -I sig'
 ```
 
-Replacing `pathname` with the `stdlib` you want to include. For example, if you need to load `Set` and `BigDecimal` in `stdlib`, you would need to have `RBS_TEST_OPT='-r set -r bigdecimal -I sig'`
+Replacing `logger` with the `stdlib` you want to include. For example, if you need to load `Set` and `BigDecimal` in `stdlib`, you would need to have `RBS_TEST_OPT='-r set -r bigdecimal -I sig'`
 
 `RBS_TEST_LOGLEVEL` can be used to configure log level. Defaults to `info`.
 
@@ -148,7 +148,7 @@ So, a typical command line to start the test would look like the following:
 $ RBS_TEST_LOGLEVEL=error \
   RBS_TEST_TARGET='Kaigi::*' \
   RBS_TEST_SKIP='Kaigi::MonkeyPatch' \
-  RBS_TEST_OPT='-rset -rpathname -Isig -Iprivate' \
+  RBS_TEST_OPT='-rlogger -Isig -Iprivate' \
   RBS_TEST_RAISE=true \
   RUBYOPT='-rbundler/setup -rrbs/test/setup' \
   bundle exec rake test

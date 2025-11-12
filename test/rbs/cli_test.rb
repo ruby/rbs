@@ -124,35 +124,35 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_list
     with_cli do |cli|
-      assert_cli_success { cli.run(%w(-r pathname list)) }
-      assert_match %r{^::Pathname \(class\)$}, stdout.string
+      assert_cli_success { cli.run(%w(-r logger list)) }
+      assert_match %r{^::Logger \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --class))
+        cli.run(%w(-r logger list --class))
       end
-      assert_match %r{^::Pathname \(class\)$}, stdout.string
+      assert_match %r{^::Logger \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --module))
+        cli.run(%w(-r logger list --module))
       end
-      refute_match %r{^::Pathname \(class\)$}, stdout.string
+      refute_match %r{^::Logger \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --interface))
+        cli.run(%w(-r logger list --interface))
       end
-      refute_match %r{^::Pathname \(class\)$}, stdout.string
+      refute_match %r{^::Logger \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
@@ -856,9 +856,9 @@ singleton(::BasicObject)
 
   def test_paths
     with_cli do |cli|
-      assert_cli_success cli.run(%w(-r pathname -I no-such-dir paths))
+      assert_cli_success cli.run(%w(-r logger -I no-such-dir paths))
       assert_match %r{/core \(dir, core\)$}, stdout.string
-      assert_match %r{/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
+      assert_match %r{/stdlib/logger/0 \(dir, library, name=logger\)$}, stdout.string
       assert_match %r{^no-such-dir \(absent\)$}, stdout.string
     end
   end
