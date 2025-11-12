@@ -1,2 +1,2 @@
 dependencies:
-  - name: pathname
+  - name: logger
