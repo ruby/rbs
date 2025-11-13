@@ -149,6 +149,14 @@ module TestHelper
   end
 
   RUBY_EXECUTABLE = ENV["RUBY"] || RbConfig.ruby
+
+  def silence_warning(which)
+    old_warning = Warning[which]
+    Warning[which] = false
+    yield
+  ensure
+    Warning[which] = old_warning
+  end
 end
 
 class StdlibTest < Test::Unit::TestCase
