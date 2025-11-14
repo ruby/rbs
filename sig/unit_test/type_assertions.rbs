@@ -153,6 +153,17 @@ module RBS
       #
       def refute_send_type: (String | MethodType method_type, untyped receiver, Symbol method_name, *untyped args) ?{ () -> untyped } -> void
 
+      # Calls a method `method_name`, validates if it's compatible with RBS type definition, and ensures it raises the `exception` class.
+      #
+      # 1. It calls `method_name` with `receiver` passing `args` and given block,
+      # 2. Validates if it's compatible with given `method_type`, and
+      # 3. Validates if it's compatible with one of the overloads defined in RBS type definition
+      # 4. Ensures that `exception` is thrown
+      #
+      # See `assert_send_type` for the details.
+      #
+      def assert_send_type_error: (String | MethodType method_type, Class exception, untyped receiver, Symbol method_name, *untyped args) ?{ () -> untyped } -> void
+
       # Asserts if the constant `constant_name` has `constant_type`, and the RBS definition has compatible type
       #
       # ```ruby
