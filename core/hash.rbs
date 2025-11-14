@@ -486,13 +486,27 @@
 # *   #flatten: Returns an array that is a 1-dimensional flattening of `self`.
 # *   #invert: Returns a hash with the each key-value pair inverted.
 #
-class Hash[unchecked out K, unchecked out V] < Object
+class Hash[unchecked out K, unchecked out V]
   include Enumerable[[ K, V ]]
 
+  # Interface that indicates a type can be used as a key to `Hash` lookup methods.
+  #
   interface _Key
     def hash: () -> Integer
 
     def eql?: (untyped rhs) -> boolish
+  end
+
+  # Interface that indicates a type convertible to `[ K, V ]` via its `#to_ary` method.
+  #
+  interface _Pair[K, V]
+    def to_ary: () -> [ K, V ]
+  end
+
+  # Interface for comparing equality of types.
+  #
+  interface _Equals
+    def ==: (untyped other) -> boolish
   end
 
   # <!--
@@ -525,9 +539,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Raises an exception if the argument list does not conform to any of the above.
   #
-  def self.[]: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-             | [U, V] (Array[[ U, V ]]) -> ::Hash[U, V]
-             | (*untyped) -> ::Hash[untyped, untyped]
+  def self.[]: [K, V] (hash[K, V] hash) -> instance
+             | [K, V] (array[ _Pair[K, V] ] two_element_arrays) -> instance
+             | [T] (*T objects) -> Hash[T, T]
 
   # <!--
   #   rdoc-file=hash.c
@@ -542,8 +556,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Raises an exception unless `obj.to_hash` returns a `Hash` object.
   #
-  def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-                      | (untyped) -> (::Hash[untyped, untyped] | nil)
+  def self.try_convert: [K, V] (hash[K, V] hash) -> Hash[K, V]
+                      | (untyped) -> nil
 
   # <!--
   #   rdoc-file=hash.c
@@ -557,7 +571,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 < h1 # => false
   #     h1 < h1 # => false
   #
-  def <: [A, B] (::Hash[A, B]) -> bool
+  def <: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -570,7 +584,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 <= h1 # => false
   #     h1 <= h1 # => true
   #
-  def <=: [A, B] (::Hash[A, B]) -> bool
+  def <=: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -604,7 +618,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 > h1 # => false
   #     h1 > h1 # => false
   #
-  def >: [A, B] (::Hash[A, B]) -> bool
+  def >: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -617,7 +631,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h2 >= h1 # => false
   #     h1 >= h1 # => true
   #
-  def >=: [A, B] (::Hash[A, B]) -> bool
+  def >=: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -632,7 +646,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h[:nosuch] # => nil
   #
-  def []: %a{implicitly-returns-nil} (K arg0) -> V
+  def []: %a{implicitly-returns-nil} (_Key key) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -655,7 +669,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.store(:bat, 3) # => 3
   #     h # => {:foo=>0, :bar=>1, :baz=>2, :bat=>3}
   #
-  def []=: (K arg0, V arg1) -> V
+  def []=: (K key, V value) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -686,8 +700,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Related: Enumerable#any?
   #
   def any?: () -> bool
-          | (untyped pattern) -> bool
-          | () { (K, V) -> boolish } -> bool
+          | (Enumerable::_Pattern pattern) -> bool
+          | () { ([ K, V ] pair) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -700,7 +714,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Returns `nil` if key `key` is not found.
   #
-  def assoc: (K arg0) -> [ K, V ]?
+  def assoc: (_Equals key) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -719,7 +733,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 = h.compact
   #     h1 # => {:foo=>0, :baz=>2}
   #
-  def compact: () -> ::Hash[K, V]
+  def compact: () -> instance
 
   # <!--
   #   rdoc-file=hash.c
@@ -774,7 +788,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - deconstruct_keys(p1)
   # -->
   #
-  def deconstruct_keys: (Array[K] | nil) -> self
+  def deconstruct_keys: (untyped) -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -795,7 +809,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h[:foo] = "Hello"
   #     h.default(:foo) # => "No key foo"
   #
-  def default: (?K arg0) -> V?
+  def default: (?_Key key) -> V?
 
   # <!--
   #   rdoc-file=hash.c
@@ -809,7 +823,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See [Default Values](rdoc-ref:Hash@Default+Values).
   #
-  def default=: (V arg0) -> V
+  def default=: (V default) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -822,7 +836,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default_proc = proc {|hash, key| "Default value for #{key}" }
   #     h.default_proc.class # => Proc
   #
-  def default_proc: () -> (Proc | nil)
+  def default_proc: () -> (^(self, _Key key) -> V)?
 
   # <!--
   #   rdoc-file=hash.c
@@ -837,7 +851,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default_proc = nil
   #     h.default_proc # => nil
   #
-  def default_proc=: (Proc | _ToProc | nil) -> (Proc | _ToProc | nil)
+  def default_proc=: (nil) -> nil
+                   | (^(self, _Key key) -> V proc) -> ^(self, _Key) -> V
+                   | (_ToProc proc) -> Proc
 
   # <!--
   #   rdoc-file=hash.c
@@ -866,8 +882,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.delete(:nosuch) { |key| "Key #{key} not found" } # => "Key nosuch not found"
   #     h # => {:foo=>0, :bar=>1, :baz=>2}
   #
-  def delete: (K arg0) -> V?
-            | [U] (K arg0) { (K arg0) -> U } -> (U | V)
+  def delete: (_Key key) -> V?
+            | [T, K2 < _Key] (K2 key) { (K2 key) -> T } -> (T | V)
 
   # <!--
   #   rdoc-file=hash.c
@@ -884,8 +900,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.delete_if # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:delete_if>
   #     e.each { |key, value| value > 0 } # => {:foo=>0}
   #
-  def delete_if: () { (K, V) -> boolish } -> self
-               | () -> ::Enumerator[[ K, V ], self]
+  def delete_if: () -> Enumerator[[ K, V ], self]
+               | () { (K key, V value) -> boolish } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -914,7 +930,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.dig(:hello, :world) # => h
   #     h.dig(:hello, :world, :foo, :bar, 2) # => :c
   #
-  def dig: (K, *untyped) -> untyped
+  def dig: (_Key key, *untyped identifiers) -> untyped
 
   # <!-- rdoc-file=hash.c -->
   # Calls the given block with each key-value pair; returns `self`:
@@ -937,8 +953,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     bar: 1
   #     baz: 2
   #
-  def each: () { ([ K, V ] arg0) -> untyped } -> self
-          | () -> ::Enumerator[[ K, V ], self]
+  def each: () -> Enumerator[[ K, V ], self]
+          | () { ([ K, V ] pair) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -965,8 +981,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     bar
   #     baz
   #
-  def each_key: () { (K arg0) -> untyped } -> ::Hash[K, V]
-              | () -> ::Enumerator[K, self]
+  def each_key: () -> Enumerator[K, self]
+              | () { (K key) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1022,8 +1038,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     1
   #     2
   #
-  def each_value: () { (V arg0) -> untyped } -> self
-                | () -> ::Enumerator[V, self]
+  def each_value: () -> Enumerator[V, self]
+                | () { (V value) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1052,7 +1068,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h3 = {baz: 2, bar: 1, foo: 0}
   #     h1.eql? h3 # => true
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped object) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1064,7 +1080,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Any given `keys` that are not found are ignored.
   #
-  def except: (*K) -> ::Hash[K, V]
+  def except: (*_Key keys) -> Hash[K, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1088,9 +1104,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Note that this method does not use the values of either #default or
   # #default_proc.
   #
-  def fetch: (K arg0) -> V
-           | [X] (K arg0, X arg1) -> (V | X)
-           | [X] (K arg0) { (K arg0) -> X } -> (V | X)
+  def fetch: (_Key key) -> V
+           | [T] (_Key key, T default_value) -> (V | T)
+           | [K2 < _Key, T] (K2 key) { (K2 key) -> T } -> (V | T)
 
   # <!--
   #   rdoc-file=hash.c
@@ -1112,10 +1128,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # When no block is given, raises an exception if any given key is not found.
   #
-  def fetch_values: (*K) -> ::Array[V]
-                  | [X] (*K) { (K) -> X } -> ::Array[V | X]
+  def fetch_values: (*_Key keys) -> Array[V]
+                  | [K2 < _Key, T] (*K2 keys) { (K2 key) -> T } -> Array[V | T]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - hash.select {|key, value| ... } -> new_hash
+  #   - hash.select -> new_enumerator
+  # -->
   # Returns a new `Hash` object whose entries are those for which the block
   # returns a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1126,10 +1146,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.select # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:select>
   #     e.each {|key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
-  def filter: () { (K, V) -> boolish } -> ::Hash[K, V]
-            | () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
+  def select: () -> Enumerator[[ K, V ], Hash[K, V]]
+            | () { (K key, V value) -> boolish } -> Hash[K, V]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - hash.select! {|key, value| ... } -> self or nil
+  #   - hash.select! -> new_enumerator
+  # -->
   # Returns `self`, whose entries are those for which the block returns a truthy
   # value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1142,8 +1166,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.select!  # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:select!>
   #     e.each { |key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
-  def filter!: () { (K, V) -> boolish } -> self?
-             | () -> ::Enumerator[[ K, V ], self?]
+  def select!: () -> Enumerator[[ K, V ], self?]
+             | () { (K key, V value) -> boolish } -> self?
 
   # <!--
   #   rdoc-file=hash.c
@@ -1175,14 +1199,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.flatten(0) # => [[:foo, 0], [:bar, [:bat, 3]], [:baz, 2]]
   #     h.flatten(0) == h.to_a # => true
   #
-  def flatten: () -> ::Array[K | V]
-             | (1 level) -> ::Array[K | V]
-             | (Integer level) -> Array[untyped]
+  def flatten: (?1 level) -> Array[K | V]
+             | (0 level) -> Array[[K, V]]
+             | (int level) -> Array[untyped]
 
   # <!-- rdoc-file=hash.c -->
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
   #
-  def has_key?: (K arg0) -> bool
+  def has_key?: (_Key key) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1191,7 +1215,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # Returns `true` if `value` is a value in `self`, otherwise `false`.
   #
-  def has_value?: (V arg0) -> bool
+  def has_value?: (_Equals value) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1244,7 +1268,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 0, baz: 0}
   #     h.invert # => {0=>:baz}
   #
-  def invert: () -> ::Hash[V, K]
+  def invert: () -> Hash[V, K]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1261,8 +1285,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.keep_if # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:keep_if>
   #     e.each { |key, value| key.start_with?('b') } # => {:bar=>1, :baz=>2}
   #
-  def keep_if: () { (K, V) -> boolish } -> self
-             | () -> ::Enumerator[[ K, V ], self]
+  def keep_if: () -> Enumerator[[ K, V ], self]
+             | () { (K key, V value) -> boolish } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1276,7 +1300,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Returns `nil` if no such value is found.
   #
-  def key: (V) -> K?
+  def key: (_Equals value) -> K?
 
   # <!-- rdoc-file=hash.c -->
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
@@ -1291,14 +1315,18 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.keys # => [:foo, :bar, :baz]
   #
-  def keys: () -> ::Array[K]
+  def keys: () -> Array[K]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - hash.length -> integer
+  #   - hash.size -> integer
+  # -->
   # Returns the count of entries in `self`:
   #
   #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
-  def length: () -> Integer
+  def size: () -> Integer
 
   # <!-- rdoc-file=hash.c -->
   # Returns `true` if `key` is a key in `self`, otherwise `false`.
@@ -1356,8 +1384,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 = h.merge { |key, old_value, new_value| raise 'Cannot happen' }
   #     h1 # => {:foo=>0, :bar=>1, :baz=>2}
   #
-  def merge: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
-           | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> C } -> ::Hash[A | K, B | V | C]
+  def merge: [A, B] (*hash[A, B] other_hashes) -> Hash[A | K, B | V]
+           | [A, B, C] (*hash[A, B] other_hashes) { (K key, V oldval, B newval) -> C } -> Hash[A | K, B | V | C]
 
   # <!-- rdoc-file=hash.c -->
   # Merges each of `other_hashes` into `self`; returns `self`.
@@ -1401,8 +1429,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 = h.merge! { |key, old_value, new_value| raise 'Cannot happen' }
   #     h1 # => {:foo=>0, :bar=>1, :baz=>2}
   #
-  def merge!: (*::Hash[K, V] other_hashes) -> self
-            | (*::Hash[K, V] other_hashes) { (K key, V oldval, V newval) -> V } -> self
+  def merge!: (*hash[K, V] other_hashes) -> self
+            | (*hash[K, V] other_hashes) { (K key, V oldval, V newval) -> V } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1416,7 +1444,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Returns `nil` if no such value found.
   #
-  def rassoc: (V) -> [ K, V ]?
+  def rassoc: (_Equals value) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -1430,6 +1458,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Key](rdoc-ref:Hash@Modifying+an+Active+Hash+Key).
   #
   def rehash: () -> self
+
+  def freeze: () -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1448,8 +1478,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 = e.each {|key, value| key.start_with?('b') }
   #     h1 # => {:foo=>0}
   #
-  def reject: () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
-            | () { (K, V) -> boolish } -> ::Hash[K, V]
+  def reject: () -> Enumerator[[ K, V ], Hash[K, V]]
+            | () { (K key, V value) -> boolish } -> Hash[K, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1468,8 +1498,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.reject! # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:reject!>
   #     e.each {|key, value| key.start_with?('b') } # => {:foo=>0}
   #
-  def reject!: () -> ::Enumerator[[ K, V ], self?]
-             | () { (K, V) -> boolish } -> self?
+  def reject!: () -> Enumerator[[ K, V ], self?]
+             | () { (K key, V value) -> boolish } -> self?
 
   # <!-- rdoc-file=hash.c -->
   # Replaces the entire contents of `self` with the contents of `other_hash`;
@@ -1477,13 +1507,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.replace({bat: 3, bam: 4}) # => {:bat=>3, :bam=>4}
   #
-  def replace: (Hash[K, V]) -> self
+  def replace: (hash[K, V] other) -> self
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - hash.select {|key, value| ... } -> new_hash
-  #   - hash.select -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # Returns a new `Hash` object whose entries are those for which the block
   # returns a truthy value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1494,13 +1520,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.select # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:select>
   #     e.each {|key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
-  alias select filter
+  alias filter select
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - hash.select! {|key, value| ... } -> self or nil
-  #   - hash.select! -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # Returns `self`, whose entries are those for which the block returns a truthy
   # value:
   #     h = {foo: 0, bar: 1, baz: 2}
@@ -1513,7 +1535,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     e = h.select!  # => #<Enumerator: {:foo=>0, :bar=>1, :baz=>2}:select!>
   #     e.each { |key, value| value < 2 } # => {:foo=>0, :bar=>1}
   #
-  alias select! filter!
+  alias filter! select!
 
   # <!--
   #   rdoc-file=hash.c
@@ -1529,16 +1551,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   def shift: () -> [ K, V ]?
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - hash.length -> integer
-  #   - hash.size -> integer
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # Returns the count of entries in `self`:
   #
   #     {foo: 0, bar: 1, baz: 2}.length # => 3
   #
-  alias size length
+  alias length size
 
   # <!--
   #   rdoc-file=hash.c
@@ -1550,7 +1568,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Any given `keys` that are not found are ignored.
   #
-  def slice: (*K) -> ::Hash[K, V]
+  def slice: [K2 < _Key] (*K2 keys) -> Hash[K2, V]
 
   # <!-- rdoc-file=hash.c -->
   # Associates the given `value` with the given `key`; returns `value`.
@@ -1580,7 +1598,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.to_a # => [[:foo, 0], [:bar, 1], [:baz, 2]]
   #
-  def to_a: () -> ::Array[[ K, V ]]
+  def to_a: () -> Array[[ K, V ]]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1600,7 +1618,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 # => {0=>:foo, 1=>:bar, 2=>:baz}
   #
   def to_h: () -> Hash[K, V]
-          | [A, B] () { (K, V) -> [ A, B ] } -> Hash[A, B]
+          | [A, B] () { (K key, V value) -> _Pair[A, B] } -> Hash[A, B]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1670,7 +1688,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 # => {"foo"=>0, "bar"=>1, "baz"=>2}
   #
   def transform_keys: () -> Enumerator[K, Hash[untyped, V]]
-                    | [A] () { (K) -> A } -> Hash[A, V]
+                    | [K2] (hash[_Key, K2] replacements) -> Hash[K | K2, V]
+                    | [K2] (hash[_Key, K2] replacements) { (K old_key) -> K2 } -> Hash[K2, V]
+                    | [K2] () { (K key) -> K2 } -> Hash[K2, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1683,7 +1703,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # returning a new hash.
   #
   def transform_keys!: () -> Enumerator[K, self]
-                     | () { (K) -> K } -> self
+                     | (hash[K, K] replacements) ?{ (K key) -> K } -> self
+                     | () { (K key) -> K } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1706,7 +1727,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 # => {:foo=>0, :bar=>100, :baz=>200}
   #
   def transform_values: () -> Enumerator[V, Hash[K, untyped]]
-                      | [A] () { (V) -> A } -> Hash[K, A]
+                      | [V2] () { (V value) -> V2 } -> Hash[K, V2]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1725,7 +1746,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h1 # => {:foo=>0, :bar=>100, :baz=>200}
   #
   def transform_values!: () -> Enumerator[V, self]
-                       | () { (V) -> V } -> self
+                       | () { (V value) -> V } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1789,7 +1810,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.values # => [0, 1, 2]
   #
-  def values: () -> ::Array[V]
+  def values: () -> Array[V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1803,7 +1824,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # that are not found:
   #     h.values_at(:hello, :foo) # => [nil, 0]
   #
-  def values_at: (*K arg0) -> ::Array[V?]
+  def values_at: (*_Key keys) -> Array[V?]
 
   private
 
@@ -1844,9 +1865,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # allocated with enough capacity to accommodate this many keys without having to
   # be resized.
   #
-  def initialize: (?capacity: int) -> void
-                | (V default, ?capacity: int) -> void
-                | (?capacity: int) { (Hash[K, V] hash, K key) -> V } -> void
+  def initialize: (?V default_value, ?capacity: int) -> void
+                | (?capacity: int) { (instance hash, _Key key) -> V } -> void
 
   # <!--
   #   rdoc-file=hash.c
@@ -1857,5 +1877,5 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.replace({bat: 3, bam: 4}) # => {:bat=>3, :bam=>4}
   #
-  def initialize_copy: (self object) -> self
+  alias initialize_copy replace
 end
