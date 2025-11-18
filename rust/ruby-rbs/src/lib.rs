@@ -40,6 +40,42 @@ pub fn parse(rbs_code: &[u8]) -> Result<*mut rbs_signature_t, String> {
     }
 }
 
+pub struct NodeListIter {
+    parser: *mut rbs_parser_t,
+    current: *mut rbs_node_list_node_t,
+}
+
+impl Iterator for NodeListIter {
+    type Item = Node;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current.is_null() {
+            None
+        } else {
+            let pointer_data = unsafe { *self.current };
+            let node = unsafe { Node::new(self.parser, pointer_data.node) };
+            self.current = pointer_data.next;
+            Some(node)
+        }
+    }
+}
+
+pub struct NodeList {
+    parser: *mut rbs_parser_t,
+    pointer: *mut rbs_node_list_t,
+}
+
+impl NodeList {
+    /// Returns an iterator over the nodes.
+    #[must_use]
+    pub fn iter(&self) -> NodeListIter {
+        NodeListIter {
+            parser: self.parser,
+            current: unsafe { (*self.pointer).head },
+        }
+    }
+}
+
 pub struct RBSString {
     pointer: *const rbs_string_t,
 }
