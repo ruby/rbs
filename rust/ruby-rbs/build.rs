@@ -47,12 +47,17 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
     // TODO: Go through all of the nodes and generate the structs to back them up
     for node in &config.nodes {
+        writeln!(file, "#[allow(dead_code)]")?; // TODO: Remove this once all nodes that need parser are implemented
         writeln!(file, "pub struct {} {{", node.rust_name)?;
+        writeln!(file, "    parser: *mut rbs_parser_t,")?;
         if let Some(fields) = &node.fields {
             for field in fields {
                 match field.c_type.as_str() {
                     "rbs_string" => writeln!(file, "    {}: *const rbs_string_t,", field.name)?,
                     "bool" => writeln!(file, "    {}: bool,", field.name)?,
+                    "rbs_ast_symbol" => {
+                        writeln!(file, "    {}: *const rbs_ast_symbol_t,", field.name)?
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
@@ -71,6 +76,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                     "bool" => {
                         writeln!(file, "    pub fn {}(&self) -> bool {{", field.name)?;
                         writeln!(file, "        self.{}", field.name)?;
+                        writeln!(file, "    }}")?;
+                    }
+                    "rbs_ast_symbol" => {
+                        writeln!(file, "    pub fn {}(&self) -> RBSSymbol {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        RBSSymbol::new(self.{}, self.parser)",
+                            field.name
+                        )?;
                         writeln!(file, "    }}")?;
                     }
                     _ => eprintln!("Unknown field type: {}", field.c_type),

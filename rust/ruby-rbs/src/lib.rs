@@ -57,6 +57,32 @@ impl RBSString {
     }
 }
 
+pub struct RBSSymbol {
+    pointer: *const rbs_ast_symbol_t,
+    parser: *mut rbs_parser_t,
+}
+
+impl RBSSymbol {
+    pub fn new(pointer: *const rbs_ast_symbol_t, parser: *mut rbs_parser_t) -> Self {
+        Self { pointer, parser }
+    }
+
+    pub fn name(&self) -> &[u8] {
+        unsafe {
+            let constant_ptr = rbs_constant_pool_id_to_constant(
+                &(*self.parser).constant_pool,
+                (*self.pointer).constant_id,
+            );
+            if constant_ptr.is_null() {
+                panic!("Constant ID for symbol is not present in the pool");
+            }
+
+            let constant = &*constant_ptr;
+            std::slice::from_raw_parts(constant.start, constant.length)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
