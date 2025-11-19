@@ -76,6 +76,66 @@ impl NodeList {
     }
 }
 
+pub struct RBSLocation {
+    pointer: *const rbs_location_t,
+    #[allow(dead_code)]
+    parser: *mut rbs_parser_t,
+}
+
+impl RBSLocation {
+    pub fn new(pointer: *const rbs_location_t, parser: *mut rbs_parser_t) -> Self {
+        Self { pointer, parser }
+    }
+
+    pub fn start_loc(&self) -> i32 {
+        unsafe { (*self.pointer).rg.start.byte_pos }
+    }
+
+    pub fn end_loc(&self) -> i32 {
+        unsafe { (*self.pointer).rg.end.byte_pos }
+    }
+}
+
+pub struct RBSLocationListIter {
+    current: *mut rbs_location_list_node_t,
+    parser: *mut rbs_parser_t,
+}
+
+impl Iterator for RBSLocationListIter {
+    type Item = RBSLocation;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current.is_null() {
+            None
+        } else {
+            let pointer_data = unsafe { *self.current };
+            let loc = RBSLocation::new(pointer_data.loc, self.parser);
+            self.current = pointer_data.next;
+            Some(loc)
+        }
+    }
+}
+
+pub struct RBSLocationList {
+    pointer: *mut rbs_location_list,
+    parser: *mut rbs_parser_t,
+}
+
+impl RBSLocationList {
+    pub fn new(pointer: *mut rbs_location_list, parser: *mut rbs_parser_t) -> Self {
+        Self { pointer, parser }
+    }
+
+    /// Returns an iterator over the locations.
+    #[must_use]
+    pub fn iter(&self) -> RBSLocationListIter {
+        RBSLocationListIter {
+            current: unsafe { (*self.pointer).head },
+            parser: self.parser,
+        }
+    }
+}
+
 pub struct RBSString {
     pointer: *const rbs_string_t,
 }

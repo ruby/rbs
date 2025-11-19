@@ -125,6 +125,28 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_location" => {
+                        writeln!(file, "    pub fn {}(&self) -> RBSLocation {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        RBSLocation::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
+                    "rbs_location_list" => {
+                        writeln!(
+                            file,
+                            "    pub fn {}(&self) -> RBSLocationList {{",
+                            field.name
+                        )?;
+                        writeln!(
+                            file,
+                            "        RBSLocationList::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
