@@ -66,6 +66,10 @@ pub struct NodeList {
 }
 
 impl NodeList {
+    pub fn new(parser: *mut rbs_parser_t, pointer: *mut rbs_node_list_t) -> Self {
+        Self { parser, pointer }
+    }
+
     /// Returns an iterator over the nodes.
     #[must_use]
     pub fn iter(&self) -> NodeListIter {

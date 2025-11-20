@@ -147,6 +147,30 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_node" => {
+                        let name = if field.name == "type" {
+                            "type_"
+                        } else {
+                            field.name.as_str()
+                        };
+
+                        writeln!(file, "    pub fn {}(&self) -> Node {{", name)?;
+                        writeln!(
+                            file,
+                            "        unsafe {{ Node::new(self.parser, (*self.pointer).{}) }}",
+                            name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
+                    "rbs_node_list" => {
+                        writeln!(file, "    pub fn {}(&self) -> NodeList {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        NodeList::new(self.parser, unsafe {{ (*self.pointer).{} }})",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
