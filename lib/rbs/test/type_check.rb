@@ -340,7 +340,12 @@ module RBS
         when Types::Variable
           true
         when Types::Literal
-          type.literal == val
+          begin
+            type.literal == val
+          rescue NoMethodError
+            raise if defined?(val.==)
+            false
+          end
         when Types::Union
           type.types.any? {|type| value(val, type) }
         when Types::Intersection
