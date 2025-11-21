@@ -972,7 +972,7 @@ Import documents from RDoc and update RBS files.
 
 Examples:
 
-  $ rbs annotate stdlib/pathname/**/*.rbs
+  $ rbs annotate stdlib/logger/**/*.rbs
 
 Options:
         EOB
