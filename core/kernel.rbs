@@ -480,9 +480,12 @@ module Kernel : BasicObject
   #
   def self?.Complex: (_ToC complex_like, ?exception: true) -> Complex
                    | (_ToC complex_like, exception: bool) -> Complex?
-                   | (Numeric | String real, ?Numeric | String imag, ?exception: true) -> Complex
-                   | (Numeric | String real, ?Numeric | String imag, exception: bool) -> Complex?
-                   | (untyped, ?untyped, ?exception: bool) -> Complex?
+                   | (Numeric numeric, ?exception: bool) -> Complex
+                   | (String real_or_both, ?exception: true) -> Complex
+                   | (untyped real_or_both, exception: bool) -> Complex?
+                   | (Numeric | String real, Numeric | String imag, ?exception: true) -> Complex
+                   | (Numeric | String real, Integer | Float | Rational | Complex imag, exception: bool) -> Complex
+                   | (Numeric | String real, untyped imag, exception: bool) -> Complex?
 
   # <!--
   #   rdoc-file=kernel.rb
@@ -502,7 +505,7 @@ module Kernel : BasicObject
   #
   def self?.Float: (_ToF float_like, ?exception: true) -> Float
                  | (_ToF float_like, exception: bool) -> Float?
-                 | (untyped, ?exception: bool) -> Float?
+                 | (untyped, exception: bool) -> Float?
 
   # <!--
   #   rdoc-file=object.c
@@ -524,7 +527,7 @@ module Kernel : BasicObject
   #     Hash(nil)              # => {}
   #     Hash([])               # => {}
   #
-  def self?.Hash: [K, V] (nil | [] _empty) -> Hash[K, V]
+  def self?.Hash: [K, V] (nil | []) -> Hash[K, V]
                 | [K, V] (hash[K, V] hash_like) -> Hash[K, V]
 
   # <!--
@@ -614,7 +617,7 @@ module Kernel : BasicObject
                    | (int | _ToI int_like, exception: bool) -> Integer?
                    | (string str, int base, ?exception: true) -> Integer
                    | (string str, int base, exception: bool) -> Integer?
-                   | (untyped, ?untyped, ?exception: bool) -> Integer?
+                   | (untyped, ?int base, exception: bool) -> Integer?
 
   # <!--
   #   rdoc-file=rational.c
@@ -655,14 +658,19 @@ module Kernel : BasicObject
   #
   def self?.Rational: (int | _ToR rational_like, ?exception: true) -> Rational
                     | (int | _ToR rational_like, exception: bool) -> Rational?
-                    | (int | _ToR numer, ?int | _ToR denom, ?exception: true) -> Rational
-                    | (int | _ToR numer, ?int | _ToR denom, exception: bool) -> Rational?
-                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | (int | _ToR numer, int | _ToR denom, ?exception: true) -> Rational
+                    | (int | _ToR numer, int | _ToR denom, exception: bool) -> Rational?
                     | [T < Numeric] (T value, 1, ?exception: bool) -> T
-                    | (untyped, ?untyped, ?exception: bool) -> Rational?
+                    | [T] (Numeric & _RationalDiv[T] numer, Numeric denom, ?exception: bool) -> T
+                    | (untyped, ?untyped, exception: bool) -> Rational?
 
+  # An interface used in `Kernel.Rational` when both arguments are `Numeric`s,
+  # but don't define `to_r` or `to_int`.
+  #
+  # The return type of the division is the return type of `Rational(numer, denom)`.
   interface _RationalDiv[T]
-    def /: (Numeric) -> T
+    # Divide the numerator by `denom`
+    def /: (Numeric denom) -> T
   end
 
   # <!--
