@@ -183,6 +183,32 @@ impl RBSSymbol {
     }
 }
 
+pub struct RBSKeyword {
+    parser: *mut rbs_parser_t,
+    pointer: *const rbs_keyword,
+}
+
+impl RBSKeyword {
+    pub fn new(parser: *mut rbs_parser_t, pointer: *const rbs_keyword) -> Self {
+        Self { parser, pointer }
+    }
+
+    pub fn name(&self) -> &[u8] {
+        unsafe {
+            let constant_ptr = rbs_constant_pool_id_to_constant(
+                &(*self.parser).constant_pool,
+                (*self.pointer).constant_id,
+            );
+            if constant_ptr.is_null() {
+                panic!("Constant ID for keyword is not present in the pool");
+            }
+
+            let constant = &*constant_ptr;
+            std::slice::from_raw_parts(constant.start, constant.length)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

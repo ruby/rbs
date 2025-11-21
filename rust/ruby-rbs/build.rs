@@ -171,6 +171,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_keyword" => {
+                        writeln!(file, "    pub fn {}(&self) -> RBSKeyword {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        RBSKeyword::new(self.parser, unsafe {{ (*self.pointer).{} }})",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
