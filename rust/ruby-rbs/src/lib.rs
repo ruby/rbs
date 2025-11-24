@@ -13,7 +13,7 @@ static INIT: Once = Once::new();
 /// let signature = parse(rbs_code.as_bytes());
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
 /// ```
-pub fn parse(rbs_code: &[u8]) -> Result<*mut rbs_signature_t, String> {
+pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode, String> {
     unsafe {
         INIT.call_once(|| {
             rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
@@ -30,12 +30,23 @@ pub fn parse(rbs_code: &[u8]) -> Result<*mut rbs_signature_t, String> {
         let mut signature: *mut rbs_signature_t = std::ptr::null_mut();
         let result = rbs_parse_signature(parser, &mut signature);
 
-        rbs_parser_free(parser);
+        let signature_node = SignatureNode {
+            parser,
+            pointer: signature,
+        };
 
         if result {
-            Ok(signature)
+            Ok(signature_node)
         } else {
             Err(String::from("Failed to parse RBS signature"))
+        }
+    }
+}
+
+impl Drop for SignatureNode {
+    fn drop(&mut self) {
+        unsafe {
+            rbs_parser_free(self.parser);
         }
     }
 }
@@ -140,6 +151,7 @@ impl RBSLocationList {
     }
 }
 
+#[derive(Debug)]
 pub struct RBSString {
     pointer: *const rbs_string_t,
 }
@@ -222,5 +234,25 @@ mod tests {
         let rbs_code2 = r#"class Foo end"#;
         let signature2 = parse(rbs_code2.as_bytes());
         assert!(signature2.is_ok(), "Failed to parse RBS signature");
+    }
+
+    #[test]
+    fn test_parse_integer() {
+        let rbs_code = r#"type foo = 1"#;
+        let signature = parse(rbs_code.as_bytes());
+        assert!(signature.is_ok(), "Failed to parse RBS signature");
+
+        let signature_node = signature.unwrap();
+        if let Node::TypeAlias(node) = signature_node.declarations().iter().next().unwrap()
+            && let Node::LiteralType(literal) = node.type_()
+            && let Node::Integer(integer) = literal.literal()
+        {
+            assert_eq!(
+                "1".to_string(),
+                String::from_utf8(integer.string_representation().as_bytes().to_vec()).unwrap()
+            );
+        } else {
+            panic!("No literal type node found");
+        }
     }
 }

@@ -89,6 +89,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     // TODO: Go through all of the nodes and generate the structs to back them up
     for node in &config.nodes {
         writeln!(file, "#[allow(dead_code)]")?; // TODO: Remove this once all nodes that need parser are implemented
+        writeln!(file, "#[derive(Debug)]")?;
         writeln!(file, "pub struct {} {{", node.rust_name)?;
         writeln!(file, "    parser: *mut rbs_parser_t,")?;
         writeln!(
@@ -188,6 +189,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     }
 
     // Generate the Node enum to wrap all of the structs
+    writeln!(file, "#[derive(Debug)]")?;
     writeln!(file, "pub enum Node {{")?;
     for node in &config.nodes {
         let variant_name = node
