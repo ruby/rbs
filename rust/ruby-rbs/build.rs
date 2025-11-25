@@ -10,6 +10,14 @@ struct Config {
 struct NodeField {
     name: String,
     c_type: String,
+    c_name: Option<String>,
+}
+
+impl NodeField {
+    fn c_name(&self) -> &str {
+        let name = self.c_name.as_ref().unwrap_or(&self.name);
+        if name == "type" { "type_" } else { name }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -108,7 +116,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        RBSString::new(unsafe {{ &(*self.pointer).{} }})",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -122,7 +130,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        CommentNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -135,7 +143,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        ClassSuperNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -144,7 +152,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        RBSSymbol::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -153,7 +161,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        RBSLocation::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -166,7 +174,16 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        RBSLocationList::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
-                            field.name
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
+                    "rbs_namespace" => {
+                        writeln!(file, "    pub fn {}(&self) -> NamespaceNode {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        NamespaceNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -181,7 +198,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        unsafe {{ Node::new(self.parser, (*self.pointer).{}) }}",
-                            name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -190,7 +207,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        NodeList::new(self.parser, unsafe {{ (*self.pointer).{} }})",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
@@ -199,7 +216,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(
                             file,
                             "        RBSKeyword::new(self.parser, unsafe {{ (*self.pointer).{} }})",
-                            field.name
+                            field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
                     }
