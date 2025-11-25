@@ -229,6 +229,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_types_block" => {
+                        writeln!(file, "    pub fn {}(&self) -> BlockTypeNode {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        BlockTypeNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
