@@ -126,6 +126,19 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_ast_declarations_class_super" => {
+                        writeln!(
+                            file,
+                            "    pub fn {}(&self) -> ClassSuperNode {{",
+                            field.name
+                        )?;
+                        writeln!(
+                            file,
+                            "        ClassSuperNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     "rbs_ast_symbol" => {
                         writeln!(file, "    pub fn {}(&self) -> RBSSymbol {{", field.name)?;
                         writeln!(
