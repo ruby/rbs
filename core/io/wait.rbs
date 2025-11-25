@@ -2,27 +2,6 @@
 class IO
   # <!--
   #   rdoc-file=ext/io/wait/wait.c
-  #   - io.nread -> int
-  # -->
-  # Returns number of bytes that can be read without blocking. Returns zero if no
-  # information available.
-  #
-  # You must require 'io/wait' to use this method.
-  #
-  def nread: () -> Integer
-
-  # <!--
-  #   rdoc-file=ext/io/wait/wait.c
-  #   - io.ready? -> truthy or falsy
-  # -->
-  # Returns a truthy value if input available without blocking, or a falsy value.
-  #
-  # You must require 'io/wait' to use this method.
-  #
-  def ready?: () -> boolish
-
-  # <!--
-  #   rdoc-file=ext/io/wait/wait.c
   #   - io.wait(events, timeout) -> event mask, false or nil
   #   - io.wait(*event_symbols[, timeout]) -> self, true, or false
   # -->
