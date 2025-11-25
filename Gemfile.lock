@@ -80,7 +80,6 @@ GEM
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
-    pathname (0.4.0)
     power_assert (3.0.1)
     prism (1.6.0)
     pstore (0.2.0)
@@ -201,7 +200,6 @@ DEPENDENCIES
   net-smtp
   nkf
   ostruct
-  pathname
   pstore
   raap
   rake

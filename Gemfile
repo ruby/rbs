@@ -30,7 +30,6 @@ group :libs do
   gem "dbm"
   gem "mutex_m"
   gem "nkf"
-  gem "pathname"
 end
 
 group :profilers do
