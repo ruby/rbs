@@ -220,6 +220,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_type_name" => {
+                        writeln!(file, "    pub fn {}(&self) -> TypeNameNode {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        TypeNameNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     _ => eprintln!("Unknown field type: {}", field.c_type),
                 }
             }
