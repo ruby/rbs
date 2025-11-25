@@ -117,6 +117,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(file, "        unsafe {{ (*self.pointer).{} }}", field.name)?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_ast_comment" => {
+                        writeln!(file, "    pub fn {}(&self) -> CommentNode {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        CommentNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+                            field.name
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     "rbs_ast_symbol" => {
                         writeln!(file, "    pub fn {}(&self) -> RBSSymbol {{", field.name)?;
                         writeln!(
