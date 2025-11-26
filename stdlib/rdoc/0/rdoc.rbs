@@ -190,7 +190,7 @@ module RDoc
     #
     # Usually this is called by super from a subclass.
     #
-    def initialize: (String text, String name) -> void
+    def initialize: (String text, String name, ?singleton: bool) -> void
 
     # <!--
     #   rdoc-file=lib/rdoc/method_attr.rb
@@ -267,7 +267,7 @@ module RDoc
     # -->
     # Creates a new AnyMethod with a token stream `text` and `name`
     #
-    def initialize: (String? text, String name) -> void
+    def initialize: (String? text, String name, ?singleton: bool) -> void
   end
 
   # <!-- rdoc-file=lib/rdoc/attr.rb -->
@@ -286,7 +286,7 @@ module RDoc
     # Creates a new Attr with body `text`, `name`, read/write status `rw` and
     # `comment`.  `singleton` marks this as a class attribute.
     #
-    def initialize: (String? text, String name, String rw, RDoc::Comment? comment, ?bool `singleton`) -> void
+    def initialize: (String? text, String name, String rw, RDoc::Comment? comment, ?singleton: bool) -> void
   end
 
   # <!-- rdoc-file=lib/rdoc/constant.rb -->
@@ -372,6 +372,8 @@ module RDoc
     #
     attr_accessor old_name: String
 
+    attr_reader singleton: bool
+
     # <!--
     #   rdoc-file=lib/rdoc/alias.rb
     #   - new(text, old_name, new_name, comment, singleton = false)
@@ -379,7 +381,7 @@ module RDoc
     # Creates a new Alias with a token stream of `text` that aliases `old_name` to
     # `new_name`, has `comment` and is a `singleton` context.
     #
-    def initialize: (String? text, String name, String old_name, RDoc::Comment? comment, ?bool `singleton`) -> void
+    def initialize: (String? text, String name, String old_name, RDoc::Comment? comment, ?singleton: bool) -> void
   end
 
   # <!-- rdoc-file=lib/rdoc/stats.rb -->

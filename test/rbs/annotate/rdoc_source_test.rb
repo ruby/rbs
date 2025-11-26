@@ -57,10 +57,10 @@ end
       assert_equal 1, klss.size
       klss[0].tap do |klass|
         assert_predicate klass, :documented?
-        assert_equal 1, klass.comment.parts.size
+        assert_equal 1, klass.comment.parse.parts.size
 
-        assert_nil RBS::Annotate::Formatter.translate(klass.comment)
-        assert_equal "Document for Hello1", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
+        assert_nil RBS::Annotate::Formatter.translate(klass.comment.parse)
+        assert_equal "Document for Hello1", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
       end
     end
 
@@ -71,8 +71,8 @@ end
       klss[0].tap do |klass|
         refute_predicate klass, :documented?
 
-        assert_nil RBS::Annotate::Formatter.translate(klass.comment)
-        assert_equal "", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
+        assert_nil RBS::Annotate::Formatter.translate(klass.comment.parse)
+        assert_equal "", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
       end
     end
 
@@ -82,10 +82,10 @@ end
       assert_equal 1, klss.size
       klss[0].tap do |klass|
         assert_predicate klass, :documented?
-        assert_equal 2, klass.comment.parts.size
+        assert_equal 2, klass.comment.parse.parts.size
 
-        assert_equal "Document (1) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parts[0])
-        assert_equal "Document (2) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parts[1])
+        assert_equal "Document (1) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
+        assert_equal "Document (2) for Hello3", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[1])
       end
     end
   end
@@ -111,7 +111,7 @@ end
       assert_equal 1, consts.size
       consts[0].tap do |const|
         assert_equal "FOO", const.name
-        assert_equal "Doc for FOO", RBS::Annotate::Formatter.translate(const.comment)
+        assert_equal "Doc for FOO", RBS::Annotate::Formatter.translate(const.comment.parse)
       end
     end
 
@@ -121,7 +121,7 @@ end
       assert_equal 1, consts.size
       consts[0].tap do |const|
         assert_equal "VERSION", const.name
-        assert_equal "Doc for Hello::VERSION", RBS::Annotate::Formatter.translate(const.comment)
+        assert_equal "Doc for Hello::VERSION", RBS::Annotate::Formatter.translate(const.comment.parse)
       end
     end
 
@@ -158,7 +158,7 @@ end
 
       ms[0].tap do |m|
         assert_equal "m1", m.name
-        assert_equal "Doc for m1", RBS::Annotate::Formatter.translate(m.comment)
+        assert_equal "Doc for m1", RBS::Annotate::Formatter.translate(m.comment.parse)
       end
     end
 
@@ -167,7 +167,7 @@ end
 
       ms[0].tap do |m|
         assert_equal "m2", m.name
-        assert_equal "Doc for m2", RBS::Annotate::Formatter.translate(m.comment)
+        assert_equal "Doc for m2", RBS::Annotate::Formatter.translate(m.comment.parse)
         assert_equal "m1", m.is_alias_for.name
       end
     end
@@ -179,7 +179,7 @@ end
 
       ms[0].tap do |m|
         assert_equal "m4", m.name
-        assert_equal "Doc for m4", RBS::Annotate::Formatter.translate(m.comment)
+        assert_equal "Doc for m4", RBS::Annotate::Formatter.translate(m.comment.parse)
       end
     end
 
@@ -188,7 +188,7 @@ end
 
       ms[0].tap do |m|
         assert_equal "m5", m.name
-        assert_equal "Doc for m5", RBS::Annotate::Formatter.translate(m.comment)
+        assert_equal "Doc for m5", RBS::Annotate::Formatter.translate(m.comment.parse)
       end
     end
   end
@@ -218,7 +218,7 @@ end
 
       attrs[0].tap do |attr|
         assert_equal "foo", attr.name
-        assert_equal "Doc for foo", RBS::Annotate::Formatter.translate(attr.comment)
+        assert_equal "Doc for foo", RBS::Annotate::Formatter.translate(attr.comment.parse)
         assert_equal "R", attr.rw
       end
     end
@@ -228,7 +228,7 @@ end
 
       attrs[0].tap do |attr|
         assert_equal "bar", attr.name
-        assert_equal "Doc for bar and baz", RBS::Annotate::Formatter.translate(attr.comment)
+        assert_equal "Doc for bar and baz", RBS::Annotate::Formatter.translate(attr.comment.parse)
         assert_equal "RW", attr.rw
       end
     end
@@ -238,7 +238,7 @@ end
 
       attrs[0].tap do |attr|
         assert_equal "baz", attr.name
-        assert_equal "Doc for bar and baz", RBS::Annotate::Formatter.translate(attr.comment)
+        assert_equal "Doc for bar and baz", RBS::Annotate::Formatter.translate(attr.comment.parse)
         assert_equal "RW", attr.rw
       end
     end

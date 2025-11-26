@@ -17,7 +17,7 @@ module RBS
       end
 
       interface _WithRDocComment
-        def comment: () -> (RDoc::Markup::Document | RDoc::Comment | String)
+        def comment: () -> (RDoc::Comment | String)
       end
 
       def each_part: (Array[Object & _WithRDocComment], tester: _PathTester) { ([RDoc::Markup::Document, Object & _WithRDocComment]) -> void } -> void
