@@ -46,5 +46,4 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.required_ruby_version = ">= 3.1"
   spec.add_dependency "logger"
-  spec.add_dependency "rdoc", '>= 6.13'
 end

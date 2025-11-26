@@ -3,7 +3,6 @@ PATH
   specs:
     rbs (3.9.5)
       logger
-      rdoc (>= 6.13)
 
 PATH
   remote: test/assets/test-gem
