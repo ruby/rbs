@@ -28,6 +28,17 @@ class Open3SingletonTest < Test::Unit::TestCase
                      Open3, :capture2e, { 'FOO' => 'BAR' }, "echo $FOO"
   end
 
+  def test_capture3
+    assert_send_type "(*::String) -> [ ::String, ::String, ::Process::Status ]",
+                     Open3, :capture3, 'echo "Foo"'
+    assert_send_type "(*::String, binmode: boolish) -> [ ::String, ::String, ::Process::Status ]",
+                     Open3, :capture3, 'echo "Foo"', binmode: true
+    assert_send_type "(*::String, stdin_data: ::String) -> [ ::String, ::String, ::Process::Status ]",
+                     Open3, :capture3, "#{RUBY_EXECUTABLE} -e 'puts STDIN.read'", stdin_data: 'Foo'
+    assert_send_type "(::Hash[::String, ::String], *::String) -> [ ::String, ::String, ::Process::Status ]",
+                     Open3, :capture3, { 'FOO' => 'BAR' }, "echo $FOO"
+  end
+
   def test_popen3
     assert_send_type "(::String) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen3, 'echo "Foo"'
