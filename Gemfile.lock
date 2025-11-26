@@ -203,7 +203,7 @@ DEPENDENCIES
   rake-compiler
   rbs!
   rbs-amber!
-  rdoc (~> 6.11.0)
+  rdoc
   rspec
   rubocop
   rubocop-on-rbs
