@@ -62,6 +62,8 @@
 # We can remove this when all maintained RubyGems remove `rubygems/rdoc.rb`.
 #
 module RDoc
+  VERSION: String
+
   # <!-- rdoc-file=lib/rdoc/token_stream.rb -->
   # A TokenStream is a list of tokens, gathered during the parse of some entity
   # (say a method). Entities populate these streams by being registered with the
@@ -84,7 +86,7 @@ module RDoc
     # -->
     # Starts collecting tokens
     #
-    def collect_tokens: () -> void
+    def collect_tokens: (Symbol) -> void
 
     # <!--
     #   rdoc-file=lib/rdoc/token_stream.rb
