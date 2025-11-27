@@ -43,9 +43,7 @@ GEM
     drb (2.2.3)
     erb (6.0.0)
     extconf_compile_commands_json (0.0.7)
-    ffi (1.17.2-aarch64-linux-gnu)
-    ffi (1.17.2-arm64-darwin)
-    ffi (1.17.2-x86_64-linux-gnu)
+    ffi (1.17.2)
     fileutils (1.8.0)
     goodcheck (3.1.0)
       marcel (>= 1.0, < 2.0)
@@ -54,6 +52,11 @@ GEM
       strong_json (>= 1.1, < 2.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    io-console (0.8.1)
+    irb (1.15.3)
+      pp (>= 0.6.0)
+      rdoc (>= 4.0.0)
+      reline (>= 0.4.2)
     json (2.16.0)
     json-schema (6.0.0)
       addressable (~> 2.8)
@@ -66,6 +69,7 @@ GEM
     logger (1.7.0)
     marcel (1.1.0)
     memory_profiler (1.1.0)
+    mini_portile2 (2.8.9)
     minitest (5.26.2)
     mutex_m (0.3.0)
     net-protocol (0.2.2)
@@ -73,19 +77,18 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
-    nokogiri (1.18.10-aarch64-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.10-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-linux-gnu)
+    nokogiri (1.18.10)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.10.0)
       ast (~> 2.4.1)
       racc
-    pathname (0.4.0)
     power_assert (3.0.1)
+    pp (0.6.3)
+      prettyprint
+    prettyprint (0.2.0)
     prism (1.6.0)
     pstore (0.2.0)
     psych (4.0.6)
@@ -107,6 +110,8 @@ GEM
       psych (>= 4.0.0)
       tsort
     regexp_parser (2.11.3)
+    reline (0.6.3)
+      io-console (~> 0.5)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -183,9 +188,7 @@ GEM
     zlib (3.2.2)
 
 PLATFORMS
-  aarch64-linux
-  arm64-darwin
-  x86_64-linux
+  ruby
 
 DEPENDENCIES
   abbrev
@@ -199,6 +202,7 @@ DEPENDENCIES
   extconf_compile_commands_json
   fileutils
   goodcheck
+  irb
   json
   json-schema
   memory_profiler
@@ -207,7 +211,6 @@ DEPENDENCIES
   net-smtp
   nkf
   ostruct
-  pathname
   pstore
   raap
   rake
@@ -226,4 +229,4 @@ DEPENDENCIES
   test-unit
 
 BUNDLED WITH
-   2.6.3
+  4.0.0.dev

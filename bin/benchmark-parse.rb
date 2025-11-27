@@ -1,7 +1,6 @@
 require "rbs"
 require "benchmark/ips"
 require "csv"
-require "pathname"
 
 files = {}
 ARGV.each do |file|
