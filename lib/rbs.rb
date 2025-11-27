@@ -4,7 +4,7 @@ require "rbs/version"
 
 require "set"
 require "json"
-require "pathname"
+require "pathname" unless defined?(Pathname)
 require "pp"
 require "ripper"
 require "logger"
