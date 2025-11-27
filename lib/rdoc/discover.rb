@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 begin
-  gem 'rdoc', '~> 6.13'
+  gem 'rdoc', '~> 6.16'
   require 'rdoc_plugin/parser'
   module RDoc
     class Parser
