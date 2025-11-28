@@ -37,6 +37,22 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config_file = File::open(&config_path)?;
     let mut config: Config = serde_yaml::from_reader(config_file)?;
 
+    // Keyword and Symbol represent identifiers (interned strings), not traditional AST nodes.
+    // However, the C parser defines them in `rbs_node_type` (RBS_KEYWORD, RBS_AST_SYMBOL) and
+    // treats them as nodes (rbs_node_t*) in many contexts (lists, hashes).
+    // We inject them into the config so they are generated as structs matching the Node pattern,
+    // allowing them to be wrapped in the Node enum and handled uniformly in Rust.
+    config.nodes.push(Node {
+        name: "RBS::Keyword".to_string(),
+        rust_name: "KeywordNode".to_string(),
+        fields: None,
+    });
+    config.nodes.push(Node {
+        name: "RBS::AST::Symbol".to_string(),
+        rust_name: "SymbolNode".to_string(),
+        fields: None,
+    });
+
     config.nodes.sort_by(|a, b| a.name.cmp(&b.name));
     generate(&config)?;
 
@@ -148,10 +164,10 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(file, "    }}")?;
                     }
                     "rbs_ast_symbol" => {
-                        writeln!(file, "    pub fn {}(&self) -> RBSSymbol {{", field.name)?;
+                        writeln!(file, "    pub fn {}(&self) -> SymbolNode {{", field.name)?;
                         writeln!(
                             file,
-                            "        RBSSymbol::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
+                            "        SymbolNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
                             field.c_name()
                         )?;
                         writeln!(file, "    }}")?;
@@ -212,10 +228,10 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(file, "    }}")?;
                     }
                     "rbs_keyword" => {
-                        writeln!(file, "    pub fn {}(&self) -> RBSKeyword {{", field.name)?;
+                        writeln!(file, "    pub fn {}(&self) -> KeywordNode {{", field.name)?;
                         writeln!(
                             file,
-                            "        RBSKeyword::new(self.parser, unsafe {{ (*self.pointer).{} }})",
+                            "        KeywordNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
                             field.c_name()
                         )?;
                         writeln!(file, "    }}")?;

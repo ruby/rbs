@@ -169,16 +169,7 @@ impl RBSString {
     }
 }
 
-pub struct RBSSymbol {
-    pointer: *const rbs_ast_symbol_t,
-    parser: *mut rbs_parser_t,
-}
-
-impl RBSSymbol {
-    pub fn new(pointer: *const rbs_ast_symbol_t, parser: *mut rbs_parser_t) -> Self {
-        Self { pointer, parser }
-    }
-
+impl SymbolNode {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
@@ -195,16 +186,7 @@ impl RBSSymbol {
     }
 }
 
-pub struct RBSKeyword {
-    parser: *mut rbs_parser_t,
-    pointer: *const rbs_keyword,
-}
-
-impl RBSKeyword {
-    pub fn new(parser: *mut rbs_parser_t, pointer: *const rbs_keyword) -> Self {
-        Self { parser, pointer }
-    }
-
+impl KeywordNode {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
