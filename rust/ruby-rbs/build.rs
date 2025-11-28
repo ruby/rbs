@@ -172,6 +172,15 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         )?;
                         writeln!(file, "    }}")?;
                     }
+                    "rbs_hash" => {
+                        writeln!(file, "    pub fn {}(&self) -> RBSHash {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        RBSHash::new(self.parser, unsafe {{ (*self.pointer).{} }})",
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                    }
                     "rbs_location" => {
                         writeln!(file, "    pub fn {}(&self) -> RBSLocation {{", field.name)?;
                         writeln!(
