@@ -1004,7 +1004,7 @@ module Kernel : BasicObject
   #
   def self?.fail: () -> bot
                 | (string message, ?cause: Exception?) -> bot
-                | (_Exception exception, ?_ToS? message, ?String | Array[String] | Array[Thread::Backtrace::Location] | nil backtrace, ?cause: Exception?) -> bot
+                | (_Exception exception, ?string | _ToS message, ?String | Array[String] | Array[Thread::Backtrace::Location] | nil backtrace, ?cause: Exception?) -> bot
                 | (_Exception exception, ?cause: Exception?, **untyped) -> bot
 
   # <!--

@@ -81,6 +81,150 @@ class KernelSingletonTest < Test::Unit::TestCase
                      Kernel, :String, ToS.new
   end
 
+  def test_abort
+    old_stderr = $stderr
+    $stderr = File.open(File::NULL, 'w')
+
+    assert_send_type_error '() -> bot', SystemExit,
+                           Kernel, :abort
+
+    with_string 'oops' do |message|
+      assert_send_type_error '(string) -> bot', SystemExit,
+                             Kernel, :abort, message
+    end
+  ensure
+    $stderr.close rescue nil
+    $stderr = old_stderr
+  end
+
+  def test_exit
+    assert_send_type_error '() -> bot', SystemExit,
+                           Kernel, :exit
+
+    with_int.and with_bool do |status|
+      assert_send_type_error '(int | bool) -> bot', SystemExit,
+                             Kernel, :exit, status
+    end
+  end
+
+  def test_exit!
+    # Sadly can't use `assert_send_type_error`, so we use exit status to check.
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!; exit(80)'))
+    assert_equal 1, status.exitstatus
+
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(true); exit(80)'))
+    assert_equal 0, status.exitstatus
+
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(false); exit(80)'))
+    assert_equal 1, status.exitstatus
+
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(12); exit(80)'))
+    assert_equal 12, status.exitstatus
+
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', <<~'RUBY'))
+      # hardcode a "blank slate" object in
+      class ToInt < BasicObject
+        instance_methods.each do |im|
+          next if im == :__id__
+          next if im == :__send__
+          undef_method im
+        end
+
+        def to_int = 12
+      end
+
+      exit!(ToInt.new)
+      exit(80)
+    RUBY
+    assert_equal 12, status.exitstatus
+  end
+
+  def test_at_exit
+    assert_send_type "() { () -> void } -> Proc",
+                     Kernel, :at_exit do end
+  end
+
+  def test_catch
+    assert_send_type "() { (Object) -> untyped } -> untyped",
+                     Kernel, :catch do end
+    assert_send_type "[T] (T) { (T) -> untyped } -> untyped",
+                     Kernel, :catch, Object.new do end
+  end
+
+  def test_throw
+    # Make sure it requires an arg
+    refute_send_type "() -> bot",
+                     Kernel, :throw
+
+    with_untyped do |tag|
+      assert_send_type_error '(untyped) -> bot', UncaughtThrowError,
+                             Kernel, :throw, tag
+      with_untyped do |obj|
+        assert_send_type_error '(untyped, untyped) -> bot', UncaughtThrowError,
+                               Kernel, :throw, tag, obj
+      end
+    end
+  end
+
+  TestException = Class.new(Exception)
+
+  def test_raise(method: :raise)
+    assert_send_type_error '() -> bot', RuntimeError,
+                           Kernel, method
+
+    cause = TestException.new
+
+    with_string do |message|
+      assert_send_type_error '(string) -> bot', RuntimeError,
+                             Kernel, method, message
+      assert_send_type_error '(string, cause: nil) -> bot', RuntimeError,
+                             Kernel, method, message, cause: nil
+      assert_send_type_error '(string, cause: Exception) -> bot', RuntimeError,
+                             Kernel, method, message, cause: cause
+    end
+
+    exception = BlankSlate.new
+    def exception.exception(mesasage = nil) = TestException.new
+
+    assert_send_type_error '(_Exception) -> bot', TestException,
+                           Kernel, method, exception
+    assert_send_type_error '(_Exception, cause: nil) -> bot', TestException,
+                           Kernel, method, exception, cause: nil
+    assert_send_type_error '(_Exception, cause: Exception) -> bot', TestException,
+                           Kernel, method, exception, cause: cause
+
+    with_string.and ToS.new, nil do |message|
+      assert_send_type_error '(_Exception, string | _ToS) -> bot', TestException,
+                             Kernel, method, exception, message
+      assert_send_type_error '(_Exception, string | _ToS, cause: nil) -> bot', TestException,
+                             Kernel, method, exception, message, cause: nil
+      assert_send_type_error '(_Exception, string | _ToS, cause: Exception) -> bot', TestException,
+                             Kernel, method, exception, message, cause: cause
+
+      with "bt", caller, caller_locations, nil do |backtrace|
+        assert_send_type_error '(_Exception, string | _ToS, String | Array[String] | Array[Thread::Backtrace::Location] | nil) -> bot', TestException,
+                               Kernel, method, exception, message, backtrace
+        assert_send_type_error '(_Exception, string | _ToS, String | Array[String] | Array[Thread::Backtrace::Location] | nil, cause: nil) -> bot', TestException,
+                               Kernel, method, exception, message, backtrace, cause: nil
+        assert_send_type_error '(_Exception, string | _ToS, String | Array[String] | Array[Thread::Backtrace::Location] | nil, cause: Exception) -> bot', TestException,
+                               Kernel, method, exception, message, backtrace, cause: cause
+      end
+    end
+
+    with_untyped do |value|
+      assert_send_type_error '(_Exception, **untyped) -> bot', TestException,
+                             Kernel, method, exception, key: value
+      assert_send_type_error '(_Exception, cause: nil, **untyped) -> bot', TestException,
+                             Kernel, method, exception, cause: nil, key: value
+      assert_send_type_error '(_Exception, cause: Exception, **untyped) -> bot', TestException,
+                             Kernel, method, exception, cause: cause, key: value
+    end
+  end
+
+  def test_fail
+    test_raise method: :fail
+  end
+
   def test_autoload?
     with_interned :TestModuleForAutoload do |interned|
       assert_send_type "(::interned) -> String?",
