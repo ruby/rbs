@@ -9524,27 +9524,15 @@ module OpenSSL
     # of both is present, a TimestampError will be raised when trying to create a
     # Response.
     #
-    # call-seq:
-    #     factory.default_policy_id = "string" -> string
-    #     factory.default_policy_id            -> string or nil
-    #
     # ### serial_number
     #
     # Sets or retrieves the serial number to be used for timestamp creation. Must be
     # present for timestamp creation.
     #
-    # call-seq:
-    #     factory.serial_number = number -> number
-    #     factory.serial_number          -> number or nil
-    #
     # ### gen_time
     #
     # Sets or retrieves the Time value to be used in the Response. Must be present
     # for timestamp creation.
-    #
-    # call-seq:
-    #     factory.gen_time = Time -> Time
-    #     factory.gen_time        -> Time or nil
     #
     # ### additional_certs
     #
@@ -9552,20 +9540,12 @@ module OpenSSL
     # (e.g. intermediate certificates) to be added to the Response. Must be an Array
     # of OpenSSL::X509::Certificate.
     #
-    # call-seq:
-    #     factory.additional_certs = [cert1, cert2] -> [ cert1, cert2 ]
-    #     factory.additional_certs                  -> array or nil
-    #
     # ### allowed_digests
     #
     # Sets or retrieves the digest algorithms that the factory is allowed create
     # timestamps for. Known vulnerable or weak algorithms should not be allowed
     # where possible. Must be an Array of String or OpenSSL::Digest subclass
     # instances.
-    #
-    # call-seq:
-    #     factory.allowed_digests = ["sha1", OpenSSL::Digest.new('SHA256').new] -> [ "sha1", OpenSSL::Digest) ]
-    #     factory.allowed_digests                                               -> array or nil
     #
     class Factory
       def additional_certs: () -> Array[X509::Certificate]?
