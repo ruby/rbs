@@ -27,6 +27,14 @@ struct Node {
     fields: Option<Vec<NodeField>>,
 }
 
+impl Node {
+    fn variant_name(&self) -> &str {
+        self.rust_name
+            .strip_suffix("Node")
+            .unwrap_or(&self.rust_name)
+    }
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     let config_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../config.yml")
@@ -62,11 +70,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 enum CIdentifier {
     Type,     // foo_bar_t
     Constant, // FOO_BAR
+    Method,   // visit_foo_bar
 }
 
 fn convert_name(name: &str, identifier: CIdentifier) -> String {
     let type_name = name.replace("::", "_");
-    let lowercase = matches!(identifier, CIdentifier::Type);
+    let lowercase = matches!(identifier, CIdentifier::Type | CIdentifier::Method);
     let mut out = String::new();
     let mut prev_is_lower = false;
 
@@ -94,10 +103,65 @@ fn convert_name(name: &str, identifier: CIdentifier) -> String {
         }
     }
 
-    if lowercase {
+    if matches!(identifier, CIdentifier::Type) {
         out.push_str("_t");
     }
     out
+}
+
+fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    writeln!(file, "/// A trait for traversing the AST using a visitor")?;
+    writeln!(file, "pub trait Visit {{")?;
+    writeln!(
+        file,
+        "   /// Visit any node of the AST. Generally used to continue traversal"
+    )?;
+    writeln!(file, "   fn visit(&mut self, node: &Node) {{")?;
+    writeln!(file, "       match node {{")?;
+
+    for node in &config.nodes {
+        let node_variant_name = node.variant_name();
+        let method_name = convert_name(node_variant_name, CIdentifier::Method);
+
+        writeln!(file, "           Node::{}(it) => {{", node_variant_name)?;
+        writeln!(file, "               self.visit_{}_node(it);", method_name,)?;
+        writeln!(file, "           }}")?;
+    }
+
+    writeln!(file, "       }}")?;
+    writeln!(file, "   }}")?;
+
+    for node in &config.nodes {
+        let node_variant_name = node.variant_name();
+        let method_name = convert_name(node_variant_name, CIdentifier::Method);
+
+        writeln!(file)?;
+        writeln!(
+            file,
+            "    fn visit_{}_node(&mut self, node: &{}Node) {{",
+            method_name, node_variant_name
+        )?;
+        writeln!(file, "        visit_{}_node(self, node);", method_name)?;
+        writeln!(file, "    }}")?;
+    }
+    writeln!(file, "}}")?;
+    writeln!(file)?;
+
+    for node in &config.nodes {
+        let node_variant_name = node.variant_name();
+        let method_name = convert_name(node_variant_name, CIdentifier::Method);
+
+        writeln!(file, "#[allow(unused_variables)]")?; // TODO: Remove this once all nodes that need visitor are implemented
+        writeln!(
+            file,
+            "pub fn visit_{}_node<V: Visit + ?Sized>(visitor: &mut V, node: &{}Node) {{",
+            method_name, node_variant_name
+        )?;
+        writeln!(file, "}}")?;
+        writeln!(file)?;
+    }
+
+    Ok(())
 }
 
 fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
@@ -291,18 +355,13 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     )?;
     writeln!(file, "        match unsafe {{ (*node).type_ }} {{")?;
     for node in &config.nodes {
-        let variant_name = node
-            .rust_name
-            .strip_suffix("Node")
-            .unwrap_or(&node.rust_name);
-
         let enum_name = convert_name(&node.name, CIdentifier::Constant);
 
         writeln!(
             file,
             "            rbs_node_type::{} => Self::{}({} {{ parser, pointer: node.cast::<{}>() }}),",
             enum_name,
-            variant_name,
+            node.variant_name(),
             node.rust_name,
             convert_name(&node.name, CIdentifier::Type)
         )?;
@@ -314,6 +373,9 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file, "        }}")?;
     writeln!(file, "    }}")?;
     writeln!(file, "}}")?;
+    writeln!(file)?;
+
+    write_visit_trait(&mut file, config)?;
 
     Ok(())
 }
