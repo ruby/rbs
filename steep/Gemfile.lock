@@ -70,7 +70,7 @@ GEM
     strscan (3.1.5)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
-    test-unit (3.7.1)
+    test-unit (3.7.3)
       power_assert
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -89,4 +89,4 @@ DEPENDENCIES
   test-unit
 
 BUNDLED WITH
-   4.0.0.dev
+   2.7.2
