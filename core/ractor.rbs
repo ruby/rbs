@@ -352,68 +352,6 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
-  #   - Ractor.receive_if {|msg| block } -> msg
-  # -->
-  # Receive only a specific message.
-  #
-  # Instead of Ractor.receive, Ractor.receive_if can be given a pattern (or any
-  # filter) in a block and you can choose the messages to accept that are
-  # available in your ractor's incoming queue.
-  #
-  #     r = Ractor.new do
-  #       p Ractor.receive_if{|msg| msg.match?(/foo/)} #=> "foo3"
-  #       p Ractor.receive_if{|msg| msg.match?(/bar/)} #=> "bar1"
-  #       p Ractor.receive_if{|msg| msg.match?(/baz/)} #=> "baz2"
-  #     end
-  #     r << "bar1"
-  #     r << "baz2"
-  #     r << "foo3"
-  #     r.take
-  #
-  # This will output:
-  #
-  #     foo3
-  #     bar1
-  #     baz2
-  #
-  # If the block returns a truthy value, the message is removed from the incoming
-  # queue and returned. Otherwise, the message remains in the incoming queue and
-  # the next messages are checked by the given block.
-  #
-  # If there are no messages left in the incoming queue, the method will block
-  # until new messages arrive.
-  #
-  # If the block is escaped by break/return/exception/throw, the message is
-  # removed from the incoming queue as if a truthy value had been returned.
-  #
-  #     r = Ractor.new do
-  #       val = Ractor.receive_if{|msg| msg.is_a?(Array)}
-  #       puts "Received successfully: #{val}"
-  #     end
-  #
-  #     r.send(1)
-  #     r.send('test')
-  #     wait
-  #     puts "2 non-matching sent, nothing received"
-  #     r.send([1, 2, 3])
-  #     wait
-  #
-  # Prints:
-  #
-  #     2 non-matching sent, nothing received
-  #     Received successfully: [1, 2, 3]
-  #
-  # Note that you can not call receive/receive_if in the given block recursively.
-  # You should not do any tasks in the block other than message filtration.
-  #
-  #     Ractor.current << true
-  #     Ractor.receive_if{|msg| Ractor.receive}
-  #     #=> `receive': can not call receive/receive_if recursively (Ractor::Error)
-  #
-  def self.receive_if: () { (untyped) -> boolish } -> untyped
-
-  # <!--
-  #   rdoc-file=ractor.rb
   #   - recv()
   # -->
   #
