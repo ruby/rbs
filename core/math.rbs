@@ -525,9 +525,8 @@ module Math
   #
   #     [Math.log(Math.gamma(x).abs), Math.gamma(x) < 0 ? -1 : 1]
   #
-  # See [logarithmic gamma
-  # function](https://en.wikipedia.org/wiki/Gamma_function#The_log-gamma_function)
-  # .
+  # See [log gamma
+  # function](https://en.wikipedia.org/wiki/Gamma_function#Log-gamma_function).
   #
   # *   Domain: `(-INFINITY, INFINITY]`.
   # *   Range of first element: `(-INFINITY, INFINITY]`.

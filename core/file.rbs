@@ -1427,8 +1427,25 @@ class File < IO
   # -->
   # Returns the string representation of the path
   #
-  #     File.path(File::NULL)           #=> "/dev/null"
-  #     File.path(Pathname.new("/tmp")) #=> "/tmp"
+  #        File.path(File::NULL)           #=> "/dev/null"
+  #        File.path(Pathname.new("/tmp")) #=> "/tmp"
+  #
+  # If `path` is not a String:
+  #
+  # 1.  If it has the `to_path` method, that method will be called to coerce to a
+  #     String.
+  #
+  # 2.  Otherwise, or if the coerced result is not a String too, the standard
+  #     coersion using `to_str` method will take place on that object. (See also
+  #     String.try_convert)
+  #
+  # The coerced string must satisfy the following conditions:
+  #
+  # 1.  It must be in an ASCII-compatible encoding; otherwise, an
+  #     Encoding::CompatibilityError is raised.
+  #
+  # 2.  It must not contain the NUL character (`\0`); otherwise, an ArgumentError
+  #     is raised.
   #
   def self.path: (path path) -> String
 
@@ -2429,10 +2446,8 @@ class File::Stat < Object
 
   # <!--
   #   rdoc-file=file.c
-  #   - new(p1)
+  #   - File::Stat.new(file_name)  -> stat
   # -->
-  # File::Stat.new(file_name)  -> stat
-  #
   # Create a File::Stat object for the given file name (raising an exception if
   # the file doesn't exist).
   #
