@@ -93,14 +93,6 @@ class RactorInstanceTest < Test::Unit::TestCase
 
   testing "::Ractor"
 
-  def test_close_outgoing
-    omit "Ractor#close_outgoing is not implemented" if RUBY_VERSION >= "3.5"
-
-    r = Ractor.new {}
-    assert_send_type "() -> bool",
-                     r, :close_outgoing
-  end
-
   def test_inspect
     assert_send_type "() -> String",
                      Ractor.current, :inspect

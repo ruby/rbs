@@ -426,22 +426,6 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
-  #   - ractor.close_outgoing -> true | false
-  # -->
-  # Closes the outgoing port and returns whether it was already closed. All
-  # further attempts to Ractor.yield in the ractor, and #take from the ractor will
-  # fail with Ractor::ClosedError.
-  #
-  #     r = Ractor.new {sleep(500)}
-  #     r.close_outgoing  #=> false
-  #     r.close_outgoing  #=> true
-  #     r.take
-  #     # Ractor::ClosedError (The outgoing-port is already closed)
-  #
-  def close_outgoing: () -> bool
-
-  # <!--
-  #   rdoc-file=ractor.rb
   #   - inspect()
   # -->
   #
