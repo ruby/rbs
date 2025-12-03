@@ -118,15 +118,6 @@ class RactorInstanceTest < Test::Unit::TestCase
                      r, :send, 42, move: nil
   end
 
-  def test_take
-    omit "Ractor#take is not implemented" if RUBY_VERSION >= "3.5"
-
-    r = Ractor.new { 42 }
-
-    assert_send_type "() -> Integer",
-                     r, :take
-  end
-
   def test_to_s
     assert_send_type "() -> String",
                      Ractor.current, :to_s
