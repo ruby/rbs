@@ -530,17 +530,17 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - nonzero?  ->  self or nil
   # -->
-  # Returns +self+ if +self+ is not a zero value, +nil+ otherwise;
-  #     uses method <tt>zero?</tt> for the evaluation.
+  # Returns `self` if `self` is not a zero value, `nil` otherwise; uses method
+  # `zero?` for the evaluation.
   #
-  #     The returned +self+ allows the method to be chained:
+  # The returned `self` allows the method to be chained:
   #
-  #       a = %w[z Bb bB bb BB a aA Aa AA A]
-  #       a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
-  #       # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
+  #     a = %w[z Bb bB bb BB a aA Aa AA A]
+  #     a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
+  #     # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
   #
-  #     Of the Core and Standard Library classes,
-  #     Integer, Float, Rational, and Complex use this implementation.
+  # Of the Core and Standard Library classes, Integer, Float, Rational, and
+  # Complex use this implementation.
   #
   # Related: #zero?
   #

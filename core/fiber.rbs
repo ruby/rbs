@@ -58,7 +58,7 @@
 # ## Non-blocking Fibers
 #
 # The concept of *non-blocking fiber* was introduced in Ruby 3.0. A non-blocking
-# fiber, when reaching a operation that would normally block the fiber (like
+# fiber, when reaching an operation that would normally block the fiber (like
 # `sleep`, or wait for another process or I/O) will yield control to other
 # fibers and allow the *scheduler* to handle blocking and waking up (resuming)
 # this fiber when it can proceed.

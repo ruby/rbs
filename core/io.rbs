@@ -2361,8 +2361,9 @@ class IO < Object
   # closed (eventually) to avoid resource leaks.
   #
   # If a block is given, the stream is passed to the block (again, open for
-  # reading, writing, or both); when the block exits, the stream is closed, and
-  # the block's value is assigned to global variable `$?` and returned.
+  # reading, writing, or both); when the block exits, the stream is closed, the
+  # block's value is returned, and the global variable `$?` is set to the child's
+  # exit status.
   #
   # Optional argument `mode` may be any valid IO mode. See [Access
   # Modes](rdoc-ref:File@Access+Modes).
@@ -2391,7 +2392,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   Options for Kernel#spawn.
   #
-  # **Forked \Process**
+  # **Forked Process**
   #
   # When argument `cmd` is the 1-character string `'-'`, causes the process to
   # fork:
@@ -2785,7 +2786,8 @@ class IO < Object
   # IO objects.
   #
   # Argument `timeout` is a numeric value (such as integer or float) timeout
-  # interval in seconds.
+  # interval in seconds. `timeout` can also be `nil` or `Float::INFINITY`. `nil`
+  # and `Float::INFINITY` means no timeout.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:
