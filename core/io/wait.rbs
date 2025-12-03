@@ -1,7 +1,7 @@
 %a{annotate:rdoc:skip}
 class IO
   # <!--
-  #   rdoc-file=ext/io/wait/wait.c
+  #   rdoc-file=io.c
   #   - io.wait(events, timeout) -> event mask, false or nil
   #   - io.wait(*event_symbols[, timeout]) -> self, true, or false
   # -->
@@ -20,15 +20,13 @@ class IO
   # order of the arguments is arbitrary, and returns `io` if any of the events is
   # ready.
   #
-  # You must require 'io/wait' to use this method.
-  #
   def wait: (Integer events, ?Time::_Timeout timeout) -> (Integer | false | nil)
           | (?Time::_Timeout? timeout, *wait_mode mode) -> (self | true | false)
 
   type wait_mode = :read | :r | :readable | :write | :w | :writable | :read_write | :rw | :readable_writable
 
   # <!--
-  #   rdoc-file=ext/io/wait/wait.c
+  #   rdoc-file=io.c
   #   - io.wait_readable          -> truthy or falsy
   #   - io.wait_readable(timeout) -> truthy or falsy
   # -->
@@ -36,19 +34,15 @@ class IO
   # times out.  Returns a truthy value immediately when buffered data is
   # available.
   #
-  # You must require 'io/wait' to use this method.
-  #
   def wait_readable: (?Time::_Timeout? timeout) -> boolish
 
   # <!--
-  #   rdoc-file=ext/io/wait/wait.c
+  #   rdoc-file=io.c
   #   - io.wait_writable          -> truthy or falsy
   #   - io.wait_writable(timeout) -> truthy or falsy
   # -->
   # Waits until IO is writable and returns a truthy value or a falsy value when
   # times out.
-  #
-  # You must require 'io/wait' to use this method.
   #
   def wait_writable: (?Time::_Timeout? timeout) -> boolish
 end
