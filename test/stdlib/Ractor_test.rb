@@ -86,19 +86,6 @@ class RactorSingletonTest < Test::Unit::TestCase
       Ractor, :store_if_absent, :test_store_if_absent, &->(_x) { true }
     )
   end
-
-  def test_yield
-    omit "Ractor#yield is not implemented" if RUBY_VERSION >= "3.5"
-
-    Ractor.new(Ractor.current) { |r| loop { r.take } }
-
-    assert_send_type "(Integer) -> untyped",
-                     Ractor, :yield, 42
-    assert_send_type "(Integer, move: true) -> untyped",
-                     Ractor, :yield, 42, move: true
-    assert_send_type "(Integer, move: false) -> untyped",
-                     Ractor, :yield, 42, move: false
-  end
 end
 
 class RactorInstanceTest < Test::Unit::TestCase

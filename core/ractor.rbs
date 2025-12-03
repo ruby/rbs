@@ -399,46 +399,6 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
-  #   - Ractor.yield(msg, move: false) -> nil
-  # -->
-  # Send a message to the current ractor's outgoing port to be accepted by #take.
-  #
-  #     r = Ractor.new {Ractor.yield 'Hello from ractor'}
-  #     puts r.take
-  #     # Prints: "Hello from ractor"
-  #
-  # This method is blocking, and will return only when somebody consumes the sent
-  # message.
-  #
-  #     r = Ractor.new do
-  #       Ractor.yield 'Hello from ractor'
-  #       puts "Ractor: after yield"
-  #     end
-  #     wait
-  #     puts "Still not taken"
-  #     puts r.take
-  #
-  # This will print:
-  #
-  #     Still not taken
-  #     Hello from ractor
-  #     Ractor: after yield
-  #
-  # If the outgoing port was closed with #close_outgoing, the method will raise:
-  #
-  #     r = Ractor.new do
-  #       close_outgoing
-  #       Ractor.yield 'Hello from ractor'
-  #     end
-  #     wait
-  #     # `yield': The outgoing-port is already closed (Ractor::ClosedError)
-  #
-  # The meaning of the `move` argument is the same as for #send.
-  #
-  def self.yield: (untyped obj, ?move: boolish) -> untyped
-
-  # <!--
-  #   rdoc-file=ractor.rb
   #   - <<(...)
   # -->
   #
