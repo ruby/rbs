@@ -73,29 +73,6 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :recv
   end
 
-  def test_select
-    omit "Ractor#yield is not implemented" if RUBY_VERSION >= "3.5"
-
-    r1 = Ractor.new {|r| loop { Ractor.yield 42 } }
-    r2 = Ractor.new {|r| loop { Ractor.yield 43 } }
-
-    assert_send_type "(Ractor) -> [Ractor, Integer]",
-                     Ractor, :select, r1
-    assert_send_type "(Ractor, Ractor) -> [Ractor, Integer]",
-                     Ractor, :select, r1, r2
-
-    Ractor.current.send 42
-    assert_send_type "(Ractor) -> [:receive, Integer]",
-                     Ractor, :select, Ractor.current
-
-    Ractor.new(Ractor.current) { |r| r.take }
-    assert_send_type "(Ractor, yield_value: untyped) -> [:yield, nil]",
-                     Ractor, :select, Ractor.current, yield_value: 'foo'
-
-    assert_send_type "(Ractor, move: bool) -> [Ractor, Integer]",
-                     Ractor, :select, r1, move: true
-  end
-
   def test_shareable?
     assert_send_type "(untyped) -> true",
                      Ractor, :shareable?, 42

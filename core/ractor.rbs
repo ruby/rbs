@@ -363,7 +363,7 @@ class Ractor
   # -->
   # TBD
   #
-  def self.select: (*Ractor ractors, ?move: boolish, ?yield_value: untyped) -> [ Ractor | Symbol, untyped ]
+  def self.select: (?) -> untyped
 
   # <!--
   #   rdoc-file=ractor.rb
