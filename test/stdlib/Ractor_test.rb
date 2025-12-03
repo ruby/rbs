@@ -93,16 +93,6 @@ class RactorInstanceTest < Test::Unit::TestCase
 
   testing "::Ractor"
 
-  def test_aset
-    omit "Accessing ractor local storage" if RUBY_VERSION >= "3.5"
-
-    r = Ractor.new {}
-    assert_send_type "(String, String) -> String",
-                     r, :[]=, 'foo', 'bar'
-    assert_send_type "(Symbol, Integer) -> Integer",
-                     r, :[]=, :foo, 42
-  end
-
   def test_close_incoming
     omit "Ractor#close_incoming is not implemented" if RUBY_VERSION >= "3.5"
 

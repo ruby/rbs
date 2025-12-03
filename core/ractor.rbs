@@ -421,6 +421,7 @@ class Ractor
   # set a value in ractor-local storage for current Ractor Obsolete and use
   # Ractor.[]= instead.
   #
+  %a{deprecated: Use Ractor.[]= instead}
   def []=: [T] (interned sym, T val) -> T
 
   # <!--
