@@ -141,7 +141,7 @@ require "rbs"
 loader = RBS::EnvironmentLoader.new()
 
 # loader.add(path: Pathname("sig"))   # Load .rbs files from `sig` directory
-# loader.add(library: "pathname")     # Load pathname library
+# loader.add(library: "logger")       # Load logger library
 
 environment = RBS::Environment.from_loader(loader).resolve_type_names
 

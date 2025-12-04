@@ -328,7 +328,7 @@ namespace :generate do
           class <%= target %>SingletonTest < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
           <%- class_methods.each do |method_name, definition| -%>
@@ -347,7 +347,7 @@ namespace :generate do
           class <%= target %>Test < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
           <%- instance_methods.each do |method_name, definition| -%>
