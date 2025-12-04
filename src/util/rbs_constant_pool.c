@@ -37,7 +37,7 @@ next_power_of_two(uint32_t v) {
     return v;
 }
 
-__attribute__((unused)) static bool is_power_of_two(uint32_t size) {
+RBS_ATTRIBUTE_UNUSED static bool is_power_of_two(uint32_t size) {
     return (size & (size - 1)) == 0;
 }
 

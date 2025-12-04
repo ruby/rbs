@@ -3,12 +3,6 @@
 
 #include <ctype.h>
 
-#if defined(__GNUC__)
-#define RBS_ATTRIBUTE_UNUSED __attribute__((unused))
-#else
-#define RBS_ATTRIBUTE_UNUSED
-#endif
-
 typedef uint32_t rbs_unicode_codepoint_t;
 
 #define UNICODE_ALPHA_CODEPOINTS_LENGTH 1450
