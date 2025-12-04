@@ -74,4 +74,13 @@
 #define NODISCARD __attribute__((warn_unused_result))
 #endif
 
+/**
+ * Mark a function or variable as potentially unused to suppress compiler warnings.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#define RBS_ATTRIBUTE_UNUSED __attribute__((unused))
+#else
+#define RBS_ATTRIBUTE_UNUSED
+#endif
+
 #endif

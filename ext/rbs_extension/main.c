@@ -16,7 +16,7 @@
  * ```
  * */
 static NORETURN(void) raise_error(rbs_error_t *error, VALUE buffer) {
-    rbs_assert(error != NULL, "raise_error() called with NULL error");
+    RBS_ASSERT(error != NULL, "raise_error() called with NULL error");
 
     if (!error->syntax_error) {
         rb_raise(rb_eRuntimeError, "Unexpected error");

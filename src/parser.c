@@ -233,7 +233,7 @@ error_handling: {
         ids = "class/module/constant name";
     }
 
-    rbs_assert(ids != NULL, "Unknown kind of type: %i", kind);
+    RBS_ASSERT(ids != NULL, "Unknown kind of type: %i", kind);
 
     rbs_parser_set_error(parser, parser->current_token, true, "expected one of %s", ids);
     return false;
