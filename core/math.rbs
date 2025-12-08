@@ -412,6 +412,27 @@ module Math
 
   # <!--
   #   rdoc-file=math.c
+  #   - Math.expm1(x) -> float
+  # -->
+  # Returns "exp(x) - 1", `e` raised to the `x` power, minus 1.
+  #
+  # *   Domain: `[-INFINITY, INFINITY]`.
+  # *   Range: `[-1.0, INFINITY]`.
+  #
+  # Examples:
+  #
+  #     expm1(-INFINITY) # => 0.0
+  #     expm1(-1.0)      # => -0.6321205588285577 # 1.0/E - 1
+  #     expm1(0.0)       # => 0.0
+  #     expm1(0.5)       # => 0.6487212707001282  # sqrt(E) - 1
+  #     expm1(1.0)       # => 1.718281828459045   # E - 1
+  #     expm1(2.0)       # => 6.38905609893065    # E**2 - 1
+  #     expm1(INFINITY)  # => Infinity
+  #
+  def self.expm1: (double x) -> Float
+
+  # <!--
+  #   rdoc-file=math.c
   #   - Math.frexp(x) -> [fraction, exponent]
   # -->
   # Returns a 2-element array containing the normalized signed float `fraction`
@@ -601,6 +622,25 @@ module Math
   #     log10(INFINITY) # => Infinity
   #
   def self.log10: (double x) -> Float
+
+  # <!--
+  #   rdoc-file=math.c
+  #   - Math.log1p(x) -> float
+  # -->
+  # Returns "log(x + 1)", the base E
+  # [logarithm](https://en.wikipedia.org/wiki/Logarithm) of (`x` + 1).
+  #
+  # *   Domain: `[-1, INFINITY]`.
+  # *   Range: `[-INFINITY, INFINITY]`.
+  #
+  # Examples:
+  #
+  #     log1p(-1.0)     # => -Infinity
+  #     log1p(0.0)      # => 0.0
+  #     log1p(E - 1)    # => 1.0
+  #     log1p(INFINITY) # => Infinity
+  #
+  def self.log1p: (double x) -> Float
 
   # <!--
   #   rdoc-file=math.c
