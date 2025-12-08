@@ -14,6 +14,7 @@ module RBS
           "net-smtp" => nil,
           "nkf" => nil,
           "observer" => nil,
+          "cgi" => nil,
         }
 
         class GemfileLockMismatchError < StandardError
