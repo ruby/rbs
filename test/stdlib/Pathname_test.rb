@@ -3,7 +3,7 @@ require 'pathname'
 
 class PathnameSingletonTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing 'singleton(::Pathname)'
 
   def test_getwd
@@ -41,7 +41,7 @@ end
 
 class PathnameInstanceTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing '::Pathname'
 
   def test_plus
@@ -830,7 +830,7 @@ end
 
 class PathnameKernelTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing '::Kernel'
 
   def test_Pathname

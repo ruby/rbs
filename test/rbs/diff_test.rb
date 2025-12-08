@@ -146,34 +146,34 @@ class RBS::DiffTest < Test::Unit::TestCase
       dir1 = (path / "dir1")
       dir1.mkdir
       (dir1 / 'before.rbs').write(<<~RBS)
-        class Pathname
+        class Logger
         end
       RBS
       (dir1 / 'manifest.yaml').write(<<~RBS)
         dependencies:
-          - name: pathname
+          - name: logger
       RBS
 
       dir2 = (path / "dir2")
       dir2.mkdir
       (dir2 / 'after.rbs').write(<<~RBS)
-        class Pathname
+        class Logger
           def foooooooo: () -> void
         end
       RBS
       (dir2 / 'manifest.yaml').write(<<~RBS)
         dependencies:
-          - name: pathname
+          - name: logger
       RBS
 
       diff = Diff.new(
-        type_name: RBS::TypeName.parse("::Pathname"),
+        type_name: RBS::TypeName.parse("::Logger"),
         library_options: RBS::CLI::LibraryOptions.new,
         before_path: [dir1],
         after_path: [dir2],
         detail: true,
       )
-      assert_equal [["-", "[::Pathname public] def foooooooo: () -> void"]], diff.each_diff.to_a
+      assert_equal [["-", "[::Logger public] def foooooooo: () -> void"]], diff.each_diff.to_a
     end
   end
 
