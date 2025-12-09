@@ -39,6 +39,24 @@ class Open3SingletonTest < Test::Unit::TestCase
                      Open3, :capture3, { 'FOO' => 'BAR' }, "echo $FOO"
   end
 
+  def test_popen2
+    assert_send_type "(*::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     Open3, :popen2, 'echo "Foo"'
+    assert_send_type "(*::String, unsetenv_others: bool) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     Open3, :popen2, 'env', unsetenv_others: true
+    assert_send_type "(*::String, close_others: bool) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     Open3, :popen2, 'env', close_others: true
+    assert_send_type "(*::String, chdir: ::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     Open3, :popen2, 'echo "Foo"', chdir: '.'
+    assert_send_type "(::Hash[::String, ::String], ::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     Open3, :popen2, { 'FOO' => 'BAR' }, "echo $FOO"
+
+    assert_send_type "(::String) { (::IO, ::IO, ::Process::Waiter) -> [::IO, ::IO, ::Process::Waiter] } -> [::IO, ::IO, ::Process::Waiter]",
+                     Open3, :popen2, 'echo "Foo"' do |*args| args end
+    assert_send_type "(::Hash[::String, ::String], ::String) { (::IO, ::IO, ::Process::Waiter) -> [::IO, ::IO, ::Process::Waiter] } -> [::IO, ::IO, ::Process::Waiter]",
+                     Open3, :popen2, { 'FOO' => 'BAR' }, 'echo $FOO' do |*args| args end
+  end
+
   def test_popen3
     assert_send_type "(::String) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen3, 'echo "Foo"'
@@ -76,6 +94,11 @@ class Open3InstanceTest < Test::Unit::TestCase
   def test_capture2e
     assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
                      CustomOpen3.new, :capture2e, 'echo "Foo"'
+  end
+
+  def test_popen2
+    assert_send_type "(::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
+                     CustomOpen3.new, :popen2, 'echo "Foo"'
   end
 
   def test_popen3
