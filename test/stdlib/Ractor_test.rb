@@ -98,6 +98,15 @@ class RactorInstanceTest < Test::Unit::TestCase
                      Ractor.current, :inspect
   end
 
+  def test_join
+    ractor = Ractor.new { }
+
+    assert_send_type(
+      "() -> ::Ractor",
+      ractor, :join
+    )
+  end
+
   def test_name
     unnamed = Ractor.new {}
     named = Ractor.new(name: 'foo') {}
@@ -121,5 +130,14 @@ class RactorInstanceTest < Test::Unit::TestCase
   def test_to_s
     assert_send_type "() -> String",
                      Ractor.current, :to_s
+  end
+
+  def test_value
+    ractor = Ractor.new { 123 }
+
+    assert_send_type(
+      "() -> ::Integer",
+      ractor, :value
+    )
   end
 end

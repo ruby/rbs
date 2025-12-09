@@ -433,6 +433,20 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
+  #   - ractor.join -> self
+  # -->
+  # Wait for the termination of the Ractor. If the Ractor was aborted (terminated
+  # with an exception), Ractor#value is called to raise an exception.
+  #
+  #     Ractor.new{}.join #=> ractor
+  #
+  #     Ractor.new{ raise "foo" }.join
+  #     #=> raise an exception "foo (RuntimeError)"
+  #
+  def join: () -> self
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - name()
   # -->
   # The name set in Ractor.new, or `nil`.
@@ -453,6 +467,21 @@ class Ractor
   # -->
   #
   alias to_s inspect
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.value -> obj
+  # -->
+  # Waits for `ractor` to complete, using #join, and return its value or raise the
+  # exception which terminated the Ractor. The value will not be copied even if it
+  # is unshareable object. Therefore at most 1 Ractor can get a value.
+  #
+  #     r = Ractor.new{ [1, 2] }
+  #     r.value #=> [1, 2] (unshareable object)
+  #
+  #     Ractor.new(r){|r| r.value} #=> Ractor::Error
+  #
+  def value: () -> untyped
 
   private
 
