@@ -116,6 +116,15 @@ class RactorInstanceTest < Test::Unit::TestCase
                      named, :name
   end
 
+  def test_monitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> untyped",
+      ractor, :monitor, Ractor::Port.new
+    )
+  end
+
   def test_send
     r = Ractor.new { sleep }
 
@@ -130,6 +139,19 @@ class RactorInstanceTest < Test::Unit::TestCase
   def test_to_s
     assert_send_type "() -> String",
                      Ractor.current, :to_s
+  end
+
+  def test_unmonitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    port = Ractor::Port.new
+
+    ractor.monitor(port)
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> ::Ractor",
+      ractor, :unmonitor, port
+    )
   end
 
   def test_value

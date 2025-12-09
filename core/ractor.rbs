@@ -455,6 +455,25 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
+  #   - ractor.monitor(port) -> self
+  # -->
+  # Register port as a monitoring port. If the ractor terminated, the port
+  # received a Symbol object. :exited will be sent if the ractor terminated
+  # without an exception. :aborted will be sent if the ractor terminated with a
+  # exception.
+  #
+  #     r = Ractor.new{ some_task() }
+  #     r.monitor(port = Ractor::Port.new)
+  #     port.receive #=> :exited and r is terminated
+  #
+  #     r = Ractor.new{ raise "foo" }
+  #     r.monitor(port = Ractor::Port.new)
+  #     port.receive #=> :terminated and r is terminated with an exception "foo"
+  #
+  def monitor: [T < Symbol] (Port[T]) -> untyped
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - ractor.send(msg) -> self
   # -->
   # It is equivalent to default_port.send(msg)
@@ -467,6 +486,14 @@ class Ractor
   # -->
   #
   alias to_s inspect
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.unmonitor(port) -> self
+  # -->
+  # Unregister port from the monitoring ports.
+  #
+  def unmonitor: (Port[untyped]) -> self
 
   # <!--
   #   rdoc-file=ractor.rb
