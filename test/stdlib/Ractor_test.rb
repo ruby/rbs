@@ -73,6 +73,18 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :recv
   end
 
+  def test_select
+    rs = [
+      Ractor.new { sleep 0.1 },
+      Ractor.new { sleep 0.1 }
+    ]
+
+    assert_send_type(
+      "(::Ractor, ::Ractor) -> ::Array[untyped]",
+      Ractor, :select, *rs
+    )
+  end
+
   def test_shareable?
     assert_send_type "(untyped) -> true",
                      Ractor, :shareable?, 42
@@ -93,9 +105,25 @@ class RactorInstanceTest < Test::Unit::TestCase
 
   testing "::Ractor"
 
+  def test_default_port
+    assert_send_type(
+      "() -> ::Ractor::Port[untyped]",
+      Ractor.current, :default_port
+    )
+  end
+
   def test_inspect
     assert_send_type "() -> String",
                      Ractor.current, :inspect
+  end
+
+  def test_join
+    ractor = Ractor.new { }
+
+    assert_send_type(
+      "() -> ::Ractor",
+      ractor, :join
+    )
   end
 
   def test_name
@@ -105,6 +133,15 @@ class RactorInstanceTest < Test::Unit::TestCase
                      unnamed, :name
     assert_send_type "() -> String",
                      named, :name
+  end
+
+  def test_monitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> untyped",
+      ractor, :monitor, Ractor::Port.new
+    )
   end
 
   def test_send
@@ -121,5 +158,27 @@ class RactorInstanceTest < Test::Unit::TestCase
   def test_to_s
     assert_send_type "() -> String",
                      Ractor.current, :to_s
+  end
+
+  def test_unmonitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    port = Ractor::Port.new
+
+    ractor.monitor(port)
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> ::Ractor",
+      ractor, :unmonitor, port
+    )
+  end
+
+  def test_value
+    ractor = Ractor.new { 123 }
+
+    assert_send_type(
+      "() -> ::Integer",
+      ractor, :value
+    )
   end
 end

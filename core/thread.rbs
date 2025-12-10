@@ -974,8 +974,8 @@ class Thread < Object
   #      from prog.rb:2:in `new'
   #      from prog.rb:2
   #
-  def raise: (?String message) -> nil
-           | (_Exception, ?_ToS message, ?Array[Thread::Backtrace::Location] | Array[String] | nil backtrace) -> nil
+  def raise: (?String message, ?cause: Exception?) -> nil
+           | (_Exception, ?_ToS message, ?Array[Thread::Backtrace::Location] | Array[String] | nil backtrace, ?cause: Exception?) -> nil
 
   # <!--
   #   rdoc-file=thread.c

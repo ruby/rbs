@@ -363,7 +363,7 @@ class Ractor
   # -->
   # TBD
   #
-  def self.select: (?) -> untyped
+  def self.select: (?) -> Array[untyped]
 
   # <!--
   #   rdoc-file=ractor.rb
@@ -379,6 +379,36 @@ class Ractor
   # docs.
   #
   def self.shareable?: (untyped obj) -> bool
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.sharable_proc(self: nil){} -> sharable proc
+  # -->
+  # It returns shareable Proc object. The Proc object is shareable and the self in
+  # a block will be replaced with the value passed via `self:` keyword.
+  #
+  # In a shareable Proc, you can not access to the outer variables.
+  #
+  #     a = 42
+  #     Ractor.shareable_proc{ p a }
+  #     #=> can not isolate a Proc because it accesses outer variables (a). (ArgumentError)
+  #
+  # The `self` should be a sharable object
+  #
+  #     Ractor.shareable_proc(self: self){}
+  #     #=> self should be shareable: main (Ractor::IsolationError)
+  #
+  def self.shareable_proc: [T] () { (?) [self: nil] -> T } -> ^(?) [self: nil] -> T
+                         | [T, S] (self: S) { (?) [self: S] -> T } -> ^(?) [self: S] -> T
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - Ractor.sharable_proc{} -> sharable proc
+  # -->
+  # Same as Ractor.sharable_proc, but returns lambda proc.
+  #
+  def self.shareable_lambda: [T] () { (?) [self: nil] -> T } -> ^(?) [self: nil] -> T
+                           | [T, S] (self: S) { (?) [self: S] -> T } -> ^(?) [self: S] -> T
 
   # <!--
   #   rdoc-file=ractor.rb
@@ -426,10 +456,32 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
+  #   - ractor.default_port -> port object
+  # -->
+  # return default port of the Ractor.
+  #
+  def default_port: () -> Port[untyped]
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - inspect()
   # -->
   #
   def inspect: () -> String
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.join -> self
+  # -->
+  # Wait for the termination of the Ractor. If the Ractor was aborted (terminated
+  # with an exception), Ractor#value is called to raise an exception.
+  #
+  #     Ractor.new{}.join #=> ractor
+  #
+  #     Ractor.new{ raise "foo" }.join
+  #     #=> raise an exception "foo (RuntimeError)"
+  #
+  def join: () -> self
 
   # <!--
   #   rdoc-file=ractor.rb
@@ -438,6 +490,25 @@ class Ractor
   # The name set in Ractor.new, or `nil`.
   #
   def name: () -> String?
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.monitor(port) -> self
+  # -->
+  # Register port as a monitoring port. If the ractor terminated, the port
+  # received a Symbol object. :exited will be sent if the ractor terminated
+  # without an exception. :aborted will be sent if the ractor terminated with a
+  # exception.
+  #
+  #     r = Ractor.new{ some_task() }
+  #     r.monitor(port = Ractor::Port.new)
+  #     port.receive #=> :exited and r is terminated
+  #
+  #     r = Ractor.new{ raise "foo" }
+  #     r.monitor(port = Ractor::Port.new)
+  #     port.receive #=> :terminated and r is terminated with an exception "foo"
+  #
+  def monitor: [T < Symbol] (Port[T]) -> untyped
 
   # <!--
   #   rdoc-file=ractor.rb
@@ -453,6 +524,29 @@ class Ractor
   # -->
   #
   alias to_s inspect
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.unmonitor(port) -> self
+  # -->
+  # Unregister port from the monitoring ports.
+  #
+  def unmonitor: (Port[untyped]) -> self
+
+  # <!--
+  #   rdoc-file=ractor.rb
+  #   - ractor.value -> obj
+  # -->
+  # Waits for `ractor` to complete, using #join, and return its value or raise the
+  # exception which terminated the Ractor. The value will not be copied even if it
+  # is unshareable object. Therefore at most 1 Ractor can get a value.
+  #
+  #     r = Ractor.new{ [1, 2] }
+  #     r.value #=> [1, 2] (unshareable object)
+  #
+  #     Ractor.new(r){|r| r.value} #=> Ractor::Error
+  #
+  def value: () -> untyped
 
   private
 
@@ -619,6 +713,166 @@ class Ractor
     # -->
     #
     def method_missing: (*untyped) -> untyped
+  end
+
+  # <!-- rdoc-file=ractor.rb -->
+  # Port objects transmit messages between Ractors.
+  #
+  class Port[T = untyped]
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - <<(obj, move: false)
+    # -->
+    #
+    alias << send
+
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - port.close
+    # -->
+    # Close the port. On the closed port, sending is not prohibited. Receiving is
+    # also not allowed if there is no sent messages arrived before closing.
+    #
+    #     port = Ractor::Port.new
+    #     Ractor.new port do |port|
+    #       port.send 1 # OK
+    #       port.send 2 # OK
+    #       port.close
+    #       port.send 3 # raise Ractor::ClosedError
+    #     end
+    #
+    #     port.receive #=> 1
+    #     port.receive #=> 2
+    #     port.receive #=> raise Ractor::ClosedError
+    #
+    # Now, only a Ractor which creates the port is allowed to close ports.
+    #
+    #     port = Ractor::Port.new
+    #     Ractor.new port do |port|
+    #       port.close #=> closing port by other ractors is not allowed (Ractor::Error)
+    #     end.join
+    #
+    def close: () -> void
+
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - port.closed? -> true/false
+    # -->
+    # Return the port is closed or not.
+    #
+    def closed?: () -> bool
+
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - port.inspect -> string
+    # -->
+    #
+    def inspect: () -> String
+
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - port.receive -> msg
+    # -->
+    # Receive a message to the port (which was sent there by Port#send).
+    #
+    #     port = Ractor::Port.new
+    #     r = Ractor.new port do |port|
+    #       port.send('message1')
+    #     end
+    #
+    #     v1 = port.receive
+    #     puts "Received: #{v1}"
+    #     r.join
+    #     # Here will be printed: "Received: message1"
+    #
+    # The method blocks if the message queue is empty.
+    #
+    #     port = Ractor::Port.new
+    #     r = Ractor.new port do |port|
+    #       wait
+    #       puts "Still not received"
+    #       port.send('message1')
+    #       wait
+    #       puts "Still received only one"
+    #       port.send('message2')
+    #     end
+    #     puts "Before first receive"
+    #     v1 = port.receive
+    #     puts "Received: #{v1}"
+    #     v2 = port.receive
+    #     puts "Received: #{v2}"
+    #     r.join
+    #
+    # Output:
+    #
+    #     Before first receive
+    #     Still not received
+    #     Received: message1
+    #     Still received only one
+    #     Received: message2
+    #
+    # If close_incoming was called on the ractor, the method raises
+    # Ractor::ClosedError if there are no more messages in the message queue:
+    #
+    #     port = Ractor::Port.new
+    #     port.close
+    #     port.receive #=> raise Ractor::ClosedError
+    #
+    def receive: () -> T
+
+    # <!--
+    #   rdoc-file=ractor.rb
+    #   - port.send(msg, move: false) -> self
+    # -->
+    # Send a message to a port to be accepted by port.receive.
+    #
+    #     port = Ractor::Port.new
+    #     r = Ractor.new do
+    #       r.send 'message'
+    #     end
+    #     value = port.receive
+    #     puts "Received #{value}"
+    #     # Prints: "Received: message"
+    #
+    # The method is non-blocking (will return immediately even if the ractor is not
+    # ready to receive anything):
+    #
+    #     port = Ractor::Port.new
+    #     r = Ractor.new(port) do |port|
+    #       port.send 'test'}
+    #       puts "Sent successfully"
+    #       # Prints: "Sent successfully" immediately
+    #     end
+    #
+    # An attempt to send to a port which already closed its execution will raise
+    # Ractor::ClosedError.
+    #
+    #     r = Ractor.new {Ractor::Port.new}
+    #     r.join
+    #     p r
+    #     # "#<Ractor:#6 (irb):23 terminated>"
+    #     port = r.value
+    #     port.send('test') # raise Ractor::ClosedError
+    #
+    # If the `obj` is unshareable, by default it will be copied into the receiving
+    # ractor by deep cloning.
+    #
+    # If the object is shareable, it only send a reference to the object without
+    # cloning.
+    #
+    def send: (T obj, ?move: boolish) -> self
+
+    private
+
+    # <!--
+    #   rdoc-file=ractor_sync.c
+    #   - Ractor::Port.new  -> new_port
+    # -->
+    # Returns a new Ractor::Port object.
+    #
+    def initialize: () -> void
+
+    def initialize_copy: (untyped) -> untyped
   end
 
   # <!-- rdoc-file=ractor.c -->
