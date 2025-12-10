@@ -825,6 +825,11 @@ class OptionParser
   #
   attr_accessor program_name: String
 
+  # <!-- rdoc-file=lib/optparse.rb -->
+  # Whether to raise at unknown option.
+  #
+  attr_accessor raise_unknown: boolish
+
   # <!--
   #   rdoc-file=lib/optparse.rb
   #   - reject(*args, &blk)
