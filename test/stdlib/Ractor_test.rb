@@ -105,6 +105,13 @@ class RactorInstanceTest < Test::Unit::TestCase
 
   testing "::Ractor"
 
+  def test_default_port
+    assert_send_type(
+      "() -> ::Ractor::Port[untyped]",
+      Ractor.current, :default_port
+    )
+  end
+
   def test_inspect
     assert_send_type "() -> String",
                      Ractor.current, :inspect

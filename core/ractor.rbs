@@ -426,6 +426,14 @@ class Ractor
 
   # <!--
   #   rdoc-file=ractor.rb
+  #   - ractor.default_port -> port object
+  # -->
+  # return default port of the Ractor.
+  #
+  def default_port: () -> Port[untyped]
+
+  # <!--
+  #   rdoc-file=ractor.rb
   #   - inspect()
   # -->
   #
