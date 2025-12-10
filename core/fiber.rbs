@@ -414,8 +414,8 @@ class Fiber < Object
   #
   # See Kernel#raise for more information.
   #
-  def raise: (?string msg) -> untyped
-           | (_Exception, ?string msg, ?Array[string] | Array[Thread::Backtrace::Location] | nil backtrace) -> untyped
+  def raise: (?string msg, ?cause: Exception?) -> untyped
+           | (_Exception, ?string msg, ?Array[string] | Array[Thread::Backtrace::Location] | nil backtrace, ?cause: Exception?) -> untyped
 
   # <!--
   #   rdoc-file=cont.c

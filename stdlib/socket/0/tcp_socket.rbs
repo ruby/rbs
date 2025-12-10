@@ -82,5 +82,6 @@ class TCPSocket < IPSocket
   # :fast_fallback
   # :   Enables the Happy Eyeballs Version 2 algorithm (enabled by default).
   #
-  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> untyped
+  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port, ?fast_fallback: boolish, ?resolv_timeout: Integer, ?connect_timeout: Integer) -> void
+                | (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port, ?fast_fallback: boolish, ?open_timeout: Integer) -> void
 end
