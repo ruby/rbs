@@ -73,6 +73,18 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :recv
   end
 
+  def test_select
+    rs = [
+      Ractor.new { sleep 0.1 },
+      Ractor.new { sleep 0.1 }
+    ]
+
+    assert_send_type(
+      "(::Ractor, ::Ractor) -> ::Array[untyped]",
+      Ractor, :select, *rs
+    )
+  end
+
   def test_shareable?
     assert_send_type "(untyped) -> true",
                      Ractor, :shareable?, 42

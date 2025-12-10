@@ -363,7 +363,7 @@ class Ractor
   # -->
   # TBD
   #
-  def self.select: (?) -> untyped
+  def self.select: (?) -> Array[untyped]
 
   # <!--
   #   rdoc-file=ractor.rb
