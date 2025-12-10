@@ -346,6 +346,131 @@ module Open3
 
   # <!--
   #   rdoc-file=lib/open3.rb
+  #   - Open3.popen2([env, ] command_line, options = {}) -> [stdin, stdout, wait_thread]
+  #   - Open3.popen2([env, ] exe_path, *args, options = {}) -> [stdin, stdout, wait_thread]
+  #   - Open3.popen2([env, ] command_line, options = {}) {|stdin, stdout, wait_thread| ... } -> object
+  #   - Open3.popen2([env, ] exe_path, *args, options = {}) {|stdin, stdout, wait_thread| ... } -> object
+  # -->
+  # Basically a wrapper for [Process.spawn](rdoc-ref:Process.spawn) that:
+  #
+  # *   Creates a child process, by calling Process.spawn with the given
+  #     arguments.
+  # *   Creates streams `stdin` and `stdout`, which are the standard input and
+  #     standard output streams in the child process.
+  # *   Creates thread `wait_thread` that waits for the child process to exit; the
+  #     thread has method `pid`, which returns the process ID of the child
+  #     process.
+  #
+  # With no block given, returns the array `[stdin, stdout, wait_thread]`. The
+  # caller should close each of the two returned streams.
+  #
+  #     stdin, stdout, wait_thread = Open3.popen2('echo')
+  #     # => [#<IO:fd 6>, #<IO:fd 7>, #<Process::Waiter:0x00007f58d52dbe98 run>]
+  #     stdin.close
+  #     stdout.close
+  #     wait_thread.pid   # => 2263572
+  #     wait_thread.value # => #<Process::Status: pid 2263572 exit 0>
+  #
+  # With a block given, calls the block with the three variables (two streams and
+  # the wait thread) and returns the block's return value. The caller need not
+  # close the streams:
+  #
+  #     Open3.popen2('echo') do |stdin, stdout, wait_thread|
+  #       p stdin
+  #       p stdout
+  #       p wait_thread
+  #       p wait_thread.pid
+  #       p wait_thread.value
+  #     end
+  #
+  # Output:
+  #
+  #     #<IO:fd 6>
+  #     #<IO:fd 7>
+  #     #<Process::Waiter:0x00007f58d59a34b0 sleep>
+  #     2263636
+  #     #<Process::Status: pid 2263636 exit 0>
+  #
+  # Like Process.spawn, this method has potential security vulnerabilities if
+  # called with untrusted input; see [Command
+  # Injection](rdoc-ref:command_injection.rdoc@Command+Injection).
+  #
+  # Unlike Process.spawn, this method waits for the child process to exit before
+  # returning, so the caller need not do so.
+  #
+  # If the first argument is a hash, it becomes leading argument `env` in the call
+  # to Process.spawn; see [Execution
+  # Environment](rdoc-ref:Process@Execution+Environment).
+  #
+  # If the last argument is a hash, it becomes trailing argument `options` in the
+  # call to Process.spawn; see [Execution
+  # Options](rdoc-ref:Process@Execution+Options).
+  #
+  # The single required argument is one of the following:
+  #
+  # *   `command_line` if it is a string, and if it begins with a shell reserved
+  #     word or special built-in, or if it contains one or more metacharacters.
+  # *   `exe_path` otherwise.
+  #
+  # **Argument `command_line`**
+  #
+  # String argument `command_line` is a command line to be passed to a shell; it
+  # must begin with a shell reserved word, begin with a special built-in, or
+  # contain meta characters:
+  #
+  #     Open3.popen2('if true; then echo "Foo"; fi') {|*args| p args } # Shell reserved word.
+  #     Open3.popen2('echo') {|*args| p args }                         # Built-in.
+  #     Open3.popen2('date > date.tmp') {|*args| p args }              # Contains meta character.
+  #
+  # Output (similar for each call above):
+  #
+  #     # => [#<IO:(closed)>, #<IO:(closed)>, #<Process::Waiter:0x00007f7577dfe410 dead>]
+  #
+  # The command line may also contain arguments and options for the command:
+  #
+  #     Open3.popen2('echo "Foo"') { |i, o, t| o.gets }
+  #     "Foo\n"
+  #
+  # **Argument `exe_path`**
+  #
+  # Argument `exe_path` is one of the following:
+  #
+  # *   The string path to an executable to be called.
+  # *   A 2-element array containing the path to an executable and the string to
+  #     be used as the name of the executing process.
+  #
+  # Example:
+  #
+  #     Open3.popen2('/usr/bin/date') { |i, o, t| o.gets }
+  #     # => "Thu Sep 28 09:41:06 AM CDT 2023\n"
+  #
+  # Ruby invokes the executable directly, with no shell and no shell expansion:
+  #
+  #     Open3.popen2('doesnt_exist') { |i, o, t| o.gets } # Raises Errno::ENOENT
+  #
+  # If one or more `args` is given, each is an argument or option to be passed to
+  # the executable:
+  #
+  #     Open3.popen2('echo', 'C #') { |i, o, t| o.gets }
+  #     # => "C #\n"
+  #     Open3.popen2('echo', 'hello', 'world') { |i, o, t| o.gets }
+  #     # => "hello world\n"
+  #
+  # Related:
+  #
+  # *   Open3.popen2e: Makes the standard input and the merge of the standard
+  #     output and standard error streams of the child process available as
+  #     separate streams.
+  # *   Open3.popen3: Makes the standard input, standard output, and standard
+  #     error streams of the child process available as separate streams.
+  #
+  def self?.popen2: (*String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?close_others: bool, ?chdir: String) -> [IO, IO, Process::Waiter]
+                  | (env, *String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?close_others: bool, ?chdir: String) -> [IO, IO, Process::Waiter]
+                  | [T] (*String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?close_others: bool, ?chdir: String) { (IO, IO, Process::Waiter) -> T } -> T
+                  | [T] (env, *String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?close_others: bool, ?chdir: String) { (IO, IO, Process::Waiter) -> T } -> T
+
+  # <!--
+  #   rdoc-file=lib/open3.rb
   #   - Open3.popen3([env, ] command_line, options = {}) -> [stdin, stdout, stderr, wait_thread]
   #   - Open3.popen3([env, ] exe_path, *args, options = {}) -> [stdin, stdout, stderr, wait_thread]
   #   - Open3.popen3([env, ] command_line, options = {}) {|stdin, stdout, stderr, wait_thread| ... } -> object
