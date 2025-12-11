@@ -942,8 +942,7 @@ module Gem
   #   - source_date_epoch_string()
   # -->
   # If the SOURCE_DATE_EPOCH environment variable is set, returns it's value.
-  # Otherwise, returns the time that `Gem.source_date_epoch_string` was first
-  # called in the same format as SOURCE_DATE_EPOCH.
+  # Otherwise, returns DEFAULT_SOURCE_DATE_EPOCH as a string.
   #
   # NOTE(@duckinator): The implementation is a tad weird because we want to:
   #     1. Make builds reproducible by default, by having this function always

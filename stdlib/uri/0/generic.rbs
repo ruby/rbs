@@ -1009,6 +1009,7 @@ module URI
     #   rdoc-file=lib/uri/generic.rb
     #   - hash()
     # -->
+    # Returns the hash value.
     #
     def hash: () -> Integer
 
@@ -1016,6 +1017,7 @@ module URI
     #   rdoc-file=lib/uri/generic.rb
     #   - eql?(oth)
     # -->
+    # Compares with *oth* for Hash.
     #
     def eql?: (URI::Generic oth) -> bool
 
