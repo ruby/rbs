@@ -55,7 +55,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.10.2)
+    json (2.17.1)
     json-schema (6.0.0)
       addressable (~> 2.8)
       bigdecimal (~> 3.1)
@@ -201,7 +201,7 @@ DEPENDENCIES
   fileutils
   goodcheck
   irb
-  json (~> 2.10.2)
+  json
   json-schema
   memory_profiler
   minitest

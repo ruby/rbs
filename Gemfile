@@ -11,7 +11,7 @@ gem "rspec"
 gem "rubocop"
 gem "rubocop-rubycw"
 gem "rubocop-on-rbs"
-gem "json", "~> 2.10.2"
+gem "json"
 gem "json-schema"
 gem "goodcheck"
 gem 'digest'

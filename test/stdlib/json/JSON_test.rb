@@ -47,39 +47,12 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(String) -> String", JSON, :create_id=, "json_class"
   end
 
-  def test_deep_const_get
-    with_interned("File") do |val|
-      assert_send_type "(interned) -> singleton(File)", JSON, :deep_const_get, val
-    end
-  end
-
   def test_dump
     assert_send_type "(ToJson) -> String", JSON, :dump, ToJson.new
     assert_send_type "(ToJson, Integer) -> String", JSON, :dump, ToJson.new, 100
     assert_send_type "(ToJson, JsonToWritableIO) -> JsonWrite", JSON, :dump, ToJson.new, JsonToWritableIO.new
     assert_send_type "(ToJson, JsonWrite) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new
     assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new, 100
-  end
-
-  def test_dump_default_options
-    assert_send_type "() -> { max_nesting: false, allow_nan: true }", JSON, :dump_default_options
-  end
-
-  def test_dump_default_options_eq
-    assert_send_type "(max_nesting: false, allow_nan: true, allow_blank: true) -> { max_nesting: false, allow_nan: true, allow_blank: true }",
-                     JSON,
-                     :dump_default_options=,
-                     { max_nesting: false, allow_nan: true, allow_blank: true }
-  end
-
-  def test_fast_generate
-    assert_send_type "(ToJson) -> String", JSON, :fast_generate, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :fast_generate, ToJson.new, { indent: "\t" }
-  end
-
-  def test_fast_unparse
-    assert_send_type "(ToJson) -> String", JSON, :fast_unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :fast_unparse, ToJson.new, { indent: "\t" }
   end
 
   def test_generate
@@ -95,19 +68,13 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(singleton(JSON::Ext::Generator)) -> void", JSON, :generator=, JSON::Ext::Generator
   end
 
-  def test_iconv
-    assert_send_type "(Encoding, Encoding, String) -> String", JSON, :iconv, Encoding::UTF_8, Encoding::UTF_16, "".encode(Encoding::UTF_16)
-    assert_send_type "(String, String, String) -> String", JSON, :iconv, 'UTF-8', 'UTF-16', "".encode(Encoding::UTF_16)
-    assert_send_type "(_ToStr, _ToStr, String) -> String", JSON, :iconv, JsonToStr.new('UTF-8'), JsonToStr.new('UTF-16'), "".encode(Encoding::UTF_16)
-  end
-
   def test_load
     assert_send_type "(String) -> 42", JSON, :load, "42"
     assert_send_type "(_ToStr) -> 42", JSON, :load, JsonToStr.new("42")
     assert_send_type "(JsonToReadableIO) -> 42", JSON, :load, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", JSON, :load, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { }, { alllow_nan: true }
+    assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { |a| a }
+    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { |a| a }, { alllow_nan: true }
   end
 
   def test_load_file
@@ -128,14 +95,6 @@ class JSONSingletonTest < Test::Unit::TestCase
       assert_send_type "(String) -> untyped", JSON, :load_file!, f.path
       assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file!, f.path, { allow_nan: true }
     end
-  end
-
-  def test_load_default_options
-    assert_send_type "() -> Hash[untyped, untyped]", JSON, :load_default_options
-  end
-
-  def test_load_default_options_eq
-    assert_send_type "(allow_nan: true) -> Hash[untyped, untyped]", JSON, :load_default_options=, { allow_nan: true }
   end
 
   def test_parse
@@ -163,35 +122,12 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(ToJson, indent: String) -> String", JSON, :pretty_generate, ToJson.new, { indent: "\t" }
   end
 
-  def test_pretty_unparse
-    assert_send_type "(ToJson) -> String", JSON, :pretty_unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :pretty_unparse, ToJson.new, { indent: "\t" }
-  end
-
-  def test_recurse_proc
-    assert_send_type "(Integer) { (Integer) -> void } -> void", JSON, :recurse_proc, 42 do |_i| end
-  end
-
-  def test_restore
-    assert_send_type "(String) -> 42", JSON, :restore, "42"
-    assert_send_type "(_ToStr) -> 42", JSON, :restore, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", JSON, :restore, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", JSON, :restore, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", JSON, :restore, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :restore, "42", proc { }, { alllow_nan: true }
-  end
-
   def test_state
     assert_send_type "() -> singleton(JSON::Ext::Generator::State)", JSON, :state
   end
 
   def test_state_eq
     assert_send_type "(singleton(JSON::Ext::Generator::State)) -> singleton(JSON::Ext::Generator::State)", JSON, :state=, JSON::Ext::Generator::State
-  end
-
-  def test_unparse
-    assert_send_type "(ToJson) -> String", JSON, :unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", JSON, :unparse, ToJson.new, { indent: "\t" }
   end
 end
 
@@ -217,28 +153,9 @@ class JSONInstanceTest < Test::Unit::TestCase
     assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new, 100
   end
 
-  def test_fast_generate
-    assert_send_type "(ToJson) -> String", MyJSON.new, :fast_generate, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :fast_generate, ToJson.new, { indent: "\t" }
-  end
-
-  def test_fast_unparse
-    assert_send_type "(ToJson) -> String", MyJSON.new, :fast_unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :fast_unparse, ToJson.new, { indent: "\t" }
-  end
-
   def test_generate
     assert_send_type "(ToJson) -> String", MyJSON.new, :generate, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :generate, ToJson.new, { indent: "\t" }
-  end
-
-  def test_load
-    assert_send_type "(String) -> 42", MyJSON.new, :load, "42"
-    assert_send_type "(_ToStr) -> 42", MyJSON.new, :load, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :load, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", MyJSON.new, :load, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", MyJSON.new, :load, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", MyJSON.new, :load, "42", proc { }, { alllow_nan: true }
   end
 
   def test_parse
@@ -256,29 +173,6 @@ class JSONInstanceTest < Test::Unit::TestCase
   def test_pretty_generate
     assert_send_type "(ToJson) -> String", MyJSON.new, :pretty_generate, ToJson.new
     assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :pretty_generate, ToJson.new, { indent: "\t" }
-  end
-
-  def test_pretty_unparse
-    assert_send_type "(ToJson) -> String", MyJSON.new, :pretty_unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :pretty_unparse, ToJson.new, { indent: "\t" }
-  end
-
-  def test_recurse_proc
-    assert_send_type "(Integer) { (Integer) -> void } -> void", MyJSON.new, :recurse_proc, 42 do |_i| end
-  end
-
-  def test_restore
-    assert_send_type "(String) -> 42", MyJSON.new, :restore, "42"
-    assert_send_type "(_ToStr) -> 42", MyJSON.new, :restore, JsonToStr.new("42")
-    assert_send_type "(JsonToReadableIO) -> 42", MyJSON.new, :restore, JsonToReadableIO.new
-    assert_send_type "(JsonRead) -> 42", MyJSON.new, :restore, JsonRead.new
-    assert_send_type "(String, Proc) -> 42", MyJSON.new, :restore, "42", proc { }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", MyJSON.new, :restore, "42", proc { }, { alllow_nan: true }
-  end
-
-  def test_unparse
-    assert_send_type "(ToJson) -> String", MyJSON.new, :unparse, ToJson.new
-    assert_send_type "(ToJson, indent: String) -> String", MyJSON.new, :unparse, ToJson.new, { indent: "\t" }
   end
 
   def test_to_json_with_object

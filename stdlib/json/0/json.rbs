@@ -14,9 +14,6 @@ end
 class JSON::GeneratorError < JSON::JSONError
 end
 
-class JSON::UnparserError < JSON::GeneratorError
-end
-
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # This exception is raised if a parser error occurs.
 #
@@ -711,8 +708,6 @@ module JSON
   #
   def self.create_id=: (_ToS create_id) -> _ToS
 
-  def self.deep_const_get: (interned path) -> untyped
-
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
   #   - JSON.dump(obj, io = nil, limit = nil)
@@ -754,6 +749,7 @@ module JSON
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
+  %a{deprecated}
   def self.dump_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
@@ -761,6 +757,7 @@ module JSON
   #     opts = JSON.dump_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true}
   #
+  %a{deprecated}
   def self.dump_default_options=: (options) -> options
 
   # <!--
@@ -778,11 +775,8 @@ module JSON
   #     # Raises SystemStackError (stack level too deep):
   #     JSON.fast_generate(a)
   #
+  %a{deprecated}
   def self?.fast_generate: (_ToJson obj, ?options opts) -> String
-
-  alias self.fast_unparse self.fast_generate
-
-  alias fast_unparse fast_generate
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -829,14 +823,6 @@ module JSON
   def self.generator: () -> generator
 
   def self.generator=: (generator generator) -> void
-
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
-  #   - iconv(to, from, string)
-  # -->
-  # Encodes string using String.encode.
-  #
-  def self.iconv: (encoding to, encoding from, String string) -> String
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -974,7 +960,8 @@ module JSON
   #        #<Admin:0x00000000064c41f8
   #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
   #
-  def self?.load: (string | _ReadableIO | _Read source, ?Proc proc, ?options options) -> untyped
+  def self?.load: (string | _ReadableIO | _Read source, ?options options) -> untyped
+                | [T] (string | _ReadableIO | _Read source, ^(?) -> T, ?options options) -> T
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
@@ -1003,6 +990,7 @@ module JSON
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
+  %a{deprecated}
   def self.load_default_options: () -> options
 
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
@@ -1010,6 +998,7 @@ module JSON
   #     opts = JSON.load_default_options
   #     opts # => {:max_nesting=>false, :allow_nan=>true, :allow_blank=>true, :create_additions=>true}
   #
+  %a{deprecated}
   def self.load_default_options=: (options) -> options
 
   # <!--
@@ -1120,29 +1109,6 @@ module JSON
   #
   def self?.pretty_generate: (_ToJson obj, ?options opts) -> untyped
 
-  alias self.pretty_unparse self.pretty_generate
-
-  alias pretty_unparse pretty_generate
-
-  # Recursively calls passed *Proc* if the parsed data structure is an *Array* or
-  # *Hash*
-  #
-  def self?.recurse_proc: (untyped result) { (*untyped) -> void } -> void
-
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = nil)
-  # -->
-  #
-  alias self.restore self.load
-
-  # <!--
-  #   rdoc-file=ext/json/lib/json/common.rb
-  #   - restore(source, proc = nil, options = nil)
-  # -->
-  #
-  alias restore load
-
   # <!-- rdoc-file=ext/json/lib/json/common.rb -->
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
@@ -1152,10 +1118,6 @@ module JSON
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
   def self.state=: (state) -> state
-
-  alias self.unparse self.generate
-
-  alias unparse generate
 end
 
 JSON::FAST_STATE_PROTOTYPE: JSON::state
@@ -1193,6 +1155,7 @@ module Kernel
   # Outputs *objs* to STDOUT as JSON strings in the shortest form, that is in one
   # line.
   #
+  %a{deprecated}
   def j: (*_ToJson) -> nil
 
   # <!--
@@ -1202,6 +1165,7 @@ module Kernel
   # Outputs *objs* to STDOUT as JSON strings in a pretty format, with indentation
   # and over many lines.
   #
+  %a{deprecated}
   def jj: (*_ToJson) -> nil
 
   # <!--
