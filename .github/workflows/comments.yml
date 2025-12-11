@@ -11,7 +11,7 @@ jobs:
   comments:
     runs-on: "ubuntu-latest"
     env:
-      RUBY_COMMIT: v4_0_0_preview2
+      RUBY_COMMIT: v4.0.0-preview2
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
