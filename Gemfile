@@ -16,11 +16,12 @@ gem "json-schema"
 gem "goodcheck"
 gem 'digest'
 gem 'tempfile'
-gem "rdoc", "~> 6.16"
+gem "rdoc", "~> 6.16.0"
 gem "fileutils"
 gem "raap"
 gem "activesupport", "~> 7.0"
 gem "extconf_compile_commands_json"
+gem "irb"
 
 group :libs do
   # Libraries required for stdlib test
@@ -30,7 +31,6 @@ group :libs do
   gem "dbm"
   gem "mutex_m"
   gem "nkf"
-  gem "pathname"
 end
 
 group :profilers do

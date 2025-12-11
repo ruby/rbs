@@ -212,7 +212,14 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --exit-error-on-syntax-error"
+    args = ["-r", lib]
+
+    if lib == "rbs"
+      args << "-r"
+      args << "prism"
+    end
+
+    sh "#{ruby} #{rbs} #{args.join(' ')} validate --exit-error-on-syntax-error"
   end
 end
 

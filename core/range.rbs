@@ -936,8 +936,7 @@ class Range[out Elem] < Object
   #
   # Related: Range#count.
   #
-  def size: () -> Integer?
-          | () -> Float?
+  def size: () -> (Integer | Float | nil)
 
   # <!--
   #   rdoc-file=range.c

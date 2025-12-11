@@ -80,4 +80,4 @@ DEPENDENCIES
   steep (~> 1.10.pre)
 
 BUNDLED WITH
-   2.6.3
+   4.0.0.dev
