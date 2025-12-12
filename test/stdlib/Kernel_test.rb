@@ -11,73 +11,208 @@ class KernelSingletonTest < Test::Unit::TestCase
     assert_send_type "(nil) -> []",
                      Kernel, :Array, nil
 
-    with_array(1r, 2r).chain([ToA.new(1r,2r)]).each do |ary|
-      assert_send_type "(::array[Rational] | ::_ToA[Rational]) -> Array[Rational]",
-                       Kernel, :Array, ary
-    end
+    with_untyped do |ele|
+      with_array(ele, ele).and ToA.new(ele, ele) do |ary|
+        assert_send_type "[T] (array[T] | _ToA[T]) -> Array[T]",
+                         Kernel, :Array, ary
+      end
 
-    assert_send_type "(Rational) -> [Rational]",
-                     Kernel, :Array, 1r
+      next if defined?(ele.to_a) || defined?(ele.to_ary)
+      assert_send_type "[T] (T) -> [T]",
+                       Kernel, :Array, ele
+    end
   end
 
-  def test_Float
-    with_float 1.0 do |float|
-      assert_send_type "(::float) -> Float",
-                       Kernel, :Float, float
-      assert_send_type "(::float, exception: true) -> Float",
-                       Kernel, :Float, float, exception: true
-      assert_send_type "(::float, exception: bool) -> Float?",
-                       Kernel, :Float, float, exception: false
+  def test_Complex
+    # (_ToC complex_like, ?exception: true) -> Complex
+    assert_send_type "(_ToC) -> Complex",
+                     Kernel, :Complex, ToC.new
+    assert_send_type "(_ToC, exception: true) -> Complex",
+                     Kernel, :Complex, ToC.new, exception: true
+
+    # (_ToC complex_like, exception: bool) -> Complex?
+    assert_send_type "(_ToC, exception: bool) -> Complex",
+                     Kernel, :Complex, ToC.new, exception: false
+    assert_send_type "(_ToC, exception: bool) -> nil",
+                     Kernel, :Complex, Class.new(BlankSlate){ def to_c = fail }.new, exception: false
+
+    numeric = Class.new(Numeric).new
+
+    # (Numeric numeric, ?exception: bool) -> Complex
+    with 1, 1r, 1.0, (1+0i), numeric do |real|
+      assert_send_type "(Numeric) -> Complex",
+                       Kernel, :Complex, real
+
+      # Single `Numeric`s can never fail
+      with_bool do |exception|
+        assert_send_type "(Numeric, exception: bool) -> Complex",
+                         Kernel, :Complex, real, exception: exception
+      end
     end
 
-    assert_send_type "(untyped, ?exception: bool) -> Float?",
-                     Kernel, :Float, :hello, exception: false
+    # (String real_or_both, ?exception: true) -> Complex
+    assert_send_type "(String) -> Complex",
+                     Kernel, :Complex, '1'
+    assert_send_type "(String, exception: true) -> Complex",
+                     Kernel, :Complex, '1', exception: true
+
+    # (untyped real_or_both, exception: bool) -> Complex?
+    with_untyped.and 'oops' do |real_untype|
+      assert_send_type '(untyped, exception: bool) -> Complex?',
+                       Kernel, :Complex, real_untype, exception: false
+    end
+
+    with '1', 1, 1r, 1.0, (1+0i), numeric do |real|
+      with '2', 2, 2r, 2.0, (2+0i), numeric do |imag|
+        # (Numeric | String real, Numeric | String imag, ?exception: true) -> Complex
+        assert_send_type "(Numeric | String, Numeric | String) -> Complex",
+                         Kernel, :Complex, real, imag
+        assert_send_type "(Numeric | String, Numeric | String, exception: true) -> Complex",
+                         Kernel, :Complex, real, imag, exception: true
+
+        # Complex has an awkward edgecase where `exception: false` will unconditionally return `nil`
+        # if the imaginary argument is not one of the builtin `Numeric`s. Oddly enough, it's not for
+        # the `real` one...
+        case imag
+        when Integer, Float, Rational, Complex
+          # (Numeric | String real, Integer | Float | Rational | Complex imag, exception: bool) -> Complex
+          assert_send_type "(Numeric | String, Integer | Float | Rational | Complex, exception: bool) -> Complex",
+                           Kernel, :Complex, real, imag, exception: false
+        end
+      end
+
+      # (Numeric | String real, untyped, exception: bool) -> Complex?
+      with_untyped.and 'oops', numeric do |imag|
+        next if [Integer, Float, Rational, Complex].any? { _1 === imag }
+        assert_send_type "(Numeric | String, untyped, exception: bool) -> nil",
+                         Kernel, :Complex, real, imag, exception: false
+      end
+    end
+  end
+
+
+  def test_Float
+    with 1, 1.0, ToF.new(1.0), '1e3' do |float_like|
+      assert_send_type "(_ToF) -> Float",
+                       Kernel, :Float, float_like
+      assert_send_type "(_ToF, exception: true) -> Float",
+                       Kernel, :Float, float_like, exception: true
+      assert_send_type "(_ToF, exception: bool) -> Float",
+                       Kernel, :Float, float_like, exception: false
+    end
+
+    with_untyped do |untyped|
+      next if defined? untyped.to_f
+      assert_send_type "(untyped, exception: bool) -> nil",
+                       Kernel, :Float, untyped, exception: false
+    end
   end
 
   def test_Hash
-    assert_send_type "(nil) -> Hash[untyped, untyped]",
+    assert_send_type "[K, V] (nil) -> Hash[K, V]",
                      Kernel, :Hash, nil
-    assert_send_type "([]) -> Hash[untyped, untyped]",
+    assert_send_type "[K, V] ([]) -> Hash[K, V]",
                      Kernel, :Hash, []
 
     with_hash 'a' => 3 do |hash|
-      assert_send_type "(::hash[String, Integer]) -> Hash[String, Integer]",
+      assert_send_type "[K, V] (hash[K, V]) -> Hash[K, V]",
                        Kernel, :Hash, hash
     end
   end
 
   def test_Integer
-    with_int(1).chain([ToI.new(1)]).each do |int|
-      assert_send_type "(::int | ::_ToI) -> Integer",
+    with_int.and ToI.new do |int|
+      assert_send_type "(int | _ToI) -> Integer",
                        Kernel, :Integer, int
-      assert_send_type "(::int | ::_ToI, exception: true) -> Integer",
+      assert_send_type "(int | _ToI, exception: true) -> Integer",
                        Kernel, :Integer, int, exception: true
-      assert_send_type "(::int | ::_ToI, exception: bool) -> Integer?",
+      assert_send_type "(int | _ToI, exception: bool) -> Integer?",
                        Kernel, :Integer, int, exception: false
     end
 
     with_string "123" do |string|
       with_int 8 do |base|
-        assert_send_type "(::string, ::int) -> Integer",
+        assert_send_type "(string, int) -> Integer",
                          Kernel, :Integer, string, base
-        assert_send_type "(::string, ::int, exception: true) -> Integer",
+        assert_send_type "(string, int, exception: true) -> Integer",
                          Kernel, :Integer, string, base, exception: true
-        assert_send_type "(::string, ::int, exception: bool) -> Integer?",
+        assert_send_type "(string, int, exception: bool) -> Integer?",
                          Kernel, :Integer, string, base, exception: false
       end
     end
 
-    assert_send_type "(untyped, ?exception: bool) -> Integer?",
-                     Kernel, :Integer, :hello, exception: false
+    with_untyped do |untyped|
+      assert_send_type "(untyped, exception: bool) -> Integer?",
+                       Kernel, :Integer, untyped, exception: false
+
+      with_int 10 do |base|
+        assert_send_type "(untyped, int, exception: bool) -> Integer?",
+                         Kernel, :Integer, untyped, base, exception: false
+      end
+    end
+  end
+
+  def test_Rational
+    with_int(1).and ToR.new(1r) do |numer|
+      assert_send_type "(int | _ToR) -> Rational",
+                       Kernel, :Rational, numer
+      assert_send_type "(int | _ToR, exception: true) -> Rational",
+                       Kernel, :Rational, numer, exception: true
+      assert_send_type "(int | _ToR, exception: bool) -> Rational",
+                       Kernel, :Rational, numer, exception: false
+
+      with_int(2).and ToR.new(2r) do |denom|
+        assert_send_type "(int | _ToR, int | _ToR) -> Rational",
+                         Kernel, :Rational, numer, denom
+        assert_send_type "(int | _ToR, int | _ToR, exception: true) -> Rational",
+                         Kernel, :Rational, numer, denom, exception: true
+        assert_send_type "(int | _ToR, int | _ToR, exception: bool) -> Rational",
+                         Kernel, :Rational, numer, denom, exception: false
+      end
+    end
+
+    bad_int = Class.new(BlankSlate){ def to_int = fail }.new
+    bad_rat = Class.new(BlankSlate){ def to_r = fail }.new
+    with bad_int, bad_rat do |bad_numer|
+      assert_send_type "(int | _ToR, exception: bool) -> nil",
+                       Kernel, :Rational, bad_numer, exception: false
+      assert_send_type "(int | _ToR, int | _ToR, exception: bool) -> nil",
+                       Kernel, :Rational, bad_numer, bad_numer, exception: false
+    end
+
+
+    numeric = Class.new(Numeric).new
+    assert_send_type "[T < _Numeric] (T numer, 1) -> T",
+                     Kernel, :Rational, numeric, 1
+    assert_send_type "[T < _Numeric] (T numer, 1, exception: bool) -> T",
+                     Kernel, :Rational, numeric, 1, exception: true
+    assert_send_type "[T < _Numeric] (T numer, 1, exception: bool) -> T",
+                     Kernel, :Rational, numeric, 1, exception: false
+
+    numeric_div = Class.new(Numeric){ def /(other) = :hello }.new
+
+    assert_send_type "[T] (Numeric & Kernel::_RationalDiv[T] numer, Numeric denom) -> T",
+                     Kernel, :Rational, numeric_div, numeric
+    assert_send_type "[T] (Numeric & Kernel::_RationalDiv[T] numer, Numeric denom, exception: bool) -> T",
+                     Kernel, :Rational, numeric_div, numeric, exception: true
+    assert_send_type "[T] (Numeric & Kernel::_RationalDiv[T] numer, Numeric denom, exception: bool) -> T",
+                     Kernel, :Rational, numeric_div, numeric, exception: false
+
+    with_untyped do |numer|
+      with_untyped do |denom|
+        assert_send_type "(untyped, untyped, exception: bool) -> Rational?",
+                         Kernel, :Rational, numer, denom, exception: false
+      end
+    end
   end
 
   def test_String
     with_string do |string|
-      assert_send_type "(::string) -> String",
+      assert_send_type "(string) -> String",
                        Kernel, :String, string
     end
 
-    assert_send_type "(::_ToS) -> String",
+    assert_send_type "(_ToS) -> String",
                      Kernel, :String, ToS.new
   end
 
