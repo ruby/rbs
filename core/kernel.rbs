@@ -204,8 +204,9 @@ module Kernel : BasicObject
   # Optionally you can pass a range, which will return an array containing the
   # entries within the specified range.
   #
-  def self?.caller_locations: (?Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
-                            | (?::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
+  def self?.caller_locations: (Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
+                            | (::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
+                            | () -> ::Array[Thread::Backtrace::Location]
 
   # <!--
   #   rdoc-file=vm_eval.c
