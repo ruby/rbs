@@ -3,11 +3,17 @@ require_relative "test_helper"
 class ComparableTest < Test::Unit::TestCase
   include TestHelper
 
+  class ComparableWithZero
+    def initialize(value) = @value = value
+    def <(zero) = @value < zero
+    def >(zero) = @value > zero
+  end
+
   class Test
     include Comparable
 
     def <=>(other)
-      rand(2) - 1
+      ComparableWithZero.new rand(2) - 1
     end
   end
 
