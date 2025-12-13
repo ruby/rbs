@@ -28,7 +28,7 @@
 # *   `match_values_cleared?(scanner)`:
 #      Returns whether the scanner's [match
 #     values](rdoc-ref:StringScanner@Match+Values) are cleared.
-# See examples [[here]](ext/strscan/helper_methods_md.html).
+# See examples at [helper methods](doc/strscan/helper_methods.md).
 # ## The `StringScanner` Object
 # This code creates a `StringScanner` object
 # (we'll call it simply a *scanner*),
@@ -85,10 +85,10 @@
 # and a zero-based *character position*.
 # Each of these methods explicitly sets positions:
 #          Method         |                         Effect
-# ------------------------|--------------------------------------------------------
-#          #reset         |Sets both positions to zero (begining of stored string).
+# ------------------------|---------------------------------------------------------
+#          #reset         |Sets both positions to zero (beginning of stored string).
 #        #terminate       |  Sets both positions to the end of the stored string.
-# #pos=(new_byte_position)|    Sets byte position; adjusts character position.
+# #pos=(new_byte_position)|     Sets byte position; adjusts character position.
 # ### Byte Position (Position)
 # The byte position (or simply *position*)
 # is a zero-based index into the bytes in the scanner's stored string;
@@ -159,7 +159,7 @@
 # #   rest_size: 12
 #
 # ## Target Substring
-# The target substring is the the part of the [stored
+# The target substring is the part of the [stored
 # string](rdoc-ref:StringScanner@Stored+String)
 # that extends from the current [byte
 # position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) to the end of

@@ -31,9 +31,11 @@ module RBS
       #     prng.rand(100)       # => 42
       #
       # When `max` is a Float, `rand` returns a random floating point number between
-      # 0.0 and `max`, including 0.0 and excluding `max`.
+      # 0.0 and `max`, including 0.0 and excluding `max`. Note that it behaves
+      # differently from Kernel.rand.
       #
-      #     prng.rand(1.5)       # => 1.4600282860034115
+      #     prng.rand(1.5)  # => 1.4600282860034115
+      #     rand(1.5)       # => 0
       #
       # When `range` is a Range, `rand` returns a random number where
       # `range.member?(number) == true`.

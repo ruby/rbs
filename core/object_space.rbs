@@ -29,6 +29,7 @@ module ObjectSpace
   #   - _id2ref(p1)
   # -->
   #
+  %a{deprecated}
   def self._id2ref: (Integer id) -> untyped
 
   # <!--
@@ -158,6 +159,18 @@ module ObjectSpace
   #     1.7976931348623157e+308
   #     2.2250738585072e-308
   #     Total count: 7
+  #
+  # Due to a current known Ractor implementation issue, this method will not yield
+  # Ractor-unshareable objects in multi-Ractor mode (when `Ractor.new` has been
+  # called within the process at least once). See
+  # https://bugs.ruby-lang.org/issues/19387 for more information.
+  #
+  #     a = 12345678987654321 # shareable
+  #     b = [].freeze # shareable
+  #     c = {} # not shareable
+  #     ObjectSpace.each_object {|x| x } # yields a, b, and c
+  #     Ractor.new {} # enter multi-Ractor mode
+  #     ObjectSpace.each_object {|x| x } # does not yield c
   #
   def self.each_object: (?Module `module`) -> Enumerator[untyped, Integer]
                       | (?Module `module`) { (untyped obj) -> void } -> Integer

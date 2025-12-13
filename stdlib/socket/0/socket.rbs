@@ -488,6 +488,13 @@ class Socket < BasicSocket
   #     a timeout is set for each connection attempt and any connection attempt
   #     that exceeds its timeout will be canceled.
   #
+  # :open_timeout
+  # :   Specifies the timeout in seconds from the start of the method execution.
+  #     If this timeout is reached while there are still addresses that have not
+  #     yet been attempted for connection, no further attempts will be made.
+  #     If this option is specified together with other timeout options, an
+  #     `ArgumentError` will be raised.
+  #
   # :fast_fallback
   # :   Enables the Happy Eyeballs Version 2 algorithm (enabled by default).
   #
@@ -504,7 +511,9 @@ class Socket < BasicSocket
   #     }
   #
   def self.tcp: (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) -> instance
-              | (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) { (instance) -> void } -> void
+              | (String host, Integer port, ?String local_host, ?Integer local_port, ?open_timeout: Time::_Timeout) -> instance
+              | [T] (String host, Integer port, ?String local_host, ?Integer local_port, ?resolv_timeout: Time::_Timeout, ?connect_timeout: Time::_Timeout) { (instance) -> T } -> T
+              | [T] (String host, Integer port, ?String local_host, ?Integer local_port, ?open_timeout: Time::_Timeout) { (instance) -> T } -> T
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -3768,6 +3777,9 @@ class Socket::Ifaddr
   #   - ifaddr.flags => integer
   # -->
   # Returns the flags of *ifaddr*.
+  #
+  # The value is bitwise-or of Socket::IFF_* constants such as
+  # Socket::IFF_LOOPBACK.
   #
   def flags: () -> Integer
 

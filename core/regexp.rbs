@@ -126,6 +126,9 @@
 #     `nil`. Note that `$0` is quite different; it returns the name of the
 #     currently executing program.
 #
+# These variables, except for `$~`, are shorthands for methods of `$~`.  See
+# MatchData@Global+variables+equivalence.
+#
 # Examples:
 #
 #     # Matched string, but no matched groups.
@@ -435,6 +438,9 @@
 #     /(?<=<b>)\w+(?=<\/b>)/.match("Fortune favors the <b>bold</b>.")
 #     # => #<MatchData "bold">
 #
+# The pattern in lookbehind must be fixed-width. But top-level alternatives can
+# be of various lengths. ex. (?<=a|bc) is OK. (?<=aaa(?:b|cd)) is not allowed.
+#
 # #### Match-Reset Anchor
 #
 # *   `\K`: Match reset: the matched content preceding `\K` in the regexp is
@@ -495,7 +501,7 @@
 #         /\w*/.match('x')
 #         # => #<MatchData "x">
 #         /\w*/.match('xyz')
-#         # => #<MatchData "yz">
+#         # => #<MatchData "xyz">
 #
 # *   `+` - Matches one or more times:
 #
@@ -708,7 +714,7 @@
 #
 # 1.  The leading subexpression `"` in the pattern matches the first character
 #     `"` in the target string.
-# 2.  The next subexpression `.*` matches the next substring `Quote“` (including
+# 2.  The next subexpression `.*` matches the next substring `Quote"` (including
 #     the trailing double-quote).
 # 3.  Now there is nothing left in the target string to match the trailing
 #     subexpression `"` in the pattern; this would cause the overall match to
@@ -1248,7 +1254,7 @@
 #
 # Regexp matching can apply an optimization to prevent ReDoS attacks. When the
 # optimization is applied, matching time increases linearly (not polynomially or
-# exponentially) in relation to the input size, and a ReDoS attach is not
+# exponentially) in relation to the input size, and a ReDoS attack is not
 # possible.
 #
 # This optimization is applied if the pattern meets these criteria:
@@ -1272,21 +1278,14 @@
 #
 # ## References
 #
-# Read (online PDF books):
+# Read:
 #
-# *   [Mastering Regular
-#     Expressions](https://ia902508.us.archive.org/10/items/allitebooks-02/Maste
-#     ring%20Regular%20Expressions%2C%203rd%20Edition.pdf) by Jeffrey E.F.
-#     Friedl.
-# *   [Regular Expressions
-#     Cookbook](https://doc.lagout.org/programmation/Regular%20Expressions/Regul
-#     ar%20Expressions%20Cookbook_%20Detailed%20Solutions%20in%20Eight%20Program
-#     ming%20Languages%20%282nd%20ed.%29%20%5BGoyvaerts%20%26%20Levithan%202012-
-#     09-06%5D.pdf) by Jan Goyvaerts & Steven Levithan.
+# *   *Mastering Regular Expressions* by Jeffrey E.F. Friedl.
+# *   *Regular Expressions Cookbook* by Jan Goyvaerts & Steven Levithan.
 #
-# Explore, test (interactive online editor):
+# Explore, test:
 #
-# *   [Rubular](https://rubular.com/).
+# *   [Rubular](https://rubular.com/): interactive online editor.
 #
 class Regexp
   # Represents an object's ability to be converted to a `Regexp`.
@@ -1297,6 +1296,9 @@ class Regexp
     def to_regexp: () -> Regexp
   end
 
+  # <!-- rdoc-file=re.c -->
+  # Raised when regexp matching timed out.
+  #
   class TimeoutError < RegexpError
   end
 
@@ -1658,9 +1660,12 @@ class Regexp
 
   # <!--
   #   rdoc-file=re.c
-  #   - obj.encoding   -> encoding
+  #   - encoding -> encoding
   # -->
-  # Returns the Encoding object that represents the encoding of obj.
+  # Returns an Encoding object that represents the encoding of `self`; see
+  # [Encodings](rdoc-ref:encodings.rdoc).
+  #
+  # Related: see [Querying](rdoc-ref:String@Querying).
   #
   def encoding: () -> Encoding
 

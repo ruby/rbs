@@ -38,7 +38,7 @@ class TCPSocket < IPSocket
 
   # <!--
   #   rdoc-file=ext/socket/tcpsocket.c
-  #   - TCPSocket.new(remote_host, remote_port, local_host=nil, local_port=nil, resolv_timeout: nil, connect_timeout: nil, fast_fallback: true)
+  #   - TCPSocket.new(remote_host, remote_port, local_host=nil, local_port=nil, resolv_timeout: nil, connect_timeout: nil, open_timeout: nil, fast_fallback: true)
   # -->
   # Opens a TCP connection to `remote_host` on `remote_port`.  If `local_host` and
   # `local_port` are specified, then those parameters are used on the local end to
@@ -72,8 +72,16 @@ class TCPSocket < IPSocket
   #     a timeout is set for each connection attempt and any connection attempt
   #     that exceeds its timeout will be canceled.
   #
+  # :open_timeout
+  # :   Specifies the timeout in seconds from the start of the method execution.
+  #     If this timeout is reached while there are still addresses that have not
+  #     yet been attempted for connection, no further attempts will be made.
+  #     If this option is specified together with other timeout options, an
+  #     `ArgumentError` will be raised.
+  #
   # :fast_fallback
   # :   Enables the Happy Eyeballs Version 2 algorithm (enabled by default).
   #
-  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port) -> untyped
+  def initialize: (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port, ?fast_fallback: boolish, ?resolv_timeout: Integer, ?connect_timeout: Integer) -> void
+                | (String remote_host, Integer remote_port, ?String local_host, ?Integer local_port, ?fast_fallback: boolish, ?open_timeout: Integer) -> void
 end

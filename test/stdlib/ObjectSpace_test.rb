@@ -7,11 +7,6 @@ class ObjectSpaceTest < Test::Unit::TestCase
   library "objspace"
   testing "singleton(::ObjectSpace)"
 
-  def test__id2ref
-    assert_send_type "(Integer) -> top",
-                     ObjectSpace, :_id2ref, 198
-  end
-
   def test_count_objects
     assert_send_type "() -> Hash[Symbol, Integer]",
                      ObjectSpace, :count_objects

@@ -38,6 +38,14 @@
 #     Errno::ENOENT::Errno      # => 2
 #     Errno::ENOTCAPABLE::Errno # => 0
 #
+# Each class in Errno can be created with optional messages:
+#
+#     Errno::EPIPE.new                  # => #<Errno::EPIPE: Broken pipe>
+#     Errno::EPIPE.new("foo")           # => #<Errno::EPIPE: Broken pipe - foo>
+#     Errno::EPIPE.new("foo", "here")   # => #<Errno::EPIPE: Broken pipe @ here - foo>
+#
+# See SystemCallError.new.
+#
 module Errno
   class NOERROR < SystemCallError
     Errno: 0

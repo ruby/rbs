@@ -1,5 +1,5 @@
 # <!-- rdoc-file=proc.c -->
-# Ruby supports two forms of objectified methods. Class Method is used to
+# Ruby supports two forms of objectified methods. Class `Method` is used to
 # represent methods that are associated with a particular object: these method
 # objects are bound to that object. Bound method objects for an object can be
 # created using Object#method.
@@ -287,10 +287,18 @@ class UnboundMethod
 
   # <!--
   #   rdoc-file=proc.c
-  #   - meth.source_location  -> [String, Integer]
+  #   - meth.source_location  -> [String, Integer, Integer, Integer, Integer]
   # -->
-  # Returns the Ruby source filename and line number containing this method or nil
-  # if this method was not defined in Ruby (i.e. native).
+  # Returns the location where the method was defined. The returned Array
+  # contains:
+  #     (1) the Ruby source filename
+  #     (2) the line number where the definition starts
+  #     (3) the column number where the definition starts
+  #     (4) the line number where the definition ends
+  #     (5) the column number where the definitions ends
+  #
+  # This method will return `nil` if the method was not defined in Ruby (i.e.
+  # native).
   #
   def source_location: () -> [String, Integer]?
 
@@ -298,8 +306,8 @@ class UnboundMethod
   #   rdoc-file=proc.c
   #   - meth.super_method  -> method
   # -->
-  # Returns a Method of superclass which would be called when super is used or nil
-  # if there is no method on superclass.
+  # Returns a `Method` of superclass which would be called when super is used or
+  # nil if there is no method on superclass.
   #
   def super_method: () -> UnboundMethod?
 

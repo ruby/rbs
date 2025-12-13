@@ -93,7 +93,7 @@ module RBS
     # *   File `t.rb`:
     #
     #         p "ARGV: #{ARGV}"
-    #         p "Line: #{ARGF.read}" # Read everything from all specified streams.
+    #         p "Read: #{ARGF.read}" # Read everything from all specified streams.
     #
     # *   Command and output:
     #
