@@ -288,6 +288,19 @@ module RBS
                   values << args
                   nil
                 end
+              when nil
+                values = []
+                count = 10_000
+
+                ret = val.each do |*args|
+                  count -= 1
+                  values << args
+                  break if count <= 0
+                end
+
+                if count == 0
+                  ret = self
+                end
               else
                 values = []
                 ret = val.each do |*args|
