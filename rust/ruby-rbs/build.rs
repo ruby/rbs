@@ -11,6 +11,8 @@ struct NodeField {
     name: String,
     c_type: String,
     c_name: Option<String>,
+    #[serde(default)]
+    optional: bool,
 }
 
 impl NodeField {
@@ -107,6 +109,42 @@ fn convert_name(name: &str, identifier: CIdentifier) -> String {
         out.push_str("_t");
     }
     out
+}
+
+fn write_node_field_accessor(
+    file: &mut File,
+    field: &NodeField,
+    rust_type: &str,
+) -> std::io::Result<()> {
+    if field.optional {
+        writeln!(
+            file,
+            "    pub fn {}(&self) -> Option<{}> {{",
+            field.name, rust_type
+        )?;
+        writeln!(
+            file,
+            "        let ptr = unsafe {{ (*self.pointer).{} }};",
+            field.c_name()
+        )?;
+        writeln!(file, "        if ptr.is_null() {{")?;
+        writeln!(file, "            None")?;
+        writeln!(file, "        }} else {{")?;
+        writeln!(
+            file,
+            "            Some({rust_type} {{ parser: self.parser, pointer: ptr }})"
+        )?;
+        writeln!(file, "        }}")?;
+    } else {
+        writeln!(file, "    pub fn {}(&self) -> {} {{", field.name, rust_type)?;
+        writeln!(
+            file,
+            "        {} {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+            rust_type,
+            field.c_name()
+        )?;
+    }
+    writeln!(file, "    }}")
 }
 
 fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std::error::Error>> {
@@ -206,75 +244,23 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         writeln!(file, "    }}")?;
                     }
                     "rbs_ast_comment" => {
-                        writeln!(file, "    pub fn {}(&self) -> CommentNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        CommentNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "CommentNode")?
                     }
                     "rbs_ast_declarations_class_super" => {
-                        writeln!(
-                            file,
-                            "    pub fn {}(&self) -> ClassSuperNode {{",
-                            field.name
-                        )?;
-                        writeln!(
-                            file,
-                            "        ClassSuperNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "ClassSuperNode")?
                     }
-                    "rbs_ast_symbol" => {
-                        writeln!(file, "    pub fn {}(&self) -> SymbolNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        SymbolNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
-                    }
+                    "rbs_ast_symbol" => write_node_field_accessor(&mut file, field, "SymbolNode")?,
                     "rbs_hash" => {
-                        writeln!(file, "    pub fn {}(&self) -> RBSHash {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        RBSHash::new(self.parser, unsafe {{ (*self.pointer).{} }})",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "RBSHash")?;
                     }
                     "rbs_location" => {
-                        writeln!(file, "    pub fn {}(&self) -> RBSLocation {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        RBSLocation::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "RBSLocation")?;
                     }
                     "rbs_location_list" => {
-                        writeln!(
-                            file,
-                            "    pub fn {}(&self) -> RBSLocationList {{",
-                            field.name
-                        )?;
-                        writeln!(
-                            file,
-                            "        RBSLocationList::new(unsafe {{ (*self.pointer).{} }}, self.parser)",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "RBSLocationList")?;
                     }
                     "rbs_namespace" => {
-                        writeln!(file, "    pub fn {}(&self) -> NamespaceNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        NamespaceNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "NamespaceNode")?;
                     }
                     "rbs_node" => {
                         let name = if field.name == "type" {
@@ -282,52 +268,38 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         } else {
                             field.name.as_str()
                         };
-
-                        writeln!(file, "    pub fn {}(&self) -> Node {{", name)?;
-                        writeln!(
-                            file,
-                            "        unsafe {{ Node::new(self.parser, (*self.pointer).{}) }}",
-                            field.c_name()
-                        )?;
+                        if field.optional {
+                            writeln!(file, "    pub fn {name}(&self) -> Option<Node> {{")?;
+                            writeln!(
+                                file,
+                                "        let ptr = unsafe {{ (*self.pointer).{} }};",
+                                field.c_name()
+                            )?;
+                            writeln!(
+                                file,
+                                "        if ptr.is_null() {{ None }} else {{ Some(Node::new(self.parser, ptr)) }}"
+                            )?;
+                        } else {
+                            writeln!(file, "    pub fn {name}(&self) -> Node {{")?;
+                            writeln!(
+                                file,
+                                "        unsafe {{ Node::new(self.parser, (*self.pointer).{}) }}",
+                                field.c_name()
+                            )?;
+                        }
                         writeln!(file, "    }}")?;
                     }
                     "rbs_node_list" => {
-                        writeln!(file, "    pub fn {}(&self) -> NodeList {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        NodeList::new(self.parser, unsafe {{ (*self.pointer).{} }})",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "NodeList")?;
                     }
-                    "rbs_keyword" => {
-                        writeln!(file, "    pub fn {}(&self) -> KeywordNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        KeywordNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
-                    }
+                    "rbs_keyword" => write_node_field_accessor(&mut file, field, "KeywordNode")?,
                     "rbs_type_name" => {
-                        writeln!(file, "    pub fn {}(&self) -> TypeNameNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        TypeNameNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "TypeNameNode")?;
                     }
                     "rbs_types_block" => {
-                        writeln!(file, "    pub fn {}(&self) -> BlockTypeNode {{", field.name)?;
-                        writeln!(
-                            file,
-                            "        BlockTypeNode {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-                            field.c_name()
-                        )?;
-                        writeln!(file, "    }}")?;
+                        write_node_field_accessor(&mut file, field, "BlockTypeNode")?
                     }
-                    _ => eprintln!("Unknown field type: {}", field.c_type),
+                    _ => panic!("Unknown field type: {}", field.c_type),
                 }
             }
         }
@@ -351,7 +323,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file, "    #[allow(clippy::missing_safety_doc)]")?;
     writeln!(
         file,
-        "    pub unsafe fn new(parser: *mut rbs_parser_t, node: *mut rbs_node_t) -> Self {{"
+        "    fn new(parser: *mut rbs_parser_t, node: *mut rbs_node_t) -> Self {{"
     )?;
     writeln!(file, "        match unsafe {{ (*node).type_ }} {{")?;
     for node in &config.nodes {

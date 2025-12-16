@@ -64,7 +64,7 @@ impl Iterator for NodeListIter {
             None
         } else {
             let pointer_data = unsafe { *self.current };
-            let node = unsafe { Node::new(self.parser, pointer_data.node) };
+            let node = Node::new(self.parser, pointer_data.node);
             self.current = pointer_data.next;
             Some(node)
         }
@@ -124,8 +124,8 @@ impl Iterator for RBSHashIter {
             None
         } else {
             let pointer_data = unsafe { *self.current };
-            let key = unsafe { Node::new(self.parser, pointer_data.key) };
-            let value = unsafe { Node::new(self.parser, pointer_data.value) };
+            let key = Node::new(self.parser, pointer_data.key);
+            let value = Node::new(self.parser, pointer_data.value);
             self.current = pointer_data.next;
             Some((key, value))
         }
