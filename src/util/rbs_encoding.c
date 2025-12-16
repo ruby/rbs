@@ -3,12 +3,6 @@
 
 #include <ctype.h>
 
-#if defined(__GNUC__)
-#define RBS_ATTRIBUTE_UNUSED __attribute__((unused))
-#else
-#define RBS_ATTRIBUTE_UNUSED
-#endif
-
 typedef uint32_t rbs_unicode_codepoint_t;
 
 #define UNICODE_ALPHA_CODEPOINTS_LENGTH 1450
@@ -5001,7 +4995,7 @@ static const uint8_t rbs_utf_8_dfa[] = {
  */
 static rbs_unicode_codepoint_t
 rbs_utf_8_codepoint(const uint8_t *b, ptrdiff_t n, size_t *width) {
-    rbs_assert(n >= 0, "[rbs_unicode_codepoint_t] n must be greater than or equal to 0. Got %ti", n);
+    RBS_ASSERT(n >= 0, "[rbs_unicode_codepoint_t] n must be greater than or equal to 0. Got %ti", n);
 
     size_t maximum = (n > 4) ? 4 : ((size_t) n);
     uint32_t codepoint;
@@ -5031,7 +5025,7 @@ rbs_utf_8_codepoint(const uint8_t *b, ptrdiff_t n, size_t *width) {
  */
 size_t
 rbs_encoding_utf_8_char_width(const uint8_t *b, ptrdiff_t n) {
-    rbs_assert(n >= 0, "[rbs_encoding_utf_8_char_width] n must be greater than or equal to 0. Got %ti", n);
+    RBS_ASSERT(n >= 0, "[rbs_encoding_utf_8_char_width] n must be greater than or equal to 0. Got %ti", n);
 
     size_t maximum = (n > 4) ? 4 : ((size_t) n);
     uint32_t state = 0;

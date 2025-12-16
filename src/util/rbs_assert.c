@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-void rbs_assert(bool condition, const char *fmt, ...) {
+void rbs_assert_impl(bool condition, const char *fmt, ...) {
+    printf("RBS_ASSERT called\n");
+
     if (condition) {
         return;
     }
