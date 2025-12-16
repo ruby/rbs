@@ -44,7 +44,7 @@ class Delegator < BasicObject
   #   rdoc-file=lib/delegate.rb
   #   - !()
   # -->
-  # Delegates ! to the _*getobj*_
+  # Delegates ! to the `__getobj__`
   #
   def !: () -> untyped
 
@@ -94,7 +94,7 @@ class Delegator < BasicObject
   #   rdoc-file=lib/delegate.rb
   #   - freeze()
   # -->
-  # :method: freeze Freeze both the object returned by _*getobj*_ and self.
+  # :method: freeze Freeze both the object returned by `__getobj__` and self.
   #
   def freeze: () -> self
 
@@ -102,7 +102,7 @@ class Delegator < BasicObject
   #   rdoc-file=lib/delegate.rb
   #   - marshal_dump()
   # -->
-  # Serialization support for the object returned by _*getobj*_.
+  # Serialization support for the object returned by `__getobj__`.
   #
   def marshal_dump: () -> untyped
 
@@ -126,7 +126,7 @@ class Delegator < BasicObject
   #   - methods(all=true)
   # -->
   # Returns the methods available to this delegate object as the union of this
-  # object's and _*getobj*_ methods.
+  # object's and `__getobj__` methods.
   #
   def methods: (?boolish all) -> Array[Symbol]
 
@@ -135,7 +135,7 @@ class Delegator < BasicObject
   #   - protected_methods(all=true)
   # -->
   # Returns the methods available to this delegate object as the union of this
-  # object's and _*getobj*_ protected methods.
+  # object's and `__getobj__` protected methods.
   #
   def protected_methods: (?boolish all) -> Array[Symbol]
 
@@ -144,7 +144,7 @@ class Delegator < BasicObject
   #   - public_methods(all=true)
   # -->
   # Returns the methods available to this delegate object as the union of this
-  # object's and _*getobj*_ public methods.
+  # object's and `__getobj__` public methods.
   #
   def public_methods: (?untyped all) -> Array[Symbol]
 
@@ -168,7 +168,7 @@ class Delegator < BasicObject
   #   - respond_to_missing?(m, include_private)
   # -->
   # Checks for a method provided by this the delegate object by forwarding the
-  # call through _*getobj*_.
+  # call through `__getobj__`.
   #
   def respond_to_missing?: (Symbol m, bool include_private) -> bool
 
@@ -180,5 +180,8 @@ class Delegator < BasicObject
   #
   def target_respond_to?: (untyped target, Symbol m, bool include_private) -> bool
 
+  # <!-- rdoc-file=lib/delegate.rb -->
+  # The version string
+  #
   VERSION: String
 end

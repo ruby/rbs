@@ -80,7 +80,7 @@
 # *   #print: Prints the given objects to standard output without a newline.
 # *   #printf: Prints the string resulting from applying the given format string
 #     to any additional arguments.
-# *   #putc: Equivalent to <tt.$stdout.putc(object)</tt> for the given object.
+# *   #putc: Equivalent to `$stdout.putc(object)` for the given object.
 # *   #puts: Equivalent to `$stdout.puts(*objects)` for the given objects.
 # *   #readline: Similar to #gets, but raises an exception at the end of file.
 # *   #readlines: Returns an array of the remaining lines from the current
@@ -725,7 +725,7 @@ module Kernel : BasicObject
   #     $ `date`                 # => "Wed Apr  9 08:56:30 CDT 2003\n"
   #     $ `echo oops && exit 99` # => "oops\n"
   #     $ $?                     # => #<Process::Status: pid 17088 exit 99>
-  #     $ $?.status              # => 99>
+  #     $ $?.exitstatus          # => 99
   #
   # The built-in syntax `%x{...}` uses this method.
   #
@@ -776,6 +776,8 @@ module Kernel : BasicObject
   #
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
+  #
+  # Files that are currently being loaded must not be registered for autoload.
   #
   def self?.autoload: (interned _module, String filename) -> NilClass
 
@@ -1218,6 +1220,7 @@ module Kernel : BasicObject
   #     loop do
   #       print "Input: "
   #       line = gets
+  #       # break if q, Q is entered or EOF signal (Ctrl-D on Unix, Ctrl-Z on windows) is sent
   #       break if !line or line =~ /^q/i
   #       # ...
   #     end
@@ -1463,7 +1466,9 @@ module Kernel : BasicObject
   # Kernel.srand may be used to ensure that sequences of random numbers are
   # reproducible between different runs of a program.
   #
-  # See also Random.rand.
+  # Related: Random.rand.
+  #     rand(100.0)        # => 64 (Integer because max.to_i is 100)
+  #     Random.rand(100.0) # => 30.315320967824523
   #
   def self?.rand: (?0) -> Float
                 | (int arg0) -> Integer
@@ -1585,7 +1590,8 @@ module Kernel : BasicObject
   # IO objects.
   #
   # Argument `timeout` is a numeric value (such as integer or float) timeout
-  # interval in seconds.
+  # interval in seconds. `timeout` can also be `nil` or `Float::INFINITY`. `nil`
+  # and `Float::INFINITY` means no timeout.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:

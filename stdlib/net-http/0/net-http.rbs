@@ -4047,6 +4047,9 @@ module Net
     alias entity body
   end
 
+  # <!-- rdoc-file=lib/net/http/responses.rb -->
+  # Unknown HTTP response
+  #
   class HTTPUnknownResponse < HTTPResponse
     HAS_BODY: bool
 

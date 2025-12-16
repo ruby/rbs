@@ -1094,7 +1094,7 @@ Float::MAX_EXP: Integer
 # Usually defaults to 2.2250738585072014e-308.
 #
 # If the platform supports denormalized numbers, there are numbers between zero
-# and Float::MIN. 0.0.next_float returns the smallest positive floating point
+# and Float::MIN. `0.0.next_float` returns the smallest positive floating point
 # number including denormalized numbers.
 #
 Float::MIN: Float
