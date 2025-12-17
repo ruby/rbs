@@ -141,6 +141,26 @@ module BigMath
   #
   def self?.cosh: (BigDecimal, Numeric) -> BigDecimal
 
+  # Computes the error function of +decimal+ to the specified number of digits of
+  # precision, +numeric+.
+  #
+  # If +decimal+ is NaN, returns NaN.
+  #
+  #   BigMath.erf(BigDecimal('1'), 32).to_s
+  #   #=> "0.84270079294971486934122063508261e0"
+  #
+  def self?.erf: (BigDecimal, Numeric) -> BigDecimal
+
+  # Computes the complementary error function of +decimal+ to the specified number of digits of
+  # precision, +numeric+.
+  #
+  # If +decimal+ is NaN, returns NaN.
+  #
+  #   BigMath.erfc(BigDecimal('10'), 32).to_s
+  #   #=> "0.20884875837625447570007862949578e-44"
+  #
+  def self?.erfc: (BigDecimal, Numeric) -> BigDecimal
+
   #   - BigMath.exp(decimal, numeric)    -> BigDecimal
   # -->
   # Computes the value of e (the base of natural logarithms) raised to the power

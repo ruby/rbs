@@ -67,6 +67,16 @@ class BigMathSingletonTest < Test::Unit::TestCase
                      BigMath, :cosh, BigDecimal('1'), 32
   end
 
+  def test_erf
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :erf, BigDecimal('1'), 32
+  end
+
+  def test_erfc
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :erfc, BigDecimal('10'), 32
+  end
+
   def test_exp
     assert_send_type  "(::BigDecimal, ::Numeric prec) -> ::BigDecimal",
                       BigMath, :exp, BigDecimal('1.23'), 10
@@ -175,6 +185,16 @@ class BigMathTest < Test::Unit::TestCase
   def test_cosh
     assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
                      TestClass.new, :cosh, BigDecimal('1'), 32
+  end
+
+  def test_erf
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :erf, BigDecimal('1'), 32
+  end
+
+  def test_erfc
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :erfc, BigDecimal('10'), 32
   end
 
   def test_exp
