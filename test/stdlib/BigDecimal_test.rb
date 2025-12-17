@@ -318,11 +318,6 @@ class BigDecimalTest < Test::Unit::TestCase
                       BigDecimal("1.23"), :**, BigDecimal("1.23")
   end
 
-  def test_precs
-    assert_send_type  "() -> [ ::Integer, ::Integer ]",
-                      BigDecimal("1.23"), :precs
-  end
-
   def test_sign
     assert_send_type  "() -> ::Integer",
                       BigDecimal("1.23"), :sign
