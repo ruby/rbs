@@ -129,8 +129,6 @@ module BigMath
   #
   def self?.cos: (BigDecimal x, Numeric prec) -> BigDecimal
 
-  # <!--
-  #   rdoc-file=ext/bigdecimal/bigdecimal.c
   # Computes the hyperbolic cosine of `decimal` to the specified number of digits
   # of precision, `numeric`.
   #
@@ -161,8 +159,6 @@ module BigMath
   #
   def self?.erfc: (BigDecimal, Numeric) -> BigDecimal
 
-  #   - BigMath.exp(decimal, numeric)    -> BigDecimal
-  # -->
   # Computes the value of e (the base of natural logarithms) raised to the power
   # of `decimal`, to the specified number of digits of precision.
   #
@@ -187,8 +183,6 @@ module BigMath
   #
   def self?.gamma: (BigDecimal, Numeric) -> BigDecimal
 
-  # <!--
-  #   rdoc-file=ext/bigdecimal/bigdecimal.c
   # Returns sqrt(x**2 + y**2) to the specified number of digits of precision,
   # `numeric`.
   #
@@ -213,8 +207,6 @@ module BigMath
   #
   def self?.lgamma: (BigDecimal, Numeric) -> [BigDecimal, Integer]
 
-  #   - BigMath.log(decimal, numeric)    -> BigDecimal
-  # -->
   # Computes the natural logarithm of `decimal` to the specified number of digits
   # of precision, `numeric`.
   #
