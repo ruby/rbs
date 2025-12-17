@@ -172,6 +172,14 @@ module BigMath
   #
   def self?.exp: (BigDecimal, Numeric prec) -> BigDecimal
 
+  # Computes the gamma function of +decimal+ to the specified number of
+  # digits of precision, +numeric+.
+  #
+  #   BigMath.gamma(BigDecimal('0.5'), 32).to_s
+  #   #=> "0.17724538509055160272981674833411e1"
+  #
+  def self?.gamma: (BigDecimal, Numeric) -> BigDecimal
+
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
   # Returns sqrt(x**2 + y**2) to the specified number of digits of precision,
@@ -181,6 +189,14 @@ module BigMath
   #     #=> "0.22360679774997896964091736687313e1"
   #
   def self?.hypot: (BigDecimal, BigDecimal, Numeric) -> BigDecimal
+
+  # Computes the natural logarithm of the absolute value of the gamma function
+  # of +decimal+ to the specified number of digits of precision, +numeric+ and its sign.
+  #
+  #   BigMath.lgamma(BigDecimal('0.5'), 32)
+  #   #=> [0.57236494292470008707171367567653e0, 1]
+  #
+  def self?.lgamma: (BigDecimal, Numeric) -> [BigDecimal, Integer]
 
   #   - BigMath.log(decimal, numeric)    -> BigDecimal
   # -->
