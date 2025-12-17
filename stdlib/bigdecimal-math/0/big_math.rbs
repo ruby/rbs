@@ -172,6 +172,13 @@ module BigMath
   #
   def self?.exp: (BigDecimal, Numeric prec) -> BigDecimal
 
+  # Decomposes +x+ into a normalized fraction and an integral power of ten.
+  #
+  #   BigMath.frexp(BigDecimal(123.456))
+  #   #=> [0.123456e0, 3]
+  #
+  def self?.frexp: (BigDecimal) -> [ BigDecimal, Integer ]
+
   # Computes the gamma function of +decimal+ to the specified number of
   # digits of precision, +numeric+.
   #
@@ -189,6 +196,14 @@ module BigMath
   #     #=> "0.22360679774997896964091736687313e1"
   #
   def self?.hypot: (BigDecimal, BigDecimal, Numeric) -> BigDecimal
+
+  # Inverse of +frexp+.
+  # Returns the value of fraction * 10**exponent.
+  #
+  #   BigMath.ldexp(BigDecimal("0.123456e0"), 3)
+  #   #=> 0.123456e3
+  #
+  def self?.ldexp: (BigDecimal, Integer) -> BigDecimal
 
   # Computes the natural logarithm of the absolute value of the gamma function
   # of +decimal+ to the specified number of digits of precision, +numeric+ and its sign.

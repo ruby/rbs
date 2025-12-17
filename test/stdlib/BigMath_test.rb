@@ -82,6 +82,11 @@ class BigMathSingletonTest < Test::Unit::TestCase
                       BigMath, :exp, BigDecimal('1.23'), 10
   end
 
+  def test_frexp
+    assert_send_type "(::BigDecimal) -> [::BigDecimal, ::Integer]",
+                     BigMath, :frexp, BigDecimal(123.456)
+  end
+
   def test_gamma
     assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
                      BigMath, :gamma, BigDecimal('0.5'), 32
@@ -90,6 +95,11 @@ class BigMathSingletonTest < Test::Unit::TestCase
   def test_hypot
     assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
                      BigMath, :hypot, BigDecimal('1'), BigDecimal('2'), 32
+  end
+
+  def test_ldexp
+    assert_send_type "(::BigDecimal, ::Integer) -> ::BigDecimal",
+                     BigMath, :ldexp, BigDecimal("0.123456e0"), 3
   end
 
   def test_lgamma
@@ -212,6 +222,11 @@ class BigMathTest < Test::Unit::TestCase
                       TestClass.new, :exp, BigDecimal('1.23'), 10
   end
 
+  def test_frexp
+    assert_send_type "(::BigDecimal) -> [::BigDecimal, ::Integer]",
+                     TestClass.new, :frexp, BigDecimal(123.456)
+  end
+
   def test_gamma
     assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
                      TestClass.new, :gamma, BigDecimal('0.5'), 32
@@ -220,6 +235,11 @@ class BigMathTest < Test::Unit::TestCase
   def test_hypot
     assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
                      TestClass.new, :hypot, BigDecimal('1'), BigDecimal('2'), 32
+  end
+
+  def test_ldexp
+    assert_send_type "(::BigDecimal, ::Integer) -> ::BigDecimal",
+                     TestClass.new, :ldexp, BigDecimal("0.123456e0"), 3
   end
 
   def test_lgamma
