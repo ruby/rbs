@@ -57,7 +57,7 @@ static size_t get_system_page_size(void) {
 static rbs_allocator_page_t *rbs_allocator_page_new(size_t payload_size) {
     const size_t page_header_size = sizeof(rbs_allocator_page_t);
 
-    rbs_allocator_page_t *page = malloc(page_header_size + payload_size);
+    rbs_allocator_page_t *page = (rbs_allocator_page_t *) malloc(page_header_size + payload_size);
     page->size = payload_size;
     page->used = 0;
 
@@ -65,7 +65,7 @@ static rbs_allocator_page_t *rbs_allocator_page_new(size_t payload_size) {
 }
 
 rbs_allocator_t *rbs_allocator_init(void) {
-    rbs_allocator_t *allocator = malloc(sizeof(rbs_allocator_t));
+    rbs_allocator_t *allocator = (rbs_allocator_t *) malloc(sizeof(rbs_allocator_t));
 
     const size_t system_page_size = get_system_page_size();
 

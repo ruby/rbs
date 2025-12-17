@@ -44,7 +44,7 @@ typedef struct rbs_error_t {
  * An RBS parser is a LL(3) parser.
  * */
 typedef struct {
-    rbs_lexer_t *rbs_lexer_t;
+    rbs_lexer_t *lexer;
 
     rbs_token_t current_token;
     rbs_token_t next_token;  /* The first lookahead token */
