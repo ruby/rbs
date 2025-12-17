@@ -57,8 +57,8 @@ rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
     void *next = calloc(next_capacity, element_size);
     if (next == NULL) return false;
 
-    rbs_constant_pool_bucket_t *next_buckets = next;
-    rbs_constant_t *next_constants = (void *) (((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
+    rbs_constant_pool_bucket_t *next_buckets = (rbs_constant_pool_bucket_t *) next;
+    rbs_constant_t *next_constants = (rbs_constant_t *) (((char *) next) + next_capacity * sizeof(rbs_constant_pool_bucket_t));
 
     // For each bucket in the current constant pool, find the index in the
     // next constant pool, and insert it.
@@ -111,8 +111,8 @@ bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity) {
     void *memory = calloc(capacity, element_size);
     if (memory == NULL) return false;
 
-    pool->buckets = memory;
-    pool->constants = (void *) (((char *) memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
+    pool->buckets = (rbs_constant_pool_bucket_t *) memory;
+    pool->constants = (rbs_constant_t *) (((char *) memory) + capacity * sizeof(rbs_constant_pool_bucket_t));
     pool->size = 0;
     pool->capacity = capacity;
     return true;
