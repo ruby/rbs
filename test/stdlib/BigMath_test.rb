@@ -17,9 +17,44 @@ class BigMathSingletonTest < Test::Unit::TestCase
                       BigMath, :PI, 10
   end
 
+  def test_acos
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :acos, BigDecimal('0.5'), 32
+  end
+
+  def test_acosh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :acosh, BigDecimal('2'), 32
+  end
+  
+  def test_asin
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :asin, BigDecimal('0.5'), 32
+  end
+
+  def test_asinh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :asinh, BigDecimal('1'), 32
+  end
+
   def test_atan
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       BigMath, :atan, BigDecimal('1.23'), 10
+  end
+
+  def test_atan2
+    assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :atan2, BigDecimal('-1'), BigDecimal('1'), 32
+  end
+
+  def test_atanh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :atanh, BigDecimal('0.5'), 32
+  end
+
+  def test_cbrt
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :cbrt, BigDecimal('2'), 32
   end
 
   def test_cos
@@ -27,9 +62,19 @@ class BigMathSingletonTest < Test::Unit::TestCase
                       BigMath, :cos, BigDecimal('1.23'), 10
   end
 
+  def test_cosh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :cosh, BigDecimal('1'), 32
+  end
+
   def test_exp
     assert_send_type  "(::BigDecimal, ::Numeric prec) -> ::BigDecimal",
                       BigMath, :exp, BigDecimal('1.23'), 10
+  end
+
+  def test_hypot
+    assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :hypot, BigDecimal('1'), BigDecimal('2'), 32
   end
 
   def test_log
@@ -37,14 +82,29 @@ class BigMathSingletonTest < Test::Unit::TestCase
                       BigMath, :log, BigDecimal('1.23'), 10
   end
 
+  def test_log2
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :log2, BigDecimal('3'), 32
+  end
+
   def test_sin
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       BigMath, :sin, BigDecimal('1.23'), 10
   end
 
+  def test_sinh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :sinh, BigDecimal('1'), 32
+  end
+
   def test_sqrt
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       BigMath, :sqrt, BigDecimal('1.23'), 10
+  end
+
+  def test_tanh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     BigMath, :tanh, BigDecimal('1'), 32
   end
 end
 
@@ -67,9 +127,44 @@ class BigMathTest < Test::Unit::TestCase
                       TestClass.new, :PI, 10
   end
 
+  def test_acos
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :acos, BigDecimal('0.5'), 32
+  end
+
+  def test_acosh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :acosh, BigDecimal('2'), 32
+  end
+
+  def test_asin
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :asin, BigDecimal('0.5'), 32
+  end
+
+  def test_asinh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :asinh, BigDecimal('1'), 32
+  end
+
   def test_atan
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       TestClass.new, :atan, BigDecimal('1.23'), 10
+  end
+
+  def test_atan2
+    assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :atan2, BigDecimal('-1'), BigDecimal('1'), 32
+  end
+
+  def test_atanh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :atanh, BigDecimal('0.5'), 32
+  end
+
+  def test_cbrt
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :cbrt, BigDecimal('2'), 32
   end
 
   def test_cos
@@ -77,13 +172,47 @@ class BigMathTest < Test::Unit::TestCase
                       TestClass.new, :cos, BigDecimal('1.23'), 10
   end
 
+  def test_cosh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :cosh, BigDecimal('1'), 32
+  end
+
+  def test_exp
+    assert_send_type  "(::BigDecimal, ::Numeric prec) -> ::BigDecimal",
+                      TestClass.new, :exp, BigDecimal('1.23'), 10
+  end
+
+  def test_hypot
+    assert_send_type "(::BigDecimal, ::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :hypot, BigDecimal('1'), BigDecimal('2'), 32
+  end
+
+  def test_log
+    assert_send_type  "(::BigDecimal, ::Numeric prec) -> ::BigDecimal",
+                      TestClass.new, :log, BigDecimal('1.23'), 10
+  end
+
+  def test_log2
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :log2, BigDecimal('3'), 32
+  end
   def test_sin
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       TestClass.new, :sin, BigDecimal('1.23'), 10
   end
 
+  def test_sinh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :sinh, BigDecimal('1'), 32
+  end
+
   def test_sqrt
     assert_send_type  "(::BigDecimal x, ::Numeric prec) -> ::BigDecimal",
                       TestClass.new, :sqrt, BigDecimal('1.23'), 10
+  end
+
+  def test_tanh
+    assert_send_type "(::BigDecimal, ::Numeric) -> ::BigDecimal",
+                     TestClass.new, :tanh, BigDecimal('1'), 32
   end
 end
