@@ -609,7 +609,7 @@ class BigDecimal < Numeric
   # The quotient q is (a/b).floor, and the modulus is the amount that must be
   # added to q * b to get a.
   #
-  def divmod: (Numeric) -> [ BigDecimal, BigDecimal ]
+  def divmod: (Numeric) -> [ Integer, BigDecimal ]
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
