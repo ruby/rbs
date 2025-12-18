@@ -185,16 +185,135 @@ fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std
     writeln!(file, "}}")?;
     writeln!(file)?;
 
+    // Map C field types (e.g. `rbs_type_name`) to the corresponding
+    // visitor method name (e.g. `type_name` -> `visit_type_name_node`).
+    let visitor_method_names: std::collections::HashMap<String, String> = config
+        .nodes
+        .iter()
+        .map(|node| {
+            let c_type = convert_name(&node.name, CIdentifier::Type);
+            let c_type = c_type.strip_suffix("_t").unwrap_or(&c_type).to_string();
+            let method = convert_name(node.variant_name(), CIdentifier::Method);
+            (c_type, method)
+        })
+        .collect();
+
+    let is_visitable = |c_type: &str| -> bool {
+        matches!(c_type, "rbs_node" | "rbs_node_list" | "rbs_hash")
+            || visitor_method_names.contains_key(c_type)
+    };
+
     for node in &config.nodes {
         let node_variant_name = node.variant_name();
         let method_name = convert_name(node_variant_name, CIdentifier::Method);
 
-        writeln!(file, "#[allow(unused_variables)]")?; // TODO: Remove this once all nodes that need visitor are implemented
+        let has_visitable_fields = node
+            .fields
+            .iter()
+            .flatten()
+            .any(|field| is_visitable(&field.c_type));
+
+        if !has_visitable_fields {
+            // If there's nothing to visit in this node, write the empty method with
+            // underscored parameters, and skip to the next iteration
+            writeln!(
+                file,
+                "pub fn visit_{method_name}_node<V: Visit + ?Sized>(_visitor: &mut V, _node: &{node_variant_name}Node) {{}}"
+            )?;
+
+            continue;
+        }
+
         writeln!(
             file,
             "pub fn visit_{}_node<V: Visit + ?Sized>(visitor: &mut V, node: &{}Node) {{",
             method_name, node_variant_name
         )?;
+
+        if let Some(fields) = &node.fields {
+            for field in fields {
+                let field_method_name = if field.name == "type" {
+                    "type_"
+                } else {
+                    field.name.as_str()
+                };
+
+                match field.c_type.as_str() {
+                    "rbs_node" => {
+                        if field.optional {
+                            writeln!(
+                                file,
+                                "    if let Some(item) = node.{field_method_name}() {{"
+                            )?;
+                            writeln!(file, "        visitor.visit(&item);")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(file, "    visitor.visit(&node.{field_method_name}());")?;
+                        }
+                    }
+
+                    "rbs_node_list" => {
+                        if field.optional {
+                            writeln!(
+                                file,
+                                "    if let Some(list) = node.{field_method_name}() {{"
+                            )?;
+                            writeln!(file, "        for item in list.iter() {{")?;
+                            writeln!(file, "            visitor.visit(&item);")?;
+                            writeln!(file, "        }}")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(file, "    for item in node.{field_method_name}().iter() {{")?;
+                            writeln!(file, "        visitor.visit(&item);")?;
+                            writeln!(file, "    }}")?;
+                        }
+                    }
+
+                    "rbs_hash" => {
+                        if field.optional {
+                            writeln!(
+                                file,
+                                "    if let Some(hash) = node.{field_method_name}() {{"
+                            )?;
+                            writeln!(file, "        for (key, value) in hash.iter() {{")?;
+                            writeln!(file, "            visitor.visit(&key);")?;
+                            writeln!(file, "            visitor.visit(&value);")?;
+                            writeln!(file, "        }}")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(
+                                file,
+                                "    for (key, value) in node.{field_method_name}().iter() {{"
+                            )?;
+                            writeln!(file, "        visitor.visit(&key);")?;
+                            writeln!(file, "        visitor.visit(&value);")?;
+                            writeln!(file, "    }}")?;
+                        }
+                    }
+
+                    _ => {
+                        if let Some(visit_method_name) = visitor_method_names.get(&field.c_type) {
+                            if field.optional {
+                                writeln!(
+                                    file,
+                                    "    if let Some(item) = node.{field_method_name}() {{"
+                                )?;
+                                writeln!(
+                                    file,
+                                    "        visitor.visit_{visit_method_name}_node(&item);"
+                                )?;
+                                writeln!(file, "    }}")?;
+                            } else {
+                                writeln!(
+                                    file,
+                                    "    visitor.visit_{visit_method_name}_node(&node.{field_method_name}());"
+                                )?;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         writeln!(file, "}}")?;
         writeln!(file)?;
     }
@@ -226,6 +345,12 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
         writeln!(file, "}}\n")?;
 
         writeln!(file, "impl {} {{", node.rust_name)?;
+        writeln!(file, "    /// Converts this node to a generic node.")?;
+        writeln!(file, "    #[must_use]")?;
+        writeln!(file, "    pub fn as_node(self) -> Node {{")?;
+        writeln!(file, "        Node::{}(self)", node.variant_name())?;
+        writeln!(file, "    }}")?;
+
         if let Some(fields) = &node.fields {
             for field in fields {
                 match field.c_type.as_str() {

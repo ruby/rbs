@@ -326,4 +326,113 @@ mod tests {
             panic!("Expected TypeAlias with RecordType");
         }
     }
+
+    #[test]
+    fn visitor_test() {
+        struct Visitor {
+            visited: Vec<String>,
+        }
+
+        impl Visit for Visitor {
+            fn visit_bool_type_node(&mut self, node: &BoolTypeNode) {
+                self.visited.push("type:bool".to_string());
+
+                crate::visit_bool_type_node(self, node);
+            }
+
+            fn visit_class_node(&mut self, node: &ClassNode) {
+                self.visited.push(format!(
+                    "class:{}",
+                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
+                ));
+
+                crate::visit_class_node(self, node);
+            }
+
+            fn visit_class_instance_type_node(&mut self, node: &ClassInstanceTypeNode) {
+                self.visited.push(format!(
+                    "type:{}",
+                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
+                ));
+
+                crate::visit_class_instance_type_node(self, node);
+            }
+
+            fn visit_class_super_node(&mut self, node: &ClassSuperNode) {
+                self.visited.push(format!(
+                    "super:{}",
+                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
+                ));
+
+                crate::visit_class_super_node(self, node);
+            }
+
+            fn visit_function_type_node(&mut self, node: &FunctionTypeNode) {
+                let count = node.required_positionals().iter().count();
+                self.visited
+                    .push(format!("function:required_positionals:{count}"));
+
+                crate::visit_function_type_node(self, node);
+            }
+
+            fn visit_method_definition_node(&mut self, node: &MethodDefinitionNode) {
+                self.visited.push(format!(
+                    "method:{}",
+                    String::from_utf8(node.name().name().to_vec()).unwrap()
+                ));
+
+                crate::visit_method_definition_node(self, node);
+            }
+
+            fn visit_record_type_node(&mut self, node: &RecordTypeNode) {
+                self.visited.push("record".to_string());
+
+                crate::visit_record_type_node(self, node);
+            }
+
+            fn visit_symbol_node(&mut self, node: &SymbolNode) {
+                self.visited.push(format!(
+                    "symbol:{}",
+                    String::from_utf8(node.name().to_vec()).unwrap()
+                ));
+
+                crate::visit_symbol_node(self, node);
+            }
+        }
+
+        let rbs_code = r#"
+            class Foo < Bar
+                def process: ({ name: String, age: Integer }, bool) -> void
+            end
+        "#;
+
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let mut visitor = Visitor {
+            visited: Vec::new(),
+        };
+
+        visitor.visit(&signature.as_node());
+
+        assert_eq!(
+            vec![
+                "class:Foo",
+                "symbol:Foo",
+                "super:Bar",
+                "symbol:Bar",
+                "method:process",
+                "symbol:process",
+                "function:required_positionals:2",
+                "record",
+                "symbol:name",
+                "type:String",
+                "symbol:String",
+                "symbol:age",
+                "type:Integer",
+                "symbol:Integer",
+                "type:bool",
+            ],
+            visitor.visited
+        );
+    }
 }
