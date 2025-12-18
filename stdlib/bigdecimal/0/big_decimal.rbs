@@ -609,7 +609,7 @@ class BigDecimal < Numeric
   # The quotient q is (a/b).floor, and the modulus is the amount that must be
   # added to q * b to get a.
   #
-  def divmod: (Numeric) -> [ BigDecimal, BigDecimal ]
+  def divmod: (Numeric) -> [ Integer, BigDecimal ]
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
@@ -782,20 +782,6 @@ class BigDecimal < Numeric
   # Also available as the operator **.
   #
   def power: (Numeric n, int prec) -> BigDecimal
-
-  # <!--
-  #   rdoc-file=ext/bigdecimal/bigdecimal.c
-  #   - precs -> array
-  # -->
-  # Returns an Array of two Integer values that represent platform-dependent
-  # internal storage properties.
-  #
-  # This method is deprecated and will be removed in the future. Instead, use
-  # BigDecimal#n_significant_digits for obtaining the number of significant digits
-  # in scientific notation, and BigDecimal#precision for obtaining the number of
-  # digits in decimal notation.
-  #
-  def precs: () -> [ Integer, Integer ]
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c

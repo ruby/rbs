@@ -189,7 +189,7 @@ class BigDecimalTest < Test::Unit::TestCase
   end
 
   def test_divmod
-    assert_send_type  "(::Numeric) -> [ ::BigDecimal, ::BigDecimal ]",
+    assert_send_type  "(::Numeric) -> [ ::Integer, ::BigDecimal ]",
                       BigDecimal("1.23"), :divmod, 2
   end
 
@@ -316,11 +316,6 @@ class BigDecimalTest < Test::Unit::TestCase
                       BigDecimal("1.23"), :power, BigDecimal("1.23"), 2
     assert_send_type  "(::Numeric) -> ::BigDecimal",
                       BigDecimal("1.23"), :**, BigDecimal("1.23")
-  end
-
-  def test_precs
-    assert_send_type  "() -> [ ::Integer, ::Integer ]",
-                      BigDecimal("1.23"), :precs
   end
 
   def test_sign
