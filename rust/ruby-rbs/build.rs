@@ -350,6 +350,16 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
         writeln!(file, "    pub fn as_node(self) -> Node {{")?;
         writeln!(file, "        Node::{}(self)", node.variant_name())?;
         writeln!(file, "    }}")?;
+        writeln!(file)?;
+        writeln!(file, "    /// Returns the location of this node.")?;
+        writeln!(file, "    #[must_use]")?;
+        writeln!(file, "    pub fn location(&self) -> RBSLocation {{")?;
+        writeln!(
+            file,
+            "        RBSLocation::new(unsafe {{ (*self.pointer).base.location }})"
+        )?;
+        writeln!(file, "    }}")?;
+        writeln!(file)?;
 
         if let Some(fields) = &node.fields {
             for field in fields {
@@ -379,10 +389,64 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                         write_node_field_accessor(&mut file, field, "RBSHash")?;
                     }
                     "rbs_location" => {
-                        write_node_field_accessor(&mut file, field, "RBSLocation")?;
+                        if field.optional {
+                            writeln!(
+                                file,
+                                "    pub fn {}(&self) -> Option<RBSLocation> {{",
+                                field.name
+                            )?;
+                            writeln!(
+                                file,
+                                "        let ptr = unsafe {{ (*self.pointer).{} }};",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "        if ptr.is_null() {{")?;
+                            writeln!(file, "            None")?;
+                            writeln!(file, "        }} else {{")?;
+                            writeln!(file, "            Some(RBSLocation {{ pointer: ptr }})")?;
+                            writeln!(file, "        }}")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(file, "    pub fn {}(&self) -> RBSLocation {{", field.name)?;
+                            writeln!(
+                                file,
+                                "        RBSLocation {{ pointer: unsafe {{ (*self.pointer).{} }} }}",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "    }}")?;
+                        }
                     }
                     "rbs_location_list" => {
-                        write_node_field_accessor(&mut file, field, "RBSLocationList")?;
+                        if field.optional {
+                            writeln!(
+                                file,
+                                "    pub fn {}(&self) -> Option<RBSLocationList> {{",
+                                field.name
+                            )?;
+                            writeln!(
+                                file,
+                                "        let ptr = unsafe {{ (*self.pointer).{} }};",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "        if ptr.is_null() {{")?;
+                            writeln!(file, "            None")?;
+                            writeln!(file, "        }} else {{")?;
+                            writeln!(file, "            Some(RBSLocationList {{ pointer: ptr }})")?;
+                            writeln!(file, "        }}")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(
+                                file,
+                                "    pub fn {}(&self) -> RBSLocationList {{",
+                                field.name
+                            )?;
+                            writeln!(
+                                file,
+                                "        RBSLocationList {{ pointer: unsafe {{ (*self.pointer).{} }} }}",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "    }}")?;
+                        }
                     }
                     "rbs_namespace" => {
                         write_node_field_accessor(&mut file, field, "NamespaceNode")?;

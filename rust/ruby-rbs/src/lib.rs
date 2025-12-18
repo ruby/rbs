@@ -134,27 +134,24 @@ impl Iterator for RBSHashIter {
 
 pub struct RBSLocation {
     pointer: *const rbs_location_t,
-    #[allow(dead_code)]
-    parser: *mut rbs_parser_t,
 }
 
 impl RBSLocation {
-    pub fn new(pointer: *const rbs_location_t, parser: *mut rbs_parser_t) -> Self {
-        Self { pointer, parser }
+    pub fn new(pointer: *const rbs_location_t) -> Self {
+        Self { pointer }
     }
 
-    pub fn start_loc(&self) -> i32 {
+    pub fn start(&self) -> i32 {
         unsafe { (*self.pointer).rg.start.byte_pos }
     }
 
-    pub fn end_loc(&self) -> i32 {
+    pub fn end(&self) -> i32 {
         unsafe { (*self.pointer).rg.end.byte_pos }
     }
 }
 
 pub struct RBSLocationListIter {
     current: *mut rbs_location_list_node_t,
-    parser: *mut rbs_parser_t,
 }
 
 impl Iterator for RBSLocationListIter {
@@ -165,7 +162,7 @@ impl Iterator for RBSLocationListIter {
             None
         } else {
             let pointer_data = unsafe { *self.current };
-            let loc = RBSLocation::new(pointer_data.loc, self.parser);
+            let loc = RBSLocation::new(pointer_data.loc);
             self.current = pointer_data.next;
             Some(loc)
         }
@@ -174,12 +171,11 @@ impl Iterator for RBSLocationListIter {
 
 pub struct RBSLocationList {
     pointer: *mut rbs_location_list,
-    parser: *mut rbs_parser_t,
 }
 
 impl RBSLocationList {
-    pub fn new(pointer: *mut rbs_location_list, parser: *mut rbs_parser_t) -> Self {
-        Self { pointer, parser }
+    pub fn new(pointer: *mut rbs_location_list) -> Self {
+        Self { pointer }
     }
 
     /// Returns an iterator over the locations.
@@ -187,7 +183,6 @@ impl RBSLocationList {
     pub fn iter(&self) -> RBSLocationListIter {
         RBSLocationListIter {
             current: unsafe { (*self.pointer).head },
-            parser: self.parser,
         }
     }
 }
@@ -434,5 +429,33 @@ mod tests {
             ],
             visitor.visited
         );
+    }
+
+    #[test]
+    fn test_node_location_ranges() {
+        let rbs_code = r#"type foo = 1"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::TypeAlias(type_alias) = declaration else {
+            panic!("Expected TypeAlias");
+        };
+
+        // TypeAlias spans the entire declaration
+        let loc = type_alias.location();
+        assert_eq!(0, loc.start());
+        assert_eq!(12, loc.end());
+
+        // The literal "1" is at position 11-12
+        let Node::LiteralType(literal) = type_alias.type_() else {
+            panic!("Expected LiteralType");
+        };
+        let Node::Integer(integer) = literal.literal() else {
+            panic!("Expected Integer");
+        };
+
+        let int_loc = integer.location();
+        assert_eq!(11, int_loc.start());
+        assert_eq!(12, int_loc.end());
     }
 }
