@@ -52,6 +52,7 @@ gem 'pstore'
 
 group :minitest do
   gem "minitest"
+  gem "minitest-mock"
 end
 
 group :typecheck_test do
