@@ -67,6 +67,10 @@ EOF
         refute typecheck.value(nil, parse_type("bool"))
         refute typecheck.value("", parse_type("bool"))
         refute typecheck.value(BasicObject.new, parse_type("bool"))
+
+        assert typecheck.value([1], parse_type("[Integer]"))
+        refute typecheck.value([], parse_type("[Integer]"))
+        refute typecheck.value([1, 2], parse_type("[Integer]"))
       end
     end
   end
