@@ -69,7 +69,8 @@ GEM
     marcel (1.1.0)
     memory_profiler (1.1.0)
     mini_portile2 (2.8.9)
-    minitest (5.27.0)
+    minitest (6.0.0)
+      prism (~> 1.5)
     mutex_m (0.3.0)
     net-protocol (0.2.2)
       timeout
