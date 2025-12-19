@@ -2021,6 +2021,32 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
+  #   - find(if_none_proc = nil) {|element| ... } -> object or nil
+  #   - find(if_none_proc = nil) -> enumerator
+  # -->
+  # Returns the first element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array;
+  # returns the first element for which the block returns a truthy value:
+  #
+  #     (0..9).find {|element| element > 2}                # => 3
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value.
+  #
+  #     (0..9).find(proc {false}) {|element| element > 12} # => false
+  #     {foo: 0, bar: 1, baz: 2}.find {|key, value| key.start_with?('b') }            # => [:bar, 1]
+  #     {foo: 0, bar: 1, baz: 2}.find(proc {[]}) {|key, value| key.start_with?('c') } # => []
+  #
+  # With no block given, returns an Enumerator.
+  #
+  def find: () { (Elem) -> boolish } -> Elem?
+          | () -> ::Enumerator[Elem, Elem?]
+          | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
+          | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
+
+  # <!--
+  #   rdoc-file=array.c
   #   - find_index(object) -> integer or nil
   #   - find_index {|element| ... } -> integer or nil
   #   - find_index -> new_enumerator
@@ -2987,6 +3013,33 @@ class Array[unchecked out Elem] < Object
   #
   def reverse_each: () { (Elem item) -> void } -> self
                   | () -> ::Enumerator[Elem, self]
+
+  # <!--
+  #   rdoc-file=array.c
+  #   - rfind(if_none_proc = nil) {|element| ... } -> object or nil
+  #   - rfind(if_none_proc = nil) -> enumerator
+  # -->
+  # Returns the last element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array in
+  # reverse order; returns the last element for which the block returns a truthy
+  # value:
+  #
+  #     (0..9).rfind {|element| element < 5}                # => 4
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value.
+  #
+  #     (0..9).rfind(proc {false}) {|element| element < -2} # => false
+  #     {foo: 0, bar: 1, baz: 2}.rfind {|key, value| key.start_with?('b') }            # => [:baz, 2]
+  #     {foo: 0, bar: 1, baz: 2}.rfind(proc {[]}) {|key, value| key.start_with?('c') } # => []
+  #
+  # With no block given, returns an Enumerator.
+  #
+  def rfind: () { (Elem) -> boolish } -> Elem?
+           | () -> ::Enumerator[Elem, Elem?]
+           | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
+           | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
   # <!--
   #   rdoc-file=array.c
