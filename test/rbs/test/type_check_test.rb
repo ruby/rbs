@@ -625,22 +625,11 @@ EOF
     end
   end
 
-  def test_is_double
-    omit unless has_gem?("rspec")
-    omit if skip_minitest?
-
+  def test_is_double__rspec
     require "rspec/mocks/standalone"
-    require "minitest/mock"
 
     SignatureManager.new do |manager|
       manager.build do |env|
-        minitest_typecheck = Test::TypeCheck.new(
-          self_class: Integer,
-          builder: DefinitionBuilder.new(env: env),
-          sample_size: 100,
-          unchecked_classes: ['Minitest::Mock']
-        )
-
         rspec_typecheck = Test::TypeCheck.new(
           self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
@@ -655,26 +644,50 @@ EOF
           unchecked_classes: []
         )
 
-        minitest_mock = ::Minitest::Mock.new
         rspec_mock = RSPEC_MOCK[]
 
-        assert minitest_typecheck.is_double? minitest_mock
         assert rspec_typecheck.is_double? rspec_mock
-
-        refute minitest_typecheck.is_double? rspec_mock
-        refute rspec_typecheck.is_double? minitest_mock
-
-        refute minitest_typecheck.is_double? 1
-        refute minitest_typecheck.is_double? 'hi'
-        refute minitest_typecheck.is_double? nil
+        refute no_mock_typecheck.is_double? rspec_mock
 
         refute rspec_typecheck.is_double? 1
         refute rspec_typecheck.is_double? 'hi'
         refute rspec_typecheck.is_double? nil
+      end
+    end
+  end
 
-        refute no_mock_typecheck.is_double? minitest_mock
+  def test_is_double__minitest
+    # Minitest is optional dependency to make ruby-lsp-test-discovery work correctly.
+    # Omit this test when minitest is unavailable, or `NO_MINITEST` env var is set.
+    omit unless has_gem?("minitest-mock") && has_gem?("minitest")
+    omit if skip_minitest?
+
+    require "minitest/mock"
+
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        minitest_typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: ['Minitest::Mock']
+        )
+
+        no_mock_typecheck = Test::TypeCheck.new(
+          self_class: Integer,
+          builder: DefinitionBuilder.new(env: env),
+          sample_size: 100,
+          unchecked_classes: []
+        )
+
+        minitest_mock = ::Minitest::Mock.new
+
+        assert minitest_typecheck.is_double? minitest_mock
         refute no_mock_typecheck.is_double? minitest_mock
 
+        refute minitest_typecheck.is_double? 1
+        refute minitest_typecheck.is_double? 'hi'
+        refute minitest_typecheck.is_double? nil
       end
     end
   end
