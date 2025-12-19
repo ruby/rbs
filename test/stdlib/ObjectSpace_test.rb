@@ -181,9 +181,9 @@ class ObjectSpaceTest < Test::Unit::TestCase
   end
 
   def test_reachable_objects_from
-    assert_send_type "(untyped) -> [untyped]",
+    assert_send_type "(untyped) -> Array[untyped]",
       ObjectSpace, :reachable_objects_from, "dummy"
-    assert_send_type "(untyped) -> [untyped]",
+    assert_send_type "(untyped) -> Array[untyped]",
       ObjectSpace, :reachable_objects_from, ["dummy", "dummy2"]
     assert_send_type "(untyped) -> nil",
       ObjectSpace, :reachable_objects_from, nil

@@ -411,7 +411,7 @@ module ObjectSpace
   #     ObjectSpace.reachable_objects_from(1)
   #     #=> nil # 1 is not markable (heap managed) object
   #
-  def self?.reachable_objects_from: (untyped) -> ([ untyped ] | nil)
+  def self?.reachable_objects_from: (untyped) -> (Array[untyped] | nil)
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c
