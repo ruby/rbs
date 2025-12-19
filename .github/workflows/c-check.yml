@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "4.0.0-preview2"
+          ruby-version: "4.0.0-preview3"
           bundler-cache: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
