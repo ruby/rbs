@@ -71,6 +71,7 @@ GEM
     mini_portile2 (2.8.9)
     minitest (6.0.0)
       prism (~> 1.5)
+    minitest-mock (5.27.0)
     mutex_m (0.3.0)
     net-protocol (0.2.2)
       timeout
@@ -207,6 +208,7 @@ DEPENDENCIES
   json-schema
   memory_profiler
   minitest
+  minitest-mock
   mutex_m
   net-smtp
   nkf
