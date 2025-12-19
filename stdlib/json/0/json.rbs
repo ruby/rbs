@@ -880,6 +880,7 @@ module JSON
 
   # <!--
   #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON.load(source, options = {}) -> object
   #   - JSON.load(source, proc = nil, options = {}) -> object
   # -->
   # Returns the Ruby objects created by parsing the given `source`.
