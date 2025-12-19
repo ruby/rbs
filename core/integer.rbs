@@ -146,9 +146,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self % other -> real_number
+  #   - self % other -> real_numeric
   # -->
-  # Returns `self` modulo `other` as a real number.
+  # Returns `self` modulo `other` as a real numeric (Integer, Float, or Rational).
   #
   # For integer `n` and real number `r`, these expressions are equivalent:
   #
@@ -193,13 +193,13 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self * numeric -> numeric_result
+  #   - self * other -> numeric
   # -->
-  # Performs multiplication:
+  # Returns the numeric product of `self` and `other`:
   #
   #     4 * 2              # => 8
-  #     4 * -2             # => -8
   #     -4 * 2             # => -8
+  #     4 * -2             # => -8
   #     4 * 2.0            # => 8.0
   #     4 * Rational(1, 3) # => (4/3)
   #     4 * Complex(2, 0)  # => (8+0i)
@@ -211,17 +211,47 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self ** numeric -> numeric_result
+  #   - self ** exponent -> numeric
   # -->
-  # Raises `self` to the power of `numeric`:
+  # Returns `self` raised to the power `exponent`:
   #
-  #     2 ** 3              # => 8
-  #     2 ** -3             # => (1/8)
-  #     -2 ** 3             # => -8
-  #     -2 ** -3            # => (-1/8)
-  #     2 ** 3.3            # => 9.849155306759329
-  #     2 ** Rational(3, 1) # => (8/1)
-  #     2 ** Complex(3, 0)  # => (8+0i)
+  #     # Result for non-negative Integer exponent is Integer.
+  #     2 ** 0   # => 1
+  #     2 ** 1   # => 2
+  #     2 ** 2   # => 4
+  #     2 ** 3   # => 8
+  #     -2 ** 3  # => -8
+  #     # Result for negative Integer exponent is Rational, not Float.
+  #     2 ** -3  # => (1/8)
+  #     -2 ** -3 # => (-1/8)
+  #
+  #     # Result for Float exponent is Float.
+  #     2 ** 0.0   # => 1.0
+  #     2 ** 1.0   # => 2.0
+  #     2 ** 2.0   # => 4.0
+  #     2 ** 3.0   # => 8.0
+  #     -2 ** 3.0  # => -8.0
+  #     2 ** -3.0  # => 0.125
+  #     -2 ** -3.0 # => -0.125
+  #
+  #     # Result for non-negative Complex exponent is Complex with Integer parts.
+  #     2 ** Complex(0, 0)   # => (1+0i)
+  #     2 ** Complex(1, 0)   # => (2+0i)
+  #     2 ** Complex(2, 0)   # => (4+0i)
+  #     2 ** Complex(3, 0)   # => (8+0i)
+  #     -2 ** Complex(3, 0) # => (-8+0i)
+  #     # Result for negative Complex exponent is Complex with Rational parts.
+  #     2 ** Complex(-3, 0)  # => ((1/8)+(0/1)*i)
+  #     -2 ** Complex(-3, 0) # => ((-1/8)+(0/1)*i)
+  #
+  #     # Result for Rational exponent is Rational.
+  #     2 ** Rational(0, 1)   # => (1/1)
+  #     2 ** Rational(1, 1)   # => (2/1)
+  #     2 ** Rational(2, 1)   # => (4/1)
+  #     2 ** Rational(3, 1)   # => (8/1)
+  #     -2 ** Rational(3, 1)  # => (-8/1)
+  #     2 ** Rational(-3, 1)  # => (1/8)
+  #     -2 ** Rational(-3, 1) # => (-1/8)
   #
   def **: (Integer) -> Numeric
         | (Float) -> Numeric
@@ -230,16 +260,20 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self + numeric -> numeric_result
+  #   - self + other -> numeric
   # -->
-  # Performs addition:
+  # Returns the sum of `self` and `other`:
   #
-  #     2 + 2              # => 4
-  #     -2 + 2             # => 0
-  #     -2 + -2            # => -4
-  #     2 + 2.0            # => 4.0
-  #     2 + Rational(2, 1) # => (4/1)
-  #     2 + Complex(2, 0)  # => (4+0i)
+  #     1 + 1               # => 2
+  #     1 + -1             # => 0
+  #     1 + 0              # => 1
+  #     1 + -2             # => -1
+  #     1 + Complex(1, 0)  # => (2+0i)
+  #     1 + Rational(1, 1) # => (2/1)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     1 + 3.14           # => 4.140000000000001
   #
   def +: (Integer) -> Integer
        | (Float) -> Float
@@ -248,9 +282,9 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self - numeric -> numeric_result
+  #   - self - other -> numeric
   # -->
-  # Performs subtraction:
+  # Returns the difference of `self` and `other`:
   #
   #     4 - 2              # => 2
   #     -4 - 2             # => -6
@@ -266,28 +300,34 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - -int -> integer
+  #   - -self -> integer
   # -->
-  # Returns `self`, negated.
+  # Returns `self`, negated:
+  #
+  #     -1    # => -1
+  #     -(-1) # => 1
+  #     -0    # => 0
   #
   def -@: () -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self / numeric -> numeric_result
+  #   - self / other -> numeric
   # -->
-  # Performs division; for integer `numeric`, truncates the result to an integer:
+  # Returns the quotient of `self` and `other`.
   #
-  #      4 / 3              # => 1
-  #      4 / -3             # => -2
-  #      -4 / 3             # => -2
-  #      -4 / -3            # => 1
+  # For integer `other`, truncates the result to an integer:
   #
-  #     For other +numeric+, returns non-integer result:
+  #     4 / 3              # => 1
+  #     4 / -3             # => -2
+  #     -4 / 3             # => -2
+  #     -4 / -3            # => 1
   #
-  #      4 / 3.0            # => 1.3333333333333333
-  #      4 / Rational(3, 1) # => (4/3)
-  #      4 / Complex(3, 0)  # => ((4/3)+0i)
+  # For non-integer `other`, returns a non-integer result:
+  #
+  #     4 / 3.0            # => 1.3333333333333333
+  #     4 / Rational(3, 1) # => (4/3)
+  #     4 / Complex(3, 0)  # => ((4/3)+0i)
   #
   def /: (Integer) -> Integer
        | (Float) -> Float
@@ -931,7 +971,7 @@ class Integer < Numeric
   def magnitude: () -> Integer
 
   # <!-- rdoc-file=numeric.c -->
-  # Returns `self` modulo `other` as a real number.
+  # Returns `self` modulo `other` as a real numeric (Integer, Float, or Rational).
   #
   # For integer `n` and real number `r`, these expressions are equivalent:
   #

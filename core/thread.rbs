@@ -1516,7 +1516,7 @@ end
 #
 class Thread::Mutex < Object
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.lock  -> self
   # -->
   # Attempts to grab the lock and waits if it isn't available. Raises
@@ -1525,7 +1525,7 @@ class Thread::Mutex < Object
   def lock: () -> self
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.locked?  -> true or false
   # -->
   # Returns `true` if this lock is currently held by some thread.
@@ -1533,7 +1533,7 @@ class Thread::Mutex < Object
   def locked?: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.owned?  -> true or false
   # -->
   # Returns `true` if this lock is currently held by current thread.
@@ -1541,7 +1541,7 @@ class Thread::Mutex < Object
   def owned?: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.synchronize { ... }    -> result of the block
   # -->
   # Obtains a lock, runs the block, and releases the lock when the block
@@ -1550,7 +1550,7 @@ class Thread::Mutex < Object
   def synchronize: [X] () { () -> X } -> X
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.try_lock  -> true or false
   # -->
   # Attempts to obtain the lock and returns immediately. Returns `true` if the
@@ -1559,11 +1559,11 @@ class Thread::Mutex < Object
   def try_lock: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
-  #   - mutex.unlock    -> self
+  #   rdoc-file=thread_sync.rb
+  #   - mutex.lock  -> self
   # -->
-  # Releases the lock. Raises `ThreadError` if `mutex` wasn't locked by the
-  # current thread.
+  # Attempts to grab the lock and waits if it isn't available. Raises
+  # `ThreadError` if `mutex` was locked by the current thread.
   #
   def unlock: () -> self
 end

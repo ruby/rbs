@@ -1373,7 +1373,7 @@ class IO < Object
   # Formats and writes `objects` to the stream.
   #
   # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
+  # Specifications](rdoc-ref:language/format_specifications.rdoc).
   #
   def printf: (String format_string, *untyped objects) -> nil
 
@@ -2331,7 +2331,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   def self.binread: (path name, ?Integer? length, ?Integer offset) -> String
 
@@ -2344,7 +2344,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
 
@@ -2409,7 +2409,7 @@ class IO < Object
   # connected to a new stream `io`.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # If no block is given, returns the new stream, which depending on given `mode`
   # may be open for reading, writing, or both. The stream should be explicitly
@@ -2584,7 +2584,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -2741,7 +2741,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -2784,7 +2784,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -3009,7 +3009,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #

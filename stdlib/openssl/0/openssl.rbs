@@ -367,7 +367,7 @@
 # ## SSL and TLS Connections
 #
 # Using our created key and certificate we can create an SSL or TLS connection.
-# An SSLContext is used to set up an SSL session.
+# An OpenSSL::SSL::SSLContext is used to set up an SSL session.
 #
 #     context = OpenSSL::SSL::SSLContext.new
 #
@@ -379,8 +379,8 @@
 #     context.cert = cert
 #     context.key = key
 #
-# Then create an SSLServer with a TCP server socket and the context.  Use the
-# SSLServer like an ordinary TCP server.
+# Then create an OpenSSL::SSL::SSLServer with a TCP server socket and the
+# context.  Use the SSLServer like an ordinary TCP server.
 #
 #     require 'socket'
 #
@@ -401,12 +401,13 @@
 #
 # ### SSL client
 #
-# An SSL client is created with a TCP socket and the context. SSLSocket#connect
-# must be called to initiate the SSL handshake and start encryption.  A key and
-# certificate are not required for the client socket.
+# An SSL client is created with a TCP socket and the context.
+# OpenSSL::SSL::SSLSocket#connect must be called to initiate the SSL handshake
+# and start encryption.  A key and certificate are not required for the client
+# socket.
 #
-# Note that SSLSocket#close doesn't close the underlying socket by default. Set
-# SSLSocket#sync_close to true if you want.
+# Note that OpenSSL::SSL::SSLSocket#close doesn't close the underlying socket by
+# default. Set OpenSSL::SSL::SSLSocket#sync_close to true if you want.
 #
 #     require 'socket'
 #
@@ -455,7 +456,7 @@ module OpenSSL
   #     OpenSSL::Digest("MD5")
   #     # => OpenSSL::Digest::MD5
   #
-  #     Digest("Foo")
+  #     OpenSSL::Digest("Foo")
   #     # => NameError: wrong constant name Foo
   #
   def self.Digest: (String name) -> singleton(Digest)
@@ -464,12 +465,13 @@ module OpenSSL
   #   rdoc-file=ext/openssl/ossl.c
   #   - OpenSSL.debug -> true | false
   # -->
+  # Returns whether Ruby/OpenSSL's debug mode is currently enabled.
   #
   def self.debug: () -> bool
 
   # <!--
   #   rdoc-file=ext/openssl/ossl.c
-  #   - OpenSSL.debug = boolean -> boolean
+  #   - OpenSSL.debug = boolean
   # -->
   # Turns on or off debug mode. With debug mode, all errors added to the OpenSSL
   # error queue will be printed to stderr.
@@ -480,10 +482,14 @@ module OpenSSL
   #   rdoc-file=ext/openssl/ossl.c
   #   - OpenSSL.errors -> [String...]
   # -->
-  # See any remaining errors held in queue.
+  # Returns any remaining errors held in the OpenSSL thread-local error queue and
+  # clears the queue. This should normally return an empty array.
   #
-  # Any errors you see here are probably due to a bug in Ruby's OpenSSL
-  # implementation.
+  # This is intended for debugging Ruby/OpenSSL. If you see any errors here, it
+  # likely indicates a bug in the extension. Please file an issue at
+  # https://github.com/ruby/openssl.
+  #
+  # For debugging your program, OpenSSL.debug= may be useful.
   #
   def self.errors: () -> Array[String]
 
@@ -491,12 +497,13 @@ module OpenSSL
   #   rdoc-file=ext/openssl/ossl.c
   #   - OpenSSL.fips_mode -> true | false
   # -->
+  # Returns whether the FIPS mode is currently enabled.
   #
   def self.fips_mode: () -> bool
 
   # <!--
   #   rdoc-file=ext/openssl/ossl.c
-  #   - OpenSSL.fips_mode = boolean -> boolean
+  #   - OpenSSL.fips_mode = boolean
   # -->
   # Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an
   # effect for FIPS-capable installations of the OpenSSL library. Trying to do so
@@ -510,60 +517,74 @@ module OpenSSL
 
   # <!--
   #   rdoc-file=ext/openssl/ossl.c
-  #   - OpenSSL.fixed_length_secure_compare(string, string) -> boolean
+  #   - OpenSSL.fixed_length_secure_compare(string, string) -> true or false
   # -->
   # Constant time memory comparison for fixed length strings, such as results of
   # HMAC calculations.
   #
   # Returns `true` if the strings are identical, `false` if they are of the same
-  # length but not identical. If the length is different, `ArgumentError` is
-  # raised.
+  # length but not identical. If the length is different, ArgumentError is raised.
   #
   def self.fixed_length_secure_compare: (String, String) -> bool
 
   # <!--
   #   rdoc-file=ext/openssl/lib/openssl.rb
-  #   - OpenSSL.secure_compare(string, string) -> boolean
+  #   - OpenSSL.secure_compare(string, string) -> true or false
   # -->
   # Constant time memory comparison. Inputs are hashed using SHA-256 to mask the
   # length of the secret. Returns `true` if the strings are identical, `false`
   # otherwise.
   #
+  # This method is expensive due to the SHA-256 hashing. In most cases, where the
+  # input lengths are known to be equal or are not sensitive,
+  # OpenSSL.fixed_length_secure_compare should be used instead.
+  #
   def self.secure_compare: (String a, String b) -> bool
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Boolean indicating whether OpenSSL is FIPS-capable or not
+  # Boolean indicating whether the OpenSSL library is FIPS-capable or not. Always
+  # `true` for OpenSSL 3.0 and later.
+  #
+  # This is obsolete and will be removed in the future. See also
+  # OpenSSL.fips_mode.
   #
   OPENSSL_FIPS: bool
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Version of OpenSSL the ruby OpenSSL extension is running with
+  # OpenSSL library version string currently used at runtime.
   #
   OPENSSL_LIBRARY_VERSION: String
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Version of OpenSSL the ruby OpenSSL extension was built with
+  # OpenSSL library version string used to compile the Ruby/OpenSSL extension.
+  # This may differ from the version used at runtime.
   #
   OPENSSL_VERSION: String
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Version number of OpenSSL the ruby OpenSSL extension was built with (base 16).
-  # The formats are below.
+  # OpenSSL library version number used to compile the Ruby/OpenSSL extension.
+  # This may differ from the version used at runtime.
   #
-  # OpenSSL 3
-  # :   `0xMNN00PP0 (major minor 00 patch 0)`
+  # The version number is encoded into a single integer value. The number follows
+  # the format:
   #
-  # OpenSSL before 3
-  # :   `0xMNNFFPPS (major minor fix patch status)`
+  # OpenSSL 3.0.0 or later
+  # :   `0xMNN00PP0` (major minor 00 patch 0)
+  #
+  # OpenSSL 1.1.1 or earlier
+  # :   `0xMNNFFPPS` (major minor fix patch status)
   #
   # LibreSSL
-  # :   `0x20000000 (fixed value)`
+  # :   `0x20000000` (a fixed value)
   #
   #
   # See also the man page OPENSSL_VERSION_NUMBER(3).
   #
   OPENSSL_VERSION_NUMBER: Integer
 
+  # <!-- rdoc-file=ext/openssl/lib/openssl/version.rb -->
+  # The version string of Ruby/OpenSSL.
+  #
   VERSION: String
 
   # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
@@ -934,7 +955,7 @@ module OpenSSL
     #     puts int2.value # => 1
     #
     class ASN1Data
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -951,7 +972,7 @@ module OpenSSL
       #
       def indefinite_length: () -> bool
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -968,7 +989,7 @@ module OpenSSL
       #
       def indefinite_length=: [U] (boolish) -> U
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -985,7 +1006,7 @@ module OpenSSL
       #
       alias infinite_length indefinite_length
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Never `nil`. A boolean value indicating whether the encoding uses indefinite
       # length (in the case of parsing) or whether an indefinite length form shall be
       # used (in the encoding case). In DER, every value uses definite length form.
@@ -1002,24 +1023,24 @@ module OpenSSL
       #
       alias infinite_length= indefinite_length=
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # An Integer representing the tag number of this ASN1Data. Never `nil`.
       #
       def tag: () -> bn
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # An Integer representing the tag number of this ASN1Data. Never `nil`.
       #
       def tag=: (::Integer) -> ::Integer
               | (BN) -> BN
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # A Symbol representing the tag class of this ASN1Data. Never `nil`. See
       # ASN1Data for possible values.
       #
       def tag_class: () -> tag_class
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # A Symbol representing the tag class of this ASN1Data. Never `nil`. See
       # ASN1Data for possible values.
       #
@@ -1036,13 +1057,13 @@ module OpenSSL
       #
       def to_der: () -> String
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Carries the value of a ASN.1 type. Please confer Constructive and Primitive
       # for the mappings between ASN.1 data types and Ruby classes.
       #
       def value: () -> untyped
 
-      # <!-- rdoc-file=ext/openssl/lib/openssl/asn1.rb -->
+      # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # Carries the value of a ASN.1 type. Please confer Constructive and Primitive
       # for the mappings between ASN.1 data types and Ruby classes.
       #
@@ -1051,7 +1072,7 @@ module OpenSSL
       private
 
       # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/asn1.rb
+      #   rdoc-file=ext/openssl/ossl_asn1.c
       #   - OpenSSL::ASN1::ASN1Data.new(value, tag, tag_class) => ASN1Data
       # -->
       # *value*: Please have a look at Constructive and Primitive to see how Ruby
@@ -1123,7 +1144,7 @@ module OpenSSL
       include Enumerable[ASN1Data]
 
       # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/asn1.rb
+      #   rdoc-file=ext/openssl/ossl_asn1.c
       #   - asn1_ary.each { |asn1| block } => asn1_ary
       # -->
       # Calls the given block once for each element in self, passing that element as
@@ -5076,7 +5097,11 @@ module OpenSSL
   end
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
-  # Generic error, common for all classes under OpenSSL module
+  # Generic error class for OpenSSL. All error classes in this library inherit
+  # from this class.
+  #
+  # This class indicates that an error was reported by the underlying OpenSSL
+  # library.
   #
   class OpenSSLError < StandardError
   end
@@ -6677,9 +6702,10 @@ module OpenSSL
 
         # <!--
         #   rdoc-file=ext/openssl/ossl_pkey_ec.c
-        #   - group.curve_name  => String
+        #   - group.curve_name -> string or nil
         # -->
-        # Returns the curve name (sn).
+        # Returns the curve name (short name) corresponding to this group, or `nil` if
+        # OpenSSL does not have an OID associated with the group.
         #
         # See the OpenSSL documentation for EC_GROUP_get_curve_name()
         #
@@ -9568,45 +9594,33 @@ module OpenSSL
     #     fac.additional_certificates = [ inter1, inter2 ]
     #     timestamp = fac.create_timestamp(p12.key, p12.certificate, req)
     #
-    # ## Attributes
-    #
-    # ### default_policy_id
-    #
-    # Request#policy_id will always be preferred over this if present in the
-    # Request, only if Request#policy_id is nil default_policy will be used. If none
-    # of both is present, a TimestampError will be raised when trying to create a
-    # Response.
-    #
-    # ### serial_number
-    #
-    # Sets or retrieves the serial number to be used for timestamp creation. Must be
-    # present for timestamp creation.
-    #
-    # ### gen_time
-    #
-    # Sets or retrieves the Time value to be used in the Response. Must be present
-    # for timestamp creation.
-    #
-    # ### additional_certs
-    #
-    # Sets or retrieves additional certificates apart from the timestamp certificate
-    # (e.g. intermediate certificates) to be added to the Response. Must be an Array
-    # of OpenSSL::X509::Certificate.
-    #
-    # ### allowed_digests
-    #
-    # Sets or retrieves the digest algorithms that the factory is allowed create
-    # timestamps for. Known vulnerable or weak algorithms should not be allowed
-    # where possible. Must be an Array of String or OpenSSL::Digest subclass
-    # instances.
-    #
     class Factory
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # Additional certificates apart from the timestamp certificate (e.g.
+      # intermediate certificates) to be added to the Response. Must be an Array of
+      # OpenSSL::X509::Certificate, or `nil`.
+      #
       def additional_certs: () -> Array[X509::Certificate]?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # Additional certificates apart from the timestamp certificate (e.g.
+      # intermediate certificates) to be added to the Response. Must be an Array of
+      # OpenSSL::X509::Certificate, or `nil`.
+      #
       def additional_certs=: (Array[X509::Certificate]? certs) -> Array[X509::Certificate]?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The list of digest algorithms that the factory is allowed create timestamps
+      # for. Known vulnerable or weak algorithms should not be allowed where possible.
+      # Must be an Array of String or OpenSSL::Digest subclass instances.
+      #
       def allowed_digests: () -> Array[String | Digest]?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The list of digest algorithms that the factory is allowed create timestamps
+      # for. Known vulnerable or weak algorithms should not be allowed where possible.
+      # Must be an Array of String or OpenSSL::Digest subclass instances.
+      #
       def allowed_digests=: (Array[String | Digest]) -> Array[String | Digest]
 
       # <!--
@@ -9635,16 +9649,48 @@ module OpenSSL
       #
       def create_timestamp: (PKey::PKey key, X509::Certificate cert, Request request) -> Response
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # A String representing the default policy object identifier, or `nil`.
+      #
+      # Request#policy_id will always be preferred over this if present in the
+      # Request, only if Request#policy_id is `nil` default_policy will be used. If
+      # none of both is present, a TimestampError will be raised when trying to create
+      # a Response.
+      #
       def default_policy_id: () -> String?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # A String representing the default policy object identifier, or `nil`.
+      #
+      # Request#policy_id will always be preferred over this if present in the
+      # Request, only if Request#policy_id is `nil` default_policy will be used. If
+      # none of both is present, a TimestampError will be raised when trying to create
+      # a Response.
+      #
       def default_policy_id=: (String) -> String
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The Time value to be used in the Response. Must be present for timestamp
+      # creation.
+      #
       def gen_time: () -> Time?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The Time value to be used in the Response. Must be present for timestamp
+      # creation.
+      #
       def gen_time=: (Time) -> Time
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The serial number to be used for timestamp creation. Must be present for
+      # timestamp creation. Must be an instance of OpenSSL::BN or Integer.
+      #
       def serial_number: () -> Integer?
 
+      # <!-- rdoc-file=ext/openssl/ossl_ts.c -->
+      # The serial number to be used for timestamp creation. Must be present for
+      # timestamp creation. Must be an instance of OpenSSL::BN or Integer.
+      #
       def serial_number=: (Integer) -> Integer
     end
 
@@ -10338,8 +10384,10 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509attr.c
-      #   - attr.oid => string
+      #   - attr.oid -> string
       # -->
+      # Returns the OID of the attribute. Returns the short name or the dotted decimal
+      # notation.
       #
       def oid: () -> String
 
@@ -10501,8 +10549,12 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509crl.c
-      #   - signature_algorithm()
+      #   - crl.signature_algorithm -> string
       # -->
+      # Returns the signature algorithm used to sign this CRL.
+      #
+      # Returns the long name of the signature algorithm, or the dotted decimal
+      # notation if OpenSSL does not define a long name for it.
       #
       def signature_algorithm: () -> String
 
@@ -10682,6 +10734,12 @@ module OpenSSL
       # Compares the two certificates. Note that this takes into account all fields,
       # not just the issuer name and the serial number.
       #
+      # This method uses X509_cmp() from OpenSSL, which compares certificates based on
+      # their cached DER encodings. The comparison can be unreliable if a certificate
+      # is incomplete.
+      #
+      # See also the man page X509_cmp(3).
+      #
       def ==: (self other) -> bool
 
       # <!--
@@ -10715,7 +10773,7 @@ module OpenSSL
       def extensions=: (Array[Extension]) -> Array[Extension]
 
       # <!--
-      #   rdoc-file=ext/openssl/ossl_x509cert.c
+      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
       #   - inspect()
       # -->
       #
@@ -10809,6 +10867,12 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_x509cert.c
       #   - cert.signature_algorithm => string
       # -->
+      # Returns the signature algorithm used to sign this certificate. This returns
+      # the algorithm name found in the TBSCertificate structure, not the outer
+      # Certificate structure.
+      #
+      # Returns the long name of the signature algorithm, or the dotted decimal
+      # notation if OpenSSL does not define a long name for it.
       #
       def signature_algorithm: () -> String
 
@@ -10926,8 +10990,10 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509ext.c
-      #   - oid()
+      #   - ext.oid -> string
       # -->
+      # Returns the OID of the extension. Returns the short name or the dotted decimal
+      # notation.
       #
       def oid: () -> String
 
@@ -11580,8 +11646,12 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509req.c
-      #   - signature_algorithm()
+      #   - req.signature_algorithm -> string
       # -->
+      # Returns the signature algorithm used to sign this request.
+      #
+      # Returns the long name of the signature algorithm, or the dotted decimal
+      # notation if OpenSSL does not define a long name for it.
       #
       def signature_algorithm: () -> String
 

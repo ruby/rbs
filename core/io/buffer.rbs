@@ -131,18 +131,25 @@ class IO
     #   - IO::Buffer.map(file, [size, [offset, [flags]]]) -> io_buffer
     # -->
     # Create an IO::Buffer for reading from `file` by memory-mapping the file.
-    # `file_io` should be a `File` instance, opened for reading.
+    # `file` should be a `File` instance, opened for reading or reading and writing.
     #
-    # Optional `size` and `offset` of mapping can be specified.
+    # Optional `size` and `offset` of mapping can be specified. Trying to map an
+    # empty file or specify `size` of 0 will raise an error. Valid values for
+    # `offset` are system-dependent.
     #
-    # By default, the buffer would be immutable (read only); to create a writable
-    # mapping, you need to open a file in read-write mode, and explicitly pass
-    # `flags` argument without IO::Buffer::IMMUTABLE.
+    # By default, the buffer is writable and expects the file to be writable. It is
+    # also shared, so several processes can use the same mapping.
+    #
+    # You can pass IO::Buffer::READONLY in `flags` argument to make a read-only
+    # buffer; this allows to work with files opened only for reading. Specifying
+    # IO::Buffer::PRIVATE in `flags` creates a private mapping, which will not
+    # impact other processes or the underlying file. It also allows updating a
+    # buffer created from a read-only file.
     #
     #     File.write('test.txt', 'test')
     #
     #     buffer = IO::Buffer.map(File.open('test.txt'), nil, 0, IO::Buffer::READONLY)
-    #     # => #<IO::Buffer 0x00000001014a0000+4 MAPPED READONLY>
+    #     # => #<IO::Buffer 0x00000001014a0000+4 EXTERNAL MAPPED FILE SHARED READONLY>
     #
     #     buffer.readonly?   # => true
     #
@@ -150,7 +157,7 @@ class IO
     #     # => "test"
     #
     #     buffer.set_string('b', 0)
-    #     # `set_string': Buffer is not writable! (IO::Buffer::AccessError)
+    #     # 'IO::Buffer#set_string': Buffer is not writable! (IO::Buffer::AccessError)
     #
     #     # create read/write mapping: length 4 bytes, offset 0, flags 0
     #     buffer = IO::Buffer.map(File.open('test.txt', 'r+'), 4, 0)
@@ -382,6 +389,10 @@ class IO
     # *   `:U64`: unsigned integer, 8 bytes, big-endian
     # *   `:s64`: signed integer, 8 bytes, little-endian
     # *   `:S64`: signed integer, 8 bytes, big-endian
+    # *   `:u128`: unsigned integer, 16 bytes, little-endian
+    # *   `:U128`: unsigned integer, 16 bytes, big-endian
+    # *   `:s128`: signed integer, 16 bytes, little-endian
+    # *   `:S128`: signed integer, 16 bytes, big-endian
     # *   `:f32`: float, 4 bytes, little-endian
     # *   `:F32`: float, 4 bytes, big-endian
     # *   `:f64`: double, 8 bytes, little-endian

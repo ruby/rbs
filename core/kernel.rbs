@@ -718,7 +718,7 @@ module Kernel : BasicObject
   # variable `$?` to the process status.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # Examples:
   #
@@ -1118,7 +1118,7 @@ module Kernel : BasicObject
   # Returns the string resulting from formatting `objects` into `format_string`.
   #
   # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
+  # Specifications](rdoc-ref:language/format_specifications.rdoc).
   #
   def self?.format: (String format, *untyped args) -> String
 
@@ -1129,7 +1129,7 @@ module Kernel : BasicObject
   # Returns the string resulting from formatting `objects` into `format_string`.
   #
   # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
+  # Specifications](rdoc-ref:language/format_specifications.rdoc).
   #
   alias sprintf format
 
@@ -1249,7 +1249,7 @@ module Kernel : BasicObject
   # Creates an IO object connected to the given file.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # With no block given, file stream is returned:
   #
@@ -1327,7 +1327,7 @@ module Kernel : BasicObject
   #     io.write(sprintf(format_string, *objects))
   #
   # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
+  # Specifications](rdoc-ref:language/format_specifications.rdoc).
   #
   # With the single argument `format_string`, formats `objects` into the string,
   # then writes the formatted string to $stdout:
@@ -1907,7 +1907,7 @@ module Kernel : BasicObject
   # *   Invoking the executable at `exe_path`.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The new process is created using the [exec system
   # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/e
@@ -1999,7 +1999,7 @@ module Kernel : BasicObject
   # *   Invoking the executable at `exe_path`.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # Returns the process ID (pid) of the new process, without waiting for it to
   # complete.
@@ -2102,7 +2102,7 @@ module Kernel : BasicObject
   # *   Invoking the executable at `exe_path`.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # Returns:
   #

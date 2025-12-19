@@ -712,6 +712,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - freeze()
   # -->
+  # Freze self.
   #
   def freeze: () -> Pathname
 
@@ -1154,9 +1155,7 @@ class Pathname
   #
   def taint: () -> Pathname
 
-  # <!-- rdoc-file=ext/pathname/pathname.c -->
-  # Return the path as a String.
-  #
+  # <!-- rdoc-file=pathname_builtin.rb -->
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
   def to_path: () -> String
