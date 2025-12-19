@@ -13,24 +13,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', '4.0.0-preview2', head]
+        ruby: ['3.2', '3.3', '3.4', '4.0.0-preview3', head]
         rubyopt: [""]
         job:
           - test
         include:
           - ruby: head
             job: stdlib_test rubocop
-          - ruby: "4.0.0-preview2"
+          - ruby: "4.0.0-preview3"
             job: stdlib_test
-          - ruby: "4.0.0-preview2"
+          - ruby: "4.0.0-preview3"
             job: test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "4.0.0-preview2"
+          - ruby: "4.0.0-preview3"
             job: stdlib_test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "4.0.0-preview2"
+          - ruby: "4.0.0-preview3"
             job: rubocop validate test_doc build test_generate_stdlib raap
-          - ruby: "4.0.0-preview2"
+          - ruby: "4.0.0-preview3"
             job: typecheck_test
     env:
       RANDOMIZE_STDLIB_TEST_ORDER: "true"
@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['4.0.0-preview2', head]
+        ruby: ['4.0.0-preview3', head]
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencies
