@@ -351,7 +351,7 @@ class Range[out Elem] < Object
   # -->
   # Returns an element from `self` selected by a binary search.
   #
-  # See [Binary Searching](rdoc-ref:bsearch.rdoc).
+  # See [Binary Searching](rdoc-ref:language/bsearch.rdoc).
   #
   def bsearch: () -> ::Enumerator[Elem, Elem?]
              | () { (Elem) -> (true | false) } -> Elem?

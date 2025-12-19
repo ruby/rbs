@@ -555,7 +555,7 @@ class DateTime < Date
   #     DateTime.now.strftime # => "2022-07-01T11:03:19-05:00"
   #
   # For other formats, see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc):
+  # Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   def strftime: (?String format) -> String
 
