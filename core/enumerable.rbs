@@ -2127,7 +2127,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     ["F", 6860]
   #
   # You can use the special symbol `:_alone` to force an element into its own
-  # separate chuck:
+  # separate chunk:
   #
   #     a = [0, 0, 1, 1]
   #     e = a.chunk{|i| i.even? ? :_alone : true }

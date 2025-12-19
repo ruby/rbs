@@ -281,7 +281,7 @@ class Encoding
   def inspect: () -> String
 
   # <!-- rdoc-file=encoding.c -->
-  # Returns the name of the encoding.
+  # The name of the encoding.
   #
   #     Encoding::UTF_8.name      #=> "UTF-8"
   #
@@ -297,12 +297,8 @@ class Encoding
   #
   def names: () -> Array[String]
 
-  # <!--
-  #   rdoc-file=encoding.c
-  #   - enc.name -> string
-  #   - enc.to_s -> string
-  # -->
-  # Returns the name of the encoding.
+  # <!-- rdoc-file=encoding.c -->
+  # The name of the encoding.
   #
   #     Encoding::UTF_8.name      #=> "UTF-8"
   #

@@ -28,7 +28,7 @@
 # *   `match_values_cleared?(scanner)`:
 #      Returns whether the scanner's [match
 #     values](rdoc-ref:StringScanner@Match+Values) are cleared.
-# See examples at [helper methods](doc/strscan/helper_methods.md).
+# See examples at [helper methods](helper_methods.md).
 # ## The `StringScanner` Object
 # This code creates a `StringScanner` object
 # (we'll call it simply a *scanner*),
