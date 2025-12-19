@@ -411,6 +411,20 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :filter!
   end
 
+  def test_find
+    assert_send_type "() { (Integer) -> bool } -> Integer",
+                     [1,2,3], :find, &->(i) { i.odd? }
+    assert_send_type "() { (Integer) -> bool } -> nil",
+                     [0,2], :find, &->(i) { i.odd? }
+    assert_send_type "(Enumerable::_NotFound[String]) { (Integer) -> bool } -> String",
+                     [0,2], :find, -> { "" }, &->(i) { i.odd? }
+
+    assert_send_type "() -> Enumerator[Integer, Integer?]",
+                     [1,2,3], :find
+    assert_send_type "(Enumerable::_NotFound[String]) -> Enumerator[Integer, Integer | String | nil]",
+                     [0,2], :find, -> { "" }
+  end
+
   def test_find_index
     assert_send_type "(Integer) -> Integer",
                      [1,2,3], :find_index, 1
@@ -722,6 +736,20 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1,2,3], :reverse_each do end
     assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
                      [2,3,4], :reverse_each
+  end
+
+  def test_rfind
+    assert_send_type "() { (Integer) -> bool } -> Integer",
+                     [1,2,3], :rfind, &->(i) { i.odd? }
+    assert_send_type "() { (Integer) -> bool } -> nil",
+                     [0,2], :rfind, &->(i) { i.odd? }
+    assert_send_type "(Enumerable::_NotFound[String]) { (Integer) -> bool } -> String",
+                     [0,2], :rfind, -> { "" }, &->(i) { i.odd? }
+
+    assert_send_type "() -> Enumerator[Integer, Integer?]",
+                     [1,2,3], :rfind
+    assert_send_type "(Enumerable::_NotFound[String]) -> Enumerator[Integer, Integer | String | nil]",
+                     [0,2], :rfind, -> { "" }
   end
 
   def test_rindex
