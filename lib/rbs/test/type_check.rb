@@ -364,6 +364,7 @@ module RBS
           value(val, builder.expand_alias2(type.name.absolute!, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
+            type.types.length == val.length &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
           Test::call(val, IS_AP, ::Hash) &&
