@@ -1,5 +1,54 @@
 # CHANGELOG
 
+## 3.10.0 (2025-12-23)
+
+RBS 3.10.0 ships with a pure C parser implementation, signature updates for Ruby 4.0, and various bug fixes.
+
+### Pure C parser implementation
+
+The new parser implementation was announced at [RubyKaigi 2025](https://rubykaigi.org/2025/presentations/amomchilov.html) and is finally shipped as a RubyGem!
+
+The new parser is faster than the one in 3.9 and is portable — it is independent of the Ruby runtime and is used to implement Sorbet’s RBS support.
+
+### Type definition of bundled gems
+
+The type definitions of `cgi` have been moved to [gem_rbs_collection](https://github.com/ruby/gem_rbs_collection/tree/main/gems/cgi), as it has been migrated to a bundled gem in Ruby 4.0
+
+`cgi-escape` has been added to `stdlib`. You may need to declare a dependency on `cgi-escape` in your `manifest.yaml`, add `-r cgi-escape` to your command line, or update your type checker configuration.
+
+```yaml
+dependencies:
+  - name: cgi-escape
+```
+
+The type definitions for `pathname` have also been moved from `stdlib` to `core`, as it is now implemented as part of the core library.
+
+### Pull Requests
+
+* [Backport] Support rdoc v7 ([#2770](https://github.com/ruby/rbs/pull/2770))
+* [Backport] Check tuple type length ([#2766](https://github.com/ruby/rbs/pull/2766))
+* Backport update to 4.0.0-preview3 ([#2768](https://github.com/ruby/rbs/pull/2768))
+* [Backport] Remove test code for bundled gems ([#2762](https://github.com/ruby/rbs/pull/2762))
+* Merge pull request #2761 from ruby/update-minitest ([#2763](https://github.com/ruby/rbs/pull/2763))
+* [Backport] Support BigDecimal v4 ([#2759](https://github.com/ruby/rbs/pull/2759))
+* Parser/lexer backports ([#2756](https://github.com/ruby/rbs/pull/2756))
+* Merge pull request #2753 from ruby/delete-printf ([#2754](https://github.com/ruby/rbs/pull/2754))
+* Backports ([#2751](https://github.com/ruby/rbs/pull/2751))
+* Merge pull request #2728 from ruby/cgi ([#2747](https://github.com/ruby/rbs/pull/2747))
+* Merge pull request #2729 from ruby/rbs-assert ([#2748](https://github.com/ruby/rbs/pull/2748))
+* Merge pull request #2749 from ruby/fix-test ([#2750](https://github.com/ruby/rbs/pull/2750))
+* Backport RBS file updates ([#2742](https://github.com/ruby/rbs/pull/2742))
+* Backport JSON PRs ([#2740](https://github.com/ruby/rbs/pull/2740))
+* Merge pull request #2718 from ruby/ruby-4 ([#2741](https://github.com/ruby/rbs/pull/2741))
+* [Backport] Move Pathname to core from stdlib ([#2730](https://github.com/ruby/rbs/pull/2730))
+* Backport rdoc 6.16 ([#2722](https://github.com/ruby/rbs/pull/2722))
+* Backport rdoc support ([#2719](https://github.com/ruby/rbs/pull/2719))
+* Backport "Remove sig for IO#{ready?,nread}" ([#2720](https://github.com/ruby/rbs/pull/2720))
+* Backport more pure C parsers ([#2679](https://github.com/ruby/rbs/pull/2679))
+* Backport module name normalization ([#2673](https://github.com/ruby/rbs/pull/2673))
+* Backport pure-C parser ([#2671](https://github.com/ruby/rbs/pull/2671))
+* Fix test failure ([#2672](https://github.com/ruby/rbs/pull/2672))
+
 ## 3.9.5 (2025-09-08)
 
 ### Signature updates
