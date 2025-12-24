@@ -18,6 +18,8 @@ KNOWN_FAILS = %w(dbm mutex_m).map do |lib|
   /cannot load such file -- #{lib}/
 end
 
+require 'test/unit'
+
 ARGV.each do |arg|
   begin
     load arg
@@ -29,3 +31,14 @@ ARGV.each do |arg|
     end
   end
 end
+
+args = []
+
+unless ENV["TESTOPTS"].nil?
+  require "shellwords"
+  args.concat Shellwords.shellsplit(ENV["TESTOPTS"])
+end
+
+exit Test::Unit::AutoRunner.run(false, nil, args)
+
+

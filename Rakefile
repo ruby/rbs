@@ -238,6 +238,8 @@ task :stdlib_test => :compile do
     test_files.shuffle!
   end
 
+  ENV["TESTOPTS"] ||= "--verbose"
+
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI-escape_test.rb"
