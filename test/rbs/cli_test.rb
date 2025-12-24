@@ -1543,6 +1543,86 @@ Processing `lib`...
     end
   end
 
+  def test_collection_install__pathname_set
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: pathname
+          - name: set
+          - name: ast
+          - name: cgi-escape
+        YAML
+
+        bundle_install('ast', 'logger')
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, 'Cannot find `pathname` gem.'
+        assert_include stderr, 'Cannot find `set` gem.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_nil lockfile.gems["set"]
+        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
+        assert_instance_of RBS::Collection::Sources::Git, lockfile.gems["ast"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__set_pathname__manifest
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - type: local
+              path: repo
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        (dir/"repo/true_string/0").mkpath
+        (dir/"repo/true_string/0/manifest.yaml").write(<<~YAML)
+          dependencies:
+          - name: set
+          - name: pathname
+          - name: cgi-escape
+        YAML
+
+        bundle_install("logger", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`set` is a part of the Ruby core library.'
+        assert_include stderr, '`pathname` is a part of the Ruby core library.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_nil lockfile.gems["set"]
+        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
+        assert_instance_of RBS::Collection::Sources::Local, lockfile.gems["true_string"][:source]
+      end
+    end
+  end
+
   def test_subtract
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
