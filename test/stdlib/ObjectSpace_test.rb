@@ -189,6 +189,10 @@ class ObjectSpaceTest < Test::Unit::TestCase
       ObjectSpace, :reachable_objects_from, nil
   end
 
+  def test_reachable_objects_from_root_no_assertion
+    ObjectSpace.reachable_objects_from_root
+  end
+
   def test_reachable_objects_from_root
     assert_send_type "() -> Hash[String, untyped]",
       ObjectSpace, :reachable_objects_from_root
