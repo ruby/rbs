@@ -3670,7 +3670,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def lstrip: () -> String
+  def lstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -3683,7 +3683,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def lstrip!: () -> self?
+  def lstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -4195,7 +4195,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def rstrip: () -> String
+  def rstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -4208,7 +4208,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def rstrip!: () -> self?
+  def rstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -4681,7 +4681,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def strip: () -> String
+  def strip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -4694,7 +4694,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def strip!: () -> self?
+  def strip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
