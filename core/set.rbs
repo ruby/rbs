@@ -299,7 +299,7 @@ class Set[unchecked out A]
   #   rdoc-file=set.c
   #   - add(obj) -> self
   # -->
-  # Adds the given object to the set and returns self.  Use `merge` to add many
+  # Adds the given object to the set and returns self. Use Set#merge to add many
   # elements at once.
   #
   #     Set[1, 2].add(3)                    #=> Set[1, 2, 3]
@@ -309,7 +309,7 @@ class Set[unchecked out A]
   def add: (A) -> self
 
   # <!-- rdoc-file=set.c -->
-  # Adds the given object to the set and returns self.  Use `merge` to add many
+  # Adds the given object to the set and returns self. Use Set#merge to add many
   # elements at once.
   #
   #     Set[1, 2].add(3)                    #=> Set[1, 2, 3]
