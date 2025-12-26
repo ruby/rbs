@@ -220,7 +220,15 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - self <=> other -> zero or nil
   # -->
-  # Returns zero if `self` is the same as `other`, `nil` otherwise.
+  # Compares `self` and `other`.
+  #
+  # Returns:
+  #
+  # *   Zero, if `self` is the same as `other`.
+  # *   `nil`, otherwise.
+  #
+  # Class Numeric includes module Comparable, each of whose methods uses
+  # Numeric#<=> for comparison.
   #
   # No subclass in the Ruby Core or Standard Library uses this implementation.
   #

@@ -277,15 +277,16 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex <=> object -> -1, 0, 1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
+  # Compares `self` and `other`.
+  #
   # Returns:
   #
-  # *   `self.real <=> object.real` if both of the following are true:
+  # *   `self.real <=> other.real` if both of the following are true:
   #
   #     *   `self.imag == 0`.
-  #     *   `object.imag == 0`. # Always true if object is numeric but not
-  #         complex.
+  #     *   `other.imag == 0` (always true if `other` is numeric but not complex).
   #
   # *   `nil` otherwise.
   #
@@ -297,6 +298,9 @@ class Complex < Numeric
   #     Complex.rect(2, 1) <=> 1               # => nil # self.imag not zero.
   #     Complex.rect(1) <=> Complex.rect(1, 1) # => nil # object.imag not zero.
   #     Complex.rect(1) <=> 'Foo'              # => nil # object.imag not defined.
+  #
+  # Class Complex includes module Comparable, each of whose methods uses
+  # Complex#<=> for comparison.
   #
   def <=>: (untyped) -> Integer?
 
