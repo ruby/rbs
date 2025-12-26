@@ -10,13 +10,13 @@ on:
 jobs:
   comments:
     runs-on: "ubuntu-latest"
-    env:
-      RUBY_COMMIT: v4.0.0-preview3
+    # env:
+    #   RUBY_COMMIT: v4.0.0-preview2
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "4.0.0-preview3"
+          ruby-version: "4.0.0"
           bundler: none
       - name: Install dependencies
         run: |

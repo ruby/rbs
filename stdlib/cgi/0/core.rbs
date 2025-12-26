@@ -1,5 +1,15 @@
 # <!-- rdoc-file=lib/cgi/escape.rb -->
-# :stopdoc
+# Since Ruby 4.0, CGI is a small holder for various escaping methods, included
+# from CGI::Escape
+#
+#     require 'cgi/escape'
+#
+#     CGI.escape("Ruby programming language")
+#     #=> "Ruby+programming+language"
+#     CGI.escapeURIComponent("Ruby programming language")
+#     #=> "Ruby%20programming%20language"
+#
+# See CGI::Escape module for methods list and their description.
 #
 class CGI
   include CGI::Util

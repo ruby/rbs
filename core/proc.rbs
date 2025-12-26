@@ -380,9 +380,9 @@ class Proc
   def dup: () -> self
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -409,9 +409,9 @@ class Proc
   alias === call
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -592,14 +592,13 @@ class Proc
 
   # <!--
   #   rdoc-file=proc.c
-  #   - prc.call(params,...)   -> obj
-  #   - prc[params,...]        -> obj
-  #   - prc.(params,...)       -> obj
-  #   - prc.yield(params,...)  -> obj
+  #   - call(...) -> obj
+  #   - self[...] -> obj
+  #   - yield(...) -> obj
   # -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -626,9 +625,9 @@ class Proc
   def call: (?) -> untyped
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
