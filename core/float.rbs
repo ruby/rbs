@@ -384,7 +384,8 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self < other -> true or false
   # -->
-  # Returns `true` if `self` is numerically less than `other`:
+  # Returns whether the value of `self` is less than the value of `other`; `other`
+  # must be numeric, but may not be Complex:
   #
   #     2.0 < 3              # => true
   #     2.0 < 3.0            # => true
@@ -399,7 +400,8 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self <= other -> true or false
   # -->
-  # Returns `true` if `self` is numerically less than or equal to `other`:
+  # Returns whether the value of `self` is less than or equal to the value of
+  # `other`; `other` must be numeric, but may not be Complex:
   #
   #     2.0 <= 3              # => true
   #     2.0 <= 3.0            # => true
@@ -413,29 +415,31 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self <=> other ->  -1, 0, +1, or nil
+  #   - self <=> other ->  -1, 0, 1, or nil
   # -->
-  # Returns a value that depends on the numeric relation between `self` and
-  # `other`:
+  # Compares `self` and `other`.
   #
-  # *   -1, if `self` is less than `other`.
-  # *   0, if `self` is equal to `other`.
-  # *   1, if `self` is greater than `other`.
+  # Returns:
+  #
+  # *   `-1`, if `self` is less than `other`.
+  # *   `0`, if `self` is equal to `other`.
+  # *   `1`, if `self` is greater than `other`.
   # *   `nil`, if the two values are incommensurate.
   #
   # Examples:
   #
+  #     2.0 <=> 2.1            # => -1
   #     2.0 <=> 2              # => 0
   #     2.0 <=> 2.0            # => 0
   #     2.0 <=> Rational(2, 1) # => 0
   #     2.0 <=> Complex(2, 0)  # => 0
   #     2.0 <=> 1.9            # => 1
-  #     2.0 <=> 2.1            # => -1
   #     2.0 <=> 'foo'          # => nil
   #
-  # This is the basis for the tests in the Comparable module.
-  #
   # `Float::NAN <=> Float::NAN` returns an implementation-dependent value.
+  #
+  # Class Float includes module Comparable, each of whose methods uses Float#<=>
+  # for comparison.
   #
   def <=>: (Numeric) -> Integer?
 
