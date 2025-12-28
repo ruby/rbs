@@ -3,7 +3,14 @@
 set -ex
 
 if [ -z ${RUBY_COMMIT} ]; then
-  RUBY_COMMIT=v`ruby -e 'puts RUBY_VERSION.gsub(".", "_")'`
+  RUBY_COMMIT=v`ruby -e '
+case
+when RUBY_VERSION >= "4.0.0"
+  puts RUBY_VERSION
+else
+  puts RUBY_VERSION.gsub(".", "_")
+end
+'`
 fi
 
 if [ -z ${RBS_RDOC_BASE_DIR} ]; then
