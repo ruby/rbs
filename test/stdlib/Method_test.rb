@@ -154,8 +154,14 @@ class MethodInstanceTest < Test::Unit::TestCase
   end
 
   def test_source_location
-    assert_send_type  '() -> [String, Integer]',
-                      METHOD, :source_location
+    if_ruby(..."4.1") do
+      assert_send_type  '() -> [String, Integer]',
+                        METHOD, :source_location
+    end
+    if_ruby("4.1"...) do
+      assert_send_type  '() -> [String, Integer, Integer, Integer, Integer]',
+                        METHOD, :source_location
+    end
     assert_send_type  '() -> nil',
                       method(:__id__), :source_location
   end
