@@ -119,8 +119,8 @@ fn write_node_field_accessor(
     if field.optional {
         writeln!(
             file,
-            "    pub fn {}(&self) -> Option<{}> {{",
-            field.name, rust_type
+            "    pub fn {}(&self) -> Option<{rust_type}> {{",
+            field.name,
         )?;
         writeln!(
             file,
@@ -136,11 +136,10 @@ fn write_node_field_accessor(
         )?;
         writeln!(file, "        }}")?;
     } else {
-        writeln!(file, "    pub fn {}(&self) -> {} {{", field.name, rust_type)?;
+        writeln!(file, "    pub fn {}(&self) -> {rust_type} {{", field.name)?;
         writeln!(
             file,
-            "        {} {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
-            rust_type,
+            "        {rust_type} {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
             field.c_name()
         )?;
     }
@@ -161,8 +160,8 @@ fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std
         let node_variant_name = node.variant_name();
         let method_name = convert_name(node_variant_name, CIdentifier::Method);
 
-        writeln!(file, "           Node::{}(it) => {{", node_variant_name)?;
-        writeln!(file, "               self.visit_{}_node(it);", method_name,)?;
+        writeln!(file, "           Node::{node_variant_name}(it) => {{")?;
+        writeln!(file, "               self.visit_{method_name}_node(it);")?;
         writeln!(file, "           }}")?;
     }
 
@@ -176,10 +175,9 @@ fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std
         writeln!(file)?;
         writeln!(
             file,
-            "    fn visit_{}_node(&mut self, node: &{}Node) {{",
-            method_name, node_variant_name
+            "    fn visit_{method_name}_node(&mut self, node: &{node_variant_name}Node) {{"
         )?;
-        writeln!(file, "        visit_{}_node(self, node);", method_name)?;
+        writeln!(file, "        visit_{method_name}_node(self, node);")?;
         writeln!(file, "    }}")?;
     }
     writeln!(file, "}}")?;
@@ -226,8 +224,7 @@ fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std
 
         writeln!(
             file,
-            "pub fn visit_{}_node<V: Visit + ?Sized>(visitor: &mut V, node: &{}Node) {{",
-            method_name, node_variant_name
+            "pub fn visit_{method_name}_node<V: Visit + ?Sized>(visitor: &mut V, node: &{node_variant_name}Node) {{"
         )?;
 
         if let Some(fields) = &node.fields {
@@ -504,7 +501,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
             .strip_suffix("Node")
             .unwrap_or(&node.rust_name);
 
-        writeln!(file, "    {}({}),", variant_name, node.rust_name)?;
+        writeln!(file, "    {variant_name}({}),", node.rust_name)?;
     }
     writeln!(file, "}}")?;
 
@@ -517,14 +514,13 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file, "        match unsafe {{ (*node).type_ }} {{")?;
     for node in &config.nodes {
         let enum_name = convert_name(&node.name, CIdentifier::Constant);
+        let c_type = convert_name(&node.name, CIdentifier::Type);
 
         writeln!(
             file,
-            "            rbs_node_type::{} => Self::{}({} {{ parser, pointer: node.cast::<{}>() }}),",
-            enum_name,
+            "            rbs_node_type::{enum_name} => Self::{}({} {{ parser, pointer: node.cast::<{c_type}>() }}),",
             node.variant_name(),
             node.rust_name,
-            convert_name(&node.name, CIdentifier::Type)
         )?;
     }
     writeln!(
