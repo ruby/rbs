@@ -139,8 +139,10 @@ class ProcInstanceTest < Test::Unit::TestCase
   end
 
   def test_source_location
-    assert_send_type  '() -> [String, Integer]',
-                      proc{}, :source_location
+    if_ruby(..."4.1") do
+      assert_send_type  '() -> [String, Integer]',
+                        proc{}, :source_location
+    end
     assert_send_type  '() -> nil',
                       Proc.new(&Kernel.method(:print)), :source_location
   end
