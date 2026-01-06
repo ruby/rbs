@@ -99,17 +99,6 @@ class ObjectSpaceTest < Test::Unit::TestCase
       ObjectSpace, :count_imemo_objects, { TOTAL: 0 }
   end
 
-  def test_count_nodes
-    ObjectSpace::trace_object_allocations do
-      assert_send_type "() -> Hash[Symbol, Integer]",
-        ObjectSpace, :count_nodes
-      assert_send_type "(Hash[Symbol, Integer]) -> Hash[Symbol, Integer]",
-        ObjectSpace, :count_nodes, {}
-      assert_send_type "(Hash[Symbol, Integer]) -> Hash[Symbol, Integer]",
-        ObjectSpace, :count_nodes, { TOTAL: 0 }
-    end
-  end
-
   def test_count_objects_size
     assert_send_type "() -> Hash[Symbol, Integer]",
       ObjectSpace, :count_objects_size
