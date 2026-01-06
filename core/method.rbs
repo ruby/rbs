@@ -400,7 +400,7 @@ class Method
   # This method will return `nil` if the method was not defined in Ruby (i.e.
   # native).
   #
-  def source_location: () -> [String, Integer]?
+  def source_location: () -> ([String, Integer]? | [String, Integer, Integer, Integer, Integer]?)
 
   # <!--
   #   rdoc-file=proc.c
