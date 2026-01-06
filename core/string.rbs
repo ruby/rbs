@@ -1177,23 +1177,28 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - self <=> other_string -> -1, 0, 1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
-  # Compares `self` and `other_string`, returning:
+  # Compares `self` and `other`, evaluating their *contents*, not their *lengths*.
   #
-  # *   -1 if `other_string` is larger.
-  # *   0 if the two are equal.
-  # *   1 if `other_string` is smaller.
-  # *   `nil` if the two are incomparable.
+  # Returns:
+  #
+  # *   `-1`, if `self` is smaller.
+  # *   `0`, if the two are equal.
+  # *   `1`, if `self` is larger.
+  # *   `nil`, if the two are incomparable.
   #
   # Examples:
   #
-  #     'foo' <=> 'foo'  # => 0
-  #     'foo' <=> 'food' # => -1
-  #     'food' <=> 'foo' # => 1
-  #     'FOO' <=> 'foo'  # => -1
-  #     'foo' <=> 'FOO'  # => 1
-  #     'foo' <=> 1      # => nil
+  #     'a'  <=> 'b'  # => -1
+  #     'a'  <=> 'ab' # => -1
+  #     'a'  <=> 'a'  # => 0
+  #     'b'  <=> 'a'  # => 1
+  #     'ab' <=> 'a'  # => 1
+  #     'a'  <=> :a   # => nil
+  #
+  # Class String includes module Comparable, each of whose methods uses String#<=>
+  # for comparison.
   #
   # Related: see [Comparing](rdoc-ref:String@Comparing).
   #
@@ -1576,9 +1581,9 @@ class String
   #     s['ll'] = 'foo'  # => "foo"
   #     s  # => "hefooo"
   #
-  #     s = 'тест'
-  #     s['ес'] = 'foo'  # => "foo"
-  #     s  # => "тfooт"
+  #     s = 'Привет'
+  #     s['ив'] = 'foo'  # => "foo"
+  #     s  # => "Прfooет"
   #
   #     s = 'こんにちは'
   #     s['んにち'] = 'foo'  # => "foo"
@@ -1817,8 +1822,8 @@ class String
   # -->
   # Returns an array of the bytes in `self`:
   #
-  #     'hello'.bytes # => [104, 101, 108, 108, 111]
-  #     'тест'.bytes  # => [209, 130, 208, 181, 209, 129, 209, 130]
+  #     'hello'.bytes  # => [104, 101, 108, 108, 111]
+  #     'Привет'.bytes # => [208, 159, 209, 128, 208, 184, 208, 178, 208, 181, 209, 130]
   #     'こんにちは'.bytes
   #     # => [227, 129, 147, 227, 130, 147, 227, 129, 171, 227, 129, 161, 227, 129, 175]
   #
@@ -1840,9 +1845,9 @@ class String
   #     s = 'foo'
   #     s.bytesize # => 3
   #     s.size     # => 3
-  #     s = 'тест'
-  #     s.bytesize # => 8
-  #     s.size     # => 4
+  #     s = 'Привет'
+  #     s.bytesize # => 12
+  #     s.size     # => 6
   #     s = 'こんにちは'
   #     s.bytesize # => 15
   #     s.size     # => 5
@@ -2108,7 +2113,7 @@ class String
   #     'hello'.center(20, '-|')      # => "-|-|-|-hello-|-|-|-|" # Some padding repeated.
   #     'hello'.center(10, 'abcdefg') # => "abhelloabc"           # Some padding not used.
   #     '  hello  '.center(13)        # => "    hello    "
-  #     'тест'.center(10)             # => "   тест   "
+  #     'Привет'.center(10)           # => "  Привет  "
   #     'こんにちは'.center(10)         # => "  こんにちは   "      # Multi-byte characters.
   #
   # If `size` is less than or equal to the size of `self`, returns an unpadded
@@ -2129,7 +2134,7 @@ class String
   # Returns an array of the characters in `self`:
   #
   #     'hello'.chars     # => ["h", "e", "l", "l", "o"]
-  #     'тест'.chars      # => ["т", "е", "с", "т"]
+  #     'Привет'.chars    # => ["П", "р", "и", "в", "е", "т"]
   #     'こんにちは'.chars # => ["こ", "ん", "に", "ち", "は"]
   #     ''.chars          # => []
   #
@@ -3665,7 +3670,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def lstrip: () -> String
+  def lstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -3678,7 +3683,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def lstrip!: () -> self?
+  def lstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -3928,8 +3933,8 @@ class String
   # `self`, not `self`.
   #
   # If `pattern` is a Regexp, performs the equivalent of `self.match(pattern)`
-  # (also setting [pattern-matching global
-  # variables](rdoc-ref:language/globals.md@Pattern+Matching)):
+  # (also setting [matched-data
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition(/h/)  # => ["", "h", "ello"]
   #     'hello'.partition(/l/)  # => ["he", "l", "lo"]
@@ -3942,8 +3947,8 @@ class String
   #
   # If `pattern` is not a Regexp, converts it to a string (if it is not already
   # one), then performs the equivalent of `self.index(pattern)` (and does *not*
-  # set [pattern-matching global
-  # variables](rdoc-ref:language/globals.md@Pattern+Matching)):
+  # set [matched-data global
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition('h')     # => ["", "h", "ello"]
   #     'hello'.partition('l')     # => ["he", "l", "lo"]
@@ -4133,8 +4138,8 @@ class String
   # `self`, not `self`.
   #
   # If `pattern` is a Regexp, searches for the last matching substring (also
-  # setting [pattern-matching global
-  # variables](rdoc-ref:language/globals.md@Pattern+Matching)):
+  # setting [matched-data global
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.rpartition(/l/)     # => ["hel", "l", "o"]
   #     'hello'.rpartition(/ll/)    # => ["he", "ll", "o"]
@@ -4147,8 +4152,7 @@ class String
   #
   # If `pattern` is not a Regexp, converts it to a string (if it is not already
   # one), then searches for the last matching substring (and does *not* set
-  # [pattern-matching global
-  # variables](rdoc-ref:language/globals.md@Pattern+Matching)):
+  # [matched-data global variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.rpartition('l')     # => ["hel", "l", "o"]
   #     'hello'.rpartition('ll')    # => ["he", "ll", "o"]
@@ -4191,7 +4195,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def rstrip: () -> String
+  def rstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -4204,7 +4208,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def rstrip!: () -> self?
+  def rstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -4677,7 +4681,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def strip: () -> String
+  def strip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -4690,7 +4694,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def strip!: () -> self?
+  def strip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c

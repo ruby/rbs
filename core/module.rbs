@@ -114,12 +114,15 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
-  #   - mod < other   ->  true, false, or nil
+  #   - self < other -> true, false, or nil
   # -->
-  # Returns true if *mod* is a subclass of *other*. Returns `false` if *mod* is
-  # the same as *other* or *mod* is an ancestor of *other*. Returns `nil` if
-  # there's no relationship between the two. (Think of the relationship in terms
-  # of the class definition: "class A < B" implies "A < B".)
+  # Returns whether `self` is a subclass of `other`, or `nil` if there is no
+  # relationship between the two:
+  #
+  #     Float < Numeric # => true
+  #     Numeric < Float # => false
+  #     Float < Float   # => false
+  #     Float < Hash    # => nil
   #
   def <: (Module other) -> bool?
 
@@ -135,13 +138,15 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
-  #   - self <=> object -> -1, 0, +1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
+  # Compares `self` and `other`.
+  #
   # Returns:
   #
-  # *   `-1`, if `self` includes `object`, if or `self` is a subclass of `object`.
-  # *   `0`, if `self` and `object` are the same.
-  # *   `1`, if `object` includes `self`, or if `object` is a subclass of `self`.
+  # *   `-1`, if `self` includes `other`, if or `self` is a subclass of `other`.
+  # *   `0`, if `self` and `other` are the same.
+  # *   `1`, if `other` includes `self`, or if `other` is a subclass of `self`.
   # *   `nil`, if none of the above is true.
   #
   # Examples:
@@ -152,8 +157,10 @@ class Module < Object
   #         Enumerable <=> Array      # =>  1
   #     # Class File is a subclass of class IO.
   #               File <=> IO         # => -1
-  #                 IO <=> File       # =>  1
   #               File <=> File       # =>  0
+  #                 IO <=> File       # =>  1
+  #     # Class File has no relationship to class String.
+  #               File <=> String     # => nil
   #
   def <=>: (untyped other) -> Integer?
 
@@ -1647,7 +1654,7 @@ class Module < Object
   #     m.name #=> nil
   #
   #     c = Class.new
-  #     c.set_temporary_name("MyClass(with description)")
+  #     c.set_temporary_name("MyClass(with description)") # => MyClass(with description)
   #
   #     c.new # => #<MyClass(with description):0x0....>
   #

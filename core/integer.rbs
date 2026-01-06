@@ -338,15 +338,14 @@ class Integer < Numeric
   #   rdoc-file=numeric.c
   #   - self < other -> true or false
   # -->
-  # Returns `true` if the value of `self` is less than that of `other`:
+  # Returns whether the value of `self` is less than the value of `other`; `other`
+  # must be numeric, but may not be Complex:
   #
-  #       1 < 0              # => false
-  #       1 < 1              # => false
-  #       1 < 2              # => true
-  #       1 < 0.5            # => false
-  #       1 < Rational(1, 2) # => false
-  #
-  #     Raises an exception if the comparison cannot be made.
+  #     1 < 0              # => false
+  #     1 < 1              # => false
+  #     1 < 2              # => true
+  #     1 < 0.5            # => false
+  #     1 < Rational(1, 2) # => false
   #
   def <: (Numeric) -> bool
 
@@ -369,44 +368,46 @@ class Integer < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self <= real -> true or false
+  #   - self <= other -> true or false
   # -->
-  # Returns `true` if the value of `self` is less than or equal to that of
-  # `other`:
+  # Returns whether the value of `self` is less than or equal to the value of
+  # `other`; `other` must be numeric, but may not be Complex:
   #
-  #     1 <= 0              # => false
-  #     1 <= 1              # => true
-  #     1 <= 2              # => true
-  #     1 <= 0.5            # => false
-  #     1 <= Rational(1, 2) # => false
+  #       1 <= 0              # => false
+  #       1 <= 1              # => true
+  #       1 <= 2              # => true
+  #       1 <= 0.5            # => false
+  #       1 <= Rational(1, 2) # => false
   #
-  # Raises an exception if the comparison cannot be made.
+  #     Raises an exception if the comparison cannot be made.
   #
   def <=: (Numeric) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self <=> other  ->  -1, 0, +1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
+  # Compares `self` and `other`.
+  #
   # Returns:
   #
-  # *   -1, if `self` is less than `other`.
-  # *   0, if `self` is equal to `other`.
-  # *   1, if `self` is greater then `other`.
+  # *   `-1`, if `self` is less than `other`.
+  # *   `0`, if `self` is equal to `other`.
+  # *   `1`, if `self` is greater then `other`.
   # *   `nil`, if `self` and `other` are incomparable.
   #
   # Examples:
   #
   #     1 <=> 2              # => -1
   #     1 <=> 1              # => 0
-  #     1 <=> 0              # => 1
-  #     1 <=> 'foo'          # => nil
-  #
   #     1 <=> 1.0            # => 0
   #     1 <=> Rational(1, 1) # => 0
   #     1 <=> Complex(1, 0)  # => 0
+  #     1 <=> 0              # => 1
+  #     1 <=> 'foo'          # => nil
   #
-  # This method is the basis for comparisons in module Comparable.
+  # Class Integer includes module Comparable, each of whose methods uses
+  # Integer#<=> for comparison.
   #
   def <=>: (Integer | Rational) -> Integer
          | (untyped) -> Integer?
