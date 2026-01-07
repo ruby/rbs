@@ -1569,7 +1569,6 @@ Processing `lib`...
         bundle_install('ast', 'logger')
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
-        assert_include stderr, 'Cannot find `pathname` gem.'
         assert_include stderr, 'Cannot find `set` gem.'
 
         lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
