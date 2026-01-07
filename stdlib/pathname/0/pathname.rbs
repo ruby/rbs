@@ -1,0 +1,36 @@
+%a{annotate:rdoc:skip}
+class Pathname
+  # <!--
+  #   rdoc-file=lib/pathname.rb
+  #   - find(ignore_error: true) { |pathname| ... }
+  # -->
+  # Iterates over the directory tree in a depth first manner, yielding a Pathname
+  # for each file under "this" directory.
+  #
+  # Note that you need to require 'pathname' to use this method.
+  #
+  # Returns an Enumerator if no block is given.
+  #
+  # Since it is implemented by the standard library module Find, Find.prune can be
+  # used to control the traversal.
+  #
+  # If `self` is `.`, yielded pathnames begin with a filename in the current
+  # directory, not `./`.
+  #
+  # See Find.find
+  #
+  def find: (?ignore_error: boolish) { (Pathname) -> untyped } -> nil
+          | (?ignore_error: boolish) -> Enumerator[Pathname, nil]
+
+  # <!--
+  #   rdoc-file=lib/pathname.rb
+  #   - rmtree(noop: nil, verbose: nil, secure: nil)
+  # -->
+  # Recursively deletes a directory, including all directories beneath it.
+  #
+  # Note that you need to require 'pathname' to use this method.
+  #
+  # See FileUtils.rm_rf
+  #
+  def rmtree: () -> self
+end
