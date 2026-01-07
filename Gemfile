@@ -16,7 +16,7 @@ gem "json-schema"
 gem "goodcheck"
 gem 'digest'
 gem 'tempfile'
-gem "rdoc", "~> 6.16"
+gem "rdoc"
 gem "fileutils"
 gem "raap"
 gem "activesupport", "~> 7.0"
@@ -52,6 +52,7 @@ gem 'pstore'
 
 group :minitest do
   gem "minitest"
+  gem "minitest-mock"
 end
 
 group :typecheck_test do

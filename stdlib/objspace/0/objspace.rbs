@@ -128,29 +128,6 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c
-  #   - ObjectSpace.count_nodes([result_hash]) -> hash
-  # -->
-  # Counts nodes for each node type.
-  #
-  # This method is only for MRI developers interested in performance and memory
-  # usage of Ruby programs.
-  #
-  # It returns a hash as:
-  #
-  #     {:NODE_METHOD=>2027, :NODE_FBODY=>1927, :NODE_CFUNC=>1798, ...}
-  #
-  # If the optional argument, result_hash, is given, it is overwritten and
-  # returned. This is intended to avoid probe effect.
-  #
-  # Note: The contents of the returned hash is implementation defined. It may be
-  # changed in future.
-  #
-  # This method is only expected to work with C Ruby.
-  #
-  def self?.count_nodes: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
-
-  # <!--
-  #   rdoc-file=ext/objspace/objspace.c
   #   - ObjectSpace.count_objects_size([result_hash]) -> hash
   # -->
   # Counts objects size (in bytes) for each type.
@@ -411,7 +388,7 @@ module ObjectSpace
   #     ObjectSpace.reachable_objects_from(1)
   #     #=> nil # 1 is not markable (heap managed) object
   #
-  def self?.reachable_objects_from: (untyped) -> ([ untyped ] | nil)
+  def self?.reachable_objects_from: (untyped) -> (Array[untyped] | nil)
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c

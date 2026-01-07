@@ -187,10 +187,10 @@
 #
 # *Counts*
 #
-# *   #length (aliased as #size): Returns the count of characters (not bytes).
-# *   #empty?: Returns whether the length of `self` is zero.
 # *   #bytesize: Returns the count of bytes.
 # *   #count: Returns the count of substrings matching given strings.
+# *   #empty?: Returns whether the length of `self` is zero.
+# *   #length (aliased as #size): Returns the count of characters (not bytes).
 #
 # *Substrings*
 #
@@ -350,8 +350,8 @@
 # *Substitution*
 #
 # *   #dump: Returns a printable version of `self`, enclosed in double-quotes.
-# *   #undump: Returns a copy of `self` with all `\xNN` notations replaced by
-#     `\uNNNN` notations and all escaped characters unescaped.
+# *   #undump: Inverse of #dump; returns a copy of `self` with changes of the
+#     kinds made by #dump "undone."
 # *   #sub: Returns a copy of `self` with the first substring matching a given
 #     pattern replaced with a given replacement string.
 # *   #gsub: Returns a copy of `self` with each substring that matches a given
@@ -660,10 +660,10 @@
 #
 # *Counts*
 #
-# *   #length (aliased as #size): Returns the count of characters (not bytes).
-# *   #empty?: Returns whether the length of `self` is zero.
 # *   #bytesize: Returns the count of bytes.
 # *   #count: Returns the count of substrings matching given strings.
+# *   #empty?: Returns whether the length of `self` is zero.
+# *   #length (aliased as #size): Returns the count of characters (not bytes).
 #
 # *Substrings*
 #
@@ -823,8 +823,8 @@
 # *Substitution*
 #
 # *   #dump: Returns a printable version of `self`, enclosed in double-quotes.
-# *   #undump: Returns a copy of `self` with all `\xNN` notations replaced by
-#     `\uNNNN` notations and all escaped characters unescaped.
+# *   #undump: Inverse of #dump; returns a copy of `self` with changes of the
+#     kinds made by #dump "undone."
 # *   #sub: Returns a copy of `self` with the first substring matching a given
 #     pattern replaced with a given replacement string.
 # *   #gsub: Returns a copy of `self` with each substring that matches a given
@@ -1042,7 +1042,7 @@ class String
   # -->
   # Returns the result of formatting `object` into the format specifications
   # contained in `self` (see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc)):
+  # Specifications](rdoc-ref:language/format_specifications.rdoc)):
   #
   #     '%05d' % 123 # => "00123"
   #
@@ -1177,23 +1177,28 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - self <=> other_string -> -1, 0, 1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
-  # Compares `self` and `other_string`, returning:
+  # Compares `self` and `other`, evaluating their *contents*, not their *lengths*.
   #
-  # *   -1 if `other_string` is larger.
-  # *   0 if the two are equal.
-  # *   1 if `other_string` is smaller.
-  # *   `nil` if the two are incomparable.
+  # Returns:
+  #
+  # *   `-1`, if `self` is smaller.
+  # *   `0`, if the two are equal.
+  # *   `1`, if `self` is larger.
+  # *   `nil`, if the two are incomparable.
   #
   # Examples:
   #
-  #     'foo' <=> 'foo'  # => 0
-  #     'foo' <=> 'food' # => -1
-  #     'food' <=> 'foo' # => 1
-  #     'FOO' <=> 'foo'  # => -1
-  #     'foo' <=> 'FOO'  # => 1
-  #     'foo' <=> 1      # => nil
+  #     'a'  <=> 'b'  # => -1
+  #     'a'  <=> 'ab' # => -1
+  #     'a'  <=> 'a'  # => 0
+  #     'b'  <=> 'a'  # => 1
+  #     'ab' <=> 'a'  # => 1
+  #     'a'  <=> :a   # => nil
+  #
+  # Class String includes module Comparable, each of whose methods uses String#<=>
+  # for comparison.
   #
   # Related: see [Comparing](rdoc-ref:String@Comparing).
   #
@@ -1306,7 +1311,7 @@ class String
   #     'hello'[0]    # => "h"
   #     'hello'[4]    # => "o"
   #     'hello'[5]    # => nil
-  #     'тест'[2]     # => "с"
+  #     'Привет'[2]   # => "и"
   #     'こんにちは'[4] # => "は"
   #
   # With negative integer argument `index` given, counts backward from the end of
@@ -1387,7 +1392,7 @@ class String
   #     'hello'['ell']      # => "ell"
   #     'hello'['']         # => ""
   #     'hello'['nosuch']   # => nil
-  #     'тест'['ес']        # => "ес"
+  #     'Привет'['ив']      # => "ив"
   #     'こんにちは'['んにち'] # => "んにち"
   #
   # Related: see [Converting to New
@@ -1449,7 +1454,7 @@ class String
   # size `length` characters (as available) beginning at character offset
   # specified by `start`.
   #
-  # If argument `start` is non-negative, the offset is +start':
+  # If argument `start` is non-negative, the offset is `start`:
   #
   #     s = 'hello'
   #     s[0, 1] = 'foo'  # => "foo"
@@ -1576,9 +1581,9 @@ class String
   #     s['ll'] = 'foo'  # => "foo"
   #     s  # => "hefooo"
   #
-  #     s = 'тест'
-  #     s['ес'] = 'foo'  # => "foo"
-  #     s  # => "тfooт"
+  #     s = 'Привет'
+  #     s['ив'] = 'foo'  # => "foo"
+  #     s  # => "Прfooет"
   #
   #     s = 'こんにちは'
   #     s['んにち'] = 'foo'  # => "foo"
@@ -1817,8 +1822,8 @@ class String
   # -->
   # Returns an array of the bytes in `self`:
   #
-  #     'hello'.bytes # => [104, 101, 108, 108, 111]
-  #     'тест'.bytes  # => [209, 130, 208, 181, 209, 129, 209, 130]
+  #     'hello'.bytes  # => [104, 101, 108, 108, 111]
+  #     'Привет'.bytes # => [208, 159, 209, 128, 208, 184, 208, 178, 208, 181, 209, 130]
   #     'こんにちは'.bytes
   #     # => [227, 129, 147, 227, 130, 147, 227, 129, 171, 227, 129, 161, 227, 129, 175]
   #
@@ -1840,9 +1845,9 @@ class String
   #     s = 'foo'
   #     s.bytesize # => 3
   #     s.size     # => 3
-  #     s = 'тест'
-  #     s.bytesize # => 8
-  #     s.size     # => 4
+  #     s = 'Привет'
+  #     s.bytesize # => 12
+  #     s.size     # => 6
   #     s = 'こんにちは'
   #     s.bytesize # => 15
   #     s.size     # => 5
@@ -1989,23 +1994,30 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - capitalize(mapping = :ascii) -> string
+  #   - capitalize(mapping = :ascii) -> new_string
   # -->
   # Returns a string containing the characters in `self`, each with possibly
   # changed case:
   #
-  # *   The first character is upcased.
-  # *   All other characters are downcased.
+  # *   The first character made uppercase.
+  # *   All other characters are made lowercase.
   #
   # Examples:
   #
-  #     'hello world'.capitalize # => "Hello world"
-  #     'HELLO WORLD'.capitalize # => "Hello world"
+  #     'hello'.capitalize  # => "Hello"
+  #     'HELLO'.capitalize  # => "Hello"
+  #     'straße'.capitalize # => "Straße"  # Lowercase 'ß' not changed.
+  #     'STRAẞE'.capitalize # => "Straße"  # Uppercase 'ẞ' downcased to 'ß'.
+  #     'привет'.capitalize # => "Привет"
+  #     'ПРИВЕТ'.capitalize # => "Привет"
   #
-  # Some characters do not have upcase and downcase, and so are not changed; see
-  # [Case Mapping](rdoc-ref:case_mapping.rdoc):
+  # Some characters (and some character sets) do not have upcase and downcase
+  # versions; see [Case Mapping](rdoc-ref:case_mapping.rdoc):
   #
-  #     '1, 2, 3, ...'.capitalize # => "1, 2, 3, ..."
+  #     s = '1, 2, 3, ...'
+  #     s.capitalize == s # => true
+  #     s = 'こんにちは'
+  #     s.capitalize == s # => true
   #
   # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
   # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
@@ -2101,7 +2113,7 @@ class String
   #     'hello'.center(20, '-|')      # => "-|-|-|-hello-|-|-|-|" # Some padding repeated.
   #     'hello'.center(10, 'abcdefg') # => "abhelloabc"           # Some padding not used.
   #     '  hello  '.center(13)        # => "    hello    "
-  #     'тест'.center(10)             # => "   тест   "
+  #     'Привет'.center(10)           # => "  Привет  "
   #     'こんにちは'.center(10)         # => "  こんにちは   "      # Multi-byte characters.
   #
   # If `size` is less than or equal to the size of `self`, returns an unpadded
@@ -2122,7 +2134,7 @@ class String
   # Returns an array of the characters in `self`:
   #
   #     'hello'.chars     # => ["h", "e", "l", "l", "o"]
-  #     'тест'.chars      # => ["т", "е", "с", "т"]
+  #     'Привет'.chars    # => ["П", "р", "и", "в", "е", "т"]
   #     'こんにちは'.chars # => ["こ", "ん", "に", "ち", "は"]
   #     ''.chars          # => []
   #
@@ -2632,18 +2644,25 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - downcase(mapping) -> string
+  #   - downcase(mapping = :ascii) -> new_string
   # -->
   # Returns a new string containing the downcased characters in `self`:
   #
-  #     'Hello, World!'.downcase      # => "hello, world!"
-  #     'ТЕСТ'.downcase               # => "тест"
-  #     'よろしくお願いします'.downcase # => "よろしくお願いします"
+  #     'HELLO'.downcase        # => "hello"
+  #     'STRAẞE'.downcase       # => "straße"
+  #     'ПРИВЕТ'.downcase       # => "привет"
+  #     'RubyGems.org'.downcase # => "rubygems.org"
   #
-  # Some characters do not have upcased and downcased versions.
+  # Some characters (and some character sets) do not have upcase and downcase
+  # versions; see [Case Mapping](rdoc-ref:case_mapping.rdoc):
   #
-  # The casing may be affected by the given `mapping`; see [Case
-  # Mapping](rdoc-ref:case_mapping.rdoc).
+  #     s = '1, 2, 3, ...'
+  #     s.downcase == s # => true
+  #     s = 'こんにちは'
+  #     s.downcase == s # => true
+  #
+  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
+  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -2673,60 +2692,104 @@ class String
   #   rdoc-file=string.c
   #   - dump -> new_string
   # -->
-  # Returns a printable version of `self`, enclosed in double-quotes:
+  # For an ordinary string, this method, +String#dump+, returns a printable
+  # ASCII-only version of `self`, enclosed in double-quotes.
   #
-  #     'hello'.dump     # => "\"hello\""
+  # For a dumped string, method String#undump is the inverse of +String#dump+; it
+  # returns a "restored" version of `self`, where all the dumping changes have
+  # been undone.
   #
-  # Certain special characters are rendered with escapes:
+  # In the simplest case, the dumped string contains the original string, enclosed
+  # in double-quotes; this example is done in `irb` (interactive Ruby), which uses
+  # method `inspect` to render the results:
   #
-  #     '"'.dump  # => "\"\\\"\""
-  #     '\\'.dump # => "\"\\\\\""
+  #     s = 'hello'   # => "hello"
+  #     s.dump        # => "\"hello\""
+  #     s.dump.undump # => "hello"
   #
-  # Non-printing characters are rendered with escapes:
+  # Keep in mind that in the second line above:
+  #
+  # *   The outer double-quotes are put on by `inspect`, and *are* *not* part of
+  #     the output of #dump.
+  # *   The inner double-quotes *are* part of the output of `dump`, and are
+  #     escaped by `inspect` because they are within the outer double-quotes.
+  #
+  # To avoid confusion, we'll use this helper method to omit the outer
+  # double-quotes:
+  #
+  #     def dump(s)
+  #       print "String:   ", s, "\n"
+  #       print "Dumped:   ", s.dump, "\n"
+  #       print "Undumped: ", s.dump.undump, "\n"
+  #     end
+  #
+  # So that for string `'hello'`, we'll see:
+  #
+  #     String:    hello
+  #     Dumped:    "hello"
+  #     Undumped:  hello
+  #
+  # In a dump, certain special characters are escaped:
+  #
+  #     String:    "
+  #     Dumped:    "\""
+  #     Undumped:  "
+  #
+  #     String:    \
+  #     Dumped:    "\\"
+  #     Undumped:  \
+  #
+  # In a dump, unprintable characters are replaced by printable ones; the
+  # unprintable characters are the whitespace characters (other than space
+  # itself); here we see the ordinals for those characers, together with
+  # explanatory text:
+  #
+  #     h = {
+  #        7 => 'Alert (BEL)',
+  #        8 => 'Backspace (BS)',
+  #        9 => 'Horizontal tab (HT)',
+  #       10 => 'Linefeed (LF)',
+  #       11 => 'Vertical tab (VT)',
+  #       12 => 'Formfeed (FF)',
+  #       13 => 'Carriage return (CR)'
+  #     }
+  #
+  # In this example, the dumped output is printed by method #inspect, and so
+  # contains both outer double-quotes and escaped inner double-quotes:
   #
   #     s = ''
-  #     s << 7   # Alarm (bell).
-  #     s << 8   # Back space.
-  #     s << 9   # Horizontal tab.
-  #     s << 10  # Line feed.
-  #     s << 11  # Vertical tab.
-  #     s << 12  # Form feed.
-  #     s << 13  # Carriage return.
-  #     s        # => "\a\b\t\n\v\f\r"
-  #     s.dump   # => "\"\\a\\b\\t\\n\\v\\f\\r\""
+  #     h.keys.each {|i| s << i } # => [7, 8, 9, 10, 11, 12, 13]
+  #     s                         # => "\a\b\t\n\v\f\r"
+  #     s.dump                    # => "\"\\a\\b\\t\\n\\v\\f\\r\""
   #
-  # If `self` is encoded in UTF-8 and contains Unicode characters, renders Unicode
-  # characters in Unicode escape sequence:
+  # If `self` is encoded in UTF-8 and contains Unicode characters, each Unicode
+  # character is dumped as a Unicode escape sequence:
   #
-  #     'тест'.dump     # => "\"\\u0442\\u0435\\u0441\\u0442\""
-  #     'こんにちは'.dump # => "\"\\u3053\\u3093\\u306B\\u3061\\u306F\""
+  #     String:    тест
+  #     Dumped:    "\u0442\u0435\u0441\u0442"
+  #     Undumped:  тест
   #
-  # If the encoding of `self` is not ASCII-compatible (i.e.,
-  # `self.encoding.ascii_compatible?` returns `false`), renders all
-  # ASCII-compatible bytes as ASCII characters and all other bytes as hexadecimal.
-  # Appends `.dup.force_encoding(\"encoding\")`, where `<encoding>` is
-  # `self.encoding.name`:
+  #     String:    こんにちは
+  #     Dumped:    "\u3053\u3093\u306B\u3061\u306F"
+  #     Undumped:  こんにちは
   #
-  #     s = 'hello'
-  #     s.encoding                # => #<Encoding:UTF-8>
-  #     s.dump                    # => "\"hello\""
-  #     s.encode('utf-16').dump   # => "\"\\xFE\\xFF\\x00h\\x00e\\x00l\\x00l\\x00o\".dup.force_encoding(\"UTF-16\")"
-  #     s.encode('utf-16le').dump # => "\"h\\x00e\\x00l\\x00l\\x00o\\x00\".dup.force_encoding(\"UTF-16LE\")"
+  # If the encoding of `self` is not ASCII-compatible (i.e., if
+  # `self.encoding.ascii_compatible?` returns `false`), each ASCII-compatible byte
+  # is dumped as an ASCII character, and all other bytes are dumped as
+  # hexadecimal; also appends `.dup.force_encoding(\"encoding\")`, where
+  # `<encoding>` is `self.encoding.name`:
   #
-  #     s = 'тест'
-  #     s.encoding                # => #<Encoding:UTF-8>
-  #     s.dump                    # => "\"\\u0442\\u0435\\u0441\\u0442\""
-  #     s.encode('utf-16').dump   # => "\"\\xFE\\xFF\\x04B\\x045\\x04A\\x04B\".dup.force_encoding(\"UTF-16\")"
-  #     s.encode('utf-16le').dump # => "\"B\\x045\\x04A\\x04B\\x04\".dup.force_encoding(\"UTF-16LE\")"
+  #     String:    hello
+  #     Dumped:    "\xFE\xFF\x00h\x00e\x00l\x00l\x00o".dup.force_encoding("UTF-16")
+  #     Undumped:  hello
   #
-  #     s = 'こんにちは'
-  #     s.encoding                # => #<Encoding:UTF-8>
-  #     s.dump                    # => "\"\\u3053\\u3093\\u306B\\u3061\\u306F\""
-  #     s.encode('utf-16').dump   # => "\"\\xFE\\xFF0S0\\x930k0a0o\".dup.force_encoding(\"UTF-16\")"
-  #     s.encode('utf-16le').dump # => "\"S0\\x930k0a0o0\".dup.force_encoding(\"UTF-16LE\")"
+  #     String:    тест
+  #     Dumped:    "\xFE\xFF\x04B\x045\x04A\x04B".dup.force_encoding("UTF-16")
+  #     Undumped:  тест
   #
-  # Related: see [Converting to New
-  # String](rdoc-ref:String@Converting+to+New+String).
+  #     String:    こんにちは
+  #     Dumped:    "\xFE\xFF0S0\x930k0a0o".dup.force_encoding("UTF-16")
+  #     Undumped:  こんにちは
   #
   def dump: () -> String
 
@@ -3580,7 +3643,7 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - lstrip -> new_string
+  #   - lstrip(*selectors) -> new_string
   # -->
   # Returns a copy of `self` with leading whitespace removed; see [Whitespace in
   # Strings](rdoc-ref:String@Whitespace+in+Strings):
@@ -3591,14 +3654,27 @@ class String
   #     s.lstrip
   #     # => "abc\u0000\t\n\v\f\r "
   #
+  # If `selectors` are given, removes characters of `selectors` from the beginning
+  # of `self`:
+  #
+  #     s = "---abc+++"
+  #     s.lstrip("-") # => "abc+++"
+  #
+  # `selectors` must be valid character selectors (see [Character
+  # Selectors](rdoc-ref:character_selectors.rdoc)), and may use any of its valid
+  # forms, including negation, ranges, and escapes:
+  #
+  #     "01234abc56789".lstrip("0-9") # "abc56789"
+  #     "01234abc56789".lstrip("0-9", "^4-6") # "4abc56789"
+  #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def lstrip: () -> String
+  def lstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
-  #   - lstrip! -> self or nil
+  #   - lstrip!(*selectors) -> self or nil
   # -->
   # Like String#lstrip, except that:
   #
@@ -3607,7 +3683,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def lstrip!: () -> self?
+  def lstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -3857,8 +3933,8 @@ class String
   # `self`, not `self`.
   #
   # If `pattern` is a Regexp, performs the equivalent of `self.match(pattern)`
-  # (also setting [pattern-matching global
-  # variables](rdoc-ref:globals.md@Pattern+Matching)):
+  # (also setting [matched-data
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition(/h/)  # => ["", "h", "ello"]
   #     'hello'.partition(/l/)  # => ["he", "l", "lo"]
@@ -3871,8 +3947,8 @@ class String
   #
   # If `pattern` is not a Regexp, converts it to a string (if it is not already
   # one), then performs the equivalent of `self.index(pattern)` (and does *not*
-  # set [pattern-matching global
-  # variables](rdoc-ref:globals.md@Pattern+Matching)):
+  # set [matched-data global
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition('h')     # => ["", "h", "ello"]
   #     'hello'.partition('l')     # => ["he", "l", "lo"]
@@ -4062,8 +4138,8 @@ class String
   # `self`, not `self`.
   #
   # If `pattern` is a Regexp, searches for the last matching substring (also
-  # setting [pattern-matching global
-  # variables](rdoc-ref:globals.md@Pattern+Matching)):
+  # setting [matched-data global
+  # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.rpartition(/l/)     # => ["hel", "l", "o"]
   #     'hello'.rpartition(/ll/)    # => ["he", "ll", "o"]
@@ -4076,7 +4152,7 @@ class String
   #
   # If `pattern` is not a Regexp, converts it to a string (if it is not already
   # one), then searches for the last matching substring (and does *not* set
-  # [pattern-matching global variables](rdoc-ref:globals.md@Pattern+Matching)):
+  # [matched-data global variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.rpartition('l')     # => ["hel", "l", "o"]
   #     'hello'.rpartition('ll')    # => ["he", "ll", "o"]
@@ -4093,7 +4169,7 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - rstrip -> new_string
+  #   - rstrip(*selectors) -> new_string
   # -->
   # Returns a copy of `self` with trailing whitespace removed; see [Whitespace in
   # Strings](rdoc-ref:String@Whitespace+in+Strings):
@@ -4103,14 +4179,27 @@ class String
   #     s        # => "\u0000\t\n\v\f\r abc\u0000\t\n\v\f\r "
   #     s.rstrip # => "\u0000\t\n\v\f\r abc"
   #
+  # If `selectors` are given, removes characters of `selectors` from the end of
+  # `self`:
+  #
+  #     s = "---abc+++"
+  #     s.rstrip("+") # => "---abc"
+  #
+  # `selectors` must be valid character selectors (see [Character
+  # Selectors](rdoc-ref:character_selectors.rdoc)), and may use any of its valid
+  # forms, including negation, ranges, and escapes:
+  #
+  #     "01234abc56789".rstrip("0-9") # "01234abc"
+  #     "01234abc56789".rstrip("0-9", "^4-6") # "01234abc56"
+  #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def rstrip: () -> String
+  def rstrip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
-  #   - rstrip! -> self or nil
+  #   - rstrip!(*selectors) -> self or nil
   # -->
   # Like String#rstrip, except that:
   #
@@ -4119,7 +4208,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def rstrip!: () -> self?
+  def rstrip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -4259,7 +4348,7 @@ class String
   #     'hello'[0]    # => "h"
   #     'hello'[4]    # => "o"
   #     'hello'[5]    # => nil
-  #     'тест'[2]     # => "с"
+  #     'Привет'[2]   # => "и"
   #     'こんにちは'[4] # => "は"
   #
   # With negative integer argument `index` given, counts backward from the end of
@@ -4340,7 +4429,7 @@ class String
   #     'hello'['ell']      # => "ell"
   #     'hello'['']         # => ""
   #     'hello'['nosuch']   # => nil
-  #     'тест'['ес']        # => "ес"
+  #     'Привет'['ив']      # => "ив"
   #     'こんにちは'['んにち'] # => "んにち"
   #
   # Related: see [Converting to New
@@ -4565,7 +4654,7 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - strip -> new_string
+  #   - strip(*selectors) -> new_string
   # -->
   # Returns a copy of `self` with leading and trailing whitespace removed; see
   # [Whitespace in Strings](rdoc-ref:String@Whitespace+in+Strings):
@@ -4575,14 +4664,28 @@ class String
   #     # => "\u0000\t\n\v\f\r abc\u0000\t\n\v\f\r "
   #     s.strip # => "abc"
   #
+  # If `selectors` are given, removes characters of `selectors` from both ends of
+  # `self`:
+  #
+  #     s = "---abc+++"
+  #     s.strip("-+") # => "abc"
+  #     s.strip("+-") # => "abc"
+  #
+  # `selectors` must be valid character selectors (see [Character
+  # Selectors](rdoc-ref:character_selectors.rdoc)), and may use any of its valid
+  # forms, including negation, ranges, and escapes:
+  #
+  #     "01234abc56789".strip("0-9") # "abc"
+  #     "01234abc56789".strip("0-9", "^4-6") # "4abc56"
+  #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def strip: () -> String
+  def strip: (*selector) -> String
 
   # <!--
   #   rdoc-file=string.c
-  #   - strip! -> self or nil
+  #   - strip!(*selectors) -> self or nil
   # -->
   # Like String#strip, except that:
   #
@@ -4591,7 +4694,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def strip!: () -> self?
+  def strip!: (*selector) -> self?
 
   # <!--
   #   rdoc-file=string.c
@@ -4743,7 +4846,7 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - swapcase(mapping) -> new_string
+  #   - swapcase(mapping = :ascii) -> new_string
   # -->
   # Returns a string containing the characters in `self`, with cases reversed:
   #
@@ -4752,16 +4855,28 @@ class String
   #
   # Examples:
   #
-  #     'Hello World!'.swapcase # => "hELLO wORLD!"
-  #     'тест'.swapcase         # => "ТЕСТ"
+  #     'Hello'.swapcase        # => "hELLO"
+  #     'Straße'.swapcase       # => "sTRASSE"
+  #     'Привет'.swapcase       # => "пРИВЕТ"
+  #     'RubyGems.org'.swapcase # => "rUBYgEMS.ORG"
   #
-  # Some characters (and even character sets) do not have casing:
+  # The sizes of `self` and the upcased result may differ:
   #
-  #     '12345'.swapcase    # => "12345"
-  #     'こんにちは'.swapcase # => "こんにちは"
+  #     s = 'Straße'
+  #     s.size          # => 6
+  #     s.swapcase      # => "sTRASSE"
+  #     s.swapcase.size # => 7
   #
-  # The casing may be affected by the given `mapping`; see [Case
-  # Mapping](rdoc-ref:case_mapping.rdoc).
+  # Some characters (and some character sets) do not have upcase and downcase
+  # versions; see [Case Mapping](rdoc-ref:case_mapping.rdoc):
+  #
+  #     s = '1, 2, 3, ...'
+  #     s.swapcase == s # => true
+  #     s = 'こんにちは'
+  #     s.swapcase == s # => true
+  #
+  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
+  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -5150,16 +5265,13 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - undump -> string
+  #   - undump -> new_string
   # -->
-  # Returns an unescaped version of `self`:
+  # Inverse of String#dump; returns a copy of `self` with changes of the kinds
+  # made by String#dump "undone."
   #
-  #     s_orig = "\f\x00\xff\\\""    # => "\f\u0000\xFF\\\""
-  #     s_dumped = s_orig.dump       # => "\"\\f\\x00\\xFF\\\\\\\"\""
-  #     s_undumped = s_dumped.undump # => "\f\u0000\xFF\\\""
-  #     s_undumped == s_orig         # => true
-  #
-  # Related: String#dump (inverse of String#undump).
+  # Related: see [Converting to New
+  # String](rdoc-ref:String@Converting+to+New+String).
   #
   def undump: () -> String
 
@@ -5180,21 +5292,22 @@ class String
   #
   # The encoding of `self` must be one of:
   #
-  # *   Encoding::UTF_8
-  # *   Encoding::UTF_16BE
-  # *   Encoding::UTF_16LE
-  # *   Encoding::UTF_32BE
-  # *   Encoding::UTF_32LE
-  # *   Encoding::GB18030
-  # *   Encoding::UCS_2BE
-  # *   Encoding::UCS_4BE
+  # *   `Encoding::UTF_8`.
+  # *   `Encoding::UTF_16BE`.
+  # *   `Encoding::UTF_16LE`.
+  # *   `Encoding::UTF_32BE`.
+  # *   `Encoding::UTF_32LE`.
+  # *   `Encoding::GB18030`.
+  # *   `Encoding::UCS_2BE`.
+  # *   `Encoding::UCS_4BE`.
   #
   # Examples:
   #
-  #     "a\u0300".unicode_normalize      # => "a"
-  #     "\u00E0".unicode_normalize(:nfd) # => "a "
+  #     "a\u0300".unicode_normalize       # => "à"  # Lowercase 'a' with grave accens.
+  #     "a\u0300".unicode_normalize(:nfd) # => "à"  # Same.
   #
-  # Related: String#unicode_normalize!, String#unicode_normalized?.
+  # Related: see [Converting to New
+  # String](rdoc-ref:String@Converting+to+New+String).
   #
   def unicode_normalize: (?:nfc | :nfd | :nfkc | :nfkd form) -> self
 
@@ -5240,7 +5353,7 @@ class String
   #   - unpack(template, offset: 0) -> array
   # -->
   # Extracts data from `self` to form new objects; see [Packed
-  # Data](rdoc-ref:packed_data.rdoc).
+  # Data](rdoc-ref:language/packed_data.rdoc).
   #
   # With a block given, calls the block with each unpacked object.
   #
@@ -5257,7 +5370,7 @@ class String
   #   - unpack1(template, offset: 0) -> object
   # -->
   # Like String#unpack with no block, but unpacks and returns only the first
-  # extracted object. See [Packed Data](rdoc-ref:packed_data.rdoc).
+  # extracted object. See [Packed Data](rdoc-ref:language/packed_data.rdoc).
   #
   # Related: see [Converting to
   # Non-String](rdoc-ref:String@Converting+to+Non--5CString).
@@ -5266,17 +5379,35 @@ class String
 
   # <!--
   #   rdoc-file=string.c
-  #   - upcase(mapping) -> string
+  #   - upcase(mapping = :ascii) -> new_string
   # -->
-  # Returns a string containing the upcased characters in `self`:
+  # Returns a new string containing the upcased characters in `self`:
   #
-  #     s = 'Hello World!' # => "Hello World!"
-  #     s.upcase           # => "HELLO WORLD!"
+  #     'hello'.upcase        # => "HELLO"
+  #     'straße'.upcase       # => "STRASSE"
+  #     'привет'.upcase       # => "ПРИВЕТ"
+  #     'RubyGems.org'.upcase # => "RUBYGEMS.ORG"
   #
-  # The casing may be affected by the given `mapping`; see [Case
-  # Mapping](rdoc-ref:case_mapping.rdoc).
+  # The sizes of `self` and the upcased result may differ:
   #
-  # Related: String#upcase!, String#downcase, String#downcase!.
+  #     s = 'Straße'
+  #     s.size        # => 6
+  #     s.upcase      # => "STRASSE"
+  #     s.upcase.size # => 7
+  #
+  # Some characters (and some character sets) do not have upcase and downcase
+  # versions; see [Case Mapping](rdoc-ref:case_mapping.rdoc):
+  #
+  #     s = '1, 2, 3, ...'
+  #     s.upcase == s # => true
+  #     s = 'こんにちは'
+  #     s.upcase == s # => true
+  #
+  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
+  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
+  #
+  # Related: see [Converting to New
+  # String](rdoc-ref:String@Converting+to+New+String).
   #
   def upcase: () -> String
             | (:ascii | :lithuanian | :turkic) -> String
@@ -5287,18 +5418,12 @@ class String
   #   rdoc-file=string.c
   #   - upcase!(mapping) -> self or nil
   # -->
-  # Upcases the characters in `self`; returns `self` if any changes were made,
-  # `nil` otherwise:
+  # Like String#upcase, except that:
   #
-  #     s = 'Hello World!' # => "Hello World!"
-  #     s.upcase!          # => "HELLO WORLD!"
-  #     s                  # => "HELLO WORLD!"
-  #     s.upcase!          # => nil
+  # *   Changes character casings in `self` (not in a copy of `self`).
+  # *   Returns `self` if any changes are made, `nil` otherwise.
   #
-  # The casing may be affected by the given `mapping`; see [Case
-  # Mapping](rdoc-ref:case_mapping.rdoc).
-  #
-  # Related: String#upcase, String#downcase, String#downcase!.
+  # Related: See [Modifying](rdoc-ref:String@Modifying).
   #
   def upcase!: () -> self?
              | (:ascii | :lithuanian | :turkic) -> self?
@@ -5315,20 +5440,28 @@ class String
   # `self.succ`, and so on; the sequence terminates when value `other_string` is
   # reached; returns `self`:
   #
-  #     'a8'.upto('b6') {|s| print s, ' ' } # => "a8"
+  #     a = []
+  #     'a'.upto('f') {|c| a.push(c) }
+  #     a # => ["a", "b", "c", "d", "e", "f"]
   #
-  # Output:
+  #     a = []
+  #     'Ж'.upto('П') {|c| a.push(c) }
+  #     a # => ["Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П"]
   #
-  #     a8 a9 b0 b1 b2 b3 b4 b5 b6
+  #     a = []
+  #     'よ'.upto('ろ') {|c| a.push(c) }
+  #     a # => ["よ", "ら", "り", "る", "れ", "ろ"]
+  #
+  #     a = []
+  #     'a8'.upto('b6') {|c| a.push(c) }
+  #     a # => ["a8", "a9", "b0", "b1", "b2", "b3", "b4", "b5", "b6"]
   #
   # If argument `exclusive` is given as a truthy object, the last value is
   # omitted:
   #
-  #     'a8'.upto('b6', true) {|s| print s, ' ' } # => "a8"
-  #
-  # Output:
-  #
-  #     a8 a9 b0 b1 b2 b3 b4 b5
+  #     a = []
+  #     'a'.upto('f', true) {|c| a.push(c) }
+  #     a # => ["a", "b", "c", "d", "e"]
   #
   # If `other_string` would not be reached, does not call the block:
   #
@@ -5339,6 +5472,8 @@ class String
   #
   #     'a8'.upto('b6') # => #<Enumerator: "a8":upto("b6")>
   #
+  # Related: see [Iterating](rdoc-ref:String@Iterating).
+  #
   def upto: (string other_string, ?boolish exclusive) -> Enumerator[String, self]
           | (string other_string, ?boolish exclusive) { (String s) -> void } -> self
 
@@ -5346,11 +5481,14 @@ class String
   #   rdoc-file=string.c
   #   - valid_encoding? -> true or false
   # -->
-  # Returns `true` if `self` is encoded correctly, `false` otherwise:
+  # Returns whether `self` is encoded correctly:
   #
-  #     "\xc2\xa1".force_encoding(Encoding::UTF_8).valid_encoding? # => true
-  #     "\xc2".force_encoding(Encoding::UTF_8).valid_encoding?     # => false
-  #     "\x80".force_encoding(Encoding::UTF_8).valid_encoding?     # => false
+  #     s = 'Straße'
+  #     s.valid_encoding?                                 # => true
+  #     s.encoding                                        # => #<Encoding:UTF-8>
+  #     s.force_encoding(Encoding::ASCII).valid_encoding? # => false
+  #
+  # Related: see [Querying](rdoc-ref:String@Querying).
   #
   def valid_encoding?: () -> bool
 end

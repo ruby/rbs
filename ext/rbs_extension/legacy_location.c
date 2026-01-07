@@ -33,7 +33,7 @@ void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap) {
     check_children_max(cap);
 
     size_t s = RBS_LOC_CHILDREN_SIZE(cap);
-    loc->children = malloc(s);
+    loc->children = (rbs_loc_children *) malloc(s);
 
     *loc->children = (rbs_loc_children) {
         .len = 0,
@@ -50,7 +50,7 @@ static void check_children_cap(rbs_loc *loc) {
         if (loc->children->len == loc->children->cap) {
             check_children_max(loc->children->cap + 1);
             size_t s = RBS_LOC_CHILDREN_SIZE(++loc->children->cap);
-            loc->children = realloc(loc->children, s);
+            loc->children = (rbs_loc_children *) realloc(loc->children, s);
         }
     }
 }
@@ -86,12 +86,12 @@ void rbs_loc_free(rbs_loc *loc) {
 }
 
 static void rbs_loc_mark(void *ptr) {
-    rbs_loc *loc = ptr;
+    rbs_loc *loc = (rbs_loc *) ptr;
     rb_gc_mark(loc->buffer);
 }
 
 static size_t rbs_loc_memsize(const void *ptr) {
-    const rbs_loc *loc = ptr;
+    const rbs_loc *loc = (const rbs_loc *) ptr;
     if (loc->children == NULL) {
         return sizeof(rbs_loc);
     } else {
@@ -117,7 +117,7 @@ static VALUE location_s_allocate(VALUE klass) {
 }
 
 rbs_loc *rbs_check_location(VALUE obj) {
-    return rb_check_typeddata(obj, &location_type);
+    return (rbs_loc *) rb_check_typeddata(obj, &location_type);
 }
 
 static VALUE location_initialize(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
