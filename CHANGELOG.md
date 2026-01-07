@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.10.1 (2026-01-07)
+
+This is a follow-up release for Ruby 4.0.0 with documentation update based on Ruby 4.0.0, and bugfixes related to set/pathname library loading.
+
+### Pull Requests
+
+* Merge pull request #2777 from ksss/pathname-ext ([#2786](https://github.com/ruby/rbs/pull/2786))
+* Ruby 4.0.0 backports ([#2785](https://github.com/ruby/rbs/pull/2785))
+* [Backport] Fix subtraction of civar ([#2783](https://github.com/ruby/rbs/pull/2783))
+* [Backport] Update ruby to 4.0 ([#2778](https://github.com/ruby/rbs/pull/2778))
+
 ## 3.10.0 (2025-12-23)
 
 RBS 3.10.0 ships with a pure C parser implementation, signature updates for Ruby 4.0, and various bug fixes.
