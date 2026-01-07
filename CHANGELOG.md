@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 3.10.2 (2026-01-07)
+
+This is a minor fix on arena allocator alignment.
+
+### Pull Requests
+
+* Merge pull request #2788 from ruby/fix-alloc-alignment ([#2790](https://github.com/ruby/rbs/pull/2790))
+
 ## 3.10.1 (2026-01-07)
 
 This is a follow-up release for Ruby 4.0.0 with documentation update based on Ruby 4.0.0, and bugfixes related to set/pathname library loading.
