@@ -529,6 +529,20 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     )?;
     writeln!(file, "        }}")?;
     writeln!(file, "    }}")?;
+    writeln!(file)?;
+    writeln!(file, "    /// Returns the location of the entire node.")?;
+    writeln!(file, "    #[must_use]")?;
+    writeln!(file, "    pub fn location(&self) -> RBSLocation {{")?;
+    writeln!(file, "        match self {{")?;
+    for node in &config.nodes {
+        writeln!(
+            file,
+            "            Node::{}(node) => node.location(),",
+            node.variant_name()
+        )?;
+    }
+    writeln!(file, "        }}")?;
+    writeln!(file, "    }}")?;
     writeln!(file, "}}")?;
     writeln!(file)?;
 
