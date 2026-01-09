@@ -2214,6 +2214,49 @@ module Kernel : BasicObject
   def self?.system: (String command, *String args, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: bool, ?chdir: String, ?exception: bool) -> (NilClass | FalseClass | TrueClass)
                   | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: bool, ?chdir: String, ?exception: bool) -> (NilClass | FalseClass | TrueClass)
 
+  # An interface used with `trace_var` (and `untrace_var`) for custom command types.
+  interface _Tracer
+    # Called whenever the global variable that's being traced changes; the argument is the new value.
+    def call: (untyped argument) -> void
+  end
+
+  # <!--
+  #   rdoc-file=eval.c
+  #   - trace_var(symbol, cmd )             -> nil
+  #   - trace_var(symbol) {|val| block }    -> nil
+  # -->
+  # Controls tracing of assignments to global variables. The parameter `symbol`
+  # identifies the variable (as either a string name or a symbol identifier).
+  # *cmd* (which may be a string or a `Proc` object) or block is executed whenever
+  # the variable is assigned. The block or `Proc` object receives the variable's
+  # new value as a parameter. Also see #untrace_var.
+  #
+  #     trace_var :$_, proc {|v| puts "$_ is now '#{v}'" }
+  #     $_ = "hello"
+  #     $_ = ' there'
+  #
+  # *produces:*
+  #
+  #     $_ is now 'hello'
+  #     $_ is now ' there'
+  #
+  def self?.trace_var: (interned name, String | _Tracer cmd) -> nil
+                     | (interned name) { (untyped value) -> void } -> nil
+                     | (interned name, nil) -> Array[String | _Tracer]?
+
+  # <!--
+  #   rdoc-file=eval.c
+  #   - untrace_var(symbol [, cmd] )   -> array or nil
+  # -->
+  # Removes tracing for the specified command on the given global variable and
+  # returns `nil`. If no command is specified, removes all tracing for that
+  # variable and returns an array containing the commands actually removed.
+  #
+  def self?.untrace_var: (interned name, ?nil) -> Array[String | _Tracer]
+                       | (interned name, String cmd) -> [String]?
+                       | [T < _Tracer] (interned name, T cmd) -> [T]?
+                       | (interned name, untyped cmd) -> nil
+
   # <!--
   #   rdoc-file=object.c
   #   - obj !~ other  -> true or false
