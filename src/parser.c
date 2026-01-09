@@ -3219,7 +3219,7 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
     rbs_buffer_init(ALLOCATOR(), &rbs_buffer);
 
     for (size_t i = 0; i < com->line_tokens_count; i++) {
-        rbs_token_t tok = com->line_tokens[i];
+        rbs_token_t tok = rbs_buffer_get(com->line_tokens, i, rbs_token_t);
 
         const char *comment_start = parser->lexer->string.start + tok.range.start.byte_pos + hash_bytes;
         size_t comment_bytes = RBS_RANGE_BYTES(tok.range) - hash_bytes;
@@ -3265,42 +3265,28 @@ static rbs_comment_t *comment_get_comment(rbs_comment_t *com, int line) {
 }
 
 static void comment_insert_new_line(rbs_allocator_t *allocator, rbs_comment_t *com, rbs_token_t comment_token) {
-    if (com->line_tokens_count == com->line_tokens_capacity) {
-        size_t old_size = com->line_tokens_capacity;
-        size_t new_size = old_size * 2;
-        com->line_tokens_capacity = new_size;
+    rbs_buffer_append_value(allocator, &com->line_tokens, &comment_token, rbs_token_t);
 
-        com->line_tokens = rbs_allocator_realloc(
-            allocator,
-            com->line_tokens,
-            sizeof(rbs_token_t) * old_size,
-            sizeof(rbs_token_t) * new_size,
-            rbs_token_t
-        );
-    }
-
-    com->line_tokens[com->line_tokens_count++] = comment_token;
+    com->line_tokens_count = com->line_tokens.length / sizeof(rbs_token_t);
     com->end = comment_token.range.end;
 }
 
 static rbs_comment_t *alloc_comment(rbs_allocator_t *allocator, rbs_token_t comment_token, rbs_comment_t *last_comment) {
     rbs_comment_t *new_comment = rbs_allocator_alloc(allocator, rbs_comment_t);
 
-    size_t initial_line_capacity = 10;
-
-    rbs_token_t *tokens = rbs_allocator_calloc(allocator, initial_line_capacity, rbs_token_t);
-    tokens[0] = comment_token;
-
     *new_comment = (rbs_comment_t) {
         .start = comment_token.range.start,
         .end = comment_token.range.end,
 
-        .line_tokens_capacity = initial_line_capacity,
-        .line_tokens_count = 1,
-        .line_tokens = tokens,
+        .line_tokens_count = 0,
+        .line_tokens = { 0 },
 
         .next_comment = last_comment,
     };
+
+    size_t initial_line_capacity = 10;
+    rbs_buffer_init_with_capacity(allocator, &new_comment->line_tokens, initial_line_capacity * sizeof(rbs_token_t));
+    comment_insert_new_line(allocator, new_comment, comment_token);
 
     return new_comment;
 }
