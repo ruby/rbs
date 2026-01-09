@@ -10,6 +10,7 @@ module RBS
           "base64" => nil,
           "bigdecimal" => nil,
           "csv" => nil,
+          "kconv" => nil,
           "minitest" => nil,
           "net-smtp" => nil,
           "nkf" => nil,
@@ -172,8 +173,8 @@ module RBS
           return if lockfile.gems.key?(name)
 
           case name
-          when 'bigdecimal-math'
-            # The `bigdecimal-math` is never released as a gem.
+          when 'bigdecimal-math', 'kconv'
+            # These gems are never released as a gem.
             # Therefore, `assign_gem` should not be called.
             RBS.logger.info {
               from = from_gem || "rbs_collection.yaml"
