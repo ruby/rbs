@@ -1174,7 +1174,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger')
+        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger', 'tsort')
         _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
@@ -1240,7 +1240,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger')
+        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger', 'tsort')
         run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
@@ -1280,7 +1280,7 @@ Processing `lib`...
         RUBY
         (dir/"sig").mkdir
 
-        bundle_install(:gemspec, "abbrev", "bigdecimal", "logger")
+        bundle_install(:gemspec, "abbrev", "bigdecimal", "logger", "tsort")
         stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
@@ -1310,7 +1310,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["mutex_m", ">= 0.3.0"])
+        bundle_install("logger", "tsort", ["mutex_m", ">= 0.3.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
@@ -1343,7 +1343,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["mutex_m", "0.2.0"])
+        bundle_install("logger", "tsort", ["mutex_m", "0.2.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1379,7 +1379,7 @@ Processing `lib`...
               type: stdlib
         YAML
 
-        bundle_install("logger")
+        bundle_install("logger", "tsort")
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1410,7 +1410,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install("logger", ["mutex_m", ">= 0.3.0"])
+        bundle_install("logger", "tsort", ["mutex_m", ">= 0.3.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
@@ -1440,7 +1440,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install("logger", ["mutex_m", "0.2.0"])
+        bundle_install("logger", "tsort", ["mutex_m", "0.2.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1475,7 +1475,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+        bundle_install("logger", "tsort", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
 
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
@@ -1519,7 +1519,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["hola", { path: "gem" }])
+        bundle_install("logger", "tsort", ["hola", { path: "gem" }])
 
         (dir + RBS::Collection::Config::PATH).write(<<~YAML)
           sources:
@@ -1566,7 +1566,7 @@ Processing `lib`...
           - name: cgi-escape
         YAML
 
-        bundle_install('ast', 'logger')
+        bundle_install('ast', 'logger', 'tsort')
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, 'Cannot find `set` gem.'
@@ -1605,7 +1605,7 @@ Processing `lib`...
           - name: cgi-escape
         YAML
 
-        bundle_install("logger", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+        bundle_install("logger", "tsort", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
 
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
