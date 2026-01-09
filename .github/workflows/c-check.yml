@@ -36,10 +36,10 @@ jobs:
           curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
           tar xf re2c-4.3.tar.gz
           cd re2c-4.3
-          autoreconf -i -W all
-          ./configure
-          make -j"$(nproc)" -l"$(nproc)"
-          sudo make install
+          cmake --preset=linux-gcc-release-ootree-skeleton-fast
+          cmake --build --preset=linux-gcc-release-ootree-skeleton-fast --parallel="$(nproc)"
+          sudo ln -sf "$(pwd)"/.build/linux-gcc-release-ootree-skeleton-fast/re2c /usr/local/bin/re2c
+          re2c --version
       - name: Update rubygems & bundler
         run: |
           ruby -v
