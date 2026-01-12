@@ -479,6 +479,9 @@ class PathnameInstanceTest < Test::Unit::TestCase
                        path, :open, 'r', 0644
       assert_send_type '() { (File) -> true} -> true',
                        path, :open do true end
+      assert_send_type "(String, binmode: bool) -> File",
+                       path, :open, 'r', binmode: true
+
     end
   end
 
