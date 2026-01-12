@@ -838,8 +838,51 @@ class Pathname
   # -->
   # See `File.open`.  Opens the file for reading or writing.
   #
-  def open: (?string | int mode, ?int perm) -> File
-          | [T] (?string | int mode, ?int perm) { (File) -> T } -> T
+  def open: (
+      ?string | int mode,
+      ?int perm,
+      # open options
+      ?flags: Integer,
+      ?external_encoding: encoding,
+      ?internal_encoding: encoding,
+      ?encoding: encoding,
+      ?textmode: boolish,
+      ?binmode: boolish,
+      ?autoclose: boolish,
+      ?path: path,
+      # encoding options
+      ?invalid: :replace | nil,
+      ?undef: :replace | nil,
+      ?replace: String | nil,
+      ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+      ?xml: :text | :attr | nil,
+      ?cr_newline: bool,
+      ?crlf_newline: bool,
+      ?universal_newline: bool
+    ) -> File
+          | [T] (
+      ?string | int mode,
+      ?int perm,
+      # open options
+      ?mode: Integer | String,
+      ?flags: Integer,
+      ?external_encoding: encoding,
+      ?internal_encoding: encoding,
+      ?encoding: encoding,
+      ?textmode: boolish,
+      ?binmode: boolish,
+      ?autoclose: boolish,
+      ?path: path,
+      # encoding options
+      ?invalid: :replace | nil,
+      ?undef: :replace | nil,
+      ?replace: String | nil,
+      ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+      ?xml: :text | :attr | nil,
+      ?cr_newline: bool,
+      ?crlf_newline: bool,
+      ?universal_newline: bool
+    ) { (File) -> T } -> T
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
