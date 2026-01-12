@@ -161,6 +161,6 @@ module Zlib
     # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
     # IO::new.
     #
-    def initialize: (_Writer io, Integer level, Integer strategy, **untyped opts) -> void
+    def initialize: (_Writer io, ?Integer level, ?Integer strategy, **untyped opts) -> void
   end
 end
