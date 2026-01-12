@@ -7,8 +7,6 @@
 
 #include "rbs_extension.h"
 
-VALUE RBS_Parser;
-
 VALUE RBS;
 VALUE RBS_AST;
 VALUE RBS_AST_Declarations;
@@ -49,9 +47,11 @@ VALUE RBS_AST_Members_MethodDefinition_Overload;
 VALUE RBS_AST_Members_Prepend;
 VALUE RBS_AST_Members_Private;
 VALUE RBS_AST_Members_Public;
+VALUE RBS_AST_Ruby_Annotations_ClassAliasAnnotation;
 VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_InstanceVariableAnnotation;
 VALUE RBS_AST_Ruby_Annotations_MethodTypesAnnotation;
+VALUE RBS_AST_Ruby_Annotations_ModuleAliasAnnotation;
 VALUE RBS_AST_Ruby_Annotations_NodeTypeAssertion;
 VALUE RBS_AST_Ruby_Annotations_ReturnTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_SkipAnnotation;
@@ -136,9 +136,11 @@ void rbs__init_constants(void) {
     IMPORT_CONSTANT(RBS_AST_Members_Prepend, RBS_AST_Members, "Prepend");
     IMPORT_CONSTANT(RBS_AST_Members_Private, RBS_AST_Members, "Private");
     IMPORT_CONSTANT(RBS_AST_Members_Public, RBS_AST_Members, "Public");
+    IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ClassAliasAnnotation, RBS_AST_Ruby_Annotations, "ClassAliasAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation, RBS_AST_Ruby_Annotations, "ColonMethodTypeAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_InstanceVariableAnnotation, RBS_AST_Ruby_Annotations, "InstanceVariableAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_MethodTypesAnnotation, RBS_AST_Ruby_Annotations, "MethodTypesAnnotation");
+    IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ModuleAliasAnnotation, RBS_AST_Ruby_Annotations, "ModuleAliasAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_NodeTypeAssertion, RBS_AST_Ruby_Annotations, "NodeTypeAssertion");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ReturnTypeAnnotation, RBS_AST_Ruby_Annotations, "ReturnTypeAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_SkipAnnotation, RBS_AST_Ruby_Annotations, "SkipAnnotation");

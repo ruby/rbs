@@ -11,6 +11,10 @@ module RBS
         @declarations = []
         @diagnostics = []
       end
+
+      def type_fingerprint
+        declarations.map(&:type_fingerprint)
+      end
     end
 
     module Diagnostic
@@ -35,6 +39,7 @@ module RBS
       MixinMultipleArguments = _ = Class.new(Base)
       MixinNonConstantModule = _ = Class.new(Base)
       AttributeNonSymbolName = _ = Class.new(Base)
+      ClassModuleAliasDeclarationMissingTypeName = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -392,11 +397,14 @@ module RBS
         # Look for trailing type annotation (#: Type)
         trailing_block = comments.trailing_block!(node.location)
         type_annotation = nil
+        alias_annotation = nil
 
         if trailing_block
           case annotation = trailing_block.trailing_annotation([])
           when AST::Ruby::Annotations::NodeTypeAssertion
             type_annotation = annotation
+          when AST::Ruby::Annotations::ClassAliasAnnotation, AST::Ruby::Annotations::ModuleAliasAnnotation
+            alias_annotation = annotation
           when AST::Ruby::CommentBlock::AnnotationSyntaxError
             diagnostics << Diagnostic::AnnotationSyntaxError.new(
               annotation.location, "Syntax error: " + annotation.error.error_message
@@ -404,20 +412,60 @@ module RBS
           end
         end
 
-        # Create the constant declaration
-        constant_decl = AST::Ruby::Declarations::ConstantDecl.new(
-          buffer,
-          constant_name,
-          node,
-          leading_block,
-          type_annotation
-        )
+        # Handle class/module alias declarations
+        if alias_annotation
+          # Try to infer the old name from the right-hand side
+          infered_old_name = constant_as_type_name(node.value)
 
-        # Insert the constant declaration appropriately
-        if current_module
-          current_module.members << constant_decl
+          # Check if we have either an explicit type name or can infer one
+          if alias_annotation.type_name.nil? && infered_old_name.nil?
+            message =
+              if alias_annotation.is_a?(AST::Ruby::Annotations::ClassAliasAnnotation)
+                "Class name is missing in class alias declaration"
+              else
+                "Module name is missing in module alias declaration"
+              end
+
+            diagnostics << Diagnostic::ClassModuleAliasDeclarationMissingTypeName.new(
+              alias_annotation.location,
+              message
+            )
+            return
+          end
+
+          # Create class/module alias declaration
+          alias_decl = AST::Ruby::Declarations::ClassModuleAliasDecl.new(
+            buffer,
+            node,
+            constant_name,
+            infered_old_name,
+            leading_block,
+            alias_annotation
+          )
+
+          # Insert the alias declaration appropriately
+
+          if current_module
+            current_module.members << alias_decl
+          else
+            result.declarations << alias_decl
+          end
         else
-          result.declarations << constant_decl
+          # Create regular constant declaration
+          constant_decl = AST::Ruby::Declarations::ConstantDecl.new(
+            buffer,
+            constant_name,
+            node,
+            leading_block,
+            type_annotation
+          )
+
+          # Insert the constant declaration appropriately
+          if current_module
+            current_module.members << constant_decl
+          else
+            result.declarations << constant_decl
+          end
         end
       end
 

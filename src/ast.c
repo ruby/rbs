@@ -75,12 +75,16 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Members::Private";
     case RBS_AST_MEMBERS_PUBLIC:
         return "RBS::AST::Members::Public";
+    case RBS_AST_RUBY_ANNOTATIONS_CLASS_ALIAS_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::ClassAliasAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::InstanceVariableAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::MethodTypesAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_MODULE_ALIAS_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::ModuleAliasAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION:
         return "RBS::AST::Ruby::Annotations::NodeTypeAssertion";
     case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION:
@@ -804,6 +808,23 @@ rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator,
     return instance;
 }
 #line 156 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location) {
+    rbs_ast_ruby_annotations_class_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_class_alias_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_class_alias_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_CLASS_ALIAS_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .keyword_location = keyword_location,
+        .type_name = type_name,
+        .type_name_location = type_name_location,
+    };
+
+    return instance;
+}
+#line 156 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type) {
     rbs_ast_ruby_annotations_colon_method_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_colon_method_type_annotation_t);
 
@@ -850,6 +871,23 @@ rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_met
         .prefix_location = prefix_location,
         .overloads = overloads,
         .vertical_bar_locations = vertical_bar_locations,
+    };
+
+    return instance;
+}
+#line 156 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location) {
+    rbs_ast_ruby_annotations_module_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_module_alias_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_module_alias_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_MODULE_ALIAS_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .keyword_location = keyword_location,
+        .type_name = type_name,
+        .type_name_location = type_name_location,
     };
 
     return instance;

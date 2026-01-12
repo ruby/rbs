@@ -1571,4 +1571,119 @@ COMMENT
       end
     end
   end
+
+  def test_parse__class_alias_without_type_name
+    result = parse(<<~RUBY)
+      MyString = String #: class-alias
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassModuleAliasDecl, decl
+      assert_equal RBS::TypeName.parse("MyString"), decl.new_name
+      assert_equal RBS::TypeName.parse("String"), decl.infered_old_name
+      assert_instance_of RBS::AST::Ruby::Annotations::ClassAliasAnnotation, decl.annotation
+      assert_nil decl.annotation.type_name
+      assert_equal RBS::TypeName.parse("String"), decl.old_name
+      assert_nil decl.leading_comment
+    end
+  end
+
+  def test_parse__class_alias_with_type_name
+    result = parse(<<~RUBY)
+      # Alias for the standard Object class
+      MyObject = some_object #: class-alias Object
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassModuleAliasDecl, decl
+      assert_equal RBS::TypeName.parse("MyObject"), decl.new_name
+      assert_nil decl.infered_old_name
+      assert_instance_of RBS::AST::Ruby::Annotations::ClassAliasAnnotation, decl.annotation
+      assert_equal RBS::TypeName.parse("Object"), decl.annotation.type_name
+      assert_equal RBS::TypeName.parse("Object"), decl.old_name
+      assert_equal "Alias for the standard Object class", decl.leading_comment.as_comment.string
+    end
+  end
+
+  def test_parse__module_alias_without_type_name
+    result = parse(<<~RUBY)
+      MyKernel = Kernel #: module-alias
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassModuleAliasDecl, decl
+      assert_equal RBS::TypeName.parse("MyKernel"), decl.new_name
+      assert_equal RBS::TypeName.parse("Kernel"), decl.infered_old_name
+      assert_instance_of RBS::AST::Ruby::Annotations::ModuleAliasAnnotation, decl.annotation
+      assert_nil decl.annotation.type_name
+      assert_equal RBS::TypeName.parse("Kernel"), decl.old_name
+      assert_nil decl.leading_comment
+    end
+  end
+
+  def test_parse__module_alias_with_type_name
+    result = parse(<<~RUBY)
+      # Alias for Enumerable module
+      MyEnum = some_enumerable #: module-alias Enumerable
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassModuleAliasDecl, decl
+      assert_equal RBS::TypeName.parse("MyEnum"), decl.new_name
+      assert_nil decl.infered_old_name
+      assert_instance_of RBS::AST::Ruby::Annotations::ModuleAliasAnnotation, decl.annotation
+      assert_equal RBS::TypeName.parse("Enumerable"), decl.annotation.type_name
+      assert_equal RBS::TypeName.parse("Enumerable"), decl.old_name
+      assert_equal "Alias for Enumerable module", decl.leading_comment.as_comment.string
+    end
+  end
+
+  def test_parse__class_alias_with_skip_annotation
+    result = parse(<<~RUBY)
+      # @rbs skip
+      MyString = String #: class-alias
+    RUBY
+
+    assert_empty result.diagnostics
+
+    assert_equal 0, result.declarations.size
+  end
+
+  def test_error__class_alias_non_constant_without_type_name
+    result = parse(<<~RUBY)
+      MyString = some_function() #: class-alias
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::ClassModuleAliasDeclarationMissingTypeName, diagnostic
+      assert_equal ": class-alias", diagnostic.location.source
+      assert_equal "Class name is missing in class alias declaration", diagnostic.message
+    end
+
+    assert_empty result.declarations
+  end
+
+  def test_error__module_alias_non_constant_without_type_name
+    result = parse(<<~RUBY)
+      MyModule = some_function() #: module-alias
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::ClassModuleAliasDeclarationMissingTypeName, diagnostic
+      assert_equal ": module-alias", diagnostic.location.source
+      assert_equal "Module name is missing in module alias declaration", diagnostic.message
+    end
+
+    assert_empty result.declarations
+  end
 end

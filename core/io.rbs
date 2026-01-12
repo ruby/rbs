@@ -1373,7 +1373,7 @@ class IO < Object
   # Formats and writes `objects` to the stream.
   #
   # For details on `format_string`, see [Format
-  # Specifications](rdoc-ref:format_specifications.rdoc).
+  # Specifications](rdoc-ref:language/format_specifications.rdoc).
   #
   def printf: (String format_string, *untyped objects) -> nil
 
@@ -1442,6 +1442,61 @@ class IO < Object
   #     show([[[0, 1], 2, 3], 4, 5])  # => "0\n1\n2\n3\n4\n5\n"
   #
   def puts: (*untyped objects) -> nil
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - pread(maxlen, offset)             -> string
+  #   - pread(maxlen, offset, out_string) -> string
+  # -->
+  # Behaves like IO#readpartial, except that it:
+  #
+  # *   Reads at the given `offset` (in bytes).
+  # *   Disregards, and does not modify, the stream's position (see
+  #     [Position](rdoc-ref:IO@Position)).
+  # *   Bypasses any user space buffering in the stream.
+  #
+  # Because this method does not disturb the stream's state (its position, in
+  # particular), `pread` allows multiple threads and processes to use the same IO
+  # object for reading at various offsets.
+  #
+  #     f = File.open('t.txt')
+  #     f.read # => "First line\nSecond line\n\nFourth line\nFifth line\n"
+  #     f.pos  # => 52
+  #     # Read 12 bytes at offset 0.
+  #     f.pread(12, 0) # => "First line\n"
+  #     # Read 9 bytes at offset 8.
+  #     f.pread(9, 8)  # => "ne\nSecon"
+  #     f.close
+  #
+  # Not available on some platforms.
+  #
+  def pread: (int maxlen, int offset, ?string out_string) -> String
+
+  # <!--
+  #   rdoc-file=io.c
+  #   - pwrite(object, offset) -> integer
+  # -->
+  # Behaves like IO#write, except that it:
+  #
+  # *   Writes at the given `offset` (in bytes).
+  # *   Disregards, and does not modify, the stream's position (see
+  #     [Position](rdoc-ref:IO@Position)).
+  # *   Bypasses any user space buffering in the stream.
+  #
+  # Because this method does not disturb the stream's state (its position, in
+  # particular), `pwrite` allows multiple threads and processes to use the same IO
+  # object for writing at various offsets.
+  #
+  #     f = File.open('t.tmp', 'w+')
+  #     # Write 6 bytes at offset 3.
+  #     f.pwrite('ABCDEF', 3) # => 6
+  #     f.rewind
+  #     f.read # => "\u0000\u0000\u0000ABCDEF"
+  #     f.close
+  #
+  # Not available on some platforms.
+  #
+  def pwrite: (_ToS object, int offset) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2276,7 +2331,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   def self.binread: (path name, ?Integer? length, ?Integer offset) -> String
 
@@ -2289,7 +2344,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
 
@@ -2354,15 +2409,16 @@ class IO < Object
   # connected to a new stream `io`.
   #
   # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:command_injection.rdoc).
+  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # If no block is given, returns the new stream, which depending on given `mode`
   # may be open for reading, writing, or both. The stream should be explicitly
   # closed (eventually) to avoid resource leaks.
   #
   # If a block is given, the stream is passed to the block (again, open for
-  # reading, writing, or both); when the block exits, the stream is closed, and
-  # the block's value is assigned to global variable `$?` and returned.
+  # reading, writing, or both); when the block exits, the stream is closed, the
+  # block's value is returned, and the global variable `$?` is set to the child's
+  # exit status.
   #
   # Optional argument `mode` may be any valid IO mode. See [Access
   # Modes](rdoc-ref:File@Access+Modes).
@@ -2391,7 +2447,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   Options for Kernel#spawn.
   #
-  # **Forked \Process**
+  # **Forked Process**
   #
   # When argument `cmd` is the 1-character string `'-'`, causes the process to
   # fork:
@@ -2503,10 +2559,10 @@ class IO < Object
   #
   # Raises exceptions that IO.pipe and Kernel.spawn raise.
   #
-  def self.popen: (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
-                | (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) -> instance
-                | [X] (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
-                | [X] (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: boolish, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: boolish, ?chdir: String) { (instance) -> X } -> X
+  def self.popen: (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) -> instance
+                | (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) -> instance
+                | [X] (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) { (instance) -> X } -> X
+                | [X] (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) { (instance) -> X } -> X
 
   # The command can be given as:
   #
@@ -2528,7 +2584,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -2594,8 +2650,8 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (string | _ToPath path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
@@ -2685,7 +2741,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -2728,7 +2784,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -2769,7 +2825,7 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
-  def self.readlines: (String | _ToPath name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (path name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -2785,7 +2841,8 @@ class IO < Object
   # IO objects.
   #
   # Argument `timeout` is a numeric value (such as integer or float) timeout
-  # interval in seconds.
+  # interval in seconds. `timeout` can also be `nil` or `Float::INFINITY`. `nil`
+  # and `Float::INFINITY` means no timeout.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:
@@ -2952,7 +3009,7 @@ class IO < Object
   #
   # When called from class IO (but not subclasses of IO), this method has
   # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:command_injection.rdoc).
+  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #

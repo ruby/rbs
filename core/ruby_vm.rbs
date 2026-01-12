@@ -443,7 +443,7 @@ module RubyVM::AbstractSyntaxTree
   #
   # See ::parse for explanation of keyword argument meaning and usage.
   #
-  def self.parse_file: (String | ::_ToPath string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
+  def self.parse_file: (path string, ?keep_script_lines: bool, ?error_tolerant: bool, ?keep_tokens: bool) -> Node
 
   # <!--
   #   rdoc-file=ast.rb
@@ -683,11 +683,13 @@ module RubyVM::YJIT
 
   # <!--
   #   rdoc-file=yjit.rb
-  #   - enable(stats: false, log: false)
+  #   - enable(stats: false, log: false, mem_size: nil, call_threshold: nil)
   # -->
   # Enable YJIT compilation. `stats` option decides whether to enable YJIT stats
   # or not. `log` decides
-  # whether to enable YJIT compilation logging or not.
+  # whether to enable YJIT compilation logging or not. Optional `mem_size` and
+  # `call_threshold` can be
+  # provided to override default configuration.
   # *   `stats`:
   #     *   `false`: Don't enable stats.
   #     *   `true`: Enable stats. Print stats at exit.

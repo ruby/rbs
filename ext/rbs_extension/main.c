@@ -16,7 +16,7 @@
  * ```
  * */
 static NORETURN(void) raise_error(rbs_error_t *error, VALUE buffer) {
-    rbs_assert(error != NULL, "raise_error() called with NULL error");
+    RBS_ASSERT(error != NULL, "raise_error() called with NULL error");
 
     if (!error->syntax_error) {
         rb_raise(rb_eRuntimeError, "Unexpected error");
@@ -211,17 +211,9 @@ static VALUE parse_method_type_try(VALUE a) {
     }
 
     rbs_method_type_t *method_type = NULL;
-    rbs_parse_method_type(parser, &method_type, true);
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof), true);
 
     raise_error_if_any(parser, arg->buffer);
-
-    if (RB_TEST(arg->require_eof)) {
-        rbs_parser_advance(parser);
-        if (parser->current_token.type != pEOF) {
-            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
-            raise_error(parser->error, arg->buffer);
-        }
-    }
 
     rbs_translation_context_t ctx = rbs_translation_context_create(
         &parser->constant_pool,
@@ -453,8 +445,12 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 void rbs__init_parser(void) {
     RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
     rb_gc_register_mark_object(RBS_Parser);
-    VALUE empty_array = rb_obj_freeze(rb_ary_new());
-    rb_gc_register_mark_object(empty_array);
+
+    EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+    rb_gc_register_mark_object(EMPTY_ARRAY);
+
+    EMPTY_HASH = rb_obj_freeze(rb_hash_new());
+    rb_gc_register_mark_object(EMPTY_HASH);
 
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 8);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);

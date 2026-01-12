@@ -1,9 +1,9 @@
 require_relative "test_helper"
-require 'pathname'
+require "pathname" unless defined?(Pathname)
 
 class PathnameSingletonTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing 'singleton(::Pathname)'
 
   def test_getwd
@@ -27,11 +27,11 @@ class PathnameSingletonTest < Test::Unit::TestCase
                      Pathname, :pwd
   end
 
-  def test_initialize
+  def test_new
     assert_send_type '(String) -> Pathname',
                      Pathname, :new, 'foo'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname, :new, ToStr.new('foo')
+                     Pathname, :new, ToStr.new('foo').__with_object_methods(:respond_to?)
     assert_send_type '(Pathname) -> Pathname',
                      Pathname, :new, Pathname('foo')
   end
@@ -39,7 +39,7 @@ end
 
 class PathnameInstanceTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing '::Pathname'
 
   def test_plus
@@ -48,7 +48,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
     assert_send_type '(String) -> Pathname',
                      Pathname('foo'), :+, 'bar'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname('foo'), :+, ToStr.new('bar')
+                     Pathname('foo'), :+, ToStr.new('bar').__with_object_methods(:respond_to?)
   end
 
   def test_slash
@@ -57,7 +57,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
     assert_send_type '(String) -> Pathname',
                      Pathname('foo'), :/, 'bar'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname('foo'), :/, ToStr.new('bar')
+                     Pathname('foo'), :/, ToStr.new('bar').__with_object_methods(:respond_to?)
   end
 
   def test_spaceship
@@ -314,17 +314,6 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('/unknown'), :file?
   end
 
-  def test_find
-    assert_send_type '() { (Pathname) -> untyped } -> nil',
-                     Pathname(__dir__), :find do end
-    assert_send_type '(ignore_error: bool) -> Enumerator[Pathname, nil]',
-                     Pathname(__dir__), :find, ignore_error: true
-    assert_send_type '(ignore_error: Symbol) -> Enumerator[Pathname, nil]',
-                     Pathname(__dir__), :find, ignore_error: :true
-    assert_send_type '() -> Enumerator[Pathname, nil]',
-                     Pathname(__dir__), :find
-  end
-
   def test_fnmatch
     assert_send_type '(String) -> bool',
                      Pathname('foo'), :fnmatch, 'fo*'
@@ -387,7 +376,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
     assert_send_type '(String, String) -> Pathname',
                      Pathname('.'), :join, 'foo', 'bar'
     assert_send_type '(ToStr) -> Pathname',
-                     Pathname('.'), :join, ToStr.new('foo')
+                     Pathname('.'), :join, ToStr.new('foo').__with_object_methods(:respond_to?)
     assert_send_type '(Pathname) -> Pathname',
                      Pathname('.'), :join, Pathname('foo')
   end
@@ -608,7 +597,7 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('.'), :relative_path_from, '.'
 
     assert_send_type '(_ToStr) -> Pathname',
-                     Pathname('.'), :relative_path_from, ToStr.new('.').__with_object_methods(:is_a?)
+                     Pathname('.'), :relative_path_from, ToStr.new('.').__with_object_methods(:is_a?, :respond_to?)
   end
 
   def test_rename
@@ -635,15 +624,6 @@ class PathnameInstanceTest < Test::Unit::TestCase
       target.mkdir
       assert_send_type '() -> 0',
                        target, :rmdir
-    end
-  end
-
-  def test_rmtree
-    Dir.mktmpdir do |dir|
-      target = Pathname(dir).join('target')
-      target.mkdir
-      assert_send_type '() -> Pathname',
-                       target, :rmtree
     end
   end
 
@@ -820,16 +800,19 @@ end
 
 class PathnameKernelTest < Test::Unit::TestCase
   include TestHelper
-  library 'pathname'
+
   testing '::Kernel'
 
   def test_Pathname
-    with_string("Gemfile") do
-      assert_send_type(
-        "(::string) -> ::Pathname",
-        self, :Pathname, _1
-      )
-    end
+    assert_send_type(
+      "(::String) -> ::Pathname",
+      self, :Pathname, "Gemfile"
+    )
+
+    assert_send_type(
+      "(::_ToStr) -> ::Pathname",
+      self, :Pathname, ToStr.new("Gemfile").__with_object_methods(:respond_to?)
+    )
 
     assert_send_type(
       "(::Pathname) -> ::Pathname",

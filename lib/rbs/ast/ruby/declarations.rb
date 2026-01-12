@@ -54,6 +54,13 @@ module RBS
 
             alias name type_name
             alias args type_args
+
+            def type_fingerprint
+              [
+                type_name.to_s,
+                type_annotation&.type_fingerprint
+              ]
+            end
           end
 
           attr_reader :class_name
@@ -91,6 +98,17 @@ module RBS
           def name_location
             rbs_location(node.constant_path.location)
           end
+
+          def type_fingerprint
+            result = [] #: Array[untyped]
+
+            result << "decls/class"
+            result << class_name.to_s
+            result << super_class&.type_fingerprint
+            result << members.map { _1.type_fingerprint }
+
+            result
+          end
         end
 
         class ModuleDecl < Base
@@ -127,6 +145,16 @@ module RBS
 
           def name_location
             rbs_location(node.constant_path.location)
+          end
+
+          def type_fingerprint
+            result = [] #: Array[untyped]
+
+            result << "decls/module"
+            result << module_name.to_s
+            result << members.map { _1.type_fingerprint}
+
+            result
           end
         end
 
@@ -180,6 +208,71 @@ module RBS
 
           def comment
             leading_comment&.as_comment
+          end
+
+          def type_fingerprint
+            [
+              "decls/constant",
+              constant_name.to_s,
+              type.to_s,
+              leading_comment&.as_comment&.string
+            ]
+          end
+        end
+
+        class ClassModuleAliasDecl < Base
+          attr_reader :node
+          attr_reader :leading_comment
+          attr_reader :new_name
+          attr_reader :infered_old_name
+          attr_reader :annotation
+
+          def initialize(buffer, node, new_name, infered_old_name, leading_comment, annotation)
+            super(buffer)
+            @node = node
+            @new_name = new_name
+            @infered_old_name = infered_old_name
+            @leading_comment = leading_comment
+            @annotation = annotation
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_location
+            case node
+            when Prism::ConstantWriteNode
+              rbs_location(node.name_loc)
+            when Prism::ConstantPathWriteNode
+              rbs_location(node.target.location)
+            end
+          end
+
+          def old_name
+            # Return explicit type name from annotation if provided, otherwise use inferred name
+            case
+            when annotation.type_name
+              annotation.type_name
+            when infered_old_name
+              infered_old_name
+            else
+              raise "No old name available"
+            end
+          end
+
+          def comment
+            leading_comment&.as_comment
+          end
+
+          def type_fingerprint
+            [
+              "decls/class_module_alias",
+              annotation.type_fingerprint,
+              new_name.to_s,
+              old_name.to_s,
+              leading_comment&.as_comment&.string
+            ]
           end
         end
       end

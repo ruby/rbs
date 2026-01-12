@@ -147,8 +147,10 @@
 module Coverage
   # <!--
   #   rdoc-file=ext/coverage/lib/coverage.rb
-  #   - line_stub(file)
+  #   - line_stub(file) -> array
   # -->
+  # A simple helper function that creates the "stub" of line coverage from a given
+  # source code.
   #
   def self.line_stub: (String) -> Array[Integer?]
 

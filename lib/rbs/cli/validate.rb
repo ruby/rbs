@@ -121,7 +121,7 @@ EOU
 
                 self_params =
                   if self_type.name.class?
-                    @env.normalized_module_entry(self_type.name)&.type_params
+                    @env.module_entry(self_type.name, normalized: true)&.type_params
                   else
                     @env.interface_decls[self_type.name]&.decl&.type_params
                   end
@@ -167,7 +167,7 @@ EOU
                 when AST::Members::Mixin
                   params =
                     if member.name.class?
-                      module_decl = @env.normalized_module_entry(member.name) or raise
+                      module_decl = @env.module_entry(member.name, normalized: true) or raise
                       module_decl.type_params
                     else
                       interface_decl = @env.interface_decls.fetch(member.name)

@@ -11,12 +11,12 @@ jobs:
   comments:
     runs-on: "ubuntu-latest"
     # env:
-    #   RUBY_COMMIT: 1b0c46daed9186b82ab4fef1a4ab225afe582ee6
+    #   RUBY_COMMIT: v4.0.0-preview2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4.5"
+          ruby-version: "4.0.0"
           bundler: none
       - name: Install dependencies
         run: |

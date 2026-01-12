@@ -449,6 +449,22 @@ MAX_RETRIES = 3
 CONFIG = load_config() #: Hash[String, untyped]
 ```
 
-### Current Limitations
+## Class/module Aliases
 
-- Module/class aliases are not supported
+Class and module aliases can be defined by assigning existing classes or modules to constants using the `#: class-alias` or `#: module-alias` syntax.
+
+```ruby
+MyObject = Object #: class-alias
+
+MyKernel = Kernel #: module-alias
+```
+
+This creates new type names that refer to the same class or module as the original.
+
+The annotations can have optional type name to specify the class/module name, for the case it cannot be infered through the right-hand-side of the constant declaration.
+
+```ruby
+MyObject = object #: class-alias Object
+
+MyKernel = kernel #: module-alias Kernel
+```

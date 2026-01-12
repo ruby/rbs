@@ -484,32 +484,46 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :readline, "\n", 100, chomp: true
     end
   end
+
+  def test_pwrite
+    Dir.mktmpdir do |dir|
+      File.open(File.join(dir, "io-pwrite"), "w") do |io|
+        with_int(0) do |offset|
+          assert_send_type "(String, int) -> Integer",
+                          io, :pwrite, "hello", offset
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
+
+  def test_pread
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      with_int(10) do |maxlen|
+        with_int(0) do |offset|
+          assert_send_type(
+            "(int, int) -> String",
+            io, :pread, maxlen, offset
+          )
+          with_string(+"buffer") do |buffer|
+            assert_send_type(
+              "(int, int, string) -> String",
+              io, :pread, maxlen, offset, buffer
+            )
+          end
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
   include TestHelper
 
   testing "::IO"
-
-  def test_readyp
-    # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
-
-    IO.pipe.tap do |r, w|
-      assert_send_type(
-        "() -> untyped",
-        r, :ready?
-      )
-    end
-
-    IO.pipe.tap do |r, w|
-      w.write("hello")
-
-      assert_send_type(
-        "() -> untyped",
-        r, :ready?
-      )
-    end
-  end
 
   def test_wait_readable
     if_ruby "3.0.0"..."3.2.0" do
@@ -546,15 +560,6 @@ class IOWaitTest < Test::Unit::TestCase
           w, :wait_writable, 1
         )
       end
-    end
-  end
-
-  def test_nread
-    IO.pipe.tap do |r, w|
-      assert_send_type(
-        "() -> Integer",
-        r, :nread
-      )
     end
   end
 

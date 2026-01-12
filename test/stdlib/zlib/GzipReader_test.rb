@@ -1,7 +1,6 @@
 require_relative "../test_helper"
 require "zlib"
 require "tempfile"
-require "pathname"
 
 class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
   include TestHelper

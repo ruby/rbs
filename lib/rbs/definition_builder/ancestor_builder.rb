@@ -220,7 +220,7 @@ module RBS
               InvalidTypeApplicationError.check2!(type_name: super_class.name, args: super_class.args, env: env, location: super_class.location)
             end
 
-            super_entry = env.normalized_class_entry(super_name) or raise
+            super_entry = env.class_entry(super_name, normalized: true) or raise
             super_args = AST::TypeParam.normalize_args(super_entry.type_params, super_args)
 
             ancestors = OneAncestors.class_instance(
@@ -248,7 +248,7 @@ module RBS
 
               module_name = module_self.name
               if module_name.class?
-                module_entry = env.normalized_module_class_entry(module_name) or raise
+                module_entry = env.module_class_entry(module_name, normalized: true) or raise
                 module_name = module_entry.name
                 self_args = AST::TypeParam.normalize_args(module_entry.type_params, module_self.args)
               end
@@ -361,7 +361,7 @@ module RBS
                 MixinClassError.check!(type_name: type_name, env: env, member: member)
                 NoMixinFoundError.check!(member.name, env: env, member: member)
 
-                module_decl = env.normalized_module_entry(module_name) or raise
+                module_decl = env.module_entry(module_name, normalized: true) or raise
                 module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
 
                 module_name = env.normalize_module_name(module_name)
@@ -380,7 +380,7 @@ module RBS
                 MixinClassError.check!(type_name: type_name, env: env, member: member)
                 NoMixinFoundError.check!(member.name, env: env, member: member)
 
-                module_decl = env.normalized_module_entry(member.name) or raise
+                module_decl = env.module_entry(member.name, normalized: true) or raise
                 module_name = module_decl.name
 
                 module_args = member.args.map {|type| align_params ? type.sub(align_params) : type }
@@ -398,7 +398,7 @@ module RBS
                 MixinClassError.check!(type_name: type_name, env: env, member: member)
                 NoMixinFoundError.check!(member.name, env: env, member: member)
 
-                module_decl = env.normalized_module_entry(module_name) or raise
+                module_decl = env.module_entry(module_name, normalized: true) or raise
                 module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
 
                 module_name = env.normalize_module_name(module_name)
@@ -427,7 +427,7 @@ module RBS
                 end
 
                 # Check if module exists
-                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_decl = env.module_entry(module_name, normalized: true) or raise NoMixinFoundError.new(type_name: module_name, member: member)
                 module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
                 module_name = env.normalize_module_name(module_name)
                 included_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
@@ -444,7 +444,7 @@ module RBS
                 end
 
                 # Check if module exists
-                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_decl = env.module_entry(module_name, normalized: true) or raise NoMixinFoundError.new(type_name: module_name, member: member)
                 module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
                 module_name = env.normalize_module_name(module_name)
                 extended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)
@@ -461,7 +461,7 @@ module RBS
                 end
 
                 # Check if module exists
-                module_decl = env.normalized_module_entry(module_name) or raise NoMixinFoundError.new(type_name: module_name, member: member)
+                module_decl = env.module_entry(module_name, normalized: true) or raise NoMixinFoundError.new(type_name: module_name, member: member)
                 module_args = AST::TypeParam.normalize_args(module_decl.type_params, module_args)
                 module_name = env.normalize_module_name(module_name)
                 prepended_modules << Definition::Ancestor::Instance.new(name: module_name, args: module_args, source: member)

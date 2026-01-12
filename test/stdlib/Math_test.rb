@@ -159,6 +159,20 @@ class MathSingletonTest < Test::Unit::TestCase
                       Math, :exp, ToF.new(0.0)
   end
 
+  def test_expm1
+    with_double 0.0 do |double|
+      assert_send_type(
+        '(Math::double) -> Float',
+        Math, :expm1, double
+      )
+    end
+
+    refute_send_type(
+      '(_ToF) -> Float',
+      Math, :expm1, ToF.new(0.0)
+    )
+  end
+
   def test_frexp
     with_double 0.0 do |double|
       assert_send_type  '(Math::double) -> [Float, Integer]',
@@ -243,6 +257,20 @@ class MathSingletonTest < Test::Unit::TestCase
 
     refute_send_type  '(_ToF) -> Float',
                       Math, :log10, ToF.new(0.0)
+  end
+
+  def test_log1p
+    with_double 0.0 do |double|
+      assert_send_type(
+        '(Math::double) -> Float',
+        Math, :log1p, double
+      )
+    end
+
+    refute_send_type(
+      '(_ToF) -> Float',
+      Math, :log1p, ToF.new(0.0)
+    )
   end
 
   def test_log2

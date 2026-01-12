@@ -45,45 +45,47 @@ enum rbs_node_type {
     RBS_AST_MEMBERS_PREPEND = 29,
     RBS_AST_MEMBERS_PRIVATE = 30,
     RBS_AST_MEMBERS_PUBLIC = 31,
-    RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION = 32,
-    RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION = 33,
-    RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION = 34,
-    RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION = 35,
-    RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION = 36,
-    RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION = 37,
-    RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION = 38,
-    RBS_AST_STRING = 39,
-    RBS_AST_TYPE_PARAM = 40,
-    RBS_METHOD_TYPE = 41,
-    RBS_NAMESPACE = 42,
-    RBS_SIGNATURE = 43,
-    RBS_TYPE_NAME = 44,
-    RBS_TYPES_ALIAS = 45,
-    RBS_TYPES_BASES_ANY = 46,
-    RBS_TYPES_BASES_BOOL = 47,
-    RBS_TYPES_BASES_BOTTOM = 48,
-    RBS_TYPES_BASES_CLASS = 49,
-    RBS_TYPES_BASES_INSTANCE = 50,
-    RBS_TYPES_BASES_NIL = 51,
-    RBS_TYPES_BASES_SELF = 52,
-    RBS_TYPES_BASES_TOP = 53,
-    RBS_TYPES_BASES_VOID = 54,
-    RBS_TYPES_BLOCK = 55,
-    RBS_TYPES_CLASS_INSTANCE = 56,
-    RBS_TYPES_CLASS_SINGLETON = 57,
-    RBS_TYPES_FUNCTION = 58,
-    RBS_TYPES_FUNCTION_PARAM = 59,
-    RBS_TYPES_INTERFACE = 60,
-    RBS_TYPES_INTERSECTION = 61,
-    RBS_TYPES_LITERAL = 62,
-    RBS_TYPES_OPTIONAL = 63,
-    RBS_TYPES_PROC = 64,
-    RBS_TYPES_RECORD = 65,
-    RBS_TYPES_RECORD_FIELD_TYPE = 66,
-    RBS_TYPES_TUPLE = 67,
-    RBS_TYPES_UNION = 68,
-    RBS_TYPES_UNTYPED_FUNCTION = 69,
-    RBS_TYPES_VARIABLE = 70,
+    RBS_AST_RUBY_ANNOTATIONS_CLASS_ALIAS_ANNOTATION = 32,
+    RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION = 33,
+    RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION = 34,
+    RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION = 35,
+    RBS_AST_RUBY_ANNOTATIONS_MODULE_ALIAS_ANNOTATION = 36,
+    RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION = 37,
+    RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION = 38,
+    RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION = 39,
+    RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION = 40,
+    RBS_AST_STRING = 41,
+    RBS_AST_TYPE_PARAM = 42,
+    RBS_METHOD_TYPE = 43,
+    RBS_NAMESPACE = 44,
+    RBS_SIGNATURE = 45,
+    RBS_TYPE_NAME = 46,
+    RBS_TYPES_ALIAS = 47,
+    RBS_TYPES_BASES_ANY = 48,
+    RBS_TYPES_BASES_BOOL = 49,
+    RBS_TYPES_BASES_BOTTOM = 50,
+    RBS_TYPES_BASES_CLASS = 51,
+    RBS_TYPES_BASES_INSTANCE = 52,
+    RBS_TYPES_BASES_NIL = 53,
+    RBS_TYPES_BASES_SELF = 54,
+    RBS_TYPES_BASES_TOP = 55,
+    RBS_TYPES_BASES_VOID = 56,
+    RBS_TYPES_BLOCK = 57,
+    RBS_TYPES_CLASS_INSTANCE = 58,
+    RBS_TYPES_CLASS_SINGLETON = 59,
+    RBS_TYPES_FUNCTION = 60,
+    RBS_TYPES_FUNCTION_PARAM = 61,
+    RBS_TYPES_INTERFACE = 62,
+    RBS_TYPES_INTERSECTION = 63,
+    RBS_TYPES_LITERAL = 64,
+    RBS_TYPES_OPTIONAL = 65,
+    RBS_TYPES_PROC = 66,
+    RBS_TYPES_RECORD = 67,
+    RBS_TYPES_RECORD_FIELD_TYPE = 68,
+    RBS_TYPES_TUPLE = 69,
+    RBS_TYPES_UNION = 70,
+    RBS_TYPES_UNTYPED_FUNCTION = 71,
+    RBS_TYPES_VARIABLE = 72,
     RBS_KEYWORD,
     RBS_AST_SYMBOL,
 };
@@ -399,6 +401,15 @@ typedef struct rbs_ast_members_public {
 
 } rbs_ast_members_public_t;
 
+typedef struct rbs_ast_ruby_annotations_class_alias_annotation {
+    rbs_node_t base;
+
+    struct rbs_location *prefix_location;
+    struct rbs_location *keyword_location;
+    struct rbs_type_name *type_name;
+    struct rbs_location *type_name_location;
+} rbs_ast_ruby_annotations_class_alias_annotation_t;
+
 typedef struct rbs_ast_ruby_annotations_colon_method_type_annotation {
     rbs_node_t base;
 
@@ -425,6 +436,15 @@ typedef struct rbs_ast_ruby_annotations_method_types_annotation {
     struct rbs_node_list *overloads;
     struct rbs_location_list *vertical_bar_locations;
 } rbs_ast_ruby_annotations_method_types_annotation_t;
+
+typedef struct rbs_ast_ruby_annotations_module_alias_annotation {
+    rbs_node_t base;
+
+    struct rbs_location *prefix_location;
+    struct rbs_location *keyword_location;
+    struct rbs_type_name *type_name;
+    struct rbs_location *type_name_location;
+} rbs_ast_ruby_annotations_module_alias_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_node_type_assertion {
     rbs_node_t base;
@@ -729,9 +749,11 @@ rbs_ast_members_method_definition_overload_t *rbs_ast_members_method_definition_
 rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
 rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocator, rbs_location_t *location);
 rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator, rbs_location_t *location);
+rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location);
 rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type);
 rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_t *ivar_name_location, rbs_location_t *colon_location, rbs_node_t *type, rbs_location_t *comment_location);
 rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *overloads, rbs_location_list_t *vertical_bar_locations);
+rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location);
 rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_t *type);
 rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *return_location, rbs_location_t *colon_location, rbs_node_t *return_type, rbs_location_t *comment_location);
 rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *skip_location, rbs_location_t *comment_location);

@@ -288,6 +288,19 @@ module RBS
                   values << args
                   nil
                 end
+              when nil
+                values = []
+                count = 10_000
+
+                ret = val.each do |*args|
+                  count -= 1
+                  values << args
+                  break if count <= 0
+                end
+
+                if count == 0
+                  ret = self
+                end
               else
                 values = []
                 ret = val.each do |*args|
@@ -351,6 +364,7 @@ module RBS
           value(val, builder.expand_alias2(type.name.absolute!, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
+            type.types.length == val.length &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
           Test::call(val, IS_AP, ::Hash) &&

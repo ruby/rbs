@@ -28,6 +28,8 @@ class JSONOpenStructInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      OpenStruct.new, :to_json
+    assert_send_type "(nil) -> String",
+                     OpenStruct.new, :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      OpenStruct.new, :to_json, JSON::State.new
   end

@@ -10,7 +10,7 @@ class Time
 
   # <!--
   #   rdoc-file=lib/time.rb
-  #   - zone_offset(zone, year=self.now.year)
+  #   - zone_offset(zone, year=nil)
   # -->
   # Return the number of seconds the specified time zone differs from UTC.
   #

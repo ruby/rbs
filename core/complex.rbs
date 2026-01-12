@@ -184,23 +184,24 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex * numeric -> new_complex
+  #   - self * other -> numeric
   # -->
-  # Returns the product of `self` and `numeric`:
+  # Returns the numeric product of `self` and `other`:
   #
+  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
+  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
   #     Complex.rect(2, 3)  * Complex.rect(2, 3)  # => (-5+12i)
   #     Complex.rect(900)   * Complex.rect(1)     # => (900+0i)
   #     Complex.rect(-2, 9) * Complex.rect(-9, 2) # => (0-85i)
-  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
-  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
+  #     Complex.rect(9, 8)  * Rational(2, 3)      # => ((6/1)+(16/3)*i)
   #
   def *: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex ** numeric -> new_complex
+  #   - self ** exponent -> complex
   # -->
-  # Returns `self` raised to power `numeric`:
+  # Returns `self` raised to the power `exponent`:
   #
   #     Complex.rect(0, 1) ** 2            # => (-1+0i)
   #     Complex.rect(-8) ** Rational(1, 3) # => (1.0000000000000002+1.7320508075688772i)
@@ -209,23 +210,33 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex + numeric -> new_complex
+  #   - self + other -> numeric
   # -->
-  # Returns the sum of `self` and `numeric`:
+  # Returns the sum of `self` and `other`:
   #
-  #     Complex.rect(2, 3)  + Complex.rect(2, 3)  # => (4+6i)
-  #     Complex.rect(900)   + Complex.rect(1)     # => (901+0i)
-  #     Complex.rect(-2, 9) + Complex.rect(-9, 2) # => (-11+11i)
-  #     Complex.rect(9, 8)  + 4                   # => (13+8i)
-  #     Complex.rect(20, 9) + 9.8                 # => (29.8+9i)
+  #     Complex(1, 2) + 0  # => (1+2i)
+  #     Complex(1, 2) + 1  # => (2+2i)
+  #     Complex(1, 2) + -1 # => (0+2i)
+  #
+  #     Complex(1, 2) + 1.0  # => (2.0+2i)
+  #
+  #     Complex(1, 2) + Complex(2, 1)     # => (3+3i)
+  #     Complex(1, 2) + Complex(2.0, 1.0) # => (3.0+3.0i)
+  #
+  #     Complex(1, 2) + Rational(1, 1) # => ((2/1)+2i)
+  #     Complex(1, 2) + Rational(1, 2) # => ((3/2)+2i)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     Complex(1, 2) + 3.14 # => (4.140000000000001+2i)
   #
   def +: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex - numeric -> new_complex
+  #   - self - other -> complex
   # -->
-  # Returns the difference of `self` and `numeric`:
+  # Returns the difference of `self` and `other`:
   #
   #     Complex.rect(2, 3)  - Complex.rect(2, 3)  # => (0+0i)
   #     Complex.rect(900)   - Complex.rect(1)     # => (899+0i)
@@ -237,9 +248,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - -complex -> new_complex
+  #   - -self -> complex
   # -->
-  # Returns the negation of `self`, which is the negation of each of its parts:
+  # Returns `self`, negated, which is the negation of each of its parts:
   #
   #     -Complex.rect(1, 2)   # => (-1-2i)
   #     -Complex.rect(-1, -2) # => (1+2i)
@@ -248,9 +259,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex / numeric -> new_complex
+  #   - self / other -> complex
   # -->
-  # Returns the quotient of `self` and `numeric`:
+  # Returns the quotient of `self` and `other`:
   #
   #     Complex.rect(2, 3)  / Complex.rect(2, 3)  # => (1+0i)
   #     Complex.rect(900)   / Complex.rect(1)     # => (900+0i)
@@ -266,15 +277,16 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex <=> object -> -1, 0, 1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
+  # Compares `self` and `other`.
+  #
   # Returns:
   #
-  # *   `self.real <=> object.real` if both of the following are true:
+  # *   `self.real <=> other.real` if both of the following are true:
   #
   #     *   `self.imag == 0`.
-  #     *   `object.imag == 0`. # Always true if object is numeric but not
-  #         complex.
+  #     *   `other.imag == 0` (always true if `other` is numeric but not complex).
   #
   # *   `nil` otherwise.
   #
@@ -286,6 +298,9 @@ class Complex < Numeric
   #     Complex.rect(2, 1) <=> 1               # => nil # self.imag not zero.
   #     Complex.rect(1) <=> Complex.rect(1, 1) # => nil # object.imag not zero.
   #     Complex.rect(1) <=> 'Foo'              # => nil # object.imag not defined.
+  #
+  # Class Complex includes module Comparable, each of whose methods uses
+  # Complex#<=> for comparison.
   #
   def <=>: (untyped) -> Integer?
 
@@ -597,9 +612,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex / numeric -> new_complex
+  #   - self / other -> complex
   # -->
-  # Returns the quotient of `self` and `numeric`:
+  # Returns the quotient of `self` and `other`:
   #
   #     Complex.rect(2, 3)  / Complex.rect(2, 3)  # => (1+0i)
   #     Complex.rect(900)   / Complex.rect(1)     # => (900+0i)
