@@ -8,28 +8,56 @@ module RBS
     class TypeNameResolver
       type query = [TypeName, context]
 
-      def initialize: (Environment) -> void
+      def initialize: (Set[TypeName] all_names, Hash[TypeName, [TypeName, context]] aliases) -> void
 
-      # Translates given type name to absolute type name.
+      def self.build: (Environment) -> instance
+
+      # Translates given type name to absolute type name
+      #
       # Returns `nil` if cannot find associated type name.
+      # Module names in the type name are normalized.
       #
       def resolve: (TypeName, context: context) -> TypeName?
 
-      private
+      # Translates given type name to absolute type name
+      #
+      # Returns `false` if a cycle is detected while resolving aliases.
+      # Returns `nil` if the type name cannot be resolved.
+      #
+      def resolve_namespace: (TypeName, context: context) -> (TypeName | false | nil)
 
-      attr_reader env: Environment
+      private
 
       attr_reader all_names: Set[TypeName]
 
+      attr_reader aliases: Hash[TypeName, [TypeName, context]]
+
       attr_reader cache: Hash[query, TypeName?]
 
-      def has_name?: (TypeName) -> TypeName?
+      # Returns the type name if it exists in `all_names` (normalized)
+      #
+      def has_type_name?: (TypeName) -> TypeName?
+
+      # Returns the type name if it is an alias (not normalized)
+      #
+      def aliased_name?: (TypeName) -> TypeName?
 
       def try_cache: (query) { () -> TypeName? } -> TypeName?
 
-      def resolve_in: (Symbol, context) -> TypeName?
+      # Translates the head module name in the context and returns an absolute type name
+      #
+      # Returns `nil` if cannot find associated type name.
+      # The returned namespace may be an alias
+      #
+      def resolve_head_namespace: (Symbol, context) -> TypeName?
 
-      def partition: (TypeName) -> [Symbol, TypeName?]
+      # Resolves the type name in the given context
+      #
+      def resolve_type_name: (Symbol, context) -> TypeName?
+
+      def resolve_namespace0: (TypeName, context, Set[TypeName]) -> (TypeName | false | nil)
+
+      def normalize_namespace: (TypeName, TypeName rhs, context, Set[TypeName]) -> (TypeName | false | nil)
     end
   end
 end

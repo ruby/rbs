@@ -543,6 +543,39 @@ RBS
     assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name(type_name("::N"))
   end
 
+  def test_normalize_module_name_q
+    buf, dirs, decls = RBS::Parser.parse_signature(<<~EOF)
+      class Foo
+        module Bar
+          module Baz
+          end
+        end
+      end
+
+      module M = Foo::Bar
+      module N = M::Baz
+
+      module C = D
+      module D = C
+
+      module E = F
+    EOF
+
+    env = Environment.new()
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env = env.resolve_type_names
+
+    assert_equal type_name("::Foo::Bar"), env.normalize_module_name?(type_name("::M"))
+    assert_equal type_name("::Foo::Bar::Baz"), env.normalize_module_name?(type_name("::N"))
+
+    assert_equal false, env.normalize_module_name?(type_name("::C"))
+    assert_equal false, env.normalize_module_name?(type_name("::D"))
+
+    assert_nil env.normalize_module_name?(type_name("::E"))
+  end
+
+
   def test_use_resolve
     buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
 use Object as OB
@@ -601,6 +634,34 @@ type s = untyped
     end
   end
 
+  def test_resolve_type_names_module_alias
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+module M
+  module N
+  end
+
+  module N2 = N
+end
+
+class C
+  include M::N2
+end
+    RBS
+
+    env = Environment.new
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::C")]
+      class_decl.each_decl do |decl|
+        decl.members[0].tap do |member|
+          assert_instance_of RBS::AST::Members::Include, member
+          assert_equal RBS::TypeName.parse("::M::N"), member.name
+        end
+      end
+    end
+  end
+
   def parse_inline(src)
     buffer = RBS::Buffer.new(name: Pathname("a.rb"), content: src)
     prism = Prism.parse(src)
@@ -645,5 +706,283 @@ type s = untyped
         assert_equal RBS::TypeName.parse("::Hello::World"), decl.module_name
       end
     end
+  end
+
+  def test__ruby__resolve_type_names_mixin_members
+    result = parse_inline(<<~RUBY)
+      module M
+      end
+
+      class String
+      end
+
+      class Integer
+      end
+
+      class A
+        include M #[String]
+      end
+
+      class B
+        extend M #[String, Integer]
+      end
+
+      class C
+        prepend M #[Integer]
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    env.resolve_type_names.tap do |env|
+      # Test A include
+      a_decl = env.class_decls[RBS::TypeName.parse("::A")]
+      a_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::IncludeMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 1, member.type_args.size
+            # Type argument should be resolved to absolute TypeName
+            assert_equal RBS::TypeName.parse("::String"), member.type_args[0].name
+          end
+        end
+      end
+
+      # Test B extend
+      b_decl = env.class_decls[RBS::TypeName.parse("::B")]
+      b_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::ExtendMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 2, member.type_args.size
+            # Both type arguments should be resolved to absolute TypeNames
+            assert_equal RBS::TypeName.parse("::String"), member.type_args[0].name
+            assert_equal RBS::TypeName.parse("::Integer"), member.type_args[1].name
+          end
+        end
+      end
+
+      # Test C prepend
+      c_decl = env.class_decls[RBS::TypeName.parse("::C")]
+      c_decl.each_decl do |decl|
+        decl.members.each do |member|
+          case member
+          when RBS::AST::Ruby::Members::PrependMember
+            assert_equal RBS::TypeName.parse("::M"), member.module_name
+            assert_equal 1, member.type_args.size
+            # Type argument should be resolved to absolute TypeName
+            assert_equal RBS::TypeName.parse("::Integer"), member.type_args[0].name
+          end
+        end
+      end
+    end
+  end
+
+  def test__ruby__multiple_decls
+    result = parse_inline(<<~RUBY)
+      class Hello
+      end
+
+      class Hello
+      end
+
+      module World
+      end
+
+      module World
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+
+    env.resolve_type_names.tap do |env|
+      class_decl = env.class_decls[RBS::TypeName.parse("::Hello")]
+      assert_equal 2, class_decl.context_decls.size
+
+      module_decl = env.class_decls[RBS::TypeName.parse("::World")]
+      assert_equal 2, module_decl.context_decls.size
+    end
+  end
+
+  def test__ruby__constant_declarations
+    result = parse_inline(<<~RUBY)
+      A = "123"
+      B = [1, 2] #: Object
+      Object::FOO = :FOO
+
+      class Object
+        BAR = "BAR"
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+    resolved_env = env.resolve_type_names
+
+    # Check top-level constant A with inferred type
+    assert_operator resolved_env.constant_decls, :key?, type_name("::A")
+    resolved_env.constant_decls[type_name("::A")].tap do |entry|
+      assert_equal type_name("::A"), entry.name
+      assert_equal "::String", entry.decl.type.to_s
+    end
+
+    # Check top-level constant B with type annotation
+    assert_operator resolved_env.constant_decls, :key?, type_name("::B")
+    resolved_env.constant_decls[type_name("::B")].tap do |entry|
+      assert_equal type_name("::B"), entry.name
+      assert_equal "::Object", entry.decl.type.to_s
+    end
+
+    # Check constant path Object::FOO
+    assert_operator resolved_env.constant_decls, :key?, type_name("::Object::FOO")
+    resolved_env.constant_decls[type_name("::Object::FOO")].tap do |entry|
+      assert_equal type_name("::Object::FOO"), entry.name
+      assert_equal "::Symbol", entry.decl.type.to_s
+    end
+
+    # Check constant inside class Object
+    assert_operator resolved_env.constant_decls, :key?, type_name("::Object::BAR")
+    resolved_env.constant_decls[type_name("::Object::BAR")].tap do |entry|
+      assert_equal type_name("::Object::BAR"), entry.name
+      assert_equal "::String", entry.decl.type.to_s
+    end
+
+    # Verify that Object class is created
+    assert_operator resolved_env.class_decls, :key?, type_name("::Object")
+  end
+
+  def test__ruby__class_alias_declarations
+    result = parse_inline(<<~RUBY)
+      class String
+      end
+      class Object
+      end
+      class Array
+      end
+
+      # Basic class alias without explicit type name
+      MyString = String #: class-alias
+
+      # Class alias with explicit type name
+      MyObject = some_object_factory #: class-alias Object
+
+      # Class alias with namespace
+      MyArray = Array #: class-alias
+
+      # Nested class alias
+      module Container
+        InnerString = String #: class-alias
+      end
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+    resolved_env = env.resolve_type_names
+
+    # Check basic class alias without explicit type name
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::MyString")
+    resolved_env.class_alias_decls[type_name("::MyString")].tap do |entry|
+      assert_instance_of Environment::ClassAliasEntry, entry
+      assert_equal type_name("::MyString"), entry.name
+      assert_equal type_name("::String"), entry.decl.old_name
+    end
+
+    # Check class alias with explicit type name
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::MyObject")
+    resolved_env.class_alias_decls[type_name("::MyObject")].tap do |entry|
+      assert_instance_of Environment::ClassAliasEntry, entry
+      assert_equal type_name("::MyObject"), entry.name
+      assert_equal type_name("::Object"), entry.decl.old_name
+    end
+
+    # Check class alias with Array
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::MyArray")
+    resolved_env.class_alias_decls[type_name("::MyArray")].tap do |entry|
+      assert_instance_of Environment::ClassAliasEntry, entry
+      assert_equal type_name("::MyArray"), entry.name
+      assert_equal type_name("::Array"), entry.decl.old_name
+    end
+
+    # Check nested class alias
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::Container::InnerString")
+    resolved_env.class_alias_decls[type_name("::Container::InnerString")].tap do |entry|
+      assert_instance_of Environment::ClassAliasEntry, entry
+      assert_equal type_name("::Container::InnerString"), entry.name
+      assert_equal type_name("::String"), entry.decl.old_name
+    end
+
+    # Verify Container module is created
+    assert_operator resolved_env.class_decls, :key?, type_name("::Container")
+  end
+
+  def test__ruby__module_alias_declarations
+    result = parse_inline(<<~RUBY)
+      module Kernel
+      end
+
+      module Enumerable
+      end
+
+      # Basic module alias without explicit type name
+      MyKernel = Kernel #: module-alias
+
+      # Module alias with explicit type name
+      MyEnum = some_enumerable_factory #: module-alias Enumerable
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+    resolved_env = env.resolve_type_names
+
+    # Check basic module alias without explicit type name
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::MyKernel")
+    resolved_env.class_alias_decls[type_name("::MyKernel")].tap do |entry|
+      assert_instance_of Environment::ModuleAliasEntry, entry
+      assert_equal type_name("::MyKernel"), entry.name
+      assert_equal type_name("::Kernel"), entry.decl.old_name
+    end
+
+    # Check module alias with explicit type name
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::MyEnum")
+    resolved_env.class_alias_decls[type_name("::MyEnum")].tap do |entry|
+      assert_instance_of Environment::ModuleAliasEntry, entry
+      assert_equal type_name("::MyEnum"), entry.name
+      assert_equal type_name("::Enumerable"), entry.decl.old_name
+    end
+  end
+
+  def test__ruby__class_module_alias_with_skip_annotation
+    result = parse_inline(<<~RUBY)
+      # @rbs skip
+      SkippedString = String #: class-alias
+
+      # This should be processed
+      ProcessedString = String #: class-alias
+
+      # @rbs skip
+      SkippedKernel = Kernel #: module-alias
+
+      # This should be processed
+      ProcessedKernel = Kernel #: module-alias
+    RUBY
+
+    env = Environment.new
+    env.add_source(RBS::Source::Ruby.new(result.buffer, result.prism_result, result.declarations, result.diagnostics))
+    resolved_env = env.resolve_type_names
+
+    # Check that skipped aliases are not present
+    refute_operator resolved_env.class_alias_decls, :key?, type_name("::SkippedString")
+    refute_operator resolved_env.class_alias_decls, :key?, type_name("::SkippedKernel")
+
+    # Check that non-skipped aliases are present
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::ProcessedString")
+    assert_instance_of Environment::ClassAliasEntry, resolved_env.class_alias_decls[type_name("::ProcessedString")]
+
+    assert_operator resolved_env.class_alias_decls, :key?, type_name("::ProcessedKernel")
+    assert_instance_of Environment::ModuleAliasEntry, resolved_env.class_alias_decls[type_name("::ProcessedKernel")]
   end
 end

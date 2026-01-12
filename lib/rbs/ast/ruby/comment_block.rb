@@ -177,6 +177,13 @@ module RBS
           Location.new(comment_buffer, start_offset, end_offset)
         end
 
+        def location()
+          first_comment = comments[0] or raise
+          last_comment = comments[-1] or raise
+
+          comment_buffer.rbs_location(first_comment.location.join last_comment.location)
+        end
+
         def parse_annotation_lines(start_line, end_line, variables)
           start_pos = comment_buffer.ranges[start_line].begin
           end_pos = comment_buffer.ranges[end_line].end
@@ -214,6 +221,23 @@ module RBS
           end
 
           false
+        end
+
+        def as_comment
+          lines = [] #: Array[String]
+
+          each_paragraph([]) do |paragraph|
+            case paragraph
+            when Location
+              lines << paragraph.local_source
+            end
+          end
+
+          string = lines.join("\n")
+
+          unless string.strip.empty?
+            AST::Comment.new(string: string, location: location)
+          end
         end
       end
     end

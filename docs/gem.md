@@ -34,7 +34,6 @@ dependencies:
   - name: json
   - name: logger
   - name: optparse
-  - name: pathname
   - name: rdoc
   - name: tsort
 ```

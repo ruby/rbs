@@ -15,15 +15,11 @@
 # ```
 #
 module TestSkip
-  env = ENV["RBS_SKIP_TESTS"]
-  SKIP_TESTS_FILE =
-    if env
-      Pathname(env)
-    end
+  SKIP_TESTS_FILES = ENV["RBS_SKIP_TESTS"]&.split(File::PATH_SEPARATOR)
 
   SKIP_TESTS =
-    if SKIP_TESTS_FILE
-      SKIP_TESTS_FILE.each_line.with_object({}) do |line, hash|
+    SKIP_TESTS_FILES&.each_with_object({}) do |file, hash|
+      File.foreach(file) do |line|
         line.chomp!
         line.gsub!(/#.*/, "")
         line.strip!
@@ -32,7 +28,7 @@ module TestSkip
 
         name, message = line.split(/\s+/, 2)
 
-        hash[name] = message
+        hash[name] = [file, message]
       end
     end
 
@@ -40,11 +36,12 @@ module TestSkip
     def setup
       super
 
-      if SKIP_TESTS.key?(name) || SKIP_TESTS.key?(self.class.name)
-        if message = SKIP_TESTS[name] || SKIP_TESTS[self.class.name]
-          omit "Skip test by RBS_SKIP_TESTS(#{SKIP_TESTS_FILE}): #{message}"
+      file, message = SKIP_TESTS[name] || SKIP_TESTS[self.class.name]
+      if file
+        if message
+          omit "Skip test by RBS_SKIP_TESTS(#{file}): #{message}"
         else
-          omit "Skip test by RBS_SKIP_TESTS(#{SKIP_TESTS_FILE})"
+          omit "Skip test by RBS_SKIP_TESTS(#{file})"
         end
       end
     end
@@ -54,7 +51,7 @@ module TestSkip
       when passed?
         # nop
       else
-        puts "💡You can skip this test `#{name}` by adding the name to `#{SKIP_TESTS_FILE}`"
+        puts "💡You can skip this test `#{name}` by adding the name to `#{SKIP_TESTS_FILES.join('`, `')}`"
       end
 
       super

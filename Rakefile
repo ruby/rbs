@@ -25,6 +25,12 @@ test_config = lambda do |t|
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
   end
+  if defined?(RubyMemcheck)
+    if t.is_a?(RubyMemcheck::TestTask)
+      t.verbose = true
+      t.options = '-v'
+    end
+  end
 end
 
 Rake::TestTask.new(test: :compile, &test_config)
@@ -206,7 +212,14 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --exit-error-on-syntax-error"
+    args = ["-r", lib]
+
+    if lib == "rbs"
+      args << "-r"
+      args << "prism"
+    end
+
+    sh "#{ruby} #{rbs} #{args.join(' ')} validate --exit-error-on-syntax-error"
   end
 end
 
@@ -218,7 +231,7 @@ end
 
 task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI_test}
+    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI-escape_test}
   end
 
   if ENV["RANDOMIZE_STDLIB_TEST_ORDER"] == "true"
@@ -227,7 +240,7 @@ task :stdlib_test => :compile do
 
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
-  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI-escape_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
@@ -325,7 +338,7 @@ namespace :generate do
           class <%= target %>SingletonTest < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
           <%- class_methods.each do |method_name, definition| -%>
@@ -344,7 +357,7 @@ namespace :generate do
           class <%= target %>Test < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
           <%- instance_methods.each do |method_name, definition| -%>
@@ -534,4 +547,18 @@ task :compile_c99 do
   Rake::Task[:"compile"].invoke
 ensure
   ENV.delete("TEST_NO_C23")
+end
+
+task :prepare_bench do
+  ENV.delete("DEBUG")
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
+end
+
+task :prepare_profiling do
+  ENV["DEBUG"] = "1"
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
 end

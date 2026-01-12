@@ -609,7 +609,7 @@ class BigDecimal < Numeric
   # The quotient q is (a/b).floor, and the modulus is the amount that must be
   # added to q * b to get a.
   #
-  def divmod: (Numeric) -> [ BigDecimal, BigDecimal ]
+  def divmod: (Numeric) -> [ Integer, BigDecimal ]
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
@@ -782,20 +782,6 @@ class BigDecimal < Numeric
   # Also available as the operator **.
   #
   def power: (Numeric n, int prec) -> BigDecimal
-
-  # <!--
-  #   rdoc-file=ext/bigdecimal/bigdecimal.c
-  #   - precs -> array
-  # -->
-  # Returns an Array of two Integer values that represent platform-dependent
-  # internal storage properties.
-  #
-  # This method is deprecated and will be removed in the future. Instead, use
-  # BigDecimal#n_significant_digits for obtaining the number of significant digits
-  # in scientific notation, and BigDecimal#precision for obtaining the number of
-  # digits in decimal notation.
-  #
-  def precs: () -> [ Integer, Integer ]
 
   # <!--
   #   rdoc-file=ext/bigdecimal/bigdecimal.c
@@ -1274,33 +1260,35 @@ class Integer
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self / numeric -> numeric_result
+  #   - self / other -> numeric
   # -->
-  # Performs division; for integer `numeric`, truncates the result to an integer:
+  # Returns the quotient of `self` and `other`.
   #
-  #      4 / 3              # => 1
-  #      4 / -3             # => -2
-  #      -4 / 3             # => -2
-  #      -4 / -3            # => 1
+  # For integer `other`, truncates the result to an integer:
   #
-  #     For other +numeric+, returns non-integer result:
+  #     4 / 3              # => 1
+  #     4 / -3             # => -2
+  #     -4 / 3             # => -2
+  #     -4 / -3            # => 1
   #
-  #      4 / 3.0            # => 1.3333333333333333
-  #      4 / Rational(3, 1) # => (4/3)
-  #      4 / Complex(3, 0)  # => ((4/3)+0i)
+  # For non-integer `other`, returns a non-integer result:
+  #
+  #     4 / 3.0            # => 1.3333333333333333
+  #     4 / Rational(3, 1) # => (4/3)
+  #     4 / Complex(3, 0)  # => ((4/3)+0i)
   #
   def /: (BigDecimal) -> BigDecimal
     | ...
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self * numeric -> numeric_result
+  #   - self * other -> numeric
   # -->
-  # Performs multiplication:
+  # Returns the numeric product of `self` and `other`:
   #
   #     4 * 2              # => 8
-  #     4 * -2             # => -8
   #     -4 * 2             # => -8
+  #     4 * -2             # => -8
   #     4 * 2.0            # => 8.0
   #     4 * Rational(1, 3) # => (4/3)
   #     4 * Complex(2, 0)  # => (8+0i)
@@ -1310,25 +1298,29 @@ class Integer
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self + numeric -> numeric_result
+  #   - self + other -> numeric
   # -->
-  # Performs addition:
+  # Returns the sum of `self` and `other`:
   #
-  #     2 + 2              # => 4
-  #     -2 + 2             # => 0
-  #     -2 + -2            # => -4
-  #     2 + 2.0            # => 4.0
-  #     2 + Rational(2, 1) # => (4/1)
-  #     2 + Complex(2, 0)  # => (4+0i)
+  #     1 + 1               # => 2
+  #     1 + -1             # => 0
+  #     1 + 0              # => 1
+  #     1 + -2             # => -1
+  #     1 + Complex(1, 0)  # => (2+0i)
+  #     1 + Rational(1, 1) # => (2/1)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     1 + 3.14           # => 4.140000000000001
   #
   def +: (BigDecimal) -> BigDecimal
     | ...
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self - numeric -> numeric_result
+  #   - self - other -> numeric
   # -->
-  # Performs subtraction:
+  # Returns the difference of `self` and `other`:
   #
   #     4 - 2              # => 2
   #     -4 - 2             # => -6
@@ -1368,7 +1360,7 @@ class Float
   #   rdoc-file=numeric.c
   #   - self / other -> numeric
   # -->
-  # Returns a new Float which is the result of dividing `self` by `other`:
+  # Returns the quotient of `self` and `other`:
   #
   #     f = 3.14
   #     f / 2              # => 1.57
@@ -1383,7 +1375,7 @@ class Float
   #   rdoc-file=numeric.c
   #   - self * other -> numeric
   # -->
-  # Returns a new Float which is the product of `self` and `other`:
+  # Returns the numeric product of `self` and `other`:
   #
   #     f = 3.14
   #     f * 2              # => 6.28
@@ -1396,15 +1388,20 @@ class Float
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self + other -> numeric
+  #   - self + other -> float or complex
   # -->
-  # Returns a new Float which is the sum of `self` and `other`:
+  # Returns the sum of `self` and `other`; the result may be inexact (see Float):
   #
-  #     f = 3.14
-  #     f + 1                 # => 4.140000000000001
-  #     f + 1.0               # => 4.140000000000001
-  #     f + Rational(1, 1)    # => 4.140000000000001
-  #     f + Complex(1, 0)     # => (4.140000000000001+0i)
+  #     3.14 + 0              # => 3.14
+  #     3.14 + 1              # => 4.140000000000001
+  #     -3.14 + 0             # => -3.14
+  #     -3.14 + 1             # => -2.14
+  #
+  #     3.14 + -3.14          # => 0.0
+  #     -3.14 + -3.14         # => -6.28
+  #
+  #     3.14 + Complex(1, 0)   # => (4.140000000000001+0i)
+  #     3.14 + Rational(1, 1)  # => 4.140000000000001
   #
   def +: (BigDecimal) -> BigDecimal
     | ...
@@ -1413,7 +1410,7 @@ class Float
   #   rdoc-file=numeric.c
   #   - self - other -> numeric
   # -->
-  # Returns a new Float which is the difference of `self` and `other`:
+  # Returns the difference of `self` and `other`:
   #
   #     f = 3.14
   #     f - 1                 # => 2.14
@@ -1468,10 +1465,9 @@ class Rational
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat / numeric     ->  numeric
-  #   - rat.quo(numeric)  ->  numeric
+  #   - self / other -> numeric
   # -->
-  # Performs division.
+  # Returns the quotient of `self` and `other`:
   #
   #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
   #     Rational(900)   / Rational(1)      #=> (900/1)
@@ -1484,39 +1480,50 @@ class Rational
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat * numeric  ->  numeric
+  #   - self * other -> numeric
   # -->
-  # Performs multiplication.
+  # Returns the numeric product of `self` and `other`:
   #
-  #     Rational(2, 3)  * Rational(2, 3)   #=> (4/9)
-  #     Rational(900)   * Rational(1)      #=> (900/1)
-  #     Rational(-2, 9) * Rational(-9, 2)  #=> (1/1)
-  #     Rational(9, 8)  * 4                #=> (9/2)
-  #     Rational(20, 9) * 9.8              #=> 21.77777777777778
+  #     Rational(9, 8)  * 4               #=> (9/2)
+  #     Rational(20, 9) * 9.8             #=> 21.77777777777778
+  #     Rational(9, 8)  * Complex(1, 2)   # => ((9/8)+(9/4)*i)
+  #     Rational(2, 3)  * Rational(2, 3)  #=> (4/9)
+  #     Rational(900)   * Rational(1)     #=> (900/1)
+  #     Rational(-2, 9) * Rational(-9, 2) #=> (1/1)
   #
   def *: (BigDecimal) -> BigDecimal
     | ...
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat + numeric  ->  numeric
+  #   - self + other -> numeric
   # -->
-  # Performs addition.
+  # Returns the sum of `self` and `other`:
   #
-  #     Rational(2, 3)  + Rational(2, 3)   #=> (4/3)
-  #     Rational(900)   + Rational(1)      #=> (901/1)
-  #     Rational(-2, 9) + Rational(-9, 2)  #=> (-85/18)
-  #     Rational(9, 8)  + 4                #=> (41/8)
-  #     Rational(20, 9) + 9.8              #=> 12.022222222222222
+  #     Rational(2, 3) + 0  # => (2/3)
+  #     Rational(2, 3) + 1  # => (5/3)
+  #     Rational(2, 3) + -1 # => (-1/3)
+  #
+  #     Rational(2, 3) + Complex(1, 0)     # => ((5/3)+0i)
+  #
+  #     Rational(2, 3) + Rational(1, 1)     # => (5/3)
+  #     Rational(2, 3) + Rational(3, 2)     # => (13/6)
+  #     Rational(2, 3) + Rational(3.0, 2.0) # => (13/6)
+  #     Rational(2, 3) + Rational(3.1, 2.1) # => (30399297484750849/14186338826217063)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     Rational(2, 3) + 1.0 # => 1.6666666666666665
+  #     Rational(2, 3) + Complex(1.0, 0.0) # => (1.6666666666666665+0.0i)
   #
   def +: (BigDecimal) -> BigDecimal
     | ...
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat - numeric  ->  numeric
+  #   - self - other -> numeric
   # -->
-  # Performs subtraction.
+  # Returns the difference of `self` and `other`:
   #
   #     Rational(2, 3)  - Rational(2, 3)   #=> (0/1)
   #     Rational(900)   - Rational(1)      #=> (899/1)
@@ -1553,9 +1560,9 @@ class Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex / numeric -> new_complex
+  #   - self / other -> complex
   # -->
-  # Returns the quotient of `self` and `numeric`:
+  # Returns the quotient of `self` and `other`:
   #
   #     Complex.rect(2, 3)  / Complex.rect(2, 3)  # => (1+0i)
   #     Complex.rect(900)   / Complex.rect(1)     # => (900+0i)
@@ -1568,39 +1575,50 @@ class Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex * numeric -> new_complex
+  #   - self * other -> numeric
   # -->
-  # Returns the product of `self` and `numeric`:
+  # Returns the numeric product of `self` and `other`:
   #
+  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
+  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
   #     Complex.rect(2, 3)  * Complex.rect(2, 3)  # => (-5+12i)
   #     Complex.rect(900)   * Complex.rect(1)     # => (900+0i)
   #     Complex.rect(-2, 9) * Complex.rect(-9, 2) # => (0-85i)
-  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
-  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
+  #     Complex.rect(9, 8)  * Rational(2, 3)      # => ((6/1)+(16/3)*i)
   #
   def *: (BigDecimal) -> Complex
     | ...
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex + numeric -> new_complex
+  #   - self + other -> numeric
   # -->
-  # Returns the sum of `self` and `numeric`:
+  # Returns the sum of `self` and `other`:
   #
-  #     Complex.rect(2, 3)  + Complex.rect(2, 3)  # => (4+6i)
-  #     Complex.rect(900)   + Complex.rect(1)     # => (901+0i)
-  #     Complex.rect(-2, 9) + Complex.rect(-9, 2) # => (-11+11i)
-  #     Complex.rect(9, 8)  + 4                   # => (13+8i)
-  #     Complex.rect(20, 9) + 9.8                 # => (29.8+9i)
+  #     Complex(1, 2) + 0  # => (1+2i)
+  #     Complex(1, 2) + 1  # => (2+2i)
+  #     Complex(1, 2) + -1 # => (0+2i)
+  #
+  #     Complex(1, 2) + 1.0  # => (2.0+2i)
+  #
+  #     Complex(1, 2) + Complex(2, 1)     # => (3+3i)
+  #     Complex(1, 2) + Complex(2.0, 1.0) # => (3.0+3.0i)
+  #
+  #     Complex(1, 2) + Rational(1, 1) # => ((2/1)+2i)
+  #     Complex(1, 2) + Rational(1, 2) # => ((3/2)+2i)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     Complex(1, 2) + 3.14 # => (4.140000000000001+2i)
   #
   def +: (BigDecimal) -> Complex
     | ...
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex - numeric -> new_complex
+  #   - self - other -> complex
   # -->
-  # Returns the difference of `self` and `numeric`:
+  # Returns the difference of `self` and `other`:
   #
   #     Complex.rect(2, 3)  - Complex.rect(2, 3)  # => (0+0i)
   #     Complex.rect(900)   - Complex.rect(1)     # => (899+0i)

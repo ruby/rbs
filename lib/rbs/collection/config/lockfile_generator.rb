@@ -14,6 +14,7 @@ module RBS
           "net-smtp" => nil,
           "nkf" => nil,
           "observer" => nil,
+          "cgi" => nil,
         }
 
         class GemfileLockMismatchError < StandardError
@@ -182,6 +183,13 @@ module RBS
             if source&.is_a?(Sources::Stdlib)
               lockfile.gems[name] = { name: name, version: "0", source: source }
             end
+            return
+          when 'set', 'pathname'
+            # set and pathname is migrated to core from stdlib.
+            RBS.logger.info {
+              from = from_gem || "rbs_collection.yaml"
+              "`#{name}` is a part of the Ruby core library. The dependency to the library can be safely deleted from #{from}."
+            }
             return
           when *ALUMNI_STDLIBS.keys
             version = ALUMNI_STDLIBS.fetch(name)

@@ -24,6 +24,10 @@ class EnumeratorTest < Test::Unit::TestCase
     assert_send_type "() { (Integer) -> nil } -> [1,2,3]",
                      enum, :each do end
   end
+
+  def test_plus
+    assert_send_type "(Array[Integer]) -> Enumerator::Chain[Integer]", (1..3).each, :+, [4, 5]
+  end
 end
 
 class EnumeratorSingletonTest < Test::Unit::TestCase
@@ -86,6 +90,16 @@ class EnumeratorYielderTest < Test::Unit::TestCase
                        y, :to_proc
       y << 42 # To avoid StopIteration error
     end.next
+  end
+end
+
+class EnumeratorLazyInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Enumerator::Lazy[::Integer, ::Range[Integer]]"
+
+  def test_eager
+    assert_send_type "() -> Enumerator[Integer, Range[Integer]]", (1..3).lazy, :eager
   end
 end
 

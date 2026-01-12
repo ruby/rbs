@@ -16,7 +16,7 @@ module RBS
         #
         class Definition
           type original = AST::Members::MethodDefinition | AST::Members::Alias | AST::Members::AttrAccessor | AST::Members::AttrWriter | AST::Members::AttrReader
-                        | AST::Ruby::Members::DefMember
+                        | AST::Ruby::Members::DefMember | AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember
 
           type overloading_definition = AST::Members::MethodDefinition | AST::Ruby::Members::DefMember
 
@@ -76,6 +76,8 @@ module RBS
       def build_alias: (Methods, Methods::instance_type, member: AST::Members::Alias) -> void
 
       def build_attribute: (Methods, Methods::instance_type, member: AST::Members::AttrAccessor | AST::Members::AttrReader | AST::Members::AttrWriter, accessibility: Definition::accessibility) -> void
+
+      def build_ruby_attribute: (Methods, Methods::instance_type, member: AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember, accessibility: Definition::accessibility) -> void
 
       def build_method: (Methods, Methods::instance_type, member: AST::Members::MethodDefinition | AST::Ruby::Members::DefMember, accessibility: Definition::accessibility) -> void
 

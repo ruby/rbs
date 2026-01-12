@@ -9,6 +9,8 @@ module RBS
       attr_reader diagnostics: Array[Diagnostic::t]
 
       def initialize: (Buffer, Prism::ParseResult) -> void
+
+      def type_fingerprint: () -> untyped
     end
 
     module Diagnostic
@@ -29,7 +31,13 @@ module RBS
       class NonConstantModuleName < Base
       end
 
+      class NonConstantSuperClassName < Base
+      end
+
       class TopLevelMethodDefinition < Base
+      end
+
+      class TopLevelAttributeDefinition < Base
       end
 
       class UnusedInlineAnnotation < Base
@@ -38,10 +46,29 @@ module RBS
       class AnnotationSyntaxError < Base
       end
 
+      class MixinMultipleArguments < Base
+      end
+
+      class MixinNonConstantModule < Base
+      end
+
+      class AttributeNonSymbolName < Base
+      end
+
+      class NonConstantConstantDeclaration < Base
+      end
+
+      class ClassModuleAliasDeclarationMissingTypeName < Base
+      end
+
       type t = NotImplementedYet
-             | NonConstantClassName | NonConstantModuleName
-             | TopLevelMethodDefinition
+             | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
+             | TopLevelMethodDefinition | TopLevelAttributeDefinition
              | UnusedInlineAnnotation | AnnotationSyntaxError
+             | MixinMultipleArguments | MixinNonConstantModule
+             | AttributeNonSymbolName
+             | NonConstantConstantDeclaration
+             | ClassModuleAliasDeclarationMissingTypeName
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
@@ -82,6 +109,16 @@ module RBS
       def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
 
       def report_unused_block: (AST::Ruby::CommentBlock) -> void
+
+      private
+
+      def parse_mixin_call: (Prism::CallNode) -> void
+
+      def parse_attribute_call: (Prism::CallNode) -> void
+
+      def parse_constant_declaration: (Prism::ConstantWriteNode | Prism::ConstantPathWriteNode) -> void
+
+      def parse_super_class: (Prism::node, Prism::Location) -> Declarations::ClassDecl::SuperClass?
     end
   end
 end

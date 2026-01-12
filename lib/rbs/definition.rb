@@ -66,7 +66,7 @@ module RBS
           when AST::Members::Base
             member.comment
           when AST::Ruby::Members::Base
-            nil
+            member.leading_comment&.as_comment
           end
         end
 

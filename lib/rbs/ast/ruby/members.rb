@@ -28,6 +28,10 @@ module RBS
               end #: self
             end
 
+            def type_fingerprint
+              return_type_annotation&.type_fingerprint
+            end
+
             def method_type
               return_type =
                 case return_type_annotation
@@ -175,6 +179,17 @@ module RBS
               ]
             end
           end
+
+          def type_fingerprint
+            case type_annotations
+            when DocStyle
+              type_annotations.type_fingerprint
+            when Array
+              type_annotations.map(&:type_fingerprint)
+            when nil
+              nil
+            end
+          end
         end
 
         class DefMember < Base
@@ -183,12 +198,14 @@ module RBS
           attr_reader :name
           attr_reader :node
           attr_reader :method_type
+          attr_reader :leading_comment
 
-          def initialize(buffer, name, node, method_type)
+          def initialize(buffer, name, node, method_type, leading_comment)
             super(buffer)
             @name = name
             @node = node
             @method_type = method_type
+            @leading_comment = leading_comment
           end
 
           def location
@@ -205,6 +222,147 @@ module RBS
 
           def annotations
             []
+          end
+
+          def name_location
+            rbs_location(node.name_loc)
+          end
+
+          def type_fingerprint
+            [
+              "members/def",
+              name.to_s,
+              method_type.type_fingerprint,
+              leading_comment&.as_comment&.string
+            ]
+          end
+        end
+
+        class MixinMember < Base
+          attr_reader :node
+          attr_reader :module_name
+          attr_reader :annotation
+
+          def initialize(buffer, node, module_name, annotation)
+            super(buffer)
+            @node = node
+            @module_name = module_name
+            @annotation = annotation
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_location
+            args = node.arguments or raise
+            first_arg = args.arguments.first or raise
+
+            rbs_location(first_arg.location)
+          end
+
+          def type_args
+            annotation&.type_args || []
+          end
+
+          def type_fingerprint
+            [
+              "members/mixin",
+              self.class.name,
+              module_name.to_s,
+              annotation&.type_fingerprint
+            ]
+          end
+        end
+
+        class IncludeMember < MixinMember
+        end
+
+        class ExtendMember < MixinMember
+        end
+
+        class PrependMember < MixinMember
+        end
+
+        class AttributeMember < Base
+          attr_reader :node
+          attr_reader :name_nodes
+          attr_reader :type_annotation
+          attr_reader :leading_comment
+
+          def initialize(buffer, node, name_nodes, leading_comment, type_annotation)
+            super(buffer)
+            @node = node
+            @name_nodes = name_nodes
+            @leading_comment = leading_comment
+            @type_annotation = type_annotation
+          end
+
+          def names
+            name_nodes.map do |node|
+              node.unescaped.to_sym
+            end
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def name_locations
+            name_nodes.map do |name_node|
+              rbs_location(name_node.location)
+            end
+          end
+
+          def type
+            type_annotation&.type
+          end
+
+          def type_fingerprint
+            [
+              "members/attribute",
+              self.class.name,
+              names.map(&:to_s),
+              type_annotation&.type_fingerprint,
+              leading_comment&.as_comment&.string
+            ]
+          end
+        end
+
+        class AttrReaderMember < AttributeMember
+        end
+
+        class AttrWriterMember < AttributeMember
+        end
+
+        class AttrAccessorMember < AttributeMember
+        end
+
+        class InstanceVariableMember < Base
+          attr_reader :annotation
+
+          def initialize(buffer, annotation)
+            super(buffer)
+            @annotation = annotation
+          end
+
+          def name
+            annotation.ivar_name
+          end
+
+          def type
+            annotation.type
+          end
+
+          def location
+            annotation.location
+          end
+
+          def type_fingerprint
+            [
+              "members/instance_variable",
+              annotation.type_fingerprint
+            ]
           end
         end
       end

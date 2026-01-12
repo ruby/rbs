@@ -122,21 +122,17 @@ module RBS
       end
     end
 
-    def class_entry(type_name)
-      case
-      when (class_entry = class_decls[type_name]).is_a?(ClassEntry)
-        class_entry
-      when (class_alias = class_alias_decls[type_name]).is_a?(ClassAliasEntry)
-        class_alias
+    def class_entry(type_name, normalized: false)
+      case entry = constant_entry(type_name, normalized: normalized || false)
+      when ClassEntry, ClassAliasEntry
+        entry
       end
     end
 
-    def module_entry(type_name)
-      case
-      when (module_entry = class_decls[type_name]).is_a?(ModuleEntry)
-        module_entry
-      when (module_alias = class_alias_decls[type_name]).is_a?(ModuleAliasEntry)
-        module_alias
+    def module_entry(type_name, normalized: false)
+      case entry = constant_entry(type_name, normalized: normalized || false)
+      when ModuleEntry, ModuleAliasEntry
+        entry
       end
     end
 
@@ -152,26 +148,40 @@ module RBS
     end
 
     def normalized_module_entry(type_name)
-      if name = normalize_module_name?(type_name)
-        case entry = module_entry(name)
-        when ModuleEntry, nil
-          entry
-        when ModuleAliasEntry
-          raise
-        end
+      module_entry(type_name, normalized: true)
+    end
+
+    def module_class_entry(type_name, normalized: false)
+      entry = constant_entry(type_name, normalized: normalized || false)
+      if entry.is_a?(ConstantEntry)
+        nil
+      else
+        entry
       end
     end
 
-    def module_class_entry(type_name)
-      class_entry(type_name) || module_entry(type_name)
-    end
-
     def normalized_module_class_entry(type_name)
-      normalized_class_entry(type_name) || normalized_module_entry(type_name)
+      module_class_entry(type_name, normalized: true)
     end
 
-    def constant_entry(type_name)
-      class_entry(type_name) || module_entry(type_name) || constant_decls[type_name]
+    def constant_entry(type_name, normalized: false)
+      if normalized
+        if normalized_name = normalize_module_name?(type_name)
+          class_decls.fetch(normalized_name, nil)
+        else
+          # The type_name may be declared with constant declaration
+          unless type_name.namespace.empty?
+            parent = type_name.namespace.to_type_name
+            normalized_parent = normalize_module_name?(parent) or return
+            constant_name = TypeName.new(name: type_name.name, namespace: normalized_parent.to_namespace)
+            constant_decls.fetch(constant_name, nil)
+          end
+        end
+      else
+        class_decls.fetch(type_name, nil) ||
+          class_alias_decls.fetch(type_name, nil) ||
+          constant_decls.fetch(type_name, nil)
+      end
     end
 
     def normalize_type_name?(name)
@@ -206,6 +216,10 @@ module RBS
       end
     end
 
+    def normalize_type_name(name)
+      normalize_type_name?(name) || name
+    end
+
     def normalized_type_name?(type_name)
       case
       when type_name.interface?
@@ -220,53 +234,44 @@ module RBS
     end
 
     def normalized_type_name!(name)
-      normalized_type_name?(name) or raise "Normalized type name is expected but given `#{name}`, which is normalized to `#{normalize_type_name?(name)}`"
+      normalized_type_name?(name) or raise "Normalized type name is expected but given `#{name}`"
       name
-    end
-
-    def normalize_type_name(name)
-      normalize_type_name?(name) || name
-    end
-
-    def normalize_module_name(name)
-      normalize_module_name?(name) or name
     end
 
     def normalize_module_name?(name)
       raise "Class/module name is expected: #{name}" unless name.class?
       name = name.absolute! unless name.absolute?
 
-      if @normalize_module_name_cache.key?(name)
-        return @normalize_module_name_cache[name]
+      original_name = name
+
+      if @normalize_module_name_cache.key?(original_name)
+        return @normalize_module_name_cache[original_name]
       end
 
-      unless name.namespace.empty?
-        parent = name.namespace.to_type_name
-        if normalized_parent = normalize_module_name?(parent)
-          type_name = TypeName.new(namespace: normalized_parent.to_namespace, name: name.name)
-        else
-          @normalize_module_name_cache[name] = nil
-          return
+      if alias_entry = class_alias_decls.fetch(name, nil)
+        unless alias_entry.decl.old_name.absolute?
+          # Having relative old_name means the type name resolution was failed.
+          # Run TypeNameResolver for failure reason
+          resolver = Resolver::TypeNameResolver.build(self)
+          name = resolver.resolve_namespace(name, context: nil)
+          @normalize_module_name_cache[original_name] = name
+          return name
         end
-      else
-        type_name = name
+
+        name = alias_entry.decl.old_name
       end
 
-      @normalize_module_name_cache[name] = false
+      if class_decls.key?(name)
+        @normalize_module_name_cache[original_name] = name
+      end
+    end
 
-      entry = constant_entry(type_name)
+    def normalize_module_name(name)
+      normalize_module_name?(name) || name
+    end
 
-      normalized_type_name =
-        case entry
-        when ClassEntry, ModuleEntry
-          type_name
-        when ClassAliasEntry, ModuleAliasEntry
-          normalize_module_name?(entry.decl.old_name)
-        else
-          nil
-        end
-
-      @normalize_module_name_cache[name] = normalized_type_name
+    def normalize_module_name!(name)
+      normalize_module_name?(name) or raise "Module name `#{name}` cannot be normalized"
     end
 
     def insert_rbs_decl(decl, context:, namespace:)
@@ -378,10 +383,9 @@ module RBS
           if entry.is_a?(ModuleEntry)
             raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
+        else
+          entry = class_decls[name] = ClassEntry.new(name)
         end
-
-        entry = ClassEntry.new(name)
-        class_decls[name] = entry
 
         entry << [context, decl]
 
@@ -400,10 +404,9 @@ module RBS
           if entry.is_a?(ClassEntry)
             raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
           end
+        else
+          entry = class_decls[name] = ModuleEntry.new(name)
         end
-
-        entry = ModuleEntry.new(name)
-        class_decls[name] = entry
 
         entry << [context, decl]
 
@@ -411,6 +414,41 @@ module RBS
         decl.each_decl do |member|
           insert_ruby_decl(member, context: inner_context, namespace: name.to_namespace)
         end
+
+      when AST::Ruby::Declarations::ConstantDecl
+        name = decl.constant_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          case entry
+          when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          when ClassEntry, ModuleEntry
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        constant_decls[name] = ConstantEntry.new(name: name, decl: decl, context: context)
+
+      when AST::Ruby::Declarations::ClassModuleAliasDecl
+        name = decl.new_name.with_prefix(namespace)
+
+        if entry = constant_entry(name)
+          case entry
+          when ClassAliasEntry, ModuleAliasEntry, ConstantEntry
+            raise DuplicatedDeclarationError.new(name, decl, entry.decl)
+          when ClassEntry, ModuleEntry
+            raise DuplicatedDeclarationError.new(name, decl, *entry.each_decl.to_a)
+          end
+        end
+
+        case decl.annotation
+        when AST::Ruby::Annotations::ClassAliasAnnotation
+          class_alias_decls[name] = ClassAliasEntry.new(name: name, decl: decl, context: context)
+        when AST::Ruby::Annotations::ModuleAliasAnnotation
+          class_alias_decls[name] = ModuleAliasEntry.new(name: name, decl: decl, context: context)
+        end
+      else
+        raise "Unknown Ruby declaration type: #{decl.class}"
       end
     end
 
@@ -482,7 +520,7 @@ module RBS
     end
 
     def resolve_type_names(only: nil)
-      resolver = Resolver::TypeNameResolver.new(self)
+      resolver = Resolver::TypeNameResolver.build(self)
       env = Environment.new
 
       table = UseMap::Table.new()
@@ -679,7 +717,16 @@ module RBS
         inner_context = [context, full_name] #: Resolver::context
         inner_prefix = full_name.to_namespace
 
-        AST::Ruby::Declarations::ClassDecl.new(decl.buffer, full_name, decl.node).tap do |resolved|
+        super_class = decl.super_class&.yield_self do |super_class|
+          AST::Ruby::Declarations::ClassDecl::SuperClass.new(
+            super_class.type_name_location,
+            super_class.operator_location,
+            absolute_type_name(resolver, nil, super_class.name, context: context),
+            super_class.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+          )
+        end
+
+        AST::Ruby::Declarations::ClassDecl.new(decl.buffer, full_name, decl.node, super_class).tap do |resolved|
           decl.members.each do |member|
             case member
             when AST::Ruby::Declarations::Base
@@ -702,11 +749,38 @@ module RBS
             case member
             when AST::Ruby::Declarations::Base
               resolved.members << resolve_ruby_decl(resolver, member, context: inner_context, prefix: inner_prefix)
+            when AST::Ruby::Members::Base
+              resolved.members << resolve_ruby_member(resolver, member, context: inner_context)
             else
               raise "Unknown member type: #{member.class}"
             end
           end
         end
+
+      when AST::Ruby::Declarations::ConstantDecl
+        full_name = decl.constant_name.with_prefix(prefix)
+
+        AST::Ruby::Declarations::ConstantDecl.new(
+          decl.buffer,
+          full_name,
+          decl.node,
+          decl.leading_comment,
+          decl.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        )
+
+      when AST::Ruby::Declarations::ClassModuleAliasDecl
+        full_name = decl.new_name.with_prefix(prefix)
+        resolved_annotation = decl.annotation.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        resolved_infered_name = decl.infered_old_name&.yield_self {|name| absolute_type_name(resolver, nil, name, context: context) }
+
+        AST::Ruby::Declarations::ClassModuleAliasDecl.new(
+          decl.buffer,
+          decl.node,
+          full_name,
+          resolved_infered_name,
+          decl.leading_comment,
+          resolved_annotation
+        )
 
       else
         raise "Unknown declaration type: #{decl.class}"
@@ -720,7 +794,65 @@ module RBS
           member.buffer,
           member.name,
           member.node,
-          member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+          member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) },
+          member.leading_comment
+        )
+      when AST::Ruby::Members::IncludeMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::IncludeMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
+        )
+      when AST::Ruby::Members::ExtendMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::ExtendMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
+        )
+      when AST::Ruby::Members::PrependMember
+        resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::PrependMember.new(
+          member.buffer,
+          member.node,
+          absolute_type_name(resolver, nil, member.module_name, context: context),
+          resolved_annotation
+        )
+      when AST::Ruby::Members::AttrReaderMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrReaderMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
+      when AST::Ruby::Members::AttrWriterMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrWriterMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
+      when AST::Ruby::Members::AttrAccessorMember
+        resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::AttrAccessorMember.new(
+          member.buffer,
+          member.node,
+          member.name_nodes,
+          member.leading_comment,
+          resolved_type_annotation
+        )
+      when AST::Ruby::Members::InstanceVariableMember
+        resolved_annotation = member.annotation.map_type_name {|name| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::InstanceVariableMember.new(
+          member.buffer,
+          resolved_annotation
         )
       else
         raise "Unknown member type: #{member.class}"

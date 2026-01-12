@@ -61,7 +61,7 @@ module RBS
         include EmptyEachType
         include NoTypeName
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           klass = to_s.to_sym
           { class: klass, location: location }.to_json(state)
         end
@@ -157,7 +157,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :variable, name: name, location: location }.to_json(state)
       end
 
@@ -221,7 +221,7 @@ module RBS
       include NoFreeVariables
       include NoSubst
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :class_singleton, name: name, location: location }.to_json(state)
       end
 
@@ -303,7 +303,7 @@ module RBS
             # `void` in immediate generics parameter is allowed
             false
           else
-            type.with_nonreturn_void?
+            type.with_nonreturn_void? # steep:ignore DeprecatedReference
           end
         end
       end
@@ -320,7 +320,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :interface, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -364,7 +364,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :class_instance, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -408,7 +408,7 @@ module RBS
         @location = location
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :alias, name: name, args: args, location: location }.to_json(state)
       end
 
@@ -466,7 +466,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :tuple, types: types, location: location }.to_json(state)
       end
 
@@ -520,7 +520,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -573,7 +573,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :record, fields: fields, optional_fields: optional_fields, location: location }.to_json(state)
       end
 
@@ -638,7 +638,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -665,7 +665,7 @@ module RBS
         type.free_variables(set)
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :optional, type: type, location: location }.to_json(state)
       end
 
@@ -724,7 +724,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -755,7 +755,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :union, types: types, location: location }.to_json(state)
       end
 
@@ -815,7 +815,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -846,7 +846,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :intersection, types: types, location: location }.to_json(state)
       end
 
@@ -898,7 +898,7 @@ module RBS
       end
 
       def with_nonreturn_void?
-        each_type.any? {|type| type.with_nonreturn_void? }
+        each_type.any? {|type| type.with_nonreturn_void? } # steep:ignore DeprecatedReference
       end
     end
 
@@ -932,7 +932,7 @@ module RBS
           end
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           { type: type, name: name }.to_json(state)
         end
 
@@ -1091,7 +1091,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -1226,13 +1226,13 @@ module RBS
       end
 
       def with_nonreturn_void?
-        if each_param.any? {|param| param.type.with_nonreturn_void? }
+        if each_param.any? {|param| param.type.with_nonreturn_void? } # steep:ignore DeprecatedReference
           true
         else
           if return_type.is_a?(Bases::Void)
             false
           else
-            return_type.with_nonreturn_void?
+            return_type.with_nonreturn_void? # steep:ignore DeprecatedReference
           end
         end
       end
@@ -1279,7 +1279,7 @@ module RBS
         end
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           return_type: return_type
         }.to_json(state)
@@ -1355,7 +1355,7 @@ module RBS
           other.self_type == self_type
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           type: type,
           required: required,
@@ -1424,7 +1424,7 @@ module RBS
         set
       end
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         {
           class: :proc,
           type: type,
@@ -1505,11 +1505,11 @@ module RBS
       end
 
       def with_nonreturn_void?
-        if type.with_nonreturn_void? || self_type&.with_nonreturn_void?
+        if type.with_nonreturn_void? || self_type&.with_nonreturn_void? # steep:ignore DeprecatedReference
           true
         else
           if block = block()
-            block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false
+            block.type.with_nonreturn_void? || block.self_type&.with_nonreturn_void? || false # steep:ignore DeprecatedReference
           else
             false
           end
@@ -1541,7 +1541,7 @@ module RBS
       include EmptyEachType
       include NoTypeName
 
-      def to_json(state = _ = nil)
+      def to_json(state = nil)
         { class: :literal, literal: literal.inspect, location: location }.to_json(state)
       end
 

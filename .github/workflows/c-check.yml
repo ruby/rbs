@@ -9,10 +9,10 @@ jobs:
   format-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: "4.0"
           bundler-cache: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
@@ -23,19 +23,22 @@ jobs:
       - name: Install clang-format from LLVM
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main"
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"
           sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-format-20
+          sudo ln -sf /usr/bin/clang-format-20 /usr/local/bin/clang-format
           clang-format --version
+      - name: Count processors
+        run: nproc
       - name: Install Re2c
         run: |
           cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz > re2c-3.1.tar.gz
-          tar xf re2c-3.1.tar.gz
-          cd re2c-3.1
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
+          tar xf re2c-4.3.tar.gz
+          cd re2c-4.3
           autoreconf -i -W all
           ./configure
-          make
+          make -j"$(nproc)" -l"$(nproc)"
           sudo make install
       - name: Update rubygems & bundler
         run: |

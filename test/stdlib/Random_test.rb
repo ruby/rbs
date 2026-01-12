@@ -29,6 +29,11 @@ class RandomSingletonTest < Test::Unit::TestCase
                       Random, :bytes, 0
   end
 
+  def test_seed
+    assert_send_type "() -> ::Integer",
+                     Random, :seed
+  end
+
   def test_new_seed
     assert_send_type  "() -> ::Integer",
                       Random, :new_seed
@@ -37,6 +42,19 @@ class RandomSingletonTest < Test::Unit::TestCase
   def test_urandom
     assert_send_type  "(::Integer) -> ::String",
                       Random, :urandom, 0
+  end
+
+  def test_random_number
+    assert_send_type "() -> ::Float",
+                     Random, :random_number
+    assert_send_type "(::Float) -> ::Float",
+                     Random, :random_number, 100.0
+    assert_send_type "(::Integer) -> ::Integer",
+                     Random, :random_number, 100
+    assert_send_type "(::Range[::Float]) -> ::Float",
+                     Random, :random_number, 1.0..100.0
+    assert_send_type "(::Range[::Integer]) -> ::Integer",
+                     Random, :random_number, 1..100
   end
 end
 
@@ -72,5 +90,18 @@ class RandomTest < Test::Unit::TestCase
   def test_seed
     assert_send_type  "() -> ::Integer",
                       Random.new, :seed
+  end
+
+  def test_random_number
+    assert_send_type "() -> ::Float",
+                     Random.new, :random_number
+    assert_send_type "(::Float) -> ::Float",
+                     Random.new, :random_number, 100.0
+    assert_send_type "(::Integer) -> ::Integer",
+                     Random.new, :random_number, 100
+    assert_send_type "(::Range[::Float]) -> ::Float",
+                     Random.new, :random_number, 1.0..100.0
+    assert_send_type "(::Range[::Integer]) -> ::Integer",
+                     Random.new, :random_number, 1..100
   end
 end

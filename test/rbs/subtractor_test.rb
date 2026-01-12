@@ -472,6 +472,34 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_civar
+    decls = to_decls(<<~RBS)
+      class C
+        @v1: untyped
+        self.@v1: untyped
+        @v2: untyped
+        self.@v2: untyped
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C
+        self.@v1: untyped
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C
+        @v1: untyped
+
+        @v2: untyped
+        self.@v2: untyped
+      end
+    RBS
+  end
+
   def test_cvar
     decls = to_decls(<<~RBS)
       class C

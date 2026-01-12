@@ -33,6 +33,24 @@
 #endif
 
 /**
+ * Support RBS_LIKELY and RBS_UNLIKELY to help the compiler optimize its
+ * branch predication.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+/** The compiler should predicate that this branch will be taken. */
+#define RBS_LIKELY(x) __builtin_expect(!!(x), 1)
+
+/** The compiler should predicate that this branch will not be taken. */
+#define RBS_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+/** Void because this platform does not support branch prediction hints. */
+#define RBS_LIKELY(x) (x)
+
+/** Void because this platform does not support branch prediction hints. */
+#define RBS_UNLIKELY(x) (x)
+#endif
+
+/**
  * We use -Wimplicit-fallthrough to guard potentially unintended fall-through between cases of a switch.
  * Use RBS_FALLTHROUGH to explicitly annotate cases where the fallthrough is intentional.
  */
@@ -54,6 +72,15 @@
 #define NODISCARD _Check_return_
 #else
 #define NODISCARD __attribute__((warn_unused_result))
+#endif
+
+/**
+ * Mark a function or variable as potentially unused to suppress compiler warnings.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#define RBS_ATTRIBUTE_UNUSED __attribute__((unused))
+#else
+#define RBS_ATTRIBUTE_UNUSED
 #endif
 
 #endif

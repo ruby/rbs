@@ -8,9 +8,14 @@ module RBS
           def initialize: (Buffer) -> void
 
           include Helpers::LocationHelper
+
+          def type_fingerprint: () -> untyped
         end
 
         type t = DefMember
+               | IncludeMember | ExtendMember | PrependMember
+               | AttrReaderMember | AttrWriterMember | AttrAccessorMember
+               | InstanceVariableMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -21,6 +26,8 @@ module RBS
             def map_type_name: () { (TypeName) -> TypeName } -> self
 
             def method_type: () -> MethodType
+
+            def type_fingerprint: () -> untyped
           end
 
           type type_annotations = DocStyle | Array[Annotations::ColonMethodTypeAnnotation | Annotations::MethodTypesAnnotation] | nil
@@ -47,6 +54,8 @@ module RBS
           # Returns the method type overloads
           #
           def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
+
+          def type_fingerprint: () -> untyped
         end
 
         class DefMember < Base
@@ -55,8 +64,9 @@ module RBS
           attr_reader name: Symbol
           attr_reader node: Prism::DefNode
           attr_reader method_type: MethodTypeAnnotation
+          attr_reader leading_comment: CommentBlock?
 
-          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation) -> void
+          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation, CommentBlock? leading_comment) -> void
 
           def location: () -> Location
 
@@ -65,6 +75,82 @@ module RBS
           def overloading?: () -> bool
 
           def annotations: () -> Array[AST::Annotation]
+
+          def name_location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class MixinMember < Base
+          attr_reader node: Prism::CallNode
+
+          attr_reader module_name: TypeName
+
+          attr_reader annotation: Annotations::TypeApplicationAnnotation | nil
+
+          def initialize: (Buffer, Prism::CallNode, TypeName, Annotations::TypeApplicationAnnotation | nil) -> void
+
+          def location: () -> Location
+
+          def name_location: () -> Location
+
+          def type_args: () -> Array[Types::t]
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class IncludeMember < MixinMember
+        end
+
+        class ExtendMember < MixinMember
+        end
+
+        class PrependMember < MixinMember
+        end
+
+        class AttributeMember < Base
+          attr_reader node: Prism::CallNode
+
+          attr_reader name_nodes: Array[Prism::SymbolNode]
+
+          attr_reader type_annotation: Annotations::NodeTypeAssertion?
+
+          attr_reader leading_comment: CommentBlock?
+
+          def initialize: (Buffer, Prism::CallNode, Array[Prism::SymbolNode] name_nodes, RBS::AST::Ruby::CommentBlock? leading_comment, Annotations::NodeTypeAssertion? type_annotation) -> void
+
+          def names: () -> Array[Symbol]
+
+          def location: () -> Location
+
+          def name_locations: () -> Array[Location]
+
+          def type: () -> Types::t?
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class AttrReaderMember < AttributeMember
+        end
+
+        class AttrWriterMember < AttributeMember
+        end
+
+        class AttrAccessorMember < AttributeMember
+        end
+
+        class InstanceVariableMember < Base
+          attr_reader annotation: Annotations::InstanceVariableAnnotation
+
+          def initialize: (Buffer, Annotations::InstanceVariableAnnotation) -> void
+
+          def name: () -> Symbol
+
+          def type: () -> Types::t
+
+          def location: () -> Location
+
+          def type_fingerprint: () -> untyped
         end
       end
     end

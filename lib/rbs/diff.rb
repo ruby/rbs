@@ -104,7 +104,13 @@ module RBS
         detail_to_s = @detail ? "[#{definition_method.defined_in} #{definition_method.accessibility}] " : ""
         if definition_method.alias_of
           first_def = definition_method.alias_of.defs.first #: Definition::Method::TypeDef
-          "#{detail_to_s}alias #{prefix}#{key} #{prefix}#{first_def.member.name}"
+          member_name = case first_def.member
+                        when AST::Members::Base
+                          first_def.member.name
+                        else
+                          raise
+                        end
+          "#{detail_to_s}alias #{prefix}#{key} #{prefix}#{member_name}"
         else
           "#{detail_to_s}def #{prefix}#{key}: #{definition_method.method_types.join(" | ")}"
         end

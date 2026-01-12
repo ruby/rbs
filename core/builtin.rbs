@@ -9,7 +9,7 @@ end
 # A type that's convertible to a `Rational`.
 #
 interface _ToR
-  # Convert `self` to a `Complex`.
+  # Convert `self` to a `Rational`.
   #
   def to_r: () -> Rational
 end
@@ -58,7 +58,7 @@ end
 #
 # Implicit `.to_str` conversions are usable all over Ruby's stdlib, such as `Kernel#abort`,
 # `String#+`, and `Object#send`. Virtually anywhere that accepts a `String` will also accept
-# something that defines `.to_Str`.
+# something that defines `.to_str`.
 #
 # Types that define `.to_str` are also usable wherever paths are expected (See the `path` type
 # alias).

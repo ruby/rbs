@@ -238,7 +238,7 @@ module RBS
 
     def test_loc(pos, location:)
       if location
-        location.range === pos
+        location.start_pos <= pos && pos <= location.end_pos
       else
         false
       end

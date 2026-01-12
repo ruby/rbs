@@ -12,6 +12,10 @@ module RBS
                   | AST::Members::InstanceVariable
                   | AST::Members::ClassVariable
                   | AST::Members::ClassInstanceVariable
+                  | AST::Ruby::Members::AttrReaderMember
+                  | AST::Ruby::Members::AttrWriterMember
+                  | AST::Ruby::Members::AttrAccessorMember
+                  | AST::Ruby::Members::InstanceVariableMember
       attr_reader source: source
 
       def initialize: (parent_variable: Variable?, type: Types::t, declared_in: TypeName, source: source) -> void
@@ -21,7 +25,7 @@ module RBS
 
     class Method
       type method_member = AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrAccessor | AST::Members::AttrWriter
-                         | AST::Ruby::Members::DefMember
+                         | AST::Ruby::Members::DefMember | AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember
 
       class TypeDef
         attr_reader type: MethodType
@@ -155,6 +159,7 @@ module RBS
         type source = :super     # Inheritance
                     | nil        # Itself
                     | AST::Members::Include | AST::Members::Extend | AST::Members::Prepend  # AST
+                    | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::ExtendMember | AST::Ruby::Members::PrependMember  # Ruby AST
                     | AST::Declarations::Module::Self
 
         attr_reader name: TypeName

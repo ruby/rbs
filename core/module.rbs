@@ -114,12 +114,15 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
-  #   - mod < other   ->  true, false, or nil
+  #   - self < other -> true, false, or nil
   # -->
-  # Returns true if *mod* is a subclass of *other*. Returns `false` if *mod* is
-  # the same as *other* or *mod* is an ancestor of *other*. Returns `nil` if
-  # there's no relationship between the two. (Think of the relationship in terms
-  # of the class definition: "class A < B" implies "A < B".)
+  # Returns whether `self` is a subclass of `other`, or `nil` if there is no
+  # relationship between the two:
+  #
+  #     Float < Numeric # => true
+  #     Numeric < Float # => false
+  #     Float < Float   # => false
+  #     Float < Hash    # => nil
   #
   def <: (Module other) -> bool?
 
@@ -135,14 +138,29 @@ class Module < Object
 
   # <!--
   #   rdoc-file=object.c
-  #   - module <=> other_module   -> -1, 0, +1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
-  # Comparison---Returns -1, 0, +1 or nil depending on whether `module` includes
-  # `other_module`, they are the same, or if `module` is included by
-  # `other_module`.
+  # Compares `self` and `other`.
   #
-  # Returns `nil` if `module` has no relationship with `other_module`, if
-  # `other_module` is not a module, or if the two values are incomparable.
+  # Returns:
+  #
+  # *   `-1`, if `self` includes `other`, if or `self` is a subclass of `other`.
+  # *   `0`, if `self` and `other` are the same.
+  # *   `1`, if `other` includes `self`, or if `other` is a subclass of `self`.
+  # *   `nil`, if none of the above is true.
+  #
+  # Examples:
+  #
+  #     # Class Array includes module Enumerable.
+  #              Array <=> Enumerable # => -1
+  #         Enumerable <=> Enumerable # =>  0
+  #         Enumerable <=> Array      # =>  1
+  #     # Class File is a subclass of class IO.
+  #               File <=> IO         # => -1
+  #               File <=> File       # =>  0
+  #                 IO <=> File       # =>  1
+  #     # Class File has no relationship to class String.
+  #               File <=> String     # => nil
   #
   def <=>: (untyped other) -> Integer?
 
@@ -328,6 +346,8 @@ class Module < Object
   # replaced with *filename*.  If *const* is defined but not as autoload, does
   # nothing.
   #
+  # Files that are currently being loaded must not be registered for autoload.
+  #
   def autoload: (interned _module, String filename) -> NilClass
 
   # <!--
@@ -486,6 +506,31 @@ class Module < Object
   # *produces:*
   #
   #     Added :FOO
+  #
+  # If we define a class using the `class` keyword, `const_added` runs before
+  # `inherited`:
+  #
+  #     module M
+  #       def self.const_added(const_name)
+  #         super
+  #         p :const_added
+  #       end
+  #
+  #       parent = Class.new do
+  #         def self.inherited(subclass)
+  #           super
+  #           p :inherited
+  #         end
+  #       end
+  #
+  #       class Child < parent
+  #       end
+  #     end
+  #
+  # *produces:*
+  #
+  #     :const_added
+  #     :inherited
   #
   def const_added: (Symbol) -> void
 
@@ -752,8 +797,6 @@ class Module < Object
   #     # warning: constant HTTP::NOT_FOUND is deprecated
   #
   def deprecate_constant: (*interned) -> self
-
-  def eql?: (untyped other) -> bool
 
   def equal?: (untyped other) -> bool
 
@@ -1321,19 +1364,52 @@ class Module < Object
   #   - protected(method_name, method_name, ...) -> array
   #   - protected(array)                         -> array
   # -->
-  # With no arguments, sets the default visibility for subsequently defined
-  # methods to protected. With arguments, sets the named methods to have protected
-  # visibility. String arguments are converted to symbols. An Array of Symbols
-  # and/or Strings is also accepted. If a single argument is passed, it is
-  # returned. If no argument is passed, nil is returned. If multiple arguments are
-  # passed, the arguments are returned as an array.
+  # Sets the visibility of a section or of a list of method names as protected.
+  # Accepts no arguments, a splat of method names (symbols or strings) or an array
+  # of method names. Returns the arguments that it received.
   #
-  # If a method has protected visibility, it is callable only where `self` of the
-  # context is the same as the method. (method definition or instance_eval). This
-  # behavior is different from Java's protected method. Usually `private` should
-  # be used.
+  # ## Important difference between protected in other languages
   #
-  # Note that a protected method is slow because it can't use inline cache.
+  # Protected methods in Ruby are different from other languages such as Java,
+  # where methods are marked as protected to give access to subclasses. In Ruby,
+  # subclasses **already have access to all methods defined in the parent class**,
+  # even private ones.
+  #
+  # Marking a method as protected allows **different objects of the same class**
+  # to call it.
+  #
+  # One use case is for comparison methods, such as `==`, if we want to expose a
+  # method for comparison between objects of the same class without making the
+  # method public to objects of other classes.
+  #
+  # ## Performance considerations
+  #
+  # Protected methods are slower than others because they can't use inline cache.
+  #
+  # ## Example
+  #
+  #     class Account
+  #       # Mark balance as protected, so that we can compare between accounts
+  #       # without making it public.
+  #       attr_reader :balance
+  #       protected :balance
+  #
+  #       def initialize(balance)
+  #         @balance = balance
+  #       end
+  #
+  #       def >(other)
+  #         # The invocation to `other.balance` is allowed because `other` is a
+  #         # different object of the same class (Account).
+  #         balance > other.balance
+  #       end
+  #     end
+  #
+  #     account1 = Account.new(100)
+  #     account2 = Account.new(50)
+  #
+  #     account1 > account2  # => true (works)
+  #     account1.balance     # => NoMethodError (fails because balance is not public)
   #
   # To show a private method on RDoc, use `:doc:` instead of this.
   #
@@ -1578,7 +1654,7 @@ class Module < Object
   #     m.name #=> nil
   #
   #     c = Class.new
-  #     c.set_temporary_name("MyClass(with description)")
+  #     c.set_temporary_name("MyClass(with description)") # => MyClass(with description)
   #
   #     c.new # => #<MyClass(with description):0x0....>
   #
@@ -1696,7 +1772,8 @@ class Module < Object
   # `attr_reader(name)` but deprecated. Returns an array of defined method names
   # as symbols.
   #
-  def attr: (*interned arg0) -> Array[Symbol]
+  def attr: %a{deprecated} (interned, bool) -> Array[Symbol]
+          | (*interned arg0) -> Array[Symbol]
 
   # A previous incarnation of `interned` for backward-compatibility (see #1499)
   %a{deprecated: Use `interned`}

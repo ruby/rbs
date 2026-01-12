@@ -12,10 +12,10 @@ module RBS
       def initialize: (name: N, decl: D, context: Resolver::context) -> void
     end
 
-    class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias]
+    class ModuleAliasEntry < SingleEntry[TypeName, AST::Declarations::ModuleAlias | AST::Ruby::Declarations::ClassModuleAliasDecl]
     end
 
-    class ClassAliasEntry < SingleEntry[TypeName, AST::Declarations::ClassAlias]
+    class ClassAliasEntry < SingleEntry[TypeName, AST::Declarations::ClassAlias | AST::Ruby::Declarations::ClassModuleAliasDecl]
     end
 
     class InterfaceEntry < SingleEntry[TypeName, AST::Declarations::Interface]
@@ -24,7 +24,7 @@ module RBS
     class TypeAliasEntry < SingleEntry[TypeName, AST::Declarations::TypeAlias]
     end
 
-    class ConstantEntry < SingleEntry[TypeName, AST::Declarations::Constant]
+    class ConstantEntry < SingleEntry[TypeName, AST::Declarations::Constant | AST::Ruby::Declarations::ConstantDecl]
     end
 
     class GlobalEntry < SingleEntry[Symbol, AST::Declarations::Global]
@@ -142,22 +142,58 @@ module RBS
     # Returns true if the type name is a class alias
     def class_alias?: (TypeName) -> bool
 
-    def class_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | nil)
+    # Returns the entry for the class name
+    #
+    # Returns `nil` when:
+    #
+    # * The type name is not found
+    # * The type name is not a class
+    #
+    # It normalizes when `normalized: true` is given -- returns `ClassEntry` or `nil`.
+    #
+    def class_entry: (TypeName, normalized: true) -> ClassEntry?
+                   | (TypeName, ?normalized: bool) -> (ClassEntry | ClassAliasEntry | nil)
 
     # Returns ClassEntry if the class definition is found, normalized in case of alias
     #
+    %a{deprecated: Use `class_entry(type_name, normalized: true)` instead. }
     def normalized_class_entry: (TypeName) -> ClassEntry?
 
-    def module_entry: (TypeName) -> (ModuleEntry | ModuleAliasEntry | nil)
+    # Returns the entry for the module name
+    #
+    # Returns `nil` when:
+    #
+    # * The type name is not found
+    # * The type name is not a module
+    #
+    # It normalizes when `normalized: true` is given -- returns `ModuleEntry` or `nil`.
+    #
+    def module_entry: (TypeName, normalized: true) -> ModuleEntry?
+                    | (TypeName, ?normalized: bool) -> (ModuleEntry | ModuleAliasEntry | nil)
 
     # Returns ModuleEntry if the module definition is found, normalized in case of alias
     #
+    %a{deprecated: Use `module_entry(type_name, normalized: true)` instead. }
     def normalized_module_entry: (TypeName) -> ModuleEntry?
 
-    def constant_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | ConstantEntry | nil)
+    # Returns the entry for the type name
+    #
+    # The entry is one of ClassEntry, ModuleEntry, ConstantEntry, ClassAliasEntry, or ModuleAliasEntry.
+    # When `normalized: true` is given, it returns normalized entry -- one of ClassEntry, ModuleEntry, or ConstantEntry.
+    #
+    # Returns `nil` if not found.
+    #
+    def constant_entry: (TypeName, normalized: true) -> (ClassEntry | ModuleEntry | ConstantEntry | nil)
+                      | (TypeName, ?normalized: bool) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | ConstantEntry | nil)
 
-    def module_class_entry: (TypeName) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | nil)
+    # Returns ClassEntry or ModuleEntry if the class/module definition is found
+    #
+    # Normalizes when `normalized: true` is given.
+    #
+    def module_class_entry: (TypeName, normalized: true) -> (ClassEntry | ModuleEntry | nil)
+                          | (TypeName, ?normalized: bool) -> (ClassEntry | ClassAliasEntry | ModuleEntry | ModuleAliasEntry | nil)
 
+    %a{deprecated: Use `module_class_entry(type_name, normalized: true)` instead. }
     def normalized_module_class_entry: (TypeName) -> (ClassEntry | ModuleEntry | nil)
 
     @normalize_module_name_cache: Hash[TypeName, TypeName | false | nil]
@@ -168,15 +204,24 @@ module RBS
     # * Returns `nil` if the rhs name cannot be found
     # * Returns `false` if the name is cyclic
     #
+    # Note that this method assumes the declarations have resolved type names.
+    #
     def normalize_module_name?: (TypeName) -> (TypeName | nil | false)
 
-    # Returns the original module name that is defined with `module` declaration
+    # Returns the original module name that is defined with `module`/`class` declaration
     #
-    # * Raises an error if given type name is not module
+    # * Raises an error if given type name is not module/class
     # * Calls `#absolute!` for relative module names
     # * Returns the name itself if the name cannot be normalized to a class/module
     #
+    # Note that this method assumes the declarations have resolved type names.
+    #
     def normalize_module_name: (TypeName) -> TypeName
+
+    # Returns the original module name that is defined with `module`/`class` declaration
+    #
+    # * Raises an error if given type name is not a module/class
+    def normalize_module_name!: (TypeName) -> TypeName
 
     # Returns a normalized module/class name or a type name with a normalized namespace
     #
@@ -184,9 +229,13 @@ module RBS
     # * Returns `nil` if the typename cannot be found
     # * Returns `false` if the name is cyclic
     #
+    # Note that this method assumes the declarations have resolved type names.
+    #
     def normalize_type_name?: (TypeName) -> (TypeName | nil | false)
 
     # Normalize the type name or raises an error
+    #
+    # Note that this method assumes the declarations have resolved type names.
     #
     def normalize_type_name!: (TypeName) -> TypeName
 
@@ -194,6 +243,8 @@ module RBS
     #
     # * Calls `#absolute!` for relative module names
     # * Returns the typename itself if the name cannot be normalized
+    #
+    # Note that this method assumes the declarations have resolved type names.
     #
     def normalize_type_name: (TypeName) -> TypeName
 

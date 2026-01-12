@@ -16,7 +16,7 @@
  * ```
  * */
 static NORETURN(void) raise_error(rbs_error_t *error, VALUE buffer) {
-    rbs_assert(error != NULL, "raise_error() called with NULL error");
+    RBS_ASSERT(error != NULL, "raise_error() called with NULL error");
 
     if (!error->syntax_error) {
         rb_raise(rb_eRuntimeError, "Unexpected error");
@@ -85,6 +85,22 @@ struct parse_type_arg {
     rb_encoding *encoding;
     rbs_parser_t *parser;
     VALUE require_eof;
+    VALUE void_allowed;
+    VALUE self_allowed;
+};
+
+struct parse_method_type_arg {
+    VALUE buffer;
+    rb_encoding *encoding;
+    rbs_parser_t *parser;
+    VALUE require_eof;
+};
+
+struct parse_signature_arg {
+    VALUE buffer;
+    rb_encoding *encoding;
+    rbs_parser_t *parser;
+    VALUE require_eof;
 };
 
 static VALUE ensure_free_parser(VALUE parser) {
@@ -100,8 +116,11 @@ static VALUE parse_type_try(VALUE a) {
         return Qnil;
     }
 
+    bool void_allowed = RTEST(arg->void_allowed);
+    bool self_allowed = RTEST(arg->self_allowed);
+
     rbs_node_t *type;
-    rbs_parse_type(parser, &type);
+    rbs_parse_type(parser, &type, void_allowed, self_allowed);
 
     raise_error_if_any(parser, arg->buffer);
 
@@ -157,7 +176,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     );
 }
 
-static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
@@ -168,7 +187,9 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
         .buffer = buffer,
         .encoding = encoding,
         .parser = parser,
-        .require_eof = require_eof
+        .require_eof = require_eof,
+        .void_allowed = void_allowed,
+        .self_allowed = self_allowed
     };
 
     VALUE result = rb_ensure(parse_type_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
@@ -179,7 +200,7 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
 }
 
 static VALUE parse_method_type_try(VALUE a) {
-    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    struct parse_method_type_arg *arg = (struct parse_method_type_arg *) a;
     rbs_parser_t *parser = arg->parser;
 
     if (parser->next_token.type == pEOF) {
@@ -187,17 +208,9 @@ static VALUE parse_method_type_try(VALUE a) {
     }
 
     rbs_method_type_t *method_type = NULL;
-    rbs_parse_method_type(parser, &method_type);
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof));
 
     raise_error_if_any(parser, arg->buffer);
-
-    if (RB_TEST(arg->require_eof)) {
-        rbs_parser_advance(parser);
-        if (parser->current_token.type != pEOF) {
-            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
-            raise_error(parser->error, arg->buffer);
-        }
-    }
 
     rbs_translation_context_t ctx = rbs_translation_context_create(
         &parser->constant_pool,
@@ -215,7 +228,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
 
     rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
     declare_type_variables(parser, variables, buffer);
-    struct parse_type_arg arg = {
+    struct parse_method_type_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
         .parser = parser,
@@ -230,7 +243,7 @@ static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_p
 }
 
 static VALUE parse_signature_try(VALUE a) {
-    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    struct parse_signature_arg *arg = (struct parse_signature_arg *) a;
     rbs_parser_t *parser = arg->parser;
 
     rbs_signature_t *signature = NULL;
@@ -253,7 +266,7 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
     rb_encoding *encoding = rb_enc_get(string);
 
     rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
-    struct parse_type_arg arg = {
+    struct parse_signature_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
         .parser = parser,
@@ -429,10 +442,14 @@ static VALUE rbsparser_lex(VALUE self, VALUE buffer, VALUE end_pos) {
 void rbs__init_parser(void) {
     RBS_Parser = rb_define_class_under(RBS, "Parser", rb_cObject);
     rb_gc_register_mark_object(RBS_Parser);
-    VALUE empty_array = rb_obj_freeze(rb_ary_new());
-    rb_gc_register_mark_object(empty_array);
 
-    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 5);
+    EMPTY_ARRAY = rb_obj_freeze(rb_ary_new());
+    rb_gc_register_mark_object(EMPTY_ARRAY);
+
+    EMPTY_HASH = rb_obj_freeze(rb_hash_new());
+    rb_gc_register_mark_object(EMPTY_HASH);
+
+    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
     rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);

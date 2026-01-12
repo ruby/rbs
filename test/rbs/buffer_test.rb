@@ -96,4 +96,23 @@ abc
       assert_equal [3, 0], sub_buffer.pos_to_loc(6)
     end
   end
+
+  def test_empty_buffer
+    buffer = Buffer.new(name: Pathname("foo.rbs"), content: "")
+
+    assert_equal "", buffer.content
+    assert_equal [""], buffer.lines
+    assert_equal [0...0], buffer.ranges
+    assert_equal "", buffer.content
+  end
+
+  def test_empty_sub_buffer
+    buffer = Buffer.new(name: Pathname("foo.rbs"), content: "")
+
+    sub_buffer = buffer.sub_buffer(lines: [0...0])
+    assert_equal "", sub_buffer.content
+    assert_equal [""], sub_buffer.lines
+    assert_equal [0...0], sub_buffer.ranges
+    assert_equal "", sub_buffer.content
+  end
 end

@@ -53,15 +53,16 @@ class Rational < Numeric
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat * numeric  ->  numeric
+  #   - self * other -> numeric
   # -->
-  # Performs multiplication.
+  # Returns the numeric product of `self` and `other`:
   #
-  #     Rational(2, 3)  * Rational(2, 3)   #=> (4/9)
-  #     Rational(900)   * Rational(1)      #=> (900/1)
-  #     Rational(-2, 9) * Rational(-9, 2)  #=> (1/1)
-  #     Rational(9, 8)  * 4                #=> (9/2)
-  #     Rational(20, 9) * 9.8              #=> 21.77777777777778
+  #     Rational(9, 8)  * 4               #=> (9/2)
+  #     Rational(20, 9) * 9.8             #=> 21.77777777777778
+  #     Rational(9, 8)  * Complex(1, 2)   # => ((9/8)+(9/4)*i)
+  #     Rational(2, 3)  * Rational(2, 3)  #=> (4/9)
+  #     Rational(900)   * Rational(1)     #=> (900/1)
+  #     Rational(-2, 9) * Rational(-9, 2) #=> (1/1)
   #
   def *: (Integer) -> Rational
        | (Rational) -> Rational
@@ -69,9 +70,9 @@ class Rational < Numeric
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat ** numeric  ->  numeric
+  #   - self ** exponent -> numeric
   # -->
-  # Performs exponentiation.
+  # Returns `self` raised to the power `exponent`:
   #
   #     Rational(2)    ** Rational(3)     #=> (8/1)
   #     Rational(10)   ** -2              #=> (1/100)
@@ -85,27 +86,35 @@ class Rational < Numeric
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat + numeric  ->  numeric
+  #   - self + other -> numeric
   # -->
-  # Performs addition.
+  # Returns the sum of `self` and `other`:
   #
-  #     Rational(2, 3)  + Rational(2, 3)   #=> (4/3)
-  #     Rational(900)   + Rational(1)      #=> (901/1)
-  #     Rational(-2, 9) + Rational(-9, 2)  #=> (-85/18)
-  #     Rational(9, 8)  + 4                #=> (41/8)
-  #     Rational(20, 9) + 9.8              #=> 12.022222222222222
+  #     Rational(2, 3) + 0  # => (2/3)
+  #     Rational(2, 3) + 1  # => (5/3)
+  #     Rational(2, 3) + -1 # => (-1/3)
+  #
+  #     Rational(2, 3) + Complex(1, 0)     # => ((5/3)+0i)
+  #
+  #     Rational(2, 3) + Rational(1, 1)     # => (5/3)
+  #     Rational(2, 3) + Rational(3, 2)     # => (13/6)
+  #     Rational(2, 3) + Rational(3.0, 2.0) # => (13/6)
+  #     Rational(2, 3) + Rational(3.1, 2.1) # => (30399297484750849/14186338826217063)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     Rational(2, 3) + 1.0 # => 1.6666666666666665
+  #     Rational(2, 3) + Complex(1.0, 0.0) # => (1.6666666666666665+0.0i)
   #
   def +: (Float) -> Float
        | (Complex) -> Complex
        | (Numeric) -> Rational
 
-  def +@: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
-  #   - rat - numeric  ->  numeric
+  #   - self - other -> numeric
   # -->
-  # Performs subtraction.
+  # Returns the difference of `self` and `other`:
   #
   #     Rational(2, 3)  - Rational(2, 3)   #=> (0/1)
   #     Rational(900)   - Rational(1)      #=> (899/1)
@@ -119,18 +128,20 @@ class Rational < Numeric
 
   # <!--
   #   rdoc-file=rational.c
-  #   - -rat  ->  rational
+  #   - -self -> rational
   # -->
-  # Negates `rat`.
+  # Returns `self`, negated:
+  #
+  #     -(1/3r)   # => (-1/3)
+  #     -(-1/3r)  # => (1/3)
   #
   def -@: () -> Rational
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rat / numeric     ->  numeric
-  #   - rat.quo(numeric)  ->  numeric
+  #   - self / other -> numeric
   # -->
-  # Performs division.
+  # Returns the quotient of `self` and `other`:
   #
   #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
   #     Rational(900)   / Rational(1)      #=> (900/1)
@@ -144,20 +155,29 @@ class Rational < Numeric
 
   # <!--
   #   rdoc-file=rational.c
-  #   - rational <=> numeric  ->  -1, 0, +1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
-  # Returns -1, 0, or +1 depending on whether `rational` is less than, equal to,
-  # or greater than `numeric`.
+  # Compares `self` and `other`.
   #
-  # `nil` is returned if the two values are incomparable.
+  # Returns:
   #
-  #     Rational(2, 3) <=> Rational(2, 3)  #=> 0
-  #     Rational(5)    <=> 5               #=> 0
-  #     Rational(2, 3) <=> Rational(1, 3)  #=> 1
-  #     Rational(1, 3) <=> 1               #=> -1
-  #     Rational(1, 3) <=> 0.3             #=> 1
+  # *   `-1`, if `self` is less than `other`.
+  # *   `0`, if the two values are the same.
+  # *   `1`, if `self` is greater than `other`.
+  # *   `nil`, if the two values are incomparable.
   #
-  #     Rational(1, 3) <=> "0.3"           #=> nil
+  # Examples:
+  #
+  #     Rational(2, 3) <=> Rational(4, 3) # => -1
+  #     Rational(2, 1) <=> Rational(2, 1) # => 0
+  #     Rational(2, 1) <=> 2              # => 0
+  #     Rational(2, 1) <=> 2.0            # => 0
+  #     Rational(2, 1) <=> Complex(2, 0)  # => 0
+  #     Rational(4, 3) <=> Rational(2, 3) # => 1
+  #     Rational(4, 3) <=> :foo           # => nil
+  #
+  # Class Rational includes module Comparable, each of whose methods uses
+  # Rational#<=> for comparison.
   #
   def <=>: (Integer | Rational) -> Integer
          | (untyped) -> Integer?
@@ -188,12 +208,6 @@ class Rational < Numeric
   #
   def abs: () -> Rational
 
-  def abs2: () -> Rational
-
-  def angle: () -> (Integer | Float)
-
-  alias arg angle
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.ceil([ndigits])  ->  integer or rational
@@ -222,10 +236,6 @@ class Rational < Numeric
 
   def coerce: (Numeric) -> [ Numeric, Numeric ]
 
-  def conj: () -> Rational
-
-  def conjugate: () -> Rational
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.denominator  ->  integer
@@ -239,14 +249,8 @@ class Rational < Numeric
   #
   def denominator: () -> Integer
 
-  def div: (Numeric) -> Integer
-
   def divmod: (Integer | Float | Rational) -> [ Integer, Rational ]
             | (Numeric) -> [ Numeric, Numeric ]
-
-  def dup: () -> self
-
-  def eql?: (untyped) -> bool
 
   # <!--
   #   rdoc-file=rational.c
@@ -259,8 +263,6 @@ class Rational < Numeric
   #     Rational(2).fdiv(3)          #=> 0.6666666666666666
   #
   def fdiv: (Numeric) -> Float
-
-  def finite?: () -> bool
 
   # <!--
   #   rdoc-file=rational.c
@@ -295,14 +297,6 @@ class Rational < Numeric
   #
   def hash: () -> Integer
 
-  def i: () -> Complex
-
-  def imag: () -> Integer
-
-  def imaginary: () -> Integer
-
-  def infinite?: () -> Integer?
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.inspect  ->  string
@@ -314,8 +308,6 @@ class Rational < Numeric
   #     Rational('1/2').inspect  #=> "(1/2)"
   #
   def inspect: () -> String
-
-  def integer?: () -> bool
 
   # <!-- rdoc-file=rational.c -->
   # Returns the absolute value of `rat`.
@@ -349,8 +341,6 @@ class Rational < Numeric
   #
   def numerator: () -> Integer
 
-  alias phase angle
-
   def polar: () -> [ Rational, Integer | Float ]
 
   # <!--
@@ -362,7 +352,7 @@ class Rational < Numeric
   def positive?: () -> bool
 
   # <!-- rdoc-file=rational.c -->
-  # Performs division.
+  # Returns the quotient of `self` and `other`:
   #
   #     Rational(2, 3)  / Rational(2, 3)   #=> (1/1)
   #     Rational(900)   / Rational(1)      #=> (900/1)
@@ -389,13 +379,7 @@ class Rational < Numeric
   #
   def rationalize: (?Numeric eps) -> Rational
 
-  def real: () -> Rational
-
-  def real?: () -> true
-
   def rect: () -> [ Rational, Numeric ]
-
-  alias rectangular rect
 
   def remainder: (Float) -> Float
                | (Numeric) -> Rational
@@ -438,13 +422,6 @@ class Rational < Numeric
   def round: (?half: :up | :down | :even) -> Integer
            | (Integer digits, ?half: :up | :down | :even) -> (Integer | Rational)
 
-  def step: (?Numeric limit, ?Numeric step) { (Rational) -> void } -> self
-          | (?Numeric limit, ?Numeric step) -> Enumerator[Rational, self]
-          | (?by: Numeric, ?to: Numeric) { (Rational) -> void } -> self
-          | (?by: Numeric, ?to: Numeric) -> Enumerator[Rational, self]
-
-  def to_c: () -> Complex
-
   # <!--
   #   rdoc-file=rational.c
   #   - rat.to_f  ->  float
@@ -473,8 +450,6 @@ class Rational < Numeric
   #     Rational(-31, 2).to_i  #=> -15
   #
   def to_i: () -> Integer
-
-  alias to_int to_i
 
   # <!--
   #   rdoc-file=rational.c
@@ -524,6 +499,4 @@ class Rational < Numeric
   #
   def truncate: () -> Integer
               | (Integer ndigits) -> (Integer | Rational)
-
-  def zero?: () -> bool
 end

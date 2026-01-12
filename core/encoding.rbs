@@ -281,7 +281,7 @@ class Encoding
   def inspect: () -> String
 
   # <!-- rdoc-file=encoding.c -->
-  # Returns the name of the encoding.
+  # The name of the encoding.
   #
   #     Encoding::UTF_8.name      #=> "UTF-8"
   #
@@ -297,12 +297,8 @@ class Encoding
   #
   def names: () -> Array[String]
 
-  # <!--
-  #   rdoc-file=encoding.c
-  #   - enc.name -> string
-  #   - enc.to_s -> string
-  # -->
-  # Returns the name of the encoding.
+  # <!-- rdoc-file=encoding.c -->
+  # The name of the encoding.
   #
   #     Encoding::UTF_8.name      #=> "UTF-8"
   #
@@ -785,7 +781,7 @@ class Encoding::Converter < Object
   #   - ec == other        -> true or false
   # -->
   #
-  def ==: (self) -> bool
+  def ==: (untyped) -> bool
 
   # <!--
   #   rdoc-file=transcode.c
@@ -923,8 +919,9 @@ class Encoding::Converter < Object
   #     p ec.primitive_convert(src, dst, nil, 1)             #=> :destination_buffer_full
   #     p ec.last_error      #=> nil
   #
-  def last_error: () -> Encoding::InvalidByteSequenceError?
-                | () -> Encoding::UndefinedConversionError?
+  def last_error: () -> ( Encoding::InvalidByteSequenceError
+                        | Encoding::UndefinedConversionError
+                        | nil )
 
   # <!--
   #   rdoc-file=transcode.c
