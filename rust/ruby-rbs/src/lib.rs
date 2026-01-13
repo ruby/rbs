@@ -1,6 +1,7 @@
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use rbs_encoding_type_t::RBS_ENCODING_UTF_8;
 use ruby_rbs_sys::bindings::*;
+use std::marker::PhantomData;
 use std::sync::Once;
 
 static INIT: Once = Once::new();
@@ -13,7 +14,7 @@ static INIT: Once = Once::new();
 /// let signature = parse(rbs_code.as_bytes());
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
 /// ```
-pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode, String> {
+pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
     unsafe {
         INIT.call_once(|| {
             rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
@@ -33,6 +34,7 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode, String> {
         let signature_node = SignatureNode {
             parser,
             pointer: signature,
+            marker: PhantomData,
         };
 
         if result {
@@ -43,7 +45,7 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode, String> {
     }
 }
 
-impl Drop for SignatureNode {
+impl Drop for SignatureNode<'_> {
     fn drop(&mut self) {
         unsafe {
             rbs_parser_free(self.parser);
@@ -51,7 +53,7 @@ impl Drop for SignatureNode {
     }
 }
 
-impl KeywordNode {
+impl KeywordNode<'_> {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
@@ -68,33 +70,40 @@ impl KeywordNode {
     }
 }
 
-pub struct NodeList {
+pub struct NodeList<'a> {
     parser: *mut rbs_parser_t,
     pointer: *mut rbs_node_list_t,
+    marker: PhantomData<&'a mut rbs_node_list_t>,
 }
 
-impl NodeList {
+impl<'a> NodeList<'a> {
     pub fn new(parser: *mut rbs_parser_t, pointer: *mut rbs_node_list_t) -> Self {
-        Self { parser, pointer }
+        Self {
+            parser,
+            pointer,
+            marker: PhantomData,
+        }
     }
 
     /// Returns an iterator over the nodes.
     #[must_use]
-    pub fn iter(&self) -> NodeListIter {
+    pub fn iter(&self) -> NodeListIter<'a> {
         NodeListIter {
             parser: self.parser,
             current: unsafe { (*self.pointer).head },
+            marker: PhantomData,
         }
     }
 }
 
-pub struct NodeListIter {
+pub struct NodeListIter<'a> {
     parser: *mut rbs_parser_t,
     current: *mut rbs_node_list_node_t,
+    marker: PhantomData<&'a mut rbs_node_list_node_t>,
 }
 
-impl Iterator for NodeListIter {
-    type Item = Node;
+impl<'a> Iterator for NodeListIter<'a> {
+    type Item = Node<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current.is_null() {
@@ -108,33 +117,40 @@ impl Iterator for NodeListIter {
     }
 }
 
-pub struct RBSHash {
+pub struct RBSHash<'a> {
     parser: *mut rbs_parser_t,
     pointer: *mut rbs_hash,
+    marker: PhantomData<&'a mut rbs_hash>,
 }
 
-impl RBSHash {
+impl<'a> RBSHash<'a> {
     pub fn new(parser: *mut rbs_parser_t, pointer: *mut rbs_hash) -> Self {
-        Self { parser, pointer }
+        Self {
+            parser,
+            pointer,
+            marker: PhantomData,
+        }
     }
 
     /// Returns an iterator over the key-value pairs.
     #[must_use]
-    pub fn iter(&self) -> RBSHashIter {
+    pub fn iter(&self) -> RBSHashIter<'a> {
         RBSHashIter {
             parser: self.parser,
             current: unsafe { (*self.pointer).head },
+            marker: PhantomData,
         }
     }
 }
 
-pub struct RBSHashIter {
+pub struct RBSHashIter<'a> {
     parser: *mut rbs_parser_t,
     current: *mut rbs_hash_node_t,
+    marker: PhantomData<&'a mut rbs_hash_node_t>,
 }
 
-impl Iterator for RBSHashIter {
-    type Item = (Node, Node);
+impl<'a> Iterator for RBSHashIter<'a> {
+    type Item = (Node<'a>, Node<'a>);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current.is_null() {
@@ -222,7 +238,7 @@ impl RBSString {
     }
 }
 
-impl SymbolNode {
+impl SymbolNode<'_> {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(

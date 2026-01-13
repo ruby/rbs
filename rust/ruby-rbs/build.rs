@@ -119,7 +119,7 @@ fn write_node_field_accessor(
     if field.optional {
         writeln!(
             file,
-            "    pub fn {}(&self) -> Option<{rust_type}> {{",
+            "    pub fn {}(&self) -> Option<{rust_type}<'a>> {{",
             field.name,
         )?;
         writeln!(
@@ -132,14 +132,18 @@ fn write_node_field_accessor(
         writeln!(file, "        }} else {{")?;
         writeln!(
             file,
-            "            Some({rust_type} {{ parser: self.parser, pointer: ptr }})"
+            "            Some({rust_type} {{ parser: self.parser, pointer: ptr, marker: PhantomData }})"
         )?;
         writeln!(file, "        }}")?;
     } else {
-        writeln!(file, "    pub fn {}(&self) -> {rust_type} {{", field.name)?;
         writeln!(
             file,
-            "        {rust_type} {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }} }}",
+            "    pub fn {}(&self) -> {rust_type}<'a> {{",
+            field.name
+        )?;
+        writeln!(
+            file,
+            "        {rust_type} {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }}, marker: PhantomData }}",
             field.c_name()
         )?;
     }
@@ -331,7 +335,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
     for node in &config.nodes {
         writeln!(file, "#[derive(Debug)]")?;
-        writeln!(file, "pub struct {} {{", node.rust_name)?;
+        writeln!(file, "pub struct {}<'a> {{", node.rust_name)?;
         writeln!(file, "    #[allow(dead_code)]")?;
         writeln!(file, "    parser: *mut rbs_parser_t,")?;
         writeln!(
@@ -339,12 +343,17 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
             "    pointer: *mut {},",
             convert_name(&node.name, CIdentifier::Type)
         )?;
+        writeln!(
+            file,
+            "    marker: PhantomData<&'a mut {}>",
+            convert_name(&node.name, CIdentifier::Type)
+        )?;
         writeln!(file, "}}\n")?;
 
-        writeln!(file, "impl {} {{", node.rust_name)?;
+        writeln!(file, "impl<'a> {}<'a> {{", node.rust_name)?;
         writeln!(file, "    /// Converts this node to a generic node.")?;
         writeln!(file, "    #[must_use]")?;
-        writeln!(file, "    pub fn as_node(self) -> Node {{")?;
+        writeln!(file, "    pub fn as_node(self) -> Node<'a> {{")?;
         writeln!(file, "        Node::{}(self)", node.variant_name())?;
         writeln!(file, "    }}")?;
         writeln!(file)?;
@@ -459,7 +468,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                             field.name.as_str()
                         };
                         if field.optional {
-                            writeln!(file, "    pub fn {name}(&self) -> Option<Node> {{")?;
+                            writeln!(file, "    pub fn {name}(&self) -> Option<Node<'a>> {{")?;
                             writeln!(
                                 file,
                                 "        let ptr = unsafe {{ (*self.pointer).{} }};",
@@ -470,7 +479,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                                 "        if ptr.is_null() {{ None }} else {{ Some(Node::new(self.parser, ptr)) }}"
                             )?;
                         } else {
-                            writeln!(file, "    pub fn {name}(&self) -> Node {{")?;
+                            writeln!(file, "    pub fn {name}(&self) -> Node<'a> {{")?;
                             writeln!(
                                 file,
                                 "        unsafe {{ Node::new(self.parser, (*self.pointer).{}) }}",
@@ -499,18 +508,18 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
     // Generate the Node enum to wrap all of the structs
     writeln!(file, "#[derive(Debug)]")?;
-    writeln!(file, "pub enum Node {{")?;
+    writeln!(file, "pub enum Node<'a> {{")?;
     for node in &config.nodes {
         let variant_name = node
             .rust_name
             .strip_suffix("Node")
             .unwrap_or(&node.rust_name);
 
-        writeln!(file, "    {variant_name}({}),", node.rust_name)?;
+        writeln!(file, "    {variant_name}({}<'a>),", node.rust_name)?;
     }
     writeln!(file, "}}")?;
 
-    writeln!(file, "impl Node {{")?;
+    writeln!(file, "impl Node<'_> {{")?;
     writeln!(file, "    #[allow(clippy::missing_safety_doc)]")?;
     writeln!(
         file,
@@ -523,7 +532,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
         writeln!(
             file,
-            "            rbs_node_type::{enum_name} => Self::{}({} {{ parser, pointer: node.cast::<{c_type}>() }}),",
+            "            rbs_node_type::{enum_name} => Self::{}({} {{ parser, pointer: node.cast::<{c_type}>(), marker: PhantomData }}),",
             node.variant_name(),
             node.rust_name,
         )?;
