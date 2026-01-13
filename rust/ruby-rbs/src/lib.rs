@@ -51,22 +51,19 @@ impl Drop for SignatureNode {
     }
 }
 
-pub struct NodeListIter {
-    parser: *mut rbs_parser_t,
-    current: *mut rbs_node_list_node_t,
-}
+impl KeywordNode {
+    pub fn name(&self) -> &[u8] {
+        unsafe {
+            let constant_ptr = rbs_constant_pool_id_to_constant(
+                &(*self.parser).constant_pool,
+                (*self.pointer).constant_id,
+            );
+            if constant_ptr.is_null() {
+                panic!("Constant ID for keyword is not present in the pool");
+            }
 
-impl Iterator for NodeListIter {
-    type Item = Node;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.current.is_null() {
-            None
-        } else {
-            let pointer_data = unsafe { *self.current };
-            let node = Node::new(self.parser, pointer_data.node);
-            self.current = pointer_data.next;
-            Some(node)
+            let constant = &*constant_ptr;
+            std::slice::from_raw_parts(constant.start, constant.length)
         }
     }
 }
@@ -87,6 +84,26 @@ impl NodeList {
         NodeListIter {
             parser: self.parser,
             current: unsafe { (*self.pointer).head },
+        }
+    }
+}
+
+pub struct NodeListIter {
+    parser: *mut rbs_parser_t,
+    current: *mut rbs_node_list_node_t,
+}
+
+impl Iterator for NodeListIter {
+    type Item = Node;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current.is_null() {
+            None
+        } else {
+            let pointer_data = unsafe { *self.current };
+            let node = Node::new(self.parser, pointer_data.node);
+            self.current = pointer_data.next;
+            Some(node)
         }
     }
 }
@@ -150,6 +167,24 @@ impl RBSLocation {
     }
 }
 
+pub struct RBSLocationList {
+    pointer: *mut rbs_location_list,
+}
+
+impl RBSLocationList {
+    pub fn new(pointer: *mut rbs_location_list) -> Self {
+        Self { pointer }
+    }
+
+    /// Returns an iterator over the locations.
+    #[must_use]
+    pub fn iter(&self) -> RBSLocationListIter {
+        RBSLocationListIter {
+            current: unsafe { (*self.pointer).head },
+        }
+    }
+}
+
 pub struct RBSLocationListIter {
     current: *mut rbs_location_list_node_t,
 }
@@ -165,24 +200,6 @@ impl Iterator for RBSLocationListIter {
             let loc = RBSLocation::new(pointer_data.loc);
             self.current = pointer_data.next;
             Some(loc)
-        }
-    }
-}
-
-pub struct RBSLocationList {
-    pointer: *mut rbs_location_list,
-}
-
-impl RBSLocationList {
-    pub fn new(pointer: *mut rbs_location_list) -> Self {
-        Self { pointer }
-    }
-
-    /// Returns an iterator over the locations.
-    #[must_use]
-    pub fn iter(&self) -> RBSLocationListIter {
-        RBSLocationListIter {
-            current: unsafe { (*self.pointer).head },
         }
     }
 }
@@ -214,23 +231,6 @@ impl SymbolNode {
             );
             if constant_ptr.is_null() {
                 panic!("Constant ID for symbol is not present in the pool");
-            }
-
-            let constant = &*constant_ptr;
-            std::slice::from_raw_parts(constant.start, constant.length)
-        }
-    }
-}
-
-impl KeywordNode {
-    pub fn name(&self) -> &[u8] {
-        unsafe {
-            let constant_ptr = rbs_constant_pool_id_to_constant(
-                &(*self.parser).constant_pool,
-                (*self.pointer).constant_id,
-            );
-            if constant_ptr.is_null() {
-                panic!("Constant ID for keyword is not present in the pool");
             }
 
             let constant = &*constant_ptr;
