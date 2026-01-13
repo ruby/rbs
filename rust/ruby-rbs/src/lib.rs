@@ -2,6 +2,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use rbs_encoding_type_t::RBS_ENCODING_UTF_8;
 use ruby_rbs_sys::bindings::*;
 use std::marker::PhantomData;
+use std::ptr::NonNull;
 use std::sync::Once;
 
 static INIT: Once = Once::new();
@@ -32,7 +33,7 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
         let result = rbs_parse_signature(parser, &mut signature);
 
         let signature_node = SignatureNode {
-            parser,
+            parser: NonNull::new_unchecked(parser),
             pointer: signature,
             marker: PhantomData,
         };
@@ -48,7 +49,7 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
 impl Drop for SignatureNode<'_> {
     fn drop(&mut self) {
         unsafe {
-            rbs_parser_free(self.parser);
+            rbs_parser_free(self.parser.as_ptr());
         }
     }
 }
@@ -57,7 +58,7 @@ impl KeywordNode<'_> {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
-                &(*self.parser).constant_pool,
+                &(*self.parser.as_ptr()).constant_pool,
                 (*self.pointer).constant_id,
             );
             if constant_ptr.is_null() {
@@ -71,13 +72,13 @@ impl KeywordNode<'_> {
 }
 
 pub struct NodeList<'a> {
-    parser: *mut rbs_parser_t,
+    parser: NonNull<rbs_parser_t>,
     pointer: *mut rbs_node_list_t,
     marker: PhantomData<&'a mut rbs_node_list_t>,
 }
 
 impl<'a> NodeList<'a> {
-    pub fn new(parser: *mut rbs_parser_t, pointer: *mut rbs_node_list_t) -> Self {
+    pub fn new(parser: NonNull<rbs_parser_t>, pointer: *mut rbs_node_list_t) -> Self {
         Self {
             parser,
             pointer,
@@ -97,7 +98,7 @@ impl<'a> NodeList<'a> {
 }
 
 pub struct NodeListIter<'a> {
-    parser: *mut rbs_parser_t,
+    parser: NonNull<rbs_parser_t>,
     current: *mut rbs_node_list_node_t,
     marker: PhantomData<&'a mut rbs_node_list_node_t>,
 }
@@ -118,13 +119,13 @@ impl<'a> Iterator for NodeListIter<'a> {
 }
 
 pub struct RBSHash<'a> {
-    parser: *mut rbs_parser_t,
+    parser: NonNull<rbs_parser_t>,
     pointer: *mut rbs_hash,
     marker: PhantomData<&'a mut rbs_hash>,
 }
 
 impl<'a> RBSHash<'a> {
-    pub fn new(parser: *mut rbs_parser_t, pointer: *mut rbs_hash) -> Self {
+    pub fn new(parser: NonNull<rbs_parser_t>, pointer: *mut rbs_hash) -> Self {
         Self {
             parser,
             pointer,
@@ -144,7 +145,7 @@ impl<'a> RBSHash<'a> {
 }
 
 pub struct RBSHashIter<'a> {
-    parser: *mut rbs_parser_t,
+    parser: NonNull<rbs_parser_t>,
     current: *mut rbs_hash_node_t,
     marker: PhantomData<&'a mut rbs_hash_node_t>,
 }
@@ -242,7 +243,7 @@ impl SymbolNode<'_> {
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
-                &(*self.parser).constant_pool,
+                &(*self.parser.as_ptr()).constant_pool,
                 (*self.pointer).constant_id,
             );
             if constant_ptr.is_null() {

@@ -337,7 +337,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
         writeln!(file, "#[derive(Debug)]")?;
         writeln!(file, "pub struct {}<'a> {{", node.rust_name)?;
         writeln!(file, "    #[allow(dead_code)]")?;
-        writeln!(file, "    parser: *mut rbs_parser_t,")?;
+        writeln!(file, "    parser: NonNull<rbs_parser_t>,")?;
         writeln!(
             file,
             "    pointer: *mut {},",
@@ -523,7 +523,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file, "    #[allow(clippy::missing_safety_doc)]")?;
     writeln!(
         file,
-        "    fn new(parser: *mut rbs_parser_t, node: *mut rbs_node_t) -> Self {{"
+        "    fn new(parser: NonNull<rbs_parser_t>, node: *mut rbs_node_t) -> Self {{"
     )?;
     writeln!(file, "        match unsafe {{ (*node).type_ }} {{")?;
     for node in &config.nodes {
