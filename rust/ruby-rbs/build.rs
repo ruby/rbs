@@ -1,6 +1,9 @@
 use serde::Deserialize;
 use std::{env, error::Error, fs::File, io::Write, path::Path};
 
+// This config-driven code generation approach is inspired by Prism's ruby-prism crate.
+// See: https://github.com/ruby/prism/blob/main/rust/ruby-prism/build.rs
+
 #[derive(Debug, Deserialize)]
 struct Config {
     nodes: Vec<Node>,
