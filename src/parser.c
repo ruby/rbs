@@ -2146,7 +2146,7 @@ static bool parse_mixin_member(rbs_parser_t *parser, bool from_interface, rbs_po
         &name_range,
         &args_range,
         &name,
-        true
+        !from_interface
     ));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
