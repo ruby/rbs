@@ -2711,8 +2711,6 @@ end
 
         interface _C
           include _M[void]
-          include _M[class]
-          include _M[instance]
         end
       SIG
     end
@@ -2728,6 +2726,18 @@ end
     end
     assert_equal [1, 18], ex.location.start_loc
     assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I include _M[class] end")
+    end
+    assert_equal [1, 24], ex.location.start_loc
+    assert_equal [1, 29], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I include _M[instance] end")
+    end
+    assert_equal [1, 24], ex.location.start_loc
+    assert_equal [1, 32], ex.location.end_loc
   end
 
   def test_context_syntax_error_variable
