@@ -25,6 +25,9 @@ class ModuleInstanceTest < Test::Unit::TestCase
 
   module Foo
     BAR = 1
+
+    def foo(meth, *args, &block)
+    end
   end
 
   def test_include
@@ -409,6 +412,13 @@ class ModuleInstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, String) -> Array[Symbol]",
       mod, :attr_accessor, :foo, "bar"
+    )
+  end
+
+  def test_ruby2_keywords
+    assert_send_type(
+      "(Symbol) -> nil",
+      Foo, :ruby2_keywords, :foo
     )
   end
 
