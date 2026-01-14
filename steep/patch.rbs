@@ -1,0 +1,9 @@
+# Remove here if duplicated
+
+class Module
+  def ruby2_keywords: (*untyped) -> void
+end
+
+class Proc
+  def ruby2_keywords: () -> self
+end
