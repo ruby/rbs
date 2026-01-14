@@ -1105,6 +1105,31 @@ class Module < Object
   private def method_removed: (Symbol method_name) -> untyped
 
   # <!--
+  #   rdoc-file=object.c
+  #   - method_undefined(method_name)
+  # -->
+  # Invoked as a callback whenever an instance method is undefined from the
+  # receiver.
+  #
+  #     module Chatty
+  #       def self.method_undefined(method_name)
+  #         puts "Undefining #{method_name.inspect}"
+  #       end
+  #       def self.some_class_method() end
+  #       def some_instance_method() end
+  #       class << self
+  #         undef_method :some_class_method
+  #       end
+  #       undef_method :some_instance_method
+  #     end
+  #
+  # *produces:*
+  #
+  #     Undefining :some_instance_method
+  #
+  private def method_undefined: (Symbol method_name) -> untyped
+
+  # <!--
   #   rdoc-file=vm_eval.c
   #   - mod.class_eval(string [, filename [, lineno]])  -> obj
   #   - mod.class_eval {|mod| block }                   -> obj
