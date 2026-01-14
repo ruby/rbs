@@ -55,6 +55,7 @@ impl Drop for SignatureNode<'_> {
 }
 
 impl KeywordNode<'_> {
+    #[must_use]
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
@@ -78,6 +79,7 @@ pub struct NodeList<'a> {
 }
 
 impl<'a> NodeList<'a> {
+    #[must_use]
     pub fn new(parser: NonNull<rbs_parser_t>, pointer: *mut rbs_node_list_t) -> Self {
         Self {
             parser,
@@ -125,6 +127,7 @@ pub struct RBSHash<'a> {
 }
 
 impl<'a> RBSHash<'a> {
+    #[must_use]
     pub fn new(parser: NonNull<rbs_parser_t>, pointer: *mut rbs_hash) -> Self {
         Self {
             parser,
@@ -171,14 +174,17 @@ pub struct RBSLocation {
 }
 
 impl RBSLocation {
+    #[must_use]
     pub fn new(pointer: *const rbs_location_t) -> Self {
         Self { pointer }
     }
 
+    #[must_use]
     pub fn start(&self) -> i32 {
         unsafe { (*self.pointer).rg.start.byte_pos }
     }
 
+    #[must_use]
     pub fn end(&self) -> i32 {
         unsafe { (*self.pointer).rg.end.byte_pos }
     }
@@ -189,6 +195,7 @@ pub struct RBSLocationList {
 }
 
 impl RBSLocationList {
+    #[must_use]
     pub fn new(pointer: *mut rbs_location_list) -> Self {
         Self { pointer }
     }
@@ -227,10 +234,12 @@ pub struct RBSString {
 }
 
 impl RBSString {
+    #[must_use]
     pub fn new(pointer: *const rbs_string_t) -> Self {
         Self { pointer }
     }
 
+    #[must_use]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let s = *self.pointer;
@@ -240,6 +249,7 @@ impl RBSString {
 }
 
 impl SymbolNode<'_> {
+    #[must_use]
     pub fn name(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
