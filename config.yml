@@ -594,6 +594,7 @@ nodes:
       - name: comment_location
         c_type: rbs_location
   - name: RBS::AST::Ruby::Annotations::TypeApplicationAnnotation
+    rust_name: TypeApplicationAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -604,6 +605,7 @@ nodes:
       - name: comma_locations
         c_type: rbs_location_list
   - name: RBS::AST::Ruby::Annotations::InstanceVariableAnnotation
+    rust_name: InstanceVariableAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -618,6 +620,7 @@ nodes:
       - name: comment_location
         c_type: rbs_location
   - name: RBS::AST::Ruby::Annotations::ClassAliasAnnotation
+    rust_name: ClassAliasAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
@@ -628,6 +631,7 @@ nodes:
       - name: type_name_location
         c_type: rbs_location
   - name: RBS::AST::Ruby::Annotations::ModuleAliasAnnotation
+    rust_name: ModuleAliasAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location
