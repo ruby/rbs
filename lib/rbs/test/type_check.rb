@@ -264,6 +264,9 @@ module RBS
           klass = get_class(type.name) or return false
           if params = builder.env.normalized_module_class_entry(type.name.absolute!)&.type_params
             args = AST::TypeParam.normalize_args(params, type.args)
+            if args.size != params.size
+              return false
+            end
             unless args == type.args
               type = Types::ClassInstance.new(name: type.name, args: args, location: type.location)
             end
