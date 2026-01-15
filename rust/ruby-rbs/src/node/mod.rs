@@ -10,7 +10,7 @@ static INIT: Once = Once::new();
 /// Parse RBS code into an AST.
 ///
 /// ```rust
-/// use ruby_rbs::parse;
+/// use ruby_rbs::node::parse;
 /// let rbs_code = r#"type foo = "hello""#;
 /// let signature = parse(rbs_code.as_bytes());
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
@@ -359,7 +359,7 @@ mod tests {
             fn visit_bool_type_node(&mut self, node: &BoolTypeNode) {
                 self.visited.push("type:bool".to_string());
 
-                crate::visit_bool_type_node(self, node);
+                crate::node::visit_bool_type_node(self, node);
             }
 
             fn visit_class_node(&mut self, node: &ClassNode) {
@@ -368,7 +368,7 @@ mod tests {
                     String::from_utf8(node.name().name().name().to_vec()).unwrap()
                 ));
 
-                crate::visit_class_node(self, node);
+                crate::node::visit_class_node(self, node);
             }
 
             fn visit_class_instance_type_node(&mut self, node: &ClassInstanceTypeNode) {
@@ -377,7 +377,7 @@ mod tests {
                     String::from_utf8(node.name().name().name().to_vec()).unwrap()
                 ));
 
-                crate::visit_class_instance_type_node(self, node);
+                crate::node::visit_class_instance_type_node(self, node);
             }
 
             fn visit_class_super_node(&mut self, node: &ClassSuperNode) {
@@ -386,7 +386,7 @@ mod tests {
                     String::from_utf8(node.name().name().name().to_vec()).unwrap()
                 ));
 
-                crate::visit_class_super_node(self, node);
+                crate::node::visit_class_super_node(self, node);
             }
 
             fn visit_function_type_node(&mut self, node: &FunctionTypeNode) {
@@ -394,7 +394,7 @@ mod tests {
                 self.visited
                     .push(format!("function:required_positionals:{count}"));
 
-                crate::visit_function_type_node(self, node);
+                crate::node::visit_function_type_node(self, node);
             }
 
             fn visit_method_definition_node(&mut self, node: &MethodDefinitionNode) {
@@ -403,13 +403,13 @@ mod tests {
                     String::from_utf8(node.name().name().to_vec()).unwrap()
                 ));
 
-                crate::visit_method_definition_node(self, node);
+                crate::node::visit_method_definition_node(self, node);
             }
 
             fn visit_record_type_node(&mut self, node: &RecordTypeNode) {
                 self.visited.push("record".to_string());
 
-                crate::visit_record_type_node(self, node);
+                crate::node::visit_record_type_node(self, node);
             }
 
             fn visit_symbol_node(&mut self, node: &SymbolNode) {
@@ -418,7 +418,7 @@ mod tests {
                     String::from_utf8(node.name().to_vec()).unwrap()
                 ));
 
-                crate::visit_symbol_node(self, node);
+                crate::node::visit_symbol_node(self, node);
             }
         }
 
