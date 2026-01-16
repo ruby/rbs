@@ -49,7 +49,7 @@ class ObjectSpaceTest < Test::Unit::TestCase
   def test_undefine_finalizer
     assert_send_type "(String) -> String",
                      ObjectSpace, :undefine_finalizer, +"abc"
-    assert_send_type "(Array) -> Array",
+    assert_send_type "(Array[untyped]) -> Array[untyped]",
                      ObjectSpace, :undefine_finalizer, []
   end
 
