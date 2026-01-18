@@ -191,7 +191,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate --exit-error-on-syntax-error"
+  sh "#{ruby} #{rbs} validate"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -219,7 +219,7 @@ task :validate => :compile do
       args << "prism"
     end
 
-    sh "#{ruby} #{rbs} #{args.join(' ')} validate --exit-error-on-syntax-error"
+    sh "#{ruby} #{rbs} #{args.join(' ')} validate"
   end
 end
 

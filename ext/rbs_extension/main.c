@@ -87,6 +87,7 @@ struct parse_type_arg {
     VALUE require_eof;
     VALUE void_allowed;
     VALUE self_allowed;
+    VALUE classish_allowed;
 };
 
 struct parse_method_type_arg {
@@ -118,9 +119,10 @@ static VALUE parse_type_try(VALUE a) {
 
     bool void_allowed = RTEST(arg->void_allowed);
     bool self_allowed = RTEST(arg->self_allowed);
+    bool classish_allowed = RTEST(arg->classish_allowed);
 
     rbs_node_t *type;
-    rbs_parse_type(parser, &type, void_allowed, self_allowed);
+    rbs_parse_type(parser, &type, void_allowed, self_allowed, classish_allowed);
 
     raise_error_if_any(parser, arg->buffer);
 
@@ -176,7 +178,7 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     );
 }
 
-static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed) {
+static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
@@ -189,7 +191,8 @@ static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VAL
         .parser = parser,
         .require_eof = require_eof,
         .void_allowed = void_allowed,
-        .self_allowed = self_allowed
+        .self_allowed = self_allowed,
+        .classish_allowed = classish_allowed
     };
 
     VALUE result = rb_ensure(parse_type_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
@@ -208,7 +211,7 @@ static VALUE parse_method_type_try(VALUE a) {
     }
 
     rbs_method_type_t *method_type = NULL;
-    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof));
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof), true);
 
     raise_error_if_any(parser, arg->buffer);
 
@@ -449,7 +452,7 @@ void rbs__init_parser(void) {
     EMPTY_HASH = rb_obj_freeze(rb_hash_new());
     rb_gc_register_mark_object(EMPTY_HASH);
 
-    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 7);
+    rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 8);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
     rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);
