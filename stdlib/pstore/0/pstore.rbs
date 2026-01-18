@@ -299,7 +299,7 @@
 #       end
 #     end
 #
-class PStore
+class PStore[unchecked out K, unchecked out V]
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - [](key)
@@ -320,7 +320,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def []: (untyped name) -> untyped
+  def []: (K name) -> V?
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -338,7 +338,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def []=: (untyped name, untyped value) -> untyped
+  def []=: (K name, V value) -> V
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -349,7 +349,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def abort: () -> untyped
+  def abort: () -> void
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -360,7 +360,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def commit: () -> nil
+  def commit: () -> void
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -379,7 +379,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def delete: (untyped name) -> untyped
+  def delete: (K name) -> V?
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -400,7 +400,7 @@ class PStore
   #
   # Raises an exception if called outside a transaction block.
   #
-  def fetch: (untyped name, ?untyped default) -> untyped
+  def fetch: (K name, ?V default) -> V
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -410,21 +410,25 @@ class PStore
   #
   #     store.path # => "flat.store"
   #
-  def path: () -> untyped
+  def path: () -> String
 
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - root?(key)
   # -->
   #
-  def root?: (untyped name) -> bool
+  def key?: (K name) -> bool
+
+  alias root? key?
 
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - roots()
   # -->
   #
-  def roots: () -> Array[untyped]
+  def keys: () -> Array[K]
+
+  alias roots keys
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -441,7 +445,7 @@ class PStore
   #
   # Raises an exception if called within a transaction block.
   #
-  def transaction: (?untyped read_only) -> untyped
+  def transaction: [U] (?bool read_only) { (self) -> U } -> U
 
   # <!-- rdoc-file=lib/pstore.rb -->
   # Whether PStore should do its best to prevent file corruptions, even when an
@@ -458,7 +462,7 @@ class PStore
   #     raises no unexpected I/O error; if such an error occurs during a write to
   #     the store, the file may become corrupted.
   #
-  def ultra_safe: () -> untyped
+  def ultra_safe: () -> bool
 
   # <!-- rdoc-file=lib/pstore.rb -->
   # Whether PStore should do its best to prevent file corruptions, even when an
@@ -475,7 +479,7 @@ class PStore
   #     raises no unexpected I/O error; if such an error occurs during a write to
   #     the store, the file may become corrupted.
   #
-  def ultra_safe=: (untyped) -> untyped
+  def ultra_safe=: (bool) -> bool
 
   private
 
@@ -486,14 +490,14 @@ class PStore
   #   - empty_marshal_checksum()
   # -->
   #
-  def empty_marshal_checksum: () -> untyped
+  def empty_marshal_checksum: () -> String
 
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - empty_marshal_data()
   # -->
   #
-  def empty_marshal_data: () -> untyped
+  def empty_marshal_data: () -> String
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -501,7 +505,7 @@ class PStore
   # -->
   # Raises PStore::Error if the calling code is not in a PStore#transaction.
   #
-  def in_transaction: () -> untyped
+  def in_transaction: () -> void
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -510,7 +514,7 @@ class PStore
   # Raises PStore::Error if the calling code is not in a PStore#transaction or if
   # the code is in a read-only PStore#transaction.
   #
-  def in_transaction_wr: () -> untyped
+  def in_transaction_wr: () -> void
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -531,7 +535,7 @@ class PStore
   #
   #     store = PStore.new(path, true)
   #
-  def initialize: (untyped file, ?boolish thread_safe) -> untyped
+  def initialize: (path file, ?boolish thread_safe) -> void
 
   def load: (untyped content) -> untyped
 
@@ -543,7 +547,8 @@ class PStore
   # be returned. If `read_only` is false, a 3-tuple will be returned: the
   # unmarshalled Hash, a checksum of the data, and the size of the data.
   #
-  def load_data: (untyped file, untyped read_only) -> untyped
+  def load_data: (path file, true read_only) -> Hash[untyped, untyped]
+               | (path file, false read_only) -> [Hash[untyped, untyped], String, Integer]
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -564,7 +569,7 @@ class PStore
   #
   # All exceptions are propagated.
   #
-  def open_and_lock_file: (untyped filename, untyped read_only) -> untyped
+  def open_and_lock_file: (string filename, bool read_only) -> File?
 
   # <!--
   #   rdoc-file=lib/pstore.rb
@@ -578,26 +583,26 @@ class PStore
   #   - save_data_with_atomic_file_rename_strategy(data, file)
   # -->
   #
-  def save_data_with_atomic_file_rename_strategy: (untyped data, untyped file) -> untyped
+  def save_data_with_atomic_file_rename_strategy: (string data, File file) -> void
 
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - save_data_with_fast_strategy(data, file)
   # -->
   #
-  def save_data_with_fast_strategy: (untyped data, untyped file) -> untyped
+  def save_data_with_fast_strategy: (string data, File file) -> void
+
+  EMPTY_MARSHAL_CHECKSUM: String
+
+  EMPTY_MARSHAL_DATA: String
+
+  EMPTY_STRING: String
+
+  RDWR_ACCESS: { mode: Integer, encoding: Encoding }
+
+  RD_ACCESS: { mode: Integer, encoding: Encoding }
+
+  VERSION: String
+
+  WR_ACCESS: { mode: Integer, encoding: Encoding }
 end
-
-PStore::EMPTY_MARSHAL_CHECKSUM: String
-
-PStore::EMPTY_MARSHAL_DATA: String
-
-PStore::EMPTY_STRING: String
-
-PStore::RDWR_ACCESS: Hash[untyped, untyped]
-
-PStore::RD_ACCESS: Hash[untyped, untyped]
-
-PStore::VERSION: String
-
-PStore::WR_ACCESS: Hash[untyped, untyped]
