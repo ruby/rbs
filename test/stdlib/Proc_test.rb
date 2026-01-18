@@ -138,6 +138,11 @@ class ProcInstanceTest < Test::Unit::TestCase
                       proc{|*, **, &b| }, :parameters
   end
 
+  def test_ruby2_keywords
+    assert_send_type '() -> ProcInstanceTest::MyProc',
+                     MyProc.new{}, :ruby2_keywords
+  end
+
   def test_source_location
     if_ruby(..."4.1") do
       assert_send_type  '() -> [String, Integer]',
