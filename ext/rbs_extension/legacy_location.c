@@ -228,6 +228,9 @@ static VALUE rbs_new_location_from_loc_range(VALUE buffer, rbs_loc_range rg) {
 }
 
 static rbs_constant_id_t rbs_constant_pool_find_ruby_symbol(VALUE symbol) {
+    if (!RB_TYPE_P(symbol, T_SYMBOL)) {
+        rb_raise(rb_eTypeError, "wrong argument type %" PRIsVALUE " (must be a Symbol)", rb_obj_class(symbol));
+    }
     VALUE name = rb_sym2str(symbol);
 
     return rbs_constant_pool_find(RBS_GLOBAL_CONSTANT_POOL, (const uint8_t *) RSTRING_PTR(name), RSTRING_LEN(name));
