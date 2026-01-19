@@ -8,6 +8,8 @@ VALUE EMPTY_ARRAY;
 VALUE EMPTY_HASH;
 
 #define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
+#define RBS_LOCATION_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
+#define RBS_LOCATION_OPTIONAL_P(loc, i) (!RBS_LOCATION_REQUIRED_P((loc), (i)))
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
     return (rbs_translation_context_t) {
@@ -53,7 +55,21 @@ VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *so
 
     if (source_loc->children != NULL) {
         rbs_loc_legacy_alloc_children(new_loc_struct, source_loc->children->cap);
-        memcpy(new_loc_struct->children, source_loc->children, RBS_LOCATION_CHILDREN_SIZE(source_loc->children->cap));
+
+        for (size_t i = 0; i < source_loc->children->len; i++) {
+            rbs_location_entry *entry = &source_loc->children->entries[i];
+
+            rbs_constant_t *constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, entry->name);
+            ID name = rb_intern2((const char *) constant->start, constant->length);
+
+            rbs_loc_range rg = { entry->rg.start, entry->rg.end };
+
+            if (RBS_LOCATION_REQUIRED_P(source_loc, i)) {
+                rbs_loc_legacy_add_required_child(new_loc_struct, name, rg);
+            } else {
+                rbs_loc_legacy_add_optional_child(new_loc_struct, name, rg);
+            }
+        }
     }
 
     return new_loc;

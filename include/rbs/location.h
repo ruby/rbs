@@ -19,7 +19,7 @@ typedef struct {
 typedef unsigned int rbs_location_entry_bitmap;
 
 // The flexible array always allocates, but it's okay.
-// This struct is not allocated when the `rbs_location`/`rbs_loc` doesn't have children.
+// This struct is not allocated when the `rbs_location` doesn't have children.
 typedef struct {
     unsigned short len;
     unsigned short cap;
