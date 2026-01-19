@@ -169,6 +169,9 @@ static VALUE location_end_pos(VALUE self) {
 }
 
 static rbs_constant_id_t rbs_constant_pool_insert_ruby_symbol(VALUE symbol) {
+    if (!RB_TYPE_P(symbol, T_SYMBOL)) {
+        rb_raise(rb_eTypeError, "wrong argument type %" PRIsVALUE " (must be a Symbol)", rb_obj_class(symbol));
+    }
     VALUE name = rb_sym2str(symbol);
 
     // Constants inserted here will never be freed, but that's acceptable because:
