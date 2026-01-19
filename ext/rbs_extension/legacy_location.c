@@ -3,10 +3,10 @@
 
 #define RBS_LOC_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
 #define RBS_LOC_OPTIONAL_P(loc, i) (!RBS_LOC_REQUIRED_P((loc), (i)))
-#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
+#define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
 #define NULL_LOC_RANGE_P(rg) ((rg).start == -1)
 
-rbs_loc_range RBS_LOC_NULL_RANGE = { -1, -1 };
+rbs_location_range RBS_LOC_NULL_RANGE = { -1, -1 };
 VALUE RBS_Location;
 
 rbs_position_t rbs_loc_position(int char_pos) {
@@ -17,13 +17,13 @@ rbs_position_t rbs_loc_position3(int char_pos, int line, int column) {
     return (rbs_position_t) { 0, char_pos, line, column };
 }
 
-static rbs_loc_range rbs_new_loc_range(rbs_range_t rg) {
-    rbs_loc_range r = { rg.start.char_pos, rg.end.char_pos };
+static rbs_location_range rbs_new_loc_range(rbs_range_t rg) {
+    rbs_location_range r = { rg.start.char_pos, rg.end.char_pos };
     return r;
 }
 
 static void check_children_max(unsigned short n) {
-    size_t max = sizeof(rbs_loc_entry_bitmap) * 8;
+    size_t max = sizeof(rbs_location_entry_bitmap) * 8;
     if (n > max) {
         rb_raise(rb_eRuntimeError, "Too many children added to location: %d", n);
     }
@@ -32,10 +32,10 @@ static void check_children_max(unsigned short n) {
 void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap) {
     check_children_max(cap);
 
-    size_t s = RBS_LOC_CHILDREN_SIZE(cap);
-    loc->children = (rbs_loc_children *) malloc(s);
+    size_t s = RBS_LOCATION_CHILDREN_SIZE(cap);
+    loc->children = (rbs_location_children *) malloc(s);
 
-    *loc->children = (rbs_loc_children) {
+    *loc->children = (rbs_location_children) {
         .len = 0,
         .required_p = 0,
         .cap = cap,
@@ -49,8 +49,8 @@ static void check_children_cap(rbs_loc *loc) {
     } else {
         if (loc->children->len == loc->children->cap) {
             check_children_max(loc->children->cap + 1);
-            size_t s = RBS_LOC_CHILDREN_SIZE(++loc->children->cap);
-            loc->children = (rbs_loc_children *) realloc(loc->children, s);
+            size_t s = RBS_LOCATION_CHILDREN_SIZE(++loc->children->cap);
+            loc->children = (rbs_location_children *) realloc(loc->children, s);
         }
     }
 }
@@ -59,7 +59,7 @@ void rbs_loc_legacy_add_optional_child(rbs_loc *loc, rbs_constant_id_t name, rbs
     check_children_cap(loc);
 
     unsigned short i = loc->children->len++;
-    loc->children->entries[i] = (rbs_loc_entry) {
+    loc->children->entries[i] = (rbs_location_entry) {
         .name = name,
         .rg = rbs_new_loc_range(r),
     };
@@ -72,7 +72,7 @@ void rbs_loc_legacy_add_required_child(rbs_loc *loc, rbs_constant_id_t name, rbs
     loc->children->required_p |= 1 << last_index;
 }
 
-void rbs_loc_init(rbs_loc *loc, VALUE buffer, rbs_loc_range rg) {
+void rbs_loc_init(rbs_loc *loc, VALUE buffer, rbs_location_range rg) {
     *loc = (rbs_loc) {
         .buffer = buffer,
         .rg = rg,
@@ -95,7 +95,7 @@ static size_t rbs_loc_memsize(const void *ptr) {
     if (loc->children == NULL) {
         return sizeof(rbs_loc);
     } else {
-        return sizeof(rbs_loc) + RBS_LOC_CHILDREN_SIZE(loc->children->cap);
+        return sizeof(rbs_loc) + RBS_LOCATION_CHILDREN_SIZE(loc->children->cap);
     }
 }
 
@@ -128,7 +128,7 @@ static VALUE location_initialize(VALUE self, VALUE buffer, VALUE start_pos, VALU
 
     *loc = (rbs_loc) {
         .buffer = buffer,
-        .rg = (rbs_loc_range) { start, end },
+        .rg = (rbs_location_range) { start, end },
         .children = NULL,
     };
 
@@ -147,7 +147,7 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
 
     if (other_loc->children != NULL) {
         rbs_loc_legacy_alloc_children(self_loc, other_loc->children->cap);
-        memcpy(self_loc->children, other_loc->children, RBS_LOC_CHILDREN_SIZE(other_loc->children->cap));
+        memcpy(self_loc->children, other_loc->children, RBS_LOCATION_CHILDREN_SIZE(other_loc->children->cap));
     }
 
     return Qnil;
@@ -219,7 +219,7 @@ VALUE rbs_new_location(VALUE buffer, rbs_range_t rg) {
     return obj;
 }
 
-static VALUE rbs_new_location_from_loc_range(VALUE buffer, rbs_loc_range rg) {
+static VALUE rbs_new_location_from_loc_range(VALUE buffer, rbs_location_range rg) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
@@ -242,7 +242,7 @@ static VALUE location_aref(VALUE self, VALUE name) {
     if (loc->children != NULL && id != RBS_CONSTANT_ID_UNSET) {
         for (unsigned short i = 0; i < loc->children->len; i++) {
             if (loc->children->entries[i].name == id) {
-                rbs_loc_range result = loc->children->entries[i].rg;
+                rbs_location_range result = loc->children->entries[i].rg;
 
                 if (RBS_LOC_OPTIONAL_P(loc, i) && NULL_LOC_RANGE_P(result)) {
                     return Qnil;
@@ -265,7 +265,7 @@ static VALUE location_optional_keys(VALUE self) {
     VALUE keys = rb_ary_new();
 
     rbs_loc *loc = rbs_check_location(self);
-    rbs_loc_children *children = loc->children;
+    rbs_location_children *children = loc->children;
     if (children == NULL) {
         return keys;
     }
@@ -285,7 +285,7 @@ static VALUE location_required_keys(VALUE self) {
     VALUE keys = rb_ary_new();
 
     rbs_loc *loc = rbs_check_location(self);
-    rbs_loc_children *children = loc->children;
+    rbs_location_children *children = loc->children;
     if (children == NULL) {
         return keys;
     }

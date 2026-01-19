@@ -7,7 +7,7 @@
 VALUE EMPTY_ARRAY;
 VALUE EMPTY_HASH;
 
-#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
+#define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
     return (rbs_translation_context_t) {
@@ -53,7 +53,7 @@ VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *so
 
     if (source_loc->children != NULL) {
         rbs_loc_legacy_alloc_children(new_loc_struct, source_loc->children->cap);
-        memcpy(new_loc_struct->children, source_loc->children, RBS_LOC_CHILDREN_SIZE(source_loc->children->cap));
+        memcpy(new_loc_struct->children, source_loc->children, RBS_LOCATION_CHILDREN_SIZE(source_loc->children->cap));
     }
 
     return new_loc;
