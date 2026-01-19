@@ -3,12 +3,12 @@
 
 #include <stdio.h>
 
-#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
+#define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
 
 void rbs_loc_alloc_children(rbs_allocator_t *allocator, rbs_location_t *loc, size_t capacity) {
-    RBS_ASSERT(capacity <= sizeof(rbs_loc_entry_bitmap) * 8, "Capacity %zu is too large. Max is %zu", capacity, sizeof(rbs_loc_entry_bitmap) * 8);
+    RBS_ASSERT(capacity <= sizeof(rbs_location_entry_bitmap) * 8, "Capacity %zu is too large. Max is %zu", capacity, sizeof(rbs_location_entry_bitmap) * 8);
 
-    loc->children = (rbs_loc_children *) rbs_allocator_malloc_impl(allocator, RBS_LOC_CHILDREN_SIZE(capacity), rbs_alignof(rbs_loc_children));
+    loc->children = (rbs_location_children *) rbs_allocator_malloc_impl(allocator, RBS_LOCATION_CHILDREN_SIZE(capacity), rbs_alignof(rbs_location_children));
 
     loc->children->len = 0;
     loc->children->required_p = 0;
@@ -21,7 +21,7 @@ void rbs_loc_add_optional_child(rbs_location_t *loc, rbs_constant_id_t name, rbs
 
     unsigned short i = loc->children->len++;
     loc->children->entries[i].name = name;
-    loc->children->entries[i].rg = (rbs_loc_range) { r.start.char_pos, r.end.char_pos };
+    loc->children->entries[i].rg = (rbs_location_range) { r.start.char_pos, r.end.char_pos };
 }
 
 void rbs_loc_add_required_child(rbs_location_t *loc, rbs_constant_id_t name, rbs_range_t r) {

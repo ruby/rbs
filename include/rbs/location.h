@@ -9,27 +9,27 @@
 typedef struct {
     int start;
     int end;
-} rbs_loc_range;
+} rbs_location_range;
 
 typedef struct {
     rbs_constant_id_t name;
-    rbs_loc_range rg;
-} rbs_loc_entry;
+    rbs_location_range rg;
+} rbs_location_entry;
 
-typedef unsigned int rbs_loc_entry_bitmap;
+typedef unsigned int rbs_location_entry_bitmap;
 
 // The flexible array always allocates, but it's okay.
-// This struct is not allocated when the `rbs_loc` doesn't have children.
+// This struct is not allocated when the `rbs_location`/`rbs_loc` doesn't have children.
 typedef struct {
     unsigned short len;
     unsigned short cap;
-    rbs_loc_entry_bitmap required_p;
-    rbs_loc_entry entries[1];
-} rbs_loc_children;
+    rbs_location_entry_bitmap required_p;
+    rbs_location_entry entries[1];
+} rbs_location_children;
 
 typedef struct rbs_location {
     rbs_range_t rg;
-    rbs_loc_children *children;
+    rbs_location_children *children;
 } rbs_location_t;
 
 typedef struct rbs_location_list_node {
