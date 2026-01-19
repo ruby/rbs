@@ -162,7 +162,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_bsearch
-    assert_send_type "() -> Enumerable[String, Integer?]", [0,1,2,3,4],
+    assert_send_type "() -> Enumerator[Integer]", [0,1,2,3,4],
                      :bsearch
 
     assert_send_type "() { (Integer) -> (true | false) } -> Integer",
