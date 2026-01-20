@@ -123,7 +123,7 @@ rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
     return node ? node->value : NULL;
 }
 
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
+rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_id_t constant_id) {
     rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
 
     *instance = (rbs_keyword_t) {
@@ -137,7 +137,7 @@ rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *locat
     return instance;
 }
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
     rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
