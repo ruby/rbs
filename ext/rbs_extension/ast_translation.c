@@ -104,6 +104,20 @@ VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_locatio
     return ruby_array;
 }
 
+VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_range_list_t *list) {
+    if (list == NULL) {
+        return EMPTY_ARRAY;
+    }
+
+    VALUE ruby_array = rb_ary_new();
+
+    for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_location_range_to_ruby_location(ctx, n->range));
+    }
+
+    return ruby_array;
+}
+
 #ifdef RB_PASS_KEYWORDS
 // Ruby 2.7 or later
 #define CLASS_NEW_INSTANCE(klass, argc, argv) \
@@ -822,7 +836,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_location_range_to_ruby_location(ctx, node->prefix_location));
         rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(ctx, node->overloads));
-        rb_hash_aset(h, ID2SYM(rb_intern("vertical_bar_locations")), rbs_location_list_to_ruby_array(ctx, node->vertical_bar_locations));
+        rb_hash_aset(h, ID2SYM(rb_intern("vertical_bar_locations")), rbs_location_range_list_to_ruby_array(ctx, node->vertical_bar_locations));
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Ruby_Annotations_MethodTypesAnnotation,
@@ -900,7 +914,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_location_range_to_ruby_location(ctx, node->prefix_location));
         rb_hash_aset(h, ID2SYM(rb_intern("type_args")), rbs_node_list_to_ruby_array(ctx, node->type_args));
         rb_hash_aset(h, ID2SYM(rb_intern("close_bracket_location")), rbs_location_range_to_ruby_location(ctx, node->close_bracket_location));
-        rb_hash_aset(h, ID2SYM(rb_intern("comma_locations")), rbs_location_list_to_ruby_array(ctx, node->comma_locations));
+        rb_hash_aset(h, ID2SYM(rb_intern("comma_locations")), rbs_location_range_list_to_ruby_array(ctx, node->comma_locations));
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Ruby_Annotations_TypeApplicationAnnotation,

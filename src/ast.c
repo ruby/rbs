@@ -950,7 +950,7 @@ rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotation
     return instance;
 }
 #line 156 "prism/templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_range prefix_location, rbs_node_list_t *overloads, rbs_location_list_t *vertical_bar_locations) {
+rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_range prefix_location, rbs_node_list_t *overloads, rbs_location_range_list_t *vertical_bar_locations) {
     rbs_ast_ruby_annotations_method_types_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_method_types_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_method_types_annotation_t) {
@@ -1032,7 +1032,7 @@ rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annota
     return instance;
 }
 #line 156 "prism/templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_range prefix_location, rbs_node_list_t *type_args, rbs_location_range close_bracket_location, rbs_location_list_t *comma_locations) {
+rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_range prefix_location, rbs_node_list_t *type_args, rbs_location_range close_bracket_location, rbs_location_range_list_t *comma_locations) {
     rbs_ast_ruby_annotations_type_application_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_type_application_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_type_application_annotation_t) {

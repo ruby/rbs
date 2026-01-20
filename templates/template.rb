@@ -58,6 +58,8 @@ module RBS
           "rbs_string_t #{c_name}"
         when "rbs_location_range"
           "rbs_location_range #{c_name}#{optional? ? " /* optional */" : ""}"
+        when "rbs_location_range_list"
+          "rbs_location_range_list_t *#{c_name}"
         else
           "struct #{@c_type} *#{c_name}"
         end

@@ -56,6 +56,18 @@ void rbs_loc_alloc_children(rbs_allocator_t *, rbs_location_t *loc, size_t capac
 void rbs_loc_add_required_child(rbs_location_t *loc, rbs_constant_id_t name, rbs_range_t r);
 void rbs_loc_add_optional_child(rbs_location_t *loc, rbs_constant_id_t name, rbs_range_t r);
 
+typedef struct rbs_location_range_list_node {
+    rbs_location_range range;
+    struct rbs_location_range_list_node *next;
+} rbs_location_range_list_node_t;
+
+typedef struct rbs_location_range_list {
+    rbs_allocator_t *allocator;
+    struct rbs_location_range_list_node *head;
+    struct rbs_location_range_list_node *tail;
+    size_t length;
+} rbs_location_range_list_t;
+
 /**
  * Allocate new rbs_location_t object through the given allocator.
  * */
@@ -63,5 +75,11 @@ rbs_location_t *rbs_location_new(rbs_allocator_t *, rbs_range_t rg);
 
 rbs_location_list_t *rbs_location_list_new(rbs_allocator_t *allocator);
 void rbs_location_list_append(rbs_location_list_t *list, rbs_location_t *loc);
+
+/**
+ * Allocate new rbs_location_range_list_t object through the given allocator.
+ */
+rbs_location_range_list_t *rbs_location_range_list_new(rbs_allocator_t *allocator);
+void rbs_location_range_list_append(rbs_location_range_list_t *list, rbs_location_range range);
 
 #endif

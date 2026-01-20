@@ -277,15 +277,15 @@ static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_nod
                           | {} type `,` ... `,` <type> eol
 */
 NODISCARD
-static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations, bool void_allowed, bool self_allowed, bool classish_allowed) {
+static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_range_list_t *comma_locations, bool void_allowed, bool self_allowed, bool classish_allowed) {
     while (true) {
         rbs_node_t *type;
         CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed, self_allowed, classish_allowed));
         rbs_node_list_append(types, type);
 
         if (parser->next_token.type == pCOMMA) {
-            rbs_location_t *comma_loc = rbs_location_new(ALLOCATOR(), parser->next_token.range);
-            rbs_location_list_append(comma_locations, comma_loc);
+            rbs_location_range comma_loc = RBS_RANGE_LEX2AST(parser->next_token.range);
+            rbs_location_range_list_append(comma_locations, comma_loc);
             rbs_parser_advance(parser);
 
             if (parser->next_token.type == eol) {
@@ -3614,7 +3614,7 @@ static bool parse_method_overload(rbs_parser_t *parser, rbs_node_list_t *annotat
                            | {<>}                                 -- returns false
 */
 NODISCARD
-static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_list_t *bar_locations) {
+static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_range_list_t *bar_locations) {
     while (true) {
         rbs_node_list_t *annotations = rbs_node_list_new(ALLOCATOR());
         rbs_method_type_t *method_type = NULL;
@@ -3633,11 +3633,11 @@ static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t 
         rbs_node_list_append(overloads, (rbs_node_t *) overload);
 
         if (parser->next_token.type == pBAR) {
-            rbs_location_t *bar_location = rbs_location_new(ALLOCATOR(), parser->next_token.range);
+            rbs_location_range bar_range = RBS_RANGE_LEX2AST(parser->next_token.range);
 
             rbs_parser_advance(parser);
 
-            rbs_location_list_append(bar_locations, bar_location);
+            rbs_location_range_list_append(bar_locations, bar_range);
 
             continue;
         }
@@ -3700,7 +3700,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
         case pLBRACE:
         case tANNOTATION: {
             rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
-            rbs_location_list_t *bar_locations = rbs_location_list_new(ALLOCATOR());
+            rbs_location_range_list_t *bar_locations = rbs_location_range_list_new(ALLOCATOR());
 
             if (!parse_inline_method_overloads(parser, overloads, bar_locations)) {
                 return false;
@@ -3928,7 +3928,7 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         rbs_parser_advance(parser);
 
         rbs_node_list_t *type_args = rbs_node_list_new(ALLOCATOR());
-        rbs_location_list_t *comma_locations = rbs_location_list_new(ALLOCATOR());
+        rbs_location_range_list_t *comma_locations = rbs_location_range_list_new(ALLOCATOR());
 
         // Check for empty type args
         if (parser->next_token.type == pRBRACKET) {
