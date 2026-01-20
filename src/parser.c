@@ -3680,12 +3680,11 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
         };
 
         rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-        rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
         *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_colon_method_type_annotation_new(
             ALLOCATOR(),
             full_loc,
-            colon_loc,
+            RBS_RANGE_LEX2AST(colon_range),
             annotations,
             (rbs_node_t *) method_type
         );
@@ -3713,12 +3712,11 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             };
 
             rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
 
             *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_method_types_annotation_new(
                 ALLOCATOR(),
                 full_loc,
-                rbs_loc,
+                RBS_RANGE_LEX2AST(rbs_range),
                 overloads,
                 bar_locations
             );
@@ -3728,7 +3726,6 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_parser_advance(parser);
 
             rbs_range_t skip_range = parser->current_token.range;
-            rbs_location_t *skip_loc = rbs_location_new(ALLOCATOR(), skip_range);
 
             rbs_location_t *comment_loc = NULL;
             if (!parse_inline_comment(parser, &comment_loc)) {
@@ -3741,14 +3738,13 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             };
 
             rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
 
             *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
                 ALLOCATOR(),
                 full_loc,
-                rbs_loc,
-                skip_loc,
-                comment_loc
+                RBS_RANGE_LEX2AST(rbs_range),
+                RBS_RANGE_LEX2AST(skip_range),
+                comment_loc ? RBS_RANGE_LEX2AST(comment_loc->rg) : RBS_LOCATION_NULL_RANGE
             );
             return true;
         }
@@ -3756,12 +3752,10 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_parser_advance(parser);
 
             rbs_range_t return_range = parser->current_token.range;
-            rbs_location_t *return_loc = rbs_location_new(ALLOCATOR(), return_range);
 
             ADVANCE_ASSERT(parser, pCOLON);
 
             rbs_range_t colon_range = parser->current_token.range;
-            rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
             rbs_node_t *return_type = NULL;
             if (!rbs_parse_type(parser, &return_type, true, true, true)) {
@@ -3779,16 +3773,15 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             };
 
             rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
 
             *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_return_type_annotation_new(
                 ALLOCATOR(),
                 full_loc,
-                rbs_loc,
-                return_loc,
-                colon_loc,
+                RBS_RANGE_LEX2AST(rbs_range),
+                RBS_RANGE_LEX2AST(return_range),
+                RBS_RANGE_LEX2AST(colon_range),
                 return_type,
-                comment_loc
+                comment_loc ? RBS_RANGE_LEX2AST(comment_loc->rg) : RBS_LOCATION_NULL_RANGE
             );
             return true;
         }
@@ -3807,7 +3800,6 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             ADVANCE_ASSERT(parser, pCOLON);
 
             rbs_range_t colon_range = parser->current_token.range;
-            rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
             rbs_node_t *type = NULL;
             if (!rbs_parse_type(parser, &type, false, true, true)) {
@@ -3825,17 +3817,16 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             };
 
             rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-            rbs_location_t *rbs_loc = rbs_location_new(ALLOCATOR(), rbs_range);
 
             *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_instance_variable_annotation_new(
                 ALLOCATOR(),
                 full_loc,
-                rbs_loc,
+                RBS_RANGE_LEX2AST(rbs_range),
                 ivar_name,
-                ivar_name_loc,
-                colon_loc,
+                RBS_RANGE_LEX2AST(ivar_name_range),
+                RBS_RANGE_LEX2AST(colon_range),
                 type,
-                comment_loc
+                comment_loc ? RBS_RANGE_LEX2AST(comment_loc->rg) : RBS_LOCATION_NULL_RANGE
             );
             return true;
         }
@@ -3864,7 +3855,6 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         if (parser->next_token.type == kCLASSALIAS || parser->next_token.type == kMODULEALIAS) {
             bool is_class_alias = (parser->next_token.type == kCLASSALIAS);
             rbs_range_t keyword_range = parser->next_token.range;
-            rbs_location_t *keyword_loc = rbs_location_new(ALLOCATOR(), keyword_range);
             rbs_parser_advance(parser);
 
             rbs_type_name_t *type_name = NULL;
@@ -3890,25 +3880,24 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
             }
 
             rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-            rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
 
             if (is_class_alias) {
                 *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_class_alias_annotation_new(
                     ALLOCATOR(),
                     full_loc,
-                    prefix_loc,
-                    keyword_loc,
+                    RBS_RANGE_LEX2AST(prefix_range),
+                    RBS_RANGE_LEX2AST(keyword_range),
                     type_name,
-                    type_name_loc
+                    type_name_loc ? RBS_RANGE_LEX2AST(type_name_loc->rg) : RBS_LOCATION_NULL_RANGE
                 );
             } else {
                 *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_module_alias_annotation_new(
                     ALLOCATOR(),
                     full_loc,
-                    prefix_loc,
-                    keyword_loc,
+                    RBS_RANGE_LEX2AST(prefix_range),
+                    RBS_RANGE_LEX2AST(keyword_range),
                     type_name,
-                    type_name_loc
+                    type_name_loc ? RBS_RANGE_LEX2AST(type_name_loc->rg) : RBS_LOCATION_NULL_RANGE
                 );
             }
             return true;
@@ -3926,12 +3915,11 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         };
 
         rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-        rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
 
         *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_node_type_assertion_new(
             ALLOCATOR(),
             full_loc,
-            prefix_loc,
+            RBS_RANGE_LEX2AST(prefix_range),
             type
         );
         return true;
@@ -3952,7 +3940,6 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations, true, true, false));
 
         rbs_range_t close_bracket_range = parser->next_token.range;
-        rbs_location_t *close_bracket_loc = rbs_location_new(ALLOCATOR(), close_bracket_range);
         rbs_parser_advance(parser); // consume ]
 
         rbs_range_t full_range = {
@@ -3961,14 +3948,13 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         };
 
         rbs_location_t *full_loc = rbs_location_new(ALLOCATOR(), full_range);
-        rbs_location_t *prefix_loc = rbs_location_new(ALLOCATOR(), prefix_range);
 
         *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_type_application_annotation_new(
             ALLOCATOR(),
             full_loc,
-            prefix_loc,
+            RBS_RANGE_LEX2AST(prefix_range),
             type_args,
-            close_bracket_loc,
+            RBS_RANGE_LEX2AST(close_bracket_range),
             comma_locations
         );
         return true;
