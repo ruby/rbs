@@ -165,7 +165,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = rb_hash_new();
         <%- if node.expose_location? -%>
             <%- if node.locations -%>
-        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
         rbs_loc *loc = rbs_check_location(location);
         rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
                 <%- node.locations.each do |location_field| -%>
@@ -177,7 +177,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
                 <%- end -%>
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
             <%- else -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
             <%- end -%>
         <%- end -%>
         <%- node.fields.each do |field| -%>

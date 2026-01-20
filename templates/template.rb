@@ -162,7 +162,7 @@ module RBS
 
         @constructor_params = [
           Field.new(name: "allocator",  c_type: "rbs_allocator_t *"),
-          Field.new(name: "location",   c_type: "rbs_location_t *" ),
+          Field.new(name: "location",   c_type: "rbs_location_range" ),
         ]
         @constructor_params.concat @fields
         @locations&.each do |loc|
