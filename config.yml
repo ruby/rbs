@@ -707,7 +707,7 @@ nodes:
       - name: overloads
         c_type: rbs_node_list
       - name: vertical_bar_locations
-        c_type: rbs_location_list
+        c_type: rbs_location_range_list
   - name: RBS::AST::Ruby::Annotations::SkipAnnotation
     rust_name: SkipAnnotationNode
     fields:
@@ -742,7 +742,7 @@ nodes:
       - name: close_bracket_location
         c_type: rbs_location_range
       - name: comma_locations
-        c_type: rbs_location_list
+        c_type: rbs_location_range_list
   - name: RBS::AST::Ruby::Annotations::InstanceVariableAnnotation
     rust_name: InstanceVariableAnnotationNode
     fields:
