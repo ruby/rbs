@@ -75,6 +75,14 @@ VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *so
     return new_loc;
 }
 
+VALUE rbs_location_range_to_ruby_location(rbs_translation_context_t ctx, rbs_location_range range) {
+    if (RBS_LOCATION_NULL_RANGE_P(range)) {
+        return Qnil;
+    }
+
+    return rbs_new_location2(ctx.buffer, range.start, range.end);
+}
+
 VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_list_t *list) {
     if (list == NULL) {
         return EMPTY_ARRAY;
@@ -174,6 +182,8 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.c_name %>, ctx.encoding));
         <%- when "bool" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %> ? Qtrue : Qfalse);
+        <%- when "rbs_location_range" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_to_ruby_location(ctx, node-><%= field.name %>));<%= field.optional? ? " // optional" : "" %>
         <%- when "rbs_location" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
         <%- when "rbs_location_list" -%>

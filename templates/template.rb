@@ -9,14 +9,28 @@ module RBS
     class Field
       attr_reader :name, :c_type, :c_name #: String
 
-      def initialize(name:, c_type:, c_name: nil)
+      def initialize(name:, c_type:, optional: false, c_name: nil)
         @name = name
         @c_type = c_type
         @c_name = c_name || name
+        @optional = optional
       end
 
       def self.from_hash(hash)
-        new(name: hash["name"], c_type: hash.fetch("c_type", "VALUE"), c_name: hash["c_name"])
+        new(
+          name: hash["name"],
+          c_type: hash.fetch("c_type", "VALUE"),
+          c_name: hash["c_name"],
+          optional: hash.fetch("optional", false)
+        )
+      end
+
+      def optional? #: bool
+        @optional
+      end
+
+      def required? #: bool
+        !@optional
       end
 
       def parameter_decl
@@ -42,6 +56,8 @@ module RBS
           "bool #{c_name}"
         when "rbs_string"
           "rbs_string_t #{c_name}"
+        when "rbs_location_range"
+          "rbs_location_range #{c_name}#{optional? ? " /* optional */" : ""}"
         else
           "struct #{@c_type} *#{c_name}"
         end

@@ -687,14 +687,14 @@ nodes:
     rust_name: NodeTypeAssertionNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type
         c_type: rbs_node
   - name: RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation
     rust_name: ColonMethodTypeAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: annotations
         c_type: rbs_node_list
       - name: method_type
@@ -703,7 +703,7 @@ nodes:
     rust_name: MethodTypesAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: overloads
         c_type: rbs_node_list
       - name: vertical_bar_locations
@@ -712,69 +712,74 @@ nodes:
     rust_name: SkipAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: skip_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ReturnTypeAnnotation
     rust_name: ReturnTypeAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: return_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: colon_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: return_type
         c_type: rbs_node
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::TypeApplicationAnnotation
     rust_name: TypeApplicationAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_args
         c_type: rbs_node_list
       - name: close_bracket_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: comma_locations
         c_type: rbs_location_list
   - name: RBS::AST::Ruby::Annotations::InstanceVariableAnnotation
     rust_name: InstanceVariableAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: ivar_name
         c_type: rbs_ast_symbol
       - name: ivar_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: colon_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type
         c_type: rbs_node
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ClassAliasAnnotation
     rust_name: ClassAliasAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: keyword_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_name
         c_type: rbs_type_name
       - name: type_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ModuleAliasAnnotation
     rust_name: ModuleAliasAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: keyword_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_name
         c_type: rbs_type_name
       - name: type_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
