@@ -201,6 +201,14 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String) -> String", opt, :program_name=, 'foo'
   end
 
+  def test_raise_unknown
+    assert_send_type "() -> boolish", opt, :raise_unknown
+  end
+
+  def test_raise_unknown=
+    assert_send_type "(boolish) -> boolish", opt, :raise_unknown=, true
+  end
+
   def test_reject
     assert_send_type '(Class) -> void', opt, :reject, Class.new
   end

@@ -689,6 +689,27 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse_method_type__require_eof
+    RBS::Parser.parse_method_type(buffer("-> Foo extra input")).tap do |method_type|
+      assert_instance_of RBS::MethodType, method_type
+      assert_equal "-> Foo", method_type.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("-> Foo extra input")).tap do |method_type|
+      assert_instance_of RBS::MethodType, method_type
+      assert_equal "-> Foo", method_type.location.source
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("-> Foo extra input"), require_eof: true)
+    end.tap do |exn|
+      assert_equal(
+        "test.rbs:1:7...1:12: Syntax error: expected a token `pEOF`, token=`extra` (tLIDENT)",
+        exn.message
+      )
+    end
+  end
+
   def test_duplicate_keyword
     RBS::Parser.parse_method_type(buffer("(top foo, foo: top) -> void")).tap do |method_type|
       assert_equal "top foo, foo: top", method_type.type.param_to_s

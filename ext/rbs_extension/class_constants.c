@@ -7,8 +7,6 @@
 
 #include "rbs_extension.h"
 
-VALUE RBS_Parser;
-
 VALUE RBS;
 VALUE RBS_AST;
 VALUE RBS_AST_Declarations;

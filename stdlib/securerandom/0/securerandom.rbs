@@ -35,5 +35,15 @@
 # raised.
 #
 module SecureRandom
+  # <!--
+  #   rdoc-file=lib/securerandom.rb
+  #   - bytes(n)
+  # -->
+  # Returns a random binary string containing `size` bytes.
+  #
+  # See Random.bytes
+  #
+  def self.bytes: (Integer) -> String
+
   extend Random::Formatter
 end

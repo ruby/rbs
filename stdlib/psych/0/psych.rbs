@@ -265,7 +265,7 @@ module Psych
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - load(yaml, permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false)
+  #   - load(yaml, permitted_classes: [Symbol], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false, parse_symbols: true)
   # -->
   # Load `yaml` in to a Ruby data structure.  If multiple documents are provided,
   # the object contained in the first document will be returned. `filename` will
@@ -312,7 +312,7 @@ module Psych
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false)
+  #   - safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: false, filename: nil, fallback: nil, symbolize_names: false, freeze: false, strict_integer: false, parse_symbols: true)
   # -->
   # Safely load the yaml string in `yaml`.  By default, only the following classes
   # are allowed to be deserialized:
@@ -363,7 +363,7 @@ module Psych
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - unsafe_load(yaml, filename: nil, fallback: false, symbolize_names: false, freeze: false, strict_integer: false)
+  #   - unsafe_load(yaml, filename: nil, fallback: false, symbolize_names: false, freeze: false, strict_integer: false, parse_symbols: true)
   # -->
   # Load `yaml` in to a Ruby data structure.  If multiple documents are provided,
   # the object contained in the first document will be returned. `filename` will

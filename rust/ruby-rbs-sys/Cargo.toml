@@ -1,0 +1,11 @@
+[package]
+name = "ruby-rbs-sys"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+doctest = false
+
+[build-dependencies]
+bindgen = "0.72.0"
+cc = "1.2.29"

@@ -7,6 +7,20 @@ class KernelSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Kernel)"
 
+  def test_caller_locations
+    assert_send_type "() -> Array[Thread::Backtrace::Location]",
+                     Kernel, :caller_locations
+
+    assert_send_type "(Integer) -> Array[Thread::Backtrace::Location]?",
+                      Kernel, :caller_locations, 1
+
+    assert_send_type "(Integer, Integer) -> Array[Thread::Backtrace::Location]?",
+                      Kernel, :caller_locations, 1, 2
+
+    assert_send_type "(::Range[Integer]) -> Array[Thread::Backtrace::Location]?",
+                     Kernel, :caller_locations, (1..3)
+  end
+
   def test_Array
     assert_send_type "(nil) -> []",
                      Kernel, :Array, nil
