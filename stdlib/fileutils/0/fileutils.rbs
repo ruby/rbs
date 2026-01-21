@@ -907,12 +907,12 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `group: *group`* - changes the group if not `nil`, using
+  # *   `group: <i>group</i>` - changes the group if not `nil`, using
   #     [File.chown](rdoc-ref:File.chown).
-  # *   `mode: *permissions`* - changes the permissions. using
+  # *   `mode: <i>permissions</i>` - changes the permissions. using
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not copy entries; returns `nil`.
-  # *   `owner: *owner`* - changes the owner if not `nil`, using
+  # *   `owner: <i>owner</i>` - changes the owner if not `nil`, using
   #     [File.chown](rdoc-ref:File.chown).
   # *   `preserve: true` - preserve timestamps using
   #     [File.utime](rdoc-ref:File.utime).
@@ -1174,7 +1174,7 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mode: *mode`* - also calls `File.chmod(mode, path)`; see
+  # *   `mode: <i>mode</i>` - also calls `File.chmod(mode, path)`; see
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not create directories.
   # *   `verbose: true` - prints an equivalent command:
@@ -1214,7 +1214,7 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mode: *mode`* - also calls `File.chmod(mode, path)`; see
+  # *   `mode: <i>mode</i>` - also calls `File.chmod(mode, path)`; see
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not create directories.
   # *   `verbose: true` - prints an equivalent command:
@@ -1699,8 +1699,8 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mtime: *time`* - sets the entry's mtime to the given time, instead of the
-  #     current time.
+  # *   `mtime: <i>time</i>` - sets the entry's mtime to the given time, instead
+  #     of the current time.
   # *   `nocreate: true` - raises an exception if the entry does not exist.
   # *   `noop: true` - does not touch entries; returns `nil`.
   # *   `verbose: true` - prints an equivalent command:

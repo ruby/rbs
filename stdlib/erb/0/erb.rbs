@@ -181,7 +181,7 @@
 #      in the result, the entire tag is to be omitted.
 # ### Expression Tags
 # You can embed a Ruby expression in a template using an *expression tag*.
-# Its syntax is `<%= *expression* %>`,
+# Its syntax is `<%= _expression_ %>`,
 # where *expression* is any valid Ruby expression.
 # When you call method #result,
 # the method evaluates the expression and replaces the entire expression tag
@@ -203,7 +203,7 @@
 #
 # ### Execution Tags
 # You can embed Ruby executable code in template using an *execution tag*.
-# Its syntax is `<% *code* %>`,
+# Its syntax is `<% _code_ %>`,
 # where *code* is any valid Ruby code.
 # When you call method #result,
 # the method executes the code and removes the entire execution tag
@@ -270,7 +270,7 @@
 # #### Shorthand Format for Execution Tags
 # You can use keyword argument `trim_mode: '%'` to enable a shorthand format for
 # execution tags;
-# this example uses the shorthand format `% *code`* instead of `<% *code* %>`:
+# this example uses the shorthand format `% _code_` instead of `<% _code_ %>`:
 #     template = <<TEMPLATE
 # % priorities.each do |priority|
 #   * <%= priority %>
@@ -350,7 +350,7 @@
 #     `'<%'` and ending with `'%>'`.
 # ### Comment Tags
 # You can embed a comment in a template using a *comment tag*;
-# its syntax is `<%# *text* %>`,
+# its syntax is `<%# _text_ %>`,
 # where *text* is the text of the comment.
 # When you call method #result,
 # it removes the entire comment tag
