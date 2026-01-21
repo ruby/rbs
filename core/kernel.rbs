@@ -1253,9 +1253,6 @@ module Kernel : BasicObject
   # -->
   # Creates an IO object connected to the given file.
   #
-  # This method has potential security vulnerabilities if called with untrusted
-  # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
-  #
   # With no block given, file stream is returned:
   #
   #     open('t.txt') # => #<File:t.txt>
