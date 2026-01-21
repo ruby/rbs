@@ -55,19 +55,26 @@
 module Comparable : _WithSpaceshipOperator
   # <!--
   #   rdoc-file=compar.c
-  #   - obj < other    -> true or false
+  #   - self < other -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value less than 0.
+  # Returns whether `self` is "less than" `other`; equivalent to `(self <=> other)
+  # < 0`:
+  #
+  #     'foo' < 'foo'  # => false
+  #     'foo' < 'food' # => true
   #
   def <: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=compar.c
-  #   - obj <= other    -> true or false
+  #   - self <= other -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value less than or equal to 0.
+  # Returns whether `self` is "less than or equal to" `other`; equivalent to
+  # `(self <=> other) <= 0`:
+  #
+  #     'foo' <= 'foo'  # => true
+  #     'foo' <= 'food' # => true
+  #     'food' <= 'foo' # => false
   #
   def <=: (untyped other) -> bool
 

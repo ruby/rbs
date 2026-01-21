@@ -128,4 +128,7 @@ module Singleton
   end
 end
 
+# <!-- rdoc-file=lib/singleton.rb -->
+# The version string
+#
 Singleton::VERSION: String

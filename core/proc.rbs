@@ -201,8 +201,8 @@
 #     ["Bob", "Jane"].map(&hi)    #=> ["Hi, Bob!", "Hi, Jane!"]
 #     ["Bob", "Jane"].map(&hey)   #=> ["Hey, Bob!", "Hey, Jane!"]
 #
-# Of the Ruby core classes, this method is implemented by Symbol, Method, and
-# Hash.
+# Of the Ruby core classes, this method is implemented by `Symbol`, `Method`,
+# and `Hash`.
 #
 #     :to_s.to_proc.call(1)           #=> "1"
 #     [1, 2].map(&:to_s)              #=> ["1", "2"]
@@ -285,7 +285,7 @@
 #     [1, 2, 3].each { |x| p it }
 #     # syntax error found (SyntaxError)
 #     # [1, 2, 3].each { |x| p it }
-#     #                        ^~ `it` is not allowed when an ordinary parameter is defined
+#     #                        ^~ 'it' is not allowed when an ordinary parameter is defined
 #
 # But if a local name (variable or method) is available, it would be used:
 #
@@ -302,7 +302,7 @@
 #
 #     p = proc { it**2 }
 #     l = lambda { it**2 }
-#     p.parameters     # => [[:opt, nil]]
+#     p.parameters     # => [[:opt]]
 #     p.arity          # => 1
 #     l.parameters     # => [[:req]]
 #     l.arity          # => 1
@@ -332,7 +332,7 @@
 # Numbered parameters can't be mixed with `it` either:
 #
 #     [10, 20, 30].map { _1 + it }
-#     # SyntaxError: `it` is not allowed when a numbered parameter is already used
+#     # SyntaxError: 'it' is not allowed when a numbered parameter is already used
 #
 # To avoid conflicts, naming local variables or method arguments `_1`, `_2` and
 # so on, causes an error.
@@ -379,9 +379,9 @@ class Proc
   def clone: () -> self
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -408,9 +408,9 @@ class Proc
   alias === call
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -591,14 +591,13 @@ class Proc
 
   # <!--
   #   rdoc-file=proc.c
-  #   - prc.call(params,...)   -> obj
-  #   - prc[params,...]        -> obj
-  #   - prc.(params,...)       -> obj
-  #   - prc.yield(params,...)  -> obj
+  #   - call(...) -> obj
+  #   - self[...] -> obj
+  #   - yield(...) -> obj
   # -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -625,9 +624,9 @@ class Proc
   def call: (?) -> untyped
 
   # <!-- rdoc-file=proc.c -->
-  # Invokes the block, setting the block's parameters to the values in *params*
-  # using something close to method calling semantics. Returns the value of the
-  # last expression evaluated in the block.
+  # Invokes the block, setting the block's parameters to the arguments using
+  # something close to method calling semantics. Returns the value of the last
+  # expression evaluated in the block.
   #
   #     a_proc = Proc.new {|scalar, *values| values.map {|value| value*scalar } }
   #     a_proc.call(9, 1, 2, 3)    #=> [9, 18, 27]
@@ -834,10 +833,17 @@ class Proc
 
   # <!--
   #   rdoc-file=proc.c
-  #   - prc.source_location  -> [String, Integer]
+  #   - prc.source_location  -> [String, Integer, Integer, Integer, Integer]
   # -->
-  # Returns the Ruby source filename and line number containing this proc or `nil`
-  # if this proc was not defined in Ruby (i.e. native).
+  # Returns the location where the Proc was defined. The returned Array contains:
+  #     (1) the Ruby source filename
+  #     (2) the line number where the definition starts
+  #     (3) the column number where the definition starts
+  #     (4) the line number where the definition ends
+  #     (5) the column number where the definitions ends
+  #
+  # This method will return `nil` if the Proc was not defined in Ruby (i.e.
+  # native).
   #
   def source_location: () -> [String, Integer]?
 

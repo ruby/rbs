@@ -118,7 +118,7 @@ class Exception
   #       # String
   #     end
   #
-  # The value returned by this method migth be adjusted when raising (see
+  # The value returned by this method might be adjusted when raising (see
   # Kernel#raise), or during intermediate handling by #set_backtrace.
   #
   # See also #backtrace_locations that provide the same value, as structured
@@ -447,7 +447,7 @@ class Exception
   #     *   If the value of keyword `order` is `:top` (the default), lists the
   #         error message and the innermost backtrace entry first.
   #     *   If the value of keyword `order` is `:bottom`, lists the error message
-  #         the the innermost entry last.
+  #         the innermost entry last.
   #
   # Example:
   #

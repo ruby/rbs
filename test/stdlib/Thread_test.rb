@@ -74,6 +74,15 @@ class ThreadTest < Test::Unit::TestCase
                        t, :raise, StandardError, 'Error!', caller_locations
     end
 
+    if_ruby("4.0"..., skip: false) do
+      assert_send_type "(cause: Exception) -> nil",
+                       t, :raise, cause: Exception.new
+      assert_send_type "(String, cause: Exception) -> nil",
+                       t, :raise, "Error!", cause: Exception.new
+      assert_send_type "(Exception, cause: Exception) -> nil",
+                       t, :raise, Exception.new, cause: Exception.new
+    end
+
     t.kill
   end
 end

@@ -151,8 +151,8 @@
 #
 # ## Example Usage
 #
-# In addition to the methods it mixes in through the Enumerable module, the
-# `Array` class has proprietary methods for accessing, searching and otherwise
+# In addition to the methods it mixes in through the Enumerable module, class
+# Array has proprietary methods for accessing, searching and otherwise
 # manipulating arrays.
 #
 # Some of the more common ones are illustrated below.
@@ -200,9 +200,9 @@
 #
 #     arr.drop(3) #=> [4, 5, 6]
 #
-# ## Obtaining Information about an `Array`
+# ## Obtaining Information about an Array
 #
-# Arrays keep track of their own length at all times.  To query an array about
+# An array keeps track of its own length at all times.  To query an array about
 # the number of elements it contains, use #length, #count or #size.
 #
 #     browsers = ['Chrome', 'Firefox', 'Safari', 'Opera', 'IE']
@@ -217,7 +217,7 @@
 #
 #     browsers.include?('Konqueror') #=> false
 #
-# ## Adding Items to Arrays
+# ## Adding Items to an Array
 #
 # Items can be added to the end of an array by using either #push or #<<
 #
@@ -238,7 +238,7 @@
 #     arr.insert(3, 'orange', 'pear', 'grapefruit')
 #     #=> [0, 1, 2, "orange", "pear", "grapefruit", "apple", 3, 4, 5, 6]
 #
-# ## Removing Items from an `Array`
+# ## Removing Items from an Array
 #
 # The method #pop removes the last element in an array and returns it:
 #
@@ -277,12 +277,12 @@
 #     arr = [2, 5, 6, 556, 6, 6, 8, 9, 0, 123, 556]
 #     arr.uniq #=> [2, 5, 6, 556, 8, 9, 0, 123]
 #
-# ## Iterating over Arrays
+# ## Iterating over an Array
 #
-# Like all classes that include the Enumerable module, `Array` has an each
+# Like all classes that include the Enumerable module, class Array has an each
 # method, which defines what elements should be iterated over and how.  In case
-# of Array's #each, all elements in the `Array` instance are yielded to the
-# supplied block in sequence.
+# of Array#each, all elements in `self` are yielded to the supplied block in
+# sequence.
 #
 # Note that this operation leaves the array unchanged.
 #
@@ -307,7 +307,7 @@
 #     arr.map! {|a| a**2}   #=> [1, 4, 9, 16, 25]
 #     arr                   #=> [1, 4, 9, 16, 25]
 #
-# ## Selecting Items from an `Array`
+# ## Selecting Items from an Array
 #
 # Elements can be selected from an array according to criteria defined in a
 # block.  The selection can happen in a destructive or a non-destructive manner.
@@ -340,13 +340,13 @@
 #
 # ## What's Here
 #
-# First, what's elsewhere. Class `Array`:
+# First, what's elsewhere. Class Array:
 #
 # *   Inherits from [class Object](rdoc-ref:Object@What-27s+Here).
 # *   Includes [module Enumerable](rdoc-ref:Enumerable@What-27s+Here), which
 #     provides dozens of additional methods.
 #
-# Here, class `Array` provides methods that are useful for:
+# Here, class Array provides methods that are useful for:
 #
 # *   [Creating an Array](rdoc-ref:Array@Methods+for+Creating+an+Array)
 # *   [Querying](rdoc-ref:Array@Methods+for+Querying)
@@ -359,7 +359,7 @@
 # *   [Converting](rdoc-ref:Array@Methods+for+Converting)
 # *   [And more....](rdoc-ref:Array@Other+Methods)
 #
-# ### Methods for Creating an `Array`
+# ### Methods for Creating an Array
 #
 # *   ::[]: Returns a new array populated with given objects.
 # *   ::new: Returns a new array.
@@ -524,7 +524,7 @@
 #     return-value.
 # *   #flatten: Returns an array that is a recursive flattening of `self`.
 # *   #inspect (aliased as #to_s): Returns a new String containing the elements.
-# *   #join: Returns a newsString containing the elements joined by the field
+# *   #join: Returns a new String containing the elements joined by the field
 #     separator.
 # *   #to_a: Returns `self` or a new array containing all elements.
 # *   #to_ary: Returns `self`.
@@ -840,9 +840,8 @@ class Array[unchecked out Elem] < Object
   #
   # If `index` is out of range, returns `nil`.
   #
-  # When two Integer arguments `start` and `length` are given, returns a new
-  # `Array` of size `length` containing successive elements beginning at offset
-  # `start`:
+  # When two Integer arguments `start` and `length` are given, returns a new array
+  # of size `length` containing successive elements beginning at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 2] # => [:foo, "bar"]
@@ -856,7 +855,7 @@ class Array[unchecked out Elem] < Object
   #     a[1, 3] # => ["bar", 2]
   #     a[2, 2] # => [2]
   #
-  # If `start == self.size` and `length >= 0`, returns a new empty `Array`.
+  # If `start == self.size` and `length >= 0`, returns a new empty array.
   #
   # If `length` is negative, returns `nil`.
   #
@@ -867,7 +866,7 @@ class Array[unchecked out Elem] < Object
   #     a[0..1] # => [:foo, "bar"]
   #     a[1..2] # => ["bar", 2]
   #
-  # Special case: If `range.start == a.size`, returns a new empty `Array`.
+  # Special case: If `range.start == a.size`, returns a new empty array.
   #
   # If `range.end` is negative, calculates the end index from the end:
   #
@@ -891,7 +890,7 @@ class Array[unchecked out Elem] < Object
   #     a[4..-1] # => nil
   #
   # When a single Enumerator::ArithmeticSequence argument `aseq` is given, returns
-  # an `Array` of elements corresponding to the indexes produced by the sequence.
+  # an array of elements corresponding to the indexes produced by the sequence.
   #
   #     a = ['--', 'data1', '--', 'data2', '--', 'data3']
   #     a[(1..).step(2)] # => ["data1", "data2", "data3"]
@@ -976,8 +975,8 @@ class Array[unchecked out Elem] < Object
   #     a # => [:foo, "bar", "two"]
   #
   # When Integer arguments `start` and `length` are given and `object` is not an
-  # `Array`, removes `length - 1` elements beginning at offset `start`, and
-  # assigns `object` at offset `start`:
+  # array, removes `length - 1` elements beginning at offset `start`, and assigns
+  # `object` at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 2] = 'foo' # => "foo"
@@ -1010,7 +1009,7 @@ class Array[unchecked out Elem] < Object
   #     a[1, 5] = 'foo' # => "foo"
   #     a # => [:foo, "foo"]
   #
-  # When Range argument `range` is given and `object` is not an `Array`, removes
+  # When Range argument `range` is given and `object` is not an array, removes
   # `length - 1` elements beginning at offset `start`, and assigns `object` at
   # offset `start`:
   #
@@ -1214,7 +1213,7 @@ class Array[unchecked out Elem] < Object
   # Returns the element from `self` found by a binary search, or `nil` if the
   # search found no suitable element.
   #
-  # See [Binary Searching](rdoc-ref:bsearch.rdoc).
+  # See [Binary Searching](rdoc-ref:language/bsearch.rdoc).
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
@@ -1230,7 +1229,7 @@ class Array[unchecked out Elem] < Object
   # Returns the integer index of the element from `self` found by a binary search,
   # or `nil` if the search found no suitable element.
   #
-  # See [Binary Searching](rdoc-ref:bsearch.rdoc).
+  # See [Binary Searching](rdoc-ref:language/bsearch.rdoc).
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
@@ -1274,9 +1273,9 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - collect! {|element| ... } -> new_array
+  #   - collect! {|element| ... } -> self
   #   - collect! -> new_enumerator
-  #   - map! {|element| ... } -> new_array
+  #   - map! {|element| ... } -> self
   #   - map! -> new_enumerator
   # -->
   # With a block given, calls the block with each element of `self` and replaces
@@ -1564,7 +1563,7 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - array.dig(index, *identifiers) -> object
+  #   - dig(index, *identifiers) -> object
   # -->
   # Finds and returns the object in nested object specified by `index` and
   # `identifiers`; the nested objects may be instances of various classes. See
@@ -1693,7 +1692,7 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - array.empty?  -> true or false
+  #   - empty?  -> true or false
   # -->
   # Returns `true` if the count of elements in `self` is zero, `false` otherwise.
   #
@@ -1804,10 +1803,10 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - fill(object, start = nil, count = nil) -> new_array
-  #   - fill(object, range) -> new_array
-  #   - fill(start = nil, count = nil) {|element| ... } -> new_array
-  #   - fill(range) {|element| ... } -> new_array
+  #   - fill(object, start = nil, count = nil) -> self
+  #   - fill(object, range) -> self
+  #   - fill(start = nil, count = nil) {|element| ... } -> self
+  #   - fill(range) {|element| ... } -> self
   # -->
   # Replaces selected elements in `self`; may add elements to `self`; always
   # returns `self` (never a new array).
@@ -2019,6 +2018,30 @@ class Array[unchecked out Elem] < Object
   #
   def filter!: () { (Elem item) -> boolish } -> self?
              | () -> ::Enumerator[Elem, self?]
+
+  # <!--
+  #   rdoc-file=array.c
+  #   - find(if_none_proc = nil) {|element| ... } -> object or nil
+  #   - find(if_none_proc = nil) -> enumerator
+  # -->
+  # Returns the first element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array;
+  # returns the first element for which the block returns a truthy value:
+  #
+  #     [1, 3, 5].find {|element| element > 2}                # => 3
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value.
+  #
+  #     [1, 3, 5].find(proc {-1}) {|element| element > 12} # => -1
+  #
+  # With no block given, returns an Enumerator.
+  #
+  def find: () { (Elem) -> boolish } -> Elem?
+          | () -> ::Enumerator[Elem, Elem?]
+          | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
+          | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -2300,7 +2323,7 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - array.join(separator = $,) -> new_string
+  #   - join(separator = $,) -> new_string
   # -->
   # Returns the new string formed by joining the converted elements of `self`; for
   # each element `element`:
@@ -2619,7 +2642,7 @@ class Array[unchecked out Elem] < Object
   #   - pack(template, buffer: nil) -> string
   # -->
   # Formats each element in `self` into a binary string; returns that string. See
-  # [Packed Data](rdoc-ref:packed_data.rdoc).
+  # [Packed Data](rdoc-ref:language/packed_data.rdoc).
   #
   def pack: (string fmt, ?buffer: String?) -> String
 
@@ -2991,6 +3014,31 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
+  #   - rfind(if_none_proc = nil) {|element| ... } -> object or nil
+  #   - rfind(if_none_proc = nil) -> enumerator
+  # -->
+  # Returns the last element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array in
+  # reverse order; returns the first element for which the block returns a truthy
+  # value:
+  #
+  #     [1, 2, 3, 4, 5, 6].rfind {|element| element < 5}       # => 4
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value.
+  #
+  #     [1, 2, 3, 4].rfind(proc {0}) {|element| element < -2}  # => 0
+  #
+  # With no block given, returns an Enumerator.
+  #
+  def rfind: () { (Elem) -> boolish } -> Elem?
+           | () -> ::Enumerator[Elem, Elem?]
+           | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
+           | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
+
+  # <!--
+  #   rdoc-file=array.c
   #   - rindex(object) -> integer or nil
   #   - rindex {|element| ... } -> integer or nil
   #   - rindex -> new_enumerator
@@ -3115,7 +3163,7 @@ class Array[unchecked out Elem] < Object
   #
   # The order of the result array is unrelated to the order of `self`.
   #
-  # Returns a new empty `Array` if `self` is empty:
+  # Returns a new empty array if `self` is empty:
   #
   #     [].sample(4) # => []
   #
@@ -3320,9 +3368,8 @@ class Array[unchecked out Elem] < Object
   #
   # If `index` is out of range, returns `nil`.
   #
-  # When two Integer arguments `start` and `length` are given, returns a new
-  # `Array` of size `length` containing successive elements beginning at offset
-  # `start`:
+  # When two Integer arguments `start` and `length` are given, returns a new array
+  # of size `length` containing successive elements beginning at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 2] # => [:foo, "bar"]
@@ -3336,7 +3383,7 @@ class Array[unchecked out Elem] < Object
   #     a[1, 3] # => ["bar", 2]
   #     a[2, 2] # => [2]
   #
-  # If `start == self.size` and `length >= 0`, returns a new empty `Array`.
+  # If `start == self.size` and `length >= 0`, returns a new empty array.
   #
   # If `length` is negative, returns `nil`.
   #
@@ -3347,7 +3394,7 @@ class Array[unchecked out Elem] < Object
   #     a[0..1] # => [:foo, "bar"]
   #     a[1..2] # => ["bar", 2]
   #
-  # Special case: If `range.start == a.size`, returns a new empty `Array`.
+  # Special case: If `range.start == a.size`, returns a new empty array.
   #
   # If `range.end` is negative, calculates the end index from the end:
   #
@@ -3371,7 +3418,7 @@ class Array[unchecked out Elem] < Object
   #     a[4..-1] # => nil
   #
   # When a single Enumerator::ArithmeticSequence argument `aseq` is given, returns
-  # an `Array` of elements corresponding to the indexes produced by the sequence.
+  # an array of elements corresponding to the indexes produced by the sequence.
   #
   #     a = ['--', 'data1', '--', 'data2', '--', 'data3']
   #     a[(1..).step(2)] # => ["data1", "data2", "data3"]
@@ -3518,6 +3565,9 @@ class Array[unchecked out Elem] < Object
   # When the block returns zero, the order for `a` and `b` is indeterminate, and
   # may be unstable.
   #
+  # See an example in Numeric#nonzero? for the idiom to sort more complex
+  # structure.
+  #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def sort: () -> ::Array[Elem]
@@ -3647,7 +3697,7 @@ class Array[unchecked out Elem] < Object
   #   rdoc-file=array.c
   #   - to_a -> self or new_array
   # -->
-  # When `self` is an instance of `Array`, returns `self`.
+  # When `self` is an instance of Array, returns `self`.
   #
   # Otherwise, returns a new array containing the elements of `self`:
   #
@@ -3663,7 +3713,7 @@ class Array[unchecked out Elem] < Object
 
   # <!--
   #   rdoc-file=array.c
-  #   - array.to_ary -> self
+  #   - to_ary -> self
   # -->
   # Returns `self`.
   #
@@ -4008,7 +4058,7 @@ class Array[unchecked out Elem] < Object
   #      [:c3, :b3, :a3]]
   #
   # For an **object** in **other_arrays** that is not actually an array, forms the
-  # the "other array" as `object.to_ary`, if defined, or as `object.each.to_a`
+  # "other array" as `object.to_ary`, if defined, or as `object.each.to_a`
   # otherwise.
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).

@@ -93,7 +93,7 @@ module RBS
     # *   File `t.rb`:
     #
     #         p "ARGV: #{ARGV}"
-    #         p "Line: #{ARGF.read}" # Read everything from all specified streams.
+    #         p "Read: #{ARGF.read}" # Read everything from all specified streams.
     #
     # *   Command and output:
     #
@@ -836,7 +836,7 @@ module RBS
       # Formats and writes `objects` to the stream.
       #
       # For details on `format_string`, see [Format
-      # Specifications](rdoc-ref:format_specifications.rdoc).
+      # Specifications](rdoc-ref:language/format_specifications.rdoc).
       #
       %a{annotate:rdoc:copy:ARGF#printf}
       def printf: (String format_string, *untyped args) -> nil

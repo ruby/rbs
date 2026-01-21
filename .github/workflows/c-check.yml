@@ -9,10 +9,10 @@ jobs:
   format-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: "4.0"
           bundler-cache: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
@@ -36,10 +36,10 @@ jobs:
           curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
           tar xf re2c-4.3.tar.gz
           cd re2c-4.3
-          autoreconf -i -W all
-          ./configure
-          make -j"$(nproc)" -l"$(nproc)"
-          sudo make install
+          cmake --preset=linux-gcc-release-ootree-skeleton-fast
+          cmake --build --preset=linux-gcc-release-ootree-skeleton-fast --parallel="$(nproc)"
+          sudo ln -sf "$(pwd)"/.build/linux-gcc-release-ootree-skeleton-fast/re2c /usr/local/bin/re2c
+          re2c --version
       - name: Update rubygems & bundler
         run: |
           ruby -v

@@ -83,6 +83,9 @@ end
 # :   Tanaka Akira <akr@m17n.org>
 #
 module OpenURI
+  # <!-- rdoc-file=lib/open-uri.rb -->
+  # Raised on HTTP session failure
+  #
   class HTTPError < StandardError
     # <!--
     #   rdoc-file=lib/open-uri.rb
@@ -91,6 +94,9 @@ module OpenURI
     #
     def initialize: (String message, (StringIO & OpenURI::Meta) io) -> void
 
+    # <!-- rdoc-file=lib/open-uri.rb -->
+    # StringIO having the received data
+    #
     attr_reader io: StringIO & OpenURI::Meta
   end
 
@@ -105,9 +111,15 @@ module OpenURI
     #
     def initialize: (String message, (StringIO & OpenURI::Meta) io, URI uri) -> void
 
+    # <!-- rdoc-file=lib/open-uri.rb -->
+    # URI to redirect
+    #
     attr_reader uri: URI
   end
 
+  # <!-- rdoc-file=lib/open-uri.rb -->
+  # Raised on too many redirection,
+  #
   class TooManyRedirects < HTTPError
   end
 

@@ -1099,6 +1099,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       ' hello', :lstrip
     assert_send_type  '() -> String',
                       'hello', :lstrip
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type  '(String::selector) -> String',
+                          "01234abc56789", :lstrip, selector
+      end
+    end
   end
 
   def test_lstrip!
@@ -1106,6 +1113,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       +' hello', :lstrip!
     assert_send_type  '() -> nil',
                       +'hello', :lstrip!
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type  '(String::selector) -> String',
+                          "01234abc56789", :lstrip!, selector
+      end
+    end
   end
 
   def test_match
@@ -1252,6 +1266,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       'hello ', :rstrip
     assert_send_type  '() -> String',
                       'hello', :rstrip
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type '(String::selector) -> String',
+                         "01234abc56789", :rstrip, selector
+      end
+    end
   end
 
   def test_rstrip!
@@ -1259,6 +1280,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       +'hello ', :rstrip!
     assert_send_type  '() -> nil',
                       +'hello', :rstrip!
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type '(String::selector) -> String',
+                         "01234abc56789", :rstrip!, selector
+      end
+    end
   end
 
   def test_scan
@@ -1491,6 +1519,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       ' hello ', :strip
     assert_send_type  '() -> String',
                       'hello', :strip
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type '(String::selector) -> String',
+                         "01234abc56789", :strip, selector
+      end
+    end
   end
 
   def test_strip!
@@ -1498,6 +1533,13 @@ class StringInstanceTest < Test::Unit::TestCase
                       ' hello ', :strip!
     assert_send_type  '() -> nil',
                       'hello', :strip!
+
+    if_ruby("4.0"...) do
+      with_string "0-9" do |selector|
+        assert_send_type '(String::selector) -> String',
+                         "01234abc56789", :strip!, selector
+      end
+    end
   end
 
   def test_sub

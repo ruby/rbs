@@ -44,7 +44,7 @@ typedef struct rbs_error_t {
  * An RBS parser is a LL(3) parser.
  * */
 typedef struct {
-    rbs_lexer_t *rbs_lexer_t;
+    rbs_lexer_t *lexer;
 
     rbs_token_t current_token;
     rbs_token_t next_token;  /* The first lookahead token */
@@ -127,7 +127,7 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
 void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
 bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed);
-bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type);
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, bool require_eof);
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params);

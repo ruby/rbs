@@ -28,7 +28,7 @@
 # *   `match_values_cleared?(scanner)`:
 #      Returns whether the scanner's [match
 #     values](rdoc-ref:StringScanner@Match+Values) are cleared.
-# See examples [[here]](ext/strscan/helper_methods_md.html).
+# See examples at [helper methods](helper_methods.md).
 # ## The `StringScanner` Object
 # This code creates a `StringScanner` object
 # (we'll call it simply a *scanner*),
@@ -85,10 +85,10 @@
 # and a zero-based *character position*.
 # Each of these methods explicitly sets positions:
 #          Method         |                         Effect
-# ------------------------|--------------------------------------------------------
-#          #reset         |Sets both positions to zero (begining of stored string).
+# ------------------------|---------------------------------------------------------
+#          #reset         |Sets both positions to zero (beginning of stored string).
 #        #terminate       |  Sets both positions to the end of the stored string.
-# #pos=(new_byte_position)|    Sets byte position; adjusts character position.
+# #pos=(new_byte_position)|     Sets byte position; adjusts character position.
 # ### Byte Position (Position)
 # The byte position (or simply *position*)
 # is a zero-based index into the bytes in the scanner's stored string;
@@ -159,7 +159,7 @@
 # #   rest_size: 12
 #
 # ## Target Substring
-# The target substring is the the part of the [stored
+# The target substring is the part of the [stored
 # string](rdoc-ref:StringScanner@Stored+String)
 # that extends from the current [byte
 # position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) to the end of
@@ -211,12 +211,12 @@
 # This table summarizes (details and examples at the links):
 #        Method        |                   Returns                   |Sets Match Values?
 # ---------------------|---------------------------------------------|------------------
-#    #check(pattern)   |     Matched leading substring or +nil+.     |       Yes.
-# #check_until(pattern)|   Matched substring (anywhere) or +nil+.    |       Yes.
+#    #check(pattern)   |     Matched leading substring or `nil`.     |       Yes.
+# #check_until(pattern)|   Matched substring (anywhere) or `nil`.    |       Yes.
 #   #exist?(pattern)   |   Matched substring (anywhere) end index.   |       Yes.
-#   #match?(pattern)   | Size of matched leading substring or +nil+. |       Yes.
+#   #match?(pattern)   | Size of matched leading substring or `nil`. |       Yes.
 #      #peek(size)     | Leading substring of given length (bytes).  |       No.
-#      #peek_byte      |       Integer leading byte or +nil+.        |       No.
+#      #peek_byte      |       Integer leading byte or `nil`.        |       No.
 #         #rest        |Target substring (from byte position to end).|       No.
 # ### Traversing the Target Substring
 # A *traversal* method examines the target substring,
@@ -226,24 +226,24 @@
 # This table summarizes (details and examples at links):
 #        Method       |                      Returns                       |Sets Match Values?
 # --------------------|----------------------------------------------------|------------------
-#      #get_byte      |               Leading byte or +nil+.               |       No.
-#        #getch       |            Leading character or +nil+.             |       No.
-#    #scan(pattern)   |        Matched leading substring or +nil+.         |       Yes.
-#      #scan_byte     |           Integer leading byte or +nil+.           |       No.
-# #scan_until(pattern)|       Matched substring (anywhere) or +nil+.       |       Yes.
-#    #skip(pattern)   |      Matched leading substring size or +nil+.      |       Yes.
-# #skip_until(pattern)|Position delta to end-of-matched-substring or +nil+.|       Yes.
-#       #unscan       |                      +self+.                       |       No.
+#      #get_byte      |               Leading byte or `nil`.               |       No.
+#        #getch       |            Leading character or `nil`.             |       No.
+#    #scan(pattern)   |        Matched leading substring or `nil`.         |       Yes.
+#      #scan_byte     |           Integer leading byte or `nil`.           |       No.
+# #scan_until(pattern)|       Matched substring (anywhere) or `nil`.       |       Yes.
+#    #skip(pattern)   |      Matched leading substring size or `nil`.      |       Yes.
+# #skip_until(pattern)|Position delta to end-of-matched-substring or `nil`.|       Yes.
+#       #unscan       |                      `self`.                       |       No.
 # ## Querying the Scanner
 # Each of these methods queries the scanner object
 # without modifying it (details and examples at links)
 #       Method       |            Returns
 # -------------------|--------------------------------
-# #beginning_of_line?|       +true+ or +false+.
+# #beginning_of_line?|       `true` or `false`.
 #      #charpos      |      Character position.
-#        #eos?       |       +true+ or +false+.
-#   #fixed_anchor?   |       +true+ or +false+.
-#      #inspect      |String representation of +self+.
+#        #eos?       |       `true` or `false`.
+#   #fixed_anchor?   |       `true` or `false`.
+#      #inspect      |String representation of `self`.
 #        #pos        |         Byte position.
 #        #rest       |       Target substring.
 #     #rest_size     |   Size of target substring.
@@ -312,11 +312,11 @@
 # Each of these methods returns a basic match value:
 #    Method    |          Return After Match          |Return After No Match
 # -------------|--------------------------------------|---------------------
-#   #matched?  |               +true+.                |      +false+.
-# #matched_size|      Size of matched substring.      |       +nil+.
-#   #matched   |          Matched substring.          |       +nil+.
-#  #pre_match  |Substring preceding matched substring.|       +nil+.
-#  #post_match |Substring following matched substring.|       +nil+.
+#   #matched?  |               `true`.                |      `false`.
+# #matched_size|      Size of matched substring.      |       `nil`.
+#   #matched   |          Matched substring.          |       `nil`.
+#  #pre_match  |Substring preceding matched substring.|       `nil`.
+#  #post_match |Substring following matched substring.|       `nil`.
 #
 # See examples below.
 # #### Captured Match Values
@@ -326,11 +326,11 @@
 # Each of these methods returns a captured match value:
 #     Method     |          Return After Match           |Return After No Match
 # ---------------|---------------------------------------|---------------------
-#      #size     |     Count of captured substrings.     |       +nil+.
-#     #{}[n]     |   <tt>n</tt>th captured substring.    |       +nil+.
-#    #captures   |   Array of all captured substrings.   |       +nil+.
-# #values_at(*n) |Array of specified captured substrings.|       +nil+.
-# #named_captures|        Hash of named captures.        |    <tt>{}</tt>.
+#      #size     |     Count of captured substrings.     |       `nil`.
+#     #[](n)     |       `n`th captured substring.       |       `nil`.
+#    #captures   |   Array of all captured substrings.   |       `nil`.
+# #values_at(*n) |Array of specified captured substrings.|       `nil`.
+# #named_captures|        Hash of named captures.        |        `{}`.
 #
 # See examples below.
 # #### Match Values Examples

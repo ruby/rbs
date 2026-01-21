@@ -40,7 +40,7 @@ class ObjectSpace_WeakKeyMapTest < Test::Unit::TestCase
     map = ObjectSpace::WeakKeyMap.new()
 
     assert_send_type(
-      "() -> ::ObjectSpace::WeakKeyMap",
+      "() -> ::ObjectSpace::WeakKeyMap[::String, ::Integer]",
       map, :clear
     )
   end
