@@ -171,10 +171,18 @@ static VALUE location_end_pos(VALUE self) {
 static rbs_constant_id_t rbs_constant_pool_insert_ruby_symbol(VALUE symbol) {
     VALUE name = rb_sym2str(symbol);
 
-    // Constants inserted here will never be freed, but that's acceptable because:
-    // 1. Most symbols passed into here will be the ones already inserted into the constant pool by `parser.c`.
-    // 2. Methods like `add_required_child` and `add_optional_child` will usually only get called with a few different symbols.
-    return rbs_constant_pool_insert_constant(RBS_GLOBAL_CONSTANT_POOL, (const uint8_t *) RSTRING_PTR(name), RSTRING_LEN(name));
+    if (RB_STATIC_SYM_P(symbol)) {
+        // Constants inserted here will never be freed, but that's acceptable because:
+        // 1. Most symbols passed into here will be the ones already inserted into the constant pool by `parser.c`.
+        // 2. Methods like `add_required_child` and `add_optional_child` will usually only get called with a few different symbols.
+        return rbs_constant_pool_insert_constant(RBS_GLOBAL_CONSTANT_POOL, (const uint8_t *) RSTRING_PTR(name), RSTRING_LEN(name));
+    } else {
+        // To prevent memory compaction from breaking references to strings,
+        // strings are copied and memory managed with an owned type.
+        uint8_t *copied_name = malloc(RSTRING_LEN(name));
+        memcpy((void *) copied_name, RSTRING_PTR(name), RSTRING_LEN(name));
+        return rbs_constant_pool_insert_owned(RBS_GLOBAL_CONSTANT_POOL, copied_name, RSTRING_LEN(name));
+    }
 }
 
 static VALUE location_add_required_child(VALUE self, VALUE name, VALUE start, VALUE end) {
