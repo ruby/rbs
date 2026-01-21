@@ -740,7 +740,7 @@ class Complex < Numeric
   #     Complex.rect(1, Rational(0, 1)).to_f # => 1.0
   #
   # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`).
+  # `Rational(0, _n_)`).
   #
   def to_f: () -> Float
 
@@ -754,7 +754,7 @@ class Complex < Numeric
   #     Complex.rect(1, Rational(0, 1)).to_i # => 1
   #
   # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`).
+  # `Rational(0, _n_)`).
   #
   def to_i: () -> Integer
 
@@ -769,7 +769,7 @@ class Complex < Numeric
   #     Complex.rect(1, 0.0).to_r            # => (1/1)
   #
   # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`) and `self.imag.to_r` is not exactly zero.
+  # `Rational(0, _n_)`) and `self.imag.to_r` is not exactly zero.
   #
   # Related: Complex#rationalize.
   #

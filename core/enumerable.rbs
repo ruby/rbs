@@ -2314,7 +2314,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Creates an enumerator for each chunked elements. The ends of chunks are
   # defined by *pattern* and the block.
   #
-  # If *`pattern* === *elt`* returns `true` or the block returns `true` for the
+  # If `_pattern_ === _elt_` returns `true` or the block returns `true` for the
   # element, the element is end of a chunk.
   #
   # The `===` and *block* is called from the first element to the last element of

@@ -257,10 +257,10 @@
 #
 # Use execution options to set resource limits.
 #
-# The keys for these options are symbols of the form `:rlimit_*resource_name`*,
-# where *resource_name* is the downcased form of one of the string resource
-# names described at method Process.setrlimit. For example, key `:rlimit_cpu`
-# corresponds to resource limit `'CPU'`.
+# The keys for these options are symbols of the form
+# `:rlimit_<i>resource_name</i>`, where *resource_name* is the downcased form of
+# one of the string resource names described at method Process.setrlimit. For
+# example, key `:rlimit_cpu` corresponds to resource limit `'CPU'`.
 #
 # The value for such as key is one of:
 #

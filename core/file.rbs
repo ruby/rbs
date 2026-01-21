@@ -2239,9 +2239,9 @@ File::Separator: String
 #
 # #### File::FNM_EXTGLOB
 #
-# Flag File::FNM_EXTGLOB enables pattern `'{*a*,*b*}'`, which matches pattern
+# Flag File::FNM_EXTGLOB enables pattern `'{_a_,_b_}'`, which matches pattern
 # '*a*' and pattern '*b*'; behaves like a [regexp union](rdoc-ref:Regexp.union)
-# (e.g., `'(?:*a*|*b*)'`):
+# (e.g., `'(?:_a_|_b_)'`):
 #
 #     pattern = '{LEGAL,BSDL}'
 #     Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
