@@ -2329,10 +2329,6 @@ class IO < Object
   # Behaves like IO.read, except that the stream is opened in binary mode with
   # ASCII-8BIT encoding.
   #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
-  #
   def self.binread: (path name, ?Integer? length, ?Integer offset) -> String
 
   # <!--
@@ -2341,10 +2337,6 @@ class IO < Object
   # -->
   # Behaves like IO.write, except that the stream is opened in binary mode with
   # ASCII-8BIT encoding.
-  #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
 
@@ -2582,10 +2574,6 @@ class IO < Object
   # -->
   # Calls the block with each successive line read from the stream.
   #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
-  #
   # The first argument must be a string that is the path to a file.
   #
   # With only argument `path` given, parses lines from the file at the given
@@ -2739,10 +2727,6 @@ class IO < Object
   # Opens the stream, reads and returns some or all of its content, and closes the
   # stream; returns `nil` if no bytes were read.
   #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
-  #
   # The first argument must be a string that is the path to a file.
   #
   # With only argument `path` given, reads in text mode and returns the entire
@@ -2781,10 +2765,6 @@ class IO < Object
   #   - IO.readlines(path, sep, limit, **opts) -> array
   # -->
   # Returns an array of all lines read from the stream.
-  #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
@@ -3006,10 +2986,6 @@ class IO < Object
   # -->
   # Opens the stream, writes the given `data` to it, and closes the stream;
   # returns the number of bytes written.
-  #
-  # When called from class IO (but not subclasses of IO), this method has
-  # potential security vulnerabilities if called with untrusted input; see
-  # [Command Injection](rdoc-ref:security/command_injection.rdoc).
   #
   # The first argument must be a string that is the path to a file.
   #
