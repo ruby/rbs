@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - ".github/workflows/rust.yml"
-      - "rust/**"
-      - "include/**"
-      - "src/**"
   pull_request:
     paths:
       - ".github/workflows/rust.yml"
