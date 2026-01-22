@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "ext/**"
-      - "include/**"
-      - "src/**"
   pull_request:
     paths:
       - "ext/**"

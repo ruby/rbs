@@ -2,6 +2,8 @@ name: C Code Generation and Formatting Check
 
 on:
   push:
+    branches:
+      - master
   pull_request: {}
   merge_group: {}
 
