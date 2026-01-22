@@ -120,7 +120,6 @@ enum rbs_node_type {
     RBS_TYPES_UNION = 70,
     RBS_TYPES_UNTYPED_FUNCTION = 71,
     RBS_TYPES_VARIABLE = 72,
-    RBS_KEYWORD,
     RBS_AST_SYMBOL,
 };
 
@@ -869,16 +868,6 @@ typedef union rbs_ast_ruby_annotations {
     rbs_ast_ruby_annotations_return_type_annotation_t return_type_annotation;
     rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
 } rbs_ast_ruby_annotations_t;
-
-/// `rbs_keyword_t` models RBS keywords like "private", "instance", "covariant", etc.
-/// These are stored in the global constant pool, and get surfaced to Ruby as `Symbol`s,
-/// just like `rbs_ast_symbol_t`s.
-typedef struct rbs_keyword {
-    rbs_node_t base;
-    rbs_constant_id_t constant_id;
-} rbs_keyword_t;
-
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *, rbs_location_range, rbs_constant_id_t);
 
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.
 /// These get stored in the parser's own constant pool, and get surfaced to Ruby as `Symbol`s.

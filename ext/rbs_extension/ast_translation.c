@@ -1405,15 +1405,8 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             &h
         );
     }
-    case RBS_KEYWORD: {
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, ((rbs_keyword_t *) instance)->constant_id);
-        assert(constant != NULL && "constant is NULL");
-        assert(constant->start != NULL && "constant->start is NULL");
-
-        return ID2SYM(rb_intern2((const char *) constant->start, constant->length));
-    }
     case RBS_AST_SYMBOL: {
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_keyword_t *) instance)->constant_id);
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_ast_symbol_t *) instance)->constant_id);
         assert(constant != NULL && "constant is NULL");
         assert(constant->start != NULL && "constant->start is NULL");
 
