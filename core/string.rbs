@@ -1623,7 +1623,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def append_as_bytes: (String) -> String
+  def append_as_bytes: (*String | Integer) -> String
 
   # <!--
   #   rdoc-file=string.c
