@@ -95,10 +95,6 @@ rbs_constant_pool_resize(rbs_constant_pool_t *pool) {
     return true;
 }
 
-// This storage is initialized by `Init_rbs_extension()` in `main.c`.
-static rbs_constant_pool_t RBS_GLOBAL_CONSTANT_POOL_STORAGE = { 0 };
-rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL = &RBS_GLOBAL_CONSTANT_POOL_STORAGE;
-
 /**
  * Initialize a new constant pool with a given capacity.
  */

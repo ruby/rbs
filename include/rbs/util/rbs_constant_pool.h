@@ -81,9 +81,6 @@ typedef struct {
     uint32_t capacity;
 } rbs_constant_pool_t;
 
-// A global constant pool for storing permenant keywords, such as the names of location children in `parser.c`.
-extern rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL;
-
 /**
  * Initialize a new constant pool with a given capacity.
  *

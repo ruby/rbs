@@ -15,13 +15,6 @@
 #include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_assert.h"
 
-#define INTERN(str)                    \
-    rbs_constant_pool_insert_constant( \
-        RBS_GLOBAL_CONSTANT_POOL,      \
-        (const uint8_t *) str,         \
-        strlen(str)                    \
-    )
-
 #define INTERN_TOKEN(parser, tok)                             \
     rbs_constant_pool_insert_shared_with_encoding(            \
         &parser->constant_pool,                               \
