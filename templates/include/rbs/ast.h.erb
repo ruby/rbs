@@ -15,6 +15,17 @@ enum <%= enum.c_name %> {
 
 <%- end -%>
 
+enum rbs_attr_ivar_name_tag {
+    RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED,   /* The attribute has inferred instance variable (nil) */
+    RBS_ATTR_IVAR_NAME_TAG_EMPTY,         /* The attribute has no instance variable (false) */
+    RBS_ATTR_IVAR_NAME_TAG_NAME,          /* The attribute has instance variable with the given name */
+};
+
+typedef struct rbs_attr_ivar_name {
+    enum rbs_attr_ivar_name_tag tag;
+    rbs_constant_id_t name;  /* valid when tag == RBS_ATTR_IVAR_NAME_TAG_NAME */
+} rbs_attr_ivar_name_t;
+
 enum rbs_node_type {
 <%- nodes.each_with_index do |node, index| -%>
     <%= node.c_node_enum_name %> = <%= index + 1 %>,

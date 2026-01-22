@@ -2373,31 +2373,23 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_ast_symbol_t *attr_name;
     CHECK_PARSE(parse_method_name(parser, &name_range, &attr_name));
 
-    rbs_node_t *ivar_name; // rbs_ast_symbol_t, NULL or rbs_ast_bool_new(ALLOCATOR(), false)
-    rbs_range_t ivar_range, ivar_name_range;
+    rbs_attr_ivar_name_t ivar_name = { .tag = RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED };
+    rbs_location_range ivar_range = RBS_LOCATION_NULL_RANGE;
+    rbs_location_range ivar_name_range = RBS_LOCATION_NULL_RANGE;
     if (parser->next_token.type == pLPAREN) {
         ADVANCE_ASSERT(parser, pLPAREN);
-        ivar_range.start = parser->current_token.range.start;
+        ivar_range.start = parser->current_token.range.start.char_pos;
+
+        ivar_name.tag = RBS_ATTR_IVAR_NAME_TAG_EMPTY;
 
         if (parser_advance_if(parser, tAIDENT) || parser_advance_if(parser, kATRBS)) {
-            rbs_location_range symbol_loc = rbs_location_range_current_token(parser);
-            ivar_name = (rbs_node_t *) rbs_ast_symbol_new(ALLOCATOR(), symbol_loc, &parser->constant_pool, INTERN_TOKEN(parser, parser->current_token));
-            ivar_name_range = parser->current_token.range;
-        } else {
-            rbs_range_t false_range = {
-                .start = parser->current_token.range.start,
-                .end = parser->current_token.range.end
-            };
-            ivar_name = (rbs_node_t *) rbs_ast_bool_new(ALLOCATOR(), RBS_RANGE_LEX2AST(false_range), false);
-            ivar_name_range = NULL_RANGE;
+            ivar_name.tag = RBS_ATTR_IVAR_NAME_TAG_NAME;
+            ivar_name.name = INTERN_TOKEN(parser, parser->current_token);
+            ivar_name_range = rbs_location_range_current_token(parser);
         }
 
         ADVANCE_ASSERT(parser, pRPAREN);
-        ivar_range.end = parser->current_token.range.end;
-    } else {
-        ivar_range = NULL_RANGE;
-        ivar_name = NULL;
-        ivar_name_range = NULL_RANGE;
+        ivar_range.end = parser->current_token.range.end.char_pos;
     }
 
     ADVANCE_ASSERT(parser, pCOLON);
@@ -2417,16 +2409,14 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_location_range name_rg = RBS_RANGE_LEX2AST(name_range);
     rbs_location_range colon_rg = RBS_RANGE_LEX2AST(colon_range);
     rbs_location_range kind_rg = RBS_RANGE_LEX2AST(kind_range);
-    rbs_location_range ivar_rg = RBS_RANGE_LEX2AST(ivar_range);
-    rbs_location_range ivar_name_rg = RBS_RANGE_LEX2AST(ivar_name_range);
     rbs_location_range visibility_rg = RBS_RANGE_LEX2AST(visibility_range);
 
     switch (attr_type) {
     case kATTRREADER: {
         rbs_ast_members_attr_reader_t *attr_reader = rbs_ast_members_attr_reader_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
         attr_reader->kind_range = kind_rg;
-        attr_reader->ivar_range = ivar_rg;
-        attr_reader->ivar_name_range = ivar_name_rg;
+        attr_reader->ivar_range = ivar_range;
+        attr_reader->ivar_name_range = ivar_name_range;
         attr_reader->visibility_range = visibility_rg;
 
         *attribute_member = (rbs_node_t *) attr_reader;
@@ -2436,8 +2426,8 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     case kATTRWRITER: {
         rbs_ast_members_attr_writer_t *attr_writer = rbs_ast_members_attr_writer_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
         attr_writer->kind_range = kind_rg;
-        attr_writer->ivar_range = ivar_rg;
-        attr_writer->ivar_name_range = ivar_name_rg;
+        attr_writer->ivar_range = ivar_range;
+        attr_writer->ivar_name_range = ivar_name_range;
         attr_writer->visibility_range = visibility_rg;
 
         *attribute_member = (rbs_node_t *) attr_writer;
@@ -2447,8 +2437,8 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     case kATTRACCESSOR: {
         rbs_ast_members_attr_accessor_t *attr_accessor = rbs_ast_members_attr_accessor_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
         attr_accessor->kind_range = kind_rg;
-        attr_accessor->ivar_range = ivar_rg;
-        attr_accessor->ivar_name_range = ivar_name_rg;
+        attr_accessor->ivar_range = ivar_range;
+        attr_accessor->ivar_name_range = ivar_name_range;
         attr_accessor->visibility_range = visibility_rg;
 
         *attribute_member = (rbs_node_t *) attr_accessor;

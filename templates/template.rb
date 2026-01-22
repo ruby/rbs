@@ -65,6 +65,7 @@ module RBS
       "rbs_hash" => NodeType.new(name: "rbs_hash", c_name: "rbs_hash", ruby_name: nil),
       "rbs_location_range" => Type.new(name: "rbs_location_range", c_name: "rbs_location_range"),
       "rbs_location_range_list" => Type.new(name: "rbs_location_range_list", c_name: "rbs_location_range_list_t *"),
+      "rbs_attr_ivar_name" => Type.new(name: "rbs_attr_ivar_name", c_name: "rbs_attr_ivar_name_t"),
     }
 
     class Field
@@ -331,7 +332,7 @@ module RBS
         enum_desc = []
         config.fetch("enums", {}).each do |enum_name, enum_info|
           next unless  enum_info.key?("symbols")
-          
+
           descr = SymbolEnumDescription.new(
             name: enum_name,
             symbols: enum_info.fetch("symbols"),

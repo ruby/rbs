@@ -73,6 +73,23 @@ VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_l
 
     return ruby_array;
 }
+
+VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_name_t ivar_name) {
+    switch (ivar_name.tag) {
+    case RBS_ATTR_IVAR_NAME_TAG_NAME: {
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ivar_name.name);
+        assert(constant != NULL && "constant is NULL");
+        assert(constant->start != NULL && "constant->start is NULL");
+
+        return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
+    }
+    case RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED:
+        return Qnil;
+    case RBS_ATTR_IVAR_NAME_TAG_EMPTY:
+        return Qfalse;
+    }
+}
+
 VALUE rbs_attribute_visibility_to_ruby(enum rbs_attribute_visibility value) {
     switch (value) {
     case RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED:
@@ -544,10 +561,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
         rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
-        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
+        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
+        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_attr_ivar_name_to_ruby(ctx, node->ivar_name));    // rbs_attr_ivar_name_t
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                   // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility
@@ -573,10 +590,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
         rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
-        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
+        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
+        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_attr_ivar_name_to_ruby(ctx, node->ivar_name));    // rbs_attr_ivar_name_t
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                   // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility
@@ -602,10 +619,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
         rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
-        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
+        rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
+        rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_attr_ivar_name_to_ruby(ctx, node->ivar_name));    // rbs_attr_ivar_name_t
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                   // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility

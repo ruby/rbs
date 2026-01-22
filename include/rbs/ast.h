@@ -47,6 +47,17 @@ enum rbs_type_param_variance {
     RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT, /* contravariant (:contravariant) */
 };
 
+enum rbs_attr_ivar_name_tag {
+    RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED, /* The attribute has inferred instance variable (nil) */
+    RBS_ATTR_IVAR_NAME_TAG_EMPTY,       /* The attribute has no instance variable (false) */
+    RBS_ATTR_IVAR_NAME_TAG_NAME,        /* The attribute has instance variable with the given name */
+};
+
+typedef struct rbs_attr_ivar_name {
+    enum rbs_attr_ivar_name_tag tag;
+    rbs_constant_id_t name; /* valid when tag == RBS_ATTR_IVAR_NAME_TAG_NAME */
+} rbs_attr_ivar_name_t;
+
 enum rbs_node_type {
     RBS_AST_ANNOTATION = 1,
     RBS_AST_BOOL = 2,
@@ -383,7 +394,7 @@ typedef struct rbs_ast_members_attr_accessor {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name; /* Optional */
+    rbs_attr_ivar_name_t ivar_name;
     enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
     struct rbs_ast_comment *comment; /* Optional */
@@ -403,7 +414,7 @@ typedef struct rbs_ast_members_attr_reader {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name; /* Optional */
+    rbs_attr_ivar_name_t ivar_name;
     enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
     struct rbs_ast_comment *comment; /* Optional */
@@ -423,7 +434,7 @@ typedef struct rbs_ast_members_attr_writer {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name; /* Optional */
+    rbs_attr_ivar_name_t ivar_name;
     enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
     struct rbs_ast_comment *comment; /* Optional */
@@ -896,9 +907,9 @@ rbs_ast_directives_use_single_clause_t *rbs_ast_directives_use_single_clause_new
 rbs_ast_directives_use_wildcard_clause_t *rbs_ast_directives_use_wildcard_clause_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_namespace_t *rbs_namespace, rbs_location_range namespace_range, rbs_location_range star_range);
 rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_string_t string_representation);
 rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, enum rbs_alias_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range new_name_range, rbs_location_range old_name_range);
-rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
-rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
-rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
 rbs_ast_members_class_instance_variable_t *rbs_ast_members_class_instance_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range colon_range);
 rbs_ast_members_class_variable_t *rbs_ast_members_class_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range colon_range);
 rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range keyword_range);
