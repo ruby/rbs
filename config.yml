@@ -240,8 +240,7 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_accessor foo: T`); Symbol when named (`attr_accessor foo (@bar): T`); Bool(false) when empty parens (`attr_accessor foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
         c_type: attribute_kind
       - name: annotations
@@ -267,8 +266,7 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_reader foo: T`); Symbol when named (`attr_reader foo (@bar): T`); Bool(false) when empty parens (`attr_reader foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
         c_type: attribute_kind
       - name: annotations
@@ -294,8 +292,7 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_writer foo: T`); Symbol when named (`attr_writer foo (@bar): T`); Bool(false) when empty parens (`attr_writer foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
         c_type: attribute_kind
       - name: annotations

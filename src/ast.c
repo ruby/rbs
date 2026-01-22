@@ -618,7 +618,7 @@ rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, r
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
-rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
+rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
     rbs_ast_members_attr_accessor_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_accessor_t);
 
     *instance = (rbs_ast_members_attr_accessor_t) {
@@ -645,7 +645,7 @@ rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
-rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
+rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
     rbs_ast_members_attr_reader_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_reader_t);
 
     *instance = (rbs_ast_members_attr_reader_t) {
@@ -672,7 +672,7 @@ rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
-rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
+rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range) {
     rbs_ast_members_attr_writer_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_attr_writer_t);
 
     *instance = (rbs_ast_members_attr_writer_t) {

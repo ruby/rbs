@@ -66,6 +66,23 @@ VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_l
 
     return ruby_array;
 }
+
+VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_name_t ivar_name) {
+    switch (ivar_name.tag) {
+    case RBS_ATTR_IVAR_NAME_TAG_NAME: {
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ivar_name.name);
+        assert(constant != NULL && "constant is NULL");
+        assert(constant->start != NULL && "constant->start is NULL");
+
+        return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
+    }
+    case RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED:
+        return Qnil;
+    case RBS_ATTR_IVAR_NAME_TAG_EMPTY: 
+        return Qfalse;
+    }
+}
+
 <%- enums.each do |enum| -%>
 VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
     switch (value) {
@@ -173,6 +190,8 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
         <%- when "rbs_location_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
+        <%- when "rbs_attr_ivar_name" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_attr_ivar_name_to_ruby(ctx, node-><%= field.c_name %>)); // rbs_attr_ivar_name_t
         <%- else -%>
             <%- if field.type.is_a?(RBS::Template::EnumType) -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), <%= field.type.descr.translator_name %>(node-><%= field.c_name %>));  // <%= field.type.name %>
