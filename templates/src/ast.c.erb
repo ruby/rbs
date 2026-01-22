@@ -70,8 +70,6 @@ bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
     switch (lhs->type) {
     case RBS_AST_SYMBOL:
         return ((rbs_ast_symbol_t *) lhs)->constant_id == ((rbs_ast_symbol_t *) rhs)->constant_id;
-    case RBS_KEYWORD:
-        return ((rbs_keyword_t *) lhs)->constant_id == ((rbs_keyword_t *) rhs)->constant_id;
     case RBS_AST_BOOL:
         return ((rbs_ast_bool_t *) lhs)->value == ((rbs_ast_bool_t *) rhs)->value;
     case RBS_AST_INTEGER:
@@ -121,20 +119,6 @@ void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
 rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
     rbs_hash_node_t *node = rbs_hash_find(hash, key);
     return node ? node->value : NULL;
-}
-
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_id_t constant_id) {
-    rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
-
-    *instance = (rbs_keyword_t) {
-        .base = (rbs_node_t) {
-            .type = RBS_KEYWORD,
-            .location = location,
-        },
-        .constant_id = constant_id,
-    };
-
-    return instance;
 }
 
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {

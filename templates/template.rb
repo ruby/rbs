@@ -62,7 +62,6 @@ module RBS
       "rbs_node_list" => NodeType.new(name: "rbs_node_list", c_name: "rbs_node_list", ruby_name: nil),
       "rbs_node" => NodeType.new(name: "rbs_node", c_name: "rbs_node", ruby_name: nil),
       "rbs_ast_symbol" => NodeType.new(name: "rbs_ast_symbol", c_name: "rbs_ast_symbol", ruby_name: nil),
-      "rbs_keyword" => NodeType.new(name: "rbs_keyword", c_name: "rbs_keyword", ruby_name: nil),
       "rbs_hash" => NodeType.new(name: "rbs_hash", c_name: "rbs_hash", ruby_name: nil),
       "rbs_location_range" => Type.new(name: "rbs_location_range", c_name: "rbs_location_range"),
       "rbs_location_range_list" => Type.new(name: "rbs_location_range_list", c_name: "rbs_location_range_list_t *"),
