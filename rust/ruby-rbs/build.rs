@@ -7,6 +7,16 @@ use std::{env, error::Error, fs::File, io::Write, path::Path};
 #[derive(Debug, Deserialize)]
 struct Config {
     nodes: Vec<Node>,
+    #[serde(default)]
+    enums: std::collections::HashMap<String, EnumDef>,
+}
+
+#[derive(Debug, Deserialize)]
+struct EnumDef {
+    #[serde(default)]
+    #[allow(dead_code)]
+    optional: bool,
+    symbols: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -50,16 +60,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config_file = File::open(&config_path)?;
     let mut config: Config = serde_yaml::from_reader(config_file)?;
 
-    // Keyword and Symbol represent identifiers (interned strings), not traditional AST nodes.
-    // However, the C parser defines them in `rbs_node_type` (RBS_KEYWORD, RBS_AST_SYMBOL) and
-    // treats them as nodes (rbs_node_t*) in many contexts (lists, hashes).
-    // We inject them into the config so they are generated as structs matching the Node pattern,
-    // allowing them to be wrapped in the Node enum and handled uniformly in Rust.
-    config.nodes.push(Node {
-        name: "RBS::Keyword".to_string(),
-        rust_name: "KeywordNode".to_string(),
-        fields: None,
-    });
+    // Symbol represents identifiers (interned strings), not traditional AST nodes.
+    // However, the C parser defines it in `rbs_node_type` (RBS_AST_SYMBOL) and
+    // treats it as a node (rbs_node_t*) in many contexts (lists, hashes).
+    // We inject it into the config so it is generated as a struct matching the Node pattern,
+    // allowing it to be wrapped in the Node enum and handled uniformly in Rust.
     config.nodes.push(Node {
         name: "RBS::AST::Symbol".to_string(),
         rust_name: "SymbolNode".to_string(),
@@ -112,6 +117,50 @@ fn convert_name(name: &str, identifier: CIdentifier) -> String {
         out.push_str("_t");
     }
     out
+}
+
+/// Converts snake_case to PascalCase for Rust enum names
+fn snake_to_pascal(s: &str) -> String {
+    s.split('_')
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(first) => first.to_uppercase().chain(chars).collect(),
+            }
+        })
+        .collect()
+}
+
+/// Generates Rust enum module constant name from snake_case (e.g., "unspecified" -> "RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED")
+fn enum_constant_name(enum_name: &str, variant: &str) -> String {
+    format!(
+        "RBS_{}",
+        format!("{}_{}", enum_name, variant).to_uppercase()
+    )
+}
+
+fn write_enum_field_accessor(
+    file: &mut File,
+    field: &NodeField,
+    enum_name: &str,
+) -> std::io::Result<()> {
+    let rust_enum_name = snake_to_pascal(enum_name);
+    writeln!(file, "    #[must_use]")?;
+    writeln!(
+        file,
+        "    pub fn {}(&self) -> {} {{",
+        field.name, rust_enum_name
+    )?;
+    writeln!(
+        file,
+        "        {}::from_raw(unsafe {{ (*self.pointer).{} }})",
+        rust_enum_name,
+        field.c_name()
+    )?;
+    writeln!(file, "    }}")?;
+    writeln!(file)?;
+    Ok(())
 }
 
 fn write_node_field_accessor(
@@ -329,6 +378,66 @@ fn write_visit_trait(file: &mut File, config: &Config) -> Result<(), Box<dyn std
     Ok(())
 }
 
+fn write_enum_types(
+    file: &mut File,
+    enums: &std::collections::HashMap<String, EnumDef>,
+) -> Result<(), Box<dyn Error>> {
+    for (enum_name, enum_def) in enums {
+        let rust_enum_name = snake_to_pascal(enum_name);
+        let c_enum_module = format!("rbs_{}", enum_name);
+
+        // Write enum definition
+        writeln!(file, "/// Generated from config.yml enums.{}", enum_name)?;
+        writeln!(file, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
+        writeln!(file, "pub enum {} {{", rust_enum_name)?;
+
+        for symbol in &enum_def.symbols {
+            let variant_name = snake_to_pascal(symbol);
+            writeln!(file, "    /// {} (:{}) ", variant_name, symbol)?;
+            writeln!(file, "    {},", variant_name)?;
+        }
+
+        writeln!(file, "}}")?;
+        writeln!(file)?;
+
+        // Write impl block with from_raw
+        writeln!(file, "impl {} {{", rust_enum_name)?;
+        writeln!(
+            file,
+            "    /// Converts the raw C enum value to the Rust enum."
+        )?;
+        writeln!(file, "    #[must_use]")?;
+        writeln!(
+            file,
+            "    pub fn from_raw(raw: {}::Type) -> Self {{",
+            c_enum_module
+        )?;
+        writeln!(file, "        match raw {{")?;
+
+        for symbol in &enum_def.symbols {
+            let variant_name = snake_to_pascal(symbol);
+            let constant_name = enum_constant_name(enum_name, symbol);
+            writeln!(
+                file,
+                "            {}::{} => Self::{},",
+                c_enum_module, constant_name, variant_name
+            )?;
+        }
+
+        writeln!(
+            file,
+            "            _ => panic!(\"Unknown {}: {{}}\", raw),",
+            c_enum_module
+        )?;
+        writeln!(file, "        }}")?;
+        writeln!(file, "    }}")?;
+        writeln!(file, "}}")?;
+        writeln!(file)?;
+    }
+
+    Ok(())
+}
+
 fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     let out_dir = env::var("OUT_DIR")?;
     let dest_path = Path::new(&out_dir).join("bindings.rs");
@@ -337,6 +446,9 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
 
     writeln!(file, "// Generated by build.rs from config.yml")?;
     writeln!(file)?;
+
+    // Generate enum types from config
+    write_enum_types(&mut file, &config.enums)?;
 
     for node in &config.nodes {
         writeln!(file, "#[derive(Debug)]")?;
@@ -364,10 +476,10 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
         writeln!(file)?;
         writeln!(file, "    /// Returns the location of this node.")?;
         writeln!(file, "    #[must_use]")?;
-        writeln!(file, "    pub fn location(&self) -> RBSLocation {{")?;
+        writeln!(file, "    pub fn location(&self) -> RBSLocationRange {{")?;
         writeln!(
             file,
-            "        RBSLocation::new(unsafe {{ (*self.pointer).base.location }})"
+            "        RBSLocationRange::new(unsafe {{ (*self.pointer).base.location }})"
         )?;
         writeln!(file, "    }}")?;
         writeln!(file)?;
@@ -402,72 +514,6 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                     "rbs_ast_symbol" => write_node_field_accessor(&mut file, field, "SymbolNode")?,
                     "rbs_hash" => {
                         write_node_field_accessor(&mut file, field, "RBSHash")?;
-                    }
-                    "rbs_location" => {
-                        if field.optional {
-                            writeln!(file, "    #[must_use]")?;
-                            writeln!(
-                                file,
-                                "    pub fn {}(&self) -> Option<RBSLocation> {{",
-                                field.name
-                            )?;
-                            writeln!(
-                                file,
-                                "        let ptr = unsafe {{ (*self.pointer).{} }};",
-                                field.c_name()
-                            )?;
-                            writeln!(file, "        if ptr.is_null() {{")?;
-                            writeln!(file, "            None")?;
-                            writeln!(file, "        }} else {{")?;
-                            writeln!(file, "            Some(RBSLocation {{ pointer: ptr }})")?;
-                            writeln!(file, "        }}")?;
-                            writeln!(file, "    }}")?;
-                        } else {
-                            writeln!(file, "    #[must_use]")?;
-                            writeln!(file, "    pub fn {}(&self) -> RBSLocation {{", field.name)?;
-                            writeln!(
-                                file,
-                                "        RBSLocation {{ pointer: unsafe {{ (*self.pointer).{} }} }}",
-                                field.c_name()
-                            )?;
-                            writeln!(file, "    }}")?;
-                        }
-                        writeln!(file)?;
-                    }
-                    "rbs_location_list" => {
-                        if field.optional {
-                            writeln!(file, "    #[must_use]")?;
-                            writeln!(
-                                file,
-                                "    pub fn {}(&self) -> Option<RBSLocationList> {{",
-                                field.name
-                            )?;
-                            writeln!(
-                                file,
-                                "        let ptr = unsafe {{ (*self.pointer).{} }};",
-                                field.c_name()
-                            )?;
-                            writeln!(file, "        if ptr.is_null() {{")?;
-                            writeln!(file, "            None")?;
-                            writeln!(file, "        }} else {{")?;
-                            writeln!(file, "            Some(RBSLocationList {{ pointer: ptr }})")?;
-                            writeln!(file, "        }}")?;
-                            writeln!(file, "    }}")?;
-                        } else {
-                            writeln!(file, "    #[must_use]")?;
-                            writeln!(
-                                file,
-                                "    pub fn {}(&self) -> RBSLocationList {{",
-                                field.name
-                            )?;
-                            writeln!(
-                                file,
-                                "        RBSLocationList {{ pointer: unsafe {{ (*self.pointer).{} }} }}",
-                                field.c_name()
-                            )?;
-                            writeln!(file, "    }}")?;
-                        }
-                        writeln!(file)?;
                     }
                     "rbs_namespace" => {
                         write_node_field_accessor(&mut file, field, "NamespaceNode")?;
@@ -505,12 +551,75 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                     "rbs_node_list" => {
                         write_node_field_accessor(&mut file, field, "NodeList")?;
                     }
-                    "rbs_keyword" => write_node_field_accessor(&mut file, field, "KeywordNode")?,
                     "rbs_type_name" => {
                         write_node_field_accessor(&mut file, field, "TypeNameNode")?;
                     }
                     "rbs_types_block" => {
                         write_node_field_accessor(&mut file, field, "BlockTypeNode")?
+                    }
+                    c_type if config.enums.contains_key(c_type) => {
+                        write_enum_field_accessor(&mut file, field, c_type)?;
+                    }
+                    "rbs_attr_ivar_name" => {
+                        writeln!(file, "    #[must_use]")?;
+                        writeln!(file, "    pub fn {}(&self) -> AttrIvarName {{", field.name)?;
+                        writeln!(
+                            file,
+                            "        AttrIvarName::from_raw(unsafe {{ (*self.pointer).{} }})",
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                        writeln!(file)?;
+                    }
+                    "rbs_location_range" => {
+                        if field.optional {
+                            writeln!(file, "    #[must_use]")?;
+                            writeln!(
+                                file,
+                                "    pub fn {}(&self) -> Option<RBSLocationRange> {{",
+                                field.name
+                            )?;
+                            writeln!(
+                                file,
+                                "        let range = unsafe {{ (*self.pointer).{} }};",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "        if range.start_char == -1 {{")?;
+                            writeln!(file, "            None")?;
+                            writeln!(file, "        }} else {{")?;
+                            writeln!(file, "            Some(RBSLocationRange::new(range))")?;
+                            writeln!(file, "        }}")?;
+                            writeln!(file, "    }}")?;
+                        } else {
+                            writeln!(file, "    #[must_use]")?;
+                            writeln!(
+                                file,
+                                "    pub fn {}(&self) -> RBSLocationRange {{",
+                                field.name
+                            )?;
+                            writeln!(
+                                file,
+                                "        RBSLocationRange::new(unsafe {{ (*self.pointer).{} }})",
+                                field.c_name()
+                            )?;
+                            writeln!(file, "    }}")?;
+                        }
+                        writeln!(file)?;
+                    }
+                    "rbs_location_range_list" => {
+                        writeln!(file, "    #[must_use]")?;
+                        writeln!(
+                            file,
+                            "    pub fn {}(&self) -> RBSLocationRangeList<'a> {{",
+                            field.name
+                        )?;
+                        writeln!(
+                            file,
+                            "        RBSLocationRangeList {{ parser: self.parser, pointer: unsafe {{ (*self.pointer).{} }}, marker: PhantomData }}",
+                            field.c_name()
+                        )?;
+                        writeln!(file, "    }}")?;
+                        writeln!(file)?;
                     }
                     _ => panic!("Unknown field type: {}", field.c_type),
                 }
@@ -559,7 +668,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     writeln!(file)?;
     writeln!(file, "    /// Returns the location of the entire node.")?;
     writeln!(file, "    #[must_use]")?;
-    writeln!(file, "    pub fn location(&self) -> RBSLocation {{")?;
+    writeln!(file, "    pub fn location(&self) -> RBSLocationRange {{")?;
     writeln!(file, "        match self {{")?;
     for node in &config.nodes {
         writeln!(
