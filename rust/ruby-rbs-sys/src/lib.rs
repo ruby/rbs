@@ -14,22 +14,11 @@ pub mod bindings {
 #[cfg(test)]
 mod tests {
     use super::bindings::*;
-    use std::sync::Once;
 
     use rbs_encoding_type_t::RBS_ENCODING_UTF_8;
 
-    static INIT: Once = Once::new();
-
-    fn setup() {
-        INIT.call_once(|| unsafe {
-            rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
-        });
-    }
-
     #[test]
     fn test_rbs_parser_bindings() {
-        setup();
-
         let rbs_code = r#"
                 class User
                   attr_reader name: String

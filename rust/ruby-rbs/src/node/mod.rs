@@ -3,9 +3,6 @@ use rbs_encoding_type_t::RBS_ENCODING_UTF_8;
 use ruby_rbs_sys::bindings::*;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
-use std::sync::Once;
-
-static INIT: Once = Once::new();
 
 /// Parse RBS code into an AST.
 ///
@@ -17,10 +14,6 @@ static INIT: Once = Once::new();
 /// ```
 pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
     unsafe {
-        INIT.call_once(|| {
-            rbs_constant_pool_init(RBS_GLOBAL_CONSTANT_POOL, 26);
-        });
-
         let start_ptr = rbs_code.as_ptr() as *const i8;
         let end_ptr = start_ptr.add(rbs_code.len());
 
@@ -54,20 +47,26 @@ impl Drop for SignatureNode<'_> {
     }
 }
 
-impl KeywordNode<'_> {
-    #[must_use]
-    pub fn name(&self) -> &[u8] {
-        unsafe {
-            let constant_ptr = rbs_constant_pool_id_to_constant(
-                &(*self.parser.as_ptr()).constant_pool,
-                (*self.pointer).constant_id,
-            );
-            if constant_ptr.is_null() {
-                panic!("Constant ID for keyword is not present in the pool");
-            }
+/// Instance variable name specification for attributes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AttrIvarName {
+    /// The attribute has inferred instance variable (nil)
+    Unspecified,
+    /// The attribute has no instance variable (false)
+    Empty,
+    /// The attribute has instance variable with the given name
+    Name(rbs_constant_id_t),
+}
 
-            let constant = &*constant_ptr;
-            std::slice::from_raw_parts(constant.start, constant.length)
+impl AttrIvarName {
+    /// Converts the raw C struct to the Rust enum.
+    #[must_use]
+    pub fn from_raw(raw: rbs_attr_ivar_name_t) -> Self {
+        match raw.tag {
+            rbs_attr_ivar_name_tag::RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED => Self::Unspecified,
+            rbs_attr_ivar_name_tag::RBS_ATTR_IVAR_NAME_TAG_EMPTY => Self::Empty,
+            rbs_attr_ivar_name_tag::RBS_ATTR_IVAR_NAME_TAG_NAME => Self::Name(raw.name),
+            _ => panic!("Unknown ivar_name_tag: {}", raw.tag),
         }
     }
 }
@@ -169,61 +168,59 @@ impl<'a> Iterator for RBSHashIter<'a> {
     }
 }
 
-pub struct RBSLocation {
-    pointer: *const rbs_location_t,
+pub struct RBSLocationRange {
+    range: rbs_location_range,
 }
 
-impl RBSLocation {
+impl RBSLocationRange {
     #[must_use]
-    pub fn new(pointer: *const rbs_location_t) -> Self {
-        Self { pointer }
+    pub fn new(range: rbs_location_range) -> Self {
+        Self { range }
     }
 
     #[must_use]
     pub fn start(&self) -> i32 {
-        unsafe { (*self.pointer).rg.start.byte_pos }
+        self.range.start_byte
     }
 
     #[must_use]
     pub fn end(&self) -> i32 {
-        unsafe { (*self.pointer).rg.end.byte_pos }
+        self.range.end_byte
     }
 }
 
-pub struct RBSLocationList {
-    pointer: *mut rbs_location_list,
+pub struct RBSLocationRangeList<'a> {
+    #[allow(dead_code)]
+    parser: NonNull<rbs_parser_t>,
+    pointer: *mut rbs_location_range_list_t,
+    marker: PhantomData<&'a mut rbs_location_range_list_t>,
 }
 
-impl RBSLocationList {
+impl<'a> RBSLocationRangeList<'a> {
+    /// Returns an iterator over the location ranges.
     #[must_use]
-    pub fn new(pointer: *mut rbs_location_list) -> Self {
-        Self { pointer }
-    }
-
-    /// Returns an iterator over the locations.
-    #[must_use]
-    pub fn iter(&self) -> RBSLocationListIter {
-        RBSLocationListIter {
+    pub fn iter(&self) -> RBSLocationRangeListIter {
+        RBSLocationRangeListIter {
             current: unsafe { (*self.pointer).head },
         }
     }
 }
 
-pub struct RBSLocationListIter {
-    current: *mut rbs_location_list_node_t,
+pub struct RBSLocationRangeListIter {
+    current: *mut rbs_location_range_list_node_t,
 }
 
-impl Iterator for RBSLocationListIter {
-    type Item = RBSLocation;
+impl Iterator for RBSLocationRangeListIter {
+    type Item = RBSLocationRange;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current.is_null() {
             None
         } else {
             let pointer_data = unsafe { *self.current };
-            let loc = RBSLocation::new(pointer_data.loc);
+            let range = RBSLocationRange::new(pointer_data.range);
             self.current = pointer_data.next;
-            Some(loc)
+            Some(range)
         }
     }
 }
@@ -484,5 +481,136 @@ mod tests {
         let int_loc = integer.location();
         assert_eq!(11, int_loc.start());
         assert_eq!(12, int_loc.end());
+    }
+
+    #[test]
+    fn test_enum_types() {
+        let rbs_code = r#"
+            class Foo
+                attr_reader name: String
+                def self.process: () -> void
+                alias instance_method target_method
+                alias self.singleton_method self.target_method
+            end
+
+            class Bar[out T, in U, V]
+            end
+        "#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declarations: Vec<_> = signature.declarations().iter().collect();
+
+        // Test class Foo
+        let Node::Class(class_foo) = &declarations[0] else {
+            panic!("Expected Class");
+        };
+
+        let members: Vec<_> = class_foo.members().iter().collect();
+
+        // attr_reader - should be instance with unspecified visibility (default)
+        if let Node::AttrReader(attr) = &members[0] {
+            assert_eq!(attr.kind(), AttributeKind::Instance);
+            assert_eq!(attr.visibility(), AttributeVisibility::Unspecified);
+        } else {
+            panic!("Expected AttrReader");
+        }
+
+        // def self.process - should be singleton method with unspecified visibility (default)
+        if let Node::MethodDefinition(method) = &members[1] {
+            assert_eq!(method.kind(), MethodDefinitionKind::Singleton);
+            assert_eq!(method.visibility(), MethodDefinitionVisibility::Unspecified);
+        } else {
+            panic!("Expected MethodDefinition");
+        }
+
+        // alias instance_method
+        if let Node::Alias(alias) = &members[2] {
+            assert_eq!(alias.kind(), AliasKind::Instance);
+        } else {
+            panic!("Expected Alias");
+        }
+
+        // alias self.singleton_method
+        if let Node::Alias(alias) = &members[3] {
+            assert_eq!(alias.kind(), AliasKind::Singleton);
+        } else {
+            panic!("Expected Alias");
+        }
+
+        // Test class Bar with type params
+        let Node::Class(class_bar) = &declarations[1] else {
+            panic!("Expected Class");
+        };
+
+        let type_params: Vec<_> = class_bar.type_params().iter().collect();
+        assert_eq!(type_params.len(), 3);
+
+        // out T - covariant
+        if let Node::TypeParam(param) = &type_params[0] {
+            assert_eq!(param.variance(), TypeParamVariance::Covariant);
+        } else {
+            panic!("Expected TypeParam");
+        }
+
+        // in U - contravariant
+        if let Node::TypeParam(param) = &type_params[1] {
+            assert_eq!(param.variance(), TypeParamVariance::Contravariant);
+        } else {
+            panic!("Expected TypeParam");
+        }
+
+        // V - invariant (default)
+        if let Node::TypeParam(param) = &type_params[2] {
+            assert_eq!(param.variance(), TypeParamVariance::Invariant);
+        } else {
+            panic!("Expected TypeParam");
+        }
+    }
+
+    #[test]
+    fn test_ivar_name_enum() {
+        let rbs_code = r#"
+            class Foo
+                attr_reader name: String
+                attr_accessor age(): Integer
+                attr_writer email(@email): String
+            end
+        "#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let Node::Class(class) = signature.declarations().iter().next().unwrap() else {
+            panic!("Expected Class");
+        };
+
+        let members: Vec<_> = class.members().iter().collect();
+
+        // attr_reader name: String - should be Unspecified (inferred as @name)
+        if let Node::AttrReader(attr) = &members[0] {
+            let ivar = attr.ivar_name();
+            assert_eq!(ivar, AttrIvarName::Unspecified);
+        } else {
+            panic!("Expected AttrReader");
+        }
+
+        // attr_accessor age(): Integer - should be Empty (no ivar)
+        if let Node::AttrAccessor(attr) = &members[1] {
+            let ivar = attr.ivar_name();
+            assert_eq!(ivar, AttrIvarName::Empty);
+        } else {
+            panic!("Expected AttrAccessor");
+        }
+
+        // attr_writer email(@email): String - should be Name with constant ID
+        if let Node::AttrWriter(attr) = &members[2] {
+            let ivar = attr.ivar_name();
+            match ivar {
+                AttrIvarName::Name(id) => {
+                    assert!(id > 0, "Expected valid constant ID");
+                }
+                _ => panic!("Expected AttrIvarName::Name, got {:?}", ivar),
+            }
+        } else {
+            panic!("Expected AttrWriter");
+        }
     }
 }
