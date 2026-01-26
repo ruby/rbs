@@ -609,5 +609,5 @@ module Kernel
   #
   # You must require 'uri' to use this method.
   #
-  def self?.URI: (URI::Generic | String uri) -> URI::Generic
+  def self?.URI: (URI::Generic | string uri) -> URI::Generic
 end
