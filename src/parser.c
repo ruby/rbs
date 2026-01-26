@@ -121,8 +121,8 @@ static rbs_location_t *rbs_location_current_token(rbs_parser_t *parser) {
     return rbs_location_new(ALLOCATOR(), parser->current_token.range);
 }
 
-static bool parse_optional(rbs_parser_t *parser, rbs_node_t **optional, bool void_allowed, bool self_allowed);
-static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed);
+static bool parse_optional(rbs_parser_t *parser, rbs_node_t **optional, bool void_allowed, bool self_allowed, bool classish_allowed);
+static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed, bool classish_allowed);
 
 /**
  * @returns A borrowed copy of the current token, which does *not* need to be freed.
@@ -245,10 +245,10 @@ error_handling: {
               | {} type `,` ... `,` <type> eol
 */
 NODISCARD
-static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, bool void_allowed, bool self_allowed) {
+static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, bool void_allowed, bool self_allowed, bool classish_allowed) {
     while (true) {
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed, self_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed, self_allowed, classish_allowed));
         rbs_node_list_append(types, type);
 
         if (parser->next_token.type == pCOMMA) {
@@ -275,10 +275,10 @@ static bool parse_type_list(rbs_parser_t *parser, enum RBSTokenType eol, rbs_nod
                           | {} type `,` ... `,` <type> eol
 */
 NODISCARD
-static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations, bool void_allowed, bool self_allowed) {
+static bool parse_type_list_with_commas(rbs_parser_t *parser, enum RBSTokenType eol, rbs_node_list_t *types, rbs_location_list_t *comma_locations, bool void_allowed, bool self_allowed, bool classish_allowed) {
     while (true) {
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed, self_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &type, void_allowed, self_allowed, classish_allowed));
         rbs_node_list_append(types, type);
 
         if (parser->next_token.type == pCOMMA) {
@@ -327,11 +327,11 @@ static bool is_keyword_token(enum RBSTokenType type) {
                    | {} type <param>
 */
 NODISCARD
-static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_t **function_param, bool self_allowed) {
+static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_t **function_param, bool self_allowed, bool classish_allowed) {
     rbs_range_t type_range;
     type_range.start = parser->next_token.range.start;
     rbs_node_t *type;
-    CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed));
+    CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed, classish_allowed));
     type_range.end = parser->current_token.range.end;
 
     if (parser->next_token.type == pCOMMA || parser->next_token.type == pRPAREN) {
@@ -410,7 +410,7 @@ static bool parse_keyword_key(rbs_parser_t *parser, rbs_ast_symbol_t **key) {
   keyword ::= {} keyword `:` <function_param>
 */
 NODISCARD
-static bool parse_keyword(rbs_parser_t *parser, rbs_hash_t *keywords, rbs_hash_t *memo, bool self_allowed) {
+static bool parse_keyword(rbs_parser_t *parser, rbs_hash_t *keywords, rbs_hash_t *memo, bool self_allowed, bool classish_allowed) {
     rbs_ast_symbol_t *key = NULL;
     CHECK_PARSE(parse_keyword_key(parser, &key));
 
@@ -424,7 +424,7 @@ static bool parse_keyword(rbs_parser_t *parser, rbs_hash_t *keywords, rbs_hash_t
 
     ADVANCE_ASSERT(parser, pCOLON);
     rbs_types_function_param_t *param = NULL;
-    CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+    CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
 
     rbs_hash_set(keywords, (rbs_node_t *) key, (rbs_node_t *) param);
 
@@ -495,7 +495,7 @@ static bool parser_advance_if(rbs_parser_t *parser, enum RBSTokenType type) {
              | {} `**` <function_param>
 */
 NODISCARD
-static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_allowed) {
+static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_allowed, bool classish_allowed) {
     if (parser->next_token.type == pQUESTION && parser->next_token2.type == pRPAREN) {
         params->required_positionals = NULL;
         rbs_parser_advance(parser);
@@ -524,7 +524,7 @@ static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_
             }
 
             rbs_types_function_param_t *param = NULL;
-            CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+            CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             rbs_node_list_append(params->required_positionals, (rbs_node_t *) param);
 
             break;
@@ -542,13 +542,13 @@ PARSE_OPTIONAL_PARAMS:
             rbs_parser_advance(parser);
 
             if (is_keyword(parser)) {
-                CHECK_PARSE(parse_keyword(parser, params->optional_keywords, memo, self_allowed));
+                CHECK_PARSE(parse_keyword(parser, params->optional_keywords, memo, self_allowed, classish_allowed));
                 parser_advance_if(parser, pCOMMA);
                 goto PARSE_KEYWORDS;
             }
 
             rbs_types_function_param_t *param = NULL;
-            CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+            CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             rbs_node_list_append(params->optional_positionals, (rbs_node_t *) param);
 
             break;
@@ -565,7 +565,7 @@ PARSE_REST_PARAM:
     if (parser->next_token.type == pSTAR) {
         rbs_parser_advance(parser);
         rbs_types_function_param_t *param = NULL;
-        CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+        CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
         params->rest_positionals = (rbs_node_t *) param;
 
         if (!parser_advance_if(parser, pCOMMA)) {
@@ -592,7 +592,7 @@ PARSE_TRAILING_PARAMS:
             }
 
             rbs_types_function_param_t *param = NULL;
-            CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+            CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             rbs_node_list_append(params->trailing_positionals, (rbs_node_t *) param);
 
             break;
@@ -609,7 +609,7 @@ PARSE_KEYWORDS:
         case pQUESTION:
             rbs_parser_advance(parser);
             if (is_keyword(parser)) {
-                CHECK_PARSE(parse_keyword(parser, params->optional_keywords, memo, self_allowed));
+                CHECK_PARSE(parse_keyword(parser, params->optional_keywords, memo, self_allowed, classish_allowed));
             } else {
                 rbs_parser_set_error(parser, parser->next_token, true, "optional keyword argument type is expected");
                 return false;
@@ -619,7 +619,7 @@ PARSE_KEYWORDS:
         case pSTAR2:
             rbs_parser_advance(parser);
             rbs_types_function_param_t *param = NULL;
-            CHECK_PARSE(parse_function_param(parser, &param, self_allowed));
+            CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             params->rest_keywords = (rbs_node_t *) param;
             break;
 
@@ -631,7 +631,7 @@ PARSE_KEYWORDS:
         case tBANGIDENT:
             KEYWORD_CASES
             if (is_keyword(parser)) {
-                CHECK_PARSE(parse_keyword(parser, params->required_keywords, memo, self_allowed));
+                CHECK_PARSE(parse_keyword(parser, params->required_keywords, memo, self_allowed, classish_allowed));
             } else {
                 rbs_parser_set_error(parser, parser->next_token, true, "required keyword argument type is expected");
                 return false;
@@ -661,12 +661,12 @@ EOP:
              | {} simple_type <`?`>
 */
 NODISCARD
-static bool parse_optional(rbs_parser_t *parser, rbs_node_t **optional, bool void_allowed, bool self_allowed) {
+static bool parse_optional(rbs_parser_t *parser, rbs_node_t **optional, bool void_allowed, bool self_allowed, bool classish_allowed) {
     rbs_range_t rg;
     rg.start = parser->next_token.range.start;
 
     rbs_node_t *type = NULL;
-    CHECK_PARSE(parse_simple(parser, &type, void_allowed, self_allowed));
+    CHECK_PARSE(parse_simple(parser, &type, void_allowed, self_allowed, classish_allowed));
 
     if (parser->next_token.type == pQUESTION) {
         if (void_allowed && type->type == RBS_TYPES_BASES_VOID) {
@@ -702,13 +702,13 @@ static void initialize_method_params(method_params *params, rbs_allocator_t *all
                       | {} `[` `self` `:` type <`]`>
 */
 NODISCARD
-static bool parse_self_type_binding(rbs_parser_t *parser, rbs_node_t **self_type, bool self_allowed) {
+static bool parse_self_type_binding(rbs_parser_t *parser, rbs_node_t **self_type, bool self_allowed, bool classish_allowed) {
     if (parser->next_token.type == pLBRACKET) {
         rbs_parser_advance(parser);
         ADVANCE_ASSERT(parser, kSELF);
         ADVANCE_ASSERT(parser, pCOLON);
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRBRACKET);
         *self_type = type;
     }
@@ -730,7 +730,7 @@ typedef struct {
              | {} self_type_binding? `->` <optional>
 */
 NODISCARD
-static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse_function_result **result, bool self_allowed) {
+static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse_function_result **result, bool self_allowed, bool classish_allowed) {
     rbs_node_t *function = NULL;
     rbs_types_block_t *block = NULL;
     rbs_node_t *function_self_type = NULL;
@@ -742,13 +742,13 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 
     if (parser->next_token.type == pLPAREN) {
         rbs_parser_advance(parser);
-        CHECK_PARSE(parse_params(parser, &params, self_allowed));
+        CHECK_PARSE(parse_params(parser, &params, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRPAREN);
     }
 
     // Passing NULL to function_self_type means the function itself doesn't accept self type binding. (== method type)
     if (accept_type_binding) {
-        CHECK_PARSE(parse_self_type_binding(parser, &function_self_type, self_allowed));
+        CHECK_PARSE(parse_self_type_binding(parser, &function_self_type, self_allowed, classish_allowed));
     } else {
         if (rbs_is_untyped_params(&params)) {
             if (parser->next_token.type != pARROW) {
@@ -778,16 +778,16 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 
         if (parser->next_token.type == pLPAREN) {
             rbs_parser_advance(parser);
-            CHECK_PARSE(parse_params(parser, &block_params, self_allowed));
+            CHECK_PARSE(parse_params(parser, &block_params, self_allowed, classish_allowed));
             ADVANCE_ASSERT(parser, pRPAREN);
         }
 
         rbs_node_t *self_type = NULL;
-        CHECK_PARSE(parse_self_type_binding(parser, &self_type, self_allowed));
+        CHECK_PARSE(parse_self_type_binding(parser, &self_type, self_allowed, classish_allowed));
 
         ADVANCE_ASSERT(parser, pARROW);
         rbs_node_t *block_return_type = NULL;
-        CHECK_PARSE(parse_optional(parser, &block_return_type, true, self_allowed));
+        CHECK_PARSE(parse_optional(parser, &block_return_type, true, self_allowed, classish_allowed));
 
         ADVANCE_ASSERT(parser, pRBRACE);
 
@@ -817,7 +817,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 
     ADVANCE_ASSERT(parser, pARROW);
     rbs_node_t *type = NULL;
-    CHECK_PARSE(parse_optional(parser, &type, true, self_allowed));
+    CHECK_PARSE(parse_optional(parser, &type, true, self_allowed, classish_allowed));
 
     function_range.end = parser->current_token.range.end;
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), function_range);
@@ -848,10 +848,10 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
   proc_type ::= {`^`} <function>
 */
 NODISCARD
-static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed) {
+static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed, bool classish_allowed) {
     rbs_position_t start = parser->current_token.range.start;
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, true, &result, self_allowed));
+    CHECK_PARSE(parse_function(parser, true, &result, self_allowed, classish_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), (rbs_range_t) { .start = start, .end = end });
@@ -876,7 +876,7 @@ static void check_key_duplication(rbs_parser_t *parser, rbs_hash_t *fields, rbs_
                      | {} literal_type `=>` <type>
 */
 NODISCARD
-static bool parse_record_attributes(rbs_parser_t *parser, rbs_hash_t **fields, bool self_allowed) {
+static bool parse_record_attributes(rbs_parser_t *parser, rbs_hash_t **fields, bool self_allowed, bool classish_allowed) {
     *fields = rbs_hash_new(ALLOCATOR());
 
     if (parser->next_token.type == pRBRACE) return true;
@@ -909,7 +909,7 @@ static bool parse_record_attributes(rbs_parser_t *parser, rbs_hash_t **fields, b
             case kTRUE:
             case kFALSE: {
                 rbs_node_t *type = NULL;
-                CHECK_PARSE(parse_simple(parser, &type, false, self_allowed));
+                CHECK_PARSE(parse_simple(parser, &type, false, self_allowed, classish_allowed));
 
                 key = (rbs_ast_symbol_t *) ((rbs_types_literal_t *) type)->literal;
                 break;
@@ -926,7 +926,7 @@ static bool parse_record_attributes(rbs_parser_t *parser, rbs_hash_t **fields, b
         field_range.start = parser->current_token.range.end;
 
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &type, false, self_allowed, classish_allowed));
 
         field_range.end = parser->current_token.range.end;
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), field_range);
@@ -1033,7 +1033,7 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
     if (parser->next_token.type == pLBRACKET) {
         rbs_parser_advance(parser);
         args_range.start = parser->current_token.range.start;
-        CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, true, true));
+        CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, true, true, true));
         ADVANCE_ASSERT(parser, pRBRACKET);
         args_range.end = parser->current_token.range.end;
     } else {
@@ -1120,13 +1120,13 @@ static bool parser_typevar_member(rbs_parser_t *parser, rbs_constant_id_t id) {
            | {} `^` <function>
 */
 NODISCARD
-static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed) {
+static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed, bool classish_allowed) {
     rbs_parser_advance(parser);
 
     switch (parser->current_token.type) {
     case pLPAREN: {
         rbs_node_t *lparen_type;
-        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, false, self_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, false, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRPAREN);
         *type = lparen_type;
         return true;
@@ -1142,11 +1142,21 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
         return true;
     }
     case kCLASS: {
+        if (!classish_allowed) {
+            rbs_parser_set_error(parser, parser->current_token, true, "class type is not allowed here");
+            return false;
+        }
+
         rbs_location_t *loc = rbs_location_current_token(parser);
         *type = (rbs_node_t *) rbs_types_bases_class_new(ALLOCATOR(), loc);
         return true;
     }
     case kINSTANCE: {
+        if (!classish_allowed) {
+            rbs_parser_set_error(parser, parser->current_token, true, "instance type is not allowed here");
+            return false;
+        }
+
         rbs_location_t *loc = rbs_location_current_token(parser);
         *type = (rbs_node_t *) rbs_types_bases_instance_new(ALLOCATOR(), loc);
         return true;
@@ -1265,7 +1275,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
         rg.start = parser->current_token.range.start;
         rbs_node_list_t *types = rbs_node_list_new(ALLOCATOR());
         if (parser->next_token.type != pRBRACKET) {
-            CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, false, self_allowed));
+            CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, false, self_allowed, classish_allowed));
         }
         ADVANCE_ASSERT(parser, pRBRACKET);
         rg.end = parser->current_token.range.end;
@@ -1283,7 +1293,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     case pLBRACE: {
         rbs_position_t start = parser->current_token.range.start;
         rbs_hash_t *fields = NULL;
-        CHECK_PARSE(parse_record_attributes(parser, &fields, self_allowed));
+        CHECK_PARSE(parse_record_attributes(parser, &fields, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRBRACE);
         rbs_position_t end = parser->current_token.range.end;
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), (rbs_range_t) { .start = start, .end = end });
@@ -1292,7 +1302,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     }
     case pHAT: {
         rbs_types_proc_t *value = NULL;
-        CHECK_PARSE(parse_proc_type(parser, &value, self_allowed));
+        CHECK_PARSE(parse_proc_type(parser, &value, self_allowed, classish_allowed));
         *type = (rbs_node_t *) value;
         return true;
     }
@@ -1307,12 +1317,12 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
                  | {} <optional>
 */
 NODISCARD
-static bool parse_intersection(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed) {
+static bool parse_intersection(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed, bool classish_allowed) {
     rbs_range_t rg;
     rg.start = parser->next_token.range.start;
 
     rbs_node_t *optional = NULL;
-    CHECK_PARSE(parse_optional(parser, &optional, void_allowed, self_allowed));
+    CHECK_PARSE(parse_optional(parser, &optional, void_allowed, self_allowed, classish_allowed));
     *type = optional;
 
     rbs_node_list_t *intersection_types = rbs_node_list_new(ALLOCATOR());
@@ -1326,7 +1336,7 @@ static bool parse_intersection(rbs_parser_t *parser, rbs_node_t **type, bool voi
 
         rbs_parser_advance(parser);
         rbs_node_t *type = NULL;
-        CHECK_PARSE(parse_optional(parser, &type, false, self_allowed));
+        CHECK_PARSE(parse_optional(parser, &type, false, self_allowed, classish_allowed));
         rbs_node_list_append(intersection_types, type);
     }
 
@@ -1344,12 +1354,12 @@ static bool parse_intersection(rbs_parser_t *parser, rbs_node_t **type, bool voi
   union ::= {} intersection '|' ... '|' <intersection>
           | {} <intersection>
 */
-bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed) {
+bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed, bool classish_allowed) {
     rbs_range_t rg;
     rg.start = parser->next_token.range.start;
     rbs_node_list_t *union_types = rbs_node_list_new(ALLOCATOR());
 
-    CHECK_PARSE(parse_intersection(parser, type, void_allowed, self_allowed));
+    CHECK_PARSE(parse_intersection(parser, type, void_allowed, self_allowed, classish_allowed));
 
     rbs_node_list_append(union_types, *type);
 
@@ -1361,7 +1371,7 @@ bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, 
 
         rbs_parser_advance(parser);
         rbs_node_t *intersection = NULL;
-        CHECK_PARSE(parse_intersection(parser, &intersection, false, self_allowed));
+        CHECK_PARSE(parse_intersection(parser, &intersection, false, self_allowed, classish_allowed));
         rbs_node_list_append(union_types, intersection);
     }
 
@@ -1454,7 +1464,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
 
                     rbs_parser_advance(parser);
                     upper_bound_range.start = parser->current_token.range.start;
-                    CHECK_PARSE(rbs_parse_type(parser, &upper_bound, false, false));
+                    CHECK_PARSE(rbs_parse_type(parser, &upper_bound, false, false, false));
                     upper_bound_range.end = parser->current_token.range.end;
                     break;
 
@@ -1466,7 +1476,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
 
                     rbs_parser_advance(parser);
                     lower_bound_range.start = parser->current_token.range.start;
-                    CHECK_PARSE(rbs_parse_type(parser, &lower_bound, false, false));
+                    CHECK_PARSE(rbs_parse_type(parser, &lower_bound, false, false, false));
                     lower_bound_range.end = parser->current_token.range.end;
                     break;
 
@@ -1481,7 +1491,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
                     rbs_parser_advance(parser);
 
                     default_type_range.start = parser->current_token.range.start;
-                    CHECK_PARSE(rbs_parse_type(parser, &default_type, true, false));
+                    CHECK_PARSE(rbs_parse_type(parser, &default_type, true, false, false));
                     default_type_range.end = parser->current_token.range.end;
 
                     required_param_allowed = false;
@@ -1551,7 +1561,7 @@ static bool parser_pop_typevar_table(rbs_parser_t *parser) {
   method_type ::= {} type_params <function>
   */
 // TODO: Should this be NODISCARD?
-bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, bool require_eof) {
+bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, bool require_eof, bool classish_allowed) {
     rbs_parser_push_typevar_table(parser, false);
 
     rbs_range_t rg;
@@ -1565,7 +1575,7 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     type_range.start = parser->next_token.range.start;
 
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, false, &result, true));
+    CHECK_PARSE(parse_function(parser, false, &result, true, classish_allowed));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -1608,7 +1618,7 @@ static bool parse_global_decl(rbs_parser_t *parser, rbs_node_list_t *annotations
     rbs_range_t colon_range = parser->current_token.range;
 
     rbs_node_t *type;
-    CHECK_PARSE(rbs_parse_type(parser, &type, false, false));
+    CHECK_PARSE(rbs_parse_type(parser, &type, false, false, false));
     decl_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
@@ -1638,7 +1648,7 @@ static bool parse_const_decl(rbs_parser_t *parser, rbs_node_list_t *annotations,
     rbs_range_t colon_range = parser->current_token.range;
 
     rbs_node_t *type;
-    CHECK_PARSE(rbs_parse_type(parser, &type, false, false));
+    CHECK_PARSE(rbs_parse_type(parser, &type, false, false, false));
 
     decl_range.end = parser->current_token.range.end;
 
@@ -1678,7 +1688,7 @@ static bool parse_type_decl(rbs_parser_t *parser, rbs_position_t comment_pos, rb
     rbs_range_t eq_range = parser->current_token.range;
 
     rbs_node_t *type;
-    CHECK_PARSE(rbs_parse_type(parser, &type, false, false));
+    CHECK_PARSE(rbs_parse_type(parser, &type, false, false, false));
 
     decl_range.end = parser->current_token.range.end;
 
@@ -1989,7 +1999,7 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
         case pLBRACKET:
         case pQUESTION: {
             rbs_method_type_t *method_type = NULL;
-            CHECK_PARSE(rbs_parse_method_type(parser, &method_type, false));
+            CHECK_PARSE(rbs_parse_method_type(parser, &method_type, false, !instance_only));
 
             overload_range.end = parser->current_token.range.end;
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), overload_range);
@@ -2064,7 +2074,7 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
  * @param kind
  * */
 NODISCARD
-static bool class_instance_name(rbs_parser_t *parser, TypeNameKind kind, rbs_node_list_t *args, rbs_range_t *name_range, rbs_range_t *args_range, rbs_type_name_t **name) {
+static bool class_instance_name(rbs_parser_t *parser, TypeNameKind kind, rbs_node_list_t *args, rbs_range_t *name_range, rbs_range_t *args_range, rbs_type_name_t **name, bool classish_allowed) {
     rbs_parser_advance(parser);
 
     rbs_type_name_t *type_name = NULL;
@@ -2074,7 +2084,7 @@ static bool class_instance_name(rbs_parser_t *parser, TypeNameKind kind, rbs_nod
     if (parser->next_token.type == pLBRACKET) {
         rbs_parser_advance(parser);
         args_range->start = parser->current_token.range.start;
-        CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, true, false));
+        CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, true, false, classish_allowed));
         ADVANCE_ASSERT(parser, pRBRACKET);
         args_range->end = parser->current_token.range.end;
     } else {
@@ -2135,7 +2145,8 @@ static bool parse_mixin_member(rbs_parser_t *parser, bool from_interface, rbs_po
         args,
         &name_range,
         &args_range,
-        &name
+        &name,
+        !from_interface
     ));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
@@ -2249,7 +2260,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         rbs_range_t colon_range = parser->current_token.range;
 
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, false, true));
+        CHECK_PARSE(rbs_parse_type(parser, &type, false, true, true));
         member_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
@@ -2272,7 +2283,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         rbs_parser_push_typevar_table(parser, true);
 
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, false, false));
+        CHECK_PARSE(rbs_parse_type(parser, &type, false, false, true));
 
         CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -2311,7 +2322,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         rbs_parser_push_typevar_table(parser, true);
 
         rbs_node_t *type;
-        CHECK_PARSE(rbs_parse_type(parser, &type, false, true));
+        CHECK_PARSE(rbs_parse_type(parser, &type, false, true, true));
 
         CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -2452,7 +2463,7 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_parser_push_typevar_table(parser, is_kind == SINGLETON_KIND);
 
     rbs_node_t *type;
-    CHECK_PARSE(rbs_parse_type(parser, &type, false, true));
+    CHECK_PARSE(rbs_parse_type(parser, &type, false, true, true));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -2605,7 +2616,7 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
         if (parser->next_token.type == pLBRACKET) {
             rbs_parser_advance(parser);
             args_range.start = parser->current_token.range.start;
-            CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, true, false));
+            CHECK_PARSE(parse_type_list(parser, pRBRACKET, args, true, false, false));
             rbs_parser_advance(parser);
             self_range.end = args_range.end = parser->current_token.range.end;
         }
@@ -2840,7 +2851,7 @@ static bool parse_class_decl_super(rbs_parser_t *parser, rbs_range_t *lt_range, 
         rbs_node_list_t *args = rbs_node_list_new(ALLOCATOR());
         rbs_type_name_t *name = NULL;
         rbs_range_t name_range, args_range;
-        CHECK_PARSE(class_instance_name(parser, CLASS_NAME, args, &name_range, &args_range, &name));
+        CHECK_PARSE(class_instance_name(parser, CLASS_NAME, args, &name_range, &args_range, &name, false));
 
         super_range.end = parser->current_token.range.end;
 
@@ -3619,7 +3630,7 @@ static bool parse_method_overload(rbs_parser_t *parser, rbs_node_list_t *annotat
         return false;
     }
 
-    return rbs_parse_method_type(parser, method_type, false);
+    return rbs_parse_method_type(parser, method_type, false, true);
 }
 
 /*
@@ -3778,7 +3789,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
             rbs_node_t *return_type = NULL;
-            if (!rbs_parse_type(parser, &return_type, true, true)) {
+            if (!rbs_parse_type(parser, &return_type, true, true, true)) {
                 return false;
             }
 
@@ -3824,7 +3835,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_t *colon_loc = rbs_location_new(ALLOCATOR(), colon_range);
 
             rbs_node_t *type = NULL;
-            if (!rbs_parse_type(parser, &type, false, true)) {
+            if (!rbs_parse_type(parser, &type, false, true, true)) {
                 return false;
             }
 
@@ -3930,7 +3941,7 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
 
         // Otherwise, parse as regular type assertion
         rbs_node_t *type = NULL;
-        if (!rbs_parse_type(parser, &type, true, true)) {
+        if (!rbs_parse_type(parser, &type, true, true, true)) {
             return false;
         }
 
@@ -3963,7 +3974,7 @@ static bool parse_inline_trailing_annotation(rbs_parser_t *parser, rbs_ast_ruby_
         }
 
         // Parse type list with comma tracking
-        CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations, true, true));
+        CHECK_PARSE(parse_type_list_with_commas(parser, pRBRACKET, type_args, comma_locations, true, true, false));
 
         rbs_range_t close_bracket_range = parser->next_token.range;
         rbs_location_t *close_bracket_loc = rbs_location_new(ALLOCATOR(), close_bracket_range);

@@ -5,9 +5,9 @@ require_relative "parser/token"
 
 module RBS
   class Parser
-    def self.parse_type(source, range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true)
+    def self.parse_type(source, range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true, classish_allowed: true)
       buf = buffer(source)
-      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof, void_allowed, self_allowed)
+      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof, void_allowed, self_allowed, classish_allowed)
     end
 
     def self.parse_method_type(source, range: 0..., variables: [], require_eof: false)
