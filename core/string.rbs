@@ -86,7 +86,7 @@
 # *   `\&` and `\0` correspond to `$&`, which contains the complete matched
 #     text.
 # *   `\'` corresponds to `$'`, which contains the string after the match.
-# *   `\`` corresponds to `$``, which contains the string before the match.
+# *   ``` corresponds to `$``, which contains the string before the match.
 # *   `\+` corresponds to `$+`, which contains the last capture group.
 #
 # See Regexp for details.
@@ -559,7 +559,7 @@
 # *   `\&` and `\0` correspond to `$&`, which contains the complete matched
 #     text.
 # *   `\'` corresponds to `$'`, which contains the string after the match.
-# *   `\`` corresponds to `$``, which contains the string before the match.
+# *   ``` corresponds to `$``, which contains the string before the match.
 # *   `\+` corresponds to `$+`, which contains the last capture group.
 #
 # See Regexp for details.
@@ -1623,7 +1623,7 @@ class String
   #
   # Related: see [Modifying](rdoc-ref:String@Modifying).
   #
-  def append_as_bytes: (String) -> String
+  def append_as_bytes: (*String | Integer) -> String
 
   # <!--
   #   rdoc-file=string.c

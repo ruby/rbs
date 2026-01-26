@@ -29,6 +29,10 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :new, File.expand_path(__FILE__), "r", 0644
     assert_send_type "(String, String, ToInt) -> File",
                      File, :new, File.expand_path(__FILE__), "r", ToInt.new(0644)
+    assert_send_type "(String, mode: String) -> File",
+                     File, :new, File.expand_path(__FILE__), mode: "r"
+    assert_send_type "(String, mode: Integer) -> File",
+                     File, :new, File.expand_path(__FILE__), mode: File::RDONLY
   end
 
   def test_open
@@ -56,6 +60,11 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :open, File.expand_path(__FILE__), "r", ToInt.new(0644)
     assert_send_type "(String) { (File) -> String } -> String",
                      File, :open, File.expand_path(__FILE__) do |file| file.read end
+    assert_send_type "(String, mode: String) -> File",
+                     File, :open, File.expand_path(__FILE__), mode: "r"
+    assert_send_type "(String, mode: Integer) -> File",
+                     File, :open, File.expand_path(__FILE__), mode: File::RDONLY
+
   end
 
   def test_absolute_path

@@ -161,6 +161,34 @@ class RBS::LocationTest < Test::Unit::TestCase
     end
   end
 
+  def test_gc_compaction
+    GC.disable
+    buffer = buffer()
+    locations = 10.times.map do |i|
+      Location.new(buffer, 0, 10).tap do |loc|
+        loc.add_required_child(:static_0, 0...1)
+        loc.add_required_child(:static_1, 1...2)
+        loc.add_required_child(:static_2, 2...3)
+        3.times do |j|
+          loc.add_required_child(:"dynamic_#{i}_#{j}", j...j+1)
+        end
+      end
+    end
+    GC.start
+    GC.start
+    GC.compact
+    locations.each_with_index do |loc, i|
+      assert_instance_of Location, loc[:static_0]
+      assert_instance_of Location, loc[:static_1]
+      assert_instance_of Location, loc[:static_2]
+      3.times do |j|
+        assert_instance_of Location, loc[:"dynamic_#{i}_#{j}"]
+      end
+    end
+  ensure
+    GC.enable
+  end
+
   private
 
   def buffer(content: nil)

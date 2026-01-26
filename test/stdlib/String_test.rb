@@ -301,6 +301,12 @@ class StringInstanceTest < Test::Unit::TestCase
     if_ruby("3.4"...) do
       assert_send_type  '(String) -> String',
                         'hello', :append_as_bytes, "world"
+      assert_send_type  '(*String) -> String',
+                        'hello', :append_as_bytes, "world", "once", "more"
+      assert_send_type  '(Integer) -> String',
+                        'hello', :append_as_bytes, 0
+      assert_send_type  '(*Integer) -> String',
+                        'hello', :append_as_bytes, 0, 257
     end
   end
 

@@ -284,7 +284,7 @@ class Module < Object
   # module to *mod* if this module has not already been added to *mod* or one of
   # its ancestors. See also Module#include.
   #
-  def append_features: (Module arg0) -> self
+  private def append_features: (Module arg0) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -532,7 +532,7 @@ class Module < Object
   #     :const_added
   #     :inherited
   #
-  def const_added: (Symbol) -> void
+  private def const_added: (Symbol) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -826,7 +826,7 @@ class Module < Object
   #     Picky added to Array
   #     Can't add Picky to a String
   #
-  def extend_object: (untyped arg0) -> untyped
+  private def extend_object: (untyped arg0) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -844,7 +844,7 @@ class Module < Object
   #     end
   #      # => prints "A extended in Enumerable"
   #
-  def extended: (Module othermod) -> untyped
+  private def extended: (Module othermod) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -902,7 +902,7 @@ class Module < Object
   #     end
   #      # => prints "A included in Enumerable"
   #
-  def included: (Module othermod) -> untyped
+  private def included: (Module othermod) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -1041,7 +1041,7 @@ class Module < Object
   #
   #     Adding :some_instance_method
   #
-  def method_added: (Symbol meth) -> untyped
+  private def method_added: (Symbol meth) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1102,7 +1102,32 @@ class Module < Object
   #
   #     Removing :some_instance_method
   #
-  def method_removed: (Symbol method_name) -> untyped
+  private def method_removed: (Symbol method_name) -> untyped
+
+  # <!--
+  #   rdoc-file=object.c
+  #   - method_undefined(method_name)
+  # -->
+  # Invoked as a callback whenever an instance method is undefined from the
+  # receiver.
+  #
+  #     module Chatty
+  #       def self.method_undefined(method_name)
+  #         puts "Undefining #{method_name.inspect}"
+  #       end
+  #       def self.some_class_method() end
+  #       def some_instance_method() end
+  #       class << self
+  #         undef_method :some_class_method
+  #       end
+  #       undef_method :some_instance_method
+  #     end
+  #
+  # *produces:*
+  #
+  #     Undefining :some_instance_method
+  #
+  private def method_undefined: (Symbol method_name) -> untyped
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1195,11 +1220,11 @@ class Module < Object
   #     Mod.one     #=> "This is one"
   #     c.call_one  #=> "This is the new one"
   #
-  def module_function: () -> nil
-                     | (Symbol method_name) -> Symbol
-                     | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                     | (string method_name) -> string
-                     | (interned, interned, *interned method_name) -> Array[interned]
+  private def module_function: () -> nil
+                             | (Symbol method_name) -> Symbol
+                             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                             | (string method_name) -> string
+                             | (interned, interned, *interned method_name) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1227,7 +1252,7 @@ class Module < Object
   # this module to *mod* if this module has not already been added to *mod* or one
   # of its ancestors. See also Module#prepend.
   #
-  def prepend_features: (Module arg0) -> self
+  private def prepend_features: (Module arg0) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1245,7 +1270,7 @@ class Module < Object
   #     end
   #      # => prints "A prepended to Enumerable"
   #
-  def prepended: (Module othermod) -> untyped
+  private def prepended: (Module othermod) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1272,12 +1297,12 @@ class Module < Object
   #
   # Note that to show a private method on RDoc, use `:doc:`.
   #
-  def private: () -> nil
-             | (Symbol method_name) -> Symbol
-             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-             | (string method_name) -> string
-             | (interned, interned, *interned method_name) -> Array[interned]
-             | (Array[interned]) -> Array[interned]
+  private def private: () -> nil
+                     | (Symbol method_name) -> Symbol
+                     | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                     | (string method_name) -> string
+                     | (interned, interned, *interned method_name) -> Array[interned]
+                     | (Array[interned]) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1413,12 +1438,12 @@ class Module < Object
   #
   # To show a private method on RDoc, use `:doc:` instead of this.
   #
-  def protected: () -> nil
-               | (Symbol method_name) -> Symbol
-               | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-               | (string method_name) -> string
-               | (interned, interned, *interned method_name) -> Array[interned]
-               | (Array[interned]) -> Array[interned]
+  private def protected: () -> nil
+                       | (Symbol method_name) -> Symbol
+                       | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                       | (string method_name) -> string
+                       | (interned, interned, *interned method_name) -> Array[interned]
+                       | (Array[interned]) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1473,12 +1498,12 @@ class Module < Object
   # returned. If no argument is passed, nil is returned. If multiple arguments are
   # passed, the arguments are returned as an array.
   #
-  def public: () -> nil
-            | (Symbol method_name) -> Symbol
-            | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-            | (string method_name) -> string
-            | (interned, interned, *interned method_name) -> Array[interned]
-            | (Array[interned]) -> Array[interned]
+  private def public: () -> nil
+                    | (Symbol method_name) -> Symbol
+                    | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
+                    | (string method_name) -> string
+                    | (interned, interned, *interned method_name) -> Array[interned]
+                    | (Array[interned]) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1557,7 +1582,7 @@ class Module < Object
   #
   # Returns a module, where refined methods are defined.
   #
-  def refine: (Module mod) { () [self: Refinement] -> void } -> Refinement
+  private def refine: (Module mod) { () [self: Refinement] -> void } -> Refinement
 
   # <!--
   #   rdoc-file=eval.c
@@ -1609,7 +1634,7 @@ class Module < Object
   # previous value.  If that constant referred to a module, this will not change
   # that module's name and can lead to confusion.
   #
-  def remove_const: (interned arg0) -> untyped
+  private def remove_const: (interned arg0) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1752,7 +1777,7 @@ class Module < Object
   # Import class refinements from *module* into the current class or module
   # definition.
   #
-  def using: (Module arg0) -> self
+  private def using: (Module arg0) -> self
 
   # <!-- rdoc-file=object.c -->
   # Returns a string representing this module or class. For basic classes and

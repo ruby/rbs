@@ -133,7 +133,7 @@ class Struct[Elem]
   # **Class Name**
   #
   # With string argument `class_name`, returns a new subclass of `Struct` named
-  # `Struct::*class_name`*:
+  # `Struct::<em>class_name</em>`:
   #
   #     Foo = Struct.new('Foo', :foo, :bar) # => Struct::Foo
   #     Foo.name                            # => "Struct::Foo"

@@ -847,7 +847,30 @@ class File < IO
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def initialize: (path | int file_name, ?string | int mode, ?int perm) -> void
+  def initialize: (
+    path | int file_name,
+    ?string | int mode,
+    ?int perm,
+    # open options
+    ?mode: Integer | String,
+    ?flags: Integer,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish,
+    ?autoclose: boolish,
+    ?path: path,
+    # encoding options
+    ?invalid: :replace | nil,
+    ?undef: :replace | nil,
+    ?replace: String | nil,
+    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+    ?xml: :text | :attr | nil,
+    ?cr_newline: bool,
+    ?crlf_newline: bool,
+    ?universal_newline: bool
+  ) -> void
 
   # <!--
   #   rdoc-file=file.c
@@ -1407,8 +1430,54 @@ class File < IO
   # With a block given, calls the block with the File object and returns the
   # block's value.
   #
-  def self.open: (path | int file_name, ?string | int mode, ?int perm) -> instance
-               | [T] (path | int file_name, ?string | int mode, ?int perm) { (File) -> T } -> T
+  def self.open: (
+    path | int file_name,
+    ?string | int mode,
+    ?int perm,
+    # open options
+    ?mode: Integer | String,
+    ?flags: Integer,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish,
+    ?autoclose: boolish,
+    ?path: path,
+    # encoding options
+    ?invalid: :replace | nil,
+    ?undef: :replace | nil,
+    ?replace: String | nil,
+    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+    ?xml: :text | :attr | nil,
+    ?cr_newline: bool,
+    ?crlf_newline: bool,
+    ?universal_newline: bool
+  ) -> instance
+               | [T] (
+      path | int file_name,
+      ?string | int mode,
+      ?int perm,
+      # open options
+      ?mode: Integer | String,
+      ?flags: Integer,
+      ?external_encoding: encoding,
+      ?internal_encoding: encoding,
+      ?encoding: encoding,
+      ?textmode: boolish,
+      ?binmode: boolish,
+      ?autoclose: boolish,
+      ?path: path,
+      # encoding options
+      ?invalid: :replace | nil,
+      ?undef: :replace | nil,
+      ?replace: String | nil,
+      ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+      ?xml: :text | :attr | nil,
+      ?cr_newline: bool,
+      ?crlf_newline: bool,
+      ?universal_newline: bool
+    ) { (File) -> T } -> T
 
   # <!--
   #   rdoc-file=file.c
@@ -2239,9 +2308,9 @@ File::Separator: String
 #
 # #### File::FNM_EXTGLOB
 #
-# Flag File::FNM_EXTGLOB enables pattern `'{*a*,*b*}'`, which matches pattern
+# Flag File::FNM_EXTGLOB enables pattern `'{_a_,_b_}'`, which matches pattern
 # '*a*' and pattern '*b*'; behaves like a [regexp union](rdoc-ref:Regexp.union)
-# (e.g., `'(?:*a*|*b*)'`):
+# (e.g., `'(?:_a_|_b_)'`):
 #
 #     pattern = '{LEGAL,BSDL}'
 #     Dir.glob(pattern)      # => ["LEGAL", "BSDL"]

@@ -414,26 +414,26 @@
 #
 # Lookahead anchors:
 #
-# *   `(?=*pat*)`: Positive lookahead assertion: ensures that the following
+# *   `(?=_pat_)`: Positive lookahead assertion: ensures that the following
 #     characters match *pat*, but doesn't include those characters in the
 #     matched substring.
 #
-# *   `(?!*pat*)`: Negative lookahead assertion: ensures that the following
+# *   `(?!_pat_)`: Negative lookahead assertion: ensures that the following
 #     characters *do not* match *pat*, but doesn't include those characters in
 #     the matched substring.
 #
 # Lookbehind anchors:
 #
-# *   `(?<=*pat*)`: Positive lookbehind assertion: ensures that the preceding
+# *   `(?<=_pat_)`: Positive lookbehind assertion: ensures that the preceding
 #     characters match *pat*, but doesn't include those characters in the
 #     matched substring.
 #
-# *   `(?<!*pat*)`: Negative lookbehind assertion: ensures that the preceding
+# *   `(?<!_pat_)`: Negative lookbehind assertion: ensures that the preceding
 #     characters do not match *pat*, but doesn't include those characters in the
 #     matched substring.
 #
 # The pattern below uses positive lookahead and positive lookbehind to match
-# text appearing in **...** tags without including the tags in the match:
+# text appearing in `<b>`...`</b>` tags without including the tags in the match:
 #
 #     /(?<=<b>)\w+(?=<\/b>)/.match("Fortune favors the <b>bold</b>.")
 #     # => #<MatchData "bold">
@@ -577,7 +577,7 @@
 #     re.match('1943-02-04').size # => 1
 #     re.match('foo')             # => nil
 #
-# Adding one or more pairs of parentheses, `(*subexpression*)`, defines
+# Adding one or more pairs of parentheses, `(_subexpression_)`, defines
 # *groups*, which may result in multiple matched substrings, called *captures*:
 #
 #     re = /(\d\d\d\d)-(\d\d)-(\d\d)/
@@ -649,8 +649,8 @@
 #
 # *   For a large number of groups:
 #
-#     *   The ordinary `\*n`* notation applies only for *n* in range (1..9).
-#     *   The `MatchData[*n*]` notation applies for any non-negative *n*.
+#     *   The ordinary `\_n_` notation applies only for *n* in range (1..9).
+#     *   The `MatchData[_n_]` notation applies for any non-negative *n*.
 #
 # *   `\0` is a special backreference, referring to the entire matched string;
 #     it may not be used within the regexp itself, but may be used outside it
@@ -662,7 +662,7 @@
 # #### Named Captures
 #
 # As seen above, a capture can be referred to by its number. A capture can also
-# have a name, prefixed as `?<*name*>` or `?'*name*'`, and the name (symbolized)
+# have a name, prefixed as `?<_name_>` or `?'_name_'`, and the name (symbolized)
 # may be used as an index in `MatchData[]`:
 #
 #     md = /\$(?<dollars>\d+)\.(?'cents'\d+)/.match("$3.67")
@@ -677,7 +677,7 @@
 #     /\$(?<dollars>\d+)\.(\d+)/.match("$3.67")
 #     # => #<MatchData "$3.67" dollars:"3">
 #
-# A named group may be backreferenced as `\k<*name*>`:
+# A named group may be backreferenced as `\k<_name_>`:
 #
 #     /(?<vowel>[aeiou]).\k<vowel>.\k<vowel>/.match('ototomy')
 #     # => #<MatchData "ototo" vowel:"o">
@@ -733,9 +733,9 @@
 #
 # #### Subexpression Calls
 #
-# As seen above, a backreference number (`\*n`*) or name (`\k<*name*>`) gives
+# As seen above, a backreference number (`\_n_`) or name (`\k<_name_>`) gives
 # access to a captured *substring*; the corresponding regexp *subexpression* may
-# also be accessed, via the number (`\\g*n`*) or name (`\g<*name*>`):
+# also be accessed, via the number (`\\g<i>n</i>`) or name (`\g<_name_>`):
 #
 #     /\A(?<paren>\(\g<paren>*\))*\z/.match('(())')
 #     # ^1
@@ -770,12 +770,12 @@
 #
 # #### Conditionals
 #
-# The conditional construct takes the form `(?(*cond*)*yes*|*no*)`, where:
+# The conditional construct takes the form `(?(_cond_)_yes_|_no_)`, where:
 #
 # *   *cond* may be a capture number or name.
 # *   The match to be applied is *yes* if *cond* is captured; otherwise the
 #     match to be applied is *no*.
-# *   If not needed, `|*no`* may be omitted.
+# *   If not needed, `|_no_` may be omitted.
 #
 # Examples:
 #
@@ -804,7 +804,7 @@
 #
 # #### Unicode Properties
 #
-# The `/\p{*property_name*}/` construct (with lowercase `p`) matches characters
+# The `/\p{_property_name_}/` construct (with lowercase `p`) matches characters
 # using a Unicode property name, much like a character class; property `Alpha`
 # specifies alphabetic characters:
 #
@@ -1038,21 +1038,21 @@
 #
 # Each of these modifiers sets a mode for the regexp:
 #
-# *   `i`: `/*pattern*/i` sets [Case-Insensitive
+# *   `i`: `/_pattern_/i` sets [Case-Insensitive
 #     Mode](rdoc-ref:Regexp@Case-Insensitive+Mode).
-# *   `m`: `/*pattern*/m` sets [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode).
-# *   `x`: `/*pattern*/x` sets [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
-# *   `o`: `/*pattern*/o` sets [Interpolation
+# *   `m`: `/_pattern_/m` sets [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode).
+# *   `x`: `/_pattern_/x` sets [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
+# *   `o`: `/_pattern_/o` sets [Interpolation
 #     Mode](rdoc-ref:Regexp@Interpolation+Mode).
 #
 # Any, all, or none of these may be applied.
 #
 # Modifiers `i`, `m`, and `x` may be applied to subexpressions:
 #
-# *   `(?*modifier*)` turns the mode "on" for ensuing subexpressions
-# *   `(?-*modifier*)` turns the mode "off" for ensuing subexpressions
-# *   `(?*modifier*:*subexp*)` turns the mode "on" for *subexp* within the group
-# *   `(?-*modifier*:*subexp*)` turns the mode "off" for *subexp* within the
+# *   `(?_modifier_)` turns the mode "on" for ensuing subexpressions
+# *   `(?-_modifier_)` turns the mode "off" for ensuing subexpressions
+# *   `(?_modifier_:_subexp_)` turns the mode "on" for *subexp* within the group
+# *   `(?-_modifier_:_subexp_)` turns the mode "off" for *subexp* within the
 #     group
 #
 # Example:
@@ -1168,22 +1168,22 @@
 # A regular expression containing non-US-ASCII characters is assumed to use the
 # source encoding. This can be overridden with one of the following modifiers.
 #
-# *   `/*pat*/n`: US-ASCII if only containing US-ASCII characters, otherwise
+# *   `/_pat_/n`: US-ASCII if only containing US-ASCII characters, otherwise
 #     ASCII-8BIT:
 #
 #         /foo/n.encoding     # => #<Encoding:US-ASCII>
 #         /foo\xff/n.encoding # => #<Encoding:ASCII-8BIT>
 #         /foo\x7f/n.encoding # => #<Encoding:US-ASCII>
 #
-# *   `/*pat*/u`: UTF-8
+# *   `/_pat_/u`: UTF-8
 #
 #         /foo/u.encoding # => #<Encoding:UTF-8>
 #
-# *   `/*pat*/e`: EUC-JP
+# *   `/_pat_/e`: EUC-JP
 #
 #         /foo/e.encoding # => #<Encoding:EUC-JP>
 #
-# *   `/*pat*/s`: Windows-31J
+# *   `/_pat_/s`: Windows-31J
 #
 #         /foo/s.encoding # => #<Encoding:Windows-31J>
 #
@@ -1926,7 +1926,7 @@ class Regexp
   #   rdoc-file=re.c
   #   - ~ rxp -> integer or nil
   # -->
-  # Equivalent to *`rxp* =~ $_`:
+  # Equivalent to `<i>rxp</i> =~ $_`:
   #
   #     $_ = "input data"
   #     ~ /at/ # => 7

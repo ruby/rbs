@@ -4,16 +4,13 @@ on:
   push:
     branches:
       - master
-    paths:
-      - "ext/**"
-      - "include/**"
-      - "src/**"
   pull_request:
     paths:
       - "ext/**"
       - "include/**"
       - "src/**"
   merge_group: {}
+  workflow_dispatch:
 
 jobs:
   valgrind:
