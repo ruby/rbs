@@ -6,7 +6,6 @@ require "set"
 require "json"
 require "pathname" unless defined?(Pathname)
 require "pp"
-require "ripper"
 require "logger"
 require "tsort"
 require "strscan"

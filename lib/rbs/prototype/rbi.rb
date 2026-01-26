@@ -16,23 +16,24 @@ module RBS
       end
 
       def parse(string)
-        comments = Ripper.lex(string).yield_self do |tokens|
-          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
-            if token[1] == :on_comment
-              line = token[0][0]
-              body = token[2][2..-1] or raise
+        comments = Prism.parse_comments(string).yield_self do |prism_comments|
+          prism_comments.each_with_object({}) do |comment, hash| #$ Hash[Integer, AST::Comment]
+            # Skip EmbDoc comments
+            next unless comment.is_a?(Prism::InlineComment)
 
-              body = "\n" if body.empty?
+            line = comment.location.start_line
+            body = "#{comment.location.slice}\n"
+            body = body[2..-1] or raise
+            body = "\n" if body.empty?
 
-              comment = AST::Comment.new(string: body, location: nil)
-              if (prev_comment = hash.delete(line - 1))
-                hash[line] = AST::Comment.new(
-                  string: prev_comment.string + comment.string,
-                  location: nil
-                )
-              else
-                hash[line] = comment
-              end
+            comment = AST::Comment.new(string: body, location: nil)
+            if (prev_comment = hash.delete(line - 1))
+              hash[line] = AST::Comment.new(
+                string: prev_comment.string + comment.string,
+                location: nil
+              )
+            else
+              hash[line] = comment
             end
           end
         end

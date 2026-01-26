@@ -74,29 +74,24 @@ module RBS
 
       def parse(string)
         # @type var comments: Hash[Integer, AST::Comment]
-        comments = Ripper.lex(string).yield_self do |tokens|
-          code_lines = {} #: Hash[Integer, bool]
-          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
-            case token[1]
-            when :on_sp, :on_ignored_nl
-              # skip
-            when :on_comment
-              line = token[0][0]
-              # skip like `module Foo # :nodoc:`
-              next if code_lines[line]
-              body = token[2][2..-1] or raise
+        comments = Prism.parse_comments(string).yield_self do |prism_comments|
+          prism_comments.each_with_object({}) do |comment, hash| #$ Hash[Integer, AST::Comment]
+            # Skip EmbDoc comments
+            next unless comment.is_a?(Prism::InlineComment)
+            # skip like `module Foo # :nodoc:`
+            next if comment.trailing?
 
-              body = "\n" if body.empty?
+            line = comment.location.start_line
+            body = "#{comment.location.slice}\n"
+            body = body[2..-1] or raise
+            body = "\n" if body.empty?
 
-              comment = AST::Comment.new(string: body, location: nil)
-              if prev_comment = hash.delete(line - 1)
-                hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
-                                              location: nil)
-              else
-                hash[line] = comment
-              end
+            comment = AST::Comment.new(string: body, location: nil)
+            if prev_comment = hash.delete(line - 1)
+              hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
+                                            location: nil)
             else
-              code_lines[token[0][0]] = true
+              hash[line] = comment
             end
           end
         end
