@@ -32,6 +32,8 @@ jobs:
             job: rubocop validate test_doc build test_generate_stdlib raap
           - ruby: "4.0"
             job: typecheck_test
+          - ruby: asan-release
+            job: test
     env:
       RANDOMIZE_STDLIB_TEST_ORDER: "true"
     steps:
@@ -66,6 +68,10 @@ jobs:
       - name: bin/setup
         run: |
           bin/setup
+      - name: Configure ASAN options
+        if: ${{ contains(matrix.ruby, 'asan') }}
+        run: |
+          echo "ASAN_OPTIONS=abort_on_error=1" >> $GITHUB_ENV
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
