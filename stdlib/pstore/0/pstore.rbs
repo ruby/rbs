@@ -299,7 +299,7 @@
 #       end
 #     end
 #
-class PStore[unchecked out K, unchecked out V]
+class PStore[unchecked out K = untyped, unchecked out V = untyped]
   # <!--
   #   rdoc-file=lib/pstore.rb
   #   - [](key)
