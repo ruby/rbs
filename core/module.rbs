@@ -1647,6 +1647,43 @@ class Module < Object
   def remove_method: (*interned arg0) -> self
 
   # <!--
+  #   rdoc-file=vm_method.c
+  #   - ruby2_keywords(method_name, ...)    -> nil
+  # -->
+  # For the given method names, marks the method as passing keywords through a
+  # normal argument splat.  This should only be called on methods that accept an
+  # argument splat (`*args`) but not explicit keywords or a keyword splat.  It
+  # marks the method such that if the method is called with keyword arguments, the
+  # final hash argument is marked with a special flag such that if it is the final
+  # element of a normal argument splat to another method call, and that method
+  # call does not include explicit keywords or a keyword splat, the final element
+  # is interpreted as keywords. In other words, keywords will be passed through
+  # the method to other methods.
+  #
+  # This should only be used for methods that delegate keywords to another method,
+  # and only for backwards compatibility with Ruby versions before 3.0. See
+  # https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyw
+  # ord-arguments-in-ruby-3-0/ for details on why `ruby2_keywords` exists and when
+  # and how to use it.
+  #
+  # This method will probably be removed at some point, as it exists only for
+  # backwards compatibility. As it does not exist in Ruby versions before 2.7,
+  # check that the module responds to this method before calling it:
+  #
+  #     module Mod
+  #       def foo(meth, *args, &block)
+  #         send(:"do_#{meth}", *args, &block)
+  #       end
+  #       ruby2_keywords(:foo) if respond_to?(:ruby2_keywords, true)
+  #     end
+  #
+  # However, be aware that if the `ruby2_keywords` method is removed, the behavior
+  # of the `foo` method using the above approach will change so that the method
+  # does not pass through keywords.
+  #
+  private def ruby2_keywords: (*interned method_name) -> nil
+
+  # <!--
   #   rdoc-file=object.c
   #   - mod.set_temporary_name(string) -> self
   #   - mod.set_temporary_name(nil) -> self
