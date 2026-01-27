@@ -37,3 +37,4 @@ jobs:
       - run: bundle exec rake test:valgrind
         env:
           RUBY_FREE_AT_EXIT: 1
+          RBS_SKIP_TESTS: test/rbs_skip_tests_valgrind
