@@ -39,6 +39,16 @@ class RBS::LocationTest < Test::Unit::TestCase
     end
   end
 
+  def test_location_add_required_child_with_invalid_argument
+    loc = Location.new(buffer, 0, 8)
+    assert_raise(TypeError) { loc.add_required_child("string", 0...6) }
+  end
+
+  def test_location_add_optional_child_with_invalid_argument
+    loc = Location.new(buffer, 0, 8)
+    assert_raise(TypeError) { loc.add_optional_child("string", 0...6) }
+  end
+
   def test_location_initialize_copy
     loc = Location.new(buffer, 0, 8)
     loc.add_optional_child(:num, 0...2)
