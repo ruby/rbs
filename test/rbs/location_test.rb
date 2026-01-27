@@ -60,6 +60,11 @@ class RBS::LocationTest < Test::Unit::TestCase
     assert_equal "abc", loc[:alpha].source
   end
 
+  def test_location_aref_invalid_argument
+    loc = Location.new(buffer, 0, 8)
+    assert_raise(TypeError) { loc["string"] }
+  end
+
   def test_location_start_pos
     loc = Location.new(buffer, 0, 8)
     assert_equal 0, loc.start_pos
