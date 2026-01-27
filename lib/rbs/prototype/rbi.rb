@@ -16,27 +16,7 @@ module RBS
       end
 
       def parse(string)
-        comments = Prism.parse_comments(string).yield_self do |prism_comments|
-          prism_comments.each_with_object({}) do |comment, hash| #$ Hash[Integer, AST::Comment]
-            # Skip EmbDoc comments
-            next unless comment.is_a?(Prism::InlineComment)
-
-            line = comment.location.start_line
-            body = "#{comment.location.slice}\n"
-            body = body[2..-1] or raise
-            body = "\n" if body.empty?
-
-            comment = AST::Comment.new(string: body, location: nil)
-            if (prev_comment = hash.delete(line - 1))
-              hash[line] = AST::Comment.new(
-                string: prev_comment.string + comment.string,
-                location: nil
-              )
-            else
-              hash[line] = comment
-            end
-          end
-        end
+        comments = parse_comments(string, include_trailing: true)
         process RubyVM::AbstractSyntaxTree.parse(string), comments: comments
       end
 
