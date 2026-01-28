@@ -128,27 +128,29 @@ module RBS
 
       def to_a
         ary = []
-        head = self.safe_get(:head)
-        while head
-          ary << head.safe_get(:node)
-          nxt = head[:next]
-          break if nxt.address == 0
-          head = NodeListNode.new(nxt)
+        each do |node|
+          ary << node
         end
         ary
       end
 
       def inspect
         str = +"#<NodeList ["
-        head = self.safe_get(:head)
-        while head
+        each do |node|
           str << head.inspect
-          nxt = head[:next]
-          break if nxt.address == 0
-          head = NodeListNode.new(nxt)
         end
         str << "]>"
         str
+      end
+
+      def each
+        node = self.safe_get(:head)
+        while node
+          yield node
+          nxt = node[:next]
+          break if nxt.address == 0
+          node = NodeListNode.new(nxt)
+        end
       end
     end
 
