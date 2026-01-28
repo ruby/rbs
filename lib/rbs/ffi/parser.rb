@@ -85,7 +85,7 @@ module RBS
         :symbol,
     )
 
-    class FFI::Struct
+    module StructUtils
       def safe_get(name)
         value = self[name]
         if value.respond_to?(:null?) && value.null?
@@ -93,9 +93,20 @@ module RBS
         end
         value
       end
+
+      def inspect
+        str = "#<#{self.class}"
+        members.each do
+          str << " #{it}=#{safe_get(it).inspect}"
+        end
+        str << ">"
+        str
+      end
     end
 
     class StringPointer < FFI::Struct
+      include StructUtils
+
       layout :start, :pointer, :end, :pointer
 
       def self.new(str)
@@ -107,23 +118,87 @@ module RBS
       end
     end
 
-    class Node < FFI::Struct
-      layout :type, :uint8, :location, :pointer
+    typedef :uint32, :constant_id
 
-      def inspect
-        "#<Node type=#{self.safe_get(:type).inspect} location:#{self.safe_get(:location).inspect}"
-      end
+    class Position < FFI::Struct
+      include StructUtils
+
+      layout :byte_pos, :int32,
+             :char_pos, :int32,
+             :line, :int32,
+             :column, :int32
+    end
+
+    class Range < FFI::Struct
+      include StructUtils
+
+      layout :start, Position,
+             :end, Position
+    end
+
+    class LocRange < FFI::Struct
+      include StructUtils
+
+      layout :start, :int32,
+             :end, :int32
+    end
+
+    class LocEntry < FFI::Struct
+      include StructUtils
+
+      layout :name, :constant_id,
+             :range, LocRange
+    end
+
+    typedef :uint32, :loc_entry_bitmap
+
+    class LocChildren < FFI::Struct
+      include StructUtils
+
+      layout :len, :uint16,
+             :cap, :uint16,
+             :required_p, :loc_entry_bitmap,
+             :entries, [LocEntry, 1]
+    end
+
+    class Location < FFI::Struct
+      include StructUtils
+
+      layout :rg, Range,
+             :children, LocChildren.ptr
+    end
+
+    class LocationListNode < FFI::Struct
+      include StructUtils
+
+      layout :loc, Location.ptr,
+             :next, :pointer # LocationListNode
+    end
+
+    class LocationList < FFI::Struct
+      include StructUtils
+
+      layout :allocator, :pointer,
+             :head, LocationListNode.ptr,
+             :tail, :pointer, # LocationListNode
+             :length, :size_t
+    end
+
+    class Node < FFI::Struct
+      include StructUtils
+
+      layout :type, :uint8, :location, Location.ptr
     end
 
     class NodeListNode < FFI::Struct
-      layout :node, Node.ptr, :next, :pointer
+      include StructUtils
 
-      def inspect
-        "#<NodeListNode node=#{self.safe_get(:node).inspect} next=#{self.safe_get(:next).inspect}"
-      end
+      layout :node, Node.ptr, :next, :pointer
     end
 
     class NodeList < FFI::Struct
+      include StructUtils
+
       layout :allocator, :pointer, :head, NodeListNode.ptr, :tail, NodeListNode.ptr, :length, :size_t
 
       def to_a
@@ -132,15 +207,6 @@ module RBS
           ary << node
         end
         ary
-      end
-
-      def inspect
-        str = +"#<NodeList ["
-        each do |node|
-          str << head.inspect
-        end
-        str << "]>"
-        str
       end
 
       def each
@@ -155,12 +221,16 @@ module RBS
     end
 
     class HashNode < FFI::Struct
+      include StructUtils
+
       layout :key, Node.ptr,
              :value, Node.ptr,
              :next, :pointer # HashNode
     end
 
     class Hash < FFI::Struct
+      include StructUtils
+
       layout :allocator, :pointer,
              :head, HashNode,
              :tail, :pointer,
@@ -168,43 +238,52 @@ module RBS
     end
 
     class Namespace < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :path, NodeList.ptr,
              :absolute, :bool
     end
 
-    class ConstantID < FFI::Struct
-      layout :start, :pointer,
-             :length, :size_t
-    end
-
     class ASTSymbol < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
-             :constant_id, ConstantID.ptr
+             :constant_id, :constant_id
     end
 
     class TypeName < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :rbs_namespace, Namespace.ptr,
              :name, ASTSymbol.ptr
     end
 
     class ASTAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :string, StringPointer
     end
 
     class ASTBool < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :value, :bool
     end
 
     class ASTComment < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :string, StringPointer
     end
 
     class ASTDeclarationsClassSuper < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :new_name, TypeName.ptr,
              :old_name, TypeName.ptr,
@@ -213,6 +292,8 @@ module RBS
     end
 
     class ASTDeclarationsClass < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :type_params, NodeList.ptr,
@@ -222,6 +303,8 @@ module RBS
     end
 
     class ASTDeclarationsGlobal < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -230,6 +313,8 @@ module RBS
     end
 
     class ASTDeclarationsInterface < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :type_params, NodeList.ptr,
@@ -239,6 +324,8 @@ module RBS
     end
 
     class ASTDeclarationsModule < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :args, NodeList.ptr,
@@ -249,12 +336,16 @@ module RBS
     end
 
     class ASTDeclarationsModuleSelf < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :args, NodeList.ptr
     end
 
     class ASTDeclarationsModuleAlias < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :new_name, TypeName.ptr,
              :old_name, TypeName.ptr,
@@ -263,6 +354,8 @@ module RBS
     end
 
     class ASTDeclarationsTypeAlias < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :type_params, NodeList.ptr,
@@ -272,32 +365,44 @@ module RBS
     end
 
     class ASTDeclarationsUse < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :clauses, NodeList.ptr
     end
 
     class ASTDeclarationsUseSingleClause < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type_name, TypeName.ptr,
              :new_name, ASTSymbol.ptr
     end
 
     class ASTDirectivesUseWildcardClause < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :namespace, Namespace.ptr
     end
 
     class ASTInteger < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :string_representation, StringPointer.ptr
     end
 
     class Keyword < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
-             :constant_id, ConstantID.ptr
+             :constant_id, :constant_id
     end
 
     class ASTMembersAlias < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :new_name, ASTSymbol.ptr,
              :old_name, ASTSymbol.ptr,
@@ -307,6 +412,8 @@ module RBS
     end
 
     class ASTMembersAttrAccessor < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -318,6 +425,8 @@ module RBS
     end
 
     class ASTMembersAttReader < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -329,6 +438,8 @@ module RBS
     end
 
     class ASTMembersAttWriter < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -340,6 +451,8 @@ module RBS
     end
 
     class ASTMembersClassInstanceVariable < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -347,6 +460,8 @@ module RBS
     end
 
     class ASTMembersExtend < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :args, NodeList.ptr,
@@ -355,6 +470,8 @@ module RBS
     end
 
     class ASTMembersInclude < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :args, NodeList.ptr,
@@ -363,6 +480,8 @@ module RBS
     end
 
     class ASTMembersInstanceVariable < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :type, Node.ptr,
@@ -370,6 +489,8 @@ module RBS
     end
 
     class ASTMembersMethodDefinition < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :kind, Keyword.ptr,
@@ -381,12 +502,16 @@ module RBS
     end
 
     class ASTMembersMethodDefinitionOverload < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :annotations, NodeList.ptr,
              :method_type, Node.ptr
     end
 
     class ASTMembersPrepend < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :node_list, NodeList.ptr,
@@ -395,67 +520,27 @@ module RBS
     end
 
     class ASTMembersPrivate < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class ASTMembersPublic < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
-    class Position < FFI::Struct
-      layout :byte_pos, :int32,
-             :char_pos, :int32,
-             :line, :int32,
-             :column, :int32
-    end
-
-    class Range < FFI::Struct
-      layout :start, Position,
-             :end, Position
-    end
-
     class Token < FFI::Struct
+      include StructUtils
+
       layout :type, :uint8, # RBSTokenType enum
              :range, Range
     end
 
-    class LocRange < FFI::Struct
-      layout :start, :int32,
-             :end, :int32
-    end
-
-    class LocEntry < FFI::Struct
-      layout :name, ConstantID,
-             :range, LocRange
-    end
-
-    typedef :uint32, :loc_entry_bitmap
-
-    class LocChildren < FFI::Struct
-      layout :len, :uint16,
-             :cap, :uint16,
-             :required_p, :loc_entry_bitmap,
-             :entries, LocEntry.ptr
-    end
-
-    class Location < FFI::Struct
-      layout :rg, Range,
-             :children, LocChildren.ptr
-    end
-
-    class LocationListNode < FFI::Struct
-      layout :loc, Location.ptr,
-             :next, :pointer # LocationListNode
-    end
-
-    class LocationList < FFI::Struct
-      layout :allocator, :pointer,
-             :head, LocationListNode.ptr,
-             :tail, :pointer, # LocationListNode
-             :length, :size_t
-    end
-
     class ASTRubyAnnotationsClassAliasAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :keyword_location, Location.ptr,
@@ -464,6 +549,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsColonMethodTypeAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :annotations, NodeList.ptr,
@@ -471,6 +558,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsInstanceVariableAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :ivar_name, ASTSymbol.ptr,
@@ -481,6 +570,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsMethodTypesAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :overloads, NodeList.ptr,
@@ -488,6 +579,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsModuleAliasAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :keyword_location, Location.ptr,
@@ -496,12 +589,16 @@ module RBS
     end
 
     class ASTRubyAnnotationsNodeTypeAssertion < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :type, Node.ptr
     end
 
     class ASTRubyAnnotationsReturnTypeAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :return_location, Location.ptr,
@@ -511,6 +608,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsSkipAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :skip_location, Location.ptr,
@@ -518,6 +617,8 @@ module RBS
     end
 
     class ASTRubyAnnotationsTypeApplicationAnnotation < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :prefix_location, Location.ptr,
              :type_args, NodeList.ptr,
@@ -526,11 +627,15 @@ module RBS
     end
 
     class ASTString < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :string, StringPointer.ptr
     end
 
     class ASTTypeParam < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr,
              :variance, Keyword.ptr,
@@ -541,6 +646,8 @@ module RBS
     end
 
     class TypesBlock < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr,
              :required, :bool,
@@ -548,6 +655,8 @@ module RBS
     end
 
     class MethodType < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type_params, NodeList.ptr,
              :type, Node.ptr,
@@ -555,6 +664,8 @@ module RBS
     end
 
     class Signature < FFI::Struct
+      include StructUtils
+
       layout :base, Node, :directives, NodeList.ptr, :declarations, NodeList.ptr
 
       def inspect
@@ -575,60 +686,86 @@ module RBS
     end
 
     class TypesAlias < FFI::Struct
+      include StructUtils
+      
       layout :base, Node,
              :type_name, TypeName.ptr,
              :args, NodeList.ptr
     end
 
     class TypesBasesAny < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :todo, :bool
     end
 
     class TypesBasesBool < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesBottom < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesClasses < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesInstance < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesNil < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesSelf < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesTop < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesBasesVoid < FFI::Struct
+      include StructUtils
+
       layout :base, Node
     end
 
     class TypesClassInstance < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr,
              :args, NodeList.ptr
     end
 
     class TypesClassSingleton < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, TypeName.ptr
     end
 
     class TypesFunction < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :required_positionals, NodeList.ptr,
              :optional_positionals, NodeList.ptr,
@@ -641,33 +778,45 @@ module RBS
     end
 
     class TypesFunctionParam < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr,
              :name, ASTSymbol.ptr
     end
 
     class TypesInterface < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr,
              :args, NodeList.ptr
     end
 
     class TypesIntersection < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :types, NodeList.ptr
     end
 
     class TypesLiteral < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :literal, Node.ptr
     end
 
     class TypesOptional < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr
     end
 
     class TypesProc < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr,
              :block, TypesBlock.ptr,
@@ -675,37 +824,51 @@ module RBS
     end
 
     class TypesRecord < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :all_fields, Hash.ptr
     end
 
     class TypesRecordFieldType < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :type, Node.ptr,
              :required, :bool
     end
 
     class TypesTuple < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :types, NodeList.ptr
     end
 
     class TypesUnion < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :types, NodeList.ptr
     end
 
     class TypesUntypedFunction < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :return_type, Node.ptr
     end
 
     class TypesVariable < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :name, ASTSymbol.ptr
     end
 
     class ASTRubyAnnotations < FFI::Struct
+      include StructUtils
+
       layout :base, Node,
              :colon_method_type_annotation, ASTRubyAnnotationsColonMethodTypeAnnotation.ptr,
              :method_types_annotation, ASTRubyAnnotationsMethodTypesAnnotation.ptr,
@@ -761,7 +924,7 @@ module RBS
 
       raise RuntimeError.new("failed to parse signature") unless result
 
-      [signature.directives.to_a, signature.declarations.to_a]
+      [signature.directives, signature.declarations]
     end
 
     def _parse_type_params(buffer, start_pos, end_pos, module_type_params)
