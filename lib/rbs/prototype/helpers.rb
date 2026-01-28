@@ -5,6 +5,63 @@ module RBS
     module Helpers
       private
 
+      # Prism can't parse Ruby 3.2 code
+      if RUBY_VERSION >= "3.3"
+        def parse_comments(string, include_trailing:)
+          Prism.parse_comments(string, version: "current").yield_self do |prism_comments| # steep:ignore UnexpectedKeywordArgument
+            prism_comments.each_with_object({}) do |comment, hash| #$ Hash[Integer, AST::Comment]
+              # Skip EmbDoc comments
+              next unless comment.is_a?(Prism::InlineComment)
+              # skip like `module Foo # :nodoc:`
+              next if comment.trailing? && !include_trailing
+
+              line = comment.location.start_line
+              body = "#{comment.location.slice}\n"
+              body = body[2..-1] or raise
+              body = "\n" if body.empty?
+
+              comment = AST::Comment.new(string: body, location: nil)
+              if prev_comment = hash.delete(line - 1)
+                hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
+                                              location: nil)
+              else
+                hash[line] = comment
+              end
+            end
+          end
+        end
+      else
+        require "ripper"
+        def parse_comments(string, include_trailing:)
+          Ripper.lex(string).yield_self do |tokens|
+            code_lines = {} #: Hash[Integer, bool]
+            tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
+              case token[1]
+              when :on_sp, :on_ignored_nl
+                # skip
+              when :on_comment
+                line = token[0][0]
+                # skip like `module Foo # :nodoc:`
+                next if code_lines[line] && !include_trailing
+                body = token[2][2..-1] or raise
+
+                body = "\n" if body.empty?
+
+                comment = AST::Comment.new(string: body, location: nil)
+                if prev_comment = hash.delete(line - 1)
+                  hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
+                                                location: nil)
+                else
+                  hash[line] = comment
+                end
+              else
+                code_lines[token[0][0]] = true
+              end
+            end
+          end
+        end
+      end
+
       def block_from_body(node)
         _, args_node, body_node = node.children
         _pre_num, _pre_init, _opt, _first_post, _post_num, _post_init, _rest, _kw, _kwrest, block_var = args_from_node(args_node)
