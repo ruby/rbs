@@ -832,7 +832,7 @@ static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool 
     CHECK_PARSE(parse_function(parser, true, &result, self_allowed, classish_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
-    rbs_location_range range = { .start = start.char_pos, .end = end.char_pos };
+    rbs_location_range range = { .start_char = start.char_pos, .start_byte = start.byte_pos, .end_char = end.char_pos, .end_byte = end.byte_pos };
     *proc = rbs_types_proc_new(ALLOCATOR(), range, result->function, result->block, result->function_self_type);
     return true;
 }
@@ -1271,7 +1271,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
         CHECK_PARSE(parse_record_attributes(parser, &fields, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRBRACE);
         rbs_position_t end = parser->current_token.range.end;
-        rbs_location_range loc = { .start = start.char_pos, .end = end.char_pos };
+        rbs_location_range loc = { .start_char = start.char_pos, .start_byte = start.byte_pos, .end_char = end.char_pos, .end_byte = end.byte_pos };
         *type = (rbs_node_t *) rbs_types_record_new(ALLOCATOR(), loc, fields);
         return true;
     }
@@ -2371,7 +2371,8 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_location_range ivar_name_range = RBS_LOCATION_NULL_RANGE;
     if (parser->next_token.type == pLPAREN) {
         ADVANCE_ASSERT(parser, pLPAREN);
-        ivar_range.start = parser->current_token.range.start.char_pos;
+        ivar_range.start_char = parser->current_token.range.start.char_pos;
+        ivar_range.start_byte = parser->current_token.range.start.byte_pos;
 
         ivar_name.tag = RBS_ATTR_IVAR_NAME_TAG_EMPTY;
 
@@ -2382,7 +2383,8 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
         }
 
         ADVANCE_ASSERT(parser, pRPAREN);
-        ivar_range.end = parser->current_token.range.end.char_pos;
+        ivar_range.end_char = parser->current_token.range.end.char_pos;
+        ivar_range.end_byte = parser->current_token.range.end.byte_pos;
     }
 
     ADVANCE_ASSERT(parser, pCOLON);
@@ -3171,7 +3173,12 @@ static rbs_ast_comment_t *parse_comment_lines(rbs_parser_t *parser, rbs_comment_
 
     return rbs_ast_comment_new(
         ALLOCATOR(),
-        (rbs_location_range) { .start = com->start.char_pos, .end = com->end.char_pos },
+        (rbs_location_range) {
+            .start_char = com->start.char_pos,
+            .start_byte = com->start.byte_pos,
+            .end_char = com->end.char_pos,
+            .end_byte = com->end.byte_pos,
+        },
         rbs_buffer_to_string(&rbs_buffer)
     );
 }
