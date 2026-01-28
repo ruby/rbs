@@ -3,17 +3,20 @@
 
 #include "rbs/util/rbs_allocator.h"
 
-#define RBS_LOCATION_NULL_RANGE ((rbs_location_range) { -1, -1 })
-#define RBS_LOCATION_NULL_RANGE_P(rg) ((rg).start == -1)
+#define RBS_LOCATION_NULL_RANGE ((rbs_location_range) { -1, -1, -1, -1 })
+#define RBS_LOCATION_NULL_RANGE_P(rg) ((rg).start_char == -1)
 
 /**
- * Converts a lexer range (rbs_range_t) to an AST location range (rbs_location_range) by extracting character positions.
+ * Converts a lexer range (rbs_range_t) to an AST location range (rbs_location_range) by extracting character and byte positions.
  */
-#define RBS_RANGE_LEX2AST(rg) ((rbs_location_range) { (rg).start.char_pos, (rg).end.char_pos })
+#define RBS_RANGE_LEX2AST(rg) ((rbs_location_range) { .start_char = (rg).start.char_pos, .start_byte = (rg).start.byte_pos, .end_char = (rg).end.char_pos, .end_byte = (rg).end.byte_pos })
 
 typedef struct {
-    int start;
-    int end;
+    int start_char;
+    int start_byte;
+
+    int end_char;
+    int end_byte;
 } rbs_location_range;
 
 typedef struct rbs_location_range_list_node {
