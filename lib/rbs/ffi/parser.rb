@@ -178,7 +178,11 @@ module RBS
     attach_function :rbs_parser_free, [:pointer], :void
     attach_function :rbs_parse_type, [:pointer, :pointer, :bool, :bool, :bool], :bool
     attach_function :rbs_parse_signature, [:pointer, :pointer], :bool
+    attach_function :rbs_constant_pool_init, [:pointer, :uint32], :bool
+    attach_variable :RBS_GLOBAL_CONSTANT_POOL, :pointer
   end
+
+  Native.rbs_constant_pool_init(Native.RBS_GLOBAL_CONSTANT_POOL, 7)
 
   class Parser
 
