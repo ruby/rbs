@@ -154,6 +154,406 @@ module RBS
       end
     end
 
+    class HashNode < FFI::Struct
+      layout :key, Node.ptr,
+             :value, Node.ptr,
+             :next, :pointer # HashNode
+    end
+
+    class Hash < FFI::Struct
+      layout :allocator, :pointer,
+             :head, HashNode,
+             :tail, :pointer,
+             :length, :size_t
+    end
+
+    class Namespace < FFI::Struct
+      layout :base, Node,
+             :path, NodeList.ptr,
+             :absolute, :bool
+    end
+
+    class ConstantID < FFI::Struct
+      layout :start, :pointer,
+             :length, :size_t
+    end
+
+    class ASTSymbol < FFI::Struct
+      layout :base, Node,
+             :constant_id, ConstantID.ptr
+    end
+
+    class TypeName < FFI::Struct
+      layout :base, Node,
+             :rbs_namespace, Namespace.ptr,
+             :name, ASTSymbol.ptr
+    end
+
+    class ASTAnnotation < FFI::Struct
+      layout :base, Node,
+             :string, StringPointer
+    end
+
+    class ASTBool < FFI::Struct
+      layout :base, Node,
+             :value, :bool
+    end
+
+    class ASTComment < FFI::Struct
+      layout :base, Node,
+             :string, StringPointer
+    end
+
+    class ASTDeclarationsClassSuper < FFI::Struct
+      layout :base, Node,
+             :new_name, TypeName.ptr,
+             :old_name, TypeName.ptr,
+             :comment, ASTComment.ptr,
+             :anotations, NodeList.ptr
+    end
+
+    class ASTDeclarationsClass < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :type_params, NodeList.ptr,
+             :super_class, ASTDeclarationsClassSuper.ptr,
+             :members, NodeList.ptr, :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTDeclarationsGlobal < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :comment, ASTComment.ptr,
+             :annotations, NodeList.ptr
+    end
+
+    class ASTDeclarationsInterface < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :type_params, NodeList.ptr,
+             :members, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTDeclarationsModule < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :args, NodeList.ptr,
+             :self_types, NodeList.ptr,
+             :members, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTDeclarationsModuleSelf < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :args, NodeList.ptr
+    end
+
+    class ASTDeclarationsModuleAlias < FFI::Struct
+      layout :base, Node,
+             :new_name, TypeName.ptr,
+             :old_name, TypeName.ptr,
+             :comment, ASTComment.ptr,
+             :annotations, NodeList.ptr
+    end
+
+    class ASTDeclarationsTypeAlias < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :type_params, NodeList.ptr,
+             :type, Node.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTDeclarationsUse < FFI::Struct
+      layout :base, Node,
+             :clauses, NodeList.ptr
+    end
+
+    class ASTDeclarationsUseSingleClause < FFI::Struct
+      layout :base, Node,
+             :type_name, TypeName.ptr,
+             :new_name, ASTSymbol.ptr
+    end
+
+    class ASTDirectivesUseWildcardClause < FFI::Struct
+      layout :base, Node,
+             :namespace, Namespace.ptr
+    end
+
+    class ASTInteger < FFI::Struct
+      layout :base, Node,
+             :string_representation, StringPointer.ptr
+    end
+
+    class Keyword < FFI::Struct
+      layout :base, Node,
+             :constant_id, ConstantID.ptr
+    end
+
+    class ASTMembersAlias < FFI::Struct
+      layout :base, Node,
+             :new_name, ASTSymbol.ptr,
+             :old_name, ASTSymbol.ptr,
+             :kind, Keyword.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersAttrAccessor < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :ivar_name, Node.ptr,
+             :kind, Keyword.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr,
+             :visibility, Keyword.ptr
+    end
+
+    class ASTMembersAttReader < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :ivar_name, Node.ptr,
+             :kind, Keyword.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr,
+             :visibility, Keyword.ptr
+    end
+
+    class ASTMembersAttWriter < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :ivar_name, Node.ptr,
+             :kind, Keyword.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr,
+             :visibility, Keyword.ptr
+    end
+
+    class ASTMembersClassInstanceVariable < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersExtend < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :args, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersInclude < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :args, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersInstanceVariable < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :type, Node.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersMethodDefinition < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :kind, Keyword.ptr,
+             :overloads, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr,
+             :overloading, :bool,
+             :visibility, Keyword.ptr
+    end
+
+    class ASTMembersMethodDefinitionOverload < FFI::Struct
+      layout :base, Node,
+             :annotations, NodeList.ptr,
+             :method_type, Node.ptr
+    end
+
+    class ASTMembersPrepend < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :node_list, NodeList.ptr,
+             :annotations, NodeList.ptr,
+             :comment, ASTComment.ptr
+    end
+
+    class ASTMembersPrivate < FFI::Struct
+      layout :base, Node
+    end
+
+    class ASTMembersPublic < FFI::Struct
+      layout :base, Node
+    end
+
+    class Position < FFI::Struct
+      layout :byte_pos, :int32,
+             :char_pos, :int32,
+             :line, :int32,
+             :column, :int32
+    end
+
+    class Range < FFI::Struct
+      layout :start, Position,
+             :end, Position
+    end
+
+    class Token < FFI::Struct
+      layout :type, :uint8, # RBSTokenType enum
+             :range, Range
+    end
+
+    class LocRange < FFI::Struct
+      layout :start, :int32,
+             :end, :int32
+    end
+
+    class LocEntry < FFI::Struct
+      layout :name, ConstantID,
+             :range, LocRange
+    end
+
+    typedef :uint32, :loc_entry_bitmap
+
+    class LocChildren < FFI::Struct
+      layout :len, :uint16,
+             :cap, :uint16,
+             :required_p, :loc_entry_bitmap,
+             :entries, LocEntry.ptr
+    end
+
+    class Location < FFI::Struct
+      layout :rg, Range,
+             :children, LocChildren.ptr
+    end
+
+    class LocationListNode < FFI::Struct
+      layout :loc, Location.ptr,
+             :next, :pointer # LocationListNode
+    end
+
+    class LocationList < FFI::Struct
+      layout :allocator, :pointer,
+             :head, LocationListNode.ptr,
+             :tail, :pointer, # LocationListNode
+             :length, :size_t
+    end
+
+    class ASTRubyAnnotationsClassAliasAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :keyword_location, Location.ptr,
+             :type_name, TypeName.ptr,
+             :location, Location.ptr
+    end
+
+    class ASTRubyAnnotationsColonMethodTypeAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :annotations, NodeList.ptr,
+             :method_type, Node.ptr
+    end
+
+    class ASTRubyAnnotationsInstanceVariableAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :ivar_name, ASTSymbol.ptr,
+             :ivar_name_location, Location.ptr,
+             :colon_location, Location.ptr,
+             :type, Node.ptr,
+             :comment_location, Location.ptr
+    end
+
+    class ASTRubyAnnotationsMethodTypesAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :overloads, NodeList.ptr,
+             :vertical_bar_locations, LocationList.ptr
+    end
+
+    class ASTRubyAnnotationsModuleAliasAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :keyword_location, Location.ptr,
+             :type_name, TypeName.ptr,
+             :type_name_location, Location.ptr
+    end
+
+    class ASTRubyAnnotationsNodeTypeAssertion < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :type, Node.ptr
+    end
+
+    class ASTRubyAnnotationsReturnTypeAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :return_location, Location.ptr,
+             :colon_location, Location.ptr,
+             :return_type, TypeName.ptr,
+             :comment_location, Location.ptr
+    end
+
+    class ASTRubyAnnotationsSkipAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :skip_location, Location.ptr,
+             :comment_location, Location.ptr
+    end
+
+    class ASTRubyAnnotationsTypeApplicationAnnotation < FFI::Struct
+      layout :base, Node,
+             :prefix_location, Location.ptr,
+             :type_args, NodeList.ptr,
+             :close_bracket_location, Location.ptr,
+             :comma_locations, Location.ptr
+    end
+
+    class ASTString < FFI::Struct
+      layout :base, Node,
+             :string, StringPointer.ptr
+    end
+
+    class ASTTypeParam < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr,
+             :variance, Keyword.ptr,
+             :upper_bound, Node.ptr,
+             :lower_bound, Node.ptr,
+             :default_type, Node.ptr,
+             :unchecked, :bool
+    end
+
+    class TypesBlock < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr,
+             :required, :bool,
+             :self_type, Node.ptr
+    end
+
+    class MethodType < FFI::Struct
+      layout :base, Node,
+             :type_params, NodeList.ptr,
+             :type, Node.ptr,
+             :block, TypesBlock.ptr
+    end
+
     class Signature < FFI::Struct
       layout :base, Node, :directives, NodeList.ptr, :declarations, NodeList.ptr
 
@@ -172,6 +572,146 @@ module RBS
       def declarations
         self.safe_get(:declarations)
       end
+    end
+
+    class TypesAlias < FFI::Struct
+      layout :base, Node,
+             :type_name, TypeName.ptr,
+             :args, NodeList.ptr
+    end
+
+    class TypesBasesAny < FFI::Struct
+      layout :base, Node,
+             :todo, :bool
+    end
+
+    class TypesBasesBool < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesBottom < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesClasses < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesInstance < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesNil < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesSelf < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesTop < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesBasesVoid < FFI::Struct
+      layout :base, Node
+    end
+
+    class TypesClassInstance < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr,
+             :args, NodeList.ptr
+    end
+
+    class TypesClassSingleton < FFI::Struct
+      layout :base, Node,
+             :name, TypeName.ptr
+    end
+
+    class TypesFunction < FFI::Struct
+      layout :base, Node,
+             :required_positionals, NodeList.ptr,
+             :optional_positionals, NodeList.ptr,
+             :rest_positionals, Node.ptr,
+             :trailing_positionals, NodeList.ptr,
+             :required_keywords, Hash.ptr,
+             :optional_keywords, Hash.ptr,
+             :rest_keywords, Node.ptr,
+             :return_type, Node.ptr
+    end
+
+    class TypesFunctionParam < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr,
+             :name, ASTSymbol.ptr
+    end
+
+    class TypesInterface < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr,
+             :args, NodeList.ptr
+    end
+
+    class TypesIntersection < FFI::Struct
+      layout :base, Node,
+             :types, NodeList.ptr
+    end
+
+    class TypesLiteral < FFI::Struct
+      layout :base, Node,
+             :literal, Node.ptr
+    end
+
+    class TypesOptional < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr
+    end
+
+    class TypesProc < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr,
+             :block, TypesBlock.ptr,
+             :self_type, Node.ptr
+    end
+
+    class TypesRecord < FFI::Struct
+      layout :base, Node,
+             :all_fields, Hash.ptr
+    end
+
+    class TypesRecordFieldType < FFI::Struct
+      layout :base, Node,
+             :type, Node.ptr,
+             :required, :bool
+    end
+
+    class TypesTuple < FFI::Struct
+      layout :base, Node,
+             :types, NodeList.ptr
+    end
+
+    class TypesUnion < FFI::Struct
+      layout :base, Node,
+             :types, NodeList.ptr
+    end
+
+    class TypesUntypedFunction < FFI::Struct
+      layout :base, Node,
+             :return_type, Node.ptr
+    end
+
+    class TypesVariable < FFI::Struct
+      layout :base, Node,
+             :name, ASTSymbol.ptr
+    end
+
+    class ASTRubyAnnotations < FFI::Struct
+      layout :base, Node,
+             :colon_method_type_annotation, ASTRubyAnnotationsColonMethodTypeAnnotation.ptr,
+             :method_types_annotation, ASTRubyAnnotationsMethodTypesAnnotation.ptr,
+             :node_type_assertion, ASTRubyAnnotationsNodeTypeAssertion.ptr,
+             :return_type_annotation, ASTRubyAnnotationsReturnTypeAnnotation.ptr,
+             :skip_annotation, ASTRubyAnnotationsSkipAnnotation.ptr
     end
 
     attach_function :rbs_encoding_find, [:pointer, :pointer], :pointer
