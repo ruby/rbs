@@ -1,3 +1,5 @@
+# See `docs/config.md` for quick documentation of this file format.
+
 nodes:
   - name: RBS::AST::Annotation
     rust_name: AnnotationNode
