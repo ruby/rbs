@@ -66,6 +66,23 @@ VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_l
 
     return ruby_array;
 }
+<%- enums.each do |enum| -%>
+VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
+    switch (value) {
+    <%- enum.each_symbol do |symbol, enum_const, ruby_value| -%>
+    case <%= enum_const %>:
+        <%- if ruby_value.nil? -%>
+        return Qnil;
+        <%- else -%>
+        return rb_id2sym(rb_intern("<%= ruby_value %>"));
+        <%- end -%>
+    <%- end -%>
+    default:
+        rb_fatal("unknown <%= enum.c_type_name %> value: %d", value);
+    }
+}
+
+<%- end -%>
 
 #ifdef RB_PASS_KEYWORDS
 // Ruby 2.7 or later
@@ -159,10 +176,14 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         <%- when "rbs_location_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
         <%- else -%>
-        <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
-        #warning unexpected type <%= field.c_type -%>
-        <%- end -%>
+            <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), <%= field.type.descr.translator_name %>(node-><%= field.c_name %>));  // <%= field.type.name %>
+            <%- else -%>
+                <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
+        #warning unexpected type <%= field.inspect -%>
+                <%- end -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.type.c_name %>
+            <%- end -%>
         <%- end -%>
         <%- end -%>
 
