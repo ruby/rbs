@@ -37,6 +37,6 @@ void rbs__init_constants(void) {
     IMPORT_CONSTANT(RBS_Types_Bases, RBS_Types, "Bases");
 
     <%- nodes.filter(&:expose_to_ruby?).each do |node| -%>
-    IMPORT_CONSTANT(<%= node.c_constant_name %>, <%= node.c_parent_constant_name %>, "<%= node.ruby_class_name %>");
+    IMPORT_CONSTANT(<%= node.c_constant_name %>, <%= node.c_parent_constant_name %>, "<%= node.ruby_base_name %>");
     <%- end -%>
 }

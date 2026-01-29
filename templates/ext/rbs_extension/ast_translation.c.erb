@@ -82,7 +82,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
     switch (instance->type) {
     <%- nodes.each do |node| -%>
-    case <%= node.c_type_enum_name %>: {
+    case <%= node.c_node_enum_name %>: {
         <%- case node.ruby_full_name -%>
         <%- when "RBS::AST::Bool" -%>
         return ((rbs_ast_bool_t *) instance)->value ? Qtrue : Qfalse;
@@ -137,9 +137,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             <%- end -%>
         <%- end -%>
         <%- node.fields.each do |field| -%>
-        <%- case field.c_type -%>
-        <%- when "VALUE" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %>);
+        <%- case field.type.name -%>
         <%- when "rbs_node_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>));
         <%- when "rbs_hash" -%>
@@ -161,10 +159,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         <%- when "rbs_location_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
         <%- else -%>
-        <%- unless field.ast_node? -%>
+        <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
         #warning unexpected type <%= field.c_type -%>
         <%- end -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.c_type %>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.type.c_name %>
         <%- end -%>
         <%- end -%>
 
