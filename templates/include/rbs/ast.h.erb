@@ -8,7 +8,7 @@
 
 enum rbs_node_type {
 <%- nodes.each_with_index do |node, index| -%>
-    <%= node.c_type_enum_name %> = <%= index + 1 %>,
+    <%= node.c_node_enum_name %> = <%= index + 1 %>,
 <%- end -%>
     RBS_KEYWORD,
     RBS_AST_SYMBOL,
@@ -65,11 +65,15 @@ rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key);
 /* rbs_ast_node */
 
 <%- nodes.each do |node| -%>
-typedef struct <%= node.c_base_name %> {
+typedef struct <%= node.c_name %> {
     rbs_node_t base;
 
     <%- node.fields.each do |field| -%>
-    <%= field.stored_field_decl %>;
+        <%- if field.type.is_a?(RBS::Template::NodeType) -%>
+    struct <%= field.type.c_name %> *<%= field.c_name %>;  <%= field.optional? ? "/* Optional */" : "" %>
+        <%- else -%>
+    <%= field.type.c_type_name %> <%= field.c_name %>;   <%= field.optional? ? "/* Optional */" : "" %>
+        <%- end -%>
     <%- end -%>
     <%- if node.locations -%>
     
@@ -109,7 +113,7 @@ typedef struct rbs_ast_symbol {
 rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_range, rbs_constant_pool_t *, rbs_constant_id_t);
 
 <%- nodes.each do |node| -%>
-<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>);
+<%= node.c_name %>_t *<%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>);
 <%- end -%>
 
 #endif

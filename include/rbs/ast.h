@@ -163,10 +163,10 @@ typedef struct rbs_ast_declarations_class {
 
     struct rbs_type_name *name;
     struct rbs_node_list *type_params;
-    struct rbs_ast_declarations_class_super *super_class;
+    struct rbs_ast_declarations_class_super *super_class; /* Optional */
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range keyword_range;     /* Required */
     rbs_location_range name_range;        /* Required */
@@ -190,7 +190,7 @@ typedef struct rbs_ast_declarations_class_alias {
 
     struct rbs_type_name *new_name;
     struct rbs_type_name *old_name;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
 
     rbs_location_range keyword_range;  /* Required */
@@ -204,7 +204,7 @@ typedef struct rbs_ast_declarations_constant {
 
     struct rbs_type_name *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
 
     rbs_location_range name_range;  /* Required */
@@ -216,7 +216,7 @@ typedef struct rbs_ast_declarations_global {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
 
     rbs_location_range name_range;  /* Required */
@@ -230,7 +230,7 @@ typedef struct rbs_ast_declarations_interface {
     struct rbs_node_list *type_params;
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range keyword_range;     /* Required */
     rbs_location_range name_range;        /* Required */
@@ -246,7 +246,7 @@ typedef struct rbs_ast_declarations_module {
     struct rbs_node_list *self_types;
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range keyword_range;     /* Required */
     rbs_location_range name_range;        /* Required */
@@ -271,7 +271,7 @@ typedef struct rbs_ast_declarations_module_alias {
 
     struct rbs_type_name *new_name;
     struct rbs_type_name *old_name;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
 
     rbs_location_range keyword_range;  /* Required */
@@ -287,7 +287,7 @@ typedef struct rbs_ast_declarations_type_alias {
     struct rbs_node_list *type_params;
     struct rbs_node *type;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range keyword_range;     /* Required */
     rbs_location_range name_range;        /* Required */
@@ -307,7 +307,7 @@ typedef struct rbs_ast_directives_use_single_clause {
     rbs_node_t base;
 
     struct rbs_type_name *type_name;
-    struct rbs_ast_symbol *new_name;
+    struct rbs_ast_symbol *new_name; /* Optional */
 
     rbs_location_range type_name_range; /* Required */
     rbs_location_range keyword_range;   /* Optional */
@@ -336,7 +336,7 @@ typedef struct rbs_ast_members_alias {
     struct rbs_ast_symbol *old_name;
     struct rbs_keyword *kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range keyword_range;  /* Required */
     rbs_location_range new_name_range; /* Required */
@@ -350,11 +350,11 @@ typedef struct rbs_ast_members_attr_accessor {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
+    struct rbs_node *ivar_name; /* Optional */
     struct rbs_keyword *kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    struct rbs_keyword *visibility;  /* Optional */
 
     rbs_location_range keyword_range;    /* Required */
     rbs_location_range name_range;       /* Required */
@@ -370,11 +370,11 @@ typedef struct rbs_ast_members_attr_reader {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
+    struct rbs_node *ivar_name; /* Optional */
     struct rbs_keyword *kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    struct rbs_keyword *visibility;  /* Optional */
 
     rbs_location_range keyword_range;    /* Required */
     rbs_location_range name_range;       /* Required */
@@ -390,11 +390,11 @@ typedef struct rbs_ast_members_attr_writer {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
+    struct rbs_node *ivar_name; /* Optional */
     struct rbs_keyword *kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    struct rbs_keyword *visibility;  /* Optional */
 
     rbs_location_range keyword_range;    /* Required */
     rbs_location_range name_range;       /* Required */
@@ -410,7 +410,7 @@ typedef struct rbs_ast_members_class_instance_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;  /* Required */
     rbs_location_range colon_range; /* Required */
@@ -422,7 +422,7 @@ typedef struct rbs_ast_members_class_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;  /* Required */
     rbs_location_range colon_range; /* Required */
@@ -435,7 +435,7 @@ typedef struct rbs_ast_members_extend {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;    /* Required */
     rbs_location_range keyword_range; /* Required */
@@ -448,7 +448,7 @@ typedef struct rbs_ast_members_include {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;    /* Required */
     rbs_location_range keyword_range; /* Required */
@@ -460,7 +460,7 @@ typedef struct rbs_ast_members_instance_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;  /* Required */
     rbs_location_range colon_range; /* Required */
@@ -474,9 +474,9 @@ typedef struct rbs_ast_members_method_definition {
     struct rbs_keyword *kind;
     struct rbs_node_list *overloads;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     bool overloading;
-    struct rbs_keyword *visibility;
+    struct rbs_keyword *visibility; /* Optional */
 
     rbs_location_range keyword_range;     /* Required */
     rbs_location_range name_range;        /* Required */
@@ -498,7 +498,7 @@ typedef struct rbs_ast_members_prepend {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
 
     rbs_location_range name_range;    /* Required */
     rbs_location_range keyword_range; /* Required */
@@ -521,7 +521,7 @@ typedef struct rbs_ast_ruby_annotations_class_alias_annotation {
     rbs_location_range prefix_location;
     rbs_location_range keyword_location;
     struct rbs_type_name *type_name;
-    rbs_location_range type_name_location /* optional */;
+    rbs_location_range type_name_location; /* Optional */
 } rbs_ast_ruby_annotations_class_alias_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_colon_method_type_annotation {
@@ -540,7 +540,7 @@ typedef struct rbs_ast_ruby_annotations_instance_variable_annotation {
     rbs_location_range ivar_name_location;
     rbs_location_range colon_location;
     struct rbs_node *type;
-    rbs_location_range comment_location /* optional */;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_instance_variable_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_method_types_annotation {
@@ -557,7 +557,7 @@ typedef struct rbs_ast_ruby_annotations_module_alias_annotation {
     rbs_location_range prefix_location;
     rbs_location_range keyword_location;
     struct rbs_type_name *type_name;
-    rbs_location_range type_name_location /* optional */;
+    rbs_location_range type_name_location; /* Optional */
 } rbs_ast_ruby_annotations_module_alias_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_node_type_assertion {
@@ -574,7 +574,7 @@ typedef struct rbs_ast_ruby_annotations_return_type_annotation {
     rbs_location_range return_location;
     rbs_location_range colon_location;
     struct rbs_node *return_type;
-    rbs_location_range comment_location /* optional */;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_return_type_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_skip_annotation {
@@ -582,7 +582,7 @@ typedef struct rbs_ast_ruby_annotations_skip_annotation {
 
     rbs_location_range prefix_location;
     rbs_location_range skip_location;
-    rbs_location_range comment_location /* optional */;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_skip_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_type_application_annotation {
@@ -605,9 +605,9 @@ typedef struct rbs_ast_type_param {
 
     struct rbs_ast_symbol *name;
     struct rbs_keyword *variance;
-    struct rbs_node *upper_bound;
-    struct rbs_node *lower_bound;
-    struct rbs_node *default_type;
+    struct rbs_node *upper_bound;  /* Optional */
+    struct rbs_node *lower_bound;  /* Optional */
+    struct rbs_node *default_type; /* Optional */
     bool unchecked;
 
     rbs_location_range name_range;        /* Required */
@@ -623,7 +623,7 @@ typedef struct rbs_method_type {
 
     struct rbs_node_list *type_params;
     struct rbs_node *type;
-    struct rbs_types_block *block;
+    struct rbs_types_block *block; /* Optional */
 
     rbs_location_range type_range;        /* Required */
     rbs_location_range type_params_range; /* Optional */
@@ -711,7 +711,7 @@ typedef struct rbs_types_block {
 
     struct rbs_node *type;
     bool required;
-    struct rbs_node *self_type;
+    struct rbs_node *self_type; /* Optional */
 } rbs_types_block_t;
 
 typedef struct rbs_types_class_instance {
@@ -737,11 +737,11 @@ typedef struct rbs_types_function {
 
     struct rbs_node_list *required_positionals;
     struct rbs_node_list *optional_positionals;
-    struct rbs_node *rest_positionals;
+    struct rbs_node *rest_positionals; /* Optional */
     struct rbs_node_list *trailing_positionals;
     struct rbs_hash *required_keywords;
     struct rbs_hash *optional_keywords;
-    struct rbs_node *rest_keywords;
+    struct rbs_node *rest_keywords; /* Optional */
     struct rbs_node *return_type;
 } rbs_types_function_t;
 
@@ -749,7 +749,7 @@ typedef struct rbs_types_function_param {
     rbs_node_t base;
 
     struct rbs_node *type;
-    struct rbs_ast_symbol *name;
+    struct rbs_ast_symbol *name; /* Optional */
 
     rbs_location_range name_range; /* Optional */
 } rbs_types_function_param_t;
@@ -786,8 +786,8 @@ typedef struct rbs_types_proc {
     rbs_node_t base;
 
     struct rbs_node *type;
-    struct rbs_types_block *block;
-    struct rbs_node *self_type;
+    struct rbs_types_block *block; /* Optional */
+    struct rbs_node *self_type;    /* Optional */
 } rbs_types_proc_t;
 
 typedef struct rbs_types_record {
