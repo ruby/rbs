@@ -45,56 +45,12 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
     return ruby_hash;
 }
 
-VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *source_loc) {
-    if (source_loc == NULL) {
-        return Qnil;
-    }
-
-    VALUE new_loc = rbs_new_location(ctx.buffer, source_loc->rg);
-    rbs_loc *new_loc_struct = rbs_check_location(new_loc);
-
-    if (source_loc->children != NULL) {
-        rbs_loc_legacy_alloc_children(new_loc_struct, source_loc->children->cap);
-
-        for (size_t i = 0; i < source_loc->children->len; i++) {
-            rbs_location_entry *entry = &source_loc->children->entries[i];
-
-            rbs_constant_t *constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, entry->name);
-            ID name = rb_intern2((const char *) constant->start, constant->length);
-
-            rbs_loc_range rg = { entry->rg.start, entry->rg.end };
-
-            if (RBS_LOCATION_REQUIRED_P(source_loc, i)) {
-                rbs_loc_legacy_add_required_child(new_loc_struct, name, rg);
-            } else {
-                rbs_loc_legacy_add_optional_child(new_loc_struct, name, rg);
-            }
-        }
-    }
-
-    return new_loc;
-}
-
 VALUE rbs_location_range_to_ruby_location(rbs_translation_context_t ctx, rbs_location_range range) {
     if (RBS_LOCATION_NULL_RANGE_P(range)) {
         return Qnil;
     }
 
     return rbs_new_location2(ctx.buffer, range.start, range.end);
-}
-
-VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_list_t *list) {
-    if (list == NULL) {
-        return EMPTY_ARRAY;
-    }
-
-    VALUE ruby_array = rb_ary_new();
-
-    for (rbs_location_list_node_t *n = list->head; n != NULL; n = n->next) {
-        rb_ary_push(ruby_array, rbs_loc_to_ruby_location(ctx, n->loc));
-    }
-
-    return ruby_array;
 }
 
 VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_range_list_t *list) {
