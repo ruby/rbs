@@ -68,7 +68,12 @@ require "rbs/type_alias_dependency"
 require "rbs/type_alias_regularity"
 require "rbs/collection"
 
-require "rbs_extension"
+begin
+  require "rbs_extension"
+rescue LoadError
+  require "rbs/ffi/parser"
+  require "rbs/ffi/location"
+end
 require "rbs/parser_aux"
 require "rbs/location_aux"
 

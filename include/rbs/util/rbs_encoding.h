@@ -277,6 +277,7 @@ extern const rbs_encoding_t rbs_encodings[RBS_ENCODING_MAXIMUM];
  * @param end A pointer to the last byte of the name.
  * @returns A pointer to the encoding struct if one is found, otherwise NULL.
  */
+RBS_EXPORTED_FUNCTION
 const rbs_encoding_t *rbs_encoding_find(const uint8_t *start, const uint8_t *end);
 
 #endif
