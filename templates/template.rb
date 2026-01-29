@@ -25,6 +25,8 @@ module RBS
           "#{@c_type} #{c_name}"
         when "rbs_string"
           "rbs_string_t #{c_name}"
+        when "rbs_location_range"
+          "rbs_location_range #{c_name}"
         when ->(c_type) { c_type.end_with?("_t *") }
           "#{@c_type}#{c_name}"
         else
@@ -52,6 +54,38 @@ module RBS
           @c_type.include?("_ast_") ||
           @c_type.include?("_decl_") ||
           @c_type.include?("_types_")
+      end
+    end
+
+    class LocationField
+      attr_reader :name #: String
+
+      def initialize(name:, required:)
+        @name = name
+        @required = required
+      end
+
+      # @rbs (Hash[untyped, untyped]) -> RBS::Template::LocationField
+      def self.from_hash(hash)
+        name = hash["required"] || hash["optional"]
+        required = hash.key?("required")
+        new(name: name, required: required)
+      end
+
+      def required? #: bool
+        @required
+      end
+
+      def optional? #: bool
+        !@required
+      end
+
+      def attribute_name #: String
+        "#{@name}_range"
+      end
+
+      def type_name #: String
+        "rbs_location_range"
       end
     end
 
@@ -84,6 +118,7 @@ module RBS
 
       attr_reader :constructor_params #: Array[RBS::Template::Field]
       attr_reader :fields #: Array[RBS::Template::Field]
+      attr_reader :locations #: Array[RBS::Template::LocationField]?
 
       def initialize(yaml)
         @ruby_full_name = yaml["name"]
@@ -103,11 +138,21 @@ module RBS
 
         @fields = yaml.fetch("fields", []).map { |field| Field.from_hash(field) }.freeze
 
+        if locs = yaml["locations"]
+          @locations = locs.map { |loc| LocationField.from_hash(loc) }.freeze
+        end
+
         @constructor_params = [
           Field.new(name: "allocator",  c_type: "rbs_allocator_t *"),
           Field.new(name: "location",   c_type: "rbs_location_t *" ),
         ]
         @constructor_params.concat @fields
+        @locations&.each do |loc|
+          if loc.required?
+            @constructor_params << Field.new(name: loc.attribute_name, c_type: loc.type_name)
+          end
+        end
+
         @constructor_params.freeze
       end
 
