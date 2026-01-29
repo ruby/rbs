@@ -233,7 +233,10 @@ class OpenSSLBNSingletonTest < Test::Unit::TestCase
       OpenSSL::BN, :generate_prime, 3
   end
 
-
+  def test_new
+    assert_send_type "(::OpenSSL::BN) -> OpenSSL::BN",
+      OpenSSL::BN, :new, OpenSSL::BN.new(3)
+  end
 end
 
 class OpenSSLBNTest < Test::Unit::TestCase

@@ -398,6 +398,19 @@ module RBS
                         .update(type_params: class_params + method_type.type_params)
                     end
 
+                    method_type = method_type.map_type do |type|
+                      case type
+                      when Types::Bases::Self
+                        Types::ClassInstance.new(
+                          name: type_name,
+                          args: entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) },
+                          location: nil
+                        )
+                      else
+                        type
+                      end
+                    end
+
                     method_type = method_type.update(
                       type: method_type.type.with_return_type(
                         Types::ClassInstance.new(
