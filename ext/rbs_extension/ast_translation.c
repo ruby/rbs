@@ -143,7 +143,15 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_class_t *node = (rbs_ast_declarations_class_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 5);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("end"), (rbs_loc_range) { .start = node->end_range.start, .end = node->end_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("type_params"), (rbs_loc_range) { .start = node->type_params_range.start, .end = node->type_params_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("lt"), (rbs_loc_range) { .start = node->lt_range.start, .end = node->lt_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(ctx, node->type_params));
         rb_hash_aset(h, ID2SYM(rb_intern("super_class")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->super_class)); // rbs_ast_declarations_class_super
@@ -167,7 +175,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_class_super_t *node = (rbs_ast_declarations_class_super_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 
@@ -181,7 +194,14 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_class_alias_t *node = (rbs_ast_declarations_class_alias_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 4);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("new_name"), (rbs_loc_range) { .start = node->new_name_range.start, .end = node->new_name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("eq"), (rbs_loc_range) { .start = node->eq_range.start, .end = node->eq_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("old_name"), (rbs_loc_range) { .start = node->old_name_range.start, .end = node->old_name_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment));   // rbs_ast_comment
@@ -197,7 +217,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_constant_t *node = (rbs_ast_declarations_constant_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));       // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));       // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
@@ -213,7 +238,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_global_t *node = (rbs_ast_declarations_global_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));       // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));       // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
@@ -229,7 +259,14 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_interface_t *node = (rbs_ast_declarations_interface_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 4);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("end"), (rbs_loc_range) { .start = node->end_range.start, .end = node->end_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("type_params"), (rbs_loc_range) { .start = node->type_params_range.start, .end = node->type_params_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(ctx, node->type_params));
         rb_hash_aset(h, ID2SYM(rb_intern("members")), rbs_node_list_to_ruby_array(ctx, node->members));
@@ -252,7 +289,16 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_module_t *node = (rbs_ast_declarations_module_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 6);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("end"), (rbs_loc_range) { .start = node->end_range.start, .end = node->end_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("type_params"), (rbs_loc_range) { .start = node->type_params_range.start, .end = node->type_params_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("self_types"), (rbs_loc_range) { .start = node->self_types_range.start, .end = node->self_types_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(ctx, node->type_params));
         rb_hash_aset(h, ID2SYM(rb_intern("self_types")), rbs_node_list_to_ruby_array(ctx, node->self_types));
@@ -276,7 +322,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_module_self_t *node = (rbs_ast_declarations_module_self_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 
@@ -290,7 +341,14 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_module_alias_t *node = (rbs_ast_declarations_module_alias_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 4);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("new_name"), (rbs_loc_range) { .start = node->new_name_range.start, .end = node->new_name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("eq"), (rbs_loc_range) { .start = node->eq_range.start, .end = node->eq_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("old_name"), (rbs_loc_range) { .start = node->old_name_range.start, .end = node->old_name_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment));   // rbs_ast_comment
@@ -306,7 +364,14 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_declarations_type_alias_t *node = (rbs_ast_declarations_type_alias_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 4);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("eq"), (rbs_loc_range) { .start = node->eq_range.start, .end = node->eq_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("type_params"), (rbs_loc_range) { .start = node->type_params_range.start, .end = node->type_params_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(ctx, node->type_params));
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
@@ -329,7 +394,11 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_directives_use_t *node = (rbs_ast_directives_use_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 1);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("clauses")), rbs_node_list_to_ruby_array(ctx, node->clauses));
 
         return CLASS_NEW_INSTANCE(
@@ -342,7 +411,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_directives_use_single_clause_t *node = (rbs_ast_directives_use_single_clause_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("type_name"), (rbs_loc_range) { .start = node->type_name_range.start, .end = node->type_name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("new_name"), (rbs_loc_range) { .start = node->new_name_range.start, .end = node->new_name_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type_name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name));   // rbs_ast_symbol
 
@@ -356,7 +431,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_directives_use_wildcard_clause_t *node = (rbs_ast_directives_use_wildcard_clause_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("namespace"), (rbs_loc_range) { .start = node->namespace_range.start, .end = node->namespace_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("star"), (rbs_loc_range) { .start = node->star_range.start, .end = node->star_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("namespace")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->rbs_namespace)); // rbs_namespace
 
         return CLASS_NEW_INSTANCE(
@@ -377,7 +457,15 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_alias_t *node = (rbs_ast_members_alias_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 5);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("new_name"), (rbs_loc_range) { .start = node->new_name_range.start, .end = node->new_name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("old_name"), (rbs_loc_range) { .start = node->old_name_range.start, .end = node->old_name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("new_kind"), (rbs_loc_range) { .start = node->new_kind_range.start, .end = node->new_kind_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("old_kind"), (rbs_loc_range) { .start = node->old_kind_range.start, .end = node->old_kind_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind));         // rbs_keyword
@@ -394,7 +482,17 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_attr_accessor_t *node = (rbs_ast_members_attr_accessor_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 7);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar"), (rbs_loc_range) { .start = node->ivar_range.start, .end = node->ivar_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
@@ -413,7 +511,17 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_attr_reader_t *node = (rbs_ast_members_attr_reader_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 7);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar"), (rbs_loc_range) { .start = node->ivar_range.start, .end = node->ivar_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
@@ -432,7 +540,17 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_attr_writer_t *node = (rbs_ast_members_attr_writer_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 7);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar"), (rbs_loc_range) { .start = node->ivar_range.start, .end = node->ivar_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("ivar_name"), (rbs_loc_range) { .start = node->ivar_name_range.start, .end = node->ivar_name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
@@ -451,7 +569,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_class_instance_variable_t *node = (rbs_ast_members_class_instance_variable_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));       // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));       // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
@@ -466,7 +590,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_class_variable_t *node = (rbs_ast_members_class_variable_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));       // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));       // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
@@ -481,7 +611,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_extend_t *node = (rbs_ast_members_extend_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
@@ -497,7 +633,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_include_t *node = (rbs_ast_members_include_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
@@ -513,7 +655,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_instance_variable_t *node = (rbs_ast_members_instance_variable_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("colon"), (rbs_loc_range) { .start = node->colon_range.start, .end = node->colon_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));       // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));       // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
@@ -528,7 +676,15 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_method_definition_t *node = (rbs_ast_members_method_definition_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 5);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("kind"), (rbs_loc_range) { .start = node->kind_range.start, .end = node->kind_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("overloading"), (rbs_loc_range) { .start = node->overloading_range.start, .end = node->overloading_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind)); // rbs_keyword
         rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(ctx, node->overloads));
@@ -560,7 +716,13 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_members_prepend_t *node = (rbs_ast_members_prepend_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 3);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_required_child(loc, rb_intern("keyword"), (rbs_loc_range) { .start = node->keyword_range.start, .end = node->keyword_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
@@ -748,7 +910,16 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_type_param_t *node = (rbs_ast_type_param_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 6);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("variance"), (rbs_loc_range) { .start = node->variance_range.start, .end = node->variance_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("unchecked"), (rbs_loc_range) { .start = node->unchecked_range.start, .end = node->unchecked_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("upper_bound"), (rbs_loc_range) { .start = node->upper_bound_range.start, .end = node->upper_bound_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("lower_bound"), (rbs_loc_range) { .start = node->lower_bound_range.start, .end = node->lower_bound_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("default"), (rbs_loc_range) { .start = node->default_range.start, .end = node->default_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));                 // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("variance")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->variance));         // rbs_keyword
         rb_hash_aset(h, ID2SYM(rb_intern("upper_bound")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->upper_bound));   // rbs_node
@@ -766,7 +937,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_method_type_t *node = (rbs_method_type_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("type"), (rbs_loc_range) { .start = node->type_range.start, .end = node->type_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("type_params"), (rbs_loc_range) { .start = node->type_params_range.start, .end = node->type_params_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), rbs_node_list_to_ruby_array(ctx, node->type_params));
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));   // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("block")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->block)); // rbs_types_block
@@ -821,7 +997,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_types_alias_t *node = (rbs_types_alias_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 
@@ -959,7 +1140,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_types_class_instance_t *node = (rbs_types_class_instance_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 
@@ -973,7 +1159,11 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_types_class_singleton_t *node = (rbs_types_class_singleton_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 1);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
 
         return CLASS_NEW_INSTANCE(
@@ -1005,7 +1195,11 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_types_function_param_t *node = (rbs_types_function_param_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 1);
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type)); // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
 
@@ -1019,7 +1213,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_types_interface_t *node = (rbs_types_interface_t *) instance;
 
         VALUE h = rb_hash_new();
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+        VALUE location = rbs_new_location(ctx.buffer, node->base.location->rg);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, 2);
+        rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start, .end = node->name_range.end });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start, .end = node->args_range.end });
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
         rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 

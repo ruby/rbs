@@ -6,8 +6,10 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "rbs/ast.h"
 #include "rbs/defines.h"
 #include "rbs/lexer.h"
+#include "rbs/location.h"
 #include "rbs/string.h"
 #include "rbs/util/rbs_unescape.h"
 #include "rbs/util/rbs_buffer.h"
@@ -338,8 +340,6 @@ static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_
         rbs_range_t param_range = type_range;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), param_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 1);
-        rbs_loc_add_optional_child(loc, INTERN("name"), NULL_RANGE);
 
         *function_param = rbs_types_function_param_new(ALLOCATOR(), loc, type, NULL);
         return true;
@@ -364,10 +364,9 @@ static bool parse_function_param(rbs_parser_t *parser, rbs_types_function_param_
         rbs_ast_symbol_t *name = rbs_ast_symbol_new(ALLOCATOR(), symbolLoc, &parser->constant_pool, constant_id);
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), param_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 1);
-        rbs_loc_add_optional_child(loc, INTERN("name"), name_range);
 
         *function_param = rbs_types_function_param_new(ALLOCATOR(), loc, type, name);
+        (*function_param)->name_range = RBS_RANGE_LEX2AST(name_range);
         return true;
     }
 }
@@ -1046,16 +1045,19 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
     };
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), type_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
     if (kind == CLASS_NAME) {
-        *type = (rbs_node_t *) rbs_types_class_instance_new(ALLOCATOR(), loc, type_name, types);
+        rbs_types_class_instance_t *instance_type = rbs_types_class_instance_new(ALLOCATOR(), loc, type_name, types, RBS_RANGE_LEX2AST(name_range));
+        instance_type->args_range = RBS_RANGE_LEX2AST(args_range);
+        *type = (rbs_node_t *) instance_type;
     } else if (kind == INTERFACE_NAME) {
-        *type = (rbs_node_t *) rbs_types_interface_new(ALLOCATOR(), loc, type_name, types);
+        rbs_types_interface_t *interface_type = rbs_types_interface_new(ALLOCATOR(), loc, type_name, types, RBS_RANGE_LEX2AST(name_range));
+        interface_type->args_range = RBS_RANGE_LEX2AST(args_range);
+        *type = (rbs_node_t *) interface_type;
     } else if (kind == ALIAS_NAME) {
-        *type = (rbs_node_t *) rbs_types_alias_new(ALLOCATOR(), loc, type_name, types);
+        rbs_types_alias_t *type_alias = rbs_types_alias_new(ALLOCATOR(), loc, type_name, types, RBS_RANGE_LEX2AST(name_range));
+        type_alias->args_range = RBS_RANGE_LEX2AST(args_range);
+        *type = (rbs_node_t *) type_alias;
     }
 
     return true;
@@ -1081,10 +1083,8 @@ static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton
     type_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), type_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 1);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
 
-    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name);
+    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name, RBS_RANGE_LEX2AST(name_range));
     return true;
 }
 
@@ -1506,15 +1506,13 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
             param_range.end = parser->current_token.range.end;
 
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), param_range);
-            rbs_loc_alloc_children(ALLOCATOR(), loc, 6);
-            rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-            rbs_loc_add_optional_child(loc, INTERN("variance"), variance_range);
-            rbs_loc_add_optional_child(loc, INTERN("unchecked"), unchecked_range);
-            rbs_loc_add_optional_child(loc, INTERN("upper_bound"), upper_bound_range);
-            rbs_loc_add_optional_child(loc, INTERN("lower_bound"), lower_bound_range);
-            rbs_loc_add_optional_child(loc, INTERN("default"), default_type_range);
 
-            rbs_ast_type_param_t *param = rbs_ast_type_param_new(ALLOCATOR(), loc, name, variance, upper_bound, lower_bound, default_type, unchecked);
+            rbs_ast_type_param_t *param = rbs_ast_type_param_new(ALLOCATOR(), loc, name, variance, upper_bound, lower_bound, default_type, unchecked, RBS_RANGE_LEX2AST(name_range));
+            param->variance_range = RBS_RANGE_LEX2AST(variance_range);
+            param->unchecked_range = RBS_RANGE_LEX2AST(unchecked_range);
+            param->upper_bound_range = RBS_RANGE_LEX2AST(upper_bound_range);
+            param->lower_bound_range = RBS_RANGE_LEX2AST(lower_bound_range);
+            param->default_range = RBS_RANGE_LEX2AST(default_type_range);
 
             rbs_node_list_append(*params, (rbs_node_t *) param);
 
@@ -1591,11 +1589,10 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     }
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), rg);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-    rbs_loc_add_required_child(loc, INTERN("type"), type_range);
-    rbs_loc_add_optional_child(loc, INTERN("type_params"), params_range);
 
-    *method_type = rbs_method_type_new(ALLOCATOR(), loc, type_params, result->function, result->block);
+    *method_type = rbs_method_type_new(ALLOCATOR(), loc, type_params, result->function, result->block, RBS_RANGE_LEX2AST(type_range));
+    (*method_type)->type_params_range = RBS_RANGE_LEX2AST(params_range);
+
     return true;
 }
 
@@ -1622,11 +1619,8 @@ static bool parse_global_decl(rbs_parser_t *parser, rbs_node_list_t *annotations
     decl_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-    *global = rbs_ast_declarations_global_new(ALLOCATOR(), loc, type_name, type, comment, annotations);
+    *global = rbs_ast_declarations_global_new(ALLOCATOR(), loc, type_name, type, comment, annotations, RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(colon_range));
     return true;
 }
 
@@ -1653,11 +1647,8 @@ static bool parse_const_decl(rbs_parser_t *parser, rbs_node_list_t *annotations,
     decl_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
 
-    *constant = rbs_ast_declarations_constant_new(ALLOCATOR(), loc, type_name, type, comment, annotations);
+    *constant = rbs_ast_declarations_constant_new(ALLOCATOR(), loc, type_name, type, comment, annotations, RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(colon_range));
     return true;
 }
 
@@ -1692,18 +1683,13 @@ static bool parse_type_decl(rbs_parser_t *parser, rbs_position_t comment_pos, rb
 
     decl_range.end = parser->current_token.range.end;
 
-    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 4);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(loc, INTERN("type_params"), params_range);
-    rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
-
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
+    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
-    *typealias = rbs_ast_declarations_type_alias_new(ALLOCATOR(), loc, type_name, type_params, type, annotations, comment);
+    *typealias = rbs_ast_declarations_type_alias_new(ALLOCATOR(), loc, type_name, type_params, type, annotations, comment, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(eq_range));
+    (*typealias)->type_params_range = RBS_RANGE_LEX2AST(params_range);
     return true;
 }
 
@@ -2056,14 +2042,12 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
     }
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 5);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
-    rbs_loc_add_optional_child(loc, INTERN("overloading"), overloading_range);
-    rbs_loc_add_optional_child(loc, INTERN("visibility"), visibility_range);
 
-    *method_definition = rbs_ast_members_method_definition_new(ALLOCATOR(), loc, name, k, overloads, annotations, comment, overloading, visibility);
+    *method_definition = rbs_ast_members_method_definition_new(ALLOCATOR(), loc, name, k, overloads, annotations, comment, overloading, visibility, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(name_range));
+    (*method_definition)->kind_range = RBS_RANGE_LEX2AST(kind_range);
+    (*method_definition)->overloading_range = RBS_RANGE_LEX2AST(overloading_range);
+    (*method_definition)->visibility_range = RBS_RANGE_LEX2AST(visibility_range);
+
     return true;
 }
 
@@ -2154,22 +2138,30 @@ static bool parse_mixin_member(rbs_parser_t *parser, bool from_interface, rbs_po
     member_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 3);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
+    rbs_location_range name_rg = RBS_RANGE_LEX2AST(name_range);
+    rbs_location_range keyword_rg = RBS_RANGE_LEX2AST(keyword_range);
+    rbs_location_range args_rg = RBS_RANGE_LEX2AST(args_range);
 
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
     switch (type) {
-    case kINCLUDE:
-        *mixin_member = (rbs_node_t *) rbs_ast_members_include_new(ALLOCATOR(), loc, name, args, annotations, comment);
+    case kINCLUDE: {
+        rbs_ast_members_include_t *include_member = rbs_ast_members_include_new(ALLOCATOR(), loc, name, args, annotations, comment, name_rg, keyword_rg);
+        include_member->args_range = args_rg;
+        *mixin_member = (rbs_node_t *) include_member;
         return true;
-    case kEXTEND:
-        *mixin_member = (rbs_node_t *) rbs_ast_members_extend_new(ALLOCATOR(), loc, name, args, annotations, comment);
+    }
+    case kEXTEND: {
+        rbs_ast_members_extend_t *extend_member = rbs_ast_members_extend_new(ALLOCATOR(), loc, name, args, annotations, comment, name_rg, keyword_rg);
+        extend_member->args_range = args_rg;
+        *mixin_member = (rbs_node_t *) extend_member;
         return true;
-    case kPREPEND:
-        *mixin_member = (rbs_node_t *) rbs_ast_members_prepend_new(ALLOCATOR(), loc, name, args, annotations, comment);
+    }
+    case kPREPEND: {
+        rbs_ast_members_prepend_t *prepend_member = rbs_ast_members_prepend_new(ALLOCATOR(), loc, name, args, annotations, comment, name_rg, keyword_rg);
+        prepend_member->args_range = args_rg;
+        *mixin_member = (rbs_node_t *) prepend_member;
         return true;
+    }
     default:
         rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
         return false;
@@ -2220,15 +2212,13 @@ static bool parse_alias_member(rbs_parser_t *parser, bool instance_only, rbs_pos
     }
 
     member_range.end = parser->current_token.range.end;
-    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 5);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("new_name"), new_name_range);
-    rbs_loc_add_required_child(loc, INTERN("old_name"), old_name_range);
-    rbs_loc_add_optional_child(loc, INTERN("new_kind"), new_kind_range);
-    rbs_loc_add_optional_child(loc, INTERN("old_kind"), old_kind_range);
 
-    *alias_member = rbs_ast_members_alias_new(ALLOCATOR(), loc, new_name, old_name, kind, annotations, comment);
+    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
+
+    *alias_member = rbs_ast_members_alias_new(ALLOCATOR(), loc, new_name, old_name, kind, annotations, comment, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(new_name_range), RBS_RANGE_LEX2AST(old_name_range));
+    (*alias_member)->new_kind_range = RBS_RANGE_LEX2AST(new_kind_range);
+    (*alias_member)->old_kind_range = RBS_RANGE_LEX2AST(old_kind_range);
+
     return true;
 }
 
@@ -2264,12 +2254,9 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         member_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 3);
-        rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-        rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
-        rbs_loc_add_optional_child(loc, INTERN("kind"), NULL_RANGE);
 
-        *variable_member = (rbs_node_t *) rbs_ast_members_instance_variable_new(ALLOCATOR(), loc, name, type, comment);
+        *variable_member = (rbs_node_t *) rbs_ast_members_instance_variable_new(ALLOCATOR(), loc, name, type, comment, RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(colon_range));
+
         return true;
     }
     case tA2IDENT: {
@@ -2290,12 +2277,9 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         member_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 3);
-        rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-        rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
-        rbs_loc_add_optional_child(loc, INTERN("kind"), NULL_RANGE);
 
-        *variable_member = (rbs_node_t *) rbs_ast_members_class_variable_new(ALLOCATOR(), loc, name, type, comment);
+        *variable_member = (rbs_node_t *) rbs_ast_members_class_variable_new(ALLOCATOR(), loc, name, type, comment, RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(colon_range));
+
         return true;
     }
     case kSELF: {
@@ -2329,12 +2313,12 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         member_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 3);
-        rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-        rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
-        rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
 
-        *variable_member = (rbs_node_t *) rbs_ast_members_class_instance_variable_new(ALLOCATOR(), loc, name, type, comment);
+        rbs_ast_members_class_instance_variable_t *class_ivar_member = rbs_ast_members_class_instance_variable_new(ALLOCATOR(), loc, name, type, comment, RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(colon_range));
+        class_ivar_member->kind_range = RBS_RANGE_LEX2AST(kind_range);
+
+        *variable_member = (rbs_node_t *) class_ivar_member;
+
         return true;
     }
     default:
@@ -2470,25 +2454,48 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     member_range.end = parser->current_token.range.end;
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 7);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("colon"), colon_range);
-    rbs_loc_add_optional_child(loc, INTERN("kind"), kind_range);
-    rbs_loc_add_optional_child(loc, INTERN("ivar"), ivar_range);
-    rbs_loc_add_optional_child(loc, INTERN("ivar_name"), ivar_name_range);
-    rbs_loc_add_optional_child(loc, INTERN("visibility"), visibility_range);
+    rbs_location_range keyword_rg = RBS_RANGE_LEX2AST(keyword_range);
+    rbs_location_range name_rg = RBS_RANGE_LEX2AST(name_range);
+    rbs_location_range colon_rg = RBS_RANGE_LEX2AST(colon_range);
+    rbs_location_range kind_rg = RBS_RANGE_LEX2AST(kind_range);
+    rbs_location_range ivar_rg = RBS_RANGE_LEX2AST(ivar_range);
+    rbs_location_range ivar_name_rg = RBS_RANGE_LEX2AST(ivar_name_range);
+    rbs_location_range visibility_rg = RBS_RANGE_LEX2AST(visibility_range);
 
     switch (attr_type) {
-    case kATTRREADER:
-        *attribute_member = (rbs_node_t *) rbs_ast_members_attr_reader_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility);
+    case kATTRREADER: {
+        rbs_ast_members_attr_reader_t *attr_reader = rbs_ast_members_attr_reader_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
+        attr_reader->kind_range = kind_rg;
+        attr_reader->ivar_range = ivar_rg;
+        attr_reader->ivar_name_range = ivar_name_rg;
+        attr_reader->visibility_range = visibility_rg;
+
+        *attribute_member = (rbs_node_t *) attr_reader;
+
         return true;
-    case kATTRWRITER:
-        *attribute_member = (rbs_node_t *) rbs_ast_members_attr_writer_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility);
+    }
+    case kATTRWRITER: {
+        rbs_ast_members_attr_writer_t *attr_writer = rbs_ast_members_attr_writer_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
+        attr_writer->kind_range = kind_rg;
+        attr_writer->ivar_range = ivar_rg;
+        attr_writer->ivar_name_range = ivar_name_rg;
+        attr_writer->visibility_range = visibility_rg;
+
+        *attribute_member = (rbs_node_t *) attr_writer;
+
         return true;
-    case kATTRACCESSOR:
-        *attribute_member = (rbs_node_t *) rbs_ast_members_attr_accessor_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility);
+    }
+    case kATTRACCESSOR: {
+        rbs_ast_members_attr_accessor_t *attr_accessor = rbs_ast_members_attr_accessor_new(ALLOCATOR(), loc, attr_name, type, ivar_name, kind, annotations, comment, visibility, keyword_rg, name_rg, colon_rg);
+        attr_accessor->kind_range = kind_rg;
+        attr_accessor->ivar_range = ivar_rg;
+        attr_accessor->ivar_name_range = ivar_name_rg;
+        attr_accessor->visibility_range = visibility_rg;
+
+        *attribute_member = (rbs_node_t *) attr_accessor;
+
         return true;
+    }
     default:
         rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
         return false;
@@ -2580,15 +2587,11 @@ static bool parse_interface_decl(rbs_parser_t *parser, rbs_position_t comment_po
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), member_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 4);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("end"), end_range);
-    rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
-
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
-    *interface_decl = rbs_ast_declarations_interface_new(ALLOCATOR(), loc, name, type_params, members, annotations, comment);
+    *interface_decl = rbs_ast_declarations_interface_new(ALLOCATOR(), loc, name, type_params, members, annotations, comment, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(end_range));
+    (*interface_decl)->type_params_range = RBS_RANGE_LEX2AST(type_params_range);
+
     return true;
 }
 
@@ -2622,11 +2625,9 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
         }
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), self_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-        rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-        rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
 
-        rbs_ast_declarations_module_self_t *self_type = rbs_ast_declarations_module_self_new(ALLOCATOR(), loc, module_name, args);
+        rbs_ast_declarations_module_self_t *self_type = rbs_ast_declarations_module_self_new(ALLOCATOR(), loc, module_name, args, RBS_RANGE_LEX2AST(name_range));
+        self_type->args_range = RBS_RANGE_LEX2AST(args_range);
         rbs_node_list_append(array, (rbs_node_t *) self_type);
 
         if (parser->next_token.type == pCOMMA) {
@@ -2772,18 +2773,14 @@ static bool parse_module_decl0(rbs_parser_t *parser, rbs_range_t keyword_range, 
     rbs_range_t end_range = parser->current_token.range;
     decl_range.end = parser->current_token.range.end;
 
-    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 6);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("end"), end_range);
-    rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
-    rbs_loc_add_optional_child(loc, INTERN("colon"), colon_range);
-    rbs_loc_add_optional_child(loc, INTERN("self_types"), self_types_range);
-
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
-    *module_decl = rbs_ast_declarations_module_new(ALLOCATOR(), loc, module_name, type_params, self_types, members, annotations, comment);
+    rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
+
+    *module_decl = rbs_ast_declarations_module_new(ALLOCATOR(), loc, module_name, type_params, self_types, members, annotations, comment, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(end_range));
+    (*module_decl)->type_params_range = RBS_RANGE_LEX2AST(type_params_range);
+    (*module_decl)->colon_range = RBS_RANGE_LEX2AST(colon_range);
+    (*module_decl)->self_types_range = RBS_RANGE_LEX2AST(self_types_range);
     return true;
 }
 
@@ -2820,13 +2817,8 @@ static bool parse_module_decl(rbs_parser_t *parser, rbs_position_t comment_pos, 
         };
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 4);
-        rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-        rbs_loc_add_required_child(loc, INTERN("new_name"), module_name_range);
-        rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
-        rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-        *module_decl = (rbs_node_t *) rbs_ast_declarations_module_alias_new(ALLOCATOR(), loc, module_name, old_name, comment, annotations);
+        *module_decl = (rbs_node_t *) rbs_ast_declarations_module_alias_new(ALLOCATOR(), loc, module_name, old_name, comment, annotations, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(module_name_range), RBS_RANGE_LEX2AST(eq_range), RBS_RANGE_LEX2AST(old_name_range));
     } else {
         rbs_ast_declarations_module_t *module_decl0 = NULL;
         CHECK_PARSE(parse_module_decl0(parser, keyword_range, module_name, module_name_range, comment, annotations, &module_decl0));
@@ -2856,11 +2848,8 @@ static bool parse_class_decl_super(rbs_parser_t *parser, rbs_range_t *lt_range, 
         super_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), super_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-        rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-        rbs_loc_add_optional_child(loc, INTERN("args"), args_range);
-
-        *super = rbs_ast_declarations_class_super_new(ALLOCATOR(), loc, name, args);
+        *super = rbs_ast_declarations_class_super_new(ALLOCATOR(), loc, name, args, RBS_RANGE_LEX2AST(name_range));
+        (*super)->args_range = RBS_RANGE_LEX2AST(args_range);
     } else {
         *lt_range = NULL_RANGE;
     }
@@ -2898,14 +2887,11 @@ static bool parse_class_decl0(rbs_parser_t *parser, rbs_range_t keyword_range, r
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
     rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-    rbs_loc_alloc_children(ALLOCATOR(), loc, 5);
-    rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-    rbs_loc_add_required_child(loc, INTERN("name"), name_range);
-    rbs_loc_add_required_child(loc, INTERN("end"), end_range);
-    rbs_loc_add_optional_child(loc, INTERN("type_params"), type_params_range);
-    rbs_loc_add_optional_child(loc, INTERN("lt"), lt_range);
 
-    *class_decl = rbs_ast_declarations_class_new(ALLOCATOR(), loc, name, type_params, super, members, annotations, comment);
+    *class_decl = rbs_ast_declarations_class_new(ALLOCATOR(), loc, name, type_params, super, members, annotations, comment, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(name_range), RBS_RANGE_LEX2AST(end_range));
+    (*class_decl)->type_params_range = RBS_RANGE_LEX2AST(type_params_range);
+    (*class_decl)->lt_range = RBS_RANGE_LEX2AST(lt_range);
+
     return true;
 }
 
@@ -2940,13 +2926,8 @@ static bool parse_class_decl(rbs_parser_t *parser, rbs_position_t comment_pos, r
         };
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), decl_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 4);
-        rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
-        rbs_loc_add_required_child(loc, INTERN("new_name"), class_name_range);
-        rbs_loc_add_required_child(loc, INTERN("eq"), eq_range);
-        rbs_loc_add_optional_child(loc, INTERN("old_name"), old_name_range);
 
-        *class_decl = (rbs_node_t *) rbs_ast_declarations_class_alias_new(ALLOCATOR(), loc, class_name, old_name, comment, annotations);
+        *class_decl = (rbs_node_t *) rbs_ast_declarations_class_alias_new(ALLOCATOR(), loc, class_name, old_name, comment, annotations, RBS_RANGE_LEX2AST(keyword_range), RBS_RANGE_LEX2AST(class_name_range), RBS_RANGE_LEX2AST(eq_range), RBS_RANGE_LEX2AST(old_name_range));
     } else {
         rbs_ast_declarations_class_t *class_decl0 = NULL;
         CHECK_PARSE(parse_class_decl0(parser, keyword_range, class_name, class_name_range, comment, annotations, &class_decl0));
@@ -3154,12 +3135,11 @@ static bool parse_use_clauses(rbs_parser_t *parser, rbs_node_list_t *clauses) {
             }
 
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), clause_range);
-            rbs_loc_alloc_children(ALLOCATOR(), loc, 3);
-            rbs_loc_add_required_child(loc, INTERN("type_name"), type_name_range);
-            rbs_loc_add_optional_child(loc, INTERN("keyword"), keyword_range);
-            rbs_loc_add_optional_child(loc, INTERN("new_name"), new_name_range);
 
-            rbs_ast_directives_use_single_clause_t *clause = rbs_ast_directives_use_single_clause_new(ALLOCATOR(), loc, type_name, new_name);
+            rbs_ast_directives_use_single_clause_t *clause = rbs_ast_directives_use_single_clause_new(ALLOCATOR(), loc, type_name, new_name, RBS_RANGE_LEX2AST(type_name_range));
+            clause->keyword_range = RBS_RANGE_LEX2AST(keyword_range);
+            clause->new_name_range = RBS_RANGE_LEX2AST(new_name_range);
+
             rbs_node_list_append(clauses, (rbs_node_t *) clause);
 
             break;
@@ -3172,11 +3152,8 @@ static bool parse_use_clauses(rbs_parser_t *parser, rbs_node_list_t *clauses) {
             clause_range.end = star_range.end;
 
             rbs_location_t *loc = rbs_location_new(ALLOCATOR(), clause_range);
-            rbs_loc_alloc_children(ALLOCATOR(), loc, 2);
-            rbs_loc_add_required_child(loc, INTERN("namespace"), namespace_range);
-            rbs_loc_add_required_child(loc, INTERN("star"), star_range);
 
-            rbs_ast_directives_use_wildcard_clause_t *clause = rbs_ast_directives_use_wildcard_clause_new(ALLOCATOR(), loc, ns);
+            rbs_ast_directives_use_wildcard_clause_t *clause = rbs_ast_directives_use_wildcard_clause_new(ALLOCATOR(), loc, ns, RBS_RANGE_LEX2AST(namespace_range), RBS_RANGE_LEX2AST(star_range));
             rbs_node_list_append(clauses, (rbs_node_t *) clause);
 
             break;
@@ -3213,10 +3190,8 @@ static bool parse_use_directive(rbs_parser_t *parser, rbs_ast_directives_use_t *
         directive_range.end = parser->current_token.range.end;
 
         rbs_location_t *loc = rbs_location_new(ALLOCATOR(), directive_range);
-        rbs_loc_alloc_children(ALLOCATOR(), loc, 1);
-        rbs_loc_add_required_child(loc, INTERN("keyword"), keyword_range);
 
-        *use_directive = rbs_ast_directives_use_new(ALLOCATOR(), loc, clauses);
+        *use_directive = rbs_ast_directives_use_new(ALLOCATOR(), loc, clauses, RBS_RANGE_LEX2AST(keyword_range));
     }
 
     return true;
