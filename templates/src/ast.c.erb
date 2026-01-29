@@ -167,6 +167,13 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
         <%- node.fields.each do |field| -%>
         .<%= field.c_name %> = <%= field.c_name %>,
         <%- end -%>
+        <%- node.locations&.each do |loc| -%>
+        <%- if loc.required? -%>
+        .<%= loc.attribute_name %> = <%= loc.attribute_name %>,
+        <%- else -%>
+        .<%= loc.attribute_name %> = RBS_LOCATION_NULL_RANGE,
+        <%- end -%>
+        <%- end -%>
     };
 
     return instance;

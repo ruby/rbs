@@ -71,6 +71,12 @@ typedef struct <%= node.c_base_name %> {
     <%- node.fields.each do |field| -%>
     <%= field.stored_field_decl %>;
     <%- end -%>
+    <%- if node.locations -%>
+    
+        <%- node.locations.each do |loc| -%>
+    <%= loc.type_name %> <%= loc.attribute_name %>;  /* <%= loc.required? ? "Required" : "Optional" %> */
+        <%- end -%>
+    <%- end -%>
 } <%= node.c_type_name %>;
 
 <%- end -%>
