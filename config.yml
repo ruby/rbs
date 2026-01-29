@@ -1,3 +1,5 @@
+# See `docs/config.md` for quick documentation of this file format.
+
 nodes:
   - name: RBS::AST::Annotation
     rust_name: AnnotationNode
@@ -33,6 +35,12 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: keyword
+      - required: name
+      - required: end
+      - optional: type_params
+      - optional: lt
   - name: RBS::AST::Declarations::Class::Super
     rust_name: ClassSuperNode
     fields:
@@ -40,6 +48,9 @@ nodes:
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - optional: args
   - name: RBS::AST::Declarations::ClassAlias
     rust_name: ClassAliasNode
     fields:
@@ -52,6 +63,11 @@ nodes:
         optional: true  # NULL when no comment precedes the declaration
       - name: annotations
         c_type: rbs_node_list
+    locations:
+      - required: keyword
+      - required: new_name
+      - required: eq
+      - required: old_name
   - name: RBS::AST::Declarations::Constant
     rust_name: ConstantNode
     fields:
@@ -64,6 +80,9 @@ nodes:
         optional: true  # NULL when no comment precedes the declaration
       - name: annotations
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - required: colon
   - name: RBS::AST::Declarations::Global
     rust_name: GlobalNode
     fields:
@@ -76,6 +95,9 @@ nodes:
         optional: true  # NULL when no comment precedes the declaration
       - name: annotations
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - required: colon
   - name: RBS::AST::Declarations::Interface
     rust_name: InterfaceNode
     fields:
@@ -90,6 +112,11 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: keyword
+      - required: name
+      - required: end
+      - optional: type_params
   - name: RBS::AST::Declarations::Module
     rust_name: ModuleNode
     fields:
@@ -106,6 +133,13 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: keyword
+      - required: name
+      - required: end
+      - optional: type_params        
+      - optional: colon
+      - optional: self_types
   - name: RBS::AST::Declarations::Module::Self
     rust_name: ModuleSelfNode
     fields:
@@ -113,6 +147,9 @@ nodes:
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - optional: args
   - name: RBS::AST::Declarations::ModuleAlias
     rust_name: ModuleAliasNode
     fields:
@@ -125,6 +162,11 @@ nodes:
         optional: true  # NULL when no comment precedes the declaration
       - name: annotations
         c_type: rbs_node_list
+    locations:
+      - required: keyword
+      - required: new_name
+      - required: eq
+      - required: old_name
   - name: RBS::AST::Declarations::TypeAlias
     rust_name: TypeAliasNode
     fields:
@@ -139,11 +181,18 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: keyword
+      - required: name
+      - required: eq
+      - optional: type_params
   - name: RBS::AST::Directives::Use
     rust_name: UseNode
     fields:
       - name: clauses
         c_type: rbs_node_list
+    locations:
+      - required: keyword
   - name: RBS::AST::Directives::Use::SingleClause
     rust_name: UseSingleClauseNode
     fields:
@@ -152,12 +201,19 @@ nodes:
       - name: new_name
         c_type: rbs_ast_symbol
         optional: true  # NULL when no alias (e.g., `use Foo::Bar` vs `use Foo::Bar as Baz`)
+    locations:
+      - required: type_name
+      - optional: keyword
+      - optional: new_name
   - name: RBS::AST::Directives::Use::WildcardClause
     rust_name: UseWildcardClauseNode
     fields:
       - name: namespace
         c_type: rbs_namespace
         c_name: rbs_namespace
+    locations:
+      - required: namespace
+      - required: star
   - name: RBS::AST::Members::Alias
     rust_name: AliasNode
     fields:
@@ -166,12 +222,18 @@ nodes:
       - name: old_name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_keyword
+        c_type: alias_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: keyword
+      - required: new_name
+      - required: old_name
+      - optional: new_kind
+      - optional: old_kind
   - name: RBS::AST::Members::AttrAccessor
     rust_name: AttrAccessorNode
     fields:
@@ -180,18 +242,24 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_accessor foo: T`); Symbol when named (`attr_accessor foo (@bar): T`); Bool(false) when empty parens (`attr_accessor foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_accessor foo: T` vs `private attr_accessor foo: T`)
+        c_type: attribute_visibility
+    locations:
+      - required: keyword
+      - required: name
+      - required: colon
+      - optional: kind
+      - optional: ivar
+      - optional: ivar_name
+      - optional: visibility
   - name: RBS::AST::Members::AttrReader
     rust_name: AttrReaderNode
     fields:
@@ -200,18 +268,24 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_reader foo: T`); Symbol when named (`attr_reader foo (@bar): T`); Bool(false) when empty parens (`attr_reader foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_reader foo: T` vs `private attr_reader foo: T`)
+        c_type: attribute_visibility
+    locations:
+      - required: keyword
+      - required: name
+      - required: colon
+      - optional: kind
+      - optional: ivar
+      - optional: ivar_name
+      - optional: visibility
   - name: RBS::AST::Members::AttrWriter
     rust_name: AttrWriterNode
     fields:
@@ -220,18 +294,24 @@ nodes:
       - name: type
         c_type: rbs_node
       - name: ivar_name
-        c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
-        optional: true  # NULL when omitted (`attr_writer foo: T`); Symbol when named (`attr_writer foo (@bar): T`); Bool(false) when empty parens (`attr_writer foo (): T`)
+        c_type: rbs_attr_ivar_name
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_writer foo: T` vs `private attr_writer foo: T`)
+        c_type: attribute_visibility
+    locations:
+      - required: keyword
+      - required: name
+      - required: colon
+      - optional: kind
+      - optional: ivar
+      - optional: ivar_name
+      - optional: visibility
   - name: RBS::AST::Members::ClassInstanceVariable
     rust_name: ClassInstanceVariableNode
     fields:
@@ -242,6 +322,10 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: colon
+      - optional: kind
   - name: RBS::AST::Members::ClassVariable
     rust_name: ClassVariableNode
     fields:
@@ -252,6 +336,10 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: colon
+      - optional: kind
   - name: RBS::AST::Members::Extend
     rust_name: ExtendNode
     fields:
@@ -264,6 +352,10 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: keyword
+      - optional: args
   - name: RBS::AST::Members::Include
     rust_name: IncludeNode
     fields:
@@ -276,6 +368,10 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: keyword
+      - optional: args
   - name: RBS::AST::Members::InstanceVariable
     rust_name: InstanceVariableNode
     fields:
@@ -286,13 +382,17 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: colon
+      - optional: kind
   - name: RBS::AST::Members::MethodDefinition
     rust_name: MethodDefinitionNode
     fields:
       - name: name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_keyword
+        c_type: method_definition_kind
       - name: overloads
         c_type: rbs_node_list
       - name: annotations
@@ -303,8 +403,13 @@ nodes:
       - name: overloading
         c_type: bool
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `def foo: ...` vs `private def foo: ...`)
+        c_type: method_definition_visibility
+    locations:
+      - required: keyword
+      - required: name
+      - optional: kind
+      - optional: overloading
+      - optional: visibility
   - name: RBS::AST::Members::MethodDefinition::Overload
     rust_name: MethodDefinitionOverloadNode
     expose_location: false
@@ -325,6 +430,10 @@ nodes:
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
+    locations:
+      - required: name
+      - required: keyword
+      - optional: args
   - name: RBS::AST::Members::Private
     rust_name: PrivateNode
   - name: RBS::AST::Members::Public
@@ -335,7 +444,7 @@ nodes:
       - name: name
         c_type: rbs_ast_symbol
       - name: variance
-        c_type: rbs_keyword
+        c_type: type_param_variance
       - name: upper_bound
         c_type: rbs_node
         optional: true  # NULL when no upper bound (e.g., `[T]` vs `[T < Bound]`)
@@ -347,6 +456,13 @@ nodes:
         optional: true  # NULL when no default (e.g., `[T]` vs `[T = Default]`)
       - name: unchecked
         c_type: bool
+    locations:
+      - required: name
+      - optional: variance
+      - optional: unchecked
+      - optional: upper_bound
+      - optional: lower_bound
+      - optional: default
   - name: RBS::AST::Integer
     rust_name: IntegerNode
     expose_to_ruby: false
@@ -371,6 +487,9 @@ nodes:
       - name: block
         c_type: rbs_types_block
         optional: true  # NULL when no block (e.g., `() -> void` vs `() { () -> void } -> void`)
+    locations:
+      - required: type
+      - optional: type_params
   - name: RBS::Namespace
     rust_name: NamespaceNode
     expose_location: false
@@ -404,6 +523,9 @@ nodes:
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - optional: args
   - name: RBS::Types::Bases::Any
     rust_name: AnyTypeNode
     fields:
@@ -443,11 +565,16 @@ nodes:
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - optional: args
   - name: RBS::Types::ClassSingleton
     rust_name: ClassSingletonTypeNode
     fields:
       - name: name
         c_type: rbs_type_name
+    locations:
+      - required: name
   - name: RBS::Types::Function
     rust_name: FunctionTypeNode
     expose_location: false
@@ -478,6 +605,8 @@ nodes:
       - name: name
         c_type: rbs_ast_symbol
         optional: true  # NULL when param is unnamed (e.g., `(String) -> void` vs `(String name) -> void`)
+    locations:
+      - optional: name
   - name: RBS::Types::Interface
     rust_name: InterfaceTypeNode
     fields:
@@ -485,6 +614,9 @@ nodes:
         c_type: rbs_type_name
       - name: args
         c_type: rbs_node_list
+    locations:
+      - required: name
+      - optional: args
   - name: RBS::Types::Intersection
     rust_name: IntersectionTypeNode
     fields:
@@ -550,14 +682,14 @@ nodes:
     rust_name: NodeTypeAssertionNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type
         c_type: rbs_node
   - name: RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation
     rust_name: ColonMethodTypeAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: annotations
         c_type: rbs_node_list
       - name: method_type
@@ -566,78 +698,115 @@ nodes:
     rust_name: MethodTypesAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: overloads
         c_type: rbs_node_list
       - name: vertical_bar_locations
-        c_type: rbs_location_list
+        c_type: rbs_location_range_list
   - name: RBS::AST::Ruby::Annotations::SkipAnnotation
     rust_name: SkipAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: skip_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ReturnTypeAnnotation
     rust_name: ReturnTypeAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: return_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: colon_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: return_type
         c_type: rbs_node
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::TypeApplicationAnnotation
     rust_name: TypeApplicationAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_args
         c_type: rbs_node_list
       - name: close_bracket_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: comma_locations
-        c_type: rbs_location_list
+        c_type: rbs_location_range_list
   - name: RBS::AST::Ruby::Annotations::InstanceVariableAnnotation
     rust_name: InstanceVariableAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: ivar_name
         c_type: rbs_ast_symbol
       - name: ivar_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: colon_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type
         c_type: rbs_node
       - name: comment_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ClassAliasAnnotation
     rust_name: ClassAliasAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: keyword_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_name
         c_type: rbs_type_name
       - name: type_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::ModuleAliasAnnotation
     rust_name: ModuleAliasAnnotationNode
     fields:
       - name: prefix_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: keyword_location
-        c_type: rbs_location
+        c_type: rbs_location_range
       - name: type_name
         c_type: rbs_type_name
       - name: type_name_location
-        c_type: rbs_location
+        c_type: rbs_location_range
+        optional: true
+
+enums:
+  attribute_visibility:
+    optional: true
+    symbols:
+      - unspecified
+      - public
+      - private
+  attribute_kind:
+    symbols:
+      - instance
+      - singleton
+  alias_kind:
+    symbols:
+      - instance
+      - singleton
+  method_definition_kind:
+    symbols:
+      - instance
+      - singleton
+      - singleton_instance
+  method_definition_visibility:
+    optional: true
+    symbols:
+      - unspecified
+      - public
+      - private
+  type_param_variance:
+    symbols:
+      - invariant
+      - covariant
+      - contravariant

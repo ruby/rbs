@@ -7,7 +7,9 @@
 VALUE EMPTY_ARRAY;
 VALUE EMPTY_HASH;
 
-#define RBS_LOC_CHILDREN_SIZE(cap) (sizeof(rbs_loc_children) + sizeof(rbs_loc_entry) * ((cap) - 1))
+#define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
+#define RBS_LOCATION_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
+#define RBS_LOCATION_OPTIONAL_P(loc, i) (!RBS_LOCATION_REQUIRED_P((loc), (i)))
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
     return (rbs_translation_context_t) {
@@ -43,35 +45,61 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
     return ruby_hash;
 }
 
-VALUE rbs_loc_to_ruby_location(rbs_translation_context_t ctx, rbs_location_t *source_loc) {
-    if (source_loc == NULL) {
+VALUE rbs_location_range_to_ruby_location(rbs_translation_context_t ctx, rbs_location_range range) {
+    if (RBS_LOCATION_NULL_RANGE_P(range)) {
         return Qnil;
     }
 
-    VALUE new_loc = rbs_new_location(ctx.buffer, source_loc->rg);
-    rbs_loc *new_loc_struct = rbs_check_location(new_loc);
-
-    if (source_loc->children != NULL) {
-        rbs_loc_legacy_alloc_children(new_loc_struct, source_loc->children->cap);
-        memcpy(new_loc_struct->children, source_loc->children, RBS_LOC_CHILDREN_SIZE(source_loc->children->cap));
-    }
-
-    return new_loc;
+    return rbs_new_location2(ctx.buffer, range.start_char, range.end_char);
 }
 
-VALUE rbs_location_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_list_t *list) {
+VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_range_list_t *list) {
     if (list == NULL) {
         return EMPTY_ARRAY;
     }
 
     VALUE ruby_array = rb_ary_new();
 
-    for (rbs_location_list_node_t *n = list->head; n != NULL; n = n->next) {
-        rb_ary_push(ruby_array, rbs_loc_to_ruby_location(ctx, n->loc));
+    for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_location_range_to_ruby_location(ctx, n->range));
     }
 
     return ruby_array;
 }
+
+VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_name_t ivar_name) {
+    switch (ivar_name.tag) {
+    case RBS_ATTR_IVAR_NAME_TAG_NAME: {
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ivar_name.name);
+        assert(constant != NULL && "constant is NULL");
+        assert(constant->start != NULL && "constant->start is NULL");
+
+        return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
+    }
+    case RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED:
+        return Qnil;
+    case RBS_ATTR_IVAR_NAME_TAG_EMPTY: 
+        return Qfalse;
+    }
+}
+
+<%- enums.each do |enum| -%>
+VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
+    switch (value) {
+    <%- enum.each_symbol do |symbol, enum_const, ruby_value| -%>
+    case <%= enum_const %>:
+        <%- if ruby_value.nil? -%>
+        return Qnil;
+        <%- else -%>
+        return rb_id2sym(rb_intern("<%= ruby_value %>"));
+        <%- end -%>
+    <%- end -%>
+    default:
+        rb_fatal("unknown <%= enum.c_type_name %> value: %d", value);
+    }
+}
+
+<%- end -%>
 
 #ifdef RB_PASS_KEYWORDS
 // Ruby 2.7 or later
@@ -88,7 +116,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
     switch (instance->type) {
     <%- nodes.each do |node| -%>
-    case <%= node.c_type_enum_name %>: {
+    case <%= node.c_node_enum_name %>: {
         <%- case node.ruby_full_name -%>
         <%- when "RBS::AST::Bool" -%>
         return ((rbs_ast_bool_t *) instance)->value ? Qtrue : Qfalse;
@@ -126,33 +154,53 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
         VALUE h = rb_hash_new();
         <%- if node.expose_location? -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_loc_to_ruby_location(ctx, node->base.location));
+            <%- if node.locations -%>
+        VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
+                <%- node.locations.each do |location_field| -%>
+                    <%- if location_field.required? -%>
+        rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+                    <%- else -%>
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+                    <%- end -%>
+                <%- end -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
+            <%- else -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
+            <%- end -%>
         <%- end -%>
         <%- node.fields.each do |field| -%>
-        <%- case field.c_type -%>
-        <%- when "VALUE" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %>);
+        <%- case field.type.name -%>
         <%- when "rbs_node_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>));
         <%- when "rbs_hash" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(ctx, node-><%= field.c_name %>));
         <%- when "rbs_ast_symbol" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // rbs_ast_symbol
-        <%- when "rbs_keyword" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // rbs_keyword
         <%- when "rbs_string" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.c_name %>, ctx.encoding));
         <%- when "bool" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %> ? Qtrue : Qfalse);
+        <%- when "rbs_location_range" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_to_ruby_location(ctx, node-><%= field.name %>));<%= field.optional? ? " // optional" : "" %>
+        <%- when "rbs_location_range_list" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_list_to_ruby_array(ctx, node-><%= field.name %>));
         <%- when "rbs_location" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
         <%- when "rbs_location_list" -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
+        <%- when "rbs_attr_ivar_name" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_attr_ivar_name_to_ruby(ctx, node-><%= field.c_name %>)); // rbs_attr_ivar_name_t
         <%- else -%>
-        <%- unless field.ast_node? -%>
-        #warning unexpected type <%= field.c_type -%>
-        <%- end -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.c_type %>
+            <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), <%= field.type.descr.translator_name %>(node-><%= field.c_name %>));  // <%= field.type.name %>
+            <%- else -%>
+                <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
+        #warning unexpected type <%= field.inspect -%>
+                <%- end -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.type.c_name %>
+            <%- end -%>
         <%- end -%>
         <%- end -%>
 
@@ -173,15 +221,8 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         <%- end -%>
     }
     <%- end -%>
-    case RBS_KEYWORD: {
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(RBS_GLOBAL_CONSTANT_POOL, ((rbs_keyword_t *) instance)->constant_id);
-        assert(constant != NULL && "constant is NULL");
-        assert(constant->start != NULL && "constant->start is NULL");
-
-        return ID2SYM(rb_intern2((const char *) constant->start, constant->length));
-    }
     case RBS_AST_SYMBOL: {
-        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_keyword_t *) instance)->constant_id);
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_ast_symbol_t *) instance)->constant_id);
         assert(constant != NULL && "constant is NULL");
         assert(constant->start != NULL && "constant->start is NULL");
 

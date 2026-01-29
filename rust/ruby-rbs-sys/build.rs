@@ -95,6 +95,7 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_directives_use_t")
         .allowlist_type("rbs_ast_directives_use_wildcard_clause_t")
         .allowlist_type("rbs_ast_integer_t")
+        .allowlist_type("rbs_attr_ivar_name_t")
         .allowlist_type("rbs_ast_members_alias_t")
         .allowlist_type("rbs_ast_members_attr_accessor_t")
         .allowlist_type("rbs_ast_members_attr_reader_t")
@@ -123,7 +124,9 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_type_param_t")
         .allowlist_type("rbs_encoding_t")
         .allowlist_type("rbs_encoding_type_t")
-        .allowlist_type("rbs_keyword_t")
+        .allowlist_type("rbs_location_range")
+        .allowlist_type("rbs_location_range_list_t")
+        .allowlist_type("rbs_location_range_list_node_t")
         .allowlist_type("rbs_method_type_t")
         .allowlist_type("rbs_namespace_t")
         .allowlist_type("rbs_node_list_t")
@@ -156,20 +159,29 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_types_union_t")
         .allowlist_type("rbs_types_untyped_function_t")
         .allowlist_type("rbs_types_variable_t")
+        .constified_enum_module("rbs_alias_kind")
+        .constified_enum_module("rbs_attribute_kind")
+        .constified_enum_module("rbs_attribute_visibility")
         .constified_enum_module("rbs_encoding_type_t")
+        .constified_enum_module("rbs_attr_ivar_name_tag")
+        .constified_enum_module("rbs_method_definition_kind")
+        .constified_enum_module("rbs_method_definition_visibility")
         .constified_enum_module("rbs_node_type")
+        .constified_enum_module("rbs_type_param_variance")
         // Encodings
         .allowlist_var("rbs_encodings")
         // Parser functions
-        .allowlist_function("rbs_constant_pool_id_to_constant")
         .allowlist_function("rbs_parse_signature")
         .allowlist_function("rbs_parser_free")
         .allowlist_function("rbs_parser_new")
         // String functions
         .allowlist_function("rbs_string_new")
-        // Global constant pool
-        .allowlist_var("RBS_GLOBAL_CONSTANT_POOL")
+        // Location functions
+        .allowlist_function("rbs_location_range_list_new")
+        .allowlist_function("rbs_location_range_list_append")
+        // Constant pool functions
         .allowlist_function("rbs_constant_pool_free")
+        .allowlist_function("rbs_constant_pool_id_to_constant")
         .allowlist_function("rbs_constant_pool_init")
         .generate()
         .map_err(|_| "Unable to generate rbs bindings")?;
