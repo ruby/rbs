@@ -6,6 +6,14 @@
 #include "rbs/util/rbs_constant_pool.h"
 #include "rbs/util/rbs_allocator.h"
 
+#define RBS_LOCATION_NULL_RANGE ((rbs_location_range) { -1, -1 })
+#define RBS_LOCATION_NULL_RANGE_P(rg) ((rg).start == -1)
+
+/**
+ * Converts a lexer range (rbs_range_t) to an AST location range (rbs_location_range) by extracting character positions.
+ */
+#define RBS_RANGE_LEX2AST(rg) ((rbs_location_range) { (rg).start.char_pos, (rg).end.char_pos })
+
 typedef struct {
     int start;
     int end;
