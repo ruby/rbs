@@ -6,6 +6,15 @@
 #include "string.h"
 #include "location.h"
 
+<%- enums.each do |enum| -%>
+enum <%= enum.c_name %> {
+<%- enum.each_symbol do |symbol, enum_const, value| -%>
+    <%= enum_const %>,    /* <%= symbol %> (<%= value.inspect %>) */
+<%- end -%>
+};
+
+<%- end -%>
+
 enum rbs_node_type {
 <%- nodes.each_with_index do |node, index| -%>
     <%= node.c_node_enum_name %> = <%= index + 1 %>,

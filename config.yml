@@ -220,7 +220,7 @@ nodes:
       - name: old_name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_keyword
+        c_type: alias_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
@@ -243,15 +243,14 @@ nodes:
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
         optional: true  # NULL when omitted (`attr_accessor foo: T`); Symbol when named (`attr_accessor foo (@bar): T`); Bool(false) when empty parens (`attr_accessor foo (): T`)
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_accessor foo: T` vs `private attr_accessor foo: T`)
+        c_type: attribute_visibility
     locations:
       - required: keyword
       - required: name
@@ -271,15 +270,14 @@ nodes:
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
         optional: true  # NULL when omitted (`attr_reader foo: T`); Symbol when named (`attr_reader foo (@bar): T`); Bool(false) when empty parens (`attr_reader foo (): T`)
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_reader foo: T` vs `private attr_reader foo: T`)
+        c_type: attribute_visibility
     locations:
       - required: keyword
       - required: name
@@ -299,15 +297,14 @@ nodes:
         c_type: rbs_node # rbs_ast_symbol_t, NULL or rbs_ast_bool_new(false)
         optional: true  # NULL when omitted (`attr_writer foo: T`); Symbol when named (`attr_writer foo (@bar): T`); Bool(false) when empty parens (`attr_writer foo (): T`)
       - name: kind
-        c_type: rbs_keyword
+        c_type: attribute_kind
       - name: annotations
         c_type: rbs_node_list
       - name: comment
         c_type: rbs_ast_comment
         optional: true  # NULL when no comment precedes the declaration
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `attr_writer foo: T` vs `private attr_writer foo: T`)
+        c_type: attribute_visibility
     locations:
       - required: keyword
       - required: name
@@ -396,7 +393,7 @@ nodes:
       - name: name
         c_type: rbs_ast_symbol
       - name: kind
-        c_type: rbs_keyword
+        c_type: method_definition_kind
       - name: overloads
         c_type: rbs_node_list
       - name: annotations
@@ -407,8 +404,7 @@ nodes:
       - name: overloading
         c_type: bool
       - name: visibility
-        c_type: rbs_keyword
-        optional: true  # NULL when no visibility prefix (e.g., `def foo: ...` vs `private def foo: ...`)
+        c_type: method_definition_visibility
     locations:
       - required: keyword
       - required: name
@@ -449,7 +445,7 @@ nodes:
       - name: name
         c_type: rbs_ast_symbol
       - name: variance
-        c_type: rbs_keyword
+        c_type: type_param_variance
       - name: upper_bound
         c_type: rbs_node
         optional: true  # NULL when no upper bound (e.g., `[T]` vs `[T < Bound]`)
@@ -783,3 +779,35 @@ nodes:
       - name: type_name_location
         c_type: rbs_location_range
         optional: true
+
+enums:
+  attribute_visibility:
+    optional: true
+    symbols:
+      - unspecified
+      - public
+      - private
+  attribute_kind:
+    symbols:
+      - instance
+      - singleton
+  alias_kind:
+    symbols:
+      - instance
+      - singleton
+  method_definition_kind:
+    symbols:
+      - instance
+      - singleton
+      - singleton_instance
+  method_definition_visibility:
+    optional: true
+    symbols:
+      - unspecified
+      - public
+      - private
+  type_param_variance:
+    symbols:
+      - invariant
+      - covariant
+      - contravariant

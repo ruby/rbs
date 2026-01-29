@@ -73,6 +73,79 @@ VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_l
 
     return ruby_array;
 }
+VALUE rbs_attribute_visibility_to_ruby(enum rbs_attribute_visibility value) {
+    switch (value) {
+    case RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED:
+        return Qnil;
+    case RBS_ATTRIBUTE_VISIBILITY_PUBLIC:
+        return rb_id2sym(rb_intern("public"));
+    case RBS_ATTRIBUTE_VISIBILITY_PRIVATE:
+        return rb_id2sym(rb_intern("private"));
+    default:
+        rb_fatal("unknown enum rbs_attribute_visibility value: %d", value);
+    }
+}
+
+VALUE rbs_attribute_kind_to_ruby(enum rbs_attribute_kind value) {
+    switch (value) {
+    case RBS_ATTRIBUTE_KIND_INSTANCE:
+        return rb_id2sym(rb_intern("instance"));
+    case RBS_ATTRIBUTE_KIND_SINGLETON:
+        return rb_id2sym(rb_intern("singleton"));
+    default:
+        rb_fatal("unknown enum rbs_attribute_kind value: %d", value);
+    }
+}
+
+VALUE rbs_alias_kind_to_ruby(enum rbs_alias_kind value) {
+    switch (value) {
+    case RBS_ALIAS_KIND_INSTANCE:
+        return rb_id2sym(rb_intern("instance"));
+    case RBS_ALIAS_KIND_SINGLETON:
+        return rb_id2sym(rb_intern("singleton"));
+    default:
+        rb_fatal("unknown enum rbs_alias_kind value: %d", value);
+    }
+}
+
+VALUE rbs_method_definition_kind_to_ruby(enum rbs_method_definition_kind value) {
+    switch (value) {
+    case RBS_METHOD_DEFINITION_KIND_INSTANCE:
+        return rb_id2sym(rb_intern("instance"));
+    case RBS_METHOD_DEFINITION_KIND_SINGLETON:
+        return rb_id2sym(rb_intern("singleton"));
+    case RBS_METHOD_DEFINITION_KIND_SINGLETON_INSTANCE:
+        return rb_id2sym(rb_intern("singleton_instance"));
+    default:
+        rb_fatal("unknown enum rbs_method_definition_kind value: %d", value);
+    }
+}
+
+VALUE rbs_method_definition_visibility_to_ruby(enum rbs_method_definition_visibility value) {
+    switch (value) {
+    case RBS_METHOD_DEFINITION_VISIBILITY_UNSPECIFIED:
+        return Qnil;
+    case RBS_METHOD_DEFINITION_VISIBILITY_PUBLIC:
+        return rb_id2sym(rb_intern("public"));
+    case RBS_METHOD_DEFINITION_VISIBILITY_PRIVATE:
+        return rb_id2sym(rb_intern("private"));
+    default:
+        rb_fatal("unknown enum rbs_method_definition_visibility value: %d", value);
+    }
+}
+
+VALUE rbs_type_param_variance_to_ruby(enum rbs_type_param_variance value) {
+    switch (value) {
+    case RBS_TYPE_PARAM_VARIANCE_INVARIANT:
+        return rb_id2sym(rb_intern("invariant"));
+    case RBS_TYPE_PARAM_VARIANCE_COVARIANT:
+        return rb_id2sym(rb_intern("covariant"));
+    case RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT:
+        return rb_id2sym(rb_intern("contravariant"));
+    default:
+        rb_fatal("unknown enum rbs_type_param_variance value: %d", value);
+    }
+}
 
 #ifdef RB_PASS_KEYWORDS
 // Ruby 2.7 or later
@@ -446,7 +519,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->new_name)); // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->old_name)); // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind));         // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_alias_kind_to_ruby(node->kind));                               // alias_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
 
@@ -474,10 +547,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind));           // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
-        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment));       // rbs_ast_comment
-        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->visibility)); // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Members_AttrAccessor,
@@ -503,10 +576,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind));           // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
-        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment));       // rbs_ast_comment
-        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->visibility)); // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Members_AttrReader,
@@ -532,10 +605,10 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));           // rbs_ast_symbol
         rb_hash_aset(h, ID2SYM(rb_intern("type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->type));           // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("ivar_name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->ivar_name)); // rbs_node
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind));           // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_attribute_kind_to_ruby(node->kind));                             // attribute_kind
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
-        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment));       // rbs_ast_comment
-        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->visibility)); // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
+        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_attribute_visibility_to_ruby(node->visibility));       // attribute_visibility
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Members_AttrWriter,
@@ -664,12 +737,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_loc_legacy_add_optional_child(loc, rb_intern("visibility"), (rbs_loc_range) { .start = node->visibility_range.start, .end = node->visibility_range.end });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->kind)); // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("kind")), rbs_method_definition_kind_to_ruby(node->kind));           // method_definition_kind
         rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(ctx, node->overloads));
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), rbs_node_list_to_ruby_array(ctx, node->annotations));
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->comment)); // rbs_ast_comment
         rb_hash_aset(h, ID2SYM(rb_intern("overloading")), node->overloading ? Qtrue : Qfalse);
-        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->visibility)); // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("visibility")), rbs_method_definition_visibility_to_ruby(node->visibility)); // method_definition_visibility
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Members_MethodDefinition,
@@ -899,7 +972,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_loc_legacy_add_optional_child(loc, rb_intern("default"), (rbs_loc_range) { .start = node->default_range.start, .end = node->default_range.end });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name));                 // rbs_ast_symbol
-        rb_hash_aset(h, ID2SYM(rb_intern("variance")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->variance));         // rbs_keyword
+        rb_hash_aset(h, ID2SYM(rb_intern("variance")), rbs_type_param_variance_to_ruby(node->variance));                      // type_param_variance
         rb_hash_aset(h, ID2SYM(rb_intern("upper_bound")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->upper_bound));   // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("lower_bound")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->lower_bound));   // rbs_node
         rb_hash_aset(h, ID2SYM(rb_intern("default_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->default_type)); // rbs_node

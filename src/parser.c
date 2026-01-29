@@ -1386,7 +1386,7 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
 
         while (true) {
             bool unchecked = false;
-            rbs_keyword_t *variance = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("invariant"));
+            enum rbs_type_param_variance variance = RBS_TYPE_PARAM_VARIANCE_INVARIANT;
             rbs_node_t *upper_bound = NULL;
             rbs_node_t *lower_bound = NULL;
             rbs_node_t *default_type = NULL;
@@ -1406,10 +1406,10 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
                 if (parser->next_token.type == kIN || parser->next_token.type == kOUT) {
                     switch (parser->next_token.type) {
                     case kIN:
-                        variance = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("contravariant"));
+                        variance = RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT;
                         break;
                     case kOUT:
-                        variance = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("covariant"));
+                        variance = RBS_TYPE_PARAM_VARIANCE_COVARIANT;
                         break;
                     default:
                         rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
@@ -1880,25 +1880,25 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t visibility_range;
-    rbs_keyword_t *visibility;
+    enum rbs_method_definition_visibility visibility;
     switch (parser->current_token.type) {
     case kPRIVATE: {
         visibility_range = parser->current_token.range;
-        visibility = rbs_keyword_new(ALLOCATOR(), RBS_RANGE_LEX2AST(visibility_range), INTERN("private"));
+        visibility = RBS_METHOD_DEFINITION_VISIBILITY_PRIVATE;
         member_range.start = visibility_range.start;
         rbs_parser_advance(parser);
         break;
     }
     case kPUBLIC: {
         visibility_range = parser->current_token.range;
-        visibility = rbs_keyword_new(ALLOCATOR(), RBS_RANGE_LEX2AST(visibility_range), INTERN("public"));
+        visibility = RBS_METHOD_DEFINITION_VISIBILITY_PUBLIC;
         member_range.start = visibility_range.start;
         rbs_parser_advance(parser);
         break;
     }
     default:
         visibility_range = NULL_RANGE;
-        visibility = NULL;
+        visibility = RBS_METHOD_DEFINITION_VISIBILITY_UNSPECIFIED;
         break;
     }
 
@@ -1910,7 +1910,7 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
         kind_range = NULL_RANGE;
         kind = INSTANCE_KIND;
     } else {
-        kind = parse_instance_singleton_kind(parser, visibility == NULL, &kind_range);
+        kind = parse_instance_singleton_kind(parser, visibility == RBS_METHOD_DEFINITION_VISIBILITY_UNSPECIFIED, &kind_range);
     }
 
     rbs_range_t name_range;
@@ -1986,18 +1986,18 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
-    rbs_keyword_t *k;
+    enum rbs_method_definition_kind k;
     switch (kind) {
     case INSTANCE_KIND: {
-        k = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("instance"));
+        k = RBS_METHOD_DEFINITION_KIND_INSTANCE;
         break;
     }
     case SINGLETON_KIND: {
-        k = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("singleton"));
+        k = RBS_METHOD_DEFINITION_KIND_SINGLETON;
         break;
     }
     case INSTANCE_SINGLETON_KIND: {
-        k = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("singleton_instance"));
+        k = RBS_METHOD_DEFINITION_KIND_SINGLETON_INSTANCE;
         break;
     }
     default:
@@ -2147,12 +2147,12 @@ static bool parse_alias_member(rbs_parser_t *parser, bool instance_only, rbs_pos
     comment_pos = rbs_nonnull_pos_or(comment_pos, member_range.start);
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
-    rbs_keyword_t *kind;
+    enum rbs_alias_kind kind;
     rbs_ast_symbol_t *new_name, *old_name;
     rbs_range_t new_kind_range, old_kind_range, new_name_range, old_name_range;
 
     if (!instance_only && parser->next_token.type == kSELF) {
-        kind = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("singleton"));
+        kind = RBS_ALIAS_KIND_SINGLETON;
 
         new_kind_range.start = parser->next_token.range.start;
         new_kind_range.end = parser->next_token2.range.end;
@@ -2166,7 +2166,7 @@ static bool parse_alias_member(rbs_parser_t *parser, bool instance_only, rbs_pos
         ADVANCE_ASSERT(parser, pDOT);
         CHECK_PARSE(parse_method_name(parser, &old_name_range, &old_name));
     } else {
-        kind = rbs_keyword_new(ALLOCATOR(), rbs_location_range_current_token(parser), INTERN("instance"));
+        kind = RBS_ALIAS_KIND_INSTANCE;
         CHECK_PARSE(parse_method_name(parser, &new_name_range, &new_name));
         CHECK_PARSE(parse_method_name(parser, &old_name_range, &old_name));
         new_kind_range = NULL_RANGE;
@@ -2340,22 +2340,23 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t visibility_range;
-    rbs_keyword_t *visibility;
+    enum rbs_attribute_visibility visibility;
+
     switch (parser->current_token.type) {
     case kPRIVATE: {
         visibility_range = parser->current_token.range;
-        visibility = rbs_keyword_new(ALLOCATOR(), RBS_RANGE_LEX2AST(visibility_range), INTERN("private"));
+        visibility = RBS_ATTRIBUTE_VISIBILITY_PRIVATE;
         rbs_parser_advance(parser);
         break;
     }
     case kPUBLIC: {
         visibility_range = parser->current_token.range;
-        visibility = rbs_keyword_new(ALLOCATOR(), RBS_RANGE_LEX2AST(visibility_range), INTERN("public"));
+        visibility = RBS_ATTRIBUTE_VISIBILITY_PUBLIC;
         rbs_parser_advance(parser);
         break;
     }
     default:
-        visibility = NULL;
+        visibility = RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED;
         visibility_range = NULL_RANGE;
         break;
     }
@@ -2366,11 +2367,7 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     rbs_range_t kind_range;
     InstanceSingletonKind is_kind = parse_instance_singleton_kind(parser, false, &kind_range);
 
-    rbs_keyword_t *kind = rbs_keyword_new(
-        ALLOCATOR(),
-        RBS_RANGE_LEX2AST(keyword_range),
-        INTERN(((is_kind == INSTANCE_KIND) ? "instance" : "singleton"))
-    );
+    enum rbs_attribute_kind kind = (is_kind == INSTANCE_KIND) ? RBS_ATTRIBUTE_KIND_INSTANCE : RBS_ATTRIBUTE_KIND_SINGLETON;
 
     rbs_range_t name_range;
     rbs_ast_symbol_t *attr_name;

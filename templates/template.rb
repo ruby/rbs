@@ -42,6 +42,19 @@ module RBS
       end
     end
 
+    class EnumType < Type
+      attr_reader :descr #: SymbolEnumDescription
+      
+      def initialize(descr)
+        super(name: descr.name, c_name: descr.c_name)
+        @descr = descr
+      end
+
+      def c_type_name
+        descr.c_type_name
+      end
+    end
+
     BUILTIN_TYPES = {
       "VALUE" => Type.new(name: "VALUE", c_name: "VALUE"),
       "bool" => Type.new(name: "bool", c_name: "bool"),
@@ -216,6 +229,41 @@ module RBS
       end
     end
 
+    class SymbolEnumDescription < Data.define(:name, :symbols, :optional)
+      def optional?
+        optional
+      end
+
+      def required?
+        !optional
+      end
+
+      def c_type_name
+        "enum rbs_#{name}"
+      end
+
+      def c_name
+        "rbs_#{name}"
+      end
+
+      # Yields the symbol name in String, the `enum` constant name in C, and the Ruby value.
+      #
+      def each_symbol
+        symbols.each_with_index do |sym, index|
+          constant_name = "RBS_#{name.upcase}_#{sym.to_s.upcase}"
+          value =
+            unless optional? && index == 0
+              sym.to_sym
+            end
+          yield sym, constant_name, value
+        end
+      end
+
+      def translator_name
+        "rbs_#{name}_to_ruby"
+      end
+    end
+
     class << self
       def render(out_file)
         filepath = "templates/#{out_file}.erb"
@@ -280,6 +328,21 @@ module RBS
 
         types = {}
         types.merge!(BUILTIN_TYPES)
+
+        enum_desc = []
+        config.fetch("enums", {}).each do |enum_name, enum_info|
+          next unless  enum_info.key?("symbols")
+          
+          descr = SymbolEnumDescription.new(
+            name: enum_name,
+            symbols: enum_info.fetch("symbols"),
+            optional: enum_info.fetch("optional", false),
+          )
+
+          enum_desc << descr
+          types[enum_name] = EnumType.new(descr)
+        end
+
         node_desc.each do |node, _, _|
           type = NodeType.new(name: node.name, c_name: node.c_name, ruby_name: node.ruby_full_name)
           types[type.c_name] = type
@@ -311,7 +374,8 @@ module RBS
         end
 
         {
-          nodes: nodes.sort_by { _1.descr.ruby_full_name }
+          nodes: nodes.sort_by { _1.descr.ruby_full_name },
+          enums: enum_desc
         }
       end
     end
