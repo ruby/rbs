@@ -192,6 +192,31 @@ module RBS
         end
       end
 
+      ruby2_keywords def assert_send_type_error(method_type, error_type, receiver, method, *args, &block)
+        send_setup(method_type, receiver, method, args, block) do |method_type, trace, result, exception|
+          typecheck = RBS::Test::TypeCheck.new(
+            self_class: receiver.class,
+            builder: builder,
+            sample_size: 100,
+            unchecked_classes: [],
+            instance_class: instance_class,
+            class_class: class_class
+          )
+          errors = typecheck.method_call(method, method_type, trace, errors: [])
+
+          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
+
+          method_defs = method_defs(method)
+          all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
+          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
+
+          # Use `instnace_of?` instead of `is_a?` as we want to check for _the exact exception class_.
+          assert exception.instance_of? error_type
+
+          result
+        end
+      end
+
       ruby2_keywords def refute_send_type(method_type, receiver, method, *args, &block)
         send_setup(method_type, receiver, method, args, block) do |method_type, trace, result, exception|
           method_type = method_type.update(
