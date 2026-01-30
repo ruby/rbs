@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 3.10.3 (2026-01-30)
+
+This is a minor fix around the dependency to `tsort`.
+
+## Pull Requests
+
+* Merge pull request #2601 from ima1zumi/add-tsort-dep ([#2834](https://github.com/ruby/rbs/pull/2834))
+
 ## 3.10.2 (2026-01-07)
 
 This is a minor fix on arena allocator alignment.
