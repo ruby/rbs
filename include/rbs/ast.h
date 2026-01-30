@@ -13,6 +13,51 @@
 #include "string.h"
 #include "location.h"
 
+enum rbs_attribute_visibility {
+    RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED, /* unspecified (nil) */
+    RBS_ATTRIBUTE_VISIBILITY_PUBLIC,      /* public (:public) */
+    RBS_ATTRIBUTE_VISIBILITY_PRIVATE,     /* private (:private) */
+};
+
+enum rbs_attribute_kind {
+    RBS_ATTRIBUTE_KIND_INSTANCE,  /* instance (:instance) */
+    RBS_ATTRIBUTE_KIND_SINGLETON, /* singleton (:singleton) */
+};
+
+enum rbs_alias_kind {
+    RBS_ALIAS_KIND_INSTANCE,  /* instance (:instance) */
+    RBS_ALIAS_KIND_SINGLETON, /* singleton (:singleton) */
+};
+
+enum rbs_method_definition_kind {
+    RBS_METHOD_DEFINITION_KIND_INSTANCE,           /* instance (:instance) */
+    RBS_METHOD_DEFINITION_KIND_SINGLETON,          /* singleton (:singleton) */
+    RBS_METHOD_DEFINITION_KIND_SINGLETON_INSTANCE, /* singleton_instance (:singleton_instance) */
+};
+
+enum rbs_method_definition_visibility {
+    RBS_METHOD_DEFINITION_VISIBILITY_UNSPECIFIED, /* unspecified (nil) */
+    RBS_METHOD_DEFINITION_VISIBILITY_PUBLIC,      /* public (:public) */
+    RBS_METHOD_DEFINITION_VISIBILITY_PRIVATE,     /* private (:private) */
+};
+
+enum rbs_type_param_variance {
+    RBS_TYPE_PARAM_VARIANCE_INVARIANT,     /* invariant (:invariant) */
+    RBS_TYPE_PARAM_VARIANCE_COVARIANT,     /* covariant (:covariant) */
+    RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT, /* contravariant (:contravariant) */
+};
+
+enum rbs_attr_ivar_name_tag {
+    RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED, /* The attribute has inferred instance variable (nil) */
+    RBS_ATTR_IVAR_NAME_TAG_EMPTY,       /* The attribute has no instance variable (false) */
+    RBS_ATTR_IVAR_NAME_TAG_NAME,        /* The attribute has instance variable with the given name */
+};
+
+typedef struct rbs_attr_ivar_name {
+    enum rbs_attr_ivar_name_tag tag;
+    rbs_constant_id_t name; /* valid when tag == RBS_ATTR_IVAR_NAME_TAG_NAME */
+} rbs_attr_ivar_name_t;
+
 enum rbs_node_type {
     RBS_AST_ANNOTATION = 1,
     RBS_AST_BOOL = 2,
@@ -86,13 +131,12 @@ enum rbs_node_type {
     RBS_TYPES_UNION = 70,
     RBS_TYPES_UNTYPED_FUNCTION = 71,
     RBS_TYPES_VARIABLE = 72,
-    RBS_KEYWORD,
     RBS_AST_SYMBOL,
 };
 
 typedef struct rbs_node {
     enum rbs_node_type type;
-    rbs_location_t *location;
+    rbs_location_range location;
 } rbs_node_t;
 
 const char *rbs_node_type_name(rbs_node_t *node);
@@ -163,10 +207,16 @@ typedef struct rbs_ast_declarations_class {
 
     struct rbs_type_name *name;
     struct rbs_node_list *type_params;
-    struct rbs_ast_declarations_class_super *super_class;
+    struct rbs_ast_declarations_class_super *super_class; /* Optional */
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range keyword_range;     /* Required */
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range end_range;         /* Required */
+    rbs_location_range type_params_range; /* Optional */
+    rbs_location_range lt_range;          /* Optional */
 } rbs_ast_declarations_class_t;
 
 typedef struct rbs_ast_declarations_class_super {
@@ -174,6 +224,9 @@ typedef struct rbs_ast_declarations_class_super {
 
     struct rbs_type_name *name;
     struct rbs_node_list *args;
+
+    rbs_location_range name_range; /* Required */
+    rbs_location_range args_range; /* Optional */
 } rbs_ast_declarations_class_super_t;
 
 typedef struct rbs_ast_declarations_class_alias {
@@ -181,8 +234,13 @@ typedef struct rbs_ast_declarations_class_alias {
 
     struct rbs_type_name *new_name;
     struct rbs_type_name *old_name;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
+
+    rbs_location_range keyword_range;  /* Required */
+    rbs_location_range new_name_range; /* Required */
+    rbs_location_range eq_range;       /* Required */
+    rbs_location_range old_name_range; /* Required */
 } rbs_ast_declarations_class_alias_t;
 
 typedef struct rbs_ast_declarations_constant {
@@ -190,8 +248,11 @@ typedef struct rbs_ast_declarations_constant {
 
     struct rbs_type_name *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
+
+    rbs_location_range name_range;  /* Required */
+    rbs_location_range colon_range; /* Required */
 } rbs_ast_declarations_constant_t;
 
 typedef struct rbs_ast_declarations_global {
@@ -199,8 +260,11 @@ typedef struct rbs_ast_declarations_global {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
+
+    rbs_location_range name_range;  /* Required */
+    rbs_location_range colon_range; /* Required */
 } rbs_ast_declarations_global_t;
 
 typedef struct rbs_ast_declarations_interface {
@@ -210,7 +274,12 @@ typedef struct rbs_ast_declarations_interface {
     struct rbs_node_list *type_params;
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range keyword_range;     /* Required */
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range end_range;         /* Required */
+    rbs_location_range type_params_range; /* Optional */
 } rbs_ast_declarations_interface_t;
 
 typedef struct rbs_ast_declarations_module {
@@ -221,7 +290,14 @@ typedef struct rbs_ast_declarations_module {
     struct rbs_node_list *self_types;
     struct rbs_node_list *members;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range keyword_range;     /* Required */
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range end_range;         /* Required */
+    rbs_location_range type_params_range; /* Optional */
+    rbs_location_range colon_range;       /* Optional */
+    rbs_location_range self_types_range;  /* Optional */
 } rbs_ast_declarations_module_t;
 
 typedef struct rbs_ast_declarations_module_self {
@@ -229,6 +305,9 @@ typedef struct rbs_ast_declarations_module_self {
 
     struct rbs_type_name *name;
     struct rbs_node_list *args;
+
+    rbs_location_range name_range; /* Required */
+    rbs_location_range args_range; /* Optional */
 } rbs_ast_declarations_module_self_t;
 
 typedef struct rbs_ast_declarations_module_alias {
@@ -236,8 +315,13 @@ typedef struct rbs_ast_declarations_module_alias {
 
     struct rbs_type_name *new_name;
     struct rbs_type_name *old_name;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     struct rbs_node_list *annotations;
+
+    rbs_location_range keyword_range;  /* Required */
+    rbs_location_range new_name_range; /* Required */
+    rbs_location_range eq_range;       /* Required */
+    rbs_location_range old_name_range; /* Required */
 } rbs_ast_declarations_module_alias_t;
 
 typedef struct rbs_ast_declarations_type_alias {
@@ -247,26 +331,40 @@ typedef struct rbs_ast_declarations_type_alias {
     struct rbs_node_list *type_params;
     struct rbs_node *type;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range keyword_range;     /* Required */
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range eq_range;          /* Required */
+    rbs_location_range type_params_range; /* Optional */
 } rbs_ast_declarations_type_alias_t;
 
 typedef struct rbs_ast_directives_use {
     rbs_node_t base;
 
     struct rbs_node_list *clauses;
+
+    rbs_location_range keyword_range; /* Required */
 } rbs_ast_directives_use_t;
 
 typedef struct rbs_ast_directives_use_single_clause {
     rbs_node_t base;
 
     struct rbs_type_name *type_name;
-    struct rbs_ast_symbol *new_name;
+    struct rbs_ast_symbol *new_name; /* Optional */
+
+    rbs_location_range type_name_range; /* Required */
+    rbs_location_range keyword_range;   /* Optional */
+    rbs_location_range new_name_range;  /* Optional */
 } rbs_ast_directives_use_single_clause_t;
 
 typedef struct rbs_ast_directives_use_wildcard_clause {
     rbs_node_t base;
 
     struct rbs_namespace *rbs_namespace;
+
+    rbs_location_range namespace_range; /* Required */
+    rbs_location_range star_range;      /* Required */
 } rbs_ast_directives_use_wildcard_clause_t;
 
 typedef struct rbs_ast_integer {
@@ -280,9 +378,15 @@ typedef struct rbs_ast_members_alias {
 
     struct rbs_ast_symbol *new_name;
     struct rbs_ast_symbol *old_name;
-    struct rbs_keyword *kind;
+    enum rbs_alias_kind kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range keyword_range;  /* Required */
+    rbs_location_range new_name_range; /* Required */
+    rbs_location_range old_name_range; /* Required */
+    rbs_location_range new_kind_range; /* Optional */
+    rbs_location_range old_kind_range; /* Optional */
 } rbs_ast_members_alias_t;
 
 typedef struct rbs_ast_members_attr_accessor {
@@ -290,11 +394,19 @@ typedef struct rbs_ast_members_attr_accessor {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
-    struct rbs_keyword *kind;
+    rbs_attr_ivar_name_t ivar_name;
+    enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    enum rbs_attribute_visibility visibility;
+
+    rbs_location_range keyword_range;    /* Required */
+    rbs_location_range name_range;       /* Required */
+    rbs_location_range colon_range;      /* Required */
+    rbs_location_range kind_range;       /* Optional */
+    rbs_location_range ivar_range;       /* Optional */
+    rbs_location_range ivar_name_range;  /* Optional */
+    rbs_location_range visibility_range; /* Optional */
 } rbs_ast_members_attr_accessor_t;
 
 typedef struct rbs_ast_members_attr_reader {
@@ -302,11 +414,19 @@ typedef struct rbs_ast_members_attr_reader {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
-    struct rbs_keyword *kind;
+    rbs_attr_ivar_name_t ivar_name;
+    enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    enum rbs_attribute_visibility visibility;
+
+    rbs_location_range keyword_range;    /* Required */
+    rbs_location_range name_range;       /* Required */
+    rbs_location_range colon_range;      /* Required */
+    rbs_location_range kind_range;       /* Optional */
+    rbs_location_range ivar_range;       /* Optional */
+    rbs_location_range ivar_name_range;  /* Optional */
+    rbs_location_range visibility_range; /* Optional */
 } rbs_ast_members_attr_reader_t;
 
 typedef struct rbs_ast_members_attr_writer {
@@ -314,11 +434,19 @@ typedef struct rbs_ast_members_attr_writer {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_node *ivar_name;
-    struct rbs_keyword *kind;
+    rbs_attr_ivar_name_t ivar_name;
+    enum rbs_attribute_kind kind;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
-    struct rbs_keyword *visibility;
+    struct rbs_ast_comment *comment; /* Optional */
+    enum rbs_attribute_visibility visibility;
+
+    rbs_location_range keyword_range;    /* Required */
+    rbs_location_range name_range;       /* Required */
+    rbs_location_range colon_range;      /* Required */
+    rbs_location_range kind_range;       /* Optional */
+    rbs_location_range ivar_range;       /* Optional */
+    rbs_location_range ivar_name_range;  /* Optional */
+    rbs_location_range visibility_range; /* Optional */
 } rbs_ast_members_attr_writer_t;
 
 typedef struct rbs_ast_members_class_instance_variable {
@@ -326,7 +454,11 @@ typedef struct rbs_ast_members_class_instance_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;  /* Required */
+    rbs_location_range colon_range; /* Required */
+    rbs_location_range kind_range;  /* Optional */
 } rbs_ast_members_class_instance_variable_t;
 
 typedef struct rbs_ast_members_class_variable {
@@ -334,7 +466,11 @@ typedef struct rbs_ast_members_class_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;  /* Required */
+    rbs_location_range colon_range; /* Required */
+    rbs_location_range kind_range;  /* Optional */
 } rbs_ast_members_class_variable_t;
 
 typedef struct rbs_ast_members_extend {
@@ -343,7 +479,11 @@ typedef struct rbs_ast_members_extend {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;    /* Required */
+    rbs_location_range keyword_range; /* Required */
+    rbs_location_range args_range;    /* Optional */
 } rbs_ast_members_extend_t;
 
 typedef struct rbs_ast_members_include {
@@ -352,7 +492,11 @@ typedef struct rbs_ast_members_include {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;    /* Required */
+    rbs_location_range keyword_range; /* Required */
+    rbs_location_range args_range;    /* Optional */
 } rbs_ast_members_include_t;
 
 typedef struct rbs_ast_members_instance_variable {
@@ -360,19 +504,29 @@ typedef struct rbs_ast_members_instance_variable {
 
     struct rbs_ast_symbol *name;
     struct rbs_node *type;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;  /* Required */
+    rbs_location_range colon_range; /* Required */
+    rbs_location_range kind_range;  /* Optional */
 } rbs_ast_members_instance_variable_t;
 
 typedef struct rbs_ast_members_method_definition {
     rbs_node_t base;
 
     struct rbs_ast_symbol *name;
-    struct rbs_keyword *kind;
+    enum rbs_method_definition_kind kind;
     struct rbs_node_list *overloads;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
     bool overloading;
-    struct rbs_keyword *visibility;
+    enum rbs_method_definition_visibility visibility;
+
+    rbs_location_range keyword_range;     /* Required */
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range kind_range;        /* Optional */
+    rbs_location_range overloading_range; /* Optional */
+    rbs_location_range visibility_range;  /* Optional */
 } rbs_ast_members_method_definition_t;
 
 typedef struct rbs_ast_members_method_definition_overload {
@@ -388,7 +542,11 @@ typedef struct rbs_ast_members_prepend {
     struct rbs_type_name *name;
     struct rbs_node_list *args;
     struct rbs_node_list *annotations;
-    struct rbs_ast_comment *comment;
+    struct rbs_ast_comment *comment; /* Optional */
+
+    rbs_location_range name_range;    /* Required */
+    rbs_location_range keyword_range; /* Required */
+    rbs_location_range args_range;    /* Optional */
 } rbs_ast_members_prepend_t;
 
 typedef struct rbs_ast_members_private {
@@ -404,16 +562,16 @@ typedef struct rbs_ast_members_public {
 typedef struct rbs_ast_ruby_annotations_class_alias_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
-    struct rbs_location *keyword_location;
+    rbs_location_range prefix_location;
+    rbs_location_range keyword_location;
     struct rbs_type_name *type_name;
-    struct rbs_location *type_name_location;
+    rbs_location_range type_name_location; /* Optional */
 } rbs_ast_ruby_annotations_class_alias_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_colon_method_type_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
+    rbs_location_range prefix_location;
     struct rbs_node_list *annotations;
     struct rbs_node *method_type;
 } rbs_ast_ruby_annotations_colon_method_type_annotation_t;
@@ -421,63 +579,63 @@ typedef struct rbs_ast_ruby_annotations_colon_method_type_annotation {
 typedef struct rbs_ast_ruby_annotations_instance_variable_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
+    rbs_location_range prefix_location;
     struct rbs_ast_symbol *ivar_name;
-    struct rbs_location *ivar_name_location;
-    struct rbs_location *colon_location;
+    rbs_location_range ivar_name_location;
+    rbs_location_range colon_location;
     struct rbs_node *type;
-    struct rbs_location *comment_location;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_instance_variable_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_method_types_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
+    rbs_location_range prefix_location;
     struct rbs_node_list *overloads;
-    struct rbs_location_list *vertical_bar_locations;
+    rbs_location_range_list_t *vertical_bar_locations;
 } rbs_ast_ruby_annotations_method_types_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_module_alias_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
-    struct rbs_location *keyword_location;
+    rbs_location_range prefix_location;
+    rbs_location_range keyword_location;
     struct rbs_type_name *type_name;
-    struct rbs_location *type_name_location;
+    rbs_location_range type_name_location; /* Optional */
 } rbs_ast_ruby_annotations_module_alias_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_node_type_assertion {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
+    rbs_location_range prefix_location;
     struct rbs_node *type;
 } rbs_ast_ruby_annotations_node_type_assertion_t;
 
 typedef struct rbs_ast_ruby_annotations_return_type_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
-    struct rbs_location *return_location;
-    struct rbs_location *colon_location;
+    rbs_location_range prefix_location;
+    rbs_location_range return_location;
+    rbs_location_range colon_location;
     struct rbs_node *return_type;
-    struct rbs_location *comment_location;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_return_type_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_skip_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
-    struct rbs_location *skip_location;
-    struct rbs_location *comment_location;
+    rbs_location_range prefix_location;
+    rbs_location_range skip_location;
+    rbs_location_range comment_location; /* Optional */
 } rbs_ast_ruby_annotations_skip_annotation_t;
 
 typedef struct rbs_ast_ruby_annotations_type_application_annotation {
     rbs_node_t base;
 
-    struct rbs_location *prefix_location;
+    rbs_location_range prefix_location;
     struct rbs_node_list *type_args;
-    struct rbs_location *close_bracket_location;
-    struct rbs_location_list *comma_locations;
+    rbs_location_range close_bracket_location;
+    rbs_location_range_list_t *comma_locations;
 } rbs_ast_ruby_annotations_type_application_annotation_t;
 
 typedef struct rbs_ast_string {
@@ -490,11 +648,18 @@ typedef struct rbs_ast_type_param {
     rbs_node_t base;
 
     struct rbs_ast_symbol *name;
-    struct rbs_keyword *variance;
-    struct rbs_node *upper_bound;
-    struct rbs_node *lower_bound;
-    struct rbs_node *default_type;
+    enum rbs_type_param_variance variance;
+    struct rbs_node *upper_bound;  /* Optional */
+    struct rbs_node *lower_bound;  /* Optional */
+    struct rbs_node *default_type; /* Optional */
     bool unchecked;
+
+    rbs_location_range name_range;        /* Required */
+    rbs_location_range variance_range;    /* Optional */
+    rbs_location_range unchecked_range;   /* Optional */
+    rbs_location_range upper_bound_range; /* Optional */
+    rbs_location_range lower_bound_range; /* Optional */
+    rbs_location_range default_range;     /* Optional */
 } rbs_ast_type_param_t;
 
 typedef struct rbs_method_type {
@@ -502,7 +667,10 @@ typedef struct rbs_method_type {
 
     struct rbs_node_list *type_params;
     struct rbs_node *type;
-    struct rbs_types_block *block;
+    struct rbs_types_block *block; /* Optional */
+
+    rbs_location_range type_range;        /* Required */
+    rbs_location_range type_params_range; /* Optional */
 } rbs_method_type_t;
 
 typedef struct rbs_namespace {
@@ -531,6 +699,9 @@ typedef struct rbs_types_alias {
 
     struct rbs_type_name *name;
     struct rbs_node_list *args;
+
+    rbs_location_range name_range; /* Required */
+    rbs_location_range args_range; /* Optional */
 } rbs_types_alias_t;
 
 typedef struct rbs_types_bases_any {
@@ -584,7 +755,7 @@ typedef struct rbs_types_block {
 
     struct rbs_node *type;
     bool required;
-    struct rbs_node *self_type;
+    struct rbs_node *self_type; /* Optional */
 } rbs_types_block_t;
 
 typedef struct rbs_types_class_instance {
@@ -592,12 +763,17 @@ typedef struct rbs_types_class_instance {
 
     struct rbs_type_name *name;
     struct rbs_node_list *args;
+
+    rbs_location_range name_range; /* Required */
+    rbs_location_range args_range; /* Optional */
 } rbs_types_class_instance_t;
 
 typedef struct rbs_types_class_singleton {
     rbs_node_t base;
 
     struct rbs_type_name *name;
+
+    rbs_location_range name_range; /* Required */
 } rbs_types_class_singleton_t;
 
 typedef struct rbs_types_function {
@@ -605,11 +781,11 @@ typedef struct rbs_types_function {
 
     struct rbs_node_list *required_positionals;
     struct rbs_node_list *optional_positionals;
-    struct rbs_node *rest_positionals;
+    struct rbs_node *rest_positionals; /* Optional */
     struct rbs_node_list *trailing_positionals;
     struct rbs_hash *required_keywords;
     struct rbs_hash *optional_keywords;
-    struct rbs_node *rest_keywords;
+    struct rbs_node *rest_keywords; /* Optional */
     struct rbs_node *return_type;
 } rbs_types_function_t;
 
@@ -617,7 +793,9 @@ typedef struct rbs_types_function_param {
     rbs_node_t base;
 
     struct rbs_node *type;
-    struct rbs_ast_symbol *name;
+    struct rbs_ast_symbol *name; /* Optional */
+
+    rbs_location_range name_range; /* Optional */
 } rbs_types_function_param_t;
 
 typedef struct rbs_types_interface {
@@ -625,6 +803,9 @@ typedef struct rbs_types_interface {
 
     struct rbs_type_name *name;
     struct rbs_node_list *args;
+
+    rbs_location_range name_range; /* Required */
+    rbs_location_range args_range; /* Optional */
 } rbs_types_interface_t;
 
 typedef struct rbs_types_intersection {
@@ -649,8 +830,8 @@ typedef struct rbs_types_proc {
     rbs_node_t base;
 
     struct rbs_node *type;
-    struct rbs_types_block *block;
-    struct rbs_node *self_type;
+    struct rbs_types_block *block; /* Optional */
+    struct rbs_node *self_type;    /* Optional */
 } rbs_types_proc_t;
 
 typedef struct rbs_types_record {
@@ -699,16 +880,6 @@ typedef union rbs_ast_ruby_annotations {
     rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
 } rbs_ast_ruby_annotations_t;
 
-/// `rbs_keyword_t` models RBS keywords like "private", "instance", "covariant", etc.
-/// These are stored in the global constant pool, and get surfaced to Ruby as `Symbol`s,
-/// just like `rbs_ast_symbol_t`s.
-typedef struct rbs_keyword {
-    rbs_node_t base;
-    rbs_constant_id_t constant_id;
-} rbs_keyword_t;
-
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *, rbs_location_t *, rbs_constant_id_t);
-
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.
 /// These get stored in the parser's own constant pool, and get surfaced to Ruby as `Symbol`s.
 typedef struct rbs_ast_symbol {
@@ -716,79 +887,79 @@ typedef struct rbs_ast_symbol {
     rbs_constant_id_t constant_id;
 } rbs_ast_symbol_t;
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_t *, rbs_constant_pool_t *, rbs_constant_id_t);
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_range, rbs_constant_pool_t *, rbs_constant_id_t);
 
-rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string);
-rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_t *location, bool value);
-rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string);
-rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args);
-rbs_ast_declarations_class_alias_t *rbs_ast_declarations_class_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
-rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
-rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
-rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args);
-rbs_ast_declarations_module_alias_t *rbs_ast_declarations_module_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations);
-rbs_ast_declarations_type_alias_t *rbs_ast_declarations_type_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *clauses);
-rbs_ast_directives_use_single_clause_t *rbs_ast_directives_use_single_clause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *type_name, rbs_ast_symbol_t *new_name);
-rbs_ast_directives_use_wildcard_clause_t *rbs_ast_directives_use_wildcard_clause_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace);
-rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string_representation);
-rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility);
-rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility);
-rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_node_t *ivar_name, rbs_keyword_t *kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_keyword_t *visibility);
-rbs_ast_members_class_instance_variable_t *rbs_ast_members_class_instance_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment);
-rbs_ast_members_class_variable_t *rbs_ast_members_class_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment);
-rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_members_instance_variable_t *rbs_ast_members_instance_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment);
-rbs_ast_members_method_definition_t *rbs_ast_members_method_definition_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *kind, rbs_node_list_t *overloads, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, bool overloading, rbs_keyword_t *visibility);
-rbs_ast_members_method_definition_overload_t *rbs_ast_members_method_definition_overload_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *annotations, rbs_node_t *method_type);
-rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment);
-rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location);
-rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type);
-rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_t *ivar_name_location, rbs_location_t *colon_location, rbs_node_t *type, rbs_location_t *comment_location);
-rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *overloads, rbs_location_list_t *vertical_bar_locations);
-rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *keyword_location, rbs_type_name_t *type_name, rbs_location_t *type_name_location);
-rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_t *type);
-rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *return_location, rbs_location_t *colon_location, rbs_node_t *return_type, rbs_location_t *comment_location);
-rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_location_t *skip_location, rbs_location_t *comment_location);
-rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_location_t *prefix_location, rbs_node_list_t *type_args, rbs_location_t *close_bracket_location, rbs_location_list_t *comma_locations);
-rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_string_t string);
-rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name, rbs_keyword_t *variance, rbs_node_t *upper_bound, rbs_node_t *lower_bound, rbs_node_t *default_type, bool unchecked);
-rbs_method_type_t *rbs_method_type_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block);
-rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *path, bool absolute);
-rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *directives, rbs_node_list_t *declarations);
-rbs_type_name_t *rbs_type_name_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_namespace_t *rbs_namespace, rbs_ast_symbol_t *name);
-rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args);
-rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, rbs_location_t *location, bool todo);
-rbs_types_bases_bool_t *rbs_types_bases_bool_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_bottom_t *rbs_types_bases_bottom_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_class_t *rbs_types_bases_class_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_instance_t *rbs_types_bases_instance_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_nil_t *rbs_types_bases_nil_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_self_t *rbs_types_bases_self_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_top_t *rbs_types_bases_top_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_bases_void_t *rbs_types_bases_void_new(rbs_allocator_t *allocator, rbs_location_t *location);
-rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required, rbs_node_t *self_type);
-rbs_types_class_instance_t *rbs_types_class_instance_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args);
-rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name);
-rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *required_positionals, rbs_node_list_t *optional_positionals, rbs_node_t *rest_positionals, rbs_node_list_t *trailing_positionals, rbs_hash_t *required_keywords, rbs_hash_t *optional_keywords, rbs_node_t *rest_keywords, rbs_node_t *return_type);
-rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_ast_symbol_t *name);
-rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_type_name_t *name, rbs_node_list_t *args);
-rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types);
-rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *literal);
-rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type);
-rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, rbs_types_block_t *block, rbs_node_t *self_type);
-rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_hash_t *all_fields);
-rbs_types_record_field_type_t *rbs_types_record_field_type_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *type, bool required);
-rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types);
-rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_list_t *types);
-rbs_types_untyped_function_t *rbs_types_untyped_function_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_node_t *return_type);
-rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_ast_symbol_t *name);
+rbs_ast_annotation_t *rbs_ast_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_string_t string);
+rbs_ast_bool_t *rbs_ast_bool_new(rbs_allocator_t *allocator, rbs_location_range location, bool value);
+rbs_ast_comment_t *rbs_ast_comment_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_string_t string);
+rbs_ast_declarations_class_t *rbs_ast_declarations_class_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_ast_declarations_class_super_t *super_class, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range end_range);
+rbs_ast_declarations_class_super_t *rbs_ast_declarations_class_super_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range);
+rbs_ast_declarations_class_alias_t *rbs_ast_declarations_class_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations, rbs_location_range keyword_range, rbs_location_range new_name_range, rbs_location_range eq_range, rbs_location_range old_name_range);
+rbs_ast_declarations_constant_t *rbs_ast_declarations_constant_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_declarations_global_t *rbs_ast_declarations_global_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_node_list_t *annotations, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_declarations_interface_t *rbs_ast_declarations_interface_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range end_range);
+rbs_ast_declarations_module_t *rbs_ast_declarations_module_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_list_t *self_types, rbs_node_list_t *members, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range end_range);
+rbs_ast_declarations_module_self_t *rbs_ast_declarations_module_self_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range);
+rbs_ast_declarations_module_alias_t *rbs_ast_declarations_module_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *new_name, rbs_type_name_t *old_name, rbs_ast_comment_t *comment, rbs_node_list_t *annotations, rbs_location_range keyword_range, rbs_location_range new_name_range, rbs_location_range eq_range, rbs_location_range old_name_range);
+rbs_ast_declarations_type_alias_t *rbs_ast_declarations_type_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *type_params, rbs_node_t *type, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range eq_range);
+rbs_ast_directives_use_t *rbs_ast_directives_use_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *clauses, rbs_location_range keyword_range);
+rbs_ast_directives_use_single_clause_t *rbs_ast_directives_use_single_clause_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *type_name, rbs_ast_symbol_t *new_name, rbs_location_range type_name_range);
+rbs_ast_directives_use_wildcard_clause_t *rbs_ast_directives_use_wildcard_clause_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_namespace_t *rbs_namespace, rbs_location_range namespace_range, rbs_location_range star_range);
+rbs_ast_integer_t *rbs_ast_integer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_string_t string_representation);
+rbs_ast_members_alias_t *rbs_ast_members_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *new_name, rbs_ast_symbol_t *old_name, enum rbs_alias_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range keyword_range, rbs_location_range new_name_range, rbs_location_range old_name_range);
+rbs_ast_members_attr_accessor_t *rbs_ast_members_attr_accessor_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_attr_reader_t *rbs_ast_members_attr_reader_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_attr_writer_t *rbs_ast_members_attr_writer_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_attr_ivar_name_t ivar_name, enum rbs_attribute_kind kind, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, enum rbs_attribute_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_class_instance_variable_t *rbs_ast_members_class_instance_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_class_variable_t *rbs_ast_members_class_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_extend_t *rbs_ast_members_extend_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range keyword_range);
+rbs_ast_members_include_t *rbs_ast_members_include_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range keyword_range);
+rbs_ast_members_instance_variable_t *rbs_ast_members_instance_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, rbs_node_t *type, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range colon_range);
+rbs_ast_members_method_definition_t *rbs_ast_members_method_definition_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, enum rbs_method_definition_kind kind, rbs_node_list_t *overloads, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, bool overloading, enum rbs_method_definition_visibility visibility, rbs_location_range keyword_range, rbs_location_range name_range);
+rbs_ast_members_method_definition_overload_t *rbs_ast_members_method_definition_overload_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *annotations, rbs_node_t *method_type);
+rbs_ast_members_prepend_t *rbs_ast_members_prepend_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_node_list_t *annotations, rbs_ast_comment_t *comment, rbs_location_range name_range, rbs_location_range keyword_range);
+rbs_ast_members_private_t *rbs_ast_members_private_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_ast_ruby_annotations_class_alias_annotation_t *rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *type_name, rbs_location_range type_name_location);
+rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *annotations, rbs_node_t *method_type);
+rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_range ivar_name_location, rbs_location_range colon_location, rbs_node_t *type, rbs_location_range comment_location);
+rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *overloads, rbs_location_range_list_t *vertical_bar_locations);
+rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *type_name, rbs_location_range type_name_location);
+rbs_ast_ruby_annotations_node_type_assertion_t *rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_t *type);
+rbs_ast_ruby_annotations_return_type_annotation_t *rbs_ast_ruby_annotations_return_type_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range return_location, rbs_location_range colon_location, rbs_node_t *return_type, rbs_location_range comment_location);
+rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range skip_location, rbs_location_range comment_location);
+rbs_ast_ruby_annotations_type_application_annotation_t *rbs_ast_ruby_annotations_type_application_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *type_args, rbs_location_range close_bracket_location, rbs_location_range_list_t *comma_locations);
+rbs_ast_string_t *rbs_ast_string_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_string_t string);
+rbs_ast_type_param_t *rbs_ast_type_param_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name, enum rbs_type_param_variance variance, rbs_node_t *upper_bound, rbs_node_t *lower_bound, rbs_node_t *default_type, bool unchecked, rbs_location_range name_range);
+rbs_method_type_t *rbs_method_type_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *type_params, rbs_node_t *type, rbs_types_block_t *block, rbs_location_range type_range);
+rbs_namespace_t *rbs_namespace_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *path, bool absolute);
+rbs_signature_t *rbs_signature_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *directives, rbs_node_list_t *declarations);
+rbs_type_name_t *rbs_type_name_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_namespace_t *rbs_namespace, rbs_ast_symbol_t *name);
+rbs_types_alias_t *rbs_types_alias_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range);
+rbs_types_bases_any_t *rbs_types_bases_any_new(rbs_allocator_t *allocator, rbs_location_range location, bool todo);
+rbs_types_bases_bool_t *rbs_types_bases_bool_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_bottom_t *rbs_types_bases_bottom_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_class_t *rbs_types_bases_class_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_instance_t *rbs_types_bases_instance_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_nil_t *rbs_types_bases_nil_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_self_t *rbs_types_bases_self_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_top_t *rbs_types_bases_top_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_bases_void_t *rbs_types_bases_void_new(rbs_allocator_t *allocator, rbs_location_range location);
+rbs_types_block_t *rbs_types_block_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *type, bool required, rbs_node_t *self_type);
+rbs_types_class_instance_t *rbs_types_class_instance_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range);
+rbs_types_class_singleton_t *rbs_types_class_singleton_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_location_range name_range);
+rbs_types_function_t *rbs_types_function_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *required_positionals, rbs_node_list_t *optional_positionals, rbs_node_t *rest_positionals, rbs_node_list_t *trailing_positionals, rbs_hash_t *required_keywords, rbs_hash_t *optional_keywords, rbs_node_t *rest_keywords, rbs_node_t *return_type);
+rbs_types_function_param_t *rbs_types_function_param_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *type, rbs_ast_symbol_t *name);
+rbs_types_interface_t *rbs_types_interface_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range name_range);
+rbs_types_intersection_t *rbs_types_intersection_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *types);
+rbs_types_literal_t *rbs_types_literal_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *literal);
+rbs_types_optional_t *rbs_types_optional_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *type);
+rbs_types_proc_t *rbs_types_proc_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *type, rbs_types_block_t *block, rbs_node_t *self_type);
+rbs_types_record_t *rbs_types_record_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_hash_t *all_fields);
+rbs_types_record_field_type_t *rbs_types_record_field_type_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *type, bool required);
+rbs_types_tuple_t *rbs_types_tuple_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *types);
+rbs_types_union_t *rbs_types_union_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_list_t *types);
+rbs_types_untyped_function_t *rbs_types_untyped_function_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_node_t *return_type);
+rbs_types_variable_t *rbs_types_variable_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_ast_symbol_t *name);
 
 #endif
