@@ -67,7 +67,7 @@ jobs:
           bundle config set without 'typecheck_test'
       - name: Set bundle path to avoid permission issues
         run: |
-          bundle config set --local path 'vendor/bundle'
+          echo "BUNDLE_PATH=vendor/bundle" >> $GITHUB_ENV
       - name: bin/setup
         run: |
           bin/setup
@@ -107,7 +107,7 @@ jobs:
           bundle config set force_ruby_platform true
       - name: Set bundle path to avoid permission issues
         run: |
-          bundle config set --local path 'vendor/bundle'
+          echo "BUNDLE_PATH=vendor/bundle" >> $GITHUB_ENV
       - name: bin/setup
         run: |
           bin/setup
