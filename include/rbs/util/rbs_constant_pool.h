@@ -82,6 +82,7 @@ typedef struct {
 } rbs_constant_pool_t;
 
 // A global constant pool for storing permenant keywords, such as the names of location children in `parser.c`.
+RBS_EXPORTED_FUNCTION
 extern rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL;
 
 /**
@@ -91,6 +92,7 @@ extern rbs_constant_pool_t *RBS_GLOBAL_CONSTANT_POOL;
  * @param capacity The initial capacity of the pool.
  * @return Whether the initialization succeeded.
  */
+RBS_EXPORTED_FUNCTION
 bool rbs_constant_pool_init(rbs_constant_pool_t *pool, uint32_t capacity);
 
 /**

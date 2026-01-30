@@ -10,7 +10,7 @@ gem "test-unit"
 gem "rspec"
 gem "rubocop"
 gem "rubocop-rubycw"
-gem "rubocop-on-rbs"
+gem "rubocop-on-rbs", platform: :ruby # zlib transitive dep
 gem "json"
 gem "json-schema"
 gem "goodcheck"
@@ -28,15 +28,15 @@ group :libs do
   gem "abbrev"
   gem "base64"
   gem "bigdecimal"
-  gem "dbm"
+  gem "dbm", platform: :ruby
   gem "mutex_m"
   gem "nkf"
 end
 
 group :profilers do
   # Performance profiling and benchmarking
-  gem 'stackprof'
-  gem 'memory_profiler'
+  gem 'stackprof', platform: :ruby
+  gem 'memory_profiler', platform: :ruby
   gem 'benchmark-ips'
   gem "ruby_memcheck", platform: :ruby
 end

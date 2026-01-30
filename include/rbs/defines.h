@@ -83,4 +83,19 @@
 #define RBS_ATTRIBUTE_UNUSED
 #endif
 
+/***********************************************************************************************************************
+ * Exported functions from dynamic lib                                                                                 *
+ **********************************************************************************************************************/
+#ifndef RBS_EXPORTED_FUNCTION
+#   ifdef RBS_EXPORT_SYMBOLS
+#       ifdef _WIN32
+#          define RBS_EXPORTED_FUNCTION __declspec(dllexport) extern
+#       else
+#          define RBS_EXPORTED_FUNCTION __attribute__((__visibility__("default"))) extern
+#       endif
+#   else
+#       define RBS_EXPORTED_FUNCTION
+#   endif
+#endif
+
 #endif

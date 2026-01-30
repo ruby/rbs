@@ -99,7 +99,9 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_enc
  * rbs_parser_new(buffer, string, encoding, 0, 1);
  * ```
  * */
+RBS_EXPORTED_FUNCTION
 rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+RBS_EXPORTED_FUNCTION
 void rbs_parser_free(rbs_parser_t *parser);
 
 /**
@@ -126,8 +128,10 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
 
 void rbs_parser_set_error(rbs_parser_t *parser, rbs_token_t tok, bool syntax_error, const char *fmt, ...) RBS_ATTRIBUTE_FORMAT(4, 5);
 
+RBS_EXPORTED_FUNCTION
 bool rbs_parse_type(rbs_parser_t *parser, rbs_node_t **type, bool void_allowed, bool self_allowed, bool classish_allowed);
 bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type, bool require_eof, bool classish_allowed);
+RBS_EXPORTED_FUNCTION
 bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature);
 
 bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params);
