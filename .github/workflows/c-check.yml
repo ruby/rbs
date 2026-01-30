@@ -46,6 +46,8 @@ jobs:
         run: |
           ruby -v
           gem update --system
+      - name: install erb
+        run: gem install erb
       - name: bin/setup
         run: |
           bin/setup
