@@ -50,6 +50,8 @@ jobs:
         run: |
           ruby -v
           gem update --system
+      - name: install erb
+        run: gem install erb
       - name: bundle config set with
         run: |
           echo "NO_MINITEST=true" >> $GITHUB_ENV
@@ -110,6 +112,8 @@ jobs:
         run: |
           ruby -v
           gem update --system
+      - name: install erb
+        run: gem install erb
       - name: clang version
         run: clang --version
       - name: bin/setup
