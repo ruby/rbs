@@ -65,6 +65,9 @@ jobs:
         if: ${{ ! contains(matrix.job, 'typecheck_test') }}
         run: |
           bundle config set without 'typecheck_test'
+      - name: Set bundle path to avoid permission issues
+        run: |
+          bundle config set --local path 'vendor/bundle'
       - name: bin/setup
         run: |
           bin/setup
@@ -102,6 +105,9 @@ jobs:
         if: ${{ contains(matrix.ruby, 'head') }}
         run: |
           bundle config set force_ruby_platform true
+      - name: Set bundle path to avoid permission issues
+        run: |
+          bundle config set --local path 'vendor/bundle'
       - name: bin/setup
         run: |
           bin/setup
