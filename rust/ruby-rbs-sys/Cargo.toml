@@ -1,12 +1,19 @@
 [package]
 name = "ruby-rbs-sys"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "BSD-2-Clause"
 description = "Low-level FFI bindings for RBS -- the type signature language for Ruby programs"
 homepage = "https://github.com/ruby/rbs"
 repository = "https://github.com/ruby/rbs.git"
 readme = "../../README.md"
+include = [
+    "src/**/*",
+    "vendor/**/*",
+    "build.rs",
+    "wrapper.h",
+    "Cargo.toml",
+]
 
 [lib]
 doctest = false
