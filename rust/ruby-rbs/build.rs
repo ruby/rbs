@@ -51,9 +51,19 @@ impl Node {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let config_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../config.yml")
-        .canonicalize()?;
+    // Allow overriding the source directory via environment variable (useful for packaging)
+    let config_path = if let Ok(source_dir) = env::var("RBS_SOURCE_DIR") {
+        Path::new(&source_dir).join("config.yml")
+    } else {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../config.yml")
+    };
+
+    let config_path = config_path.canonicalize().map_err(|e| {
+        format!(
+            "Failed to find config.yml at {:?}: {}. Set RBS_SOURCE_DIR environment variable to the repository root.",
+            config_path, e
+        )
+    })?;
 
     println!("cargo:rerun-if-changed={}", config_path.display());
 

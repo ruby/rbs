@@ -33,11 +33,36 @@ fn build(include_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn Error>> {
 }
 
 fn root_dir() -> Result<PathBuf, Box<dyn Error>> {
-    Ok(Path::new(env!("CARGO_MANIFEST_DIR"))
-        .ancestors()
-        .nth(2)
-        .ok_or("Failed to find project root directory")?
-        .to_path_buf())
+    // Allow overriding via environment variable (useful for packaging)
+    if let Ok(source_dir) = env::var("RBS_SOURCE_DIR") {
+        let root = PathBuf::from(source_dir);
+        let include_dir = root.join("include");
+        let src_dir = root.join("src");
+
+        if include_dir.exists() && src_dir.exists() {
+            return Ok(root);
+        } else {
+            return Err(format!(
+                "RBS_SOURCE_DIR is set to {:?}, but include/ and src/ directories not found",
+                root
+            )
+            .into());
+        }
+    }
+
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+
+    // Try workspace structure (development)
+    if let Some(workspace_root) = manifest_dir.ancestors().nth(2) {
+        let include_dir = workspace_root.join("include");
+        let src_dir = workspace_root.join("src");
+
+        if include_dir.exists() && src_dir.exists() {
+            return Ok(workspace_root.to_path_buf());
+        }
+    }
+
+    Err("Cannot find include/ and src/ directories. Set RBS_SOURCE_DIR environment variable to the repository root.".into())
 }
 
 fn source_files<P: AsRef<Path>>(root_dir: P) -> Result<Vec<String>, Box<dyn Error>> {
