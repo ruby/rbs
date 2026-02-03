@@ -7,6 +7,13 @@ description = "Low-level FFI bindings for RBS -- the type signature language for
 homepage = "https://github.com/ruby/rbs"
 repository = "https://github.com/ruby/rbs.git"
 readme = "../../README.md"
+include = [
+    "src/**/*",
+    "vendor/**/*",
+    "build.rs",
+    "wrapper.h",
+    "Cargo.toml",
+]
 
 [lib]
 doctest = false
