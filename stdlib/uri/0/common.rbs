@@ -420,8 +420,8 @@ module URI
   #     URI.parse('http://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top')
   #     # => #<URI::HTTP http://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top>
   #
-  # It's recommended to first ::escape string `uri` if it may contain invalid URI
-  # characters.
+  # It's recommended to first URI::RFC2396_PARSER.escape string `uri` if it may
+  # contain invalid URI characters.
   #
   def self.parse: (_ToStr uri) -> (File | FTP | HTTP | HTTPS | LDAP | LDAPS | MailTo | WS | WSS | Generic)
 
@@ -561,6 +561,11 @@ URI::REL_URI: Regexp
 URI::REL_URI_REF: Regexp
 
 # <!-- rdoc-file=lib/uri/common.rb -->
+# The default parser instance for RFC 2396.
+#
+URI::RFC2396_PARSER: URI::RFC2396_Parser
+
+# <!-- rdoc-file=lib/uri/common.rb -->
 # The default parser instance for RFC 3986.
 #
 URI::RFC3986_PARSER: URI::RFC3986_Parser
@@ -594,6 +599,7 @@ module Kernel
   # Returns a URI object derived from the given `uri`, which may be a URI string
   # or an existing URI object:
   #
+  #     require 'uri'
   #     # Returns a new URI.
   #     uri = URI('http://github.com/ruby/ruby')
   #     # => #<URI::HTTP http://github.com/ruby/ruby>
@@ -601,5 +607,7 @@ module Kernel
   #     URI(uri)
   #     # => #<URI::HTTP http://github.com/ruby/ruby>
   #
-  def self?.URI: (URI::Generic | String uri) -> URI::Generic
+  # You must require 'uri' to use this method.
+  #
+  def self?.URI: (URI::Generic | string uri) -> URI::Generic
 end

@@ -257,10 +257,10 @@
 #
 # Use execution options to set resource limits.
 #
-# The keys for these options are symbols of the form `:rlimit_*resource_name`*,
-# where *resource_name* is the downcased form of one of the string resource
-# names described at method Process.setrlimit. For example, key `:rlimit_cpu`
-# corresponds to resource limit `'CPU'`.
+# The keys for these options are symbols of the form
+# `:rlimit_<i>resource_name</i>`, where *resource_name* is the downcased form of
+# one of the string resource names described at method Process.setrlimit. For
+# example, key `:rlimit_cpu` corresponds to resource limit `'CPU'`.
 #
 # The value for such as key is one of:
 #
@@ -590,7 +590,7 @@ module Process
   # *   `:microsecond`: Number of microseconds as an integer.
   # *   `:millisecond`: Number of milliseconds as an integer.
   # *   `:nanosecond`: Number of nanoseconds as an integer.
-  # *   `::second`: Number of seconds as an integer.
+  # *   `:second`: Number of seconds as an integer.
   #
   # Examples:
   #
@@ -2025,7 +2025,7 @@ end
 # <!-- rdoc-file=process.c -->
 # The Process::Sys module contains UID and GID functions which provide direct
 # bindings to the system calls of the same names instead of the more-portable
-# versions of the same functionality found in the Process, Process::UID, and
+# versions of the same functionality found in the `Process`, Process::UID, and
 # Process::GID modules.
 #
 module Process::Sys

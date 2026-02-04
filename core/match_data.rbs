@@ -41,7 +41,7 @@
 # *   `$'` is Regexp.last_match`.post_match`;
 # *   `$+` is Regexp.last_match`[ -1 ]` (the last capture).
 #
-# See also "Special global variables" section in Regexp documentation.
+# See also Regexp@Global+Variables.
 #
 class MatchData
   type capture = String | Symbol | int

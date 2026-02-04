@@ -847,7 +847,30 @@ class File < IO
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def initialize: (path | int file_name, ?string | int mode, ?int perm) -> void
+  def initialize: (
+    path | int file_name,
+    ?string | int mode,
+    ?int perm,
+    # open options
+    ?mode: Integer | String,
+    ?flags: Integer,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish,
+    ?autoclose: boolish,
+    ?path: path,
+    # encoding options
+    ?invalid: :replace | nil,
+    ?undef: :replace | nil,
+    ?replace: String | nil,
+    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+    ?xml: :text | :attr | nil,
+    ?cr_newline: bool,
+    ?crlf_newline: bool,
+    ?universal_newline: bool
+  ) -> void
 
   # <!--
   #   rdoc-file=file.c
@@ -1407,14 +1430,60 @@ class File < IO
   # With a block given, calls the block with the File object and returns the
   # block's value.
   #
-  def self.open: (path | int file_name, ?string | int mode, ?int perm) -> instance
-               | [T] (path | int file_name, ?string | int mode, ?int perm) { (File) -> T } -> T
+  def self.open: (
+    path | int file_name,
+    ?string | int mode,
+    ?int perm,
+    # open options
+    ?mode: Integer | String,
+    ?flags: Integer,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish,
+    ?autoclose: boolish,
+    ?path: path,
+    # encoding options
+    ?invalid: :replace | nil,
+    ?undef: :replace | nil,
+    ?replace: String | nil,
+    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+    ?xml: :text | :attr | nil,
+    ?cr_newline: bool,
+    ?crlf_newline: bool,
+    ?universal_newline: bool
+  ) -> instance
+               | [T] (
+      path | int file_name,
+      ?string | int mode,
+      ?int perm,
+      # open options
+      ?mode: Integer | String,
+      ?flags: Integer,
+      ?external_encoding: encoding,
+      ?internal_encoding: encoding,
+      ?encoding: encoding,
+      ?textmode: boolish,
+      ?binmode: boolish,
+      ?autoclose: boolish,
+      ?path: path,
+      # encoding options
+      ?invalid: :replace | nil,
+      ?undef: :replace | nil,
+      ?replace: String | nil,
+      ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+      ?xml: :text | :attr | nil,
+      ?cr_newline: bool,
+      ?crlf_newline: bool,
+      ?universal_newline: bool
+    ) { (File) -> T } -> T
 
   # <!--
   #   rdoc-file=file.c
   #   - File.owned?(file_name)   -> true or false
   # -->
-  # Returns `true` if the named file exists and the effective used id of the
+  # Returns `true` if the named file exists and the effective user id of the
   # calling process is the owner of the file.
   #
   # *file_name* can be an IO object.
@@ -1427,8 +1496,25 @@ class File < IO
   # -->
   # Returns the string representation of the path
   #
-  #     File.path(File::NULL)           #=> "/dev/null"
-  #     File.path(Pathname.new("/tmp")) #=> "/tmp"
+  #        File.path(File::NULL)           #=> "/dev/null"
+  #        File.path(Pathname.new("/tmp")) #=> "/tmp"
+  #
+  # If `path` is not a String:
+  #
+  # 1.  If it has the `to_path` method, that method will be called to coerce to a
+  #     String.
+  #
+  # 2.  Otherwise, or if the coerced result is not a String too, the standard
+  #     coersion using `to_str` method will take place on that object. (See also
+  #     String.try_convert)
+  #
+  # The coerced string must satisfy the following conditions:
+  #
+  # 1.  It must be in an ASCII-compatible encoding; otherwise, an
+  #     Encoding::CompatibilityError is raised.
+  #
+  # 2.  It must not contain the NUL character (`\0`); otherwise, an ArgumentError
+  #     is raised.
   #
   def self.path: (path path) -> String
 
@@ -1822,12 +1908,12 @@ class File < IO
   # Returns `false` if `File::LOCK_NB` is specified and the operation would have
   # blocked;
   # otherwise returns `0`.
-  #    Constant    |    Lock    |                                                    Effect
-  # ---------------|------------|--------------------------------------------------------------------------------------------------------------
-  # +File::LOCK_EX+| Exclusive  |                      Only one process may hold an exclusive lock for +self+ at a time.
-  # +File::LOCK_NB+|Non-blocking|No blocking; may be combined with +File::LOCK_SH+ or +File::LOCK_EX+ using the bitwise OR operator <tt>|</tt>.
-  # +File::LOCK_SH+|   Shared   |                 Multiple processes may each hold a shared lock for +self+ at the same time.
-  # +File::LOCK_UN+|   Unlock   |                                Remove an existing lock held by this process.
+  #    Constant    |    Lock    |                                                Effect
+  # ---------------|------------|-------------------------------------------------------------------------------------------------------
+  # `File::LOCK_EX`| Exclusive  |                   Only one process may hold an exclusive lock for `self` at a time.
+  # `File::LOCK_NB`|Non-blocking|No blocking; may be combined with `File::LOCK_SH` or `File::LOCK_EX` using the bitwise OR operator `|`.
+  # `File::LOCK_SH`|   Shared   |              Multiple processes may each hold a shared lock for `self` at the same time.
+  # `File::LOCK_UN`|   Unlock   |                             Remove an existing lock held by this process.
   # Example:
   #     # Update a counter using an exclusive lock.
   # # Don't use File::WRONLY because it truncates the file.
@@ -2222,9 +2308,9 @@ File::Separator: String
 #
 # #### File::FNM_EXTGLOB
 #
-# Flag File::FNM_EXTGLOB enables pattern `'{*a*,*b*}'`, which matches pattern
+# Flag File::FNM_EXTGLOB enables pattern `'{_a_,_b_}'`, which matches pattern
 # '*a*' and pattern '*b*'; behaves like a [regexp union](rdoc-ref:Regexp.union)
-# (e.g., `'(?:*a*|*b*)'`):
+# (e.g., `'(?:_a_|_b_)'`):
 #
 #     pattern = '{LEGAL,BSDL}'
 #     Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
@@ -2429,10 +2515,8 @@ class File::Stat < Object
 
   # <!--
   #   rdoc-file=file.c
-  #   - new(p1)
+  #   - File::Stat.new(file_name)  -> stat
   # -->
-  # File::Stat.new(file_name)  -> stat
-  #
   # Create a File::Stat object for the given file name (raising an exception if
   # the file doesn't exist).
   #
@@ -2440,16 +2524,31 @@ class File::Stat < Object
 
   # <!--
   #   rdoc-file=file.c
-  #   - stat <=> other_stat    -> -1, 0, 1, nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
-  # Compares File::Stat objects by comparing their respective modification times.
+  # Compares `self` and `other`, by comparing their modification times; that is,
+  # by comparing `self.mtime` and `other.mtime`.
   #
-  # `nil` is returned if `other_stat` is not a File::Stat object
+  # Returns:
   #
-  #     f1 = File.new("f1", "w")
-  #     sleep 1
-  #     f2 = File.new("f2", "w")
-  #     f1.stat <=> f2.stat   #=> -1
+  # *   `-1`, if `self.mtime` is earlier.
+  # *   `0`, if the two values are equal.
+  # *   `1`, if `self.mtime` is later.
+  # *   `nil`, if `other` is not a File::Stat object.
+  #
+  # Examples:
+  #
+  #     stat0 = File.stat('README.md')
+  #     stat1 = File.stat('NEWS.md')
+  #     stat0.mtime         # => 2025-12-20 15:33:05.6972341 -0600
+  #     stat1.mtime         # => 2025-12-20 16:02:08.2672945 -0600
+  #     stat0 <=> stat1     # => -1
+  #     stat0 <=> stat0.dup # => 0
+  #     stat1 <=> stat0     # => 1
+  #     stat0 <=> :foo      # => nil
+  #
+  # Class File::Stat includes module Comparable, each of whose methods uses
+  # File::Stat#<=> for comparison.
   #
   def <=>: (File::Stat other) -> Integer
          | (untyped) -> nil

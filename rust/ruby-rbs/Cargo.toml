@@ -1,0 +1,22 @@
+[package]
+name = "ruby-rbs"
+version = "0.1.1"
+edition = "2024"
+license = "BSD-2-Clause"
+description = "Rust bindings for RBS -- the type signature language for Ruby programs"
+homepage = "https://github.com/ruby/rbs"
+repository = "https://github.com/ruby/rbs.git"
+readme = "../../README.md"
+include = [
+    "src/**/*",
+    "vendor/**/*",
+    "build.rs",
+    "Cargo.toml",
+]
+
+[dependencies]
+ruby-rbs-sys = { version = "0.1", path = "../ruby-rbs-sys" }
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"

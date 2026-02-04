@@ -58,7 +58,7 @@
 # ## Non-blocking Fibers
 #
 # The concept of *non-blocking fiber* was introduced in Ruby 3.0. A non-blocking
-# fiber, when reaching a operation that would normally block the fiber (like
+# fiber, when reaching an operation that would normally block the fiber (like
 # `sleep`, or wait for another process or I/O) will yield control to other
 # fibers and allow the *scheduler* to handle blocking and waking up (resuming)
 # this fiber when it can proceed.
@@ -82,7 +82,8 @@ class Fiber < Object
   # -->
   # Returns the value of the fiber storage variable identified by `key`.
   #
-  # The `key` must be a symbol, and the value is set by Fiber#[]= or Fiber#store.
+  # The `key` must be a symbol, and the value is set by Fiber#[]= or
+  # Fiber#storage.
   #
   # See also Fiber::[]=.
   #
@@ -403,30 +404,38 @@ class Fiber < Object
 
   # <!--
   #   rdoc-file=cont.c
-  #   - fiber.raise                                 -> obj
-  #   - fiber.raise(string)                         -> obj
-  #   - fiber.raise(exception [, string [, array]]) -> obj
+  #   - raise(exception, message = exception.to_s, backtrace = nil, cause: $!)
+  #   - raise(message = nil, cause: $!)
   # -->
   # Raises an exception in the fiber at the point at which the last `Fiber.yield`
-  # was called. If the fiber has not been started or has already run to
-  # completion, raises `FiberError`. If the fiber is yielding, it is resumed. If
-  # it is transferring, it is transferred into. But if it is resuming, raises
-  # `FiberError`.
+  # was called.
   #
-  # With no arguments, raises a `RuntimeError`. With a single `String` argument,
-  # raises a `RuntimeError` with the string as a message.  Otherwise, the first
-  # parameter should be the name of an `Exception` class (or an object that
-  # returns an `Exception` object when sent an `exception` message). The optional
-  # second parameter sets the message associated with the exception, and the third
-  # parameter is an array of callback information. Exceptions are caught by the
-  # `rescue` clause of `begin...end` blocks.
+  #     f = Fiber.new {
+  #       puts "Before the yield"
+  #       Fiber.yield 1 # -- exception will be raised here
+  #       puts "After the yield"
+  #     }
+  #
+  #     p f.resume
+  #     f.raise "Gotcha"
+  #
+  # Output
+  #
+  #     Before the first yield
+  #     1
+  #     t.rb:8:in 'Fiber.yield': Gotcha (RuntimeError)
+  #       from t.rb:8:in 'block in <main>'
+  #
+  # If the fiber has not been started or has already run to completion, raises
+  # `FiberError`. If the fiber is yielding, it is resumed. If it is transferring,
+  # it is transferred into. But if it is resuming, raises `FiberError`.
   #
   # Raises `FiberError` if called on a Fiber belonging to another `Thread`.
   #
-  # See Kernel#raise for more information.
+  # See Kernel#raise for more information on arguments.
   #
-  def raise: (?string msg) -> untyped
-           | (_Exception, ?string msg, ?Array[string] | Array[Thread::Backtrace::Location] | nil backtrace) -> untyped
+  def raise: (?string msg, ?cause: Exception?) -> untyped
+           | (_Exception, ?string msg, ?Array[string] | Array[Thread::Backtrace::Location] | nil backtrace, ?cause: Exception?) -> untyped
 
   # <!--
   #   rdoc-file=cont.c

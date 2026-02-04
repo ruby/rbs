@@ -160,7 +160,7 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - self % other -> real_numeric
   # -->
-  # Returns `self` modulo `other` as a real number.
+  # Returns `self` modulo `other` as a real numeric (Integer, Float, or Rational).
   #
   # Of the Core and Standard Library classes, only Rational uses this
   # implementation.
@@ -212,7 +212,7 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - -self -> numeric
   # -->
-  # Unary Minus---Returns the receiver, negated.
+  # Returns `self`, negated.
   #
   def -@: () -> self
 
@@ -220,7 +220,15 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - self <=> other -> zero or nil
   # -->
-  # Returns zero if `self` is the same as `other`, `nil` otherwise.
+  # Compares `self` and `other`.
+  #
+  # Returns:
+  #
+  # *   Zero, if `self` is the same as `other`.
+  # *   `nil`, otherwise.
+  #
+  # Class Numeric includes module Comparable, each of whose methods uses
+  # Numeric#<=> for comparison.
   #
   # No subclass in the Ruby Core or Standard Library uses this implementation.
   #
@@ -336,7 +344,7 @@ class Numeric
   #   - div(other) -> integer
   # -->
   # Returns the quotient `self/other` as an integer (via `floor`), using method
-  # `/` in the derived class of `self`. (Numeric itself does not define method
+  # `/` as defined in the subclass of Numeric. (Numeric itself does not define
   # `/`.)
   #
   # Of the Core and Standard Library classes, Only Float and Rational use this
@@ -398,8 +406,8 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - fdiv(other) -> float
   # -->
-  # Returns the quotient `self/other` as a float, using method `/` in the derived
-  # class of `self`. (Numeric itself does not define method `/`.)
+  # Returns the quotient `self/other` as a float, using method `/` as defined in
+  # the subclass of Numeric. (Numeric itself does not define `/`.)
   #
   # Of the Core and Standard Library classes, only BigDecimal uses this
   # implementation.
@@ -488,7 +496,7 @@ class Numeric
   alias magnitude abs
 
   # <!-- rdoc-file=numeric.c -->
-  # Returns `self` modulo `other` as a real number.
+  # Returns `self` modulo `other` as a real numeric (Integer, Float, or Rational).
   #
   # Of the Core and Standard Library classes, only Rational uses this
   # implementation.
@@ -530,17 +538,17 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - nonzero?  ->  self or nil
   # -->
-  # Returns +self+ if +self+ is not a zero value, +nil+ otherwise;
-  #     uses method <tt>zero?</tt> for the evaluation.
+  # Returns `self` if `self` is not a zero value, `nil` otherwise; uses method
+  # `zero?` for the evaluation.
   #
-  #     The returned +self+ allows the method to be chained:
+  # The returned `self` allows the method to be chained:
   #
-  #       a = %w[z Bb bB bb BB a aA Aa AA A]
-  #       a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
-  #       # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
+  #     a = %w[z Bb bB bb BB a aA Aa AA A]
+  #     a.sort {|a, b| (a.downcase <=> b.downcase).nonzero? || a <=> b }
+  #     # => ["A", "a", "AA", "Aa", "aA", "BB", "Bb", "bB", "bb", "z"]
   #
-  #     Of the Core and Standard Library classes,
-  #     Integer, Float, Rational, and Complex use this implementation.
+  # Of the Core and Standard Library classes, Integer, Float, Rational, and
+  # Complex use this implementation.
   #
   # Related: #zero?
   #
@@ -765,8 +773,8 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - to_int -> integer
   # -->
-  # Returns `self` as an integer; converts using method `to_i` in the derived
-  # class.
+  # Returns `self` as an integer; converts using method `to_i` in the subclass of
+  # Numeric. (Numeric itself does not define `to_i`.)
   #
   # Of the Core and Standard Library classes, only Rational and Complex use this
   # implementation.

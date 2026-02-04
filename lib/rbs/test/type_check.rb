@@ -264,6 +264,9 @@ module RBS
           klass = get_class(type.name) or return false
           if params = builder.env.normalized_module_class_entry(type.name.absolute!)&.type_params
             args = AST::TypeParam.normalize_args(params, type.args)
+            if args.size != params.size
+              return false
+            end
             unless args == type.args
               type = Types::ClassInstance.new(name: type.name, args: args, location: type.location)
             end
@@ -287,6 +290,19 @@ module RBS
                 val.lazy.take(10).each do |*args|
                   values << args
                   nil
+                end
+              when nil
+                values = []
+                count = 10_000
+
+                ret = val.each do |*args|
+                  count -= 1
+                  values << args
+                  break if count <= 0
+                end
+
+                if count == 0
+                  ret = self
                 end
               else
                 values = []
@@ -356,6 +372,7 @@ module RBS
           value(val, builder.expand_alias2(type.name.absolute!, type.args))
         when Types::Tuple
           Test.call(val, IS_AP, ::Array) &&
+            type.types.length == val.length &&
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
           Test::call(val, IS_AP, ::Hash) &&

@@ -398,6 +398,19 @@ module RBS
                         .update(type_params: class_params + method_type.type_params)
                     end
 
+                    method_type = method_type.map_type do |type|
+                      case type
+                      when Types::Bases::Self
+                        Types::ClassInstance.new(
+                          name: type_name,
+                          args: entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) },
+                          location: nil
+                        )
+                      else
+                        type
+                      end
+                    end
+
                     method_type = method_type.update(
                       type: method_type.type.with_return_type(
                         Types::ClassInstance.new(
@@ -695,12 +708,14 @@ module RBS
           )
         end
 
+        accessibility = special_accessibility(original.instance?, original.new_name) || original_method.accessibility
+
         method_definition = Definition::Method.new(
           super_method: existing_method,
           defs: original_method.defs.map do |defn|
             defn.update(defined_in: defined_in, implemented_in: implemented_in)
           end,
-          accessibility: original_method.accessibility,
+          accessibility: accessibility,
           alias_of: original_method,
           alias_member: original
         )
@@ -727,13 +742,9 @@ module RBS
           end
         end
 
-        # @type var accessibility: RBS::Definition::accessibility
-        accessibility =
-          if original.instance? && [:initialize, :initialize_copy, :initialize_clone, :initialize_dup, :respond_to_missing?].include?(method.name)
-            :private
-          else
-            method.accessibility
-          end
+        # Respect the visibility of the original method definition.
+        accessibility = original.visibility || special_accessibility(original.instance?, method.name) || method.accessibility
+
         # Skip setting up `super_method` if `implemented_in` is `nil`, that means the type doesn't have implementation.
         # This typically happens if the type is an interface.
         if implemented_in
@@ -786,6 +797,9 @@ module RBS
           super_method = existing_method
         end
 
+        # Respect the visibility of the original method definition.
+        accessibility = original.visibility || special_accessibility(original.kind == :instance, method.name) || method.accessibility
+
         method_definition = Definition::Method.new(
           super_method: super_method,
           defs: [
@@ -796,7 +810,7 @@ module RBS
               implemented_in: implemented_in
             )
           ],
-          accessibility: method.accessibility,
+          accessibility: accessibility,
           alias_of: nil,
           alias_member: nil
         )
@@ -941,6 +955,12 @@ module RBS
       end
 
       methods[method.name] = method_definition
+    end
+
+    def special_accessibility(is_instance, method_name)
+      if is_instance && [:initialize, :initialize_copy, :initialize_clone, :initialize_dup, :respond_to_missing?].include?(method_name)
+        :private
+      end
     end
 
     def try_cache(type_name, cache:)

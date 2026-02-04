@@ -523,11 +523,13 @@ module FileUtils
   # symbolic links; other file types (FIFO streams, device files, etc.) are not
   # supported.
   #
-  # Keyword arguments:
+  # Optional arguments:
   #
-  # *   `dereference_root: true` - if `src` is a symbolic link, follows the link.
-  # *   `preserve: true` - preserves file times.
-  # *   `remove_destination: true` - removes `dest` before copying files.
+  # *   `dereference_root` - if `src` is a symbolic link, follows the link
+  #     (`false` by default).
+  # *   `preserve` - preserves file times (`false` by default).
+  # *   `remove_destination` - removes `dest` before copying files (`false` by
+  #     default).
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
@@ -548,12 +550,13 @@ module FileUtils
   #     FileUtils.copy_file('src0.txt', 'dest0.txt')
   #     File.file?('dest0.txt') # => true
   #
-  # Keyword arguments:
+  # Optional arguments:
   #
-  # *   `dereference: false` - if `src` is a symbolic link, does not follow the
-  #     link.
-  # *   `preserve: true` - preserves file times.
-  # *   `remove_destination: true` - removes `dest` before copying files.
+  # *   `dereference` - if `src` is a symbolic link, follows the link (`true` by
+  #     default).
+  # *   `preserve` - preserves file times (`false` by default).
+  # *   `remove_destination` - removes `dest` before copying files (`false` by
+  #     default).
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
@@ -904,12 +907,12 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `group: *group`* - changes the group if not `nil`, using
+  # *   `group: <i>group</i>` - changes the group if not `nil`, using
   #     [File.chown](rdoc-ref:File.chown).
-  # *   `mode: *permissions`* - changes the permissions. using
+  # *   `mode: <i>permissions</i>` - changes the permissions. using
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not copy entries; returns `nil`.
-  # *   `owner: *owner`* - changes the owner if not `nil`, using
+  # *   `owner: <i>owner</i>` - changes the owner if not `nil`, using
   #     [File.chown](rdoc-ref:File.chown).
   # *   `preserve: true` - preserve timestamps using
   #     [File.utime](rdoc-ref:File.utime).
@@ -964,13 +967,15 @@ module FileUtils
   #     File.file?('dest1/dir1/t2.txt') # => true
   #     File.file?('dest1/dir1/t3.txt') # => true
   #
-  # Keyword arguments:
+  # Optional arguments:
   #
-  # *   `dereference_root: true` - dereferences `src` if it is a symbolic link.
-  # *   `remove_destination: true` - removes `dest` before creating links.
+  # *   `dereference_root` - dereferences `src` if it is a symbolic link (`false`
+  #     by default).
+  # *   `remove_destination` - removes `dest` before creating links (`false` by
+  #     default).
   #
   # Raises an exception if `dest` is the path to an existing file or directory and
-  # keyword argument `remove_destination: true` is not given.
+  # optional argument `remove_destination` is not given.
   #
   # Related: FileUtils.ln (has different options).
   #
@@ -1169,7 +1174,7 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mode: *mode`* - also calls `File.chmod(mode, path)`; see
+  # *   `mode: <i>mode</i>` - also calls `File.chmod(mode, path)`; see
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not create directories.
   # *   `verbose: true` - prints an equivalent command:
@@ -1209,7 +1214,7 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mode: *mode`* - also calls `File.chmod(mode, path)`; see
+  # *   `mode: <i>mode</i>` - also calls `File.chmod(mode, path)`; see
   #     [File.chmod](rdoc-ref:File.chmod).
   # *   `noop: true` - does not create directories.
   # *   `verbose: true` - prints an equivalent command:
@@ -1694,8 +1699,8 @@ module FileUtils
   #
   # Keyword arguments:
   #
-  # *   `mtime: *time`* - sets the entry's mtime to the given time, instead of the
-  #     current time.
+  # *   `mtime: <i>time</i>` - sets the entry's mtime to the given time, instead
+  #     of the current time.
   # *   `nocreate: true` - raises an exception if the entry does not exist.
   # *   `noop: true` - does not touch entries; returns `nil`.
   # *   `verbose: true` - prints an equivalent command:

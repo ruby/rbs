@@ -171,7 +171,7 @@ class Dir
   # system's encoding is used:
   #
   #     Dir.new('.').read.encoding                       # => #<Encoding:UTF-8>
-  #     Dir.new('.', encoding: 'US-ASCII').read.encoding # => #<Encoding:US-ASCII>
+  #     Dir.new('.', encoding: Encoding::US_ASCI).read.encoding # => #<Encoding:US-ASCII>
   #
   def initialize: (path dir, ?encoding: encoding?) -> void
 
@@ -477,8 +477,8 @@ class Dir
 
   # <!--
   #   rdoc-file=dir.rb
-  #   - Dir.glob(*patterns, flags: 0, base: nil, sort: true) -> array
-  #   - Dir.glob(*patterns, flags: 0, base: nil, sort: true) {|entry_name| ... } -> nil
+  #   - Dir.glob(patterns, flags: 0, base: nil, sort: true) -> array
+  #   - Dir.glob(patterns, flags: 0, base: nil, sort: true) {|entry_name| ... } -> nil
   # -->
   # Forms an array *entry_names* of the entry names selected by the arguments.
   #
@@ -567,14 +567,14 @@ class Dir
   #
   #         Dir.glob('io.?') # => ["io.c"]
   #
-  # *   `'[*set*]'`: Matches any one character in the string *set*; behaves like a
+  # *   `'[_set_]'`: Matches any one character in the string *set*; behaves like a
   #     [Regexp character class](rdoc-ref:Regexp@Character+Classes), including set
   #     negation (`'[^a-z]'`):
   #
   #         Dir.glob('*.[a-z][a-z]').take(3)
   #         # => ["CONTRIBUTING.md", "COPYING.ja", "KNOWNBUGS.rb"]
   #
-  # *   `'{*abc*,*xyz*}'`: Matches either string *abc* or string *xyz*; behaves
+  # *   `'{_abc_,_xyz_}'`: Matches either string *abc* or string *xyz*; behaves
   #     like [Regexp alternation](rdoc-ref:Regexp@Alternation):
   #
   #         Dir.glob('{LEGAL,BSDL}') # => ["LEGAL", "BSDL"]
@@ -631,9 +631,9 @@ class Dir
   #         Dir.glob('*', flags: File::FNM_DOTMATCH).take(5)
   #         # => [".", ".appveyor.yml", ".cirrus.yml", ".dir-locals.el", ".document"]
   #
-  # *   File::FNM_EXTGLOB: enables the pattern extension `'{*a*,*b*}'`, which
+  # *   File::FNM_EXTGLOB: enables the pattern extension `'{_a_,_b_}'`, which
   #     matches pattern *a* and pattern *b*; behaves like a [regexp
-  #     union](rdoc-ref:Regexp.union) (e.g., `'(?:*a*|*b*)'`):
+  #     union](rdoc-ref:Regexp.union) (e.g., `'(?:_a_|_b_)'`):
   #
   #         pattern = '{LEGAL,BSDL}'
   #         Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
@@ -704,7 +704,7 @@ class Dir
   # system's encoding is used:
   #
   #     Dir.open('.').read.encoding                       # => #<Encoding:UTF-8>
-  #     Dir.open('.', encoding: 'US-ASCII').read.encoding # => #<Encoding:US-ASCII>
+  #     Dir.open('.', encoding: Encoding::US_ASCII).read.encoding # => #<Encoding:US-ASCII>
   #
   def self.open: (path dirname, ?encoding: encoding?) -> instance
                | [U] (path dirname, ?encoding: encoding?) { (instance) -> U } -> U

@@ -2387,6 +2387,7 @@ end
           def foo: (self) -> self
           def foo: (class) -> class
           def foo: (instance) -> instance
+          def foo: () -> A[void, self, class, instance]
         end
       RBS
     end
@@ -2483,6 +2484,46 @@ end
     end
     assert_equal [2, 19], ex.location.start_loc
     assert_equal [2, 23], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> class
+        end
+      RBS
+    end
+    assert_equal [2, 17], ex.location.start_loc
+    assert_equal [2, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> ^() -> class
+        end
+      RBS
+    end
+    assert_equal [2, 24], ex.location.start_loc
+    assert_equal [2, 29], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () -> instance
+        end
+      RBS
+    end
+    assert_equal [2, 17], ex.location.start_loc
+    assert_equal [2, 25], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~RBS)
+        interface _Foo
+          def foo: () { () -> instance } -> void
+        end
+      RBS
+    end
+    assert_equal [2, 22], ex.location.start_loc
+    assert_equal [2, 30], ex.location.end_loc
   end
 
   def test_context_syntax_error_attribute
@@ -2537,6 +2578,18 @@ end
     end
     assert_equal [1, 18], ex.location.start_loc
     assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[class] end")
+    end
+    assert_equal [1, 18], ex.location.start_loc
+    assert_equal [1, 23], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class Foo < Array[instance] end")
+    end
+    assert_equal [1, 18], ex.location.start_loc
+    assert_equal [1, 26], ex.location.end_loc
   end
 
   def test_context_syntax_error_module_self_type
@@ -2555,6 +2608,18 @@ end
     end
     assert_equal [1, 19], ex.location.start_loc
     assert_equal [1, 23], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[class] end")
+    end
+    assert_equal [1, 19], ex.location.start_loc
+    assert_equal [1, 24], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module Foo : Array[instance] end")
+    end
+    assert_equal [1, 19], ex.location.start_loc
+    assert_equal [1, 27], ex.location.end_loc
   end
 
   def test_context_syntax_error_global
@@ -2569,6 +2634,18 @@ end
     end
     assert_equal [1, 7], ex.location.start_loc
     assert_equal [1, 11], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: class")
+    end
+    assert_equal [1, 7], ex.location.start_loc
+    assert_equal [1, 12], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("$glob: instance")
+    end
+    assert_equal [1, 7], ex.location.start_loc
+    assert_equal [1, 15], ex.location.end_loc
   end
 
   def test_context_syntax_error_constant
@@ -2583,6 +2660,18 @@ end
     end
     assert_equal [1, 7], ex.location.start_loc
     assert_equal [1, 11], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: class")
+    end
+    assert_equal [1, 7], ex.location.start_loc
+    assert_equal [1, 12], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("CONST: instance")
+    end
+    assert_equal [1, 7], ex.location.start_loc
+    assert_equal [1, 15], ex.location.end_loc
   end
 
   def test_context_syntax_error_type_alias
@@ -2597,6 +2686,18 @@ end
     end
     assert_equal [1, 9], ex.location.start_loc
     assert_equal [1, 13], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = class")
+    end
+    assert_equal [1, 9], ex.location.start_loc
+    assert_equal [1, 14], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a = instance")
+    end
+    assert_equal [1, 9], ex.location.start_loc
+    assert_equal [1, 17], ex.location.end_loc
   end
 
   def test_context_syntax_error_mixin
@@ -2606,6 +2707,10 @@ end
           include M[void]
           include M[class]
           include M[instance]
+        end
+
+        interface _C
+          include _M[void]
         end
       SIG
     end
@@ -2621,6 +2726,18 @@ end
     end
     assert_equal [1, 18], ex.location.start_loc
     assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I include _M[class] end")
+    end
+    assert_equal [1, 24], ex.location.start_loc
+    assert_equal [1, 29], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I include _M[instance] end")
+    end
+    assert_equal [1, 24], ex.location.start_loc
+    assert_equal [1, 32], ex.location.end_loc
   end
 
   def test_context_syntax_error_variable
@@ -2690,6 +2807,18 @@ end
     assert_equal [1, 16], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < class] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 17], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T < instance] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 20], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("module M[T < void] end")
     end
     assert_equal [1, 13], ex.location.start_loc
@@ -2700,6 +2829,18 @@ end
     end
     assert_equal [1, 13], ex.location.start_loc
     assert_equal [1, 17], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < class] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 18], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T < instance] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 21], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("interface _I[T < void] end")
@@ -2714,6 +2855,18 @@ end
     assert_equal [1, 21], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < class] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T < instance] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 25], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("type a[T < void] = 1")
     end
     assert_equal [1, 11], ex.location.start_loc
@@ -2724,6 +2877,18 @@ end
     end
     assert_equal [1, 11], ex.location.start_loc
     assert_equal [1, 15], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < class] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 16], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T < instance] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 19], ex.location.end_loc
   end
 
   def test_context_syntax_error_lower_bound
@@ -2752,6 +2917,22 @@ end
     assert_equal [1, 16], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > class] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 17], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > instance] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 20], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T > instance] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("module M[T > void] end")
     end
     assert_equal [1, 13], ex.location.start_loc
@@ -2763,6 +2944,22 @@ end
     assert_equal [1, 13], ex.location.start_loc
     assert_equal [1, 17], ex.location.end_loc
 
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > class] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 18], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > instance] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 21], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T > instance] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
     ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("interface _I[T > void] end")
     end
@@ -2776,6 +2973,18 @@ end
     assert_equal [1, 21], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > class] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T > instance] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 25], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("type a[T > void] = 1")
     end
     assert_equal [1, 11], ex.location.start_loc
@@ -2786,6 +2995,18 @@ end
     end
     assert_equal [1, 11], ex.location.start_loc
     assert_equal [1, 15], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > class] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 16], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T > instance] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 19], ex.location.end_loc
   end
 
   def test_context_syntax_error_upper_and_lower_bound
@@ -2859,6 +3080,18 @@ end
     assert_equal [1, 16], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = class] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 17], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("class C[T = instance] end")
+    end
+    assert_equal [1, 12], ex.location.start_loc
+    assert_equal [1, 20], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("module M[T = [void]] end")
     end
     assert_equal [1, 14], ex.location.start_loc
@@ -2869,6 +3102,18 @@ end
     end
     assert_equal [1, 13], ex.location.start_loc
     assert_equal [1, 17], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = class] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 18], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("module M[T = instance] end")
+    end
+    assert_equal [1, 13], ex.location.start_loc
+    assert_equal [1, 21], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("interface _I[T = [void]] end")
@@ -2883,6 +3128,18 @@ end
     assert_equal [1, 21], ex.location.end_loc
 
     ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = class] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 22], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("interface _I[T = instance] end")
+    end
+    assert_equal [1, 17], ex.location.start_loc
+    assert_equal [1, 25], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
       Parser.parse_signature("type a[T = [void]] = 1")
     end
     assert_equal [1, 12], ex.location.start_loc
@@ -2893,5 +3150,17 @@ end
     end
     assert_equal [1, 11], ex.location.start_loc
     assert_equal [1, 15], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = class] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 16], ex.location.end_loc
+
+    ex = assert_raises RBS::ParsingError do
+      Parser.parse_signature("type a[T = instance] = 1")
+    end
+    assert_equal [1, 11], ex.location.start_loc
+    assert_equal [1, 19], ex.location.end_loc
   end
 end

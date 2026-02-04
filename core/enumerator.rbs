@@ -137,7 +137,7 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
 
   # <!--
   #   rdoc-file=enumerator.c
-  #   - Enumerator.produce(initial = nil) { |prev| block } -> enumerator
+  #   - Enumerator.produce(initial = nil, size: nil) { |prev| block } -> enumerator
   # -->
   # Creates an infinite enumerator from any block, just called over and over.  The
   # result of the previous iteration is passed to the next one. If `initial` is
@@ -168,6 +168,29 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
   #     PATTERN = %r{\d+|[-/+*]}
   #     Enumerator.produce { scanner.scan(PATTERN) }.slice_after { scanner.eos? }.first
   #     # => ["7", "+", "38", "/", "6"]
+  #
+  # The optional `size` keyword argument specifies the size of the enumerator,
+  # which can be retrieved by Enumerator#size.  It can be an integer,
+  # `Float::INFINITY`, a callable object (such as a lambda), or `nil` to indicate
+  # unknown size.  When not specified, the size defaults to `Float::INFINITY`.
+  #
+  #     # Infinite enumerator
+  #     enum = Enumerator.produce(1, size: Float::INFINITY, &:succ)
+  #     enum.size  # => Float::INFINITY
+  #
+  #     # Finite enumerator with known/computable size
+  #     abs_dir = File.expand_path("./baz") # => "/foo/bar/baz"
+  #     traverser = Enumerator.produce(abs_dir, size: -> { abs_dir.count("/") + 1 }) {
+  #       raise StopIteration if it == "/"
+  #       File.dirname(it)
+  #     }
+  #     traverser.size  # => 4
+  #
+  #     # Finite enumerator with unknown size
+  #     calendar = Enumerator.produce(Date.today, size: nil) {
+  #       it.monday? ? raise(StopIteration) : it + 1
+  #     }
+  #     calendar.size  # => nil
   #
   def self.produce: [T] () { (T? prev) -> T } -> Enumerator[T, bot]
                   | [T] (T initial) { (T prev) -> T } -> Enumerator[T, bot]
@@ -445,6 +468,25 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
   #     (1..100).to_a.permutation(4).size # => 94109400
   #     loop.size # => Float::INFINITY
   #     (1..100).drop_while.size # => nil
+  #
+  # Note that enumerator size might be inaccurate, and should be rather treated as
+  # a hint. For example, there is no check that the size provided to ::new is
+  # accurate:
+  #
+  #     e = Enumerator.new(5) { |y| 2.times { y << it} }
+  #     e.size # => 5
+  #     e.to_a.size # => 2
+  #
+  # Another example is an enumerator created by ::produce without a `size`
+  # argument. Such enumerators return `Infinity` for size, but this is inaccurate
+  # if the passed block raises StopIteration:
+  #
+  #     e = Enumerator.produce(1) { it + 1 }
+  #     e.size # => Infinity
+  #
+  #     e = Enumerator.produce(1) { it > 3 ? raise(StopIteration) : it + 1 }
+  #     e.size # => Infinity
+  #     e.to_a.size # => 4
   #
   def size: () -> (Integer | Float)?
 

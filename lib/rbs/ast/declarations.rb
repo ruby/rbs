@@ -74,7 +74,7 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash
           end
 
-          def to_json(state = _ = nil)
+          def to_json(state = nil)
             {
               name: name,
               args: args,
@@ -130,7 +130,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ super_class.hash ^ members.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :class,
             name: name,
@@ -166,7 +166,7 @@ module RBS
             self.class.hash ^ name.hash ^ args.hash ^ location.hash
           end
 
-          def to_json(state = _ = nil)
+          def to_json(state = nil)
             {
               name: name,
               args: args,
@@ -231,7 +231,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ self_types.hash ^ members.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :module,
             name: name,
@@ -288,7 +288,7 @@ module RBS
           self.class.hash ^ type_params.hash ^ members.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :interface,
             name: name,
@@ -331,7 +331,7 @@ module RBS
           self.class.hash ^ name.hash ^ type_params.hash ^ type.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :alias,
             name: name,
@@ -371,7 +371,7 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :constant,
             name: name,
@@ -409,7 +409,7 @@ module RBS
           self.class.hash ^ name.hash ^ type.hash
         end
 
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :global,
             name: name,
@@ -445,7 +445,7 @@ module RBS
       end
 
       class ClassAlias < AliasDecl
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :class_alias,
             new_name: new_name,
@@ -457,7 +457,7 @@ module RBS
       end
 
       class ModuleAlias < AliasDecl
-        def to_json(state = _ = nil)
+        def to_json(state = nil)
           {
             declaration: :module_alias,
             new_name: new_name,

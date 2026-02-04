@@ -55,19 +55,26 @@
 module Comparable : _WithSpaceshipOperator
   # <!--
   #   rdoc-file=compar.c
-  #   - obj < other    -> true or false
+  #   - self < other -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value less than 0.
+  # Returns whether `self` is "less than" `other`; equivalent to `(self <=> other)
+  # < 0`:
+  #
+  #     'foo' < 'foo'  # => false
+  #     'foo' < 'food' # => true
   #
   def <: (untyped other) -> bool
 
   # <!--
   #   rdoc-file=compar.c
-  #   - obj <= other    -> true or false
+  #   - self <= other -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value less than or equal to 0.
+  # Returns whether `self` is "less than or equal to" `other`; equivalent to
+  # `(self <=> other) <= 0`:
+  #
+  #     'foo' <= 'foo'  # => true
+  #     'foo' <= 'food' # => true
+  #     'food' <= 'foo' # => false
   #
   def <=: (untyped other) -> bool
 
@@ -167,5 +174,13 @@ interface Comparable::_WithSpaceshipOperator
   # If `other` is less than `self`, it returns a positive Integer.
   # If no comparison is defined with `other` and `self`, it returns `nil`.
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (untyped other) -> Comparable::_CompareToZero?
+end
+
+# This interface indicates a type is comparable against zero.
+#
+interface Comparable::_CompareToZero
+  def <: (0) -> boolish
+
+  def >: (0) -> boolish
 end

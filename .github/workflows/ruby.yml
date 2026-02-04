@@ -13,29 +13,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', head]
+        ruby: ['3.2', '3.3', '3.4', '4.0', head]
         rubyopt: [""]
         job:
           - test
         include:
           - ruby: head
             job: stdlib_test rubocop
-          - ruby: "3.4"
+          - ruby: "4.0"
             job: stdlib_test
-          - ruby: "3.4"
+          - ruby: "4.0"
             job: test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "3.4"
+          - ruby: "4.0"
             job: stdlib_test
             rubyopt: "--enable-frozen-string-literal"
-          - ruby: "3.4"
+          - ruby: "4.0"
             job: rubocop validate test_doc build test_generate_stdlib raap
-          - ruby: "3.4"
+          - ruby: "4.0"
             job: typecheck_test
+          - ruby: asan-release
+            job: test
     env:
       RANDOMIZE_STDLIB_TEST_ORDER: "true"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -50,6 +52,8 @@ jobs:
         run: |
           ruby -v
           gem update --system
+      - name: install erb
+        run: gem install erb
       - name: bundle config set with
         run: |
           echo "NO_MINITEST=true" >> $GITHUB_ENV
@@ -66,6 +70,10 @@ jobs:
       - name: bin/setup
         run: |
           bin/setup
+      - name: Configure ASAN options
+        if: ${{ contains(matrix.ruby, 'asan') }}
+        run: |
+          echo "ASAN_OPTIONS=abort_on_error=1" >> $GITHUB_ENV
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
@@ -74,9 +82,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.4', head]
+        ruby: ['4.0', head]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           brew install ruby-build
@@ -90,6 +98,8 @@ jobs:
         run: |
           ruby -v
           gem update --system
+      - name: install erb
+        run: gem install erb
       - name: clang version
         run: clang --version
       - name: bundle config set force_ruby_platform true if head
@@ -100,4 +110,3 @@ jobs:
         run: |
           bin/setup
       - run: bundle exec rake clean compile_c99
-

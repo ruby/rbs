@@ -145,7 +145,7 @@ module FileTest
   #   rdoc-file=file.c
   #   - File.owned?(file_name)   -> true or false
   # -->
-  # Returns `true` if the named file exists and the effective used id of the
+  # Returns `true` if the named file exists and the effective user id of the
   # calling process is the owner of the file.
   #
   # *file_name* can be an IO object.

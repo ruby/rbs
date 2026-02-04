@@ -334,6 +334,81 @@ class KernelSingletonTest < Test::Unit::TestCase
     assert_send_type "(Range[Float]) -> Float", Kernel, :rand, 0.0...10.0
     assert_send_type "(Range[Float]) -> nil", Kernel, :rand, 0.0...0.0
   end
+
+  def test_trace_var
+    tracer = BlankSlate.new
+    def tracer.call(new) nil end
+
+    with_interned '$__TEST_TRACE_VAR' do |name|
+      assert_send_type '(interned, String) -> nil',
+                       Kernel, :trace_var, name, '1'
+      assert_send_type '(interned, ::Kernel::_Tracer) -> nil',
+                       Kernel, :trace_var, name, tracer
+      assert_send_type '(interned) { (any) -> void } -> nil',
+                       Kernel, :trace_var, name do |x| 0 end
+
+      # `Kernel.trace_var` doesn't actually check the type of its second argument,
+      # but instead defers until the global is actually assigned. To ensure that
+      # our signatures are correct, we assign the global here (which, if our
+      # signatures are incorrect, will raise an exception)
+      $__TEST_TRACE_VAR = 1
+
+      # Acts the same as `untrace_var`, so this performs the untracing for us.
+      assert_send_type '(interned, nil) -> Array[String | ::Kernel::_Tracer]',
+                       Kernel, :trace_var, name, nil
+    end
+  ensure
+    # Just in case an exception stopped it, we don't want to continue tracing.
+    # We do `defined?` as `untrace_var :$some_undefined_global` fails
+    untrace_var :$__TEST_TRACE_VAR if defined? $__TEST_TRACE_VAR
+  end
+
+  def test_untrace_var
+    tracer = BlankSlate.new
+    def tracer.call(new) nil end
+
+    with_interned '$__TEST_UNTRACE_VAR' do |name|
+      # No argument yields all traces
+      trace_var :$__TEST_UNTRACE_VAR, '"string"'
+      trace_var :$__TEST_UNTRACE_VAR do "proc" end
+      trace_var :$__TEST_UNTRACE_VAR, tracer
+      assert_send_type '(interned) -> Array[String | ::Kernel::_Tracer]',
+                       Kernel, :untrace_var, name
+
+      # `nil` also yields all traces
+      trace_var :$__TEST_UNTRACE_VAR, '"string"'
+      trace_var :$__TEST_UNTRACE_VAR do "proc" end
+      trace_var :$__TEST_UNTRACE_VAR, tracer
+      assert_send_type '(interned, nil) -> Array[String | ::Kernel::_Tracer]',
+                       Kernel, :untrace_var, name, nil
+
+      # Passing a String in yields the string if they're the same, or `nil`
+      string = '"string"'
+      trace_var :$__TEST_UNTRACE_VAR, string
+      assert_send_type '(interned, String) -> [String]',
+                       Kernel, :untrace_var, name, string
+      assert_send_type '(interned, String) -> nil',
+                       Kernel, :untrace_var, name, 'not a trace'
+
+      # Passing a `tracer` yields the tracer if it's set, or `nil` otherwise
+      trace_var :$__TEST_UNTRACE_VAR, tracer
+      assert_send_type '[T < ::Kernel::_Tracer] (interned, T) -> [T]',
+                       Kernel, :untrace_var, name, tracer
+      assert_send_type '[T < ::Kernel::_Tracer] (interned, T) -> nil',
+                       Kernel, :untrace_var, name, tracer
+
+      # Anything else is `nil`
+      with_untyped do |trace|
+        next if nil == trace
+        assert_send_type '(interned, untyped) -> nil',
+                         Kernel, :untrace_var, name, trace
+      end
+    end
+  ensure
+    # Just in case an exception stopped it, we don't want to continue tracing.
+    # We do `defined?` as `untrace_var :$some_undefined_global` fails
+    untrace_var :$__TEST_UNTRACE_VAR if defined? $__TEST_UNTRACE_VAR
+  end
 end
 
 class KernelInstanceTest < Test::Unit::TestCase

@@ -124,35 +124,35 @@ class RBS::CliTest < Test::Unit::TestCase
 
   def test_list
     with_cli do |cli|
-      assert_cli_success { cli.run(%w(-r pathname list)) }
-      assert_match %r{^::Pathname \(class\)$}, stdout.string
+      assert_cli_success { cli.run(%w(-r logger list)) }
+      assert_match %r{^::Logger \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --class))
+        cli.run(%w(-r logger list --class))
       end
-      assert_match %r{^::Pathname \(class\)$}, stdout.string
+      assert_match %r{^::Logger \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --module))
+        cli.run(%w(-r logger list --module))
       end
-      refute_match %r{^::Pathname \(class\)$}, stdout.string
+      refute_match %r{^::Logger \(class\)$}, stdout.string
       assert_match %r{^::Kernel \(module\)$}, stdout.string
       refute_match %r{^::_Each \(interface\)$}, stdout.string
     end
 
     with_cli do |cli|
       assert_cli_success do
-        cli.run(%w(-r pathname list --interface))
+        cli.run(%w(-r logger list --interface))
       end
-      refute_match %r{^::Pathname \(class\)$}, stdout.string
+      refute_match %r{^::Logger \(class\)$}, stdout.string
       refute_match %r{^::Kernel \(module\)$}, stdout.string
       assert_match %r{^::_Each \(interface\)$}, stdout.string
     end
@@ -665,42 +665,6 @@ singleton(::BasicObject)
     end
   end
 
-  def test_validate_multiple_with_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            type bar = instance
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "a.rbs:2:13...2:21: `instance` or `class` type is not allowed in this context (RBS::WillSyntaxError)"
-      end
-    end
-  end
-
-  def test_validate_multiple_with_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      Dir.mktmpdir do |dir|
-        (Pathname(dir) + 'a.rbs').write(<<~RBS)
-          class Foo
-            def foo: (T) -> void
-            def bar: (T) -> void
-          end
-        RBS
-
-        refute_cli_success do
-          cli.run(["-I", dir, "--log-level=warn", "validate", "--fail-fast", "--exit-error-on-syntax-error"])
-        end
-        assert_include stdout.string, "/a.rbs:2:12...2:13: Could not find T (RBS::NoTypeFoundError)"
-        assert_not_include stdout.string, "/a.rbs:3:12...3:13: Could not find T (RBS::NoTypeFoundError)"
-      end
-    end
-  end
-
   def test_validate_multiple_with_many_errors
     with_cli do |cli|
       refute_cli_success do
@@ -736,60 +700,6 @@ singleton(::BasicObject)
         cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast))
       end
       assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args []")
-    end
-  end
-
-  def test_validate_multiple_fail_fast_and_exit_error_on_syntax_error
-    with_cli do |cli|
-      refute_cli_success do
-        cli.run(%w(--log-level=warn -I test/multiple_error.rbs validate --fail-fast --exit-error-on-syntax-error))
-      end
-      assert_include(stdout.string, "test/multiple_error.rbs:6:17...6:24: ::TypeArg expects parameters [T], but given args [] (RBS::InvalidTypeApplicationError)")
-    end
-  end
-
-  def test_context_validation
-    tests = [
-      <<~RBS,
-        class Bar[A]
-        end
-        class Foo < Bar[instance]
-        end
-      RBS
-      <<~RBS,
-        module Bar : _Each[instance]
-        end
-      RBS
-      <<~RBS,
-        type foo = instance
-      RBS
-      <<~RBS,
-        BAR: instance
-      RBS
-      <<~RBS,
-        $FOO: instance
-      RBS
-    ]
-
-    tests.each do |rbs|
-      with_cli do |cli|
-        Dir.mktmpdir do |dir|
-          (Pathname(dir) + 'a.rbs').write(rbs)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate"])
-          end
-
-          assert_match(/void|self|instance|class/, stdout.string)
-
-          assert_cli_success do
-            cli.run(["-I", dir, "validate", "--no-exit-error-on-syntax-error"])
-          end
-          refute_cli_success do
-            cli.run(["-I", dir, "validate", "--exit-error-on-syntax-error"])
-          end
-        end
-      end
     end
   end
 
@@ -856,9 +766,9 @@ singleton(::BasicObject)
 
   def test_paths
     with_cli do |cli|
-      assert_cli_success cli.run(%w(-r pathname -I no-such-dir paths))
+      assert_cli_success cli.run(%w(-r logger -I no-such-dir paths))
       assert_match %r{/core \(dir, core\)$}, stdout.string
-      assert_match %r{/stdlib/pathname/0 \(dir, library, name=pathname\)$}, stdout.string
+      assert_match %r{/stdlib/logger/0 \(dir, library, name=logger\)$}, stdout.string
       assert_match %r{^no-such-dir \(absent\)$}, stdout.string
     end
   end
@@ -1171,7 +1081,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger')
+        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger', 'tsort')
         _stdout, _stderr = run_rbs_collection("install", bundler: true)
 
         rbs_collection_lock = dir.join('rbs_collection.lock.yaml')
@@ -1237,7 +1147,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger')
+        bundle_install('ast', 'abbrev', 'bigdecimal', 'logger', 'tsort')
         run_rbs_collection("update", bundler: true)
 
         assert dir.join('rbs_collection.lock.yaml').exist?
@@ -1277,7 +1187,7 @@ Processing `lib`...
         RUBY
         (dir/"sig").mkdir
 
-        bundle_install(:gemspec, "abbrev", "bigdecimal", "logger")
+        bundle_install(:gemspec, "abbrev", "bigdecimal", "logger", "tsort")
         stdout, _ = run_rbs_collection("install", bundler: true)
 
         assert_match(/Installing ast:(\d(\.\d)*)/, stdout)
@@ -1307,7 +1217,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["mutex_m", ">= 0.3.0"])
+        bundle_install("logger", "tsort", ["mutex_m", ">= 0.3.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
@@ -1340,7 +1250,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["mutex_m", "0.2.0"])
+        bundle_install("logger", "tsort", ["mutex_m", "0.2.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1376,7 +1286,7 @@ Processing `lib`...
               type: stdlib
         YAML
 
-        bundle_install("logger")
+        bundle_install("logger", "tsort")
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1407,7 +1317,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install("logger", ["mutex_m", ">= 0.3.0"])
+        bundle_install("logger", "tsort", ["mutex_m", ">= 0.3.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         refute_match(/`mutex_m` as a stdlib in rbs-gem is deprecated./, stderr)
@@ -1437,7 +1347,7 @@ Processing `lib`...
           path: #{dir.join('gem_rbs_collection')}
         YAML
 
-        bundle_install("logger", ["mutex_m", "0.2.0"])
+        bundle_install("logger", "tsort", ["mutex_m", "0.2.0"])
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`mutex_m` as a stdlib in rbs-gem is deprecated.'
@@ -1472,7 +1382,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+        bundle_install("logger", "tsort", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
 
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
@@ -1516,7 +1426,7 @@ Processing `lib`...
           - name: mutex_m
         YAML
 
-        bundle_install("logger", ["hola", { path: "gem" }])
+        bundle_install("logger", "tsort", ["hola", { path: "gem" }])
 
         (dir + RBS::Collection::Config::PATH).write(<<~YAML)
           sources:
@@ -1539,6 +1449,85 @@ Processing `lib`...
         )
 
         assert_instance_of RBS::Collection::Sources::Rubygems, lockfile.gems["mutex_m"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__pathname_set
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: pathname
+          - name: set
+          - name: ast
+          - name: cgi-escape
+        YAML
+
+        bundle_install('ast', 'logger', 'tsort')
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, 'Cannot find `set` gem.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_nil lockfile.gems["set"]
+        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
+        assert_instance_of RBS::Collection::Sources::Git, lockfile.gems["ast"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__set_pathname__manifest
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+
+        (dir + RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - type: local
+              path: repo
+
+          path: #{dir.join('gem_rbs_collection')}
+        YAML
+
+        (dir/"repo/true_string/0").mkpath
+        (dir/"repo/true_string/0/manifest.yaml").write(<<~YAML)
+          dependencies:
+          - name: set
+          - name: pathname
+          - name: cgi-escape
+        YAML
+
+        bundle_install("logger", "tsort", "true_string")  # true_string is a soutaro's gem that doesn't have sig directory
+
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        assert_include stderr, '`set` is a part of the Ruby core library.'
+        assert_include stderr, '`pathname` is a part of the Ruby core library.'
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_nil lockfile.gems["set"]
+        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
+        assert_instance_of RBS::Collection::Sources::Local, lockfile.gems["true_string"][:source]
       end
     end
   end
