@@ -56,5 +56,5 @@ group :minitest do
 end
 
 group :typecheck_test do
-  gem "steep", require: false
+  gem "steep", require: false, git: "https://github.com/soutaro/steep.git"
 end

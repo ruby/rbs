@@ -1,3 +1,25 @@
+GIT
+  remote: https://github.com/soutaro/steep.git
+  revision: daa249e47ff4d1d197d3b6d2d73400db32293250
+  specs:
+    steep (2.0.0.dev)
+      activesupport (>= 5.1)
+      concurrent-ruby (>= 1.1.10)
+      csv (>= 3.0.9)
+      fileutils (>= 1.1.0)
+      json (>= 2.1.0)
+      language_server-protocol (>= 3.17.0.4, < 4.0)
+      listen (~> 3.0)
+      logger (>= 1.3.0)
+      mutex_m (>= 0.3.0)
+      parser (>= 3.2)
+      rainbow (>= 2.2.2, < 4.0)
+      rbs (~> 4.0.0.dev)
+      securerandom (>= 0.1)
+      strscan (>= 1.0.0)
+      terminal-table (>= 2, < 5)
+      uri (>= 0.12.0)
+
 PATH
   remote: .
   specs:
@@ -155,23 +177,6 @@ GEM
       nokogiri
     securerandom (0.4.1)
     stackprof (0.2.27)
-    steep (1.10.0)
-      activesupport (>= 5.1)
-      concurrent-ruby (>= 1.1.10)
-      csv (>= 3.0.9)
-      fileutils (>= 1.1.0)
-      json (>= 2.1.0)
-      language_server-protocol (>= 3.17.0.4, < 4.0)
-      listen (~> 3.0)
-      logger (>= 1.3.0)
-      mutex_m (>= 0.3.0)
-      parser (>= 3.1)
-      rainbow (>= 2.2.2, < 4.0)
-      rbs (~> 3.9)
-      securerandom (>= 0.1)
-      strscan (>= 1.0.0)
-      terminal-table (>= 2, < 5)
-      uri (>= 0.12.0)
     stringio (3.2.0)
     strong_json (2.1.2)
     strscan (3.1.7)
@@ -228,7 +233,7 @@ DEPENDENCIES
   rubocop-rubycw
   ruby_memcheck
   stackprof
-  steep
+  steep!
   tempfile
   test-unit
 
