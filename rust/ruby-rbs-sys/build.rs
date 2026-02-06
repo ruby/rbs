@@ -33,7 +33,6 @@ fn build(include_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-
 fn source_files<P: AsRef<Path>>(root_dir: P) -> Result<Vec<String>, Box<dyn Error>> {
     let mut files = Vec::new();
 
