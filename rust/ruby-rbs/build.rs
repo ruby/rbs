@@ -54,12 +54,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let config_path = manifest_dir.join("vendor/rbs/config.yml");
 
-    let config_path = config_path.canonicalize().map_err(|e| {
-        format!(
-            "Failed to find config.yml at {:?}: {}",
-            config_path, e
-        )
-    })?;
+    let config_path = config_path
+        .canonicalize()
+        .map_err(|e| format!("Failed to find config.yml at {:?}: {}", config_path, e))?;
 
     println!("cargo:rerun-if-changed={}", config_path.display());
 
