@@ -812,7 +812,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def include?: (Elem arg0) -> bool
+  def include?: (untyped arg0) -> bool
 
   # <!--
   #   rdoc-file=enum.c
