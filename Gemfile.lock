@@ -92,7 +92,6 @@ GEM
     logger (1.7.0)
     marcel (1.1.0)
     memory_profiler (1.1.0)
-    mini_portile2 (2.8.9)
     minitest (6.0.1)
       prism (~> 1.5)
     minitest-mock (5.27.0)
@@ -102,9 +101,6 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     nkf (0.2.0)
-    nokogiri (1.19.0)
-      mini_portile2 (~> 2.8.2)
-      racc (~> 1.4)
     ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.10.1)
@@ -173,8 +169,6 @@ GEM
       lint_roller (~> 1.1)
       rubocop (~> 1.72, >= 1.72.1)
     ruby-progressbar (1.13.0)
-    ruby_memcheck (3.0.1)
-      nokogiri
     securerandom (0.4.1)
     stackprof (0.2.27)
     stringio (3.2.0)
@@ -231,7 +225,6 @@ DEPENDENCIES
   rubocop
   rubocop-on-rbs
   rubocop-rubycw
-  ruby_memcheck
   stackprof
   steep!
   tempfile
