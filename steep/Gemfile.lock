@@ -25,7 +25,7 @@ GEM
     fileutils (1.8.0)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
-    json (2.18.0)
+    json (2.18.1)
     language_server-protocol (3.17.0.5)
     listen (3.10.0)
       logger
@@ -48,7 +48,7 @@ GEM
     rbs (3.10.3)
       logger
       tsort
-    ruby-lsp (0.26.5)
+    ruby-lsp (0.26.6)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
