@@ -1278,7 +1278,7 @@ class Integer
   #     4 / Complex(3, 0)  # => ((4/3)+0i)
   #
   def /: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1294,7 +1294,7 @@ class Integer
   #     4 * Complex(2, 0)  # => (8+0i)
   #
   def *: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1314,7 +1314,7 @@ class Integer
   #     1 + 3.14           # => 4.140000000000001
   #
   def +: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1330,7 +1330,7 @@ class Integer
   #     4 - Complex(2, 0)  # => (2+0i)
   #
   def -: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1369,7 +1369,7 @@ class Float
   #     f / Complex(2, 0)  # => (1.57+0.0i)
   #
   def /: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1384,7 +1384,7 @@ class Float
   #     f * Complex(2, 0)  # => (6.28+0.0i)
   #
   def *: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1404,7 +1404,7 @@ class Float
   #     3.14 + Rational(1, 1)  # => 4.140000000000001
   #
   def +: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1419,7 +1419,7 @@ class Float
   #     f - Complex(1, 0)     # => (2.14+0i)
   #
   def -: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1476,7 +1476,7 @@ class Rational
   #     Rational(20, 9) / 9.8              #=> 0.22675736961451246
   #
   def /: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=rational.c
@@ -1492,7 +1492,7 @@ class Rational
   #     Rational(-2, 9) * Rational(-9, 2) #=> (1/1)
   #
   def *: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=rational.c
@@ -1517,7 +1517,7 @@ class Rational
   #     Rational(2, 3) + Complex(1.0, 0.0) # => (1.6666666666666665+0.0i)
   #
   def +: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=rational.c
@@ -1532,7 +1532,7 @@ class Rational
   #     Rational(20, 9) - 9.8              #=> -7.577777777777778
   #
   def -: (BigDecimal) -> BigDecimal
-    | ...
+       | ...
 end
 
 %a{annotate:rdoc:skip}
@@ -1571,7 +1571,7 @@ class Complex
   #     Complex.rect(20, 9) / 9.8                 # => (2.0408163265306123+0.9183673469387754i)
   #
   def /: (BigDecimal) -> Complex
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=complex.c
@@ -1587,7 +1587,7 @@ class Complex
   #     Complex.rect(9, 8)  * Rational(2, 3)      # => ((6/1)+(16/3)*i)
   #
   def *: (BigDecimal) -> Complex
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=complex.c
@@ -1612,7 +1612,7 @@ class Complex
   #     Complex(1, 2) + 3.14 # => (4.140000000000001+2i)
   #
   def +: (BigDecimal) -> Complex
-    | ...
+       | ...
 
   # <!--
   #   rdoc-file=complex.c
@@ -1627,7 +1627,7 @@ class Complex
   #     Complex.rect(20, 9) - 9.8                 # => (10.2+9i)
   #
   def -: (BigDecimal) -> Complex
-    | ...
+       | ...
 end
 
 %a{annotate:rdoc:skip}
