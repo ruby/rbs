@@ -160,7 +160,7 @@ GEM
     rubocop-ast (1.49.0)
       parser (>= 3.3.7.2)
       prism (~> 1.7)
-    rubocop-on-rbs (1.9.0)
+    rubocop-on-rbs (1.9.1)
       lint_roller (~> 1.1)
       rbs (~> 3.5)
       rubocop (>= 1.72.1, < 2.0)
