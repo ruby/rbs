@@ -78,7 +78,7 @@ VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_na
     }
     case RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED:
         return Qnil;
-    case RBS_ATTR_IVAR_NAME_TAG_EMPTY: 
+    case RBS_ATTR_IVAR_NAME_TAG_EMPTY:
         return Qfalse;
     }
 }
@@ -154,21 +154,38 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
         VALUE h = rb_hash_new();
         <%- if node.expose_location? -%>
+
+        VALUE required_children = rb_ary_new();
+        VALUE optional_children = rb_ary_new();
+
             <%- if node.locations -%>
-        VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
-        rbs_loc *loc = rbs_check_location(location);
-        rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
+        VALUE pair;
+
                 <%- node.locations.each do |location_field| -%>
+        pair = rb_ary_new();
+        rb_ary_push(pair, ID2SYM(rb_intern("<%= location_field.name %>")));
                     <%- if location_field.required? -%>
-        rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+        rb_ary_push(pair, rb_range_new(INT2NUM(node-><%= location_field.attribute_name %>.start_char), INT2NUM(node-><%= location_field.attribute_name %>.end_char), false));
+        rb_ary_push(required_children, pair);
                     <%- else -%>
-        rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+        if (!RBS_LOCATION_NULL_RANGE_P(node-><%= location_field.attribute_name %>)) {
+            rb_ary_push(pair, rb_range_new(INT2NUM(node-><%= location_field.attribute_name %>.start_char), INT2NUM(node-><%= location_field.attribute_name %>.end_char), false));
+        } else {
+            rb_ary_push(pair, Qnil);
+        }
+        rb_ary_push(optional_children, pair);
                     <%- end -%>
                 <%- end -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
-            <%- else -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
             <%- end -%>
+        VALUE location = rbs_build_location2(
+            ctx.buffer,
+            node->base.location.start_char,
+            node->base.location.end_char,
+            required_children,
+            optional_children
+        );
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
+
         <%- end -%>
         <%- node.fields.each do |field| -%>
         <%- case field.type.name -%>

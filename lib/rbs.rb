@@ -70,7 +70,7 @@ require "rbs/collection"
 
 require "rbs_extension"
 require "rbs/parser_aux"
-require "rbs/location_aux"
+require "rbs/location"
 
 module RBS
   class <<self

@@ -42,6 +42,8 @@ module RBS
     #
     def ranges: () -> Array[Range[Integer]]
 
+    def finalize: () -> self
+
     # Returns the number of the lines
     def line_count: () -> Integer
 

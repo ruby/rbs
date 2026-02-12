@@ -4,37 +4,34 @@ module RBS
   #
   # A location can have _child_ locations.
   #
-  class Location[in RequiredChildKeys = untyped, in OptionalChildKeys = untyped]
+  class Location[in RequiredChildKeys < Symbol = bot, in OptionalChildKeys < Symbol = bot]
     # The buffer this location points on.
-    attr_reader buffer (): Buffer
+    attr_reader buffer: Buffer
 
     # The absolute start index of character the range starts from
     #
     # It returns the index in the `buffer.top_buffer`.
     #
-    attr_reader start_pos (): Integer
+    attr_reader start_pos: Integer
 
     # The absolute end index of character the range ends at
     #
     # It returns the index in the `buffer.top_buffer`.
     #
-    attr_reader end_pos (): Integer
+    attr_reader end_pos: Integer
+
+    attr_reader required_children: Hash[Symbol, Range[Integer]]
+
+    attr_reader optional_children: Hash[Symbol, Range[Integer]?]
 
     def initialize: (Buffer, Integer start_pos, Integer end_pos) -> void
 
-    def self.new: (Buffer, Integer start_pos, Integer end_pos) -> instance
-                | (buffer: Buffer, start_pos: Integer, end_pos: Integer) -> instance
+    def self.build: [RequiredChildKeys < Symbol, OptionalChildKeys < Symbol] (Buffer, Integer start_pos, Integer end_pos, Array[[RequiredChildKeys, Range[Integer]]], Array[[OptionalChildKeys, Range[Integer]?]]) -> Location[RequiredChildKeys, OptionalChildKeys]
 
     def inspect: () -> String
 
     # Returns the name of the buffer.
-    def name: () -> untyped
-
-    # The *raw* index of character the range starts from.
-    attr_reader _start_pos (): Integer
-
-    # The *raw* index of character the range ends at.
-    attr_reader _end_pos (): Integer
+    def name: () -> Pathname
 
     # Line of the `start_pos` (1 origin, absolute)
     attr_reader start_line (): Integer
@@ -52,23 +49,15 @@ module RBS
     #
     attr_reader start_loc (): Buffer::loc
 
-    @start_loc: Buffer::loc?
-
     # The absolute line-column pair of the end position
     #
     attr_reader end_loc (): Buffer::loc
 
-    @end_loc: Buffer::loc?
-
     # The absolute range of the start and end position
     attr_reader range (): Range[Integer]
 
-    @range: Range[Integer]?
-
     # A substring of buffer associated to the location.
     def source: () -> String
-
-    @source: String?
 
     def to_s: () -> String
 
@@ -119,16 +108,8 @@ module RBS
     def local_location: () -> self
 
     # Returns the source of `#local_location`
-    # 
+    #
     def local_source: () -> String
-
-    private
-
-    def _add_required_child: (RequiredChildKeys name, Integer start_pos, Integer end_pos) -> void
-    def _add_optional_child: (OptionalChildKeys name, Integer start_pos, Integer end_pos) -> void
-    def _add_optional_no_child: (OptionalChildKeys name) -> void
-    def _optional_keys: () -> Array[Symbol]
-    def _required_keys: () -> Array[Symbol]
 
     WithChildren: singleton(Location)
   end

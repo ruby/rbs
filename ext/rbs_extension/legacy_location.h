@@ -52,6 +52,8 @@ typedef struct {
     rbs_loc_children *children; // NULL when no children is allocated
 } rbs_loc;
 
+VALUE rbs_build_location2(VALUE buffer, int start_char, int end_char, VALUE required_children, VALUE optional_children);
+
 /**
  * Returns new RBS::Location object, with given buffer and range.
  * */
@@ -62,17 +64,17 @@ VALUE rbs_new_location2(VALUE buffer, int start_char, int end_char);
 /**
  * Return rbs_loc associated with the RBS::Location object.
  * */
-rbs_loc *rbs_check_location(VALUE location);
+// rbs_loc *rbs_check_location(VALUE location);
 
 /**
  * Allocate memory for child locations.
  *
  * Do not call twice for the same location.
  * */
-void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap);
+// void rbs_loc_legacy_alloc_children(rbs_loc *loc, unsigned short cap);
 
-void rbs_loc_legacy_add_optional_child(rbs_loc *loc, ID name, rbs_loc_range r);
-void rbs_loc_legacy_add_required_child(rbs_loc *loc, ID name, rbs_loc_range r);
+// void rbs_loc_legacy_add_optional_child(rbs_loc *loc, ID name, rbs_loc_range r);
+// void rbs_loc_legacy_add_required_child(rbs_loc *loc, ID name, rbs_loc_range r);
 
 /**
  * Define RBS::Location class.

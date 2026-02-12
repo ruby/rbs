@@ -27,6 +27,13 @@ module RBS
       ranges.size
     end
 
+    def finalize
+      name.freeze
+      content.freeze
+      ranges.freeze
+      self.freeze
+    end
+
     def ranges
       @ranges ||= begin
         if content.empty?
