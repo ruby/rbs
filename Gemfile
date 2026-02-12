@@ -38,7 +38,6 @@ group :profilers do
   gem 'stackprof'
   gem 'memory_profiler'
   gem 'benchmark-ips'
-  gem "ruby_memcheck", platform: :ruby
 end
 
 # Test gems
@@ -56,5 +55,5 @@ group :minitest do
 end
 
 group :typecheck_test do
-  gem "steep", require: false
+  gem "steep", require: false, git: "https://github.com/soutaro/steep.git"
 end
