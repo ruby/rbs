@@ -5,11 +5,11 @@
 #
 # Changing the behavior of Warning.warn is useful to customize how warnings are
 # handled by Ruby, for instance by filtering some warnings, and/or outputting
-# warnings somewhere other than `$stderr`.
+# warnings somewhere other than <code>$stderr</code>.
 #
 # If you want to change the behavior of Warning.warn you should use
-# `Warning.extend(MyNewModuleWithWarnMethod)` and you can use `super` to get the
-# default behavior of printing the warning to `$stderr`.
+# <code>Warning.extend(MyNewModuleWithWarnMethod)</code> and you can use `super`
+# to get the default behavior of printing the warning to <code>$stderr</code>.
 #
 # Example:
 #     module MyWarningFilter
@@ -41,18 +41,18 @@ module Warning
   # Returns the flag to show the warning messages for `category`. Supported
   # categories are:
   #
-  # `:deprecated`
+  # <code>:deprecated</code>
   # :   deprecation warnings
-  #     *   assignment of non-nil value to `$,` and `$;`
+  #     *   assignment of non-nil value to <code>$,</code> and <code>$;</code>
   #     *   keyword arguments
   #     etc.
   #
   #
-  # `:experimental`
+  # <code>:experimental</code>
   # :   experimental features
   #
   #
-  # `:performance`
+  # <code>:performance</code>
   # :   performance hints
   #     *   Shape variation limit
   #

@@ -41,8 +41,8 @@
 # because many such values are, in mathematics, of infinite precision, while in
 # numerical computation the precision is finite.
 #
-# Thus, in mathematics, *cos(π/2)* is exactly zero, but in our computation
-# `cos(PI/2)` is a number very close to zero:
+# Thus, in mathematics, <em>cos(π/2)</em> is exactly zero, but in our
+# computation <code>cos(PI/2)</code> is a number very close to zero:
 #
 #     cos(PI/2) # => 6.123031769111886e-17
 #
@@ -114,7 +114,7 @@
 #
 # #### Hypotenuse Function
 #
-# *   ::hypot: Returns `sqrt(a**2 + b**2)` for the given `a` and `b`.
+# *   ::hypot: Returns <code>sqrt(a**2 + b**2)</code> for the given `a` and `b`.
 #
 module Math
   # <!-- rdoc-file=math.c -->
@@ -137,7 +137,7 @@ module Math
   #
   #     Math.acos(42)
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Math::DomainError: Numerical argument is out of domain - "acos"
   #
@@ -155,8 +155,8 @@ module Math
   # Returns the [arc
   # cosine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of `x`.
   #
-  # *   Domain: `[-1, 1]`.
-  # *   Range: `[0, PI]`.
+  # *   Domain: <code>[-1, 1]</code>.
+  # *   Range: <code>[0, PI]</code>.
   #
   # Examples:
   #
@@ -173,8 +173,8 @@ module Math
   # Returns the [inverse hyperbolic
   # cosine](https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions) of `x`.
   #
-  # *   Domain: `[1, INFINITY]`.
-  # *   Range: `[0, INFINITY]`.
+  # *   Domain: <code>[1, INFINITY]</code>.
+  # *   Range: <code>[0, INFINITY]</code>.
   #
   # Examples:
   #
@@ -190,8 +190,8 @@ module Math
   # Returns the [arc
   # sine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of `x`.
   #
-  # *   Domain: `[-1, -1]`.
-  # *   Range: `[-PI/2, PI/2]`.
+  # *   Domain: <code>[-1, -1]</code>.
+  # *   Range: <code>[-PI/2, PI/2]</code>.
   #
   # Examples:
   #
@@ -208,8 +208,8 @@ module Math
   # Returns the [inverse hyperbolic
   # sine](https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions) of `x`.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -227,8 +227,8 @@ module Math
   # tangent](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of
   # `x`.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-PI/2, PI/2]  `.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-PI/2, PI/2]  </code>.
   #
   # Examples:
   #
@@ -251,9 +251,9 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain of `y`: `[-INFINITY, INFINITY]`.
-  # *   Domain of `x`: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-PI, PI]`.
+  # *   Domain of `y`: <code>[-INFINITY, INFINITY]</code>.
+  # *   Domain of `x`: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-PI, PI]</code>.
   #
   # Examples:
   #
@@ -271,8 +271,8 @@ module Math
   # Returns the [inverse hyperbolic
   # tangent](https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions) of `x`.
   #
-  # *   Domain: `[-1, 1]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-1, 1]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -288,8 +288,8 @@ module Math
   # -->
   # Returns the [cube root](https://en.wikipedia.org/wiki/Cube_root) of `x`.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -315,8 +315,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `(-INFINITY, INFINITY)`.
-  # *   Range: `[-1.0, 1.0]`.
+  # *   Domain: <code>(-INFINITY, INFINITY)</code>.
+  # *   Range: <code>[-1.0, 1.0]</code>.
   #
   # Examples:
   #
@@ -337,8 +337,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[1, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[1, INFINITY]</code>.
   #
   # Examples:
   #
@@ -355,8 +355,8 @@ module Math
   # Returns the value of the [Gauss error
   # function](https://en.wikipedia.org/wiki/Error_function) for `x`.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-1, 1]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-1, 1]</code>.
   #
   # Examples:
   #
@@ -376,8 +376,8 @@ module Math
   # function](https://en.wikipedia.org/wiki/Error_function#Complementary_error_fun
   # ction) for `x`.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[0, 2]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[0, 2]</code>.
   #
   # Examples:
   #
@@ -395,8 +395,8 @@ module Math
   # -->
   # Returns `e` raised to the `x` power.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[0, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[0, INFINITY]</code>.
   #
   # Examples:
   #
@@ -416,8 +416,8 @@ module Math
   # -->
   # Returns "exp(x) - 1", `e` raised to the `x` power, minus 1.
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-1.0, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-1.0, INFINITY]</code>.
   #
   # Examples:
   #
@@ -444,8 +444,8 @@ module Math
   # binary64](https://en.wikipedia.org/wiki/Double-precision_floating-point_format
   # #IEEE_754_double-precision_binary_floating-point_format:_binary64).
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -468,8 +468,8 @@ module Math
   # Returns the value of the [gamma
   # function](https://en.wikipedia.org/wiki/Gamma_function) for `x`.
   #
-  # *   Domain: `(-INFINITY, INFINITY]` excluding negative integers.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>(-INFINITY, INFINITY]</code> excluding negative integers.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -491,12 +491,13 @@ module Math
   #   rdoc-file=math.c
   #   - Math.hypot(a, b) -> float
   # -->
-  # Returns `sqrt(a**2 + b**2)`, which is the length of the longest side `c` (the
-  # hypotenuse) of the right triangle whose other sides have lengths `a` and `b`.
+  # Returns <code>sqrt(a**2 + b**2)</code>, which is the length of the longest
+  # side `c` (the hypotenuse) of the right triangle whose other sides have lengths
+  # `a` and `b`.
   #
-  # *   Domain of `a`: `[-INFINITY, INFINITY]`.
-  # *   Domain of +ab: `[-INFINITY, INFINITY]`.
-  # *   Range: `[0, INFINITY]`.
+  # *   Domain of `a`: <code>[-INFINITY, INFINITY]</code>.
+  # *   Domain of +ab: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[0, INFINITY]</code>.
   #
   # Examples:
   #
@@ -506,8 +507,8 @@ module Math
   #     hypot(5.0, 12.0)      # => 13.0
   #     hypot(1.0, sqrt(3.0)) # => 1.9999999999999998 # Near 2.0
   #
-  # Note that if either argument is `INFINITY` or `-INFINITY`, the result is
-  # `Infinity`.
+  # Note that if either argument is `INFINITY` or <code>-INFINITY</code>, the
+  # result is `Infinity`.
   #
   def self.hypot: (double x, double y) -> Float
 
@@ -515,10 +516,11 @@ module Math
   #   rdoc-file=math.c
   #   - Math.ldexp(fraction, exponent) -> float
   # -->
-  # Returns the value of `fraction * 2**exponent`.
+  # Returns the value of <code>fraction * 2**exponent</code>.
   #
-  # *   Domain of `fraction`: `[0.0, 1.0)`.
-  # *   Domain of `exponent`: `[0, 1024]` (larger values are equivalent to 1024).
+  # *   Domain of `fraction`: <code>[0.0, 1.0)</code>.
+  # *   Domain of `exponent`: <code>[0, 1024]</code> (larger values are equivalent
+  #     to 1024).
   #
   # See [IEEE 754 double-precision binary floating-point format:
   # binary64](https://en.wikipedia.org/wiki/Double-precision_floating-point_format
@@ -549,8 +551,8 @@ module Math
   # See [log gamma
   # function](https://en.wikipedia.org/wiki/Gamma_function#Log-gamma_function).
   #
-  # *   Domain: `(-INFINITY, INFINITY]`.
-  # *   Range of first element: `(-INFINITY, INFINITY]`.
+  # *   Domain: <code>(-INFINITY, INFINITY]</code>.
+  # *   Range of first element: <code>(-INFINITY, INFINITY]</code>.
   # *   Second element is -1 or 1.
   #
   # Examples:
@@ -584,8 +586,8 @@ module Math
   # Returns the base `base` [logarithm](https://en.wikipedia.org/wiki/Logarithm)
   # of `x`.
   #
-  # *   Domain: `[0, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY)]`.
+  # *   Domain: <code>[0, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY)]</code>.
   #
   # Examples:
   #
@@ -611,8 +613,8 @@ module Math
   # Returns the base 10 [logarithm](https://en.wikipedia.org/wiki/Logarithm) of
   # `x`.
   #
-  # *   Domain: `[0, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[0, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -630,8 +632,8 @@ module Math
   # Returns "log(x + 1)", the base E
   # [logarithm](https://en.wikipedia.org/wiki/Logarithm) of (`x` + 1).
   #
-  # *   Domain: `[-1, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-1, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -649,8 +651,8 @@ module Math
   # Returns the base 2 [logarithm](https://en.wikipedia.org/wiki/Logarithm) of
   # `x`.
   #
-  # *   Domain: `[0, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[0, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -669,8 +671,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `(-INFINITY, INFINITY)`.
-  # *   Range: `[-1.0, 1.0]`.
+  # *   Domain: <code>(-INFINITY, INFINITY)</code>.
+  # *   Range: <code>[-1.0, 1.0]</code>.
   #
   # Examples:
   #
@@ -691,8 +693,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-INFINITY, INFINITY]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-INFINITY, INFINITY]</code>.
   #
   # Examples:
   #
@@ -709,8 +711,8 @@ module Math
   # Returns the principal (non-negative) [square
   # root](https://en.wikipedia.org/wiki/Square_root) of `x`.
   #
-  # *   Domain: `[0, INFINITY]`.
-  # *   Range: `[0, INFINITY]`.
+  # *   Domain: <code>[0, INFINITY]</code>.
+  # *   Range: <code>[0, INFINITY]</code>.
   #
   # Examples:
   #
@@ -733,8 +735,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `(-INFINITY, INFINITY)`.
-  # *   Range: `(-INFINITY, INFINITY)`.
+  # *   Domain: <code>(-INFINITY, INFINITY)</code>.
+  # *   Range: <code>(-INFINITY, INFINITY)</code>.
   #
   # Examples:
   #
@@ -755,8 +757,8 @@ module Math
   # [radians](https://en.wikipedia.org/wiki/Trigonometric_functions#Radians_versus
   # _degrees).
   #
-  # *   Domain: `[-INFINITY, INFINITY]`.
-  # *   Range: `[-1, 1]`.
+  # *   Domain: <code>[-INFINITY, INFINITY]</code>.
+  # *   Range: <code>[-1, 1]</code>.
   #
   # Examples:
   #

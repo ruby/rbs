@@ -214,29 +214,30 @@ module Psych
   #
   # Currently supported options are:
   #
-  # `:indentation`
+  # <code>:indentation</code>
   # :   Number of space characters used to indent. Acceptable value should be in
-  #     `0..9` range, otherwise option is ignored.
+  #     <code>0..9</code> range, otherwise option is ignored.
   #
   #     Default: `2`.
   #
-  # `:line_width`
-  # :   Max character to wrap line at. For unlimited line width use `-1`.
+  # <code>:line_width</code>
+  # :   Max character to wrap line at. For unlimited line width use
+  #     <code>-1</code>.
   #
   #     Default: `0` (meaning "wrap at 81").
   #
-  # `:canonical`
+  # <code>:canonical</code>
   # :   Write "canonical" YAML form (very verbose, yet strictly formal).
   #
   #     Default: `false`.
   #
-  # `:header`
-  # :   Write `%YAML [version]` at the beginning of document.
+  # <code>:header</code>
+  # :   Write <code>%YAML [version]</code> at the beginning of document.
   #
   #     Default: `false`.
   #
   #
-  # `:stringify_names`
+  # <code>:stringify_names</code>
   # :   Dump symbol keys in Hash objects as string.
   #
   #     Default: `false`.

@@ -8,8 +8,8 @@
 # The same `Symbol` object will be created for a given name or string for the
 # duration of a program's execution, regardless of the context or meaning of
 # that name. Thus if `Fred` is a constant in one context, a method in another,
-# and a class in a third, the `Symbol` `:Fred` will be the same object in all
-# three contexts.
+# and a class in a third, the `Symbol` <code>:Fred</code> will be the same
+# object in all three contexts.
 #
 #     module One
 #       class Fred
@@ -75,7 +75,8 @@
 #     given Regexp or other object; returns `nil` if no match is found.
 # *   #[], #slice : Returns a substring of symbol determined by a given index,
 #     start/length, or range, or string.
-# *   #empty?: Returns `true` if `self.length` is zero; `false` otherwise.
+# *   #empty?: Returns `true` if <code>self.length</code> is zero; `false`
+#     otherwise.
 # *   #encoding: Returns the Encoding object that represents the encoding of
 #     symbol.
 # *   #end_with?: Returns `true` if symbol ends with any of the given strings.
@@ -136,7 +137,7 @@ class Symbol
   #
   # Returns:
   #
-  # *   `self.to_s <=> other.to_s`, if `other` is a symbol.
+  # *   <code>self.to_s <=> other.to_s</code>, if `other` is a symbol.
   # *   `nil`, otherwise.
   #
   # Examples:
@@ -171,8 +172,8 @@ class Symbol
   #   rdoc-file=string.c
   #   - symbol =~ object -> integer or nil
   # -->
-  # Equivalent to `symbol.to_s =~ object`, including possible updates to global
-  # variables; see String#=~.
+  # Equivalent to <code>symbol.to_s =~ object</code>, including possible updates
+  # to global variables; see String#=~.
   #
   def =~: (Regexp regex) -> Integer?
         | [T] (String::_MatchAgainst[String, T] object) -> T
@@ -185,7 +186,7 @@ class Symbol
   #   - symbol[regexp, capture = 0] -> string or nil
   #   - symbol[substring] -> string or nil
   # -->
-  # Equivalent to `symbol.to_s[]`; see String#[].
+  # Equivalent to <code>symbol.to_s[]</code>; see String#[].
   #
   def []: (int start, ?int length) -> String?
         | (range[int?] range) -> String?
@@ -196,7 +197,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - capitalize(mapping) -> symbol
   # -->
-  # Equivalent to `sym.to_s.capitalize.to_sym`.
+  # Equivalent to <code>sym.to_s.capitalize.to_sym</code>.
   #
   # See String#capitalize.
   #
@@ -210,7 +211,7 @@ class Symbol
   #   - casecmp(object) -> -1, 0, 1, or nil
   # -->
   # Like Symbol#<=>, but case-insensitive; equivalent to
-  # `self.to_s.casecmp(object.to_s)`:
+  # <code>self.to_s.casecmp(object.to_s)</code>:
   #
   #     lower = :abc
   #     upper = :ABC
@@ -276,7 +277,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - downcase(mapping) -> symbol
   # -->
-  # Equivalent to `sym.to_s.downcase.to_sym`.
+  # Equivalent to <code>sym.to_s.downcase.to_sym</code>.
   #
   # See String#downcase.
   #
@@ -291,7 +292,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - empty? -> true or false
   # -->
-  # Returns `true` if `self` is `:''`, `false` otherwise.
+  # Returns `true` if `self` is <code>:''</code>, `false` otherwise.
   #
   def empty?: () -> bool
 
@@ -299,7 +300,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - encoding -> encoding
   # -->
-  # Equivalent to `self.to_s.encoding`; see String#encoding.
+  # Equivalent to <code>self.to_s.encoding</code>; see String#encoding.
   #
   def encoding: () -> Encoding
 
@@ -307,7 +308,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - end_with?(*strings) -> true or false
   # -->
-  # Equivalent to `self.to_s.end_with?`; see String#end_with?.
+  # Equivalent to <code>self.to_s.end_with?</code>; see String#end_with?.
   #
   def end_with?: (*string suffixes) -> bool
 
@@ -341,7 +342,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - length -> integer
   # -->
-  # Equivalent to `self.to_s.length`; see String#length.
+  # Equivalent to <code>self.to_s.length</code>; see String#length.
   #
   def length: () -> Integer
 
@@ -350,8 +351,8 @@ class Symbol
   #   - match(pattern, offset = 0) -> matchdata or nil
   #   - match(pattern, offset = 0) {|matchdata| } -> object
   # -->
-  # Equivalent to `self.to_s.match`, including possible updates to global
-  # variables; see String#match.
+  # Equivalent to <code>self.to_s.match</code>, including possible updates to
+  # global variables; see String#match.
   #
   def match: (Regexp | string pattern, ?int offset) -> MatchData?
            | [T] (Regexp | string pattern, ?int offset) { (MatchData matchdata) -> T } -> T?
@@ -360,12 +361,12 @@ class Symbol
   #   rdoc-file=string.c
   #   - match?(pattern, offset) -> true or false
   # -->
-  # Equivalent to `sym.to_s.match?`; see String#match.
+  # Equivalent to <code>sym.to_s.match?</code>; see String#match.
   #
   def match?: (Regexp | string pattern, ?int offset) -> bool
 
   # <!-- rdoc-file=string.c -->
-  # Equivalent to `self.to_s.succ.to_sym`:
+  # Equivalent to <code>self.to_s.succ.to_sym</code>:
   #
   #     :foo.succ # => :fop
   #
@@ -388,12 +389,12 @@ class Symbol
   def name: () -> String
 
   # <!-- rdoc-file=string.c -->
-  # Equivalent to `self.to_s.length`; see String#length.
+  # Equivalent to <code>self.to_s.length</code>; see String#length.
   #
   alias size length
 
   # <!-- rdoc-file=string.c -->
-  # Equivalent to `symbol.to_s[]`; see String#[].
+  # Equivalent to <code>symbol.to_s[]</code>; see String#[].
   #
   alias slice []
 
@@ -401,7 +402,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - start_with?(*string_or_regexp) -> true or false
   # -->
-  # Equivalent to `self.to_s.start_with?`; see String#start_with?.
+  # Equivalent to <code>self.to_s.start_with?</code>; see String#start_with?.
   #
   def start_with?: (*Regexp | string prefixes) -> bool
 
@@ -409,7 +410,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - succ
   # -->
-  # Equivalent to `self.to_s.succ.to_sym`:
+  # Equivalent to <code>self.to_s.succ.to_sym</code>:
   #
   #     :foo.succ # => :fop
   #
@@ -421,7 +422,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - swapcase(mapping) -> symbol
   # -->
-  # Equivalent to `sym.to_s.swapcase.to_sym`.
+  # Equivalent to <code>sym.to_s.swapcase.to_sym</code>.
   #
   # See String#swapcase.
   #
@@ -470,7 +471,7 @@ class Symbol
   #   rdoc-file=string.c
   #   - upcase(mapping) -> symbol
   # -->
-  # Equivalent to `sym.to_s.upcase.to_sym`.
+  # Equivalent to <code>sym.to_s.upcase.to_sym</code>.
   #
   # See String#upcase.
   #

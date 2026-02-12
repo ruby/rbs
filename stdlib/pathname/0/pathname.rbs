@@ -14,8 +14,8 @@ class Pathname
   # Since it is implemented by the standard library module Find, Find.prune can be
   # used to control the traversal.
   #
-  # If `self` is `.`, yielded pathnames begin with a filename in the current
-  # directory, not `./`.
+  # If `self` is <code>.</code>, yielded pathnames begin with a filename in the
+  # current directory, not <code>./</code>.
   #
   # See Find.find
   #

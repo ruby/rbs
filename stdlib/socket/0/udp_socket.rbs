@@ -81,7 +81,7 @@ class UDPSocket < IPSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # recvfrom_nonblock should not raise an IO::WaitReadable exception, but return
-  # the symbol `:wait_readable` instead.
+  # the symbol <code>:wait_readable</code> instead.
   #
   # ### See
   # *   Socket#recvfrom

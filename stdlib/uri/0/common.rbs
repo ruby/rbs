@@ -119,7 +119,7 @@ module URI
   #   rdoc-file=lib/uri/common.rb
   #   - decode_uri_component(str, enc=Encoding::UTF_8)
   # -->
-  # Like URI.decode_www_form_component, except that `'+'` is preserved.
+  # Like URI.decode_www_form_component, except that <code>'+'</code> is preserved.
   #
   def self.decode_uri_component: (String str, ?encoding enc) -> String
 
@@ -131,7 +131,8 @@ module URI
   # ASCII string.
   #
   # The method may be used to decode the body of Net::HTTPResponse object `res`
-  # for which `res['Content-Type']` is `'application/x-www-form-urlencoded'`.
+  # for which <code>res['Content-Type']</code> is
+  # <code>'application/x-www-form-urlencoded'</code>.
   #
   # The returned data is an array of 2-element subarrays; each subarray is a
   # name/value pair (both are strings). Each returned string has encoding `enc`,
@@ -175,8 +176,10 @@ module URI
   #
   # *   Preserves:
   #
-  #     *   Characters `'*'`, `'.'`, `'-'`, and `'_'`.
-  #     *   Character in ranges `'a'..'z'`, `'A'..'Z'`, and `'0'..'9'`.
+  #     *   Characters <code>'*'</code>, <code>'.'</code>, <code>'-'</code>, and
+  #         <code>'_'</code>.
+  #     *   Character in ranges <code>'a'..'z'</code>, <code>'A'..'Z'</code>, and
+  #         <code>'0'..'9'</code>.
   #
   #     Example:
   #
@@ -185,7 +188,7 @@ module URI
   #
   # *   Converts:
   #
-  #     *   Character `'+'` to character `' '`.
+  #     *   Character <code>'+'</code> to character <code>' '</code>.
   #     *   Each "percent notation" to an ASCII character.
   #
   #     Example:
@@ -193,7 +196,7 @@ module URI
   #         URI.decode_www_form_component('Here+are+some+punctuation+characters%3A+%2C%3B%3F%3A')
   #         # => "Here are some punctuation characters: ,;?:"
   #
-  # Related: URI.decode_uri_component (preserves `'+'`).
+  # Related: URI.decode_uri_component (preserves <code>'+'</code>).
   #
   def self.decode_www_form_component: (String str, ?encoding enc) -> String
 
@@ -201,8 +204,8 @@ module URI
   #   rdoc-file=lib/uri/common.rb
   #   - encode_uri_component(str, enc=nil)
   # -->
-  # Like URI.encode_www_form_component, except that `' '` (space) is encoded as
-  # `'%20'` (instead of `'+'`).
+  # Like URI.encode_www_form_component, except that <code>' '</code> (space) is
+  # encoded as <code>'%20'</code> (instead of <code>'+'</code>).
   #
   def self.encode_uri_component: (String str, ?encoding enc) -> String
 
@@ -214,10 +217,10 @@ module URI
   # [Enumerable](rdoc-ref:Enumerable@Enumerable+in+Ruby+Classes) `enum`.
   #
   # The result is suitable for use as form data for an HTTP request whose
-  # `Content-Type` is `'application/x-www-form-urlencoded'`.
+  # <code>Content-Type</code> is <code>'application/x-www-form-urlencoded'</code>.
   #
   # The returned string consists of the elements of `enum`, each converted to one
-  # or more URL-encoded strings, and all joined with character `'&'`.
+  # or more URL-encoded strings, and all joined with character <code>'&'</code>.
   #
   # Simple examples:
   #
@@ -248,7 +251,8 @@ module URI
   #         URI.encode_www_form([['foo', 0], ['bar', :baz, 'bat']])
   #         # => "foo=0&bar=baz"
   #
-  # *   If `ele` is an array of one element, the field is formed from `ele[0]`:
+  # *   If `ele` is an array of one element, the field is formed from
+  #     <code>ele[0]</code>:
   #
   #         URI.encode_www_form_component(ele[0])
   #
@@ -316,8 +320,10 @@ module URI
   #
   # *   Preserves:
   #
-  #     *   Characters `'*'`, `'.'`, `'-'`, and `'_'`.
-  #     *   Character in ranges `'a'..'z'`, `'A'..'Z'`, and `'0'..'9'`.
+  #     *   Characters <code>'*'</code>, <code>'.'</code>, <code>'-'</code>, and
+  #         <code>'_'</code>.
+  #     *   Character in ranges <code>'a'..'z'</code>, <code>'A'..'Z'</code>, and
+  #         <code>'0'..'9'</code>.
   #
   #     Example:
   #
@@ -326,9 +332,9 @@ module URI
   #
   # *   Converts:
   #
-  #     *   Character `' '` to character `'+'`.
+  #     *   Character <code>' '</code> to character <code>'+'</code>.
   #     *   Any other character to "percent notation"; the percent notation for
-  #         character *c* is `'%%%X' % c.ord`.
+  #         character *c* is <code>'%%%X' % c.ord</code>.
   #
   #     Example:
   #
@@ -343,7 +349,8 @@ module URI
   #
   # In either case, the returned string has forced encoding Encoding::US_ASCII.
   #
-  # Related: URI.encode_uri_component (encodes `' '` as `'%20'`).
+  # Related: URI.encode_uri_component (encodes <code>' '</code> as
+  # <code>'%20'</code>).
   #
   def self.encode_www_form_component: (_ToS str, ?encoding? enc) -> String
 
@@ -491,7 +498,8 @@ module URI
   # Returns a new object constructed from the given `scheme`, `arguments`, and
   # `default`:
   #
-  # *   The new object is an instance of `URI.scheme_list[scheme.upcase]`.
+  # *   The new object is an instance of
+  #     <code>URI.scheme_list[scheme.upcase]</code>.
   # *   The object is initialized by calling the class initializer using `scheme`
   #     and `arguments`. See URI::Generic.new.
   #

@@ -22,10 +22,11 @@ class IPSocket < BasicSocket
   # Returns the local address as an array which contains address_family, port,
   # hostname and numeric_address.
   #
-  # If `reverse_lookup` is `true` or `:hostname`, hostname is obtained from
-  # numeric_address using reverse lookup. Or if it is `false`, or `:numeric`,
-  # hostname is the same as numeric_address. Or if it is `nil` or omitted, obeys
-  # to `ipsocket.do_not_reverse_lookup`. See `Socket.getaddrinfo` also.
+  # If `reverse_lookup` is `true` or <code>:hostname</code>, hostname is obtained
+  # from numeric_address using reverse lookup. Or if it is `false`, or
+  # <code>:numeric</code>, hostname is the same as numeric_address. Or if it is
+  # `nil` or omitted, obeys to <code>ipsocket.do_not_reverse_lookup</code>. See
+  # <code>Socket.getaddrinfo</code> also.
   #
   #     TCPSocket.open("www.ruby-lang.org", 80) {|sock|
   #       p sock.addr #=> ["AF_INET", 49429, "hal", "192.168.0.128"]
@@ -53,10 +54,11 @@ class IPSocket < BasicSocket
   # hostname and numeric_address. It is defined for connection oriented socket
   # such as TCPSocket.
   #
-  # If `reverse_lookup` is `true` or `:hostname`, hostname is obtained from
-  # numeric_address using reverse lookup. Or if it is `false`, or `:numeric`,
-  # hostname is the same as numeric_address. Or if it is `nil` or omitted, obeys
-  # to `ipsocket.do_not_reverse_lookup`. See `Socket.getaddrinfo` also.
+  # If `reverse_lookup` is `true` or <code>:hostname</code>, hostname is obtained
+  # from numeric_address using reverse lookup. Or if it is `false`, or
+  # <code>:numeric</code>, hostname is the same as numeric_address. Or if it is
+  # `nil` or omitted, obeys to <code>ipsocket.do_not_reverse_lookup</code>. See
+  # <code>Socket.getaddrinfo</code> also.
   #
   #     TCPSocket.open("www.ruby-lang.org", 80) {|sock|
   #       p sock.peeraddr #=> ["AF_INET", 80, "carbon.ruby-lang.org", "221.186.184.68"]

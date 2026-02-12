@@ -6,8 +6,8 @@
 # *   StringIO.new: returns a new StringIO object containing the given string.
 # *   StringIO.open: passes a new StringIO object to the given block.
 # Like an IO stream, a StringIO stream has certain properties:
-# *   **Read/write mode**: whether the stream may be read, written, appended to,
-#     etc.;
+# *   <strong>Read/write mode</strong>: whether the stream may be read, written,
+#     appended to, etc.;
 #      see [Read/Write Mode](rdoc-ref:StringIO@Read-2FWrite+Mode).
 # *   **Data mode**: text-only or binary;
 #      see [Data Mode](rdoc-ref:StringIO@Data+Mode).
@@ -18,8 +18,8 @@
 # *   **Line number**: a special, line-oriented, "position" (different from the
 #     position mentioned above);
 #      see [Line Number](rdoc-ref:StringIO@Line+Number).
-# *   **Open/closed**: whether the stream is open or closed, for reading or
-#     writing.
+# *   <strong>Open/closed</strong>: whether the stream is open or closed, for
+#     reading or writing.
 #      see [Open/Closed Streams](rdoc-ref:StringIO@Open-2FClosed+Streams).
 # *   **BOM**: byte mark order;
 #      see [Byte Order Mark](rdoc-ref:StringIO@BOM+-28Byte+Order+Mark-29).
@@ -39,24 +39,24 @@
 # ## Stream Properties
 # ### Read/Write Mode
 # #### Summary
-#        Mode        |Initial Clear?|  Read  | Write
-# -------------------|--------------|--------|--------
-#  `'r'`: read-only  |      No      |Anywhere| Error
-#  `'w'`: write-only |     Yes      | Error  |Anywhere
-# `'a'`: append-only |      No      | Error  |End only
-# `'r+'`: read/write |      No      |Anywhere|Anywhere
-# `'w+'`: read-write |     Yes      |Anywhere|Anywhere
-# `'a+'`: read/append|      No      |Anywhere|End only
+#              Mode             |Initial Clear?|  Read  | Write
+# ------------------------------|--------------|--------|--------
+#  <code>'r'</code>: read-only  |      No      |Anywhere| Error
+#  <code>'w'</code>: write-only |     Yes      | Error  |Anywhere
+# <code>'a'</code>: append-only |      No      | Error  |End only
+# <code>'r+'</code>: read/write |      No      |Anywhere|Anywhere
+# <code>'w+'</code>: read-write |     Yes      |Anywhere|Anywhere
+# <code>'a+'</code>: read/append|      No      |Anywhere|End only
 # Each section below describes a read/write mode.
 # Any of the modes may be given as a string or as file constants;
 # example:
 #     strio = StringIO.new('foo', 'a')
 # strio = StringIO.new('foo', File::WRONLY | File::APPEND)
 #
-# #### `'r'`: Read-Only
+# #### <code>'r'</code>: Read-Only
 # Mode specified as one of:
-# *   String: `'r'`.
-# *   Constant: `File::RDONLY`.
+# *   String: <code>'r'</code>.
+# *   Constant: <code>File::RDONLY</code>.
 # Initial state:
 #     strio = StringIO.new('foobarbaz', 'r')
 # strio.pos    # => 0            # Beginning-of-stream.
@@ -71,10 +71,10 @@
 # May not be written:
 #     strio.write('foo')  # Raises IOError: not opened for writing
 #
-# #### `'w'`: Write-Only
+# #### <code>'w'</code>: Write-Only
 # Mode specified as one of:
-# *   String: `'w'`.
-# *   Constant: `File::WRONLY`.
+# *   String: <code>'w'</code>.
+# *   Constant: <code>File::WRONLY</code>.
 # Initial state:
 #     strio = StringIO.new('foo', 'w')
 # strio.pos    # => 0   # Beginning of stream.
@@ -96,10 +96,10 @@
 # May not be read:
 #     strio.read  # Raises IOError: not opened for reading
 #
-# #### `'a'`: Append-Only
+# #### <code>'a'</code>: Append-Only
 # Mode specified as one of:
-# *   String: `'a'`.
-# *   Constant: `File::WRONLY | File::APPEND`.
+# *   String: <code>'a'</code>.
+# *   Constant: <code>File::WRONLY | File::APPEND</code>.
 # Initial state:
 #     strio = StringIO.new('foo', 'a')
 # strio.pos    # => 0      # Beginning-of-stream.
@@ -117,10 +117,10 @@
 # May not be read:
 #     strio.gets  # Raises IOError: not opened for reading
 #
-# #### `'r+'`: Read/Write
+# #### <code>'r+'</code>: Read/Write
 # Mode specified as one of:
-# *   String: `'r+'`.
-# *   Constant: `File::RDRW`.
+# *   String: <code>'r+'</code>.
+# *   Constant: <code>File::RDRW</code>.
 # Initial state:
 #     strio = StringIO.new('foobar', 'r+')
 # strio.pos    # => 0         # Beginning-of-stream.
@@ -145,10 +145,10 @@
 # strio.pos = 400
 # strio.gets(3) # => nil
 #
-# #### `'w+'`: Read/Write (Initially Clear)
+# #### <code>'w+'</code>: Read/Write (Initially Clear)
 # Mode specified as one of:
-# *   String: `'w+'`.
-# *   Constant: `File::RDWR | File::TRUNC`.
+# *   String: <code>'w+'</code>.
+# *   Constant: <code>File::RDWR | File::TRUNC</code>.
 # Initial state:
 #     strio = StringIO.new('foo', 'w+')
 # strio.pos    # => 0   # Beginning-of-stream.
@@ -177,10 +177,10 @@
 # strio.pos = 400
 # strio.gets(3) # => nil
 #
-# #### `'a+'`: Read/Append
+# #### <code>'a+'</code>: Read/Append
 # Mode specified as one of:
-# *   String: `'a+'`.
-# *   Constant: `File::RDWR | File::APPEND`.
+# *   String: <code>'a+'</code>.
+# *   Constant: <code>File::RDWR | File::APPEND</code>.
 # Initial state:
 #     strio = StringIO.new('foo', 'a+')
 # strio.pos    # => 0      # Beginning-of-stream.
@@ -208,9 +208,9 @@
 # To specify whether the stream is to be treated as text or as binary data,
 # either of the following may be suffixed to any of the string read/write modes
 # above:
-# *   `'t'`: Text;
+# *   <code>'t'</code>: Text;
 #      initializes the encoding as Encoding::UTF_8.
-# *   `'b'`: Binary;
+# *   <code>'b'</code>: Binary;
 #      initializes the encoding as Encoding::ASCII_8BIT.
 # If neither is given, the stream defaults to text data.
 # Examples:
@@ -231,12 +231,12 @@
 # .
 # The initial encoding for a new or re-opened stream depends on its [data
 # mode](rdoc-ref:StringIO@Data+Mode):
-# *   Text: `Encoding::UTF_8`.
-# *   Binary: `Encoding::ASCII_8BIT`.
+# *   Text: <code>Encoding::UTF_8</code>.
+# *   Binary: <code>Encoding::ASCII_8BIT</code>.
 # These instance methods are relevant:
 # *   #external_encoding: returns the current encoding of the stream as an
 #     `Encoding` object.
-# *   #internal_encoding: returns `nil`; a stream does not have an internal
+# *   #internal_encoding: returns +nil+; a stream does not have an internal
 #     encoding.
 # *   #set_encoding: sets the encoding for the stream.
 # *   #set_encoding_by_bom: sets the encoding for the stream to the stream's BOM
@@ -371,7 +371,7 @@
 # *   Method #lineno= sets the line number.
 # The line number can be affected by reading (but never by writing);
 # in general, the line number is incremented each time the record separator
-# (default: `"\n"`) is read.
+# (default: <code>"\n"</code>) is read.
 # Examples:
 #     strio = StringIO.new(TEXT)
 # strio.string # => "First line\nSecond line\n\nFourth line\nFifth line\n"
@@ -522,7 +522,7 @@ class StringIO
   #     strio.closed_write? # => false
   #     strio.close
   #
-  # If `string` is frozen, the default `mode` is `'r'`:
+  # If `string` is frozen, the default `mode` is <code>'r'</code>:
   #
   #     strio = StringIO.new('foo'.freeze)
   #     strio.string        # => "foo"
@@ -546,7 +546,8 @@ class StringIO
   #   - StringIO.open(string = '', mode = 'r+') -> new_stringio
   #   - StringIO.open(string = '', mode = 'r+') {|strio| ... } -> object
   # -->
-  # Creates new StringIO instance by calling `StringIO.new(string, mode)`.
+  # Creates new StringIO instance by calling <code>StringIO.new(string,
+  # mode)</code>.
   #
   # With no block given, returns the new instance:
   #
@@ -685,7 +686,7 @@ class StringIO
   # **No Arguments**
   # With no arguments given,
   # reads lines using the default record separator
-  # (global variable `$/`, whose initial value is `"\n"`).
+  # (global variable <code>$/</code>, whose initial value is <code>"\n"</code>).
   #     strio = StringIO.new(TEXT)
   # strio.each_line {|line| p line }
   # strio.eof? # => true
@@ -697,7 +698,7 @@ class StringIO
   # "Fourth line\n"
   # "Fifth line\n"
   #
-  # **Argument `sep`**
+  # <strong>Argument `sep`</strong>
   # With only string argument `sep` given,
   # reads lines using that string as the record separator:
   #     strio = StringIO.new(TEXT)
@@ -710,7 +711,7 @@ class StringIO
   # "line\nFifth "
   # "line\n"
   #
-  # **Argument `limit`**
+  # <strong>Argument `limit`</strong>
   # With only integer argument `limit` given,
   # reads lines using the default record separator;
   # also limits the size (in characters) of each line to the given limit:
@@ -728,7 +729,7 @@ class StringIO
   # "Fifth line"
   # "\n"
   #
-  # **Arguments `sep` and `limit`**
+  # <strong>Arguments `sep` and `limit`</strong>
   # With arguments `sep` and `limit` both given,
   # honors both:
   #     strio = StringIO.new(TEXT)
@@ -793,7 +794,7 @@ class StringIO
   # Output:
   #     "First line\nSecond line\n\nFourth line\nFifth line\n"
   #
-  # **Keyword Argument `chomp`**
+  # <strong>Keyword Argument `chomp`</strong>
   # With keyword argument `chomp` given as `true` (the default is `false`),
   # removes trailing newline (if any) from each line:
   #     strio = StringIO.new(TEXT)
@@ -1085,10 +1086,10 @@ class StringIO
   # Side effects:
   #
   # *   Increments stream position by the number of bytes read.
-  # *   Assigns the return value to global variable `$_`.
+  # *   Assigns the return value to global variable <code>$_</code>.
   #
   # With no arguments given, reads a line using the default record separator
-  # (global variable `$/`,* whose initial value is `"\n"`):
+  # (global variable <code>$/</code>,* whose initial value is <code>"\n"</code>):
   #
   #     strio = StringIO.new(TEXT)
   #     strio.pos  # => 0
@@ -1105,7 +1106,7 @@ class StringIO
   #     strio.gets # => "Привет"
   #     strio.pos  # => 12
   #
-  # **Argument `sep`**
+  # <strong>Argument `sep`</strong>
   #
   # With only string argument `sep` given, reads a line using that string as the
   # record separator:
@@ -1115,7 +1116,7 @@ class StringIO
   #     strio.gets(' ') # => "line\nSecond "
   #     strio.gets(' ') # => "line\n\nFourth "
   #
-  # **Argument `limit`**
+  # <strong>Argument `limit`</strong>
   #
   # With only integer argument `limit` given, reads a line using the default
   # record separator; limits the size (in characters) of each line to the given
@@ -1127,7 +1128,7 @@ class StringIO
   #     strio.gets(10) # => "Second lin"
   #     strio.gets(10) # => "e\n"
   #
-  # **Arguments `sep` and `limit`**
+  # <strong>Arguments `sep` and `limit`</strong>
   #
   # With arguments `sep` and `limit` both given, honors both:
   #
@@ -1170,7 +1171,7 @@ class StringIO
   #     strio.gets(nil) # "Slurp": read all.
   #     # => "First line\nSecond line\n\nFourth line\nFifth line\n"
   #
-  # **Keyword Argument `chomp`**
+  # <strong>Keyword Argument `chomp`</strong>
   #
   # With keyword argument `chomp` given as `true` (the default is `false`),
   # removes the trailing newline (if any) from the returned line:
@@ -1507,7 +1508,7 @@ class StringIO
   # **No Arguments**
   # With no arguments given,
   # reads lines using the default record separator
-  # (global variable `$/`, whose initial value is `"\n"`).
+  # (global variable <code>$/</code>, whose initial value is <code>"\n"</code>).
   #     strio = StringIO.new(TEXT)
   # strio.each_line {|line| p line }
   # strio.eof? # => true
@@ -1519,7 +1520,7 @@ class StringIO
   # "Fourth line\n"
   # "Fifth line\n"
   #
-  # **Argument `sep`**
+  # <strong>Argument `sep`</strong>
   # With only string argument `sep` given,
   # reads lines using that string as the record separator:
   #     strio = StringIO.new(TEXT)
@@ -1532,7 +1533,7 @@ class StringIO
   # "line\nFifth "
   # "line\n"
   #
-  # **Argument `limit`**
+  # <strong>Argument `limit`</strong>
   # With only integer argument `limit` given,
   # reads lines using the default record separator;
   # also limits the size (in characters) of each line to the given limit:
@@ -1550,7 +1551,7 @@ class StringIO
   # "Fifth line"
   # "\n"
   #
-  # **Arguments `sep` and `limit`**
+  # <strong>Arguments `sep` and `limit`</strong>
   # With arguments `sep` and `limit` both given,
   # honors both:
   #     strio = StringIO.new(TEXT)
@@ -1615,7 +1616,7 @@ class StringIO
   # Output:
   #     "First line\nSecond line\n\nFourth line\nFifth line\n"
   #
-  # **Keyword Argument `chomp`**
+  # <strong>Keyword Argument `chomp`</strong>
   # With keyword argument `chomp` given as `true` (the default is `false`),
   # removes trailing newline (if any) from each line:
   #     strio = StringIO.new(TEXT)

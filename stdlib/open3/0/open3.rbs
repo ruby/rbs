@@ -60,10 +60,10 @@ module Open3
   # *   Creates a child process, by calling Open3.popen3 with the given arguments
   #     (except for certain entries in hash `options`; see below).
   # *   Returns as string `stdout_s` the standard output of the child process.
-  # *   Returns as `status` a `Process::Status` object that represents the exit
-  #     status of the child process.
+  # *   Returns as `status` a <code>Process::Status</code> object that represents
+  #     the exit status of the child process.
   #
-  # Returns the array `[stdout_s, status]`:
+  # Returns the array <code>[stdout_s, status]</code>:
   #
   #     stdout_s, status = Open3.capture2('echo "Foo"')
   #     # => ["Foo\n", #<Process::Status: pid 2326047 exit 0>]
@@ -86,15 +86,15 @@ module Open3
   # The hash `options` is given; two options have local effect in method
   # Open3.capture2:
   #
-  # *   If entry `options[:stdin_data]` exists, the entry is removed and its
-  #     string value is sent to the command's standard input:
+  # *   If entry <code>options[:stdin_data]</code> exists, the entry is removed
+  #     and its string value is sent to the command's standard input:
   #
   #         Open3.capture2('tee', stdin_data: 'Foo')
   #
   #         # => ["Foo", #<Process::Status: pid 2326087 exit 0>]
   #
-  # *   If entry `options[:binmode]` exists, the entry is removed and the internal
-  #     streams are set to binary mode.
+  # *   If entry <code>options[:binmode]</code> exists, the entry is removed and
+  #     the internal streams are set to binary mode.
   #
   # The single required argument is one of the following:
   #
@@ -102,7 +102,7 @@ module Open3
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -120,7 +120,7 @@ module Open3
   #     Open3.capture2('echo "Foo"')
   #     # => ["Foo\n", #<Process::Status: pid 2326183 exit 0>]
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -159,10 +159,10 @@ module Open3
   #     (except for certain entries in hash `options`; see below).
   # *   Returns as string `stdout_and_stderr_s` the merged standard output and
   #     standard error of the child process.
-  # *   Returns as `status` a `Process::Status` object that represents the exit
-  #     status of the child process.
+  # *   Returns as `status` a <code>Process::Status</code> object that represents
+  #     the exit status of the child process.
   #
-  # Returns the array `[stdout_and_stderr_s, status]`:
+  # Returns the array <code>[stdout_and_stderr_s, status]</code>:
   #
   #     stdout_and_stderr_s, status = Open3.capture2e('echo "Foo"')
   #     # => ["Foo\n", #<Process::Status: pid 2371692 exit 0>]
@@ -185,14 +185,14 @@ module Open3
   # The hash `options` is given; two options have local effect in method
   # Open3.capture2e:
   #
-  # *   If entry `options[:stdin_data]` exists, the entry is removed and its
-  #     string value is sent to the command's standard input:
+  # *   If entry <code>options[:stdin_data]</code> exists, the entry is removed
+  #     and its string value is sent to the command's standard input:
   #
   #         Open3.capture2e('tee', stdin_data: 'Foo')
   #         # => ["Foo", #<Process::Status: pid 2371732 exit 0>]
   #
-  # *   If entry `options[:binmode]` exists, the entry is removed and the internal
-  #     streams are set to binary mode.
+  # *   If entry <code>options[:binmode]</code> exists, the entry is removed and
+  #     the internal streams are set to binary mode.
   #
   # The single required argument is one of the following:
   #
@@ -200,7 +200,7 @@ module Open3
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -218,7 +218,7 @@ module Open3
   #     Open3.capture2e('echo "Foo"')
   #     # => ["Foo\n", #<Process::Status: pid 2326183 exit 0>]
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -257,10 +257,10 @@ module Open3
   #     (except for certain entries in hash `options`; see below).
   # *   Returns as strings `stdout_s` and `stderr_s` the standard output and
   #     standard error of the child process.
-  # *   Returns as `status` a `Process::Status` object that represents the exit
-  #     status of the child process.
+  # *   Returns as `status` a <code>Process::Status</code> object that represents
+  #     the exit status of the child process.
   #
-  # Returns the array `[stdout_s, stderr_s, status]`:
+  # Returns the array <code>[stdout_s, stderr_s, status]</code>:
   #
   #     stdout_s, stderr_s, status = Open3.capture3('echo "Foo"')
   #     # => ["Foo\n", "", #<Process::Status: pid 2281954 exit 0>]
@@ -283,14 +283,14 @@ module Open3
   # The hash `options` is given; two options have local effect in method
   # Open3.capture3:
   #
-  # *   If entry `options[:stdin_data]` exists, the entry is removed and its
-  #     string value is sent to the command's standard input:
+  # *   If entry <code>options[:stdin_data]</code> exists, the entry is removed
+  #     and its string value is sent to the command's standard input:
   #
   #         Open3.capture3('tee', stdin_data: 'Foo')
   #         # => ["Foo", "", #<Process::Status: pid 2319575 exit 0>]
   #
-  # *   If entry `options[:binmode]` exists, the entry is removed and the internal
-  #     streams are set to binary mode.
+  # *   If entry <code>options[:binmode]</code> exists, the entry is removed and
+  #     the internal streams are set to binary mode.
   #
   # The single required argument is one of the following:
   #
@@ -298,7 +298,7 @@ module Open3
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -316,7 +316,7 @@ module Open3
   #     Open3.capture3('echo "Foo"')
   #     # => ["Foo\n", "", #<Process::Status: pid 2282092 exit 0>]
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -361,8 +361,8 @@ module Open3
   #     thread has method `pid`, which returns the process ID of the child
   #     process.
   #
-  # With no block given, returns the array `[stdin, stdout, wait_thread]`. The
-  # caller should close each of the two returned streams.
+  # With no block given, returns the array <code>[stdin, stdout,
+  # wait_thread]</code>. The caller should close each of the two returned streams.
   #
   #     stdin, stdout, wait_thread = Open3.popen2('echo')
   #     # => [#<IO:fd 6>, #<IO:fd 7>, #<Process::Waiter:0x00007f58d52dbe98 run>]
@@ -412,7 +412,7 @@ module Open3
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -431,7 +431,7 @@ module Open3
   #     Open3.popen2('echo "Foo"') { |i, o, t| o.gets }
   #     "Foo\n"
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -486,8 +486,9 @@ module Open3
   #     thread has method `pid`, which returns the process ID of the child
   #     process.
   #
-  # With no block given, returns the array `[stdin, stdout, stderr, wait_thread]`.
-  # The caller should close each of the three returned streams.
+  # With no block given, returns the array <code>[stdin, stdout, stderr,
+  # wait_thread]</code>. The caller should close each of the three returned
+  # streams.
   #
   #     stdin, stdout, stderr, wait_thread = Open3.popen3('echo')
   #     # => [#<IO:fd 8>, #<IO:fd 10>, #<IO:fd 12>, #<Process::Waiter:0x00007f58d5428f58 run>]
@@ -540,7 +541,7 @@ module Open3
   #     word or special built-in, or if it contains one or more metacharacters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -559,7 +560,7 @@ module Open3
   #     Open3.popen3('echo "Foo"') { |i, o, e, t| o.gets }
   #     "Foo\n"
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #

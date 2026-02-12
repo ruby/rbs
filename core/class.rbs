@@ -10,8 +10,9 @@
 # When a new class is created, an object of type Class is initialized and
 # assigned to a global constant (Name in this case).
 #
-# When `Name.new` is called to create a new object, the #new method in Class is
-# run by default. This can be demonstrated by overriding #new in Class:
+# When <code>Name.new</code> is called to create a new object, the #new method
+# in Class is run by default. This can be demonstrated by overriding #new in
+# Class:
 #
 #     class Class
 #       alias old_new new
@@ -26,7 +27,7 @@
 #
 #     n = Name.new
 #
-# *produces:*
+# <em>produces:</em>
 #
 #     Creating a new Name
 #
@@ -144,7 +145,7 @@ class Class < Module
   #     class Baz < Bar
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     New subclass: Bar
   #     New subclass: Baz
@@ -157,7 +158,7 @@ class Class < Module
   # -->
   # Calls #allocate to create a new object of *class*'s class, then invokes that
   # object's #initialize method, passing it *args*.  This is the method that ends
-  # up getting called whenever an object is constructed using `.new`.
+  # up getting called whenever an object is constructed using <code>.new</code>.
   #
   def new: () -> untyped
 

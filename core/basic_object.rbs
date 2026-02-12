@@ -17,7 +17,8 @@
 # *   Do not have namespace "pollution" from the many methods provided in class
 #     Object and its included module Kernel.
 # *   Do not have definitions of common classes, and so references to such
-#     common classes must be fully qualified (`::String`, not `String`).
+#     common classes must be fully qualified (<code>::String</code>, not
+#     `String`).
 #
 # A variety of strategies can be used to provide useful portions of the Standard
 # Library in subclasses of `BasicObject`:
@@ -92,8 +93,8 @@ class BasicObject
   # classes to provide class-specific meaning.
   #
   # Unlike #==, the #equal? method should never be overridden by subclasses as it
-  # is used to determine object identity (that is, `a.equal?(b)` if and only if
-  # `a` is the same object as `b`):
+  # is used to determine object identity (that is, <code>a.equal?(b)</code> if and
+  # only if `a` is the same object as `b`):
   #
   #     obj = "a"
   #     other = obj.dup
@@ -174,8 +175,8 @@ class BasicObject
   # classes to provide class-specific meaning.
   #
   # Unlike #==, the #equal? method should never be overridden by subclasses as it
-  # is used to determine object identity (that is, `a.equal?(b)` if and only if
-  # `a` is the same object as `b`):
+  # is used to determine object identity (that is, <code>a.equal?(b)</code> if and
+  # only if `a` is the same object as `b`):
   #
   #     obj = "a"
   #     other = obj.dup
@@ -315,7 +316,7 @@ class BasicObject
   #       def Chatty.three() end
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Adding singleton_method_added
   #     Adding one
@@ -343,7 +344,7 @@ class BasicObject
   #       end
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Removing three
   #     Removing one
@@ -367,7 +368,7 @@ class BasicObject
   #       end
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Undefining one
   #

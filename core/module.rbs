@@ -6,7 +6,7 @@
 # methods may not. (See Module#module_function.)
 #
 # In the descriptions that follow, the parameter *sym* refers to a symbol, which
-# is either a quoted string or a Symbol (such as `:name`).
+# is either a quoted string or a Symbol (such as <code>:name</code>).
 #
 #     module Mod
 #       include Math
@@ -79,7 +79,7 @@ class Module < Object
   #     using B
   #     p Module.used_modules
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     [B, A]
   #
@@ -106,7 +106,7 @@ class Module < Object
   #     using B
   #     p Module.used_refinements
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     [#<refinement:Object@B>, #<refinement:Object@A>]
   #
@@ -144,7 +144,8 @@ class Module < Object
   #
   # Returns:
   #
-  # *   `-1`, if `self` includes `other`, if or `self` is a subclass of `other`.
+  # *   <code>-1</code>, if `self` includes `other`, if or `self` is a subclass of
+  #     `other`.
   # *   `0`, if `self` and `other` are the same.
   # *   `1`, if `other` includes `self`, or if `other` is a subclass of `self`.
   # *   `nil`, if none of the above is true.
@@ -175,8 +176,8 @@ class Module < Object
   # classes to provide class-specific meaning.
   #
   # Unlike #==, the #equal? method should never be overridden by subclasses as it
-  # is used to determine object identity (that is, `a.equal?(b)` if and only if
-  # `a` is the same object as `b`):
+  # is used to determine object identity (that is, <code>a.equal?(b)</code> if and
+  # only if `a` is the same object as `b`):
   #
   #     obj = "a"
   #     other = obj.dup
@@ -249,7 +250,7 @@ class Module < Object
   #     include Mod
   #     exit(99)
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Exiting with code 99
   #
@@ -292,10 +293,10 @@ class Module < Object
   #   - attr_accessor(string, ...)    -> array
   # -->
   # Defines a named attribute for this module, where the name is
-  # *symbol.*`id2name`, creating an instance variable (`@name`) and a
-  # corresponding access method to read it. Also creates a method called `name=`
-  # to set the attribute. String arguments are converted to symbols. Returns an
-  # array of defined method names as symbols.
+  # <em>symbol.</em>`id2name`, creating an instance variable (<code>@name</code>)
+  # and a corresponding access method to read it. Also creates a method called
+  # <code>name=</code> to set the attribute. String arguments are converted to
+  # symbols. Returns an array of defined method names as symbols.
   #
   #     module Mod
   #       attr_accessor(:one, :two) #=> [:one, :one=, :two, :two=]
@@ -312,8 +313,8 @@ class Module < Object
   #   - attr(string, ...)         -> array
   # -->
   # Creates instance variables and corresponding methods that return the value of
-  # each instance variable. Equivalent to calling ```attr`*:name*'' on each name
-  # in turn. String arguments are converted to symbols. Returns an array of
+  # each instance variable. Equivalent to calling ```attr`<em>:name</em>'' on each
+  # name in turn. String arguments are converted to symbols. Returns an array of
   # defined method names as symbols.
   #
   def attr_reader: (*interned arg0) -> Array[Symbol]
@@ -324,8 +325,8 @@ class Module < Object
   #   - attr_writer(string, ...)    -> array
   # -->
   # Creates an accessor method to allow assignment to the attribute
-  # *symbol*`.id2name`. String arguments are converted to symbols. Returns an
-  # array of defined method names as symbols.
+  # *symbol*<code>.id2name</code>. String arguments are converted to symbols.
+  # Returns an array of defined method names as symbols.
   #
   def attr_writer: (*interned arg0) -> Array[Symbol]
 
@@ -390,7 +391,7 @@ class Module < Object
   #     puts Thing.new.hello()
   #     Thing.module_eval("invalid code", "dummy", 123)
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Hello there!
   #     dummy:123:in `module_eval': undefined local variable
@@ -412,7 +413,7 @@ class Module < Object
   #     }
   #     puts Thing.new.hello()
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Hello there!
   #
@@ -440,8 +441,8 @@ class Module < Object
   #   - mod.class_variable_get(string)    -> obj
   # -->
   # Returns the value of the given class variable (or throws a NameError
-  # exception). The `@@` part of the variable name should be included for regular
-  # class variables. String arguments are converted to symbols.
+  # exception). The <code>@@</code> part of the variable name should be included
+  # for regular class variables. String arguments are converted to symbols.
   #
   #     class Fred
   #       @@foo = 99
@@ -503,7 +504,7 @@ class Module < Object
   #       FOO = 1
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Added :FOO
   #
@@ -527,7 +528,7 @@ class Module < Object
   #       end
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     :const_added
   #     :inherited
@@ -635,10 +636,11 @@ class Module < Object
   #
   # In the next example, when a reference is made to an undefined constant,
   # `const_missing` attempts to load a file whose path is the lowercase version of
-  # the constant name (thus class `Fred` is assumed to be in file `fred.rb`). If
-  # defined as a side-effect of loading the file, the method returns the value
-  # stored in the constant. This implements an autoload feature similar to
-  # Kernel#autoload and Module#autoload, though it differs in important ways.
+  # the constant name (thus class `Fred` is assumed to be in file
+  # <code>fred.rb</code>). If defined as a side-effect of loading the file, the
+  # method returns the value stored in the constant. This implements an autoload
+  # feature similar to Kernel#autoload and Module#autoload, though it differs in
+  # important ways.
   #
   #     def Object.const_missing(name)
   #       @looked_for ||= {}
@@ -680,7 +682,8 @@ class Module < Object
   # If the constant is found, but its source location can not be extracted
   # (constant is defined in C code), empty array is returned.
   #
-  # *inherit* specifies whether to lookup in `mod.ancestors` (`true` by default).
+  # *inherit* specifies whether to lookup in <code>mod.ancestors</code> (`true` by
+  # default).
   #
   #     # test.rb:
   #     class A         # line 1
@@ -769,7 +772,7 @@ class Module < Object
   #     a.create_method(:betty) { p self }
   #     a.betty
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     In Fred
   #     Charge it!
@@ -821,7 +824,7 @@ class Module < Object
   #     (s = Array.new).extend Picky  # Call Object.extend
   #     (s = "quick brown fox").extend Picky
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Picky added to Array
   #     Can't add Picky to a String
@@ -889,8 +892,8 @@ class Module < Object
   #   - included(othermod)
   # -->
   # Callback invoked whenever the receiver is included in another module or class.
-  # This should be used in preference to `Module.append_features` if your code
-  # wants to perform some action when a module is included in another.
+  # This should be used in preference to <code>Module.append_features</code> if
+  # your code wants to perform some action when a module is included in another.
   #
   #     module A
   #       def A.included(mod)
@@ -980,7 +983,7 @@ class Module < Object
   #     interpreter = Interpreter.new
   #     interpreter.interpret('dave')
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Hello there, Dave!
   #
@@ -1037,7 +1040,7 @@ class Module < Object
   #       def some_instance_method() end
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Adding :some_instance_method
   #
@@ -1098,7 +1101,7 @@ class Module < Object
   #       remove_method :some_instance_method
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Removing :some_instance_method
   #
@@ -1123,7 +1126,7 @@ class Module < Object
   #       undef_method :some_instance_method
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Undefining :some_instance_method
   #
@@ -1149,7 +1152,7 @@ class Module < Object
   #     puts Thing.new.hello()
   #     Thing.module_eval("invalid code", "dummy", 123)
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Hello there!
   #     dummy:123:in `module_eval': undefined local variable
@@ -1175,7 +1178,7 @@ class Module < Object
   #     }
   #     puts Thing.new.hello()
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Hello there!
   #
@@ -1295,7 +1298,7 @@ class Module < Object
   #     end
   #     Mod.private_instance_methods   #=> [:a, :c]
   #
-  # Note that to show a private method on RDoc, use `:doc:`.
+  # Note that to show a private method on RDoc, use <code>:doc:</code>.
   #
   private def private: () -> nil
                      | (Symbol method_name) -> Symbol
@@ -1403,9 +1406,9 @@ class Module < Object
   # Marking a method as protected allows **different objects of the same class**
   # to call it.
   #
-  # One use case is for comparison methods, such as `==`, if we want to expose a
-  # method for comparison between objects of the same class without making the
-  # method public to objects of other classes.
+  # One use case is for comparison methods, such as <code>==</code>, if we want to
+  # expose a method for comparison between objects of the same class without
+  # making the method public to objects of other classes.
   #
   # ## Performance considerations
   #
@@ -1436,7 +1439,7 @@ class Module < Object
   #     account1 > account2  # => true (works)
   #     account1.balance     # => NoMethodError (fails because balance is not public)
   #
-  # To show a private method on RDoc, use `:doc:` instead of this.
+  # To show a private method on RDoc, use <code>:doc:</code> instead of this.
   #
   private def protected: () -> nil
                        | (Symbol method_name) -> Symbol
@@ -1600,7 +1603,7 @@ class Module < Object
   #
   #     p A.refinements
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     [#<refinement:Integer@A>, #<refinement:String@A>]
   #
@@ -1619,7 +1622,7 @@ class Module < Object
   #       p(defined? @@var)
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     99
   #     nil
@@ -1652,13 +1655,13 @@ class Module < Object
   # -->
   # For the given method names, marks the method as passing keywords through a
   # normal argument splat.  This should only be called on methods that accept an
-  # argument splat (`*args`) but not explicit keywords or a keyword splat.  It
-  # marks the method such that if the method is called with keyword arguments, the
-  # final hash argument is marked with a special flag such that if it is the final
-  # element of a normal argument splat to another method call, and that method
-  # call does not include explicit keywords or a keyword splat, the final element
-  # is interpreted as keywords. In other words, keywords will be passed through
-  # the method to other methods.
+  # argument splat (<code>*args</code>) but not explicit keywords or a keyword
+  # splat.  It marks the method such that if the method is called with keyword
+  # arguments, the final hash argument is marked with a special flag such that if
+  # it is the final element of a normal argument splat to another method call, and
+  # that method call does not include explicit keywords or a keyword splat, the
+  # final element is interpreted as keywords. In other words, keywords will be
+  # passed through the method to other methods.
   #
   # This should only be used for methods that delegate keywords to another method,
   # and only for backwards compatibility with Ruby versions before 3.0. See
@@ -1790,7 +1793,7 @@ class Module < Object
   #     end
   #     c.hello
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     In child
   #     In parent
@@ -1830,9 +1833,9 @@ class Module < Object
   #   - attr(name, false) -> array
   # -->
   # The first form is equivalent to #attr_reader. The second form is equivalent to
-  # `attr_accessor(name)` but deprecated. The last form is equivalent to
-  # `attr_reader(name)` but deprecated. Returns an array of defined method names
-  # as symbols.
+  # <code>attr_accessor(name)</code> but deprecated. The last form is equivalent
+  # to <code>attr_reader(name)</code> but deprecated. Returns an array of defined
+  # method names as symbols.
   #
   def attr: %a{deprecated} (interned, bool) -> Array[Symbol]
           | (*interned arg0) -> Array[Symbol]

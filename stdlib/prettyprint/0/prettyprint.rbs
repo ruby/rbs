@@ -196,8 +196,8 @@ class PrettyPrint
   #
   # If `sep` is not specified, " " is used.
   #
-  # If `width` is not specified, `sep.length` is used. You will have to specify
-  # this when `sep` is a multibyte character, for example.
+  # If `width` is not specified, <code>sep.length</code> is used. You will have to
+  # specify this when `sep` is a multibyte character, for example.
   #
   def fill_breakable: (?String sep, ?Integer width) -> void
 
@@ -210,8 +210,8 @@ class PrettyPrint
   #
   # If `sep` is not specified, " " is used.
   #
-  # If `width` is not specified, `sep.length` is used. You will have to specify
-  # this when `sep` is a multibyte character, for example.
+  # If `width` is not specified, <code>sep.length</code> is used. You will have to
+  # specify this when `sep` is a multibyte character, for example.
   #
   def breakable: (?String sep, ?Integer width) -> void
 
@@ -225,9 +225,9 @@ class PrettyPrint
   # If `indent` is specified, the method call is regarded as nested by
   # nest(indent) { ... }.
   #
-  # If `open_obj` is specified, `text open_obj, open_width` is called before
-  # grouping. If `close_obj` is specified, `text close_obj, close_width` is called
-  # after grouping.
+  # If `open_obj` is specified, <code>text open_obj, open_width</code> is called
+  # before grouping. If `close_obj` is specified, <code>text close_obj,
+  # close_width</code> is called after grouping.
   #
   def group: (?::Integer indent, ?::String open_obj, ?::String close_obj, ?Integer open_width, ?Integer close_width) { () -> untyped } -> Integer
 

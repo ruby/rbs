@@ -79,8 +79,8 @@ end
 # JSON is a lightweight data-interchange format.
 #
 # A JSON value is one of the following:
-# *   Double-quoted text:  `"foo"`.
-# *   Number:  `1`, `1.0`, `2.0e2`.
+# *   Double-quoted text:  <code>"foo"</code>.
+# *   Number:  `1`, <code>1.0</code>, <code>2.0e2</code>.
 # *   Boolean:  `true`, `false`.
 # *   Null: `null`.
 # *   Array: an ordered list of values, enclosed by square brackets:
@@ -105,8 +105,8 @@ end
 # ### Parsing JSON
 #
 # You can parse a String containing JSON data using either of two methods:
-# *   `JSON.parse(source, opts)`
-# *   `JSON.parse!(source, opts)`
+# *   <code>JSON.parse(source, opts)</code>
+# *   <code>JSON.parse!(source, opts)</code>
 #
 # where
 # *   `source` is a Ruby object.
@@ -292,12 +292,12 @@ end
 # ---
 #
 # Option `create_additions` (boolean) specifies whether to use JSON additions in
-# parsing. See [\JSON Additions](#module-JSON-label-JSON+Additions).
+# parsing. See [JSON Additions](#module-JSON-label-JSON+Additions).
 #
 # ### Generating JSON
 #
 # To generate a Ruby String containing JSON data, use method
-# `JSON.generate(source, opts)`, where
+# <code>JSON.generate(source, opts)</code>, where
 # *   `source` is a Ruby object.
 # *   `opts` is a Hash object containing options that control both input allowed
 #     and output formatting.
@@ -361,7 +361,7 @@ end
 # ###### Input Options
 #
 # Option `allow_nan` (boolean) specifies whether `NaN`, `Infinity`, and
-# `-Infinity` may be generated; defaults to `false`.
+# <code>-Infinity</code> may be generated; defaults to `false`.
 #
 # With the default, `false`:
 #     # Raises JSON::GeneratorError (920: NaN not allowed in JSON):
@@ -409,9 +409,9 @@ end
 #
 # ###### Escaping Options
 #
-# Options `script_safe` (boolean) specifies wether `'\u2028'`, `'\u2029'` and
-# `'/'` should be escaped as to make the JSON object safe to interpolate in
-# script tags.
+# Options `script_safe` (boolean) specifies wether <code>'\u2028'</code>,
+# <code>'\u2029'</code> and <code>'/'</code> should be escaped as to make the
+# JSON object safe to interpolate in script tags.
 #
 # Options `ascii_only` (boolean) specifies wether all characters outside the
 # ASCII range should be escaped.
@@ -425,19 +425,21 @@ end
 # format, using whitespace. See also JSON.pretty_generate.
 #
 # *   Option `array_nl` (String) specifies a string (usually a newline) to be
-#     inserted after each JSON array; defaults to the empty String, `''`.
+#     inserted after each JSON array; defaults to the empty String,
+#     <code>''</code>.
 # *   Option `object_nl` (String) specifies a string (usually a newline) to be
-#     inserted after each JSON object; defaults to the empty String, `''`.
+#     inserted after each JSON object; defaults to the empty String,
+#     <code>''</code>.
 # *   Option `indent` (String) specifies the string (usually spaces) to be used
-#     for indentation; defaults to the empty String, `''`; defaults to the empty
-#     String, `''`; has no effect unless options `array_nl` or `object_nl`
-#     specify newlines.
+#     for indentation; defaults to the empty String, <code>''</code>; defaults
+#     to the empty String, <code>''</code>; has no effect unless options
+#     `array_nl` or `object_nl` specify newlines.
 # *   Option `space` (String) specifies a string (usually a space) to be
 #     inserted after the colon in each JSON object's pair; defaults to the empty
-#     String, `''`.
+#     String, <code>''</code>.
 # *   Option `space_before` (String) specifies a string (usually a space) to be
 #     inserted before the colon in each JSON object's pair; defaults to the
-#     empty String, `''`.
+#     empty String, <code>''</code>.
 #
 # In this example, `obj` is used first to generate the shortest JSON data (no
 # whitespace), then again with all formatting options specified:
@@ -519,26 +521,26 @@ end
 #       With addition:     0..2 (Range)
 #
 # The JSON module includes additions for certain classes. You can also craft
-# custom additions. See [Custom \JSON
+# custom additions. See [Custom JSON
 # Additions](#module-JSON-label-Custom+JSON+Additions).
 #
 # ### Built-in Additions
 #
 # The JSON module includes additions for certain classes. To use an addition,
 # `require` its source:
-# *   BigDecimal: `require 'json/add/bigdecimal'`
-# *   Complex: `require 'json/add/complex'`
-# *   Date: `require 'json/add/date'`
-# *   DateTime: `require 'json/add/date_time'`
-# *   Exception: `require 'json/add/exception'`
-# *   OpenStruct: `require 'json/add/ostruct'`
-# *   Range: `require 'json/add/range'`
-# *   Rational: `require 'json/add/rational'`
-# *   Regexp: `require 'json/add/regexp'`
-# *   Set: `require 'json/add/set'`
-# *   Struct: `require 'json/add/struct'`
-# *   Symbol: `require 'json/add/symbol'`
-# *   Time: `require 'json/add/time'`
+# *   BigDecimal: <code>require 'json/add/bigdecimal'</code>
+# *   Complex: <code>require 'json/add/complex'</code>
+# *   Date: <code>require 'json/add/date'</code>
+# *   DateTime: <code>require 'json/add/date_time'</code>
+# *   Exception: <code>require 'json/add/exception'</code>
+# *   OpenStruct: <code>require 'json/add/ostruct'</code>
+# *   Range: <code>require 'json/add/range'</code>
+# *   Rational: <code>require 'json/add/rational'</code>
+# *   Regexp: <code>require 'json/add/regexp'</code>
+# *   Set: <code>require 'json/add/set'</code>
+# *   Struct: <code>require 'json/add/struct'</code>
+# *   Symbol: <code>require 'json/add/symbol'</code>
+# *   Time: <code>require 'json/add/time'</code>
 #
 # To reduce punctuation clutter, the examples below show the generated JSON via
 # `puts`, rather than the usual `inspect`,
@@ -857,7 +859,7 @@ module JSON
   #     json = JSON.generate(obj)
   #     json # => '{"foo":0,"bar":"s","baz":"bat"}'
   #
-  # For examples of generating from other Ruby objects, see [Generating \JSON from
+  # For examples of generating from other Ruby objects, see [Generating JSON from
   # Other Objects](#module-JSON-label-Generating+JSON+from+Other+Objects).
   #
   # ---
@@ -895,15 +897,17 @@ module JSON
   # in JSON version 3.0, `load` will have `create_additions` disabled by default.
   #
   # *   Argument `source` must be, or be convertible to, a String:
-  #     *   If `source` responds to instance method `to_str`, `source.to_str`
-  #         becomes the source.
-  #     *   If `source` responds to instance method `to_io`, `source.to_io.read`
-  #         becomes the source.
-  #     *   If `source` responds to instance method `read`, `source.read` becomes
-  #         the source.
-  #     *   If both of the following are true, source becomes the String `'null'`:
+  #     *   If `source` responds to instance method `to_str`,
+  #         <code>source.to_str</code> becomes the source.
+  #     *   If `source` responds to instance method `to_io`,
+  #         <code>source.to_io.read</code> becomes the source.
+  #     *   If `source` responds to instance method `read`,
+  #         <code>source.read</code> becomes the source.
+  #     *   If both of the following are true, source becomes the String
+  #         <code>'null'</code>:
   #         *   Option `allow_blank` specifies a truthy value.
-  #         *   The source, as defined above, is `nil` or the empty String `''`.
+  #         *   The source, as defined above, is `nil` or the empty String
+  #             <code>''</code>.
   #     *   Otherwise, `source` remains the source.
   # *   Argument `proc`, if given, must be a Proc that accepts one argument. It
   #     will be called recursively with each result (depth-first order). See
@@ -915,7 +919,7 @@ module JSON
   # ---
   #
   # When no `proc` is given, modifies `source` as above and returns the result of
-  # `parse(source, opts)`;  see #parse.
+  # <code>parse(source, opts)</code>;  see #parse.
   #
   # Source for following examples:
   #     source = <<~JSON
@@ -950,8 +954,8 @@ module JSON
   #
   # When `proc` is given:
   # *   Modifies `source` as above.
-  # *   Gets the `result` from calling `parse(source, opts)`.
-  # *   Recursively calls `proc(result)`.
+  # *   Gets the `result` from calling <code>parse(source, opts)</code>.
+  # *   Recursively calls <code>proc(result)</code>.
   # *   Returns the final result.
   #
   # Example:
@@ -1083,7 +1087,7 @@ module JSON
   #     ruby.class # => Hash
   #
   # For examples of parsing for all JSON data types, see [Parsing
-  # \JSON](#module-JSON-label-Parsing+JSON).
+  # JSON](#module-JSON-label-Parsing+JSON).
   #
   # Parses nested JSON objects:
   #     source = <<~JSON
@@ -1326,19 +1330,20 @@ class BigDecimal
   #   rdoc-file=ext/json/lib/json/add/bigdecimal.rb
   #   - as_json(*)
   # -->
-  # Methods `BigDecimal#as_json` and `BigDecimal.json_create` may be used to
-  # serialize and deserialize a BigDecimal object; see
-  # [Marshal](rdoc-ref:Marshal).
+  # Methods <code>BigDecimal#as_json</code> and
+  # <code>BigDecimal.json_create</code> may be used to serialize and deserialize a
+  # BigDecimal object; see [Marshal](rdoc-ref:Marshal).
   #
-  # Method `BigDecimal#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>BigDecimal#as_json</code> serializes `self`, returning a
+  # 2-element hash representing `self`:
   #
   #     require 'json/add/bigdecimal'
   #     x = BigDecimal(2).as_json             # => {"json_class"=>"BigDecimal", "b"=>"27:0.2e1"}
   #     y = BigDecimal(2.0, 4).as_json        # => {"json_class"=>"BigDecimal", "b"=>"36:0.2e1"}
   #     z = BigDecimal(Complex(2, 0)).as_json # => {"json_class"=>"BigDecimal", "b"=>"27:0.2e1"}
   #
-  # Method `JSON.create` deserializes such a hash, returning a BigDecimal object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a
+  # BigDecimal object:
   #
   #     BigDecimal.json_create(x) # => 0.2e1
   #     BigDecimal.json_create(y) # => 0.2e1
@@ -1380,17 +1385,19 @@ class Complex
   #   rdoc-file=ext/json/lib/json/add/complex.rb
   #   - as_json(*)
   # -->
-  # Methods `Complex#as_json` and `Complex.json_create` may be used to serialize
-  # and deserialize a Complex object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Complex#as_json</code> and <code>Complex.json_create</code> may
+  # be used to serialize and deserialize a Complex object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Complex#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Complex#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/complex'
   #     x = Complex(2).as_json      # => {"json_class"=>"Complex", "r"=>2, "i"=>0}
   #     y = Complex(2.0, 4).as_json # => {"json_class"=>"Complex", "r"=>2.0, "i"=>4}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Complex object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Complex
+  # object:
   #
   #     Complex.json_create(x) # => (2+0i)
   #     Complex.json_create(y) # => (2.0+4i)
@@ -1429,17 +1436,19 @@ class Date
   #   rdoc-file=ext/json/lib/json/add/date.rb
   #   - as_json(*)
   # -->
-  # Methods `Date#as_json` and `Date.json_create` may be used to serialize and
-  # deserialize a Date object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Date#as_json</code> and <code>Date.json_create</code> may be
+  # used to serialize and deserialize a Date object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Date#as_json` serializes `self`, returning a 2-element hash
+  # Method <code>Date#as_json</code> serializes `self`, returning a 2-element hash
   # representing `self`:
   #
   #     require 'json/add/date'
   #     x = Date.today.as_json
   #     # => {"json_class"=>"Date", "y"=>2023, "m"=>11, "d"=>21, "sg"=>2299161.0}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Date object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Date
+  # object:
   #
   #     Date.json_create(x)
   #     # => #<Date: 2023-11-21 ((2460270j,0s,0n),+0s,2299161j)>
@@ -1476,17 +1485,19 @@ class DateTime
   #   rdoc-file=ext/json/lib/json/add/date_time.rb
   #   - as_json(*)
   # -->
-  # Methods `DateTime#as_json` and `DateTime.json_create` may be used to serialize
-  # and deserialize a DateTime object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>DateTime#as_json</code> and <code>DateTime.json_create</code>
+  # may be used to serialize and deserialize a DateTime object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `DateTime#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>DateTime#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/datetime'
   #     x = DateTime.now.as_json
   #     # => {"json_class"=>"DateTime", "y"=>2023, "m"=>11, "d"=>21, "sg"=>2299161.0}
   #
-  # Method `JSON.create` deserializes such a hash, returning a DateTime object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a DateTime
+  # object:
   #
   #     DateTime.json_create(x) # BUG? Raises Date::Error "invalid date"
   #
@@ -1522,16 +1533,18 @@ class Exception
   #   rdoc-file=ext/json/lib/json/add/exception.rb
   #   - as_json(*)
   # -->
-  # Methods `Exception#as_json` and `Exception.json_create` may be used to
-  # serialize and deserialize a Exception object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Exception#as_json</code> and <code>Exception.json_create</code>
+  # may be used to serialize and deserialize a Exception object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Exception#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Exception#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/exception'
   #     x = Exception.new('Foo').as_json # => {"json_class"=>"Exception", "m"=>"Foo", "b"=>nil}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Exception object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a
+  # Exception object:
   #
   #     Exception.json_create(x) # => #<Exception: Foo>
   #
@@ -1567,18 +1580,19 @@ class OpenStruct
   #   rdoc-file=ext/json/lib/json/add/ostruct.rb
   #   - as_json(*)
   # -->
-  # Methods `OpenStruct#as_json` and `OpenStruct.json_create` may be used to
-  # serialize and deserialize a OpenStruct object; see
-  # [Marshal](rdoc-ref:Marshal).
+  # Methods <code>OpenStruct#as_json</code> and
+  # <code>OpenStruct.json_create</code> may be used to serialize and deserialize a
+  # OpenStruct object; see [Marshal](rdoc-ref:Marshal).
   #
-  # Method `OpenStruct#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>OpenStruct#as_json</code> serializes `self`, returning a
+  # 2-element hash representing `self`:
   #
   #     require 'json/add/ostruct'
   #     x = OpenStruct.new('name' => 'Rowdy', :age => nil).as_json
   #     # => {"json_class"=>"OpenStruct", "t"=>{:name=>'Rowdy', :age=>nil}}
   #
-  # Method `JSON.create` deserializes such a hash, returning a OpenStruct object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a
+  # OpenStruct object:
   #
   #     OpenStruct.json_create(x)
   #     # => #<OpenStruct name='Rowdy', age=nil>
@@ -1615,18 +1629,20 @@ class Range[out Elem]
   #   rdoc-file=ext/json/lib/json/add/range.rb
   #   - as_json(*)
   # -->
-  # Methods `Range#as_json` and `Range.json_create` may be used to serialize and
-  # deserialize a Range object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Range#as_json</code> and <code>Range.json_create</code> may be
+  # used to serialize and deserialize a Range object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Range#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Range#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/range'
   #     x = (1..4).as_json     # => {"json_class"=>"Range", "a"=>[1, 4, false]}
   #     y = (1...4).as_json    # => {"json_class"=>"Range", "a"=>[1, 4, true]}
   #     z = ('a'..'d').as_json # => {"json_class"=>"Range", "a"=>["a", "d", false]}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Range object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Range
+  # object:
   #
   #     Range.json_create(x) # => 1..4
   #     Range.json_create(y) # => 1...4
@@ -1668,17 +1684,19 @@ class Rational
   #   rdoc-file=ext/json/lib/json/add/rational.rb
   #   - as_json(*)
   # -->
-  # Methods `Rational#as_json` and `Rational.json_create` may be used to serialize
-  # and deserialize a Rational object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Rational#as_json</code> and <code>Rational.json_create</code>
+  # may be used to serialize and deserialize a Rational object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Rational#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Rational#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/rational'
   #     x = Rational(2, 3).as_json
   #     # => {"json_class"=>"Rational", "n"=>2, "d"=>3}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Rational object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Rational
+  # object:
   #
   #     Rational.json_create(x)
   #     # => (2/3)
@@ -1715,17 +1733,19 @@ class Regexp
   #   rdoc-file=ext/json/lib/json/add/regexp.rb
   #   - as_json(*)
   # -->
-  # Methods `Regexp#as_json` and `Regexp.json_create` may be used to serialize and
-  # deserialize a Regexp object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Regexp#as_json</code> and <code>Regexp.json_create</code> may be
+  # used to serialize and deserialize a Regexp object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Regexp#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Regexp#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/regexp'
   #     x = /foo/.as_json
   #     # => {"json_class"=>"Regexp", "o"=>0, "s"=>"foo"}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Regexp object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Regexp
+  # object:
   #
   #     Regexp.json_create(x) # => /foo/
   #
@@ -1761,17 +1781,18 @@ class Set[unchecked out A]
   #   rdoc-file=ext/json/lib/json/add/set.rb
   #   - as_json(*)
   # -->
-  # Methods `Set#as_json` and `Set.json_create` may be used to serialize and
-  # deserialize a Set object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Set#as_json</code> and <code>Set.json_create</code> may be used
+  # to serialize and deserialize a Set object; see [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Set#as_json` serializes `self`, returning a 2-element hash
+  # Method <code>Set#as_json</code> serializes `self`, returning a 2-element hash
   # representing `self`:
   #
   #     require 'json/add/set'
   #     x = Set.new(%w/foo bar baz/).as_json
   #     # => {"json_class"=>"Set", "a"=>["foo", "bar", "baz"]}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Set object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Set
+  # object:
   #
   #     Set.json_create(x) # => #<Set: {"foo", "bar", "baz"}>
   #
@@ -1807,18 +1828,20 @@ class Struct[Elem]
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - as_json(*)
   # -->
-  # Methods `Struct#as_json` and `Struct.json_create` may be used to serialize and
-  # deserialize a Struct object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Struct#as_json</code> and <code>Struct.json_create</code> may be
+  # used to serialize and deserialize a Struct object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Struct#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Struct#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/struct'
   #     Customer = Struct.new('Customer', :name, :address, :zip)
   #     x = Struct::Customer.new.as_json
   #     # => {"json_class"=>"Struct::Customer", "v"=>[nil, nil, nil]}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Struct object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Struct
+  # object:
   #
   #     Struct::Customer.json_create(x)
   #     # => #<struct Struct::Customer name=nil, address=nil, zip=nil>
@@ -1856,17 +1879,19 @@ class Symbol
   #   rdoc-file=ext/json/lib/json/add/symbol.rb
   #   - as_json(*)
   # -->
-  # Methods `Symbol#as_json` and `Symbol.json_create` may be used to serialize and
-  # deserialize a Symbol object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Symbol#as_json</code> and <code>Symbol.json_create</code> may be
+  # used to serialize and deserialize a Symbol object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Symbol#as_json` serializes `self`, returning a 2-element hash
-  # representing `self`:
+  # Method <code>Symbol#as_json</code> serializes `self`, returning a 2-element
+  # hash representing `self`:
   #
   #     require 'json/add/symbol'
   #     x = :foo.as_json
   #     # => {"json_class"=>"Symbol", "s"=>"foo"}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Symbol object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Symbol
+  # object:
   #
   #     Symbol.json_create(x) # => :foo
   #
@@ -1902,17 +1927,19 @@ class Time
   #   rdoc-file=ext/json/lib/json/add/time.rb
   #   - as_json(*)
   # -->
-  # Methods `Time#as_json` and `Time.json_create` may be used to serialize and
-  # deserialize a Time object; see [Marshal](rdoc-ref:Marshal).
+  # Methods <code>Time#as_json</code> and <code>Time.json_create</code> may be
+  # used to serialize and deserialize a Time object; see
+  # [Marshal](rdoc-ref:Marshal).
   #
-  # Method `Time#as_json` serializes `self`, returning a 2-element hash
+  # Method <code>Time#as_json</code> serializes `self`, returning a 2-element hash
   # representing `self`:
   #
   #     require 'json/add/time'
   #     x = Time.now.as_json
   #     # => {"json_class"=>"Time", "s"=>1700931656, "n"=>472846644}
   #
-  # Method `JSON.create` deserializes such a hash, returning a Time object:
+  # Method <code>JSON.create</code> deserializes such a hash, returning a Time
+  # object:
   #
   #     Time.json_create(x)
   #     # => 2023-11-25 11:00:56.472846644 -0600

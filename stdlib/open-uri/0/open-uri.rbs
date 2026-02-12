@@ -9,9 +9,9 @@ module URI
   # If the first argument responds to the 'open' method, 'open' is called on it
   # with the rest of the arguments.
   #
-  # If the first argument is a string that begins with `(protocol)://`, it is
-  # parsed by URI.parse.  If the parsed object responds to the 'open' method,
-  # 'open' is called on it with the rest of the arguments.
+  # If the first argument is a string that begins with <code>(protocol)://</code>,
+  # it is parsed by URI.parse.  If the parsed object responds to the 'open'
+  # method, 'open' is called on it with the rest of the arguments.
   #
   # Otherwise, Kernel#open is called.
   #
@@ -349,17 +349,17 @@ module OpenURI
     # :   Synopsis:
     #         :ftp_active_mode=>bool
     #
-    #     `:ftp_active_mode => true` is used to make ftp active mode. Ruby 1.9 uses
-    #     passive mode by default. Note that the active mode is default in Ruby 1.8
-    #     or prior.
+    #     <code>:ftp_active_mode => true</code> is used to make ftp active mode.
+    #     Ruby 1.9 uses passive mode by default. Note that the active mode is
+    #     default in Ruby 1.8 or prior.
     #
     #
     # :redirect
     # :   Synopsis:
     #         :redirect=>bool
     #
-    #     `:redirect` is true by default.  `:redirect => false` is used to disable
-    #     all HTTP redirects.
+    #     <code>:redirect</code> is true by default.  <code>:redirect =>
+    #     false</code> is used to disable all HTTP redirects.
     #
     #     OpenURI::HTTPRedirect exception raised on redirection. Using `true` also
     #     means that redirections between http and ftp are permitted.

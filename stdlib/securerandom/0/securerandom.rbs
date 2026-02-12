@@ -29,7 +29,7 @@
 # *   uuid
 #
 # These methods are usable as class methods of SecureRandom such as
-# `SecureRandom.hex`.
+# <code>SecureRandom.hex</code>.
 #
 # If a secure random number generator is not available, `NotImplementedError` is
 # raised.

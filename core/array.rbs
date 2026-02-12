@@ -376,10 +376,10 @@
 # *   #find_index (aliased as #index): Returns the index of the first element
 #     that meets a given criterion.
 # *   #hash: Returns the integer hash code.
-# *   #include?: Returns whether any element `==` a given object.
+# *   #include?: Returns whether any element <code>==</code> a given object.
 # *   #length (aliased as #size): Returns the count of elements.
-# *   #none?: Returns whether no element `==` a given object.
-# *   #one?: Returns whether exactly one element `==` a given object.
+# *   #none?: Returns whether no element <code>==</code> a given object.
+# *   #one?: Returns whether exactly one element <code>==</code> a given object.
 # *   #rindex: Returns the index of the last element that meets a given
 #     criterion.
 #
@@ -387,9 +387,9 @@
 #
 # *   #<=>: Returns -1, 0, or 1, as `self` is less than, equal to, or greater
 #     than a given object.
-# *   #==: Returns whether each element in `self` is `==` to the corresponding
-#     element in a given object.
-# *   #eql?: Returns whether each element in `self` is `eql?` to the
+# *   #==: Returns whether each element in `self` is <code>==</code> to the
+#     corresponding element in a given object.
+# *   #eql?: Returns whether each element in `self` is <code>eql?</code> to the
 #     corresponding element in a given object.
 #
 # ### Methods for Fetching
@@ -399,7 +399,7 @@
 # *   #[] (aliased as #slice): Returns consecutive elements as determined by a
 #     given argument.
 # *   #assoc: Returns the first element that is an array whose first element
-#     `==` a given object.
+#     <code>==</code> a given object.
 # *   #at: Returns the element at a given offset.
 # *   #bsearch: Returns an element selected via a binary search as determined by
 #     a given block.
@@ -414,14 +414,14 @@
 # *   #fetch_values: Returns elements at given offsets.
 # *   #first: Returns one or more leading elements.
 # *   #last: Returns one or more trailing elements.
-# *   #max: Returns one or more maximum-valued elements, as determined by `#<=>`
-#     or a given block.
-# *   #min: Returns one or more minimum-valued elements, as determined by `#<=>`
-#     or a given block.
+# *   #max: Returns one or more maximum-valued elements, as determined by
+#     <code>#<=></code> or a given block.
+# *   #min: Returns one or more minimum-valued elements, as determined by
+#     <code>#<=></code> or a given block.
 # *   #minmax: Returns the minimum-valued and maximum-valued elements, as
-#     determined by `#<=>` or a given block.
+#     determined by <code>#<=></code> or a given block.
 # *   #rassoc: Returns the first element that is an array whose second element
-#     `==` a given object.
+#     <code>==</code> a given object.
 # *   #reject: Returns an array containing elements not rejected by a given
 #     block.
 # *   #reverse: Returns all elements in reverse order.
@@ -430,8 +430,8 @@
 # *   #select (aliased as #filter): Returns an array containing elements
 #     selected by a given block.
 # *   #shuffle: Returns elements in a random order.
-# *   #sort: Returns all elements in an order determined by `#<=>` or a given
-#     block.
+# *   #sort: Returns all elements in an order determined by <code>#<=></code> or
+#     a given block.
 # *   #take: Returns leading elements as determined by a given index.
 # *   #take_while: Returns leading elements as determined by a given block.
 # *   #uniq: Returns an array containing non-duplicate elements.
@@ -455,8 +455,8 @@
 # *   #reverse!: Replaces `self` with its elements reversed.
 # *   #rotate!: Replaces `self` with its elements rotated.
 # *   #shuffle!: Replaces `self` with its elements in random order.
-# *   #sort!: Replaces `self` with its elements sorted, as determined by `#<=>`
-#     or a given block.
+# *   #sort!: Replaces `self` with its elements sorted, as determined by
+#     <code>#<=></code> or a given block.
 # *   #sort_by!: Replaces `self` with its elements sorted, as determined by a
 #     given block.
 # *   #unshift (aliased as #prepend): Prepends leading elements.
@@ -539,10 +539,11 @@
 #     *   With integer argument `n`, a new array that is the concatenation of
 #         `n` copies of `self`.
 #     *   With string argument `field_separator`, a new string that is
-#         equivalent to `join(field_separator)`.
+#         equivalent to <code>join(field_separator)</code>.
 #
 # *   #pack: Packs the elements into a binary sequence.
-# *   #sum: Returns a sum of elements according to either `+` or a given block.
+# *   #sum: Returns a sum of elements according to either <code>+</code> or a
+#     given block.
 #
 %a{annotate:rdoc:source:from=array.c}
 class Array[unchecked out Elem] < Object
@@ -574,8 +575,8 @@ class Array[unchecked out Elem] < Object
   #     Array.new(2, 3) # => [3, 3]
   #
   # With a block given, returns an array of the given `size`; calls the block with
-  # each `index` in the range `(0...size)`; the element at that `index` in the
-  # returned array is the blocks return value:
+  # each `index` in the range <code>(0...size)</code>; the element at that `index`
+  # in the returned array is the blocks return value:
   #
   #     Array.new(3)  {|index| "Element #{index}" } # => ["Element 0", "Element 1", "Element 2"]
   #
@@ -630,9 +631,9 @@ class Array[unchecked out Elem] < Object
   #
   # If `object` is an array, returns `object`.
   #
-  # Otherwise if `object` responds to `:to_ary`. calls `object.to_ary`: if the
-  # return value is an array or `nil`, returns that value; if not, raises
-  # TypeError.
+  # Otherwise if `object` responds to <code>:to_ary</code>. calls
+  # <code>object.to_ary</code>: if the return value is an array or `nil`, returns
+  # that value; if not, raises TypeError.
   #
   # Otherwise returns `nil`.
   #
@@ -658,8 +659,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [0, 1, 2] & [3, 2, 1, 0] # => [0, 1, 2]
   #
-  # Identifies common elements using method `#eql?` (as defined in each element of
-  # `self`).
+  # Identifies common elements using method <code>#eql?</code> (as defined in each
+  # element of `self`).
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
@@ -677,7 +678,7 @@ class Array[unchecked out Elem] < Object
   #     a * 3 # => ["x", "y", "x", "y", "x", "y"]
   #
   # When string argument `string_separator` is given, equivalent to
-  # `self.join(string_separator)`:
+  # <code>self.join(string_separator)</code>:
   #
   #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {foo: 0}"
   #
@@ -709,8 +710,8 @@ class Array[unchecked out Elem] < Object
   #     [0, 1, 1, 2, 1, 1, 3, 1, 1] - [3, 2, 0, :foo] # => [1, 1, 1, 1, 1, 1]
   #     [0, 1, 2] - [:foo]                            # => [0, 1, 2]
   #
-  # Element are compared using method `#eql?` (as defined in each element of
-  # `self`).
+  # Element are compared using method <code>#eql?</code> (as defined in each
+  # element of `self`).
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
@@ -739,21 +740,22 @@ class Array[unchecked out Elem] < Object
   # Returns -1, 0, or 1 as `self` is determined to be less than, equal to, or
   # greater than `other_array`.
   #
-  # Iterates over each index `i` in `(0...self.size)`:
+  # Iterates over each index `i` in <code>(0...self.size)</code>:
   #
-  # *   Computes `result[i]` as `self[i] <=> other_array[i]`.
-  # *   Immediately returns 1 if `result[i]` is 1:
+  # *   Computes <code>result[i]</code> as <code>self[i] <=>
+  #     other_array[i]</code>.
+  # *   Immediately returns 1 if <code>result[i]</code> is 1:
   #
   #         [0, 1, 2] <=> [0, 0, 2] # => 1
   #
-  # *   Immediately returns -1 if `result[i]` is -1:
+  # *   Immediately returns -1 if <code>result[i]</code> is -1:
   #
   #         [0, 1, 2] <=> [0, 2, 2] # => -1
   #
-  # *   Continues if `result[i]` is 0.
+  # *   Continues if <code>result[i]</code> is 0.
   #
-  # When every `result` is 0, returns `self.size <=> other_array.size` (see
-  # Integer#<=>):
+  # When every `result` is 0, returns <code>self.size <=> other_array.size</code>
+  # (see Integer#<=>):
   #
   #     [0, 1, 2] <=> [0, 1]        # => 1
   #     [0, 1, 2] <=> [0, 1, 2]     # => 0
@@ -778,7 +780,7 @@ class Array[unchecked out Elem] < Object
   #
   # *   `self` and `other_array` are the same size.
   # *   Their corresponding elements are the same; that is, for each index `i` in
-  #     `(0...self.size)`, `self[i] == other_array[i]`.
+  #     <code>(0...self.size)</code>, <code>self[i] == other_array[i]</code>.
   #
   # Examples:
   #
@@ -788,7 +790,7 @@ class Array[unchecked out Elem] < Object
   #     [:foo, 'bar', 2] == [:foo, 'bar', 3]   # => false # Different elements.
   #
   # This method is different from method Array#eql?, which compares elements using
-  # `Object#eql?`.
+  # <code>Object#eql?</code>.
   #
   # Related: see [Methods for Comparing](rdoc-ref:Array@Methods+for+Comparing).
   #
@@ -847,42 +849,45 @@ class Array[unchecked out Elem] < Object
   #     a[0, 2] # => [:foo, "bar"]
   #     a[1, 2] # => ["bar", 2]
   #
-  # If `start + length` is greater than `self.length`, returns all elements from
-  # offset `start` to the end:
+  # If <code>start + length</code> is greater than <code>self.length</code>,
+  # returns all elements from offset `start` to the end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 4] # => [:foo, "bar", 2]
   #     a[1, 3] # => ["bar", 2]
   #     a[2, 2] # => [2]
   #
-  # If `start == self.size` and `length >= 0`, returns a new empty array.
+  # If <code>start == self.size</code> and <code>length >= 0</code>, returns a new
+  # empty array.
   #
   # If `length` is negative, returns `nil`.
   #
-  # When a single Range argument `range` is given, treats `range.min` as `start`
-  # above and `range.size` as `length` above:
+  # When a single Range argument `range` is given, treats <code>range.min</code>
+  # as `start` above and <code>range.size</code> as `length` above:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0..1] # => [:foo, "bar"]
   #     a[1..2] # => ["bar", 2]
   #
-  # Special case: If `range.start == a.size`, returns a new empty array.
+  # Special case: If <code>range.start == a.size</code>, returns a new empty
+  # array.
   #
-  # If `range.end` is negative, calculates the end index from the end:
+  # If <code>range.end</code> is negative, calculates the end index from the end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0..-1] # => [:foo, "bar", 2]
   #     a[0..-2] # => [:foo, "bar"]
   #     a[0..-3] # => [:foo]
   #
-  # If `range.start` is negative, calculates the start index from the end:
+  # If <code>range.start</code> is negative, calculates the start index from the
+  # end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[-1..2] # => [2]
   #     a[-2..2] # => ["bar", 2]
   #     a[-3..2] # => [:foo, "bar", 2]
   #
-  # If `range.start` is larger than the array size, returns `nil`.
+  # If <code>range.start</code> is larger than the array size, returns `nil`.
   #
   #     a = [:foo, 'bar', 2]
   #     a[4..1] # => nil
@@ -962,7 +967,7 @@ class Array[unchecked out Elem] < Object
   #     a[0] = 'foo' # => "foo"
   #     a # => ["foo", "bar", 2]
   #
-  # If `index` is greater than `self.length`, extends the array:
+  # If `index` is greater than <code>self.length</code>, extends the array:
   #
   #     a = [:foo, 'bar', 2]
   #     a[7] = 'foo' # => "foo"
@@ -975,8 +980,8 @@ class Array[unchecked out Elem] < Object
   #     a # => [:foo, "bar", "two"]
   #
   # When Integer arguments `start` and `length` are given and `object` is not an
-  # array, removes `length - 1` elements beginning at offset `start`, and assigns
-  # `object` at offset `start`:
+  # array, removes <code>length - 1</code> elements beginning at offset `start`,
+  # and assigns `object` at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 2] = 'foo' # => "foo"
@@ -988,8 +993,8 @@ class Array[unchecked out Elem] < Object
   #     a[-2, 2] = 'foo' # => "foo"
   #     a # => [:foo, "foo"]
   #
-  # If `start` is non-negative and outside the array (` >= self.size`), extends
-  # the array with `nil`, assigns `object` at offset `start`, and ignores
+  # If `start` is non-negative and outside the array (<code> >= self.size</code>),
+  # extends the array with `nil`, assigns `object` at offset `start`, and ignores
   # `length`:
   #
   #     a = [:foo, 'bar', 2]
@@ -1010,35 +1015,38 @@ class Array[unchecked out Elem] < Object
   #     a # => [:foo, "foo"]
   #
   # When Range argument `range` is given and `object` is not an array, removes
-  # `length - 1` elements beginning at offset `start`, and assigns `object` at
-  # offset `start`:
+  # <code>length - 1</code> elements beginning at offset `start`, and assigns
+  # `object` at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0..1] = 'foo' # => "foo"
   #     a # => ["foo", 2]
   #
-  # if `range.begin` is negative, counts backwards from the end of the array:
+  # if <code>range.begin</code> is negative, counts backwards from the end of the
+  # array:
   #
   #     a = [:foo, 'bar', 2]
   #     a[-2..2] = 'foo' # => "foo"
   #     a # => [:foo, "foo"]
   #
-  # If the array length is less than `range.begin`, extends the array with `nil`,
-  # assigns `object` at offset `range.begin`, and ignores `length`:
+  # If the array length is less than <code>range.begin</code>, extends the array
+  # with `nil`, assigns `object` at offset <code>range.begin</code>, and ignores
+  # `length`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[6..50] = 'foo' # => "foo"
   #     a # => [:foo, "bar", 2, nil, nil, nil, "foo"]
   #
-  # If `range.end` is zero, shifts elements at and following offset `start` and
-  # assigns `object` at offset `start`:
+  # If <code>range.end</code> is zero, shifts elements at and following offset
+  # `start` and assigns `object` at offset `start`:
   #
   #     a = [:foo, 'bar', 2]
   #     a[1..0] = 'foo' # => "foo"
   #     a # => [:foo, "foo", "bar", 2]
   #
-  # If `range.end` is negative, assigns `object` at offset `start`, retains
-  # `range.end.abs -1` elements past that, and removes those beyond:
+  # If <code>range.end</code> is negative, assigns `object` at offset `start`,
+  # retains <code>range.end.abs -1</code> elements past that, and removes those
+  # beyond:
   #
   #     a = [:foo, 'bar', 2]
   #     a[1..-1] = 'foo' # => "foo"
@@ -1051,8 +1059,8 @@ class Array[unchecked out Elem] < Object
   #     a # => [:foo, "foo", "bar", 2]
   #     a = [:foo, 'bar', 2]
   #
-  # If `range.end` is too large for the existing array, replaces array elements,
-  # but does not extend the array with `nil` values:
+  # If <code>range.end</code> is too large for the existing array, replaces array
+  # elements, but does not extend the array with `nil` values:
   #
   #     a = [:foo, 'bar', 2]
   #     a[1..5] = 'foo' # => "foo"
@@ -1083,8 +1091,8 @@ class Array[unchecked out Elem] < Object
   #     [[], {}, '', 0, 0.0, nil].all?        # => false # nil is not truthy.
   #     [[], {}, '', 0, 0.0, false].all?      # => false # false is not truthy.
   #
-  # With argument `object` given, returns whether `object === ele` for every
-  # element `ele` in `self`:
+  # With argument `object` given, returns whether <code>object === ele</code> for
+  # every element `ele` in `self`:
   #
   #     [0, 0, 0].all?(0)                    # => true
   #     [0, 1, 2].all?(1)                    # => false
@@ -1125,8 +1133,8 @@ class Array[unchecked out Elem] < Object
   #     [nil, false, ''].any? # => true  # String object is truthy.
   #     [nil, false].any?     # => false # Nil and false are not truthy.
   #
-  # With argument `object` given, returns whether `object === ele` for any element
-  # `ele` in `self`:
+  # With argument `object` given, returns whether <code>object === ele</code> for
+  # any element `ele` in `self`:
   #
   #     [nil, false, 0].any?(0)          # => true
   #     [nil, false, 1].any?(0)          # => false
@@ -1169,7 +1177,7 @@ class Array[unchecked out Elem] < Object
   #   - assoc(object) -> found_array or nil
   # -->
   # Returns the first element `ele` in `self` such that `ele` is an array and
-  # `ele[0] == object`:
+  # <code>ele[0] == object</code>:
   #
   #     a = [{foo: 0}, [2, 4], [4, 5, 6], [4, 5]]
   #     a.assoc(4) # => [4, 5, 6]
@@ -1299,8 +1307,8 @@ class Array[unchecked out Elem] < Object
   # -->
   # When a block and a positive [integer-convertible
   # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects)
-  # argument `count` (`0 < count <= self.size`) are given, calls the block with
-  # each combination of `self` of size `count`; returns `self`:
+  # argument `count` (<code>0 < count <= self.size</code>) are given, calls the
+  # block with each combination of `self` of size `count`; returns `self`:
   #
   #     a = %w[a b c]                                   # => ["a", "b", "c"]
   #     a.combination(2) {|combination| p combination } # => ["a", "b", "c"]
@@ -1323,8 +1331,8 @@ class Array[unchecked out Elem] < Object
   #     []
   #     []
   #
-  # When `count` is negative or larger than `self.size` and `self` is non-empty,
-  # does not call the block:
+  # When `count` is negative or larger than <code>self.size</code> and `self` is
+  # non-empty, does not call the block:
   #
   #     a.combination(-1) {|combination| fail 'Cannot happen' } # => ["a", "b", "c"]
   #     a.combination(4)  {|combination| fail 'Cannot happen' } # => ["a", "b", "c"]
@@ -1395,7 +1403,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [0, :one, 'two', 3, 3.0].count # => 5
   #
-  # With argument `object` given, returns the count of elements `==` to `object`:
+  # With argument `object` given, returns the count of elements <code>==</code> to
+  # `object`:
   #
   #     [0, :one, 'two', 3, 3.0].count(3) # => 2
   #
@@ -1405,7 +1414,7 @@ class Array[unchecked out Elem] < Object
   #     [0, 1, 2, 3].count {|element| element > 1 } # => 2
   #
   # With argument `object` and a block given, issues a warning, ignores the block,
-  # and returns the count of elements `==` to `object`.
+  # and returns the count of elements <code>==</code> to `object`.
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
@@ -1462,8 +1471,8 @@ class Array[unchecked out Elem] < Object
   # -->
   # Removes zero or more elements from `self`.
   #
-  # With no block given, removes from `self` each element `ele` such that `ele ==
-  # object`; returns the last removed element:
+  # With no block given, removes from `self` each element `ele` such that
+  # <code>ele == object</code>; returns the last removed element:
   #
   #     a = [0, 1, 2, 2.0]
   #     a.delete(2) # => 2.0
@@ -1473,8 +1482,8 @@ class Array[unchecked out Elem] < Object
   #
   #     a.delete(2) # => nil
   #
-  # With a block given, removes from `self` each element `ele` such that `ele ==
-  # object`.
+  # With a block given, removes from `self` each element `ele` such that <code>ele
+  # == object</code>.
   #
   # If any such elements are found, ignores the block and returns the last removed
   # element:
@@ -1546,8 +1555,8 @@ class Array[unchecked out Elem] < Object
   #   - difference(*other_arrays = []) -> new_array
   # -->
   # Returns a new array containing only those elements from `self` that are not
-  # found in any of the given `other_arrays`; items are compared using `eql?`;
-  # order from `self` is preserved:
+  # found in any of the given `other_arrays`; items are compared using
+  # <code>eql?</code>;  order from `self` is preserved:
   #
   #     [0, 1, 1, 2, 1, 1, 3, 1, 1].difference([1]) # => [0, 2, 3]
   #     [0, 1, 2, 3].difference([3, 0], [1, 3])     # => [2]
@@ -1705,7 +1714,7 @@ class Array[unchecked out Elem] < Object
   #   - eql?(other_array) -> true or false
   # -->
   # Returns `true` if `self` and `other_array` are the same size, and if, for each
-  # index `i` in `self`, `self[i].eql?(other_array[i])`:
+  # index `i` in `self`, <code>self[i].eql?(other_array[i])</code>:
   #
   #     a0 = [:foo, 'bar', 2]
   #     a1 = [:foo, 'bar', 2]
@@ -1714,7 +1723,7 @@ class Array[unchecked out Elem] < Object
   # Otherwise, returns `false`.
   #
   # This method is different from method Array#==, which compares using method
-  # `Object#==`.
+  # <code>Object#==</code>.
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
@@ -2055,7 +2064,7 @@ class Array[unchecked out Elem] < Object
   # Returns the zero-based integer index of a specified element, or `nil`.
   #
   # With only argument `object` given, returns the index of the first element
-  # `element` for which `object == element`:
+  # `element` for which <code>object == element</code>:
   #
   #     a = [:foo, 'bar', 2, 'bar']
   #     a.index('bar') # => 1
@@ -2197,7 +2206,8 @@ class Array[unchecked out Elem] < Object
   #   rdoc-file=array.c
   #   - include?(object) -> true or false
   # -->
-  # Returns whether for some element `element` in `self`, `object == element`:
+  # Returns whether for some element `element` in `self`, <code>object ==
+  # element</code>:
   #
   #     [0, 1, 2].include?(2)   # => true
   #     [0, 1, 2].include?(2.0) # => true
@@ -2211,7 +2221,7 @@ class Array[unchecked out Elem] < Object
   # Returns the zero-based integer index of a specified element, or `nil`.
   #
   # With only argument `object` given, returns the index of the first element
-  # `element` for which `object == element`:
+  # `element` for which <code>object == element</code>:
   #
   #     a = [:foo, 'bar', 2, 'bar']
   #     a.index('bar') # => 1
@@ -2244,13 +2254,14 @@ class Array[unchecked out Elem] < Object
   #     a = ['a', 'b', 'c']     # => ["a", "b", "c"]
   #     a.insert(1, :x, :y, :z) # => ["a", :x, :y, :z, "b", "c"]
   #
-  # Extends the array if `index` is beyond the array (`index >= self.size`):
+  # Extends the array if `index` is beyond the array (<code>index >=
+  # self.size</code>):
   #
   #     a = ['a', 'b', 'c']     # => ["a", "b", "c"]
   #     a.insert(5, :x, :y, :z) # => ["a", "b", "c", nil, nil, :x, :y, :z]
   #
   # When `index` is negative, inserts `objects` *after* the element at offset
-  # `index + self.size`:
+  # <code>index + self.size</code>:
   #
   #     a = ['a', 'b', 'c']      # => ["a", "b", "c"]
   #     a.insert(-2, :x, :y, :z) # => ["a", "b", :x, :y, :z, "c"]
@@ -2274,8 +2285,8 @@ class Array[unchecked out Elem] < Object
   #   - inspect -> new_string
   #   - to_s -> new_string
   # -->
-  # Returns the new string formed by calling method `#inspect` on each array
-  # element:
+  # Returns the new string formed by calling method <code>#inspect</code> on each
+  # array element:
   #
   #     a = [:foo, 'bar', 2]
   #     a.inspect # => "[:foo, \"bar\", 2]"
@@ -2288,13 +2299,13 @@ class Array[unchecked out Elem] < Object
   #   rdoc-file=array.c
   #   - intersect?(other_array) -> true or false
   # -->
-  # Returns whether `other_array` has at least one element that is `#eql?` to some
-  # element of `self`:
+  # Returns whether `other_array` has at least one element that is
+  # <code>#eql?</code> to some element of `self`:
   #
   #     [1, 2, 3].intersect?([3, 4, 5]) # => true
   #     [1, 2, 3].intersect?([4, 5, 6]) # => false
   #
-  # Each element must correctly implement method `#hash`.
+  # Each element must correctly implement method <code>#hash</code>.
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
@@ -2304,12 +2315,13 @@ class Array[unchecked out Elem] < Object
   #   rdoc-file=array.c
   #   - intersection(*other_arrays) -> new_array
   # -->
-  # Returns a new array containing each element in `self` that is `#eql?` to at
-  # least one element in each of the given `other_arrays`; duplicates are omitted:
+  # Returns a new array containing each element in `self` that is
+  # <code>#eql?</code> to at least one element in each of the given
+  # `other_arrays`; duplicates are omitted:
   #
   #     [0, 0, 1, 1, 2, 3].intersection([0, 1, 2], [0, 1, 3]) # => [0, 1]
   #
-  # Each element must correctly implement method `#hash`.
+  # Each element must correctly implement method <code>#hash</code>.
   #
   # Order from `self` is preserved:
   #
@@ -2328,11 +2340,12 @@ class Array[unchecked out Elem] < Object
   # Returns the new string formed by joining the converted elements of `self`; for
   # each element `element`:
   #
-  # *   Converts recursively using `element.join(separator)` if `element` is a
-  #     `kind_of?(Array)`.
-  # *   Otherwise, converts using `element.to_s`.
+  # *   Converts recursively using <code>element.join(separator)</code> if
+  #     `element` is a <code>kind_of?(Array)</code>.
+  # *   Otherwise, converts using <code>element.to_s</code>.
   #
-  # With no argument given, joins using the output field separator, `$,`:
+  # With no argument given, joins using the output field separator,
+  # <code>$,</code>:
   #
   #     a = [:foo, 'bar', 2]
   #     $, # => nil
@@ -2455,16 +2468,17 @@ class Array[unchecked out Elem] < Object
   #
   # Does not modify `self`.
   #
-  # With no block given, each element in `self` must respond to method `#<=>` with
-  # a numeric.
+  # With no block given, each element in `self` must respond to method
+  # <code>#<=></code> with a numeric.
   #
   # With no argument and no block, returns the element in `self` having the
-  # maximum value per method `#<=>`:
+  # maximum value per method <code>#<=></code>:
   #
   #     [1, 0, 3, 2].max # => 3
   #
   # With non-negative numeric argument `count` and no block, returns a new array
-  # with at most `count` elements, in descending order, per method `#<=>`:
+  # with at most `count` elements, in descending order, per method
+  # <code>#<=></code>:
   #
   #     [1, 0, 3, 2].max(3)   # => [3, 2, 1]
   #     [1, 0, 3, 2].max(3.0) # => [3, 2, 1]
@@ -2473,8 +2487,9 @@ class Array[unchecked out Elem] < Object
   #
   # With a block given, the block must return a numeric.
   #
-  # With a block and no argument, calls the block `self.size - 1` times to compare
-  # elements; returns the element having the maximum value per the block:
+  # With a block and no argument, calls the block <code>self.size - 1</code> times
+  # to compare elements; returns the element having the maximum value per the
+  # block:
   #
   #     ['0', '', '000', '00'].max {|a, b| a.size <=> b.size }
   #     # => "000"
@@ -2506,16 +2521,17 @@ class Array[unchecked out Elem] < Object
   #
   # Does not modify `self`.
   #
-  # With no block given, each element in `self` must respond to method `#<=>` with
-  # a numeric.
+  # With no block given, each element in `self` must respond to method
+  # <code>#<=></code> with a numeric.
   #
   # With no argument and no block, returns the element in `self` having the
-  # minimum value per method `#<=>`:
+  # minimum value per method <code>#<=></code>:
   #
   #     [1, 0, 3, 2].min # => 0
   #
   # With non-negative numeric argument `count` and no block, returns a new array
-  # with at most `count` elements, in ascending order, per method `#<=>`:
+  # with at most `count` elements, in ascending order, per method
+  # <code>#<=></code>:
   #
   #     [1, 0, 3, 2].min(3)   # => [0, 1, 2]
   #     [1, 0, 3, 2].min(3.0) # => [0, 1, 2]
@@ -2524,8 +2540,9 @@ class Array[unchecked out Elem] < Object
   #
   # With a block given, the block must return a numeric.
   #
-  # With a block and no argument, calls the block `self.size - 1` times to compare
-  # elements; returns the element having the minimum value per the block:
+  # With a block and no argument, calls the block <code>self.size - 1</code> times
+  # to compare elements; returns the element having the minimum value per the
+  # block:
   #
   #     ['0', '', '000', '00'].min {|a, b| a.size <=> b.size }
   #     # => ""
@@ -2549,13 +2566,13 @@ class Array[unchecked out Elem] < Object
   # elements from `self`; does not modify `self`.
   #
   # With no block given, the minimum and maximum values are determined using
-  # method `#<=>`:
+  # method <code>#<=></code>:
   #
   #     [1, 0, 3, 2].minmax # => [0, 3]
   #
   # With a block given, the block must return a numeric; the block is called
-  # `self.size - 1` times to compare elements; returns the elements having the
-  # minimum and maximum values per the block:
+  # <code>self.size - 1</code> times to compare elements; returns the elements
+  # having the minimum and maximum values per the block:
   #
   #     ['0', '', '000', '00'].minmax {|a, b| a.size <=> b.size }
   #     # => ["", "000"]
@@ -2582,7 +2599,7 @@ class Array[unchecked out Elem] < Object
   #     [].none?              # => true
   #
   # With argument `object` given, returns `false` if for any element `element`,
-  # `object === element`; `true` otherwise:
+  # <code>object === element</code>; `true` otherwise:
   #
   #     ['food', 'drink'].none?(/bar/) # => true
   #     ['food', 'drink'].none?(/foo/) # => false
@@ -2624,7 +2641,7 @@ class Array[unchecked out Elem] < Object
   #     [0, 1, 2].one? {|element| element > 2 } # => false
   #
   # With argument `object` given, returns `true` if for exactly one element
-  # `element`, `object === element`; `false` otherwise:
+  # `element`, <code>object === element</code>; `false` otherwise:
   #
   #     [0, 1, 2].one?(0) # => true
   #     [0, 0, 1].one?(0) # => false
@@ -2654,9 +2671,9 @@ class Array[unchecked out Elem] < Object
   # Iterates over permutations of the elements of `self`; the order of
   # permutations is indeterminate.
   #
-  # With a block and an in-range positive integer argument `count` (`0 < count <=
-  # self.size`) given, calls the block with each permutation of `self` of size
-  # `count`; returns `self`:
+  # With a block and an in-range positive integer argument `count` (<code>0 <
+  # count <= self.size</code>) given, calls the block with each permutation of
+  # `self` of size `count`; returns `self`:
   #
   #     a = [0, 1, 2]
   #     perms = []
@@ -2677,8 +2694,8 @@ class Array[unchecked out Elem] < Object
   #     a.permutation(0) {|perm| perms.push(perm) }
   #     perms # => [[]]
   #
-  # When `count` is out of range (negative or larger than `self.size`), does not
-  # call the block:
+  # When `count` is out of range (negative or larger than <code>self.size</code>),
+  # does not call the block:
   #
   #     a.permutation(-1) {|permutation| fail 'Cannot happen' }
   #     a.permutation(4) {|permutation| fail 'Cannot happen' }
@@ -2815,7 +2832,7 @@ class Array[unchecked out Elem] < Object
   #   - rassoc(object) -> found_array or nil
   # -->
   # Returns the first element `ele` in `self` such that `ele` is an array and
-  # `ele[1] == object`:
+  # <code>ele[1] == object</code>:
   #
   #     a = [{foo: 0}, [2, 4], [4, 5, 6], [4, 5]]
   #     a.rassoc(4) # => [2, 4]
@@ -2879,7 +2896,7 @@ class Array[unchecked out Elem] < Object
   #
   # If a positive integer argument `size` is given, calls the block with each
   # `size`-tuple repeated combination of the elements of `self`. The number of
-  # combinations is `(size+1)(size+2)/2`.
+  # combinations is <code>(size+1)(size+2)/2</code>.
   #
   # Examples:
   #
@@ -2919,7 +2936,7 @@ class Array[unchecked out Elem] < Object
   #
   # If a positive integer argument `size` is given, calls the block with each
   # `size`-tuple repeated permutation of the elements of `self`. The number of
-  # permutations is `self.size**size`.
+  # permutations is <code>self.size**size</code>.
   #
   # Examples:
   #
@@ -3043,7 +3060,8 @@ class Array[unchecked out Elem] < Object
   #   - rindex {|element| ... } -> integer or nil
   #   - rindex -> new_enumerator
   # -->
-  # Returns the index of the last element for which `object == element`.
+  # Returns the index of the last element for which <code>object ==
+  # element</code>.
   #
   # With argument `object` given, returns the index of the last such element
   # found:
@@ -3082,7 +3100,7 @@ class Array[unchecked out Elem] < Object
   #     [0, 1, 2, 3].rotate(2)   # => [2, 3, 0, 1]
   #     [0, 1, 2, 3].rotate(2.1) # => [2, 3, 0, 1]
   #
-  # If `count` is large, uses `count % array.size` as the count:
+  # If `count` is large, uses <code>count % array.size</code> as the count:
   #
   #     [0, 1, 2, 3].rotate(22) # => [2, 3, 0, 1]
   #
@@ -3095,7 +3113,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [0, 1, 2, 3].rotate(-1) # => [3, 0, 1, 2]
   #
-  # If `count` is small (far from zero), uses `count % array.size` as the count:
+  # If `count` is small (far from zero), uses <code>count % array.size</code> as
+  # the count:
   #
   #     [0, 1, 2, 3].rotate(-21) # => [3, 0, 1, 2]
   #
@@ -3116,7 +3135,7 @@ class Array[unchecked out Elem] < Object
   #     [0, 1, 2, 3].rotate!(2)   # => [2, 3, 0, 1]
   #     [0, 1, 2, 3].rotate!(2.1) # => [2, 3, 0, 1]
   #
-  # If `count` is large, uses `count % array.size` as the count:
+  # If `count` is large, uses <code>count % array.size</code> as the count:
   #
   #     [0, 1, 2, 3].rotate!(21) # => [1, 2, 3, 0]
   #
@@ -3129,7 +3148,8 @@ class Array[unchecked out Elem] < Object
   #
   #     [0, 1, 2, 3].rotate!(-1) # => [3, 0, 1, 2]
   #
-  # If `count` is small (far from zero), uses `count % array.size` as the count:
+  # If `count` is small (far from zero), uses <code>count % array.size</code> as
+  # the count:
   #
   #     [0, 1, 2, 3].rotate!(-21) # => [3, 0, 1, 2]
   #
@@ -3172,8 +3192,8 @@ class Array[unchecked out Elem] < Object
   #     a = [1, 1, 1, 2, 2, 3]
   #     a.sample(a.size) # => [1, 1, 3, 2, 1, 2]
   #
-  # Returns no more than `a.size` elements (because no new duplicates are
-  # introduced):
+  # Returns no more than <code>a.size</code> elements (because no new duplicates
+  # are introduced):
   #
   #     a.sample(50) # => [6, 4, 1, 8, 5, 9, 0, 2, 3, 7]
   #
@@ -3375,42 +3395,45 @@ class Array[unchecked out Elem] < Object
   #     a[0, 2] # => [:foo, "bar"]
   #     a[1, 2] # => ["bar", 2]
   #
-  # If `start + length` is greater than `self.length`, returns all elements from
-  # offset `start` to the end:
+  # If <code>start + length</code> is greater than <code>self.length</code>,
+  # returns all elements from offset `start` to the end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0, 4] # => [:foo, "bar", 2]
   #     a[1, 3] # => ["bar", 2]
   #     a[2, 2] # => [2]
   #
-  # If `start == self.size` and `length >= 0`, returns a new empty array.
+  # If <code>start == self.size</code> and <code>length >= 0</code>, returns a new
+  # empty array.
   #
   # If `length` is negative, returns `nil`.
   #
-  # When a single Range argument `range` is given, treats `range.min` as `start`
-  # above and `range.size` as `length` above:
+  # When a single Range argument `range` is given, treats <code>range.min</code>
+  # as `start` above and <code>range.size</code> as `length` above:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0..1] # => [:foo, "bar"]
   #     a[1..2] # => ["bar", 2]
   #
-  # Special case: If `range.start == a.size`, returns a new empty array.
+  # Special case: If <code>range.start == a.size</code>, returns a new empty
+  # array.
   #
-  # If `range.end` is negative, calculates the end index from the end:
+  # If <code>range.end</code> is negative, calculates the end index from the end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[0..-1] # => [:foo, "bar", 2]
   #     a[0..-2] # => [:foo, "bar"]
   #     a[0..-3] # => [:foo]
   #
-  # If `range.start` is negative, calculates the start index from the end:
+  # If <code>range.start</code> is negative, calculates the start index from the
+  # end:
   #
   #     a = [:foo, 'bar', 2]
   #     a[-1..2] # => [2]
   #     a[-2..2] # => ["bar", 2]
   #     a[-3..2] # => [:foo, "bar", 2]
   #
-  # If `range.start` is larger than the array size, returns `nil`.
+  # If <code>range.start</code> is larger than the array size, returns `nil`.
   #
   #     a = [:foo, 'bar', 2]
   #     a[4..1] # => nil
@@ -3492,42 +3515,43 @@ class Array[unchecked out Elem] < Object
   #     a.slice!(5, 1)  # => nil
   #     a.slice!(-5, 1) # => nil
   #
-  # If `start + length` exceeds the array size, removes and returns all elements
-  # from offset `start` to the end:
+  # If <code>start + length</code> exceeds the array size, removes and returns all
+  # elements from offset `start` to the end:
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(2, 50) # => ["c", "d"]
   #     a               # => ["a", "b"]
   #
-  # If `start == a.size` and `length` is non-negative, returns a new empty array.
+  # If <code>start == a.size</code> and `length` is non-negative, returns a new
+  # empty array.
   #
   # If `length` is negative, returns `nil`.
   #
-  # With Range argument `range` given, treats `range.min` as `start` (as above)
-  # and `range.size` as `length` (as above):
+  # With Range argument `range` given, treats <code>range.min</code> as `start`
+  # (as above) and <code>range.size</code> as `length` (as above):
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(1..2) # => ["b", "c"]
   #     a              # => ["a", "d"]
   #
-  # If `range.start == a.size`, returns a new empty array:
+  # If <code>range.start == a.size</code>, returns a new empty array:
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(4..5) # => []
   #
-  # If `range.start` is larger than the array size, returns `nil`:
+  # If <code>range.start</code> is larger than the array size, returns `nil`:
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(5..6) # => nil
   #
-  # If `range.start` is negative, calculates the start index by counting backwards
-  # from the end of `self`:
+  # If <code>range.start</code> is negative, calculates the start index by
+  # counting backwards from the end of `self`:
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(-2..2) # => ["c"]
   #
-  # If `range.end` is negative, calculates the end index by counting backwards
-  # from the end of `self`:
+  # If <code>range.end</code> is negative, calculates the end index by counting
+  # backwards from the end of `self`:
   #
   #     a = ['a', 'b', 'c', 'd']
   #     a.slice!(0..-2) # => ["a", "b", "c"]
@@ -3545,7 +3569,8 @@ class Array[unchecked out Elem] < Object
   # -->
   # Returns a new array containing the elements of `self`, sorted.
   #
-  # With no block given, compares elements using operator `#<=>` (see Object#<=>):
+  # With no block given, compares elements using operator <code>#<=></code> (see
+  # Object#<=>):
   #
   #     [0, 2, 3, 1].sort # => [0, 1, 2, 3]
   #
@@ -3621,7 +3646,8 @@ class Array[unchecked out Elem] < Object
   #     array.each {|element| sum += element }
   #     sum
   #
-  # For example, `[e0, e1, e2].sum` returns `init + e0 + e1 + e2`.
+  # For example, <code>[e0, e1, e2].sum</code> returns <code>init + e0 + e1 +
+  # e2</code>.
   #
   # Examples:
   #
@@ -3632,7 +3658,7 @@ class Array[unchecked out Elem] < Object
   #     # => [2, 3, :foo, :bar, "foo", "bar"]
   #
   # The `init` value and elements need not be numeric, but must all be
-  # `+`-compatible:
+  # <code>+</code>-compatible:
   #
   #     # Raises TypeError: Array can't be coerced into Integer.
   #     [[:foo, :bar], ['foo', 'bar']].sum(2)
@@ -3747,8 +3773,8 @@ class Array[unchecked out Elem] < Object
           | [T, S] () { (Elem) -> [ T, S ] } -> Hash[T, S]
 
   # <!-- rdoc-file=array.c -->
-  # Returns the new string formed by calling method `#inspect` on each array
-  # element:
+  # Returns the new string formed by calling method <code>#inspect</code> on each
+  # array element:
   #
   #     a = [:foo, 'bar', 2]
   #     a.inspect # => "[:foo, \"bar\", 2]"
@@ -3778,7 +3804,7 @@ class Array[unchecked out Elem] < Object
   #   - union(*other_arrays) -> new_array
   # -->
   # Returns a new array that is the union of the elements of `self` and all given
-  # arrays `other_arrays`; items are compared using `eql?`:
+  # arrays `other_arrays`; items are compared using <code>eql?</code>:
   #
   #     [0, 1, 2, 3].union([4, 5], [6, 7]) # => [0, 1, 2, 3, 4, 5, 6, 7]
   #
@@ -3805,15 +3831,15 @@ class Array[unchecked out Elem] < Object
   # duplicates, the first occurrence always being retained.
   #
   # With no block given, identifies and omits duplicate elements using method
-  # `eql?` to compare elements:
+  # <code>eql?</code> to compare elements:
   #
   #     a = [0, 0, 1, 1, 2, 2]
   #     a.uniq # => [0, 1, 2]
   #
   # With a block given, calls the block for each element; identifies and omits
-  # "duplicate" elements using method `eql?` to compare *block return values*;
-  # that is, an element is a duplicate if its block return value is the same as
-  # that of a previous element:
+  # "duplicate" elements using method <code>eql?</code> to compare *block return
+  # values*; that is, an element is a duplicate if its block return value is the
+  # same as that of a previous element:
   #
   #     a = ['a', 'aa', 'aaa', 'b', 'bb', 'bbb']
   #     a.uniq {|element| element.size } # => ["a", "aa", "aaa"]
@@ -3831,17 +3857,17 @@ class Array[unchecked out Elem] < Object
   # Removes duplicate elements from `self`, the first occurrence always being
   # retained; returns `self` if any elements removed, `nil` otherwise.
   #
-  # With no block given, identifies and removes elements using method `eql?` to
-  # compare elements:
+  # With no block given, identifies and removes elements using method
+  # <code>eql?</code> to compare elements:
   #
   #     a = [0, 0, 1, 1, 2, 2]
   #     a.uniq! # => [0, 1, 2]
   #     a.uniq! # => nil
   #
   # With a block given, calls the block for each element; identifies and omits
-  # "duplicate" elements using method `eql?` to compare *block return values*;
-  # that is, an element is a duplicate if its block return value is the same as
-  # that of a previous element:
+  # "duplicate" elements using method <code>eql?</code> to compare *block return
+  # values*; that is, an element is a duplicate if its block return value is the
+  # same as that of a previous element:
   #
   #     a = ['a', 'aa', 'aaa', 'b', 'bb', 'bbb']
   #     a.uniq! {|element| element.size } # => ["a", "aa", "aaa"]
@@ -3907,13 +3933,13 @@ class Array[unchecked out Elem] < Object
   # For each numeric specifier `index`, includes an element:
   #
   # *   For each non-negative numeric specifier `index` that is in-range (less
-  #     than `self.size`), includes the element at offset `index`:
+  #     than <code>self.size</code>), includes the element at offset `index`:
   #
   #         a.values_at(0, 2)     # => ["a", "c"]
   #         a.values_at(0.1, 2.9) # => ["a", "c"]
   #
   # *   For each negative numeric `index` that is in-range (greater than or equal
-  #     to `- self.size`), counts backwards from the end of `self`:
+  #     to <code>- self.size</code>), counts backwards from the end of `self`:
   #
   #         a.values_at(-1, -4) # => ["d", "a"]
   #
@@ -3925,37 +3951,41 @@ class Array[unchecked out Elem] < Object
   #
   #     a.values_at(4, -5) # => [nil, nil]
   #
-  # For each Range specifier `range`, includes elements according to `range.begin`
-  # and `range.end`:
+  # For each Range specifier `range`, includes elements according to
+  # <code>range.begin</code> and <code>range.end</code>:
   #
-  # *   If both `range.begin` and `range.end` are non-negative and in-range (less
-  #     than `self.size`), includes elements from index `range.begin` through
-  #     `range.end - 1` (if `range.exclude_end?`), or through `range.end`
-  #     (otherwise):
+  # *   If both <code>range.begin</code> and <code>range.end</code> are
+  #     non-negative and in-range (less than <code>self.size</code>), includes
+  #     elements from index <code>range.begin</code> through <code>range.end -
+  #     1</code> (if <code>range.exclude_end?</code>), or through
+  #     <code>range.end</code> (otherwise):
   #
   #         a.values_at(1..2)  # => ["b", "c"]
   #         a.values_at(1...2) # => ["b"]
   #
-  # *   If `range.begin` is negative and in-range (greater than or equal to `-
-  #     self.size`), counts backwards from the end of `self`:
+  # *   If <code>range.begin</code> is negative and in-range (greater than or
+  #     equal to <code>- self.size</code>), counts backwards from the end of
+  #     `self`:
   #
   #         a.values_at(-2..3) # => ["c", "d"]
   #
-  # *   If `range.begin` is negative and out-of-range, raises an exception:
+  # *   If <code>range.begin</code> is negative and out-of-range, raises an
+  #     exception:
   #
   #         a.values_at(-5..3) # Raises RangeError.
   #
-  # *   If `range.end` is positive and out-of-range, extends the returned array
-  #     with `nil` elements:
+  # *   If <code>range.end</code> is positive and out-of-range, extends the
+  #     returned array with `nil` elements:
   #
   #         a.values_at(1..5) # => ["b", "c", "d", nil, nil]
   #
-  # *   If `range.end` is negative and in-range, counts backwards from the end of
-  #     `self`:
+  # *   If <code>range.end</code> is negative and in-range, counts backwards from
+  #     the end of `self`:
   #
   #         a.values_at(1..-2) # => ["b", "c"]
   #
-  # *   If `range.end` is negative and out-of-range, returns an empty array:
+  # *   If <code>range.end</code> is negative and out-of-range, returns an empty
+  #     array:
   #
   #         a.values_at(1..-5) # => []
   #
@@ -3984,8 +4014,8 @@ class Array[unchecked out Elem] < Object
   #
   # Returned:
   #
-  # *   The outer array is of size `self.size`.
-  # *   Each sub-array is of size `other_arrays.size + 1`.
+  # *   The outer array is of size <code>self.size</code>.
+  # *   Each sub-array is of size <code>other_arrays.size + 1</code>.
   # *   The *nth* sub-array contains (in order):
   #
   #     *   The *nth* element of `self`.
@@ -4058,8 +4088,8 @@ class Array[unchecked out Elem] < Object
   #      [:c3, :b3, :a3]]
   #
   # For an **object** in **other_arrays** that is not actually an array, forms the
-  # "other array" as `object.to_ary`, if defined, or as `object.each.to_a`
-  # otherwise.
+  # "other array" as <code>object.to_ary</code>, if defined, or as
+  # <code>object.each.to_a</code> otherwise.
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
@@ -4073,7 +4103,7 @@ class Array[unchecked out Elem] < Object
   #   - self | other_array -> new_array
   # -->
   # Returns the union of `self` and `other_array`; duplicates are removed; order
-  # is preserved; items are compared using `eql?`:
+  # is preserved; items are compared using <code>eql?</code>:
   #
   #     [0, 1] | [2, 3] # => [0, 1, 2, 3]
   #     [0, 1, 1] | [2, 2, 3] # => [0, 1, 2, 3]
