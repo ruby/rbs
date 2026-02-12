@@ -182,9 +182,9 @@ module Kernel : BasicObject
   #     c(4)   #=> []
   #     c(5)   #=> nil
   #
-  def self?.caller: (Integer start_or_range, ?Integer length) -> ::Array[String]?
-                  | (::Range[Integer] start_or_range) -> ::Array[String]?
-                  | () -> ::Array[String]
+  def self?.caller: () -> Array[String]
+                  | (int start, ?int? length) -> Array[String]?
+                  | (range[int] range) -> Array[String]?
 
   # <!--
   #   rdoc-file=vm_backtrace.c
@@ -207,9 +207,9 @@ module Kernel : BasicObject
   # Optionally you can pass a range, which will return an array containing the
   # entries within the specified range.
   #
-  def self?.caller_locations: (Integer start_or_range, ?Integer length) -> ::Array[Thread::Backtrace::Location]?
-                            | (::Range[Integer] start_or_range) -> ::Array[Thread::Backtrace::Location]?
-                            | () -> ::Array[Thread::Backtrace::Location]
+  def self?.caller_locations: () -> Array[Thread::Backtrace::Location]
+                            | (int start, ?int? length) -> Array[Thread::Backtrace::Location]?
+                            | (range[int] range) -> Array[Thread::Backtrace::Location]?
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -314,6 +314,16 @@ module Kernel : BasicObject
   #
   def self?.block_given?: () -> bool
 
+  alias self.iterator? self.block_given?
+
+  # <!--
+  #   rdoc-file=vm_eval.c
+  #   - iterator?      -> true or false
+  # -->
+  # Deprecated.  Use block_given? instead.
+  #
+  alias iterator? block_given?
+
   # <!--
   #   rdoc-file=vm_eval.c
   #   - local_variables    -> array
@@ -326,7 +336,7 @@ module Kernel : BasicObject
   #     end
   #     local_variables   #=> [:fred, :i]
   #
-  def self?.local_variables: () -> ::Array[Symbol]
+  def self?.local_variables: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=random.c
@@ -786,9 +796,7 @@ module Kernel : BasicObject
   # If *const* is defined as autoload, the file name to be loaded is replaced with
   # *filename*.  If *const* is defined but not as autoload, does nothing.
   #
-  # Files that are currently being loaded must not be registered for autoload.
-  #
-  def self?.autoload: (interned _module, String filename) -> NilClass
+  def self?.autoload: (interned const, path filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -812,7 +820,7 @@ module Kernel : BasicObject
   #       autoload?(:B)          #=> "b"
   #     end
   #
-  def self?.autoload?: (interned name) -> String?
+  def self?.autoload?: (interned name, ?boolish inherit) -> String?
 
   # <!--
   #   rdoc-file=proc.c
@@ -1193,7 +1201,7 @@ module Kernel : BasicObject
   #
   #     global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
   #
-  def self?.global_variables: () -> ::Array[Symbol]
+  def self?.global_variables: () -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -1848,7 +1856,12 @@ module Kernel : BasicObject
   # ----------------|---------------------------------------------
   # <code>'-'</code>|Whether the entities exist and are identical.
   #
-  def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
+  def self?.test: ('b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'G' | 'k' | 'l' | 'o' | 'O' | 'p' | 'r' | 'R' | 'S' | 'u' | 'w' | 'W' | 'x' | 'X' | 'z' |
+                    98 | 99 | 100 | 101 | 102 | 103 | 71 | 107 | 108 | 111 | 79 | 112 | 114 | 82 | 83 | 117 | 119 | 87 | 120 | 88 | 122, path filepath) -> bool
+                | ('s' | 115, path filepath) -> Integer?
+                | ('A' | 'M' | 'C' | 65 | 77 | 67, path filepath) -> Time
+                | ('<' | '=' | '>' | '-' | 60 | 61 | 62 | 45, path filepath1, path filepath2) -> bool
+                | (String | int cmd, path filepath1, ?path filepath2) -> (bool | Time | Integer | nil)
 
   # <!--
   #   rdoc-file=vm_eval.c

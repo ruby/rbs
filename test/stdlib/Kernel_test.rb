@@ -7,20 +7,6 @@ class KernelSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Kernel)"
 
-  def test_caller_locations
-    assert_send_type "() -> Array[Thread::Backtrace::Location]",
-                     Kernel, :caller_locations
-
-    assert_send_type "(Integer) -> Array[Thread::Backtrace::Location]?",
-                      Kernel, :caller_locations, 1
-
-    assert_send_type "(Integer, Integer) -> Array[Thread::Backtrace::Location]?",
-                      Kernel, :caller_locations, 1, 2
-
-    assert_send_type "(::Range[Integer]) -> Array[Thread::Backtrace::Location]?",
-                     Kernel, :caller_locations, (1..3)
-  end
-
   def test_Array
     assert_send_type "(nil) -> []",
                      Kernel, :Array, nil
@@ -95,17 +81,239 @@ class KernelSingletonTest < Test::Unit::TestCase
                      Kernel, :String, ToS.new
   end
 
+  TOPLEVEL___callee__ = __callee__ # outside of a method
+  def test___callee__
+    assert_send_type '() -> Symbol',
+                     Kernel, :__callee__
+    assert_type 'nil', TOPLEVEL___callee__
+  end
+
+  TOPLEVEL___method__ = __method__ # outside of a method
+  def test___method__
+    assert_send_type '() -> Symbol',
+                     Kernel, :__method__
+    assert_type 'nil', TOPLEVEL___method__
+  end
+
+  def test___dir__
+    assert_send_type '() -> String',
+                     Kernel, :__dir__
+
+    # Make sure it can return `nil`; this can't go through `assert_send_type`,
+    # as it's only `nil` thru `eval`s
+    assert_equal nil, eval('__dir__')
+  end
+
+  def test_autoload
+    with_interned :TestModuleForAutoload do |const|
+      with_path '/does/not/exist' do |path|
+        assert_send_type '(interned, path) -> nil',
+                         Kernel, :autoload, const, path
+      end
+    end
+  end
+
   def test_autoload?
-    with_interned :TestModuleForAutoload do |interned|
-      assert_send_type "(::interned) -> String?",
-                       Kernel, :autoload?, interned
+    with_interned :TestModuleForAutoloadP do |const|
+      assert_send_type '(interned) -> nil',
+                       Kernel, :autoload?, const
+
+      with_boolish do |inherit|
+        assert_send_type '(interned, boolish) -> nil',
+                         Kernel, :autoload?, const, inherit
+      end
     end
 
-    autoload :TestModuleForAutoload, '/shouldnt/be/executed'
+    # Unfortunately, `autoload` doesn't play well with `assert_send_type`
+    Kernel.autoload :TestModuleForAutoloadP, '/does/not/exist'
 
-    with_interned :TestModuleForAutoload do |interned|
-      assert_send_type "(::interned) -> String?",
-                       Kernel, :autoload?, interned
+    with_interned :TestModuleForAutoloadP do |const|
+      assert_type 'String', Kernel.autoload?(const)
+
+      with_boolish do |inherit|
+        assert_type 'String', Kernel.autoload?(const, inherit)
+      end
+    end
+  end
+
+  def test_binding
+    assert_send_type '() -> Binding',
+                     Kernel, :binding
+  end
+
+  def test_block_given?(method: :block_given?)
+    assert_send_type '() -> bool',
+                     Kernel, method
+  end
+
+  def test_iterator?
+    silence_warning :deprecated do
+      test_block_given?(method: :iterator?)
+    end
+  end
+
+  def test_caller
+    assert_send_type '() -> Array[String]',
+                     Kernel, :caller
+
+    with_int 1 do |start|
+      assert_send_type '(int) -> Array[String]',
+                       Kernel, :caller, start
+
+      with_int(2).and_nil do |length|
+        assert_send_type '(int, int?) -> Array[String]',
+                         Kernel, :caller, start, length
+      end
+    end
+
+    with_int 100000 do |start|
+      assert_send_type '(int) -> nil',
+                       Kernel, :caller, start
+
+      with_int(2).and_nil do |length|
+        assert_send_type '(int, int?) -> nil',
+                         Kernel, :caller, start, length
+      end
+    end
+
+    with_range with_int(1), with_int(2) do |range|
+      assert_send_type '(range[int]) -> Array[String]',
+                       Kernel, :caller, range
+    end
+
+    with_range with_int(100000) ,with_int(100001) do |range|
+      assert_send_type '(range[int]) -> nil',
+                       Kernel, :caller, range
+    end
+  end
+
+  def test_caller_locations
+    assert_send_type '() -> Array[Thread::Backtrace::Location]',
+                     Kernel, :caller_locations
+
+    with_int 1 do |start|
+      assert_send_type '(int) -> Array[Thread::Backtrace::Location]',
+                       Kernel, :caller_locations, start
+
+      with_int(2).and_nil do |length|
+        assert_send_type '(int, int?) -> Array[Thread::Backtrace::Location]',
+                         Kernel, :caller_locations, start, length
+      end
+    end
+
+    with_int 100000 do |start|
+      assert_send_type '(int) -> nil',
+                       Kernel, :caller_locations, start
+
+      with_int(2).and_nil do |length|
+        assert_send_type '(int, int?) -> nil',
+                         Kernel, :caller_locations, start, length
+      end
+    end
+
+    with_range with_int(1), with_int(2) do |range|
+      assert_send_type '(range[int]) -> Array[Thread::Backtrace::Location]',
+                       Kernel, :caller_locations, range
+    end
+
+    with_range with_int(100000) ,with_int(100001) do |range|
+      assert_send_type '(range[int]) -> nil',
+                       Kernel, :caller_locations, range
+    end
+  end
+
+  def test_global_variables
+    assert_send_type '() -> Array[Symbol]',
+                     Kernel, :global_variables
+  end
+
+  def test_local_variables
+    assert_send_type '() -> Array[Symbol]',
+                     Kernel, :local_variables
+  end
+
+  def test_test
+    # true/false tests
+    with_path do |filepath|
+      %w[b c d e f g G k l o O p r R S u w W x X z].each do |test_char|
+        test_ord = test_char.ord
+
+        with test_char, test_ord do |test_literal|
+          assert_send_type "('b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'G' | 'k' | 'l' | 'o' | 'O' | 'p' | 'r' | 'R' | 'S' | 'u' | 'w' | 'W' | 'x' | 'X' | 'z' |
+                              98 |  99 | 100 | 101 | 102 | 103 |  71 | 107 | 108 | 111 |  79 | 112 | 114 |  82 |  83 | 117 | 119 |  87 | 120 |  88 | 122, path) -> bool",
+                           Kernel, :test, test_literal, filepath
+        end
+
+        with_int(test_ord).and test_char do |test_nonliteral|
+          assert_send_type "(String | int, path, ?path) -> (bool | Time | Integer | nil)",
+                           Kernel, :test, test_nonliteral, filepath
+        end
+      end
+    end
+
+    # Integer? tests
+    %w[s].each do |test_char|
+      test_ord = test_char.ord
+
+      with_path __FILE__ do |filepath|
+        with test_char, test_ord do |test_literal|
+          assert_send_type "('s' | 115, path) -> Integer",
+                           Kernel, :test, test_literal, filepath
+        end
+
+        with_int(test_ord).and test_char do |test_nonliteral|
+          assert_send_type "(String | int, path, ?path) -> (bool | Time | Integer | nil)",
+                           Kernel, :test, test_nonliteral, filepath
+        end
+      end
+
+      with_path '/not/a/file' do |filepath|
+        with test_char, test_ord do |test_literal|
+          assert_send_type "('s' | 115, path) -> nil",
+                           Kernel, :test, test_literal, filepath
+        end
+
+        with_int(test_ord).and test_char do |test_nonliteral|
+          assert_send_type "(String | int, path, ?path) -> (bool | Time | Integer | nil)",
+                           Kernel, :test, test_nonliteral, filepath
+        end
+      end
+    end
+
+    # Time tests
+    with_path __FILE__ do |filepath|
+      %w[A M C].each do |test_char|
+        test_ord = test_char.ord
+
+        with test_char, test_ord do |test_literal|
+          assert_send_type "('A' | 'M' | 'C' | 65 | 77 | 67, path) -> Time",
+                           Kernel, :test, test_literal, filepath
+        end
+
+        with_int(test_ord).and test_char do |test_nonliteral|
+          assert_send_type "(String | int, path, ?path) -> (bool | Time | Integer | nil)",
+                           Kernel, :test, test_nonliteral, filepath
+        end
+      end
+    end
+
+    # Comparison Tests
+    with_path __dir__ + '/Integer_test.rb' do |filepath1|
+      with_path __FILE__ do |filepath2|
+        %w[< = > -].each do |test_char|
+          test_ord = test_char.ord
+
+          with test_char, test_ord do |test_literal|
+            assert_send_type "('<' | '=' | '>' | '-' | 60 | 61 | 62 | 45, path, path) -> bool",
+                             Kernel, :test, test_literal, filepath1, filepath2
+          end
+
+          with_int(test_ord).and test_char do |test_nonliteral|
+            assert_send_type "(String | int, path, ?path) -> (bool | Time | Integer | nil)",
+                             Kernel, :test, test_nonliteral, filepath1, filepath2
+          end
+        end
+      end
     end
   end
 
