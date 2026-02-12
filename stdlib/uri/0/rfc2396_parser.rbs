@@ -75,7 +75,7 @@ module URI
     # :   String to make safe
     #
     # `unsafe`
-    # :   Regexp to apply. Defaults to `self.regexp[:UNSAFE]`
+    # :   Regexp to apply. Defaults to <code>self.regexp[:UNSAFE]</code>
     #
     #
     # ## Description
@@ -130,8 +130,9 @@ module URI
     #   rdoc-file=lib/uri/rfc2396_parser.rb
     #   - make_regexp(schemes = nil)
     # -->
-    # Returns Regexp that is default `self.regexp[:ABS_URI_REF]`, unless `schemes`
-    # is provided. Then it is a Regexp.union with `self.pattern[:X_ABS_URI]`.
+    # Returns Regexp that is default <code>self.regexp[:ABS_URI_REF]</code>, unless
+    # `schemes` is provided. Then it is a Regexp.union with
+    # <code>self.pattern[:X_ABS_URI]</code>.
     #
     def make_regexp: (?Array[String] schemes) -> Regexp
 
@@ -161,7 +162,7 @@ module URI
     #   rdoc-file=lib/uri/rfc2396_parser.rb
     #   - split(uri)
     # -->
-    # Returns a split URI against `regexp[:ABS_URI]`.
+    # Returns a split URI against <code>regexp[:ABS_URI]</code>.
     #
     def split: (String uri) -> [ String?, String?, String?, String?, String?, String?, String?, String?, String? ]
 
@@ -176,7 +177,7 @@ module URI
     # :   String to remove escapes from
     #
     # `escaped`
-    # :   Regexp to apply. Defaults to `self.regexp[:ESCAPED]`
+    # :   Regexp to apply. Defaults to <code>self.regexp[:ESCAPED]</code>
     #
     #
     # ## Description

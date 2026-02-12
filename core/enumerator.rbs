@@ -171,8 +171,9 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
   #
   # The optional `size` keyword argument specifies the size of the enumerator,
   # which can be retrieved by Enumerator#size.  It can be an integer,
-  # `Float::INFINITY`, a callable object (such as a lambda), or `nil` to indicate
-  # unknown size.  When not specified, the size defaults to `Float::INFINITY`.
+  # <code>Float::INFINITY</code>, a callable object (such as a lambda), or `nil`
+  # to indicate unknown size.  When not specified, the size defaults to
+  # <code>Float::INFINITY</code>.
   #
   #     # Infinite enumerator
   #     enum = Enumerator.produce(1, size: Float::INFINITY, &:succ)
@@ -305,7 +306,7 @@ class Enumerator[unchecked out Elem, out Return = void] < Object
   #
   # Iteration is defined by the given block, in which a "yielder" object, given as
   # block parameter, can be used to yield a value by calling the `yield` method
-  # (aliased as `<<`):
+  # (aliased as <code><<</code>):
   #
   #     fib = Enumerator.new do |y|
   #       a = b = 1

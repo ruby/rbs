@@ -35,8 +35,8 @@ module Zlib
   # Be careful of the footer of the gzip file. A gzip file has the checksum of
   # pre-compressed data in its footer. GzipReader checks all uncompressed data
   # against that checksum at the following cases, and if it fails, raises
-  # `Zlib::GzipFile::NoFooter`, `Zlib::GzipFile::CRCError`, or
-  # `Zlib::GzipFile::LengthError` exception.
+  # <code>Zlib::GzipFile::NoFooter</code>, <code>Zlib::GzipFile::CRCError</code>,
+  # or <code>Zlib::GzipFile::LengthError</code> exception.
   #
   # *   When an reading request is received beyond the end of file (the end of
   #     compressed data). That is, when Zlib::GzipReader#read,
@@ -282,8 +282,8 @@ module Zlib
     # `read` method that behaves same as the IO#read.
     #
     # The `options` hash may be used to set the encoding of the data.
-    # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
-    # IO::new.
+    # <code>:external_encoding</code>, <code>:internal_encoding</code> and
+    # <code>:encoding</code> may be set as in IO::new.
     #
     # If the gzip file header is incorrect, raises an Zlib::GzipFile::Error
     # exception.

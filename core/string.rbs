@@ -16,8 +16,8 @@
 # *   Method #String.
 #
 # Some `String` methods modify `self`. Typically, a method whose name ends with
-# `!` modifies `self` and returns `self`; often, a similarly named method
-# (without the `!`) returns a new string.
+# <code>!</code> modifies `self` and returns `self`; often, a similarly named
+# method (without the <code>!</code>) returns a new string.
 #
 # In general, if both bang and non-bang versions of a method exist, the bang
 # method mutates and the non-bang method does not. However, a method without a
@@ -48,7 +48,7 @@
 # The examples in this section mostly use the String#sub and String#gsub
 # methods; the principles illustrated apply to all four substitution methods.
 #
-# **Argument `pattern`**
+# <strong>Argument `pattern`</strong>
 #
 # Argument `pattern` is commonly a regular expression:
 #
@@ -65,7 +65,7 @@
 #
 #     'THX1138'.gsub('\d+', '00') # => "THX1138"
 #
-# **`String` `replacement`**
+# <strong>`String` `replacement`</strong>
 #
 # If `replacement` is a string, that string determines the replacing string that
 # is substituted for the matched text.
@@ -74,41 +74,48 @@
 #
 # `String` `replacement` may contain back-references to the pattern's captures:
 #
-# *   `\n` (*n* is a non-negative integer) refers to `$n`.
-# *   `\k<name>` refers to the named capture `name`.
+# *   <code>\n</code> (*n* is a non-negative integer) refers to <code>$n</code>.
+# *   <code>\k<name></code> refers to the named capture `name`.
 #
 # See Regexp for details.
 #
 # Note that within the string `replacement`, a character combination such as
-# `$&` is treated as ordinary text, not as a special match variable. However,
-# you may refer to some special match variables using these combinations:
+# <code>$&</code> is treated as ordinary text, not as a special match variable.
+# However, you may refer to some special match variables using these
+# combinations:
 #
-# *   `\&` and `\0` correspond to `$&`, which contains the complete matched
-#     text.
-# *   `\'` corresponds to `$'`, which contains the string after the match.
-# *   ``` corresponds to `$``, which contains the string before the match.
-# *   `\+` corresponds to `$+`, which contains the last capture group.
+# *   <code>\&</code> and <code>\0</code> correspond to <code>$&</code>, which
+#     contains the complete matched text.
+# *   <code>\'</code> corresponds to <code>$'</code>, which contains the string
+#     after the match.
+# *   <code>`</code> corresponds to <code>$`</code>, which contains the string
+#     before the match.
+# *   <code>\+</code> corresponds to <code>$+</code>, which contains the last
+#     capture group.
 #
 # See Regexp for details.
 #
-# Note that `\\\` is interpreted as an escape, i.e., a single backslash.
+# Note that <code>\\</code> is interpreted as an escape, i.e., a single
+# backslash.
 #
 # Note also that a string literal consumes backslashes. See [String
 # Literals](rdoc-ref:syntax/literals.rdoc@String+Literals) for details about
 # string literals.
 #
 # A back-reference is typically preceded by an additional backslash. For
-# example, if you want to write a back-reference `\&` in `replacement` with a
-# double-quoted string literal, you need to write `"..\\\\&.."`.
+# example, if you want to write a back-reference <code>\&</code> in
+# `replacement` with a double-quoted string literal, you need to write
+# <code>"..\\&.."</code>.
 #
-# If you want to write a non-back-reference string `\&` in `replacement`, you
-# need to first escape the backslash to prevent this method from interpreting it
-# as a back-reference, and then you need to escape the backslashes again to
-# prevent a string literal from consuming them: `"..\\\\\\\\&.."`.
+# If you want to write a non-back-reference string <code>\&</code> in
+# `replacement`, you need to first escape the backslash to prevent this method
+# from interpreting it as a back-reference, and then you need to escape the
+# backslashes again to prevent a string literal from consuming them:
+# <code>"..\\\\&.."</code>.
 #
 # You may want to use the block form to avoid excessive backslashes.
 #
-# **\Hash `replacement`**
+# <strong>Hash `replacement`</strong>
 #
 # If the argument `replacement` is a hash, and `pattern` matches one of its
 # keys, the replacing string is the value for that key:
@@ -129,21 +136,21 @@
 #     s = '@'
 #     '1234'.gsub(/\d/) { |match| s.succ! } # => "ABCD"
 #
-# Special match variables such as `$1`, `$2`, `$``, `$&`, and `$'` are set
-# appropriately.
+# Special match variables such as <code>$1</code>, <code>$2</code>,
+# <code>$`</code>, <code>$&</code>, and <code>$'</code> are set appropriately.
 #
 # ## Whitespace in Strings
 #
 # In the class `String`, *whitespace* is defined as a contiguous sequence of
 # characters consisting of any mixture of the following:
 #
-# *   NL (null): `"\x00"`, `"\u0000"`.
-# *   HT (horizontal tab): `"\x09"`, `"\t"`.
-# *   LF (line feed): `"\x0a"`, `"\n"`.
-# *   VT (vertical tab): `"\x0b"`, `"\v"`.
-# *   FF (form feed): `"\x0c"`, `"\f"`.
-# *   CR (carriage return): `"\x0d"`, `"\r"`.
-# *   SP (space): `"\x20"`, `" "`.
+# *   NL (null): <code>"\x00"</code>, <code>"\u0000"</code>.
+# *   HT (horizontal tab): <code>"\x09"</code>, <code>"\t"</code>.
+# *   LF (line feed): <code>"\x0a"</code>, <code>"\n"</code>.
+# *   VT (vertical tab): <code>"\x0b"</code>, <code>"\v"</code>.
+# *   FF (form feed): <code>"\x0c"</code>, <code>"\f"</code>.
+# *   CR (carriage return): <code>"\x0d"</code>, <code>"\r"</code>.
+# *   SP (space): <code>"\x20"</code>, <code>" "</code>.
 #
 # Whitespace is relevant for the following methods:
 #
@@ -160,15 +167,14 @@
 #
 # Here, class `String` provides methods that are useful for:
 #
-# *   [Creating a \String](rdoc-ref:String@Creating+a+String).
-# *   [Freezing/Unfreezing a \String](rdoc-ref:String@Freezing-2FUnfreezing).
-# *   [Querying a \String](rdoc-ref:String@Querying).
+# *   [Creating a String](rdoc-ref:String@Creating+a+String).
+# *   [Freezing/Unfreezing a String](rdoc-ref:String@Freezing-2FUnfreezing).
+# *   [Querying a String](rdoc-ref:String@Querying).
 # *   [Comparing Strings](rdoc-ref:String@Comparing).
-# *   [Modifying a \String](rdoc-ref:String@Modifying).
-# *   [Converting to a new \String](rdoc-ref:String@Converting+to+New+String).
-# *   [Converting to a
-#     non-\String](rdoc-ref:String@Converting+to+Non--5CString).
-# *   [Iterating over a \String](rdoc-ref:String@Iterating).
+# *   [Modifying a String](rdoc-ref:String@Modifying).
+# *   [Converting to a new String](rdoc-ref:String@Converting+to+New+String).
+# *   [Converting to a non-String](rdoc-ref:String@Converting+to+Non--5CString).
+# *   [Iterating over a String](rdoc-ref:String@Iterating).
 #
 # ### Creating a String
 #
@@ -177,10 +183,10 @@
 #
 # ### Freezing/Unfreezing
 #
-# *   #+@: Returns a string that is not frozen: `self` if not frozen; `self.dup`
-#     otherwise.
+# *   #+@: Returns a string that is not frozen: `self` if not frozen;
+#     <code>self.dup</code> otherwise.
 # *   #-@ (aliased as #dedup): Returns a string that is frozen: `self` if
-#     already frozen; `self.freeze` otherwise.
+#     already frozen; <code>self.freeze</code> otherwise.
 # *   #freeze: Freezes `self` if not already frozen; returns `self`.
 #
 # ### Querying
@@ -406,7 +412,7 @@
 #
 # Each of these methods converts the contents of `self` to a non-`String`.
 #
-# *Characters, Bytes, and Clusters*
+# <em>Characters, Bytes, and Clusters</em>
 #
 # *   #bytes: Returns an array of the bytes in `self`.
 # *   #chars: Returns an array of the characters in `self`.
@@ -489,8 +495,8 @@
 # *   Method #String.
 #
 # Some `String` methods modify `self`. Typically, a method whose name ends with
-# `!` modifies `self` and returns `self`; often, a similarly named method
-# (without the `!`) returns a new string.
+# <code>!</code> modifies `self` and returns `self`; often, a similarly named
+# method (without the <code>!</code>) returns a new string.
 #
 # In general, if both bang and non-bang versions of a method exist, the bang
 # method mutates and the non-bang method does not. However, a method without a
@@ -521,7 +527,7 @@
 # The examples in this section mostly use the String#sub and String#gsub
 # methods; the principles illustrated apply to all four substitution methods.
 #
-# **Argument `pattern`**
+# <strong>Argument `pattern`</strong>
 #
 # Argument `pattern` is commonly a regular expression:
 #
@@ -538,7 +544,7 @@
 #
 #     'THX1138'.gsub('\d+', '00') # => "THX1138"
 #
-# **`String` `replacement`**
+# <strong>`String` `replacement`</strong>
 #
 # If `replacement` is a string, that string determines the replacing string that
 # is substituted for the matched text.
@@ -547,41 +553,48 @@
 #
 # `String` `replacement` may contain back-references to the pattern's captures:
 #
-# *   `\n` (*n* is a non-negative integer) refers to `$n`.
-# *   `\k<name>` refers to the named capture `name`.
+# *   <code>\n</code> (*n* is a non-negative integer) refers to <code>$n</code>.
+# *   <code>\k<name></code> refers to the named capture `name`.
 #
 # See Regexp for details.
 #
 # Note that within the string `replacement`, a character combination such as
-# `$&` is treated as ordinary text, not as a special match variable. However,
-# you may refer to some special match variables using these combinations:
+# <code>$&</code> is treated as ordinary text, not as a special match variable.
+# However, you may refer to some special match variables using these
+# combinations:
 #
-# *   `\&` and `\0` correspond to `$&`, which contains the complete matched
-#     text.
-# *   `\'` corresponds to `$'`, which contains the string after the match.
-# *   ``` corresponds to `$``, which contains the string before the match.
-# *   `\+` corresponds to `$+`, which contains the last capture group.
+# *   <code>\&</code> and <code>\0</code> correspond to <code>$&</code>, which
+#     contains the complete matched text.
+# *   <code>\'</code> corresponds to <code>$'</code>, which contains the string
+#     after the match.
+# *   <code>`</code> corresponds to <code>$`</code>, which contains the string
+#     before the match.
+# *   <code>\+</code> corresponds to <code>$+</code>, which contains the last
+#     capture group.
 #
 # See Regexp for details.
 #
-# Note that `\\\` is interpreted as an escape, i.e., a single backslash.
+# Note that <code>\\</code> is interpreted as an escape, i.e., a single
+# backslash.
 #
 # Note also that a string literal consumes backslashes. See [String
 # Literals](rdoc-ref:syntax/literals.rdoc@String+Literals) for details about
 # string literals.
 #
 # A back-reference is typically preceded by an additional backslash. For
-# example, if you want to write a back-reference `\&` in `replacement` with a
-# double-quoted string literal, you need to write `"..\\\\&.."`.
+# example, if you want to write a back-reference <code>\&</code> in
+# `replacement` with a double-quoted string literal, you need to write
+# <code>"..\\&.."</code>.
 #
-# If you want to write a non-back-reference string `\&` in `replacement`, you
-# need to first escape the backslash to prevent this method from interpreting it
-# as a back-reference, and then you need to escape the backslashes again to
-# prevent a string literal from consuming them: `"..\\\\\\\\&.."`.
+# If you want to write a non-back-reference string <code>\&</code> in
+# `replacement`, you need to first escape the backslash to prevent this method
+# from interpreting it as a back-reference, and then you need to escape the
+# backslashes again to prevent a string literal from consuming them:
+# <code>"..\\\\&.."</code>.
 #
 # You may want to use the block form to avoid excessive backslashes.
 #
-# **\Hash `replacement`**
+# <strong>Hash `replacement`</strong>
 #
 # If the argument `replacement` is a hash, and `pattern` matches one of its
 # keys, the replacing string is the value for that key:
@@ -602,21 +615,21 @@
 #     s = '@'
 #     '1234'.gsub(/\d/) { |match| s.succ! } # => "ABCD"
 #
-# Special match variables such as `$1`, `$2`, `$``, `$&`, and `$'` are set
-# appropriately.
+# Special match variables such as <code>$1</code>, <code>$2</code>,
+# <code>$`</code>, <code>$&</code>, and <code>$'</code> are set appropriately.
 #
 # ## Whitespace in Strings
 #
 # In the class `String`, *whitespace* is defined as a contiguous sequence of
 # characters consisting of any mixture of the following:
 #
-# *   NL (null): `"\x00"`, `"\u0000"`.
-# *   HT (horizontal tab): `"\x09"`, `"\t"`.
-# *   LF (line feed): `"\x0a"`, `"\n"`.
-# *   VT (vertical tab): `"\x0b"`, `"\v"`.
-# *   FF (form feed): `"\x0c"`, `"\f"`.
-# *   CR (carriage return): `"\x0d"`, `"\r"`.
-# *   SP (space): `"\x20"`, `" "`.
+# *   NL (null): <code>"\x00"</code>, <code>"\u0000"</code>.
+# *   HT (horizontal tab): <code>"\x09"</code>, <code>"\t"</code>.
+# *   LF (line feed): <code>"\x0a"</code>, <code>"\n"</code>.
+# *   VT (vertical tab): <code>"\x0b"</code>, <code>"\v"</code>.
+# *   FF (form feed): <code>"\x0c"</code>, <code>"\f"</code>.
+# *   CR (carriage return): <code>"\x0d"</code>, <code>"\r"</code>.
+# *   SP (space): <code>"\x20"</code>, <code>" "</code>.
 #
 # Whitespace is relevant for the following methods:
 #
@@ -633,15 +646,14 @@
 #
 # Here, class `String` provides methods that are useful for:
 #
-# *   [Creating a \String](rdoc-ref:String@Creating+a+String).
-# *   [Freezing/Unfreezing a \String](rdoc-ref:String@Freezing-2FUnfreezing).
-# *   [Querying a \String](rdoc-ref:String@Querying).
+# *   [Creating a String](rdoc-ref:String@Creating+a+String).
+# *   [Freezing/Unfreezing a String](rdoc-ref:String@Freezing-2FUnfreezing).
+# *   [Querying a String](rdoc-ref:String@Querying).
 # *   [Comparing Strings](rdoc-ref:String@Comparing).
-# *   [Modifying a \String](rdoc-ref:String@Modifying).
-# *   [Converting to a new \String](rdoc-ref:String@Converting+to+New+String).
-# *   [Converting to a
-#     non-\String](rdoc-ref:String@Converting+to+Non--5CString).
-# *   [Iterating over a \String](rdoc-ref:String@Iterating).
+# *   [Modifying a String](rdoc-ref:String@Modifying).
+# *   [Converting to a new String](rdoc-ref:String@Converting+to+New+String).
+# *   [Converting to a non-String](rdoc-ref:String@Converting+to+Non--5CString).
+# *   [Iterating over a String](rdoc-ref:String@Iterating).
 #
 # ### Creating a String
 #
@@ -650,10 +662,10 @@
 #
 # ### Freezing/Unfreezing
 #
-# *   #+@: Returns a string that is not frozen: `self` if not frozen; `self.dup`
-#     otherwise.
+# *   #+@: Returns a string that is not frozen: `self` if not frozen;
+#     <code>self.dup</code> otherwise.
 # *   #-@ (aliased as #dedup): Returns a string that is frozen: `self` if
-#     already frozen; `self.freeze` otherwise.
+#     already frozen; <code>self.freeze</code> otherwise.
 # *   #freeze: Freezes `self` if not already frozen; returns `self`.
 #
 # ### Querying
@@ -879,7 +891,7 @@
 #
 # Each of these methods converts the contents of `self` to a non-`String`.
 #
-# *Characters, Bytes, and Clusters*
+# <em>Characters, Bytes, and Clusters</em>
 #
 # *   #bytes: Returns an array of the bytes in `self`.
 # *   #chars: Returns an array of the characters in `self`.
@@ -958,12 +970,12 @@ class String
   #
   # If `object` is already a string, returns `object`, unmodified.
   #
-  # Otherwise if `object` responds to `:to_str`, calls `object.to_str` and returns
-  # the result.
+  # Otherwise if `object` responds to <code>:to_str</code>, calls
+  # <code>object.to_str</code> and returns the result.
   #
-  # Returns `nil` if `object` does not respond to `:to_str`.
+  # Returns `nil` if `object` does not respond to <code>:to_str</code>.
   #
-  # Raises an exception unless `object.to_str` returns a string.
+  # Raises an exception unless <code>object.to_str</code> returns a string.
   #
   def self.try_convert: (String object) -> String # technically will return `object` unchanged.
                       | (_ToStr object) -> String
@@ -978,7 +990,7 @@ class String
   # The `options` are optional keyword options (see below).
   #
   # With no argument given and keyword `encoding` also not given, returns an empty
-  # string with the Encoding `ASCII-8BIT`:
+  # string with the Encoding <code>ASCII-8BIT</code>:
   #
   #     s = String.new # => ""
   #     s.encoding     # => #<Encoding:ASCII-8BIT>
@@ -991,9 +1003,10 @@ class String
   #     s1.encoding # => #<Encoding:UTF-16 (dummy)>
   #
   # (Unlike String.new, a [string
-  # literal](rdoc-ref:syntax/literals.rdoc@String+Literals) like `''` or a [here
-  # document literal](rdoc-ref:syntax/literals.rdoc@Here+Document+Literals) always
-  # has [script encoding](rdoc-ref:encodings.rdoc@Script+Encoding).)
+  # literal](rdoc-ref:syntax/literals.rdoc@String+Literals) like <code>''</code>
+  # or a [here document
+  # literal](rdoc-ref:syntax/literals.rdoc@Here+Document+Literals) always has
+  # [script encoding](rdoc-ref:encodings.rdoc@Script+Encoding).)
   #
   # With keyword option `encoding` given, returns a string with the specified
   # encoding; the `encoding` may be an Encoding object, an encoding name, or an
@@ -1094,7 +1107,7 @@ class String
   # Returns `self` if `self` is not frozen and can be mutated without warning
   # issuance.
   #
-  # Otherwise returns `self.dup`, which is not frozen.
+  # Otherwise returns <code>self.dup</code>, which is not frozen.
   #
   # Related: see [Freezing/Unfreezing](rdoc-ref:String@Freezing-2FUnfreezing).
   #
@@ -1154,8 +1167,9 @@ class String
   #     s = 'foo'
   #     s << 33 # => "foo!"
   #
-  # Additionally, if the codepoint is in range `0..0xff` and the encoding of
-  # `self` is Encoding::US_ASCII, changes the encoding to Encoding::ASCII_8BIT:
+  # Additionally, if the codepoint is in range <code>0..0xff</code> and the
+  # encoding of `self` is Encoding::US_ASCII, changes the encoding to
+  # Encoding::ASCII_8BIT:
   #
   #     s = 'foo'.encode(Encoding::US_ASCII)
   #     s.encoding # => #<Encoding:US-ASCII>
@@ -1183,7 +1197,7 @@ class String
   #
   # Returns:
   #
-  # *   `-1`, if `self` is smaller.
+  # *   <code>-1</code>, if `self` is smaller.
   # *   `0`, if the two are equal.
   # *   `1`, if `self` is larger.
   # *   `nil`, if the two are incomparable.
@@ -1225,8 +1239,8 @@ class String
   #
   # When `object` is not a string:
   #
-  # *   If `object` responds to method `to_str`, `object == self` is called and
-  #     its return value is returned.
+  # *   If `object` responds to method `to_str`, <code>object == self</code> is
+  #     called and its return value is returned.
   # *   If `object` does not respond to `to_str`, `false` is returned.
   #
   # Related: [Comparing](rdoc-ref:String@Comparing).
@@ -1250,8 +1264,8 @@ class String
   #
   # When `object` is not a string:
   #
-  # *   If `object` responds to method `to_str`, `object == self` is called and
-  #     its return value is returned.
+  # *   If `object` responds to method `to_str`, <code>object == self</code> is
+  #     called and its return value is returned.
   # *   If `object` does not respond to `to_str`, `false` is returned.
   #
   # Related: [Comparing](rdoc-ref:String@Comparing).
@@ -1273,8 +1287,8 @@ class String
   #     'foo' =~ /x/ # => nil
   #     $~           # => nil
   #
-  # Note that `string =~ regexp` is different from `regexp =~ string` (see
-  # Regexp#=~):
+  # Note that <code>string =~ regexp</code> is different from <code>regexp =~
+  # string</code> (see Regexp#=~):
   #
   #     number = nil
   #     'no. 9' =~ /(?<number>\d+)/ # => 4
@@ -1282,7 +1296,8 @@ class String
   #     /(?<number>\d+)/ =~ 'no. 9' # => 4
   #     number                      # => "9" # Assigned.
   #
-  # If `object` is not a Regexp, returns the value returned by `object =~ self`.
+  # If `object` is not a Regexp, returns the value returned by <code>object =~
+  # self</code>.
   #
   # Related: see [Querying](rdoc-ref:String@Querying).
   #
@@ -1303,7 +1318,7 @@ class String
   # -->
   # Returns the substring of `self` specified by the arguments.
   #
-  # **Form `self[index]`**
+  # <strong>Form <code>self[index]</code></strong>
   #
   # With non-negative integer argument `index` given, returns the 1-character
   # substring found in self at character offset index:
@@ -1321,7 +1336,7 @@ class String
   #     'hello'[-5] # => "h"
   #     'hello'[-6] # => nil
   #
-  # **Form `self[start, length]`**
+  # <strong>Form <code>self[start, length]</code></strong>
   #
   # With integer arguments `start` and `length` given, returns a substring of size
   # `length` characters (as available) beginning at character offset specified by
@@ -1348,10 +1363,10 @@ class String
   #
   #     'hello'[5, 3]  # => ""
   #
-  # **Form `self[range]`**
+  # <strong>Form <code>self[range]</code></strong>
   #
-  # With Range argument `range` given, forms substring `self[range.start,
-  # range.size]`:
+  # With Range argument `range` given, forms substring <code>self[range.start,
+  # range.size]</code>:
   #
   #     'hello'[0..2]  # => "hel"
   #     'hello'[0, 3]  # => "hel"
@@ -1362,7 +1377,7 @@ class String
   #     'hello'[0, 0]  # => ""
   #     'hello'[0...0] # => ""
   #
-  # **Form `self[regexp, capture = 0]`**
+  # <strong>Form <code>self[regexp, capture = 0]</code></strong>
   #
   # With Regexp argument `regexp` given and `capture` as zero, searches for a
   # matching substring in `self`; updates [Regexp-related global
@@ -1384,7 +1399,7 @@ class String
   #     'hello'[/(h)(e)(l+)(o)/, 4] # => "o"
   #     'hello'[/(h)(e)(l+)(o)/, 5] # => nil
   #
-  # **Form `self[substring]`**
+  # <strong>Form <code>self[substring]</code></strong>
   #
   # With string argument `substring` given, returns the matching substring of
   # `self`, if found:
@@ -1414,7 +1429,7 @@ class String
   # Returns `self` with all, a substring, or none of its contents replaced;
   # returns the argument `other_string`.
   #
-  # **Form `self[index] = other_string`**
+  # <strong>Form <code>self[index] = other_string</code></strong>
   #
   # With non-negative integer argument `index` given, searches for the 1-character
   # substring found in self at character offset index:
@@ -1448,7 +1463,7 @@ class String
   #     s = 'hello'
   #     s[-6] = 'foo'  # Raises IndexError: index -6 out of string.
   #
-  # **Form `self[start, length] = other_string`**
+  # <strong>Form <code>self[start, length] = other_string</code></strong>
   #
   # With integer arguments `start` and `length` given, searches for a substring of
   # size `length` characters (as available) beginning at character offset
@@ -1503,10 +1518,10 @@ class String
   #     s[5, 3] = 'foo' # => "foo"
   #     s               # => "hellofoo"
   #
-  # **Form `self[range] = other_string`**
+  # <strong>Form <code>self[range] = other_string</code></strong>
   #
-  # With Range argument `range` given, equivalent to `self[range.start,
-  # range.size] = other_string`:
+  # With Range argument `range` given, equivalent to <code>self[range.start,
+  # range.size] = other_string</code>:
   #
   #     s0 = 'hello'
   #     s1 = 'hello'
@@ -1526,7 +1541,7 @@ class String
   #     s = 'hello'
   #     s[9..10] = 'foo' # Raises RangeError: 9..10 out of range
   #
-  # **Form `self[regexp, capture = 0] = other_string`**
+  # <strong>Form <code>self[regexp, capture = 0] = other_string</code></strong>
   #
   # With Regexp argument `regexp` given and `capture` as zero, searches for a
   # matching substring in `self`; updates [Regexp-related global
@@ -1569,7 +1584,7 @@ class String
   #     s = 'hello'
   #     s[/nosuch/] = 'foo'           # Raises IndexError: regexp not matched.
   #
-  # **Form `self[substring] = other_string`**
+  # <strong>Form <code>self[substring] = other_string</code></strong>
   #
   # With string argument `substring` given:
   #
@@ -1884,8 +1899,8 @@ class String
   #     s.byteslice(-4)    # => "6"
   #     s.byteslice(-4, 3) # => "678"
   #
-  # With Range argument `range` given, returns `byteslice(range.begin,
-  # range.size)`:
+  # With Range argument `range` given, returns <code>byteslice(range.begin,
+  # range.size)</code>:
   #
   #     s = '0123456789'    # => "0123456789"
   #     s.byteslice(4..6)   # => "456"
@@ -2019,8 +2034,9 @@ class String
   #     s = 'こんにちは'
   #     s.capitalize == s # => true
   #
-  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
-  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
+  # The casing is affected by the given `mapping`, which may be
+  # <code>:ascii</code>, <code>:fold</code>, or <code>:turkic</code>; see [Case
+  # Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -2052,9 +2068,11 @@ class String
   # -->
   # Ignoring case, compares `self` and `other_string`; returns:
   #
-  # *   -1 if `self.downcase` is smaller than `other_string.downcase`.
+  # *   -1 if <code>self.downcase</code> is smaller than
+  #     <code>other_string.downcase</code>.
   # *   0 if the two are equal.
-  # *   1 if `self.downcase` is larger than `other_string.downcase`.
+  # *   1 if <code>self.downcase</code> is larger than
+  #     <code>other_string.downcase</code>.
   # *   `nil` if the two are incomparable.
   #
   # See [Case Mapping](rdoc-ref:case_mapping.rdoc).
@@ -2151,8 +2169,9 @@ class String
   # Returns a new string copied from `self`, with trailing characters possibly
   # removed:
   #
-  # When `line_sep` is `"\n"`, removes the last one or two characters if they are
-  # `"\r"`, `"\n"`, or `"\r\n"` (but not `"\n\r"`):
+  # When `line_sep` is <code>"\n"</code>, removes the last one or two characters
+  # if they are <code>"\r"</code>, <code>"\n"</code>, or <code>"\r\n"</code> (but
+  # not <code>"\n\r"</code>):
   #
   #     $/                    # => "\n"
   #     "abc\r".chomp         # => "abc"
@@ -2162,8 +2181,9 @@ class String
   #     "тест\r\n".chomp      # => "тест"
   #     "こんにちは\r\n".chomp  # => "こんにちは"
   #
-  # When `line_sep` is `''` (an empty string), removes multiple trailing
-  # occurrences of `"\n"` or `"\r\n"` (but not `"\r"` or `"\n\r"`):
+  # When `line_sep` is <code>''</code> (an empty string), removes multiple
+  # trailing occurrences of <code>"\n"</code> or <code>"\r\n"</code> (but not
+  # <code>"\r"</code> or <code>"\n\r"</code>):
   #
   #     "abc\n\n\n".chomp('')           # => "abc"
   #     "abc\r\n\r\n\r\n".chomp('')     # => "abc"
@@ -2171,8 +2191,8 @@ class String
   #     "abc\n\r\n\r\n\r".chomp('')     # => "abc\n\r\n\r\n\r"
   #     "abc\r\r\r".chomp('')           # => "abc\r\r\r"
   #
-  # When `line_sep` is neither `"\n"` nor `''`, removes a single trailing line
-  # separator if there is one:
+  # When `line_sep` is neither <code>"\n"</code> nor <code>''</code>, removes a
+  # single trailing line separator if there is one:
   #
   #     'abcd'.chomp('cd')   # => "ab"
   #     'abcdcd'.chomp('cd') # => "abcd"
@@ -2205,7 +2225,7 @@ class String
   # Returns a new string copied from `self`, with trailing characters possibly
   # removed.
   #
-  # Removes `"\r\n"` if those are the last two characters.
+  # Removes <code>"\r\n"</code> if those are the last two characters.
   #
   #     "abc\r\n".chop      # => "abc"
   #     "тест\r\n".chop     # => "тест"
@@ -2356,20 +2376,20 @@ class String
   #
   # In a character selector, three characters get special treatment:
   #
-  # *   A caret (`'^'`) functions as a *negation* operator for the immediately
-  #     following characters:
+  # *   A caret (<code>'^'</code>) functions as a *negation* operator for the
+  #     immediately following characters:
   #
   #         s = 'abracadabra'
   #         s.count('^bc') # => 8  # Count of all except 'b' and 'c'.
   #
-  # *   A hyphen (`'-'`) between two other characters defines a *range* of
-  #     characters:
+  # *   A hyphen (<code>'-'</code>) between two other characters defines a *range*
+  #     of characters:
   #
   #         s = 'abracadabra'
   #         s.count('a-c') # => 8  # Count of all 'a', 'b', and 'c'.
   #
-  # *   A backslash (`'\'`) acts as an escape for a caret, a hyphen, or another
-  #     backslash:
+  # *   A backslash (<code>'\'</code>) acts as an escape for a caret, a hyphen, or
+  #     another backslash:
   #
   #         s = 'abracadabra'
   #         s.count('\^bc')           # => 3  # Count of '^', 'b', and 'c'.
@@ -2399,24 +2419,24 @@ class String
   #   rdoc-file=string.c
   #   - crypt(salt_str) -> new_string
   # -->
-  # Returns the string generated by calling `crypt(3)` standard library function
-  # with `str` and `salt_str`, in this order, as its arguments.  Please do not use
-  # this method any longer.  It is legacy; provided only for backward
+  # Returns the string generated by calling <code>crypt(3)</code> standard library
+  # function with `str` and `salt_str`, in this order, as its arguments.  Please
+  # do not use this method any longer.  It is legacy; provided only for backward
   # compatibility with ruby scripts in earlier days.  It is bad to use in
   # contemporary programs for several reasons:
   #
-  # *   Behaviour of C's `crypt(3)` depends on the OS it is run.  The generated
-  #     string lacks data portability.
+  # *   Behaviour of C's <code>crypt(3)</code> depends on the OS it is run.  The
+  #     generated string lacks data portability.
   #
-  # *   On some OSes such as Mac OS, `crypt(3)` never fails (i.e. silently ends up
-  #     in unexpected results).
+  # *   On some OSes such as Mac OS, <code>crypt(3)</code> never fails (i.e.
+  #     silently ends up in unexpected results).
   #
-  # *   On some OSes such as Mac OS, `crypt(3)` is not thread safe.
+  # *   On some OSes such as Mac OS, <code>crypt(3)</code> is not thread safe.
   #
-  # *   So-called "traditional" usage of `crypt(3)` is very very very weak.
-  #     According to its manpage, Linux's traditional `crypt(3)` output has only
-  #     2**56 variations; too easy to brute force today.  And this is the default
-  #     behaviour.
+  # *   So-called "traditional" usage of <code>crypt(3)</code> is very very very
+  #     weak.  According to its manpage, Linux's traditional <code>crypt(3)</code>
+  #     output has only 2**56 variations; too easy to brute force today.  And this
+  #     is the default behaviour.
   #
   # *   In order to make things robust some OSes implement so-called "modular"
   #     usage. To go through, you have to do a complex build-up of the `salt_str`
@@ -2431,21 +2451,22 @@ class String
   #             "foo".crypt("$5$round=1000$salt$")  # Typo not detected
   #
   # *   Even in the "modular" mode, some hash functions are considered archaic and
-  #     no longer recommended at all; for instance module `$1$` is officially
-  #     abandoned by its author: see http://phk.freebsd.dk/sagas/md5crypt_eol/ .
-  #     For another instance module `$3$` is considered completely broken: see the
-  #     manpage of FreeBSD.
+  #     no longer recommended at all; for instance module <code>$1$</code> is
+  #     officially abandoned by its author: see
+  #     http://phk.freebsd.dk/sagas/md5crypt_eol/ .  For another instance module
+  #     <code>$3$</code> is considered completely broken: see the manpage of
+  #     FreeBSD.
   #
   # *   On some OS such as Mac OS, there is no modular mode. Yet, as written
-  #     above, `crypt(3)` on Mac OS never fails. This means even if you build up a
-  #     proper salt string it generates a traditional DES hash anyways, and there
-  #     is no way for you to be aware of.
+  #     above, <code>crypt(3)</code> on Mac OS never fails. This means even if you
+  #     build up a proper salt string it generates a traditional DES hash anyways,
+  #     and there is no way for you to be aware of.
   #
   #         "foo".crypt("$5$rounds=1000$salt$") # => "$5fNPQMxC5j6."
   #
   # If for some reason you cannot migrate to other secure contemporary password
-  # hashing algorithms, install the string-crypt gem and `require 'string/crypt'`
-  # to continue using it.
+  # hashing algorithms, install the string-crypt gem and <code>require
+  # 'string/crypt'</code> to continue using it.
   #
   %a{deprecated}
   def crypt: (string salt_str) -> String
@@ -2532,20 +2553,20 @@ class String
   #
   # In a character selector, three characters get special treatment:
   #
-  # *   A caret (`'^'`) functions as a *negation* operator for the immediately
-  #     following characters:
+  # *   A caret (<code>'^'</code>) functions as a *negation* operator for the
+  #     immediately following characters:
   #
   #         s = 'abracadabra'
   #         s.delete('^bc') # => "bcb"  # Deletes all except 'b' and 'c'.
   #
-  # *   A hyphen (`'-'`) between two other characters defines a *range* of
-  #     characters:
+  # *   A hyphen (<code>'-'</code>) between two other characters defines a *range*
+  #     of characters:
   #
   #         s = 'abracadabra'
   #         s.delete('a-c') # => "rdr"  # Deletes all 'a', 'b', and 'c'.
   #
-  # *   A backslash (`'\'`) acts as an escape for a caret, a hyphen, or another
-  #     backslash:
+  # *   A backslash (<code>'\'</code>) acts as an escape for a caret, a hyphen, or
+  #     another backslash:
   #
   #         s = 'abracadabra'
   #         s.delete('\^bc')           # => "araadara"   # Deletes all '^', 'b', and 'c'.
@@ -2661,8 +2682,9 @@ class String
   #     s = 'こんにちは'
   #     s.downcase == s # => true
   #
-  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
-  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
+  # The casing is affected by the given `mapping`, which may be
+  # <code>:ascii</code>, <code>:fold</code>, or <code>:turkic</code>; see [Case
+  # Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -2723,7 +2745,7 @@ class String
   #       print "Undumped: ", s.dump.undump, "\n"
   #     end
   #
-  # So that for string `'hello'`, we'll see:
+  # So that for string <code>'hello'</code>, we'll see:
   #
   #     String:    hello
   #     Dumped:    "hello"
@@ -2774,10 +2796,11 @@ class String
   #     Undumped:  こんにちは
   #
   # If the encoding of `self` is not ASCII-compatible (i.e., if
-  # `self.encoding.ascii_compatible?` returns `false`), each ASCII-compatible byte
-  # is dumped as an ASCII character, and all other bytes are dumped as
-  # hexadecimal; also appends `.dup.force_encoding(\"encoding\")`, where
-  # `<encoding>` is `self.encoding.name`:
+  # <code>self.encoding.ascii_compatible?</code> returns `false`), each
+  # ASCII-compatible byte is dumped as an ASCII character, and all other bytes are
+  # dumped as hexadecimal; also appends
+  # <code>.dup.force_encoding(\"encoding\")</code>, where <code><encoding></code>
+  # is <code>self.encoding.name</code>:
   #
   #     String:    hello
   #     Dumped:    "\xFE\xFF\x00h\x00e\x00l\x00l\x00o".dup.force_encoding("UTF-16")
@@ -3017,8 +3040,8 @@ class String
   #
   # With no arguments:
   #
-  # *   Uses the same encoding if `Encoding.default_internal` is `nil` (the
-  #     default):
+  # *   Uses the same encoding if <code>Encoding.default_internal</code> is `nil`
+  #     (the default):
   #
   #         Encoding.default_internal # => nil
   #         s = "Ruby\x99".force_encoding('Windows-1252')
@@ -3028,7 +3051,7 @@ class String
   #         t.encoding                # => #<Encoding:Windows-1252>
   #         t.bytes                   # => [82, 117, 98, 121, 226, 132, 162]
   #
-  # *   Otherwise, uses the encoding `Encoding.default_internal`:
+  # *   Otherwise, uses the encoding <code>Encoding.default_internal</code>:
   #
   #         Encoding.default_internal = 'UTF-8'
   #         t = s.encode              # => "Ruby™"
@@ -3051,11 +3074,11 @@ class String
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # Options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  # Please note that, unless `invalid: :replace` option is given, conversion from
-  # an encoding `enc` to the same encoding `enc` (independent of whether `enc` is
-  # given explicitly or implicitly) is a no-op, i.e. the string is simply copied
-  # without any changes, and no exceptions are raised, even if there are invalid
-  # bytes.
+  # Please note that, unless <code>invalid: :replace</code> option is given,
+  # conversion from an encoding `enc` to the same encoding `enc` (independent of
+  # whether `enc` is given explicitly or implicitly) is a no-op, i.e. the string
+  # is simply copied without any changes, and no exceptions are raised, even if
+  # there are invalid bytes.
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -3351,9 +3374,9 @@ class String
   # The leading substring is interpreted as hexadecimal when it begins with:
   #
   # *   One or more character representing hexadecimal digits (each in one of the
-  #     ranges `'0'..'9'`, `'a'..'f'`, or `'A'..'F'`); the string to be
-  #     interpreted ends at the first character that does not represent a
-  #     hexadecimal digit:
+  #     ranges <code>'0'..'9'</code>, <code>'a'..'f'</code>, or
+  #     <code>'A'..'F'</code>); the string to be interpreted ends at the first
+  #     character that does not represent a hexadecimal digit:
   #
   #         'f'.hex        # => 15
   #         '11'.hex       # => 17
@@ -3363,12 +3386,14 @@ class String
   #         'bar'.hex      # => 186  # 'ba' hexadecimal, 'r' not.
   #         'deadbeef'.hex # => 3735928559
   #
-  # *   `'0x'` or `'0X'`, followed by one or more hexadecimal digits:
+  # *   <code>'0x'</code> or <code>'0X'</code>, followed by one or more
+  #     hexadecimal digits:
   #
   #         '0xfff'.hex    # => 4095
   #         '0xfffg'.hex   # => 4095
   #
-  # Any of the above may prefixed with `'-'`, which negates the interpreted value:
+  # Any of the above may prefixed with <code>'-'</code>, which negates the
+  # interpreted value:
   #
   #     '-fff'.hex      # => -4095
   #     '-0xFFF'.hex    # => -4095
@@ -3496,15 +3521,15 @@ class String
   #     'тест'.inspect       # => "\"тест\""
   #     'こんにちは'.inspect  # => "\"こんにちは\""
   #
-  # But printable characters double-quote (`'"'`) and backslash and (`'\\'`) are
-  # escaped:
+  # But printable characters double-quote (<code>'"'</code>) and backslash and
+  # (<code>'\'</code>) are escaped:
   #
   #     '"'.inspect  # => "\"\\\"\""
   #     '\\'.inspect # => "\"\\\\\""
   #
   # Unprintable characters are the [ASCII
   # characters](https://en.wikipedia.org/wiki/ASCII) whose values are in range
-  # `0..31`, along with the character whose value is `127`.
+  # <code>0..31</code>, along with the character whose value is `127`.
   #
   # Most of these characters are rendered thus:
   #
@@ -3631,7 +3656,7 @@ class String
   #     'тест'.ljust(10)        # => "тест      "
   #     'こんにちは'.ljust(10)   # => "こんにちは     "
   #
-  # If `width <= self.length`, returns a copy of `self`:
+  # If <code>width <= self.length</code>, returns a copy of `self`:
   #
   #     'hello'.ljust(5)  # => "hello"
   #     'hello'.ljust(1)  # => "hello"  # Does not truncate to width.
@@ -3735,8 +3760,8 @@ class String
   #
   #     regexp = Regexp.new(pattern)
   #
-  # Returns `true` if `self[offset..].match(regexp)` returns a MatchData object,
-  # `false` otherwise:
+  # Returns `true` if <code>self[offset..].match(regexp)</code> returns a
+  # MatchData object, `false` otherwise:
   #
   #     'foo'.match?(/o/) # => true
   #     'foo'.match?('o') # => true
@@ -3835,8 +3860,8 @@ class String
   # The leading substring is interpreted as octal when it begins with:
   #
   # *   One or more character  representing octal digits (each in the range
-  #     `'0'..'7'`); the string to be interpreted ends at the first character that
-  #     does not represent an octal digit:
+  #     <code>'0'..'7'</code>); the string to be interpreted ends at the first
+  #     character that does not represent an octal digit:
   #
   #         '7'.oct      @ => 7
   #         '11'.oct     # => 9
@@ -3845,39 +3870,41 @@ class String
   #         '7778'.oct   # => 511
   #         '777x'.oct   # => 511
   #
-  # *   `'0o'`, followed by one or more octal digits:
+  # *   <code>'0o'</code>, followed by one or more octal digits:
   #
   #         '0o777'.oct  # => 511
   #         '0o7778'.oct # => 511
   #
   # The leading substring is *not* interpreted as octal when it begins with:
   #
-  # *   `'0b'`, followed by one or more characters representing binary digits
-  #     (each in the range `'0'..'1'`); the string to be interpreted ends at the
-  #     first character that does not represent a binary digit. the string is
-  #     interpreted as binary digits (base 2):
+  # *   <code>'0b'</code>, followed by one or more characters representing binary
+  #     digits (each in the range <code>'0'..'1'</code>); the string to be
+  #     interpreted ends at the first character that does not represent a binary
+  #     digit. the string is interpreted as binary digits (base 2):
   #
   #         '0b111'.oct  # => 7
   #         '0b1112'.oct # => 7
   #
-  # *   `'0d'`, followed by one or more characters representing decimal digits
-  #     (each in the range `'0'..'9'`); the string to be interpreted ends at the
-  #     first character that does not represent a decimal digit. the string is
-  #     interpreted as decimal digits (base 10):
+  # *   <code>'0d'</code>, followed by one or more characters representing decimal
+  #     digits (each in the range <code>'0'..'9'</code>); the string to be
+  #     interpreted ends at the first character that does not represent a decimal
+  #     digit. the string is interpreted as decimal digits (base 10):
   #
   #         '0d999'.oct  # => 999
   #         '0d999x'.oct # => 999
   #
-  # *   `'0x'`, followed by one or more characters representing hexadecimal digits
-  #     (each in one of the ranges `'0'..'9'`, `'a'..'f'`, or `'A'..'F'`); the
-  #     string to be interpreted ends at the first character that does not
-  #     represent a hexadecimal digit. the string is interpreted as hexadecimal
-  #     digits (base 16):
+  # *   <code>'0x'</code>, followed by one or more characters representing
+  #     hexadecimal digits (each in one of the ranges <code>'0'..'9'</code>,
+  #     <code>'a'..'f'</code>, or <code>'A'..'F'</code>); the string to be
+  #     interpreted ends at the first character that does not represent a
+  #     hexadecimal digit. the string is interpreted as hexadecimal digits (base
+  #     16):
   #
   #         '0xfff'.oct  # => 4095
   #         '0xfffg'.oct # => 4095
   #
-  # Any of the above may prefixed with `'-'`, which negates the interpreted value:
+  # Any of the above may prefixed with <code>'-'</code>, which negates the
+  # interpreted value:
   #
   #     '-777'.oct   # => -511
   #     '-0777'.oct  # => -511
@@ -3929,11 +3956,11 @@ class String
   #
   #     [self.dup, "", ""]
   #
-  # Note that in the examples below, a returned string `'hello'` is a copy of
-  # `self`, not `self`.
+  # Note that in the examples below, a returned string <code>'hello'</code> is a
+  # copy of `self`, not `self`.
   #
-  # If `pattern` is a Regexp, performs the equivalent of `self.match(pattern)`
-  # (also setting [matched-data
+  # If `pattern` is a Regexp, performs the equivalent of
+  # <code>self.match(pattern)</code> (also setting [matched-data
   # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition(/h/)  # => ["", "h", "ello"]
@@ -3946,8 +3973,8 @@ class String
   #     'hello'.partition(/x/)  # => ["hello", "", ""]
   #
   # If `pattern` is not a Regexp, converts it to a string (if it is not already
-  # one), then performs the equivalent of `self.index(pattern)` (and does *not*
-  # set [matched-data global
+  # one), then performs the equivalent of <code>self.index(pattern)</code> (and
+  # does *not* set [matched-data global
   # variables](rdoc-ref:language/globals.md@Matched+Data)):
   #
   #     'hello'.partition('h')     # => ["", "h", "ello"]
@@ -4098,7 +4125,7 @@ class String
   #     'тест'.rjust(10)        # => "      тест"
   #     'こんにちは'.rjust(10)    # => "     こんにちは"
   #
-  # If `width <= self.size`, returns a copy of `self`:
+  # If <code>width <= self.size</code>, returns a copy of `self`:
   #
   #     'hello'.rjust(5, 'ab')  # => "hello"
   #     'hello'.rjust(1, 'ab')  # => "hello"
@@ -4132,10 +4159,10 @@ class String
   # The pattern used is:
   #
   # *   `pattern` itself, if it is a Regexp.
-  # *   `Regexp.quote(pattern)`, if `pattern` is a string.
+  # *   <code>Regexp.quote(pattern)</code>, if `pattern` is a string.
   #
-  # Note that in the examples below, a returned string `'hello'` is a copy of
-  # `self`, not `self`.
+  # Note that in the examples below, a returned string <code>'hello'</code> is a
+  # copy of `self`, not `self`.
   #
   # If `pattern` is a Regexp, searches for the last matching substring (also
   # setting [matched-data global
@@ -4218,7 +4245,8 @@ class String
   # Matches a pattern against `self`:
   #
   # *   If `pattern` is a Regexp, the pattern used is `pattern` itself.
-  # *   If `pattern` is a string, the pattern used is `Regexp.quote(pattern)`.
+  # *   If `pattern` is a string, the pattern used is
+  #     <code>Regexp.quote(pattern)</code>.
   #
   # Generates a collection of matching results and updates [regexp-related global
   # variables](rdoc-ref:Regexp@Global+Variables):
@@ -4267,8 +4295,8 @@ class String
   # `replacement_string`.
   #
   # With no block given, replaces each invalid sequence with the given
-  # `default_replacement_string` (by default, `"�"` for a Unicode encoding, `'?'`
-  # otherwise):
+  # `default_replacement_string` (by default, <code>"�"</code> for a Unicode
+  # encoding, <code>'?'</code> otherwise):
   #
   #     "foo\x81\x81bar"scrub                             # => "foo��bar"
   #     "foo\x81\x81bar".force_encoding('US-ASCII').scrub # => "foo??bar"
@@ -4340,7 +4368,7 @@ class String
   # <!-- rdoc-file=string.c -->
   # Returns the substring of `self` specified by the arguments.
   #
-  # **Form `self[index]`**
+  # <strong>Form <code>self[index]</code></strong>
   #
   # With non-negative integer argument `index` given, returns the 1-character
   # substring found in self at character offset index:
@@ -4358,7 +4386,7 @@ class String
   #     'hello'[-5] # => "h"
   #     'hello'[-6] # => nil
   #
-  # **Form `self[start, length]`**
+  # <strong>Form <code>self[start, length]</code></strong>
   #
   # With integer arguments `start` and `length` given, returns a substring of size
   # `length` characters (as available) beginning at character offset specified by
@@ -4385,10 +4413,10 @@ class String
   #
   #     'hello'[5, 3]  # => ""
   #
-  # **Form `self[range]`**
+  # <strong>Form <code>self[range]</code></strong>
   #
-  # With Range argument `range` given, forms substring `self[range.start,
-  # range.size]`:
+  # With Range argument `range` given, forms substring <code>self[range.start,
+  # range.size]</code>:
   #
   #     'hello'[0..2]  # => "hel"
   #     'hello'[0, 3]  # => "hel"
@@ -4399,7 +4427,7 @@ class String
   #     'hello'[0, 0]  # => ""
   #     'hello'[0...0] # => ""
   #
-  # **Form `self[regexp, capture = 0]`**
+  # <strong>Form <code>self[regexp, capture = 0]</code></strong>
   #
   # With Regexp argument `regexp` given and `capture` as zero, searches for a
   # matching substring in `self`; updates [Regexp-related global
@@ -4421,7 +4449,7 @@ class String
   #     'hello'[/(h)(e)(l+)(o)/, 4] # => "o"
   #     'hello'[/(h)(e)(l+)(o)/, 5] # => nil
   #
-  # **Form `self[substring]`**
+  # <strong>Form <code>self[substring]</code></strong>
   #
   # With string argument `substring` given, returns the matching substring of
   # `self`, if found:
@@ -4474,15 +4502,15 @@ class String
   # Creates an array of substrings by splitting `self` at each occurrence of the
   # given field separator `field_sep`.
   #
-  # With no arguments given, splits using the field separator `$;`, whose default
-  # value is `nil`.
+  # With no arguments given, splits using the field separator <code>$;</code>,
+  # whose default value is `nil`.
   #
   # With no block given, returns the array of substrings:
   #
   #     'abracadabra'.split('a') # => ["", "br", "c", "d", "br"]
   #
-  # When `field_sep` is `nil` or `' '` (a single space), splits at each sequence
-  # of whitespace:
+  # When `field_sep` is `nil` or <code>' '</code> (a single space), splits at each
+  # sequence of whitespace:
   #
   #     'foo bar baz'.split(nil)          # => ["foo", "bar", "baz"]
   #     'foo bar baz'.split(' ')          # => ["foo", "bar", "baz"]
@@ -4497,8 +4525,8 @@ class String
   #     'тест'.split('')        # => ["т", "е", "с", "т"]
   #     'こんにちは'.split('')   # => ["こ", "ん", "に", "ち", "は"]
   #
-  # When `field_sep` is a non-empty string and different from `' '` (a single
-  # space), uses that string as the separator:
+  # When `field_sep` is a non-empty string and different from <code>' '</code> (a
+  # single space), uses that string as the separator:
   #
   #     'abracadabra'.split('a')  # => ["", "br", "c", "d", "br"]
   #     'abracadabra'.split('ab') # => ["", "racad", "ra"]
@@ -4528,7 +4556,8 @@ class String
   #     'abracadabra'.split('a', 0) # => ["", "br", "c", "d", "br"]  # Empty string after last 'a' omitted.
   #
   # When `limit` is a positive integer, there is a limit on the size of the array
-  # (no more than `n - 1` splits occur), and trailing empty strings are included:
+  # (no more than <code>n - 1</code> splits occur), and trailing empty strings are
+  # included:
   #
   #     'abracadabra'.split('', 3)   # => ["a", "b", "racadabra"]
   #     'abracadabra'.split('a', 3)  # => ["", "br", "cadabra"]
@@ -4637,7 +4666,7 @@ class String
   # For each argument, the pattern used is:
   #
   # *   The pattern itself, if it is a Regexp.
-  # *   `Regexp.quote(pattern)`, if it is a string.
+  # *   <code>Regexp.quote(pattern)</code>, if it is a string.
   #
   # Returns `true` if any pattern matches the beginning, `false` otherwise:
   #
@@ -4830,7 +4859,7 @@ class String
   # -->
   # Returns a basic `n`-bit [checksum](https://en.wikipedia.org/wiki/Checksum) of
   # the characters in `self`; the checksum is the sum of the binary value of each
-  # byte in `self`, modulo `2**n - 1`:
+  # byte in `self`, modulo <code>2**n - 1</code>:
   #
   #     'hello'.sum     # => 532
   #     'hello'.sum(4)  # => 4
@@ -4875,8 +4904,9 @@ class String
   #     s = 'こんにちは'
   #     s.swapcase == s # => true
   #
-  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
-  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
+  # The casing is affected by the given `mapping`, which may be
+  # <code>:ascii</code>, <code>:fold</code>, or <code>:turkic</code>; see [Case
+  # Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -4913,8 +4943,9 @@ class String
   # (real and imaginary parts) or polar coordinates (magnitude and angle parts),
   # depending on an included or implied "separator" character:
   #
-  # *   `'+'`, `'-'`, or no separator: rectangular coordinates.
-  # *   `'@'`: polar coordinates.
+  # *   <code>'+'</code>, <code>'-'</code>, or no separator: rectangular
+  #     coordinates.
+  # *   <code>'@'</code>: polar coordinates.
   #
   # **In Brief**
   #
@@ -4994,8 +5025,8 @@ class String
   #
   # **Rectangular Coordinates**
   #
-  # With separator `'+'` or `'-'`, or with no separator, interprets the values as
-  # rectangular coordinates: real and imaginary.
+  # With separator <code>'+'</code> or <code>'-'</code>, or with no separator,
+  # interprets the values as rectangular coordinates: real and imaginary.
   #
   # With no separator, assigns a single value to either the real or the imaginary
   # part:
@@ -5005,7 +5036,7 @@ class String
   #     '1i'.to_c # => (0+1i)  # Imaginary (trailing 'i').
   #     'i'.to_c  # => (0+1i)  # Special case (imaginary 1).
   #
-  # With separator `'+'`, both parts positive (or zero):
+  # With separator <code>'+'</code>, both parts positive (or zero):
   #
   #     # Without trailing 'i'.
   #     '+'.to_c    # => (0+0i)  # No values: defaults to zero.
@@ -5017,7 +5048,7 @@ class String
   #     '2+i'.to_c  # => (2+1i)  # Value before '+': real and imaginary 1.
   #     '2+1i'.to_c # => (2+1i)  # Values before and after '+': real and imaginary.
   #
-  # With separator `'-'`, negative imaginary part:
+  # With separator <code>'-'</code>, negative imaginary part:
   #
   #     # Without trailing 'i'.
   #     '-'.to_c    # => (0+0i)   # No values: defaults to zero.
@@ -5029,13 +5060,13 @@ class String
   #     '2-i'.to_c  # => (2-1i)   # Value before '-': positive real, negative imaginary.
   #     '2-1i'.to_c # => (2-1i)   # Values before and after '-': positive real, negative imaginary.
   #
-  # Note that the suffixed character `'i'` may instead be one of `'I'`, `'j'`, or
-  # `'J'`, with the same effect.
+  # Note that the suffixed character <code>'i'</code> may instead be one of
+  # <code>'I'</code>, <code>'j'</code>, or <code>'J'</code>, with the same effect.
   #
   # **Polar Coordinates**
   #
-  # With separator `'@'`) interprets the values as polar coordinates: magnitude
-  # and angle.
+  # With separator <code>'@'</code>) interprets the values as polar coordinates:
+  # magnitude and angle.
   #
   #     '2@'.to_c.polar  # => [2, 0.0]    # Value before '@': magnitude only.
   #      # Values before and after '@': magnitude and angle.
@@ -5048,8 +5079,9 @@ class String
   #
   #     '1.0@0'.to_c             # => (1+0.0i)
   #
-  # Note that in all cases, the suffixed character `'i'` may instead be one of
-  # `'I'`, `'j'`, `'J'`, with the same effect.
+  # Note that in all cases, the suffixed character <code>'i'</code> may instead be
+  # one of <code>'I'</code>, <code>'j'</code>, <code>'J'</code>, with the same
+  # effect.
   #
   # See [Converting to Non-String](rdoc-ref:String@Converting+to+Non--5CString).
   #
@@ -5081,7 +5113,8 @@ class String
   #   - to_i(base = 10) -> integer
   # -->
   # Returns the result of interpreting leading characters in `self` as an integer
-  # in the given `base`; `base` must be either `0` or in range `(2..36)`:
+  # in the given `base`; `base` must be either `0` or in range
+  # <code>(2..36)</code>:
   #
   #     '123456'.to_i     # => 123456
   #     '123def'.to_i(16) # => 1195503
@@ -5132,7 +5165,8 @@ class String
   #
   #     'BWV 1079'.to_r  # => (0/1)
   #
-  # NOTE: `'0.3'.to_r` is equivalent to `3/10r`, but is different from `0.3.to_r`:
+  # NOTE: <code>'0.3'.to_r</code> is equivalent to <code>3/10r</code>, but is
+  # different from <code>0.3.to_r</code>:
   #
   #     '0.3'.to_r # => (3/10)
   #     3/10r      # => (3/10)
@@ -5285,21 +5319,23 @@ class String
   # Argument `form` must be one of the following symbols (see [Unicode
   # normalization forms](https://unicode.org/reports/tr15/#Norm_Forms)):
   #
-  # *   `:nfc`: Canonical decomposition, followed by canonical composition.
-  # *   `:nfd`: Canonical decomposition.
-  # *   `:nfkc`: Compatibility decomposition, followed by canonical composition.
-  # *   `:nfkd`: Compatibility decomposition.
+  # *   <code>:nfc</code>: Canonical decomposition, followed by canonical
+  #     composition.
+  # *   <code>:nfd</code>: Canonical decomposition.
+  # *   <code>:nfkc</code>: Compatibility decomposition, followed by canonical
+  #     composition.
+  # *   <code>:nfkd</code>: Compatibility decomposition.
   #
   # The encoding of `self` must be one of:
   #
-  # *   `Encoding::UTF_8`.
-  # *   `Encoding::UTF_16BE`.
-  # *   `Encoding::UTF_16LE`.
-  # *   `Encoding::UTF_32BE`.
-  # *   `Encoding::UTF_32LE`.
-  # *   `Encoding::GB18030`.
-  # *   `Encoding::UCS_2BE`.
-  # *   `Encoding::UCS_4BE`.
+  # *   <code>Encoding::UTF_8</code>.
+  # *   <code>Encoding::UTF_16BE</code>.
+  # *   <code>Encoding::UTF_16LE</code>.
+  # *   <code>Encoding::UTF_32BE</code>.
+  # *   <code>Encoding::UTF_32LE</code>.
+  # *   <code>Encoding::GB18030</code>.
+  # *   <code>Encoding::UCS_2BE</code>.
+  # *   <code>Encoding::UCS_4BE</code>.
   #
   # Examples:
   #
@@ -5329,7 +5365,8 @@ class String
   # Returns whether `self` is in the given `form` of Unicode normalization; see
   # String#unicode_normalize.
   #
-  # The `form` must be one of `:nfc`, `:nfd`, `:nfkc`, or `:nfkd`.
+  # The `form` must be one of <code>:nfc</code>, <code>:nfd</code>,
+  # <code>:nfkc</code>, or <code>:nfkd</code>.
   #
   # Examples:
   #
@@ -5403,8 +5440,9 @@ class String
   #     s = 'こんにちは'
   #     s.upcase == s # => true
   #
-  # The casing is affected by the given `mapping`, which may be `:ascii`, `:fold`,
-  # or `:turkic`; see [Case Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
+  # The casing is affected by the given `mapping`, which may be
+  # <code>:ascii</code>, <code>:fold</code>, or <code>:turkic</code>; see [Case
+  # Mappings](rdoc-ref:case_mapping.rdoc@Case+Mappings).
   #
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
@@ -5437,8 +5475,8 @@ class String
   # -->
   # With a block given, calls the block with each `String` value returned by
   # successive calls to String#succ; the first value is `self`, the next is
-  # `self.succ`, and so on; the sequence terminates when value `other_string` is
-  # reached; returns `self`:
+  # <code>self.succ</code>, and so on; the sequence terminates when value
+  # `other_string` is reached; returns `self`:
   #
   #     a = []
   #     'a'.upto('f') {|c| a.push(c) }

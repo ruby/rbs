@@ -8,7 +8,7 @@
 #
 # ### Hash Data Syntax
 #
-# The original syntax for a hash entry uses the "hash rocket," `=>`:
+# The original syntax for a hash entry uses the "hash rocket," <code>=></code>:
 #
 #     h = {:foo => 0, :bar => 1, :baz => 2}
 #     h # => {foo: 0, bar: 1, baz: 2}
@@ -165,7 +165,7 @@
 # #### `Hash` Key Equivalence
 #
 # Two objects are treated as the same hash key when their `hash` value is
-# identical and the two objects are `eql?` to each other.
+# identical and the two objects are <code>eql?</code> to each other.
 #
 # #### Modifying an Active `Hash` Key
 #
@@ -180,7 +180,7 @@
 #     h[a0] # => 0
 #     a0.hash # => 110002110
 #
-# Modifying array element `a0[0]` changes its hash value:
+# Modifying array element <code>a0[0]</code> changes its hash value:
 #
 #     a0[0] = :bam
 #     a0.hash # => 1069447059
@@ -208,17 +208,17 @@
 # #### User-Defined `Hash` Keys
 #
 # To be usable as a `Hash` key, objects must implement the methods `hash` and
-# `eql?`. Note: this requirement does not apply if the `Hash` uses
+# <code>eql?</code>. Note: this requirement does not apply if the `Hash` uses
 # #compare_by_identity since comparison will then rely on the keys' object id
-# instead of `hash` and `eql?`.
+# instead of `hash` and <code>eql?</code>.
 #
-# Object defines basic implementation for `hash` and `eq?` that makes each
-# object a distinct key. Typically, user-defined classes will want to override
-# these methods to provide meaningful behavior, or for example inherit Struct
-# that has useful definitions for these.
+# Object defines basic implementation for `hash` and <code>eq?</code> that makes
+# each object a distinct key. Typically, user-defined classes will want to
+# override these methods to provide meaningful behavior, or for example inherit
+# Struct that has useful definitions for these.
 #
-# A typical implementation of `hash` is based on the object's data while `eql?`
-# is usually aliased to the overridden `==` method:
+# A typical implementation of `hash` is based on the object's data while
+# <code>eql?</code> is usually aliased to the overridden <code>==</code> method:
 #
 #     class Book
 #       attr_reader :author, :title
@@ -263,7 +263,7 @@
 #
 # If you want `nil` returned for a not-found key, you can call:
 #
-# *   #[](key) (usually written as `#[key]`.
+# *   #[](key) (usually written as <code>#[key]</code>.
 # *   #assoc(key).
 # *   #dig(key, *identifiers).
 # *   #values_at(*keys).
@@ -524,10 +524,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   # -->
   # If `object` is a hash, returns `object`.
   #
-  # Otherwise if `object` responds to `:to_hash`, calls `object.to_hash`; returns
-  # the result if it is a hash, or raises TypeError if not.
+  # Otherwise if `object` responds to <code>:to_hash</code>, calls
+  # <code>object.to_hash</code>; returns the result if it is a hash, or raises
+  # TypeError if not.
   #
-  # Otherwise if `object` does not respond to `:to_hash`, returns `nil`.
+  # Otherwise if `object` does not respond to <code>:to_hash</code>, returns
+  # `nil`.
   #
   def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
                       | (untyped) -> (::Hash[untyped, untyped] | nil)
@@ -587,7 +589,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # *   `object` is a `Hash` object (or can be converted to one).
   # *   `self` and `object` have the same keys (regardless of order).
-  # *   For each key `key`, `self[key] == object[key]`.
+  # *   For each key `key`, <code>self[key] == object[key]</code>.
   #
   # Otherwise, returns `false`.
   #
@@ -716,7 +718,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # otherwise.
   #
   # With argument `entry` and no block, returns `true` if for any key `key`
-  # `self.assoc(key) == entry`, `false` otherwise:
+  # <code>self.assoc(key) == entry</code>, `false` otherwise:
   #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.assoc(:bar)     # => [:bar, 1]
@@ -1103,7 +1105,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # *   The given `object` is a `Hash` object.
   # *   `self` and `object` have the same keys (regardless of order).
-  # *   For each key `key`, `self[key].eql?(object[key])`.
+  # *   For each key `key`, <code>self[key].eql?(object[key])</code>.
   #
   # Otherwise, returns `false`.
   #
@@ -1232,7 +1234,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # *   Each element whose value is not an array is unchanged. even if the value
   #     is an object that has instance method flatten (such as a hash).
   #
-  # Examples; note that entry `foo: {bar: 1, baz: 2}` is never flattened.
+  # Examples; note that entry <code>foo: {bar: 1, baz: 2}</code> is never
+  # flattened.
   #
   #     h = {foo: {bar: 1, baz: 2}, bat: [:bam, [:bap, [:bah]]]}
   #     h.flatten(1) # => [:foo, {:bar=>1, :baz=>2}, :bat, [:bam, [:bap, [:bah]]]]
@@ -1475,8 +1478,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With no block given, for each successive entry `key`/`new_value` in each
   # successive `other_hash`:
   #
-  # *   If `key` is in `self`, sets `self[key] = new_value`, whose position is
-  #     unchanged:
+  # *   If `key` is in `self`, sets <code>self[key] = new_value</code>, whose
+  #     position is unchanged:
   #
   #         h0 = {foo: 0, bar: 1, baz: 2}
   #         h1 = {bar: 3, foo: -1}
@@ -1490,9 +1493,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With a block given, for each successive entry `key`/`new_value` in each
   # successive `other_hash`:
   #
-  # *   If `key` is in `self`, fetches `old_value` from `self[key]`, calls the
-  #     block with `key`, `old_value`, and `new_value`, and sets `self[key] =
-  #     new_value`, whose position is unchanged  :
+  # *   If `key` is in `self`, fetches `old_value` from <code>self[key]</code>,
+  #     calls the block with `key`, `old_value`, and `new_value`, and sets
+  #     <code>self[key] = new_value</code>, whose position is unchanged  :
   #
   #         season = {AB: 75, H: 20, HR: 3, SO: 17, W: 11, HBP: 3}
   #         today = {AB: 3, H: 1, W: 1}
@@ -1515,8 +1518,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   rdoc-file=hash.c
   #   - rassoc(value) -> new_array or nil
   # -->
-  # Searches `self` for the first entry whose value is `==` to the given `value`;
-  # see [Entry Order](rdoc-ref:Hash@Entry+Order).
+  # Searches `self` for the first entry whose value is <code>==</code> to the
+  # given `value`; see [Entry Order](rdoc-ref:Hash@Entry+Order).
   #
   # If the entry is found, returns its key and value as a 2-element array; returns
   # `nil` if not found:
@@ -1796,9 +1799,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With a block given and no argument, `new_hash` has keys determined only by the
   # block.
   #
-  # For each key/value pair `old_key/value` in `self`, calls the block with
-  # `old_key`; the block's return value becomes `new_key`; sets `new_hash[new_key]
-  # = value`; a duplicate key overwrites:
+  # For each key/value pair <code>old_key/value</code> in `self`, calls the block
+  # with `old_key`; the block's return value becomes `new_key`; sets
+  # <code>new_hash[new_key] = value</code>; a duplicate key overwrites:
   #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.transform_keys {|old_key| old_key.to_s }
@@ -1809,11 +1812,12 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With argument `other_hash` given and no block, `new_hash` may have new keys
   # provided by `other_hash` and unchanged keys provided by `self`.
   #
-  # For each key/value pair `old_key/old_value` in `self`, looks for key `old_key`
-  # in `other_hash`:
+  # For each key/value pair <code>old_key/old_value</code> in `self`, looks for
+  # key `old_key` in `other_hash`:
   #
-  # *   If `old_key` is found, its value `other_hash[old_key]` is taken as
-  #     `new_key`; sets `new_hash[new_key] = value`; a duplicate key overwrites:
+  # *   If `old_key` is found, its value <code>other_hash[old_key]</code> is taken
+  #     as `new_key`; sets <code>new_hash[new_key] = value</code>; a duplicate key
+  #     overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys(baz: :BAZ, bar: :BAR, foo: :FOO)
@@ -1821,8 +1825,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #         h.transform_keys(baz: :FOO, bar: :FOO, foo: :FOO)
   #         # => {FOO: 2}
   #
-  # *   If `old_key` is not found, sets `new_hash[old_key] = value`; a duplicate
-  #     key overwrites:
+  # *   If `old_key` is not found, sets <code>new_hash[old_key] = value</code>; a
+  #     duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys({})
@@ -1843,16 +1847,16 @@ class Hash[unchecked out K, unchecked out V] < Object
   # For each pair `old_key` and `value` in `self`:
   #
   # *   If `other_hash` has key `old_key` (with value `new_key`), does not call
-  #     the block for that key; sets `new_hash[new_key] = value`; a duplicate key
-  #     overwrites:
+  #     the block for that key; sets <code>new_hash[new_key] = value</code>; a
+  #     duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys(baz: :BAZ, bar: :BAR, foo: :FOO) {|key| fail 'Not called' }
   #         # => {FOO: 0, BAR: 1, BAZ: 2}
   #
   # *   If `other_hash` does not have key `old_key`, calls the block with
-  #     `old_key` and takes its return value as `new_key`; sets `new_hash[new_key]
-  #     = value`; a duplicate key overwrites:
+  #     `old_key` and takes its return value as `new_key`; sets
+  #     <code>new_hash[new_key] = value</code>; a duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys(baz: :BAZ) {|key| key.to_s.reverse }
@@ -1881,10 +1885,10 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With a block given and no argument, derives keys only from the block; all,
   # some, or none of the keys in `self` may be changed.
   #
-  # For each key/value pair `old_key/value` in `self`, calls the block with
-  # `old_key`; the block's return value becomes `new_key`; removes the entry for
-  # `old_key`: `self.delete(old_key)`; sets `self[new_key] = value`; a duplicate
-  # key overwrites:
+  # For each key/value pair <code>old_key/value</code> in `self`, calls the block
+  # with `old_key`; the block's return value becomes `new_key`; removes the entry
+  # for `old_key`: <code>self.delete(old_key)</code>; sets <code>self[new_key] =
+  # value</code>; a duplicate key overwrites:
   #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.transform_keys! {|old_key| old_key.to_s }
@@ -1897,12 +1901,13 @@ class Hash[unchecked out K, unchecked out V] < Object
   # `other_hash` and `self`; all, some, or none of the keys in `self` may be
   # changed.
   #
-  # For each key/value pair `old_key/old_value` in `self`, looks for key `old_key`
-  # in `other_hash`:
+  # For each key/value pair <code>old_key/old_value</code> in `self`, looks for
+  # key `old_key` in `other_hash`:
   #
-  # *   If `old_key` is found, takes value `other_hash[old_key]` as `new_key`;
-  #     removes the entry for `old_key`: `self.delete(old_key)`; sets
-  #     `self[new_key] = value`; a duplicate key overwrites:
+  # *   If `old_key` is found, takes value <code>other_hash[old_key]</code> as
+  #     `new_key`; removes the entry for `old_key`:
+  #     <code>self.delete(old_key)</code>; sets <code>self[new_key] =
+  #     value</code>; a duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys!(baz: :BAZ, bar: :BAR, foo: :FOO)
@@ -1933,8 +1938,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # *   If `other_hash` has key `old_key` (with value `new_key`), does not call
   #     the block for that key; removes the entry for `old_key`:
-  #     `self.delete(old_key)`; sets `self[new_key] = value`; a duplicate key
-  #     overwrites:
+  #     <code>self.delete(old_key)</code>; sets <code>self[new_key] =
+  #     value</code>; a duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys!(baz: :BAZ, bar: :BAR, foo: :FOO) {|key| fail 'Not called' }
@@ -1942,8 +1947,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # *   If `other_hash` does not have key `old_key`, calls the block with
   #     `old_key` and takes its return value as `new_key`; removes the entry for
-  #     `old_key`: `self.delete(old_key)`; sets `self[new_key] = value`; a
-  #     duplicate key overwrites:
+  #     `old_key`: <code>self.delete(old_key)</code>; sets <code>self[new_key] =
+  #     value</code>; a duplicate key overwrites:
   #
   #         h = {foo: 0, bar: 1, baz: 2}
   #         h.transform_keys!(baz: :BAZ) {|key| key.to_s.reverse }
@@ -1990,7 +1995,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # returns `self`.
   #
   # For each entry `key`/`old_value` in `self`, calls the block with `old_value`,
-  # captures its return value as `new_value`, and sets `self[key] = new_value`:
+  # captures its return value as `new_value`, and sets <code>self[key] =
+  # new_value</code>:
   #
   #     h = {foo: 0, bar: 1, baz: 2}
   #     h.transform_values! {|value| value * 100} # => {foo: 0, bar: 100, baz: 200}
@@ -2015,8 +2021,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With no block given, for each successive entry `key`/`new_value` in each
   # successive `other_hash`:
   #
-  # *   If `key` is in `self`, sets `self[key] = new_value`, whose position is
-  #     unchanged:
+  # *   If `key` is in `self`, sets <code>self[key] = new_value</code>, whose
+  #     position is unchanged:
   #
   #         h0 = {foo: 0, bar: 1, baz: 2}
   #         h1 = {bar: 3, foo: -1}
@@ -2030,9 +2036,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # With a block given, for each successive entry `key`/`new_value` in each
   # successive `other_hash`:
   #
-  # *   If `key` is in `self`, fetches `old_value` from `self[key]`, calls the
-  #     block with `key`, `old_value`, and `new_value`, and sets `self[key] =
-  #     new_value`, whose position is unchanged  :
+  # *   If `key` is in `self`, fetches `old_value` from <code>self[key]</code>,
+  #     calls the block with `key`, `old_value`, and `new_value`, and sets
+  #     <code>self[key] = new_value</code>, whose position is unchanged  :
   #
   #         season = {AB: 75, H: 20, HR: 3, SO: 17, W: 11, HBP: 3}
   #         today = {AB: 3, H: 1, W: 1}

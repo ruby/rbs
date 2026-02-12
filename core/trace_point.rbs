@@ -21,62 +21,62 @@
 # If you don't specify the types of events you want to listen for, TracePoint
 # will include all available events.
 #
-# **Note:** Do not depend on the current event set, as this list is subject to
-# change. Instead, it is recommended to specify the types of events you want to
-# use.
+# <strong>Note:</strong> Do not depend on the current event set, as this list is
+# subject to change. Instead, it is recommended to specify the types of events
+# you want to use.
 #
 # To filter what is traced, you can pass any number of the following as
 # `events`:
 #
-# `:line`
+# <code>:line</code>
 # :   Execute an expression or statement on a new line.
 #
-# `:class`
+# <code>:class</code>
 # :   Start a class or module definition.
 #
-# `:end`
+# <code>:end</code>
 # :   Finish a class or module definition.
 #
-# `:call`
+# <code>:call</code>
 # :   Call a Ruby method.
 #
-# `:return`
+# <code>:return</code>
 # :   Return from a Ruby method.
 #
-# `:c_call`
+# <code>:c_call</code>
 # :   Call a C-language routine.
 #
-# `:c_return`
+# <code>:c_return</code>
 # :   Return from a C-language routine.
 #
-# `:raise`
+# <code>:raise</code>
 # :   Raise an exception.
 #
-# `:rescue`
+# <code>:rescue</code>
 # :   Rescue an exception.
 #
-# `:b_call`
+# <code>:b_call</code>
 # :   Event hook at block entry.
 #
-# `:b_return`
+# <code>:b_return</code>
 # :   Event hook at block ending.
 #
-# `:a_call`
+# <code>:a_call</code>
 # :   Event hook at all calls (`call`, `b_call`, and `c_call`).
 #
-# `:a_return`
+# <code>:a_return</code>
 # :   Event hook at all returns (`return`, `b_return`, and `c_return`).
 #
-# `:thread_begin`
+# <code>:thread_begin</code>
 # :   Event hook at thread beginning.
 #
-# `:thread_end`
+# <code>:thread_end</code>
 # :   Event hook at thread ending.
 #
-# `:fiber_switch`
+# <code>:fiber_switch</code>
 # :   Event hook at fiber switch.
 #
-# `:script_compiled`
+# <code>:script_compiled</code>
 # :   New Ruby code compiled (with `eval`, `load`, or `require`).
 #
 class TracePoint
@@ -140,7 +140,7 @@ class TracePoint
   #
   # If called when reentrance is already allowed, it raises a RuntimeError.
   #
-  # **Example:**
+  # <strong>Example:</strong>
   #
   #     # Without reentry
   #     # ---------------
@@ -223,8 +223,8 @@ class TracePoint
   # -->
   # Returns the generated binding object from the event.
   #
-  # Note that for `:c_call` and `:c_return` events, the method returns `nil`,
-  # since C methods themselves do not have bindings.
+  # Note that for <code>:c_call</code> and <code>:c_return</code> events, the
+  # method returns `nil`, since C methods themselves do not have bindings.
   #
   def binding: () -> Binding?
 
@@ -259,12 +259,13 @@ class TracePoint
   #       C.new.foo
   #     end
   #
-  # **Note:** #defined_class returns the singleton class.
+  # <strong>Note:</strong> #defined_class returns the singleton class.
   #
   # The 6th block parameter of Kernel#set_trace_func passes the original class
   # attached by the singleton class.
   #
-  # **This is a difference between Kernel#set_trace_func and TracePoint.**
+  # <strong>This is a difference between Kernel#set_trace_func and
+  # TracePoint.</strong>
   #
   #     class C; def self.foo; end; end
   #     trace = TracePoint.new(:call) do |tp|
@@ -432,8 +433,8 @@ class TracePoint
   #   rdoc-file=trace_point.rb
   #   - raised_exception()
   # -->
-  # Returns the exception raised on the `:raise` event or rescued on the `:rescue`
-  # event.
+  # Returns the exception raised on the <code>:raise</code> event or rescued on
+  # the <code>:rescue</code> event.
   #
   def raised_exception: () -> Exception
 
@@ -441,7 +442,8 @@ class TracePoint
   #   rdoc-file=trace_point.rb
   #   - return_value()
   # -->
-  # Returns the return value from `:return`, `:c_return`, and `:b_return` events.
+  # Returns the return value from <code>:return</code>, <code>:c_return</code>,
+  # and <code>:b_return</code> events.
   #
   def return_value: () -> untyped
 
@@ -452,7 +454,7 @@ class TracePoint
   # Returns the trace object during the event.
   #
   # Similar to the following, but it returns the correct object (the method
-  # receiver) for `:c_call` and `:c_return` events:
+  # receiver) for <code>:c_call</code> and <code>:c_return</code> events:
   #
   #     trace.binding.eval('self')
   #
@@ -463,7 +465,7 @@ class TracePoint
   #   - eval_script()
   # -->
   # Returns the compiled source code (String) from eval methods on the
-  # `:script_compiled` event. If loaded from a file, it returns `nil`.
+  # <code>:script_compiled</code> event. If loaded from a file, it returns `nil`.
   #
   def eval_script: () -> String?
 
@@ -472,7 +474,8 @@ class TracePoint
   #   - instruction_sequence()
   # -->
   # Returns the compiled instruction sequence represented by a
-  # RubyVM::InstructionSequence instance on the `:script_compiled` event.
+  # RubyVM::InstructionSequence instance on the <code>:script_compiled</code>
+  # event.
   #
   # Note that this method is CRuby-specific.
   #

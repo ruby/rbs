@@ -120,8 +120,8 @@
 # supported (see below).
 #
 # PKCS5 supports PBKDF2 as it was specified in PKCS#5
-# [v2.0](http://www.rsa.com/rsalabs/node.asp?id=2127). It still uses a password,
-# a salt, and additionally a number of iterations that will slow the key
+# v2.0[http://www.rsa.com/rsalabs/node.asp?id=2127]. It still uses a password, a
+# salt, and additionally a number of iterations that will slow the key
 # derivation process down. The slower this is, the more work it requires being
 # able to brute-force the resulting key.
 #
@@ -441,8 +441,8 @@
 #     ssl_client.puts "hello server!"
 #     puts ssl_client.gets
 #
-# If the server certificate is invalid or `context.ca_file` is not set when
-# verifying peers an OpenSSL::SSL::SSLError will be raised.
+# If the server certificate is invalid or <code>context.ca_file</code> is not
+# set when verifying peers an OpenSSL::SSL::SSLError will be raised.
 #
 module OpenSSL
   # <!--
@@ -612,7 +612,8 @@ module OpenSSL
   # can only be determined using out-of-band information from the ASN.1 type
   # declaration. Since this information is normally known when encoding a type,
   # all sub-classes of ASN1Data offer an additional attribute *tagging* that
-  # allows to encode a value implicitly (`:IMPLICIT`) or explicitly (`:EXPLICIT`).
+  # allows to encode a value implicitly (<code>:IMPLICIT</code>) or explicitly
+  # (<code>:EXPLICIT</code>).
   #
   # ### Constructive
   #
@@ -640,18 +641,18 @@ module OpenSSL
   # When constructing an ASN1Data object the ASN.1 type definition may require
   # certain elements to be either implicitly or explicitly tagged. This can be
   # achieved by setting the *tagging* attribute manually for sub-classes of
-  # ASN1Data. Use the symbol `:IMPLICIT` for implicit tagging and `:EXPLICIT` if
-  # the element requires explicit tagging.
+  # ASN1Data. Use the symbol <code>:IMPLICIT</code> for implicit tagging and
+  # <code>:EXPLICIT</code> if the element requires explicit tagging.
   #
   # ## Possible values for *tag_class*
   #
   # It is possible to create arbitrary ASN1Data objects that also support a
   # PRIVATE or APPLICATION tag class. Possible values for the *tag_class*
   # attribute are:
-  # *   `:UNIVERSAL` (the default for untagged values)
-  # *   `:CONTEXT_SPECIFIC` (the default for tagged values)
-  # *   `:APPLICATION`
-  # *   `:PRIVATE`
+  # *   <code>:UNIVERSAL</code> (the default for untagged values)
+  # *   <code>:CONTEXT_SPECIFIC</code> (the default for tagged values)
+  # *   <code>:APPLICATION</code>
+  # *   <code>:PRIVATE</code>
   #
   # ## Tag constants
   #
@@ -684,7 +685,8 @@ module OpenSSL
   #
   # An Array that stores the name of a given tag number. These names are the same
   # as the name of the tag constant that is additionally defined, e.g.
-  # `UNIVERSAL_TAG_NAME[2] = "INTEGER"` and `OpenSSL::ASN1::INTEGER = 2`.
+  # <code>UNIVERSAL_TAG_NAME[2] = "INTEGER"</code> and
+  # <code>OpenSSL::ASN1::INTEGER = 2</code>.
   #
   # ## Example usage
   #
@@ -760,8 +762,8 @@ module OpenSSL
     #   - OpenSSL::ASN1.decode(der) -> ASN1Data
     # -->
     # Decodes a BER- or DER-encoded value and creates an ASN1Data instance. *der*
-    # may be a String or any object that features a `.to_der` method transforming it
-    # into a BER-/DER-encoded String+
+    # may be a String or any object that features a <code>.to_der</code> method
+    # transforming it into a BER-/DER-encoded String+
     #
     # ## Example
     #     der = File.binread('asn1data')
@@ -892,7 +894,7 @@ module OpenSSL
     #
     # An implicitly 1-tagged INTEGER value will be parsed as an ASN1Data with
     # *   *tag* equal to 1
-    # *   *tag_class* equal to `:CONTEXT_SPECIFIC`
+    # *   *tag_class* equal to <code>:CONTEXT_SPECIFIC</code>
     # *   *value* equal to a String that carries the raw encoding of the INTEGER.
     # This implies that a subsequent decoding step is required to completely decode
     # implicitly tagged values.
@@ -901,7 +903,7 @@ module OpenSSL
     #
     # An explicitly 1-tagged INTEGER value will be parsed as an ASN1Data with
     # *   *tag* equal to 1
-    # *   *tag_class* equal to `:CONTEXT_SPECIFIC`
+    # *   *tag_class* equal to <code>:CONTEXT_SPECIFIC</code>
     # *   *value* equal to an Array with one single element, an instance of
     #     OpenSSL::ASN1::Integer, i.e. the inner element is the non-tagged primitive
     #     value, and the tagging is represented in the outer ASN1Data
@@ -1159,15 +1161,17 @@ module OpenSSL
 
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # May be used as a hint for encoding a value either implicitly or explicitly by
-      # setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set when
-      # a ASN.1 structure is parsed using OpenSSL::ASN1.decode.
+      # setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>.
+      # *tagging* is not set when a ASN.1 structure is parsed using
+      # OpenSSL::ASN1.decode.
       #
       def tagging: () -> tagging?
 
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # May be used as a hint for encoding a value either implicitly or explicitly by
-      # setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set when
-      # a ASN.1 structure is parsed using OpenSSL::ASN1.decode.
+      # setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>.
+      # *tagging* is not set when a ASN.1 structure is parsed using
+      # OpenSSL::ASN1.decode.
       #
       def tagging=: (tagging) -> tagging
 
@@ -1193,9 +1197,10 @@ module OpenSSL
       # *tagging*: may be used as an encoding hint to encode a value either explicitly
       # or implicitly, see ASN1 for possible values.
       #
-      # *tag_class*: if *tag* and *tagging* are `nil` then this is set to `:UNIVERSAL`
-      # by default. If either *tag* or *tagging* are set then `:CONTEXT_SPECIFIC` is
-      # used as the default. For possible values please cf. ASN1.
+      # *tag_class*: if *tag* and *tagging* are `nil` then this is set to
+      # <code>:UNIVERSAL</code> by default. If either *tag* or *tagging* are set then
+      # <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
+      # please cf. ASN1.
       #
       # ## Example
       #     int = OpenSSL::ASN1::Integer.new(42)
@@ -1408,15 +1413,17 @@ module OpenSSL
     class Primitive < OpenSSL::ASN1::ASN1Data
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # May be used as a hint for encoding a value either implicitly or explicitly by
-      # setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set when
-      # a ASN.1 structure is parsed using OpenSSL::ASN1.decode.
+      # setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>.
+      # *tagging* is not set when a ASN.1 structure is parsed using
+      # OpenSSL::ASN1.decode.
       #
       def tagging: () -> tagging?
 
       # <!-- rdoc-file=ext/openssl/ossl_asn1.c -->
       # May be used as a hint for encoding a value either implicitly or explicitly by
-      # setting it either to `:IMPLICIT` or to `:EXPLICIT`. *tagging* is not set when
-      # a ASN.1 structure is parsed using OpenSSL::ASN1.decode.
+      # setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>.
+      # *tagging* is not set when a ASN.1 structure is parsed using
+      # OpenSSL::ASN1.decode.
       #
       def tagging=: (tagging) -> tagging
 
@@ -1442,9 +1449,10 @@ module OpenSSL
       # *tagging*: may be used as an encoding hint to encode a value either explicitly
       # or implicitly, see ASN1 for possible values.
       #
-      # *tag_class*: if *tag* and *tagging* are `nil` then this is set to `:UNIVERSAL`
-      # by default. If either *tag* or *tagging* are set then `:CONTEXT_SPECIFIC` is
-      # used as the default. For possible values please cf. ASN1.
+      # *tag_class*: if *tag* and *tagging* are `nil` then this is set to
+      # <code>:UNIVERSAL</code> by default. If either *tag* or *tagging* are set then
+      # <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
+      # please cf. ASN1.
       #
       # ## Example
       #     int = OpenSSL::ASN1::Integer.new(42)
@@ -1511,7 +1519,7 @@ module OpenSSL
     # -->
     # Generates a random prime number of bit length *bits*. If *safe* is set to
     # `true`, generates a safe prime. If *add* is specified, generates a prime that
-    # fulfills condition `p % add = rem`.
+    # fulfills condition <code>p % add = rem</code>.
     #
     # ### Parameters
     # *   *bits* - integer
@@ -1680,8 +1688,8 @@ module OpenSSL
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.eql?(obj) => true or false
     # -->
-    # Returns `true` only if *obj* is a `OpenSSL::BN` with the same value as *bn*.
-    # Contrast this with OpenSSL::BN#==, which performs type conversions.
+    # Returns `true` only if *obj* is a <code>OpenSSL::BN</code> with the same value
+    # as *bn*. Contrast this with OpenSSL::BN#==, which performs type conversions.
     #
     def eql?: (untyped other) -> bool
 
@@ -1802,7 +1810,8 @@ module OpenSSL
     # -->
     # Performs a Miller-Rabin probabilistic primality test for `bn`.
     #
-    # **`checks` parameter is deprecated in version 3.0.** It has no effect.
+    # <strong>`checks` parameter is deprecated in version 3.0.</strong> It has no
+    # effect.
     #
     def prime?: (?int checks) -> bool
 
@@ -1814,7 +1823,7 @@ module OpenSSL
     # -->
     # Performs a Miller-Rabin probabilistic primality test for `bn`.
     #
-    # **Deprecated in version 3.0.** Use #prime? instead.
+    # <strong>Deprecated in version 3.0.</strong> Use #prime? instead.
     #
     # `checks` and `trial_div` parameters no longer have any effect.
     #
@@ -1964,8 +1973,8 @@ module OpenSSL
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
     #   - <<(s)
     # -->
-    # Writes *s* to the stream.  *s* will be converted to a String using `.to_s`
-    # method.
+    # Writes *s* to the stream.  *s* will be converted to a String using
+    # <code>.to_s</code> method.
     #
     def <<: (String s) -> self
 
@@ -2127,8 +2136,8 @@ module OpenSSL
     #
     # By specifying a keyword argument *exception* to `false`, you can indicate that
     # read_nonblock should not raise an IO::Wait*able exception, but return the
-    # symbol `:wait_writable` or `:wait_readable` instead. At EOF, it will return
-    # `nil` instead of raising EOFError.
+    # symbol <code>:wait_writable</code> or <code>:wait_readable</code> instead. At
+    # EOF, it will return `nil` instead of raising EOFError.
     #
     def read_nonblock: (Integer maxlen, ?String buf, ?exception: true) -> String
                      | (Integer maxlen, ?String buf, exception: false) -> (String | :wait_writable | :wait_readable | nil)
@@ -2205,7 +2214,8 @@ module OpenSSL
     #   - write(*s)
     # -->
     # Writes *s* to the stream.  If the argument is not a String it will be
-    # converted using `.to_s` method.  Returns the number of bytes written.
+    # converted using <code>.to_s</code> method.  Returns the number of bytes
+    # written.
     #
     def write: (*_ToS s) -> Integer
 
@@ -2247,7 +2257,7 @@ module OpenSSL
     #
     # By specifying a keyword argument *exception* to `false`, you can indicate that
     # write_nonblock should not raise an IO::Wait*able exception, but return the
-    # symbol `:wait_writable` or `:wait_readable` instead.
+    # symbol <code>:wait_writable</code> or <code>:wait_readable</code> instead.
     #
     def write_nonblock: (_ToS s, ?exception: true) -> Integer
                       | (_ToS s, exception: false) -> (Integer | :wait_writable | :wait_readable | nil)
@@ -3965,7 +3975,7 @@ module OpenSSL
   # short-circuits on evaluation, and is therefore vulnerable to timing attacks.
   # The proper way is to use a method that always takes the same amount of time
   # when comparing two values, thus not leaking any information to potential
-  # attackers. To do this, use `OpenSSL.fixed_length_secure_compare`.
+  # attackers. To do this, use <code>OpenSSL.fixed_length_secure_compare</code>.
   #
   module KDF
     # <!--
@@ -3988,8 +3998,8 @@ module OpenSSL
     # :   The context and application specific information.
     #
     # *length*
-    # :   The output length in octets. Must be <= `255 * HashLen`, where HashLen is
-    #     the length of the hash function output in octets.
+    # :   The output length in octets. Must be <= <code>255 * HashLen</code>, where
+    #     HashLen is the length of the hash function output in octets.
     #
     # *hash*
     # :   The hash function.
@@ -4849,8 +4859,8 @@ module OpenSSL
       #
       #
       # For most responses, clients can check *result* > 0.  If a responder doesn't
-      # handle nonces `result.nonzero?` may be necessary.  A result of `0` is always
-      # an error.
+      # handle nonces <code>result.nonzero?</code> may be necessary.  A result of `0`
+      # is always an error.
       #
       def check_nonce: (Response response) -> (-1 | 0 | 1 | 2 | 3)
 
@@ -5206,7 +5216,8 @@ module OpenSSL
     # -->
     # Creates a PKCS #7 enveloped-data structure.
     #
-    # Before version 3.3.0, `cipher` was optional and defaulted to `"RC2-40-CBC"`.
+    # Before version 3.3.0, `cipher` was optional and defaulted to
+    # <code>"RC2-40-CBC"</code>.
     #
     # See also the man page PKCS7_encrypt(3).
     #
@@ -5678,8 +5689,8 @@ module OpenSSL
       # result of DH#public_key), then this method needs to be called first in order
       # to generate the per-session keys before performing the actual key exchange.
       #
-      # **Deprecated in version 3.0**. This method is incompatible with OpenSSL 3.0.0
-      # or later.
+      # <strong>Deprecated in version 3.0</strong>. This method is incompatible with
+      # OpenSSL 3.0.0 or later.
       #
       # See also OpenSSL::PKey.generate_key.
       #
@@ -5984,8 +5995,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # traditional, non-standard OpenSSL format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the traditional, non-standard OpenSSL format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -6070,8 +6081,8 @@ module OpenSSL
       # to be an already-computed message digest of the original input data. The
       # signature is issued using the private key of this DSA instance.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw instead.
       #
       # `string`
       # :   A message digest of the original input data to be signed.
@@ -6099,8 +6110,8 @@ module OpenSSL
       # Verifies whether the signature is valid given the message digest input. It
       # does so by validating `sig` using the public key of this DSA instance.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw instead.
       #
       # `digest`
       # :   A message digest of the original input data to be signed.
@@ -6118,8 +6129,8 @@ module OpenSSL
       #
       # See #to_pem for details.
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # traditional, non-standard OpenSSL format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the traditional, non-standard OpenSSL format is required.
       #
       # Consider using #public_to_der or #private_to_der instead.
       #
@@ -6171,8 +6182,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # traditional, non-standard OpenSSL format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the traditional, non-standard OpenSSL format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -6225,8 +6236,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # traditional, non-standard OpenSSL format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the traditional, non-standard OpenSSL format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -6365,8 +6376,8 @@ module OpenSSL
       #   rdoc-file=ext/openssl/lib/openssl/pkey.rb
       #   - key.dsa_sign_asn1(data) -> String
       # -->
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw instead.
       #
       def dsa_sign_asn1: (String digest) -> String
 
@@ -6374,8 +6385,8 @@ module OpenSSL
       #   rdoc-file=ext/openssl/lib/openssl/pkey.rb
       #   - key.dsa_verify_asn1(data, sig) -> true | false
       # -->
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw instead.
       #
       def dsa_verify_asn1: (String digest, String signature) -> bool
 
@@ -6429,8 +6440,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the SEC 1/RFC 5915 ECPrivateKey format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -6555,8 +6566,8 @@ module OpenSSL
       #
       # See #to_pem for details.
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the SEC 1/RFC 5915 ECPrivateKey format is required.
       #
       # Consider using #public_to_der or #private_to_der instead.
       #
@@ -6608,8 +6619,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # SEC 1/RFC 5915 ECPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the SEC 1/RFC 5915 ECPrivateKey format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -6767,14 +6778,14 @@ module OpenSSL
         #
         # *format* can be one of these:
         #
-        # `:compressed`
+        # <code>:compressed</code>
         # :   Encoded as z||x, where z is an octet indicating which solution of the
         #     equation y is. z will be 0x02 or 0x03.
         #
-        # `:uncompressed`
+        # <code>:uncompressed</code>
         # :   Encoded as z||x||y, where z is an octet 0x04.
         #
-        # `:hybrid`
+        # <code>:hybrid</code>
         # :   Encodes as z||x||y, where z is an octet indicating which solution of the
         #     equation y is. z will be 0x06 or 0x07.
         #
@@ -6918,9 +6929,9 @@ module OpenSSL
         # -->
         # Performs elliptic curve point multiplication.
         #
-        # The first form calculates `bn1 * point + bn2 * G`, where `G` is the generator
-        # of the group of *point*. *bn2* may be omitted, and in that case, the result is
-        # just `bn1 * point`.
+        # The first form calculates <code>bn1 * point + bn2 * G</code>, where `G` is the
+        # generator of the group of *point*. *bn2* may be omitted, and in that case, the
+        # result is just <code>bn1 * point</code>.
         #
         # Before version 4.0.0, and when compiled with OpenSSL 1.1.1 or older, this
         # method allowed another form:
@@ -6965,9 +6976,9 @@ module OpenSSL
         #
         # *conversion_form* specifies how the point is converted. Possible values are:
         #
-        # *   `:compressed`
-        # *   `:uncompressed`
-        # *   `:hybrid`
+        # *   <code>:compressed</code>
+        # *   <code>:uncompressed</code>
+        # *   <code>:hybrid</code>
         #
         def to_octet_string: (point_conversion_format) -> String
 
@@ -7266,8 +7277,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # PKCS #1 RSAPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the PKCS #1 RSAPrivateKey format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -7308,8 +7319,8 @@ module OpenSSL
       # private key. `padding` defaults to PKCS1_PADDING, which is known to be
       # insecure but is kept for backwards compatibility.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#encrypt and
-      # PKey::PKey#decrypt instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#encrypt
+      # and PKey::PKey#decrypt instead.
       #
       def private_decrypt: (String data, ?Integer padding) -> String
 
@@ -7322,8 +7333,8 @@ module OpenSSL
       # which is known to be insecure but is kept for backwards compatibility. The
       # encrypted string output can be decrypted using #public_decrypt.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
       #
       def private_encrypt: (String data, ?Integer padding) -> String
 
@@ -7345,8 +7356,8 @@ module OpenSSL
       # public key.  `padding` defaults to PKCS1_PADDING which is known to be insecure
       # but is kept for backwards compatibility.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#sign_raw and
-      # PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
+      # and PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
       #
       def public_decrypt: (String data, ?Integer padding) -> String
 
@@ -7359,8 +7370,8 @@ module OpenSSL
       # which is known to be insecure but is kept for backwards compatibility. The
       # encrypted string output can be decrypted using #private_decrypt.
       #
-      # **Deprecated in version 3.0**. Consider using PKey::PKey#encrypt and
-      # PKey::PKey#decrypt instead.
+      # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#encrypt
+      # and PKey::PKey#decrypt instead.
       #
       def public_encrypt: (String data, ?Integer padding) -> String
 
@@ -7384,8 +7395,9 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_pkey_rsa.c
       #   - rsa.set_crt_params(dmp1, dmq1, iqmp) -> self
       # -->
-      # Sets *dmp1*, *dmq1*, *iqmp* for the RSA instance. They are calculated by `d
-      # mod (p - 1)`, `d mod (q - 1)` and `q^(-1) mod p` respectively.
+      # Sets *dmp1*, *dmq1*, *iqmp* for the RSA instance. They are calculated by
+      # <code>d mod (p - 1)</code>, <code>d mod (q - 1)</code> and <code>q^(-1) mod
+      # p</code> respectively.
       #
       def set_crt_params: (bn dmp1, bn dmq1, bn iqmp) -> self
 
@@ -7425,9 +7437,9 @@ module OpenSSL
       #
       # *salt_length*
       # :   The length in octets of the salt. Two special values are reserved:
-      #     `:digest` means the digest length, and `:max` means the maximum possible
-      #     length for the combination of the private key and the selected message
-      #     digest algorithm.
+      #     <code>:digest</code> means the digest length, and <code>:max</code> means
+      #     the maximum possible length for the combination of the private key and the
+      #     selected message digest algorithm.
       #
       # *mgf1_hash*
       # :   The hash algorithm used in MGF1 (the currently supported mask generation
@@ -7452,8 +7464,8 @@ module OpenSSL
       #
       # See #to_pem for details.
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # PKCS #1 RSAPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the PKCS #1 RSAPrivateKey format is required.
       #
       # Consider using #public_to_der or #private_to_der instead.
       #
@@ -7505,8 +7517,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # PKCS #1 RSAPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the PKCS #1 RSAPrivateKey format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -7559,8 +7571,8 @@ module OpenSSL
       #     will not be available on FIPS-compliant systems.
       #
       #
-      # **This method is kept for compatibility.** This should only be used when the
-      # PKCS #1 RSAPrivateKey format is required.
+      # <strong>This method is kept for compatibility.</strong> This should only be
+      # used when the PKCS #1 RSAPrivateKey format is required.
       #
       # Consider using #public_to_pem (X.509 SubjectPublicKeyInfo) or #private_to_pem
       # (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.
@@ -7599,8 +7611,8 @@ module OpenSSL
       #
       # *salt_length*
       # :   The length in octets of the salt. Two special values are reserved:
-      #     `:digest` means the digest length, and `:auto` means automatically
-      #     determining the length based on the signature.
+      #     <code>:digest</code> means the digest length, and <code>:auto</code> means
+      #     automatically determining the length based on the signature.
       #
       # *mgf1_hash*
       # :   The hash algorithm used in MGF1.
@@ -8334,8 +8346,8 @@ module OpenSSL
       #   - ctx.options = integer
       # -->
       # Sets various OpenSSL options. The options are a bit field and can be combined
-      # with the bitwise OR operator (`|`). Available options are defined as constants
-      # in OpenSSL::SSL that begin with `OP_`.
+      # with the bitwise OR operator (<code>|</code>). Available options are defined
+      # as constants in OpenSSL::SSL that begin with `OP_`.
       #
       # For backwards compatibility, passing `nil` has the same effect as passing
       # OpenSSL::SSL::OP_ALL.
@@ -8670,7 +8682,7 @@ module OpenSSL
       # The callback must return an OpenSSL::PKey::DH instance of the correct key
       # length.
       #
-      # **Deprecated in version 3.0.** Use #tmp_dh= instead.
+      # <strong>Deprecated in version 3.0.</strong> Use #tmp_dh= instead.
       #
       def tmp_dh_callback: () -> (^(Session, Integer, Integer) -> PKey::DH | nil)
 
@@ -8684,7 +8696,7 @@ module OpenSSL
       # The callback must return an OpenSSL::PKey::DH instance of the correct key
       # length.
       #
-      # **Deprecated in version 3.0.** Use #tmp_dh= instead.
+      # <strong>Deprecated in version 3.0.</strong> Use #tmp_dh= instead.
       #
       def tmp_dh_callback=: (^(Session, Integer, Integer) -> PKey::DH) -> void
 
@@ -8945,8 +8957,8 @@ module OpenSSL
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
       #   - open(remote_host, remote_port, local_host=nil, local_port=nil, context: nil)
       # -->
-      # Creates a new instance of SSLSocket. *remote*host_ and *remote*port_ are used
-      # to open TCPSocket. If *local*host_ and *local*port_ are specified, then those
+      # Creates a new instance of SSLSocket. _remote_host_ and _remote_port_ are used
+      # to open TCPSocket. If _local_host_ and _local_port_ are specified, then those
       # parameters are used on the local end to establish the connection. If *context*
       # is provided, the SSL Sockets initial params will be taken from the context.
       #
@@ -8990,7 +9002,8 @@ module OpenSSL
       #
       # By specifying a keyword argument *exception* to `false`, you can indicate that
       # accept_nonblock should not raise an IO::WaitReadable or IO::WaitWritable
-      # exception, but return the symbol `:wait_readable` or `:wait_writable` instead.
+      # exception, but return the symbol <code>:wait_readable</code> or
+      # <code>:wait_writable</code> instead.
       #
       def accept_nonblock: (?exception: true) -> self
                          | (exception: false) -> (self | :wait_readable | :wait_writable)
@@ -9061,7 +9074,8 @@ module OpenSSL
       #
       # By specifying a keyword argument *exception* to `false`, you can indicate that
       # connect_nonblock should not raise an IO::WaitReadable or IO::WaitWritable
-      # exception, but return the symbol `:wait_readable` or `:wait_writable` instead.
+      # exception, but return the symbol <code>:wait_readable</code> or
+      # <code>:wait_writable</code> instead.
       #
       def connect_nonblock: (?exception: true) -> self
                           | (exception: false) -> (self | :wait_readable | :wait_writable)
@@ -9577,9 +9591,10 @@ module OpenSSL
     # Assume we received a timestamp request that has set Request#policy_id to `nil`
     # and Request#cert_requested? to true. The raw request bytes are stored in a
     # variable called `req_raw`. We'd still like to integrate the necessary
-    # intermediate certificates (in `inter1.cer` and `inter2.cer`) to simplify
-    # validation of the resulting Response. `ts.p12` is a PKCS#12-compatible file
-    # including the private key and the timestamping certificate.
+    # intermediate certificates (in <code>inter1.cer</code> and
+    # <code>inter2.cer</code>) to simplify validation of the resulting Response.
+    # <code>ts.p12</code> is a PKCS#12-compatible file including the private key and
+    # the timestamping certificate.
     #
     #     req = OpenSSL::Timestamp::Request.new(raw_bytes)
     #     p12 = OpenSSL::PKCS12.new(File.binread('ts.p12'), 'pwd')
@@ -11295,11 +11310,11 @@ module OpenSSL
       # Parses the string representation of a distinguished name. Two different forms
       # are supported:
       #
-      # *   OpenSSL format (`X509_NAME_oneline()`) used by `#to_s`. For example:
-      #     `/DC=com/DC=example/CN=nobody`
-      # *   OpenSSL format (`X509_NAME_print()`) used by
-      #     `#to_s(OpenSSL::X509::Name::COMPAT)`. For example: `DC=com, DC=example,
-      #     CN=nobody`
+      # *   OpenSSL format (<code>X509_NAME_oneline()</code>) used by
+      #     <code>#to_s</code>. For example: <code>/DC=com/DC=example/CN=nobody</code>
+      # *   OpenSSL format (<code>X509_NAME_print()</code>) used by
+      #     <code>#to_s(OpenSSL::X509::Name::COMPAT)</code>. For example:
+      #     <code>DC=com, DC=example, CN=nobody</code>
       #
       # Neither of them is standardized and has quirks and inconsistencies in handling
       # of escaped characters or multi-valued RDNs.
@@ -11321,9 +11336,9 @@ module OpenSSL
       def self.parse_rfc2253: (String str, ?template template) -> instance
 
       # <!-- rdoc-file=ext/openssl/ossl_x509name.c -->
-      # Compares this Name with *other* and returns `0` if they are the same and `-1`
-      # or `+1` if they are greater or less than each other respectively. Returns
-      # `nil` if they are not comparable (i.e. different types).
+      # Compares this Name with *other* and returns `0` if they are the same and
+      # <code>-1</code> or ++1+ if they are greater or less than each other
+      # respectively. Returns `nil` if they are not comparable (i.e. different types).
       #
       alias <=> cmp
 
@@ -11365,9 +11380,9 @@ module OpenSSL
       #   - name.cmp(other) -> -1 | 0 | 1 | nil
       #   - name <=> other  -> -1 | 0 | 1 | nil
       # -->
-      # Compares this Name with *other* and returns `0` if they are the same and `-1`
-      # or `+1` if they are greater or less than each other respectively. Returns
-      # `nil` if they are not comparable (i.e. different types).
+      # Compares this Name with *other* and returns `0` if they are the same and
+      # <code>-1</code> or ++1+ if they are greater or less than each other
+      # respectively. Returns `nil` if they are not comparable (i.e. different types).
       #
       def cmp: (untyped other) -> Integer?
 
@@ -11435,14 +11450,14 @@ module OpenSSL
       # *   OpenSSL::X509::Name::MULTILINE
       #
       # If *format* is omitted, the largely broken and traditional OpenSSL format
-      # (`X509_NAME_oneline()` format) is chosen.
+      # (<code>X509_NAME_oneline()</code> format) is chosen.
       #
-      # **Use of this method is discouraged.** None of the formats other than
-      # OpenSSL::X509::Name::RFC2253 is standardized and may show an inconsistent
+      # <strong>Use of this method is discouraged.</strong> None of the formats other
+      # than OpenSSL::X509::Name::RFC2253 is standardized and may show an inconsistent
       # behavior through OpenSSL versions.
       #
       # It is recommended to use #to_utf8 instead, which is equivalent to calling
-      # `name.to_s(OpenSSL::X509::Name::RFC2253).force_encoding("UTF-8")`.
+      # <code>name.to_s(OpenSSL::X509::Name::RFC2253).force_encoding("UTF-8")</code>.
       #
       def to_s: (?format format) -> String
 

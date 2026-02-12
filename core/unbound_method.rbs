@@ -150,7 +150,7 @@ class UnboundMethod
   #   - umeth.bind(obj) -> method
   # -->
   # Bind *umeth* to *obj*. If Klass was the class from which *umeth* was obtained,
-  # `obj.kind_of?(Klass)` must be true.
+  # <code>obj.kind_of?(Klass)</code> must be true.
   #
   #     class A
   #       def test
@@ -170,7 +170,7 @@ class UnboundMethod
   #     bm = um.bind(A.new)
   #     bm.call
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     In test, class = C
   #     In test, class = B
@@ -199,12 +199,12 @@ class UnboundMethod
   #     Net::HTTP.method(:get).inspect
   #     #=> "#<Method: Net::HTTP.get(uri_or_host, path=..., port=...) <skip>/lib/ruby/2.7.0/net/http.rb:457>"
   #
-  # `...` in argument definition means argument is optional (has some default
-  # value).
+  # <code>...</code> in argument definition means argument is optional (has some
+  # default value).
   #
   # For methods defined in C (language core and extensions), location and argument
   # names can't be extracted, and only generic information is provided in form of
-  # `*` (any number of arguments) or `_` (some positional argument).
+  # <code>*</code> (any number of arguments) or `_` (some positional argument).
   #
   #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
   #     "cat".method(:+).inspect       #=> "#<Method: String#+(_)>""
@@ -227,12 +227,12 @@ class UnboundMethod
   #     Net::HTTP.method(:get).inspect
   #     #=> "#<Method: Net::HTTP.get(uri_or_host, path=..., port=...) <skip>/lib/ruby/2.7.0/net/http.rb:457>"
   #
-  # `...` in argument definition means argument is optional (has some default
-  # value).
+  # <code>...</code> in argument definition means argument is optional (has some
+  # default value).
   #
   # For methods defined in C (language core and extensions), location and argument
   # names can't be extracted, and only generic information is provided in form of
-  # `*` (any number of arguments) or `_` (some positional argument).
+  # <code>*</code> (any number of arguments) or `_` (some positional argument).
   #
   #     "cat".method(:count).inspect   #=> "#<Method: String#count(*)>"
   #     "cat".method(:+).inspect       #=> "#<Method: String#+(_)>""
@@ -330,8 +330,8 @@ class UnboundMethod
   #   - umeth.bind_call(recv, args, ...) -> obj
   # -->
   # Bind *umeth* to *recv* and then invokes the method with the specified
-  # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
-  # ...)`.
+  # arguments. This is semantically equivalent to
+  # <code>umeth.bind(recv).call(args, ...)</code>.
   #
   def bind_call: (untyped recv, *untyped, **untyped) ?{ (?) -> untyped } -> untyped
 end

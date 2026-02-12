@@ -12,7 +12,8 @@
 # will find the top-level File class.
 #
 # In the descriptions of Object's methods, the parameter *symbol* refers to a
-# symbol, which is either a quoted string or a Symbol (such as `:name`).
+# symbol, which is either a quoted string or a Symbol (such as
+# <code>:name</code>).
 #
 # ## What's Here
 #
@@ -32,7 +33,7 @@
 # *   #!~: Returns `true` if `self` does not match the given object, otherwise
 #     `false`.
 # *   #<=>: Returns 0 if `self` and the given object `object` are the same
-#     object, or if `self == object`; otherwise returns `nil`.
+#     object, or if <code>self == object</code>; otherwise returns `nil`.
 # *   #===: Implements case equality, effectively the same as calling #==.
 # *   #eql?: Implements hash equality, effectively the same as calling #==.
 # *   #kind_of? (aliased as #is_a?): Returns whether given argument is an
@@ -43,7 +44,8 @@
 # *   #method: Returns the `Method` object for the given method in `self`.
 # *   #methods: Returns an array of symbol names of public and protected methods
 #     in `self`.
-# *   #nil?: Returns `false`. (Only `nil` responds `true` to method `nil?`.)
+# *   #nil?: Returns `false`. (Only `nil` responds `true` to method
+#     <code>nil?</code>.)
 # *   #object_id: Returns an integer corresponding to `self` that is unique for
 #     the current process
 # *   #private_methods: Returns an array of the symbol names of the private
@@ -85,7 +87,7 @@
 #     frozen state.
 # *   #define_singleton_method: Defines a singleton method in `self` for the
 #     given symbol method-name and block or proc.
-# *   #display: Prints `self` to the given IO stream or `$stdout`.
+# *   #display: Prints `self` to the given IO stream or <code>$stdout</code>.
 # *   #dup: Returns a shallow unfrozen copy of `self`.
 # *   #enum_for (aliased as #to_enum): Returns an Enumerator for `self` using
 #     the using the given method, arguments, and block.

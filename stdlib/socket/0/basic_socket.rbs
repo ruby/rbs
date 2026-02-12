@@ -325,7 +325,7 @@ class BasicSocket < IO
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # recv_nonblock should not raise an IO::WaitReadable exception, but return the
-  # symbol `:wait_readable` instead.
+  # symbol <code>:wait_readable</code> instead.
   #
   # ### See
   # *   Socket#recvfrom
@@ -399,7 +399,7 @@ class BasicSocket < IO
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # recvmsg_nonblock should not raise an IO::WaitReadable exception, but return
-  # the symbol `:wait_readable` instead.
+  # the symbol <code>:wait_readable</code> instead.
   #
   def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: boolish, ?scm_rights: boolish) -> ([ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ] | :wait_readable)
 
@@ -487,7 +487,7 @@ class BasicSocket < IO
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # sendmsg_nonblock should not raise an IO::WaitWritable exception, but return
-  # the symbol `:wait_writable` instead.
+  # the symbol <code>:wait_writable</code> instead.
   #
   def sendmsg_nonblock: (String mesg, ?Integer flags, ?Addrinfo | String dest_sockaddr, *Socket::AncillaryData controls, ?exception: boolish) -> (Integer | :wait_writable)
 

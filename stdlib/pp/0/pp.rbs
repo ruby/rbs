@@ -31,18 +31,19 @@
 #     pp(obj1, obj2, ...) #=> [obj1, obj2, ...]
 #     pp()                #=> nil
 #
-# Output `obj(s)` to `$>` in pretty printed format.
+# Output <code>obj(s)</code> to <code>$></code> in pretty printed format.
 #
-# It returns `obj(s)`.
+# It returns <code>obj(s)</code>.
 #
 # ## Output Customization
 #
 # To define a customized pretty printing function for your classes, redefine
-# method `#pretty_print(pp)` in the class. Note that `require 'pp'` is needed
-# before redefining `#pretty_print(pp)`.
+# method <code>#pretty_print(pp)</code> in the class. Note that <code>require
+# 'pp'</code> is needed before redefining <code>#pretty_print(pp)</code>.
 #
-# `#pretty_print` takes the `pp` argument, which is an instance of the PP class.
-# The method uses #text, #breakable, #nest, #group and #pp to print the object.
+# <code>#pretty_print</code> takes the `pp` argument, which is an instance of
+# the PP class. The method uses #text, #breakable, #nest, #group and #pp to
+# print the object.
 #
 # ## Pretty-Print JSON
 #
@@ -237,8 +238,8 @@ class PP < PrettyPrint
   # -->
   # Outputs `obj` to `out` in pretty printed format of `width` columns in width.
   #
-  # If `out` is omitted, `$>` is assumed. If `width` is omitted, the width of
-  # `out` is assumed (see width_for).
+  # If `out` is omitted, <code>$></code> is assumed. If `width` is omitted, the
+  # width of `out` is assumed (see width_for).
   #
   # PP.pp returns `out`.
   #

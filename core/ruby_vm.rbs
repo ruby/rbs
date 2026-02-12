@@ -41,8 +41,8 @@ RubyVM::OPTS: Array[String]
 # you want to learn how YARV works, but it also lets you control various
 # settings for the Ruby iseq compiler.
 #
-# You can find the source for the VM instructions in `insns.def` in the Ruby
-# source.
+# You can find the source for the VM instructions in <code>insns.def</code> in
+# the Ruby source.
 #
 # The instruction sequence results will almost certainly change as Ruby changes,
 # so example output in this documentation may be different from what you see.
@@ -183,8 +183,8 @@ class RubyVM::InstructionSequence < Object
   # -->
   # Returns the label of this instruction sequence.
   #
-  # `<main>` if it's at the top level, `<compiled>` if it was evaluated from a
-  # string.
+  # <code><main></code> if it's at the top level, <code><compiled></code> if it
+  # was evaluated from a string.
   #
   # For example, using irb:
   #
@@ -212,7 +212,7 @@ class RubyVM::InstructionSequence < Object
   # -->
   # Returns the path of this instruction sequence.
   #
-  # `<compiled>` if the iseq was evaluated from a string.
+  # <code><compiled></code> if the iseq was evaluated from a string.
   #
   # For example, using irb:
   #
@@ -254,8 +254,8 @@ class RubyVM::InstructionSequence < Object
   # the following data:
   #
   # magic
-  # :   A string identifying the data format. **Always
-  #     `YARVInstructionSequence/SimpleDataFormat`.**
+  # :   A string identifying the data format. <strong>Always
+  #     <code>YARVInstructionSequence/SimpleDataFormat</code>.</strong>
   #
   #
   # major_version
@@ -273,14 +273,14 @@ class RubyVM::InstructionSequence < Object
   # misc
   # :   A hash containing:
   #
-  #     `:arg_size`
+  #     <code>:arg_size</code>
   # :       the total number of arguments taken by the method or the block (0 if
   #         *iseq* doesn't represent a method or block)
   #
-  #     `:local_size`
+  #     <code>:local_size</code>
   # :       the number of local variables + 1
   #
-  #     `:stack_max`
+  #     <code>:stack_max</code>
   # :       used in calculating the stack depth at which a SystemStackError is
   #         thrown.
   #
@@ -290,15 +290,15 @@ class RubyVM::InstructionSequence < Object
   # :   The name of the context (block, method, class, module, etc.) that this
   #     instruction sequence belongs to.
   #
-  #     `<main>` if it's at the top level, `<compiled>` if it was evaluated from a
-  #     string.
+  #     <code><main></code> if it's at the top level, <code><compiled></code> if
+  #     it was evaluated from a string.
   #
   #
   # #path
   # :   The relative path to the Ruby file where the instruction sequence was
   #     loaded from.
   #
-  #     `<compiled>` if the iseq was evaluated from a string.
+  #     <code><compiled></code> if the iseq was evaluated from a string.
   #
   #
   # #absolute_path
@@ -316,8 +316,9 @@ class RubyVM::InstructionSequence < Object
   # type
   # :   The type of the instruction sequence.
   #
-  #     Valid values are `:top`, `:method`, `:block`, `:class`, `:rescue`,
-  #     `:ensure`, `:eval`, `:main`, and `plain`.
+  #     Valid values are <code>:top</code>, <code>:method</code>,
+  #     <code>:block</code>, <code>:class</code>, <code>:rescue</code>,
+  #     <code>:ensure</code>, <code>:eval</code>, <code>:main</code>, and `plain`.
   #
   #
   # locals
@@ -328,7 +329,7 @@ class RubyVM::InstructionSequence < Object
   # params
   # :   An Hash object containing parameter information.
   #
-  #     More info about these values can be found in `vm_core.h`.
+  #     More info about these values can be found in <code>vm_core.h</code>.
   #
   #
   # catch_table
@@ -400,15 +401,16 @@ module RubyVM::AbstractSyntaxTree
   #     RubyVM::AbstractSyntaxTree.parse("x = 1 + 2")
   #     # => #<RubyVM::AbstractSyntaxTree::Node:SCOPE@1:0-1:9>
   #
-  # If `keep_script_lines: true` option is provided, the text of the parsed source
-  # is associated with nodes and is available via Node#script_lines.
+  # If <code>keep_script_lines: true</code> option is provided, the text of the
+  # parsed source is associated with nodes and is available via Node#script_lines.
   #
-  # If `keep_tokens: true` option is provided, Node#tokens are populated.
+  # If <code>keep_tokens: true</code> option is provided, Node#tokens are
+  # populated.
   #
   # SyntaxError is raised if the given *string* is invalid syntax. To overwrite
-  # this behavior, `error_tolerant: true` can be provided. In this case, the
-  # parser will produce a tree where expressions with syntax errors would be
-  # represented by Node with `type=:ERROR`.
+  # this behavior, <code>error_tolerant: true</code> can be provided. In this
+  # case, the parser will produce a tree where expressions with syntax errors
+  # would be represented by Node with <code>type=:ERROR</code>.
   #
   #     root = RubyVM::AbstractSyntaxTree.parse("x = 1; p(x; y=2")
   #     # <internal:ast>:33:in `parse': syntax error, unexpected ';', expecting ')' (SyntaxError)
@@ -661,7 +663,7 @@ module RubyVM::YJIT
   # -->
   # Marshal dumps exit locations to the given filename.
   # Usage:
-  # If `--yjit-exit-locations` is passed, a file named
+  # If <code>--yjit-exit-locations</code> is passed, a file named
   # "yjit_exit_locations.dump" will automatically be generated.
   # If you want to collect traces manually, call `dump_exit_locations`
   # directly.
@@ -693,11 +695,11 @@ module RubyVM::YJIT
   # *   `stats`:
   #     *   `false`: Don't enable stats.
   #     *   `true`: Enable stats. Print stats at exit.
-  #     *   `:quiet`: Enable stats. Do not print stats at exit.
+  #     *   <code>:quiet</code>: Enable stats. Do not print stats at exit.
   # *   `log`:
   #     *   `false`: Don't enable the log.
   #     *   `true`: Enable the log. Print log at exit.
-  #     *   `:quiet`: Enable the log. Do not print log at exit.
+  #     *   <code>:quiet</code>: Enable the log. Do not print log at exit.
   #
   def self.enable: (?stats: false | true | :quiet) -> void
 
@@ -729,7 +731,7 @@ module RubyVM::YJIT
   #   rdoc-file=yjit.rb
   #   - reset_stats!()
   # -->
-  # Discard statistics collected for `--yjit-stats`.
+  # Discard statistics collected for <code>--yjit-stats</code>.
   #
   def self.reset_stats!: () -> void
 
@@ -737,8 +739,8 @@ module RubyVM::YJIT
   #   rdoc-file=yjit.rb
   #   - runtime_stats(key = nil)
   # -->
-  # Return a hash for statistics generated for the `--yjit-stats` command line
-  # option.
+  # Return a hash for statistics generated for the <code>--yjit-stats</code>
+  # command line option.
   # Return `nil` when option is not passed or unavailable.
   # If a symbol argument is provided, return only the value for the named stat.
   # If any other type is provided, raises TypeError.
@@ -749,7 +751,7 @@ module RubyVM::YJIT
   #   rdoc-file=yjit.rb
   #   - stats_enabled?()
   # -->
-  # Check if `--yjit-stats` is used.
+  # Check if <code>--yjit-stats</code> is used.
   #
   def self.stats_enabled?: () -> bool
 
@@ -758,7 +760,7 @@ module RubyVM::YJIT
   #   - stats_string()
   # -->
   # Format and print out counters as a String. This returns a non-empty
-  # content only when `--yjit-stats` is enabled.
+  # content only when <code>--yjit-stats</code> is enabled.
   #
   def self.stats_string: () -> String
 end

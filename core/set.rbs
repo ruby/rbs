@@ -22,10 +22,11 @@
 #
 # ## Comparison
 #
-# The comparison operators `<`, `>`, `<=`, and `>=` are implemented as shorthand
-# for the {proper_,}{subset?,superset?} methods.  The `<=>` operator reflects
-# this order, or returns `nil` for sets that both have distinct elements (`{x,
-# y}` vs. `{x, z}` for example).
+# The comparison operators <code><</code>, <code>></code>, <code><=</code>, and
+# <code>>=</code> are implemented as shorthand for the
+# {proper_,}{subset?,superset?} methods.  The <code><=></code> operator reflects
+# this order, or returns `nil` for sets that both have distinct elements
+# (<code>{x, y}</code> vs. <code>{x, z}</code> for example).
 #
 # ## Example
 #
@@ -48,9 +49,9 @@
 # core methods were adjusted.
 #
 # To keep backward compatibility, when a class is inherited from Set, additional
-# module `Set::SubclassCompatible` is included, which makes the inherited class
-# behavior, as well as internal method names, closer to what it was before Ruby
-# 4.0.
+# module <code>Set::SubclassCompatible</code> is included, which makes the
+# inherited class behavior, as well as internal method names, closer to what it
+# was before Ruby 4.0.
 #
 # It can be easily seen, for example, in the #inspect method behavior:
 #
@@ -63,7 +64,7 @@
 #     # prints "#<MySet: {1, 2, 3}>", like it was in Ruby 3.4
 #
 # For new code, if backward compatibility is not necessary, it is recommended to
-# instead inherit from `Set::CoreSet`, which avoids including the
+# instead inherit from <code>Set::CoreSet</code>, which avoids including the
 # "compatibility" layer:
 #
 #     class MyCoreSet < Set::CoreSet
@@ -340,8 +341,8 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].include? 2   #=> true
   #     Set[1, 2, 3].include? 4   #=> false
   #
-  # Note that `include?` and `member?` do not test member equality using `==` as
-  # do other Enumerables.
+  # Note that <code>include?</code> and <code>member?</code> do not test member
+  # equality using <code>==</code> as do other Enumerables.
   #
   # This is aliased to #===, so it is usable in `case` expressions:
   #
@@ -363,8 +364,8 @@ class Set[unchecked out A]
   #     Set[1, 2, 3].include? 2   #=> true
   #     Set[1, 2, 3].include? 4   #=> false
   #
-  # Note that `include?` and `member?` do not test member equality using `==` as
-  # do other Enumerables.
+  # Note that <code>include?</code> and <code>member?</code> do not test member
+  # equality using <code>==</code> as do other Enumerables.
   #
   # This is aliased to #===, so it is usable in `case` expressions:
   #
@@ -385,8 +386,8 @@ class Set[unchecked out A]
   #   - set ^ enum -> new_set
   # -->
   # Returns a new set containing elements exclusive between the set and the given
-  # enumerable object.  `(set ^ enum)` is equivalent to `((set | enum) - (set &
-  # enum))`.
+  # enumerable object.  <code>(set ^ enum)</code> is equivalent to <code>((set |
+  # enum) - (set & enum))</code>.
   #
   #     Set[1, 2] ^ Set[2, 3]                   #=> Set[3, 1]
   #     Set[1, 'b', 'c'] ^ ['b', 'd']           #=> Set["d", 1, "c"]
@@ -500,7 +501,7 @@ class Set[unchecked out A]
   #   - disjoint?(set) -> true or false
   # -->
   # Returns true if the set and the given enumerable have no element in common.
-  # This method is the opposite of `intersect?`.
+  # This method is the opposite of <code>intersect?</code>.
   #
   #     Set[1, 2, 3].disjoint? Set[3, 4]   #=> false
   #     Set[1, 2, 3].disjoint? Set[4, 5]   #=> true

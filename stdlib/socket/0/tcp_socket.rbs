@@ -68,7 +68,7 @@ class TCPSocket < IPSocket
   #     The `connect_timeout` specifies the timeout in seconds from the start of
   #     the connection attempt to the last candidate.
   #     By default, all connection attempts continue until the timeout occurs.
-  #     When `fast_fallback:false` is explicitly specified,
+  #     When <code>fast_fallback:false</code> is explicitly specified,
   #     a timeout is set for each connection attempt and any connection attempt
   #     that exceeds its timeout will be canceled.
   #

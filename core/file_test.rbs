@@ -269,7 +269,7 @@ module FileTest
   # -->
   # If *file_name* is readable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the
-  # bits is platform dependent; on Unix systems, see `stat(2)`.
+  # bits is platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   # *file_name* can be an IO object.
   #
@@ -285,7 +285,7 @@ module FileTest
   # -->
   # If *file_name* is writable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the
-  # bits is platform dependent; on Unix systems, see `stat(2)`.
+  # bits is platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   # *file_name* can be an IO object.
   #

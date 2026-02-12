@@ -73,15 +73,18 @@
 # ### IO
 #
 # *   ::pp: Prints the given objects in pretty form.
-# *   #gets: Returns and assigns to `$_` the next line from the current input.
+# *   #gets: Returns and assigns to <code>$_</code> the next line from the
+#     current input.
 # *   #open: Creates an IO object connected to the given stream, file, or
 #     subprocess.
 # *   #p:  Prints the given objects' inspect output to the standard output.
 # *   #print: Prints the given objects to standard output without a newline.
 # *   #printf: Prints the string resulting from applying the given format string
 #     to any additional arguments.
-# *   #putc: Equivalent to `$stdout.putc(object)` for the given object.
-# *   #puts: Equivalent to `$stdout.puts(*objects)` for the given objects.
+# *   #putc: Equivalent to <code>$stdout.putc(object)</code> for the given
+#     object.
+# *   #puts: Equivalent to <code>$stdout.puts(*objects)</code> for the given
+#     objects.
 # *   #readline: Similar to #gets, but raises an exception at the end of file.
 # *   #readlines: Returns an array of the remaining lines from the current
 #     input.
@@ -150,7 +153,7 @@ module Kernel : BasicObject
   #   - caller(range)                -> array or nil
   # -->
   # Returns the current execution stack---an array containing strings in the form
-  # `file:line` or `file:line: in `method'`.
+  # <code>file:line</code> or <code>file:line: in `method'</code>.
   #
   # The optional *start* parameter determines the number of initial stack entries
   # to omit from the top of the stack.
@@ -217,10 +220,10 @@ module Kernel : BasicObject
   #
   #     catch(1) { 123 }            # => 123
   #
-  # If `throw(tag2, val)` is called, Ruby searches up its stack for a `catch`
-  # block whose `tag` has the same `object_id` as *tag2*. When found, the block
-  # stops executing and returns *val* (or `nil` if no second argument was given to
-  # `throw`).
+  # If <code>throw(tag2, val)</code> is called, Ruby searches up its stack for a
+  # `catch` block whose `tag` has the same `object_id` as *tag2*. When found, the
+  # block stops executing and returns *val* (or `nil` if no second argument was
+  # given to `throw`).
   #
   #     catch(1) { throw(1, 456) }  # => 456
   #     catch(1) { throw(1) }       # => nil
@@ -231,8 +234,8 @@ module Kernel : BasicObject
   #     catch(1) {|x| x + 2 }       # => 3
   #
   # When no `tag` is given, `catch` yields a new unique object (as from
-  # `Object.new`) as the block parameter. This object can then be used as the
-  # argument to `throw`, and will match the correct `catch` block.
+  # <code>Object.new</code>) as the block parameter. This object can then be used
+  # as the argument to `throw`, and will match the correct `catch` block.
   #
   #     catch do |obj_A|
   #       catch do |obj_B|
@@ -296,7 +299,7 @@ module Kernel : BasicObject
   #   - block_given?   -> true or false
   # -->
   # Returns `true` if `yield` would execute a block in the current context. The
-  # `iterator?` form is mildly deprecated.
+  # <code>iterator?</code> form is mildly deprecated.
   #
   #     def try
   #       if block_given?
@@ -422,7 +425,8 @@ module Kernel : BasicObject
   #     Array({foo: 0, bar: 1}) # => [[:foo, 0], [:bar, 1]]
   #     Array(0..4)             # => [0, 1, 2, 3, 4]
   #
-  # Returns `object` in an array, `[object]`, if `object` cannot be converted:
+  # Returns `object` in an array, <code>[object]</code>, if `object` cannot be
+  # converted:
   #
   #     Array(:foo)             # => [:foo]
   #
@@ -438,8 +442,8 @@ module Kernel : BasicObject
   # Returns a new Complex object if the arguments are valid; otherwise raises an
   # exception if `exception` is `true`; otherwise returns `nil`.
   #
-  # With Numeric arguments `real` and `imag`, returns `Complex.rect(real, imag)`
-  # if the arguments are valid.
+  # With Numeric arguments `real` and `imag`, returns <code>Complex.rect(real,
+  # imag)</code> if the arguments are valid.
   #
   # With string argument `s`, returns a new Complex object if the argument is
   # valid; the string may have:
@@ -449,7 +453,7 @@ module Kernel : BasicObject
   #     coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
   #
   #     *   Sign-separated real and imaginary numeric substrings (with trailing
-  #         character `'i'`):
+  #         character <code>'i'</code>):
   #
   #             Complex('1+2i')  # => (1+2i)
   #             Complex('+1+2i') # => (1+2i)
@@ -457,13 +461,15 @@ module Kernel : BasicObject
   #             Complex('-1+2i') # => (-1+2i)
   #             Complex('-1-2i') # => (-1-2i)
   #
-  #     *   Real-only numeric string (without trailing character `'i'`):
+  #     *   Real-only numeric string (without trailing character
+  #         <code>'i'</code>):
   #
   #             Complex('1')  # => (1+0i)
   #             Complex('+1') # => (1+0i)
   #             Complex('-1') # => (-1+0i)
   #
-  #     *   Imaginary-only numeric string (with trailing character `'i'`):
+  #     *   Imaginary-only numeric string (with trailing character
+  #         <code>'i'</code>):
   #
   #             Complex('1i')  # => (0+1i)
   #             Complex('+1i') # => (0+1i)
@@ -490,10 +496,10 @@ module Kernel : BasicObject
   #   - Float(arg, exception: true)    -> float or nil
   # -->
   # Returns *arg* converted to a float. Numeric types are converted directly, and
-  # with exception to String and `nil`, the rest are converted using *arg*`.to_f`.
-  # Converting a String with invalid characters will result in an ArgumentError.
-  # Converting `nil` generates a TypeError. Exceptions can be suppressed by
-  # passing `exception: false`.
+  # with exception to String and `nil`, the rest are converted using
+  # *arg*<code>.to_f</code>. Converting a String with invalid characters will
+  # result in an ArgumentError. Converting `nil` generates a TypeError. Exceptions
+  # can be suppressed by passing <code>exception: false</code>.
   #
   #     Float(1)                 #=> 1.0
   #     Float("123.456")         #=> 123.456
@@ -516,7 +522,8 @@ module Kernel : BasicObject
   #     *   A hash, returns `object`.
   #     *   An empty array or `nil`, returns an empty hash.
   #
-  # *   Otherwise, if `object.to_hash` returns a hash, returns that hash.
+  # *   Otherwise, if <code>object.to_hash</code> returns a hash, returns that
+  #     hash.
   # *   Otherwise, returns TypeError.
   #
   # Examples:
@@ -622,7 +629,7 @@ module Kernel : BasicObject
   #   - Rational(x, y, exception: true)  ->  rational or nil
   #   - Rational(arg, exception: true)   ->  rational or nil
   # -->
-  # Returns `x/y` or `arg` as a Rational.
+  # Returns <code>x/y</code> or `arg` as a Rational.
   #
   #     Rational(2, 3)   #=> (2/3)
   #     Rational(5)      #=> (5/1)
@@ -698,7 +705,7 @@ module Kernel : BasicObject
   # Returns the canonicalized absolute path of the directory of the file from
   # which this method is called. It means symlinks in the path is resolved. If
   # `__FILE__` is `nil`, it returns `nil`. The return value equals to
-  # `File.dirname(File.realpath(__FILE__))`.
+  # <code>File.dirname(File.realpath(__FILE__))</code>.
   #
   def self?.__dir__: () -> String?
 
@@ -715,8 +722,8 @@ module Kernel : BasicObject
   #   rdoc-file=io.c
   #   - `command` -> string
   # -->
-  # Returns the `$stdout` output from running `command` in a subshell; sets global
-  # variable `$?` to the process status.
+  # Returns the <code>$stdout</code> output from running `command` in a subshell;
+  # sets global variable <code>$?</code> to the process status.
   #
   # This method has potential security vulnerabilities if called with untrusted
   # input; see [Command Injection](rdoc-ref:security/command_injection.rdoc).
@@ -728,7 +735,7 @@ module Kernel : BasicObject
   #     $ $?                     # => #<Process::Status: pid 17088 exit 99>
   #     $ $?.exitstatus          # => 99
   #
-  # The built-in syntax `%x{...}` uses this method.
+  # The built-in syntax <code>%x{...}</code> uses this method.
   #
   def self?.`: (String arg0) -> String
 
@@ -737,7 +744,8 @@ module Kernel : BasicObject
   #   - abort
   #   - Process.abort(msg = nil)
   # -->
-  # Terminates execution immediately, effectively by calling `Kernel.exit(false)`.
+  # Terminates execution immediately, effectively by calling
+  # <code>Kernel.exit(false)</code>.
   #
   # If string argument `msg` is given, it is written to STDERR prior to
   # termination; otherwise, if an exception was raised, prints its message and
@@ -760,7 +768,7 @@ module Kernel : BasicObject
   #     do_at_exit("goodbye ")
   #     exit
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     goodbye cruel world
   #
@@ -987,13 +995,14 @@ module Kernel : BasicObject
   #     end
   #     # => #<RuntimeError: RuntimeError>
   #
-  # If keyword argument `cause` is not given, the cause is the value of `$!`.
+  # If keyword argument `cause` is not given, the cause is the value of
+  # <code>$!</code>.
   #
   # See [Cause](rdoc-ref:exceptions.md@Cause).
   #
   # In the alternate calling sequence, where argument `exception` *not* given,
-  # raises a new exception of the class given by `$!`, or of class RuntimeError if
-  # `$!` is `nil`:
+  # raises a new exception of the class given by <code>$!</code>, or of class
+  # RuntimeError if <code>$!</code> is `nil`:
   #
   #     begin
   #       raise
@@ -1095,13 +1104,14 @@ module Kernel : BasicObject
   #     end
   #     # => #<RuntimeError: RuntimeError>
   #
-  # If keyword argument `cause` is not given, the cause is the value of `$!`.
+  # If keyword argument `cause` is not given, the cause is the value of
+  # <code>$!</code>.
   #
   # See [Cause](rdoc-ref:exceptions.md@Cause).
   #
   # In the alternate calling sequence, where argument `exception` *not* given,
-  # raises a new exception of the class given by `$!`, or of class RuntimeError if
-  # `$!` is `nil`:
+  # raises a new exception of the class given by <code>$!</code>, or of class
+  # RuntimeError if <code>$!</code> is `nil`:
   #
   #     begin
   #       raise
@@ -1146,29 +1156,29 @@ module Kernel : BasicObject
   #   - gets(limit [, getline_args])      -> string or nil
   #   - gets(sep, limit [, getline_args]) -> string or nil
   # -->
-  # Returns (and assigns to `$_`) the next line from the list of files in `ARGV`
-  # (or `$*`), or from standard input if no files are present on the command line.
-  # Returns `nil` at end of file. The optional argument specifies the record
-  # separator. The separator is included with the contents of each record. A
-  # separator of `nil` reads the entire contents, and a zero-length separator
-  # reads the input one paragraph at a time, where paragraphs are divided by two
-  # consecutive newlines.  If the first argument is an integer, or optional second
-  # argument is given, the returning string would not be longer than the given
-  # value in bytes.  If multiple filenames are present in `ARGV`, `gets(nil)` will
-  # read the contents one file at a time.
+  # Returns (and assigns to <code>$_</code>) the next line from the list of files
+  # in `ARGV` (or <code>$*</code>), or from standard input if no files are present
+  # on the command line. Returns `nil` at end of file. The optional argument
+  # specifies the record separator. The separator is included with the contents of
+  # each record. A separator of `nil` reads the entire contents, and a zero-length
+  # separator reads the input one paragraph at a time, where paragraphs are
+  # divided by two consecutive newlines.  If the first argument is an integer, or
+  # optional second argument is given, the returning string would not be longer
+  # than the given value in bytes.  If multiple filenames are present in `ARGV`,
+  # <code>gets(nil)</code> will read the contents one file at a time.
   #
   #     ARGV << "testfile"
   #     print while gets
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     This is line one
   #     This is line two
   #     This is line three
   #     And so on...
   #
-  # The style of programming using `$_` as an implicit parameter is gradually
-  # losing favor in the Ruby community.
+  # The style of programming using <code>$_</code> as an implicit parameter is
+  # gradually losing favor in the Ruby community.
   #
   def self?.gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
 
@@ -1177,8 +1187,9 @@ module Kernel : BasicObject
   #   - global_variables    -> array
   # -->
   # Returns an array of the names of global variables. This includes special
-  # regexp global variables such as `$~` and `$+`, but does not include the
-  # numbered regexp global variables (`$1`, `$2`, etc.).
+  # regexp global variables such as <code>$~</code> and <code>$+</code>, but does
+  # not include the numbered regexp global variables (<code>$1</code>,
+  # <code>$2</code>, etc.).
   #
   #     global_variables.grep /std/   #=> [:$stdin, :$stdout, :$stderr]
   #
@@ -1197,10 +1208,10 @@ module Kernel : BasicObject
   # the file will be loaded using the relative path from the current directory.
   #
   # Otherwise, the file will be searched for in the library directories listed in
-  # `$LOAD_PATH` (`$:`). If the file is found in a directory, it will attempt to
-  # load the file relative to that directory.  If the file is not found in any of
-  # the directories in `$LOAD_PATH`, the file will be loaded using the relative
-  # path from the current directory.
+  # <code>$LOAD_PATH</code> (<code>$:</code>). If the file is found in a
+  # directory, it will attempt to load the file relative to that directory.  If
+  # the file is not found in any of the directories in <code>$LOAD_PATH</code>,
+  # the file will be loaded using the relative path from the current directory.
   #
   # If the file doesn't exist when there is an attempt to load it, a LoadError
   # will be raised.
@@ -1275,18 +1286,19 @@ module Kernel : BasicObject
   #   rdoc-file=io.c
   #   - print(*objects) -> nil
   # -->
-  # Equivalent to `$stdout.print(*objects)`, this method is the straightforward
-  # way to write to `$stdout`.
+  # Equivalent to <code>$stdout.print(*objects)</code>, this method is the
+  # straightforward way to write to <code>$stdout</code>.
   #
-  # Writes the given objects to `$stdout`; returns `nil`. Appends the output
-  # record separator `$OUTPUT_RECORD_SEPARATOR` `$\`), if it is not `nil`.
+  # Writes the given objects to <code>$stdout</code>; returns `nil`. Appends the
+  # output record separator <code>$OUTPUT_RECORD_SEPARATOR</code>
+  # <code>$\</code>), if it is not `nil`.
   #
   # With argument `objects` given, for each object:
   #
   # *   Converts via its method `to_s` if not a string.
   # *   Writes to `stdout`.
   # *   If not the last object, writes the output field separator
-  #     `$OUTPUT_FIELD_SEPARATOR` (`$,` if it is not `nil`.
+  #     <code>$OUTPUT_FIELD_SEPARATOR</code> (<code>$,</code> if it is not `nil`.
   #
   # With default separators:
   #
@@ -1311,8 +1323,8 @@ module Kernel : BasicObject
   #
   #     0,0.0,0/1,0+0i,zero,zero
   #
-  # With no argument given, writes the content of `$_` (which is usually the most
-  # recent user input):
+  # With no argument given, writes the content of <code>$_</code> (which is
+  # usually the most recent user input):
   #
   #     gets  # Sets $_ to the most recent user input.
   #     print # Prints $_.
@@ -1434,7 +1446,7 @@ module Kernel : BasicObject
   # -->
   # prints arguments in pretty form.
   #
-  # `#pp` returns argument(s).
+  # <code>#pp</code> returns argument(s).
   #
   def self?.pp: [T] (T arg0) -> T
               | (untyped, untyped, *untyped) -> Array[untyped]
@@ -1444,19 +1456,20 @@ module Kernel : BasicObject
   #   rdoc-file=random.c
   #   - rand(max=0)    -> number
   # -->
-  # If called without an argument, or if `max.to_i.abs == 0`, rand returns a
-  # pseudo-random floating point number between 0.0 and 1.0, including 0.0 and
-  # excluding 1.0.
+  # If called without an argument, or if <code>max.to_i.abs == 0</code>, rand
+  # returns a pseudo-random floating point number between 0.0 and 1.0, including
+  # 0.0 and excluding 1.0.
   #
   #     rand        #=> 0.2725926052826416
   #
-  # When `max.abs` is greater than or equal to 1, `rand` returns a pseudo-random
-  # integer greater than or equal to 0 and less than `max.to_i.abs`.
+  # When <code>max.abs</code> is greater than or equal to 1, `rand` returns a
+  # pseudo-random integer greater than or equal to 0 and less than
+  # <code>max.to_i.abs</code>.
   #
   #     rand(100)   #=> 12
   #
   # When `max` is a Range, `rand` returns a random number where
-  # `range.member?(number) == true`.
+  # <code>range.member?(number) == true</code>.
   #
   # Negative or floating point values for `max` are allowed, but may give
   # surprising results.
@@ -1557,7 +1570,7 @@ module Kernel : BasicObject
   # When RubyGems is required, Kernel#require is replaced with our own which is
   # capable of loading gems on demand.
   #
-  # When you call `require 'x'`, this is what happens:
+  # When you call <code>require 'x'</code>, this is what happens:
   # *   If the file can be loaded from the existing Ruby loadpath, it is.
   # *   Otherwise, installed gems are searched for a file that matches. If it's
   #     found in gem 'y', that gem is activated (added to the loadpath).
@@ -1592,8 +1605,9 @@ module Kernel : BasicObject
   # IO objects.
   #
   # Argument `timeout` is a numeric value (such as integer or float) timeout
-  # interval in seconds. `timeout` can also be `nil` or `Float::INFINITY`. `nil`
-  # and `Float::INFINITY` means no timeout.
+  # interval in seconds. `timeout` can also be `nil` or
+  # <code>Float::INFINITY</code>. `nil` and <code>Float::INFINITY</code> means no
+  # timeout.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:
@@ -1668,8 +1682,8 @@ module Kernel : BasicObject
   #
   # The writability notified by select(2) doesn't show how many bytes are
   # writable. IO#write method blocks until given whole string is written. So,
-  # `IO#write(two or more bytes)` can block after writability is notified by
-  # IO.select.  IO#write_nonblock is required to avoid the blocking.
+  # <code>IO#write(two or more bytes)</code> can block after writability is
+  # notified by IO.select.  IO#write_nonblock is required to avoid the blocking.
   #
   # Blocking write (#write) can be emulated using #write_nonblock and IO.select as
   # follows: IO::WaitReadable should also be rescued for SSL renegotiation in
@@ -1781,58 +1795,58 @@ module Kernel : BasicObject
   # *   Each of these tests operates only on the entity at `path0`,
   #      and returns `true` or `false`;
   #      for a non-existent entity, returns `false` (does not raise exception):
-  # Character|Test
-  # ---------|-------------------------------------------------------------------
-  #   `'b'`  |Whether the entity is a block device.
-  #   `'c'`  |Whether the entity is a character device.
-  #   `'d'`  |Whether the entity is a directory.
-  #   `'e'`  |Whether the entity is an existing entity.
-  #   `'f'`  |Whether the entity is an existing regular file.
-  #   `'g'`  |Whether the entity's setgid bit is set.
-  #   `'G'`  |Whether the entity's group ownership is equal to the caller's.
-  #   `'k'`  |Whether the entity's sticky bit is set.
-  #   `'l'`  |Whether the entity is a symbolic link.
-  #   `'o'`  |Whether the entity is owned by the caller's effective uid.
-  #   `'O'`  |Like `'o'`, but uses the real uid (not the effective uid).
-  #   `'p'`  |Whether the entity is a FIFO device (named pipe).
-  #   `'r'`  |Whether the entity is readable by the caller's effective uid/gid.
-  #   `'R'`  |Like `'r'`, but uses the real uid/gid (not the effective uid/gid).
-  #   `'S'`  |Whether the entity is a socket.
-  #   `'u'`  |Whether the entity's setuid bit is set.
-  #   `'w'`  |Whether the entity is writable by the caller's effective uid/gid.
-  #   `'W'`  |Like `'w'`, but uses the real uid/gid (not the effective uid/gid).
-  #   `'x'`  |Whether the entity is executable by the caller's effective uid/gid.
-  #   `'X'`  |Like `'x'`, but uses the real uid/gid (not the effective uid/git).
-  #   `'z'`  |Whether the entity exists and is of length zero.
+  #    Character    |Test
+  # ----------------|-----------------------------------------------------------------------------
+  # <code>'b'</code>|Whether the entity is a block device.
+  # <code>'c'</code>|Whether the entity is a character device.
+  # <code>'d'</code>|Whether the entity is a directory.
+  # <code>'e'</code>|Whether the entity is an existing entity.
+  # <code>'f'</code>|Whether the entity is an existing regular file.
+  # <code>'g'</code>|Whether the entity's setgid bit is set.
+  # <code>'G'</code>|Whether the entity's group ownership is equal to the caller's.
+  # <code>'k'</code>|Whether the entity's sticky bit is set.
+  # <code>'l'</code>|Whether the entity is a symbolic link.
+  # <code>'o'</code>|Whether the entity is owned by the caller's effective uid.
+  # <code>'O'</code>|Like <code>'o'</code>, but uses the real uid (not the effective uid).
+  # <code>'p'</code>|Whether the entity is a FIFO device (named pipe).
+  # <code>'r'</code>|Whether the entity is readable by the caller's effective uid/gid.
+  # <code>'R'</code>|Like <code>'r'</code>, but uses the real uid/gid (not the effective uid/gid).
+  # <code>'S'</code>|Whether the entity is a socket.
+  # <code>'u'</code>|Whether the entity's setuid bit is set.
+  # <code>'w'</code>|Whether the entity is writable by the caller's effective uid/gid.
+  # <code>'W'</code>|Like <code>'w'</code>, but uses the real uid/gid (not the effective uid/gid).
+  # <code>'x'</code>|Whether the entity is executable by the caller's effective uid/gid.
+  # <code>'X'</code>|Like <code>'x'</code>, but uses the real uid/gid (not the effective uid/git).
+  # <code>'z'</code>|Whether the entity exists and is of length zero.
   # *   This test operates only on the entity at `path0`,
-  #      and returns an integer size or `nil`:
-  # Character|Test
-  # ---------|--------------------------------------------------------------------------------------------
-  #   `'s'`  |Returns positive integer size if the entity exists and has non-zero length, `nil` otherwise.
+  #      and returns an integer size or +nil+:
+  #    Character    |Test
+  # ----------------|--------------------------------------------------------------------------------------------
+  # <code>'s'</code>|Returns positive integer size if the entity exists and has non-zero length, +nil+ otherwise.
   # *   Each of these tests operates only on the entity at `path0`,
   #      and returns a Time object;
   #      raises an exception if the entity does not exist:
-  # Character|Test
-  # ---------|--------------------------------------
-  #   `'A'`  |Last access time for the entity.
-  #   `'C'`  |Last change time for the entity.
-  #   `'M'`  |Last modification time for the entity.
+  #    Character    |Test
+  # ----------------|--------------------------------------
+  # <code>'A'</code>|Last access time for the entity.
+  # <code>'C'</code>|Last change time for the entity.
+  # <code>'M'</code>|Last modification time for the entity.
   # *   Each of these tests operates on the modification time (`mtime`)
   #      of each of the entities at `path0` and `path1`,
   #      and returns a `true` or `false`;
   #      returns `false` if either entity does not exist:
-  # Character|Test
-  # ---------|---------------------------------------------------------------
-  #   `'<'`  |Whether the `mtime` at `path0` is less than that at `path1`.
-  #   `'='`  |Whether the `mtime` at `path0` is equal to that at `path1`.
-  #   `'>'`  |Whether the `mtime` at `path0` is greater than that at `path1`.
+  #    Character    |Test
+  # ----------------|---------------------------------------------------------------
+  # <code>'<'</code>|Whether the `mtime` at `path0` is less than that at `path1`.
+  # <code>'='</code>|Whether the `mtime` at `path0` is equal to that at `path1`.
+  # <code>'>'</code>|Whether the `mtime` at `path0` is greater than that at `path1`.
   # *   This test operates on the content of each of the entities at `path0` and
   #     `path1`,
   #      and returns a `true` or `false`;
   #      returns `false` if either entity does not exist:
-  # Character|Test
-  # ---------|---------------------------------------------
-  #   `'-'`  |Whether the entities exist and are identical.
+  #    Character    |Test
+  # ----------------|---------------------------------------------
+  # <code>'-'</code>|Whether the entities exist and are identical.
   #
   def self?.test: (String | Integer cmd, String | IO file1, ?String | IO file2) -> (TrueClass | FalseClass | Time | nil | Integer)
 
@@ -1851,14 +1865,14 @@ module Kernel : BasicObject
   #   rdoc-file=warning.rb
   #   - warn(*msgs, uplevel: nil, category: nil)   -> nil
   # -->
-  # If warnings have been disabled (for example with the `-W0` flag), does
-  # nothing.  Otherwise, converts each of the messages to strings, appends a
+  # If warnings have been disabled (for example with the <code>-W0</code> flag),
+  # does nothing.  Otherwise, converts each of the messages to strings, appends a
   # newline character to the string if the string does not end in a newline, and
   # calls Warning.warn with the string.
   #
   #     warn("warning 1", "warning 2")
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     warning 1
   #     warning 2
@@ -1878,12 +1892,13 @@ module Kernel : BasicObject
   #
   #     bar
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     baz.rb:6: warning: invalid call to foo
   #
   # If `category` keyword argument is given, passes the category to
-  # `Warning.warn`.  The category given must be one of the following categories:
+  # <code>Warning.warn</code>.  The category given must be one of the following
+  # categories:
   #
   # :deprecated
   # :   Used for warning for deprecated functionality that may be removed in the
@@ -1928,7 +1943,7 @@ module Kernel : BasicObject
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -1951,7 +1966,7 @@ module Kernel : BasicObject
   #
   # Raises an exception if the new process could not execute.
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -2028,7 +2043,7 @@ module Kernel : BasicObject
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -2057,7 +2072,7 @@ module Kernel : BasicObject
   #
   # Raises an exception if the new process could not execute.
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -2115,7 +2130,7 @@ module Kernel : BasicObject
   # Raises an exception (instead of returning `false` or `nil`) if keyword
   # argument `exception` is set to `true`.
   #
-  # Assigns the command's error status to `$?`.
+  # Assigns the command's error status to <code>$?</code>.
   #
   # The new process is created using the [system system
   # call](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/functions/s
@@ -2134,7 +2149,7 @@ module Kernel : BasicObject
   #     word or special built-in, or if it contains one or more meta characters.
   # *   `exe_path` otherwise.
   #
-  # **Argument `command_line`**
+  # <strong>Argument `command_line`</strong>
   #
   # String argument `command_line` is a command line to be passed to a shell; it
   # must begin with a shell reserved word, begin with a special built-in, or
@@ -2146,7 +2161,7 @@ module Kernel : BasicObject
   #     system('date > /nop/date.tmp')                  # => false
   #     system('date > /nop/date.tmp', exception: true) # Raises RuntimeError.
   #
-  # Assigns the command's error status to `$?`:
+  # Assigns the command's error status to <code>$?</code>:
   #
   #     system('exit')                             # => true  # Built-in.
   #     $?                                         # => #<Process::Status: pid 640610 exit 0>
@@ -2166,7 +2181,7 @@ module Kernel : BasicObject
   #
   # Raises an exception if the new process could not execute.
   #
-  # **Argument `exe_path`**
+  # <strong>Argument `exe_path`</strong>
   #
   # Argument `exe_path` is one of the following:
   #
@@ -2183,7 +2198,7 @@ module Kernel : BasicObject
   #
   #     Mon Aug 28 11:43:10 AM CDT 2023
   #
-  # Assigns the command's error status to `$?`:
+  # Assigns the command's error status to <code>$?</code>:
   #
   #     system('/usr/bin/date') # => true
   #     $?                      # => #<Process::Status: pid 645605 exit 0>
@@ -2232,7 +2247,7 @@ module Kernel : BasicObject
   #     $_ = "hello"
   #     $_ = ' there'
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     $_ is now 'hello'
   #     $_ is now ' there'
@@ -2299,8 +2314,8 @@ module Kernel : BasicObject
   # -->
   # Produces a shallow copy of *obj*---the instance variables of *obj* are copied,
   # but not the objects they reference. #clone copies the frozen value state of
-  # *obj*, unless the `:freeze` keyword argument is given with a false or true
-  # value. See also the discussion under Object#dup.
+  # *obj*, unless the <code>:freeze</code> keyword argument is given with a false
+  # or true value. See also the discussion under Object#dup.
   #
   #     class Klass
   #        attr_accessor :str

@@ -2,9 +2,9 @@
 # Class Struct provides a convenient way to create a simple class that can store
 # and fetch values.
 #
-# This example creates a subclass of `Struct`, `Struct::Customer`; the first
-# argument, a string, is the name of the subclass; the other arguments, symbols,
-# determine the *members* of the new subclass.
+# This example creates a subclass of `Struct`, <code>Struct::Customer</code>;
+# the first argument, a string, is the name of the subclass; the other
+# arguments, symbols, determine the *members* of the new subclass.
 #
 #     Customer = Struct.new('Customer', :name, :address, :zip)
 #     Customer.name       # => "Struct::Customer"
@@ -18,7 +18,7 @@
 #     methods # => [:zip, :address=, :zip=, :address, :name, :name=]
 #
 # An instance of the subclass may be created, and its members assigned values,
-# via method `::new`:
+# via method <code>::new</code>:
 #
 #     joe = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
 #     joe # => #<struct Struct::Customer name="Joe Smith", address="123 Maple, Anytown NC", zip=12345>
@@ -71,10 +71,10 @@
 #
 # ### Methods for Comparing
 #
-# *   #==: Returns whether a given object is equal to `self`, using `==` to
-#     compare member values.
-# *   #eql?: Returns whether a given object is equal to `self`, using `eql?` to
-#     compare member values.
+# *   #==: Returns whether a given object is equal to `self`, using
+#     <code>==</code> to compare member values.
+# *   #eql?: Returns whether a given object is equal to `self`, using
+#     <code>eql?</code> to compare member values.
 #
 # ### Methods for Fetching
 #
@@ -119,13 +119,13 @@ class Struct[Elem]
   #   - Struct_subclass.new(*member_names) -> Struct_subclass_instance
   #   - Struct_subclass.new(**member_names) -> Struct_subclass_instance
   # -->
-  # `Struct.new` returns a new subclass of `Struct`.  The new subclass:
+  # <code>Struct.new</code> returns a new subclass of `Struct`.  The new subclass:
   #
   # *   May be anonymous, or may have the name given by `class_name`.
   # *   May have members as given by `member_names`.
   # *   May have initialization via ordinary arguments, or via keyword arguments
   #
-  # The new subclass has its own method `::new`; thus:
+  # The new subclass has its own method <code>::new</code>; thus:
   #
   #     Foo = Struct.new('Foo', :foo, :bar) # => Struct::Foo
   #     f = Foo.new(0, 1)                   # => #<struct Struct::Foo foo=0, bar=1>
@@ -133,7 +133,7 @@ class Struct[Elem]
   # **Class Name**
   #
   # With string argument `class_name`, returns a new subclass of `Struct` named
-  # `Struct::<em>class_name</em>`:
+  # <code>Struct::<em>class_name</em></code>:
   #
   #     Foo = Struct.new('Foo', :foo, :bar) # => Struct::Foo
   #     Foo.name                            # => "Struct::Foo"
@@ -158,7 +158,7 @@ class Struct[Elem]
   #     dave # =>     #<struct Struct::Customer name="Dave", address="123 Main">
   #     dave.greeting # => "Hello Dave at 123 Main"
   #
-  # Output, from `Struct.new`:
+  # Output, from <code>Struct.new</code>:
   #
   #     "The new subclass is Struct::Customer"
   #
@@ -184,7 +184,7 @@ class Struct[Elem]
   #
   # A subclass returned by Struct.new has these singleton methods:
   #
-  # *   Method `::new ` creates an instance of the subclass:
+  # *   Method <code>::new </code> creates an instance of the subclass:
   #
   #         Foo.new          # => #<struct Struct::Foo foo=nil, bar=nil>
   #         Foo.new(0)       # => #<struct Struct::Foo foo=0, bar=nil>
@@ -197,12 +197,13 @@ class Struct[Elem]
   #         Foo.new(foo: 0, bar: 1, baz: 2)
   #         # Raises ArgumentError: unknown keywords: baz
   #
-  # *   Method `:inspect` returns a string representation of the subclass:
+  # *   Method <code>:inspect</code> returns a string representation of the
+  #     subclass:
   #
   #         Foo.inspect
   #         # => "Struct::Foo"
   #
-  # *   Method `::members` returns an array of the member names:
+  # *   Method <code>::members</code> returns an array of the member names:
   #
   #         Foo.members # => [:foo, :bar]
   #
@@ -211,8 +212,8 @@ class Struct[Elem]
   # By default, the arguments for initializing an instance of the new subclass can
   # be both positional and keyword arguments.
   #
-  # Optional keyword argument `keyword_init:` allows to force only one type of
-  # arguments to be accepted:
+  # Optional keyword argument <code>keyword_init:</code> allows to force only one
+  # type of arguments to be accepted:
   #
   #     KeywordsOnly = Struct.new(:foo, :bar, keyword_init: true)
   #     KeywordsOnly.new(bar: 1, foo: 0)
@@ -252,8 +253,8 @@ class Struct[Elem]
   #   rdoc-file=struct.c
   #   - StructClass::keyword_init? -> true or falsy value
   # -->
-  # Returns `true` if the class was initialized with `keyword_init: true`.
-  # Otherwise returns `nil` or `false`.
+  # Returns `true` if the class was initialized with <code>keyword_init:
+  # true</code>. Otherwise returns `nil` or `false`.
   #
   # Examples:
   #     Foo = Struct.new(:a)
@@ -272,8 +273,8 @@ class Struct[Elem]
   # Returns  `true` if and only if the following are true; otherwise returns
   # `false`:
   #
-  # *   `other.class == self.class`.
-  # *   For each member name `name`, `other.name == self.name`.
+  # *   <code>other.class == self.class</code>.
+  # *   For each member name `name`, <code>other.name == self.name</code>.
   #
   # Examples:
   #
@@ -294,8 +295,8 @@ class Struct[Elem]
   # Returns `true` if and only if the following are true; otherwise returns
   # `false`:
   #
-  # *   `other.class == self.class`.
-  # *   For each member name `name`, `other.name.eql?(self.name)`.
+  # *   <code>other.class == self.class</code>.
+  # *   For each member name `name`, <code>other.name.eql?(self.name)</code>.
   #
   #         Customer = Struct.new(:name, :address, :zip)
   #         joe    = Customer.new("Joe Smith", "123 Maple, Anytown NC", 12345)
@@ -483,8 +484,8 @@ class Struct[Elem]
   #
   # Raises NameError if `name` is not the name of a member.
   #
-  # With integer argument `n` given, returns `self.values[n]` if `n` is in range;
-  # see Array@Array+Indexes:
+  # With integer argument `n` given, returns <code>self.values[n]</code> if `n` is
+  # in range; see Array@Array+Indexes:
   #
   #     joe[2]  # => 12345
   #     joe[-2] # => "123 Maple, Anytown NC"

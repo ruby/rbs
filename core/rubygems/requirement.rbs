@@ -2,7 +2,7 @@
 module Gem
   # <!-- rdoc-file=lib/rubygems/requirement.rb -->
   # A Requirement is a set of one or more version restrictions. It supports a few
-  # (`=, !=, >, <, >=, <=, ~>`) different restriction operators.
+  # (<code>=, !=, >, <, >=, <=, ~></code>) different restriction operators.
   #
   # See Gem::Version for a description on how versions and requirements work
   # together in RubyGems.
@@ -60,11 +60,11 @@ module Gem
     #   rdoc-file=lib/rubygems/requirement.rb
     #   - parse(obj)
     # -->
-    # Parse `obj`, returning an `[op, version]` pair. `obj` can be a String or a
-    # Gem::Version.
+    # Parse `obj`, returning an <code>[op, version]</code> pair. `obj` can be a
+    # String or a Gem::Version.
     #
     # If `obj` is a String, it can be either a full requirement specification, like
-    # `">= 1.2"`, or a simple version number, like `"1.2"`.
+    # <code>">= 1.2"</code>, or a simple version number, like <code>"1.2"</code>.
     #
     #     parse("> 1.0")                 # => [">", Gem::Version.new("1.0")]
     #     parse("1.0")                   # => ["=", Gem::Version.new("1.0")]
@@ -78,7 +78,7 @@ module Gem
     # -->
     # Constructs a requirement from `requirements`. Requirements can be Strings,
     # Gem::Versions, or Arrays of those. `nil` and duplicate requirements are
-    # ignored. An empty set of `requirements` is the same as `">= 0"`.
+    # ignored. An empty set of `requirements` is the same as <code>">= 0"</code>.
     #
     def initialize: (*String | Gem::Version requirements) -> void
 

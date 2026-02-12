@@ -3,8 +3,8 @@
 # designated object, using the methods #def_delegator and #def_delegators.
 #
 # For example, say you have a class RecordCollection which contains an array
-# `@records`.  You could provide the lookup method #record_number(), which
-# simply calls #[] on the `@records` array, like this:
+# <code>@records</code>.  You could provide the lookup method #record_number(),
+# which simply calls #[] on the <code>@records</code> array, like this:
 #
 #     require 'forwardable'
 #
@@ -90,13 +90,13 @@
 #
 # Be advised, RDoc will not detect delegated methods.
 #
-# `forwardable.rb` provides single-method delegation via the def_delegator and
-# def_delegators methods. For full-class delegation via DelegateClass, see
-# `delegate.rb`.
+# <code>forwardable.rb</code> provides single-method delegation via the
+# def_delegator and def_delegators methods. For full-class delegation via
+# DelegateClass, see <code>delegate.rb</code>.
 #
 module Forwardable
   # <!-- rdoc-file=lib/forwardable.rb -->
-  # Version of `forwardable.rb`
+  # Version of <code>forwardable.rb</code>
   #
   VERSION: String
 
@@ -151,10 +151,10 @@ module Forwardable
   #   - def_instance_delegator(accessor, method, ali = method)
   # -->
   # Define `method` as delegator instance method with an optional alias name
-  # `ali`. Method calls to `ali` will be delegated to `accessor.method`.
-  # `accessor` should be a method name, instance variable name, or constant name.
-  # Use the full path to the constant if providing the constant name. Returns the
-  # name of the method defined.
+  # `ali`. Method calls to `ali` will be delegated to
+  # <code>accessor.method</code>.  `accessor` should be a method name, instance
+  # variable name, or constant name.  Use the full path to the constant if
+  # providing the constant name. Returns the name of the method defined.
   #
   #     class MyQueue
   #       CONST = 1

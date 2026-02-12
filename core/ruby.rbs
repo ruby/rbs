@@ -11,7 +11,7 @@ module Ruby
   COPYRIGHT: ::String
 
   # <!-- rdoc-file=version.c -->
-  # The full ruby version string, like `ruby -v` prints
+  # The full ruby version string, like <code>ruby -v</code> prints
   #
   DESCRIPTION: ::String
 

@@ -116,10 +116,12 @@
 #
 # *   ::[]: Same as ::glob without the ability to pass flags.
 # *   ::children: Returns an array of names of the children (both files and
-#     directories) of the given directory, but not including `.` or `..`.
+#     directories) of the given directory, but not including <code>.</code> or
+#     <code>..</code>.
 # *   ::empty?: Returns whether the given path is an empty directory.
 # *   ::entries: Returns an array of names of the children (both files and
-#     directories) of the given directory, including `.` and `..`.
+#     directories) of the given directory, including <code>.</code> and
+#     <code>..</code>.
 # *   ::exist?: Returns whether the given path is a directory.
 # *   ::getwd (aliased as #pwd): Returns the path to the current working
 #     directory.
@@ -128,7 +130,8 @@
 # *   ::home: Returns the home directory path for a given user or the current
 #     user.
 # *   #children: Returns an array of names of the children (both files and
-#     directories) of `self`, but not including `.` or `..`.
+#     directories) of `self`, but not including <code>.</code> or
+#     <code>..</code>.
 # *   #fileno: Returns the integer file descriptor for `self`.
 # *   #path (aliased as #to_path): Returns the path used to create `self`.
 # *   #tell (aliased as #pos): Returns the integer position in the directory
@@ -137,13 +140,13 @@
 # ### Iterating
 #
 # *   ::each_child: Calls the given block with each entry in the given
-#     directory, but not including `.` or `..`.
+#     directory, but not including <code>.</code> or <code>..</code>.
 # *   ::foreach: Calls the given block with each entry in the given directory,
-#     including `.` and `..`.
-# *   #each: Calls the given block with each entry in `self`, including `.` and
-#     `..`.
+#     including <code>.</code> and <code>..</code>.
+# *   #each: Calls the given block with each entry in `self`, including
+#     <code>.</code> and <code>..</code>.
 # *   #each_child: Calls the given block with each entry in `self`, but not
-#     including `.` or `..`.
+#     including <code>.</code> or <code>..</code>.
 #
 # ### Other
 #
@@ -255,7 +258,8 @@ class Dir
   #   - Dir.children(dirpath, encoding: 'UTF-8') -> array
   # -->
   # Returns an array of the entry names in the directory at `dirpath` except for
-  # `'.'` and `'..'`; sets the given encoding onto each returned entry name:
+  # <code>'.'</code> and <code>'..'</code>; sets the given encoding onto each
+  # returned entry name:
   #
   #     Dir.children('/example') # => ["config.h", "lib", "main.rb"]
   #     Dir.children('/example').first.encoding
@@ -274,8 +278,9 @@ class Dir
   #   - Dir.chroot(dirpath) -> 0
   # -->
   # Changes the root directory of the calling process to that specified in
-  # `dirpath`. The new root directory is used for pathnames beginning with `'/'`.
-  # The root directory is inherited by all children of the calling process.
+  # `dirpath`. The new root directory is used for pathnames beginning with
+  # <code>'/'</code>. The root directory is inherited by all children of the
+  # calling process.
   #
   # Only a privileged process may call `chroot`.
   #
@@ -300,7 +305,8 @@ class Dir
   #   - Dir.each_child(dirpath) {|entry_name| ... } -> nil
   #   - Dir.each_child(dirpath, encoding: 'UTF-8') {|entry_name| ... }  -> nil
   # -->
-  # Like Dir.foreach, except that entries `'.'` and `'..'` are not included.
+  # Like Dir.foreach, except that entries <code>'.'</code> and <code>'..'</code>
+  # are not included.
   #
   def self.each_child: (path dirname, ?encoding: encoding?) -> Enumerator[String, nil]
                      | (path dirname, ?encoding: encoding?) { (String filename) -> void } -> nil
@@ -487,8 +493,8 @@ class Dir
   #
   # Notes for the following examples:
   #
-  # *   `'*'` is the pattern that matches any entry name except those that begin
-  #     with `'.'`.
+  # *   <code>'*'</code> is the pattern that matches any entry name except those
+  #     that begin with <code>'.'</code>.
   # *   We use method Array#take to shorten returned arrays that otherwise would
   #     be very large.
   #
@@ -513,8 +519,8 @@ class Dir
   #
   # If optional keyword argument `base` is given, its value specifies the base
   # directory. Each pattern string specifies entries relative to the base
-  # directory; the default is `'.'`. The base directory is not prepended to the
-  # entry names in the result:
+  # directory; the default is <code>'.'</code>. The base directory is not
+  # prepended to the entry names in the result:
   #
   #     Dir.glob(pattern, base: 'lib').take(5)
   #     # => ["abbrev.gemspec", "abbrev.rb", "base64.gemspec", "base64.rb", "benchmark.gemspec"]
@@ -531,60 +537,64 @@ class Dir
   # Each pattern string is expanded according to certain metacharacters; examples
   # below use the [Ruby file tree](rdoc-ref:Dir@About+the+Examples):
   #
-  # *   `'*'`: Matches any substring in an entry name, similar in meaning to
-  #     regexp `/.*/mx`; may be restricted by other values in the pattern strings:
+  # *   <code>'*'</code>: Matches any substring in an entry name, similar in
+  #     meaning to regexp <code>/.*/mx</code>; may be restricted by other values
+  #     in the pattern strings:
   #
-  #     *   `'*'` matches all entry names:
+  #     *   <code>'*'</code> matches all entry names:
   #
   #             Dir.glob('*').take(3)  # => ["BSDL", "CONTRIBUTING.md", "COPYING"]
   #
-  #     *   `'c*'` matches entry names beginning with `'c'`:
+  #     *   <code>'c*'</code> matches entry names beginning with <code>'c'</code>:
   #
   #             Dir.glob('c*').take(3) # => ["CONTRIBUTING.md", "COPYING", "COPYING.ja"]
   #
-  #     *   `'*c'` matches entry names ending with `'c'`:
+  #     *   <code>'*c'</code> matches entry names ending with <code>'c'</code>:
   #
   #             Dir.glob('*c').take(3) # => ["addr2line.c", "array.c", "ast.c"]
   #
-  #     *   `'*c*'` matches entry names that contain `'c'`, even at the beginning
-  #         or end:
+  #     *   <code>'*c*'</code> matches entry names that contain <code>'c'</code>,
+  #         even at the beginning or end:
   #
   #             Dir.glob('*c*').take(3) # => ["CONTRIBUTING.md", "COPYING", "COPYING.ja"]
   #
   #     Does not match Unix-like hidden entry names ("dot files"). To include
   #     those in the matched entry names, use flag IO::FNM_DOTMATCH or something
-  #     like `'{*,.*}'`.
+  #     like <code>'{*,.*}'</code>.
   #
-  # *   `'**'`: Matches entry names recursively if followed by  the slash
-  #     character `'/'`:
+  # *   <code>'**'</code>: Matches entry names recursively if followed by  the
+  #     slash character <code>'/'</code>:
   #
   #         Dir.glob('**/').take(3) # => ["basictest/", "benchmark/", "benchmark/gc/"]
   #
   #     If the string pattern contains other characters or is not followed by a
-  #     slash character, it is equivalent to `'*'`.
+  #     slash character, it is equivalent to <code>'*'</code>.
   #
-  # *   `'?'` Matches any single character; similar in meaning to regexp `/./`:
+  # *   <code>'?'</code> Matches any single character; similar in meaning to
+  #     regexp <code>/./</code>:
   #
   #         Dir.glob('io.?') # => ["io.c"]
   #
-  # *   `'[_set_]'`: Matches any one character in the string *set*; behaves like a
-  #     [Regexp character class](rdoc-ref:Regexp@Character+Classes), including set
-  #     negation (`'[^a-z]'`):
+  # *   <code>'[_set_]'</code>: Matches any one character in the string *set*;
+  #     behaves like a [Regexp character
+  #     class](rdoc-ref:Regexp@Character+Classes), including set negation
+  #     (<code>'[^a-z]'</code>):
   #
   #         Dir.glob('*.[a-z][a-z]').take(3)
   #         # => ["CONTRIBUTING.md", "COPYING.ja", "KNOWNBUGS.rb"]
   #
-  # *   `'{_abc_,_xyz_}'`: Matches either string *abc* or string *xyz*; behaves
-  #     like [Regexp alternation](rdoc-ref:Regexp@Alternation):
+  # *   <code>'{_abc_,_xyz_}'</code>: Matches either string *abc* or string *xyz*;
+  #     behaves like [Regexp alternation](rdoc-ref:Regexp@Alternation):
   #
   #         Dir.glob('{LEGAL,BSDL}') # => ["LEGAL", "BSDL"]
   #
   #     More than two alternatives may be given.
   #
-  # *   `\`: Escapes the following metacharacter.
+  # *   <code>\</code>: Escapes the following metacharacter.
   #
   #     Note that on Windows, the backslash character may not be used in a string
-  #     pattern: `Dir['c:\\foo*']` will not work, use `Dir['c:/foo*']` instead.
+  #     pattern: <code>Dir['c:\foo*']</code> will not work, use
+  #     <code>Dir['c:/foo*']</code> instead.
   #
   # More examples (using the [simple file tree](rdoc-ref:Dir@About+the+Examples)):
   #
@@ -623,26 +633,26 @@ class Dir
   #
   # The flags for this method (other constants in File::Constants do not apply):
   #
-  # *   File::FNM_DOTMATCH: specifies that entry names beginning with `'.'` should
-  #     be considered for matching:
+  # *   File::FNM_DOTMATCH: specifies that entry names beginning with
+  #     <code>'.'</code> should be considered for matching:
   #
   #         Dir.glob('*').take(5)
   #         # => ["BSDL", "CONTRIBUTING.md", "COPYING", "COPYING.ja", "GPL"]
   #         Dir.glob('*', flags: File::FNM_DOTMATCH).take(5)
   #         # => [".", ".appveyor.yml", ".cirrus.yml", ".dir-locals.el", ".document"]
   #
-  # *   File::FNM_EXTGLOB: enables the pattern extension `'{_a_,_b_}'`, which
-  #     matches pattern *a* and pattern *b*; behaves like a [regexp
-  #     union](rdoc-ref:Regexp.union) (e.g., `'(?:_a_|_b_)'`):
+  # *   File::FNM_EXTGLOB: enables the pattern extension <code>'{_a_,_b_}'</code>,
+  #     which matches pattern *a* and pattern *b*; behaves like a [regexp
+  #     union](rdoc-ref:Regexp.union) (e.g., <code>'(?:_a_|_b_)'</code>):
   #
   #         pattern = '{LEGAL,BSDL}'
   #         Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
   #
   # *   File::FNM_NOESCAPE: specifies that escaping with the backslash character
-  #     `'\'` is disabled; the character is not an escape character.
+  #     <code>'\'</code> is disabled; the character is not an escape character.
   #
-  # *   File::FNM_PATHNAME: specifies that metacharacters `'*'` and `'?'` do not
-  #     match directory separators.
+  # *   File::FNM_PATHNAME: specifies that metacharacters <code>'*'</code> and
+  #     <code>'?'</code> do not match directory separators.
   #
   # *   File::FNM_SHORTNAME: specifies that patterns may match short names if they
   #     exist; Windows only.
@@ -774,7 +784,8 @@ class Dir
   #   rdoc-file=dir.c
   #   - children -> array
   # -->
-  # Returns an array of the entry names in `self` except for `'.'` and `'..'`:
+  # Returns an array of the entry names in `self` except for <code>'.'</code> and
+  # <code>'..'</code>:
   #
   #     dir = Dir.new('/example')
   #     dir.children # => ["config.h", "lib", "main.rb"]
@@ -821,7 +832,8 @@ class Dir
   #   rdoc-file=dir.c
   #   - each_child {|entry_name| ... } -> self
   # -->
-  # Calls the block with each entry name in `self` except `'.'` and `'..'`:
+  # Calls the block with each entry name in `self` except <code>'.'</code> and
+  # <code>'..'</code>:
   #
   #     dir = Dir.new('/example')
   #     dir.each_child {|entry_name| p entry_name }

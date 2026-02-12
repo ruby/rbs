@@ -57,16 +57,16 @@
 #
 # ## Non-blocking Fibers
 #
-# The concept of *non-blocking fiber* was introduced in Ruby 3.0. A non-blocking
-# fiber, when reaching an operation that would normally block the fiber (like
-# `sleep`, or wait for another process or I/O) will yield control to other
-# fibers and allow the *scheduler* to handle blocking and waking up (resuming)
-# this fiber when it can proceed.
+# The concept of <em>non-blocking fiber</em> was introduced in Ruby 3.0. A
+# non-blocking fiber, when reaching an operation that would normally block the
+# fiber (like `sleep`, or wait for another process or I/O) will yield control to
+# other fibers and allow the *scheduler* to handle blocking and waking up
+# (resuming) this fiber when it can proceed.
 #
 # For a Fiber to behave as non-blocking, it need to be created in Fiber.new with
-# `blocking: false` (which is the default), and Fiber.scheduler should be set
-# with Fiber.set_scheduler. If Fiber.scheduler is not set in the current thread,
-# blocking and non-blocking fibers' behavior is identical.
+# <code>blocking: false</code> (which is the default), and Fiber.scheduler
+# should be set with Fiber.set_scheduler. If Fiber.scheduler is not set in the
+# current thread, blocking and non-blocking fibers' behavior is identical.
 #
 # Ruby doesn't provide a scheduler class: it is expected to be implemented by
 # the user and correspond to Fiber::Scheduler.
@@ -118,7 +118,7 @@ class Fiber < Object
   #   - Fiber.blocking? -> false or 1
   # -->
   # Returns `false` if the current fiber is non-blocking. Fiber is non-blocking if
-  # it was created via passing `blocking: false` to Fiber.new, or via
+  # it was created via passing <code>blocking: false</code> to Fiber.new, or via
   # Fiber.schedule.
   #
   # If the current Fiber is blocking, the method returns 1. Future developments
@@ -176,18 +176,18 @@ class Fiber < Object
   #     ...1 sec pause here...
   #     I slept well
   #
-  # ...e.g. on the first blocking operation inside the Fiber (`sleep(1)`), the
-  # control is yielded to the outside code (main fiber), and *at the end of that
-  # execution*, the scheduler takes care of properly resuming all the blocked
-  # fibers.
+  # ...e.g. on the first blocking operation inside the Fiber
+  # (<code>sleep(1)</code>), the control is yielded to the outside code (main
+  # fiber), and *at the end of that execution*, the scheduler takes care of
+  # properly resuming all the blocked fibers.
   #
   # Note that the behavior described above is how the method is *expected* to
   # behave, actual behavior is up to the current scheduler's implementation of
   # Fiber::Scheduler#fiber method. Ruby doesn't enforce this method to behave in
   # any particular way.
   #
-  # If the scheduler is not set, the method raises `RuntimeError (No scheduler is
-  # available!)`.
+  # If the scheduler is not set, the method raises <code>RuntimeError (No
+  # scheduler is available!)</code>.
   #
   def self.schedule: () { () -> void } -> Fiber
 
@@ -208,11 +208,11 @@ class Fiber < Object
   #   - Fiber.set_scheduler(scheduler) -> scheduler
   # -->
   # Sets the Fiber scheduler for the current thread. If the scheduler is set,
-  # non-blocking fibers (created by Fiber.new with `blocking: false`, or by
-  # Fiber.schedule) call that scheduler's hook methods on potentially blocking
-  # operations, and the current thread will call scheduler's `close` method on
-  # finalization (allowing the scheduler to properly manage all non-finished
-  # fibers).
+  # non-blocking fibers (created by Fiber.new with <code>blocking: false</code>,
+  # or by Fiber.schedule) call that scheduler's hook methods on potentially
+  # blocking operations, and the current thread will call scheduler's `close`
+  # method on finalization (allowing the scheduler to properly manage all
+  # non-finished fibers).
   #
   # `scheduler` can be an object of any class corresponding to Fiber::Scheduler.
   # Its implementation is up to the user.
@@ -251,13 +251,13 @@ class Fiber < Object
   #     f.resume          # prints: current: nil
   #     # ... and so on ...
   #
-  # If `blocking: false` is passed to `Fiber.new`, *and* current thread has a
-  # Fiber.scheduler defined, the Fiber becomes non-blocking (see "Non-blocking
-  # Fibers" section in class docs).
+  # If <code>blocking: false</code> is passed to <code>Fiber.new</code>, *and*
+  # current thread has a Fiber.scheduler defined, the Fiber becomes non-blocking
+  # (see "Non-blocking Fibers" section in class docs).
   #
   # If the `storage` is unspecified, the default is to inherit a copy of the
-  # storage from the current fiber. This is the same as specifying `storage:
-  # true`.
+  # storage from the current fiber. This is the same as specifying <code>storage:
+  # true</code>.
   #
   #     Fiber[:x] = 1
   #     Fiber.new do
@@ -277,8 +277,8 @@ class Fiber < Object
   # Otherwise, the given `storage` is used as the new fiber's storage, and it must
   # be an instance of Hash.
   #
-  # Explicitly using `storage: true` is currently experimental and may change in
-  # the future.
+  # Explicitly using <code>storage: true</code> is currently experimental and may
+  # change in the future.
   #
   def initialize: (?blocking: boolish, ?storage: true | Hash[interned, untyped] | nil) { (?) -> void } -> void
 
@@ -364,8 +364,8 @@ class Fiber < Object
   #   - fiber.blocking? -> true or false
   # -->
   # Returns `true` if `fiber` is blocking and `false` otherwise. Fiber is
-  # non-blocking if it was created via passing `blocking: false` to Fiber.new, or
-  # via Fiber.schedule.
+  # non-blocking if it was created via passing <code>blocking: false</code> to
+  # Fiber.new, or via Fiber.schedule.
   #
   # Note that, even if the method returns `false`, the fiber behaves differently
   # only if Fiber.scheduler is set in the current thread.
@@ -389,9 +389,9 @@ class Fiber < Object
   # the given fiber and no other fiber, returning `nil` to another fiber if that
   # fiber was calling #resume or #transfer.
   #
-  # `Fiber#kill` only interrupts another fiber when it is in Fiber.yield. If
-  # called on the current fiber then it raises that exception at the `Fiber#kill`
-  # call site.
+  # <code>Fiber#kill</code> only interrupts another fiber when it is in
+  # Fiber.yield. If called on the current fiber then it raises that exception at
+  # the <code>Fiber#kill</code> call site.
   #
   # If the fiber has not been started, transition directly to the terminated
   # state.
@@ -407,8 +407,8 @@ class Fiber < Object
   #   - raise(exception, message = exception.to_s, backtrace = nil, cause: $!)
   #   - raise(message = nil, cause: $!)
   # -->
-  # Raises an exception in the fiber at the point at which the last `Fiber.yield`
-  # was called.
+  # Raises an exception in the fiber at the point at which the last
+  # <code>Fiber.yield</code> was called.
   #
   #     f = Fiber.new {
   #       puts "Before the yield"
@@ -472,8 +472,8 @@ class Fiber < Object
   # important fiber-storage state. You should mostly prefer to assign specific
   # keys in the storage using Fiber::[]=.
   #
-  # You can also use `Fiber.new(storage: nil)` to create a fiber with an empty
-  # storage.
+  # You can also use <code>Fiber.new(storage: nil)</code> to create a fiber with
+  # an empty storage.
   #
   # Example:
   #

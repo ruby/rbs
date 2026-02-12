@@ -14,8 +14,8 @@
 #
 #     thr.join #=> "What's the big deal"
 #
-# If we don't call `thr.join` before the main thread terminates, then all other
-# threads including `thr` will be killed.
+# If we don't call <code>thr.join</code> before the main thread terminates, then
+# all other threads including `thr` will be killed.
 #
 # Alternatively, you can use an array for handling multiple threads at once,
 # like in the following example:
@@ -105,8 +105,8 @@
 #       p Thread.current.thread_variable_get(:foo)   # => 2
 #     }.join
 #
-# You can see that the thread-local `:foo` carried over into the fiber and was
-# changed to `2` by the end of the thread.
+# You can see that the thread-local <code>:foo</code> carried over into the
+# fiber and was changed to `2` by the end of the thread.
 #
 # This example makes use of #thread_variable_set to create new thread-locals,
 # and #thread_variable_get to reference them.
@@ -617,13 +617,13 @@ class Thread < Object
   # -->
   # Returns the status of `thr`.
   #
-  # `"sleep"`
+  # <code>"sleep"</code>
   # :   Returned if this thread is sleeping or waiting on I/O
   #
-  # `"run"`
+  # <code>"run"</code>
   # :   When this thread is executing
   #
-  # `"aborting"`
+  # <code>"aborting"</code>
   # :   If this thread is aborting
   #
   # `false`
@@ -769,7 +769,8 @@ class Thread < Object
   # Marks a given thread as eligible for scheduling, however it may still remain
   # blocked on I/O.
   #
-  # **Note:** This does not invoke the scheduler, see #run for more information.
+  # <strong>Note:</strong> This does not invoke the scheduler, see #run for more
+  # information.
   #
   #     c = Thread.new { Thread.stop; puts "hey!" }
   #     sleep 0.1 while c.status!='sleep'
@@ -790,7 +791,8 @@ class Thread < Object
   # When set to `true`, if any thread is aborted by an exception, the raised
   # exception will be re-raised in the main thread.
   #
-  # Can also be specified by the global $DEBUG flag or command line option `-d`.
+  # Can also be specified by the global $DEBUG flag or command line option
+  # <code>-d</code>.
   #
   # See also ::abort_on_exception=.
   #
@@ -872,17 +874,17 @@ class Thread < Object
   # Thread#raise, Thread#kill, signal trap (not supported yet) and main thread
   # termination (if main thread terminates, then all other thread will be killed).
   #
-  # The given `hash` has pairs like `ExceptionClass => :TimingSymbol`. Where the
-  # ExceptionClass is the interrupt handled by the given block. The TimingSymbol
-  # can be one of the following symbols:
+  # The given `hash` has pairs like <code>ExceptionClass => :TimingSymbol</code>.
+  # Where the ExceptionClass is the interrupt handled by the given block. The
+  # TimingSymbol can be one of the following symbols:
   #
-  # `:immediate`
+  # <code>:immediate</code>
   # :   Invoke interrupts immediately.
   #
-  # `:on_blocking`
+  # <code>:on_blocking</code>
   # :   Invoke interrupts while *BlockingOperation*.
   #
-  # `:never`
+  # <code>:never</code>
   # :   Never invoke all interrupts.
   #
   #
@@ -906,8 +908,8 @@ class Thread < Object
   #
   # In this example, we can guard from Thread#raise exceptions.
   #
-  # Using the `:never` TimingSymbol the RuntimeError exception will always be
-  # ignored in the first block of the main thread. In the second
+  # Using the <code>:never</code> TimingSymbol the RuntimeError exception will
+  # always be ignored in the first block of the main thread. In the second
   # ::handle_interrupt block we can purposefully handle RuntimeError exceptions.
   #
   #     th = Thread.new do
@@ -1030,7 +1032,8 @@ class Thread < Object
   # Since Thread::handle_interrupt can be used to defer asynchronous events, this
   # method can be used to determine if there are any deferred events.
   #
-  # If you find this method returns true, then you may finish `:never` blocks.
+  # If you find this method returns true, then you may finish <code>:never</code>
+  # blocks.
   #
   # For example, the following method processes deferred asynchronous events
   # immediately.
@@ -1108,9 +1111,9 @@ class Thread < Object
   #     where it is raised rather then let it kill the Thread.
   # *   If it is guaranteed the Thread will be joined with Thread#join or
   #     Thread#value, then it is safe to disable this report with
-  #     `Thread.current.report_on_exception = false` when starting the Thread.
-  #     However, this might handle the exception much later, or not at all if the
-  #     Thread is never joined due to the parent thread being blocked, etc.
+  #     <code>Thread.current.report_on_exception = false</code> when starting the
+  #     Thread. However, this might handle the exception much later, or not at all
+  #     if the Thread is never joined due to the parent thread being blocked, etc.
   #
   # See also ::report_on_exception=.
   #
@@ -1188,10 +1191,11 @@ class Thread::Backtrace < Object
   #   rdoc-file=vm_backtrace.c
   #   - Thread::Backtrace::limit -> integer
   # -->
-  # Returns maximum backtrace length set by `--backtrace-limit` command-line
-  # option. The default is `-1` which means unlimited backtraces. If the value is
-  # zero or positive, the error backtraces, produced by Exception#full_message,
-  # are abbreviated and the extra lines are replaced by `... 3 levels... `
+  # Returns maximum backtrace length set by <code>--backtrace-limit</code>
+  # command-line option. The default is <code>-1</code> which means unlimited
+  # backtraces. If the value is zero or positive, the error backtraces, produced
+  # by Exception#full_message, are abbreviated and the extra lines are replaced by
+  # <code>... 3 levels... </code>
   #
   #     $ ruby -r net/http -e "p Thread::Backtrace.limit; Net::HTTP.get(URI('http://wrong.address'))"
   #     - 1
@@ -1257,7 +1261,7 @@ end
 #       puts call.to_s
 #     end
 #
-# Running `ruby caller_locations.rb` will produce:
+# Running <code>ruby caller_locations.rb</code> will produce:
 #
 #     caller_locations.rb:2:in `a'
 #     caller_locations.rb:5:in `b'
@@ -1277,7 +1281,7 @@ end
 #       puts call.to_s
 #     end
 #
-# Now run `ruby foo.rb` and you should see:
+# Now run <code>ruby foo.rb</code> and you should see:
 #
 #     init.rb:4:in `initialize'
 #     init.rb:8:in `new'
@@ -1360,7 +1364,8 @@ class Thread::Backtrace::Location
   # -->
   # Returns the line number of this frame.
   #
-  # For example, using `caller_locations.rb` from Thread::Backtrace::Location
+  # For example, using <code>caller_locations.rb</code> from
+  # Thread::Backtrace::Location
   #
   #     loc = c(0..1).first
   #     loc.lineno #=> 2
@@ -1375,7 +1380,8 @@ class Thread::Backtrace::Location
   # unless the frame is in the main script, in which case it will be the script
   # location passed on the command line.
   #
-  # For example, using `caller_locations.rb` from Thread::Backtrace::Location
+  # For example, using <code>caller_locations.rb</code> from
+  # Thread::Backtrace::Location
   #
   #     loc = c(0..1).first
   #     loc.path #=> caller_locations.rb
@@ -1620,16 +1626,16 @@ class Thread::Queue[Elem = untyped] < Object
   #
   # After the call to close completes, the following are true:
   #
-  # *   `closed?` will return true
+  # *   <code>closed?</code> will return true
   #
   # *   `close` will be ignored.
   #
   # *   calling enq/push/<< will raise a `ClosedQueueError`.
   #
-  # *   when `empty?` is false, calling deq/pop/shift will return an object from
-  #     the queue as usual.
-  # *   when `empty?` is true, deq(false) will not suspend the thread and will
-  #     return nil. deq(true) will raise a `ThreadError`.
+  # *   when <code>empty?</code> is false, calling deq/pop/shift will return an
+  #     object from the queue as usual.
+  # *   when <code>empty?</code> is true, deq(false) will not suspend the thread
+  #     and will return nil. deq(true) will raise a `ThreadError`.
   #
   # ClosedQueueError is inherited from StopIteration, so that you can break loop
   # block.

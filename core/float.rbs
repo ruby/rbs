@@ -12,7 +12,7 @@
 #
 # Others cannot; among these are the transcendental numbers, including:
 #
-# *   Pi, *π*: in mathematics, a number of infinite precision:
+# *   Pi, <em>π</em>: in mathematics, a number of infinite precision:
 #     3.1415926535897932384626433... (to 25 places); in Ruby, it is of limited
 #     precision (in this case, to 16 decimal places):
 #
@@ -32,8 +32,8 @@
 # Others do not:
 #
 # *   In mathematics, 2/3 as a decimal number is an infinitely-repeating
-#     decimal: 0.666... (forever); in Ruby, `2.0/3` is of limited precision (in
-#     this case, to 16 decimal places):
+#     decimal: 0.666... (forever); in Ruby, <code>2.0/3</code> is of limited
+#     precision (in this case, to 16 decimal places):
 #
 #         2.0/3 # => 0.6666666666666666
 #
@@ -139,7 +139,7 @@
 #
 # Others cannot; among these are the transcendental numbers, including:
 #
-# *   Pi, *π*: in mathematics, a number of infinite precision:
+# *   Pi, <em>π</em>: in mathematics, a number of infinite precision:
 #     3.1415926535897932384626433... (to 25 places); in Ruby, it is of limited
 #     precision (in this case, to 16 decimal places):
 #
@@ -159,8 +159,8 @@
 # Others do not:
 #
 # *   In mathematics, 2/3 as a decimal number is an infinitely-repeating
-#     decimal: 0.666... (forever); in Ruby, `2.0/3` is of limited precision (in
-#     this case, to 16 decimal places):
+#     decimal: 0.666... (forever); in Ruby, <code>2.0/3</code> is of limited
+#     precision (in this case, to 16 decimal places):
 #
 #         2.0/3 # => 0.6666666666666666
 #
@@ -390,7 +390,8 @@ class Float < Numeric
   #     2.0 < Rational(3, 1) # => true
   #     2.0 < 2.0            # => false
   #
-  # `Float::NAN < Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN < Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def <: (Numeric) -> bool
 
@@ -407,7 +408,8 @@ class Float < Numeric
   #     2.0 <= 2.0            # => true
   #     2.0 <= 1.0            # => false
   #
-  # `Float::NAN <= Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN <= Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def <=: (Numeric) -> bool
 
@@ -419,7 +421,7 @@ class Float < Numeric
   #
   # Returns:
   #
-  # *   `-1`, if `self` is less than `other`.
+  # *   <code>-1</code>, if `self` is less than `other`.
   # *   `0`, if `self` is equal to `other`.
   # *   `1`, if `self` is greater than `other`.
   # *   `nil`, if the two values are incommensurate.
@@ -434,7 +436,8 @@ class Float < Numeric
   #     2.0 <=> 1.9            # => 1
   #     2.0 <=> 'foo'          # => nil
   #
-  # `Float::NAN <=> Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN <=> Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   # Class Float includes module Comparable, each of whose methods uses Float#<=>
   # for comparison.
@@ -452,7 +455,8 @@ class Float < Numeric
   #     2.0 == Rational(2, 1) # => true
   #     2.0 == Complex(2, 0)  # => true
   #
-  # `Float::NAN == Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN == Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
@@ -466,7 +470,8 @@ class Float < Numeric
   #     2.0 == Rational(2, 1) # => true
   #     2.0 == Complex(2, 0)  # => true
   #
-  # `Float::NAN == Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN == Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
@@ -483,7 +488,8 @@ class Float < Numeric
   #     2.0 > Rational(1, 2) # => true
   #     2.0 > 2.0            # => false
   #
-  # `Float::NAN > Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN > Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def >: (Numeric) -> bool
 
@@ -499,7 +505,8 @@ class Float < Numeric
   #     2.0 >= 2.0            # => true
   #     2.0 >= 2.1            # => false
   #
-  # `Float::NAN >= Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN >= Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def >=: (Numeric) -> bool
 
@@ -554,7 +561,7 @@ class Float < Numeric
   #
   # When `ndigits` is non-positive,
   # returns an Integer based on a computed granularity:
-  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The granularity is <code>10 ** ndigits.abs</code>.
   # *   The returned value is the largest multiple of the granularity
   #      that is less than or equal to `self`.
   # Examples with positive `self`:
@@ -620,7 +627,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - divmod(other) -> array
   # -->
-  # Returns a 2-element array `[q, r]`, where
+  # Returns a 2-element array <code>[q, r]</code>, where
   #
   #     q = (self/other).floor      # Quotient
   #     r = self % other            # Remainder
@@ -656,7 +663,8 @@ class Float < Numeric
   #     2.0.eql?(Rational(2, 1)) # => false
   #     2.0.eql?(Complex(2, 0))  # => false
   #
-  # `Float::NAN.eql?(Float::NAN)` returns an implementation-dependent value.
+  # <code>Float::NAN.eql?(Float::NAN)</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#== (performs type conversions).
   #
@@ -678,8 +686,8 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - finite? -> true or false
   # -->
-  # Returns `true` if `self` is not `Infinity`, `-Infinity`, or `NaN`, `false`
-  # otherwise:
+  # Returns `true` if `self` is not `Infinity`, <code>-Infinity</code>, or `NaN`,
+  # `false` otherwise:
   #
   #     f = 2.0      # => 2.0
   #     f.finite?    # => true
@@ -724,7 +732,7 @@ class Float < Numeric
   #
   # When `self` is non-zero and `ndigits` is non-positive,
   # returns an integer value based on a computed granularity:
-  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The granularity is <code>10 ** ndigits.abs</code>.
   # *   The returned value is the largest multiple of the granularity
   #      that is less than or equal to `self`.
   # Examples with positive `self`:
@@ -772,7 +780,7 @@ class Float < Numeric
   # Returns:
   #
   # *   1, if `self` is `Infinity`.
-  # *   -1 if `self` is `-Infinity`.
+  # *   -1 if `self` is <code>-Infinity</code>.
   # *   `nil`, otherwise.
   #
   # Examples:
@@ -870,7 +878,7 @@ class Float < Numeric
   # Returns the next-larger representable Float.
   #
   # These examples show the internally stored values (64-bit hexadecimal) for each
-  # Float `f` and for the corresponding `f.next_float`:
+  # Float `f` and for the corresponding <code>f.next_float</code>:
   #
   #     f = 0.0      # 0x0000000000000000
   #     f.next_float # 0x0000000000000001
@@ -944,7 +952,7 @@ class Float < Numeric
   # Returns the next-smaller representable Float.
   #
   # These examples show the internally stored values (64-bit hexadecimal) for each
-  # Float `f` and for the corresponding `f.pev_float`:
+  # Float `f` and for the corresponding <code>f.pev_float</code>:
   #
   #     f = 5e-324   # 0x0000000000000001
   #     f.prev_float # 0x0000000000000000
@@ -1025,8 +1033,8 @@ class Float < Numeric
   #     f.round(1) # => -12345.7
   #     f.round(3) # => -12345.679
   #
-  # When `ndigits` is negative, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, returns an integer with at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     f = 12345.6789
   #     f.round(0)  # => 12346
@@ -1038,19 +1046,20 @@ class Float < Numeric
   # If keyword argument `half` is given, and `self` is equidistant from the two
   # candidate values, the rounding is according to the given `half` value:
   #
-  # *   `:up` or `nil`: round away from zero:
+  # *   <code>:up</code> or `nil`: round away from zero:
   #
   #         2.5.round(half: :up)      # => 3
   #         3.5.round(half: :up)      # => 4
   #         (-2.5).round(half: :up)   # => -3
   #
-  # *   `:down`: round toward zero:
+  # *   <code>:down</code>: round toward zero:
   #
   #         2.5.round(half: :down)    # => 2
   #         3.5.round(half: :down)    # => 3
   #         (-2.5).round(half: :down) # => -2
   #
-  # *   `:even`: round toward the candidate whose last nonzero digit is even:
+  # *   <code>:even</code>: round toward the candidate whose last nonzero digit is
+  #     even:
   #
   #         2.5.round(half: :even)    # => 2
   #         3.5.round(half: :even)    # => 4
@@ -1163,8 +1172,8 @@ class Float < Numeric
   #     f.truncate(1) # => -12345.6
   #     f.truncate(3) # => -12345.678
   #
-  # When `ndigits` is negative, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, returns an integer with at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     f = 12345.6789
   #     f.truncate(0)  # => 12345
@@ -1250,8 +1259,8 @@ Float::MAX_EXP: Integer
 # Usually defaults to 2.2250738585072014e-308.
 #
 # If the platform supports denormalized numbers, there are numbers between zero
-# and Float::MIN. `0.0.next_float` returns the smallest positive floating point
-# number including denormalized numbers.
+# and Float::MIN. <code>0.0.next_float</code> returns the smallest positive
+# floating point number including denormalized numbers.
 #
 Float::MIN: Float
 

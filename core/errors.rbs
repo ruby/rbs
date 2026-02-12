@@ -6,7 +6,7 @@
 #
 #     [1, 2, 3].first(4, 5)
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     ArgumentError: wrong number of arguments (given 2, expected 1)
 #
@@ -14,7 +14,7 @@
 #
 #     [1, 2, 3].first(-4)
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     ArgumentError: negative array size
 #
@@ -66,7 +66,7 @@ end
 #
 #     [1, 2, 3].freeze << 4
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     FrozenError: can't modify frozen Array
 #
@@ -115,11 +115,11 @@ end
 #       puts "Note: You will typically use Signal.trap instead."
 #     end
 #
-# *produces:*
+# <em>produces:</em>
 #
 #     Press ctrl-C when you get bored
 #
-# *then waits until it is interrupted with Control-C and then prints:*
+# <em>then waits until it is interrupted with Control-C and then prints:</em>
 #
 #     Note: You will typically use Signal.trap instead.
 #
@@ -184,7 +184,7 @@ end
 #
 #     require 'this/file/does/not/exist'
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     LoadError: no such file to load -- this/file/does/not/exist
 #
@@ -209,7 +209,7 @@ end
 #     end
 #     call_block
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     LocalJumpError: no block given (yield)
 #
@@ -220,7 +220,7 @@ end
 #     end
 #     get_me_a_return.call
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     LocalJumpError: unexpected return
 #
@@ -248,7 +248,7 @@ end
 #
 #     puts foo
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     NameError: undefined local variable or method `foo' for main:Object
 #
@@ -256,7 +256,7 @@ end
 #
 #     Integer.const_set :answer, 42
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     NameError: wrong constant name answer
 #
@@ -350,7 +350,7 @@ end
 #
 #     "hello".to_ary
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     NoMethodError: undefined method `to_ary' for an instance of String
 #
@@ -360,11 +360,13 @@ class NoMethodError[T] < NameError[T]
   #   - NoMethodError.new(msg=nil, name=nil, args=nil, private=false, receiver: nil)  -> no_method_error
   # -->
   # Construct a NoMethodError exception for a method of the given name called with
-  # the given arguments. The name may be accessed using the `#name` method on the
-  # resulting object, and the arguments using the `#args` method.
+  # the given arguments. The name may be accessed using the <code>#name</code>
+  # method on the resulting object, and the arguments using the <code>#args</code>
+  # method.
   #
   # If *private* argument were passed, it designates method was attempted to call
-  # in private context, and can be accessed with `#private_call?` method.
+  # in private context, and can be accessed with <code>#private_call?</code>
+  # method.
   #
   # *receiver* argument stores an object whose method was called.
   #
@@ -393,8 +395,8 @@ end
 # exception if the underlying operating system or Ruby runtime does not support
 # them.
 #
-# Note that if `fork` raises a `NotImplementedError`, then `respond_to?(:fork)`
-# returns `false`.
+# Note that if `fork` raises a `NotImplementedError`, then
+# <code>respond_to?(:fork)</code> returns `false`.
 #
 class NotImplementedError < ScriptError
 end
@@ -404,7 +406,7 @@ end
 #
 #     [1, 2, 3].drop(1 << 100)
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     RangeError: bignum too big to convert into `long'
 #
@@ -416,7 +418,7 @@ end
 #
 #     Regexp.new("?")
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     RegexpError: target of repeat operator is not specified: /?/
 #
@@ -429,7 +431,7 @@ end
 #
 #     raise "ouch"
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     RuntimeError: ouch
 #
@@ -461,7 +463,7 @@ end
 #       puts "received Exception #{e}"
 #     end
 #
-# *produces:*
+# <em>produces:</em>
 #
 #     received Exception SIGHUP
 #
@@ -502,7 +504,7 @@ end
 #
 #     require 'does/not/exist' rescue "Hi"
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     LoadError: no such file to load -- does/not/exist
 #
@@ -520,7 +522,7 @@ end
 #     end
 #     puts "Done!"
 #
-# *produces:*
+# <em>produces:</em>
 #
 #     Hello
 #     Done!
@@ -560,7 +562,7 @@ end
 #
 #     eval("1+1=2")
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     SyntaxError: (eval):1: syntax error, unexpected '=', expecting $end
 #
@@ -587,7 +589,7 @@ end
 #
 #     File.open("does/not/exist")
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     Errno::ENOENT: No such file or directory - does/not/exist
 #
@@ -614,7 +616,7 @@ class SystemCallError < StandardError
   #     SystemCallError.new("foo", Errno::EPIPE::Errno)
   #     #=> #<Errno::EPIPE: Broken pipe - foo>
   #
-  # If *func* is not `nil`, it is appended to the message with "` @ `".
+  # If *func* is not `nil`, it is appended to the message with "<code> @ </code>".
   #
   #     SystemCallError.new("foo", Errno::EPIPE::Errno, "here")
   #     #=> #<Errno::EPIPE: Broken pipe @ here - foo>
@@ -685,7 +687,7 @@ end
 #     end
 #     me_myself_and_i
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     SystemStackError: stack level too deep
 #
@@ -712,7 +714,7 @@ end
 #
 #     [1, 2, 3].first("two")
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     TypeError: no implicit conversion of String into Integer
 #
@@ -725,7 +727,7 @@ end
 #
 #     throw "foo", "bar"
 #
-# *raises the exception:*
+# <em>raises the exception:</em>
 #
 #     UncaughtThrowError: uncaught throw "foo"
 #
@@ -741,7 +743,7 @@ class UncaughtThrowError < ArgumentError
   #
   #     throw "foo", "bar"
   #
-  # *raises the exception:*
+  # <em>raises the exception:</em>
   #
   #     UncaughtThrowError: uncaught throw "foo"
   #

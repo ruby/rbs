@@ -25,7 +25,7 @@ class CGI
     #   - escape(string)
     # -->
     # URL-encode a string into application/x-www-form-urlencoded. Space characters
-    # (`" "`) are encoded with plus signs (`"+"`)
+    # (<code>" "</code>) are encoded with plus signs (<code>"+"</code>)
     #     url_encoded_string = CGI.escape("'Stop!' said Fred")
     #        # => "%27Stop%21%27+said+Fred"
     #
@@ -55,7 +55,7 @@ class CGI
     #   rdoc-file=lib/cgi/escape.rb
     #   - escapeHTML(string)
     # -->
-    # Escape special characters in HTML, namely `'&\"<>`
+    # Escape special characters in HTML, namely <code>'&\"<></code>
     #     CGI.escapeHTML('Usage: foo "bar" <baz>')
     #        # => "Usage: foo &quot;bar&quot; &lt;baz&gt;"
     #
@@ -65,8 +65,8 @@ class CGI
     #   rdoc-file=lib/cgi/escape.rb
     #   - escapeURIComponent(string)
     # -->
-    # URL-encode a string following RFC 3986 Space characters (`" "`) are encoded
-    # with (`"%20"`)
+    # URL-encode a string following RFC 3986 Space characters (<code>" "</code>) are
+    # encoded with (<code>"%20"</code>)
     #     url_encoded_string = CGI.escapeURIComponent("'Stop!' said Fred")
     #        # => "%27Stop%21%27%20said%20Fred"
     #

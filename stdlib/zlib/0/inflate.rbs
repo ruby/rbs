@@ -123,7 +123,7 @@ module Zlib
     #
     #     What is this?
     #
-    # `:)`
+    # <code>:)</code>
     #
     def sync_point?: () -> bool
 

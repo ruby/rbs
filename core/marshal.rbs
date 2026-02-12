@@ -167,9 +167,9 @@ module Marshal
   # Never pass untrusted data (including user supplied input) to this method.
   # Please see the overview for further details.
   #
-  # If the `freeze: true` argument is passed, deserialized object would be deeply
-  # frozen. Note that it may lead to more efficient memory usage due to frozen
-  # strings deduplication:
+  # If the <code>freeze: true</code> argument is passed, deserialized object would
+  # be deeply frozen. Note that it may lead to more efficient memory usage due to
+  # frozen strings deduplication:
   #
   #     serialized = Marshal.dump(['value1', 'value2', 'value1', 'value2'])
   #
