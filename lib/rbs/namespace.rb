@@ -5,8 +5,10 @@ module RBS
     attr_reader :path
 
     def initialize(path:, absolute:)
-      @path = path
+      @path = path.freeze
       @absolute = absolute ? true : false
+
+      freeze
     end
 
     def self.empty

@@ -1,0 +1,40 @@
+module RBS
+  class MultithreadLoader
+    class TypeNameEnumerator
+      attr_reader names: Set[TypeName]
+
+      attr_reader aliases: Hash[TypeName, [TypeName, Resolver::context]]
+
+      def initialize: () -> void
+
+      def enumerate: (AST::Declarations::t, Namespace, Resolver::context) -> void
+    end
+
+    class ASTResolver
+      attr_reader resolver: Resolver::TypeNameResolver
+
+      attr_reader map: Environment::UseMap
+
+      def self.build: (Resolver::TypeNameResolver, Environment::UseMap::Table, Array[AST::Directives::t]) -> instance
+
+      def initialize: (Resolver::TypeNameResolver, Environment::UseMap) -> void
+
+      def resolve_decl: (AST::Declarations::t, Resolver::context, Namespace prefix) -> AST::Declarations::t
+
+      def resolve_member: (AST::Members::t, Resolver::context) -> AST::Members::t
+
+      def resolve_type: (Types::t, Resolver::context) -> Types::t
+
+      def resolve_type_name: (TypeName, Resolver::context) -> TypeName
+
+      def resolve_type_params: (Array[AST::TypeParam], Resolver::context) -> Array[AST::TypeParam]
+
+      def resolve_method_type: (MethodType, Resolver::context) -> MethodType
+
+      def concat_namespace: (Namespace, TypeName) -> Namespace
+    end
+
+    def initialize: (Integer size) -> void
+  end
+end
+

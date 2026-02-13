@@ -1,0 +1,21 @@
+module RBS
+  class RactorPool[T, U]
+    STOP: Object
+
+    attr_reader ractors: Array[Ractor]
+
+    attr_reader worker_port: Ractor::Port
+
+    attr_reader result_port: Ractor::Port
+
+    def initialize: (Integer size) { (T) -> U } -> void
+
+    def map: (Array[T]) -> Array[U]
+
+    def each: (Array[T]) { (T) -> void } -> void
+
+    def self.map: [T, U] (Array[T], Integer size) { (T) -> U } -> Array[U]
+
+    def self.finalizer: (Array[Ractor]) -> (^(?) -> void)
+  end
+end

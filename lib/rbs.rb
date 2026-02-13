@@ -72,6 +72,9 @@ require "rbs_extension"
 require "rbs/parser_aux"
 require "rbs/location"
 
+require "rbs/ractor_pool"
+require "rbs/multithread_loader"
+
 module RBS
   class <<self
     attr_reader :logger_level

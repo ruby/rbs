@@ -20,6 +20,8 @@ module RBS
                 # Defaults to :class
                 :class
               end
+
+      freeze
     end
 
     def ==(other)
