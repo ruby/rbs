@@ -86,7 +86,7 @@ module RBS
         )
       end
     end
-    
+
     def self.parse(string)
       absolute = string.start_with?("::")
 

@@ -108,7 +108,8 @@ module RBS
       class Void < Base; end
       class Any < Base
         def initialize(location:, todo: false)
-          super(location: location)
+          # super(location: location)
+          @location = location
           if todo
             @string = "__todo__"
           end
@@ -548,6 +549,10 @@ module RBS
         else
           raise ArgumentError, "only one of `:fields` or `:all_fields` is required"
         end
+
+        @fields.freeze
+        @optional_fields.freeze
+        all_fields.freeze
 
         @location = location
       end

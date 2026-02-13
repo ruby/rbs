@@ -95,7 +95,7 @@ module RBS
         vars = Set.new(params.map(&:name))
 
         params.map! do |param|
-          param.map_type {|bound| _ = subst_var(vars, bound) }
+          Ractor.make_shareable(param.map_type {|bound| _ = subst_var(vars, bound) })
         end
       end
 

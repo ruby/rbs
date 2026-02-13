@@ -32,7 +32,7 @@ module RBS
         dirs.unshift(resolved)
       end
 
-      [buf, dirs, decls]
+      [buf, dirs, decls].freeze
     end
 
     def self.parse_type_params(source, module_type_params: true)

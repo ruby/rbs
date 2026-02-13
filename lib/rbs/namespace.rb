@@ -30,10 +30,10 @@ module RBS
     end
 
     def parent
-      @parent ||= begin
+      # @parent ||= begin
         raise "Parent with empty namespace" if empty?
         self.class.new(path: path.take(path.size - 1), absolute: absolute?)
-      end
+      # end
     end
 
     def absolute?

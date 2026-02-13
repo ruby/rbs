@@ -26,6 +26,8 @@ VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t
         rb_ary_push(ruby_array, rbs_struct_to_ruby_value(ctx, n->node));
     }
 
+    rb_obj_freeze(ruby_array);
+
     return ruby_array;
 }
 
@@ -42,6 +44,7 @@ VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash)
         rb_hash_aset(ruby_hash, key, value);
     }
 
+    rb_obj_freeze(ruby_hash);
     return ruby_hash;
 }
 
@@ -63,6 +66,8 @@ VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_l
     for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
         rb_ary_push(ruby_array, rbs_location_range_to_ruby_location(ctx, n->range));
     }
+
+    rb_obj_freeze(ruby_array);
 
     return ruby_array;
 }
@@ -104,11 +109,11 @@ VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
 #ifdef RB_PASS_KEYWORDS
 // Ruby 2.7 or later
 #define CLASS_NEW_INSTANCE(klass, argc, argv) \
-    rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
+    rb_obj_freeze(rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS))
 #else
 // Ruby 2.6
 #define CLASS_NEW_INSTANCE(receiver, argc, argv) \
-    rb_class_new_instance(argc, argv, receiver)
+    rb_obj_freeze(rb_class_new_instance(argc, argv, receiver))
 #endif
 
 VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instance) {
@@ -132,7 +137,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rbs_ast_string_t *string_node = (rbs_ast_string_t *) instance;
         rbs_string_t s = string_node->string;
 
-        return rb_enc_str_new(s.start, rbs_string_len(s), rb_utf8_encoding());
+        return rb_obj_freeze(rb_enc_str_new(s.start, rbs_string_len(s), rb_utf8_encoding()));
 
         <%- when "RBS::Types::Record::FieldType" -%>
         rbs_types_record_field_type_t *record_fieldtype = (rbs_types_record_field_type_t *) instance;
@@ -140,7 +145,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE array = rb_ary_new();
         rb_ary_push(array, rbs_struct_to_ruby_value(ctx, record_fieldtype->type));
         rb_ary_push(array, record_fieldtype->required ? Qtrue : Qfalse);
-        return array;
+        return rb_obj_freeze(array);
 
         <%- when "RBS::Signature" -%>
         rbs_signature_t *signature = (rbs_signature_t *) instance;
@@ -148,7 +153,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE array = rb_ary_new();
         rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->directives));
         rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->declarations));
-        return array;
+        return rb_obj_freeze(array);
         <%- else -%>
         <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
 
@@ -223,12 +228,19 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
         <%- case node.ruby_full_name -%>
         <%- when "RBS::AST::Declarations::Class", "RBS::AST::Declarations::Module", "RBS::AST::Declarations::Interface", "RBS::AST::Declarations::TypeAlias", "RBS::MethodType" -%>
+        VALUE params = rb_hash_lookup(h, ID2SYM(rb_intern("type_params")));
+        params = rb_obj_dup(params);
+
         rb_funcall(
             RBS_AST_TypeParam,
             rb_intern("resolve_variables"),
             1,
-            rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
+            params
         );
+
+        rb_obj_freeze(params);
+        rb_hash_aset(h, ID2SYM(rb_intern("type_params")), params);
+
         <%- end -%>
         return CLASS_NEW_INSTANCE(
             <%= node.c_constant_name %>,

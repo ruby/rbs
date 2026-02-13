@@ -9,6 +9,9 @@ module RBS
       def initialize(string:, location:)
         @string = string
         @location = location
+
+        @string.freeze
+        freeze
       end
 
       def ==(other)
