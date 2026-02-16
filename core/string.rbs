@@ -5248,7 +5248,7 @@ class String
   # Related: see [Converting to New
   # String](rdoc-ref:String@Converting+to+New+String).
   #
-  def tr: (selector source, string relpacement) -> String
+  def tr: (selector source, string replacement) -> String
 
   # <!--
   #   rdoc-file=string.c
@@ -5261,7 +5261,7 @@ class String
   #
   # Related: [Modifying](rdoc-ref:String@Modifying).
   #
-  def tr!: (selector source, string relpacement) -> self?
+  def tr!: (selector source, string replacement) -> self?
 
   # <!--
   #   rdoc-file=string.c
