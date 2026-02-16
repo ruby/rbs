@@ -1870,7 +1870,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_keys: () -> Enumerator[K, Hash[untyped, V]]
+                    | [A] (Hash[K, A]) -> Hash[A, V]
                     | [A] () { (K) -> A } -> Hash[A, V]
+                    | [A] (Hash[K, A]) { (K) -> A } -> Hash[A, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1963,7 +1965,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_keys!: () -> Enumerator[K, self]
+                     | (Hash[K, K]) -> self
                      | () { (K) -> K } -> self
+                     | (Hash[K, K]) { (K) -> K } -> self
 
   # <!--
   #   rdoc-file=hash.c
