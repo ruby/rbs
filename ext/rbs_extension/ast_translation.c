@@ -1229,10 +1229,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = rb_hash_new();
         VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
         rbs_loc *loc = rbs_check_location(location);
-        rbs_loc_legacy_alloc_children(loc, 1);
+        rbs_loc_legacy_alloc_children(loc, 2);
         rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start_char, .end = node->name_range.end_char });
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start_char, .end = node->args_range.end_char });
         rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name)); // rbs_type_name
+        rb_hash_aset(h, ID2SYM(rb_intern("args")), rbs_node_list_to_ruby_array(ctx, node->args));
 
         return CLASS_NEW_INSTANCE(
             RBS_Types_ClassSingleton,

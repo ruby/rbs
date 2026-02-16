@@ -573,8 +573,11 @@ nodes:
     fields:
       - name: name
         c_type: rbs_type_name
+      - name: args
+        c_type: rbs_node_list
     locations:
       - required: name
+      - optional: args
   - name: RBS::Types::Function
     rust_name: FunctionTypeNode
     expose_location: false
