@@ -59,6 +59,42 @@ foo: 123
     )
   end
 
+  def test_safe_load_file
+    Dir.mktmpdir do |dir|
+      (Pathname(dir) + "test.yaml").write(<<-YAML)
+foo: 123
+      YAML
+
+      assert_send_type(
+        "(::String) -> untyped",
+        Psych, :safe_load_file, File.join(dir, "test.yaml")
+      )
+
+      assert_send_type(
+        "(::_ToPath, permitted_classes: ::Array[::Class], permitted_symbols: ::Array[::Symbol], aliases: bool, fallback: ::Symbol, symbolize_names: bool, freeze: bool) -> untyped",
+        Psych, :safe_load_file, Pathname(File.join(dir, "test.yaml")), permitted_classes: [Integer], permitted_symbols: [:foo], aliases: true, fallback: :foo, symbolize_names: true, freeze: false
+      )
+    end
+  end
+
+  def test_unsafe_load_file
+    Dir.mktmpdir do |dir|
+      (Pathname(dir) + "test.yaml").write(<<-YAML)
+foo: 123
+      YAML
+
+      assert_send_type(
+        "(::String) -> untyped",
+        Psych, :unsafe_load_file, File.join(dir, "test.yaml")
+      )
+
+      assert_send_type(
+        "(::_ToPath, fallback: ::String, symbolize_names: bool, freeze: bool) -> untyped",
+        Psych, :unsafe_load_file, Pathname(File.join(dir, "test.yaml")), fallback: "foo", symbolize_names: false, freeze: false
+      )
+    end
+  end
+
   def test_dump
     assert_send_type(
       "(::Array[::Integer]) -> ::String",
