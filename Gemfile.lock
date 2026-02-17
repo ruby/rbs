@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 8521be6192b88d5c58514783d7f58585c5545497
+  revision: bf0b8d90d091f20d3bad7ea8974ccd8bf65b8193
   specs:
     steep (2.0.0.dev)
       activesupport (>= 5.1)
@@ -112,7 +112,7 @@ GEM
       prettyprint
     prettyprint (0.2.0)
     prism (1.9.0)
-    pstore (0.2.0)
+    pstore (0.2.1)
     psych (4.0.6)
       stringio
     public_suffix (7.0.2)
@@ -147,7 +147,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.7)
-    rubocop (1.84.1)
+    rubocop (1.84.2)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -171,7 +171,7 @@ GEM
       rubocop (~> 1.72, >= 1.72.1)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
-    stackprof (0.2.27)
+    stackprof (0.2.28)
     stringio (3.2.0)
     strong_json (2.1.2)
     strscan (3.1.7)
