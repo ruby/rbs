@@ -30,6 +30,7 @@ module RBS
       if resolved
         dirs = dirs.dup if dirs.frozen?
         dirs.unshift(resolved)
+        dirs.freeze
       end
 
       [buf, dirs, decls].freeze
@@ -56,8 +57,12 @@ module RBS
           location.add_required_child(:keyword, kw_offset[0]...kw_offset[1])
           location.add_required_child(:colon, colon_offset[0]...colon_offset[1])
           location.add_required_child(:value, value_offset[0]...value_offset[1])
+          location.freeze
 
-          return AST::Directives::ResolveTypeNames.new(value: value == "true", location: location)
+          resolved = AST::Directives::ResolveTypeNames.new(value: value == "true", location: location)
+          resolved.freeze
+
+          return resolved
         else
           return
         end

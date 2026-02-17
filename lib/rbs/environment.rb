@@ -532,11 +532,11 @@ module RBS
 
       each_rbs_source do |source|
         resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
-        if !resolve || resolve.value
+        # if !resolve || resolve.value
           _, decls = resolve_signature(resolver, table, source.directives, source.declarations, only: only)
-        else
-          decls = source.declarations
-        end
+        # else
+        #   decls = source.declarations
+        # end
         env.add_source(Source::RBS.new(source.buffer, source.directives, decls))
       end
 

@@ -18,19 +18,18 @@ module RBS
 
           loop do
             task = Ractor.receive
-
             if stop.equal?(task)
               break
             else
               result = block[task]
-              result_port << result
+              result_port.send(result)
               worker_port << Ractor.current
             end
           end
         end
       end
 
-      ObjectSpace.define_finalizer(self, RactorPool.finalizer(ractors))
+      # ObjectSpace.define_finalizer(self, RactorPool.finalizer(ractors))
     end
 
     def self.finalizer(ractors)
@@ -53,12 +52,14 @@ module RBS
       count = objects.size
 
       thread = Thread.start do
+        index = 0
         objects.each do |obj|
           ractor = worker_port.receive
-          ractor << obj
+          ractor.send(obj)
+          index += 1
         end
 
-        ractors.each { _1 << RactorPool::STOP }
+        # ractors.each { _1 << RactorPool::STOP }
       end
 
       while count > 0

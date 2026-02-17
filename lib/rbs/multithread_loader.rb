@@ -6,27 +6,33 @@ module RBS
       attr_reader :names, :aliases
 
       def initialize()
-        @names = Set.new
+        @names = Set[]
         @aliases = {}
       end
 
       def enumerate(decl, parent, context)
         case decl
         when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
-          full_name = decl.name.with_prefix(parent)
+          full_name = decl.name.absolute? ? decl.name : decl.name.with_prefix(parent)
           names << full_name
           ns = full_name.to_namespace
+          con = nil
           decl.members.each do |member|
             if member.is_a?(RBS::AST::Declarations::Base)
-              enumerate(member, ns, [context, full_name])
+              con ||= [context, full_name]
+              enumerate(member, ns, con)
             end
           end
         when RBS::AST::Declarations::Interface, RBS::AST::Declarations::TypeAlias
-          full_name = decl.name.with_prefix(parent)
+          full_name = decl.name.absolute? ? decl.name : decl.name.with_prefix(parent)
           names << full_name
         when RBS::AST::Declarations::ClassAlias, RBS::AST::Declarations::ModuleAlias
-          full_name = decl.new_name.with_prefix(parent)
+          full_name = decl.new_name.absolute? ? decl.new_name : decl.new_name.with_prefix(parent)
           aliases[full_name] = [decl.old_name, context]
+        when RBS::AST::Declarations::Base
+          # nop
+        else
+          raise "Unknown declaration: #{decl.class}"
         end
       end
     end
@@ -40,11 +46,19 @@ module RBS
       end
 
       def resolve_type_name(type_name, context)
+        # return type_name.absolute!
+
         re = map.resolve(type_name)
         if re.absolute?
           return re
         end
-        resolver.resolve(type_name, context: context) || raise("Unresolved type name: #{type_name} in #{context.inspect}")
+        resolver.resolve(type_name, context: context) || begin
+          absolute_name = type_name.absolute!
+          if resolver.all_names.include?(absolute_name)
+            return absolute_name
+          end
+          raise("Unresolved type name: #{type_name} in #{context.inspect}")
+        end
       end
 
       def resolve_type(type, context)
@@ -54,6 +68,10 @@ module RBS
       end
 
       def concat_namespace(namespace, typename)
+        if typename.absolute?
+          return typename.to_namespace
+        end
+
         if typename.namespace.empty?
           path = namespace.path.dup
         else
@@ -84,7 +102,8 @@ module RBS
         case decl
         when AST::Declarations::Class
           outer_context = context
-          inner_context = [context, decl.name.with_prefix(prefix)] #: Resolver::context
+          full_name = decl.name.absolute? ? decl.name : decl.name.with_prefix(prefix)
+          inner_context = [context, full_name] #: Resolver::context
 
           prefix_ = concat_namespace(prefix, decl.name)
 
@@ -115,7 +134,8 @@ module RBS
 
         when AST::Declarations::Module
           outer_context = context
-          inner_context = [outer_context, decl.name.with_prefix(prefix)] #: Resolver::context
+          full_name = decl.name.absolute? ? decl.name : decl.name.with_prefix(prefix)
+          inner_context = [context, full_name] #: Resolver::context
 
           prefix_ = concat_namespace(prefix, decl.name)
           AST::Declarations::Module.new(
@@ -145,7 +165,7 @@ module RBS
 
         when AST::Declarations::Interface
           AST::Declarations::Interface.new(
-            name: decl.name.with_prefix(prefix),
+            name: decl.name.absolute? ? decl.name : decl.name.with_prefix(prefix),
             type_params: resolve_type_params(decl.type_params, context),
             members: decl.members.map do |member|
               resolve_member(member, context)
@@ -157,7 +177,7 @@ module RBS
 
         when AST::Declarations::TypeAlias
           AST::Declarations::TypeAlias.new(
-            name: decl.name.with_prefix(prefix),
+            name: decl.name.absolute? ? decl.name : decl.name.with_prefix(prefix),
             type_params: resolve_type_params(decl.type_params, context),
             type: resolve_type(decl.type, context),
             location: decl.location,
@@ -167,7 +187,7 @@ module RBS
 
         when AST::Declarations::Constant
           AST::Declarations::Constant.new(
-            name: decl.name.with_prefix(prefix),
+            name: decl.name.absolute? ? decl.name : decl.name.with_prefix(prefix),
             type: resolve_type(decl.type, context),
             location: decl.location,
             comment: decl.comment,
@@ -176,7 +196,7 @@ module RBS
 
         when AST::Declarations::ClassAlias
           AST::Declarations::ClassAlias.new(
-            new_name: decl.new_name.with_prefix(prefix),
+            new_name: decl.new_name.absolute? ? decl.new_name : decl.new_name.with_prefix(prefix),
             old_name: resolve_type_name(decl.old_name, context),
             location: decl.location,
             comment: decl.comment,
@@ -185,7 +205,7 @@ module RBS
 
         when AST::Declarations::ModuleAlias
           AST::Declarations::ModuleAlias.new(
-            new_name: decl.new_name.with_prefix(prefix),
+            new_name: decl.new_name.absolute? ? decl.new_name : decl.new_name.with_prefix(prefix),
             old_name: resolve_type_name(decl.old_name, context),
             location: decl.location,
             comment: decl.comment,

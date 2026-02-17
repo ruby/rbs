@@ -106,6 +106,8 @@ module RBS
 
     def each_signature: () { (source, Pathname, Buffer, Array[AST::Declarations::t], Array[AST::Directives::t]) -> void } -> void
 
+    def each_signature_file: () { (source, Pathname) -> void } -> void
+
     def each_dir: { (source, Pathname) -> void } -> void
   end
 end

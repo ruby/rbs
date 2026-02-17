@@ -145,7 +145,7 @@ module RBS
       end
     end
 
-    def each_signature
+    def each_signature_file
       files = Set[]
 
       each_dir do |source, dir|
@@ -155,12 +155,19 @@ module RBS
           next if files.include?(path)
 
           files << path
-          buffer = Buffer.new(name: path, content: path.read(encoding: "UTF-8"))
 
-          _, dirs, decls = Parser.parse_signature(buffer)
-
-          yield source, path, buffer, decls, dirs
+          yield source, path
         end
+      end
+    end
+
+    def each_signature
+      each_signature_file do |source, path|
+        buffer = Buffer.new(name: path, content: path.read(encoding: "UTF-8"))
+
+        _, dirs, decls = Parser.parse_signature(buffer)
+
+        yield source, path, buffer, decls, dirs
       end
     end
   end
