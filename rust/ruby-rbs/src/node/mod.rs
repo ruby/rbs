@@ -484,6 +484,112 @@ mod tests {
     }
 
     #[test]
+    fn test_sub_locations() {
+        let rbs_code = r#"class Foo < Bar end"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Class(class) = declaration else {
+            panic!("Expected Class");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = class.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(5, keyword_loc.end());
+
+        let name_loc = class.name_location();
+        assert_eq!(6, name_loc.start());
+        assert_eq!(9, name_loc.end());
+
+        let end_loc = class.end_location();
+        assert_eq!(16, end_loc.start());
+        assert_eq!(19, end_loc.end());
+
+        // Test optional sub-location that's present
+        let lt_loc = class.lt_location();
+        assert!(lt_loc.is_some());
+        let lt = lt_loc.unwrap();
+        assert_eq!(10, lt.start());
+        assert_eq!(11, lt.end());
+
+        // Test optional sub-location that's not present (no type params in this class)
+        let type_params_loc = class.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_type_alias_sub_locations() {
+        let rbs_code = r#"type foo = String"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::TypeAlias(type_alias) = declaration else {
+            panic!("Expected TypeAlias");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = type_alias.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(4, keyword_loc.end());
+
+        let name_loc = type_alias.name_location();
+        assert_eq!(5, name_loc.start());
+        assert_eq!(8, name_loc.end());
+
+        let eq_loc = type_alias.eq_location();
+        assert_eq!(9, eq_loc.start());
+        assert_eq!(10, eq_loc.end());
+
+        // Test optional sub-location that's not present (no type params)
+        let type_params_loc = type_alias.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_module_sub_locations() {
+        let rbs_code = r#"module Foo[T] : Bar end"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Module(module) = declaration else {
+            panic!("Expected Module");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = module.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(6, keyword_loc.end());
+
+        let name_loc = module.name_location();
+        assert_eq!(7, name_loc.start());
+        assert_eq!(10, name_loc.end());
+
+        let end_loc = module.end_location();
+        assert_eq!(20, end_loc.start());
+        assert_eq!(23, end_loc.end());
+
+        // Test optional sub-locations that are present
+        let type_params_loc = module.type_params_location();
+        assert!(type_params_loc.is_some());
+        let tp = type_params_loc.unwrap();
+        assert_eq!(10, tp.start());
+        assert_eq!(13, tp.end());
+
+        let colon_loc = module.colon_location();
+        assert!(colon_loc.is_some());
+        let colon = colon_loc.unwrap();
+        assert_eq!(14, colon.start());
+        assert_eq!(15, colon.end());
+
+        let self_types_loc = module.self_types_location();
+        assert!(self_types_loc.is_some());
+        let st = self_types_loc.unwrap();
+        assert_eq!(16, st.start());
+        assert_eq!(19, st.end());
+    }
+
+    #[test]
     fn test_enum_types() {
         let rbs_code = r#"
             class Foo
