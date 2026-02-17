@@ -8,14 +8,17 @@ module RBS
           "mutex_m" => ">= 0.3.0",
           "abbrev" => nil,
           "base64" => nil,
+          "benchmark" => nil,
           "bigdecimal" => nil,
           "csv" => nil,
           "kconv" => nil,
+          "logger" => nil,
           "minitest" => nil,
           "net-smtp" => nil,
           "nkf" => nil,
           "observer" => nil,
           "cgi" => nil,
+          "pstore" => nil,
         }
 
         class GemfileLockMismatchError < StandardError
