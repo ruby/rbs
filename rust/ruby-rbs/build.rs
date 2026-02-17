@@ -36,10 +36,29 @@ impl NodeField {
 }
 
 #[derive(Debug, Deserialize)]
+struct LocationField {
+    #[serde(default)]
+    required: Option<String>,
+    #[serde(default)]
+    optional: Option<String>,
+}
+
+impl LocationField {
+    fn name(&self) -> &str {
+        self.required.as_ref().or(self.optional.as_ref()).unwrap()
+    }
+
+    fn is_required(&self) -> bool {
+        self.required.is_some()
+    }
+}
+
+#[derive(Debug, Deserialize)]
 struct Node {
     name: String,
     rust_name: String,
     fields: Option<Vec<NodeField>>,
+    locations: Option<Vec<LocationField>>,
 }
 
 impl Node {
@@ -72,6 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         name: "RBS::AST::Symbol".to_string(),
         rust_name: "SymbolNode".to_string(),
         fields: None,
+        locations: None,
     });
 
     config.nodes.sort_by(|a, b| a.name.cmp(&b.name));
@@ -486,6 +506,59 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
         )?;
         writeln!(file, "    }}")?;
         writeln!(file)?;
+
+        // Generate location accessor methods
+        if let Some(locations) = &node.locations {
+            for location in locations {
+                let location_name = location.name();
+                let method_name = format!("{}_location", location_name);
+                let field_name = format!("{}_range", location_name);
+
+                if location.is_required() {
+                    writeln!(
+                        file,
+                        "    /// Returns the `{}` sub-location of this node.",
+                        location_name
+                    )?;
+                    writeln!(file, "    #[must_use]")?;
+                    writeln!(
+                        file,
+                        "    pub fn {}(&self) -> RBSLocationRange {{",
+                        method_name
+                    )?;
+                    writeln!(
+                        file,
+                        "        RBSLocationRange::new(unsafe {{ (*self.pointer).{} }})",
+                        field_name
+                    )?;
+                    writeln!(file, "    }}")?;
+                } else {
+                    writeln!(
+                        file,
+                        "    /// Returns the `{}` sub-location of this node if present.",
+                        location_name
+                    )?;
+                    writeln!(file, "    #[must_use]")?;
+                    writeln!(
+                        file,
+                        "    pub fn {}(&self) -> Option<RBSLocationRange> {{",
+                        method_name
+                    )?;
+                    writeln!(
+                        file,
+                        "        let range = unsafe {{ (*self.pointer).{} }};",
+                        field_name
+                    )?;
+                    writeln!(file, "        if range.start_char == -1 {{")?;
+                    writeln!(file, "            None")?;
+                    writeln!(file, "        }} else {{")?;
+                    writeln!(file, "            Some(RBSLocationRange::new(range))")?;
+                    writeln!(file, "        }}")?;
+                    writeln!(file, "    }}")?;
+                }
+                writeln!(file)?;
+            }
+        }
 
         if let Some(fields) = &node.fields {
             for field in fields {
