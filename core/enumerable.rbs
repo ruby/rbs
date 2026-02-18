@@ -816,7 +816,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def include?: (Elem arg0) -> bool
+  def include?: (untyped object) -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -1663,7 +1663,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def member?: (Elem arg0) -> bool
+  alias member? include?
 
   # <!-- rdoc-file=enum.c -->
   # Returns the result of applying a reducer to an initial value and the first

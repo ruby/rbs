@@ -265,4 +265,15 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '(Class) -> bool', TestEnumerable.new, :one?, String
     assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :one? do |x| x == '0' end
   end
+
+  def test_include?(method: :include?)
+    with_untyped.and '1' do |element|
+      assert_send_type '(untyped) -> bool',
+                       TestEnumerable.new, method, element
+    end
+  end
+
+  def test_member?
+    test_include?(method: :member?)
+  end
 end
