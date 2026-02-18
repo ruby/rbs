@@ -16,16 +16,22 @@ module RBS
         Ractor.new(block, worker_port, result_port, STOP, name: "RBS::RactorPool(worker_ractor=#{_1})") do |block, worker_port, result_port, stop|
           worker_port << Ractor.current
 
+          results = [] #: Array[untyped]
+
           loop do
             task = Ractor.receive
             if stop.equal?(task)
               break
             else
-              result = block[task]
-              result_port.send(result)
-              worker_port << Ractor.current
+              task.each do |t|
+                result = block[t]
+                results << result
+                worker_port << Ractor.current
+              end
             end
           end
+
+          results.freeze
         end
       end
 
@@ -38,38 +44,30 @@ module RBS
       }
     end
 
-    def map(objects)
+    def each(objects)
+      map(objects)
+      nil
+    end
+
+    def map(objects, &block)
       results = [] #: Array[untyped]
 
-      each(objects) do |result|
-        results << result
+      thread = Thread.start do
+        objects.each_slice(100) do |obj|
+          ractor = worker_port.receive
+          ractor.send(obj)
+        end
+
+        ractors.each { _1 << RactorPool::STOP }
+      end
+
+      # thread.join
+
+      ractors.each do |ractor|
+        results.concat(ractor.value)
       end
 
       results
-    end
-
-    def each(objects, &block)
-      count = objects.size
-
-      thread = Thread.start do
-        index = 0
-        objects.each do |obj|
-          ractor = worker_port.receive
-          ractor.send(obj)
-          index += 1
-        end
-
-        # ractors.each { _1 << RactorPool::STOP }
-      end
-
-      while count > 0
-        yield result_port.receive
-        count -= 1
-      end
-
-      thread.join()
-
-      nil
     end
 
     def self.map(objects, size, &block)

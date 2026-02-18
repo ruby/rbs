@@ -6,6 +6,8 @@ require "rbs/ractor_pool"
 
 require "optparse"
 
+Ractor.new{}
+
 label = nil #: String?
 num_ractors = 4 #: Integer
 scale = 1 #: Integer
@@ -24,10 +26,6 @@ OptionParser.new do |opts|
 
   opts.on("--scale=N", Integer, "Scale the number of files by N times (default: 1)") do |v|
     scale = v
-  end
-
-  opts.on("--batch=N", Integer, "Number of files to send per ractor (default: 30)") do |v|
-    batch = v
   end
 end.parse!(ARGV)
 
@@ -50,75 +48,54 @@ file_names.uniq.each do |file|
   files[file] = RBS::Buffer.new(content: content, name: Pathname(file)).finalize
 end
 
-# # class RactorParser
-# #   attr_reader :workers
+def ractor_map(objects, num_ractors, &block)
+  port = Ractor::Port.new
 
-# #   attr_reader :result_port, :queue_port
+  block = Ractor.shareable_proc(&block)
 
-# #   def initialize(count)
-# #     @count = count
+  ractors = num_ractors.times.map do
+    Ractor.new(port, block, name: "worker-#{_1}") do |port, block|
+      results = []
+      port << Ractor.current
 
-# #     @result_port = Ractor::Port.new()
-# #     @queue_port = Ractor::Port.new()
+      while obj = Ractor.receive
+        if obj == :result
+          break
+        else
+          results << block[obj]
+          port << Ractor.current
+        end
+      end
 
-# #     @workers = count.times.map do |i|
-# #       Ractor.new(result_port, queue_port, name: "worker-#{i}") do |result_port, queue_port|
-# #         while buffer = Ractor.receive
-# #           case buffer
-# #           when :start
-# #             queue_port << Ractor.current
-# #           else
-# #             # ms = Benchmark.realtime do
-# #             buffer.each do |buf|
-# #               result = RBS::Parser.parse_signature(buf)
-# #             # out_port << [Ractor.current, result]
-# #             # out_port << [Ractor.current, result]
-# #             # Ractor.shareable?(result) or raise "Parsing result of #{buffer.name} is not shareable"
-# #             # Ractor.make_shareable(result) or raise
-# #               result_port << result
-# #             end
-# #             # end
-
-# #             # puts "[#{Ractor.current.name}] Parsed #{buffer.size} files in #{(ms * 1000).round} ms"
-# #             queue_port << Ractor.current
-# #             # out_port.send([Ractor.current, buffer], move: true)
-# #             # out_port.send([Ractor.current, Ractor.make_shareable(result)], move: false)
-# #           end
-# #         end
-# #       end
-# #     end
-# #   end
-
-#   def parse(buffers, batch)
-#     results = []
-
-#     workers.each do |worker|
-#       worker.send :start
-#     end
-
-#     input_thread = Thread.new do
-#       buffers.each_slice(batch) do |bufs|
-#         ractor = queue_port.receive
-#         ractor.send bufs
-#       end
-#     end
-
-#     while buffers.size > results.size
-#       sig = result_port.receive
-#       results << sig
-#     end
-
-#     input_thread.join
-
-#     results
-#   end
-# end
-
-class SingleParser
-  def parse(files)
-    files.map do |buffer|
-      RBS::Parser.parse_signature(buffer)
+      results
     end
+  end
+
+  t = Thread.new do
+    objects.each do |obj|
+      ractor = port.receive
+      ractor.send(obj)
+    end
+
+    ractors.each do |ractor|
+      ractor.send(:result)
+    end
+  end
+
+  t.join
+
+  results = []
+
+  ractors.each do |ractor|
+    results.concat(ractor.value)
+  end
+
+  results
+end
+
+def single_parse(files)
+  files.map do |buffer|
+    RBS::Parser.parse_signature(buffer)
   end
 end
 
@@ -129,23 +106,23 @@ bufs.freeze
 puts "Benchmarking with #{bufs.size} files (scale=#{scale})"
 
 Benchmark.ips do |x|
-  single = SingleParser.new
-
-  (2..10).reverse_each do |i|
-    x.report("map #{i} ractors") do
-      RBS::RactorPool.map(bufs, i) { RBS::Parser.parse_signature(_1) }
-    end
-    x.report("each #{i} ractors") do
-      pool = RBS::RactorPool.new(i) { RBS::Parser.parse_signature(_1) }
-      pool.each(bufs) { nil }
-    end
-  end
-
-  # (2..10).reverse_each do |i|
-  # end
-
   x.report("serial") do
-    single.parse(bufs)
+    buf, dirs, decls = single_parse(bufs)
+    RBS::Source::RBS.new(buf, dirs, decls)
   end
+
+  x.report("ractor_map(..., #{num_ractors})") do
+    ractor_map(bufs, num_ractors) do |buf|
+      buf, dirs, decls = RBS::Parser.parse_signature(buf)
+      RBS::Source::RBS.new(buf, dirs, decls)
+    end
+  end
+
+  # x.report("RactorPool.map(..., #{num_ractors})") do
+  #   RBS::RactorPool.map(bufs, num_ractors) do |buf|
+  #     buf, dirs, decls = RBS::Parser.parse_signature(buf)
+  #     RBS::Source::RBS.new(buf, dirs, decls)
+  #   end
+  # end
 end
 

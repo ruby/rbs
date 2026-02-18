@@ -1,6 +1,8 @@
 require "rbs"
 require "benchmark"
 
+RBS.logger_level = Logger::FATAL
+
 env_loader = RBS::EnvironmentLoader.new
 
 # env_loader.add(library: "pathname", version: nil)
@@ -180,6 +182,7 @@ puts "Read #{buffers.size} files in #{read}s"
 
 seq = Benchmark.realtime do
   buffers.each do |buffer|
+    # binding.irb
     buffer, dirs, decls = RBS::Parser.parse_signature(buffer)
     srcs << RBS::Source::RBS.new(buffer, dirs, decls)
   end
@@ -197,7 +200,7 @@ puts "Single thread parse time: #{seq}s"
 #   send_port.send(nil)
 # end
 
-srcs.each do Ractor.make_shareable(_1) or raise end
+# srcs.each do Ractor.make_shareable(_1) or raise end
 
 # s = Benchmark.realtime do
 #   t = Thread.new do
@@ -214,15 +217,24 @@ srcs.each do Ractor.make_shareable(_1) or raise end
 # end
 # puts "Sending #{srcs.size} sources to ractor time: #{s}s"
 
+# GC.disable
+
 lll = Benchmark.realtime do
-  RBS::RactorPool.map(srcs, size) do |src|
+  srcs = RBS::RactorPool.map(srcs, size) do |src|
     buffer, dirs, decls = RBS::Parser.parse_signature(src.buffer)
     # Ractor.shareable?(decls) or raise
-    RBS::Source::RBS.new(buffer, dirs, decls).freeze
-    # src
+    src = RBS::Source::RBS.new(buffer, dirs, decls)
+    # src = Ractor.make_shareable(src) or raise
+    # Ractor.shareable?(src) or raise
+    # Ractor.make_shareable(src) or raise
+    # RBS::Source::RBS.new(buffer, dirs, src.declarations)
+    src
+    # nil
   end
 end
 puts "Ractor parse time: #{lll}s"
+
+exit
 
 # GC.disable
 
@@ -277,7 +289,7 @@ puts "Ractor parse time: #{lll}s"
 
 # puts "Load #{srcs.size} files in #{lo}ms in #{size} ractors"
 
-exit
+# exit
 
 # srcs.clear
 
