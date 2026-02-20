@@ -55,6 +55,8 @@ module RBS
           #
           def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
 
+          def overloading?: () -> bool
+
           def type_fingerprint: () -> untyped
         end
 

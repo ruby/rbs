@@ -180,6 +180,17 @@ module RBS
             end
           end
 
+          def overloading?
+            case type_annotations
+            when Array
+              type_annotations.any? do |annotation|
+                annotation.is_a?(Annotations::MethodTypesAnnotation) && annotation.dot3_location
+              end
+            else
+              false
+            end
+          end
+
           def type_fingerprint
             case type_annotations
             when DocStyle
@@ -217,7 +228,7 @@ module RBS
           end
 
           def overloading?
-            false
+            method_type.overloading?
           end
 
           def annotations
