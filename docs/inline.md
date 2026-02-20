@@ -188,6 +188,18 @@ The type of both methods is `(Integer, Integer) -> Integer | (Float, Float) -> F
 > The `@rbs METHOD-TYPE` syntax allows overloads with the `|` operator, just like in RBS files.
 > Multiple `: METHOD-TYPE` declarations are required for overloads.
 
+The `@rbs METHOD-TYPE` syntax allows having `...` at the last part.
+
+```ruby
+class Calculator2 < Calculator
+  # @rbs (Float, Float) -> Float | ...
+  def add(x, y) = x + y
+
+  # @rbs ...
+  def subtract(x, y) = super
+end
+```
+
 #### Doc-style syntax
 
 The `@rbs return: T` syntax declares the return type of a method:
