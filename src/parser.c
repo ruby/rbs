@@ -3575,12 +3575,14 @@ static bool parse_method_overload(rbs_parser_t *parser, rbs_node_list_t *annotat
 }
 
 /*
-  inline_method_overloads ::= {} <overload>                        -- returns true
+  inline_method_overloads ::= {} <overload>                       -- returns true
                            | {} overload `|` ... `|` overload     -- returns true
+                           | {} overload `|` ... `|` `...`        -- returns true (dot3_location is set)
                            | {<>}                                 -- returns false
 */
 NODISCARD
-static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_range_list_t *bar_locations) {
+static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_range_list_t *bar_locations,
+                                          rbs_location_range *dot3_location) {
     while (true) {
         rbs_node_list_t *annotations = rbs_node_list_new(ALLOCATOR());
         rbs_method_type_t *method_type = NULL;
@@ -3604,6 +3606,12 @@ static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t 
             rbs_parser_advance(parser);
 
             rbs_location_range_list_append(bar_locations, bar_range);
+
+            if (parser->next_token.type == pDOT3) {
+                *dot3_location = RBS_RANGE_LEX2AST(parser->next_token.range);
+                rbs_parser_advance(parser);
+                return true;
+            }
 
             continue;
         }
@@ -3660,14 +3668,39 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
         rbs_parser_advance(parser);
 
         switch (parser->next_token.type) {
+        case pDOT3: {
+            rbs_location_range dot3_range = RBS_RANGE_LEX2AST(parser->next_token.range);
+            rbs_parser_advance(parser);
+
+            rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
+            rbs_location_range_list_t *bar_locations = rbs_location_range_list_new(ALLOCATOR());
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            rbs_location_range full_loc = RBS_RANGE_LEX2AST(full_range);
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_method_types_annotation_new(
+                ALLOCATOR(),
+                full_loc,
+                RBS_RANGE_LEX2AST(rbs_range),
+                overloads,
+                bar_locations,
+                dot3_range
+            );
+            return true;
+        }
         case pLPAREN:
         case pLBRACKET:
         case pLBRACE:
         case tANNOTATION: {
             rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
             rbs_location_range_list_t *bar_locations = rbs_location_range_list_new(ALLOCATOR());
+            rbs_location_range dot3_location = RBS_LOCATION_NULL_RANGE;
 
-            if (!parse_inline_method_overloads(parser, overloads, bar_locations)) {
+            if (!parse_inline_method_overloads(parser, overloads, bar_locations, &dot3_location)) {
                 return false;
             }
 
@@ -3683,7 +3716,8 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
                 full_loc,
                 RBS_RANGE_LEX2AST(rbs_range),
                 overloads,
-                bar_locations
+                bar_locations,
+                dot3_location
             );
             return true;
         }
