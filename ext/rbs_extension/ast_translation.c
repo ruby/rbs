@@ -883,6 +883,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_location_range_to_ruby_location(ctx, node->prefix_location));
         rb_hash_aset(h, ID2SYM(rb_intern("overloads")), rbs_node_list_to_ruby_array(ctx, node->overloads));
         rb_hash_aset(h, ID2SYM(rb_intern("vertical_bar_locations")), rbs_location_range_list_to_ruby_array(ctx, node->vertical_bar_locations));
+        rb_hash_aset(h, ID2SYM(rb_intern("dot3_location")), rbs_location_range_to_ruby_location(ctx, node->dot3_location)); // optional
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Ruby_Annotations_MethodTypesAnnotation,

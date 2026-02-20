@@ -109,12 +109,13 @@ module RBS
         class MethodTypesAnnotation < Base
           Overload = AST::Members::MethodDefinition::Overload
 
-          attr_reader :overloads, :vertical_bar_locations
+          attr_reader :overloads, :vertical_bar_locations, :dot3_location
 
-          def initialize(location:, prefix_location:, overloads:, vertical_bar_locations:)
+          def initialize(location:, prefix_location:, overloads:, vertical_bar_locations:, dot3_location:)
             super(location, prefix_location)
             @overloads = overloads
             @vertical_bar_locations = vertical_bar_locations
+            @dot3_location = dot3_location
           end
 
           def map_type_name(&block)
@@ -125,13 +126,14 @@ module RBS
               )
             end
 
-            self.class.new(location:, prefix_location:, overloads: ovs, vertical_bar_locations:) #: self
+            self.class.new(location:, prefix_location:, overloads: ovs, vertical_bar_locations:, dot3_location:) #: self
           end
 
           def type_fingerprint
             [
               "annots/method_types",
-              overloads.map { |o| [o.annotations.map(&:to_s), o.method_type.to_s] }
+              overloads.map { |o| [o.annotations.map(&:to_s), o.method_type.to_s] },
+              overloading: dot3_location ? true : false
             ]
           end
         end

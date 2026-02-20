@@ -706,6 +706,9 @@ nodes:
         c_type: rbs_node_list
       - name: vertical_bar_locations
         c_type: rbs_location_range_list
+      - name: dot3_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::SkipAnnotation
     rust_name: SkipAnnotationNode
     fields:
