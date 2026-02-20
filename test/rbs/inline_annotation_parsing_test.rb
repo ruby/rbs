@@ -292,4 +292,74 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       Parser.parse_inline_trailing_annotation(": module-alias element", 0...)
     end
   end
+
+  def test_parse__method_types_annotation
+    Parser.parse_inline_leading_annotation("@rbs (String) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (String) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 1, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(String) -> void", overload.method_type.location.source
+        assert_empty overload.annotations
+      end
+      assert_empty annot.vertical_bar_locations
+      assert_nil annot.dot3_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs (String) -> void | (Integer) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (String) -> void | (Integer) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 2, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(String) -> void", overload.method_type.location.source
+      end
+      annot.overloads[1].tap do |overload|
+        assert_equal "(Integer) -> void", overload.method_type.location.source
+      end
+      assert_equal ["|"], annot.vertical_bar_locations.map(&:source)
+      assert_nil annot.dot3_location
+    end
+  end
+
+  def test_parse__method_types_annotation__with_dot3
+    Parser.parse_inline_leading_annotation("@rbs (Float, Float) -> Float | ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (Float, Float) -> Float | ...", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 1, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(Float, Float) -> Float", overload.method_type.location.source
+      end
+      assert_equal ["|"], annot.vertical_bar_locations.map(&:source)
+      assert_equal "...", annot.dot3_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs () -> void | %a{foo} () -> String | ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs () -> void | %a{foo} () -> String | ...", annot.location.source
+      assert_equal 2, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "() -> void", overload.method_type.location.source
+      end
+      annot.overloads[1].tap do |overload|
+        assert_equal "() -> String", overload.method_type.location.source
+        assert_equal ["foo"], overload.annotations.map(&:string)
+      end
+      assert_equal ["|", "|"], annot.vertical_bar_locations.map(&:source)
+      assert_equal "...", annot.dot3_location.source
+    end
+  end
+
+  def test_parse__method_types_annotation__only_dot3
+    Parser.parse_inline_leading_annotation("@rbs ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs ...", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_empty annot.overloads
+      assert_empty annot.vertical_bar_locations
+      assert_equal "...", annot.dot3_location.source
+    end
+  end
 end
