@@ -236,6 +236,45 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__def_method_types_dot3
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs (Float, Float) -> Float | ...
+        def add(x, y)
+          x + y
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(Float, Float) -> Float"], member.overloads.map { _1.method_type.to_s }
+        assert_predicate member, :overloading?
+      end
+    end
+
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs ...
+        def add(x, y)
+          x + y
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_predicate member, :overloading?
+      end
+    end
+  end
+
   def test_parse__skip_class_module
     result = parse(<<~RUBY)
       # @rbs skip -- not a constant
