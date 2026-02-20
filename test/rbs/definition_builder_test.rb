@@ -3767,4 +3767,42 @@ EOF
       end
     end
   end
+
+  def test_inline_method_types__overloading
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+          def bar: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          # @rbs (Integer) -> String | ...
+          def foo(x = nil) = ""
+
+          # @rbs ...
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["(::Integer) -> ::String", "() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Child"), method.defs[0].defined_in
+            assert_equal type_name("::Base"), method.defs[1].defined_in
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+      end
+    end
+  end
 end
