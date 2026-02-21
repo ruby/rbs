@@ -105,6 +105,8 @@
 #
 class Object < BasicObject
   include Kernel
+
+  def self.superclass() -> Class
 end
 
 # A previous incarnation of `interned` for backward-compatibility (see #1499)

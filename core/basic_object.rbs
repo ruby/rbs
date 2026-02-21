@@ -373,4 +373,6 @@ class BasicObject
   #     Undefining one
   #
   def singleton_method_undefined: (Symbol name) -> nil
+
+  def self.superclass -> nil
 end
