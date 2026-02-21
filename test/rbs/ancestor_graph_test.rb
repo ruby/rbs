@@ -83,7 +83,7 @@ EOF
           graph.each_ancestor(InstanceNode("::M")).to_set
         )
         assert_equal(
-          Set[InstanceNode("::B"), InstanceNode("::C")],
+          Set[InstanceNode("::B"), InstanceNode("::C"), SingletonNode("::B"), SingletonNode("::C")],
           graph.each_descendant(InstanceNode("::M")).to_set
         )
 
