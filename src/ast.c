@@ -934,7 +934,7 @@ rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotation
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *overloads, rbs_location_range_list_t *vertical_bar_locations) {
+rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *overloads, rbs_location_range_list_t *vertical_bar_locations, rbs_location_range dot3_location) {
     rbs_ast_ruby_annotations_method_types_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_method_types_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_method_types_annotation_t) {
@@ -945,6 +945,7 @@ rbs_ast_ruby_annotations_method_types_annotation_t *rbs_ast_ruby_annotations_met
         .prefix_location = prefix_location,
         .overloads = overloads,
         .vertical_bar_locations = vertical_bar_locations,
+        .dot3_location = dot3_location,
     };
 
     return instance;

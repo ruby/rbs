@@ -104,9 +104,11 @@ module RBS
         # `@rbs METHOD-TYPEs` annotation in leading comments
         #
         # ```
-        # @rbs () -> void | %a{foo} () -> String
-        # ^^^^                                     -- prefix_location
-        #                 ^                        -- vertical_bar_locations[0]
+        # @rbs () -> void | %a{foo} () -> String | ...
+        # ^^^^                                            -- prefix_location
+        #                 ^                               -- vertical_bar_locations[0]
+        #                                        ^        -- vertical_bar_locations[1]
+        #                                          ^^^    -- dot3_location
         # ```
         class MethodTypesAnnotation < Base
           class Overload = AST::Members::MethodDefinition::Overload
@@ -115,7 +117,9 @@ module RBS
 
           attr_reader vertical_bar_locations: Array[Location]
 
-          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location]) -> void
+          attr_reader dot3_location: Location?
+
+          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location], dot3_location: Location?) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
 
