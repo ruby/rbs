@@ -16,11 +16,14 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
     unsafe {
         let start_ptr = rbs_code.as_ptr() as *const i8;
         let end_ptr = start_ptr.add(rbs_code.len());
+        let char_count = std::str::from_utf8(rbs_code)
+            .map(|s| s.chars().count())
+            .unwrap_or(rbs_code.len()) as i32;
 
         let raw_rbs_string_value = rbs_string_new(start_ptr, end_ptr);
 
         let encoding_ptr = &rbs_encodings[RBS_ENCODING_UTF_8 as usize] as *const rbs_encoding_t;
-        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, rbs_code.len() as i32);
+        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, char_count);
 
         let mut signature: *mut rbs_signature_t = std::ptr::null_mut();
         let result = rbs_parse_signature(parser, &mut signature);
@@ -34,7 +37,18 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
         if result {
             Ok(signature_node)
         } else {
-            Err(String::from("Failed to parse RBS signature"))
+            let error_message = (*parser)
+                .error
+                .as_ref()
+                .filter(|error| !error.message.is_null())
+                .map(|error| {
+                    std::ffi::CStr::from_ptr(error.message)
+                        .to_string_lossy()
+                        .into_owned()
+                })
+                .unwrap_or_else(|| String::from("Failed to parse RBS signature"));
+
+            Err(error_message)
         }
     }
 }
@@ -266,6 +280,14 @@ impl SymbolNode<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_parse_error_contains_actual_message() {
+        let rbs_code = "class { end";
+        let result = parse(rbs_code.as_bytes());
+        let error_message = result.unwrap_err();
+        assert_eq!(error_message, "expected one of class/module/constant name");
+    }
 
     #[test]
     fn test_parse() {
