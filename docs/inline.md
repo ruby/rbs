@@ -219,13 +219,52 @@ end
 
 #### Doc-style syntax
 
+The doc-style syntax allows annotating individual method parameters and the return type using `@rbs NAME: TYPE` comments.
+
+The `@rbs PARAM_NAME: T` syntax declares the type of a parameter:
+
+```ruby
+class Calculator
+  # @rbs x: Integer
+  # @rbs y: Integer
+  def add(x, y:)
+    x + y
+  end
+end
+```
+
+You can add a description after `--`:
+
+```ruby
+class Calculator
+  # @rbs x: Integer -- the first operand
+  # @rbs y: Integer -- the second operand
+  def add(x, y:)
+    x + y
+  end
+end
+```
+
 The `@rbs return: T` syntax declares the return type of a method:
 
 ```ruby
 class Calculator
-  # @rbs return: String
+  # @rbs return: String -- a human-readable representation
   def to_s
     "Calculator"
+  end
+end
+```
+
+Both can be combined:
+
+```ruby
+class Calculator
+  # @rbs x: Integer -- the first operand
+  # @rbs y: Integer -- the second operand
+  # @rbs return: Integer
+  def add(x, y:)
+    x + y
   end
 end
 ```
@@ -233,7 +272,7 @@ end
 ### Current Limitations
 
 - Class methods and singleton methods are not supported
-- Parameter types are not supported with doc-style syntax
+- Only positional and keyword parameters are supported. Splat parameters (`*x`, `**y`) and block parameter (`&block`) are not supported yet. 
 - Method visibility declaration is not supported yet
 
 ## Attributes
