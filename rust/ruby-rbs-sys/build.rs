@@ -112,6 +112,7 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_ruby_annotations_return_type_annotation_t")
         .allowlist_type("rbs_ast_ruby_annotations_skip_annotation_t")
         .allowlist_type("rbs_ast_ruby_annotations_type_application_annotation_t")
+        .allowlist_type("rbs_ast_ruby_annotations_param_type_annotation_t")
         .allowlist_type("rbs_ast_string_t")
         .allowlist_type("rbs_ast_symbol_t")
         .allowlist_type("rbs_ast_type_param_t")

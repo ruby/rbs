@@ -785,6 +785,7 @@ nodes:
         c_type: rbs_location_range
         optional: true
   - name: RBS::AST::Ruby::Annotations::ParamTypeAnnotation
+    rust_name: ParamTypeAnnotationNode
     fields:
       - name: prefix_location
         c_type: rbs_location_range
