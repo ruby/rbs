@@ -142,7 +142,9 @@ It detects method definitions and allows you to add annotation comments to descr
 
 ### Unannotated method definition
 
-Methods defined with `def` syntax are detected, but they are untyped.
+Methods defined with `def` syntax are detected, but their inferred type depends on whether a super method exists.
+
+If there is no super method, the inferred type is `(?) -> untyped` -- it accepts any arguments without type checking and returns an `untyped` object.
 
 ```ruby
 class Calculator
@@ -150,7 +152,22 @@ class Calculator
 end
 ```
 
-The type of the `Calculator#add` method is `(?) -> untyped` -- it accepts any arguments without type checking and returns an `untyped` object.
+The type of `Calculator#add` is `(?) -> untyped`.
+
+If the super class (or an included module) defines a method with the same name, the unannotated method inherits that type.
+
+```ruby
+class Calculator
+  # @rbs (Integer, Integer) -> Integer
+  def add(x, y) = x + y
+end
+
+class ScientificCalculator < Calculator
+  def add(x, y) = x + y   # No annotation
+end
+```
+
+The type of `ScientificCalculator#add` is `(Integer, Integer) -> Integer`, inherited from `Calculator#add`.
 
 ### Method type annotation syntax
 

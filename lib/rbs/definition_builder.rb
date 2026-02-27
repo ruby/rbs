@@ -878,27 +878,40 @@ module RBS
           )
         end
 
-        defs = original.overloads.map do |overload|
-          Definition::Method::TypeDef.new(
-            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
-            member: original,
-            defined_in: defined_in,
-            implemented_in: implemented_in
-          ).tap do |type_def|
-            # Keep the original annotations given to overloads.
-            type_def.overload_annotations.replace(overload.annotations)
+        if original.method_type.empty? && existing_method
+          # Unannotated method with a parent definition → inherit from the parent, like @rbs ...
+          method_definition = Definition::Method.new(
+            super_method: existing_method,
+            defs: existing_method.defs.map { |defn| defn.update(implemented_in: implemented_in) },
+            accessibility: :public,
+            alias_of: existing_method.alias_of,
+            alias_member: nil
+          )
+
+          method_definition.annotations.replace(existing_method.annotations)
+        else
+          defs = original.overloads.map do |overload|
+            Definition::Method::TypeDef.new(
+              type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+              member: original,
+              defined_in: defined_in,
+              implemented_in: implemented_in
+            ).tap do |type_def|
+              # Keep the original annotations given to overloads.
+              type_def.overload_annotations.replace(overload.annotations)
+            end
           end
+
+          method_definition = Definition::Method.new(
+            super_method: existing_method,
+            defs: defs,
+            accessibility: :public,
+            alias_of: nil,
+            alias_member: nil
+          )
+
+          method_definition.annotations.replace([])
         end
-
-        method_definition = Definition::Method.new(
-          super_method: existing_method,
-          defs: defs,
-          accessibility: :public,
-          alias_of: nil,
-          alias_member: nil
-        )
-
-        method_definition.annotations.replace([])
 
       when nil
         # Overloading method definition only

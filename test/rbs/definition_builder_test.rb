@@ -3805,4 +3805,43 @@ EOF
       end
     end
   end
+
+  def test_inline_method_unannotated_overriding
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          def foo = ""
+        end
+
+        class Orphan
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        # Unannotated method with parent definition → behaves like @rbs ...
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+
+        # Unannotated method without parent definition → (?) -> untyped
+        builder.build_instance(type_name("::Orphan")).tap do |definition|
+          definition.methods[:bar].tap do |method|
+            assert_equal ["(?) -> untyped"], method.method_types.map(&:to_s)
+          end
+        end
+      end
+    end
+  end
 end
