@@ -400,4 +400,56 @@ module Psych
   #
   %a{annotate:rdoc:copy:Psych.unsafe_load}
   def self.unsafe_load: (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - safe_load_file(filename, **kwargs)
+  # -->
+  # Safely loads the document contained in `filename`.  Returns the yaml contained
+  # in `filename` as a Ruby object, or if the file is empty, it returns the
+  # specified `fallback` return value, which defaults to `nil`. See safe_load for
+  # options.
+  #
+  %a{annotate:rdoc:copy:Psych.safe_load_file}
+  def self.safe_load_file: (path, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - unsafe_load_file(filename, **kwargs)
+  # -->
+  # Load the document contained in `filename`.  Returns the yaml contained in
+  # `filename` as a Ruby object, or if the file is empty, it returns the specified
+  # `fallback` return value, which defaults to `false`.
+  #
+  # NOTE: This method *should not* be used to parse untrusted documents, such as
+  # YAML documents that are supplied via user input.  Instead, please use the
+  # safe_load_file method.
+  #
+  %a{annotate:rdoc:copy:Psych.unsafe_load_file}
+  def self.unsafe_load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+
+  class Exception < ::RuntimeError
+  end
+
+  class SyntaxError < ::Psych::Exception
+    attr_reader file: String?
+    attr_reader line: Integer?
+    attr_reader column: Integer?
+    attr_reader offset: Integer?
+    attr_reader problem: String?
+    attr_reader context: String?
+
+    # <!--
+    #   rdoc-file=ext/psych/lib/psych/syntax_error.rb
+    #   - new(file, line, col, offset, problem, context)
+    # -->
+    #
+    def initialize: (?String? file, ?Integer? line, ?Integer? column, ?Integer? offset, ?String? problem, ?String? context) -> void
+  end
+
+  class BadAlias < ::Psych::Exception
+  end
+
+  class DisallowedClass < ::Psych::Exception
+  end
 end
