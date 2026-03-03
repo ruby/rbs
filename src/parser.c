@@ -3475,7 +3475,9 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
     }
 
     if (start_pos > 0) {
-        rbs_skipn(lexer, start_pos);
+        while (lexer->current.byte_pos < start_pos) {
+            rbs_skip(lexer);
+        }
     }
 
     lexer->start = lexer->current;
