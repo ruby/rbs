@@ -7,12 +7,12 @@ module RBS
   class Parser
     def self.parse_type(source, range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true, classish_allowed: true)
       buf = buffer(source)
-      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+      _parse_type(buf, range.begin || 0, range.end || buf.content.bytesize, variables, require_eof, void_allowed, self_allowed, classish_allowed)
     end
 
     def self.parse_method_type(source, range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
-      _parse_method_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof)
+      _parse_method_type(buf, range.begin || 0, range.end || buf.content.bytesize, variables, require_eof)
     end
 
     def self.parse_signature(source)
@@ -25,7 +25,8 @@ module RBS
         else
           0
         end
-      dirs, decls = _parse_signature(buf, start_pos, buf.last_position)
+      content = buf.content
+      dirs, decls = _parse_signature(buf, start_pos, content.bytesize)
 
       if resolved
         dirs = dirs.dup if dirs.frozen?
@@ -37,7 +38,7 @@ module RBS
 
     def self.parse_type_params(source, module_type_params: true)
       buf = buffer(source)
-      _parse_type_params(buf, 0, buf.last_position, module_type_params)
+      _parse_type_params(buf, 0, buf.content.bytesize, module_type_params)
     end
 
     def self.magic_comment(buf)
@@ -66,7 +67,7 @@ module RBS
 
     def self.lex(source)
       buf = buffer(source)
-      list = _lex(buf, buf.last_position)
+      list = _lex(buf, buf.content.bytesize)
       value = list.map do |type, location|
         Token.new(type: type, location: location)
       end
