@@ -5,14 +5,16 @@ require_relative "parser/token"
 
 module RBS
   class Parser
-    def self.parse_type(source, range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true, classish_allowed: true)
+    def self.parse_type(source, range: nil, byte_range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true, classish_allowed: true)
       buf = buffer(source)
-      _parse_type(buf, range.begin || 0, range.end || buf.content.bytesize, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+      byte_range = byte_range(range, buf.content) if range
+      _parse_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof, void_allowed, self_allowed, classish_allowed)
     end
 
-    def self.parse_method_type(source, range: 0..., variables: [], require_eof: false)
+    def self.parse_method_type(source, range: nil, byte_range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
-      _parse_method_type(buf, range.begin || 0, range.end || buf.content.bytesize, variables, require_eof)
+      byte_range = byte_range(range, buf.content) if range
+      _parse_method_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof)
     end
 
     def self.parse_signature(source)
@@ -125,6 +127,16 @@ module RBS
     def self.parse_inline_trailing_annotation(source, range, variables: [])
       buf = buffer(source)
       _parse_inline_trailing_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
+    def self.byte_range(char_range, content)
+      start_offset = char_range.begin
+      end_offset = char_range.end
+
+      start_prefix = content[0, start_offset] or raise if start_offset
+      end_prefix = content[0, end_offset] or raise if end_offset
+
+      start_prefix&.bytesize...end_prefix&.bytesize
     end
   end
 end

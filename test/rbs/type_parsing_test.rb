@@ -980,4 +980,48 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "[\\u30eb]", type.literal
     end
   end
+
+  def test_parse__byte_range
+    input = '["🐕", "🐈"]'
+
+    Parser.parse_type(input).yield_self do |type|
+      assert_instance_of Types::Tuple, type
+    end
+
+    Parser.parse_type(input, byte_range: '["🐕", '.bytesize...).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "🐈", type.literal
+    end
+
+    Parser.parse_type(input, byte_range: '["🐕", '.bytesize...'["🐕", "🐈"'.bytesize, require_eof: true).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "🐈", type.literal
+    end
+
+    Parser.parse_type(input, byte_range: '["🐕", '.bytesize..'["🐕", "🐈"'.bytesize, require_eof: true).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "🐈", type.literal
+    end
+  end
+
+  def test_parse__range_works
+    input = '["🐕", "🐈"]'
+
+    Parser.parse_type(input, range: 6...9, require_eof: true).yield_self do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "🐈", type.literal
+    end
+  end
+
+  def test_parse__byte_range_incorrect
+    # We want a better error handling ergonomics, but currently simply raises a syntax error.
+
+    input = '"🐕🐈"'
+
+    exn = assert_raises RBS::ParsingError do
+      Parser.parse_type(input, byte_range: 2...)
+    end
+
+    assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
+  end
 end

@@ -20,13 +20,13 @@ module RBS
 
     # Parse a method type and return it
     #
-    # When `range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
+    # When `byte_range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
     #
     # ```ruby
-    # RBS::Parser.parse_method_type("() -> void")                                # => `() -> void`
-    # RBS::Parser.parse_method_type("() -> void", range: 0...)                   # => `() -> void`
-    # RBS::Parser.parse_method_type("() -> void () -> String", range: 11...)     # => `() -> String`
-    # RBS::Parser.parse_method_type("() -> void () -> String", range: 23...)     # => nil
+    # RBS::Parser.parse_method_type("() -> void")                                     # => `() -> void`
+    # RBS::Parser.parse_method_type("() -> void", byte_range: 0...)                   # => `() -> void`
+    # RBS::Parser.parse_method_type("() -> void () -> String", byte_range: 11...)     # => `() -> String`
+    # RBS::Parser.parse_method_type("() -> void () -> String", byte_range: 23...)     # => nil
     # ```
     #
     # When `require_eof` is `true`, an error is raised if more tokens are left in the input.
@@ -39,17 +39,18 @@ module RBS
     # RBS::Parser.parse_method_type("", require_eof: true)                            # => nil
     # ```
     #
-    def self.parse_method_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool) -> MethodType?
+    def self.parse_method_type: (Buffer | String, ?byte_range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool) -> MethodType?
+                              | %a{deprecated: Use `byte_range:` keyword instead of `range:`} (Buffer | String, range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool) -> MethodType?
 
     # Parse a type and return it
     #
-    # When `range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
+    # When `byte_range` keyword is specified, it starts parsing from the `begin` to the `end` of the range.
     #
     # ```ruby
-    # RBS::Parser.parse_type("String")                          # => `String`
-    # RBS::Parser.parse_type("String", range: 0...)             # => `String`
-    # RBS::Parser.parse_type("String Integer", pos: 7...)       # => `Integer`
-    # RBS::Parser.parse_type("String Integer", pos: 14...)      # => nil
+    # RBS::Parser.parse_type("String")                               # => `String`
+    # RBS::Parser.parse_type("String", byte_range: 0...)             # => `String`
+    # RBS::Parser.parse_type("String Integer", byte_range: 7...)     # => `Integer`
+    # RBS::Parser.parse_type("String Integer", byte_range: 14...)    # => nil
     # ```
     #
     # When `require_eof` is `true`, an error is raised if more tokens are left in the input.
@@ -76,7 +77,8 @@ module RBS
     # RBS::Parser.parse_type("self", self_allowed: false)         # => Raises an syntax error
     # ```
     #
-    def self.parse_type: (Buffer | String, ?range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool, ?void_allowed: bool, ?self_allowed: bool, ?classish_allowed: bool) -> Types::t?
+    def self.parse_type: (Buffer | String, ?byte_range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool, ?void_allowed: bool, ?self_allowed: bool, ?classish_allowed: bool) -> Types::t?
+                       | %a{deprecated: Use `byte_range:` keyword instead of `range:`} (Buffer | String, range: Range[Integer?], ?variables: Array[Symbol], ?require_eof: bool, ?void_allowed: bool, ?self_allowed: bool, ?classish_allowed: bool) -> Types::t?
 
     # Parse whole RBS file and return an array of declarations
     #
@@ -129,6 +131,8 @@ module RBS
     private
 
     def self.buffer: (String | Buffer source) -> Buffer
+
+    def self.byte_range: (Range[Integer?] char_range, String content) -> Range[Integer?]
 
     def self._parse_type: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof, bool void_allowed, bool self_allowed, bool classish_allowed) -> Types::t?
 
