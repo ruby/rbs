@@ -41,6 +41,10 @@ jobs:
         run: |
           cd rust
           cargo test --verbose
+      - name: Test publish crates
+        run: |
+          cd rust
+          cargo publish --dry-run
 
   lint:
     name: cargo:lint
