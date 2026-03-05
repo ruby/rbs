@@ -113,7 +113,7 @@
 #     1.  Tarjan, "Depth First Search and Linear Graph Algorithms",
 # *SIAM Journal on Computing*, Vol. 1, No. 2, pp. 146-160, June 1972.
 #
-module TSort[Node] : TSort::_Sortable[Node]
+module TSort[N] : TSort::_Sortable[N]
   # <!--
   #   rdoc-file=lib/tsort.rb
   #   - each_strongly_connected_component(each_node, each_child) { |nodes| ... }
@@ -290,8 +290,8 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     #   [2, 3]
   #     #   [1]
   #
-  def each_strongly_connected_component: () { (Array[Node]) -> void } -> void
-                                       | () -> Enumerator[Array[Node], void]
+  def each_strongly_connected_component: () { (Array[N]) -> void } -> void
+                                       | () -> Enumerator[Array[N], void]
 
   # <!--
   #   rdoc-file=lib/tsort.rb
@@ -323,8 +323,8 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     #=> [4]
   #     #   [2, 3]
   #
-  def each_strongly_connected_component_from: (Node, ?untyped id_map, ?untyped stack) { (Array[Node]) -> void } -> void
-                                            | (Node, ?untyped id_map, ?untyped stack) -> Enumerator[Array[Node], void]
+  def each_strongly_connected_component_from: (N, ?untyped id_map, ?untyped stack) { (Array[N]) -> void } -> void
+                                            | (N, ?untyped id_map, ?untyped stack) -> Enumerator[Array[N], void]
 
   # <!--
   #   rdoc-file=lib/tsort.rb
@@ -349,7 +349,7 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     graph = G.new({1=>[2], 2=>[3, 4], 3=>[2], 4=>[]})
   #     p graph.strongly_connected_components #=> [[4], [2, 3], [1]]
   #
-  def strongly_connected_components: () -> Array[Array[Node]]
+  def strongly_connected_components: () -> Array[Array[N]]
 
   # <!--
   #   rdoc-file=lib/tsort.rb
@@ -376,7 +376,7 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     graph = G.new({1=>[2], 2=>[3, 4], 3=>[2], 4=>[]})
   #     p graph.tsort # raises TSort::Cyclic
   #
-  def tsort: () -> Array[Node]
+  def tsort: () -> Array[N]
 
   # <!--
   #   rdoc-file=lib/tsort.rb
@@ -404,6 +404,6 @@ module TSort[Node] : TSort::_Sortable[Node]
   #     #   3
   #     #   1
   #
-  def tsort_each: () { (Node) -> void } -> void
-                | () -> Enumerator[Node, void]
+  def tsort_each: () { (N) -> void } -> void
+                | () -> Enumerator[N, void]
 end

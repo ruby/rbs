@@ -1303,7 +1303,7 @@ class Hash[unchecked out K, unchecked out V]
 end
 
 %a{annotate:rdoc:skip}
-class Array[unchecked out Elem]
+class Array[unchecked out E]
   # Returns a JSON string containing a JSON array, that is generated from
   # this Array instance.
   # _state_ is a JSON::State object, that can also be used to configure the
@@ -1602,7 +1602,7 @@ class OpenStruct
 end
 
 %a{annotate:rdoc:skip}
-class Range[out Elem]
+class Range[out E]
   # <!--
   #   rdoc-file=ext/json/lib/json/add/range.rb
   #   - json_create(object)
@@ -1632,7 +1632,7 @@ class Range[out Elem]
   #     Range.json_create(y) # => 1...4
   #     Range.json_create(z) # => "a".."d"
   #
-  def as_json: (*untyped) -> Hash[String, String | [ Elem, Elem, bool ]]
+  def as_json: (*untyped) -> Hash[String, String | [ E, E, bool ]]
 
   # <!--
   #   rdoc-file=ext/json/lib/json/add/range.rb
@@ -1794,14 +1794,14 @@ class Set[unchecked out A]
 end
 
 %a{annotate:rdoc:skip}
-class Struct[Elem]
+class Struct[E]
   # <!--
   #   rdoc-file=ext/json/lib/json/add/struct.rb
   #   - json_create(object)
   # -->
   # See #as_json.
   #
-  def self.json_create: [Elem] (Hash[String, String | Array[Elem]] object) -> Struct[Elem]
+  def self.json_create: [E] (Hash[String, String | Array[E]] object) -> Struct[E]
 
   # <!--
   #   rdoc-file=ext/json/lib/json/add/struct.rb
@@ -1823,7 +1823,7 @@ class Struct[Elem]
   #     Struct::Customer.json_create(x)
   #     # => #<struct Struct::Customer name=nil, address=nil, zip=nil>
   #
-  def as_json: (*untyped) -> Hash[String, String | Array[Elem]]
+  def as_json: (*untyped) -> Hash[String, String | Array[E]]
 
   # <!--
   #   rdoc-file=ext/json/lib/json/add/struct.rb

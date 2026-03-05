@@ -2964,8 +2964,8 @@ end
 #     table['Name'] = ['Foo', 'Bar', 'Baz']
 #     table['Name'] # => ["Foo", "Bar", "Baz"]
 #
-class CSV::Table[out Elem] < Object
-  include Enumerable[Elem]
+class CSV::Table[out E] < Object
+  include Enumerable[E]
   extend Forwardable
 
   # <!--
@@ -3587,8 +3587,8 @@ class CSV::Table[out Elem] < Object
   # Returns a new Enumerator if no block is given:
   #     table.each # => #<Enumerator: #<CSV::Table mode:col row_count:4>:each>
   #
-  def each: () -> Enumerator[Elem, self]
-          | () { (Elem) -> void } -> self
+  def each: () -> Enumerator[E, self]
+          | () { (E) -> void } -> self
           | () { (*untyped) -> void } -> self
 
   def empty?: (*untyped args) { (*untyped) -> untyped } -> untyped
@@ -3758,7 +3758,7 @@ class CSV::Table[out Elem] < Object
 end
 
 %a{annotate:rdoc:skip}
-class Array[unchecked out Elem] < Object
+class Array[unchecked out E] < Object
   # Equivalent to CSV::generate_line(self, options)
   #
   #   ["CSV", "data"].to_csv

@@ -267,7 +267,7 @@
 # Enumerator#size. For example, File#size returns the number of bytes in the
 # file, not the number of lines.
 #
-module Enumerable[unchecked out Elem] : _Each[Elem]
+module Enumerable[unchecked out E] : _Each[E]
   %a{private}
   interface _Pattern
     def ===: (untyped) -> bool
@@ -316,7 +316,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def all?: () -> bool
           | (_Pattern) -> bool
-          | () { (Elem) -> boolish } -> bool
+          | () { (E) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -360,7 +360,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def any?: () -> bool
           | (_Pattern) -> bool
-          | () { (Elem) -> boolish } -> bool
+          | () { (E) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -377,8 +377,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def collect: [U] () { (Elem arg0) -> U } -> ::Array[U]
-             | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def collect: [U] () { (E arg0) -> U } -> ::Array[U]
+             | () -> ::Enumerator[E, ::Array[untyped]]
 
   # <!-- rdoc-file=enum.c -->
   # Returns an array of flattened objects returned by the block.
@@ -395,8 +395,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Alias: #collect_concat.
   #
-  def collect_concat: [U] () { (Elem) -> (::Array[U] | U) } -> ::Array[U]
-                    | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def collect_concat: [U] () { (E) -> (::Array[U] | U) } -> ::Array[U]
+                    | () -> ::Enumerator[E, ::Array[untyped]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -407,7 +407,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     a = [nil, 0, nil, 'a', false, nil, false, nil, 'a', nil, 0, nil]
   #     a.compact # => [0, "a", false, false, "a", 0]
   #
-  def compact: () -> Array[Elem]
+  def compact: () -> Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -435,8 +435,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.count {|key, value| value < 2} # => 2
   #
   def count: () -> Integer
-           | (Elem) -> Integer
-           | () { (Elem) -> boolish } -> Integer
+           | (E) -> Integer
+           | () { (E) -> boolish } -> Integer
 
   # <!--
   #   rdoc-file=enum.c
@@ -463,8 +463,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # When no block is given, returns an Enumerator.
   #
-  def cycle: (?Integer n) { (Elem arg0) -> untyped } -> NilClass
-           | (?Integer n) -> ::Enumerator[Elem, NilClass]
+  def cycle: (?Integer n) { (E arg0) -> untyped } -> NilClass
+           | (?Integer n) -> ::Enumerator[E, NilClass]
 
   # <!-- rdoc-file=enum.c -->
   # Returns the first element for which the block returns a truthy value.
@@ -484,8 +484,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def detect: (?Proc ifnone) { (Elem) -> boolish } -> Elem?
-            | (?Proc ifnone) -> ::Enumerator[Elem, Elem?]
+  def detect: (?Proc ifnone) { (E) -> boolish } -> E?
+            | (?Proc ifnone) -> ::Enumerator[E, E?]
 
   # <!--
   #   rdoc-file=enum.c
@@ -504,7 +504,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     h = {foo: 0, bar: 1, baz: 2, bat: 3}
   #     h.drop(2) # => [[:baz, 2], [:bat, 3]]
   #
-  def drop: (Integer n) -> ::Array[Elem]
+  def drop: (Integer n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -532,8 +532,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       p $!.result #=> [3, 4]
   #     end
   #
-  def drop_while: () { (Elem) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def drop_while: () { (E) -> boolish } -> ::Array[E]
+                | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -554,8 +554,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_cons: (Integer n) { (::Array[Elem]) -> void } -> self
-               | (Integer n) -> ::Enumerator[::Array[Elem], self]
+  def each_cons: (Integer n) { (::Array[E]) -> void } -> self
+               | (Integer n) -> ::Enumerator[::Array[E], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -582,8 +582,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_with_index: () { (Elem, Integer index) -> untyped } -> self
-                     | () -> ::Enumerator[[ Elem, Integer ], self]
+  def each_with_index: () { (E, Integer index) -> untyped } -> self
+                     | () -> ::Enumerator[[ E, Integer ], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -601,18 +601,18 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_with_object: [U] (U obj) { (Elem, U obj) -> untyped } -> U
-                      | [U] (U obj) -> ::Enumerator[[ Elem, U ], U]
+  def each_with_object: [U] (U obj) { (E, U obj) -> untyped } -> U
+                      | [U] (U obj) -> ::Enumerator[[ E, U ], U]
 
   # <!-- rdoc-file=enum.c -->
   # Returns an array containing the items in `self`:
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
   #
-  def entries: () -> ::Array[Elem]
+  def entries: () -> ::Array[E]
 
   def enum_for: (Symbol method, *untyped, **untyped) ?{ (?) -> Integer } -> Enumerator[untyped, untyped]
-              | () ?{ () -> Integer } -> Enumerator[Elem, self]
+              | () ?{ () -> Integer } -> Enumerator[E, self]
 
   %a{annotate:rdoc:skip}
   alias to_enum enum_for
@@ -635,8 +635,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #reject.
   #
-  def find_all: () { (Elem) -> boolish } -> ::Array[Elem]
-              | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def find_all: () { (E) -> boolish } -> ::Array[E]
+              | () -> ::Enumerator[E, ::Array[E]]
 
   # <!-- rdoc-file=enum.c -->
   # Returns an array containing elements selected by the block.
@@ -693,8 +693,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # With no argument and no block given, returns an Enumerator.
   #
   def find_index: (untyped value) -> Integer?
-                | () { (Elem) -> boolish } -> Integer?
-                | () -> ::Enumerator[Elem, Integer?]
+                | () { (E) -> boolish } -> Integer?
+                | () -> ::Enumerator[E, Integer?]
 
   # <!--
   #   rdoc-file=enum.c
@@ -719,8 +719,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 1, bar: 1, baz: 2}.first(2) # => [[:foo, 1], [:bar, 1]]
   #     [].first(2)                       # => []
   #
-  def first: () -> Elem?
-           | (_ToInt n) -> ::Array[Elem]
+  def first: () -> E?
+           | (_ToInt n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -746,8 +746,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #grep_v.
   #
-  def grep: (untyped arg0) -> ::Array[Elem]
-          | [U] (untyped arg0) { (Elem arg0) -> U } -> ::Array[U]
+  def grep: (untyped arg0) -> ::Array[E]
+          | [U] (untyped arg0) { (E arg0) -> U } -> ::Array[U]
 
   # <!--
   #   rdoc-file=enum.c
@@ -773,8 +773,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #grep.
   #
-  def grep_v: (untyped) -> ::Array[Elem]
-            | [U] (untyped) { (Elem) -> U } -> ::Array[U]
+  def grep_v: (untyped) -> ::Array[E]
+            | [U] (untyped) { (E) -> U } -> ::Array[U]
 
   # <!--
   #   rdoc-file=enum.c
@@ -797,8 +797,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def group_by: [U] () { (Elem arg0) -> U } -> ::Hash[U, ::Array[Elem]]
-              | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def group_by: [U] () { (E arg0) -> U } -> ::Hash[U, ::Array[E]]
+              | () -> ::Enumerator[E, ::Array[E]]
 
   # <!-- rdoc-file=enum.c -->
   # Returns whether for any element `object == element`:
@@ -812,7 +812,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def include?: (Elem arg0) -> bool
+  def include?: (E arg0) -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -968,8 +968,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def inject: (untyped init, Symbol method) -> untyped
             | (Symbol method) -> untyped
-            | [A] (A initial) { (A, Elem) -> A } -> A
-            | () { (Elem, Elem) -> Elem } -> Elem
+            | [A] (A initial) { (A, E) -> A } -> A
+            | () { (E, E) -> E } -> E
 
   # <!--
   #   rdoc-file=enum.c
@@ -1026,10 +1026,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #min, #minmax, #max_by.
   #
-  def max: () -> Elem?
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem?
-         | (Integer arg0) -> ::Array[Elem]
-         | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+  def max: () -> E?
+         | () { (E arg0, E arg1) -> Integer } -> E?
+         | (Integer arg0) -> ::Array[E]
+         | (Integer arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1064,10 +1064,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #max, #minmax, #min_by.
   #
-  def max_by: () -> ::Enumerator[Elem, Elem?]
-            | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (Integer arg0) -> ::Enumerator[Elem, ::Array[Elem]]
-            | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
+  def max_by: () -> ::Enumerator[E, E?]
+            | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
+            | (Integer arg0) -> ::Enumerator[E, ::Array[E]]
+            | (Integer arg0) { (E arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1124,10 +1124,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #min_by, #minmax, #max.
   #
-  def min: () -> Elem?
-         | () { (Elem arg0, Elem arg1) -> Integer } -> Elem?
-         | (Integer arg0) -> ::Array[Elem]
-         | (Integer arg0) { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+  def min: () -> E?
+         | () { (E arg0, E arg1) -> Integer } -> E?
+         | (Integer arg0) -> ::Array[E]
+         | (Integer arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1162,10 +1162,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #min, #minmax, #max_by.
   #
-  def min_by: () -> ::Enumerator[Elem, Elem?]
-            | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> Elem?
-            | (Integer arg0) -> ::Enumerator[Elem, ::Array[Elem]]
-            | (Integer arg0) { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
+  def min_by: () -> ::Enumerator[E, E?]
+            | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
+            | (Integer arg0) -> ::Enumerator[E, ::Array[E]]
+            | (Integer arg0) { (E arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1196,8 +1196,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #min, #max, #minmax_by.
   #
-  def minmax: () -> [ Elem?, Elem? ]
-            | () { (Elem arg0, Elem arg1) -> Integer } -> [ Elem?, Elem? ]
+  def minmax: () -> [ E?, E? ]
+            | () { (E arg0, E arg1) -> Integer } -> [ E?, E? ]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1220,8 +1220,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #max_by, #minmax, #min_by.
   #
-  def minmax_by: () -> [ Elem?, Elem? ]
-               | () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> [ Elem?, Elem? ]
+  def minmax_by: () -> [ E?, E? ]
+               | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> [ E?, E? ]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1262,7 +1262,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def none?: () -> bool
            | (_Pattern) -> bool
-           | () { (Elem) -> boolish } -> bool
+           | () { (E) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -1306,7 +1306,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   def one?: () -> bool
           | (_Pattern) -> bool
-          | () { (Elem) -> boolish } -> bool
+          | () { (E) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -1335,8 +1335,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: Enumerable#group_by.
   #
-  def partition: () { (Elem) -> boolish } -> [ ::Array[Elem], ::Array[Elem] ]
-               | () -> ::Enumerator[Elem, [ ::Array[Elem], ::Array[Elem] ]]
+  def partition: () { (E) -> boolish } -> [ ::Array[E], ::Array[E] ]
+               | () -> ::Enumerator[E, [ ::Array[E], ::Array[E] ]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1355,8 +1355,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Related: #select.
   #
-  def reject: () { (Elem) -> boolish } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def reject: () { (E) -> boolish } -> ::Array[E]
+            | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1382,8 +1382,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def reverse_each: () { (Elem arg0) -> untyped } -> void
-                  | () -> ::Enumerator[Elem]
+  def reverse_each: () { (E arg0) -> untyped } -> void
+                  | () -> ::Enumerator[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1415,8 +1415,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # See also #sort_by. It implements a Schwartzian transform which is useful when
   # key computation or comparison is expensive.
   #
-  def sort: () -> ::Array[Elem]
-          | () { (Elem arg0, Elem arg1) -> Integer } -> ::Array[Elem]
+  def sort: () -> ::Array[E]
+          | () { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1496,8 +1496,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   #     ary.sort_by { ... }.reverse!
   #
-  def sort_by: () { (Elem arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[Elem]
-             | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def sort_by: () { (E arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[E]
+             | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1512,7 +1512,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     h = {foo: 0, bar: 1, baz: 2, bat: 3}
   #     h.take(2) # => [[:foo, 0], [:bar, 1]]
   #
-  def take: (Integer n) -> ::Array[Elem]
+  def take: (Integer n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1529,8 +1529,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def take_while: () { (Elem) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def take_while: () { (E) -> boolish } -> ::Array[E]
+                | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1552,7 +1552,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # block is not passed.
   #
   def to_h: () -> ::Hash[untyped, untyped]
-          | [T, U] () { (Elem) -> [ T, U ] } -> ::Hash[T, U]
+          | [T, U] () { (E) -> [ T, U ] } -> ::Hash[T, U]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1573,8 +1573,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_slice: (Integer n) { (::Array[Elem]) -> void } -> self
-                | (Integer n) -> ::Enumerator[::Array[Elem], self]
+  def each_slice: (Integer n) { (::Array[E]) -> void } -> self
+                | (Integer n) -> ::Enumerator[::Array[E], self]
 
   interface _NotFound[T]
     def call: () -> T
@@ -1602,10 +1602,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def find: () { (Elem) -> boolish } -> Elem?
-          | () -> ::Enumerator[Elem, Elem?]
-          | [T] (_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
-          | [T] (_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
+  def find: () { (E) -> boolish } -> E?
+          | () -> ::Enumerator[E, E?]
+          | [T] (_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
+          | [T] (_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1626,8 +1626,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # Alias: #collect_concat.
   #
-  def flat_map: [U] () { (Elem) -> (Array[U] | U) } -> Array[U]
-              | () -> ::Enumerator[Elem, Array[untyped]]
+  def flat_map: [U] () { (E) -> (Array[U] | U) } -> Array[U]
+              | () -> ::Enumerator[E, Array[untyped]]
 
   # <!-- rdoc-file=enum.c -->
   # Returns an array of objects returned by the block.
@@ -1640,8 +1640,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def map: [U] () { (Elem arg0) -> U } -> ::Array[U]
-         | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def map: [U] () { (E arg0) -> U } -> ::Array[U]
+         | () -> ::Enumerator[E, ::Array[untyped]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1658,7 +1658,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def member?: (Elem arg0) -> bool
+  def member?: (E arg0) -> bool
 
   # <!-- rdoc-file=enum.c -->
   # Returns the result of applying a reducer to an initial value and the first
@@ -1816,7 +1816,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
   #
-  def to_a: () -> ::Array[Elem]
+  def to_a: () -> ::Array[E]
 
   # <!--
   #   rdoc-file=enumerator.c
@@ -1846,7 +1846,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     # show pythagorean triples less than 100
   #     p pythagorean_triples.take_while { |*, z| z < 100 }.force
   #
-  def lazy: () -> Enumerator::Lazy[Elem]
+  def lazy: () -> Enumerator::Lazy[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1867,8 +1867,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     a = %w[a b c d e e d c b a a b c d e]
   #     a.uniq {|c| c < 'c' }         # => ["a", "c"]
   #
-  def uniq: () -> ::Array[Elem]
-          | () { (Elem item) -> untyped } -> ::Array[Elem]
+  def uniq: () -> ::Array[E]
+          | () { (E item) -> untyped } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1899,10 +1899,10 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     h.sum {|key, value| value.odd? ? value : 0 } # => 9
   #     ('a'..'f').sum('x') {|c| c < 'd' ? c : '' }  # => "xabc"
   #
-  def sum: () -> (Elem | Integer)
-         | [T] () { (Elem arg0) -> T } -> (Integer | T)
-         | [T] (?T arg0) -> (Elem | T)
-         | [U] (?U arg0) { (Elem arg0) -> U } -> U
+  def sum: () -> (E | Integer)
+         | [T] () { (E arg0) -> T } -> (Integer | T)
+         | [T] (?T arg0) -> (E | T)
+         | [U] (?U arg0) { (E arg0) -> U } -> U
 
   # <!--
   #   rdoc-file=enum.c
@@ -1919,8 +1919,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # When no block given, returns an Enumerator.
   #
-  def filter_map: [U] () { (Elem elem) -> (nil | false | U) } -> ::Array[U]
-                | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def filter_map: [U] () { (E elem) -> (nil | false | U) } -> ::Array[U]
+                | () -> ::Enumerator[E, ::Array[untyped]]
 
   # <!--
   #   rdoc-file=enumerator.c
@@ -1932,7 +1932,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     e = (1..3).chain([4, 5])
   #     e.to_a #=> [1, 2, 3, 4, 5]
   #
-  def chain: [Elem2] (*_Each[Elem2] enumerables) -> ::Enumerator::Chain[Elem | Elem2]
+  def chain: [Elem2] (*_Each[Elem2] enumerables) -> ::Enumerator::Chain[E | Elem2]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1978,7 +1978,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #         {foo: 'a', bar: 'b'}.tally(h) # => {[:foo, "a"]=>2, [:bar, "b"]=>2, [:foo, "c"]=>1, [:bar, "d"]=>1}
   #         {foo: 'c', bar: 'd'}.tally(h) # => {[:foo, "a"]=>2, [:bar, "b"]=>2, [:foo, "c"]=>2, [:bar, "d"]=>2}
   #
-  def tally: (?Hash[Elem, Integer] hash) -> ::Hash[Elem, Integer]
+  def tally: (?Hash[E, Integer] hash) -> ::Hash[E, Integer]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2016,8 +2016,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_entry: () -> ::Enumerator[Elem, self]
-                | () { (Elem arg0) -> untyped } -> self
+  def each_entry: () -> ::Enumerator[E, self]
+                | () { (E arg0) -> untyped } -> self
 
   # <!--
   #   rdoc-file=enum.c
@@ -2083,9 +2083,9 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [:a2, :b2, :c2]
   #     [:a3, :b3, :c3]
   #
-  def zip: [Elem2] (_Each[Elem2] enum) -> Array[[ Elem, Elem2? ]]
+  def zip: [Elem2] (_Each[Elem2] enum) -> Array[[ E, Elem2? ]]
          | (_Each[untyped], *_Each[untyped]) -> Array[Array[untyped]]
-         | [Elem2] (_Each[Elem2]) { ([ Elem, Elem2? ]) -> void } -> nil
+         | [Elem2] (_Each[Elem2]) { ([ E, Elem2? ]) -> void } -> nil
          | (_Each[untyped], *_Each[untyped]) { (Array[untyped]) -> void } -> nil
 
   # <!--
@@ -2192,8 +2192,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       pp lines
   #     }
   #
-  def chunk: [U] () { (Elem elt) -> U } -> ::Enumerator[[ U, ::Array[Elem] ]]
-           | () -> ::Enumerator[Elem, ::Enumerator[[ untyped, ::Array[Elem] ]]]
+  def chunk: [U] () { (E elt) -> U } -> ::Enumerator[[ U, ::Array[E] ]]
+           | () -> ::Enumerator[E, ::Enumerator[[ untyped, ::Array[E] ]]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2242,7 +2242,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Enumerable#slice_when does the same, except splitting when the block returns
   # `true` instead of `false`.
   #
-  def chunk_while: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem]]
+  def chunk_while: () { (E elt_before, E elt_after) -> boolish } -> ::Enumerator[::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2304,7 +2304,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Enumerable#chunk_while does the same, except splitting when the block returns
   # `false` instead of `true`.
   #
-  def slice_when: () { (Elem elt_before, Elem elt_after) -> boolish } -> ::Enumerator[::Array[Elem]]
+  def slice_when: () { (E elt_before, E elt_after) -> boolish } -> ::Enumerator[::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2339,8 +2339,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     p e.map {|ll| ll[0...-1].map {|l| l.sub(/\\\n\z/, "") }.join + ll.last }
   #     #=>["foo\n", "barbaz\n", "\n", "qux\n"]
   #
-  def slice_after: (untyped pattern) -> ::Enumerator[::Array[Elem]]
-                 | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem]]
+  def slice_after: (untyped pattern) -> ::Enumerator[::Array[E]]
+                 | () { (E elt) -> boolish } -> ::Enumerator[::Array[E]]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2496,6 +2496,6 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       }
   #     }
   #
-  def slice_before: (untyped pattern) -> ::Enumerator[::Array[Elem]]
-                  | () { (Elem elt) -> boolish } -> ::Enumerator[::Array[Elem]]
+  def slice_before: (untyped pattern) -> ::Enumerator[::Array[E]]
+                  | () { (E elt) -> boolish } -> ::Enumerator[::Array[E]]
 end

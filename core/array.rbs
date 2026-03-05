@@ -545,8 +545,8 @@
 # *   #sum: Returns a sum of elements according to either `+` or a given block.
 #
 %a{annotate:rdoc:source:from=array.c}
-class Array[unchecked out Elem] < Object
-  include Enumerable[Elem]
+class Array[unchecked out E] < Object
+  include Enumerable[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -603,9 +603,9 @@ class Array[unchecked out Elem] < Object
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
   def initialize: () -> void
-                | (::Array[Elem] ary) -> void
-                | (int size, ?Elem val) -> void
-                | (int size) { (::Integer index) -> Elem } -> void
+                | (::Array[E] ary) -> void
+                | (int size, ?E val) -> void
+                | (int size) { (::Integer index) -> E } -> void
 
   # <!--
   #   rdoc-file=array.c
@@ -663,7 +663,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def &: (::Array[untyped] | _ToAry[untyped]) -> ::Array[Elem]
+  def &: (::Array[untyped] | _ToAry[untyped]) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -682,7 +682,7 @@ class Array[unchecked out Elem] < Object
   #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {foo: 0}"
   #
   def *: (string str) -> ::String
-       | (int int) -> ::Array[Elem]
+       | (int int) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -696,7 +696,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def +: [U] (_ToAry[U]) -> ::Array[Elem | U]
+  def +: [U] (_ToAry[U]) -> ::Array[E | U]
 
   # <!--
   #   rdoc-file=array.c
@@ -714,7 +714,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def -: (_ToAry[untyped]) -> ::Array[Elem]
+  def -: (_ToAry[untyped]) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -730,7 +730,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def <<: (Elem) -> self
+  def <<: (E) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -913,9 +913,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def []: %a{implicitly-returns-nil} (int index) -> Elem
-        | (int start, int length) -> ::Array[Elem]?
-        | (::Range[::Integer?] range) -> ::Array[Elem]?
+  def []: %a{implicitly-returns-nil} (int index) -> E
+        | (int start, int length) -> ::Array[E]?
+        | (::Range[::Integer?] range) -> ::Array[E]?
 
   # <!--
   #   rdoc-file=array.c
@@ -1060,12 +1060,12 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def []=: (int index, Elem obj) -> Elem
-         | (int start, int length, Elem obj) -> Elem
-         | (int start, int length, ::Array[Elem]) -> ::Array[Elem]
+  def []=: (int index, E obj) -> E
+         | (int start, int length, E obj) -> E
+         | (int start, int length, ::Array[E]) -> ::Array[E]
          | (int start, int length, nil) -> nil
-         | (::Range[::Integer?], Elem obj) -> Elem
-         | (::Range[::Integer?], ::Array[Elem]) -> ::Array[Elem]
+         | (::Range[::Integer?], E obj) -> E
+         | (::Range[::Integer?], ::Array[E]) -> ::Array[E]
          | (::Range[::Integer?], nil) -> nil
 
   # <!--
@@ -1106,8 +1106,8 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def all?: () -> bool
-          | (_Pattern[Elem] pattern) -> bool
-          | () { (Elem obj) -> boolish } -> bool
+          | (_Pattern[E] pattern) -> bool
+          | () { (E obj) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=array.c
@@ -1203,7 +1203,7 @@ class Array[unchecked out Elem] < Object
   # Related: Array#[]; see also [Methods for
   # Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def at: %a{implicitly-returns-nil} (int index) -> Elem
+  def at: %a{implicitly-returns-nil} (int index) -> E
 
   # <!--
   #   rdoc-file=array.c
@@ -1217,9 +1217,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch: () -> ::Enumerator[Elem, Elem?]
-             | () { (Elem) -> (true | false) } -> Elem?
-             | () { (Elem) -> ::Integer } -> Elem?
+  def bsearch: () -> ::Enumerator[E, E?]
+             | () { (E) -> (true | false) } -> E?
+             | () { (E) -> ::Integer } -> E?
 
   # <!--
   #   rdoc-file=array.c
@@ -1233,8 +1233,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch_index: () { (Elem) -> (true | false) } -> ::Integer?
-                   | () { (Elem) -> ::Integer } -> ::Integer?
+  def bsearch_index: () { (E) -> (true | false) } -> ::Integer?
+                   | () { (E) -> ::Integer } -> ::Integer?
 
   # <!--
   #   rdoc-file=array.c
@@ -1268,8 +1268,8 @@ class Array[unchecked out Elem] < Object
   # Related: #collect!; see also [Methods for
   # Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def collect: [U] () { (Elem item) -> U } -> ::Array[U]
-             | () -> ::Enumerator[Elem, ::Array[untyped]]
+  def collect: [U] () { (E item) -> U } -> ::Array[U]
+             | () -> ::Enumerator[E, ::Array[untyped]]
 
   # <!--
   #   rdoc-file=array.c
@@ -1289,8 +1289,8 @@ class Array[unchecked out Elem] < Object
   # Related: #collect; see also [Methods for
   # Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def collect!: () { (Elem item) -> Elem } -> self
-              | () -> ::Enumerator[Elem, self]
+  def collect!: () { (E item) -> E } -> self
+              | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1334,8 +1334,8 @@ class Array[unchecked out Elem] < Object
   # Related: Array#permutation; see also [Methods for
   # Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def combination: (int n) { (::Array[Elem]) -> void } -> self
-                 | (int n) -> ::Enumerator[::Array[Elem], self]
+  def combination: (int n) { (::Array[E]) -> void } -> self
+                 | (int n) -> ::Enumerator[::Array[E], self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1350,7 +1350,7 @@ class Array[unchecked out Elem] < Object
   # Related: Array#compact!; see also [Methods for
   # Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def compact: () -> ::Array[Elem]
+  def compact: () -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -1381,7 +1381,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def concat: (*::Array[Elem] arrays) -> self
+  def concat: (*::Array[E] arrays) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -1410,8 +1410,8 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def count: () -> ::Integer
-           | (Elem obj) -> ::Integer
-           | () { (Elem) -> boolish } -> ::Integer
+           | (E obj) -> ::Integer
+           | () { (E) -> boolish } -> ::Integer
 
   # <!--
   #   rdoc-file=array.c
@@ -1445,8 +1445,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def cycle: (?int? n) { (Elem) -> void } -> nil
-           | (?int? n) -> ::Enumerator[Elem, nil]
+  def cycle: (?int? n) { (E) -> void } -> nil
+           | (?int? n) -> ::Enumerator[E, nil]
 
   # <!--
   #   rdoc-file=array.c
@@ -1490,8 +1490,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def delete: (Elem obj) -> Elem?
-            | [S, T] (S obj) { (S) -> T } -> (Elem | T)
+  def delete: (E obj) -> E?
+            | [S, T] (S obj) { (S) -> T } -> (E | T)
 
   # <!--
   #   rdoc-file=array.c
@@ -1521,7 +1521,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def delete_at: %a{implicitly-returns-nil} (int index) -> Elem
+  def delete_at: %a{implicitly-returns-nil} (int index) -> E
 
   # <!--
   #   rdoc-file=array.c
@@ -1538,8 +1538,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def delete_if: () { (Elem item) -> boolish } -> self
-               | () -> ::Enumerator[Elem, self]
+  def delete_if: () { (E item) -> boolish } -> self
+               | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1559,7 +1559,7 @@ class Array[unchecked out Elem] < Object
   # Related: Array#-; see also [Methods for
   # Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def difference: (*::Array[untyped] arrays) -> ::Array[Elem]
+  def difference: (*::Array[untyped] arrays) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -1579,7 +1579,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def dig: (int idx) -> Elem?
+  def dig: (int idx) -> E?
          | (int idx, untyped, *untyped) -> untyped
 
   # <!--
@@ -1599,7 +1599,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def drop: (int n) -> ::Array[Elem]
+  def drop: (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -1618,8 +1618,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def drop_while: () { (Elem obj) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def drop_while: () { (E obj) -> boolish } -> ::Array[E]
+                | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -1652,8 +1652,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def each: () -> ::Enumerator[Elem, self]
-          | () { (Elem item) -> void } -> self
+  def each: () -> ::Enumerator[E, self]
+          | () { (E item) -> void } -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -1760,9 +1760,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def fetch: (int index) -> Elem
-           | [T] (int index, T default) -> (Elem | T)
-           | [T] (int index) { (int index) -> T } -> (Elem | T)
+  def fetch: (int index) -> E
+           | [T] (int index, T default) -> (E | T)
+           | [T] (int index) { (int index) -> T } -> (E | T)
 
   # <!--
   #   rdoc-file=array.rb
@@ -1979,11 +1979,11 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def fill: (Elem obj) -> self
-          | (Elem obj, int? start, ?int? length) -> self
-          | (Elem obj, ::Range[::Integer] range) -> self
-          | (?int? start, ?int? length) { (::Integer index) -> Elem } -> self
-          | (::Range[::Integer] range) { (::Integer index) -> Elem } -> self
+  def fill: (E obj) -> self
+          | (E obj, int? start, ?int? length) -> self
+          | (E obj, ::Range[::Integer] range) -> self
+          | (?int? start, ?int? length) { (::Integer index) -> E } -> self
+          | (::Range[::Integer] range) { (::Integer index) -> E } -> self
 
   # <!-- rdoc-file=array.c -->
   # With a block given, calls the block with each element of `self`; returns a new
@@ -1998,8 +1998,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def filter: () { (Elem item) -> boolish } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def filter: () { (E item) -> boolish } -> ::Array[E]
+            | () -> ::Enumerator[E, ::Array[E]]
 
   # <!-- rdoc-file=array.c -->
   # With a block given, calls the block with each element of `self`; removes from
@@ -2016,8 +2016,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def filter!: () { (Elem item) -> boolish } -> self?
-             | () -> ::Enumerator[Elem, self?]
+  def filter!: () { (E item) -> boolish } -> self?
+             | () -> ::Enumerator[E, self?]
 
   # <!--
   #   rdoc-file=array.c
@@ -2038,10 +2038,10 @@ class Array[unchecked out Elem] < Object
   #
   # With no block given, returns an Enumerator.
   #
-  def find: () { (Elem) -> boolish } -> Elem?
-          | () -> ::Enumerator[Elem, Elem?]
-          | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
-          | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
+  def find: () { (E) -> boolish } -> E?
+          | () -> ::Enumerator[E, E?]
+          | [T] (Enumerable::_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
+          | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -2075,8 +2075,8 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def find_index: (untyped obj) -> ::Integer?
-                | () { (Elem item) -> boolish } -> ::Integer?
-                | () -> ::Enumerator[Elem, ::Integer?]
+                | () { (E item) -> boolish } -> ::Integer?
+                | () -> ::Enumerator[E, ::Integer?]
 
   # <!--
   #   rdoc-file=array.rb
@@ -2104,8 +2104,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def first: %a{implicitly-returns-nil} () -> Elem
-           | (int n) -> ::Array[Elem]
+  def first: %a{implicitly-returns-nil} () -> E
+           | (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2205,7 +2205,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def include?: (Elem object) -> bool
+  def include?: (E object) -> bool
 
   # <!-- rdoc-file=array.c -->
   # Returns the zero-based integer index of a specified element, or `nil`.
@@ -2267,7 +2267,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def insert: (int index, *Elem obj) -> self
+  def insert: (int index, *E obj) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2319,7 +2319,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def intersection: (*::Array[untyped] | _ToAry[untyped] other_ary) -> ::Array[Elem]
+  def intersection: (*::Array[untyped] | _ToAry[untyped] other_ary) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2367,8 +2367,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def keep_if: () { (Elem item) -> boolish } -> self
-             | () -> ::Enumerator[Elem, self]
+  def keep_if: () { (E item) -> boolish } -> self
+             | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.rb
@@ -2395,8 +2395,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def last: %a{implicitly-returns-nil} () -> Elem
-          | (int n) -> ::Array[Elem]
+  def last: %a{implicitly-returns-nil} () -> E
+          | (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2487,10 +2487,10 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def max: %a{implicitly-returns-nil} () -> Elem
-         | %a{implicitly-returns-nil} () { (Elem a, Elem b) -> ::Integer? } -> Elem
-         | (int n) -> ::Array[Elem]
-         | (int n) { (Elem a, Elem b) -> ::Integer? } -> ::Array[Elem]
+  def max: %a{implicitly-returns-nil} () -> E
+         | %a{implicitly-returns-nil} () { (E a, E b) -> ::Integer? } -> E
+         | (int n) -> ::Array[E]
+         | (int n) { (E a, E b) -> ::Integer? } -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2562,8 +2562,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def minmax: () -> [ Elem?, Elem? ]
-            | () { (Elem a, Elem b) -> ::Integer? } -> [ Elem?, Elem? ]
+  def minmax: () -> [ E?, E? ]
+            | () { (E a, E b) -> ::Integer? } -> [ E?, E? ]
 
   # <!--
   #   rdoc-file=array.c
@@ -2687,8 +2687,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def permutation: (?int n) -> ::Enumerator[::Array[Elem], ::Array[Elem]]
-                 | (?int n) { (::Array[Elem] p) -> void } -> ::Array[Elem]
+  def permutation: (?int n) -> ::Enumerator[::Array[E], ::Array[E]]
+                 | (?int n) { (::Array[E] p) -> void } -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2719,8 +2719,8 @@ class Array[unchecked out Elem] < Object
   # Related: Array#push; see also [Methods for
   # Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def pop: () -> Elem?
-         | (int n) -> ::Array[Elem]
+  def pop: () -> E?
+         | (int n) -> ::Array[E]
 
   # <!-- rdoc-file=array.c -->
   # Prepends the given `objects` to `self`:
@@ -2786,10 +2786,10 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def product: () -> ::Array[[ Elem ]]
-             | [X] (::Array[X] other_ary) -> ::Array[[ Elem, X ]]
-             | [X, Y] (::Array[X] other_ary1, ::Array[Y] other_ary2) -> ::Array[[ Elem, X, Y ]]
-             | [U] (*::Array[U] other_arys) -> ::Array[::Array[Elem | U]]
+  def product: () -> ::Array[[ E ]]
+             | [X] (::Array[X] other_ary) -> ::Array[[ E, X ]]
+             | [X, Y] (::Array[X] other_ary1, ::Array[Y] other_ary2) -> ::Array[[ E, X, Y ]]
+             | [U] (*::Array[U] other_arys) -> ::Array[::Array[E | U]]
 
   # <!--
   #   rdoc-file=array.c
@@ -2808,7 +2808,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def push: (*Elem obj) -> self
+  def push: (*E obj) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2865,8 +2865,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def reject!: () { (Elem item) -> boolish } -> self?
-             | () -> ::Enumerator[Elem, self?]
+  def reject!: () { (E item) -> boolish } -> self?
+             | () -> ::Enumerator[E, self?]
 
   # <!--
   #   rdoc-file=array.c
@@ -2905,8 +2905,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def repeated_combination: (int n) { (::Array[Elem] c) -> void } -> self
-                          | (int n) -> ::Enumerator[::Array[Elem], self]
+  def repeated_combination: (int n) { (::Array[E] c) -> void } -> self
+                          | (int n) -> ::Enumerator[::Array[E], self]
 
   # <!--
   #   rdoc-file=array.c
@@ -2945,8 +2945,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def repeated_permutation: (int n) { (::Array[Elem] p) -> void } -> self
-                          | (int n) -> ::Enumerator[::Array[Elem], self]
+  def repeated_permutation: (int n) { (::Array[E] p) -> void } -> self
+                          | (int n) -> ::Enumerator[::Array[E], self]
 
   # <!-- rdoc-file=array.c -->
   # Replaces the elements of `self` with the elements of `other_array`, which must
@@ -2959,7 +2959,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def replace: (::Array[Elem]) -> self
+  def replace: (::Array[E]) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2971,7 +2971,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def reverse: () -> ::Array[Elem]
+  def reverse: () -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2985,7 +2985,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def reverse!: () -> ::Array[Elem]
+  def reverse!: () -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3009,8 +3009,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def reverse_each: () { (Elem item) -> void } -> self
-                  | () -> ::Enumerator[Elem, self]
+  def reverse_each: () { (E item) -> void } -> self
+                  | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -3032,10 +3032,10 @@ class Array[unchecked out Elem] < Object
   #
   # With no block given, returns an Enumerator.
   #
-  def rfind: () { (Elem) -> boolish } -> Elem?
-           | () -> ::Enumerator[Elem, Elem?]
-           | [T] (Enumerable::_NotFound[T] ifnone) { (Elem) -> boolish } -> (Elem | T)
-           | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[Elem, Elem | T]
+  def rfind: () { (E) -> boolish } -> E?
+           | () -> ::Enumerator[E, E?]
+           | [T] (Enumerable::_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
+           | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -3066,8 +3066,8 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def rindex: (untyped obj) -> ::Integer?
-            | () { (Elem item) -> boolish } -> ::Integer?
-            | () -> ::Enumerator[Elem, ::Integer?]
+            | () { (E item) -> boolish } -> ::Integer?
+            | () -> ::Enumerator[E, ::Integer?]
 
   # <!--
   #   rdoc-file=array.c
@@ -3101,7 +3101,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def rotate: (?int count) -> ::Array[Elem]
+  def rotate: (?int count) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3186,8 +3186,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def sample: %a{implicitly-returns-nil} (?random: _Rand rng) -> Elem
-            | (int n, ?random: _Rand rng) -> ::Array[Elem]
+  def sample: %a{implicitly-returns-nil} (?random: _Rand rng) -> E
+            | (int n, ?random: _Rand rng) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3208,8 +3208,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def select: () { (Elem item) -> boolish } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def select: () { (E item) -> boolish } -> ::Array[E]
+            | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -3232,8 +3232,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def select!: () { (Elem item) -> boolish } -> self?
-             | () -> ::Enumerator[Elem, self?]
+  def select!: () { (E item) -> boolish } -> self?
+             | () -> ::Enumerator[E, self?]
 
   # <!--
   #   rdoc-file=array.c
@@ -3271,8 +3271,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def shift: %a{implicitly-returns-nil} () -> Elem
-           | (int n) -> ::Array[Elem]
+  def shift: %a{implicitly-returns-nil} () -> E
+           | (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.rb
@@ -3296,7 +3296,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def shuffle: (?random: _Rand rng) -> ::Array[Elem]
+  def shuffle: (?random: _Rand rng) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.rb
@@ -3441,9 +3441,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def slice: %a{implicitly-returns-nil} (int index) -> Elem
-           | (int start, int length) -> ::Array[Elem]?
-           | (::Range[::Integer] range) -> ::Array[Elem]?
+  def slice: %a{implicitly-returns-nil} (int index) -> E
+           | (int start, int length) -> ::Array[E]?
+           | (::Range[::Integer] range) -> ::Array[E]?
 
   # <!--
   #   rdoc-file=array.c
@@ -3534,9 +3534,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def slice!: %a{implicitly-returns-nil} (int index) -> Elem
-            | (int start, int length) -> ::Array[Elem]?
-            | (::Range[::Integer] range) -> ::Array[Elem]?
+  def slice!: %a{implicitly-returns-nil} (int index) -> E
+            | (int start, int length) -> ::Array[E]?
+            | (::Range[::Integer] range) -> ::Array[E]?
 
   # <!--
   #   rdoc-file=array.c
@@ -3570,8 +3570,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def sort: () -> ::Array[Elem]
-          | () { (Elem a, Elem b) -> ::Integer } -> ::Array[Elem]
+  def sort: () -> ::Array[E]
+          | () { (E a, E b) -> ::Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3583,7 +3583,7 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
   def sort!: () -> self
-           | () { (Elem a, Elem b) -> ::Integer } -> self
+           | () { (E a, E b) -> ::Integer } -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3606,8 +3606,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def sort_by!: [U] () { (Elem obj) -> U } -> ::Array[Elem]
-              | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def sort_by!: [U] () { (E obj) -> U } -> ::Array[E]
+              | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -3651,7 +3651,7 @@ class Array[unchecked out Elem] < Object
   #     as Integer#+.
   #
   def sum: (?untyped init) -> untyped
-         | (?untyped init) { (Elem e) -> untyped } -> untyped
+         | (?untyped init) { (E e) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=array.c
@@ -3668,7 +3668,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def take: (int n) -> ::Array[Elem]
+  def take: (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3690,8 +3690,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def take_while: () { (Elem obj) -> boolish } -> ::Array[Elem]
-                | () -> ::Enumerator[Elem, ::Array[Elem]]
+  def take_while: () { (E obj) -> boolish } -> ::Array[E]
+                | () -> ::Enumerator[E, ::Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -3709,7 +3709,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def to_a: () -> ::Array[Elem]
+  def to_a: () -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3744,7 +3744,7 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
   def to_h: () -> Hash[untyped, untyped]
-          | [T, S] () { (Elem) -> [ T, S ] } -> Hash[T, S]
+          | [T, S] () { (E) -> [ T, S ] } -> Hash[T, S]
 
   # <!-- rdoc-file=array.c -->
   # Returns the new string formed by calling method `#inspect` on each array
@@ -3794,7 +3794,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def union: [T] (*::Array[T] other_arys) -> ::Array[T | Elem]
+  def union: [T] (*::Array[T] other_arys) -> ::Array[T | E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3820,8 +3820,8 @@ class Array[unchecked out Elem] < Object
   #
   # Related: [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def uniq: () -> ::Array[Elem]
-          | () { (Elem item) -> untyped } -> ::Array[Elem]
+  def uniq: () -> ::Array[E]
+          | () { (E item) -> untyped } -> ::Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3850,7 +3850,7 @@ class Array[unchecked out Elem] < Object
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def uniq!: () -> self?
-           | () { (Elem) -> untyped } -> self?
+           | () { (E) -> untyped } -> self?
 
   # <!--
   #   rdoc-file=array.c
@@ -3865,7 +3865,7 @@ class Array[unchecked out Elem] < Object
   # Related: Array#shift; see also [Methods for
   # Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def unshift: (*Elem obj) -> self
+  def unshift: (*E obj) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3969,7 +3969,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def values_at: (*int | ::Range[::Integer] selector) -> ::Array[Elem?]
+  def values_at: (*int | ::Range[::Integer] selector) -> ::Array[E?]
 
   # <!--
   #   rdoc-file=array.c
@@ -4063,9 +4063,9 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def zip: [U] (_Each[U] arg) -> Array[[ Elem, U? ]]
+  def zip: [U] (_Each[U] arg) -> Array[[ E, U? ]]
          | (_Each[untyped] arg, *_Each[untyped] args) -> Array[Array[untyped]]
-         | [U] (_Each[U] arg) { ([ Elem, U? ]) -> void } -> nil
+         | [U] (_Each[U] arg) { ([ E, U? ]) -> void } -> nil
          | (_Each[untyped] arg, *_Each[untyped] args) { (Array[untyped]) -> void } -> nil
 
   # <!--
@@ -4081,7 +4081,7 @@ class Array[unchecked out Elem] < Object
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def |: [T] (::Array[T] other_ary) -> ::Array[Elem | T]
+  def |: [T] (::Array[T] other_ary) -> ::Array[E | T]
 
   private
 

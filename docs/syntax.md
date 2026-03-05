@@ -195,8 +195,8 @@ It is an alias of `top` type, and you can use `boolish` if we want to allow any 
 We can see an example at the definition of `Enumerable#find`:
 
 ```rbs
-module Enumerable[Elem, Return]
-  def find: () { (Elem) -> boolish } -> Elem?
+module Enumerable[E, R]
+  def find: () { (E) -> boolish } -> E?
 end
 ```
 

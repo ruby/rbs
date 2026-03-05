@@ -737,7 +737,7 @@ class Set[unchecked out A]
 end
 
 %a{annotate:rdoc:skip}
-module Enumerable[unchecked out Elem]
+module Enumerable[unchecked out E]
   # <!--
   #   rdoc-file=prelude.rb
   #   - to_set(*args, &block)
@@ -745,6 +745,6 @@ module Enumerable[unchecked out Elem]
   # Makes a set from the enumerable object with given arguments. Passing arguments
   # to this method is deprecated.
   #
-  def to_set: () -> Set[Elem]
-            | [T] () { (Elem) -> T } -> Set[T]
+  def to_set: () -> Set[E]
+            | [T] () { (E) -> T } -> Set[T]
 end
