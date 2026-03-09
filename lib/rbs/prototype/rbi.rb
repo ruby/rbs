@@ -16,26 +16,7 @@ module RBS
       end
 
       def parse(string)
-        comments = Ripper.lex(string).yield_self do |tokens|
-          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
-            if token[1] == :on_comment
-              line = token[0][0]
-              body = token[2][2..-1] or raise
-
-              body = "\n" if body.empty?
-
-              comment = AST::Comment.new(string: body, location: nil)
-              if (prev_comment = hash.delete(line - 1))
-                hash[line] = AST::Comment.new(
-                  string: prev_comment.string + comment.string,
-                  location: nil
-                )
-              else
-                hash[line] = comment
-              end
-            end
-          end
-        end
+        comments = parse_comments(string, include_trailing: true)
         process RubyVM::AbstractSyntaxTree.parse(string), comments: comments
       end
 
@@ -235,6 +216,7 @@ module RBS
                 variance: variance || :invariant,
                 location: nil,
                 upper_bound: nil,
+                lower_bound: nil,
                 default_type: nil
               )
             end
@@ -332,6 +314,7 @@ module RBS
                   name: name,
                   variance: :invariant,
                   upper_bound: nil,
+                  lower_bound: nil,
                   location: nil,
                   default_type: nil
                 )

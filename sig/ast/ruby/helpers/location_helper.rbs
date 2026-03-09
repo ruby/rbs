@@ -1,0 +1,15 @@
+module RBS
+  module AST
+    module Ruby
+      module Helpers
+        module LocationHelper : _WithBuffer
+          interface _WithBuffer
+            def buffer: () -> Buffer
+          end
+          
+          def rbs_location: (Prism::Location) -> Location
+        end
+      end
+    end
+  end
+end

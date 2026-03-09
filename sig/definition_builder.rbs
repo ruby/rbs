@@ -97,13 +97,15 @@ module RBS
     #
     def interface_methods: (Array[Definition::Ancestor::Instance] interface_ancestors) -> interface_methods
 
+    def special_accessibility: (bool, Symbol) -> Definition::accessibility?
+
     def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
 
     def validate_params_with: (Array[AST::TypeParam], result: VarianceCalculator::Result) { (AST::TypeParam) -> void } -> void
 
     def validate_type_params: (Definition, ancestors: AncestorBuilder::OneAncestors, methods: MethodBuilder::Methods) -> void
 
-    def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t) -> Location[untyped, untyped]?
+    def source_location: (Definition::Ancestor::Instance::source, AST::Declarations::t | AST::Ruby::Declarations::t) -> Location[untyped, untyped]?
 
     def validate_variable: (Definition::Variable) -> void
 

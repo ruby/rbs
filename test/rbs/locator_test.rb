@@ -125,6 +125,32 @@ RBS
     end
   end
 
+  def test_find_lower_bound
+    locator = locator(<<RBS)
+module Foo[A > Baz]
+  def bar: [X > Numeric] () -> X
+end
+RBS
+
+    locator.find(line: 1, column: 17).tap do |cs|
+      assert_equal 4, cs.size
+      assert_equal :name, cs[0]
+      assert_instance_of Types::ClassInstance, cs[1]
+      assert_instance_of AST::TypeParam, cs[2]
+      assert_instance_of AST::Declarations::Module, cs[3]
+    end
+
+    locator.find(line: 2, column: 18).tap do |cs|
+      assert_equal 6, cs.size
+      assert_equal :name, cs[0]
+      assert_instance_of Types::ClassInstance, cs[1]
+      assert_instance_of AST::TypeParam, cs[2]
+      assert_instance_of MethodType, cs[3]
+      assert_instance_of AST::Members::MethodDefinition, cs[4]
+      assert_instance_of AST::Declarations::Module, cs[5]
+    end
+  end
+
   def test_find_class_alias
     locator = locator(<<~RBS)
       class Foo = Object

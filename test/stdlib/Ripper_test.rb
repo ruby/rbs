@@ -13,7 +13,7 @@ class RipperSingletonTest < Test::Unit::TestCase
 
   def test_dedent_string
     assert_send_type "(::String input, ::int width) -> ::Integer",
-                     Ripper, :dedent_string, "", 0
+                     Ripper, :dedent_string, +"", 0
   end
 
   def test_lex
@@ -180,7 +180,7 @@ class RipperTest < Test::Unit::TestCase
 
   def test_dedent_string
     assert_send_type "(String input, Integer width) -> Integer",
-                     Ripper.new("def a; end"), :dedent_string, "", 0
+                     Ripper.new("def a; end"), :dedent_string, +"", 0
   end
 
   def test_warning

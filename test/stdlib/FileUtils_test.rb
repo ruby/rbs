@@ -360,8 +360,8 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :ln_sr, ToStr.new("src"), ToStr.new("dest"), noop: true
       assert_send_type  "(ToPath, ToPath, noop: bool) -> void",
                         FileUtils, :ln_sr, ToPath.new("src"), ToPath.new("dest"), noop: true
-      assert_send_type  "(Array[String | ToStr | ToPath], String, noop: bool, verbose: bool, target_directory: false) -> void",
-                        FileUtils, :ln_sr, ["src", ToStr.new("src"), ToStr.new("src")], "dest_dir", noop: true, verbose: false, target_directory: false
+      assert_send_type  "(Array[String | ToStr | ToPath], String, noop: bool, verbose: bool, target_directory: true) -> void",
+                        FileUtils, :ln_sr, ["src", ToStr.new("src"), ToStr.new("src")], "dest_dir", noop: true, verbose: false, target_directory: true
     end
   end
 

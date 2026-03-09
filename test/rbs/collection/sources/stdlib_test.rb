@@ -4,14 +4,14 @@ class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
   def test_has?
     s = source
 
-    assert s.has?('pathname', nil)
+    assert s.has?('base64', nil)
     refute s.has?('activesupport', nil)
     refute s.has?('rbs', nil)
   end
 
   def test_versions
     s = source
-    assert_equal ['0'], s.versions('pathname')
+    assert_equal ['0'], s.versions('base64')
   end
 
   def test_manifest_of__exist
@@ -22,7 +22,7 @@ class RBS::Collection::Sources::StdlibTest < Test::Unit::TestCase
 
   def test_manifest_of__nonexist
     s = source
-    assert_equal(nil, s.manifest_of('pathname', '0'))
+    assert_equal(nil, s.manifest_of('base64', '0'))
   end
 
   def source

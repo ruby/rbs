@@ -11,42 +11,123 @@ bin = File.join(__dir__, "bin")
 
 Rake::ExtensionTask.new("rbs_extension")
 
+compile_task = Rake::Task[:compile]
+
+task :setup_extconf_compile_commands_json do
+  ENV["COMPILE_COMMANDS_JSON"] = "1"
+end
+
+compile_task.prerequisites.unshift(:setup_extconf_compile_commands_json)
+
 test_config = lambda do |t|
   t.libs << "test"
   t.libs << "lib"
   t.test_files = FileList["test/**/*_test.rb"].reject do |path|
     path =~ %r{test/stdlib/}
   end
+  if defined?(RubyMemcheck)
+    if t.is_a?(RubyMemcheck::TestTask)
+      t.verbose = true
+      t.options = '-v'
+    end
+  end
 end
 
 Rake::TestTask.new(test: :compile, &test_config)
 
-unless Gem.win_platform?
-  begin
-    require "ruby_memcheck"
-
-    namespace :test do
-      RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
-    end
-  rescue LoadError => exn
-    STDERR.puts "🚨🚨🚨🚨 Skipping RubyMemcheck: #{exn.inspect} 🚨🚨🚨🚨"
-  end
-end
-
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
-  sh "re2c -W --no-generation-date -o ext/rbs_extension/lexer.c ext/rbs_extension/lexer.re"
+  sh "re2c -W --no-generation-date -o src/lexer.c src/lexer.re"
+  sh "clang-format -i -style=file src/lexer.c"
 end
 
 task :confirm_lexer => :lexer do
   puts "Testing if lexer.c is updated with respect to lexer.re"
-  sh "git diff --exit-code ext/rbs_extension/lexer.c"
+  sh "git diff --exit-code src/lexer.c"
 end
 
 task :confirm_templates => :templates do
   puts "Testing if generated code under include and src is updated with respect to templates"
   sh "git diff --exit-code -- include src"
+end
+
+# Task to format C code using clang-format
+namespace :format do
+  dirs = ["src", "ext", "include"]
+
+  # Find all C source and header files
+  files = `find #{dirs.join(" ")} -type f \\( -name "*.c" -o -name "*.h" \\)`.split("\n")
+
+  desc "Format C source files using clang-format"
+  task :c do
+    puts "Formatting C files..."
+
+    # Check if clang-format is installed
+    unless system("which clang-format > /dev/null 2>&1")
+      abort "Error: clang-format not found. Please install clang-format first."
+    end
+
+    if files.empty?
+      puts "No C files found to format"
+      next
+    end
+
+    puts "Found #{files.length} files to format (excluding generated files)"
+
+    exit_status = 0
+    files.each do |file|
+      puts "Formatting #{file}"
+      unless system("clang-format -i -style=file #{file}")
+        puts "❌ Error formatting #{file}"
+        exit_status = 1
+      end
+    end
+
+    exit exit_status unless exit_status == 0
+    puts "✅ All files formatted successfully"
+  end
+
+  desc "Check if C source files are properly formatted"
+  task :c_check do
+    puts "Checking C file formatting..."
+
+    # Check if clang-format is installed
+    unless system("which clang-format > /dev/null 2>&1")
+      abort "Error: clang-format not found. Please install clang-format first."
+    end
+
+    if files.empty?
+      puts "No C files found to check"
+      next
+    end
+
+    puts "Found #{files.length} files to check (excluding generated files)"
+
+    needs_format = false
+    files.each do |file|
+      formatted = `clang-format -style=file #{file}`
+      original = File.read(file)
+
+      if formatted != original
+        puts "❌ #{file} needs formatting"
+        puts "Diff:"
+        # Save formatted version to temp file and run diff
+        temp_file = "#{file}.formatted"
+        File.write(temp_file, formatted)
+        system("diff -u #{file} #{temp_file}")
+        File.unlink(temp_file)
+        needs_format = true
+      end
+    end
+
+    if needs_format
+      warn "Some files need formatting. Run 'rake format:c' to format them."
+      exit 1
+    else
+      puts "✅ All files are properly formatted"
+    end
+  end
 end
 
 rule ".c" => ".re" do |t|
@@ -70,17 +151,22 @@ task :confirm_annotation do
 end
 
 task :templates do
-  sh "#{ruby} templates/template.rb include/rbs/constants.h"
-  sh "#{ruby} templates/template.rb include/rbs/ruby_objs.h"
-  sh "#{ruby} templates/template.rb src/constants.c"
-  sh "#{ruby} templates/template.rb src/ruby_objs.c"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.h"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/ast_translation.c"
+
+  sh "#{ruby} templates/template.rb ext/rbs_extension/class_constants.h"
+  sh "#{ruby} templates/template.rb ext/rbs_extension/class_constants.c"
+
+  sh "#{ruby} templates/template.rb include/rbs/ast.h"
+  sh "#{ruby} templates/template.rb src/ast.c"
+
+  # Format the generated files
+  Rake::Task["format:c"].invoke
 end
 
-task :compile => "ext/rbs_extension/lexer.c"
-task :compile => "include/rbs/constants.h"
-task :compile => "include/rbs/ruby_objs.h"
-task :compile => "src/constants.c"
-task :compile => "src/ruby_objs.c"
+task :compile => "ext/rbs_extension/class_constants.h"
+task :compile => "ext/rbs_extension/class_constants.c"
+task :compile => "src/lexer.c"
 
 task :test_doc do
   files = Dir.chdir(File.expand_path('..', __FILE__)) do
@@ -93,7 +179,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate --exit-error-on-syntax-error"
+  sh "#{ruby} #{rbs} validate"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -114,7 +200,14 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --exit-error-on-syntax-error"
+    args = ["-r", lib]
+
+    if lib == "rbs"
+      args << "-r"
+      args << "prism"
+    end
+
+    sh "#{ruby} #{rbs} #{args.join(' ')} validate"
   end
 end
 
@@ -126,7 +219,7 @@ end
 
 task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI_test}
+    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI-escape_test}
   end
 
   if ENV["RANDOMIZE_STDLIB_TEST_ORDER"] == "true"
@@ -135,7 +228,7 @@ task :stdlib_test => :compile do
 
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
-  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI-escape_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
@@ -228,7 +321,7 @@ namespace :generate do
           class <%= target %>SingletonTest < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
           <%- class_methods.each do |method_name, definition| -%>
@@ -247,7 +340,7 @@ namespace :generate do
           class <%= target %>Test < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
           <%- instance_methods.each do |method_name, definition| -%>
@@ -429,4 +522,26 @@ task :changelog do
   else
     puts "  (🤑 There is no *unreleased* pull request associated to the milestone.)"
   end
+end
+
+desc "Compile extension without C23 extensions"
+task :compile_c99 do
+  ENV["TEST_NO_C23"] = "true"
+  Rake::Task[:"compile"].invoke
+ensure
+  ENV.delete("TEST_NO_C23")
+end
+
+task :prepare_bench do
+  ENV.delete("DEBUG")
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
+end
+
+task :prepare_profiling do
+  ENV["DEBUG"] = "1"
+  Rake::Task[:"clobber"].invoke
+  Rake::Task[:"templates"].invoke
+  Rake::Task[:"compile"].invoke
 end

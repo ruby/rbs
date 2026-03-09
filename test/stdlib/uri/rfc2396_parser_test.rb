@@ -20,6 +20,7 @@ class URIRFC2396_ParserInstanceTest < Test::Unit::TestCase
   testing "::URI::RFC2396_Parser"
 
   def setup
+    super
     @instance = URI::RFC2396_Parser.new
   end
 

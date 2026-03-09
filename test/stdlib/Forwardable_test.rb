@@ -71,6 +71,7 @@ class SingleForwardableTest < Test::Unit::TestCase
   testing "::SingleForwardable"
 
   def setup
+    super
     @tested = Object.new
     @tested.extend SingleForwardable
   end

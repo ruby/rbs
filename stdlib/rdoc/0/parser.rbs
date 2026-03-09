@@ -42,7 +42,7 @@ module RDoc
 
     # <!--
     #   rdoc-file=lib/rdoc/parser.rb
-    #   - new(top_level, file_name, content, options, stats)
+    #   - new(top_level, content, options, stats)
     # -->
     # Creates a new Parser storing `top_level`, `file_name`, `content`, `options`
     # and `stats` in instance variables.  In +@preprocess+ an

@@ -20,6 +20,8 @@ module RDoc
     #
     attr_accessor location: String
 
+    alias file location
+
     # <!--
     #   rdoc-file=lib/rdoc/comment.rb
     #   - new(text = nil, location = nil, language = nil)

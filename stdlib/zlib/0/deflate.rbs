@@ -78,9 +78,10 @@ module Zlib
     #   - flush(flush = Zlib::SYNC_FLUSH)                 -> String
     #   - flush(flush = Zlib::SYNC_FLUSH) { |chunk| ... } -> nil
     # -->
-    # This method is equivalent to `deflate('', flush)`. This method is just
-    # provided to improve the readability of your Ruby program.  If a block is given
-    # chunks of deflate output are yielded to the block until the buffer is flushed.
+    # This method is equivalent to <code>deflate('', flush)</code>. This method is
+    # just provided to improve the readability of your Ruby program.  If a block is
+    # given chunks of deflate output are yielded to the block until the buffer is
+    # flushed.
     #
     # See Zlib::Deflate#deflate for detail on the `flush` constants NO_FLUSH,
     # SYNC_FLUSH, FULL_FLUSH and FINISH.

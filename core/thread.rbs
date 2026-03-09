@@ -14,8 +14,8 @@
 #
 #     thr.join #=> "What's the big deal"
 #
-# If we don't call `thr.join` before the main thread terminates, then all other
-# threads including `thr` will be killed.
+# If we don't call <code>thr.join</code> before the main thread terminates, then
+# all other threads including `thr` will be killed.
 #
 # Alternatively, you can use an array for handling multiple threads at once,
 # like in the following example:
@@ -105,8 +105,8 @@
 #       p Thread.current.thread_variable_get(:foo)   # => 2
 #     }.join
 #
-# You can see that the thread-local `:foo` carried over into the fiber and was
-# changed to `2` by the end of the thread.
+# You can see that the thread-local <code>:foo</code> carried over into the
+# fiber and was changed to `2` by the end of the thread.
 #
 # This example makes use of #thread_variable_set to create new thread-locals,
 # and #thread_variable_get to reference them.
@@ -265,7 +265,10 @@ class Thread < Object
   # -->
   # Terminates `thr` and schedules another thread to be run, returning the
   # terminated Thread.  If this is the main thread, or the last thread, exits the
-  # process.
+  # process. Note that the caller does not wait for the thread to terminate if the
+  # receiver is different from the currently running thread. The termination is
+  # asynchronous, and the thread can still run a small amount of ruby code before
+  # exiting.
   #
   def kill: () -> Thread?
 
@@ -334,7 +337,10 @@ class Thread < Object
   # <!-- rdoc-file=thread.c -->
   # Terminates `thr` and schedules another thread to be run, returning the
   # terminated Thread.  If this is the main thread, or the last thread, exits the
-  # process.
+  # process. Note that the caller does not wait for the thread to terminate if the
+  # receiver is different from the currently running thread. The termination is
+  # asynchronous, and the thread can still run a small amount of ruby code before
+  # exiting.
   #
   def exit: () -> Thread?
 
@@ -364,9 +370,9 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=thread.c
-  #   - Thread.new { ... }                  -> thread
-  #   - Thread.new(*args, &proc)            -> thread
-  #   - Thread.new(*args) { |args| ... }    -> thread
+  #   - Thread.new { ... }                -> thread
+  #   - Thread.new(*args, &proc)          -> thread
+  #   - Thread.new(*args) { |args| ... }  -> thread
   # -->
   # Creates a new thread executing the given block.
   #
@@ -611,13 +617,13 @@ class Thread < Object
   # -->
   # Returns the status of `thr`.
   #
-  # `"sleep"`
+  # <code>"sleep"</code>
   # :   Returned if this thread is sleeping or waiting on I/O
   #
-  # `"run"`
+  # <code>"run"</code>
   # :   When this thread is executing
   #
-  # `"aborting"`
+  # <code>"aborting"</code>
   # :   If this thread is aborting
   #
   # `false`
@@ -660,7 +666,10 @@ class Thread < Object
   # <!-- rdoc-file=thread.c -->
   # Terminates `thr` and schedules another thread to be run, returning the
   # terminated Thread.  If this is the main thread, or the last thread, exits the
-  # process.
+  # process. Note that the caller does not wait for the thread to terminate if the
+  # receiver is different from the currently running thread. The termination is
+  # asynchronous, and the thread can still run a small amount of ruby code before
+  # exiting.
   #
   def terminate: () -> Thread?
 
@@ -760,7 +769,8 @@ class Thread < Object
   # Marks a given thread as eligible for scheduling, however it may still remain
   # blocked on I/O.
   #
-  # **Note:** This does not invoke the scheduler, see #run for more information.
+  # <strong>Note:</strong> This does not invoke the scheduler, see #run for more
+  # information.
   #
   #     c = Thread.new { Thread.stop; puts "hey!" }
   #     sleep 0.1 while c.status!='sleep'
@@ -781,7 +791,8 @@ class Thread < Object
   # When set to `true`, if any thread is aborted by an exception, the raised
   # exception will be re-raised in the main thread.
   #
-  # Can also be specified by the global $DEBUG flag or command line option `-d`.
+  # Can also be specified by the global $DEBUG flag or command line option
+  # <code>-d</code>.
   #
   # See also ::abort_on_exception=.
   #
@@ -829,13 +840,6 @@ class Thread < Object
   #
   def self.each_caller_location: () { (Backtrace::Location) -> void } -> nil
 
-  # Wraps the block in a single, VM-global
-  # [Mutex\#synchronize](https://ruby-doc.org/core-2.6.3/Mutex.html#method-i-synchronize)
-  # , returning the value of the block. A thread executing inside the
-  # exclusive section will only block other threads which also use the
-  # [::exclusive](Thread.downloaded.ruby_doc#method-c-exclusive) mechanism.
-  def self.exclusive: () { () -> untyped } -> untyped
-
   # <!--
   #   rdoc-file=thread.c
   #   - Thread.exit   -> thread
@@ -870,17 +874,17 @@ class Thread < Object
   # Thread#raise, Thread#kill, signal trap (not supported yet) and main thread
   # termination (if main thread terminates, then all other thread will be killed).
   #
-  # The given `hash` has pairs like `ExceptionClass => :TimingSymbol`. Where the
-  # ExceptionClass is the interrupt handled by the given block. The TimingSymbol
-  # can be one of the following symbols:
+  # The given `hash` has pairs like <code>ExceptionClass => :TimingSymbol</code>.
+  # Where the ExceptionClass is the interrupt handled by the given block. The
+  # TimingSymbol can be one of the following symbols:
   #
-  # `:immediate`
+  # <code>:immediate</code>
   # :   Invoke interrupts immediately.
   #
-  # `:on_blocking`
+  # <code>:on_blocking</code>
   # :   Invoke interrupts while *BlockingOperation*.
   #
-  # `:never`
+  # <code>:never</code>
   # :   Never invoke all interrupts.
   #
   #
@@ -904,8 +908,8 @@ class Thread < Object
   #
   # In this example, we can guard from Thread#raise exceptions.
   #
-  # Using the `:never` TimingSymbol the RuntimeError exception will always be
-  # ignored in the first block of the main thread. In the second
+  # Using the <code>:never</code> TimingSymbol the RuntimeError exception will
+  # always be ignored in the first block of the main thread. In the second
   # ::handle_interrupt block we can purposefully handle RuntimeError exceptions.
   #
   #     th = Thread.new do
@@ -954,12 +958,11 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=thread.c
-  #   - thr.raise
-  #   - thr.raise(string)
-  #   - thr.raise(exception [, string [, array]])
+  #   - raise(exception, message = exception.to_s, backtrace = nil, cause: $!)
+  #   - raise(message = nil, cause: $!)
   # -->
   # Raises an exception from the given thread. The caller does not have to be
-  # `thr`. See Kernel#raise for more information.
+  # `thr`. See Kernel#raise for more information on arguments.
   #
   #     Thread.abort_on_exception = true
   #     a = Thread.new { sleep(200) }
@@ -972,8 +975,8 @@ class Thread < Object
   #      from prog.rb:2:in `new'
   #      from prog.rb:2
   #
-  def raise: (?String message) -> nil
-           | (_Exception, ?_ToS message, ?Array[Thread::Backtrace::Location] | Array[String] | nil backtrace) -> nil
+  def raise: (?String message, ?cause: Exception?) -> nil
+           | (_Exception, ?_ToS message, ?Array[Thread::Backtrace::Location] | Array[String] | nil backtrace, ?cause: Exception?) -> nil
 
   # <!--
   #   rdoc-file=thread.c
@@ -1029,7 +1032,8 @@ class Thread < Object
   # Since Thread::handle_interrupt can be used to defer asynchronous events, this
   # method can be used to determine if there are any deferred events.
   #
-  # If you find this method returns true, then you may finish `:never` blocks.
+  # If you find this method returns true, then you may finish <code>:never</code>
+  # blocks.
   #
   # For example, the following method processes deferred asynchronous events
   # immediately.
@@ -1107,9 +1111,9 @@ class Thread < Object
   #     where it is raised rather then let it kill the Thread.
   # *   If it is guaranteed the Thread will be joined with Thread#join or
   #     Thread#value, then it is safe to disable this report with
-  #     `Thread.current.report_on_exception = false` when starting the Thread.
-  #     However, this might handle the exception much later, or not at all if the
-  #     Thread is never joined due to the parent thread being blocked, etc.
+  #     <code>Thread.current.report_on_exception = false</code> when starting the
+  #     Thread. However, this might handle the exception much later, or not at all
+  #     if the Thread is never joined due to the parent thread being blocked, etc.
   #
   # See also ::report_on_exception=.
   #
@@ -1187,10 +1191,11 @@ class Thread::Backtrace < Object
   #   rdoc-file=vm_backtrace.c
   #   - Thread::Backtrace::limit -> integer
   # -->
-  # Returns maximum backtrace length set by `--backtrace-limit` command-line
-  # option. The default is `-1` which means unlimited backtraces. If the value is
-  # zero or positive, the error backtraces, produced by Exception#full_message,
-  # are abbreviated and the extra lines are replaced by `... 3 levels... `
+  # Returns maximum backtrace length set by <code>--backtrace-limit</code>
+  # command-line option. The default is <code>-1</code> which means unlimited
+  # backtraces. If the value is zero or positive, the error backtraces, produced
+  # by Exception#full_message, are abbreviated and the extra lines are replaced by
+  # <code>... 3 levels... </code>
   #
   #     $ ruby -r net/http -e "p Thread::Backtrace.limit; Net::HTTP.get(URI('http://wrong.address'))"
   #     - 1
@@ -1256,7 +1261,7 @@ end
 #       puts call.to_s
 #     end
 #
-# Running `ruby caller_locations.rb` will produce:
+# Running <code>ruby caller_locations.rb</code> will produce:
 #
 #     caller_locations.rb:2:in `a'
 #     caller_locations.rb:5:in `b'
@@ -1276,7 +1281,7 @@ end
 #       puts call.to_s
 #     end
 #
-# Now run `ruby foo.rb` and you should see:
+# Now run <code>ruby foo.rb</code> and you should see:
 #
 #     init.rb:4:in `initialize'
 #     init.rb:8:in `new'
@@ -1359,7 +1364,8 @@ class Thread::Backtrace::Location
   # -->
   # Returns the line number of this frame.
   #
-  # For example, using `caller_locations.rb` from Thread::Backtrace::Location
+  # For example, using <code>caller_locations.rb</code> from
+  # Thread::Backtrace::Location
   #
   #     loc = c(0..1).first
   #     loc.lineno #=> 2
@@ -1374,7 +1380,8 @@ class Thread::Backtrace::Location
   # unless the frame is in the main script, in which case it will be the script
   # location passed on the command line.
   #
-  # For example, using `caller_locations.rb` from Thread::Backtrace::Location
+  # For example, using <code>caller_locations.rb</code> from
+  # Thread::Backtrace::Location
   #
   #     loc = c(0..1).first
   #     loc.path #=> caller_locations.rb
@@ -1385,27 +1392,79 @@ end
 # <!-- rdoc-file=thread_sync.c -->
 # ConditionVariable objects augment class Mutex. Using condition variables, it
 # is possible to suspend while in the middle of a critical section until a
-# resource becomes available.
+# condition is met, such as a resource becomes available.
+#
+# Due to non-deterministic scheduling and spurious wake-ups, users of condition
+# variables should always use a separate boolean predicate (such as reading from
+# a boolean variable) to check if the condition is actually met before starting
+# to wait, and should wait in a loop, re-checking the condition every time the
+# ConditionVariable is waken up.  The idiomatic way of using condition variables
+# is calling the `wait` method in an `until` loop with the predicate as the loop
+# condition.
+#
+#     condvar.wait(mutex) until condition_is_met
+#
+# In the example below, we use the boolean variable `resource_available` (which
+# is protected by `mutex`) to indicate the availability of the resource, and use
+# `condvar` to wait for that variable to become true.  Note that:
+#
+# 1.  Thread `b` may be scheduled before thread `a1` and `a2`, and may run so
+#     fast that it have already made the resource available before either `a1`
+#     or `a2` starts. Therefore, `a1` and `a2` should check if
+#     `resource_available` is already true before starting to wait.
+# 2.  The `wait` method may spuriously wake up without signalling. Therefore,
+#     thread `a1` and `a2` should recheck `resource_available` after the `wait`
+#     method returns, and go back to wait if the condition is not actually met.
+# 3.  It is possible that thread `a2` starts right after thread `a1` is waken up
+#     by `b`.  Thread `a2` may have acquired the `mutex` and consumed the
+#     resource before thread `a1` acquires the `mutex`.  This necessitates
+#     rechecking after `wait`, too.
 #
 # Example:
 #
 #     mutex = Thread::Mutex.new
-#     resource = Thread::ConditionVariable.new
 #
-#     a = Thread.new {
-#        mutex.synchronize {
-#          # Thread 'a' now needs the resource
-#          resource.wait(mutex)
-#          # 'a' can now have the resource
-#        }
+#     resource_available = false
+#     condvar = Thread::ConditionVariable.new
+#
+#     a1 = Thread.new {
+#       # Thread 'a1' waits for the resource to become available and consumes
+#       # the resource.
+#       mutex.synchronize {
+#         condvar.wait(mutex) until resource_available
+#         # After the loop, 'resource_available' is guaranteed to be true.
+#
+#         resource_available = false
+#         puts "a1 consumed the resource"
+#       }
+#     }
+#
+#     a2 = Thread.new {
+#       # Thread 'a2' behaves like 'a1'.
+#       mutex.synchronize {
+#         condvar.wait(mutex) until resource_available
+#         resource_available = false
+#         puts "a2 consumed the resource"
+#       }
 #     }
 #
 #     b = Thread.new {
-#        mutex.synchronize {
-#          # Thread 'b' has finished using the resource
-#          resource.signal
-#        }
+#       # Thread 'b' periodically makes the resource available.
+#       loop {
+#         mutex.synchronize {
+#           resource_available = true
+#
+#           # Notify one waiting thread if any.  It is possible that neither
+#           # 'a1' nor 'a2 is waiting on 'condvar' at this moment.  That's OK.
+#           condvar.signal
+#         }
+#         sleep 1
+#       }
 #     }
+#
+#     # Eventually both 'a1' and 'a2' will have their resources, albeit in an
+#     # unspecified order.
+#     [a1, a2].each {|th| th.join}
 #
 class Thread::ConditionVariable < Object
   # <!--
@@ -1432,6 +1491,8 @@ class Thread::ConditionVariable < Object
   #
   # If `timeout` is given, this method returns after `timeout` seconds passed,
   # even if no other thread doesn't signal.
+  #
+  # This method may wake up spuriously due to underlying implementation details.
   #
   # Returns the slept result on `mutex`.
   #
@@ -1460,7 +1521,7 @@ end
 #
 class Thread::Mutex < Object
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.lock  -> self
   # -->
   # Attempts to grab the lock and waits if it isn't available. Raises
@@ -1469,7 +1530,7 @@ class Thread::Mutex < Object
   def lock: () -> self
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.locked?  -> true or false
   # -->
   # Returns `true` if this lock is currently held by some thread.
@@ -1477,7 +1538,7 @@ class Thread::Mutex < Object
   def locked?: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.owned?  -> true or false
   # -->
   # Returns `true` if this lock is currently held by current thread.
@@ -1485,7 +1546,7 @@ class Thread::Mutex < Object
   def owned?: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.synchronize { ... }    -> result of the block
   # -->
   # Obtains a lock, runs the block, and releases the lock when the block
@@ -1494,7 +1555,7 @@ class Thread::Mutex < Object
   def synchronize: [X] () { () -> X } -> X
 
   # <!--
-  #   rdoc-file=thread_sync.c
+  #   rdoc-file=thread_sync.rb
   #   - mutex.try_lock  -> true or false
   # -->
   # Attempts to obtain the lock and returns immediately. Returns `true` if the
@@ -1503,11 +1564,11 @@ class Thread::Mutex < Object
   def try_lock: () -> bool
 
   # <!--
-  #   rdoc-file=thread_sync.c
-  #   - mutex.unlock    -> self
+  #   rdoc-file=thread_sync.rb
+  #   - mutex.lock  -> self
   # -->
-  # Releases the lock. Raises `ThreadError` if `mutex` wasn't locked by the
-  # current thread.
+  # Attempts to grab the lock and waits if it isn't available. Raises
+  # `ThreadError` if `mutex` was locked by the current thread.
   #
   def unlock: () -> self
 end
@@ -1565,16 +1626,16 @@ class Thread::Queue[Elem = untyped] < Object
   #
   # After the call to close completes, the following are true:
   #
-  # *   `closed?` will return true
+  # *   <code>closed?</code> will return true
   #
   # *   `close` will be ignored.
   #
   # *   calling enq/push/<< will raise a `ClosedQueueError`.
   #
-  # *   when `empty?` is false, calling deq/pop/shift will return an object from
-  #     the queue as usual.
-  # *   when `empty?` is true, deq(false) will not suspend the thread and will
-  #     return nil. deq(true) will raise a `ThreadError`.
+  # *   when <code>empty?</code> is false, calling deq/pop/shift will return an
+  #     object from the queue as usual.
+  # *   when <code>empty?</code> is true, deq(false) will not suspend the thread
+  #     and will return nil. deq(true) will raise a `ThreadError`.
   #
   # ClosedQueueError is inherited from StopIteration, so that you can break loop
   # block.

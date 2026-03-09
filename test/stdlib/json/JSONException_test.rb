@@ -42,6 +42,8 @@ class JSONExceptionInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      Exception.new("foo"), :to_json
+    assert_send_type "(nil) -> String",
+                     Exception.new("foo"), :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      Exception.new("foo"), :to_json, JSON::State.new
   end

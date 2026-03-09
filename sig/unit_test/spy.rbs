@@ -20,11 +20,3 @@ module RBS
     end
   end
 end
-
-class Proc
-  def ruby2_keywords: () -> self
-end
-
-class Module
-  def ruby2_keywords: (*Symbol) -> void
-end

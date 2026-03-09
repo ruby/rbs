@@ -28,6 +28,8 @@ class JSONSetInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      Set[1, 2], :to_json
+    assert_send_type "(nil) -> String",
+                     Set[1, 2], :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      Set[1, 2], :to_json, JSON::State.new
   end

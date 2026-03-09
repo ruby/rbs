@@ -472,6 +472,34 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     RBS
   end
 
+  def test_civar
+    decls = to_decls(<<~RBS)
+      class C
+        @v1: untyped
+        self.@v1: untyped
+        @v2: untyped
+        self.@v2: untyped
+      end
+    RBS
+
+    env = to_env(<<~RBS)
+      class C
+        self.@v1: untyped
+      end
+    RBS
+
+    subtracted = RBS::Subtractor.new(decls, env).call
+
+    assert_subtracted <<~RBS, subtracted
+      class C
+        @v1: untyped
+
+        @v2: untyped
+        self.@v2: untyped
+      end
+    RBS
+  end
+
   def test_cvar
     decls = to_decls(<<~RBS)
       class C
@@ -667,14 +695,15 @@ class RBS::SubtractorTest < Test::Unit::TestCase
 
   private def to_decls(rbs)
     # It ignores directives, is it ok?
-    RBS::Parser.parse_signature(rbs).last
+    _, _, decls = RBS::Parser.parse_signature(rbs)
+    decls
   end
 
   private def to_env(rbs)
     RBS::Environment.new.tap do |env|
-      to_decls(rbs).each do |decl|
-        env << decl
-      end
+      buf, dirs, decls = RBS::Parser.parse_signature(rbs)
+      source = RBS::Source::RBS.new(buf, dirs, decls)
+      env.add_source(source)
     end
   end
 

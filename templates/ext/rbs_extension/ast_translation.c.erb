@@ -1,0 +1,234 @@
+#include "ast_translation.h"
+
+#include "class_constants.h"
+#include "rbs_string_bridging.h"
+#include "legacy_location.h"
+
+VALUE EMPTY_ARRAY;
+VALUE EMPTY_HASH;
+
+#define RBS_LOCATION_CHILDREN_SIZE(cap) (sizeof(rbs_location_children) + sizeof(rbs_location_entry) * ((cap) - 1))
+#define RBS_LOCATION_REQUIRED_P(loc, i) ((loc)->children->required_p & (1 << (i)))
+#define RBS_LOCATION_OPTIONAL_P(loc, i) (!RBS_LOCATION_REQUIRED_P((loc), (i)))
+
+rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *constant_pool, VALUE buffer, rb_encoding *ruby_encoding) {
+    return (rbs_translation_context_t) {
+        .constant_pool = constant_pool,
+        .buffer = buffer,
+        .encoding = ruby_encoding,
+    };
+}
+
+VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
+    VALUE ruby_array = rb_ary_new();
+
+    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_struct_to_ruby_value(ctx, n->node));
+    }
+
+    return ruby_array;
+}
+
+VALUE rbs_hash_to_ruby_hash(rbs_translation_context_t ctx, rbs_hash_t *rbs_hash) {
+    if (!rbs_hash->head) {
+        return EMPTY_HASH;
+    }
+
+    VALUE ruby_hash = rb_hash_new();
+
+    for (rbs_hash_node_t *n = rbs_hash->head; n != NULL; n = n->next) {
+        VALUE key = rbs_struct_to_ruby_value(ctx, n->key);
+        VALUE value = rbs_struct_to_ruby_value(ctx, n->value);
+        rb_hash_aset(ruby_hash, key, value);
+    }
+
+    return ruby_hash;
+}
+
+VALUE rbs_location_range_to_ruby_location(rbs_translation_context_t ctx, rbs_location_range range) {
+    if (RBS_LOCATION_NULL_RANGE_P(range)) {
+        return Qnil;
+    }
+
+    return rbs_new_location2(ctx.buffer, range.start_char, range.end_char);
+}
+
+VALUE rbs_location_range_list_to_ruby_array(rbs_translation_context_t ctx, rbs_location_range_list_t *list) {
+    if (list == NULL) {
+        return EMPTY_ARRAY;
+    }
+
+    VALUE ruby_array = rb_ary_new();
+
+    for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rb_ary_push(ruby_array, rbs_location_range_to_ruby_location(ctx, n->range));
+    }
+
+    return ruby_array;
+}
+
+VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_name_t ivar_name) {
+    switch (ivar_name.tag) {
+    case RBS_ATTR_IVAR_NAME_TAG_NAME: {
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ivar_name.name);
+        assert(constant != NULL && "constant is NULL");
+        assert(constant->start != NULL && "constant->start is NULL");
+
+        return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
+    }
+    case RBS_ATTR_IVAR_NAME_TAG_UNSPECIFIED:
+        return Qnil;
+    case RBS_ATTR_IVAR_NAME_TAG_EMPTY: 
+        return Qfalse;
+    }
+}
+
+<%- enums.each do |enum| -%>
+VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
+    switch (value) {
+    <%- enum.each_symbol do |symbol, enum_const, ruby_value| -%>
+    case <%= enum_const %>:
+        <%- if ruby_value.nil? -%>
+        return Qnil;
+        <%- else -%>
+        return rb_id2sym(rb_intern("<%= ruby_value %>"));
+        <%- end -%>
+    <%- end -%>
+    default:
+        rb_fatal("unknown <%= enum.c_type_name %> value: %d", value);
+    }
+}
+
+<%- end -%>
+
+#ifdef RB_PASS_KEYWORDS
+// Ruby 2.7 or later
+#define CLASS_NEW_INSTANCE(klass, argc, argv) \
+    rb_class_new_instance_kw(argc, argv, klass, RB_PASS_KEYWORDS)
+#else
+// Ruby 2.6
+#define CLASS_NEW_INSTANCE(receiver, argc, argv) \
+    rb_class_new_instance(argc, argv, receiver)
+#endif
+
+VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instance) {
+    if (instance == NULL) return Qnil;
+
+    switch (instance->type) {
+    <%- nodes.each do |node| -%>
+    case <%= node.c_node_enum_name %>: {
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Bool" -%>
+        return ((rbs_ast_bool_t *) instance)->value ? Qtrue : Qfalse;
+        <%- when "RBS::AST::Integer" -%>
+        rbs_ast_integer_t *integer_node = (rbs_ast_integer_t *) instance;
+        rbs_string_t string_repr = integer_node->string_representation;
+
+        VALUE str = rb_enc_str_new(string_repr.start, rbs_string_len(string_repr), rb_utf8_encoding());
+
+        return rb_funcall(str, rb_intern("to_i"), 0);
+
+        <%- when "RBS::AST::String" -%>
+        rbs_ast_string_t *string_node = (rbs_ast_string_t *) instance;
+        rbs_string_t s = string_node->string;
+
+        return rb_enc_str_new(s.start, rbs_string_len(s), rb_utf8_encoding());
+
+        <%- when "RBS::Types::Record::FieldType" -%>
+        rbs_types_record_field_type_t *record_fieldtype = (rbs_types_record_field_type_t *) instance;
+
+        VALUE array = rb_ary_new();
+        rb_ary_push(array, rbs_struct_to_ruby_value(ctx, record_fieldtype->type));
+        rb_ary_push(array, record_fieldtype->required ? Qtrue : Qfalse);
+        return array;
+
+        <%- when "RBS::Signature" -%>
+        rbs_signature_t *signature = (rbs_signature_t *) instance;
+
+        VALUE array = rb_ary_new();
+        rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->directives));
+        rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->declarations));
+        return array;
+        <%- else -%>
+        <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
+
+        VALUE h = rb_hash_new();
+        <%- if node.expose_location? -%>
+            <%- if node.locations -%>
+        VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+        rbs_loc *loc = rbs_check_location(location);
+        rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
+                <%- node.locations.each do |location_field| -%>
+                    <%- if location_field.required? -%>
+        rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+                    <%- else -%>
+        rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+                    <%- end -%>
+                <%- end -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
+            <%- else -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
+            <%- end -%>
+        <%- end -%>
+        <%- node.fields.each do |field| -%>
+        <%- case field.type.name -%>
+        <%- when "rbs_node_list" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>));
+        <%- when "rbs_hash" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(ctx, node-><%= field.c_name %>));
+        <%- when "rbs_ast_symbol" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // rbs_ast_symbol
+        <%- when "rbs_string" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.c_name %>, ctx.encoding));
+        <%- when "bool" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %> ? Qtrue : Qfalse);
+        <%- when "rbs_location_range" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_to_ruby_location(ctx, node-><%= field.name %>));<%= field.optional? ? " // optional" : "" %>
+        <%- when "rbs_location_range_list" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_list_to_ruby_array(ctx, node-><%= field.name %>));
+        <%- when "rbs_location" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
+        <%- when "rbs_location_list" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
+        <%- when "rbs_attr_ivar_name" -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_attr_ivar_name_to_ruby(ctx, node-><%= field.c_name %>)); // rbs_attr_ivar_name_t
+        <%- else -%>
+            <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), <%= field.type.descr.translator_name %>(node-><%= field.c_name %>));  // <%= field.type.name %>
+            <%- else -%>
+                <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
+        #warning unexpected type <%= field.inspect -%>
+                <%- end -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.type.c_name %>
+            <%- end -%>
+        <%- end -%>
+        <%- end -%>
+
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Declarations::Class", "RBS::AST::Declarations::Module", "RBS::AST::Declarations::Interface", "RBS::AST::Declarations::TypeAlias", "RBS::MethodType" -%>
+        rb_funcall(
+            RBS_AST_TypeParam,
+            rb_intern("resolve_variables"),
+            1,
+            rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
+        );
+        <%- end -%>
+        return CLASS_NEW_INSTANCE(
+            <%= node.c_constant_name %>,
+            1,
+            &h
+        );
+        <%- end -%>
+    }
+    <%- end -%>
+    case RBS_AST_SYMBOL: {
+        rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_ast_symbol_t *) instance)->constant_id);
+        assert(constant != NULL && "constant is NULL");
+        assert(constant->start != NULL && "constant->start is NULL");
+
+        return ID2SYM(rb_intern3((const char *) constant->start, constant->length, ctx.encoding));
+    }
+    }
+
+    rb_raise(rb_eRuntimeError, "Unknown node type: %d", instance->type);
+}

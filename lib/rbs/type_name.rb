@@ -36,7 +36,7 @@ module RBS
       "#{namespace.to_s}#{name}"
     end
 
-    def to_json(state = _ = nil)
+    def to_json(state = nil)
       to_s.to_json(state)
     end
 
@@ -98,12 +98,5 @@ module RBS
         namespace: RBS::Namespace.new(path: path, absolute: absolute)
       )
     end
-  end
-end
-
-module Kernel
-  def TypeName(string)
-    warn "Kernel#TypeName() is deprecated. Use RBS::TypeName.parse instead.", category: :deprecated
-    RBS::TypeName.parse(string)
   end
 end

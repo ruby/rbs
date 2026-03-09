@@ -5,14 +5,16 @@ require_relative "parser/token"
 
 module RBS
   class Parser
-    def self.parse_type(source, range: 0..., variables: [], require_eof: false)
+    def self.parse_type(source, range: nil, byte_range: 0..., variables: [], require_eof: false, void_allowed: true, self_allowed: true, classish_allowed: true)
       buf = buffer(source)
-      _parse_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof)
+      byte_range = byte_range(range, buf.content) if range
+      _parse_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof, void_allowed, self_allowed, classish_allowed)
     end
 
-    def self.parse_method_type(source, range: 0..., variables: [], require_eof: false)
+    def self.parse_method_type(source, range: nil, byte_range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
-      _parse_method_type(buf, range.begin || 0, range.end || buf.last_position, variables, require_eof)
+      byte_range = byte_range(range, buf.content) if range
+      _parse_method_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof)
     end
 
     def self.parse_signature(source)
@@ -25,7 +27,8 @@ module RBS
         else
           0
         end
-      dirs, decls = _parse_signature(buf, start_pos, buf.last_position)
+      content = buf.content
+      dirs, decls = _parse_signature(buf, start_pos, content.bytesize)
 
       if resolved
         dirs = dirs.dup if dirs.frozen?
@@ -33,6 +36,11 @@ module RBS
       end
 
       [buf, dirs, decls]
+    end
+
+    def self.parse_type_params(source, module_type_params: true)
+      buf = buffer(source)
+      _parse_type_params(buf, 0, buf.content.bytesize, module_type_params)
     end
 
     def self.magic_comment(buf)
@@ -61,7 +69,7 @@ module RBS
 
     def self.lex(source)
       buf = buffer(source)
-      list = _lex(buf, buf.last_position)
+      list = _lex(buf, buf.content.bytesize)
       value = list.map do |type, location|
         Token.new(type: type, location: location)
       end
@@ -71,7 +79,7 @@ module RBS
     def self.buffer(source)
       case source
       when String
-        Buffer.new(content: source, name: "a.rbs")
+        Buffer.new(content: source, name: Pathname("a.rbs"))
       when Buffer
         source
       end
@@ -110,5 +118,25 @@ module RBS
       ).each_with_object({}) do |keyword, hash| #$ Hash[String, bot]
         hash[keyword] = _ = nil
       end
+
+    def self.parse_inline_leading_annotation(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_leading_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
+    def self.parse_inline_trailing_annotation(source, range, variables: [])
+      buf = buffer(source)
+      _parse_inline_trailing_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+    end
+
+    def self.byte_range(char_range, content)
+      start_offset = char_range.begin
+      end_offset = char_range.end
+
+      start_prefix = content[0, start_offset] or raise if start_offset
+      end_prefix = content[0, end_offset] or raise if end_offset
+
+      start_prefix&.bytesize...end_prefix&.bytesize
+    end
   end
 end

@@ -385,7 +385,11 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
         path: "/path/to/somewhere"
         gemfile_lock_path: 'Gemfile.lock'
         gems:
-          - name: pathname
+          - name: logger
+            version: "0"
+            source:
+              type: stdlib
+          - name: monitor
             version: "0"
             source:
               type: stdlib
@@ -795,6 +799,10 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
             version: "0.3.0"
             source:
               type: rubygems
+          - name: random-formatter
+            version: "0"
+            source:
+              type: stdlib
           - name: securerandom
             version: "0"
             source:

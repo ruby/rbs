@@ -115,14 +115,16 @@ module RBS
   class NoMixinFoundError < DefinitionError
     include DetailedMessageable
 
-    attr_reader type_name: TypeName
-    attr_reader member: AST::Members::t
+    type member = AST::Members::t | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::ExtendMember | AST::Ruby::Members::PrependMember
 
-    def initialize: (type_name: TypeName, member: AST::Members::t) -> void
+    attr_reader type_name: TypeName
+    attr_reader member: member
+
+    def initialize: (type_name: TypeName, member: member) -> void
 
     def location: () -> Location[untyped, untyped]?
 
-    def self.check!: (TypeName, env: Environment, member: AST::Members::t) -> void
+    def self.check!: (TypeName, env: Environment, member: member) -> void
   end
 
   class DuplicatedMethodDefinitionError < DefinitionError
@@ -226,28 +228,35 @@ module RBS
   class InvalidOverloadMethodError < DefinitionError
     include DetailedMessageable
 
+    type member = AST::Members::MethodDefinition | AST::Ruby::Members::DefMember
+
     attr_reader type_name: TypeName
     attr_reader method_name: Symbol
     attr_reader kind: :instance | :singleton
-    attr_reader members: Array[AST::Members::MethodDefinition]
+    attr_reader members: Array[member]
 
-    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[AST::Members::MethodDefinition]) -> void
+    def initialize: (type_name: TypeName, method_name: Symbol, kind: :instance | :singleton, members: Array[member]) -> void
 
     def location: () -> AST::Members::MethodDefinition::loc?
   end
 
   class GenericParameterMismatchError < LoadingError
-    attr_reader name: TypeName
-    attr_reader decl: AST::Declarations::Class | AST::Declarations::Module
+    type decl = AST::Declarations::Class | AST::Declarations::Module
+              | AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl
 
-    def initialize: (name: TypeName, decl: AST::Declarations::Class | AST::Declarations::Module) -> void
+    attr_reader name: TypeName
+    attr_reader decl: decl
+
+    def initialize: (name: TypeName, decl: decl, ?location: Location) -> void
   end
 
   class DuplicatedDeclarationError < LoadingError
-    attr_reader name: TypeName | Symbol
-    attr_reader decls: Array[AST::Declarations::t]
+    type declaration = AST::Declarations::t | AST::Ruby::Declarations::t
 
-    def initialize: (TypeName | Symbol, *AST::Declarations::t) -> void
+    attr_reader name: TypeName | Symbol
+    attr_reader decls: Array[declaration]
+
+    def initialize: (TypeName | Symbol, *declaration) -> void
   end
 
   class InvalidVarianceAnnotationError < DefinitionError
@@ -280,6 +289,7 @@ module RBS
     include DetailedMessageable
 
     type member = AST::Members::Include | AST::Members::Prepend | AST::Members::Extend
+                | AST::Ruby::Members::IncludeMember | AST::Ruby::Members::PrependMember | AST::Ruby::Members::ExtendMember
 
     attr_reader type_name: TypeName
     attr_reader member: member
@@ -290,17 +300,21 @@ module RBS
 
     def self.check!: (type_name: TypeName, env: Environment, member: member) -> void
 
+    def member_name: (member) -> TypeName
+
     def mixin_name: () -> String
   end
 
   # InheritModuleError is raised if a class definition inherits a module (not a class)
   #
   class InheritModuleError < DefinitionError
+    type super_class = AST::Declarations::Class::Super | AST::Ruby::Declarations::ClassDecl::SuperClass
+
     include DetailedMessageable
 
-    attr_reader super_decl: AST::Declarations::Class::Super
+    attr_reader super_decl: super_class
 
-    def initialize: (AST::Declarations::Class::Super) -> void
+    def initialize: (super_class) -> void
 
     def location: () -> Location[untyped, untyped]?
 
@@ -308,7 +322,7 @@ module RBS
     #
     # Automatically normalize the name of super.
     #
-    def self.check!: (AST::Declarations::Class::Super, env: Environment) -> void
+    def self.check!: (super_class, env: Environment) -> void
   end
 
   class RecursiveTypeAliasError < BaseError
@@ -378,14 +392,6 @@ module RBS
     def initialize: (Environment::ModuleAliasEntry | Environment::ClassAliasEntry) -> void
 
     def location: () -> AST::Declarations::AliasDecl::loc?
-  end
-
-  class WillSyntaxError < BaseError
-    include RBS::DetailedMessageable
-
-    def initialize: (String message, location: Location[untyped, untyped]?) -> void
-
-    attr_reader location: Location[untyped, untyped]?
   end
 
   class TypeParamDefaultReferenceError < BaseError

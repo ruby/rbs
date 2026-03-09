@@ -262,7 +262,7 @@ class GlobalVariablesTest < Test::Unit::TestCase
     # is a singleton method), we can't use `assert_send_type` and must use `assert_type`.
     loadpath = eval(gvar.to_s)
 
-    with_path 'set' do |path|
+    with_path 'erb' do |path|
       assert_type '[:rb | :so, String]', loadpath.resolve_feature_path(path)
     end
 

@@ -39,7 +39,9 @@ module RBS
       def each_part(subjects, tester:)
         if block_given?
           subjects.each do |subject, docs|
-            Formatter.each_part(subject.comment) do |doc|
+            comment = subject.comment
+            raise if comment.is_a?(String)
+            Formatter.each_part(comment.parse) do |doc|
               if tester.test_path(doc.file || raise)
                 yield [doc, subject]
               end

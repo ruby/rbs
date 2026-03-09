@@ -1,0 +1,158 @@
+module RBS
+  module AST
+    module Ruby
+      module Declarations
+        type t = ClassDecl | ModuleDecl | ConstantDecl | ClassModuleAliasDecl
+
+        class Base
+          attr_reader buffer: Buffer
+
+          include Helpers::ConstantHelper
+          include Helpers::LocationHelper
+
+          def initialize: (Buffer) -> void
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class ClassDecl < Base
+          class SuperClass
+            attr_reader operator_location: Location
+
+            attr_reader type_name_location: Location
+
+            attr_reader type_name: TypeName
+
+            attr_reader type_annotation: Annotations::TypeApplicationAnnotation?
+
+            def type_args: () -> Array[Types::t]
+
+            alias name type_name
+
+            alias args type_args
+
+            def initialize: (Location type_name_location, Location operator_location, TypeName, RBS::AST::Ruby::Annotations::TypeApplicationAnnotation?) -> void
+
+            def location: () -> Location
+
+            def type_fingerprint: () -> untyped
+          end
+
+          type member = t | Members::t
+
+          attr_reader class_name: TypeName
+
+          attr_reader node: Prism::ClassNode
+
+          attr_reader super_class: SuperClass?
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, TypeName, Prism::ClassNode, SuperClass?) -> void
+
+          def each_decl: () { (t) -> void } -> void
+                        | () -> Enumerator[t]
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
+
+          def name_location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class ModuleDecl < Base
+          type member = t | Members::t
+
+          attr_reader module_name: TypeName
+
+          attr_reader node: Prism::ModuleNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, TypeName, Prism::ModuleNode) -> void
+
+          def each_decl: () { (t) -> void } -> void
+                        | () -> Enumerator[t]
+
+          def type_params: () -> Array[AST::TypeParam]
+
+          def location: () -> Location
+
+          def self_types: () -> Array[AST::Declarations::Module::Self]
+
+          def name_location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class ConstantDecl < Base
+          type node = Prism::ConstantWriteNode | Prism::ConstantPathWriteNode
+
+          attr_reader leading_comment: CommentBlock?
+
+          attr_reader constant_name: TypeName
+
+          attr_reader node: node
+
+          attr_reader type_annotation: Annotations::NodeTypeAssertion?
+
+          def initialize: (Buffer, TypeName, node, CommentBlock?, Annotations::NodeTypeAssertion?) -> void
+
+          def location: () -> Location
+
+          def name_location: () -> Location
+
+          # Returns the type of the constant
+          #
+          # - When type_anntoation is given, it returns the type from the annotation.
+          # - When type_annotation is not given, it returns infered type from the right-hand-side of the constant assignment
+          # - Or it returns `untyped` type
+          #
+          def type: () -> Types::t
+
+          # Returns the comment content extracted from the leading comment block
+          #
+          def comment: () -> AST::Comment?
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class ClassModuleAliasDecl < Base
+          type node = Prism::ConstantWriteNode | Prism::ConstantPathWriteNode
+
+          type annotation = Annotations::ClassAliasAnnotation | Annotations::ModuleAliasAnnotation
+
+          attr_reader node: node
+
+          attr_reader leading_comment: CommentBlock?
+
+          attr_reader new_name: TypeName
+
+          # The infered old name from the right-hand side of the constant declaration
+          #
+          # - `nil` if the annotation has the type name
+          #
+          attr_reader infered_old_name: TypeName?
+
+          attr_reader annotation: annotation
+
+          def initialize: (Buffer, node, TypeName, TypeName?, CommentBlock?, annotation) -> void
+
+          def name_location: () -> Location
+
+          def location: () -> Location
+
+          # Returns the old name of the class/module alias
+          #
+          def old_name: () -> TypeName
+
+          def comment: () -> Comment?
+
+          def type_fingerprint: () -> untyped
+        end
+      end
+    end
+  end
+end

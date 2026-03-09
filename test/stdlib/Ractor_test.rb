@@ -73,31 +73,16 @@ class RactorSingletonTest < Test::Unit::TestCase
                      Ractor, :recv
   end
 
-  def test_receive_if
-    Ractor.current.send 42
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     Ractor, :receive_if do |n| n == 42 end
-  end
-
   def test_select
-    r1 = Ractor.new { loop { Ractor.yield 42 } }
-    r2 = Ractor.new { loop { Ractor.yield 43 } }
+    rs = [
+      Ractor.new { sleep 0.1 },
+      Ractor.new { sleep 0.1 }
+    ]
 
-    assert_send_type "(Ractor) -> [Ractor, Integer]",
-                     Ractor, :select, r1
-    assert_send_type "(Ractor, Ractor) -> [Ractor, Integer]",
-                     Ractor, :select, r1, r2
-
-    Ractor.current.send 42
-    assert_send_type "(Ractor) -> [:receive, Integer]",
-                     Ractor, :select, Ractor.current
-
-    Ractor.new(Ractor.current) { |r| r.take }
-    assert_send_type "(Ractor, yield_value: untyped) -> [:yield, nil]",
-                     Ractor, :select, Ractor.current, yield_value: 'foo'
-
-    assert_send_type "(Ractor, move: bool) -> [Ractor, Integer]",
-                     Ractor, :select, r1, move: true
+    assert_send_type(
+      "(::Ractor, ::Ractor) -> ::Array[untyped]",
+      Ractor, :select, *rs
+    )
   end
 
   def test_shareable?
@@ -113,17 +98,6 @@ class RactorSingletonTest < Test::Unit::TestCase
       Ractor, :store_if_absent, :test_store_if_absent, &->(_x) { true }
     )
   end
-
-  def test_yield
-    Ractor.new(Ractor.current) { |r| loop { r.take } }
-
-    assert_send_type "(Integer) -> untyped",
-                     Ractor, :yield, 42
-    assert_send_type "(Integer, move: true) -> untyped",
-                     Ractor, :yield, 42, move: true
-    assert_send_type "(Integer, move: false) -> untyped",
-                     Ractor, :yield, 42, move: false
-  end
 end
 
 class RactorInstanceTest < Test::Unit::TestCase
@@ -131,38 +105,25 @@ class RactorInstanceTest < Test::Unit::TestCase
 
   testing "::Ractor"
 
-  def test_aref
-    r = Ractor.new {}
-    r['foo'] = 'bar'
-    assert_send_type "(String) -> untyped",
-                     r, :[], 'foo'
-    assert_send_type "(Symbol) -> untyped",
-                     r, :[], :foo
-  end
-
-  def test_aset
-    r = Ractor.new {}
-    assert_send_type "(String, String) -> String",
-                     r, :[]=, 'foo', 'bar'
-    assert_send_type "(Symbol, Integer) -> Integer",
-                     r, :[]=, :foo, 42
-  end
-
-  def test_close_incoming
-    r = Ractor.new {}
-    assert_send_type "() -> bool",
-                     r, :close_incoming
-  end
-
-  def test_close_outgoing
-    r = Ractor.new {}
-    assert_send_type "() -> bool",
-                     r, :close_outgoing
+  def test_default_port
+    assert_send_type(
+      "() -> ::Ractor::Port[untyped]",
+      Ractor.current, :default_port
+    )
   end
 
   def test_inspect
     assert_send_type "() -> String",
                      Ractor.current, :inspect
+  end
+
+  def test_join
+    ractor = Ractor.new { }
+
+    assert_send_type(
+      "() -> ::Ractor",
+      ractor, :join
+    )
   end
 
   def test_name
@@ -172,6 +133,15 @@ class RactorInstanceTest < Test::Unit::TestCase
                      unnamed, :name
     assert_send_type "() -> String",
                      named, :name
+  end
+
+  def test_monitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> untyped",
+      ractor, :monitor, Ractor::Port.new
+    )
   end
 
   def test_send
@@ -185,15 +155,30 @@ class RactorInstanceTest < Test::Unit::TestCase
                      r, :send, 42, move: nil
   end
 
-  def test_take
-    r = Ractor.new { 42 }
-
-    assert_send_type "() -> Integer",
-                     r, :take
-  end
-
   def test_to_s
     assert_send_type "() -> String",
                      Ractor.current, :to_s
+  end
+
+  def test_unmonitor
+    ractor = Ractor.new { sleep(0.1) }
+
+    port = Ractor::Port.new
+
+    ractor.monitor(port)
+
+    assert_send_type(
+      "(::Ractor::Port[untyped]) -> ::Ractor",
+      ractor, :unmonitor, port
+    )
+  end
+
+  def test_value
+    ractor = Ractor.new { 123 }
+
+    assert_send_type(
+      "() -> ::Integer",
+      ractor, :value
+    )
   end
 end

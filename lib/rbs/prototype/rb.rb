@@ -74,32 +74,7 @@ module RBS
 
       def parse(string)
         # @type var comments: Hash[Integer, AST::Comment]
-        comments = Ripper.lex(string).yield_self do |tokens|
-          code_lines = {} #: Hash[Integer, bool]
-          tokens.each.with_object({}) do |token, hash| #$ Hash[Integer, AST::Comment]
-            case token[1]
-            when :on_sp, :on_ignored_nl
-              # skip
-            when :on_comment
-              line = token[0][0]
-              # skip like `module Foo # :nodoc:`
-              next if code_lines[line]
-              body = token[2][2..-1] or raise
-
-              body = "\n" if body.empty?
-
-              comment = AST::Comment.new(string: body, location: nil)
-              if prev_comment = hash.delete(line - 1)
-                hash[line] = AST::Comment.new(string: prev_comment.string + comment.string,
-                                              location: nil)
-              else
-                hash[line] = comment
-              end
-            else
-              code_lines[token[0][0]] = true
-            end
-          end
-        end
+        comments = parse_comments(string, include_trailing: false)
 
         process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, context: Context.initial
       end
@@ -372,8 +347,8 @@ module RBS
                        end
 
           value_node = node.children.last
-          type = if value_node.nil?
-                  # Give up type prediction when node is MASGN.
+          type = if value_node.nil? || value_node.type == :SELF
+                  # Give up type prediction when node is MASGN or SELF.
                   Types::Bases::Any.new(location: nil)
                 else
                   literal_to_type(value_node)

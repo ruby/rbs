@@ -107,7 +107,9 @@ module RBS
       each_member(owner).any? do |m|
         case m
         when AST::Members::InstanceVariable
-          m.name == name
+          m.name == name && kind == :instance
+        when AST::Members::ClassInstanceVariable
+          m.name == name && kind == :singleton
         when AST::Members::Attribute
           ivar_name = m.ivar_name == false ? nil : m.ivar_name || :"@#{m.name}"
           ivar_name == name && m.kind == kind
@@ -129,9 +131,10 @@ module RBS
 
       entry = @subtrahend.class_decls[owner]
       return unless entry
-      decls = entry.decls.map { |d| d.decl }
-
-      decls.each { |d| d.members.each { |m| block.call(m) } }
+      entry.each_decl do |d|
+        next unless d.is_a?(AST::Declarations::Base)
+        d.members.each { |m| block.call(m) }
+      end
     end
 
     private def mixin_exist?(owner, mixin, context:)

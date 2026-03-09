@@ -3,6 +3,7 @@
 require 'digest/sha2'
 require 'open3'
 require 'find'
+require 'fileutils'
 
 module RBS
   module Collection

@@ -3,17 +3,17 @@
 ## Types
 
 ```markdown
-_type_ ::= _class-name_ _type-arguments_                 (Class instance type)
-         | _interface-name_ _type-arguments_             (Interface type)
-         | _alias-name_ _type-arguments_                 (Alias type)
-         | `singleton(` _class-name_ `)`                 (Class singleton type)
-         | _literal_                                     (Literal type)
-         | _type_ `|` _type_                             (Union type)
-         | _type_ `&` _type_                             (Intersection type)
-         | _type_ `?`                                    (Optional type)
-         | `{` _record-name_ `:` _type_ `,` etc. `}`     (Record type)
-         | `[]` | `[` _type_ `,` etc. `]`                (Tuples)
-         | _type-variable_                               (Type variables)
+_type_ ::= _class-name_ _type-arguments_                     (Class instance type)
+         | _interface-name_ _type-arguments_                 (Interface type)
+         | _alias-name_ _type-arguments_                     (Alias type)
+         | `singleton(` _class-name_ `)` _type-arguments_    (Class singleton type)
+         | _literal_                                         (Literal type)
+         | _type_ `|` _type_                                 (Union type)
+         | _type_ `&` _type_                                 (Intersection type)
+         | _type_ `?`                                        (Optional type)
+         | `{` _record-name_ `:` _type_ `,` etc. `}`         (Record type)
+         | `[]` | `[` _type_ `,` etc. `]`                    (Tuples)
+         | _type-variable_                                   (Type variables)
          | `self`
          | `instance`
          | `class`
@@ -85,7 +85,8 @@ Class singleton type denotes _the type of a singleton object of a class_.
 
 ```rbs
 singleton(String)
-singleton(::Hash)            # Class singleton type cannot be parametrized.
+singleton(::Hash)            # Class singleton type
+singleton(Array)[String]     # Class singleton type with type application
 ```
 
 ### Literal type
@@ -650,7 +651,7 @@ _module-type-parameters_ ::=                                                  # 
 
 Class declaration can have type parameters and superclass. When you omit superclass, `::Object` is assumed.
 
-* Super class arguments and generic class upperbounds are not *classish-context* nor *self-context*
+* Super class arguments and generic class bounds are not *classish-context* nor *self-context*
 
 ### Module declaration
 
@@ -668,7 +669,7 @@ end
 
 The `Enumerable` module above requires `each` method for enumerating objects.
 
-* Self type arguments and generic class upperbounds are not *classish-context* nor *self-context*
+* Self type arguments and generic class bounds are not *classish-context* nor *self-context*
 
 ### Class/module alias declaration
 
@@ -764,7 +765,8 @@ _module-type-parameter_ ::= _generics-unchecked_ _generics-variance_ _type-varia
 _method-type-param_ ::= _type-variable_ _generics-bound_
 
 _generics-bound_ ::=                 (No type bound)
-                   | `<` _type_      (The generics parameter is bounded)
+                   | `<` _type_      (The generics parameter has an upper bound)
+                   | '>' _type_      (The generics parameter has a lower bound)
 
 _default-type_ ::=                    (No default type)
                  | `=` _type_         (The generics parameter has default type)
@@ -776,6 +778,9 @@ _generics-variance_ ::=               (Invariant)
 _generics-unchecked_ ::=              (Empty)
                        | `unchecked`  (Skips variance annotation validation)
 ```
+
+A type parameter can have both upper and lower bounds, which can be specified in either order:
+`[T < UpperBound > LowerBound]` or `[T > LowerBound < UpperBound]`.
 
 RBS allows class/module/interface/type alias definitions and methods to be generic.
 
@@ -834,11 +839,36 @@ class PrettyPrint[T < _Output]
 end
 ```
 
-If a type parameter has an upper bound, the type parameter must be instantiated with types that is a subtype of the upper bound.
+If a type parameter has an upper bound, the type parameter must be instantiated with types that are a subtype of the upper bound.
 
 ```rbs
 type str_printer = PrettyPrint[String]    # OK
 type int_printer = PrettyPrint[Integer]   # Type error
+```
+
+If a type parameter has a lower bound, the type parameter must be instantiated with types that are a supertype of the lower bound.
+
+```rbs
+class PrettyPrint[T > Numeric]
+end
+
+type obj_printer = PrettyPrint[Object]    # OK
+type int_printer = PrettyPrint[Integer]   # Type error
+```
+
+A type parameter can have both an upper and a lower bound, and these bounds can be specified in any order.
+
+```rbs
+class FlexibleProcessor[T > Integer < Numeric]
+  # This class processes types T that are supertypes of Integer but also subtypes of Numeric.
+  # This includes Integer, Rational, Complex, Float, and Numeric itself.
+  def calculate: (T) -> T
+end
+
+type int_processor = FlexibleProcessor[Integer]   # OK (Integer > Integer and Integer < Numeric)
+type num_processor = FlexibleProcessor[Numeric]   # OK (Numeric > Integer and Numeric < Numeric)
+type obj_processor = FlexibleProcessor[Object]    # Type error (Object is not < Numeric)
+type str_processor = FlexibleProcessor[String]    # Type error (String is not > Integer)
 ```
 
 The generics type parameter of modules, classes, interfaces, or type aliases can have a default type.

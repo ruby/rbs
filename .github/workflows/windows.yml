@@ -13,9 +13,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', ucrt, mswin]
+        ruby: ['3.4', ucrt, mswin]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: load ruby
         uses: ruby/setup-ruby@v1
         with:

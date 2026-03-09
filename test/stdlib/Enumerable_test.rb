@@ -241,4 +241,28 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '(ToInt n) -> ::Array[::String]' , TestEnumerable.new, :first, ToInt.new(42)
     assert_send_type '(ToInt n) -> ::Array[::String]' , TestEmptyEnumerable.new, :first, ToInt.new(42)
   end
+
+  def test_all_p
+    assert_send_type '() -> bool', TestEnumerable.new, :all?
+    assert_send_type '(Class) -> bool', TestEnumerable.new, :all?, String
+    assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :all? do |x| x == '0' end
+  end
+
+  def test_any_p
+    assert_send_type '() -> bool', TestEnumerable.new, :any?
+    assert_send_type '(Class) -> bool', TestEnumerable.new, :any?, String
+    assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :any? do |x| x == '0' end
+  end
+
+  def test_none_p
+    assert_send_type '() -> bool', TestEnumerable.new, :none?
+    assert_send_type '(Class) -> bool', TestEnumerable.new, :none?, String
+    assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :none? do |x| x == '0' end
+  end
+
+  def test_one_p
+    assert_send_type '() -> bool', TestEnumerable.new, :one?
+    assert_send_type '(Class) -> bool', TestEnumerable.new, :one?, String
+    assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :one? do |x| x == '0' end
+  end
 end

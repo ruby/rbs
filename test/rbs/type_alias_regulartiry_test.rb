@@ -82,7 +82,7 @@ type Foo::baz[T] = Bar::baz[Foo::bar[T]]
         assert_operator validator, :nonregular?, RBS::TypeName.parse("::Bar::baz")
 
         assert_equal(
-          parse_type("::Bar::baz[::Foo::bar[T]]", variables: [:T]),
+          parse_type("::Foo::baz[::Foo::bar[T]]", variables: [:T]),
           validator.nonregular?(RBS::TypeName.parse("::Foo::baz")).nonregular_type
         )
       end

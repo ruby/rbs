@@ -62,7 +62,7 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_type_error_for_content
-    buffer = RBS::Buffer.new(content: 1, name: nil)
+    buffer = RBS::Buffer.new(content: 1, name: Pathname("a.rbs"))
     assert_raises TypeError do
       RBS::Parser.parse_signature(buffer)
     end
@@ -689,6 +689,27 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse_method_type__require_eof
+    RBS::Parser.parse_method_type(buffer("-> Foo extra input")).tap do |method_type|
+      assert_instance_of RBS::MethodType, method_type
+      assert_equal "-> Foo", method_type.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("-> Foo extra input")).tap do |method_type|
+      assert_instance_of RBS::MethodType, method_type
+      assert_equal "-> Foo", method_type.location.source
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_method_type(buffer("-> Foo extra input"), require_eof: true)
+    end.tap do |exn|
+      assert_equal(
+        "test.rbs:1:7...1:12: Syntax error: expected a token `pEOF`, token=`extra` (tLIDENT)",
+        exn.message
+      )
+    end
+  end
+
   def test_duplicate_keyword
     RBS::Parser.parse_method_type(buffer("(top foo, foo: top) -> void")).tap do |method_type|
       assert_equal "top foo, foo: top", method_type.type.param_to_s
@@ -730,6 +751,20 @@ class RBS::ParserTest < Test::Unit::TestCase
   def test_parse_method_type2
     RBS::Parser.parse_method_type(buffer("(foo?: String, bar!: Integer) -> void")).tap do |method_type|
       assert_equal "foo?: String, bar!: Integer", method_type.type.param_to_s
+    end
+  end
+
+  def test_parse_method_type_block
+    RBS::Parser.parse_method_type(buffer("{ -> void } -> void")).tap do |method_type|
+      assert_equal "{ -> void }", method_type.block.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("(Integer) { (Integer) -> void } -> void")).tap do |method_type|
+      assert_equal "{ (Integer) -> void }", method_type.block.location.source
+    end
+
+    RBS::Parser.parse_method_type(buffer("() ?{ () -> void } -> void")).tap do |method_type|
+      assert_equal "?{ () -> void }", method_type.block.location.source
     end
   end
 
@@ -777,7 +812,7 @@ class RBS::ParserTest < Test::Unit::TestCase
 
   def test_negative_range
     assert_raises ArgumentError do
-      RBS::Parser.parse_type("a", range: -2...-1)
+      RBS::Parser.parse_type("a", byte_range: -2...-1)
     end
   end
 
@@ -817,6 +852,149 @@ class RBS::ParserTest < Test::Unit::TestCase
 
     RBS::Parser.parse_type("^() { (?) -> String } -> Integer").tap do |type|
       assert_instance_of RBS::Types::UntypedFunction, type.block.type
+    end
+  end
+
+  def test_parse_type_params
+    RBS::Parser.parse_type_params(buffer("[T]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_nil params[0].upper_bound
+      assert_nil params[0].lower_bound
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T < Integer, U > Integer, V = String]")).tap do |params|
+      assert_equal 3, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].upper_bound.to_s
+      assert_equal :U, params[1].name
+      assert_equal "Integer", params[1].lower_bound.to_s
+      assert_equal :V, params[2].name
+      assert_equal "String", params[2].default_type.to_s
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T, in U, out V]")).tap do |params|
+      assert_equal 3, params.size
+      assert_equal :T, params[0].name
+      assert_equal "invariant", params[0].variance.to_s
+      assert_equal :U, params[1].name
+      assert_equal "contravariant", params[1].variance.to_s
+      assert_equal :V, params[2].name
+      assert_equal "covariant", params[2].variance.to_s
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T, unchecked U, unchecked out V = Integer]")).tap do |params|
+      assert_equal 3, params.size
+      assert_equal :T, params[0].name
+      refute params[0].unchecked?
+      assert_equal :U, params[1].name
+      assert params[1].unchecked?
+      assert_equal :V, params[2].name
+      assert params[2].unchecked?
+      assert_equal "covariant", params[2].variance.to_s
+      assert_equal "Integer", params[2].default_type.to_s
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T < Integer = String]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].upper_bound.to_s
+      assert_equal "String", params[0].default_type.to_s
+      assert_nil params[0].lower_bound
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T > Integer = String]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].lower_bound.to_s
+      assert_equal "String", params[0].default_type.to_s
+      assert_nil params[0].upper_bound
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T < Integer > String]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].upper_bound.to_s
+      assert_equal "String", params[0].lower_bound.to_s
+      assert_nil params[0].default_type
+    end
+
+    RBS::Parser.parse_type_params(buffer("[T > Integer < String]")).tap do |params|
+      assert_equal 1, params.size
+      assert_equal :T, params[0].name
+      assert_equal "Integer", params[0].lower_bound.to_s
+      assert_equal "String", params[0].upper_bound.to_s
+      assert_nil params[0].default_type
+    end
+
+    RBS::Parser.parse_type_params(buffer("[A > String < Integer, B > Symbol < Array]")).tap do |params|
+      assert_equal 2, params.size
+
+      assert_equal :A, params[0].name
+      assert_equal "String", params[0].lower_bound.to_s
+      assert_equal "Integer", params[0].upper_bound.to_s
+      assert_nil params[0].default_type
+
+      assert_equal :B, params[1].name
+      assert_equal "Symbol", params[1].lower_bound.to_s
+      assert_equal "Array", params[1].upper_bound.to_s
+      assert_nil params[1].default_type
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T]A"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T < Integer < String]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T > Integer > String]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T < Integer String]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T < Integer class]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T >]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T <]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[> T]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[< T]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T < String > Integer < String]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[T > String < Integer > String]"))
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[in T]"), module_type_params: false)
+    end
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_type_params(buffer("[unchecked T]"), module_type_params: false)
     end
   end
 

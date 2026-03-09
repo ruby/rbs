@@ -3,13 +3,14 @@
 module RBS
   class CLI
     class Diff
-      def initialize(argv:, library_options:, stdout: $stdout, stderr: $stderr)
-        @format = nil
+      def initialize(stdout: $stdout, stderr: $stderr)
         @stdout = stdout
         @stderr = stderr
+      end
 
-        # @type var type_name: String?
-        type_name = nil
+      def run(argv:, library_options:)
+        format = nil #: String?
+        type_name = nil #: String?
         library_options = library_options
         before_path = [] #: Array[String]
         after_path = [] #: Array[String]
@@ -32,7 +33,7 @@ module RBS
               # Confirmation of methods related to Time class added by including stdlib/time
               $ rbs diff --format diff --type-name Time --after stdlib/time
           HELP
-          o.on("--format NAME")    { |arg| @format = arg }
+          o.on("--format NAME")    { |arg| format = arg }
           o.on("--type-name NAME") { |arg| type_name = arg }
           o.on("--before DIR")     { |arg| before_path << arg }
           o.on("--after DIR")      { |arg| after_path << arg }
@@ -40,28 +41,28 @@ module RBS
         end
         opt.parse!(argv)
 
-        unless @format && type_name && ["markdown", "diff"].include?(@format)
+        unless format && type_name && ["markdown", "diff"].include?(format)
           @stderr.puts opt.banner
-          exit 1
+          return 1
         end
 
-        @diff = RBS::Diff.new(
+        diff = RBS::Diff.new(
           type_name: TypeName.parse(type_name).absolute!,
           library_options: library_options,
           after_path: after_path,
           before_path: before_path,
           detail: detail,
         )
+
+        public_send("run_#{format}", diff)
+
+        0
       end
 
-      def run
-        public_send("run_#{@format}")
-      end
-
-      def run_diff
+      def run_diff(diff)
         first = true
         io = RBS::CLI::ColoredIO.new(stdout: @stdout)
-        @diff.each_diff do |before, after|
+        diff.each_diff do |before, after|
           io.puts if !first
           io.puts_red   "- #{before}"
           io.puts_green "+ #{after}"
@@ -69,10 +70,10 @@ module RBS
         end
       end
 
-      def run_markdown
+      def run_markdown(diff)
         @stdout.puts "| before | after |"
         @stdout.puts "| --- | --- |"
-        @diff.each_diff do |before, after|
+        diff.each_diff do |before, after|
           before.gsub!("|", "\\|")
           after.gsub!("|", "\\|")
           @stdout.puts "| `#{before}` | `#{after}` |"

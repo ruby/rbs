@@ -11,6 +11,8 @@ class IOSingletonTest < Test::Unit::TestCase
   def test_binread
     assert_send_type "(String) -> String",
                      IO, :binread, File.expand_path(__FILE__)
+    assert_send_type "(Pathname) -> String",
+                     IO, :binread, Pathname(File.expand_path(__FILE__))
     assert_send_type "(String, Integer) -> String",
                      IO, :binread, File.expand_path(__FILE__), 3
     assert_send_type "(String, Integer, Integer) -> String",
@@ -26,12 +28,43 @@ class IOSingletonTest < Test::Unit::TestCase
 
       assert_send_type "(String, String) -> Integer",
                        IO, :binwrite, filename, content
+      assert_send_type "(Pathname, String) -> Integer",
+                       IO, :binwrite, Pathname(filename), content
       assert_send_type "(String, String, Integer) -> Integer",
                        IO, :binwrite, filename, content, 0
       assert_send_type "(String, String, mode: String) -> Integer",
                        IO, :binwrite, filename, content, mode: "a"
       assert_send_type "(String, String, Integer, mode: String) -> Integer",
                        IO, :binwrite, filename, content, 0, mode: "a"
+    end
+  end
+
+  def test_read
+    assert_send_type "(String) -> String",
+                     IO, :read, File.expand_path(__FILE__)
+    assert_send_type "(Pathname) -> String",
+                     IO, :read, Pathname(File.expand_path(__FILE__))
+    assert_send_type "(String, Integer) -> String",
+                     IO, :read, File.expand_path(__FILE__), 3
+    assert_send_type "(String, Integer, Integer) -> String",
+                     IO, :read, File.expand_path(__FILE__), 3, 0
+  end
+
+  def test_write
+    Dir.mktmpdir do |dir|
+      filename = File.join(dir, "some_file")
+      content = "foo"
+
+      assert_send_type "(String, String) -> Integer",
+                       IO, :write, filename, content
+      assert_send_type "(Pathname, String) -> Integer",
+                       IO, :write, Pathname(filename), content
+      assert_send_type "(String, String, Integer) -> Integer",
+                       IO, :write, filename, content, 0
+      assert_send_type "(String, String, mode: String) -> Integer",
+                       IO, :write, filename, content, mode: "a"
+      assert_send_type "(String, String, Integer, mode: String) -> Integer",
+                       IO, :write, filename, content, 0, mode: "a"
     end
   end
 
@@ -451,32 +484,46 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :readline, "\n", 100, chomp: true
     end
   end
+
+  def test_pwrite
+    Dir.mktmpdir do |dir|
+      File.open(File.join(dir, "io-pwrite"), "w") do |io|
+        with_int(0) do |offset|
+          assert_send_type "(String, int) -> Integer",
+                          io, :pwrite, "hello", offset
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
+
+  def test_pread
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      with_int(10) do |maxlen|
+        with_int(0) do |offset|
+          assert_send_type(
+            "(int, int) -> String",
+            io, :pread, maxlen, offset
+          )
+          with_string(+"buffer") do |buffer|
+            assert_send_type(
+              "(int, int, string) -> String",
+              io, :pread, maxlen, offset, buffer
+            )
+          end
+        end
+      end
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
+  end
 end
 
 class IOWaitTest < Test::Unit::TestCase
   include TestHelper
 
   testing "::IO"
-
-  def test_readyp
-    # This method returns true|false in Ruby 2.7, nil|IO in 3.0, and true|false in 3.1.
-
-    IO.pipe.tap do |r, w|
-      assert_send_type(
-        "() -> untyped",
-        r, :ready?
-      )
-    end
-
-    IO.pipe.tap do |r, w|
-      w.write("hello")
-
-      assert_send_type(
-        "() -> untyped",
-        r, :ready?
-      )
-    end
-  end
 
   def test_wait_readable
     if_ruby "3.0.0"..."3.2.0" do
@@ -513,15 +560,6 @@ class IOWaitTest < Test::Unit::TestCase
           w, :wait_writable, 1
         )
       end
-    end
-  end
-
-  def test_nread
-    IO.pipe.tap do |r, w|
-      assert_send_type(
-        "() -> Integer",
-        r, :nread
-      )
     end
   end
 

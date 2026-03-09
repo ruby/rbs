@@ -32,7 +32,7 @@ module RBS
           end
 
           environment.class_alias_decls.each do |name, entry|
-            normalized_entry = environment.normalized_module_class_entry(name) or next
+            normalized_entry = environment.module_class_entry(name, normalized: true) or next
             constant = constant_of_module(name, normalized_entry)
 
             # Insert class/module aliases into `children_table` and `toplevel` table
@@ -176,7 +176,7 @@ module RBS
       end
 
       def constants_from_ancestors(module_name, constants:)
-        entry = builder.env.normalized_module_class_entry(module_name) or raise
+        entry = builder.env.module_class_entry(module_name, normalized: true) or raise
 
         if entry.is_a?(Environment::ClassEntry) || entry.is_a?(Environment::ModuleEntry)
           constants.merge!(table.children(BuiltinNames::Object.name) || raise)

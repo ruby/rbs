@@ -17,6 +17,13 @@ class FiberSingletonTest < Test::Unit::TestCase
     )
   end
 
+  def test_blocking
+    if_ruby("3.2"...) do
+      assert_send_type "() { (Fiber) -> 42 } -> 42",
+                        Fiber, :blocking do 42 end
+    end
+  end
+
   def test_blocking?
     assert_send_type "() -> 1",
                      Fiber, :blocking?
@@ -194,6 +201,15 @@ class FiberTest < Test::Unit::TestCase
         "(singleton(StandardError), String, nil) -> untyped",
         f, :raise, StandardError, 'Error!', nil
       )
+    end
+
+    if_ruby("4.0"..., skip: false) do
+      assert_send_type "(cause: StandardError) -> nil",
+                       f, :raise, cause: StandardError.new
+      assert_send_type "(String, cause: StandardError) -> nil",
+                       f, :raise, "Error!", cause: StandardError.new
+      assert_send_type "(StandardError, cause: StandardError) -> nil",
+                       f, :raise, StandardError.new, cause: StandardError.new
     end
   end
 

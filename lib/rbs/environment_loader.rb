@@ -50,12 +50,6 @@ module RBS
       when path
         dirs << path
       when library
-        case library
-        when 'rubygems', 'set'
-          RBS.logger.warn "`#{library}` has been moved to core library, so it is always loaded. Remove explicit loading `#{library}`"
-          return
-        end
-
         if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
           resolve_dependencies(library: library, version: version)
         end
@@ -122,7 +116,7 @@ module RBS
         decls.each do |decl|
           loaded << [decl, path, source]
         end
-        env.add_signature(buffer: buffer, directives: dirs, decls: decls)
+        env.add_source(Source::RBS.new(buffer, dirs, decls))
       end
 
       loaded
@@ -161,7 +155,7 @@ module RBS
           next if files.include?(path)
 
           files << path
-          buffer = Buffer.new(name: path.to_s, content: path.read(encoding: "UTF-8"))
+          buffer = Buffer.new(name: path, content: path.read(encoding: "UTF-8"))
 
           _, dirs, decls = Parser.parse_signature(buffer)
 

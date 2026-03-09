@@ -28,6 +28,8 @@ class JSONDateTimeInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      DateTime.now, :to_json
+    assert_send_type "(nil) -> String",
+                     DateTime.now, :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      DateTime.now, :to_json, JSON::State.new
   end

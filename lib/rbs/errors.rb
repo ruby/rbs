@@ -93,7 +93,7 @@ module RBS
       params =
         case
         when type_name.class?
-          decl = env.normalized_module_class_entry(type_name) or raise
+          decl = env.module_class_entry(type_name, normalized: true) or raise
           decl.type_params
         when type_name.interface?
           env.interface_decls.fetch(type_name).decl.type_params
@@ -371,7 +371,7 @@ module RBS
     def initialize(name:, entry:)
       @name = name
       @entry = entry
-      super "#{Location.to_string entry.primary.decl.location}: Superclass mismatch: #{name}"
+      super "#{Location.to_string entry.primary_decl.location}: Superclass mismatch: #{name}"
     end
   end
 
@@ -408,10 +408,11 @@ module RBS
     attr_reader :name
     attr_reader :decl
 
-    def initialize(name:, decl:)
+    def initialize(name:, decl:, location: nil)
       @name = name
       @decl = decl
-      super "#{Location.to_string decl.location}: Generic parameters mismatch: #{name}"
+      location ||= decl.location
+      super "#{Location.to_string location}: Generic parameters mismatch: #{name}"
     end
   end
 
@@ -474,7 +475,7 @@ module RBS
       @type_name = type_name
       @member = member
 
-      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member.name}` in the definition of `#{type_name}`"
+      super "#{Location.to_string member.location}: Cannot #{mixin_name} a class `#{member_name(member)}` in the definition of `#{type_name}`"
     end
 
     def location
@@ -482,23 +483,43 @@ module RBS
     end
 
     def self.check!(type_name:, env:, member:)
-      if env.class_decl?(member.name)
+      name = case member
+             when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
+               member.name
+             when AST::Ruby::Members::IncludeMember, AST::Ruby::Members::ExtendMember, AST::Ruby::Members::PrependMember
+               member.module_name
+             else
+               raise "Unknown member type: #{member.class}"
+             end
+
+      if env.class_decl?(name)
         raise new(type_name: type_name, member: member)
       end
     end
 
     private
 
+    def member_name(member)
+      case member
+      when AST::Members::Include, AST::Members::Extend, AST::Members::Prepend
+        member.name
+      when AST::Ruby::Members::IncludeMember, AST::Ruby::Members::ExtendMember, AST::Ruby::Members::PrependMember
+        member.module_name
+      else
+        raise "Unknown member type: #{member.class}"
+      end
+    end
+
     def mixin_name
       case member
-      when AST::Members::Prepend
+      when AST::Members::Prepend, AST::Ruby::Members::PrependMember
         "prepend"
-      when AST::Members::Include
+      when AST::Members::Include, AST::Ruby::Members::IncludeMember
         "include"
-      when AST::Members::Extend
+      when AST::Members::Extend, AST::Ruby::Members::ExtendMember
         "extend"
       else
-        raise
+        raise "Unknown member type: #{member.class}"
       end
     end
   end
@@ -587,17 +608,6 @@ module RBS
 
     def location
       @alias_entry.decl.location
-    end
-  end
-
-  class WillSyntaxError < DefinitionError
-    include DetailedMessageable
-
-    attr_reader :location
-
-    def initialize(message, location:)
-      super "#{Location.to_string(location)}: #{message}"
-      @location = location
     end
   end
 

@@ -1,0 +1,124 @@
+use RBS::AST::Ruby::Declarations
+
+module RBS
+  class InlineParser
+    class Result
+      attr_reader buffer: Buffer
+      attr_reader prism_result: Prism::ParseResult
+      attr_reader declarations: Array[AST::Ruby::Declarations::t]
+      attr_reader diagnostics: Array[Diagnostic::t]
+
+      def initialize: (Buffer, Prism::ParseResult) -> void
+
+      def type_fingerprint: () -> untyped
+    end
+
+    module Diagnostic
+      class Base
+        attr_reader message: String
+
+        attr_reader location: Location
+
+        def initialize: (Location, String) -> void
+      end
+
+      class NotImplementedYet < Base
+      end
+
+      class NonConstantClassName < Base
+      end
+
+      class NonConstantModuleName < Base
+      end
+
+      class NonConstantSuperClassName < Base
+      end
+
+      class TopLevelMethodDefinition < Base
+      end
+
+      class TopLevelAttributeDefinition < Base
+      end
+
+      class UnusedInlineAnnotation < Base
+      end
+
+      class AnnotationSyntaxError < Base
+      end
+
+      class MixinMultipleArguments < Base
+      end
+
+      class MixinNonConstantModule < Base
+      end
+
+      class AttributeNonSymbolName < Base
+      end
+
+      class NonConstantConstantDeclaration < Base
+      end
+
+      class ClassModuleAliasDeclarationMissingTypeName < Base
+      end
+
+      type t = NotImplementedYet
+             | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
+             | TopLevelMethodDefinition | TopLevelAttributeDefinition
+             | UnusedInlineAnnotation | AnnotationSyntaxError
+             | MixinMultipleArguments | MixinNonConstantModule
+             | AttributeNonSymbolName
+             | NonConstantConstantDeclaration
+             | ClassModuleAliasDeclarationMissingTypeName
+    end
+
+    def self.parse: (Buffer, Prism::ParseResult) -> Result
+
+    class Parser < Prism::Visitor
+      type module_context = Declarations::ClassDecl | Declarations::ModuleDecl
+
+      include AST::Ruby::Helpers::ConstantHelper
+
+      include AST::Ruby::Helpers::LocationHelper
+
+      attr_reader comments: CommentAssociation
+
+      attr_reader result: Result
+
+      attr_reader module_nesting: Array[module_context]
+
+      def initialize: (Result) -> void
+
+      def buffer: () -> Buffer
+
+      %a{pure} def current_module: () -> module_context?
+
+      %a{pure} def current_module!: () -> module_context
+
+      def diagnostics: () -> Array[Diagnostic::t]
+
+      def push_module_nesting: [T] (module_context) { () -> T } -> T
+
+      # Returns `true` if the node is a comment block including `@rbs skip` annotation
+      #
+      # Doesn't update the `association` flag if returning `false`.
+      #
+      def skip_node?: (Prism::Node) -> bool
+
+      def insert_declaration: (module_context) -> void
+
+      def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
+
+      def report_unused_block: (AST::Ruby::CommentBlock) -> void
+
+      private
+
+      def parse_mixin_call: (Prism::CallNode) -> void
+
+      def parse_attribute_call: (Prism::CallNode) -> void
+
+      def parse_constant_declaration: (Prism::ConstantWriteNode | Prism::ConstantPathWriteNode) -> void
+
+      def parse_super_class: (Prism::node, Prism::Location) -> Declarations::ClassDecl::SuperClass?
+    end
+  end
+end

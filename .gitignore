@@ -21,3 +21,7 @@ lib/**/*.dll
 doc/
 
 **/*.gem
+
+# For clangd's editor integration
+ext/rbs_extension/compile_commands.json
+ext/rbs_extension/.cache

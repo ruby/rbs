@@ -1,0 +1,50 @@
+module RBS
+  class Environment
+    # Represents a class entry in the environment
+    #
+    # ```rb
+    # entry = ModuleEntry.new(TypeName.parse("::Kernel"))
+    # entry << [nil, declaration]
+    # entry << [[nil, TypeName.parse("::Object")], declaration]
+    # ```
+    #
+    class ModuleEntry
+      attr_reader name: TypeName
+
+      type declaration = AST::Declarations::Module | AST::Ruby::Declarations::ModuleDecl
+
+      type context_decl = [Resolver::context, declaration]
+
+      attr_reader context_decls: Array[context_decl]
+
+      def initialize: (TypeName) -> void
+
+      def <<: (context_decl) -> self
+
+      def each_decl: { (declaration) -> void } -> void
+                   | () -> Enumerator[declaration]
+
+      # Returns true if the entry doesn't have any declaration
+      #
+      def empty?: () -> bool
+
+      # Returns the first declaration
+      #
+      # This method helps using the class with `ClassEntry` objects.
+      #
+      def primary_decl: () -> declaration
+
+      # Returns the generics declaration
+      #
+      def type_params: () -> Array[AST::TypeParam]
+
+      # Confirms if the type parameters in the declaration are compatible
+      #
+      # * Raises `GenericParameterMismatchError` if incompatible declaration is detected.
+      #
+      def validate_type_params: () -> void
+
+      def self_types: () -> Array[AST::Declarations::Module::Self]
+    end
+  end
+end

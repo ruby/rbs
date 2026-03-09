@@ -1,0 +1,238 @@
+module RBS
+  module AST
+    module Ruby
+      module Annotations
+        type leading_annotation = ColonMethodTypeAnnotation
+                                | MethodTypesAnnotation
+                                | SkipAnnotation
+                                | ReturnTypeAnnotation
+                                | InstanceVariableAnnotation
+
+        type trailing_annotation = NodeTypeAssertion
+                                 | TypeApplicationAnnotation
+                                 | ClassAliasAnnotation
+                                 | ModuleAliasAnnotation
+
+        type t = leading_annotation | trailing_annotation
+
+        class Base
+          # Location that covers all of the annotation
+          #
+          attr_reader location: Location
+
+          # Location of `@rbs`, `@rbs!`, or `:` prefix
+          #
+          attr_reader prefix_location: Location
+
+          def initialize: (Location location, Location prefix_location) -> void
+
+          def buffer: () -> Buffer
+
+          # Returns the type fingerprint for this annotation
+          def type_fingerprint: () -> untyped
+        end
+
+        # `: TYPE` annotation attached to nodes
+        #
+        class NodeTypeAssertion < Base
+          attr_reader type: Types::t
+
+          def initialize: (location: Location, prefix_location: Location, type: Types::t) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class AliasAnnotation < Base
+          attr_reader keyword_location: Location
+
+          attr_reader type_name_location: Location?
+
+          # The name of the module that will be the target of the alias
+          #
+          # - `nil` if the module/class name is unspecified
+          # - `TypeName` object if the module/class name is specified
+          #
+          attr_reader type_name: TypeName?
+
+          def initialize: (location: Location, prefix_location: Location, keyword_location: Location, type_name: TypeName?, type_name_location: Location?) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `: class-alias` annotation
+        #
+        # ```
+        # : class-alias Foo::Bar
+        # ^                        -- prefix_location
+        #   ^^^^^^^^^^^^           -- keyword_location
+        #                ^^^^^^^^  -- type_name_location
+        # ```
+        #
+        class ClassAliasAnnotation < AliasAnnotation
+          def type_fingerprint: () -> untyped
+        end
+
+        # `: module-alias` annotation
+        #
+        # ```
+        # : module-alias Foo::Bar
+        # ^                        -- prefix_location
+        #   ^^^^^^^^^^^^           -- keyword_location
+        #                ^^^^^^^^  -- type_name_location
+        # ```
+        #
+        class ModuleAliasAnnotation < AliasAnnotation
+          def type_fingerprint: () -> untyped
+        end
+
+        # `: METHOD-TYPE` annotation in leading comments
+        #
+        class ColonMethodTypeAnnotation < Base
+          attr_reader annotations: Array[AST::Annotation]
+
+          attr_reader method_type: MethodType
+
+          def initialize: (location: Location, prefix_location: Location, annotations: Array[AST::Annotation], method_type: MethodType) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `@rbs METHOD-TYPEs` annotation in leading comments
+        #
+        # ```
+        # @rbs () -> void | %a{foo} () -> String | ...
+        # ^^^^                                            -- prefix_location
+        #                 ^                               -- vertical_bar_locations[0]
+        #                                        ^        -- vertical_bar_locations[1]
+        #                                          ^^^    -- dot3_location
+        # ```
+        class MethodTypesAnnotation < Base
+          class Overload = AST::Members::MethodDefinition::Overload
+
+          attr_reader overloads: Array[Overload]
+
+          attr_reader vertical_bar_locations: Array[Location]
+
+          attr_reader dot3_location: Location?
+
+          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location], dot3_location: Location?) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `@rbs skip -- comment` annotation in leading comments
+        #
+        class SkipAnnotation < Base
+          attr_reader skip_location: Location
+          attr_reader comment_location: Location?
+
+          def initialize: (location: Location, prefix_location: Location, skip_location: Location, comment_location: Location?) -> void
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `@rbs return: T -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs return: String -- Returns a string
+        # ^^^                                        -- prefix_location
+        #      ^^^^^^                                -- return_location
+        #            ^                               -- colon_location
+        #                     ^^^^^^^^^^^^^^^^^^^    -- comment
+        # ```
+        class ReturnTypeAnnotation < Base
+          attr_reader return_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader return_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            return_location: Location,
+            colon_location: Location,
+            return_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `[T1, T2, ...]` annotation in trailing comments
+        #
+        # ```
+        # #[String, Integer]
+        #  ^                     -- prefix_location
+        #         ^              -- comma_locations[0]
+        #                  ^     -- close_bracket_location
+        # ```
+        #
+        class TypeApplicationAnnotation < Base
+          attr_reader type_args: Array[Types::t]
+
+          attr_reader close_bracket_location: Location
+
+          attr_reader comma_locations: Array[Location]
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            type_args: Array[Types::t],
+            close_bracket_location: Location,
+            comma_locations: Array[Location],
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `@rbs IVAR-NAME : TYPE` annotation in leading comments
+        #
+        # ```
+        # @rbs @foo : String -- comment
+        # ^^^^                             -- prefix_location
+        #      ^^^^                        -- ivar_name_location
+        #           ^                      -- colon_location
+        #                    ^^^^^^^^^^    -- comment_location
+        # ```
+        class InstanceVariableAnnotation < Base
+          attr_reader ivar_name: Symbol
+
+          attr_reader ivar_name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            ivar_name: Symbol,
+            ivar_name_location: Location,
+            colon_location: Location,
+            type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+      end
+    end
+  end
+end

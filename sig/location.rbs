@@ -4,14 +4,20 @@ module RBS
   #
   # A location can have _child_ locations.
   #
-  class Location[in RequiredChildKeys, in OptionalChildKeys]
+  class Location[in RequiredChildKeys = untyped, in OptionalChildKeys = untyped]
     # The buffer this location points on.
     attr_reader buffer (): Buffer
 
-    # The index of character the range starts from.
+    # The absolute start index of character the range starts from
+    #
+    # It returns the index in the `buffer.top_buffer`.
+    #
     attr_reader start_pos (): Integer
 
-    # The index of character the range ends at.
+    # The absolute end index of character the range ends at
+    #
+    # It returns the index in the `buffer.top_buffer`.
+    #
     attr_reader end_pos (): Integer
 
     def initialize: (Buffer, Integer start_pos, Integer end_pos) -> void
@@ -24,26 +30,37 @@ module RBS
     # Returns the name of the buffer.
     def name: () -> untyped
 
-    # Line of the `start_pos` (1 origin)
+    # The *raw* index of character the range starts from.
+    attr_reader _start_pos (): Integer
+
+    # The *raw* index of character the range ends at.
+    attr_reader _end_pos (): Integer
+
+    # Line of the `start_pos` (1 origin, absolute)
     attr_reader start_line (): Integer
 
-    # Column of the `start_pos` (0 origin)
+    # Column of the `start_pos` (0 origin, absolute)
     attr_reader start_column (): Integer
 
-    # Line of the `end_pos` (1 origin)
+    # Line of the `end_pos` (1 origin, absolute)
     attr_reader end_line (): Integer
 
-    # Column of the `end_pos` (0 origin)
+    # Column of the `end_pos` (0 origin, absolute)
     attr_reader end_column (): Integer
 
+    # The absolute line-column pair of the start position
+    #
     attr_reader start_loc (): Buffer::loc
 
     @start_loc: Buffer::loc?
 
+    # The absolute line-column pair of the end position
+    #
     attr_reader end_loc (): Buffer::loc
 
     @end_loc: Buffer::loc?
 
+    # The absolute range of the start and end position
     attr_reader range (): Range[Integer]
 
     @range: Range[Integer]?
@@ -96,6 +113,14 @@ module RBS
     def required_key?: (Symbol) -> bool
 
     def key?: (Symbol) -> bool
+
+    # Returns the location of the buffer, but the buffer is detached from the parent buffer
+    #
+    def local_location: () -> self
+
+    # Returns the source of `#local_location`
+    # 
+    def local_source: () -> String
 
     private
 
