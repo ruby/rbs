@@ -53,7 +53,7 @@ module RBS
       #     a.create_method(:betty) { p self }
       #     a.betty
       #
-      # *produces:*
+      # <em>produces:</em>
       #
       #     In Fred
       #     Charge it!
@@ -109,7 +109,7 @@ module RBS
       #     end
       #     Mod.private_instance_methods   #=> [:a, :c]
       #
-      # Note that to show a private method on RDoc, use `:doc:`.
+      # Note that to show a private method on RDoc, use <code>:doc:</code>.
       #
       %a{annotate:rdoc:copy:Module#private}
       def private: () -> nil
