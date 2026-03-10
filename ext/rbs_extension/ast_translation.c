@@ -87,6 +87,8 @@ VALUE rbs_attr_ivar_name_to_ruby(rbs_translation_context_t ctx, rbs_attr_ivar_na
         return Qnil;
     case RBS_ATTR_IVAR_NAME_TAG_EMPTY:
         return Qfalse;
+    default:
+        rb_fatal("unknown enum rbs_attr_ivar_name_tag ivar_name.tag: %d", ivar_name.tag);
     }
 }
 
