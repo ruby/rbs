@@ -519,7 +519,7 @@ static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_
 PARSE_OPTIONAL_PARAMS:
     while (true) {
         switch (parser->next_token.type) {
-        case pQUESTION:
+        case pQUESTION: {
             rbs_parser_advance(parser);
 
             if (is_keyword(parser)) {
@@ -533,6 +533,7 @@ PARSE_OPTIONAL_PARAMS:
             rbs_node_list_append(params->optional_positionals, (rbs_node_t *) param);
 
             break;
+        }
         default:
             goto PARSE_REST_PARAM;
         }
@@ -597,13 +598,13 @@ PARSE_KEYWORDS:
             }
             break;
 
-        case pSTAR2:
+        case pSTAR2: {
             rbs_parser_advance(parser);
             rbs_types_function_param_t *param = NULL;
             CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             params->rest_keywords = (rbs_node_t *) param;
             break;
-
+        }
         case tUIDENT:
         case tLIDENT:
         case tQIDENT:
