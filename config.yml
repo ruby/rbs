@@ -798,6 +798,40 @@ nodes:
       - name: comment_location
         c_type: rbs_location_range
         optional: true
+  - name: RBS::AST::Ruby::Annotations::SplatParamTypeAnnotation
+    rust_name: SplatParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: star_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
+  - name: RBS::AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation
+    rust_name: DoubleSplatParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: star2_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
 
 enums:
   attribute_visibility:

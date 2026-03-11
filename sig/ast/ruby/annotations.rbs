@@ -8,6 +8,8 @@ module RBS
                                 | ReturnTypeAnnotation
                                 | InstanceVariableAnnotation
                                 | ParamTypeAnnotation
+                                | SplatParamTypeAnnotation
+                                | DoubleSplatParamTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
                                  | TypeApplicationAnnotation
@@ -247,6 +249,90 @@ module RBS
             location: Location,
             prefix_location: Location,
             name_location: Location,
+            colon_location: Location,
+            param_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `@rbs *name: Type -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs *a: String -- comment
+        # ^^^^                         -- prefix_location
+        #      ^                       -- star_location
+        #       ^                      -- name_location
+        #        ^                     -- colon_location
+        #                 ^^^^^^^^^^   -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs *: String
+        # ^^^^             -- prefix_location
+        #      ^           -- star_location
+        #       ^          -- colon_location
+        # ```
+        #
+        class SplatParamTypeAnnotation < Base
+          attr_reader star_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            star_location: Location,
+            name_location: Location?,
+            colon_location: Location,
+            param_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+        end
+
+        # `@rbs **name: Type -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs **b: bool -- comment
+        # ^^^^                        -- prefix_location
+        #      ^^                     -- star2_location
+        #        ^                    -- name_location
+        #         ^                   -- colon_location
+        #                 ^^^^^^^^^^  -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs **: bool
+        # ^^^^            -- prefix_location
+        #      ^^         -- star2_location
+        #        ^        -- colon_location
+        # ```
+        #
+        class DoubleSplatParamTypeAnnotation < Base
+          attr_reader star2_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            star2_location: Location,
+            name_location: Location?,
             colon_location: Location,
             param_type: Types::t,
             comment_location: Location?,
