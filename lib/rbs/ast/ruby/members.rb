@@ -27,29 +27,55 @@ module RBS
 
             def initialize
               @return_type_annotation = nil
-              @required_positionals = [] #: Array[Annotations::ParamTypeAnnotation?]
-              @optional_positionals = [] #: Array[Annotations::ParamTypeAnnotation?]
-              @rest_positionals = nil #: Annotations::ParamTypeAnnotation?
-              @trailing_positionals = [] #: Array[Annotations::ParamTypeAnnotation?]
-              @required_keywords = {} #: Hash[Symbol, Annotations::ParamTypeAnnotation]
-              @optional_keywords = {} #: Hash[Symbol, Annotations::ParamTypeAnnotation]
-              @rest_keywords = nil #: Annotations::ParamTypeAnnotation?
+              @required_positionals = []
+              @optional_positionals = []
+              @rest_positionals = nil
+              @trailing_positionals = []
+              @required_keywords = {}
+              @optional_keywords = {}
+              @rest_keywords = nil
             end
 
             def self.build(param_type_annotations, return_type_annotation, node)
               doc = DocStyle.new
               doc.return_type_annotation = return_type_annotation
 
-              unused = param_type_annotations.dup
+              splat_annotation = nil #: Annotations::SplatParamTypeAnnotation?
+              double_splat_annotation = nil #: Annotations::DoubleSplatParamTypeAnnotation?
+              param_annotations = {} #: Hash[Symbol, Annotations::ParamTypeAnnotation]
+              unused = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation]
+
+              param_type_annotations.each do |annot|
+                case annot
+                when Annotations::SplatParamTypeAnnotation
+                  if splat_annotation
+                    unused << annot
+                  else
+                    splat_annotation = annot
+                  end
+                when Annotations::DoubleSplatParamTypeAnnotation
+                  if double_splat_annotation
+                    unused << annot
+                  else
+                    double_splat_annotation = annot
+                  end
+                when Annotations::ParamTypeAnnotation
+                  name = annot.name_location.source.to_sym
+                  if param_annotations.key?(name)
+                    unused << annot
+                  else
+                    param_annotations[name] = annot
+                  end
+                end
+              end
 
               if node.parameters
                 params = node.parameters #: Prism::ParametersNode
 
                 params.requireds.each do |param|
                   if param.is_a?(Prism::RequiredParameterNode)
-                    annotation = unused.find { _1.name_location.source.to_sym == param.name }
+                    annotation = param_annotations.delete(param.name)
                     if annotation
-                      unused.delete(annotation)
                       doc.required_positionals << annotation
                     else
                       doc.required_positionals << param.name
@@ -59,9 +85,8 @@ module RBS
 
                 params.optionals.each do |param|
                   if param.is_a?(Prism::OptionalParameterNode)
-                    annotation = unused.find { _1.name_location.source.to_sym == param.name }
+                    annotation = param_annotations.delete(param.name)
                     if annotation
-                      unused.delete(annotation)
                       doc.optional_positionals << annotation
                     else
                       doc.optional_positionals << param.name
@@ -69,21 +94,19 @@ module RBS
                   end
                 end
 
-                if (rest = params.rest) && rest.is_a?(Prism::RestParameterNode) && rest.name
-                  annotation = unused.find { _1.name_location.source.to_sym == rest.name }
-                  if annotation
-                    unused.delete(annotation)
-                    doc.rest_positionals = annotation
+                if (rest = params.rest) && rest.is_a?(Prism::RestParameterNode)
+                  if splat_annotation && (splat_annotation.name_location.nil? || rest.name.nil? || splat_annotation.name_location.source.to_sym == rest.name)
+                    doc.rest_positionals = splat_annotation
+                    splat_annotation = nil
                   else
-                    doc.rest_positionals = rest.name
+                    doc.rest_positionals = rest.name || true
                   end
                 end
 
                 params.posts.each do |param|
                   if param.is_a?(Prism::RequiredParameterNode)
-                    annotation = unused.find { _1.name_location.source.to_sym == param.name }
+                    annotation = param_annotations.delete(param.name)
                     if annotation
-                      unused.delete(annotation)
                       doc.trailing_positionals << annotation
                     else
                       doc.trailing_positionals << param.name
@@ -94,17 +117,15 @@ module RBS
                 params.keywords.each do |param|
                   case param
                   when Prism::RequiredKeywordParameterNode
-                    annotation = unused.find { _1.name_location.source.to_sym == param.name }
+                    annotation = param_annotations.delete(param.name)
                     if annotation
-                      unused.delete(annotation)
                       doc.required_keywords[param.name] = annotation
                     else
                       doc.required_keywords[param.name] = param.name
                     end
                   when Prism::OptionalKeywordParameterNode
-                    annotation = unused.find { _1.name_location.source.to_sym == param.name }
+                    annotation = param_annotations.delete(param.name)
                     if annotation
-                      unused.delete(annotation)
                       doc.optional_keywords[param.name] = annotation
                     else
                       doc.optional_keywords[param.name] = param.name
@@ -112,23 +133,26 @@ module RBS
                   end
                 end
 
-                if (kw_rest = params.keyword_rest) && kw_rest.is_a?(Prism::KeywordRestParameterNode) && kw_rest.name
-                  annotation = unused.find { _1.name_location.source.to_sym == kw_rest.name }
-                  if annotation
-                    unused.delete(annotation)
-                    doc.rest_keywords = annotation
+                if (kw_rest = params.keyword_rest) && kw_rest.is_a?(Prism::KeywordRestParameterNode)
+                  if double_splat_annotation && (double_splat_annotation.name_location.nil? || kw_rest.name.nil? || double_splat_annotation.name_location.source.to_sym == kw_rest.name)
+                    doc.rest_keywords = double_splat_annotation
+                    double_splat_annotation = nil
                   else
-                    doc.rest_keywords = kw_rest.name
+                    doc.rest_keywords = kw_rest.name || true
                   end
                 end
               end
+
+              unused.concat(param_annotations.values)
+              unused << splat_annotation if splat_annotation
+              unused << double_splat_annotation if double_splat_annotation
 
               [doc, unused]
             end
 
             def all_param_annotations
-              annotations = [] #: Array[param_type_annotation | Symbol | nil]
-              #
+              annotations = [] #: Array[param_type_annotation | Symbol | true | nil]
+
               required_positionals.each { |a| annotations << a }
               optional_positionals.each { |a| annotations << a }
               annotations << rest_positionals
@@ -165,7 +189,7 @@ module RBS
                 )
                 new.rest_positionals =
                   case rest_positionals
-                  when Annotations::ParamTypeAnnotation
+                  when Annotations::SplatParamTypeAnnotation
                     rest_positionals.map_type_name(&block)
                   else
                     rest_positionals
@@ -202,7 +226,7 @@ module RBS
                 )
                 new.rest_keywords =
                   case rest_keywords
-                  when Annotations::ParamTypeAnnotation
+                  when Annotations::DoubleSplatParamTypeAnnotation
                     rest_keywords.map_type_name(&block)
                   else
                     rest_keywords
@@ -255,10 +279,12 @@ module RBS
               end
               rest_pos =
                 case rest_positionals
-                when Annotations::ParamTypeAnnotation
-                  Types::Function::Param.new(type: rest_positionals.param_type, name: rest_positionals.name_location.source.to_sym)
+                when Annotations::SplatParamTypeAnnotation
+                  Types::Function::Param.new(type: rest_positionals.param_type, name: rest_positionals.name_location&.source&.to_sym)
                 when Symbol
                   Types::Function::Param.new(type: any.call, name: rest_positionals)
+                when true
+                  Types::Function::Param.new(type: any.call, name: nil)
                 else
                   nil
                 end
@@ -290,9 +316,11 @@ module RBS
 
               rest_kw =
                 case rest_keywords
-                when Annotations::ParamTypeAnnotation
-                  Types::Function::Param.new(type: rest_keywords.param_type, name: nil)
+                when Annotations::DoubleSplatParamTypeAnnotation
+                  Types::Function::Param.new(type: rest_keywords.param_type, name: rest_keywords.name_location&.source&.to_sym)
                 when Symbol
+                  Types::Function::Param.new(type: any.call, name: rest_keywords)
+                when true
                   Types::Function::Param.new(type: any.call, name: nil)
                 else
                   nil
@@ -343,7 +371,7 @@ module RBS
 
             type_annotations = nil #: type_annotations
             return_annotation = nil #: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
-            param_annotations = [] #: Array[Annotations::ParamTypeAnnotation]
+            param_annotations = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation]
 
             if trailing_block
               case annotation = trailing_block.trailing_annotation(variables)
@@ -377,7 +405,7 @@ module RBS
                       next
                     end
                   end
-                when Annotations::ParamTypeAnnotation
+                when Annotations::ParamTypeAnnotation, Annotations::SplatParamTypeAnnotation, Annotations::DoubleSplatParamTypeAnnotation
                   unless type_annotations
                     param_annotations << paragraph
                     next
