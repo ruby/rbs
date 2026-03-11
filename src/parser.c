@@ -3914,6 +3914,86 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             PARAM_NAME_CASES {
                 return parse_inline_param_type_annotation(parser, annotation, rbs_range);
             }
+        case pSTAR: {
+            rbs_parser_advance(parser);
+            rbs_location_range star_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == tLIDENT) {
+                rbs_parser_advance(parser);
+                name_loc = rbs_location_range_current_token(parser);
+            }
+
+            ADVANCE_ASSERT(parser, pCOLON);
+            rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+            rbs_node_t *param_type = NULL;
+            if (!rbs_parse_type(parser, &param_type, false, true, true)) {
+                return false;
+            }
+
+            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_splat_param_type_annotation_new(
+                ALLOCATOR(),
+                RBS_RANGE_LEX2AST(full_range),
+                RBS_RANGE_LEX2AST(rbs_range),
+                star_loc,
+                name_loc,
+                colon_loc,
+                param_type,
+                comment_loc
+            );
+            return true;
+        }
+        case pSTAR2: {
+            rbs_parser_advance(parser);
+            rbs_location_range star2_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == tLIDENT) {
+                rbs_parser_advance(parser);
+                name_loc = rbs_location_range_current_token(parser);
+            }
+
+            ADVANCE_ASSERT(parser, pCOLON);
+            rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+            rbs_node_t *param_type = NULL;
+            if (!rbs_parse_type(parser, &param_type, false, true, true)) {
+                return false;
+            }
+
+            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_double_splat_param_type_annotation_new(
+                ALLOCATOR(),
+                RBS_RANGE_LEX2AST(full_range),
+                RBS_RANGE_LEX2AST(rbs_range),
+                star2_loc,
+                name_loc,
+                colon_loc,
+                param_type,
+                comment_loc
+            );
+            return true;
+        }
         default: {
             rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for @rbs annotation");
             return false;
