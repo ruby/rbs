@@ -227,8 +227,10 @@ The `@rbs PARAM_NAME: T` syntax declares the type of a parameter:
 class Calculator
   # @rbs x: Integer
   # @rbs y: Integer
-  def add(x, y:)
-    x + y
+  # @rbs a: String
+  # @rbs b: bool
+  def add(x, y = 1, a:, b: false)
+    pp(x:, y:, a:, b:)
   end
 end
 ```
@@ -237,10 +239,28 @@ You can add a description after `--`:
 
 ```ruby
 class Calculator
-  # @rbs x: Integer -- the first operand
-  # @rbs y: Integer -- the second operand
-  def add(x, y:)
-    x + y
+  # @rbs x: Integer -- required positional argument
+  # @rbs y: Integer -- optional positional argument
+  # @rbs a: String -- required keyword argument
+  # @rbs b: bool -- optional keyword argument
+  def add(x, y = 1, a:, b: false)
+    pp(x:, y:, a:, b:)
+  end
+end
+```
+
+Types of splat (`*a`) and double-splat (`**b`) parameters can be declared too.
+
+```ruby
+class Foo
+  # @rbs *a: String -- The type of `a` is `Array[String]`
+  # @rbs **b: bool -- The type of `b` is `Hash[Symbol, bool]`
+  def foo(*a, **b)
+  end
+
+  # @rbs *: String -- Parameter name is optional
+  # @rbs **: bool -- Parameter name can be omitted in Ruby too
+  def bar(*a, **)
   end
 end
 ```
@@ -272,7 +292,7 @@ end
 ### Current Limitations
 
 - Class methods and singleton methods are not supported
-- Only positional and keyword parameters are supported. Splat parameters (`*x`, `**y`) and block parameter (`&block`) are not supported yet. 
+- Only positional and keyword parameters are supported. Splat parameters (`*x`, `**y`) and block parameter (`&block`) are not supported yet.
 - Method visibility declaration is not supported yet
 
 ## Attributes
