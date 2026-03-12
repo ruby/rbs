@@ -10,6 +10,7 @@ module RBS
                                 | ParamTypeAnnotation
                                 | SplatParamTypeAnnotation
                                 | DoubleSplatParamTypeAnnotation
+                                | BlockParamTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
                                  | TypeApplicationAnnotation
@@ -255,6 +256,9 @@ module RBS
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          %a{pure}
+          def name: () -> Symbol
         end
 
         # `@rbs *name: Type -- comment` annotation in leading comments
@@ -297,6 +301,9 @@ module RBS
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          %a{pure}
+          def name: () -> Symbol?
         end
 
         # `@rbs **name: Type -- comment` annotation in leading comments
@@ -339,6 +346,66 @@ module RBS
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          %a{pure}
+          def name: () -> Symbol?
+        end
+
+        # `@rbs &name: TYPE -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs &block: () -> void -- comment
+        # ^^^^                               -- prefix_location
+        #      ^                             -- ampersand_location
+        #       ^^^^^                        -- name_location
+        #            ^                       -- colon_location
+        #              ^^^^^^^^^^            -- type_location
+        #                         ^^^^^^^^^^ -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs &: ? () -> void
+        # ^^^^                 -- prefix_location
+        #      ^               -- ampersand_location
+        #       ^              -- colon_location
+        #         ^            -- question_location
+        #           ^^^^^^^^^^ -- type_location
+        # ```
+        #
+        class BlockParamTypeAnnotation < Base
+          attr_reader ampersand_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader type_location: Location
+
+          attr_reader type: Types::function
+
+          attr_reader question_location: Location?
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            ampersand_location: Location,
+            name_location: Location?,
+            colon_location: Location,
+            question_location: Location?,
+            type_location: Location,
+            type: Types::function,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          %a{pure} def name: () -> Symbol?
+
+          def optional?: () -> bool
+
+          def required?: () -> bool
         end
       end
     end

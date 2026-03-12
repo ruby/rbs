@@ -325,6 +325,47 @@ module RBS
             ) #: self
           end
         end
+
+        class BlockParamTypeAnnotation < Base
+          attr_reader :ampersand_location, :name_location, :colon_location, :question_location, :type_location, :type, :comment_location
+
+          def initialize(location:, prefix_location:, ampersand_location:, name_location:, colon_location:, question_location:, type_location:, type:, comment_location:)
+            super(location, prefix_location)
+            @ampersand_location = ampersand_location
+            @name_location = name_location
+            @colon_location = colon_location
+            @question_location = question_location
+            @type_location = type_location
+            @type = type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              ampersand_location: ampersand_location,
+              name_location: name_location,
+              colon_location: colon_location,
+              question_location: question_location,
+              type_location: type_location,
+              type: type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+
+          def name
+            name_location&.source&.to_sym
+          end
+
+          def optional?
+            question_location ? true : false
+          end
+
+          def required?
+            !optional?
+          end
+        end
       end
     end
   end
