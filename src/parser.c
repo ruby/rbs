@@ -746,7 +746,7 @@ typedef struct {
              | {} self_type_binding? `->` <optional>
 */
 NODISCARD
-static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse_function_result **result, bool self_allowed, bool classish_allowed) {
+static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool block_allowed, parse_function_result **result, bool self_allowed, bool classish_allowed) {
     rbs_node_t *function = NULL;
     rbs_types_block_t *block = NULL;
     rbs_node_t *function_self_type = NULL;
@@ -776,6 +776,11 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 
     bool required = true;
     rbs_range_t block_range;
+
+    if (!block_allowed && (parser->next_token.type == pLBRACE || (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE))) {
+        rbs_parser_set_error(parser, parser->next_token, true, "block is not allowed in this context");
+        return false;
+    }
 
     if (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE) {
         // Optional block
@@ -865,7 +870,7 @@ NODISCARD
 static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed, bool classish_allowed) {
     rbs_position_t start = parser->current_token.range.start;
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, true, &result, self_allowed, classish_allowed));
+    CHECK_PARSE(parse_function(parser, true, true, &result, self_allowed, classish_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
     rbs_location_range range = { .start_char = start.char_pos, .start_byte = start.byte_pos, .end_char = end.char_pos, .end_byte = end.byte_pos };
@@ -1597,7 +1602,7 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     type_range.start = parser->next_token.range.start;
 
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, false, &result, true, classish_allowed));
+    CHECK_PARSE(parse_function(parser, false, true, &result, true, classish_allowed));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -4017,12 +4022,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             type_range.start = parser->next_token.range.start;
 
             parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-            if (!parse_function(parser, true, &result, true, true)) {
-                return false;
-            }
-
-            if (result->block != NULL) {
-                rbs_parser_set_error(parser, parser->current_token, true, "block type annotation cannot have a nested block");
+            if (!parse_function(parser, true, false, &result, true, true)) {
                 return false;
             }
 

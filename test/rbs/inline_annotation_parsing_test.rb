@@ -489,4 +489,13 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_equal false, annot.required?
     end
   end
+
+  def test_error__block_type_annotation
+    error = assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs &block: () { () -> void } -> void", 0...)
+    end
+    assert_match(/block is not allowed in this context/, error.message)
+    assert_match(/pLBRACE/, error.message)
+    assert_equal "{", error.location.source
+  end
 end
