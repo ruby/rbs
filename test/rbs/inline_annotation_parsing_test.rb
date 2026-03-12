@@ -455,4 +455,47 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_nil annot.comment_location
     end
   end
+
+  def test_parse__block_type_annotation
+    Parser.parse_inline_leading_annotation("@rbs &block: () [self: String] -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::BlockParamTypeAnnotation, annot
+      assert_equal "@rbs &block: () [self: String] -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "&", annot.ampersand_location.source
+      assert_equal "block", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_nil annot.question_location
+      assert_equal "() [self: String] -> void", annot.type_location.source
+      assert_instance_of Types::Function, annot.type
+      assert_nil annot.comment_location
+      assert_equal :block, annot.name
+      assert_equal false, annot.optional?
+      assert_equal true, annot.required?
+    end
+
+      Parser.parse_inline_leading_annotation("@rbs &: ? (?) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::BlockParamTypeAnnotation, annot
+      assert_equal "@rbs &: ? (?) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "&", annot.ampersand_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "?", annot.question_location.source
+      assert_equal "(?) -> void", annot.type_location.source
+      assert_instance_of Types::UntypedFunction, annot.type
+      assert_nil annot.comment_location
+      assert_nil annot.name
+      assert_equal true, annot.optional?
+      assert_equal false, annot.required?
+    end
+  end
+
+  def test_error__block_type_annotation
+    error = assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs &block: () { () -> void } -> void", 0...)
+    end
+    assert_match(/block is not allowed in this context/, error.message)
+    assert_match(/pLBRACE/, error.message)
+    assert_equal "{", error.location.source
+  end
 end

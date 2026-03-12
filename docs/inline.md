@@ -265,6 +265,24 @@ class Foo
 end
 ```
 
+Types of block parameter (`&block`) can be declared.
+
+```ruby
+class Foo
+  # @rbs &block: () -> void
+  def foo(&block)
+  end
+
+  # @rbs &: () -> void -- The parameter name can be omitted
+  def bar(&)
+  end
+
+  # @rbs &block: ? () -> untyped -- The `?` prefix is for optional block
+  def baz(&block)
+  end
+end
+```
+
 The `@rbs return: T` syntax declares the return type of a method:
 
 ```ruby

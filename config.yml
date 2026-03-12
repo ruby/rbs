@@ -832,6 +832,29 @@ nodes:
       - name: comment_location
         c_type: rbs_location_range
         optional: true
+  - name: RBS::AST::Ruby::Annotations::BlockParamTypeAnnotation
+    rust_name: BlockParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: ampersand_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: question_location
+        c_type: rbs_location_range
+        optional: true
+      - name: type_location
+        c_type: rbs_location_range
+      - name: type
+        c_name: type_
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
 
 enums:
   attribute_visibility:
