@@ -14,7 +14,7 @@ use std::ptr::NonNull;
 /// ```
 pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
     unsafe {
-        let start_ptr = rbs_code.as_ptr() as *const i8;
+        let start_ptr = rbs_code.as_ptr() as *const std::os::raw::c_char;
         let end_ptr = start_ptr.add(rbs_code.len());
         let bytes = rbs_code.len() as i32;
 
