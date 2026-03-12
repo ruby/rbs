@@ -275,6 +275,55 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__def_method_docs
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs x: Integer
+        # @rbs y: Integer
+        # @rbs a: String
+        # @rbs b: String?
+        # @rbs return: String
+        def add(x, y = 3, a:, b: nil)
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(Integer x, ?Integer y, a: String, ?b: String?) -> String"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+
+  def test_error__def_method_docs
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs x: Integer
+        # @rbs return: void
+        def add(y)
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs x: Integer", diagnostic.location.source
+    end
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(untyped y) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
   def test_parse__skip_class_module
     result = parse(<<~RUBY)
       # @rbs skip -- not a constant
@@ -767,25 +816,22 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     RUBY
 
-    # The @rbs annotations should be reported as syntax errors (invalid format)
+    # The @rbs annotations should be reported as unused (ParamTypeAnnotation is valid but not applicable to attr_*)
     assert_equal 3, result.diagnostics.size
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs name: String", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs age: Integer", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs data: Array[Hash[Symbol, untyped]]", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     result.declarations[0].tap do |decl|
