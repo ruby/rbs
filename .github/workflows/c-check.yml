@@ -32,7 +32,14 @@ jobs:
           clang-format --version
       - name: Count processors
         run: nproc
+      - name: Cache Re2c
+        id: cache-re2c
+        uses: actions/cache@v4
+        with:
+          path: /tmp/re2c-4.3/.build/linux-gcc-release-ootree-skeleton-fast/re2c
+          key: re2c-4.3-${{ runner.os }}
       - name: Install Re2c
+        if: steps.cache-re2c.outputs.cache-hit != 'true'
         run: |
           cd /tmp
           curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
@@ -40,7 +47,9 @@ jobs:
           cd re2c-4.3
           cmake --preset=linux-gcc-release-ootree-skeleton-fast
           cmake --build --preset=linux-gcc-release-ootree-skeleton-fast --parallel="$(nproc)"
-          sudo ln -sf "$(pwd)"/.build/linux-gcc-release-ootree-skeleton-fast/re2c /usr/local/bin/re2c
+      - name: Link Re2c
+        run: |
+          sudo ln -sf /tmp/re2c-4.3/.build/linux-gcc-release-ootree-skeleton-fast/re2c /usr/local/bin/re2c
           re2c --version
       - name: Update rubygems & bundler
         run: |
