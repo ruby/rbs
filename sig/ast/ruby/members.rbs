@@ -22,6 +22,7 @@ module RBS
             type param_type_annotation = Annotations::ParamTypeAnnotation
                                       | Annotations::SplatParamTypeAnnotation
                                       | Annotations::DoubleSplatParamTypeAnnotation
+                                      | Annotations::BlockParamTypeAnnotation
 
             attr_accessor return_type_annotation: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
 
@@ -32,6 +33,7 @@ module RBS
             attr_reader required_keywords: Hash[Symbol, Annotations::ParamTypeAnnotation | Symbol]
             attr_reader optional_keywords: Hash[Symbol, Annotations::ParamTypeAnnotation | Symbol]
             attr_accessor rest_keywords: Annotations::DoubleSplatParamTypeAnnotation | Symbol | true | nil
+            attr_accessor block: Annotations::BlockParamTypeAnnotation | Symbol | true | nil
 
             def initialize: () -> void
 

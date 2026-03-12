@@ -466,6 +466,117 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__def_method_docs__block
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(&block)
+        end
+
+        # @rbs &: ? () -> void
+        def bar(&)
+        end
+
+        # @rbs &block: ? () -> untyped
+        def baz(&block)
+        end
+
+        # @rbs &: () -> void
+        def qux(&blk)
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() { () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() ?{ () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() ?{ () -> untyped } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() { () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_docs__block__no_block_param
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(x)
+        end
+      end
+    RUBY
+
+    assert_equal 0, result.diagnostics.size
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_equal "(untyped x) { () -> void } -> untyped", member.overloads[0].method_type.to_s
+      end
+    end
+  end
+
+  def test_error__def_method_docs__block__name_mismatch
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(&callback)
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs &block: () -> void", diagnostic.location.source
+    end
+  end
+
+  def test_parse__def_method_docs__unannotated_block_param
+    result = parse(<<~RUBY)
+      class Foo
+        def foo(&) #: void
+        end
+
+        def bar(&block) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_equal ["() ?{ (?) -> untyped } -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :bar, member.name
+        assert_equal ["() ?{ (?) -> untyped } -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
   def test_parse__skip_class_module
     result = parse(<<~RUBY)
       # @rbs skip -- not a constant

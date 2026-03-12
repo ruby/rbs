@@ -24,6 +24,7 @@ module RBS
             attr_reader :required_keywords
             attr_reader :optional_keywords
             attr_accessor :rest_keywords
+            attr_accessor :block
 
             def initialize
               @return_type_annotation = nil
@@ -34,6 +35,7 @@ module RBS
               @required_keywords = {}
               @optional_keywords = {}
               @rest_keywords = nil
+              @block = nil
             end
 
             def self.build(param_type_annotations, return_type_annotation, node)
@@ -42,8 +44,9 @@ module RBS
 
               splat_annotation = nil #: Annotations::SplatParamTypeAnnotation?
               double_splat_annotation = nil #: Annotations::DoubleSplatParamTypeAnnotation?
+              block_annotation = nil #: Annotations::BlockParamTypeAnnotation?
               param_annotations = {} #: Hash[Symbol, Annotations::ParamTypeAnnotation]
-              unused = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation]
+              unused = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation | Annotations::BlockParamTypeAnnotation]
 
               param_type_annotations.each do |annot|
                 case annot
@@ -58,6 +61,12 @@ module RBS
                     unused << annot
                   else
                     double_splat_annotation = annot
+                  end
+                when Annotations::BlockParamTypeAnnotation
+                  if block_annotation
+                    unused << annot
+                  else
+                    block_annotation = annot
                   end
                 when Annotations::ParamTypeAnnotation
                   name = annot.name_location.source.to_sym
@@ -141,11 +150,30 @@ module RBS
                     doc.rest_keywords = kw_rest.name || true
                   end
                 end
+
+                if (blk = params.block) && blk.is_a?(Prism::BlockParameterNode)
+                  if block_annotation && (block_annotation.name_location.nil? || blk.name.nil? || block_annotation.name == blk.name)
+                    doc.block = block_annotation
+                    block_annotation = nil
+                  else
+                    doc.block = blk.name || true
+                  end
+                end
+              end
+
+              if block_annotation
+                if node.parameters&.block
+                  # Block parameter exists but name didn't match -- treat as unused
+                else
+                  doc.block = block_annotation
+                  block_annotation = nil
+                end
               end
 
               unused.concat(param_annotations.values)
               unused << splat_annotation if splat_annotation
               unused << double_splat_annotation if double_splat_annotation
+              unused << block_annotation if block_annotation
 
               [doc, unused]
             end
@@ -160,6 +188,7 @@ module RBS
               required_keywords.each_value { |a| annotations << a }
               optional_keywords.each_value { |a| annotations << a }
               annotations << rest_keywords
+              annotations << block
 
               annotations
             end
@@ -230,6 +259,13 @@ module RBS
                     rest_keywords.map_type_name(&block)
                   else
                     rest_keywords
+                  end
+                new.block =
+                  case self.block
+                  when Annotations::BlockParamTypeAnnotation
+                    self.block.map_type_name(&block)
+                  else
+                    self.block
                   end
               end #: self
             end
@@ -337,10 +373,26 @@ module RBS
                 return_type: return_type
               )
 
+              method_block =
+                case self.block
+                when Annotations::BlockParamTypeAnnotation
+                  Types::Block.new(
+                    type: self.block.type,
+                    required: self.block.required?
+                  )
+                when Symbol, true
+                  Types::Block.new(
+                    type: Types::UntypedFunction.new(return_type: Types::Bases::Any.new(location: nil)),
+                    required: false
+                  )
+                else
+                  nil
+                end
+
               MethodType.new(
                 type_params: [],
                 type: type,
-                block: nil,
+                block: method_block,
                 location: nil
               )
             end
@@ -371,7 +423,7 @@ module RBS
 
             type_annotations = nil #: type_annotations
             return_annotation = nil #: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
-            param_annotations = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation]
+            param_annotations = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation | Annotations::BlockParamTypeAnnotation]
 
             if trailing_block
               case annotation = trailing_block.trailing_annotation(variables)
@@ -405,7 +457,7 @@ module RBS
                       next
                     end
                   end
-                when Annotations::ParamTypeAnnotation, Annotations::SplatParamTypeAnnotation, Annotations::DoubleSplatParamTypeAnnotation
+                when Annotations::ParamTypeAnnotation, Annotations::SplatParamTypeAnnotation, Annotations::DoubleSplatParamTypeAnnotation, Annotations::BlockParamTypeAnnotation
                   unless type_annotations
                     param_annotations << paragraph
                     next
