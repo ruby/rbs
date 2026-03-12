@@ -379,6 +379,72 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__splat_param_type
+    Parser.parse_inline_leading_annotation("@rbs *a: String", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *a: String", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "*", annot.star_location.source
+      assert_equal "a", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs *a: String -- The rest args", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *a: String -- The rest args", annot.location.source
+      assert_equal "*", annot.star_location.source
+      assert_equal "a", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_equal "-- The rest args", annot.comment_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs *: String", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *: String", annot.location.source
+      assert_equal "*", annot.star_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
+  def test_parse__double_splat_param_type
+    Parser.parse_inline_leading_annotation("@rbs **b: bool", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **b: bool", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "**", annot.star2_location.source
+      assert_equal "b", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs **opts: bool -- The keyword args", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **opts: bool -- The keyword args", annot.location.source
+      assert_equal "**", annot.star2_location.source
+      assert_equal "opts", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_equal "-- The keyword args", annot.comment_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs **: bool", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **: bool", annot.location.source
+      assert_equal "**", annot.star2_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
   def test_parse__param_type__skip
     Parser.parse_inline_leading_annotation("@rbs skip: untyped", 0...).tap do |annot|
       assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot

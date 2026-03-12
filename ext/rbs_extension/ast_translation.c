@@ -859,6 +859,24 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             &h
         );
     }
+    case RBS_AST_RUBY_ANNOTATIONS_DOUBLE_SPLAT_PARAM_TYPE_ANNOTATION: {
+        rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *node = (rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *) instance;
+
+        VALUE h = rb_hash_new();
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
+        rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_location_range_to_ruby_location(ctx, node->prefix_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("star2_location")), rbs_location_range_to_ruby_location(ctx, node->star2_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("name_location")), rbs_location_range_to_ruby_location(ctx, node->name_location)); // optional
+        rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), rbs_location_range_to_ruby_location(ctx, node->colon_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("param_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->param_type));         // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), rbs_location_range_to_ruby_location(ctx, node->comment_location)); // optional
+
+        return CLASS_NEW_INSTANCE(
+            RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation,
+            1,
+            &h
+        );
+    }
     case RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION: {
         rbs_ast_ruby_annotations_instance_variable_annotation_t *node = (rbs_ast_ruby_annotations_instance_variable_annotation_t *) instance;
 
@@ -968,6 +986,24 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
         return CLASS_NEW_INSTANCE(
             RBS_AST_Ruby_Annotations_SkipAnnotation,
+            1,
+            &h
+        );
+    }
+    case RBS_AST_RUBY_ANNOTATIONS_SPLAT_PARAM_TYPE_ANNOTATION: {
+        rbs_ast_ruby_annotations_splat_param_type_annotation_t *node = (rbs_ast_ruby_annotations_splat_param_type_annotation_t *) instance;
+
+        VALUE h = rb_hash_new();
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
+        rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), rbs_location_range_to_ruby_location(ctx, node->prefix_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("star_location")), rbs_location_range_to_ruby_location(ctx, node->star_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("name_location")), rbs_location_range_to_ruby_location(ctx, node->name_location)); // optional
+        rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), rbs_location_range_to_ruby_location(ctx, node->colon_location));
+        rb_hash_aset(h, ID2SYM(rb_intern("param_type")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->param_type));         // rbs_node
+        rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), rbs_location_range_to_ruby_location(ctx, node->comment_location)); // optional
+
+        return CLASS_NEW_INSTANCE(
+            RBS_AST_Ruby_Annotations_SplatParamTypeAnnotation,
             1,
             &h
         );

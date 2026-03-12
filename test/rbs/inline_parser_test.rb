@@ -298,7 +298,6 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
-
   def test_error__def_method_docs
     result = parse(<<~RUBY)
       class Foo
@@ -320,6 +319,149 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       decl.members[0].tap do |member|
         assert_instance_of RBS::AST::Ruby::Members::DefMember, member
         assert_equal ["(untyped y) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_docs__splat
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs *args: String
+        # @rbs **kwargs: Integer
+        def foo(*args, **kwargs) #: void
+        end
+
+        # @rbs *: String
+        # @rbs **: Integer
+        def bar(*, **) #: void
+        end
+
+        # @rbs *args: String
+        # @rbs **kwargs: Integer
+        def baz(*, **) #: void
+        end
+
+        # @rbs *: String
+        # @rbs **: Integer
+        def baz_(*args, **kwargs) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String args, **Integer kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String, **Integer) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String args, **Integer kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String, **Integer) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_unnanotated__splat
+    result = parse(<<~RUBY)
+      class Foo
+        def foo(*args, **kwargs) #: void
+        end
+
+        def bar(*, **) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*untyped args, **untyped kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*untyped, **untyped) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_error__def_method_docs__splat
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs *foo_args: String
+        # @rbs *foo_args: Integer -- Error: duplicated annotation
+        def foo(*foo_args) #: void
+        end
+
+        # @rbs **bar_kwargs: String
+        # @rbs **bar_kwargs: Integer -- Error: duplicated annotation
+        def bar(**bar_kwargs) #: void
+        end
+
+        # @rbs baz_args: String -- Error: baz_args is a splat parameter
+        # @rbs *baz_arg: Symbol -- Error: baz_arg is not a splat parameter
+        # @rbs baz_kwargs: Integer -- Error: baz_kwargs is a double splat parameter
+        # @rbs **baz_kw: Symbol -- Error: baz_kw is not a double splat parameter
+        def baz(baz_arg, *baz_args, baz_kw:, **baz_kwargs) #: void
+        end
+      end
+    RUBY
+
+    assert_equal 6, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs *foo_args: Integer -- Error: duplicated annotation", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs **bar_kwargs: Integer -- Error: duplicated annotation", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs baz_args: String -- Error: baz_args is a splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs baz_kwargs: Integer -- Error: baz_kwargs is a double splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs *baz_arg: Symbol -- Error: baz_arg is not a splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs **baz_kw: Symbol -- Error: baz_kw is not a double splat parameter", diagnostic.location.source
+    end
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String foo_args) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(**String bar_kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(untyped baz_arg, *untyped baz_args, baz_kw: untyped, **untyped baz_kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
       end
     end
   end

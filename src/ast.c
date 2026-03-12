@@ -79,6 +79,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Ruby::Annotations::ClassAliasAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_DOUBLE_SPLAT_PARAM_TYPE_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::InstanceVariableAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION:
@@ -93,6 +95,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Ruby::Annotations::ReturnTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::SkipAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_SPLAT_PARAM_TYPE_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::SplatParamTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::TypeApplicationAnnotation";
     case RBS_AST_STRING:
@@ -917,6 +921,25 @@ rbs_ast_ruby_annotations_colon_method_type_annotation_t *rbs_ast_ruby_annotation
     return instance;
 }
 #line 140 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *rbs_ast_ruby_annotations_double_splat_param_type_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range star2_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_node_t *param_type, rbs_location_range comment_location) {
+    rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_double_splat_param_type_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_double_splat_param_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_DOUBLE_SPLAT_PARAM_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .star2_location = star2_location,
+        .name_location = name_location,
+        .colon_location = colon_location,
+        .param_type = param_type,
+        .comment_location = comment_location,
+    };
+
+    return instance;
+}
+#line 140 "prism/templates/src/ast.c.erb"
 rbs_ast_ruby_annotations_instance_variable_annotation_t *rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_ast_symbol_t *ivar_name, rbs_location_range ivar_name_location, rbs_location_range colon_location, rbs_node_t *type, rbs_location_range comment_location) {
     rbs_ast_ruby_annotations_instance_variable_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_instance_variable_annotation_t);
 
@@ -1031,6 +1054,25 @@ rbs_ast_ruby_annotations_skip_annotation_t *rbs_ast_ruby_annotations_skip_annota
         },
         .prefix_location = prefix_location,
         .skip_location = skip_location,
+        .comment_location = comment_location,
+    };
+
+    return instance;
+}
+#line 140 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_splat_param_type_annotation_t *rbs_ast_ruby_annotations_splat_param_type_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range star_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_node_t *param_type, rbs_location_range comment_location) {
+    rbs_ast_ruby_annotations_splat_param_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_splat_param_type_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_splat_param_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_SPLAT_PARAM_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .star_location = star_location,
+        .name_location = name_location,
+        .colon_location = colon_location,
+        .param_type = param_type,
         .comment_location = comment_location,
     };
 
