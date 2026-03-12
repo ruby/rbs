@@ -75,6 +75,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Members::Private";
     case RBS_AST_MEMBERS_PUBLIC:
         return "RBS::AST::Members::Public";
+    case RBS_AST_RUBY_ANNOTATIONS_BLOCK_PARAM_TYPE_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::BlockParamTypeAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_CLASS_ALIAS_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::ClassAliasAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION:
@@ -883,6 +885,27 @@ rbs_ast_members_public_t *rbs_ast_members_public_new(rbs_allocator_t *allocator,
             .type = RBS_AST_MEMBERS_PUBLIC,
             .location = location,
         },
+    };
+
+    return instance;
+}
+#line 140 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_block_param_type_annotation_t *rbs_ast_ruby_annotations_block_param_type_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range ampersand_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_location_range question_location, rbs_location_range type_location, rbs_node_t *type_, rbs_location_range comment_location) {
+    rbs_ast_ruby_annotations_block_param_type_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_block_param_type_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_block_param_type_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_BLOCK_PARAM_TYPE_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .ampersand_location = ampersand_location,
+        .name_location = name_location,
+        .colon_location = colon_location,
+        .question_location = question_location,
+        .type_location = type_location,
+        .type_ = type_,
+        .comment_location = comment_location,
     };
 
     return instance;

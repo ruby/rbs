@@ -47,6 +47,7 @@ VALUE RBS_AST_Members_MethodDefinition_Overload;
 VALUE RBS_AST_Members_Prepend;
 VALUE RBS_AST_Members_Private;
 VALUE RBS_AST_Members_Public;
+VALUE RBS_AST_Ruby_Annotations_BlockParamTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_ClassAliasAnnotation;
 VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
 VALUE RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation;
@@ -139,6 +140,7 @@ void rbs__init_constants(void) {
     IMPORT_CONSTANT(RBS_AST_Members_Prepend, RBS_AST_Members, "Prepend");
     IMPORT_CONSTANT(RBS_AST_Members_Private, RBS_AST_Members, "Private");
     IMPORT_CONSTANT(RBS_AST_Members_Public, RBS_AST_Members, "Public");
+    IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_BlockParamTypeAnnotation, RBS_AST_Ruby_Annotations, "BlockParamTypeAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ClassAliasAnnotation, RBS_AST_Ruby_Annotations, "ClassAliasAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation, RBS_AST_Ruby_Annotations, "ColonMethodTypeAnnotation");
     IMPORT_CONSTANT(RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation, RBS_AST_Ruby_Annotations, "DoubleSplatParamTypeAnnotation");

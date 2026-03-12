@@ -55,6 +55,7 @@ extern VALUE RBS_AST_Members_MethodDefinition_Overload;
 extern VALUE RBS_AST_Members_Prepend;
 extern VALUE RBS_AST_Members_Private;
 extern VALUE RBS_AST_Members_Public;
+extern VALUE RBS_AST_Ruby_Annotations_BlockParamTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_ClassAliasAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation;
 extern VALUE RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation;
