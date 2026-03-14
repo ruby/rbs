@@ -257,6 +257,8 @@ module RBS
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
 
+          def type_fingerprint: () -> untyped
+
           %a{pure}
           def name: () -> Symbol
         end
@@ -302,6 +304,8 @@ module RBS
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
 
+          def type_fingerprint: () -> untyped
+
           %a{pure}
           def name: () -> Symbol?
         end
@@ -346,6 +350,8 @@ module RBS
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
 
           %a{pure}
           def name: () -> Symbol?
@@ -400,6 +406,8 @@ module RBS
           ) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
 
           %a{pure} def name: () -> Symbol?
 

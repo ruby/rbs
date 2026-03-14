@@ -274,6 +274,15 @@ module RBS
               comment_location: comment_location
             ) #: self
           end
+
+          def type_fingerprint
+            [
+              "annots/param_type",
+              name_location.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
+          end
         end
 
         class SplatParamTypeAnnotation < Base
@@ -299,6 +308,15 @@ module RBS
               comment_location: comment_location
             ) #: self
           end
+
+          def type_fingerprint
+            [
+              "annots/splat_param_type",
+              name_location&.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
+          end
         end
 
         class DoubleSplatParamTypeAnnotation < Base
@@ -323,6 +341,15 @@ module RBS
               param_type: param_type.map_type_name { yield _1 },
               comment_location: comment_location
             ) #: self
+          end
+
+          def type_fingerprint
+            [
+              "annots/double_splat_param_type",
+              name_location&.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
           end
         end
 
@@ -364,6 +391,16 @@ module RBS
 
           def required?
             !optional?
+          end
+
+          def type_fingerprint
+            [
+              "annots/block_param_type",
+              name_location&.source,
+              type.to_s,
+              optional? ? "optional" : "required",
+              comment_location&.source
+            ]
           end
         end
       end
