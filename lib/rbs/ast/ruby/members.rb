@@ -275,7 +275,7 @@ module RBS
                 return_type_annotation&.type_fingerprint,
                 all_param_annotations.map do |param|
                   case param
-                  when Annotations::ParamTypeAnnotation
+                  when Annotations::Base
                     param.type_fingerprint
                   else
                     param
