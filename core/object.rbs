@@ -106,7 +106,3 @@
 class Object < BasicObject
   include Kernel
 end
-
-# A previous incarnation of `interned` for backward-compatibility (see #1499)
-%a{deprecated: Use `interned` instead}
-type Object::name = interned
