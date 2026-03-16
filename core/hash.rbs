@@ -1267,7 +1267,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def has_key?: (K arg0) -> bool
+  def has_key?: (_Key) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1277,7 +1277,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def has_value?: (V arg0) -> bool
+  def has_value?: (top arg0) -> bool
 
   # <!--
   #   rdoc-file=hash.c

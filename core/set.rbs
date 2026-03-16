@@ -356,7 +356,7 @@ class Set[unchecked out A]
   #
   # See also Enumerable#include?
   #
-  def include?: (A) -> bool
+  def include?: (Hash::_Key) -> bool
 
   # <!-- rdoc-file=set.c -->
   # Returns true if the set contains the given object:
