@@ -1,5 +1,328 @@
 # CHANGELOG
 
+## 4.0.0 (2026-03-16)
+
+RBS 4.0 ships with experimental RBS inline syntax support, allowing you to write type annotations directly in Ruby source files. See [docs/inline.md](docs/inline.md) for the syntax details.
+
+```ruby
+class Calculator
+  # @rbs (Integer, Integer) -> Integer
+  def add(a, b) = a + b
+end
+```
+
+Note: RBS inline is still experimental and may change in future releases.
+
+This release also introduces two language changes: type argument support for singleton types (`singleton(T)[S]`) mainly for Sorbet integration, and generic type parameter lower bounds (`T < S`).
+
+### Signature updates
+
+**Updated classes/modules/methods:** `Addrinfo`, `Array`, `BasicObject`, `BigDecimal`, `Binding`, `CGI`, `Comparable`, `Complex`, `Digest::SHA2`, `Encoding::Converter`, `Enumerable`, `Enumerator`, `Enumerator::ArithmeticSequence`, `Enumerator::Lazy`, `Fiber`, `File`, `FileUtils`, `Float`, `Hash`, `IO`, `IO::TimeoutError`, `Integer`, `JSON`, `Kernel`, `Kconv`, `Math`, `Method`, `Minitest`, `Module`, `Numeric`, `ObjectSpace`, `Open3`, `OpenURI`, `OptionParser`, `PStore`, `Pathname`, `Proc`, `Process::Status`, `Psych`, `Ractor`, `Random`, `Random::Formatter`, `Range`, `Rational`, `RBS::Unnamed::TopLevelSelfClass`, `Ripper::Lexer::Elem`, `Ruby`, `RubyVM`, `SecureRandom`, `Set`, `Socket`, `String`, `StringScanner`, `TCPSocket`, `Thread`, `URI`, `URI::Generic`, `Zlib::GzipReader`, `Zlib::GzipWriter`
+
+* Remove deprecated types ([#2880](https://github.com/ruby/rbs/pull/2880))
+* Add type `RBS::Unnamed::TopLevelSelfClass` to core ([#2362](https://github.com/ruby/rbs/pull/2362))
+* Graduate bundled gems from Ruby v4.0 ([#2852](https://github.com/ruby/rbs/pull/2852))
+* stdlib: Add missing Psych methods and exception classes ([#2850](https://github.com/ruby/rbs/pull/2850))
+* Add variants with positional argument to `Hash#transform_keys` ([#2848](https://github.com/ruby/rbs/pull/2848))
+* add extra kwarg options for File#initialize and derivatives ([#2798](https://github.com/ruby/rbs/pull/2798))
+* pstore: fixes types, treat it as a collection ([#2806](https://github.com/ruby/rbs/pull/2806))
+* Add signatures for `{Module,Proc}#ruby2_keywords` ([#2805](https://github.com/ruby/rbs/pull/2805))
+* Make Zlib::GzipWriter.new level and strategy parameters optional ([#2810](https://github.com/ruby/rbs/pull/2810))
+* URI.(s) does string coercion ([#2825](https://github.com/ruby/rbs/pull/2825))
+* Fix String#append_as_bytes to accept Integer ([#2817](https://github.com/ruby/rbs/pull/2817))
+* [Comparable] Add in Comparable::_CompareToZero ([#2697](https://github.com/ruby/rbs/pull/2697))
+* [Kernel] Add Kernel.trace_var and Kernel.untrace_var ([#2682](https://github.com/ruby/rbs/pull/2682))
+* Add signature for `Module#method_undefined` ([#2804](https://github.com/ruby/rbs/pull/2804))
+* Fix Zlib::GzipWriter signatures ([#2803](https://github.com/ruby/rbs/pull/2803))
+* GzipWriter#initialize only takes 1 required positional arg ([#2799](https://github.com/ruby/rbs/pull/2799))
+* Fix accessibility of method in Module ([#2802](https://github.com/ruby/rbs/pull/2802))
+* Graduate kconv ([#2794](https://github.com/ruby/rbs/pull/2794))
+* Fix test related to pathname ([#2789](https://github.com/ruby/rbs/pull/2789))
+* Split pathname to core and stdlib ([#2777](https://github.com/ruby/rbs/pull/2777))
+* [Kernel] Narrow `caller_locations` ([#2745](https://github.com/ruby/rbs/pull/2745))
+* Ruby 4.1 changed `source_location` type ([#2784](https://github.com/ruby/rbs/pull/2784))
+* Remove ObjectSpace.count_nodes ([#2779](https://github.com/ruby/rbs/pull/2779))
+* Support selector for `String#strip` family. ([#2775](https://github.com/ruby/rbs/pull/2775))
+* Add `Ruby`, `Array#find`, and `Array#rfind` ([#2767](https://github.com/ruby/rbs/pull/2767))
+* Update minitest ([#2761](https://github.com/ruby/rbs/pull/2761))
+* Support BigDecimal v4 ([#2758](https://github.com/ruby/rbs/pull/2758))
+* Update rdoc and comments ([#2733](https://github.com/ruby/rbs/pull/2733))
+* Update cgi and cgi/escape type definitions ([#2728](https://github.com/ruby/rbs/pull/2728))
+* Update RBS files for Ruby 4 ([#2731](https://github.com/ruby/rbs/pull/2731))
+* Update existing docs ([#2724](https://github.com/ruby/rbs/pull/2724))
+* Remove reference to `JSON.deep_const_get` ([#2701](https://github.com/ruby/rbs/pull/2701))
+* Remove deprecated methods in `JSON` ([#2366](https://github.com/ruby/rbs/pull/2366))
+* Update FileUtils to v1.8.0 ([#2700](https://github.com/ruby/rbs/pull/2700))
+* Avoid overloading where arguments are identical ([#2559](https://github.com/ruby/rbs/pull/2559))
+* Move Pathname to core from stdlib ([#2705](https://github.com/ruby/rbs/pull/2705))
+* Remove undocumented `#nonzero?` ([#2543](https://github.com/ruby/rbs/pull/2543))
+* Add signature for `OptionParser#raise_unknown` ([#2735](https://github.com/ruby/rbs/pull/2735))
+* Add signature for `Open3.popen2` ([#2734](https://github.com/ruby/rbs/pull/2734))
+* Add RFC2396_PARSER to URI module ([#2727](https://github.com/ruby/rbs/pull/2727))
+* Add signature for `Open3.capture3` ([#2714](https://github.com/ruby/rbs/pull/2714))
+* Remove sig for IO#{ready?,nread} ([#2710](https://github.com/ruby/rbs/pull/2710))
+* Accept `nil` state parameter in `to_json` type signatures ([#2691](https://github.com/ruby/rbs/pull/2691))
+* Add type of `Open3.popen3` ([#2699](https://github.com/ruby/rbs/pull/2699))
+* `unsetenv_others` and `close_others` only allows bool. ([#2698](https://github.com/ruby/rbs/pull/2698))
+* Add deprecated annotation to `attr` with bool args ([#2693](https://github.com/ruby/rbs/pull/2693))
+* Update open3 ([#2692](https://github.com/ruby/rbs/pull/2692))
+* Add signature for `SecureRandom.bytes` ([#2690](https://github.com/ruby/rbs/pull/2690))
+* Set %a{deprecated} to deprecated core methods ([#2664](https://github.com/ruby/rbs/pull/2664))
+* Migrate usages of ::_ToPath to use ::path instead ([#2677](https://github.com/ruby/rbs/pull/2677))
+* Add missing signatures for `Random::Formatter` ([#2680](https://github.com/ruby/rbs/pull/2680))
+* Split `Random::Formatter` to core and stdlib ([#2661](https://github.com/ruby/rbs/pull/2661))
+* Skip test cases of developing methods for Pathname ([#2648](https://github.com/ruby/rbs/pull/2648))
+* Add signature `Random.seed` ([#2649](https://github.com/ruby/rbs/pull/2649))
+* Update `string.rbs` to avoid deprecation warning in Steep ([#2655](https://github.com/ruby/rbs/pull/2655))
+* Add sig `IO#pread` and `IO#pwrite` ([#2647](https://github.com/ruby/rbs/pull/2647))
+* Refine signature of `Numeric#step` and add type of `Enumerator::ArithmeticSequence` ([#2600](https://github.com/ruby/rbs/pull/2600))
+* Remove undocumented override methods ([#2622](https://github.com/ruby/rbs/pull/2622))
+* Add docs ([#2625](https://github.com/ruby/rbs/pull/2625))
+* Remove undocumented methods for `imaginary` ([#2620](https://github.com/ruby/rbs/pull/2620))
+* Update securerandom ([#2619](https://github.com/ruby/rbs/pull/2619))
+* Drop undocumented `#eql?` ([#2618](https://github.com/ruby/rbs/pull/2618))
+* Just use `Numeric#+@` and return self ([#2597](https://github.com/ruby/rbs/pull/2597))
+* Drop undocumented `#dup` ([#2598](https://github.com/ruby/rbs/pull/2598))
+* Add signature for `Digest::SHA2` ([#2573](https://github.com/ruby/rbs/pull/2573))
+* Add signatures for `OpenURI` ([#2574](https://github.com/ruby/rbs/pull/2574))
+* Add signature for `IO::TimeoutError` ([#2571](https://github.com/ruby/rbs/pull/2571))
+* Add signatures for `Set` ([#2570](https://github.com/ruby/rbs/pull/2570))
+* Add signature for `Enumerator#+` ([#2567](https://github.com/ruby/rbs/pull/2567))
+* Add signature for `Enumerator::Lazy#eager` ([#2568](https://github.com/ruby/rbs/pull/2568))
+* Add signature for `Fiber#blocking` ([#2566](https://github.com/ruby/rbs/pull/2566))
+* Support BasicObject to avoid NoMethodError for `RBS::Test::TypeCheck` ([#2565](https://github.com/ruby/rbs/pull/2565))
+* Add documentation for `Range#{minmax,count,to_a,entries}` ([#2562](https://github.com/ruby/rbs/pull/2562))
+* Delegate to `Enumerable` from `Range#{min,max}` ([#2540](https://github.com/ruby/rbs/pull/2540))
+* Add URI::Generic#+ ([#2535](https://github.com/ruby/rbs/pull/2535))
+* Make IO.binread, IO.binwrite, IO.read and IO.write accept _ToPath ([#2378](https://github.com/ruby/rbs/pull/2378))
+* Support pattern argument for Enumerable#{all,any,none,one}? ([#2368](https://github.com/ruby/rbs/pull/2368))
+* fixing sig for addrinfo ([#2464](https://github.com/ruby/rbs/pull/2464))
+
+### Language updates
+
+* Add type arguments support to singleton types ([#2502](https://github.com/ruby/rbs/pull/2502))
+* Move the note about lower bound ([#2517](https://github.com/ruby/rbs/pull/2517))
+* Add support for lower bounds in type parameters ([#2490](https://github.com/ruby/rbs/pull/2490))
+
+### Library changes
+
+* Add `#type_fingerprint` methods ([#2879](https://github.com/ruby/rbs/pull/2879))
+* `top` for membership predicates of collection types ([#2878](https://github.com/ruby/rbs/pull/2878))
+* Add block parameter (`&block`) type declaration ([#2875](https://github.com/ruby/rbs/pull/2875))
+* Add splat (`*a`) and double-splat (`**a`) parameter support ([#2873](https://github.com/ruby/rbs/pull/2873))
+* Add parameter type inline annotation ([#2443](https://github.com/ruby/rbs/pull/2443))
+* Reduce compile warnings ([#2871](https://github.com/ruby/rbs/pull/2871))
+* Specify input range by byte offsets ([#2863](https://github.com/ruby/rbs/pull/2863))
+* add `extern "C"` wrapping to `rbs.h` when using C++ ([#2855](https://github.com/ruby/rbs/pull/2855))
+* Automatically inherits super method type if unannotated ([#2858](https://github.com/ruby/rbs/pull/2858))
+* Add `...` syntax to method type inline annotation syntax ([#2856](https://github.com/ruby/rbs/pull/2856))
+* Fix for string reference corruption issue ([#2836](https://github.com/ruby/rbs/pull/2836))
+* Use unreleased steep for `rake typecheck_test` ([#2842](https://github.com/ruby/rbs/pull/2842))
+* Fix breaking references after GC.compact ([#2822](https://github.com/ruby/rbs/pull/2822))
+* Fix special methods accessibility. ([#2546](https://github.com/ruby/rbs/pull/2546))
+* Fix allocation alignment ([#2788](https://github.com/ruby/rbs/pull/2788))
+* Skip `set` and `pathname` from `manifest.yaml` ([#2773](https://github.com/ruby/rbs/pull/2773))
+* Fix C++ compiler warnings ([#2755](https://github.com/ruby/rbs/pull/2755))
+* Better encoding ([#2675](https://github.com/ruby/rbs/pull/2675))
+* Move `require_eof` handling to C API ([#2678](https://github.com/ruby/rbs/pull/2678))
+* Delete debug print ([#2753](https://github.com/ruby/rbs/pull/2753))
+* Make assertions macro ([#2729](https://github.com/ruby/rbs/pull/2729))
+* Remove deprecated method `Kernel#Namespace`. Also remove `Kernel#TypeName`. ([#2480](https://github.com/ruby/rbs/pull/2480))
+* Update rdoc to 6.13.1 ([#2355](https://github.com/ruby/rbs/pull/2355))
+* Allow `self` for inline `@rbs @ivar: self` ([#2633](https://github.com/ruby/rbs/pull/2633))
+* Normalize modules during type name resolution ([#2670](https://github.com/ruby/rbs/pull/2670))
+* Only load extconf_compile_commands_json when compiling through Rake  ([#2498](https://github.com/ruby/rbs/pull/2498))
+* Use `malloc` based allocator ([#2666](https://github.com/ruby/rbs/pull/2666))
+* Add another parser benchmark script ([#2668](https://github.com/ruby/rbs/pull/2668))
+* Reuse empty array and hash ([#2667](https://github.com/ruby/rbs/pull/2667))
+* Faster lexical analyzer ([#2665](https://github.com/ruby/rbs/pull/2665))
+* Introduce `type_fingerprint` ([#2644](https://github.com/ruby/rbs/pull/2644))
+* Add module-class alias declaration ([#2636](https://github.com/ruby/rbs/pull/2636))
+* Inline constant declaration ([#2635](https://github.com/ruby/rbs/pull/2635))
+* `self` type is rejected depending on the context ([#2627](https://github.com/ruby/rbs/pull/2627))
+* Add instance variable declaration annotation ([#2632](https://github.com/ruby/rbs/pull/2632))
+* Module-self allow void once ([#2626](https://github.com/ruby/rbs/pull/2626))
+* Support inheritance in Inline RBS declaration ([#2630](https://github.com/ruby/rbs/pull/2630))
+* Inline attribute/method definitions have comments ([#2624](https://github.com/ruby/rbs/pull/2624))
+* Inline RBS declaration for attributes (`attr_***`) ([#2623](https://github.com/ruby/rbs/pull/2623))
+* Fix bad scaling in `rbs_comment_t` tokens ([#2578](https://github.com/ruby/rbs/pull/2578))
+* Update parser so that `void` type is rejected depending on the context ([#2590](https://github.com/ruby/rbs/pull/2590))
+* Implement mixin in inline RBS declarations ([#2614](https://github.com/ruby/rbs/pull/2614))
+* Validate type args given to non-generic ancestor ([#2615](https://github.com/ruby/rbs/pull/2615))
+* Add name locations to AST ([#2595](https://github.com/ruby/rbs/pull/2595))
+* Move `exit` calls to `exe/rbs` ([#2591](https://github.com/ruby/rbs/pull/2591))
+* Fix locator ([#2588](https://github.com/ruby/rbs/pull/2588))
+* Introduce standalone C parser for RBS with arena allocation ([#2398](https://github.com/ruby/rbs/pull/2398))
+* Fix subtraction of civar ([#2369](https://github.com/ruby/rbs/pull/2369))
+* Buffer with empty string ([#2551](https://github.com/ruby/rbs/pull/2551))
+* Fix unavailable MAP_ANONYMOUS ([#2470](https://github.com/ruby/rbs/pull/2470))
+* Inline minor fix ([#2514](https://github.com/ruby/rbs/pull/2514))
+* Enable `-Wc++-compat` ([#2463](https://github.com/ruby/rbs/pull/2463))
+* Expose a method to parse type parameters ([#2457](https://github.com/ruby/rbs/pull/2457))
+* Expose and fix `Block#location` ([#2456](https://github.com/ruby/rbs/pull/2456))
+* Restore RBS::Environment#declarations for backwards-compatibility ([#2393](https://github.com/ruby/rbs/pull/2393))
+* Implement `@rbs return: T` annotation ([#2406](https://github.com/ruby/rbs/pull/2406))
+* Add `@rbs skip` annotation ([#2405](https://github.com/ruby/rbs/pull/2405))
+* Inline annotations ([#2403](https://github.com/ruby/rbs/pull/2403))
+* Inline `def` support ([#2392](https://github.com/ruby/rbs/pull/2392))
+* Suppress to GCC warning with multi-line comment ([#2383](https://github.com/ruby/rbs/pull/2383))
+* Add inline class/module declaration ([#2390](https://github.com/ruby/rbs/pull/2390))
+* Add `RBS::Source::RBS` ([#2380](https://github.com/ruby/rbs/pull/2380))
+
+#### rbs prototype
+
+* [prototype runtime] Find redefined methods ([#2542](https://github.com/ruby/rbs/pull/2542))
+
+#### rbs collection
+
+### Miscellaneous
+
+* bundle update (2026-01-20) ([#2818](https://github.com/ruby/rbs/pull/2818))
+* Ruby 4.0.1 ([#2823](https://github.com/ruby/rbs/pull/2823))
+* [rbs/test] Check type arguments size ([#2809](https://github.com/ruby/rbs/pull/2809))
+* Add tsort to testing dependencies ([#2795](https://github.com/ruby/rbs/pull/2795))
+* Update ruby to 4.0 ([#2776](https://github.com/ruby/rbs/pull/2776))
+* Ruby 4.0.0 preview3 ([#2764](https://github.com/ruby/rbs/pull/2764))
+* Remove test code for bundled gems ([#2760](https://github.com/ruby/rbs/pull/2760))
+* Fix `nil` size `Enumerator` test ([#2749](https://github.com/ruby/rbs/pull/2749))
+* Fix tests for rbs_skip_tests in ruby repo ([#2725](https://github.com/ruby/rbs/pull/2725))
+* Update rdoc to v6.16 ([#2721](https://github.com/ruby/rbs/pull/2721))
+* Run CI with "4.0.0-preview2" ([#2718](https://github.com/ruby/rbs/pull/2718))
+* Minor typo fix ([#2676](https://github.com/ruby/rbs/pull/2676))
+* Add -j option to make ([#2658](https://github.com/ruby/rbs/pull/2658))
+* Allows the use of a path list as RBS_SKIP_TESTS ([#2612](https://github.com/ruby/rbs/pull/2612))
+* Fix clang-format ([#2589](https://github.com/ruby/rbs/pull/2589))
+* Restrict the execution of the valgrind task to when the C code has been modified. ([#2552](https://github.com/ruby/rbs/pull/2552))
+* Set force_ruby_platform for bundler when head ([#2555](https://github.com/ruby/rbs/pull/2555))
+* More skip paths with valgrind ([#2557](https://github.com/ruby/rbs/pull/2557))
+* Run the `Encoding::Converter` test ([#2550](https://github.com/ruby/rbs/pull/2550))
+* Fix CI ([#2527](https://github.com/ruby/rbs/pull/2527))
+* Replace reference with official documentation ([#2453](https://github.com/ruby/rbs/pull/2453))
+* Add clangd integration for improved C extension development ([#2481](https://github.com/ruby/rbs/pull/2481))
+* Setup clang format for C code ([#2437](https://github.com/ruby/rbs/pull/2437))
+* Add `super` calls in `setup` ([#2484](https://github.com/ruby/rbs/pull/2484))
+* Suppress warnings during testing ([#2370](https://github.com/ruby/rbs/pull/2370))
+* Update rubocop-on-rbs and use plugins ([#2345](https://github.com/ruby/rbs/pull/2345))
+* Fix error at Ruby CI ([#2445](https://github.com/ruby/rbs/pull/2445))
+* Use `erb` instead of `set` for load path testing ([#2439](https://github.com/ruby/rbs/pull/2439))
+* Skip loading ruby_memcheck ([#2349](https://github.com/ruby/rbs/pull/2349))
+* Forcibly uninstall gems even if there is a dependency problem. ([#2346](https://github.com/ruby/rbs/pull/2346))
+
+## 3.10.3 (2026-01-30)
+
+This is a minor fix around the dependency to `tsort`.
+
+## Pull Requests
+
+* Merge pull request #2601 from ima1zumi/add-tsort-dep ([#2834](https://github.com/ruby/rbs/pull/2834))
+
+## 3.10.2 (2026-01-07)
+
+This is a minor fix on arena allocator alignment.
+
+### Pull Requests
+
+* Merge pull request #2788 from ruby/fix-alloc-alignment ([#2790](https://github.com/ruby/rbs/pull/2790))
+
+## 3.10.1 (2026-01-07)
+
+This is a follow-up release for Ruby 4.0.0 with documentation update based on Ruby 4.0.0, and bugfixes related to set/pathname library loading.
+
+### Pull Requests
+
+* Merge pull request #2777 from ksss/pathname-ext ([#2786](https://github.com/ruby/rbs/pull/2786))
+* Ruby 4.0.0 backports ([#2785](https://github.com/ruby/rbs/pull/2785))
+* [Backport] Fix subtraction of civar ([#2783](https://github.com/ruby/rbs/pull/2783))
+* [Backport] Update ruby to 4.0 ([#2778](https://github.com/ruby/rbs/pull/2778))
+
+## 3.10.0 (2025-12-23)
+
+RBS 3.10.0 ships with a pure C parser implementation, signature updates for Ruby 4.0, and various bug fixes.
+
+### Pure C parser implementation
+
+The new parser implementation was announced at [RubyKaigi 2025](https://rubykaigi.org/2025/presentations/amomchilov.html) and is finally shipped as a RubyGem!
+
+The new parser is faster than the one in 3.9 and is portable — it is independent of the Ruby runtime and is used to implement Sorbet’s RBS support.
+
+### Type definition of bundled gems
+
+The type definitions of `cgi` have been moved to [gem_rbs_collection](https://github.com/ruby/gem_rbs_collection/tree/main/gems/cgi), as it has been migrated to a bundled gem in Ruby 4.0
+
+`cgi-escape` has been added to `stdlib`. You may need to declare a dependency on `cgi-escape` in your `manifest.yaml`, add `-r cgi-escape` to your command line, or update your type checker configuration.
+
+```yaml
+dependencies:
+  - name: cgi-escape
+```
+
+The type definitions for `pathname` have also been moved from `stdlib` to `core`, as it is now implemented as part of the core library.
+
+### Pull Requests
+
+* [Backport] Support rdoc v7 ([#2770](https://github.com/ruby/rbs/pull/2770))
+* [Backport] Check tuple type length ([#2766](https://github.com/ruby/rbs/pull/2766))
+* Backport update to 4.0.0-preview3 ([#2768](https://github.com/ruby/rbs/pull/2768))
+* [Backport] Remove test code for bundled gems ([#2762](https://github.com/ruby/rbs/pull/2762))
+* Merge pull request #2761 from ruby/update-minitest ([#2763](https://github.com/ruby/rbs/pull/2763))
+* [Backport] Support BigDecimal v4 ([#2759](https://github.com/ruby/rbs/pull/2759))
+* Parser/lexer backports ([#2756](https://github.com/ruby/rbs/pull/2756))
+* Merge pull request #2753 from ruby/delete-printf ([#2754](https://github.com/ruby/rbs/pull/2754))
+* Backports ([#2751](https://github.com/ruby/rbs/pull/2751))
+* Merge pull request #2728 from ruby/cgi ([#2747](https://github.com/ruby/rbs/pull/2747))
+* Merge pull request #2729 from ruby/rbs-assert ([#2748](https://github.com/ruby/rbs/pull/2748))
+* Merge pull request #2749 from ruby/fix-test ([#2750](https://github.com/ruby/rbs/pull/2750))
+* Backport RBS file updates ([#2742](https://github.com/ruby/rbs/pull/2742))
+* Backport JSON PRs ([#2740](https://github.com/ruby/rbs/pull/2740))
+* Merge pull request #2718 from ruby/ruby-4 ([#2741](https://github.com/ruby/rbs/pull/2741))
+* [Backport] Move Pathname to core from stdlib ([#2730](https://github.com/ruby/rbs/pull/2730))
+* Backport rdoc 6.16 ([#2722](https://github.com/ruby/rbs/pull/2722))
+* Backport rdoc support ([#2719](https://github.com/ruby/rbs/pull/2719))
+* Backport "Remove sig for IO#{ready?,nread}" ([#2720](https://github.com/ruby/rbs/pull/2720))
+* Backport more pure C parsers ([#2679](https://github.com/ruby/rbs/pull/2679))
+* Backport module name normalization ([#2673](https://github.com/ruby/rbs/pull/2673))
+* Backport pure-C parser ([#2671](https://github.com/ruby/rbs/pull/2671))
+* Fix test failure ([#2672](https://github.com/ruby/rbs/pull/2672))
+
+## 3.9.5 (2025-09-08)
+
+### Signature updates
+
+* Merge pull request #2655 from ruby/silence-string-deprecation ([#2656](https://github.com/ruby/rbs/pull/2656))
+
+### Miscellaneous
+
+* Allows the use of a path list as RBS_SKIP_TESTS ([#2641](https://github.com/ruby/rbs/pull/2641))
+* Suppress to GCC warning with multi-line comment ([#2646](https://github.com/ruby/rbs/pull/2646))
+* Backport to 3.9 ([#2487](https://github.com/ruby/rbs/pull/2487))
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
+## 3.9.4 (2025-05-15)
+
+### Miscellaneous
+
+* Backport test/CI fixes to 3.9 ([#2487](https://github.com/ruby/rbs/pull/2487))
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
+## 3.9.3 (2025-05-09)
+
+### Miscellaneous
+
+* Use erb instead of set for load path testing ([#2468](https://github.com/ruby/rbs/pull/2468))
+
+## 3.9.2 (2025-03-31)
+
+### Library changes
+
+* Change `{}` to `{ 0 }` ([#2354](https://github.com/ruby/rbs/pull/2354))
+
+## 3.9.1 (2025-03-24)
+
+### Miscellaneous
+
+* `did_you_mean` is a default gem ([#2348](https://github.com/ruby/rbs/pull/2348))
+* Skip loading ruby_memcheck ([#2347](https://github.com/ruby/rbs/pull/2347))
+
 ## 3.9.0 (2025-03-18)
 
 ### Miscellaneous
