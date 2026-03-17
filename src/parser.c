@@ -1120,7 +1120,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     switch (parser->current_token.type) {
     case pLPAREN: {
         rbs_node_t *lparen_type;
-        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, false, self_allowed, classish_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, void_allowed, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRPAREN);
         *type = lparen_type;
         return true;

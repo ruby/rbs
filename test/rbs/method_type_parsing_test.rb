@@ -32,6 +32,12 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     Parser.parse_method_type("(?foo?: Integer, ?bar!: String)->void")
   end
 
+  def test_method_type__void_in_paren
+    Parser.parse_method_type("() -> (void)").tap do |type|
+      assert_instance_of Types::Bases::Void, type.type.return_type
+    end
+  end
+
   def test_method_param
     Parser.parse_method_type("(untyped _, top __, Object _2, String _abc_123)->void").yield_self do |type|
       assert_equal "(untyped _, top __, Object _2, String _abc_123) -> void", type.to_s
