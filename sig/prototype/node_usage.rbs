@@ -1,8 +1,8 @@
 module RBS
   module Prototype
     class NodeUsage
-      include Helpers
-      
+      include RubyVMHelpers
+
       type node = RubyVM::AbstractSyntaxTree::Node
 
       attr_reader node: node

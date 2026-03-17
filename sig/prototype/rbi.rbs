@@ -1,75 +1,108 @@
 module RBS
   module Prototype
-    class RBI
-      include Helpers
-      
-      attr_reader decls: Array[AST::Declarations::t]
+    module RBI
+      def self.new: () -> Base
 
-      type module_decl = AST::Declarations::Class | AST::Declarations::Module
+      class Base
+        include CommentParser
 
-      # A stack representing the module nesting structure in the Ruby code
-      attr_reader modules: Array[module_decl]
+        type module_decl = AST::Declarations::Class | AST::Declarations::Module
 
-      # Last subsequent `sig` calls
-      attr_reader last_sig: Array[RubyVM::AbstractSyntaxTree::Node]?
+        attr_reader decls: Array[AST::Declarations::t]
 
-      def initialize: () -> void
+        attr_reader modules: Array[module_decl]
 
-      def parse: (String) -> void
+        attr_reader last_sig: Array[untyped]?
 
-      def nested_name: (RubyVM::AbstractSyntaxTree::Node name) -> TypeName
+        def initialize: () -> void
 
-      def current_namespace: () -> Namespace
+        def parse: (String) -> void
 
-      def push_class: (
-        RubyVM::AbstractSyntaxTree::Node name,
-        RubyVM::AbstractSyntaxTree::Node super_class,
-        comment: AST::Comment?
-      ) { () -> void } -> void
+        def nested_name: (untyped name) -> TypeName
 
-      def push_module: (RubyVM::AbstractSyntaxTree::Node name, comment: AST::Comment?) { () -> void } -> void
+        def current_namespace: () -> Namespace
 
-      # The inner most module/class definition, returns `nil` on toplevel
-      def current_module: () -> module_decl?
+        def push_class: (untyped name, untyped super_class, comment: AST::Comment?) { () -> void } -> void
 
-      # The inner most module/class definition, raises on toplevel
-      def current_module!: () -> module_decl
+        def push_module: (untyped name, comment: AST::Comment?) { () -> void } -> void
 
-      # Put a `sig` call to current list.
-      def push_sig: (RubyVM::AbstractSyntaxTree::Node node) -> void
+        def current_module: () -> module_decl?
 
-      # Clear the `sig` call list
-      def pop_sig: () -> Array[RubyVM::AbstractSyntaxTree::Node]?
+        def current_module!: () -> module_decl
 
-      def join_comments: (Array[RubyVM::AbstractSyntaxTree::Node] nodes, Hash[Integer, AST::Comment] comments) -> AST::Comment
+        def push_sig: (untyped node) -> void
 
-      def process: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment], ?outer: Array[RubyVM::AbstractSyntaxTree::Node]) -> void
+        def pop_sig: () -> Array[untyped]?
 
-      def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
+        def const_to_name: (untyped node) -> TypeName
+      end
 
-      def parse_params: (RubyVM::AbstractSyntaxTree::Node args_node, RubyVM::AbstractSyntaxTree::Node args, MethodType method_type, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
+      class RubyVM < Base
+        include RubyVMHelpers
 
-      def type_of: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
+        type node = RubyVM::AbstractSyntaxTree::Node
 
-      def type_of0: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
+        def join_comments: (Array[node], Hash[Integer, AST::Comment]) -> AST::Comment
 
-      def proc_type?: (RubyVM::AbstractSyntaxTree::Node type_node) -> bool
+        def process: (node, comments: Hash[Integer, AST::Comment], ?outer: Array[node]) -> void
 
-      def call_node?: (RubyVM::AbstractSyntaxTree::Node node, name: Symbol, ?receiver: ^(RubyVM::AbstractSyntaxTree::Node) -> bool, ?args: ^(RubyVM::AbstractSyntaxTree::Node) -> bool) -> bool
+        def method_type: (node?, node?, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
 
-      # Receives a constant node and returns `TypeName` instance
-      def const_to_name: (RubyVM::AbstractSyntaxTree::Node node) -> TypeName
+        def parse_params: (node, node, MethodType, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
 
-      # Receives `:ARRAY` or `:LIST` node and yields the child nodes.
-      def each_arg: (RubyVM::AbstractSyntaxTree::Node array) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
-                  | (RubyVM::AbstractSyntaxTree::Node array) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
+        def type_of: (node, variables: Array[AST::TypeParam]) -> Types::t
 
-      # Receives node and yields the child nodes.
-      def each_child: (RubyVM::AbstractSyntaxTree::Node node) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
-                    | (RubyVM::AbstractSyntaxTree::Node node) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
+        def type_of0: (node, variables: Array[AST::TypeParam]) -> Types::t
 
-      # Receives a keyword `:HASH` node and returns hash instance.
-      def node_to_hash: (RubyVM::AbstractSyntaxTree::Node node) -> Hash[Symbol, RubyVM::AbstractSyntaxTree::Node]?
+        def proc_type?: (node) -> bool
+
+        def call_node?: (node, name: Symbol, ?receiver: ^(node) -> bool, ?args: ^(node) -> bool) -> bool
+
+        def each_arg: (node?) { (node) -> void } -> void
+                    | (node?) -> Enumerator[node, void]
+
+        def each_child: (node) { (node) -> void } -> void
+
+        def node_to_hash: (node?) -> Hash[Symbol, node]?
+
+        def untyped: () -> Types::Bases::Any
+
+        @untyped: Types::Bases::Any
+      end
+
+      class Prism < Base
+        def process: (untyped, ?outer: Array[untyped], comments: Hash[Integer, AST::Comment]) -> void
+
+        private
+
+        def handle_fcall: (untyped, outer: Array[untyped], comments: Hash[Integer, AST::Comment]) -> void
+
+        def handle_sig: (untyped) -> void
+
+        def join_comments: (Array[untyped], Hash[Integer, AST::Comment]) -> AST::Comment
+
+        def method_type: (Prism::DefNode?, untyped, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
+
+        def walk_sig_chain: (Prism::DefNode?, untyped, MethodType, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
+
+        def parse_params: (Prism::DefNode, Array[untyped], MethodType, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
+
+        def args_to_hash: (untyped, variables: Array[AST::TypeParam]) -> Hash[Symbol, Types::t]
+
+        def type_of: (untyped, variables: Array[AST::TypeParam]) -> Types::t
+
+        def type_of0: (untyped, variables: Array[AST::TypeParam]) -> Types::t
+
+        def t_call?: (untyped) -> bool
+
+        def handle_t_call: (untyped, variables: Array[AST::TypeParam]) -> Types::t
+
+        def proc_type?: (untyped) -> bool
+
+        def handle_cdecl: (Prism::ConstantWriteNode) -> void
+
+        def symbol_value: (untyped) -> Symbol?
+      end
     end
   end
 end

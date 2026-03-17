@@ -1021,7 +1021,7 @@ end
   end
 
   def test_literal_to_type
-    parser = RBS::Prototype::RB.new
+    parser = RBS::Prototype::RB::RubyVM.new
     [
       [%{"abc"}, %{"abc"}],
       [%{:abc}, %{:abc}],
@@ -1038,7 +1038,7 @@ end
   end
 
   def test_const_to_name
-    parser = RBS::Prototype::RB.new
+    parser = RBS::Prototype::RB::RubyVM.new
     [
       ["self", RBS::TypeName.parse("::Foo")],
       ["Bar", RBS::TypeName.parse("Bar")],

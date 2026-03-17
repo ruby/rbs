@@ -1,9 +1,13 @@
 module RBS
   module Prototype
-    module Helpers
-      type node = RubyVM::AbstractSyntaxTree::Node
+    module CommentParser
+      def build_comments_prism: (Array[Prism::Comment] comments, include_trailing: bool) -> Hash[Integer, AST::Comment]
 
       def parse_comments: (String, include_trailing: bool) -> Hash[Integer, AST::Comment]
+    end
+
+    module RubyVMHelpers
+      type node = RubyVM::AbstractSyntaxTree::Node
 
       def block_from_body: (node) -> Types::Block?
 
@@ -15,8 +19,6 @@ module RBS
 
       def keyword_hash?: (node) -> bool
 
-      # Returns a symbol if the node is a symbol literal node
-      # 
       def symbol_literal_node?: (node) -> Symbol?
 
       def args_from_node: (node?) -> Array[untyped]

@@ -3,7 +3,7 @@
 module RBS
   module Prototype
     class NodeUsage
-      include Helpers
+      include RubyVMHelpers
 
       attr_reader :conditional_nodes
 

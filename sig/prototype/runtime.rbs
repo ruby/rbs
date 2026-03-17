@@ -28,7 +28,7 @@ module RBS
       end
 
       class ValueObjectBase
-        include Helpers
+        include Runtime::Helpers
 
         # @target_class stores the singleton object of `Data` or `Struct` subclass
         @target_class: untyped
@@ -36,6 +36,10 @@ module RBS
         def build_decl: () -> AST::Declarations::Class
 
         private
+
+        def untyped: () -> Types::Bases::Any
+
+        @untyped: Types::Bases::Any
 
         def build_member_accessors: (untyped ast_members_class) -> untyped
 
@@ -111,7 +115,8 @@ module RBS
 
       @todo_object: Todo?
 
-      include Helpers
+      include RubyVMHelpers
+      include Runtime::Helpers
 
       attr_reader patterns: Array[String]
 
@@ -171,8 +176,6 @@ module RBS
       def type_args: (TypeName type_name) -> Array[Types::t]
 
       def block_from_ast_of: (UnboundMethod method) -> Types::Block?
-
-      def block_from_body: (RubyVM::AbstractSyntaxTree::Node) -> Types::Block?
 
       def can_alias?: (Module, UnboundMethod) -> bool
 

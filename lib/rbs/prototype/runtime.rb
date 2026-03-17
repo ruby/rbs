@@ -66,7 +66,6 @@ module RBS
       end
       private_constant :Todo
 
-      include Prototype::Helpers
       include Runtime::Helpers
 
       attr_reader :patterns
@@ -659,18 +658,40 @@ module RBS
         end
       end
 
-      def block_from_ast_of(method)
-        begin
-          ast = RubyVM::AbstractSyntaxTree.of(method)
-        rescue ArgumentError
-          return # When the method is defined in eval
-        rescue RuntimeError => error
-          raise unless error.message.include?("prism")
-          return # When the method was compiled by prism
+      if ENV['RBS_RUBY_PARSER'] == 'prism'
+        def block_from_ast_of(method)
+          iseq = RubyVM::InstructionSequence.of(method)
+          return unless iseq
+          return unless (path = iseq.absolute_path)
+
+          node_id = iseq.to_a[4][:node_id]
+          result = Prism.parse_file(path)
+          def_node = result.value.breadth_first_search { |n| n.node_id == node_id && n.is_a?(::Prism::DefNode) } #: Prism::DefNode?
+          if def_node
+            prism = RB::Prism.new
+            prism.block_from_def(def_node, prism.build_body_info(def_node.body))
+          end
+        end
+      else
+        include Prototype::RubyVMHelpers
+
+        def untyped
+          @untyped ||= Types::Bases::Any.new(location: nil)
         end
 
-        if ast && ast.type == :SCOPE
-          block_from_body(ast)
+        def block_from_ast_of(method)
+          begin
+            ast = RubyVM::AbstractSyntaxTree.of(method)
+          rescue ArgumentError
+            return # When the method is defined in eval
+          rescue RuntimeError => error
+            raise unless error.message.include?("prism")
+            return # When the method was compiled by prism
+          end
+
+          if ast && ast.type == :SCOPE
+            block_from_body(ast)
+          end
         end
       end
     end

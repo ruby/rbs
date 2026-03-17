@@ -6,8 +6,6 @@ module RBS
   module Prototype
     class Runtime
       class ValueObjectBase
-        include Helpers
-
         def initialize(target_class)
           @target_class = target_class
         end
@@ -29,6 +27,10 @@ module RBS
         end
 
         private
+
+        def untyped
+          @untyped ||= Types::Bases::Any.new(location: nil)
+        end
 
         # def self.members: () -> [ :foo, :bar ]
         # def members: () -> [ :foo, :bar ]

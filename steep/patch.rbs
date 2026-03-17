@@ -7,3 +7,9 @@ end
 class Proc
   def ruby2_keywords: () -> self
 end
+
+class RubyVM
+  class InstructionSequence
+    def self.of: (Method | UnboundMethod | Proc) -> RubyVM::InstructionSequence?
+  end
+end
