@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 383f4ca6481bb7cdb9338015195a5ce35806349e
+  revision: 11af05194a4241d4fa5099f1bcb09b333cb63c6c
   specs:
     steep (2.0.0.dev)
       activesupport (>= 5.1)
@@ -11,7 +11,6 @@ GIT
       language_server-protocol (>= 3.17.0.4, < 4.0)
       listen (~> 3.0)
       logger (>= 1.3.0)
-      mutex_m (>= 0.3.0)
       parser (>= 3.2)
       rainbow (>= 2.2.2, < 4.0)
       rbs (~> 4.0.0.dev)
@@ -162,7 +161,7 @@ GEM
       rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.49.0)
+    rubocop-ast (1.49.1)
       parser (>= 3.3.7.2)
       prism (~> 1.7)
     rubocop-on-rbs (1.9.1)
