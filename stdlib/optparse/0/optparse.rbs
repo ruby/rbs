@@ -107,15 +107,16 @@
 #
 # OptionParser comes with a few ready-to-use kinds of type coercion. They are:
 #
-# *   Date  -- Anything accepted by `Date.parse` (need to require
-#     `optparse/date`)
-# *   DateTime -- Anything accepted by `DateTime.parse` (need to require
-#     `optparse/date`)
-# *   Time -- Anything accepted by `Time.httpdate` or `Time.parse` (need to
-#     require `optparse/time`)
-# *   URI  -- Anything accepted by `URI.parse` (need to require `optparse/uri`)
-# *   Shellwords -- Anything accepted by `Shellwords.shellwords` (need to
-#     require `optparse/shellwords`)
+# *   Date  -- Anything accepted by <code>Date.parse</code> (need to require
+#     <code>optparse/date</code>)
+# *   DateTime -- Anything accepted by <code>DateTime.parse</code> (need to
+#     require <code>optparse/date</code>)
+# *   Time -- Anything accepted by <code>Time.httpdate</code> or
+#     <code>Time.parse</code> (need to require <code>optparse/time</code>)
+# *   URI  -- Anything accepted by <code>URI.parse</code> (need to require
+#     <code>optparse/uri</code>)
+# *   Shellwords -- Anything accepted by <code>Shellwords.shellwords</code>
+#     (need to require <code>optparse/shellwords</code>)
 # *   String -- Any non-empty string
 # *   Integer -- Any integer. Will convert octal. (e.g. 124, -3, 040)
 # *   Float -- Any float. (e.g. 10, 3.14, -100E+13)
@@ -760,8 +761,8 @@ class OptionParser
   # -->
   # Parses command line arguments `argv` in order. When a block is given, each
   # non-option argument is yielded. When optional `into` keyword argument is
-  # provided, the parsed option values are stored there via `[]=` method (so it
-  # can be Hash, or OpenStruct, or other similar object).
+  # provided, the parsed option values are stored there via <code>[]=</code>
+  # method (so it can be Hash, or OpenStruct, or other similar object).
   #
   # Returns the rest of `argv` left unparsed.
   #
@@ -784,7 +785,8 @@ class OptionParser
   # Parses command line arguments `argv` in order when environment variable
   # POSIXLY_CORRECT is set, and in permutation mode otherwise. When optional
   # `into` keyword argument is provided, the parsed option values are stored there
-  # via `[]=` method (so it can be Hash, or OpenStruct, or other similar object).
+  # via <code>[]=</code> method (so it can be Hash, or OpenStruct, or other
+  # similar object).
   #
   def parse: (*String argv, ?into: _Intoable) -> Array[String]
            | (Array[String] argv, ?into: _Intoable) -> Array[String]
@@ -804,8 +806,8 @@ class OptionParser
   # -->
   # Parses command line arguments `argv` in permutation mode and returns list of
   # non-option arguments. When optional `into` keyword argument is provided, the
-  # parsed option values are stored there via `[]=` method (so it can be Hash, or
-  # OpenStruct, or other similar object).
+  # parsed option values are stored there via <code>[]=</code> method (so it can
+  # be Hash, or OpenStruct, or other similar object).
   #
   def permute: (*String argv, ?into: _Intoable) -> Array[String]
              | (Array[String] argv, ?into: _Intoable) -> Array[String]
@@ -876,10 +878,12 @@ class OptionParser
   #
   def separator: (String string) -> void
 
+  # <!-- rdoc-file=lib/optparse.rb -->
   # Heading banner preceding summary.
   #
   alias set_banner banner=
 
+  # <!-- rdoc-file=lib/optparse.rb -->
   # Program name to be emitted in error message and default banner, defaults to
   # $0.
   #

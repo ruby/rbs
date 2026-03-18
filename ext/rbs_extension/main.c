@@ -67,10 +67,12 @@ static void declare_type_variables(rbs_parser_t *parser, VALUE variables, VALUE 
         }
 
         VALUE name_str = rb_sym2str(symbol);
+        uint8_t *copied_name = (uint8_t *) malloc((size_t) RSTRING_LEN(name_str));
+        memcpy((void *) copied_name, RSTRING_PTR(name_str), RSTRING_LEN(name_str));
 
-        rbs_constant_id_t id = rbs_constant_pool_insert_shared(
+        rbs_constant_id_t id = rbs_constant_pool_insert_owned(
             &parser->constant_pool,
-            (const uint8_t *) RSTRING_PTR(name_str),
+            copied_name,
             RSTRING_LEN(name_str)
         );
 

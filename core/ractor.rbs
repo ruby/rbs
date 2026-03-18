@@ -96,8 +96,9 @@
 # object.
 #
 # Deep cloning of objects may be slow, and sometimes impossible. Alternatively,
-# `move: true` may be used during sending. This will *move* the unshareable
-# object to the receiving ractor, making it inaccessible to the sending ractor.
+# <code>move: true</code> may be used during sending. This will *move* the
+# unshareable object to the receiving ractor, making it inaccessible to the
+# sending ractor.
 #
 #     data = ['foo', 'bar']
 #     r = Ractor.new do
@@ -171,8 +172,8 @@
 #     # I see C
 #     # can not access instance variables of classes/modules from non-main Ractors (RuntimeError)
 #
-# See also the description of `# shareable_constant_value` pragma in [Comments
-# syntax](rdoc-ref:syntax/comments.rdoc) explanation.
+# See also the description of <code># shareable_constant_value</code> pragma in
+# [Comments syntax](rdoc-ref:syntax/comments.rdoc) explanation.
 #
 # ## Ractors vs threads
 #
@@ -392,9 +393,10 @@ class Ractor
   #     # r1 done
   #     # r0 done
   #
-  # The following example is almost equivalent to `ractors.map(&:value)` except
-  # the thread is unblocked when any of the ractors has terminated as opposed to
-  # waiting for their termination in the array element order.
+  # The following example is almost equivalent to
+  # <code>ractors.map(&:value)</code> except the thread is unblocked when any of
+  # the ractors has terminated as opposed to waiting for their termination in the
+  # array element order.
   #
   #     values = []
   #     until ractors.empty?
@@ -425,8 +427,8 @@ class Ractor
   #   - Ractor.shareable_proc(self: nil){} -> shareable proc
   # -->
   # Returns a shareable copy of the given block's Proc. The value of `self` in the
-  # Proc will be replaced with the value passed via the `self:` keyword, or `nil`
-  # if not given.
+  # Proc will be replaced with the value passed via the <code>self:</code>
+  # keyword, or `nil` if not given.
   #
   # In a shareable Proc, access to any outer variables if prohibited.
   #
@@ -539,8 +541,10 @@ class Ractor
   # Registers the port as a monitoring port for this ractor. When the ractor
   # terminates, the port receives a Symbol object.
   #
-  # *   `:exited` is sent if the ractor terminates without an unhandled exception.
-  # *   `:aborted` is sent if the ractor terminates by an unhandled exception.
+  # *   <code>:exited</code> is sent if the ractor terminates without an unhandled
+  #     exception.
+  # *   <code>:aborted</code> is sent if the ractor terminates by an unhandled
+  #     exception.
   #
   #         r = Ractor.new{ some_task() }
   #         r.monitor(port = Ractor::Port.new)

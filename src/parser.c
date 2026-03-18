@@ -60,6 +60,41 @@
     case kRETURN:       \
         /* nop */
 
+#define PARAM_NAME_CASES \
+    case kBOOL:          \
+    case kBOT:           \
+    case kCLASS:         \
+    case kFALSE:         \
+    case kINSTANCE:      \
+    case kINTERFACE:     \
+    case kNIL:           \
+    case kSELF:          \
+    case kSINGLETON:     \
+    case kTOP:           \
+    case kTRUE:          \
+    case kVOID:          \
+    case kTYPE:          \
+    case kUNCHECKED:     \
+    case kIN:            \
+    case kOUT:           \
+    case kEND:           \
+    case kDEF:           \
+    case kINCLUDE:       \
+    case kEXTEND:        \
+    case kPREPEND:       \
+    case kALIAS:         \
+    case kMODULE:        \
+    case kATTRREADER:    \
+    case kATTRWRITER:    \
+    case kATTRACCESSOR:  \
+    case kPUBLIC:        \
+    case kPRIVATE:       \
+    case kUNTYPED:       \
+    case kUSE:           \
+    case kAS:            \
+    case k__TODO__:      \
+        /* nop */
+
 #define CHECK_PARSE(call) \
     if (!call) {          \
         return false;     \
@@ -519,7 +554,7 @@ static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_
 PARSE_OPTIONAL_PARAMS:
     while (true) {
         switch (parser->next_token.type) {
-        case pQUESTION:
+        case pQUESTION: {
             rbs_parser_advance(parser);
 
             if (is_keyword(parser)) {
@@ -533,6 +568,7 @@ PARSE_OPTIONAL_PARAMS:
             rbs_node_list_append(params->optional_positionals, (rbs_node_t *) param);
 
             break;
+        }
         default:
             goto PARSE_REST_PARAM;
         }
@@ -597,13 +633,13 @@ PARSE_KEYWORDS:
             }
             break;
 
-        case pSTAR2:
+        case pSTAR2: {
             rbs_parser_advance(parser);
             rbs_types_function_param_t *param = NULL;
             CHECK_PARSE(parse_function_param(parser, &param, self_allowed, classish_allowed));
             params->rest_keywords = (rbs_node_t *) param;
             break;
-
+        }
         case tUIDENT:
         case tLIDENT:
         case tQIDENT:
@@ -710,7 +746,7 @@ typedef struct {
              | {} self_type_binding? `->` <optional>
 */
 NODISCARD
-static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse_function_result **result, bool self_allowed, bool classish_allowed) {
+static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool block_allowed, parse_function_result **result, bool self_allowed, bool classish_allowed) {
     rbs_node_t *function = NULL;
     rbs_types_block_t *block = NULL;
     rbs_node_t *function_self_type = NULL;
@@ -740,6 +776,11 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, parse
 
     bool required = true;
     rbs_range_t block_range;
+
+    if (!block_allowed && (parser->next_token.type == pLBRACE || (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE))) {
+        rbs_parser_set_error(parser, parser->next_token, true, "block is not allowed in this context");
+        return false;
+    }
 
     if (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE) {
         // Optional block
@@ -829,7 +870,7 @@ NODISCARD
 static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed, bool classish_allowed) {
     rbs_position_t start = parser->current_token.range.start;
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, true, &result, self_allowed, classish_allowed));
+    CHECK_PARSE(parse_function(parser, true, true, &result, self_allowed, classish_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
     rbs_location_range range = { .start_char = start.char_pos, .start_byte = start.byte_pos, .end_char = end.char_pos, .end_byte = end.byte_pos };
@@ -1042,10 +1083,10 @@ static bool parse_instance_type(rbs_parser_t *parser, bool parse_alias, rbs_node
 }
 
 /*
-  singleton_type ::= {`singleton`} `(` type_name <`)`>
+  singleton_type ::= {`singleton`} `(` type_name <`)`> type_args?
 */
 NODISCARD
-static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton_t **singleton) {
+static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton_t **singleton, bool self_allowed, bool classish_allowed) {
     ASSERT_TOKEN(parser, kSINGLETON);
 
     rbs_range_t type_range;
@@ -1058,9 +1099,26 @@ static bool parse_singleton_type(rbs_parser_t *parser, rbs_types_class_singleton
     CHECK_PARSE(parse_type_name(parser, CLASS_NAME, &name_range, &type_name));
 
     ADVANCE_ASSERT(parser, pRPAREN);
-    type_range.end = parser->current_token.range.end;
 
-    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), RBS_RANGE_LEX2AST(type_range), type_name, RBS_RANGE_LEX2AST(name_range));
+    rbs_node_list_t *types = rbs_node_list_new(ALLOCATOR());
+
+    rbs_location_range args_range = RBS_LOCATION_NULL_RANGE;
+    if (parser->next_token.type == pLBRACKET) {
+        rbs_parser_advance(parser);
+        args_range.start_byte = parser->current_token.range.start.byte_pos;
+        args_range.start_char = parser->current_token.range.start.char_pos;
+        CHECK_PARSE(parse_type_list(parser, pRBRACKET, types, true, self_allowed, classish_allowed));
+        ADVANCE_ASSERT(parser, pRBRACKET);
+        args_range.end_byte = parser->current_token.range.end.byte_pos;
+        args_range.end_char = parser->current_token.range.end.char_pos;
+    }
+
+    type_range.end = parser->current_token.range.end;
+    rbs_location_range loc = RBS_RANGE_LEX2AST(type_range);
+
+    *singleton = rbs_types_class_singleton_new(ALLOCATOR(), loc, type_name, types, RBS_RANGE_LEX2AST(name_range));
+    (*singleton)->args_range = args_range;
+
     return true;
 }
 
@@ -1102,7 +1160,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     switch (parser->current_token.type) {
     case pLPAREN: {
         rbs_node_t *lparen_type;
-        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, false, self_allowed, classish_allowed));
+        CHECK_PARSE(rbs_parse_type(parser, &lparen_type, void_allowed, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRPAREN);
         *type = lparen_type;
         return true;
@@ -1242,7 +1300,7 @@ static bool parse_simple(rbs_parser_t *parser, rbs_node_t **type, bool void_allo
     }
     case kSINGLETON: {
         rbs_types_class_singleton_t *singleton = NULL;
-        CHECK_PARSE(parse_singleton_type(parser, &singleton));
+        CHECK_PARSE(parse_singleton_type(parser, &singleton, self_allowed, classish_allowed));
         *type = (rbs_node_t *) singleton;
         return true;
     }
@@ -1544,7 +1602,7 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     type_range.start = parser->next_token.range.start;
 
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, false, &result, true, classish_allowed));
+    CHECK_PARSE(parse_function(parser, false, true, &result, true, classish_allowed));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -3458,7 +3516,9 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
     }
 
     if (start_pos > 0) {
-        rbs_skipn(lexer, start_pos);
+        while (lexer->current.byte_pos < start_pos) {
+            rbs_skip(lexer);
+        }
     }
 
     lexer->start = lexer->current;
@@ -3558,12 +3618,13 @@ static bool parse_method_overload(rbs_parser_t *parser, rbs_node_list_t *annotat
 }
 
 /*
-  inline_method_overloads ::= {} <overload>                        -- returns true
+  inline_method_overloads ::= {} <overload>                       -- returns true
                            | {} overload `|` ... `|` overload     -- returns true
+                           | {} overload `|` ... `|` `...`        -- returns true (dot3_location is set)
                            | {<>}                                 -- returns false
 */
 NODISCARD
-static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_range_list_t *bar_locations) {
+static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t *overloads, rbs_location_range_list_t *bar_locations, rbs_location_range *dot3_location) {
     while (true) {
         rbs_node_list_t *annotations = rbs_node_list_new(ALLOCATOR());
         rbs_method_type_t *method_type = NULL;
@@ -3588,6 +3649,12 @@ static bool parse_inline_method_overloads(rbs_parser_t *parser, rbs_node_list_t 
 
             rbs_location_range_list_append(bar_locations, bar_range);
 
+            if (parser->next_token.type == pDOT3) {
+                *dot3_location = RBS_RANGE_LEX2AST(parser->next_token.range);
+                rbs_parser_advance(parser);
+                return true;
+            }
+
             continue;
         }
 
@@ -3604,6 +3671,46 @@ static bool parse_inline_comment(rbs_parser_t *parser, rbs_location_range *comme
 
     *comment_range = RBS_RANGE_LEX2AST(parser->next_token.range);
     rbs_parser_advance(parser);
+
+    return true;
+}
+
+NODISCARD
+static bool parse_inline_param_type_annotation(rbs_parser_t *parser, rbs_ast_ruby_annotations_t **annotation, rbs_range_t rbs_range) {
+    rbs_parser_advance(parser);
+
+    rbs_location_range name_loc = rbs_location_range_current_token(parser);
+
+    ADVANCE_ASSERT(parser, pCOLON);
+
+    rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+    rbs_node_t *param_type = NULL;
+    if (!rbs_parse_type(parser, &param_type, false, true, true)) {
+        return false;
+    }
+
+    rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+    if (!parse_inline_comment(parser, &comment_loc)) {
+        return false;
+    }
+
+    rbs_location_range full_loc = {
+        .start_char = rbs_range.start.char_pos,
+        .start_byte = rbs_range.start.byte_pos,
+        .end_char = parser->current_token.range.end.char_pos,
+        .end_byte = parser->current_token.range.end.byte_pos,
+    };
+
+    *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_param_type_annotation_new(
+        ALLOCATOR(),
+        full_loc,
+        RBS_RANGE_LEX2AST(rbs_range),
+        name_loc,
+        colon_loc,
+        param_type,
+        comment_loc
+    );
 
     return true;
 }
@@ -3643,14 +3750,39 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
         rbs_parser_advance(parser);
 
         switch (parser->next_token.type) {
+        case pDOT3: {
+            rbs_location_range dot3_range = RBS_RANGE_LEX2AST(parser->next_token.range);
+            rbs_parser_advance(parser);
+
+            rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
+            rbs_location_range_list_t *bar_locations = rbs_location_range_list_new(ALLOCATOR());
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            rbs_location_range full_loc = RBS_RANGE_LEX2AST(full_range);
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_method_types_annotation_new(
+                ALLOCATOR(),
+                full_loc,
+                RBS_RANGE_LEX2AST(rbs_range),
+                overloads,
+                bar_locations,
+                dot3_range
+            );
+            return true;
+        }
         case pLPAREN:
         case pLBRACKET:
         case pLBRACE:
         case tANNOTATION: {
             rbs_node_list_t *overloads = rbs_node_list_new(ALLOCATOR());
             rbs_location_range_list_t *bar_locations = rbs_location_range_list_new(ALLOCATOR());
+            rbs_location_range dot3_location = RBS_LOCATION_NULL_RANGE;
 
-            if (!parse_inline_method_overloads(parser, overloads, bar_locations)) {
+            if (!parse_inline_method_overloads(parser, overloads, bar_locations, &dot3_location)) {
                 return false;
             }
 
@@ -3666,35 +3798,40 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
                 full_loc,
                 RBS_RANGE_LEX2AST(rbs_range),
                 overloads,
-                bar_locations
+                bar_locations,
+                dot3_location
             );
             return true;
         }
         case kSKIP: {
-            rbs_parser_advance(parser);
+            if (parser->next_token2.type == pCOLON) {
+                return parse_inline_param_type_annotation(parser, annotation, rbs_range);
+            } else {
+                rbs_parser_advance(parser);
 
-            rbs_range_t skip_range = parser->current_token.range;
+                rbs_range_t skip_range = parser->current_token.range;
 
-            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
-            if (!parse_inline_comment(parser, &comment_loc)) {
-                return false;
+                rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+                if (!parse_inline_comment(parser, &comment_loc)) {
+                    return false;
+                }
+
+                rbs_range_t full_range = {
+                    .start = rbs_range.start,
+                    .end = parser->current_token.range.end
+                };
+
+                rbs_location_range full_loc = RBS_RANGE_LEX2AST(full_range);
+
+                *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
+                    ALLOCATOR(),
+                    full_loc,
+                    RBS_RANGE_LEX2AST(rbs_range),
+                    RBS_RANGE_LEX2AST(skip_range),
+                    comment_loc
+                );
+                return true;
             }
-
-            rbs_range_t full_range = {
-                .start = rbs_range.start,
-                .end = parser->current_token.range.end
-            };
-
-            rbs_location_range full_loc = RBS_RANGE_LEX2AST(full_range);
-
-            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_skip_annotation_new(
-                ALLOCATOR(),
-                full_loc,
-                RBS_RANGE_LEX2AST(rbs_range),
-                RBS_RANGE_LEX2AST(skip_range),
-                comment_loc
-            );
-            return true;
         }
         case kRETURN: {
             rbs_parser_advance(parser);
@@ -3774,6 +3911,143 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
                 RBS_RANGE_LEX2AST(ivar_name_range),
                 RBS_RANGE_LEX2AST(colon_range),
                 type,
+                comment_loc
+            );
+            return true;
+        }
+        case tLIDENT:
+            PARAM_NAME_CASES {
+                return parse_inline_param_type_annotation(parser, annotation, rbs_range);
+            }
+        case pSTAR: {
+            rbs_parser_advance(parser);
+            rbs_location_range star_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == tLIDENT) {
+                rbs_parser_advance(parser);
+                name_loc = rbs_location_range_current_token(parser);
+            }
+
+            ADVANCE_ASSERT(parser, pCOLON);
+            rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+            rbs_node_t *param_type = NULL;
+            if (!rbs_parse_type(parser, &param_type, false, true, true)) {
+                return false;
+            }
+
+            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_splat_param_type_annotation_new(
+                ALLOCATOR(),
+                RBS_RANGE_LEX2AST(full_range),
+                RBS_RANGE_LEX2AST(rbs_range),
+                star_loc,
+                name_loc,
+                colon_loc,
+                param_type,
+                comment_loc
+            );
+            return true;
+        }
+        case pSTAR2: {
+            rbs_parser_advance(parser);
+            rbs_location_range star2_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == tLIDENT) {
+                rbs_parser_advance(parser);
+                name_loc = rbs_location_range_current_token(parser);
+            }
+
+            ADVANCE_ASSERT(parser, pCOLON);
+            rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+            rbs_node_t *param_type = NULL;
+            if (!rbs_parse_type(parser, &param_type, false, true, true)) {
+                return false;
+            }
+
+            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_double_splat_param_type_annotation_new(
+                ALLOCATOR(),
+                RBS_RANGE_LEX2AST(full_range),
+                RBS_RANGE_LEX2AST(rbs_range),
+                star2_loc,
+                name_loc,
+                colon_loc,
+                param_type,
+                comment_loc
+            );
+            return true;
+        }
+        case pAMP: {
+            rbs_parser_advance(parser);
+            rbs_location_range ampersand_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == tLIDENT) {
+                rbs_parser_advance(parser);
+                name_loc = rbs_location_range_current_token(parser);
+            }
+
+            ADVANCE_ASSERT(parser, pCOLON);
+            rbs_location_range colon_loc = rbs_location_range_current_token(parser);
+
+            rbs_location_range question_loc = RBS_LOCATION_NULL_RANGE;
+            if (parser->next_token.type == pQUESTION) {
+                rbs_parser_advance(parser);
+                question_loc = rbs_location_range_current_token(parser);
+            }
+
+            rbs_range_t type_range;
+            type_range.start = parser->next_token.range.start;
+
+            parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
+            if (!parse_function(parser, true, false, &result, true, true)) {
+                return false;
+            }
+
+            type_range.end = parser->current_token.range.end;
+
+            rbs_location_range comment_loc = RBS_LOCATION_NULL_RANGE;
+            if (!parse_inline_comment(parser, &comment_loc)) {
+                return false;
+            }
+
+            rbs_range_t full_range = {
+                .start = rbs_range.start,
+                .end = parser->current_token.range.end
+            };
+
+            *annotation = (rbs_ast_ruby_annotations_t *) rbs_ast_ruby_annotations_block_param_type_annotation_new(
+                ALLOCATOR(),
+                RBS_RANGE_LEX2AST(full_range),
+                RBS_RANGE_LEX2AST(rbs_range),
+                ampersand_loc,
+                name_loc,
+                colon_loc,
+                question_loc,
+                RBS_RANGE_LEX2AST(type_range),
+                result->function,
                 comment_loc
             );
             return true;

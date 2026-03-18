@@ -32,8 +32,8 @@ module URI
     # The components should be provided either as an Array, or as a Hash with keys
     # formed by preceding the component names with a colon.
     #
-    # If an Array is used, the components must be passed in the order `[userinfo,
-    # host, port, path, query, fragment]`.
+    # If an Array is used, the components must be passed in the order
+    # <code>[userinfo, host, port, path, query, fragment]</code>.
     #
     # Example:
     #

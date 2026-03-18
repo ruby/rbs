@@ -127,7 +127,7 @@ class Encoding
   # Sets default external encoding.  You should not set Encoding::default_external
   # in ruby code as strings created before changing the value may have a different
   # encoding from strings created after the value was changed., instead you should
-  # use `ruby -E` to invoke ruby with the correct default_external.
+  # use <code>ruby -E</code> to invoke ruby with the correct default_external.
   #
   # See Encoding::default_external for information on how the default external
   # encoding is used.
@@ -172,8 +172,8 @@ class Encoding
   # Sets default internal encoding or removes default internal encoding when
   # passed nil.  You should not set Encoding::default_internal in ruby code as
   # strings created before changing the value may have a different encoding from
-  # strings created after the change.  Instead you should use `ruby -E` to invoke
-  # ruby with the correct default_internal.
+  # strings created after the change.  Instead you should use <code>ruby -E</code>
+  # to invoke ruby with the correct default_internal.
   #
   # See Encoding::default_internal for information on how the default internal
   # encoding is used.
@@ -207,8 +207,8 @@ class Encoding
   #
   #
   # An ArgumentError is raised when no encoding with *name*. Only
-  # `Encoding.find("internal")` however returns nil when no encoding named
-  # "internal", in other words, when Ruby has no default internal encoding.
+  # <code>Encoding.find("internal")</code> however returns nil when no encoding
+  # named "internal", in other words, when Ruby has no default internal encoding.
   #
   def self.find: (encoding enc) -> Encoding?
 

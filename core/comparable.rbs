@@ -1,12 +1,13 @@
 # <!-- rdoc-file=compar.c -->
 # The Comparable mixin is used by classes whose objects may be ordered. The
-# class must define the `<=>` operator, which compares the receiver against
-# another object, returning a value less than 0, returning 0, or returning a
-# value greater than 0, depending on whether the receiver is less than, equal
-# to, or greater than the other object. If the other object is not comparable
-# then the `<=>` operator should return `nil`. Comparable uses `<=>` to
-# implement the conventional comparison operators (`<`, `<=`, `==`, `>=`, and
-# `>`) and the method `between?`.
+# class must define the <code><=></code> operator, which compares the receiver
+# against another object, returning a value less than 0, returning 0, or
+# returning a value greater than 0, depending on whether the receiver is less
+# than, equal to, or greater than the other object. If the other object is not
+# comparable then the <code><=></code> operator should return `nil`. Comparable
+# uses <code><=></code> to implement the conventional comparison operators
+# (<code><</code>, <code><=</code>, <code>==</code>, <code>>=</code>, and
+# <code>></code>) and the method <code>between?</code>.
 #
 #     class StringSorter
 #       include Comparable
@@ -38,7 +39,8 @@
 #
 # ## What's Here
 #
-# Module Comparable provides these methods, all of which use method `#<=>`:
+# Module Comparable provides these methods, all of which use method
+# <code>#<=></code>:
 #
 # *   #<: Returns whether `self` is less than the given object.
 # *   #<=: Returns whether `self` is less than or equal to the given object.
@@ -46,10 +48,11 @@
 # *   #>: Returns whether `self` is greater than the given object.
 # *   #>=: Returns whether `self` is greater than or equal to the given object.
 # *   #between?: Returns `true` if `self` is between two given objects.
-# *   #clamp: For given objects `min` and `max`, or range `(min..max)`, returns:
+# *   #clamp: For given objects `min` and `max`, or range
+#     <code>(min..max)</code>, returns:
 #
-#     *   `min` if `(self <=> min) < 0`.
-#     *   `max` if `(self <=> max) > 0`.
+#     *   `min` if <code>(self <=> min) < 0</code>.
+#     *   `max` if <code>(self <=> max) > 0</code>.
 #     *   `self` otherwise.
 #
 module Comparable : _WithSpaceshipOperator
@@ -57,8 +60,8 @@ module Comparable : _WithSpaceshipOperator
   #   rdoc-file=compar.c
   #   - self < other -> true or false
   # -->
-  # Returns whether `self` is "less than" `other`; equivalent to `(self <=> other)
-  # < 0`:
+  # Returns whether `self` is "less than" `other`; equivalent to <code>(self <=>
+  # other) < 0</code>:
   #
   #     'foo' < 'foo'  # => false
   #     'foo' < 'food' # => true
@@ -70,7 +73,7 @@ module Comparable : _WithSpaceshipOperator
   #   - self <= other -> true or false
   # -->
   # Returns whether `self` is "less than or equal to" `other`; equivalent to
-  # `(self <=> other) <= 0`:
+  # <code>(self <=> other) <= 0</code>:
   #
   #     'foo' <= 'foo'  # => true
   #     'foo' <= 'food' # => true
@@ -82,8 +85,9 @@ module Comparable : _WithSpaceshipOperator
   #   rdoc-file=compar.c
   #   - obj == other    -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns 0. Also returns true if *obj* and *other* are the same object.
+  # Compares two objects based on the receiver's <code><=></code> method,
+  # returning true if it returns 0. Also returns true if *obj* and *other* are the
+  # same object.
   #
   def ==: (untyped other) -> bool
 
@@ -91,8 +95,8 @@ module Comparable : _WithSpaceshipOperator
   #   rdoc-file=compar.c
   #   - obj > other    -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value greater than 0.
+  # Compares two objects based on the receiver's <code><=></code> method,
+  # returning true if it returns a value greater than 0.
   #
   def >: (untyped other) -> bool
 
@@ -100,8 +104,8 @@ module Comparable : _WithSpaceshipOperator
   #   rdoc-file=compar.c
   #   - obj >= other    -> true or false
   # -->
-  # Compares two objects based on the receiver's `<=>` method, returning true if
-  # it returns a value greater than or equal to 0.
+  # Compares two objects based on the receiver's <code><=></code> method,
+  # returning true if it returns a value greater than or equal to 0.
   #
   def >=: (untyped other) -> bool
 
@@ -109,8 +113,8 @@ module Comparable : _WithSpaceshipOperator
   #   rdoc-file=compar.c
   #   - obj.between?(min, max)    -> true or false
   # -->
-  # Returns `false` if *obj* `<=>` *min* is less than zero or if *obj* `<=>` *max*
-  # is greater than zero, `true` otherwise.
+  # Returns `false` if *obj* <code><=></code> *min* is less than zero or if *obj*
+  # <code><=></code> *max* is greater than zero, `true` otherwise.
   #
   #     3.between?(1, 5)               #=> true
   #     6.between?(1, 5)               #=> false
@@ -124,8 +128,9 @@ module Comparable : _WithSpaceshipOperator
   #   - obj.clamp(min, max) ->  obj
   #   - obj.clamp(range)    ->  obj
   # -->
-  # In `(min, max)` form, returns *min* if *obj* `<=>` *min* is less than zero,
-  # *max* if *obj* `<=>` *max* is greater than zero, and *obj* otherwise.
+  # In <code>(min, max)</code> form, returns *min* if *obj* <code><=></code> *min*
+  # is less than zero, *max* if *obj* <code><=></code> *max* is greater than zero,
+  # and *obj* otherwise.
   #
   #     12.clamp(0, 100)         #=> 12
   #     523.clamp(0, 100)        #=> 100
@@ -140,9 +145,10 @@ module Comparable : _WithSpaceshipOperator
   #     -20.clamp(0, nil)           #=> 0
   #     523.clamp(nil, 100)         #=> 100
   #
-  # In `(range)` form, returns *range.begin* if *obj* `<=>` *range.begin* is less
-  # than zero, *range.end* if *obj* `<=>` *range.end* is greater than zero, and
-  # *obj* otherwise.
+  # In <code>(range)</code> form, returns <em>range.begin</em> if *obj*
+  # <code><=></code> <em>range.begin</em> is less than zero, <em>range.end</em> if
+  # *obj* <code><=></code> <em>range.end</em> is greater than zero, and *obj*
+  # otherwise.
   #
   #     12.clamp(0..100)         #=> 12
   #     523.clamp(0..100)        #=> 100
@@ -151,13 +157,13 @@ module Comparable : _WithSpaceshipOperator
   #     'd'.clamp('a'..'f')      #=> 'd'
   #     'z'.clamp('a'..'f')      #=> 'f'
   #
-  # If *range.begin* is `nil`, it is considered smaller than *obj*, and if
-  # *range.end* is `nil`, it is considered greater than *obj*.
+  # If <em>range.begin</em> is `nil`, it is considered smaller than *obj*, and if
+  # <em>range.end</em> is `nil`, it is considered greater than *obj*.
   #
   #     -20.clamp(0..)           #=> 0
   #     523.clamp(..100)         #=> 100
   #
-  # When *range.end* is excluded and not `nil`, an exception is raised.
+  # When <em>range.end</em> is excluded and not `nil`, an exception is raised.
   #
   #     100.clamp(0...100)       # ArgumentError
   #

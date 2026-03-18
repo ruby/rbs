@@ -109,12 +109,13 @@ module RBS
         class MethodTypesAnnotation < Base
           Overload = AST::Members::MethodDefinition::Overload
 
-          attr_reader :overloads, :vertical_bar_locations
+          attr_reader :overloads, :vertical_bar_locations, :dot3_location
 
-          def initialize(location:, prefix_location:, overloads:, vertical_bar_locations:)
+          def initialize(location:, prefix_location:, overloads:, vertical_bar_locations:, dot3_location:)
             super(location, prefix_location)
             @overloads = overloads
             @vertical_bar_locations = vertical_bar_locations
+            @dot3_location = dot3_location
           end
 
           def map_type_name(&block)
@@ -125,13 +126,14 @@ module RBS
               )
             end
 
-            self.class.new(location:, prefix_location:, overloads: ovs, vertical_bar_locations:) #: self
+            self.class.new(location:, prefix_location:, overloads: ovs, vertical_bar_locations:, dot3_location:) #: self
           end
 
           def type_fingerprint
             [
               "annots/method_types",
-              overloads.map { |o| [o.annotations.map(&:to_s), o.method_type.to_s] }
+              overloads.map { |o| [o.annotations.map(&:to_s), o.method_type.to_s] },
+              overloading: dot3_location ? true : false
             ]
           end
         end
@@ -246,6 +248,157 @@ module RBS
               "annots/instance_variable",
               ivar_name.to_s,
               type.to_s,
+              comment_location&.source
+            ]
+          end
+        end
+
+        class ParamTypeAnnotation < Base
+          attr_reader :name_location, :colon_location, :param_type, :comment_location
+
+          def initialize(location:, prefix_location:, name_location:, colon_location:, param_type:, comment_location:)
+            super(location, prefix_location)
+            @name_location = name_location
+            @colon_location = colon_location
+            @param_type = param_type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              name_location: name_location,
+              colon_location: colon_location,
+              param_type: param_type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+
+          def type_fingerprint
+            [
+              "annots/param_type",
+              name_location.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
+          end
+        end
+
+        class SplatParamTypeAnnotation < Base
+          attr_reader :star_location, :name_location, :colon_location, :param_type, :comment_location
+
+          def initialize(location:, prefix_location:, star_location:, name_location:, colon_location:, param_type:, comment_location:)
+            super(location, prefix_location)
+            @star_location = star_location
+            @name_location = name_location
+            @colon_location = colon_location
+            @param_type = param_type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              star_location: star_location,
+              name_location: name_location,
+              colon_location: colon_location,
+              param_type: param_type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+
+          def type_fingerprint
+            [
+              "annots/splat_param_type",
+              name_location&.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
+          end
+        end
+
+        class DoubleSplatParamTypeAnnotation < Base
+          attr_reader :star2_location, :name_location, :colon_location, :param_type, :comment_location
+
+          def initialize(location:, prefix_location:, star2_location:, name_location:, colon_location:, param_type:, comment_location:)
+            super(location, prefix_location)
+            @star2_location = star2_location
+            @name_location = name_location
+            @colon_location = colon_location
+            @param_type = param_type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              star2_location: star2_location,
+              name_location: name_location,
+              colon_location: colon_location,
+              param_type: param_type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+
+          def type_fingerprint
+            [
+              "annots/double_splat_param_type",
+              name_location&.source,
+              param_type.to_s,
+              comment_location&.source
+            ]
+          end
+        end
+
+        class BlockParamTypeAnnotation < Base
+          attr_reader :ampersand_location, :name_location, :colon_location, :question_location, :type_location, :type, :comment_location
+
+          def initialize(location:, prefix_location:, ampersand_location:, name_location:, colon_location:, question_location:, type_location:, type:, comment_location:)
+            super(location, prefix_location)
+            @ampersand_location = ampersand_location
+            @name_location = name_location
+            @colon_location = colon_location
+            @question_location = question_location
+            @type_location = type_location
+            @type = type
+            @comment_location = comment_location
+          end
+
+          def map_type_name(&block)
+            self.class.new(
+              location:,
+              prefix_location:,
+              ampersand_location: ampersand_location,
+              name_location: name_location,
+              colon_location: colon_location,
+              question_location: question_location,
+              type_location: type_location,
+              type: type.map_type_name { yield _1 },
+              comment_location: comment_location
+            ) #: self
+          end
+
+          def name
+            name_location&.source&.to_sym
+          end
+
+          def optional?
+            question_location ? true : false
+          end
+
+          def required?
+            !optional?
+          end
+
+          def type_fingerprint
+            [
+              "annots/block_param_type",
+              name_location&.source,
+              type.to_s,
+              optional? ? "optional" : "required",
               comment_location&.source
             ]
           end

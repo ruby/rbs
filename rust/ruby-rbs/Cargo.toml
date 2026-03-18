@@ -1,6 +1,6 @@
 [package]
 name = "ruby-rbs"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 license = "BSD-2-Clause"
 description = "Rust bindings for RBS -- the type signature language for Ruby programs"
@@ -15,7 +15,7 @@ include = [
 ]
 
 [dependencies]
-ruby-rbs-sys = { version = "0.1", path = "../ruby-rbs-sys" }
+ruby-rbs-sys = { version = "0.2", path = "../ruby-rbs-sys" }
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }

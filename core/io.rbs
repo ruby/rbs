@@ -7,9 +7,9 @@
 # classes in the Ruby standard library are also subclasses of IO; these include
 # TCPSocket and UDPSocket.
 #
-# The global constant ARGF (also accessible as `$<`) provides an IO-like stream
-# that allows access to all file paths found in ARGV (or found in STDIN if ARGV
-# is empty). ARGF is not itself a subclass of IO.
+# The global constant ARGF (also accessible as <code>$<</code>) provides an
+# IO-like stream that allows access to all file paths found in ARGV (or found in
+# STDIN if ARGV is empty). ARGF is not itself a subclass of IO.
 #
 # Class StringIO provides an IO-like stream that handles a String. StringIO is
 # not itself a subclass of IO.
@@ -46,10 +46,10 @@
 #     from the position mentioned above); see [Line
 #     Number](rdoc-ref:IO@Line+Number).
 #
-# ## Extension `io/console`
+# ## Extension <code>io/console</code>
 #
-# Extension `io/console` provides numerous methods for interacting with the
-# console; requiring it adds numerous methods to class IO.
+# Extension <code>io/console</code> provides numerous methods for interacting
+# with the console; requiring it adds numerous methods to class IO.
 #
 # ## Example Files
 #
@@ -86,23 +86,23 @@
 # A number of IO methods accept optional keyword arguments that determine how a
 # new stream is to be opened:
 #
-# *   `:mode`: Stream mode.
-# *   `:flags`: Integer file open flags; If `mode` is also given, the two are
-#     bitwise-ORed.
-# *   `:external_encoding`: External encoding for the stream.
-# *   `:internal_encoding`: Internal encoding for the stream. `'-'` is a synonym
-#     for the default internal encoding. If the value is `nil` no conversion
-#     occurs.
-# *   `:encoding`: Specifies external and internal encodings as
-#     `'extern:intern'`.
-# *   `:textmode`: If a truthy value, specifies the mode as text-only, binary
-#     otherwise.
-# *   `:binmode`: If a truthy value, specifies the mode as binary, text-only
-#     otherwise.
-# *   `:autoclose`: If a truthy value, specifies that the `fd` will close when
-#     the stream closes; otherwise it remains open.
-# *   `:path:` If a string value is provided, it is used in #inspect and is
-#     available as #path method.
+# *   <code>:mode</code>: Stream mode.
+# *   <code>:flags</code>: Integer file open flags; If `mode` is also given, the
+#     two are bitwise-ORed.
+# *   <code>:external_encoding</code>: External encoding for the stream.
+# *   <code>:internal_encoding</code>: Internal encoding for the stream.
+#     <code>'-'</code> is a synonym for the default internal encoding. If the
+#     value is `nil` no conversion occurs.
+# *   <code>:encoding</code>: Specifies external and internal encodings as
+#     <code>'extern:intern'</code>.
+# *   <code>:textmode</code>: If a truthy value, specifies the mode as
+#     text-only, binary otherwise.
+# *   <code>:binmode</code>: If a truthy value, specifies the mode as binary,
+#     text-only otherwise.
+# *   <code>:autoclose</code>: If a truthy value, specifies that the `fd` will
+#     close when the stream closes; otherwise it remains open.
+# *   <code>:path:</code> If a string value is provided, it is used in #inspect
+#     and is available as #path method.
 #
 # Also available are the options offered in String#encode, which may control
 # conversion between external and internal encoding.
@@ -129,8 +129,8 @@
 #
 # The relevant methods:
 #
-# *   IO#tell (aliased as `#pos`): Returns the current position (in bytes) in
-#     the stream.
+# *   IO#tell (aliased as <code>#pos</code>): Returns the current position (in
+#     bytes) in the stream.
 # *   IO#pos=: Sets the position of the stream to a given integer `new_position`
 #     (in bytes).
 # *   IO#seek: Sets the position of the stream to a given integer `offset` (in
@@ -158,8 +158,8 @@
 #
 # You can query whether a stream is positioned at its end:
 #
-# *   IO#eof? (also aliased as `#eof`): Returns whether the stream is at
-#     end-of-stream.
+# *   IO#eof? (also aliased as <code>#eof</code>): Returns whether the stream is
+#     at end-of-stream.
 #
 # You can reposition to end-of-stream by using method IO#seek:
 #
@@ -225,8 +225,8 @@
 # separator*: the string that determines what is considered a line; it is
 # sometimes called the *input record separator*.
 #
-# The default line separator is taken from global variable `$/`, whose initial
-# value is `"\n"`.
+# The default line separator is taken from global variable <code>$/</code>,
+# whose initial value is <code>"\n"</code>.
 #
 # Generally, the line to be read next is all data from the current
 # [position](rdoc-ref:IO@Position) to the next line separator (but see [Special
@@ -250,7 +250,7 @@
 #     f.gets        # => "e\n"
 #     f.close
 #
-# Or by setting global variable `$/`:
+# Or by setting global variable <code>$/</code>:
 #
 #     f = File.new('t.txt')
 #     $/ = 'l'
@@ -270,8 +270,8 @@
 #         f.gets(nil) # => "First line\nSecond line\n\nFourth line\nFifth line\n"
 #         f.close
 #
-# *   `''` (the empty string): The next "paragraph" is to be read (paragraphs
-#     being separated by two consecutive line separators):
+# *   <code>''</code> (the empty string): The next "paragraph" is to be read
+#     (paragraphs being separated by two consecutive line separators):
 #
 #         f = File.new('t.txt')
 #         f.gets('') # => "First line\nSecond line\n\n"
@@ -285,8 +285,8 @@
 # multi-byte character will not be split, and so a returned line may be slightly
 # longer than the limit).
 #
-# The default limit value is `-1`; any negative limit value means that there is
-# no limit.
+# The default limit value is <code>-1</code>; any negative limit value means
+# that there is no limit.
 #
 # If there is no limit, the line is determined only by `sep`.
 #
@@ -385,10 +385,10 @@
 #     f.lineno # => 1001
 #     f.close
 #
-# Associated with the line number is the global variable `$.`:
+# Associated with the line number is the global variable <code>$.</code>:
 #
-# *   When a stream is opened, `$.` is not set; its value is left over from
-#     previous activity in the process:
+# *   When a stream is opened, <code>$.</code> is not set; its value is left
+#     over from previous activity in the process:
 #
 #         $. = 41
 #         f = File.new('t.txt')
@@ -396,7 +396,8 @@
 #         # => 41
 #         f.close
 #
-# *   When a stream is read, `$.` is set to the line number for that stream:
+# *   When a stream is read, <code>$.</code> is set to the line number for that
+#     stream:
 #
 #         f0 = File.new('t.txt')
 #         f1 = File.new('t.dat')
@@ -407,7 +408,7 @@
 #         f0.close
 #         f1.close
 #
-# *   Methods IO#rewind and IO#seek do not affect `$.`:
+# *   Methods IO#rewind and IO#seek do not affect <code>$.</code>:
 #
 #         f = File.new('t.txt')
 #         f.readlines # => ["First line\n", "Second line\n", "\n", "Fourth line\n", "Fifth line\n"]
@@ -652,15 +653,17 @@ class IO < Object
   #
   # Argument `advice` is one of the following symbols:
   #
-  # *   `:normal`: The application has no advice to give about its access pattern
-  #     for the specified data. If no advice is given for an open file, this is
-  #     the default assumption.
-  # *   `:sequential`: The application expects to access the specified data
-  #     sequentially (with lower offsets read before higher ones).
-  # *   `:random`: The specified data will be accessed in random order.
-  # *   `:noreuse`: The specified data will be accessed only once.
-  # *   `:willneed`: The specified data will be accessed in the near future.
-  # *   `:dontneed`: The specified data will not be accessed in the near future.
+  # *   <code>:normal</code>: The application has no advice to give about its
+  #     access pattern for the specified data. If no advice is given for an open
+  #     file, this is the default assumption.
+  # *   <code>:sequential</code>: The application expects to access the specified
+  #     data sequentially (with lower offsets read before higher ones).
+  # *   <code>:random</code>: The specified data will be accessed in random order.
+  # *   <code>:noreuse</code>: The specified data will be accessed only once.
+  # *   <code>:willneed</code>: The specified data will be accessed in the near
+  #     future.
+  # *   <code>:dontneed</code>: The specified data will not be accessed in the
+  #     near future.
   #
   # Not implemented on all platforms.
   #
@@ -724,8 +727,8 @@ class IO < Object
   # If the stream is open for writing, flushes any buffered writes to the
   # operating system before closing.
   #
-  # If the stream was opened by IO.popen, sets global variable `$?` (child exit
-  # status).
+  # If the stream was opened by IO.popen, sets global variable <code>$?</code>
+  # (child exit status).
   #
   # It is not an error to close an IO object that has already been closed. It just
   # returns nil.
@@ -790,7 +793,7 @@ class IO < Object
   # and Closed Streams](rdoc-ref:IO@Open+and+Closed+Streams).
   #
   # If the stream was opened by IO.popen and is also closed for writing, sets
-  # global variable `$?` (child exit status).
+  # global variable <code>$?</code> (child exit status).
   #
   # Example:
   #
@@ -824,7 +827,7 @@ class IO < Object
   # Flushes any buffered writes to the operating system before closing.
   #
   # If the stream was opened by IO.popen and is also closed for reading, sets
-  # global variable `$?` (child exit status).
+  # global variable <code>$?</code> (child exit status).
   #
   #     IO.popen('ruby', 'r+') do |pipe|
   #       puts pipe.closed?
@@ -990,8 +993,8 @@ class IO < Object
   #   - fdatasync -> 0
   # -->
   # Immediately writes to disk all data buffered in the stream, via the operating
-  # system's: `fdatasync(2)`, if supported, otherwise via `fsync(2)`, if
-  # supported; otherwise raises an exception.
+  # system's: <code>fdatasync(2)</code>, if supported, otherwise via
+  # <code>fsync(2)</code>, if supported; otherwise raises an exception.
   #
   def fdatasync: () -> Integer?
 
@@ -1026,7 +1029,7 @@ class IO < Object
   #   - fsync -> 0
   # -->
   # Immediately writes to disk all data buffered in the stream, via the operating
-  # system's `fsync(2)`.
+  # system's <code>fsync(2)</code>.
   #
   # Note this difference:
   #
@@ -1036,7 +1039,8 @@ class IO < Object
   # *   IO#fsync: Ensures both that data is flushed from internal buffers, and
   #     that data is written to disk.
   #
-  # Raises an exception if the operating system does not support `fsync(2)`.
+  # Raises an exception if the operating system does not support
+  # <code>fsync(2)</code>.
   #
   def fsync: () -> Integer?
 
@@ -1082,11 +1086,11 @@ class IO < Object
   #   - gets(limit, chomp: false)      -> string or nil
   #   - gets(sep, limit, chomp: false) -> string or nil
   # -->
-  # Reads and returns a line from the stream; assigns the return value to `$_`.
-  # See [Line IO](rdoc-ref:IO@Line+IO).
+  # Reads and returns a line from the stream; assigns the return value to
+  # <code>$_</code>. See [Line IO](rdoc-ref:IO@Line+IO).
   #
   # With no arguments given, returns the next line as determined by line separator
-  # `$/`, or `nil` if none:
+  # <code>$/</code>, or `nil` if none:
   #
   #     f = File.open('t.txt')
   #     f.gets # => "First line\n"
@@ -1316,15 +1320,15 @@ class IO < Object
   #   - print(*objects) -> nil
   # -->
   # Writes the given objects to the stream; returns `nil`. Appends the output
-  # record separator `$OUTPUT_RECORD_SEPARATOR` (`$\`), if it is not `nil`. See
-  # [Line IO](rdoc-ref:IO@Line+IO).
+  # record separator <code>$OUTPUT_RECORD_SEPARATOR</code> (<code>$\</code>), if
+  # it is not `nil`. See [Line IO](rdoc-ref:IO@Line+IO).
   #
   # With argument `objects` given, for each object:
   #
   # *   Converts via its method `to_s` if not a string.
   # *   Writes to the stream.
   # *   If not the last object, writes the output field separator
-  #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
+  #     <code>$OUTPUT_FIELD_SEPARATOR</code> (<code>$,</code>) if it is not `nil`.
   #
   # With default separators:
   #
@@ -1356,8 +1360,8 @@ class IO < Object
   #
   #     "0,0.0,0/1,0+0i,zero,zero\n"
   #
-  # With no argument given, writes the content of `$_` (which is usually the most
-  # recent user input):
+  # With no argument given, writes the content of <code>$_</code> (which is
+  # usually the most recent user input):
   #
   #     f = File.open('t.tmp', 'w+')
   #     gets # Sets $_ to the most recent user input.
@@ -1406,13 +1410,13 @@ class IO < Object
   # newline sequence. If called without arguments, writes a newline. See [Line
   # IO](rdoc-ref:IO@Line+IO).
   #
-  # Note that each added newline is the character `"\n"<//tt>, not the output
-  # record separator (<tt>$\`).
+  # Note that each added newline is the character <code>"\n"<//tt>, not the output
+  # record separator (<tt>$\</code>).
   #
   # Treatment for each object:
   #
   # *   String: writes the string.
-  # *   Neither string nor array: writes `object.to_s`.
+  # *   Neither string nor array: writes <code>object.to_s</code>.
   # *   Array: writes each element of the array; arrays may be nested.
   #
   # To keep these examples brief, we define this helper method:
@@ -1519,7 +1523,7 @@ class IO < Object
   #     *   `out_string` given: encoding of `out_string` not modified.
   #     *   `out_string` not given: ASCII-8BIT is used.
   #
-  # **Without Argument `out_string`**
+  # <strong>Without Argument `out_string`</strong>
   #
   # When argument `out_string` is omitted, the returned value is a new string:
   #
@@ -1534,7 +1538,7 @@ class IO < Object
   #
   # If `maxlen` is zero, returns an empty string.
   #
-  # ** With Argument `out_string`**
+  # <strong> With Argument `out_string`</strong>
   #
   # When argument `out_string` is given, the returned value is `out_string`, whose
   # content is replaced:
@@ -1620,8 +1624,8 @@ class IO < Object
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # read_nonblock should not raise an IO::WaitReadable exception, but return the
-  # symbol `:wait_readable` instead. At EOF, it will return nil instead of raising
-  # EOFError.
+  # symbol <code>:wait_readable</code> instead. At EOF, it will return nil instead
+  # of raising EOFError.
   #
   def read_nonblock: (int len, ?string buf, ?exception: true) -> String
                    | (int len, ?string buf, exception: false) -> (String | :wait_readable | nil)
@@ -1681,11 +1685,11 @@ class IO < Object
   #   - readlines(limit, chomp: false)       -> array
   #   - readlines(sep, limit, chomp: false) -> array
   # -->
-  # Reads and returns all remaining line from the stream; does not modify `$_`.
-  # See [Line IO](rdoc-ref:IO@Line+IO).
+  # Reads and returns all remaining line from the stream; does not modify
+  # <code>$_</code>. See [Line IO](rdoc-ref:IO@Line+IO).
   #
-  # With no arguments given, returns lines as determined by line separator `$/`,
-  # or `nil` if none:
+  # With no arguments given, returns lines as determined by line separator
+  # <code>$/</code>, or `nil` if none:
   #
   #     f = File.new('t.txt')
   #     f.readlines
@@ -1891,8 +1895,8 @@ class IO < Object
   # Seeks to the position given by integer `offset` (see
   # [Position](rdoc-ref:IO@Position)) and constant `whence`, which is one of:
   #
-  # *   `:CUR` or `IO::SEEK_CUR`: Repositions the stream to its current position
-  #     plus the given `offset`:
+  # *   <code>:CUR</code> or <code>IO::SEEK_CUR</code>: Repositions the stream to
+  #     its current position plus the given `offset`:
   #
   #         f = File.open('t.txt')
   #         f.tell            # => 0
@@ -1902,8 +1906,8 @@ class IO < Object
   #         f.tell            # => 10
   #         f.close
   #
-  # *   `:END` or `IO::SEEK_END`: Repositions the stream to its end plus the given
-  #     `offset`:
+  # *   <code>:END</code> or <code>IO::SEEK_END</code>: Repositions the stream to
+  #     its end plus the given `offset`:
   #
   #         f = File.open('t.txt')
   #         f.tell            # => 0
@@ -1915,7 +1919,8 @@ class IO < Object
   #         f.tell            # => 12
   #         f.close
   #
-  # *   `:SET` or `IO:SEEK_SET`: Repositions the stream to the given `offset`:
+  # *   <code>:SET</code> or <code>IO:SEEK_SET</code>: Repositions the stream to
+  #     the given `offset`:
   #
   #         f = File.open('t.txt')
   #         f.tell            # => 0
@@ -1943,7 +1948,7 @@ class IO < Object
   # Argument `int_enc`, if given, must be an Encoding object or a String with the
   # encoding name; it is assigned as the encoding for the internal string.
   #
-  # Argument `'ext_enc:int_enc'`, if given, is a string containing two
+  # Argument <code>'ext_enc:int_enc'</code>, if given, is a string containing two
   # colon-separated encoding names; corresponding Encoding objects are assigned as
   # the external and internal encodings for the stream.
   #
@@ -2313,11 +2318,11 @@ class IO < Object
   #
   # On some platforms such as Windows, write_nonblock is not supported according
   # to the kind of the IO object. In such cases, write_nonblock raises
-  # `Errno::EBADF`.
+  # <code>Errno::EBADF</code>.
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # write_nonblock should not raise an IO::WaitWritable exception, but return the
-  # symbol `:wait_writable` instead.
+  # symbol <code>:wait_writable</code> instead.
   #
   def write_nonblock: (_ToS s, ?exception: true) -> Integer
                     | (_ToS s, exception: false) -> (Integer | :wait_writable | nil)
@@ -2351,15 +2356,15 @@ class IO < Object
   #
   #     *   The path to a readable file, from which source data is to be read.
   #     *   An IO-like object, opened for reading and capable of responding to
-  #         method `:readpartial` or method `:read`.
+  #         method <code>:readpartial</code> or method <code>:read</code>.
   #
   # *   The given `dst` must be one of the following:
   #
   #     *   The path to a writable file, to which data is to be written.
   #     *   An IO-like object, opened for writing and capable of responding to
-  #         method `:write`.
+  #         method <code>:write</code>.
   #
-  # The examples here use file `t.txt` as source:
+  # The examples here use file <code>t.txt</code> as source:
   #
   #     File.read('t.txt')
   #     # => "First line\nSecond line\n\nThird line\nFourth line\n"
@@ -2409,8 +2414,8 @@ class IO < Object
   #
   # If a block is given, the stream is passed to the block (again, open for
   # reading, writing, or both); when the block exits, the stream is closed, the
-  # block's value is returned, and the global variable `$?` is set to the child's
-  # exit status.
+  # block's value is returned, and the global variable <code>$?</code> is set to
+  # the child's exit status.
   #
   # Optional argument `mode` may be any valid IO mode. See [Access
   # Modes](rdoc-ref:File@Access+Modes).
@@ -2441,8 +2446,8 @@ class IO < Object
   #
   # **Forked Process**
   #
-  # When argument `cmd` is the 1-character string `'-'`, causes the process to
-  # fork:
+  # When argument `cmd` is the 1-character string <code>'-'</code>, causes the
+  # process to fork:
   #     IO.popen('-') do |pipe|
   #       if pipe
   #         $stderr.puts "In parent, child pid is #{pipe.pid}\n"
@@ -2460,8 +2465,8 @@ class IO < Object
   #
   # **Shell Subprocess**
   #
-  # When argument `cmd` is a single string (but not `'-'`), the program named
-  # `cmd` is run as a shell command:
+  # When argument `cmd` is a single string (but not <code>'-'</code>), the program
+  # named `cmd` is run as a shell command:
   #
   #     IO.popen('uname') do |pipe|
   #       pipe.readlines
@@ -2485,8 +2490,8 @@ class IO < Object
   #
   # **Program Subprocess**
   #
-  # When argument `cmd` is an array of strings, the program named `cmd[0]` is run
-  # with all elements of `cmd` as its arguments:
+  # When argument `cmd` is an array of strings, the program named
+  # <code>cmd[0]</code> is run with all elements of `cmd` as its arguments:
   #
   #     IO.popen(['du', '..', '.']) do |pipe|
   #       $stderr.puts pipe.readlines.size
@@ -2496,18 +2501,19 @@ class IO < Object
   #
   #     1111
   #
-  # **Program Subprocess with `argv0`**
+  # <strong>Program Subprocess with `argv0`</strong>
   #
   # When argument `cmd` is an array whose first element is a 2-element string
   # array and whose remaining elements (if any) are strings:
   #
-  # *   `cmd[0][0]` (the first string in the nested array) is the name of a
-  #     program that is run.
-  # *   `cmd[0][1]` (the second string in the nested array) is set as the
-  #     program's `argv[0]`.
-  # *   `cmd[1..-1]` (the strings in the outer array) are the program's arguments.
+  # *   <code>cmd[0][0]</code> (the first string in the nested array) is the name
+  #     of a program that is run.
+  # *   <code>cmd[0][1]</code> (the second string in the nested array) is set as
+  #     the program's <code>argv[0]</code>.
+  # *   <code>cmd[1..-1]</code> (the strings in the outer array) are the program's
+  #     arguments.
   #
-  # Example (sets `$0` to 'foo'):
+  # Example (sets <code>$0</code> to 'foo'):
   #
   #     IO.popen([['/bin/sh', 'foo'], '-c', 'echo $0']).read # => "foo\n"
   #
@@ -2695,8 +2701,8 @@ class IO < Object
   # In the example below, the two processes close the ends of the pipe that they
   # are not using. This is not just a cosmetic nicety. The read end of a pipe will
   # not generate an end of file condition if there are any writers with the pipe
-  # still open. In the case of the parent process, the `rd.read` will never return
-  # if it does not first issue a `wr.close`:
+  # still open. In the case of the parent process, the <code>rd.read</code> will
+  # never return if it does not first issue a <code>wr.close</code>:
   #
   #     rd, wr = IO.pipe
   #
@@ -2712,7 +2718,7 @@ class IO < Object
   #       wr.close
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     Sending message to parent
   #     Parent got: <Hi Dad>
@@ -2821,8 +2827,9 @@ class IO < Object
   # IO objects.
   #
   # Argument `timeout` is a numeric value (such as integer or float) timeout
-  # interval in seconds. `timeout` can also be `nil` or `Float::INFINITY`. `nil`
-  # and `Float::INFINITY` means no timeout.
+  # interval in seconds. `timeout` can also be `nil` or
+  # <code>Float::INFINITY</code>. `nil` and <code>Float::INFINITY</code> means no
+  # timeout.
   #
   # The method monitors the IO objects given in all three arrays, waiting for some
   # to be ready; returns a 3-element array whose elements are:
@@ -2897,8 +2904,8 @@ class IO < Object
   #
   # The writability notified by select(2) doesn't show how many bytes are
   # writable. IO#write method blocks until given whole string is written. So,
-  # `IO#write(two or more bytes)` can block after writability is notified by
-  # IO.select.  IO#write_nonblock is required to avoid the blocking.
+  # <code>IO#write(two or more bytes)</code> can block after writability is
+  # notified by IO.select.  IO#write_nonblock is required to avoid the blocking.
   #
   # Blocking write (#write) can be emulated using #write_nonblock and IO.select as
   # follows: IO::WaitReadable should also be rescued for SSL renegotiation in
@@ -3009,7 +3016,7 @@ class IO < Object
   #     File.read('t.tmp')          # => "ab012f"
   #
   # If `offset` is outside the file content, the file is padded with null
-  # characters `"\u0000"`:
+  # characters <code>"\u0000"</code>:
   #
   #     IO.write('t.tmp', 'xyz', 10) # => 3
   #     File.read('t.tmp')           # => "ab012f\u0000\u0000\u0000\u0000xyz"
@@ -3048,7 +3055,8 @@ class IO < Object
   # Calls the block with each remaining line read from the stream; returns `self`.
   # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
   #
-  # With no arguments given, reads lines as determined by line separator `$/`:
+  # With no arguments given, reads lines as determined by line separator
+  # <code>$/</code>:
   #
   #     f = File.new('t.txt')
   #     f.each_line {|line| p line }
@@ -3150,7 +3158,8 @@ class IO < Object
   # Calls the block with each remaining line read from the stream; returns `self`.
   # Does nothing if already at end-of-stream; See [Line IO](rdoc-ref:IO@Line+IO).
   #
-  # With no arguments given, reads lines as determined by line separator `$/`:
+  # With no arguments given, reads lines as determined by line separator
+  # <code>$/</code>:
   #
   #     f = File.new('t.txt')
   #     f.each_line {|line| p line }

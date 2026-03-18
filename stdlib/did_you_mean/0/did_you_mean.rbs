@@ -38,7 +38,7 @@
 #
 # Occasionally, you may want to disable the `did_you_mean` gem for e.g.
 # debugging issues in the error object itself. You can disable it entirely by
-# specifying `--disable-did_you_mean` option to the `ruby` command:
+# specifying <code>--disable-did_you_mean</code> option to the `ruby` command:
 #
 #     $ ruby --disable-did_you_mean -e "1.zeor?"
 #     -e:1:in `<main>': undefined method `zeor?' for 1:Integer (NameError)
@@ -55,7 +55,7 @@
 #
 # Sometimes, you do not want to disable the gem entirely, but need to get the
 # original error message without suggestions (e.g. testing). In this case, you
-# could use the `#original_message` method on the error object:
+# could use the <code>#original_message</code> method on the error object:
 #
 #     no_method_error = begin
 #                         1.zeor?
@@ -92,9 +92,9 @@ module DidYouMean
   end
 
   # <!-- rdoc-file=lib/did_you_mean/formatter.rb -->
-  # The `DidYouMean::Formatter` is the basic, default formatter for the gem. The
-  # formatter responds to the `message_for` method and it returns a human readable
-  # string.
+  # The <code>DidYouMean::Formatter</code> is the basic, default formatter for the
+  # gem. The formatter responds to the `message_for` method and it returns a human
+  # readable string.
   #
   class Formatter
     # <!--
@@ -170,15 +170,16 @@ module DidYouMean
     NAMES_TO_EXCLUDE: Hash[untyped, Array[Symbol]]
 
     # <!-- rdoc-file=lib/did_you_mean/spell_checkers/method_name_checker.rb -->
-    # `MethodNameChecker::RB_RESERVED_WORDS` is the list of reserved words in Ruby
-    # that take an argument. Unlike `VariableNameChecker::RB_RESERVED_WORDS`, these
-    # reserved words require an argument, and a `NoMethodError` is raised due to the
-    # presence of the argument.
+    # <code>MethodNameChecker::RB_RESERVED_WORDS</code> is the list of reserved
+    # words in Ruby that take an argument. Unlike
+    # <code>VariableNameChecker::RB_RESERVED_WORDS</code>, these reserved words
+    # require an argument, and a `NoMethodError` is raised due to the presence of
+    # the argument.
     #
     # The `MethodNameChecker` will use this list to suggest a reversed word if a
     # `NoMethodError` is raised and found closest matches.
     #
-    # Also see `VariableNameChecker::RB_RESERVED_WORDS`.
+    # Also see <code>VariableNameChecker::RB_RESERVED_WORDS</code>.
     #
     RB_RESERVED_WORDS: Array[Symbol]
 
@@ -295,19 +296,19 @@ module DidYouMean
     NAMES_TO_EXCLUDE: Hash[String, Array[Symbol]]
 
     # <!-- rdoc-file=lib/did_you_mean/spell_checkers/name_error_checkers/variable_name_checker.rb -->
-    # `VariableNameChecker::RB_RESERVED_WORDS` is the list of all reserved words in
-    # Ruby. They could be declared like methods are, and a typo would cause Ruby to
-    # raise a `NameError` because of the way they are declared.
+    # <code>VariableNameChecker::RB_RESERVED_WORDS</code> is the list of all
+    # reserved words in Ruby. They could be declared like methods are, and a typo
+    # would cause Ruby to raise a `NameError` because of the way they are declared.
     #
-    # The `:VariableNameChecker` will use this list to suggest a reversed word if a
-    # `NameError` is raised and found closest matches, excluding:
+    # The <code>:VariableNameChecker</code> will use this list to suggest a reversed
+    # word if a `NameError` is raised and found closest matches, excluding:
     #
     #     * +do+
     #     * +if+
     #     * +in+
     #     * +or+
     #
-    # Also see `MethodNameChecker::RB_RESERVED_WORDS`.
+    # Also see <code>MethodNameChecker::RB_RESERVED_WORDS</code>.
     #
     RB_RESERVED_WORDS: Array[Symbol]
 

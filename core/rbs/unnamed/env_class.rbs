@@ -34,7 +34,7 @@ module RBS
     #         ENV[''] = '0'
     #         # Raises Errno::EINVAL (Invalid argument - ruby_setenv())
     #
-    # *   May not contain character `"="`:
+    # *   May not contain character <code>"="</code>:
     #         ENV['='] = '0'
     #         # Raises Errno::EINVAL (Invalid argument - ruby_setenv(=))
     #
@@ -47,7 +47,7 @@ module RBS
     #         ENV[Object.new] = '0'
     #         # Raises TypeError (no implicit conversion of Object into String)
     #
-    # *   May not contain the NUL character `"\0"`:
+    # *   May not contain the NUL character <code>"\0"</code>:
     #
     #         ENV['foo'] = "\0"
     #         # Raises ArgumentError (bad environment variable value: contains null byte)
@@ -156,7 +156,7 @@ module RBS
     # *   ::to_a: Returns the entries as an array of 2-element Arrays.
     # *   ::to_h: Returns a hash of entries selected by the block.
     # *   ::to_hash: Returns a hash of all entries.
-    # *   ::to_s: Returns the string `'ENV'`.
+    # *   ::to_s: Returns the string <code>'ENV'</code>.
     # *   ::values: Returns all values as an array.
     # *   ::values_at: Returns an array of the values for the given name.
     #
@@ -1001,11 +1001,12 @@ module RBS
       #     ENV.include?('baz') # => false
       #
       # Returns `false` if `name` is the empty String or is a String containing
-      # character `'='`:
+      # character <code>'='</code>:
       #     ENV.include?('') # => false
       #     ENV.include?('=') # => false
       #
-      # Raises an exception if `name` is a String containing the NUL character `"\0"`:
+      # Raises an exception if `name` is a String containing the NUL character
+      # <code>"\0"</code>:
       #     ENV.include?("\0") # Raises ArgumentError (bad environment variable name: contains null byte)
       #
       # Raises an exception if `name` has an encoding that is not ASCII-compatible:
@@ -1034,11 +1035,12 @@ module RBS
       #     ENV.include?('baz') # => false
       #
       # Returns `false` if `name` is the empty String or is a String containing
-      # character `'='`:
+      # character <code>'='</code>:
       #     ENV.include?('') # => false
       #     ENV.include?('=') # => false
       #
-      # Raises an exception if `name` is a String containing the NUL character `"\0"`:
+      # Raises an exception if `name` is a String containing the NUL character
+      # <code>"\0"</code>:
       #     ENV.include?("\0") # Raises ArgumentError (bad environment variable name: contains null byte)
       #
       # Raises an exception if `name` has an encoding that is not ASCII-compatible:
@@ -1067,11 +1069,12 @@ module RBS
       #     ENV.include?('baz') # => false
       #
       # Returns `false` if `name` is the empty String or is a String containing
-      # character `'='`:
+      # character <code>'='</code>:
       #     ENV.include?('') # => false
       #     ENV.include?('=') # => false
       #
-      # Raises an exception if `name` is a String containing the NUL character `"\0"`:
+      # Raises an exception if `name` is a String containing the NUL character
+      # <code>"\0"</code>:
       #     ENV.include?("\0") # Raises ArgumentError (bad environment variable name: contains null byte)
       #
       # Raises an exception if `name` has an encoding that is not ASCII-compatible:
@@ -1132,11 +1135,12 @@ module RBS
       #     ENV.include?('baz') # => false
       #
       # Returns `false` if `name` is the empty String or is a String containing
-      # character `'='`:
+      # character <code>'='</code>:
       #     ENV.include?('') # => false
       #     ENV.include?('=') # => false
       #
-      # Raises an exception if `name` is a String containing the NUL character `"\0"`:
+      # Raises an exception if `name` is a String containing the NUL character
+      # <code>"\0"</code>:
       #     ENV.include?("\0") # Raises ArgumentError (bad environment variable name: contains null byte)
       #
       # Raises an exception if `name` has an encoding that is not ASCII-compatible:
@@ -1173,9 +1177,10 @@ module RBS
       # variable.
       #
       # Returns `nil` if `name` is the empty String or is a String containing
-      # character `'='`.
+      # character <code>'='</code>.
       #
-      # Raises an exception if `name` is a String containing the NUL character `"\0"`:
+      # Raises an exception if `name` is a String containing the NUL character
+      # <code>"\0"</code>:
       #     ENV.assoc("\0") # Raises ArgumentError (bad environment variable name: contains null byte)
       #
       # Raises an exception if `name` has an encoding that is not ASCII-compatible:

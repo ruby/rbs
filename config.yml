@@ -573,8 +573,11 @@ nodes:
     fields:
       - name: name
         c_type: rbs_type_name
+      - name: args
+        c_type: rbs_node_list
     locations:
       - required: name
+      - optional: args
   - name: RBS::Types::Function
     rust_name: FunctionTypeNode
     expose_location: false
@@ -703,6 +706,9 @@ nodes:
         c_type: rbs_node_list
       - name: vertical_bar_locations
         c_type: rbs_location_range_list
+      - name: dot3_location
+        c_type: rbs_location_range
+        optional: true
   - name: RBS::AST::Ruby::Annotations::SkipAnnotation
     rust_name: SkipAnnotationNode
     fields:
@@ -776,6 +782,77 @@ nodes:
       - name: type_name
         c_type: rbs_type_name
       - name: type_name_location
+        c_type: rbs_location_range
+        optional: true
+  - name: RBS::AST::Ruby::Annotations::ParamTypeAnnotation
+    rust_name: ParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
+  - name: RBS::AST::Ruby::Annotations::SplatParamTypeAnnotation
+    rust_name: SplatParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: star_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
+  - name: RBS::AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation
+    rust_name: DoubleSplatParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: star2_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: param_type
+        c_type: rbs_node
+      - name: comment_location
+        c_type: rbs_location_range
+        optional: true
+  - name: RBS::AST::Ruby::Annotations::BlockParamTypeAnnotation
+    rust_name: BlockParamTypeAnnotationNode
+    fields:
+      - name: prefix_location
+        c_type: rbs_location_range
+      - name: ampersand_location
+        c_type: rbs_location_range
+      - name: name_location
+        c_type: rbs_location_range
+        optional: true
+      - name: colon_location
+        c_type: rbs_location_range
+      - name: question_location
+        c_type: rbs_location_range
+        optional: true
+      - name: type_location
+        c_type: rbs_location_range
+      - name: type
+        c_name: type_
+        c_type: rbs_node
+      - name: comment_location
         c_type: rbs_location_range
         optional: true
 

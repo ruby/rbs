@@ -7,6 +7,10 @@ module RBS
                                 | SkipAnnotation
                                 | ReturnTypeAnnotation
                                 | InstanceVariableAnnotation
+                                | ParamTypeAnnotation
+                                | SplatParamTypeAnnotation
+                                | DoubleSplatParamTypeAnnotation
+                                | BlockParamTypeAnnotation
 
         type trailing_annotation = NodeTypeAssertion
                                  | TypeApplicationAnnotation
@@ -104,9 +108,11 @@ module RBS
         # `@rbs METHOD-TYPEs` annotation in leading comments
         #
         # ```
-        # @rbs () -> void | %a{foo} () -> String
-        # ^^^^                                     -- prefix_location
-        #                 ^                        -- vertical_bar_locations[0]
+        # @rbs () -> void | %a{foo} () -> String | ...
+        # ^^^^                                            -- prefix_location
+        #                 ^                               -- vertical_bar_locations[0]
+        #                                        ^        -- vertical_bar_locations[1]
+        #                                          ^^^    -- dot3_location
         # ```
         class MethodTypesAnnotation < Base
           class Overload = AST::Members::MethodDefinition::Overload
@@ -115,7 +121,9 @@ module RBS
 
           attr_reader vertical_bar_locations: Array[Location]
 
-          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location]) -> void
+          attr_reader dot3_location: Location?
+
+          def initialize: (location: Location, prefix_location: Location, overloads: Array[Overload], vertical_bar_locations: Array[Location], dot3_location: Location?) -> void
 
           def map_type_name: () { (TypeName) -> TypeName } -> self
 
@@ -227,6 +235,185 @@ module RBS
           def map_type_name: () { (TypeName) -> TypeName } -> self
 
           def type_fingerprint: () -> untyped
+        end
+
+        class ParamTypeAnnotation < Base
+          attr_reader name_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            name_location: Location,
+            colon_location: Location,
+            param_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+
+          %a{pure}
+          def name: () -> Symbol
+        end
+
+        # `@rbs *name: Type -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs *a: String -- comment
+        # ^^^^                         -- prefix_location
+        #      ^                       -- star_location
+        #       ^                      -- name_location
+        #        ^                     -- colon_location
+        #                 ^^^^^^^^^^   -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs *: String
+        # ^^^^             -- prefix_location
+        #      ^           -- star_location
+        #       ^          -- colon_location
+        # ```
+        #
+        class SplatParamTypeAnnotation < Base
+          attr_reader star_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            star_location: Location,
+            name_location: Location?,
+            colon_location: Location,
+            param_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+
+          %a{pure}
+          def name: () -> Symbol?
+        end
+
+        # `@rbs **name: Type -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs **b: bool -- comment
+        # ^^^^                        -- prefix_location
+        #      ^^                     -- star2_location
+        #        ^                    -- name_location
+        #         ^                   -- colon_location
+        #                 ^^^^^^^^^^  -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs **: bool
+        # ^^^^            -- prefix_location
+        #      ^^         -- star2_location
+        #        ^        -- colon_location
+        # ```
+        #
+        class DoubleSplatParamTypeAnnotation < Base
+          attr_reader star2_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader param_type: Types::t
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            star2_location: Location,
+            name_location: Location?,
+            colon_location: Location,
+            param_type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+
+          %a{pure}
+          def name: () -> Symbol?
+        end
+
+        # `@rbs &name: TYPE -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs &block: () -> void -- comment
+        # ^^^^                               -- prefix_location
+        #      ^                             -- ampersand_location
+        #       ^^^^^                        -- name_location
+        #            ^                       -- colon_location
+        #              ^^^^^^^^^^            -- type_location
+        #                         ^^^^^^^^^^ -- comment_location
+        # ```
+        #
+        # ```
+        # @rbs &: ? () -> void
+        # ^^^^                 -- prefix_location
+        #      ^               -- ampersand_location
+        #       ^              -- colon_location
+        #         ^            -- question_location
+        #           ^^^^^^^^^^ -- type_location
+        # ```
+        #
+        class BlockParamTypeAnnotation < Base
+          attr_reader ampersand_location: Location
+
+          attr_reader name_location: Location?
+
+          attr_reader colon_location: Location
+
+          attr_reader type_location: Location
+
+          attr_reader type: Types::function
+
+          attr_reader question_location: Location?
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            ampersand_location: Location,
+            name_location: Location?,
+            colon_location: Location,
+            question_location: Location?,
+            type_location: Location,
+            type: Types::function,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+
+          %a{pure} def name: () -> Symbol?
+
+          def optional?: () -> bool
+
+          def required?: () -> bool
         end
       end
     end

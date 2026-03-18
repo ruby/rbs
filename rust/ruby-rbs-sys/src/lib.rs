@@ -31,8 +31,8 @@ mod tests {
             "#;
 
         let bytes = rbs_code.as_bytes();
-        let start_ptr = bytes.as_ptr() as *const i8;
-        let end_ptr = unsafe { start_ptr.add(bytes.len()) } as *const i8;
+        let start_ptr = bytes.as_ptr() as *const std::os::raw::c_char;
+        let end_ptr = unsafe { start_ptr.add(bytes.len()) } as *const std::os::raw::c_char;
 
         let rbs_string = unsafe { rbs_string_new(start_ptr, end_ptr) };
         let encoding_ptr =

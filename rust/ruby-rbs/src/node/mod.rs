@@ -14,13 +14,14 @@ use std::ptr::NonNull;
 /// ```
 pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
     unsafe {
-        let start_ptr = rbs_code.as_ptr() as *const i8;
+        let start_ptr = rbs_code.as_ptr() as *const std::os::raw::c_char;
         let end_ptr = start_ptr.add(rbs_code.len());
+        let bytes = rbs_code.len() as i32;
 
         let raw_rbs_string_value = rbs_string_new(start_ptr, end_ptr);
 
         let encoding_ptr = &rbs_encodings[RBS_ENCODING_UTF_8 as usize] as *const rbs_encoding_t;
-        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, rbs_code.len() as i32);
+        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, bytes);
 
         let mut signature: *mut rbs_signature_t = std::ptr::null_mut();
         let result = rbs_parse_signature(parser, &mut signature);
@@ -34,7 +35,18 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
         if result {
             Ok(signature_node)
         } else {
-            Err(String::from("Failed to parse RBS signature"))
+            let error_message = (*parser)
+                .error
+                .as_ref()
+                .filter(|error| !error.message.is_null())
+                .map(|error| {
+                    std::ffi::CStr::from_ptr(error.message)
+                        .to_string_lossy()
+                        .into_owned()
+                })
+                .unwrap_or_else(|| String::from("Failed to parse RBS signature"));
+
+            Err(error_message)
         }
     }
 }
@@ -268,6 +280,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_parse_error_contains_actual_message() {
+        let rbs_code = "class { end";
+        let result = parse(rbs_code.as_bytes());
+        let error_message = result.unwrap_err();
+        assert_eq!(error_message, "expected one of class/module/constant name");
+    }
+
+    #[test]
     fn test_parse() {
         let rbs_code = r#"type foo = "hello""#;
         let signature = parse(rbs_code.as_bytes());
@@ -481,6 +501,112 @@ mod tests {
         let int_loc = integer.location();
         assert_eq!(11, int_loc.start());
         assert_eq!(12, int_loc.end());
+    }
+
+    #[test]
+    fn test_sub_locations() {
+        let rbs_code = r#"class Foo < Bar end"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Class(class) = declaration else {
+            panic!("Expected Class");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = class.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(5, keyword_loc.end());
+
+        let name_loc = class.name_location();
+        assert_eq!(6, name_loc.start());
+        assert_eq!(9, name_loc.end());
+
+        let end_loc = class.end_location();
+        assert_eq!(16, end_loc.start());
+        assert_eq!(19, end_loc.end());
+
+        // Test optional sub-location that's present
+        let lt_loc = class.lt_location();
+        assert!(lt_loc.is_some());
+        let lt = lt_loc.unwrap();
+        assert_eq!(10, lt.start());
+        assert_eq!(11, lt.end());
+
+        // Test optional sub-location that's not present (no type params in this class)
+        let type_params_loc = class.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_type_alias_sub_locations() {
+        let rbs_code = r#"type foo = String"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::TypeAlias(type_alias) = declaration else {
+            panic!("Expected TypeAlias");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = type_alias.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(4, keyword_loc.end());
+
+        let name_loc = type_alias.name_location();
+        assert_eq!(5, name_loc.start());
+        assert_eq!(8, name_loc.end());
+
+        let eq_loc = type_alias.eq_location();
+        assert_eq!(9, eq_loc.start());
+        assert_eq!(10, eq_loc.end());
+
+        // Test optional sub-location that's not present (no type params)
+        let type_params_loc = type_alias.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_module_sub_locations() {
+        let rbs_code = r#"module Foo[T] : Bar end"#;
+        let signature = parse(rbs_code.as_bytes()).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Module(module) = declaration else {
+            panic!("Expected Module");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = module.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(6, keyword_loc.end());
+
+        let name_loc = module.name_location();
+        assert_eq!(7, name_loc.start());
+        assert_eq!(10, name_loc.end());
+
+        let end_loc = module.end_location();
+        assert_eq!(20, end_loc.start());
+        assert_eq!(23, end_loc.end());
+
+        // Test optional sub-locations that are present
+        let type_params_loc = module.type_params_location();
+        assert!(type_params_loc.is_some());
+        let tp = type_params_loc.unwrap();
+        assert_eq!(10, tp.start());
+        assert_eq!(13, tp.end());
+
+        let colon_loc = module.colon_location();
+        assert!(colon_loc.is_some());
+        let colon = colon_loc.unwrap();
+        assert_eq!(14, colon.start());
+        assert_eq!(15, colon.end());
+
+        let self_types_loc = module.self_types_location();
+        assert!(self_types_loc.is_some());
+        let st = self_types_loc.unwrap();
+        assert_eq!(16, st.start());
+        assert_eq!(19, st.end());
     }
 
     #[test]

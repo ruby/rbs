@@ -63,7 +63,7 @@
 #         # This is a very common usage.
 #         /foo/ # => /foo/
 #
-# *   A `%r` regexp literal (see [%r: Regexp
+# *   A <code>%r</code> regexp literal (see [%r: Regexp
 #     Literals](rdoc-ref:syntax/literals.rdoc@25r-3A+Regexp+Literals)):
 #
 #         # Same delimiter character at beginning and end;
@@ -89,7 +89,7 @@
 #     'food'.match(/foo/) # => #<MatchData "foo">
 #     'food'.match(/bar/) # => nil
 #
-# ## Operator `=~`
+# ## Operator <code>=~</code>
 #
 # Each of the operators Regexp#=~, String#=~, and Symbol#=~ returns an integer
 # offset if a match was found, `nil` otherwise; each also sets [global
@@ -99,7 +99,7 @@
 #     'foo bar' =~ /bar/ # => 4
 #     /baz/ =~ 'foo bar' # => nil
 #
-# ## Method `match?`
+# ## Method <code>match?</code>
 #
 # Each of the methods Regexp#match?, String#match?, and Symbol#match? returns
 # `true` if a match was found, `false` otherwise; none sets [global
@@ -112,22 +112,24 @@
 #
 # Certain regexp-oriented methods assign values to global variables:
 #
-# *   `#match`: see [Method match](rdoc-ref:Regexp@Method+match).
-# *   `#=~`: see [Operator =~](rdoc-ref:Regexp@Operator+-3D~).
+# *   <code>#match</code>: see [Method match](rdoc-ref:Regexp@Method+match).
+# *   <code>#=~</code>: see [Operator =~](rdoc-ref:Regexp@Operator+-3D~).
 #
 # The affected global variables are:
 #
-# *   `$~`: Returns a MatchData object, or `nil`.
-# *   `$&`: Returns the matched part of the string, or `nil`.
-# *   `$``: Returns the part of the string to the left of the match, or `nil`.
-# *   `$'`: Returns the part of the string to the right of the match, or `nil`.
-# *   `$+`: Returns the last group matched, or `nil`.
-# *   `$1`, `$2`, etc.: Returns the first, second, etc., matched group, or
-#     `nil`. Note that `$0` is quite different; it returns the name of the
-#     currently executing program.
+# *   <code>$~</code>: Returns a MatchData object, or `nil`.
+# *   <code>$&</code>: Returns the matched part of the string, or `nil`.
+# *   <code>$`</code>: Returns the part of the string to the left of the match,
+#     or `nil`.
+# *   <code>$'</code>: Returns the part of the string to the right of the match,
+#     or `nil`.
+# *   <code>$+</code>: Returns the last group matched, or `nil`.
+# *   <code>$1</code>, <code>$2</code>, etc.: Returns the first, second, etc.,
+#     matched group, or `nil`. Note that <code>$0</code> is quite different; it
+#     returns the name of the currently executing program.
 #
-# These variables, except for `$~`, are shorthands for methods of `$~`.  See
-# MatchData@Global+variables+equivalence.
+# These variables, except for <code>$~</code>, are shorthands for methods of
+# <code>$~</code>.  See MatchData@Global+variables+equivalence.
 #
 # Examples:
 #
@@ -228,8 +230,9 @@
 # see [Shorthand Character
 # Classes](rdoc-ref:Regexp@Shorthand+Character+Classes).
 #
-# *   `\s` in an ordinary string literal is equivalent to a space character; in
-#     a source literal, it's shorthand for matching a whitespace character.
+# *   <code>\s</code> in an ordinary string literal is equivalent to a space
+#     character; in a source literal, it's shorthand for matching a whitespace
+#     character.
 # *   In an ordinary string literal, these are (needlessly) escaped characters;
 #     in a source literal, they are shorthands for various matching characters:
 #
@@ -254,16 +257,19 @@
 #     /[a-f]/.match('foo')    # => #<MatchData "f">
 #     /[a-cd-f]/.match('foo') # => #<MatchData "f">
 #
-# When the first character of a character class is a caret (`^`), the sense of
-# the class is inverted: it matches any character *except* those specified.
+# When the first character of a character class is a caret (<code>^</code>), the
+# sense of the class is inverted: it matches any character *except* those
+# specified.
 #
 #     /[^a-eg-z]/.match('f') # => #<MatchData "f">
 #
 # A character class may contain another character class. By itself this isn't
-# useful because `[a-z[0-9]]` describes the same set as `[a-z0-9]`.
+# useful because <code>[a-z[0-9]]</code> describes the same set as
+# <code>[a-z0-9]</code>.
 #
-# However, character classes also support the `&&` operator, which performs set
-# intersection on its arguments. The two can be combined as follows:
+# However, character classes also support the <code>&&</code> operator, which
+# performs set intersection on its arguments. The two can be combined as
+# follows:
 #
 #     /[a-w&&[^c-g]z]/ # ([a-w] AND ([^c-g] OR z))
 #
@@ -276,59 +282,66 @@
 # Each of the following metacharacters serves as a shorthand for a character
 # class:
 #
-# *   `/./`: Matches any character except a newline:
+# *   <code>/./</code>: Matches any character except a newline:
 #
 #         /./.match('foo') # => #<MatchData "f">
 #         /./.match("\n")  # => nil
 #
-# *   `/./m`: Matches any character, including a newline; see [Multiline
-#     Mode](rdoc-ref:Regexp@Multiline+Mode):
+# *   <code>/./m</code>: Matches any character, including a newline; see
+#     [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode):
 #
 #         /./m.match("\n") # => #<MatchData "\n">
 #
-# *   `/\w/`: Matches a word character: equivalent to `[a-zA-Z0-9_]`:
+# *   <code>/\w/</code>: Matches a word character: equivalent to
+#     <code>[a-zA-Z0-9_]</code>:
 #
 #         /\w/.match(' foo') # => #<MatchData "f">
 #         /\w/.match(' _')   # => #<MatchData "_">
 #         /\w/.match(' ')    # => nil
 #
-# *   `/\W/`: Matches a non-word character: equivalent to `[^a-zA-Z0-9_]`:
+# *   <code>/\W/</code>: Matches a non-word character: equivalent to
+#     <code>[^a-zA-Z0-9_]</code>:
 #
 #         /\W/.match(' ') # => #<MatchData " ">
 #         /\W/.match('_') # => nil
 #
-# *   `/\d/`: Matches a digit character: equivalent to `[0-9]`:
+# *   <code>/\d/</code>: Matches a digit character: equivalent to
+#     <code>[0-9]</code>:
 #
 #         /\d/.match('THX1138') # => #<MatchData "1">
 #         /\d/.match('foo')     # => nil
 #
-# *   `/\D/`: Matches a non-digit character: equivalent to `[^0-9]`:
+# *   <code>/\D/</code>: Matches a non-digit character: equivalent to
+#     <code>[^0-9]</code>:
 #
 #         /\D/.match('123Jump!') # => #<MatchData "J">
 #         /\D/.match('123')      # => nil
 #
-# *   `/\h/`: Matches a hexdigit character: equivalent to `[0-9a-fA-F]`:
+# *   <code>/\h/</code>: Matches a hexdigit character: equivalent to
+#     <code>[0-9a-fA-F]</code>:
 #
 #         /\h/.match('xyz fedcba9876543210') # => #<MatchData "f">
 #         /\h/.match('xyz')                  # => nil
 #
-# *   `/\H/`: Matches a non-hexdigit character: equivalent to `[^0-9a-fA-F]`:
+# *   <code>/\H/</code>: Matches a non-hexdigit character: equivalent to
+#     <code>[^0-9a-fA-F]</code>:
 #
 #         /\H/.match('fedcba9876543210xyz') # => #<MatchData "x">
 #         /\H/.match('fedcba9876543210')    # => nil
 #
-# *   `/\s/`: Matches a whitespace character: equivalent to `/[ \t\r\n\f\v]/`:
+# *   <code>/\s/</code>: Matches a whitespace character: equivalent to <code>/[
+#     \t\r\n\f\v]/</code>:
 #
 #         /\s/.match('foo bar') # => #<MatchData " ">
 #         /\s/.match('foo')     # => nil
 #
-# *   `/\S/`: Matches a non-whitespace character: equivalent to `/[^
-#     \t\r\n\f\v]/`:
+# *   <code>/\S/</code>: Matches a non-whitespace character: equivalent to
+#     <code>/[^ \t\r\n\f\v]/</code>:
 #
 #         /\S/.match(" \t\r\n\f\v foo") # => #<MatchData "f">
 #         /\S/.match(" \t\r\n\f\v")     # => nil
 #
-# *   `/\R/`: Matches a linebreak, platform-independently:
+# *   <code>/\R/</code>: Matches a linebreak, platform-independently:
 #
 #         /\R/.match("\r")     # => #<MatchData "\r">     # Carriage return (CR)
 #         /\R/.match("\n")     # => #<MatchData "\n">     # Newline (LF)
@@ -355,47 +368,47 @@
 #
 # Each of these anchors matches a boundary:
 #
-# *   `^`: Matches the beginning of a line:
+# *   <code>^</code>: Matches the beginning of a line:
 #
 #         /^bar/.match("foo\nbar") # => #<MatchData "bar">
 #         /^ar/.match("foo\nbar")  # => nil
 #
-# *   `$`: Matches the end of a line:
+# *   <code>$</code>: Matches the end of a line:
 #
 #         /bar$/.match("foo\nbar") # => #<MatchData "bar">
 #         /ba$/.match("foo\nbar")  # => nil
 #
-# *   `\A`: Matches the beginning of the string:
+# *   <code>\A</code>: Matches the beginning of the string:
 #
 #         /\Afoo/.match('foo bar')  # => #<MatchData "foo">
 #         /\Afoo/.match(' foo bar') # => nil
 #
-# *   `\Z`: Matches the end of the string; if string ends with a single newline,
-#     it matches just before the ending newline:
+# *   <code>\Z</code>: Matches the end of the string; if string ends with a
+#     single newline, it matches just before the ending newline:
 #
 #         /foo\Z/.match('bar foo')     # => #<MatchData "foo">
 #         /foo\Z/.match('foo bar')     # => nil
 #         /foo\Z/.match("bar foo\n")   # => #<MatchData "foo">
 #         /foo\Z/.match("bar foo\n\n") # => nil
 #
-# *   `\z`: Matches the end of the string:
+# *   <code>\z</code>: Matches the end of the string:
 #
 #         /foo\z/.match('bar foo')   # => #<MatchData "foo">
 #         /foo\z/.match('foo bar')   # => nil
 #         /foo\z/.match("bar foo\n") # => nil
 #
-# *   `\b`: Matches word boundary when not inside brackets; matches backspace
-#     (`"0x08"`) when inside brackets:
+# *   <code>\b</code>: Matches word boundary when not inside brackets; matches
+#     backspace (<code>"0x08"</code>) when inside brackets:
 #
 #         /foo\b/.match('foo bar') # => #<MatchData "foo">
 #         /foo\b/.match('foobar')  # => nil
 #
-# *   `\B`: Matches non-word boundary:
+# *   <code>\B</code>: Matches non-word boundary:
 #
 #         /foo\B/.match('foobar')  # => #<MatchData "foo">
 #         /foo\B/.match('foo bar') # => nil
 #
-# *   `\G`: Matches first matching position:
+# *   <code>\G</code>: Matches first matching position:
 #
 #     In methods like String#gsub and String#scan, it changes on each iteration.
 #     It initially matches the beginning of subject, and in each following
@@ -414,26 +427,27 @@
 #
 # Lookahead anchors:
 #
-# *   `(?=_pat_)`: Positive lookahead assertion: ensures that the following
-#     characters match *pat*, but doesn't include those characters in the
-#     matched substring.
-#
-# *   `(?!_pat_)`: Negative lookahead assertion: ensures that the following
-#     characters *do not* match *pat*, but doesn't include those characters in
+# *   <code>(?=_pat_)</code>: Positive lookahead assertion: ensures that the
+#     following characters match *pat*, but doesn't include those characters in
 #     the matched substring.
+#
+# *   <code>(?!_pat_)</code>: Negative lookahead assertion: ensures that the
+#     following characters *do not* match *pat*, but doesn't include those
+#     characters in the matched substring.
 #
 # Lookbehind anchors:
 #
-# *   `(?<=_pat_)`: Positive lookbehind assertion: ensures that the preceding
-#     characters match *pat*, but doesn't include those characters in the
-#     matched substring.
+# *   <code>(?<=_pat_)</code>: Positive lookbehind assertion: ensures that the
+#     preceding characters match *pat*, but doesn't include those characters in
+#     the matched substring.
 #
-# *   `(?<!_pat_)`: Negative lookbehind assertion: ensures that the preceding
-#     characters do not match *pat*, but doesn't include those characters in the
-#     matched substring.
+# *   <code>(?<!_pat_)</code>: Negative lookbehind assertion: ensures that the
+#     preceding characters do not match *pat*, but doesn't include those
+#     characters in the matched substring.
 #
 # The pattern below uses positive lookahead and positive lookbehind to match
-# text appearing in `<b>`...`</b>` tags without including the tags in the match:
+# text appearing in <code><b></code>...<code></b></code> tags without including
+# the tags in the match:
 #
 #     /(?<=<b>)\w+(?=<\/b>)/.match("Fortune favors the <b>bold</b>.")
 #     # => #<MatchData "bold">
@@ -443,15 +457,15 @@
 #
 # #### Match-Reset Anchor
 #
-# *   `\K`: Match reset: the matched content preceding `\K` in the regexp is
-#     excluded from the result. For example, the following two regexps are
-#     almost equivalent:
+# *   <code>\K</code>: Match reset: the matched content preceding
+#     <code>\K</code> in the regexp is excluded from the result. For example,
+#     the following two regexps are almost equivalent:
 #
 #         /ab\Kc/.match('abc')    # => #<MatchData "c">
 #         /(?<=ab)c/.match('abc') # => #<MatchData "c">
 #
-#     These match same string and `$&` equals `'c'`, while the matched position
-#     is different.
+#     These match same string and <code>$&</code> equals <code>'c'</code>, while
+#     the matched position is different.
 #
 #     As are the following two regexps:
 #
@@ -460,9 +474,9 @@
 #
 # ### Alternation
 #
-# The vertical bar metacharacter (`|`) may be used within parentheses to express
-# alternation: two or more subexpressions any of which may match the target
-# string.
+# The vertical bar metacharacter (<code>|</code>) may be used within parentheses
+# to express alternation: two or more subexpressions any of which may match the
+# target string.
 #
 # Two alternatives:
 #
@@ -494,7 +508,7 @@
 #
 # An added *quantifier* specifies how many matches are required or allowed:
 #
-# *   `*` - Matches zero or more times:
+# *   <code>*</code> - Matches zero or more times:
 #
 #         /\w*/.match('')
 #         # => #<MatchData "">
@@ -503,39 +517,39 @@
 #         /\w*/.match('xyz')
 #         # => #<MatchData "xyz">
 #
-# *   `+` - Matches one or more times:
+# *   <code>+</code> - Matches one or more times:
 #
 #         /\w+/.match('')    # => nil
 #         /\w+/.match('x')   # => #<MatchData "x">
 #         /\w+/.match('xyz') # => #<MatchData "xyz">
 #
-# *   `?` - Matches zero or one times:
+# *   <code>?</code> - Matches zero or one times:
 #
 #         /\w?/.match('')    # => #<MatchData "">
 #         /\w?/.match('x')   # => #<MatchData "x">
 #         /\w?/.match('xyz') # => #<MatchData "x">
 #
-# *   `{`*n*`}` - Matches exactly *n* times:
+# *   <code>{</code>*n*<code>}</code> - Matches exactly *n* times:
 #
 #         /\w{2}/.match('')    # => nil
 #         /\w{2}/.match('x')   # => nil
 #         /\w{2}/.match('xyz') # => #<MatchData "xy">
 #
-# *   `{`*min*`,}` - Matches *min* or more times:
+# *   <code>{</code>*min*<code>,}</code> - Matches *min* or more times:
 #
 #         /\w{2,}/.match('')    # => nil
 #         /\w{2,}/.match('x')   # => nil
 #         /\w{2,}/.match('xy')  # => #<MatchData "xy">
 #         /\w{2,}/.match('xyz') # => #<MatchData "xyz">
 #
-# *   `{,`*max*`}` - Matches *max* or fewer times:
+# *   <code>{,</code>*max*<code>}</code> - Matches *max* or fewer times:
 #
 #         /\w{,2}/.match('')    # => #<MatchData "">
 #         /\w{,2}/.match('x')   # => #<MatchData "x">
 #         /\w{,2}/.match('xyz') # => #<MatchData "xy">
 #
-# *   `{`*min*`,`*max*`}` - Matches at least *min* times and at most *max*
-#     times:
+# *   <code>{</code>*min*<code>,</code>*max*<code>}</code> - Matches at least
+#     *min* times and at most *max* times:
 #
 #         /\w{1,2}/.match('')    # => nil
 #         /\w{1,2}/.match('x')   # => #<MatchData "x">
@@ -546,14 +560,17 @@
 # Quantifier matching may be greedy, lazy, or possessive:
 #
 # *   In *greedy* matching, as many occurrences as possible are matched while
-#     still allowing the overall match to succeed. Greedy quantifiers: `*`, `+`,
-#     `?`, `{min, max}` and its variants.
+#     still allowing the overall match to succeed. Greedy quantifiers:
+#     <code>*</code>, <code>+</code>, <code>?</code>, <code>{min, max}</code>
+#     and its variants.
 # *   In *lazy* matching, the minimum number of occurrences are matched. Lazy
-#     quantifiers: `*?`, `+?`, `??`, `{min, max}?` and its variants.
+#     quantifiers: <code>*?</code>, <code>+?</code>, <code>??</code>,
+#     <code>{min, max}?</code> and its variants.
 # *   In *possessive* matching, once a match is found, there is no backtracking;
 #     that match is retained, even if it jeopardises the overall match.
-#     Possessive quantifiers: `*+`, `++`, `?+`. Note that `{min, max}` and its
-#     variants do *not* support possessive matching.
+#     Possessive quantifiers: <code>*+</code>, <code>++</code>, <code>?+</code>.
+#     Note that <code>{min, max}</code> and its variants do *not* support
+#     possessive matching.
 #
 # More:
 #
@@ -577,8 +594,9 @@
 #     re.match('1943-02-04').size # => 1
 #     re.match('foo')             # => nil
 #
-# Adding one or more pairs of parentheses, `(_subexpression_)`, defines
-# *groups*, which may result in multiple matched substrings, called *captures*:
+# Adding one or more pairs of parentheses, <code>(_subexpression_)</code>,
+# defines *groups*, which may result in multiple matched substrings, called
+# *captures*:
 #
 #     re = /(\d\d\d\d)-(\d\d)-(\d\d)/
 #     re.match('1943-02-04')      # => #<MatchData "1943-02-04" 1:"1943" 2:"02" 3:"04">
@@ -619,7 +637,7 @@
 # have a quantifier), but its matching substring is not included among the
 # captures.
 #
-# A non-capturing group begins with `?:` (inside the parentheses):
+# A non-capturing group begins with <code>?:</code> (inside the parentheses):
 #
 #     # Don't capture the year.
 #     re = /(?:\d\d\d\d)-(\d\d)-(\d\d)/
@@ -649,12 +667,14 @@
 #
 # *   For a large number of groups:
 #
-#     *   The ordinary `\_n_` notation applies only for *n* in range (1..9).
-#     *   The `MatchData[_n_]` notation applies for any non-negative *n*.
+#     *   The ordinary <code>\_n_</code> notation applies only for *n* in range
+#         (1..9).
+#     *   The <code>MatchData[_n_]</code> notation applies for any non-negative
+#         *n*.
 #
-# *   `\0` is a special backreference, referring to the entire matched string;
-#     it may not be used within the regexp itself, but may be used outside it
-#     (for example, in a substitution method call):
+# *   <code>\0</code> is a special backreference, referring to the entire
+#     matched string; it may not be used within the regexp itself, but may be
+#     used outside it (for example, in a substitution method call):
 #
 #         'The cat sat in the hat'.gsub(/[csh]at/, '\0s')
 #         # => "The cats sats in the hats"
@@ -662,8 +682,8 @@
 # #### Named Captures
 #
 # As seen above, a capture can be referred to by its number. A capture can also
-# have a name, prefixed as `?<_name_>` or `?'_name_'`, and the name (symbolized)
-# may be used as an index in `MatchData[]`:
+# have a name, prefixed as <code>?<_name_></code> or <code>?'_name_'</code>, and
+# the name (symbolized) may be used as an index in <code>MatchData[]</code>:
 #
 #     md = /\$(?<dollars>\d+)\.(?'cents'\d+)/.match("$3.67")
 #     # => #<MatchData "$3.67" dollars:"3" cents:"67">
@@ -677,14 +697,14 @@
 #     /\$(?<dollars>\d+)\.(\d+)/.match("$3.67")
 #     # => #<MatchData "$3.67" dollars:"3">
 #
-# A named group may be backreferenced as `\k<_name_>`:
+# A named group may be backreferenced as <code>\k<_name_></code>:
 #
 #     /(?<vowel>[aeiou]).\k<vowel>.\k<vowel>/.match('ototomy')
 #     # => #<MatchData "ototo" vowel:"o">
 #
 # When (and only when) a regexp contains named capture groups and appears before
-# the `=~` operator, the captured substrings are assigned to local variables
-# with corresponding names:
+# the <code>=~</code> operator, the captured substrings are assigned to local
+# variables with corresponding names:
 #
 #     /\$(?<dollars>\d+)\.(?<cents>\d+)/ =~ '$3.67'
 #     dollars # => "3"
@@ -695,7 +715,8 @@
 #
 # #### Atomic Grouping
 #
-# A group may be made *atomic* with `(?>`*subexpression*`)`.
+# A group may be made *atomic* with
+# <code>(?></code>*subexpression*<code>)</code>.
 #
 # This causes the subexpression to be matched independently of the rest of the
 # expression, so that the matched substring becomes fixed for the remainder of
@@ -712,19 +733,19 @@
 #
 # Analysis:
 #
-# 1.  The leading subexpression `"` in the pattern matches the first character
-#     `"` in the target string.
-# 2.  The next subexpression `.*` matches the next substring `Quote"` (including
-#     the trailing double-quote).
+# 1.  The leading subexpression <code>"</code> in the pattern matches the first
+#     character <code>"</code> in the target string.
+# 2.  The next subexpression <code>.*</code> matches the next substring
+#     <code>Quote"</code> (including the trailing double-quote).
 # 3.  Now there is nothing left in the target string to match the trailing
-#     subexpression `"` in the pattern; this would cause the overall match to
-#     fail.
+#     subexpression <code>"</code> in the pattern; this would cause the overall
+#     match to fail.
 # 4.  The matched substring is backtracked by one position: `Quote`.
-# 5.  The final subexpression `"` now matches the final substring `"`, and the
-#     overall match succeeds.
+# 5.  The final subexpression <code>"</code> now matches the final substring
+#     <code>"</code>, and the overall match succeeds.
 #
-# If subexpression `.*` is grouped atomically, the backtracking is disabled, and
-# the overall match fails:
+# If subexpression <code>.*</code> is grouped atomically, the backtracking is
+# disabled, and the overall match fails:
 #
 #     /"(?>.*)"/.match('"Quote"') # => nil
 #
@@ -733,9 +754,10 @@
 #
 # #### Subexpression Calls
 #
-# As seen above, a backreference number (`\_n_`) or name (`\k<_name_>`) gives
-# access to a captured *substring*; the corresponding regexp *subexpression* may
-# also be accessed, via the number (`\\g<i>n</i>`) or name (`\g<_name_>`):
+# As seen above, a backreference number (<code>\_n_</code>) or name
+# (<code>\k<_name_></code>) gives access to a captured *substring*; the
+# corresponding regexp *subexpression* may also be accessed, via the number
+# (<code>\g<i>n</i></code>) or name (<code>\g<_name_></code>):
 #
 #     /\A(?<paren>\(\g<paren>*\))*\z/.match('(())')
 #     # ^1
@@ -753,15 +775,15 @@
 #
 # 1.  Matches at the beginning of the string, i.e. before the first character.
 # 2.  Enters a named group `paren`.
-# 3.  Matches the first character in the string, `'('`.
+# 3.  Matches the first character in the string, <code>'('</code>.
 # 4.  Calls the `paren` group again, i.e. recurses back to the  second step.
 # 5.  Re-enters the `paren` group.
-# 6.  Matches the second character in the string, `'('`.
+# 6.  Matches the second character in the string, <code>'('</code>.
 # 7.  Attempts to call `paren` a third time, but fails because doing so would
 #     prevent an overall successful match.
-# 8.  Matches the third character in the string, `')'`; marks the end of the
-#     second recursive call
-# 9.  Matches the fourth character in the string, `')'`.
+# 8.  Matches the third character in the string, <code>')'</code>; marks the end
+#     of the second recursive call
+# 9.  Matches the fourth character in the string, <code>')'</code>.
 # 10. Matches the end of the string.
 #
 # See [Subexpression
@@ -770,12 +792,13 @@
 #
 # #### Conditionals
 #
-# The conditional construct takes the form `(?(_cond_)_yes_|_no_)`, where:
+# The conditional construct takes the form <code>(?(_cond_)_yes_|_no_)</code>,
+# where:
 #
 # *   *cond* may be a capture number or name.
 # *   The match to be applied is *yes* if *cond* is captured; otherwise the
 #     match to be applied is *no*.
-# *   If not needed, `|_no_` may be omitted.
+# *   If not needed, <code>|_no_</code> may be omitted.
 #
 # Examples:
 #
@@ -804,19 +827,20 @@
 #
 # #### Unicode Properties
 #
-# The `/\p{_property_name_}/` construct (with lowercase `p`) matches characters
-# using a Unicode property name, much like a character class; property `Alpha`
-# specifies alphabetic characters:
+# The <code>/\p{_property_name_}/</code> construct (with lowercase `p`) matches
+# characters using a Unicode property name, much like a character class;
+# property `Alpha` specifies alphabetic characters:
 #
 #     /\p{Alpha}/.match('a') # => #<MatchData "a">
 #     /\p{Alpha}/.match('1') # => nil
 #
-# A property can be inverted by prefixing the name with a caret character (`^`):
+# A property can be inverted by prefixing the name with a caret character
+# (<code>^</code>):
 #
 #     /\p{^Alpha}/.match('1') # => #<MatchData "1">
 #     /\p{^Alpha}/.match('a') # => nil
 #
-# Or by using `\P` (uppercase `P`):
+# Or by using <code>\P</code> (uppercase `P`):
 #
 #     /\P{Alpha}/.match('1') # => #<MatchData "1">
 #     /\P{Alpha}/.match('a') # => nil
@@ -826,28 +850,30 @@
 #
 # Some commonly-used properties correspond to POSIX bracket expressions:
 #
-# *   `/\p{Alnum}/`: Alphabetic and numeric character
-# *   `/\p{Alpha}/`: Alphabetic character
-# *   `/\p{Blank}/`: Space or tab
-# *   `/\p{Cntrl}/`: Control character
-# *   `/\p{Digit}/`: Digit characters, and similar)
-# *   `/\p{Lower}/`: Lowercase alphabetical character
-# *   `/\p{Print}/`: Like `\p{Graph}`, but includes the space character
-# *   `/\p{Punct}/`: Punctuation character
-# *   `/\p{Space}/`: Whitespace character (`[:blank:]`, newline, carriage
-#     return, etc.)
-# *   `/\p{Upper}/`: Uppercase alphabetical
-# *   `/\p{XDigit}/`: Digit allowed in a hexadecimal number (i.e., 0-9a-fA-F)
+# *   <code>/\p{Alnum}/</code>: Alphabetic and numeric character
+# *   <code>/\p{Alpha}/</code>: Alphabetic character
+# *   <code>/\p{Blank}/</code>: Space or tab
+# *   <code>/\p{Cntrl}/</code>: Control character
+# *   <code>/\p{Digit}/</code>: Digit characters, and similar)
+# *   <code>/\p{Lower}/</code>: Lowercase alphabetical character
+# *   <code>/\p{Print}/</code>: Like <code>\p{Graph}</code>, but includes the
+#     space character
+# *   <code>/\p{Punct}/</code>: Punctuation character
+# *   <code>/\p{Space}/</code>: Whitespace character (<code>[:blank:]</code>,
+#     newline, carriage return, etc.)
+# *   <code>/\p{Upper}/</code>: Uppercase alphabetical
+# *   <code>/\p{XDigit}/</code>: Digit allowed in a hexadecimal number (i.e.,
+#     0-9a-fA-F)
 #
 # These are also commonly used:
 #
-# *   `/\p{Emoji}/`: Unicode emoji.
-# *   `/\p{Graph}/`: Characters excluding `/\p{Cntrl}/` and `/\p{Space}/`. Note
-#     that invisible characters under the Unicode
-#     ["Format"](https://www.compart.com/en/unicode/category/Cf) category are
-#     included.
-# *   `/\p{Word}/`: A member in one of these Unicode character categories (see
-#     below) or having one of these Unicode properties:
+# *   <code>/\p{Emoji}/</code>: Unicode emoji.
+# *   <code>/\p{Graph}/</code>: Characters excluding <code>/\p{Cntrl}/</code>
+#     and <code>/\p{Space}/</code>. Note that invisible characters under the
+#     Unicode ["Format"](https://www.compart.com/en/unicode/category/Cf)
+#     category are included.
+# *   <code>/\p{Word}/</code>: A member in one of these Unicode character
+#     categories (see below) or having one of these Unicode properties:
 #
 #     *   Unicode categories:
 #         *   `Mark` (`M`).
@@ -858,9 +884,10 @@
 #         *   `Alpha`
 #         *   `Join_Control`
 #
-# *   `/\p{ASCII}/`: A character in the ASCII character set.
-# *   `/\p{Any}/`: Any Unicode character (including unassigned characters).
-# *   `/\p{Assigned}/`: An assigned character.
+# *   <code>/\p{ASCII}/</code>: A character in the ASCII character set.
+# *   <code>/\p{Any}/</code>: Any Unicode character (including unassigned
+#     characters).
+# *   <code>/\p{Assigned}/</code>: An assigned character.
 #
 # #### Unicode Character Categories
 #
@@ -950,68 +977,73 @@
 # expressions provide a portable alternative to the above, with the added
 # benefit of encompassing non-ASCII characters:
 #
-# *   `/\d/` matches only ASCII decimal digits `0` through `9`.
-# *   `/[[:digit:]]/` matches any character in the Unicode `Decimal Number`
-#     (`Nd`) category; see below.
+# *   <code>/\d/</code> matches only ASCII decimal digits `0` through `9`.
+# *   <code>/[[:digit:]]/</code> matches any character in the Unicode `Decimal
+#     Number` (`Nd`) category; see below.
 #
 # The POSIX bracket expressions:
 #
-# *   `/[[:digit:]]/`: Matches a [Unicode
+# *   <code>/[[:digit:]]/</code>: Matches a [Unicode
 #     digit](https://www.compart.com/en/unicode/category/Nd):
 #
 #         /[[:digit:]]/.match('9')       # => #<MatchData "9">
 #         /[[:digit:]]/.match("\u1fbf9") # => #<MatchData "9">
 #
-# *   `/[[:xdigit:]]/`: Matches a digit allowed in a hexadecimal number;
-#     equivalent to `[0-9a-fA-F]`.
+# *   <code>/[[:xdigit:]]/</code>: Matches a digit allowed in a hexadecimal
+#     number; equivalent to <code>[0-9a-fA-F]</code>.
 #
-# *   `/[[:upper:]]/`: Matches a [Unicode uppercase
+# *   <code>/[[:upper:]]/</code>: Matches a [Unicode uppercase
 #     letter](https://www.compart.com/en/unicode/category/Lu):
 #
 #         /[[:upper:]]/.match('A')      # => #<MatchData "A">
 #         /[[:upper:]]/.match("\u00c6") # => #<MatchData "Æ">
 #
-# *   `/[[:lower:]]/`: Matches a [Unicode lowercase
+# *   <code>/[[:lower:]]/</code>: Matches a [Unicode lowercase
 #     letter](https://www.compart.com/en/unicode/category/Ll):
 #
 #         /[[:lower:]]/.match('a')      # => #<MatchData "a">
 #         /[[:lower:]]/.match("\u01fd") # => #<MatchData "ǽ">
 #
-# *   `/[[:alpha:]]/`: Matches `/[[:upper:]]/` or `/[[:lower:]]/`.
+# *   <code>/[[:alpha:]]/</code>: Matches <code>/[[:upper:]]/</code> or
+#     <code>/[[:lower:]]/</code>.
 #
-# *   `/[[:alnum:]]/`: Matches `/[[:alpha:]]/` or `/[[:digit:]]/`.
+# *   <code>/[[:alnum:]]/</code>: Matches <code>/[[:alpha:]]/</code> or
+#     <code>/[[:digit:]]/</code>.
 #
-# *   `/[[:space:]]/`: Matches [Unicode space
+# *   <code>/[[:space:]]/</code>: Matches [Unicode space
 #     character](https://www.compart.com/en/unicode/category/Zs):
 #
 #         /[[:space:]]/.match(' ')      # => #<MatchData " ">
 #         /[[:space:]]/.match("\u2005") # => #<MatchData " ">
 #
-# *   `/[[:blank:]]/`: Matches `/[[:space:]]/` or tab character:
+# *   <code>/[[:blank:]]/</code>: Matches <code>/[[:space:]]/</code> or tab
+#     character:
 #
 #         /[[:blank:]]/.match(' ')      # => #<MatchData " ">
 #         /[[:blank:]]/.match("\u2005") # => #<MatchData " ">
 #         /[[:blank:]]/.match("\t")     # => #<MatchData "\t">
 #
-# *   `/[[:cntrl:]]/`: Matches [Unicode control
+# *   <code>/[[:cntrl:]]/</code>: Matches [Unicode control
 #     character](https://www.compart.com/en/unicode/category/Cc):
 #
 #         /[[:cntrl:]]/.match("\u0000") # => #<MatchData "\u0000">
 #         /[[:cntrl:]]/.match("\u009f") # => #<MatchData "\u009F">
 #
-# *   `/[[:graph:]]/`: Matches any character except `/[[:space:]]/` or
-#     `/[[:cntrl:]]/`.
+# *   <code>/[[:graph:]]/</code>: Matches any character except
+#     <code>/[[:space:]]/</code> or <code>/[[:cntrl:]]/</code>.
 #
-# *   `/[[:print:]]/`: Matches `/[[:graph:]]/` or space character.
+# *   <code>/[[:print:]]/</code>: Matches <code>/[[:graph:]]/</code> or space
+#     character.
 #
-# *   `/[[:punct:]]/`: Matches any (Unicode punctuation
+# *   <code>/[[:punct:]]/</code>: Matches any (Unicode punctuation
 #     character}[https://www.compart.com/en/unicode/category/Po]:
 #
 # Ruby also supports these (non-POSIX) bracket expressions:
 #
-# *   `/[[:ascii:]]/`: Matches a character in the ASCII character set.
-# *   `/[[:word:]]/`: Matches a character in one of these Unicode character
-#     categories or having one of these Unicode properties:
+# *   <code>/[[:ascii:]]/</code>: Matches a character in the ASCII character
+#     set.
+# *   <code>/[[:word:]]/</code>: Matches a character in one of these Unicode
+#     character categories or having one of these Unicode properties:
 #
 #     *   Unicode categories:
 #         *   `Mark` (`M`).
@@ -1024,9 +1056,9 @@
 #
 # ### Comments
 #
-# A comment may be included in a regexp pattern using the `(?#`*comment*`)`
-# construct, where *comment* is a substring that is to be ignored. arbitrary
-# text ignored by the regexp engine:
+# A comment may be included in a regexp pattern using the
+# <code>(?#</code>*comment*<code>)</code> construct, where *comment* is a
+# substring that is to be ignored. arbitrary text ignored by the regexp engine:
 #
 #     /foo(?#Ignore me)bar/.match('foobar') # => #<MatchData "foobar">
 #
@@ -1038,22 +1070,26 @@
 #
 # Each of these modifiers sets a mode for the regexp:
 #
-# *   `i`: `/_pattern_/i` sets [Case-Insensitive
+# *   `i`: <code>/_pattern_/i</code> sets [Case-Insensitive
 #     Mode](rdoc-ref:Regexp@Case-Insensitive+Mode).
-# *   `m`: `/_pattern_/m` sets [Multiline Mode](rdoc-ref:Regexp@Multiline+Mode).
-# *   `x`: `/_pattern_/x` sets [Extended Mode](rdoc-ref:Regexp@Extended+Mode).
-# *   `o`: `/_pattern_/o` sets [Interpolation
+# *   `m`: <code>/_pattern_/m</code> sets [Multiline
+#     Mode](rdoc-ref:Regexp@Multiline+Mode).
+# *   `x`: <code>/_pattern_/x</code> sets [Extended
+#     Mode](rdoc-ref:Regexp@Extended+Mode).
+# *   `o`: <code>/_pattern_/o</code> sets [Interpolation
 #     Mode](rdoc-ref:Regexp@Interpolation+Mode).
 #
 # Any, all, or none of these may be applied.
 #
 # Modifiers `i`, `m`, and `x` may be applied to subexpressions:
 #
-# *   `(?_modifier_)` turns the mode "on" for ensuing subexpressions
-# *   `(?-_modifier_)` turns the mode "off" for ensuing subexpressions
-# *   `(?_modifier_:_subexp_)` turns the mode "on" for *subexp* within the group
-# *   `(?-_modifier_:_subexp_)` turns the mode "off" for *subexp* within the
-#     group
+# *   <code>(?_modifier_)</code> turns the mode "on" for ensuing subexpressions
+# *   <code>(?-_modifier_)</code> turns the mode "off" for ensuing
+#     subexpressions
+# *   <code>(?_modifier_:_subexp_)</code> turns the mode "on" for *subexp*
+#     within the group
+# *   <code>(?-_modifier_:_subexp_)</code> turns the mode "off" for *subexp*
+#     within the group
 #
 # Example:
 #
@@ -1088,7 +1124,8 @@
 #
 # The multiline-mode in Ruby is what is commonly called a "dot-all mode":
 #
-# *   Without the `m` modifier, the subexpression `.` does not match newlines:
+# *   Without the `m` modifier, the subexpression <code>.</code> does not match
+#     newlines:
 #
 #         /a.c/.match("a\nc")  # => nil
 #
@@ -1096,16 +1133,17 @@
 #
 #         /a.c/m.match("a\nc") # => #<MatchData "a\nc">
 #
-# Unlike other languages, the modifier `m` does not affect the anchors `^` and
-# `$`. These anchors always match at line-boundaries in Ruby.
+# Unlike other languages, the modifier `m` does not affect the anchors
+# <code>^</code> and <code>$</code>. These anchors always match at
+# line-boundaries in Ruby.
 #
 # ### Extended Mode
 #
 # Modifier `x` enables extended mode, which means that:
 #
 # *   Literal white space in the pattern is to be ignored.
-# *   Character `#` marks the remainder of its containing line as a comment,
-#     which is also to be ignored for matching purposes.
+# *   Character <code>#</code> marks the remainder of its containing line as a
+#     comment, which is also to be ignored for matching purposes.
 #
 # In extended mode, whitespace and comments may be used to form a
 # self-documented regexp.
@@ -1168,22 +1206,22 @@
 # A regular expression containing non-US-ASCII characters is assumed to use the
 # source encoding. This can be overridden with one of the following modifiers.
 #
-# *   `/_pat_/n`: US-ASCII if only containing US-ASCII characters, otherwise
-#     ASCII-8BIT:
+# *   <code>/_pat_/n</code>: US-ASCII if only containing US-ASCII characters,
+#     otherwise ASCII-8BIT:
 #
 #         /foo/n.encoding     # => #<Encoding:US-ASCII>
 #         /foo\xff/n.encoding # => #<Encoding:ASCII-8BIT>
 #         /foo\x7f/n.encoding # => #<Encoding:US-ASCII>
 #
-# *   `/_pat_/u`: UTF-8
+# *   <code>/_pat_/u</code>: UTF-8
 #
 #         /foo/u.encoding # => #<Encoding:UTF-8>
 #
-# *   `/_pat_/e`: EUC-JP
+# *   <code>/_pat_/e</code>: EUC-JP
 #
 #         /foo/e.encoding # => #<Encoding:EUC-JP>
 #
-# *   `/_pat_/s`: Windows-31J
+# *   <code>/_pat_/s</code>: Windows-31J
 #
 #         /foo/s.encoding # => #<Encoding:Windows-31J>
 #
@@ -1195,7 +1233,7 @@
 #     has a *fixed* encoding.
 #
 # If a match between incompatible encodings is attempted an
-# `Encoding::CompatibilityError` exception is raised.
+# <code>Encoding::CompatibilityError</code> exception is raised.
 #
 # Example:
 #
@@ -1262,8 +1300,9 @@
 # *   No backreferences.
 # *   No subexpression calls.
 # *   No nested lookaround anchors or atomic groups.
-# *   No nested quantifiers with counting (i.e. no nested `{n}`, `{min,}`,
-#     `{,max}`, or `{min,max}` style quantifiers)
+# *   No nested quantifiers with counting (i.e. no nested <code>{n}</code>,
+#     <code>{min,}</code>, <code>{,max}</code>, or <code>{min,max}</code> style
+#     quantifiers)
 #
 # You can use method Regexp.linear_time? to determine whether a pattern meets
 # these criteria:
@@ -1357,8 +1396,8 @@ class Regexp
   #   - Regexp.last_match(n) -> string or nil
   #   - Regexp.last_match(name) -> string or nil
   # -->
-  # With no argument, returns the value of `$~`, which is the result of the most
-  # recent pattern match (see [Regexp global
+  # With no argument, returns the value of <code>$~</code>, which is the result of
+  # the most recent pattern match (see [Regexp global
   # variables](rdoc-ref:Regexp@Global+Variables)):
   #
   #     /c(.)t/ =~ 'cat'  # => 0
@@ -1436,14 +1475,14 @@ class Regexp
   #
   #     Regexp.try_convert(/re/) # => /re/
   #
-  # Otherwise if `object` responds to `:to_regexp`, calls `object.to_regexp` and
-  # returns the result.
+  # Otherwise if `object` responds to <code>:to_regexp</code>, calls
+  # <code>object.to_regexp</code> and returns the result.
   #
-  # Returns `nil` if `object` does not respond to `:to_regexp`.
+  # Returns `nil` if `object` does not respond to <code>:to_regexp</code>.
   #
   #     Regexp.try_convert('re') # => nil
   #
-  # Raises an exception unless `object.to_regexp` returns a regexp.
+  # Raises an exception unless <code>object.to_regexp</code> returns a regexp.
   #
   def self.try_convert: (Regexp | _ToRegexp regexp_like) -> Regexp
                       | (untyped other) -> Regexp?
@@ -1464,7 +1503,7 @@ class Regexp
   # It sets the default timeout interval for Regexp matching in second. `nil`
   # means no default timeout configuration. This configuration is process-global.
   # If you want to set timeout for each Regexp, use `timeout` keyword for
-  # `Regexp.new`.
+  # <code>Regexp.new</code>.
   #
   #     Regexp.timeout = 1
   #     /^a*b?a*$/ =~ "a" * 100000 + "x" #=> regexp match timeout (RuntimeError)
@@ -1483,7 +1522,7 @@ class Regexp
   #     r.match('dog')      # => #<MatchData "dog">
   #     r.match('cog')      # => nil
   #
-  # For each pattern that is a string, `Regexp.new(pattern)` is used:
+  # For each pattern that is a string, <code>Regexp.new(pattern)</code> is used:
   #
   #     Regexp.union('penzance')             # => /penzance/
   #     Regexp.union('a+b*c')                # => /a\+b\*c/
@@ -1497,7 +1536,7 @@ class Regexp
   #     Regexp.union([/foo/i, /bar/m, /baz/x])
   #     # => /(?i-mx:foo)|(?m-ix:bar)|(?x-mi:baz)/
   #
-  # With no arguments, returns `/(?!)/`:
+  # With no arguments, returns <code>/(?!)/</code>:
   #
   #     Regexp.union # => /(?!)/
   #
@@ -1595,7 +1634,7 @@ class Regexp
   #   - regexp =~ string -> integer or nil
   # -->
   # Returns the integer index (in characters) of the first match for `self` and
-  # `string`, or `nil` if none; also sets the [rdoc-ref:Regexp global
+  # `string`, or `nil` if none; also sets the [Regexp global
   # variables](rdoc-ref:Regexp@Global+Variables):
   #
   #     /at/ =~ 'input data' # => 7
@@ -1636,7 +1675,7 @@ class Regexp
   #     '  x = y  ' =~ /(?<foo>\w+)\s*=\s*(?<foo>\w+)/
   #     p foo, foo # Undefined local variables
   #
-  # A regexp interpolation, `#{}`, also disables the assignment:
+  # A regexp interpolation, <code>#{}</code>, also disables the assignment:
   #
   #     r = /(?<foo>\w+)/
   #     /(?<foo>\w+)\s*=\s*#{r}/ =~ 'x = y'
@@ -1926,7 +1965,7 @@ class Regexp
   #   rdoc-file=re.c
   #   - ~ rxp -> integer or nil
   # -->
-  # Equivalent to `<i>rxp</i> =~ $_`:
+  # Equivalent to <code><i>rxp</i> =~ $_</code>:
   #
   #     $_ = "input data"
   #     ~ /at/ # => 7

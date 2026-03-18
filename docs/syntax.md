@@ -3,17 +3,17 @@
 ## Types
 
 ```markdown
-_type_ ::= _class-name_ _type-arguments_                 (Class instance type)
-         | _interface-name_ _type-arguments_             (Interface type)
-         | _alias-name_ _type-arguments_                 (Alias type)
-         | `singleton(` _class-name_ `)`                 (Class singleton type)
-         | _literal_                                     (Literal type)
-         | _type_ `|` _type_                             (Union type)
-         | _type_ `&` _type_                             (Intersection type)
-         | _type_ `?`                                    (Optional type)
-         | `{` _record-name_ `:` _type_ `,` etc. `}`     (Record type)
-         | `[]` | `[` _type_ `,` etc. `]`                (Tuples)
-         | _type-variable_                               (Type variables)
+_type_ ::= _class-name_ _type-arguments_                     (Class instance type)
+         | _interface-name_ _type-arguments_                 (Interface type)
+         | _alias-name_ _type-arguments_                     (Alias type)
+         | `singleton(` _class-name_ `)` _type-arguments_    (Class singleton type)
+         | _literal_                                         (Literal type)
+         | _type_ `|` _type_                                 (Union type)
+         | _type_ `&` _type_                                 (Intersection type)
+         | _type_ `?`                                        (Optional type)
+         | `{` _record-name_ `:` _type_ `,` etc. `}`         (Record type)
+         | `[]` | `[` _type_ `,` etc. `]`                    (Tuples)
+         | _type-variable_                                   (Type variables)
          | `self`
          | `instance`
          | `class`
@@ -85,7 +85,8 @@ Class singleton type denotes _the type of a singleton object of a class_.
 
 ```rbs
 singleton(String)
-singleton(::Hash)            # Class singleton type cannot be parametrized.
+singleton(::Hash)            # Class singleton type
+singleton(Array)[String]     # Class singleton type with type application
 ```
 
 ### Literal type
