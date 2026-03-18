@@ -2,7 +2,7 @@
 # The objspace library extends the ObjectSpace module and adds several methods
 # to get internal statistic information about object/memory management.
 #
-# You need to `require 'objspace'` to use this extension module.
+# You need to <code>require 'objspace'</code> to use this extension module.
 #
 # Generally, you **SHOULD** **NOT** use this library if you do not know about
 # the MRI implementation.  Mainly, this library is for (memory) profiler
@@ -128,29 +128,6 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c
-  #   - ObjectSpace.count_nodes([result_hash]) -> hash
-  # -->
-  # Counts nodes for each node type.
-  #
-  # This method is only for MRI developers interested in performance and memory
-  # usage of Ruby programs.
-  #
-  # It returns a hash as:
-  #
-  #     {:NODE_METHOD=>2027, :NODE_FBODY=>1927, :NODE_CFUNC=>1798, ...}
-  #
-  # If the optional argument, result_hash, is given, it is overwritten and
-  # returned. This is intended to avoid probe effect.
-  #
-  # Note: The contents of the returned hash is implementation defined. It may be
-  # changed in future.
-  #
-  # This method is only expected to work with C Ruby.
-  #
-  def self?.count_nodes: (?Hash[Symbol, Integer] result_hash) -> Hash[Symbol, Integer]
-
-  # <!--
-  #   rdoc-file=ext/objspace/objspace.c
   #   - ObjectSpace.count_objects_size([result_hash]) -> hash
   # -->
   # Counts objects size (in bytes) for each type.
@@ -237,12 +214,13 @@ module ObjectSpace
   # -->
   # Dump the contents of a ruby object as JSON.
   #
-  # *output* can be one of: `:stdout`, `:file`, `:string`, or IO object.
+  # *output* can be one of: <code>:stdout</code>, <code>:file</code>,
+  # <code>:string</code>, or IO object.
   #
-  # *   `:file` means dumping to a tempfile and returning corresponding File
-  #     object;
-  # *   `:stdout` means printing the dump and returning `nil`;
-  # *   `:string` means returning a string with the dump;
+  # *   <code>:file</code> means dumping to a tempfile and returning corresponding
+  #     File object;
+  # *   <code>:stdout</code> means printing the dump and returning `nil`;
+  # *   <code>:string</code> means returning a string with the dump;
   # *   if an instance of IO object is provided, the output goes there, and the
   #     object is returned.
   #
@@ -277,7 +255,7 @@ module ObjectSpace
   #
   # If *shapes* is a positive integer, only shapes newer than the provided shape
   # id are dumped. The current shape_id can be accessed using
-  # `RubyVM.stat(:next_shape_id)`.
+  # <code>RubyVM.stat(:next_shape_id)</code>.
   #
   # If *shapes* is `false`, no shapes are dumped.
   #
@@ -332,9 +310,11 @@ module ObjectSpace
   # information as only a **HINT**. Especially, the size of `T_DATA` may not be
   # correct.
   #
-  # This method is only expected to work with C Ruby.
+  # This method is only expected to work with CRuby.
   #
-  # From Ruby 2.2, memsize_of(obj) returns a memory size includes sizeof(RVALUE).
+  # From Ruby 3.2 with Variable Width Allocation, it returns the actual slot size
+  # used plus any additional memory allocated outside the slot (such as external
+  # strings, arrays, or hash tables).
   #
   def self?.memsize_of: (untyped) -> Integer
 
@@ -409,7 +389,7 @@ module ObjectSpace
   #     ObjectSpace.reachable_objects_from(1)
   #     #=> nil # 1 is not markable (heap managed) object
   #
-  def self?.reachable_objects_from: (untyped) -> ([ untyped ] | nil)
+  def self?.reachable_objects_from: (untyped) -> (Array[untyped] | nil)
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c
@@ -461,8 +441,11 @@ module ObjectSpace
 
   # <!--
   #   rdoc-file=ext/objspace/object_tracing.c
-  #   - trace_object_allocations_debug_start()
+  #   - trace_object_allocations_debug_start
   # -->
+  # Starts tracing object allocations for GC debugging. If you encounter the BUG
+  # "... is T_NONE" (and so on) on your application, please try this method at the
+  # beginning of your app.
   #
   def self?.trace_object_allocations_debug_start: () -> void
 

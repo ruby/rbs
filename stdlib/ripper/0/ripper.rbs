@@ -31,23 +31,26 @@
 #               nil,
 #               nil]]]]
 #
-# You can see in the example above, the expression starts with `:program`.
+# You can see in the example above, the expression starts with
+# <code>:program</code>.
 #
-# From here, a method definition at `:def`, followed by the method's identifier
-# `:@ident`. After the method's identifier comes the parentheses `:paren` and
-# the method parameters under `:params`.
+# From here, a method definition at <code>:def</code>, followed by the method's
+# identifier <code>:@ident</code>. After the method's identifier comes the
+# parentheses <code>:paren</code> and the method parameters under
+# <code>:params</code>.
 #
-# Next is the method body, starting at `:bodystmt` (`stmt` meaning statement),
-# which contains the full definition of the method.
+# Next is the method body, starting at <code>:bodystmt</code> (`stmt` meaning
+# statement), which contains the full definition of the method.
 #
 # In our case, we're simply returning a String, so next we have the
-# `:string_literal` expression.
+# <code>:string_literal</code> expression.
 #
-# Within our `:string_literal` you'll notice two `@tstring_content`, this is the
-# literal part for `Hello, ` and `!`. Between the two `@tstring_content`
-# statements is a `:string_embexpr`, where *embexpr* is an embedded expression.
-# Our expression consists of a local variable, or `var_ref`, with the identifier
-# (`@ident`) of `world`.
+# Within our <code>:string_literal</code> you'll notice two
+# <code>@tstring_content</code>, this is the literal part for <code>Hello,
+# </code> and <code>!</code>. Between the two <code>@tstring_content</code>
+# statements is a <code>:string_embexpr</code>, where *embexpr* is an embedded
+# expression. Our expression consists of a local variable, or `var_ref`, with
+# the identifier (<code>@ident</code>) of `world`.
 #
 # ## Resources
 #
@@ -189,7 +192,7 @@ class Ripper
     #   - state()
     # -->
     # The scanner's state of the current token. This value is the bitwise OR of zero
-    # or more of the `Ripper::EXPR_*` constants.
+    # or more of the <code>Ripper::EXPR_*</code> constants.
     #
     def state: () -> Ripper::Lexer::State
 
@@ -972,10 +975,10 @@ class Ripper
   #   - lex(src, filename = '-', lineno = 1, **kw)
   # -->
   # Tokenizes the Ruby program and returns an array of an array, which is
-  # formatted like `[[lineno, column], type, token, state]`. The `filename`
-  # argument is mostly ignored. By default, this method does not handle syntax
-  # errors in `src`, use the `raise_errors` keyword to raise a SyntaxError for an
-  # error in `src`.
+  # formatted like <code>[[lineno, column], type, token, state]</code>. The
+  # `filename` argument is mostly ignored. By default, this method does not handle
+  # syntax errors in `src`, use the `raise_errors` keyword to raise a SyntaxError
+  # for an error in `src`.
   #
   #     require 'ripper'
   #     require 'pp'

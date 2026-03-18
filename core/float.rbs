@@ -1,14 +1,192 @@
-# <!-- rdoc-file=numeric.c -->
-# A Float object represents a sometimes-inexact real number using the native
-# architecture's double-precision floating point representation.
+# <!-- rdoc-file=float.rb -->
+# A Float object stores a real number using the native architecture's
+# double-precision floating-point representation.
 #
-# Floating point has a different arithmetic and is an inexact number. So you
-# should know its esoteric system. See following:
+# ## Float Imprecisions
+#
+# Some real numbers can be represented precisely as Float objects:
+#
+#     37.5    # => 37.5
+#     98.75   # => 98.75
+#     12.3125 # => 12.3125
+#
+# Others cannot; among these are the transcendental numbers, including:
+#
+# *   Pi, <em>π</em>: in mathematics, a number of infinite precision:
+#     3.1415926535897932384626433... (to 25 places); in Ruby, it is of limited
+#     precision (in this case, to 16 decimal places):
+#
+#         Math::PI # => 3.141592653589793
+#
+# *   Euler's number, *e*: in mathematics, a number of infinite precision:
+#     2.7182818284590452353602874... (to 25 places); in Ruby, it is of limited
+#     precision (in this case, to 15 decimal places):
+#
+#         Math::E # => 2.718281828459045
+#
+# Some floating-point computations in Ruby give precise results:
+#
+#     1.0/2   # => 0.5
+#     100.0/8 # => 12.5
+#
+# Others do not:
+#
+# *   In mathematics, 2/3 as a decimal number is an infinitely-repeating
+#     decimal: 0.666... (forever); in Ruby, <code>2.0/3</code> is of limited
+#     precision (in this case, to 16 decimal places):
+#
+#         2.0/3 # => 0.6666666666666666
+#
+# *   In mathematics, the square root of 2 is an irrational number of infinite
+#     precision: 1.4142135623730950488016887... (to 25 decimal places); in Ruby,
+#     it is of limited precision (in this case, to 16 decimal places):
+#
+#         Math.sqrt(2.0) # => 1.4142135623730951
+#
+# *   Even a simple computation can introduce imprecision:
+#
+#         x = 0.1 + 0.2 # => 0.30000000000000004
+#         y = 0.3       # => 0.3
+#         x == y        # => false
+#
+# See:
 #
 # *   https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
 # *   https://github.com/rdp/ruby_tutorials_core/wiki/Ruby-Talk-FAQ#-why-are-rub
 #     ys-floats-imprecise
 # *   https://en.wikipedia.org/wiki/Floating_point#Accuracy_problems
+#
+# Note that precise storage and computation of rational numbers is possible
+# using Rational objects.
+#
+# ## Creating a Float
+#
+# You can create a Float object explicitly with:
+#
+# *   A [floating-point literal](rdoc-ref:syntax/literals.rdoc@Float+Literals).
+#
+# You can convert certain objects to Floats with:
+#
+# *   Method #Float.
+#
+# ## What's Here
+#
+# First, what's elsewhere. Class Float:
+#
+# *   Inherits from [class Numeric](rdoc-ref:Numeric@What-27s+Here) and [class
+#     Object](rdoc-ref:Object@What-27s+Here).
+# *   Includes [module Comparable](rdoc-ref:Comparable@What-27s+Here).
+#
+# Here, class Float provides methods for:
+#
+# *   [Querying](rdoc-ref:Float@Querying)
+# *   [Comparing](rdoc-ref:Float@Comparing)
+# *   [Converting](rdoc-ref:Float@Converting)
+#
+# ### Querying
+#
+# *   #finite?: Returns whether `self` is finite.
+# *   #hash: Returns the integer hash code for `self`.
+# *   #infinite?: Returns whether `self` is infinite.
+# *   #nan?: Returns whether `self` is a NaN (not-a-number).
+#
+# ### Comparing
+#
+# *   #<: Returns whether `self` is less than the given value.
+# *   #<=: Returns whether `self` is less than or equal to the given value.
+# *   #<=>: Returns a number indicating whether `self` is less than, equal to,
+#     or greater than the given value.
+# *   #== (aliased as #=== and #eql?): Returns whether `self` is equal to the
+#     given value.
+# *   #>: Returns whether `self` is greater than the given value.
+# *   #>=: Returns whether `self` is greater than or equal to the given value.
+#
+# ### Converting
+#
+# *   #% (aliased as #modulo): Returns `self` modulo the given value.
+# *   #*: Returns the product of `self` and the given value.
+# *   #**: Returns the value of `self` raised to the power of the given value.
+# *   #+: Returns the sum of `self` and the given value.
+# *   #-: Returns the difference of `self` and the given value.
+# *   #/: Returns the quotient of `self` and the given value.
+# *   #ceil: Returns the smallest number greater than or equal to `self`.
+# *   #coerce: Returns a 2-element array containing the given value converted to
+#     a Float and `self`
+# *   #divmod: Returns a 2-element array containing the quotient and remainder
+#     results of dividing `self` by the given value.
+# *   #fdiv: Returns the Float result of dividing `self` by the given value.
+# *   #floor: Returns the greatest number smaller than or equal to `self`.
+# *   #next_float: Returns the next-larger representable Float.
+# *   #prev_float: Returns the next-smaller representable Float.
+# *   #quo: Returns the quotient from dividing `self` by the given value.
+# *   #round: Returns `self` rounded to the nearest value, to a given precision.
+# *   #to_i (aliased as #to_int): Returns `self` truncated to an Integer.
+# *   #to_s (aliased as #inspect): Returns a string containing the place-value
+#     representation of `self` in the given radix.
+# *   #truncate: Returns `self` truncated to a given precision.
+#
+# <!-- rdoc-file=float.rb -->
+# A Float object stores a real number using the native architecture's
+# double-precision floating-point representation.
+#
+# ## Float Imprecisions
+#
+# Some real numbers can be represented precisely as Float objects:
+#
+#     37.5    # => 37.5
+#     98.75   # => 98.75
+#     12.3125 # => 12.3125
+#
+# Others cannot; among these are the transcendental numbers, including:
+#
+# *   Pi, <em>π</em>: in mathematics, a number of infinite precision:
+#     3.1415926535897932384626433... (to 25 places); in Ruby, it is of limited
+#     precision (in this case, to 16 decimal places):
+#
+#         Math::PI # => 3.141592653589793
+#
+# *   Euler's number, *e*: in mathematics, a number of infinite precision:
+#     2.7182818284590452353602874... (to 25 places); in Ruby, it is of limited
+#     precision (in this case, to 15 decimal places):
+#
+#         Math::E # => 2.718281828459045
+#
+# Some floating-point computations in Ruby give precise results:
+#
+#     1.0/2   # => 0.5
+#     100.0/8 # => 12.5
+#
+# Others do not:
+#
+# *   In mathematics, 2/3 as a decimal number is an infinitely-repeating
+#     decimal: 0.666... (forever); in Ruby, <code>2.0/3</code> is of limited
+#     precision (in this case, to 16 decimal places):
+#
+#         2.0/3 # => 0.6666666666666666
+#
+# *   In mathematics, the square root of 2 is an irrational number of infinite
+#     precision: 1.4142135623730950488016887... (to 25 decimal places); in Ruby,
+#     it is of limited precision (in this case, to 16 decimal places):
+#
+#         Math.sqrt(2.0) # => 1.4142135623730951
+#
+# *   Even a simple computation can introduce imprecision:
+#
+#         x = 0.1 + 0.2 # => 0.30000000000000004
+#         y = 0.3       # => 0.3
+#         x == y        # => false
+#
+# See:
+#
+# *   https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
+# *   https://github.com/rdp/ruby_tutorials_core/wiki/Ruby-Talk-FAQ#-why-are-rub
+#     ys-floats-imprecise
+# *   https://en.wikipedia.org/wiki/Floating_point#Accuracy_problems
+#
+# Note that precise storage and computation of rational numbers is possible
+# using Rational objects.
+#
+# ## Creating a Float
 #
 # You can create a Float object explicitly with:
 #
@@ -79,7 +257,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self % other -> float
   # -->
-  # Returns `self` modulo `other` as a float.
+  # Returns `self` modulo `other` as a Float.
   #
   # For float `f` and real number `r`, these expressions are equivalent:
   #
@@ -111,7 +289,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self * other -> numeric
   # -->
-  # Returns a new Float which is the product of `self` and `other`:
+  # Returns the numeric product of `self` and `other`:
   #
   #     f = 3.14
   #     f * 2              # => 6.28
@@ -124,9 +302,9 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self ** other -> numeric
+  #   - self ** exponent -> numeric
   # -->
-  # Raises `self` to the power of `other`:
+  # Returns `self` raised to the power `exponent`:
   #
   #     f = 3.14
   #     f ** 2              # => 9.8596
@@ -140,15 +318,20 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self + other -> numeric
+  #   - self + other -> float or complex
   # -->
-  # Returns a new Float which is the sum of `self` and `other`:
+  # Returns the sum of `self` and `other`; the result may be inexact (see Float):
   #
-  #     f = 3.14
-  #     f + 1                 # => 4.140000000000001
-  #     f + 1.0               # => 4.140000000000001
-  #     f + Rational(1, 1)    # => 4.140000000000001
-  #     f + Complex(1, 0)     # => (4.140000000000001+0i)
+  #     3.14 + 0              # => 3.14
+  #     3.14 + 1              # => 4.140000000000001
+  #     -3.14 + 0             # => -3.14
+  #     -3.14 + 1             # => -2.14
+  #
+  #     3.14 + -3.14          # => 0.0
+  #     -3.14 + -3.14         # => -6.28
+  #
+  #     3.14 + Complex(1, 0)   # => (4.140000000000001+0i)
+  #     3.14 + Rational(1, 1)  # => 4.140000000000001
   #
   def +: (Complex) -> Complex
        | (Numeric) -> Float
@@ -157,7 +340,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self - other -> numeric
   # -->
-  # Returns a new Float which is the difference of `self` and `other`:
+  # Returns the difference of `self` and `other`:
   #
   #     f = 3.14
   #     f - 1                 # => 2.14
@@ -170,9 +353,13 @@ class Float < Numeric
 
   # <!--
   #   rdoc-file=numeric.rb
-  #   - -float -> float
+  #   - -self -> float
   # -->
-  # Returns `self`, negated.
+  # Returns `self`, negated:
+  #
+  #     -3.14    # => -3.14
+  #     -(-3.14) # => 3.14
+  #     -0.0     # => -0.0
   #
   def -@: () -> Float
 
@@ -180,7 +367,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self / other -> numeric
   # -->
-  # Returns a new Float which is the result of dividing `self` by `other`:
+  # Returns the quotient of `self` and `other`:
   #
   #     f = 3.14
   #     f / 2              # => 1.57
@@ -195,14 +382,16 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self < other -> true or false
   # -->
-  # Returns `true` if `self` is numerically less than `other`:
+  # Returns whether the value of `self` is less than the value of `other`; `other`
+  # must be numeric, but may not be Complex:
   #
   #     2.0 < 3              # => true
   #     2.0 < 3.0            # => true
   #     2.0 < Rational(3, 1) # => true
   #     2.0 < 2.0            # => false
   #
-  # `Float::NAN < Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN < Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def <: (Numeric) -> bool
 
@@ -210,7 +399,8 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - self <= other -> true or false
   # -->
-  # Returns `true` if `self` is numerically less than or equal to `other`:
+  # Returns whether the value of `self` is less than or equal to the value of
+  # `other`; `other` must be numeric, but may not be Complex:
   #
   #     2.0 <= 3              # => true
   #     2.0 <= 3.0            # => true
@@ -218,35 +408,39 @@ class Float < Numeric
   #     2.0 <= 2.0            # => true
   #     2.0 <= 1.0            # => false
   #
-  # `Float::NAN <= Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN <= Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def <=: (Numeric) -> bool
 
   # <!--
   #   rdoc-file=numeric.c
-  #   - self <=> other ->  -1, 0, +1, or nil
+  #   - self <=> other ->  -1, 0, 1, or nil
   # -->
-  # Returns a value that depends on the numeric relation between `self` and
-  # `other`:
+  # Compares `self` and `other`.
   #
-  # *   -1, if `self` is less than `other`.
-  # *   0, if `self` is equal to `other`.
-  # *   1, if `self` is greater than `other`.
+  # Returns:
+  #
+  # *   <code>-1</code>, if `self` is less than `other`.
+  # *   `0`, if `self` is equal to `other`.
+  # *   `1`, if `self` is greater than `other`.
   # *   `nil`, if the two values are incommensurate.
   #
   # Examples:
   #
+  #     2.0 <=> 2.1            # => -1
   #     2.0 <=> 2              # => 0
   #     2.0 <=> 2.0            # => 0
   #     2.0 <=> Rational(2, 1) # => 0
   #     2.0 <=> Complex(2, 0)  # => 0
   #     2.0 <=> 1.9            # => 1
-  #     2.0 <=> 2.1            # => -1
   #     2.0 <=> 'foo'          # => nil
   #
-  # This is the basis for the tests in the Comparable module.
+  # <code>Float::NAN <=> Float::NAN</code> returns an implementation-dependent
+  # value.
   #
-  # `Float::NAN <=> Float::NAN` returns an implementation-dependent value.
+  # Class Float includes module Comparable, each of whose methods uses Float#<=>
+  # for comparison.
   #
   def <=>: (Numeric) -> Integer?
 
@@ -261,7 +455,8 @@ class Float < Numeric
   #     2.0 == Rational(2, 1) # => true
   #     2.0 == Complex(2, 0)  # => true
   #
-  # `Float::NAN == Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN == Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
@@ -275,7 +470,8 @@ class Float < Numeric
   #     2.0 == Rational(2, 1) # => true
   #     2.0 == Complex(2, 0)  # => true
   #
-  # `Float::NAN == Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN == Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
@@ -292,7 +488,8 @@ class Float < Numeric
   #     2.0 > Rational(1, 2) # => true
   #     2.0 > 2.0            # => false
   #
-  # `Float::NAN > Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN > Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def >: (Numeric) -> bool
 
@@ -308,7 +505,8 @@ class Float < Numeric
   #     2.0 >= 2.0            # => true
   #     2.0 >= 2.1            # => false
   #
-  # `Float::NAN >= Float::NAN` returns an implementation-dependent value.
+  # <code>Float::NAN >= Float::NAN</code> returns an implementation-dependent
+  # value.
   #
   def >=: (Numeric) -> bool
 
@@ -363,7 +561,7 @@ class Float < Numeric
   #
   # When `ndigits` is non-positive,
   # returns an Integer based on a computed granularity:
-  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The granularity is <code>10 ** ndigits.abs</code>.
   # *   The returned value is the largest multiple of the granularity
   #      that is less than or equal to `self`.
   # Examples with positive `self`:
@@ -429,7 +627,7 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - divmod(other) -> array
   # -->
-  # Returns a 2-element array `[q, r]`, where
+  # Returns a 2-element array <code>[q, r]</code>, where
   #
   #     q = (self/other).floor      # Quotient
   #     r = self % other            # Remainder
@@ -465,7 +663,8 @@ class Float < Numeric
   #     2.0.eql?(Rational(2, 1)) # => false
   #     2.0.eql?(Complex(2, 0))  # => false
   #
-  # `Float::NAN.eql?(Float::NAN)` returns an implementation-dependent value.
+  # <code>Float::NAN.eql?(Float::NAN)</code> returns an implementation-dependent
+  # value.
   #
   # Related: Float#== (performs type conversions).
   #
@@ -487,8 +686,8 @@ class Float < Numeric
   #   rdoc-file=numeric.c
   #   - finite? -> true or false
   # -->
-  # Returns `true` if `self` is not `Infinity`, `-Infinity`, or `NaN`, `false`
-  # otherwise:
+  # Returns `true` if `self` is not `Infinity`, <code>-Infinity</code>, or `NaN`,
+  # `false` otherwise:
   #
   #     f = 2.0      # => 2.0
   #     f.finite?    # => true
@@ -533,7 +732,7 @@ class Float < Numeric
   #
   # When `self` is non-zero and `ndigits` is non-positive,
   # returns an integer value based on a computed granularity:
-  # *   The granularity is `10 ** ndigits.abs`.
+  # *   The granularity is <code>10 ** ndigits.abs</code>.
   # *   The returned value is the largest multiple of the granularity
   #      that is less than or equal to `self`.
   # Examples with positive `self`:
@@ -581,7 +780,7 @@ class Float < Numeric
   # Returns:
   #
   # *   1, if `self` is `Infinity`.
-  # *   -1 if `self` is `-Infinity`.
+  # *   -1 if `self` is <code>-Infinity</code>.
   # *   `nil`, otherwise.
   #
   # Examples:
@@ -626,7 +825,7 @@ class Float < Numeric
   alias magnitude abs
 
   # <!-- rdoc-file=numeric.c -->
-  # Returns `self` modulo `other` as a float.
+  # Returns `self` modulo `other` as a Float.
   #
   # For float `f` and real number `r`, these expressions are equivalent:
   #
@@ -679,7 +878,7 @@ class Float < Numeric
   # Returns the next-larger representable Float.
   #
   # These examples show the internally stored values (64-bit hexadecimal) for each
-  # Float `f` and for the corresponding `f.next_float`:
+  # Float `f` and for the corresponding <code>f.next_float</code>:
   #
   #     f = 0.0      # 0x0000000000000000
   #     f.next_float # 0x0000000000000001
@@ -753,7 +952,7 @@ class Float < Numeric
   # Returns the next-smaller representable Float.
   #
   # These examples show the internally stored values (64-bit hexadecimal) for each
-  # Float `f` and for the corresponding `f.pev_float`:
+  # Float `f` and for the corresponding <code>f.pev_float</code>:
   #
   #     f = 5e-324   # 0x0000000000000001
   #     f.prev_float # 0x0000000000000000
@@ -834,8 +1033,8 @@ class Float < Numeric
   #     f.round(1) # => -12345.7
   #     f.round(3) # => -12345.679
   #
-  # When `ndigits` is negative, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, returns an integer with at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     f = 12345.6789
   #     f.round(0)  # => 12346
@@ -847,19 +1046,20 @@ class Float < Numeric
   # If keyword argument `half` is given, and `self` is equidistant from the two
   # candidate values, the rounding is according to the given `half` value:
   #
-  # *   `:up` or `nil`: round away from zero:
+  # *   <code>:up</code> or `nil`: round away from zero:
   #
   #         2.5.round(half: :up)      # => 3
   #         3.5.round(half: :up)      # => 4
   #         (-2.5).round(half: :up)   # => -3
   #
-  # *   `:down`: round toward zero:
+  # *   <code>:down</code>: round toward zero:
   #
   #         2.5.round(half: :down)    # => 2
   #         3.5.round(half: :down)    # => 3
   #         (-2.5).round(half: :down) # => -2
   #
-  # *   `:even`: round toward the candidate whose last nonzero digit is even:
+  # *   <code>:even</code>: round toward the candidate whose last nonzero digit is
+  #     even:
   #
   #         2.5.round(half: :even)    # => 2
   #         3.5.round(half: :even)    # => 4
@@ -972,8 +1172,8 @@ class Float < Numeric
   #     f.truncate(1) # => -12345.6
   #     f.truncate(3) # => -12345.678
   #
-  # When `ndigits` is negative, returns an integer with at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, returns an integer with at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     f = 12345.6789
   #     f.truncate(0)  # => 12345
@@ -1059,8 +1259,8 @@ Float::MAX_EXP: Integer
 # Usually defaults to 2.2250738585072014e-308.
 #
 # If the platform supports denormalized numbers, there are numbers between zero
-# and Float::MIN. 0.0.next_float returns the smallest positive floating point
-# number including denormalized numbers.
+# and Float::MIN. <code>0.0.next_float</code> returns the smallest positive
+# floating point number including denormalized numbers.
 #
 Float::MIN: Float
 

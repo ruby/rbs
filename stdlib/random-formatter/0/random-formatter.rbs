@@ -180,8 +180,8 @@ module RBS
       # create UUIDs that are time-ordered with sub-millisecond precision, up to 12
       # bits of additional timestamp may added with `extra_timestamp_bits`.  The extra
       # timestamp precision comes at the expense of random bits.  Setting
-      # `extra_timestamp_bits: 12` provides ~244ns of precision, but only 62 random
-      # bits (7.75 random bytes).
+      # <code>extra_timestamp_bits: 12</code> provides ~244ns of precision, but only
+      # 62 random bits (7.75 random bytes).
       #
       #     prng = Random.new
       #     Array.new(4) { prng.uuid_v7(extra_timestamp_bits: 12) }

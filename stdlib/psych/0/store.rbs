@@ -30,7 +30,7 @@
 #     greeting:
 #       hello: world
 #
-class Psych::Store < ::PStore
+class Psych::Store < ::PStore[string, untyped]
   # <!--
   #   rdoc-file=lib/yaml/store.rb
   #   - initialize( file_name, yaml_opts = {} )
@@ -45,8 +45,6 @@ class Psych::Store < ::PStore
   # Options passed in through `yaml_opts` will be used when converting the store
   # to YAML via Hash#to_yaml().
   #
-  def initialize: (*untyped o) -> void
-
   def dump: (untyped table) -> String
 
   def empty_marshal_checksum: () -> String
@@ -55,5 +53,5 @@ class Psych::Store < ::PStore
 
   def load: (String) -> untyped
 
-  def marshal_dump_supports_canonical_option?: () -> ::FalseClass
+  def marshal_dump_supports_canonical_option?: () -> bool
 end

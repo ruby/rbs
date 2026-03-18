@@ -54,7 +54,7 @@ module RBS
       # * The function return type is a return position (`() -> void`)
       # * Generic parameter is a return position (`Enumerator[Integer, void]`)
       #
-      %a{deprecated} def with_nonreturn_void?: () -> bool
+      def with_nonreturn_void?: () -> bool
     end
 
     # t represents union of all possible types.
@@ -172,24 +172,23 @@ module RBS
     class ClassSingleton
       # singleton(::Foo)
       #           ^^^^^  => name
-      type loc = Location[:name, bot]
+      type loc = Location[:name, :args]
 
-      def initialize: (name: TypeName, location: loc?) -> void
-
-      attr_reader name: TypeName
+      def initialize: (name: TypeName, location: loc?, ?args: Array[t]) -> void
 
       attr_reader location: loc?
 
       include _TypeBase
-      include NoFreeVariables
-      include NoSubst
-      include EmptyEachType
+      include Application
 
       def ==: (untyped other) -> bool
 
       alias eql? ==
 
       def hash: () -> Integer
+              
+      def map_type: () { (t) -> t } -> ClassSingleton
+                  | () -> Enumerator[t, ClassSingleton]
     end
 
     module Application
@@ -213,7 +212,7 @@ module RBS
 
       def has_classish_type?: () -> bool
 
-      %a{deprecated} def with_nonreturn_void?: () -> bool
+      def with_nonreturn_void?: () -> bool
     end
 
     class Interface
@@ -452,7 +451,7 @@ module RBS
 
       def has_classish_type?: () -> bool
 
-      %a{deprecated} def with_nonreturn_void?: () -> bool
+      def with_nonreturn_void?: () -> bool
 
       def ==: (untyped) -> bool
 
@@ -495,7 +494,7 @@ module RBS
 
       def has_classish_type?: () -> bool
 
-      %a{deprecated} def with_nonreturn_void?: () -> bool
+      def with_nonreturn_void?: () -> bool
 
       # Returns `?`
       def param_to_s: () -> String

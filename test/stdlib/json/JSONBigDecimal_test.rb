@@ -28,6 +28,8 @@ class JSONBigDecimalInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      BigDecimal("0"), :to_json
+    assert_send_type "(nil) -> String",
+                     BigDecimal("0"), :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      BigDecimal("0"), :to_json, JSON::State.new
   end

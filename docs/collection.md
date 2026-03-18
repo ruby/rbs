@@ -159,9 +159,9 @@ For example:
 # manifest.yaml
 
 dependencies:
-  # If your gem depends on pathname but the gemspec doesn't include pathname,
+  # If your gem depends on logger but the gemspec doesn't include logger,
   # you need to write the following.
-  - name: pathname
+  - name: logger
 ```
 
 If the gem's RBS is managed with [ruby/gem_rbs_collection](https://github.com/ruby/gem_rbs_collection), put it as `gems/GEM_NAME/VERSION/manifest.yaml`.  For example, `gems/activesupport/6.0/manifest.yaml`.
@@ -189,4 +189,4 @@ If the gem's RBS is included in the gem package, put it as `sig/manifest.yaml`.
 ## How it works
 
 `rbs collection` is integrated with Bundler.
-`rbs collection install` command generates `gem_rbs_collection.lock.yaml` from `gem_rbs_collection.yaml` and `Gemfile.lock`. It uses `Gemfile.lock` to detects dependencies.
+`rbs collection install` command generates `rbs_collection.lock.yaml` from `rbs_collection.yaml` and `Gemfile.lock`. It uses `Gemfile.lock` to detects dependencies.

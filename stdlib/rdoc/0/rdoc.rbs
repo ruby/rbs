@@ -84,7 +84,7 @@ module RDoc
     # -->
     # Starts collecting tokens
     #
-    def collect_tokens: () -> void
+    def collect_tokens: (Symbol) -> void
 
     # <!--
     #   rdoc-file=lib/rdoc/token_stream.rb

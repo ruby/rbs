@@ -50,7 +50,7 @@ class UNIXServer < UNIXSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # accept_nonblock should not raise an IO::WaitReadable exception, but return the
-  # symbol `:wait_readable` instead.
+  # symbol <code>:wait_readable</code> instead.
   #
   # ### See
   # *   UNIXServer#accept

@@ -10,20 +10,20 @@
 #     install: --no-rdoc --no-ri
 #     update: --no-rdoc --no-ri
 #
-# You can use `gem:` to set default arguments for all commands.
+# You can use <code>gem:</code> to set default arguments for all commands.
 #
 # RubyGems options use symbol keys.  Valid options are:
 #
-# `:backtrace`
+# <code>:backtrace</code>
 # :   See #backtrace
 #
-# `:sources`
+# <code>:sources</code>
 # :   Sets Gem::sources
 #
-# `:verbose`
+# <code>:verbose</code>
 # :   See #verbose
 #
-# `:concurrent_downloads`
+# <code>:concurrent_downloads</code>
 # :   See #concurrent_downloads
 #
 #

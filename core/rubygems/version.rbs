@@ -180,7 +180,6 @@ module Gem
     #
     #     ver1 = Version.create('1.3.17')   # -> (Version object)
     #     ver2 = Version.create(ver1)       # -> (ver1)
-    #     ver3 = Version.create(nil)        # -> nil
     #
     def self.create: (_ToS | Version input) -> instance
                    | (nil input) -> nil
@@ -199,8 +198,8 @@ module Gem
     #   - <=>(other)
     # -->
     # Compares this version with `other` returning -1, 0, or 1 if the other version
-    # is larger, the same, or smaller than this one. Attempts to compare to
-    # something that's not a `Gem::Version` or a valid version String return `nil`.
+    # is larger, the same, or smaller than this one. `other` must be an instance of
+    # Gem::Version, comparing with other types may raise an exception.
     #
     def <=>: (untyped other) -> Integer?
 

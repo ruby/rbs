@@ -19,9 +19,27 @@ module RBS
 
         class MethodTypeAnnotation
           class DocStyle
+            type param_type_annotation = Annotations::ParamTypeAnnotation
+                                      | Annotations::SplatParamTypeAnnotation
+                                      | Annotations::DoubleSplatParamTypeAnnotation
+                                      | Annotations::BlockParamTypeAnnotation
+
             attr_accessor return_type_annotation: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
 
+            attr_reader required_positionals: Array[Annotations::ParamTypeAnnotation | Symbol]
+            attr_reader optional_positionals: Array[Annotations::ParamTypeAnnotation | Symbol]
+            attr_accessor rest_positionals: Annotations::SplatParamTypeAnnotation | Symbol | true | nil
+            attr_reader trailing_positionals: Array[Annotations::ParamTypeAnnotation | Symbol]
+            attr_reader required_keywords: Hash[Symbol, Annotations::ParamTypeAnnotation | Symbol]
+            attr_reader optional_keywords: Hash[Symbol, Annotations::ParamTypeAnnotation | Symbol]
+            attr_accessor rest_keywords: Annotations::DoubleSplatParamTypeAnnotation | Symbol | true | nil
+            attr_accessor block: Annotations::BlockParamTypeAnnotation | Symbol | true | nil
+
             def initialize: () -> void
+
+            def self.build: (Array[param_type_annotation], Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil, Prism::DefNode) -> [DocStyle, Array[param_type_annotation]]
+
+            def all_param_annotations: () -> Array[param_type_annotation | Symbol | true | nil]
 
             def map_type_name: () { (TypeName) -> TypeName } -> self
 
@@ -42,7 +60,7 @@ module RBS
           #
           # Returns a tuple of `DefAnnotations` object, array of unused leading annotations, and unused trailing annotation.
           #
-          def self.build: (CommentBlock? leading_block, CommentBlock? trailing_block, Array[Symbol]) -> [
+          def self.build: (CommentBlock? leading_block, CommentBlock? trailing_block, Array[Symbol], Prism::DefNode) -> [
             MethodTypeAnnotation,
             Array[Annotations::leading_annotation | CommentBlock::AnnotationSyntaxError],
             Annotations::trailing_annotation | CommentBlock::AnnotationSyntaxError | nil
@@ -54,6 +72,8 @@ module RBS
           # Returns the method type overloads
           #
           def overloads: () -> Array[AST::Members::MethodDefinition::Overload]
+
+          def overloading?: () -> bool
 
           def type_fingerprint: () -> untyped
         end

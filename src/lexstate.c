@@ -118,7 +118,7 @@ unsigned int rbs_peek(rbs_lexer_t *lexer) {
 }
 
 bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len) {
-    if (RBS_UNLIKELY(lexer->current.char_pos == lexer->end_pos)) {
+    if (RBS_UNLIKELY(lexer->current.byte_pos == lexer->end_pos)) {
         return false;
     }
 
@@ -143,7 +143,7 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
 }
 
 void rbs_skip(rbs_lexer_t *lexer) {
-    rbs_assert(lexer->current_character_bytes > 0, "rbs_skip called with current_character_bytes == 0");
+    RBS_ASSERT(lexer->current_character_bytes > 0, "rbs_skip called with current_character_bytes == 0");
 
     if (RBS_UNLIKELY(lexer->current_code_point == '\0')) {
         return;

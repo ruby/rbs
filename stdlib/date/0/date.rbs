@@ -5,7 +5,7 @@
 #
 # *   You need both dates and times; Date handles only dates.
 # *   You need only Gregorian dates (and not Julian dates); see [Julian and
-#     Gregorian Calendars](rdoc-ref:date/calendars.rdoc).
+#     Gregorian Calendars](rdoc-ref:language/calendars.rdoc).
 #
 # A Date object, once created, is immutable, and cannot be modified.
 #
@@ -53,7 +53,7 @@
 #
 # See also the specialized methods in ["Specialized Format Strings" in Formats
 # for Dates and
-# Times](rdoc-ref:strftime_formatting.rdoc@Specialized+Format+Strings)
+# Times](rdoc-ref:language/strftime_formatting.rdoc@Specialized+Format+Strings)
 #
 # ## Argument `limit`
 #
@@ -88,7 +88,7 @@ class Date
   # number of days in the month; when the argument is negative, counts backward
   # from the end of the month.
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd.
   #
@@ -101,7 +101,7 @@ class Date
   #   - Date._httpdate(string, limit: 128) -> hash
   # -->
   # Returns a hash of values parsed from `string`, which should be a valid [HTTP
-  # date format](rdoc-ref:strftime_formatting.rdoc@HTTP+Format):
+  # date format](rdoc-ref:language/strftime_formatting.rdoc@HTTP+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.httpdate # => "Sat, 03 Feb 2001 00:00:00 GMT"
@@ -118,7 +118,8 @@ class Date
   # -->
   # Returns a hash of values parsed from `string`, which should contain an [ISO
   # 8601 formatted
-  # date](rdoc-ref:strftime_formatting.rdoc@ISO+8601+Format+Specifications):
+  # date](rdoc-ref:language/strftime_formatting.rdoc@ISO+8601+Format+Specification
+  # s):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.iso8601    # => "2001-02-03"
@@ -135,7 +136,8 @@ class Date
   #   - Date._jisx0301(string, limit: 128) -> hash
   # -->
   # Returns a hash of values parsed from `string`, which should be a valid [JIS X
-  # 0301 date format](rdoc-ref:strftime_formatting.rdoc@JIS+X+0301+Format):
+  # 0301 date
+  # format](rdoc-ref:language/strftime_formatting.rdoc@JIS+X+0301+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.jisx0301    # => "H13.02.03"
@@ -153,7 +155,8 @@ class Date
   # -->
   # **Note**: This method recognizes many forms in `string`, but it is not a
   # validator. For formats, see ["Specialized Format Strings" in Formats for Dates
-  # and Times](rdoc-ref:strftime_formatting.rdoc@Specialized+Format+Strings)
+  # and
+  # Times](rdoc-ref:language/strftime_formatting.rdoc@Specialized+Format+Strings)
   #
   # If `string` does not specify a valid date, the result is unpredictable;
   # consider using Date._strptime instead.
@@ -162,8 +165,8 @@ class Date
   #
   #     Date._parse('2001-02-03') # => {:year=>2001, :mon=>2, :mday=>3}
   #
-  # If `comp` is `true` and the given year is in the range `(0..99)`, the current
-  # century is supplied; otherwise, the year is taken as given:
+  # If `comp` is `true` and the given year is in the range <code>(0..99)</code>,
+  # the current century is supplied; otherwise, the year is taken as given:
   #
   #     Date._parse('01-02-03', true)  # => {:year=>2001, :mon=>2, :mday=>3}
   #     Date._parse('01-02-03', false) # => {:year=>1, :mon=>2, :mday=>3}
@@ -179,7 +182,7 @@ class Date
   #   - Date._rfc2822(string, limit: 128) -> hash
   # -->
   # Returns a hash of values parsed from `string`, which should be a valid [RFC
-  # 2822 date format](rdoc-ref:strftime_formatting.rdoc@RFC+2822+Format):
+  # 2822 date format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
@@ -197,7 +200,7 @@ class Date
   #   - Date._rfc3339(string, limit: 128) -> hash
   # -->
   # Returns a hash of values parsed from `string`, which should be a valid [RFC
-  # 3339 format](rdoc-ref:strftime_formatting.rdoc@RFC+3339+Format):
+  # 3339 format](rdoc-ref:language/strftime_formatting.rdoc@RFC+3339+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc3339     # => "2001-02-03T00:00:00+00:00"
@@ -215,7 +218,7 @@ class Date
   #   - Date._rfc2822(string, limit: 128) -> hash
   # -->
   # Returns a hash of values parsed from `string`, which should be a valid [RFC
-  # 2822 date format](rdoc-ref:strftime_formatting.rdoc@RFC+2822+Format):
+  # 2822 date format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
@@ -237,8 +240,8 @@ class Date
   #     Date._strptime('2001-02-03', '%Y-%m-%d') # => {:year=>2001, :mon=>2, :mday=>3}
   #
   # For other formats, see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc). (Unlike Date.strftime, does not
-  # support flags and width.)
+  # Times](rdoc-ref:language/strftime_formatting.rdoc). (Unlike Date.strftime,
+  # does not support flags and width.)
   #
   # See also [strptime(3)](https://man7.org/linux/man-pages/man3/strptime.3.html).
   #
@@ -309,7 +312,7 @@ class Date
   #         Date.commercial(2020, 1, 1).to_s # => "2019-12-30"
   #         Date.commercial(2020, 1, 7).to_s # => "2020-01-05"
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new, Date.ordinal.
   #
@@ -335,7 +338,8 @@ class Date
   #   - Date.httpdate(string = 'Mon, 01 Jan -4712 00:00:00 GMT', start = Date::ITALY, limit: 128) -> date
   # -->
   # Returns a new Date object with values parsed from `string`, which should be a
-  # valid [HTTP date format](rdoc-ref:strftime_formatting.rdoc@HTTP+Format):
+  # valid [HTTP date
+  # format](rdoc-ref:language/strftime_formatting.rdoc@HTTP+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.httpdate   # => "Sat, 03 Feb 2001 00:00:00 GMT"
@@ -343,7 +347,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._httpdate (returns a hash).
@@ -356,7 +360,8 @@ class Date
   # -->
   # Returns a new Date object with values parsed from `string`, which should
   # contain an [ISO 8601 formatted
-  # date](rdoc-ref:strftime_formatting.rdoc@ISO+8601+Format+Specifications):
+  # date](rdoc-ref:language/strftime_formatting.rdoc@ISO+8601+Format+Specification
+  # s):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.iso8601   # => "2001-02-03"
@@ -364,7 +369,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._iso8601 (returns a hash).
@@ -393,7 +398,7 @@ class Date
   #
   #         Date.jd(Date::ITALY - 1).julian?    # => true
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.new.
   #
@@ -405,7 +410,7 @@ class Date
   # -->
   # Returns a new Date object with values parsed from `string`, which should be a
   # valid [JIS X 0301
-  # format](rdoc-ref:strftime_formatting.rdoc@JIS+X+0301+Format):
+  # format](rdoc-ref:language/strftime_formatting.rdoc@JIS+X+0301+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.jisx0301   # => "H13.02.03"
@@ -417,7 +422,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._jisx0301 (returns a hash).
@@ -480,7 +485,7 @@ class Date
   #
   # Raises an exception if `yday` is zero or out of range.
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -492,9 +497,10 @@ class Date
   # -->
   # **Note**: This method recognizes many forms in `string`, but it is not a
   # validator. For formats, see ["Specialized Format Strings" in Formats for Dates
-  # and Times](rdoc-ref:strftime_formatting.rdoc@Specialized+Format+Strings) If
-  # `string` does not specify a valid date, the result is unpredictable; consider
-  # using Date._strptime instead.
+  # and
+  # Times](rdoc-ref:language/strftime_formatting.rdoc@Specialized+Format+Strings)
+  # If `string` does not specify a valid date, the result is unpredictable;
+  # consider using Date._strptime instead.
   #
   # Returns a new Date object with values parsed from `string`:
   #
@@ -502,15 +508,15 @@ class Date
   #     Date.parse('20010203')     # => #<Date: 2001-02-03>
   #     Date.parse('3rd Feb 2001') # => #<Date: 2001-02-03>
   #
-  # If `comp` is `true` and the given year is in the range `(0..99)`, the current
-  # century is supplied; otherwise, the year is taken as given:
+  # If `comp` is `true` and the given year is in the range <code>(0..99)</code>,
+  # the current century is supplied; otherwise, the year is taken as given:
   #
   #     Date.parse('01-02-03', true)  # => #<Date: 2001-02-03>
   #     Date.parse('01-02-03', false) # => #<Date: 0001-02-03>
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._parse (returns a hash).
@@ -523,7 +529,7 @@ class Date
   # -->
   # Returns a new Date object with values parsed from `string`, which should be a
   # valid [RFC 2822 date
-  # format](rdoc-ref:strftime_formatting.rdoc@RFC+2822+Format):
+  # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc2822   # => "Sat, 3 Feb 2001 00:00:00 +0000"
@@ -531,7 +537,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -543,7 +549,8 @@ class Date
   #   - Date.rfc3339(string = '-4712-01-01T00:00:00+00:00', start = Date::ITALY, limit: 128) -> date
   # -->
   # Returns a new Date object with values parsed from `string`, which should be a
-  # valid [RFC 3339 format](rdoc-ref:strftime_formatting.rdoc@RFC+3339+Format):
+  # valid [RFC 3339
+  # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+3339+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc3339   # => "2001-02-03T00:00:00+00:00"
@@ -551,7 +558,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc3339 (returns a hash).
@@ -564,7 +571,7 @@ class Date
   # -->
   # Returns a new Date object with values parsed from `string`, which should be a
   # valid [RFC 2822 date
-  # format](rdoc-ref:strftime_formatting.rdoc@RFC+2822+Format):
+  # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc2822   # => "Sat, 3 Feb 2001 00:00:00 +0000"
@@ -572,7 +579,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -595,10 +602,10 @@ class Date
   #     Date.strptime('sat3feb01', '%a%d%b%y')   # => #<Date: 2001-02-03>
   #
   # For other formats, see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc). (Unlike Date.strftime, does not
-  # support flags and width.)
+  # Times](rdoc-ref:language/strftime_formatting.rdoc). (Unlike Date.strftime,
+  # does not support flags and width.)
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # See also [strptime(3)](https://man7.org/linux/man-pages/man3/strptime.3.html).
   #
@@ -614,7 +621,7 @@ class Date
   #
   #     Date.today.to_s # => "2022-07-06"
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   def self.today: (?Integer start) -> Date
 
@@ -629,7 +636,7 @@ class Date
   #     Date.valid_date?(2001, 2, 29) # => false
   #     Date.valid_date?(2001, 2, -1) # => true
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -647,7 +654,7 @@ class Date
   #
   # See Date.commercial.
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.commercial.
   #
@@ -664,7 +671,7 @@ class Date
   #     Date.valid_date?(2001, 2, 29) # => false
   #     Date.valid_date?(2001, 2, -1) # => true
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.new.
   #
@@ -679,7 +686,7 @@ class Date
   #
   #     Date.valid_jd?(2451944) # => true
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd.
   #
@@ -695,7 +702,7 @@ class Date
   #     Date.valid_ordinal?(2001, 34)  # => true
   #     Date.valid_ordinal?(2001, 366) # => false
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   # Related: Date.jd, Date.ordinal.
   #
@@ -714,7 +721,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._xmlschema (returns a hash).
@@ -793,7 +800,7 @@ class Date
   # -->
   # Compares `self` and `other`, returning:
   #
-  # *   `-1` if `other` is larger.
+  # *   <code>-1</code> if `other` is larger.
   # *   `0` if the two are equal.
   # *   `1` if `other` is smaller.
   # *   `nil` if the two are incomparable.
@@ -815,7 +822,7 @@ class Date
   #         d <=> DateTime.new(2022, 7, 27) # => 0
   #         d <=> DateTime.new(2022, 7, 28) # => -1
   #
-  # *   A numeric (compares `self.ajd` to `other`):
+  # *   A numeric (compares <code>self.ajd</code> to `other`):
   #
   #         d <=> 2459788 # => -1
   #         d <=> 2459787 # => 1
@@ -852,7 +859,7 @@ class Date
   #         d === DateTime.new(2022, 7, 27) # => true
   #         d === DateTime.new(2022, 7, 28) # => false
   #
-  # *   A numeric (compares `self.jd` to `other`):
+  # *   A numeric (compares <code>self.jd</code> to `other`):
   #
   #         d === 2459788 # => true
   #         d === 2459787 # => false
@@ -921,9 +928,10 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - asctime -> string
   # -->
-  # Equivalent to #strftime with argument `'%a %b %e %T %Y'` (or its [shorthand
-  # form](rdoc-ref:strftime_formatting.rdoc@Shorthand+Conversion+Specifiers)
-  # `'%c'`):
+  # Equivalent to #strftime with argument <code>'%a %b %e %T %Y'</code> (or its
+  # [shorthand
+  # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
+  # rs) <code>'%c'</code>):
   #
   #     Date.new(2001, 2, 3).asctime # => "Sat Feb  3 00:00:00 2001"
   #
@@ -932,9 +940,10 @@ class Date
   def asctime: () -> String
 
   # <!-- rdoc-file=ext/date/date_core.c -->
-  # Equivalent to #strftime with argument `'%a %b %e %T %Y'` (or its [shorthand
-  # form](rdoc-ref:strftime_formatting.rdoc@Shorthand+Conversion+Specifiers)
-  # `'%c'`):
+  # Equivalent to #strftime with argument <code>'%a %b %e %T %Y'</code> (or its
+  # [shorthand
+  # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
+  # rs) <code>'%c'</code>):
   #
   #     Date.new(2001, 2, 3).asctime # => "Sat Feb  3 00:00:00 2001"
   #
@@ -986,7 +995,8 @@ class Date
   #   - deconstruct_keys(array_of_names_or_nil) -> hash
   # -->
   # Returns a hash of the name/value pairs, to use in pattern matching. Possible
-  # keys are: `:year`, `:month`, `:day`, `:wday`, `:yday`.
+  # keys are: <code>:year</code>, <code>:month</code>, <code>:day</code>,
+  # <code>:wday</code>, <code>:yday</code>.
   #
   # Possible usages:
   #
@@ -1019,7 +1029,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - downto(min){|date| ... } -> self
   # -->
-  # Equivalent to #step with arguments `min` and `-1`.
+  # Equivalent to #step with arguments `min` and <code>-1</code>.
   #
   def downto: (Date min) { (Date) -> untyped } -> Date
             | (Date min) -> Enumerator[Date, Date]
@@ -1064,8 +1074,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - httpdate -> string
   # -->
-  # Equivalent to #strftime with argument `'%a, %d %b %Y %T GMT'`; see [Formats
-  # for Dates and Times](rdoc-ref:strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%a, %d %b %Y %T GMT'</code>; see
+  # [Formats for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).httpdate # => "Sat, 03 Feb 2001 00:00:00 GMT"
   #
@@ -1086,9 +1096,10 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - iso8601    ->  string
   # -->
-  # Equivalent to #strftime with argument `'%Y-%m-%d'` (or its [shorthand
-  # form](rdoc-ref:strftime_formatting.rdoc@Shorthand+Conversion+Specifiers)
-  # `'%F'`);
+  # Equivalent to #strftime with argument <code>'%Y-%m-%d'</code> (or its
+  # [shorthand
+  # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
+  # rs) <code>'%F'</code>);
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
   #
@@ -1225,7 +1236,7 @@ class Date
   #     d1 = d0.new_start(Date::JULIAN)
   #     d1.julian? # => true
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   def new_start: (?Integer start) -> Date
 
@@ -1261,7 +1272,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - next_year(n = 1) -> new_date
   # -->
-  # Equivalent to #>> with argument `n * 12`.
+  # Equivalent to #>> with argument <code>n * 12</code>.
   #
   def next_year: (?Integer year) -> Date
 
@@ -1285,7 +1296,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - prev_year(n = 1) -> new_date
   # -->
-  # Equivalent to #<< with argument `n * 12`.
+  # Equivalent to #<< with argument <code>n * 12</code>.
   #
   def prev_year: (?Integer year) -> Date
 
@@ -1293,8 +1304,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - rfc2822 -> string
   # -->
-  # Equivalent to #strftime with argument `'%a, %-d %b %Y %T %z'`; see [Formats
-  # for Dates and Times](rdoc-ref:strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%a, %-d %b %Y %T %z'</code>; see
+  # [Formats for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
   #
@@ -1304,8 +1315,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - rfc3339 -> string
   # -->
-  # Equivalent to #strftime with argument `'%FT%T%:z'`; see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%FT%T%:z'</code>; see [Formats
+  # for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).rfc3339 # => "2001-02-03T00:00:00+00:00"
   #
@@ -1314,7 +1325,7 @@ class Date
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a new Date object with values parsed from `string`, which should be a
   # valid [RFC 2822 date
-  # format](rdoc-ref:strftime_formatting.rdoc@RFC+2822+Format):
+  # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
   #     d = Date.new(2001, 2, 3)
   #     s = d.rfc2822   # => "Sat, 3 Feb 2001 00:00:00 +0000"
@@ -1322,7 +1333,7 @@ class Date
   #
   # See:
   #
-  # *   Argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   # *   Argument [limit](rdoc-ref:Date@Argument+limit).
   #
   # Related: Date._rfc2822 (returns a hash).
@@ -1355,7 +1366,7 @@ class Date
   #     Date.new(2001, 2, 3, Date::GREGORIAN).start # => -Infinity
   #     Date.new(2001, 2, 3, Date::JULIAN).start    # => Infinity
   #
-  # See argument [start](rdoc-ref:date/calendars.rdoc@Argument+start).
+  # See argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
   #
   def start: () -> Float
 
@@ -1366,8 +1377,8 @@ class Date
   # Calls the block with specified dates; returns `self`.
   #
   # *   The first `date` is `self`.
-  # *   Each successive `date` is `date + step`, where `step` is the numeric step
-  #     size in days.
+  # *   Each successive `date` is <code>date + step</code>, where `step` is the
+  #     numeric step size in days.
   # *   The last date is the last one that is before or equal to `limit`, which
   #     should be a Date object.
   #
@@ -1401,7 +1412,7 @@ class Date
   #     Date.new(2001, 2, 3).strftime # => "2001-02-03"
   #
   # For other formats, see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc).
+  # Times](rdoc-ref:language/strftime_formatting.rdoc).
   #
   def strftime: (?String format) -> String
 
@@ -1453,8 +1464,9 @@ class Date
   #   - to_s -> string
   # -->
   # Returns a string representation of the date in `self` in [ISO 8601 extended
-  # date format](rdoc-ref:strftime_formatting.rdoc@ISO+8601+Format+Specifications)
-  # (`'%Y-%m-%d'`):
+  # date
+  # format](rdoc-ref:language/strftime_formatting.rdoc@ISO+8601+Format+Specificati
+  # ons) (<code>'%Y-%m-%d'</code>):
   #
   #     Date.new(2001, 2, 3).to_s # => "2001-02-03"
   #
@@ -1508,9 +1520,10 @@ class Date
   def wednesday?: () -> bool
 
   # <!-- rdoc-file=ext/date/date_core.c -->
-  # Equivalent to #strftime with argument `'%Y-%m-%d'` (or its [shorthand
-  # form](rdoc-ref:strftime_formatting.rdoc@Shorthand+Conversion+Specifiers)
-  # `'%F'`);
+  # Equivalent to #strftime with argument <code>'%Y-%m-%d'</code> (or its
+  # [shorthand
+  # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
+  # rs) <code>'%F'</code>);
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
   #

@@ -1156,6 +1156,26 @@ class Hello
   def self.initialize_dup: (self) -> self
   def self.respond_to_missing?: () -> bool
 end
+
+class DirectPublic
+  public def initialize: () -> void
+  public def initialize_copy: (self) -> self
+  public def initialize_clone: (self) -> self
+  public def initialize_dup: (self) -> self
+  public def respond_to_missing?: () -> bool
+end
+
+class SelfInInitialize
+  def initialize: () { (self, class, instance) -> void } -> void
+end
+
+class SelfInInitializeWithTypeParams[T]
+  def initialize: () { (self, class, instance) -> T } -> void
+end
+
+class InheritedSelfInInitialize < SelfInInitialize
+  def initialize: () { (self, class, instance) -> void } -> void
+end
 EOF
 
       manager.build do |env|
@@ -1178,6 +1198,30 @@ EOF
           assert_method_definition definition.methods[:initialize_clone], ["(self) -> self"], accessibility: :public
           assert_method_definition definition.methods[:initialize_dup], ["(self) -> self"], accessibility: :public
           assert_method_definition definition.methods[:respond_to_missing?], ["() -> bool"], accessibility: :public
+        end
+
+        builder.build_instance(type_name("::DirectPublic")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:initialize], ["() -> void"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_copy], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_clone], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:initialize_dup], ["(self) -> self"], accessibility: :public
+          assert_method_definition definition.methods[:respond_to_missing?], ["() -> bool"], accessibility: :public
+        end
+
+        builder.build_singleton(type_name("::SelfInInitialize")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:new], ["() { (::SelfInInitialize, class, instance) -> void } -> ::SelfInInitialize"], accessibility: :public
+        end
+
+        builder.build_singleton(type_name("::SelfInInitializeWithTypeParams")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:new], ["[T] () { (::SelfInInitializeWithTypeParams[T], class, instance) -> T } -> ::SelfInInitializeWithTypeParams[T]"], accessibility: :public
+        end
+
+        builder.build_singleton(type_name("::InheritedSelfInInitialize")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_method_definition definition.methods[:new], ["() { (::InheritedSelfInInitialize, class, instance) -> void } -> ::InheritedSelfInInitialize"], accessibility: :public
         end
       end
     end
@@ -2210,6 +2254,60 @@ end
           definition.methods[:b].tap do |b|
             assert_predicate b, :private?
           end
+        end
+      end
+    end
+  end
+
+  def test_alias_visibility_with_special_method
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  def original: () -> void
+  alias initialize original
+
+  def self.original: () -> void
+  alias self.initialize self.original
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:original], :public?
+          assert_predicate definition.methods[:initialize], :private?
+        end
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:original], :public?
+          assert_predicate definition.methods[:initialize], :public?
+        end
+      end
+    end
+  end
+
+  def test_attribute_visibility_with_special_method
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  attr_reader initialize: String
+  public attr_reader initialize_copy: String
+
+  attr_reader self.initialize: String
+  public attr_reader self.initialize_copy: String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:initialize], :private?
+          assert_predicate definition.methods[:initialize_copy], :public?
+        end
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:initialize], :public?
+          assert_predicate definition.methods[:initialize_copy], :public?
         end
       end
     end
@@ -3570,30 +3668,30 @@ EOF
         class Person
           # @rbs @name: String
           # @rbs @age: Integer?
-          
+
           def initialize(name, age)
             @name = name
             @age = age
           end
         end
       RUBY
-      
+
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        
+
         builder.build_instance(type_name("::Person")).tap do |definition|
           assert_instance_of Definition, definition
-          
+
           # Verify instance variables are present
           assert_equal [:@name, :@age].sort, definition.instance_variables.keys.sort
-          
+
           # Check @name type
           definition.instance_variables[:@name].tap do |variable|
             assert_instance_of Definition::Variable, variable
             assert_equal parse_type("::String"), variable.type
             assert_equal type_name("::Person"), variable.declared_in
           end
-          
+
           # Check @age type
           definition.instance_variables[:@age].tap do |variable|
             assert_instance_of Definition::Variable, variable
@@ -3611,30 +3709,30 @@ EOF
         class Container
           # @rbs @items: Array[String]
           # @rbs @metadata: Integer
-          
+
           def initialize
             @items = ""
             @metadata = 42
           end
         end
       RUBY
-      
+
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
-        
+
         builder.build_instance(type_name("::Container")).tap do |definition|
           assert_instance_of Definition, definition
-          
+
           # Verify instance variables are present
           assert_equal [:@items, :@metadata].sort, definition.instance_variables.keys.sort
-          
+
           # Check @items type
           definition.instance_variables[:@items].tap do |variable|
             assert_instance_of Definition::Variable, variable
             assert_equal "Array[::String]", variable.type.to_s
             assert_equal type_name("::Container"), variable.declared_in
           end
-          
+
           # Check @metadata type
           definition.instance_variables[:@metadata].tap do |variable|
             assert_instance_of Definition::Variable, variable
@@ -3665,6 +3763,83 @@ EOF
 
         assert_raises RBS::InstanceVariableDuplicationError do
           builder.build_instance(type_name("::Person"))
+        end
+      end
+    end
+  end
+
+  def test_inline_method_types__overloading
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+          def bar: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          # @rbs (Integer) -> String | ...
+          def foo(x = nil) = ""
+
+          # @rbs ...
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["(::Integer) -> ::String", "() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Child"), method.defs[0].defined_in
+            assert_equal type_name("::Base"), method.defs[1].defined_in
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_method_unannotated_overriding
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          def foo = ""
+        end
+
+        class Orphan
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        # Unannotated method with parent definition → behaves like @rbs ...
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+
+        # Unannotated method without parent definition → (?) -> untyped
+        builder.build_instance(type_name("::Orphan")).tap do |definition|
+          definition.methods[:bar].tap do |method|
+            assert_equal ["(?) -> untyped"], method.method_types.map(&:to_s)
+          end
         end
       end
     end

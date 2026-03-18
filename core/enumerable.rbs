@@ -16,8 +16,8 @@
 # These methods return information about the Enumerable other than the elements
 # themselves:
 #
-# *   #member? (aliased as #include?): Returns `true` if `self == object`,
-#     `false` otherwise.
+# *   #member? (aliased as #include?): Returns `true` if <code>self ==
+#     object</code>, `false` otherwise.
 # *   #all?: Returns `true` if all elements meet a specified criterion; `false`
 #     otherwise.
 # *   #any?: Returns `true` if any element meets a specified criterion; `false`
@@ -35,7 +35,7 @@
 #
 # These methods return entries from the Enumerable, without modifying it:
 #
-# *Leading, trailing, or all elements*:
+# <em>Leading, trailing, or all elements</em>:
 #
 # *   #to_a (aliased as #entries): Returns all elements.
 # *   #first: Returns the first element or leading elements.
@@ -47,9 +47,9 @@
 # *Minimum and maximum value elements*:
 #
 # *   #min: Returns the elements whose values are smallest among the elements,
-#     as determined by `#<=>` or a given block.
+#     as determined by <code>#<=></code> or a given block.
 # *   #max: Returns the elements whose values are largest among the elements, as
-#     determined by `#<=>` or a given block.
+#     determined by <code>#<=></code> or a given block.
 # *   #minmax: Returns a 2-element Array containing the smallest and largest
 #     elements.
 # *   #min_by: Returns the smallest element, as determined by the given block.
@@ -57,7 +57,7 @@
 # *   #minmax_by: Returns the smallest and largest elements, as determined by
 #     the given block.
 #
-# *Groups, slices, and partitions*:
+# <em>Groups, slices, and partitions</em>:
 #
 # *   #group_by: Returns a Hash that partitions the elements into groups.
 # *   #partition: Returns elements partitioned into two new Arrays, as
@@ -89,7 +89,8 @@
 #
 # These methods return elements in sorted order:
 #
-# *   #sort: Returns the elements, sorted by `#<=>` or the given block.
+# *   #sort: Returns the elements, sorted by <code>#<=></code> or the given
+#     block.
 # *   #sort_by: Returns the elements, sorted by the given block.
 #
 # ### Methods for Iterating
@@ -114,11 +115,11 @@
 #     by the block.
 # *   #grep: Returns elements selected by a given object or objects returned by
 #     a given block.
-# *   #grep_v: Returns elements selected by a given object or objects returned
-#     by a given block.
+# *   #grep_v: Returns elements not selected by a given object or objects
+#     returned by a given block.
 # *   #inject (aliased as #reduce): Returns the object formed by combining all
 #     elements.
-# *   #sum: Returns the sum of the elements, using method `+`.
+# *   #sum: Returns the sum of the elements, using method <code>+</code>.
 # *   #zip: Combines each element with elements from other enumerables; returns
 #     the n-tuples or calls the block with each.
 # *   #cycle: Calls the block with each element, cycling repeatedly.
@@ -131,8 +132,9 @@
 #
 #         include Enumerable
 #
-# *   Implement method `#each` which must yield successive elements of the
-#     collection. The method will be called by almost any Enumerable method.
+# *   Implement method <code>#each</code> which must yield successive elements
+#     of the collection. The method will be called by almost any Enumerable
+#     method.
 #
 # Example:
 #
@@ -173,13 +175,15 @@
 # *   CSV::Row
 # *   Set
 #
-# Virtually all methods in Enumerable call method `#each` in the including
-# class:
+# Virtually all methods in Enumerable call method <code>#each</code> in the
+# including class:
 #
-# *   `Hash#each` yields the next key-value pair as a 2-element Array.
-# *   `Struct#each` yields the next name-value pair as a 2-element Array.
-# *   For the other classes above, `#each` yields the next object from the
-#     collection.
+# *   <code>Hash#each</code> yields the next key-value pair as a 2-element
+#     Array.
+# *   <code>Struct#each</code> yields the next name-value pair as a 2-element
+#     Array.
+# *   For the other classes above, <code>#each</code> yields the next object
+#     from the collection.
 #
 # ## About the Examples
 #
@@ -190,6 +194,82 @@
 # *   Sometimes show the use of a Hash-like class. For some methods, though, the
 #     usage would not make sense, and so it is not shown.  Example: #tally would
 #     find exactly one of each Hash entry.
+#
+# ## Extended Methods
+#
+# A Enumerable class may define extended methods. This section describes the
+# standard behavior of extension methods for reference purposes.
+#
+# ### #size
+#
+# Enumerator has a #size method. It uses the size function argument passed to
+# <code>Enumerator.new</code>.
+#
+#     e = Enumerator.new(-> { 3 }) {|y| p y; y.yield :a; y.yield :b; y.yield :c; :z }
+#     p e.size #=> 3
+#     p e.next #=> :a
+#     p e.next #=> :b
+#     p e.next #=> :c
+#     begin
+#       e.next
+#     rescue StopIteration
+#       p $!.result #=> :z
+#     end
+#
+# The result of the size function should represent the number of iterations
+# (i.e., the number of times Enumerator::Yielder#yield is called). In the above
+# example, the block calls #yield three times, and the size function, +-> { 3
+# }+, returns 3 accordingly. The result of the size function can be an integer,
+# <code>Float::INFINITY</code>, or `nil`. An integer means the exact number of
+# times #yield will be called, as shown above. <code>Float::INFINITY</code>
+# indicates an infinite number of #yield calls. `nil` means the number of #yield
+# calls is difficult or impossible to determine.
+#
+# Many iteration methods return an Enumerator object with an appropriate size
+# function if no block is given.
+#
+# Examples:
+#
+#     ["a", "b", "c"].each.size #=> 3
+#     {a: "x", b: "y", c: "z"}.each.size #=> 3
+#     (0..20).to_a.permutation.size #=> 51090942171709440000
+#     loop.size #=> Float::INFINITY
+#     (1..100).drop_while.size #=> nil  # size depends on the block's behavior
+#     STDIN.each.size #=> nil # cannot be computed without consuming input
+#     File.open("/etc/resolv.conf").each.size #=> nil # cannot be computed without reading the file
+#
+# The behavior of #size for Range-based enumerators depends on the #begin
+# element:
+#
+# *   If the #begin element is an Integer, the #size method returns an Integer
+#     or <code>Float::INFINITY</code>.
+# *   If the #begin element is an object with a #succ method (other than
+#     Integer), #size returns `nil`. (Computing the size would require
+#     repeatedly calling #succ, which may be too slow.)
+# *   If the #begin element does not have a #succ method, #size raises a
+#     TypeError.
+#
+# Examples:
+#
+#     (10..42).each.size #=> 33
+#     (10..42.9).each.size #=> 33 (the #end element may be a non-integer numeric)
+#     (10..).each.size #=> Float::INFINITY
+#     ("a".."z").each.size #=> nil
+#     ("a"..).each.size #=> nil
+#     (1.0..9.0).each.size # raises TypeError (Float does not have #succ)
+#     (..10).each.size # raises TypeError (beginless range has nil as its #begin)
+#
+# The Enumerable module itself does not define a #size method. A class that
+# includes Enumerable may define its own #size method. It is recommended that
+# such a #size method be consistent with Enumerator#size.
+#
+# Array and Hash implement #size and return values consistent with
+# Enumerator#size. IO and Dir do not define #size, which is also consistent
+# because the corresponding enumerator's size function returns `nil`.
+#
+# However, it is not strictly required for a class's #size method to match
+# Enumerator#size. For example, File#size returns the number of bytes in the
+# file, not the number of lines.
 #
 module Enumerable[unchecked out Elem] : _Each[Elem]
   %a{private}
@@ -216,7 +296,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [].all?               # => true
   #
   # With argument `pattern` and no block, returns whether for each element
-  # `element`, `pattern === element`:
+  # `element`, <code>pattern === element</code>:
   #
   #     (1..4).all?(Integer)                 # => true
   #     (1..4).all?(Numeric)                 # => true
@@ -260,7 +340,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [].any?              # => false
   #
   # With argument `pattern` and no block, returns whether for any element
-  # `element`, `pattern === element`:
+  # `element`, <code>pattern === element</code>:
   #
   #     [nil, false, 0].any?(Integer)        # => true
   #     [nil, false, 0].any?(Numeric)        # => true
@@ -347,8 +427,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [0, 1, 2].count                # => 3
   #     {foo: 0, bar: 1, baz: 2}.count # => 3
   #
-  # With argument `object` given, returns the number of elements that are `==` to
-  # `object`:
+  # With argument `object` given, returns the number of elements that are
+  # <code>==</code> to `object`:
   #
   #     [0, 1, 2, 1].count(1)           # => 2
   #
@@ -445,6 +525,17 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #
   # With no block given, returns an Enumerator.
   #
+  #     e = (1..4).drop_while
+  #     p e #=> #<Enumerator: 1..4:drop_while>
+  #     i = e.next; p i; e.feed(i < 3) #=> 1
+  #     i = e.next; p i; e.feed(i < 3) #=> 2
+  #     i = e.next; p i; e.feed(i < 3) #=> 3
+  #     begin
+  #       e.next
+  #     rescue StopIteration
+  #       p $!.result #=> [3, 4]
+  #     end
+  #
   def drop_while: () { (Elem) -> boolish } -> ::Array[Elem]
                 | () -> ::Enumerator[Elem, ::Array[Elem]]
 
@@ -475,8 +566,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   - each_with_index(*args) {|element, i| ..... } -> self
   #   - each_with_index(*args)                       -> enumerator
   # -->
-  # Invoke `self.each` with `*args`. With a block given, the block receives each
-  # element and its index; returns `self`:
+  # Invoke <code>self.each</code> with <code>*args</code>. With a block given, the
+  # block receives each element and its index; returns `self`:
   #
   #     h = {}
   #     (1..4).each_with_index {|element, i| h[element] = i } # => 1..4
@@ -593,7 +684,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # `nil` if no such element is found.
   #
   # With argument `object` given, returns the index of the first element that is
-  # `==` `object`:
+  # <code>==</code> `object`:
   #
   #     ['a', 'b', 'c', 'b'].find_index('b') # => 1
   #
@@ -644,7 +735,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # pattern.
   #
   # With no block given, returns an array containing each element for which
-  # `pattern === element` is `true`:
+  # <code>pattern === element</code> is `true`:
   #
   #     a = ['foo', 'bar', 'car', 'moo']
   #     a.grep(/ar/)                   # => ["bar", "car"]
@@ -667,11 +758,11 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   - grep_v(pattern) -> array
   #   - grep_v(pattern) {|element| ... } -> array
   # -->
-  # Returns an array of objects based on elements of `self` that *don't* match the
-  # given pattern.
+  # Returns an array of objects based on elements of `self` that <em>don't</em>
+  # match the given pattern.
   #
   # With no block given, returns an array containing each element for which
-  # `pattern === element` is `false`:
+  # <code>pattern === element</code> is `false`:
   #
   #     a = ['foo', 'bar', 'car', 'moo']
   #     a.grep_v(/ar/)                   # => ["foo", "moo"]
@@ -714,7 +805,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
               | () -> ::Enumerator[Elem, ::Array[Elem]]
 
   # <!-- rdoc-file=enum.c -->
-  # Returns whether for any element `object == element`:
+  # Returns whether for any element <code>object == element</code>:
   #
   #     (1..4).include?(2)                       # => true
   #     (1..4).include?(5)                       # => false
@@ -725,7 +816,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def include?: (Elem arg0) -> bool
+  def include?: (top arg0) -> bool
 
   # <!--
   #   rdoc-file=enum.c
@@ -772,13 +863,13 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     product #=> 24
   #
   # When this runs, the block is first called with `1` (the initial value) and `2`
-  # (the first element of the array). The block returns `1*2`, so on the next
-  # iteration the block is called with `2` (the previous result) and `3`. The
-  # block returns `6`, and is called one last time with `6` and `4`. The result of
-  # the block, `24` becomes the value returned by `inject`. This code returns the
-  # product of the elements in the enumerable.
+  # (the first element of the array). The block returns <code>1*2</code>, so on
+  # the next iteration the block is called with `2` (the previous result) and `3`.
+  # The block returns `6`, and is called one last time with `6` and `4`. The
+  # result of the block, `24` becomes the value returned by `inject`. This code
+  # returns the product of the elements in the enumerable.
   #
-  # **First Shortcut: Default Initial value**
+  # <strong>First Shortcut: Default Initial value</strong>
   #
   # In the case of the previous example, the initial value, `1`, wasn't really
   # necessary: the calculation of the product of a list of numbers is
@@ -815,7 +906,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Note that the last line of the block is just the word `counts`. This ensures
   # the return value of the block is the result that's being calculated.
   #
-  # **Second Shortcut: a Reducer function**
+  # <strong>Second Shortcut: a Reducer function</strong>
   #
   # A *reducer function* is a function that takes a partial result and the next
   # value, returning the next partial result. The block that is given to `inject`
@@ -860,11 +951,11 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     position = "nnneesw".chars.reduce(Turtle.new, :move)
   #     position  #=>> #<Turtle:0x00000001052f4698 @y=2, @x=1>
   #
-  # **Third Shortcut: Reducer With no Initial Value**
+  # <strong>Third Shortcut: Reducer With no Initial Value</strong>
   #
   # If your reducer returns a value that it can accept as a parameter, then you
-  # don't have to pass in an initial value. Here `:*` is the name of the *times*
-  # function:
+  # don't have to pass in an initial value. Here <code>:*</code> is the name of
+  # the *times* function:
   #
   #     product = [ 2, 3, 4 ].inject(:*)
   #     product # => 24
@@ -895,7 +986,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # The ordering of equal elements is indeterminate and may be unstable.
   #
   # With no argument and no block, returns the maximum element, using the
-  # elements' own method `#<=>` for comparison:
+  # elements' own method <code>#<=></code> for comparison:
   #
   #     (1..4).max                   # => 4
   #     (-4..-1).max                 # => -1
@@ -915,9 +1006,9 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # With a block given, the block determines the maximum elements. The block is
   # called with two elements `a` and `b`, and must return:
   #
-  # *   A negative integer if `a < b`.
-  # *   Zero if `a == b`.
-  # *   A positive integer if `a > b`.
+  # *   A negative integer if <code>a < b</code>.
+  # *   Zero if <code>a == b</code>.
+  # *   A positive integer if <code>a > b</code>.
   #
   # With a block given and no argument, returns the maximum element as determined
   # by the block:
@@ -993,7 +1084,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # The ordering of equal elements is indeterminate and may be unstable.
   #
   # With no argument and no block, returns the minimum element, using the
-  # elements' own method `#<=>` for comparison:
+  # elements' own method <code>#<=></code> for comparison:
   #
   #     (1..4).min                   # => 1
   #     (-4..-1).min                 # => -4
@@ -1013,9 +1104,9 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # With a block given, the block determines the minimum elements. The block is
   # called with two elements `a` and `b`, and must return:
   #
-  # *   A negative integer if `a < b`.
-  # *   Zero if `a == b`.
-  # *   A positive integer if `a > b`.
+  # *   A negative integer if <code>a < b</code>.
+  # *   Zero if <code>a == b</code>.
+  # *   A positive integer if <code>a > b</code>.
   #
   # With a block given and no argument, returns the minimum element as determined
   # by the block:
@@ -1090,7 +1181,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # indeterminate and may be unstable.
   #
   # With no argument and no block, returns the minimum and maximum elements, using
-  # the elements' own method `#<=>` for comparison:
+  # the elements' own method <code>#<=></code> for comparison:
   #
   #     (1..4).minmax                   # => [1, 4]
   #     (-4..-1).minmax                 # => [-4, -1]
@@ -1153,7 +1244,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [].none?               # => true
   #
   # With argument `pattern` and no block, returns whether for no element
-  # `element`, `pattern === element`:
+  # `element`, <code>pattern === element</code>:
   #
   #     [nil, false, 1.1].none?(Integer)      # => true
   #     %w[bar baz bat bam].none?(/m/)        # => false
@@ -1195,7 +1286,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     [].one?               # => false
   #
   # With argument `pattern` and no block, returns whether for exactly one element
-  # `element`, `pattern === element`:
+  # `element`, <code>pattern === element</code>:
   #
   #     [nil, false, 0].one?(Integer)        # => true
   #     [nil, false, 0].one?(Numeric)        # => true
@@ -1306,7 +1397,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Returns an array containing the sorted elements of `self`. The ordering of
   # equal elements is indeterminate and may be unstable.
   #
-  # With no block given, the sort compares using the elements' own method `#<=>`:
+  # With no block given, the sort compares using the elements' own method
+  # <code>#<=></code>:
   #
   #     %w[b c a d].sort              # => ["a", "b", "c", "d"]
   #     {foo: 0, bar: 1, baz: 2}.sort # => [[:bar, 1], [:baz, 2], [:foo, 0]]
@@ -1314,9 +1406,9 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # With a block given, comparisons in the block determine the ordering. The block
   # is called with two elements `a` and `b`, and must return:
   #
-  # *   A negative integer if `a < b`.
-  # *   Zero if `a == b`.
-  # *   A positive integer if `a > b`.
+  # *   A negative integer if <code>a < b</code>.
+  # *   Zero if <code>a == b</code>.
+  # *   A positive integer if <code>a > b</code>.
   #
   # Examples:
   #
@@ -1364,7 +1456,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       b.report("Sort by") { a.sort_by { |a| a } }
   #     end
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     user     system      total        real
   #     Sort        0.180000   0.000000   0.180000 (  0.175469)
@@ -1560,7 +1652,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   rdoc-file=enum.c
   #   - include?(object) -> true or false
   # -->
-  # Returns whether for any element `object == element`:
+  # Returns whether for any element <code>object == element</code>:
   #
   #     (1..4).include?(2)                       # => true
   #     (1..4).include?(5)                       # => false
@@ -1571,7 +1663,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     {foo: 0, bar: 1, baz: 2}.include?('foo') # => false
   #     {foo: 0, bar: 1, baz: 2}.include?(0)     # => false
   #
-  def member?: (Elem arg0) -> bool
+  def member?: (top arg0) -> bool
 
   # <!-- rdoc-file=enum.c -->
   # Returns the result of applying a reducer to an initial value and the first
@@ -1612,13 +1704,13 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     product #=> 24
   #
   # When this runs, the block is first called with `1` (the initial value) and `2`
-  # (the first element of the array). The block returns `1*2`, so on the next
-  # iteration the block is called with `2` (the previous result) and `3`. The
-  # block returns `6`, and is called one last time with `6` and `4`. The result of
-  # the block, `24` becomes the value returned by `inject`. This code returns the
-  # product of the elements in the enumerable.
+  # (the first element of the array). The block returns <code>1*2</code>, so on
+  # the next iteration the block is called with `2` (the previous result) and `3`.
+  # The block returns `6`, and is called one last time with `6` and `4`. The
+  # result of the block, `24` becomes the value returned by `inject`. This code
+  # returns the product of the elements in the enumerable.
   #
-  # **First Shortcut: Default Initial value**
+  # <strong>First Shortcut: Default Initial value</strong>
   #
   # In the case of the previous example, the initial value, `1`, wasn't really
   # necessary: the calculation of the product of a list of numbers is
@@ -1655,7 +1747,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Note that the last line of the block is just the word `counts`. This ensures
   # the return value of the block is the result that's being calculated.
   #
-  # **Second Shortcut: a Reducer function**
+  # <strong>Second Shortcut: a Reducer function</strong>
   #
   # A *reducer function* is a function that takes a partial result and the next
   # value, returning the next partial result. The block that is given to `inject`
@@ -1700,11 +1792,11 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     position = "nnneesw".chars.reduce(Turtle.new, :move)
   #     position  #=>> #<Turtle:0x00000001052f4698 @y=2, @x=1>
   #
-  # **Third Shortcut: Reducer With no Initial Value**
+  # <strong>Third Shortcut: Reducer With no Initial Value</strong>
   #
   # If your reducer returns a value that it can accept as a parameter, then you
-  # don't have to pass in an initial value. Here `:*` is the name of the *times*
-  # function:
+  # don't have to pass in an initial value. Here <code>:*</code> is the name of
+  # the *times* function:
   #
   #     product = [ 2, 3, 4 ].inject(:*)
   #     product # => 24
@@ -1767,7 +1859,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   - uniq {|element| ... } -> array
   # -->
   # With no block, returns a new array containing only unique elements; the array
-  # has no two elements `e0` and `e1` such that `e0.eql?(e1)`:
+  # has no two elements `e0` and `e1` such that <code>e0.eql?(e1)</code>:
   #
   #     %w[a b c c b a a b c].uniq       # => ["a", "b", "c"]
   #     [0, 1, 2, 2, 1, 0, 0, 1, 2].uniq # => [0, 1, 2]
@@ -1794,12 +1886,12 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     (1..100).sum(1)       # => 5051
   #     ('a'..'d').sum('foo') # => "fooabcd"
   #
-  # Generally, the sum is computed using methods `+` and `each`; for performance
-  # optimizations, those methods may not be used, and so any redefinition of those
-  # methods may not have effect here.
+  # Generally, the sum is computed using methods <code>+</code> and `each`; for
+  # performance optimizations, those methods may not be used, and so any
+  # redefinition of those methods may not have effect here.
   #
   # One such optimization: When possible, computes using Gauss's summation formula
-  # *n(n+1)/2*:
+  # <em>n(n+1)/2</em>:
   #
   #     100 * (100 + 1) / 2 # => 5050
   #
@@ -1938,8 +2030,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #   - zip(*other_enums) {|array| ... } -> nil
   # -->
   # With no block given, returns a new array `new_array` of size self.size whose
-  # elements are arrays. Each nested array `new_array[n]` is of size
-  # `other_enums.size+1`, and contains:
+  # elements are arrays. Each nested array <code>new_array[n]</code> is of size
+  # <code>other_enums.size+1</code>, and contains:
   #
   # *   The `n`-th element of self.
   # *   The `n`-th element of each of the `other_enums`.
@@ -1963,8 +2055,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       #      [[:baz, 2], [:gaz, 5], [:haz, 8]]
   #       #    ]
   #
-  # If any enumerable in other_enums is smaller than self, fills to `self.size`
-  # with `nil`:
+  # If any enumerable in other_enums is smaller than self, fills to
+  # <code>self.size</code> with `nil`:
   #
   #     a = [:a0, :a1, :a2, :a3]
   #     b = [:b0, :b1, :b2]
@@ -2048,8 +2140,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #     ["E", 8736]
   #     ["F", 6860]
   #
-  # You can use the special symbol `:_alone` to force an element into its own
-  # separate chuck:
+  # You can use the special symbol <code>:_alone</code> to force an element into
+  # its own separate chunk:
   #
   #     a = [0, 0, 1, 1]
   #     e = a.chunk{|i| i.even? ? :_alone : true }
@@ -2064,8 +2156,8 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   #       }
   #     }
   #
-  # You can use the special symbol `:_separator` or `nil` to force an element to
-  # be ignored (not included in any chunk):
+  # You can use the special symbol <code>:_separator</code> or `nil` to force an
+  # element to be ignored (not included in any chunk):
   #
   #     a = [0, 0, -1, 1, 1]
   #     e = a.chunk{|i| i < 0 ? :_separator : true }
@@ -2227,11 +2319,11 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # Creates an enumerator for each chunked elements. The ends of chunks are
   # defined by *pattern* and the block.
   #
-  # If *`pattern* === *elt`* returns `true` or the block returns `true` for the
-  # element, the element is end of a chunk.
+  # If <code>_pattern_ === _elt_</code> returns `true` or the block returns `true`
+  # for the element, the element is end of a chunk.
   #
-  # The `===` and *block* is called from the first element to the last element of
-  # *enum*.
+  # The <code>===</code> and *block* is called from the first element to the last
+  # element of *enum*.
   #
   # The result enumerator yields the chunked elements as an array. So `each`
   # method can be called as follows:
@@ -2262,7 +2354,7 @@ module Enumerable[unchecked out Elem] : _Each[Elem]
   # -->
   # With argument `pattern`, returns an enumerator that uses the pattern to
   # partition elements into arrays ("slices"). An element begins a new slice if
-  # `element === pattern` (or if it is the first element).
+  # <code>element === pattern</code> (or if it is the first element).
   #
   #     a = %w[foo bar fop for baz fob fog bam foy]
   #     e = a.slice_before(/ba/) # => #<Enumerator: ...>

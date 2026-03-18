@@ -142,6 +142,7 @@ RBS
   end
 
   def test_minitest
+    omit unless has_gem?("minitest-mock") && has_gem?("minitest")
     omit if skip_minitest?
 
     assert_test_success(other_env: { 'RBS_TEST_TARGET' => 'Foo', 'RBS_TEST_DOUBLE_SUITE' => 'minitest' }, rbs_content: <<RBS, ruby_content: <<RUBY)
@@ -156,6 +157,7 @@ class Foo
 end
 
 require "minitest/autorun"
+require "minitest/mock"
 
 class FooTest < Minitest::Test
   def test_foo_mock

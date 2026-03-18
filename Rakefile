@@ -35,18 +35,6 @@ end
 
 Rake::TestTask.new(test: :compile, &test_config)
 
-unless Gem.win_platform?
-  begin
-    require "ruby_memcheck"
-
-    namespace :test do
-      RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
-    end
-  rescue LoadError => exn
-    STDERR.puts "🚨🚨🚨🚨 Skipping RubyMemcheck: #{exn.inspect} 🚨🚨🚨🚨"
-  end
-end
-
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
@@ -191,7 +179,7 @@ end
 task :validate => :compile do
   require 'yaml'
 
-  sh "#{ruby} #{rbs} validate --exit-error-on-syntax-error"
+  sh "#{ruby} #{rbs} validate"
 
   libs = FileList["stdlib/*"].map {|path| File.basename(path).to_s }
 
@@ -212,7 +200,14 @@ task :validate => :compile do
   end
 
   libs.each do |lib|
-    sh "#{ruby} #{rbs} -r #{lib} validate --exit-error-on-syntax-error"
+    args = ["-r", lib]
+
+    if lib == "rbs"
+      args << "-r"
+      args << "prism"
+    end
+
+    sh "#{ruby} #{rbs} #{args.join(' ')} validate"
   end
 end
 
@@ -224,7 +219,7 @@ end
 
 task :stdlib_test => :compile do
   test_files = FileList["test/stdlib/**/*_test.rb"].reject do |path|
-    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI_test}
+    path =~ %r{Ractor} || path =~ %r{Encoding} || path =~ %r{CGI-escape_test}
   end
 
   if ENV["RANDOMIZE_STDLIB_TEST_ORDER"] == "true"
@@ -233,27 +228,22 @@ task :stdlib_test => :compile do
 
   sh "#{ruby} -Ilib #{bin}/test_runner.rb #{test_files.join(' ')}"
   # TODO: Ractor tests need to be run in a separate process
-  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI_test.rb"
+  sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/CGI-escape_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Ractor_test.rb"
   sh "#{ruby} -Ilib #{bin}/test_runner.rb test/stdlib/Encoding_test.rb"
 end
 
 task :typecheck_test => :compile do
-  puts
-  puts
-  puts "⛔️⛔️⛔️⛔️⛔️⛔️ Skipping type check test because RBS is incompatible with Steep (#{__FILE__}:#{__LINE__})"
-  puts
-  puts
-  # FileList["test/typecheck/*"].each do |test|
-  #   Dir.chdir(test) do
-  #     expectations = File.join(test, "steep_expectations.yml")
-  #     if File.exist?(expectations)
-  #       sh "steep check --with_expectations"
-  #     else
-  #       sh "steep check"
-  #     end
-  #   end
-  # end
+  FileList["test/typecheck/*"].each do |test|
+    Dir.chdir(test) do
+      expectations = File.join(test, "steep_expectations.yml")
+      if File.exist?(expectations)
+        sh "steep check --with_expectations"
+      else
+        sh "steep check"
+      end
+    end
+  end
 end
 
 task :raap => :compile do
@@ -331,7 +321,7 @@ namespace :generate do
           class <%= target %>SingletonTest < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "singleton(::<%= target %>)"
 
           <%- class_methods.each do |method_name, definition| -%>
@@ -350,7 +340,7 @@ namespace :generate do
           class <%= target %>Test < Test::Unit::TestCase
             include TestHelper
 
-            # library "pathname", "securerandom"     # Declare library signatures to load
+            # library "logger", "securerandom"     # Declare library signatures to load
             testing "::<%= target %>"
 
           <%- instance_methods.each do |method_name, definition| -%>

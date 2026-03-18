@@ -202,6 +202,15 @@ class FiberTest < Test::Unit::TestCase
         f, :raise, StandardError, 'Error!', nil
       )
     end
+
+    if_ruby("4.0"..., skip: false) do
+      assert_send_type "(cause: StandardError) -> nil",
+                       f, :raise, cause: StandardError.new
+      assert_send_type "(String, cause: StandardError) -> nil",
+                       f, :raise, "Error!", cause: StandardError.new
+      assert_send_type "(StandardError, cause: StandardError) -> nil",
+                       f, :raise, StandardError.new, cause: StandardError.new
+    end
   end
 
   def test_resume

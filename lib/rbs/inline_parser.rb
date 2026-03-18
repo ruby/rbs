@@ -196,7 +196,7 @@ module RBS
             trailing_block = comments.trailing_block!(end_loc)
           end
 
-          method_type, leading_unuseds, trailing_unused = AST::Ruby::Members::MethodTypeAnnotation.build(leading_block, trailing_block, [])
+          method_type, leading_unuseds, trailing_unused = AST::Ruby::Members::MethodTypeAnnotation.build(leading_block, trailing_block, [], node)
           report_unused_annotation(trailing_unused, *leading_unuseds)
 
           defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block)

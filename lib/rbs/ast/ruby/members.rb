@@ -17,19 +17,271 @@ module RBS
         class MethodTypeAnnotation
           class DocStyle
             attr_accessor :return_type_annotation
+            attr_reader :required_positionals
+            attr_reader :optional_positionals
+            attr_accessor :rest_positionals
+            attr_reader :trailing_positionals
+            attr_reader :required_keywords
+            attr_reader :optional_keywords
+            attr_accessor :rest_keywords
+            attr_accessor :block
 
             def initialize
               @return_type_annotation = nil
+              @required_positionals = []
+              @optional_positionals = []
+              @rest_positionals = nil
+              @trailing_positionals = []
+              @required_keywords = {}
+              @optional_keywords = {}
+              @rest_keywords = nil
+              @block = nil
+            end
+
+            def self.build(param_type_annotations, return_type_annotation, node)
+              doc = DocStyle.new
+              doc.return_type_annotation = return_type_annotation
+
+              splat_annotation = nil #: Annotations::SplatParamTypeAnnotation?
+              double_splat_annotation = nil #: Annotations::DoubleSplatParamTypeAnnotation?
+              block_annotation = nil #: Annotations::BlockParamTypeAnnotation?
+              param_annotations = {} #: Hash[Symbol, Annotations::ParamTypeAnnotation]
+              unused = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation | Annotations::BlockParamTypeAnnotation]
+
+              param_type_annotations.each do |annot|
+                case annot
+                when Annotations::SplatParamTypeAnnotation
+                  if splat_annotation
+                    unused << annot
+                  else
+                    splat_annotation = annot
+                  end
+                when Annotations::DoubleSplatParamTypeAnnotation
+                  if double_splat_annotation
+                    unused << annot
+                  else
+                    double_splat_annotation = annot
+                  end
+                when Annotations::BlockParamTypeAnnotation
+                  if block_annotation
+                    unused << annot
+                  else
+                    block_annotation = annot
+                  end
+                when Annotations::ParamTypeAnnotation
+                  name = annot.name_location.source.to_sym
+                  if param_annotations.key?(name)
+                    unused << annot
+                  else
+                    param_annotations[name] = annot
+                  end
+                end
+              end
+
+              if node.parameters
+                params = node.parameters #: Prism::ParametersNode
+
+                params.requireds.each do |param|
+                  if param.is_a?(Prism::RequiredParameterNode)
+                    annotation = param_annotations.delete(param.name)
+                    if annotation
+                      doc.required_positionals << annotation
+                    else
+                      doc.required_positionals << param.name
+                    end
+                  end
+                end
+
+                params.optionals.each do |param|
+                  if param.is_a?(Prism::OptionalParameterNode)
+                    annotation = param_annotations.delete(param.name)
+                    if annotation
+                      doc.optional_positionals << annotation
+                    else
+                      doc.optional_positionals << param.name
+                    end
+                  end
+                end
+
+                if (rest = params.rest) && rest.is_a?(Prism::RestParameterNode)
+                  if splat_annotation && (splat_annotation.name_location.nil? || rest.name.nil? || splat_annotation.name_location.source.to_sym == rest.name)
+                    doc.rest_positionals = splat_annotation
+                    splat_annotation = nil
+                  else
+                    doc.rest_positionals = rest.name || true
+                  end
+                end
+
+                params.posts.each do |param|
+                  if param.is_a?(Prism::RequiredParameterNode)
+                    annotation = param_annotations.delete(param.name)
+                    if annotation
+                      doc.trailing_positionals << annotation
+                    else
+                      doc.trailing_positionals << param.name
+                    end
+                  end
+                end
+
+                params.keywords.each do |param|
+                  case param
+                  when Prism::RequiredKeywordParameterNode
+                    annotation = param_annotations.delete(param.name)
+                    if annotation
+                      doc.required_keywords[param.name] = annotation
+                    else
+                      doc.required_keywords[param.name] = param.name
+                    end
+                  when Prism::OptionalKeywordParameterNode
+                    annotation = param_annotations.delete(param.name)
+                    if annotation
+                      doc.optional_keywords[param.name] = annotation
+                    else
+                      doc.optional_keywords[param.name] = param.name
+                    end
+                  end
+                end
+
+                if (kw_rest = params.keyword_rest) && kw_rest.is_a?(Prism::KeywordRestParameterNode)
+                  if double_splat_annotation && (double_splat_annotation.name_location.nil? || kw_rest.name.nil? || double_splat_annotation.name_location.source.to_sym == kw_rest.name)
+                    doc.rest_keywords = double_splat_annotation
+                    double_splat_annotation = nil
+                  else
+                    doc.rest_keywords = kw_rest.name || true
+                  end
+                end
+
+                if (blk = params.block) && blk.is_a?(Prism::BlockParameterNode)
+                  if block_annotation && (block_annotation.name_location.nil? || blk.name.nil? || block_annotation.name == blk.name)
+                    doc.block = block_annotation
+                    block_annotation = nil
+                  else
+                    doc.block = blk.name || true
+                  end
+                end
+              end
+
+              if block_annotation
+                if node.parameters&.block
+                  # Block parameter exists but name didn't match -- treat as unused
+                else
+                  doc.block = block_annotation
+                  block_annotation = nil
+                end
+              end
+
+              unused.concat(param_annotations.values)
+              unused << splat_annotation if splat_annotation
+              unused << double_splat_annotation if double_splat_annotation
+              unused << block_annotation if block_annotation
+
+              [doc, unused]
+            end
+
+            def all_param_annotations
+              annotations = [] #: Array[param_type_annotation | Symbol | true | nil]
+
+              required_positionals.each { |a| annotations << a }
+              optional_positionals.each { |a| annotations << a }
+              annotations << rest_positionals
+              trailing_positionals.each { |a| annotations << a }
+              required_keywords.each_value { |a| annotations << a }
+              optional_keywords.each_value { |a| annotations << a }
+              annotations << rest_keywords
+              annotations << block
+
+              annotations
             end
 
             def map_type_name(&block)
               DocStyle.new.tap do |new|
                 new.return_type_annotation = return_type_annotation&.map_type_name(&block)
+                new.required_positionals.replace(
+                  required_positionals.map do |a|
+                    case a
+                    when Annotations::ParamTypeAnnotation
+                      a.map_type_name(&block)
+                    else
+                      a
+                    end
+                  end
+                )
+                new.optional_positionals.replace(
+                  optional_positionals.map do |a|
+                    case a
+                    when Annotations::ParamTypeAnnotation
+                      a.map_type_name(&block)
+                    else
+                      a
+                    end
+                  end
+                )
+                new.rest_positionals =
+                  case rest_positionals
+                  when Annotations::SplatParamTypeAnnotation
+                    rest_positionals.map_type_name(&block)
+                  else
+                    rest_positionals
+                  end
+                new.trailing_positionals.replace(
+                  trailing_positionals.map do |a|
+                    case a
+                    when Annotations::ParamTypeAnnotation
+                      a.map_type_name(&block)
+                    else
+                      a
+                    end
+                  end
+                )
+                new.required_keywords.replace(
+                  required_keywords.transform_values do |a|
+                    case a
+                    when Annotations::ParamTypeAnnotation
+                      a.map_type_name(&block)
+                    else
+                      a
+                    end
+                  end
+                )
+                new.optional_keywords.replace(
+                  optional_keywords.transform_values do |a|
+                    case a
+                    when Annotations::ParamTypeAnnotation
+                      a.map_type_name(&block)
+                    else
+                      a
+                    end
+                  end
+                )
+                new.rest_keywords =
+                  case rest_keywords
+                  when Annotations::DoubleSplatParamTypeAnnotation
+                    rest_keywords.map_type_name(&block)
+                  else
+                    rest_keywords
+                  end
+                new.block =
+                  case self.block
+                  when Annotations::BlockParamTypeAnnotation
+                    self.block.map_type_name(&block)
+                  else
+                    self.block
+                  end
               end #: self
             end
 
             def type_fingerprint
-              return_type_annotation&.type_fingerprint
+              [
+                return_type_annotation&.type_fingerprint,
+                all_param_annotations.map do |param|
+                  case param
+                  when Annotations::Base
+                    param.type_fingerprint
+                  else
+                    param
+                  end
+                end
+              ]
             end
 
             def method_type
@@ -43,21 +295,104 @@ module RBS
                   Types::Bases::Any.new(location: nil)
                 end
 
+              any = -> { Types::Bases::Any.new(location: nil) }
+
+              req_pos = required_positionals.map do |a|
+                case a
+                when Annotations::ParamTypeAnnotation
+                  Types::Function::Param.new(type: a.param_type, name: a.name_location.source.to_sym)
+                else
+                  Types::Function::Param.new(type: any.call, name: a)
+                end
+              end
+              opt_pos = optional_positionals.map do |a|
+                case a
+                when Annotations::ParamTypeAnnotation
+                  Types::Function::Param.new(type: a.param_type, name: a.name_location.source.to_sym)
+                else
+                  Types::Function::Param.new(type: any.call, name: a)
+                end
+              end
+              rest_pos =
+                case rest_positionals
+                when Annotations::SplatParamTypeAnnotation
+                  Types::Function::Param.new(type: rest_positionals.param_type, name: rest_positionals.name_location&.source&.to_sym)
+                when Symbol
+                  Types::Function::Param.new(type: any.call, name: rest_positionals)
+                when true
+                  Types::Function::Param.new(type: any.call, name: nil)
+                else
+                  nil
+                end
+              trail_pos = trailing_positionals.map do |a|
+                case a
+                when Annotations::ParamTypeAnnotation
+                  Types::Function::Param.new(type: a.param_type, name: a.name_location.source.to_sym)
+                else
+                  Types::Function::Param.new(type: any.call, name: a)
+                end
+              end
+
+              req_kw = required_keywords.transform_values do |a|
+                case a
+                when Annotations::ParamTypeAnnotation
+                  Types::Function::Param.new(type: a.param_type, name: nil)
+                else
+                  Types::Function::Param.new(type: any.call, name: nil)
+                end
+              end
+              opt_kw = optional_keywords.transform_values do |a|
+                case a
+                when Annotations::ParamTypeAnnotation
+                  Types::Function::Param.new(type: a.param_type, name: nil)
+                else
+                  Types::Function::Param.new(type: any.call, name: nil)
+                end
+              end
+
+              rest_kw =
+                case rest_keywords
+                when Annotations::DoubleSplatParamTypeAnnotation
+                  Types::Function::Param.new(type: rest_keywords.param_type, name: rest_keywords.name_location&.source&.to_sym)
+                when Symbol
+                  Types::Function::Param.new(type: any.call, name: rest_keywords)
+                when true
+                  Types::Function::Param.new(type: any.call, name: nil)
+                else
+                  nil
+                end
+
               type = Types::Function.new(
-                required_positionals: [],
-                optional_positionals: [],
-                rest_positionals: nil,
-                trailing_positionals: [],
-                required_keywords: {},
-                optional_keywords: {},
-                rest_keywords: nil,
+                required_positionals: req_pos,
+                optional_positionals: opt_pos,
+                rest_positionals: rest_pos,
+                trailing_positionals: trail_pos,
+                required_keywords: req_kw,
+                optional_keywords: opt_kw,
+                rest_keywords: rest_kw,
                 return_type: return_type
               )
+
+              method_block =
+                case self.block
+                when Annotations::BlockParamTypeAnnotation
+                  Types::Block.new(
+                    type: self.block.type,
+                    required: self.block.required?
+                  )
+                when Symbol, true
+                  Types::Block.new(
+                    type: Types::UntypedFunction.new(return_type: Types::Bases::Any.new(location: nil)),
+                    required: false
+                  )
+                else
+                  nil
+                end
 
               MethodType.new(
                 type_params: [],
                 type: type,
-                block: nil,
+                block: method_block,
                 location: nil
               )
             end
@@ -82,17 +417,18 @@ module RBS
             MethodTypeAnnotation.new(type_annotations: updated_annots) #: self
           end
 
-          def self.build(leading_block, trailing_block, variables)
+          def self.build(leading_block, trailing_block, variables, node)
             unused_annotations = [] #: Array[Annotations::leading_annotation | CommentBlock::AnnotationSyntaxError]
             unused_trailing_annotation = nil #: Annotations::trailing_annotation | CommentBlock::AnnotationSyntaxError | nil
 
             type_annotations = nil #: type_annotations
+            return_annotation = nil #: Annotations::ReturnTypeAnnotation | Annotations::NodeTypeAssertion | nil
+            param_annotations = [] #: Array[Annotations::ParamTypeAnnotation | Annotations::SplatParamTypeAnnotation | Annotations::DoubleSplatParamTypeAnnotation | Annotations::BlockParamTypeAnnotation]
 
             if trailing_block
               case annotation = trailing_block.trailing_annotation(variables)
               when Annotations::NodeTypeAssertion
-                type_annotations = DocStyle.new()
-                type_annotations.return_type_annotation = annotation
+                return_annotation = annotation
               else
                 unused_trailing_annotation = annotation
               end
@@ -116,14 +452,15 @@ module RBS
                   end
                 when Annotations::ReturnTypeAnnotation
                   unless type_annotations
-                    type_annotations = DocStyle.new()
-                  end
-
-                  if type_annotations.is_a?(DocStyle)
-                    unless type_annotations.return_type_annotation
-                      type_annotations.return_type_annotation = paragraph
+                    unless return_annotation
+                      return_annotation = paragraph
                       next
                     end
+                  end
+                when Annotations::ParamTypeAnnotation, Annotations::SplatParamTypeAnnotation, Annotations::DoubleSplatParamTypeAnnotation, Annotations::BlockParamTypeAnnotation
+                  unless type_annotations
+                    param_annotations << paragraph
+                    next
                   end
                 end
 
@@ -131,10 +468,14 @@ module RBS
               end
             end
 
+            if !type_annotations && (return_annotation || !param_annotations.empty?)
+              doc_style, unused_params = DocStyle.build(param_annotations, return_annotation, node)
+              type_annotations = doc_style
+              unused_annotations.concat(unused_params)
+            end
+
             [
-              MethodTypeAnnotation.new(
-                type_annotations: type_annotations
-              ),
+              MethodTypeAnnotation.new(type_annotations: type_annotations),
               unused_annotations,
               unused_trailing_annotation
             ]
@@ -180,6 +521,17 @@ module RBS
             end
           end
 
+          def overloading?
+            case type_annotations
+            when Array
+              type_annotations.any? do |annotation|
+                annotation.is_a?(Annotations::MethodTypesAnnotation) && annotation.dot3_location
+              end
+            else
+              false
+            end
+          end
+
           def type_fingerprint
             case type_annotations
             when DocStyle
@@ -217,7 +569,7 @@ module RBS
           end
 
           def overloading?
-            false
+            method_type.overloading?
           end
 
           def annotations
