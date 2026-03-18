@@ -21,7 +21,7 @@ module RBS
         other.block == block
     end
 
-    def to_json(state = _ = nil)
+    def to_json(state = nil)
       {
         type_params: type_params,
         type: type,

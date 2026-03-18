@@ -83,7 +83,7 @@ module RBS
         other.end_pos == end_pos
     end
 
-    def to_json(state = _ = nil)
+    def to_json(state = nil)
       {
         start: {
           line: start_line,

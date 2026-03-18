@@ -79,17 +79,19 @@
 # *   #arg (and its aliases #angle and #phase): Returns the argument (angle) for
 #     `self` in radians.
 # *   #denominator: Returns the denominator of `self`.
-# *   #finite?: Returns whether both `self.real` and `self.image` are finite.
+# *   #finite?: Returns whether both <code>self.real</code> and
+#     <code>self.image</code> are finite.
 # *   #hash: Returns the integer hash value for `self`.
 # *   #imag (and its alias #imaginary): Returns the imaginary value for `self`.
-# *   #infinite?: Returns whether `self.real` or `self.image` is infinite.
+# *   #infinite?: Returns whether <code>self.real</code> or
+#     <code>self.image</code> is infinite.
 # *   #numerator: Returns the numerator of `self`.
-# *   #polar: Returns the array `[self.abs, self.arg]`.
+# *   #polar: Returns the array <code>[self.abs, self.arg]</code>.
 # *   #inspect: Returns a string representation of `self`.
 # *   #real: Returns the real value for `self`.
 # *   #real?: Returns `false`; for compatibility with Numeric#real?.
-# *   #rect (and its alias #rectangular): Returns the array `[self.real,
-#     self.imag]`.
+# *   #rect (and its alias #rectangular): Returns the array <code>[self.real,
+#     self.imag]</code>.
 #
 # ### Comparing
 #
@@ -100,12 +102,15 @@
 # ### Converting
 #
 # *   #rationalize: Returns a Rational object whose value is exactly or
-#     approximately equivalent to that of `self.real`.
+#     approximately equivalent to that of <code>self.real</code>.
 # *   #to_c: Returns `self`.
 # *   #to_d: Returns the value as a BigDecimal object.
-# *   #to_f: Returns the value of `self.real` as a Float, if possible.
-# *   #to_i: Returns the value of `self.real` as an Integer, if possible.
-# *   #to_r: Returns the value of `self.real` as a Rational, if possible.
+# *   #to_f: Returns the value of <code>self.real</code> as a Float, if
+#     possible.
+# *   #to_i: Returns the value of <code>self.real</code> as an Integer, if
+#     possible.
+# *   #to_r: Returns the value of <code>self.real</code> as a Rational, if
+#     possible.
 # *   #to_s: Returns a string representation of `self`.
 #
 # ### Performing Complex Arithmetic
@@ -118,7 +123,8 @@
 # *   #/: Returns the quotient of `self` and the given numeric.
 # *   #abs2: Returns square of the absolute value (magnitude) for `self`.
 # *   #conj (and its alias #conjugate): Returns the conjugate of `self`.
-# *   #fdiv: Returns `Complex.rect(self.real/numeric, self.imag/numeric)`.
+# *   #fdiv: Returns <code>Complex.rect(self.real/numeric,
+#     self.imag/numeric)</code>.
 #
 # ### Working with JSON
 #
@@ -184,23 +190,24 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex * numeric -> new_complex
+  #   - self * other -> numeric
   # -->
-  # Returns the product of `self` and `numeric`:
+  # Returns the numeric product of `self` and `other`:
   #
+  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
+  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
   #     Complex.rect(2, 3)  * Complex.rect(2, 3)  # => (-5+12i)
   #     Complex.rect(900)   * Complex.rect(1)     # => (900+0i)
   #     Complex.rect(-2, 9) * Complex.rect(-9, 2) # => (0-85i)
-  #     Complex.rect(9, 8)  * 4                   # => (36+32i)
-  #     Complex.rect(20, 9) * 9.8                 # => (196.0+88.2i)
+  #     Complex.rect(9, 8)  * Rational(2, 3)      # => ((6/1)+(16/3)*i)
   #
   def *: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex ** numeric -> new_complex
+  #   - self ** exponent -> complex
   # -->
-  # Returns `self` raised to power `numeric`:
+  # Returns `self` raised to the power `exponent`:
   #
   #     Complex.rect(0, 1) ** 2            # => (-1+0i)
   #     Complex.rect(-8) ** Rational(1, 3) # => (1.0000000000000002+1.7320508075688772i)
@@ -209,23 +216,33 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex + numeric -> new_complex
+  #   - self + other -> numeric
   # -->
-  # Returns the sum of `self` and `numeric`:
+  # Returns the sum of `self` and `other`:
   #
-  #     Complex.rect(2, 3)  + Complex.rect(2, 3)  # => (4+6i)
-  #     Complex.rect(900)   + Complex.rect(1)     # => (901+0i)
-  #     Complex.rect(-2, 9) + Complex.rect(-9, 2) # => (-11+11i)
-  #     Complex.rect(9, 8)  + 4                   # => (13+8i)
-  #     Complex.rect(20, 9) + 9.8                 # => (29.8+9i)
+  #     Complex(1, 2) + 0  # => (1+2i)
+  #     Complex(1, 2) + 1  # => (2+2i)
+  #     Complex(1, 2) + -1 # => (0+2i)
+  #
+  #     Complex(1, 2) + 1.0  # => (2.0+2i)
+  #
+  #     Complex(1, 2) + Complex(2, 1)     # => (3+3i)
+  #     Complex(1, 2) + Complex(2.0, 1.0) # => (3.0+3.0i)
+  #
+  #     Complex(1, 2) + Rational(1, 1) # => ((2/1)+2i)
+  #     Complex(1, 2) + Rational(1, 2) # => ((3/2)+2i)
+  #
+  # For a computation involving Floats, the result may be inexact (see Float#+):
+  #
+  #     Complex(1, 2) + 3.14 # => (4.140000000000001+2i)
   #
   def +: (Numeric) -> Complex
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex - numeric -> new_complex
+  #   - self - other -> complex
   # -->
-  # Returns the difference of `self` and `numeric`:
+  # Returns the difference of `self` and `other`:
   #
   #     Complex.rect(2, 3)  - Complex.rect(2, 3)  # => (0+0i)
   #     Complex.rect(900)   - Complex.rect(1)     # => (899+0i)
@@ -237,9 +254,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - -complex -> new_complex
+  #   - -self -> complex
   # -->
-  # Returns the negation of `self`, which is the negation of each of its parts:
+  # Returns `self`, negated, which is the negation of each of its parts:
   #
   #     -Complex.rect(1, 2)   # => (-1-2i)
   #     -Complex.rect(-1, -2) # => (1+2i)
@@ -248,9 +265,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex / numeric -> new_complex
+  #   - self / other -> complex
   # -->
-  # Returns the quotient of `self` and `numeric`:
+  # Returns the quotient of `self` and `other`:
   #
   #     Complex.rect(2, 3)  / Complex.rect(2, 3)  # => (1+0i)
   #     Complex.rect(900)   / Complex.rect(1)     # => (900+0i)
@@ -266,15 +283,17 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex <=> object -> -1, 0, 1, or nil
+  #   - self <=> other -> -1, 0, 1, or nil
   # -->
+  # Compares `self` and `other`.
+  #
   # Returns:
   #
-  # *   `self.real <=> object.real` if both of the following are true:
+  # *   <code>self.real <=> other.real</code> if both of the following are true:
   #
-  #     *   `self.imag == 0`.
-  #     *   `object.imag == 0`. # Always true if object is numeric but not
-  #         complex.
+  #     *   <code>self.imag == 0</code>.
+  #     *   <code>other.imag == 0</code> (always true if `other` is numeric but
+  #         not complex).
   #
   # *   `nil` otherwise.
   #
@@ -287,13 +306,17 @@ class Complex < Numeric
   #     Complex.rect(1) <=> Complex.rect(1, 1) # => nil # object.imag not zero.
   #     Complex.rect(1) <=> 'Foo'              # => nil # object.imag not defined.
   #
+  # Class Complex includes module Comparable, each of whose methods uses
+  # Complex#<=> for comparison.
+  #
   def <=>: (untyped) -> Integer?
 
   # <!--
   #   rdoc-file=complex.c
   #   - complex == object -> true or false
   # -->
-  # Returns `true` if `self.real == object.real` and `self.imag == object.imag`:
+  # Returns `true` if <code>self.real == object.real</code> and <code>self.imag ==
+  # object.imag</code>:
   #
   #     Complex.rect(2, 3)  == Complex.rect(2.0, 3.0) # => true
   #
@@ -373,7 +396,8 @@ class Complex < Numeric
   def coerce: (Numeric) -> [ Complex, Complex ]
 
   # <!-- rdoc-file=complex.c -->
-  # Returns the conjugate of `self`, `Complex.rect(self.imag, self.real)`:
+  # Returns the conjugate of `self`, <code>Complex.rect(self.imag,
+  # self.real)</code>:
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
@@ -383,7 +407,8 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - conj -> complex
   # -->
-  # Returns the conjugate of `self`, `Complex.rect(self.imag, self.real)`:
+  # Returns the conjugate of `self`, <code>Complex.rect(self.imag,
+  # self.real)</code>:
   #
   #     Complex.rect(1, 2).conj # => (1-2i)
   #
@@ -395,11 +420,11 @@ class Complex < Numeric
   # -->
   # Returns the denominator of `self`, which is the [least common
   # multiple](https://en.wikipedia.org/wiki/Least_common_multiple) of
-  # `self.real.denominator` and `self.imag.denominator`:
+  # <code>self.real.denominator</code> and <code>self.imag.denominator</code>:
   #
   #     Complex.rect(Rational(1, 2), Rational(2, 3)).denominator # => 6
   #
-  # Note that `n.denominator` of a non-rational numeric is `1`.
+  # Note that <code>n.denominator</code> of a non-rational numeric is `1`.
   #
   # Related: Complex#numerator.
   #
@@ -413,7 +438,7 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - fdiv(numeric) -> new_complex
   # -->
-  # Returns `Complex.rect(self.real/numeric, self.imag/numeric)`:
+  # Returns <code>Complex.rect(self.real/numeric, self.imag/numeric)</code>:
   #
   #     Complex.rect(11, 22).fdiv(3) # => (3.6666666666666665+7.333333333333333i)
   #
@@ -423,8 +448,8 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - finite? -> true or false
   # -->
-  # Returns `true` if both `self.real.finite?` and `self.imag.finite?` are true,
-  # `false` otherwise:
+  # Returns `true` if both <code>self.real.finite?</code> and
+  # <code>self.imag.finite?</code> are true, `false` otherwise:
   #
   #     Complex.rect(1, 1).finite?               # => true
   #     Complex.rect(Float::INFINITY, 0).finite? # => false
@@ -452,7 +477,7 @@ class Complex < Numeric
   #   rdoc-file=numeric.c
   #   - i -> complex
   # -->
-  # Returns `Complex(0, self)`:
+  # Returns <code>Complex(0, self)</code>:
   #
   #     2.i              # => (0+2i)
   #     -2.i             # => (0-2i)
@@ -498,8 +523,8 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - infinite? -> 1 or nil
   # -->
-  # Returns `1` if either `self.real.infinite?` or `self.imag.infinite?` is true,
-  # `nil` otherwise:
+  # Returns `1` if either <code>self.real.infinite?</code> or
+  # <code>self.imag.infinite?</code> is true, `nil` otherwise:
   #
   #     Complex.rect(Float::INFINITY, 0).infinite? # => 1
   #     Complex.rect(1, 1).infinite?               # => nil
@@ -555,7 +580,7 @@ class Complex < Numeric
   # In this example, the lowest common denominator of the two parts is 12; the two
   # converted parts may be thought of as Rational(8, 12) and Rational(9, 12),
   # whose numerators, respectively, are 8 and 9; so the returned value of
-  # `c.numerator` is `Complex.rect(8, 9)`.
+  # <code>c.numerator</code> is <code>Complex.rect(8, 9)</code>.
   #
   # Related: Complex#denominator.
   #
@@ -579,7 +604,7 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - polar -> array
   # -->
-  # Returns the array `[self.abs, self.arg]`:
+  # Returns the array <code>[self.abs, self.arg]</code>:
   #
   #     Complex.polar(1, 2).polar # => [1.0, 2.0]
   #
@@ -597,9 +622,9 @@ class Complex < Numeric
 
   # <!--
   #   rdoc-file=complex.c
-  #   - complex / numeric -> new_complex
+  #   - self / other -> complex
   # -->
-  # Returns the quotient of `self` and `numeric`:
+  # Returns the quotient of `self` and `other`:
   #
   #     Complex.rect(2, 3)  / Complex.rect(2, 3)  # => (1+0i)
   #     Complex.rect(900)   / Complex.rect(1)     # => (900+0i)
@@ -614,17 +639,18 @@ class Complex < Numeric
   #   - rationalize(epsilon = nil) -> rational
   # -->
   # Returns a Rational object whose value is exactly or approximately equivalent
-  # to that of `self.real`.
+  # to that of <code>self.real</code>.
   #
   # With no argument `epsilon` given, returns a Rational object whose value is
-  # exactly equal to that of `self.real.rationalize`:
+  # exactly equal to that of <code>self.real.rationalize</code>:
   #
   #     Complex.rect(1, 0).rationalize              # => (1/1)
   #     Complex.rect(1, Rational(0, 1)).rationalize # => (1/1)
   #     Complex.rect(3.14159, 0).rationalize        # => (314159/100000)
   #
   # With argument `epsilon` given, returns a Rational object whose value is
-  # exactly or approximately equal to that of `self.real` to the given precision:
+  # exactly or approximately equal to that of <code>self.real</code> to the given
+  # precision:
   #
   #     Complex.rect(3.14159, 0).rationalize(0.1)          # => (16/5)
   #     Complex.rect(3.14159, 0).rationalize(0.01)         # => (22/7)
@@ -685,7 +711,7 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - rect -> array
   # -->
-  # Returns the array `[self.real, self.imag]`:
+  # Returns the array <code>[self.real, self.imag]</code>:
   #
   #     Complex.rect(1, 2).rect # => [1, 2]
   #
@@ -719,13 +745,13 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - to_f -> float
   # -->
-  # Returns the value of `self.real` as a Float, if possible:
+  # Returns the value of <code>self.real</code> as a Float, if possible:
   #
   #     Complex.rect(1, 0).to_f              # => 1.0
   #     Complex.rect(1, Rational(0, 1)).to_f # => 1.0
   #
-  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`).
+  # Raises RangeError if <code>self.imag</code> is not exactly zero (either
+  # <code>Integer(0)</code> or <code>Rational(0, _n_)</code>).
   #
   def to_f: () -> Float
 
@@ -733,13 +759,13 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - to_i -> integer
   # -->
-  # Returns the value of `self.real` as an Integer, if possible:
+  # Returns the value of <code>self.real</code> as an Integer, if possible:
   #
   #     Complex.rect(1, 0).to_i              # => 1
   #     Complex.rect(1, Rational(0, 1)).to_i # => 1
   #
-  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`).
+  # Raises RangeError if <code>self.imag</code> is not exactly zero (either
+  # <code>Integer(0)</code> or <code>Rational(0, _n_)</code>).
   #
   def to_i: () -> Integer
 
@@ -747,14 +773,15 @@ class Complex < Numeric
   #   rdoc-file=complex.c
   #   - to_r -> rational
   # -->
-  # Returns the value of `self.real` as a Rational, if possible:
+  # Returns the value of <code>self.real</code> as a Rational, if possible:
   #
   #     Complex.rect(1, 0).to_r              # => (1/1)
   #     Complex.rect(1, Rational(0, 1)).to_r # => (1/1)
   #     Complex.rect(1, 0.0).to_r            # => (1/1)
   #
-  # Raises RangeError if `self.imag` is not exactly zero (either `Integer(0)` or
-  # `Rational(0, *n*)`) and `self.imag.to_r` is not exactly zero.
+  # Raises RangeError if <code>self.imag</code> is not exactly zero (either
+  # <code>Integer(0)</code> or <code>Rational(0, _n_)</code>) and
+  # <code>self.imag.to_r</code> is not exactly zero.
   #
   # Related: Complex#rationalize.
   #
@@ -778,7 +805,7 @@ class Complex < Numeric
 end
 
 # <!-- rdoc-file=complex.c -->
-# Equivalent to `Complex.rect(0, 1)`:
+# Equivalent to <code>Complex.rect(0, 1)</code>:
 #
 #     Complex::I # => (0+1i)
 #

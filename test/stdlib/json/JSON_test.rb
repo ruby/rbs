@@ -47,12 +47,6 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(String) -> String", JSON, :create_id=, "json_class"
   end
 
-  def test_deep_const_get
-    with_interned("File") do |val|
-      assert_send_type "(interned) -> singleton(File)", JSON, :deep_const_get, val
-    end
-  end
-
   def test_dump
     assert_send_type "(ToJson) -> String", JSON, :dump, ToJson.new
     assert_send_type "(ToJson, Integer) -> String", JSON, :dump, ToJson.new, 100
@@ -183,46 +177,55 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_to_json_with_object
     assert_send_type "() -> String", Object.new, :to_json
+    assert_send_type "(nil) -> String", Object.new, :to_json, nil
     assert_send_type "(JSON::State) -> String",  Object.new, :to_json, JSON::State.new
   end
 
   def test_to_json_with_nil
     assert_send_type "() -> String", nil, :to_json
+    assert_send_type "(nil) -> String", nil, :to_json, nil
     assert_send_type "(JSON::State) -> String", nil, :to_json, JSON::State.new
   end
 
   def test_to_json_with_true
     assert_send_type "() -> String", true, :to_json
+    assert_send_type "(nil) -> String", true, :to_json, nil
     assert_send_type "(JSON::State) -> String", true, :to_json, JSON::State.new
   end
 
   def test_to_json_with_false
     assert_send_type "() -> String", false, :to_json
+    assert_send_type "(nil) -> String", false, :to_json, nil
     assert_send_type "(JSON::State) -> String", false, :to_json, JSON::State.new
   end
 
   def test_to_json_with_string
     assert_send_type "() -> String", "foo", :to_json
+    assert_send_type "(nil) -> String", "foo", :to_json, nil
     assert_send_type "(JSON::State) -> String", "foo", :to_json, JSON::State.new
   end
 
   def test_to_json_with_integer
     assert_send_type "() -> String", 123, :to_json
+    assert_send_type "(nil) -> String", 123, :to_json, nil
     assert_send_type "(JSON::State) -> String", 123, :to_json, JSON::State.new
   end
 
   def test_to_json_with_float
     assert_send_type "() -> String", 0.123, :to_json
+    assert_send_type "(nil) -> String", 0.123, :to_json, nil
     assert_send_type "(JSON::State) -> String", 0.123, :to_json, JSON::State.new
   end
 
   def test_to_json_with_hash
     assert_send_type "() -> String", { a: 1 }, :to_json
+    assert_send_type "(nil) -> String", { a: 1 }, :to_json, nil
     assert_send_type "(JSON::State) -> String", { a: 1 }, :to_json, JSON::State.new
   end
 
   def test_to_json_with_array
     assert_send_type "() -> String", [], :to_json
+    assert_send_type "(nil) -> String", [], :to_json, nil
     assert_send_type "(JSON::State) -> String", [], :to_json, JSON::State.new
   end
 end

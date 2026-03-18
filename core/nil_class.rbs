@@ -19,7 +19,7 @@
 # *   #to_s
 #
 # While `nil` doesn't have an explicitly defined #to_hash method, it can be used
-# in `**` unpacking, not adding any keyword arguments.
+# in <code>**</code> unpacking, not adding any keyword arguments.
 #
 # Another method provides inspection:
 #
@@ -97,7 +97,7 @@ class NilClass
   #   rdoc-file=object.c
   #   - inspect -> 'nil'
   # -->
-  # Returns string `'nil'`:
+  # Returns string <code>'nil'</code>:
   #
   #     nil.inspect # => "nil"
   #
@@ -107,12 +107,13 @@ class NilClass
   #   rdoc-file=object.c
   #   - nil.nil?  -> true
   # -->
-  # Returns `true`. For all other objects, method `nil?` returns `false`.
+  # Returns `true`. For all other objects, method <code>nil?</code> returns
+  # `false`.
   #
   def nil?: () -> true
 
   # <!--
-  #   rdoc-file=rational.c
+  #   rdoc-file=nilclass.rb
   #   - rationalize(eps = nil)  ->  (0/1)
   # -->
   # Returns zero as a Rational:
@@ -134,7 +135,7 @@ class NilClass
   def to_a: () -> []
 
   # <!--
-  #   rdoc-file=complex.c
+  #   rdoc-file=nilclass.rb
   #   - to_c -> (0+0i)
   # -->
   # Returns zero as a Complex:
@@ -174,7 +175,7 @@ class NilClass
   def to_i: () -> 0
 
   # <!--
-  #   rdoc-file=rational.c
+  #   rdoc-file=nilclass.rb
   #   - to_r  ->  (0/1)
   # -->
   # Returns zero as a Rational:

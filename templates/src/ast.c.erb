@@ -7,7 +7,7 @@
 const char *rbs_node_type_name(rbs_node_t *node) {
     switch (node->type) {
     <%- nodes.each do |node| -%>
-    case <%= node.c_type_enum_name %>:
+    case <%= node.c_node_enum_name %>:
         return "<%= node.ruby_full_name %>";
     <%- end -%>
     case RBS_AST_SYMBOL:
@@ -70,8 +70,6 @@ bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
     switch (lhs->type) {
     case RBS_AST_SYMBOL:
         return ((rbs_ast_symbol_t *) lhs)->constant_id == ((rbs_ast_symbol_t *) rhs)->constant_id;
-    case RBS_KEYWORD:
-        return ((rbs_keyword_t *) lhs)->constant_id == ((rbs_keyword_t *) rhs)->constant_id;
     case RBS_AST_BOOL:
         return ((rbs_ast_bool_t *) lhs)->value == ((rbs_ast_bool_t *) rhs)->value;
     case RBS_AST_INTEGER:
@@ -123,21 +121,7 @@ rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
     return node ? node->value : NULL;
 }
 
-rbs_keyword_t *rbs_keyword_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_id_t constant_id) {
-    rbs_keyword_t *instance = rbs_allocator_alloc(allocator, rbs_keyword_t);
-
-    *instance = (rbs_keyword_t) {
-        .base = (rbs_node_t) {
-            .type = RBS_KEYWORD,
-            .location = location,
-        },
-        .constant_id = constant_id,
-    };
-
-    return instance;
-}
-
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t *location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
     rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
@@ -153,19 +137,23 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_t 
 
 <%- nodes.each do |node| -%>
 #line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
-<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.map(&:parameter_decl).join(", ") %>) {
+<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>) {
     <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
-    <%- node.fields.filter { |f| f.c_type == "VALUE" }.each do |f| -%>
-    rb_gc_register_mark_object(<%= f.c_name %>);
-    <%- end -%>
 
     *instance = (<%= node.c_type_name %>) {
         .base = (rbs_node_t) {
-            .type = <%= node.c_type_enum_name %>,
+            .type = <%= node.c_node_enum_name %>,
             .location = location,
         },
         <%- node.fields.each do |field| -%>
         .<%= field.c_name %> = <%= field.c_name %>,
+        <%- end -%>
+        <%- node.locations&.each do |loc| -%>
+        <%- if loc.required? -%>
+        .<%= loc.attribute_name %> = <%= loc.attribute_name %>,
+        <%- else -%>
+        .<%= loc.attribute_name %> = RBS_LOCATION_NULL_RANGE,
+        <%- end -%>
         <%- end -%>
     };
 

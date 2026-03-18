@@ -25,7 +25,7 @@ void rbs_buffer_append_string(rbs_allocator_t *allocator, rbs_buffer_t *buffer, 
     if (next_length > buffer->capacity) {
         size_t old_capacity = buffer->capacity;
 
-        rbs_assert(old_capacity != 0, "Precondition: capacity must be at least 1. Got %zu", old_capacity);
+        RBS_ASSERT(old_capacity != 0, "Precondition: capacity must be at least 1. Got %zu", old_capacity);
 
         size_t new_capacity = buffer->capacity * 2;
 
@@ -34,7 +34,7 @@ void rbs_buffer_append_string(rbs_allocator_t *allocator, rbs_buffer_t *buffer, 
         }
 
         char *new_value = rbs_allocator_realloc(allocator, buffer->value, old_capacity, new_capacity, char);
-        rbs_assert(new_value != NULL, "Failed to append to buffer. Old capacity: %zu, new capacity: %zu", old_capacity, new_capacity);
+        RBS_ASSERT(new_value != NULL, "Failed to append to buffer. Old capacity: %zu, new capacity: %zu", old_capacity, new_capacity);
 
         buffer->value = new_value;
         buffer->capacity = new_capacity;

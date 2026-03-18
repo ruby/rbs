@@ -38,15 +38,15 @@ class RBS::VendorerTest < Test::Unit::TestCase
       vendor_dir = path + "vendor/rbs"
 
       loader = EnvironmentLoader.new()
-      loader.add(library: "pathname")
+      loader.add(library: "logger")
 
       vendorer = Vendorer.new(vendor_dir: vendor_dir, loader: loader)
 
       vendorer.copy!
 
       assert_predicate vendor_dir, :directory?
-      assert_predicate vendor_dir + "pathname-0", :directory?
-      assert_predicate vendor_dir + "pathname-0/pathname.rbs", :file?
+      assert_predicate vendor_dir + "logger-0", :directory?
+      assert_predicate vendor_dir + "logger-0/logger.rbs", :file?
     end
   end
 end

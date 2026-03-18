@@ -28,6 +28,8 @@ class JSONRangeInstanceTest < Test::Unit::TestCase
   def test_to_json
     assert_send_type "() -> String",
                      (0..9), :to_json
+    assert_send_type "(nil) -> String",
+                     (0..9), :to_json, nil
     assert_send_type "(JSON::State) -> String",
                      (0..9), :to_json, JSON::State.new
   end

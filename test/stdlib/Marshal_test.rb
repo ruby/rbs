@@ -1,5 +1,4 @@
 require_relative "test_helper"
-require "pathname"
 require "tmpdir"
 
 class MarshalSingletonTest < Test::Unit::TestCase

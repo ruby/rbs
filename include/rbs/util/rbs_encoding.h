@@ -6,6 +6,8 @@
 #ifndef RBS_RBS_ENCODING_H
 #define RBS_RBS_ENCODING_H
 
+#include "rbs/defines.h"
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>

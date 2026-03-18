@@ -54,18 +54,24 @@ static size_t get_system_page_size(void) {
 #endif
 }
 
+static inline uintptr_t rbs_align_up_uintptr(uintptr_t value, size_t alignment) {
+    // alignment must be a non-zero power of two
+    RBS_ASSERT(alignment != 0 && (alignment & (alignment - 1)) == 0, "alignment must be a non-zero power of two. alignment: %zu", alignment);
+    return (value + (alignment - 1)) & ~(uintptr_t) (alignment - 1);
+}
+
 static rbs_allocator_page_t *rbs_allocator_page_new(size_t payload_size) {
     const size_t page_header_size = sizeof(rbs_allocator_page_t);
 
-    rbs_allocator_page_t *page = malloc(page_header_size + payload_size);
+    rbs_allocator_page_t *page = (rbs_allocator_page_t *) malloc(page_header_size + payload_size);
     page->size = payload_size;
     page->used = 0;
 
     return page;
 }
 
-rbs_allocator_t *rbs_allocator_init() {
-    rbs_allocator_t *allocator = malloc(sizeof(rbs_allocator_t));
+rbs_allocator_t *rbs_allocator_init(void) {
+    rbs_allocator_t *allocator = (rbs_allocator_t *) malloc(sizeof(rbs_allocator_t));
 
     const size_t system_page_size = get_system_page_size();
 
@@ -98,10 +104,9 @@ void *rbs_allocator_realloc_impl(rbs_allocator_t *allocator, void *ptr, size_t o
 
 // Allocates `size` bytes from `allocator`, aligned to an `alignment`-byte boundary.
 void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t alignment) {
-    rbs_assert(size % alignment == 0, "size must be a multiple of the alignment. size: %zu, alignment: %zu", size, alignment);
-
     if (allocator->default_page_payload_size < size) { // Big allocation, give it its own page.
-        rbs_allocator_page_t *new_page = rbs_allocator_page_new(size);
+        // Add padding to ensure we can align the start pointer within this page
+        rbs_allocator_page_t *new_page = rbs_allocator_page_new(size + (alignment - 1));
 
         // This simple allocator can only put small allocations into the head page.
         // Naively prepending this large allocation page to the head of the allocator before the previous head page
@@ -120,21 +125,29 @@ void *rbs_allocator_malloc_impl(rbs_allocator_t *allocator, size_t size, size_t 
         new_page->next = allocator->page->next;
         allocator->page->next = new_page;
 
-        uintptr_t pointer = (uintptr_t) new_page + sizeof(rbs_allocator_page_t);
-        return (void *) pointer;
+        uintptr_t base = (uintptr_t) new_page + sizeof(rbs_allocator_page_t);
+        uintptr_t aligned_ptr = rbs_align_up_uintptr(base, alignment);
+        return (void *) aligned_ptr;
     }
 
     rbs_allocator_page_t *page = allocator->page;
-    if (page->used + size > page->size) {
+    uintptr_t base = (uintptr_t) page + sizeof(rbs_allocator_page_t);
+
+    // Compute aligned offset within the payload
+    size_t used_aligned = (size_t) (rbs_align_up_uintptr(base + page->used, alignment) - base);
+
+    if (used_aligned + size > page->size) {
         // Not enough space. Allocate a new small page and prepend it to the allocator's linked list.
         rbs_allocator_page_t *new_page = rbs_allocator_page_new(allocator->default_page_payload_size);
         new_page->next = allocator->page;
         allocator->page = new_page;
         page = new_page;
+        base = (uintptr_t) page + sizeof(rbs_allocator_page_t);
+        used_aligned = (size_t) (rbs_align_up_uintptr(base, alignment) - base); // start of fresh page (usually 0 if header is aligned)
     }
 
-    uintptr_t pointer = (uintptr_t) page + sizeof(rbs_allocator_page_t) + page->used;
-    page->used += size;
+    uintptr_t pointer = base + used_aligned;
+    page->used = used_aligned + size;
     return (void *) pointer;
 }
 

@@ -58,7 +58,7 @@ end
 #
 # Implicit `.to_str` conversions are usable all over Ruby's stdlib, such as `Kernel#abort`,
 # `String#+`, and `Object#send`. Virtually anywhere that accepts a `String` will also accept
-# something that defines `.to_Str`.
+# something that defines `.to_str`.
 #
 # Types that define `.to_str` are also usable wherever paths are expected (See the `path` type
 # alias).

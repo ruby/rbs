@@ -1,4 +1,5 @@
 require_relative "../test_helper"
+require "did_you_mean"
 
 class DidYouMean::CorrectableTest < Test::Unit::TestCase
   include TestHelper
