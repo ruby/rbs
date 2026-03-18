@@ -925,6 +925,11 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     Parser.parse_type("^() { () -> void } -> void").tap do |type|
       assert_instance_of Types::Proc, type
     end
+
+    Parser.parse_type("^() -> (void)").tap do |type|
+      assert_instance_of Types::Proc, type
+      assert_instance_of Types::Bases::Void, type.type.return_type
+    end
   end
 
   def test_parse__void__prohibited
