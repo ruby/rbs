@@ -557,7 +557,7 @@ class Hash[unchecked out K, unchecked out V]
   # Raises an exception unless `obj.to_hash` returns a `Hash` object.
   #
   def self.try_convert: [K, V] (hash[K, V] hash) -> Hash[K, V]
-                      | (untyped) -> nil
+                      | (untyped) -> Hash[untyped, untyped]?
 
   # <!--
   #   rdoc-file=hash.c
