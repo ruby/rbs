@@ -39,13 +39,13 @@ class ClassInstanceTest < Test::Unit::TestCase
     assert_send_type "() -> void",
                      Class.allocate, :initialize
 
-    assert_send_type "() { (Class) [self: Class] -> void } -> void",
+    assert_send_type "() { (Class) [self: untyped] -> void } -> void",
                      Class.allocate, :initialize do end
 
     assert_send_type "(Class) -> void",
                      Class.allocate, :initialize, String
 
-    assert_send_type "(Class) { (Class) [self: Class] -> void } -> void",
+    assert_send_type "(Class) { (Class) [self: untyped] -> void } -> void",
                      Class.allocate, :initialize, String do end
   end
 
