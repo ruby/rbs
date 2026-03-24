@@ -124,7 +124,7 @@ class Class < Module
   #     TrueClass.attached_object                  #=> TypeError: `TrueClass' is not a singleton class
   #     NilClass.attached_object                   #=> TypeError: `NilClass' is not a singleton class
   #
-  def attached_object: () -> instance
+  def attached_object: () -> untyped
 
   # <!--
   #   rdoc-file=object.c
