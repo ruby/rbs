@@ -82,7 +82,7 @@ class Class < Module
   # Assign the class to a constant (name starting uppercase) if you want to treat
   # it like a regular class.
   #
-  def initialize: (?Class superclass) ?{ (Class newclass) -> void } -> void
+  def initialize: (?Class superclass) ?{ (Class newclass) [self: Class] -> void } -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -106,6 +106,8 @@ class Class < Module
   #
   def allocate: () -> untyped
 
+  def self.allocate: () -> untyped
+
   # <!--
   #   rdoc-file=object.c
   #   - attached_object -> object
@@ -122,7 +124,7 @@ class Class < Module
   #     TrueClass.attached_object                  #=> TypeError: `TrueClass' is not a singleton class
   #     NilClass.attached_object                   #=> TypeError: `NilClass' is not a singleton class
   #
-  def attached_object: () -> untyped
+  def attached_object: () -> instance
 
   # <!--
   #   rdoc-file=object.c
@@ -149,7 +151,7 @@ class Class < Module
   #     New subclass: Bar
   #     New subclass: Baz
   #
-  def inherited: (Class arg0) -> untyped
+  private def inherited: (Class subclass) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -159,7 +161,7 @@ class Class < Module
   # object's #initialize method, passing it *args*.  This is the method that ends
   # up getting called whenever an object is constructed using `.new`.
   #
-  def new: () -> untyped
+  def new: (*untyped, **untyped) ?{ (?) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=object.c
