@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 3.10.4 (2026-03-25)
+
+### Library changes
+
+#### rbs collection
+
+* [Backport] [3.10] Fix: pathname not written to lockfile. ([#2896](https://github.com/ruby/rbs/pull/2896))
+
 ## 3.10.3 (2026-01-30)
 
 This is a minor fix around the dependency to `tsort`.
