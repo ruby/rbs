@@ -43,9 +43,9 @@ class Open3SingletonTest < Test::Unit::TestCase
     assert_send_type "(*::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen2, 'echo "Foo"'
     assert_send_type "(*::String, unsetenv_others: bool) -> [ ::IO, ::IO, ::Process::Waiter ]",
-                     Open3, :popen2, 'env', unsetenv_others: true
+                     Open3, :popen2, 'echo "Foo"', unsetenv_others: true
     assert_send_type "(*::String, close_others: bool) -> [ ::IO, ::IO, ::Process::Waiter ]",
-                     Open3, :popen2, 'env', close_others: true
+                     Open3, :popen2, 'echo "Foo"', close_others: true
     assert_send_type "(*::String, chdir: ::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen2, 'echo "Foo"', chdir: '.'
     assert_send_type "(::Hash[::String, ::String], ::String) -> [ ::IO, ::IO, ::Process::Waiter ]",
@@ -61,9 +61,9 @@ class Open3SingletonTest < Test::Unit::TestCase
     assert_send_type "(::String) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen3, 'echo "Foo"'
     assert_send_type "(::String, unsetenv_others: bool) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
-                     Open3, :popen3, 'env', unsetenv_others: true
+                     Open3, :popen3, 'echo "Foo"', unsetenv_others: true
     assert_send_type "(::String, close_others: bool) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
-                     Open3, :popen3, 'env', close_others: true
+                     Open3, :popen3, 'echo "Foo"', close_others: true
     assert_send_type "(::String, chdir: ::String) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
                      Open3, :popen3, 'echo "Foo"', chdir: '.'
     assert_send_type "(::Hash[::String, ::String], ::String) -> [ ::IO, ::IO, ::IO, ::Process::Waiter ]",
