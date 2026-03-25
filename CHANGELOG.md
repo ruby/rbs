@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.0.2 (2026-03-25)
+
+### Library changes
+
+#### rbs collection
+
+* Fix: pathname not written to lockfile. ([#2889](https://github.com/ruby/rbs/pull/2889))
+
+### Miscellaneous
+
+* Fix test failure on Windows in `ruby/ruby` ([#2900](https://github.com/ruby/rbs/pull/2900))
+* Fix test for Ruby 4.1 ([#2899](https://github.com/ruby/rbs/pull/2899))
+
 ## 4.0.1 (2026-03-23)
 
 This is a minor release to fix Ruby CI failure, which was caused by symlinks included in the `rust` directory.
