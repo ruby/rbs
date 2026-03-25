@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.0.1 (2026-03-23)
+
+This is a minor release to fix Ruby CI failure, which was caused by symlinks included in the `rust` directory.
+
+### Library changes
+
+* Fix `() -> (void)` being rejected as SyntaxError ([#2884](https://github.com/ruby/rbs/pull/2884))
+
+### Miscellaneous
+
+* Drop crates ([#2887](https://github.com/ruby/rbs/pull/2887))
+* Add newline at eof ([#2885](https://github.com/ruby/rbs/pull/2885))
+
 ## 4.0.0 (2026-03-16)
 
 RBS 4.0 ships with experimental RBS inline syntax support, allowing you to write type annotations directly in Ruby source files. See [docs/inline.md](docs/inline.md) for the syntax details.

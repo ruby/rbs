@@ -1,0 +1,80 @@
+name: Check milestone
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, milestoned, demilestoned, synchronize]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract RBS::Version
+        id: version
+        run: |
+          # Extract version string from lib/rbs/version.rb
+          version=$(ruby -e 'load "lib/rbs/version.rb"; print RBS::VERSION')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          # Parse major.minor.patch
+          IFS='.' read -r major minor patch _rest <<< "$version"
+          echo "major=$major" >> "$GITHUB_OUTPUT"
+          echo "minor=$minor" >> "$GITHUB_OUTPUT"
+          echo "patch=$patch" >> "$GITHUB_OUTPUT"
+
+          echo "RBS::VERSION = $version (major=$major, minor=$minor, patch=$patch)"
+
+      - name: Check milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const milestone = pr.milestone;
+            const labels = pr.labels.map(l => l.name);
+
+            const version = '${{ steps.version.outputs.version }}';
+            const major = '${{ steps.version.outputs.major }}';
+            const minor = '${{ steps.version.outputs.minor }}';
+            const patch = parseInt('${{ steps.version.outputs.patch }}', 10);
+
+            if (!milestone) {
+              if (labels.includes('no-milestone')) {
+                core.info('No milestone set, but no-milestone label is present — OK');
+                return;
+              }
+              core.setFailed(
+                'No milestone set. Add a milestone or add the "no-milestone" label.'
+              );
+              return;
+            }
+
+            if (labels.includes('no-milestone')) {
+              core.setFailed(
+                'Milestone is set but "no-milestone" label is present. Remove the label or the milestone.'
+              );
+              return;
+            }
+
+            const milestoneName = milestone.title;
+            core.info(`Milestone: "${milestoneName}", RBS::VERSION: ${version}`);
+
+            // Expected milestone based on version:
+            //   patch == 0 → "RBS major.minor"   (e.g. "RBS 4.0")
+            //   patch >= 1 → "RBS major.minor.x"  (e.g. "RBS 4.0.x")
+            let expectedMilestone;
+            if (patch === 0) {
+              expectedMilestone = `RBS ${major}.${minor}`;
+            } else {
+              expectedMilestone = `RBS ${major}.${minor}.x`;
+            }
+
+            if (milestoneName !== expectedMilestone) {
+              core.setFailed(
+                `Milestone "${milestoneName}" does not match RBS::VERSION ${version}. ` +
+                `Expected milestone: "${expectedMilestone}"`
+              );
+            } else {
+              core.info(`Milestone "${milestoneName}" matches RBS::VERSION ${version}`);
+            }
