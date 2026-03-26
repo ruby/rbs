@@ -19,7 +19,7 @@
 #     Mod.constants          #=> [:CONST, :PI, :E]
 #     Mod.instance_methods   #=> [:meth]
 #
-class Module < Object
+class Module
   # <!--
   #   rdoc-file=eval.c
   #   - Module.constants   -> array
@@ -40,7 +40,7 @@ class Module < Object
   #
   # The second form calls the instance method `constants`.
   #
-  def self.constants: () -> ::Array[Integer]
+  def self.constants: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=eval.c
@@ -56,7 +56,7 @@ class Module < Object
   #     $a           #=> [M1::M2, M1]
   #     $a[0].name   #=> "M1::M2"
   #
-  def self.nesting: () -> ::Array[Module]
+  def self.nesting: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c
@@ -83,7 +83,7 @@ class Module < Object
   #
   #     [B, A]
   #
-  def self.used_modules: () -> ::Array[Module]
+  def self.used_modules: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c

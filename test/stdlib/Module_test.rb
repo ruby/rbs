@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require_relative 'Module_test_helper'
 
 class ModuleSingletonTest < Test::Unit::TestCase
   include TestHelper
@@ -8,13 +9,32 @@ class ModuleSingletonTest < Test::Unit::TestCase
   def test_used_modules
     assert_send_type "() -> Array[Module]",
                      Module, :used_modules
+
+    assert_type 'Array[Module]',
+                ModuleTestHelperRefinement::USED_MODULES
   end
 
   def test_used_refinements
-    assert_send_type(
-      "() -> Array[Refinement]",
-      Module, :used_refinements
-    )
+    assert_send_type "() -> Array[Refinement]",
+                     Module, :used_refinements
+
+    assert_type 'Array[Refinement]',
+                ModuleTestHelperRefinement::USED_REFINEMENTS
+  end
+
+  def test_constants
+    assert_send_type '() -> Array[Symbol]',
+                     Module, :constants
+
+    with_boolish do |inherit|
+      assert_send_type '(boolish) -> Array[Symbol]',
+                       Module, :constants, inherit
+    end
+  end
+
+  def test_nesting
+    assert_send_type '() -> Array[Module]',
+                     Module, :nesting
   end
 end
 
