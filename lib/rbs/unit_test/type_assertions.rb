@@ -296,6 +296,10 @@ module RBS
         assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
       end
 
+      def assert_visibility(vis, receiver, method)
+        omit 'TODO: visibility for types'
+      end
+
       def assert_type(type, value)
         typecheck = RBS::Test::TypeCheck.new(
           self_class: value.class,

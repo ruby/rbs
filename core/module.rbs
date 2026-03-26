@@ -862,7 +862,7 @@ class Module
   # -->
   # Invokes Module.append_features on each parameter in reverse order.
   #
-  def include: (Module, *Module arg0) -> self
+  def include: (Module module, *Module additional_modules) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1240,7 +1240,7 @@ class Module
   # -->
   # Invokes Module.prepend_features on each parameter in reverse order.
   #
-  def prepend: (Module, *Module arg0) -> self
+  def prepend: (Module module, *Module additional_modules) -> self
 
   # <!--
   #   rdoc-file=eval.c

@@ -50,6 +50,11 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
   end
 
+  module RefinedModule
+    refine String do
+    end
+  end
+
   def test_op_lt
     with Object, Float, Hash do |mod|
       assert_send_type  '(Module) -> bool?',
@@ -108,50 +113,63 @@ class ModuleInstanceTest < Test::Unit::TestCase
   def test_include
     assert_send_type "(Module) -> Module",
                      Module.new, :include, Module.new
-    assert_send_type "(Module, Module) -> Module",
+    assert_send_type "(Module, *Module) -> Module",
                      Module.new, :include, Module.new, Module.new
   end
 
   def test_prepend
     assert_send_type "(Module) -> Module",
                      Module.new, :prepend, Module.new
-    assert_send_type "(Module, Module) -> Module",
+    assert_send_type "(Module, *Module) -> Module",
                      Module.new, :prepend, Module.new, Module.new
   end
 
   def test_refine
     assert_send_type "(Module) { () -> void } -> Refinement",
-                     Foo, :refine, String do nil end
+                     RefinedModule, :refine, Integer do nil end
+
+    assert_visibility :private,
+                      RefinedModule, :refine
   end
 
   def test_refinements
-    assert_send_type(
-      "() -> Array[Refinement]",
-      Foo, :refinements
-    )
+    assert_send_type "() -> Array[Refinement]",
+                     Module.new, :refinements
+
+    assert_send_type "() -> Array[Refinement]",
+                     RefinedModule, :refinements
   end
 
   def test_const_source_location
-    assert_send_type "(Symbol) -> [String, Integer]",
-                     Foo, :const_source_location, :BAR
-    assert_send_type "(Symbol) -> nil",
-                     Foo, :const_source_location, :UNKNOWN
-    assert_send_type "(String) -> [String, Integer]",
-                     Foo, :const_source_location, "BAR"
-    assert_send_type "(String) -> nil",
-                     Foo, :const_source_location, "UNKNOWN"
-    assert_send_type "(Symbol, true) -> [String, Integer]",
-                     Foo, :const_source_location, :BAR, true
-    assert_send_type "(String, nil) -> [String, Integer]",
-                     Foo, :const_source_location, "BAR", nil
-    assert_send_type "(Symbol) -> [ ]",
-                     Foo, :const_source_location, :String
-    assert_send_type "(String) -> [ ]",
-                     Foo, :const_source_location, "String"
-    assert_send_type "(Symbol, true) -> [ ]",
-                     Foo, :const_source_location, :String, true
-    assert_send_type "(String, nil) -> nil",
-                     Foo, :const_source_location, "String", nil
+    with_interned :BAR do |interned|
+      assert_send_type "(interned) -> [String, Integer]",
+                       Foo, :const_source_location, interned
+
+      with_boolish.and_nil do |boolish|
+        assert_send_type "(interned, boolish) -> [String, Integer]",
+                         Foo, :const_source_location, interned, boolish
+      end
+    end
+
+    with_interned :UNKNOWN do |interned|
+      assert_send_type "(interned) -> nil",
+                       Foo, :const_source_location, interned
+
+      with_boolish.and_nil do |boolish|
+        assert_send_type "(interned, boolish) -> nil",
+                         Foo, :const_source_location, interned, boolish
+      end
+    end
+
+    with_interned :String do |interned|
+      assert_send_type "(interned) -> []",
+                       Foo, :const_source_location, interned
+
+      with_boolish.and_nil do |boolish|
+        assert_send_type "(interned, boolish) -> []?",
+                         Foo, :const_source_location, interned, boolish
+      end
+    end
   end
 
   def test_module_eval
