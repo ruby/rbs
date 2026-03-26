@@ -386,74 +386,69 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_attr
-    mod = Module.new
-
     assert_send_type  '() -> Array[Symbol]',
-                       mod, :attr
+                       Module.new, :attr
 
     with_interned :foo do |foo|
       with_bool do |writer|
-        assert_send_type  '(interned, bool) -> Array[Symbol]',
-                          mod, :attr, foo, writer
+        # attr with bool arguments yields a warning normally
+        disable_verbose do
+          assert_send_type  '(interned, bool) -> Array[Symbol]',
+                            Module.new, :attr, foo, writer
+        end
       end
 
       assert_send_type  '(interned) -> Array[Symbol]',
-                        mod, :attr, foo
+                        Module.new, :attr, foo
 
       with_interned :bar do |bar|
         assert_send_type  '(*interned) -> Array[Symbol]',
-                          mod, :attr, foo, bar
+                          Module.new, :attr, foo, bar
       end
     end
   end
 
   def test_attr_reader
-    mod = Module.new
-
     assert_send_type  '() -> Array[Symbol]',
-                      mod, :attr_reader
+                      Module.new, :attr_reader
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> Array[Symbol]',
-                        mod, :attr_reader, foo
+                        Module.new, :attr_reader, foo
 
       with_interned :bar do |bar|
         assert_send_type  '(interned, interned) -> Array[Symbol]',
-                          mod, :attr_reader, foo, bar
+                          Module.new, :attr_reader, foo, bar
       end
     end
   end
 
   def test_attr_writer
-    mod = Module.new
-
     assert_send_type  '() -> Array[Symbol]',
-                      mod, :attr_writer
+                      Module.new, :attr_writer
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> Array[Symbol]',
-                        mod, :attr_writer, foo
+                        Module.new, :attr_writer, foo
 
       with_interned :bar do |bar|
         assert_send_type  '(interned, interned) -> Array[Symbol]',
-                          mod, :attr_writer, foo, bar
+                          Module.new, :attr_writer, foo, bar
       end
     end
   end
 
   def test_attr_accessor
-    mod = Module.new
-
     assert_send_type  '() -> Array[Symbol]',
-                      mod, :attr_accessor
+                      Module.new, :attr_accessor
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> Array[Symbol]',
-                        mod, :attr_accessor, foo
+                        Module.new, :attr_accessor, foo
 
       with_interned :bar do |bar|
         assert_send_type  '(interned, interned) -> Array[Symbol]',
-                          mod, :attr_accessor, foo, bar
+                          Module.new, :attr_accessor, foo, bar
       end
     end
   end
@@ -478,14 +473,12 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_set_temporary_name
-    mod = Module.new
-
     assert_send_type '(nil) -> Module',
-                     mod, :set_temporary_name, nil
+                     Module.new, :set_temporary_name, nil
 
     with_string "fake_name" do |name|
       assert_send_type '(string) -> Module',
-                       mod, :set_temporary_name, name
+                       Module.new, :set_temporary_name, name
     end
   end
 
@@ -623,12 +616,10 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_const_set
-    mod = Module.new
-
     with_interned :ModuleTestConstSet do |name|
       with_untyped do |value|
         assert_send_type '[T] (interned, T) -> T',
-                         mod, :const_set, name, value
+                         Module.new, :const_set, name, value
       end
     end
   end
@@ -644,12 +635,9 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
 
     # No arguments yields a warning with `-w`
-    begin
-      old_v, $-v = $-v, nil
+    disable_verbose do
       assert_send_type  '() -> Module',
                         mod, method
-    ensure
-      $-v = old_v
     end
 
     with_interned :Foo do |foo|
