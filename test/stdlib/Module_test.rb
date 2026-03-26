@@ -267,10 +267,9 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   # Helper for `private`, `public`, and `protected`, as they all function identically
-  def visibility_helper(visibility)
+  def classlevel_visibility_helper(visibility)
     mod = Module.new do
       def foo; end
-
       def bar; end
     end
 
@@ -329,15 +328,15 @@ class ModuleInstanceTest < Test::Unit::TestCase
 
 
   def test_private
-    visibility_helper(:private)
+    classlevel_visibility_helper(:private)
   end
 
   def test_protected
-    visibility_helper(:protected)
+    classlevel_visibility_helper(:protected)
   end
 
   def test_public
-    visibility_helper(:public)
+    classlevel_visibility_helper(:public)
   end
 
 
@@ -491,47 +490,132 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_s(method: :to_s)
-    omit 'todo'
+    assert_send_type  '() -> String',
+                      Module.new, method
   end
 
   def test_inspect
-    test_to_s(method: :inspcet)
+    test_to_s(method: :inspect)
   end
 
   def test_ancestors
-    omit 'todo'
+    assert_send_type  '() -> Array[Module]',
+                      Module.new, :ancestors
+    assert_send_type  '() -> Array[Module]',
+                      Module, :ancestors
   end
 
   def test_autoload
     omit 'todo'
   end
 
-  def test_autoload
+  def test_autoload?
     omit 'todo'
   end
 
-  def test_class_variable_defined
-    omit 'todo'
+  def test_class_variable_defined?
+    mod = Module.new
+
+    with_interned :@@module_test_class_variable_defined do |name|
+      assert_send_type "(interned) -> bool",
+                       mod, :class_variable_defined?, name
+    end
+
+    mod.class_variable_set :@@module_test_class_variable_defined, 12
+    with_interned :@@module_test_class_variable_defined do |name|
+      assert_send_type "(interned) -> bool",
+                       mod, :class_variable_defined?, name
+    end
   end
 
   def test_class_variable_get
-    omit 'todo'
+    mod = Module.new
+
+    # If it's not set it raises an exception
+    mod.class_variable_set :@@module_test_class_variable_get, 12
+
+    with_interned :@@module_test_class_variable_get do |name|
+      assert_send_type "(interned) -> untyped",
+                       mod, :class_variable_get, name
+    end
   end
 
   def test_class_variable_set
-    omit 'todo'
+    mod = Module.new
+
+    with_interned :@@module_test_class_variable_set do |name|
+      with_untyped do |value|
+        assert_send_type "[T] (interned, T) -> T",
+                         mod, :class_variable_set, name, value
+      end
+    end
   end
 
   def test_class_variables
-    omit 'todo'
+    mod = Module.new do
+      include Module.new {
+        class_variable_set :@@module_test_class_variables_1, 12
+      }
+
+      class_variable_set :@@module_test_class_variables_2, 34
+    end
+
+    assert_send_type  '() -> Array[Symbol]',
+                      Module.new, :class_variables
+    assert_send_type  '() -> Array[Symbol]',
+                      mod, :class_variables
+
+    with_boolish do |inherit|
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        Module.new, :class_variables, inherit
+      assert_send_type  '(boolish) -> Array[Symbol]',
+                        mod, :class_variables, inherit
+    end
   end
 
-  def test_const_defined
-    omit 'todo'
+  def test_const_defined?
+    mod = Module.new
+
+    # Before defining the constant
+    with_interned :ModuleTestConstDefined do |name|
+      assert_send_type '(interned) -> bool',
+                       mod, :const_defined?, name
+
+      with_boolish do |inherit|
+        assert_send_type '(interned, boolish) -> bool',
+                         mod, :const_defined?, name, inherit
+      end
+    end
+
+    mod.const_set :ModuleTestConstDefined, 123
+
+    # After defining the constant
+    with_interned :ModuleTestConstDefined do |name|
+      assert_send_type '(interned) -> bool',
+                       mod, :const_defined?, name
+
+      with_boolish do |inherit|
+        assert_send_type '(interned, boolish) -> bool',
+                         mod, :const_defined?, name, inherit
+      end
+    end
   end
 
   def test_const_get
-    omit 'todo'
+    mod = Module.new
+
+    # Define the constant first to avoid NameError paths
+    mod.const_set :ModuleTestConstGet, 123
+
+    with_interned :ModuleTestConstGet do |name|
+      assert_send_type '(interned) -> untyped',
+                       mod, :const_get, name
+
+      with_boolish do |inherit|
+        assert_send_type '(interned, boolish) -> untyped',
+                         mod, :const_get, name, inherit
+      end
+    end
   end
 
   def test_const_missing
@@ -539,23 +623,60 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_const_set
-    omit 'todo'
+    mod = Module.new
+
+    with_interned :ModuleTestConstSet do |name|
+      with_untyped do |value|
+        assert_send_type '[T] (interned, T) -> T',
+                         mod, :const_set, name, value
+      end
+    end
   end
 
   def test_define_method
     omit 'todo'
   end
 
+  def constant_visibility_helper(method)
+    mod = Module.new do
+      const_set :Foo, 3
+      const_set :Bar, 4
+    end
+
+    # No arguments yields a warning with `-w`
+    begin
+      old_v, $-v = $-v, nil
+      assert_send_type  '() -> Module',
+                        mod, method
+    ensure
+      $-v = old_v
+    end
+
+    with_interned :Foo do |foo|
+      assert_send_type  '(interned) -> Module',
+                        mod, method, foo
+
+      with_interned :Bar do |bar|
+        assert_send_type  '(interned, *interned) -> Module',
+                          mod, method, foo, bar
+      end
+    end
+  end
+
   def test_deprecate_constant
-    omit 'todo'
+    constant_visibility_helper(:deprecate_constant)
   end
 
   def test_freeze
-    omit 'todo'
+    assert_send_type  '() -> Module',
+                      Module.new, :freeze
   end
 
   def test_included_modules
-    omit 'todo'
+    assert_send_type  '() -> Array[Module]',
+                      Module.new, :included_modules
+    assert_send_type  '() -> Array[Module]',
+                      Module.new{ include Module.new }, :included_modules
   end
 
   def test_initialize
@@ -567,43 +688,164 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_instance_method
-    omit 'todo'
+    mod = Module.new do
+      def foo = 3
+    end
+
+    with_interned :foo do |name|
+      assert_send_type '(interned) -> UnboundMethod',
+                       mod, :instance_method, name
+    end
   end
 
   def test_instance_methods
     omit 'todo'
   end
 
-  def test_method_defined
-    omit 'todo'
+  def test_method_defined?
+    mod = Module.new do
+      include Module.new { def bar = 1 }
+      def foo = 2
+    end
+
+    with_interned :foo do |foo|
+      assert_send_type  '(interned) -> bool',
+                        mod, :method_defined?, foo
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :method_defined?, foo, inherit
+      end
+    end
+
+    with_interned :bar do |bar|
+      assert_send_type  '(interned) -> bool',
+                        mod, :method_defined?, bar
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :method_defined?, bar, inherit
+      end
+    end
+
+    with_interned :baz do |baz|
+      assert_send_type  '(interned) -> bool',
+                        mod, :method_defined?, baz
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :method_defined?, baz, inherit
+      end
+    end
   end
 
   def test_name
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      Module.new, :name
+
+    assert_send_type  '() -> String',
+                      Comparable, :name
   end
 
   def test_private_constant
-    omit 'todo'
+    constant_visibility_helper(:private_constant)
   end
 
   def test_private_instance_methods
     omit 'todo'
   end
 
-  def test_private_method_defined
-    omit 'todo'
+  def test_private_method_defined?
+    mod = Module.new do
+      include Module.new { private def bar = 1 }
+      private def foo = 2
+      public def baz = 3
+    end
+
+    with_interned :foo do |foo|
+      assert_send_type  '(interned) -> bool',
+                        mod, :private_method_defined?, foo
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :private_method_defined?, foo, inherit
+      end
+    end
+
+    with_interned :bar do |bar|
+      assert_send_type  '(interned) -> bool',
+                        mod, :private_method_defined?, bar
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :private_method_defined?, bar, inherit
+      end
+    end
+
+    with_interned :baz do |baz|
+      assert_send_type  '(interned) -> bool',
+                        mod, :private_method_defined?, baz
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :private_method_defined?, baz, inherit
+      end
+    end
+
+    with_interned :quux do |quux|
+      assert_send_type  '(interned) -> bool',
+                        mod, :private_method_defined?, quux
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :private_method_defined?, quux, inherit
+      end
+    end
   end
 
   def test_protected_instance_methods
     omit 'todo'
   end
 
-  def test_protected_method_defined
-    omit 'todo'
+  def test_protected_method_defined?
+    mod = Module.new do
+      include Module.new { protected def bar = 1 }
+      protected def foo = 2
+      public def baz = 3
+    end
+
+    with_interned :foo do |foo|
+      assert_send_type  '(interned) -> bool',
+                        mod, :protected_method_defined?, foo
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :protected_method_defined?, foo, inherit
+      end
+    end
+
+    with_interned :bar do |bar|
+      assert_send_type  '(interned) -> bool',
+                        mod, :protected_method_defined?, bar
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :protected_method_defined?, bar, inherit
+      end
+    end
+
+    with_interned :baz do |baz|
+      assert_send_type  '(interned) -> bool',
+                        mod, :protected_method_defined?, baz
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :protected_method_defined?, baz, inherit
+      end
+    end
+
+    with_interned :quux do |quux|
+      assert_send_type  '(interned) -> bool',
+                        mod, :protected_method_defined?, quux
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :protected_method_defined?, quux, inherit
+      end
+    end
   end
 
   def test_public_constant
-    omit 'todo'
+    constant_visibility_helper(:public_constant)
   end
 
   def test_public_instance_method
@@ -614,8 +856,48 @@ class ModuleInstanceTest < Test::Unit::TestCase
     omit 'todo'
   end
 
-  def test_public_method_defined
-    omit 'todo'
+  def test_public_method_defined?
+    mod = Module.new do
+      include Module.new { public def bar = 1 }
+      public def foo = 2
+      private def baz = 3
+    end
+
+    with_interned :foo do |foo|
+      assert_send_type  '(interned) -> bool',
+                        mod, :public_method_defined?, foo
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :public_method_defined?, foo, inherit
+      end
+    end
+
+    with_interned :bar do |bar|
+      assert_send_type  '(interned) -> bool',
+                        mod, :public_method_defined?, bar
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :public_method_defined?, bar, inherit
+      end
+    end
+
+    with_interned :baz do |baz|
+      assert_send_type  '(interned) -> bool',
+                        mod, :public_method_defined?, baz
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :public_method_defined?, baz, inherit
+      end
+    end
+
+    with_interned :quux do |quux|
+      assert_send_type  '(interned) -> bool',
+                        mod, :public_method_defined?, quux
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> bool',
+                          mod, :public_method_defined?, quux, inherit
+      end
+    end
   end
 
   def test_remove_class_variable

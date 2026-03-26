@@ -272,7 +272,7 @@ class Module
   #     Math.ancestors       #=> [Math]
   #     Enumerable.ancestors #=> [Enumerable]
   #
-  def ancestors: () -> ::Array[Module]
+  def ancestors: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c
@@ -431,7 +431,7 @@ class Module
   #     Fred.class_variable_defined?(:@@foo)    #=> true
   #     Fred.class_variable_defined?(:@@bar)    #=> false
   #
-  def class_variable_defined?: (interned arg0) -> bool
+  def class_variable_defined?: (interned name) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -447,7 +447,7 @@ class Module
   #     end
   #     Fred.class_variable_get(:@@foo)     #=> 99
   #
-  def class_variable_get: (interned arg0) -> untyped
+  def class_variable_get: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -466,7 +466,7 @@ class Module
   #     Fred.class_variable_set(:@@foo, 101)     #=> 101
   #     Fred.new.foo                             #=> 101
   #
-  def class_variable_set: (interned arg0, untyped arg1) -> untyped
+  def class_variable_set: [T] (interned name, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -486,7 +486,7 @@ class Module
   #     Two.class_variables          #=> [:@@var2, :@@var1]
   #     Two.class_variables(false)   #=> [:@@var2]
   #
-  def class_variables: (?boolish inherit) -> ::Array[Symbol]
+  def class_variables: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -649,7 +649,7 @@ class Module
   #       const_get(name, false)
   #     end
   #
-  def const_missing: (Symbol arg0) -> untyped
+  def const_missing: (Symbol name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -667,7 +667,7 @@ class Module
   #
   #     Object.const_set('foobar', 42) #=> NameError: wrong constant name foobar
   #
-  def const_set: (interned arg0, untyped arg1) -> untyped
+  def const_set: [T] (interned name, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -795,7 +795,8 @@ class Module
   #     HTTP::NOT_FOUND
   #     # warning: constant HTTP::NOT_FOUND is deprecated
   #
-  def deprecate_constant: (*interned) -> self
+  def deprecate_constant: () -> self
+                        | (interned name, *interned more_names) -> self
 
   def equal?: (untyped other) -> bool
 
@@ -924,7 +925,7 @@ class Module
   #     Mixin.included_modules   #=> [Sub]
   #     Outer.included_modules   #=> [Sub, Mixin]
   #
-  def included_modules: () -> ::Array[Module]
+  def included_modules: () -> Array[Module]
 
   # <!--
   #   rdoc-file=object.c
@@ -983,7 +984,7 @@ class Module
   #
   #     Hello there, Dave!
   #
-  def instance_method: (interned arg0) -> UnboundMethod
+  def instance_method: (interned name) -> UnboundMethod
 
   # <!--
   #   rdoc-file=object.c
@@ -1338,7 +1339,8 @@ class Module
   # -->
   # Makes a list of existing constants private.
   #
-  def private_constant: (*interned arg0) -> self
+  def private_constant: () -> self
+                      | (interned name, *interned more_names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1538,7 +1540,8 @@ class Module
   # -->
   # Makes a list of existing constants public.
   #
-  def public_constant: (*interned arg0) -> self
+  def public_constant: () -> self
+                     | (interned name, *interned more_names) -> self
 
   # <!--
   #   rdoc-file=proc.c
