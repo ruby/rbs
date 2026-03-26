@@ -162,7 +162,7 @@ class Module
   #     # Class File has no relationship to class String.
   #               File <=> String     # => nil
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (untyped other) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=object.c
@@ -1821,7 +1821,7 @@ class Module
   # modules, this is the name. For singletons, we show information on the thing
   # we're attached to as well.
   #
-  def inspect: () -> String
+  alias inspect to_s
 
   # <!--
   #   rdoc-file=object.c

@@ -50,6 +50,61 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_op_lt
+    with Object, Float, Hash do |mod|
+      assert_send_type  '(Module) -> bool?',
+                        Numeric, :<, mod
+    end
+  end
+
+  def test_op_le
+    with Object, Float, Hash do |mod|
+      assert_send_type  '(Module) -> bool?',
+                        Numeric, :<=, mod
+    end
+  end
+
+  def test_op_gt
+    with Object, Float, Hash do |mod|
+      assert_send_type  '(Module) -> bool?',
+                        Numeric, :>, mod
+    end
+  end
+
+  def test_op_ge
+    with Object, Float, Hash do |mod|
+      assert_send_type  '(Module) -> bool?',
+                        Numeric, :>=, mod
+    end
+  end
+
+  def test_op_cmp
+    with Object, Float, Numeric, Hash do |mod|
+      assert_send_type  '(untyped) -> (-1 | 0 | 1)?',
+                        Numeric, :<=>, mod
+    end
+
+    with_untyped do |untyped|
+      next if Module === untyped
+      assert_send_type  '(untyped) -> nil',
+                        Numeric, :<=>, untyped
+    end
+  end
+
+  def test_op_eq
+    with_untyped.and Numeric, Module do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        Numeric, :==, untyped
+    end
+  end
+
+  def test_op_eqq
+    with_untyped.and Numeric, Module do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        Numeric, :===, untyped
+    end
+  end
+
   def test_include
     assert_send_type "(Module) -> Module",
                      Module.new, :include, Module.new
@@ -456,5 +511,205 @@ class ModuleInstanceTest < Test::Unit::TestCase
       "(nil) -> Module",
       mod, :set_temporary_name, nil
     )
+  end
+
+  def test_to_s(method: :to_s)
+    omit 'todo'
+  end
+
+  def test_inspect
+    test_to_s(method: :inspcet)
+  end
+
+  def test_ancestors
+    omit 'todo'
+  end
+
+  def test_autoload
+    omit 'todo'
+  end
+
+  def test_autoload
+    omit 'todo'
+  end
+
+  def test_class_variable_defined
+    omit 'todo'
+  end
+
+  def test_class_variable_get
+    omit 'todo'
+  end
+
+  def test_class_variable_set
+    omit 'todo'
+  end
+
+  def test_class_variables
+    omit 'todo'
+  end
+
+  def test_const_defined
+    omit 'todo'
+  end
+
+  def test_const_get
+    omit 'todo'
+  end
+
+  def test_const_missing
+    omit 'todo'
+  end
+
+  def test_const_set
+    omit 'todo'
+  end
+
+  def test_define_method
+    omit 'todo'
+  end
+
+  def test_deprecate_constant
+    omit 'todo'
+  end
+
+  def test_freeze
+    omit 'todo'
+  end
+
+  def test_included_modules
+    omit 'todo'
+  end
+
+  def test_initialize
+    omit 'todo'
+  end
+
+  def test_initialize_clone
+    omit 'todo'
+  end
+
+  def test_instance_method
+    omit 'todo'
+  end
+
+  def test_instance_methods
+    omit 'todo'
+  end
+
+  def test_method_defined
+    omit 'todo'
+  end
+
+  def test_module_exec
+    omit 'todo'
+  end
+
+  def test_name
+    omit 'todo'
+  end
+
+  def test_private_constant
+    omit 'todo'
+  end
+
+  def test_private_instance_methods
+    omit 'todo'
+  end
+
+  def test_private_method_defined
+    omit 'todo'
+  end
+
+  def test_protected_instance_methods
+    omit 'todo'
+  end
+
+  def test_protected_method_defined
+    omit 'todo'
+  end
+
+  def test_public_constant
+    omit 'todo'
+  end
+
+  def test_public_instance_method
+    omit 'todo'
+  end
+
+  def test_public_instance_methods
+    omit 'todo'
+  end
+
+  def test_public_method_defined
+    omit 'todo'
+  end
+
+  def test_remove_class_variable
+    omit 'todo'
+  end
+
+  def test_remove_method
+    omit 'todo'
+  end
+
+  def test_singleton_class
+    omit 'todo'
+  end
+
+  def test_undef_method
+    omit 'todo'
+  end
+
+  def test_undefined_instance_methods
+    omit 'todo'
+  end
+
+  def test_append_features
+    omit 'todo' # private
+  end
+
+  def test_const_added
+    omit 'todo' # private
+  end
+
+  def test_extend_object
+    omit 'todo' # private
+  end
+
+  def test_extended
+    omit 'todo' # private
+  end
+
+  def test_included
+    omit 'todo' # private
+  end
+
+  def test_method_added
+    omit 'todo' # private
+  end
+
+  def test_method_removed
+    omit 'todo' # private
+  end
+
+  def test_method_undefined
+    omit 'todo' # private
+  end
+
+  def test_prepend_features
+    omit 'todo' # private
+  end
+
+  def test_prepended
+    omit 'todo' # private
+  end
+
+  def test_remove_const
+    omit 'todo' # private
+  end
+
+  def test_using
+    omit 'todo' # private
   end
 end
