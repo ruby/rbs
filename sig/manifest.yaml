@@ -1,5 +1,4 @@
 dependencies:
-  - name: logger
   - name: json
   - name: optparse
   - name: tsort
