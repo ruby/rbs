@@ -253,7 +253,7 @@ class Module
   #
   #     Exiting with code 99
   #
-  def alias_method: (interned new_name, interned old_name) -> ::Symbol
+  def alias_method: (interned new_name, interned old_name) -> Symbol
 
   # <!--
   #   rdoc-file=object.c
@@ -302,7 +302,7 @@ class Module
   #     end
   #     Mod.instance_methods.sort   #=> [:one, :one=, :two, :two=]
   #
-  def attr_accessor: (*interned arg0) -> Array[Symbol]
+  def attr_accessor: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -316,7 +316,7 @@ class Module
   # in turn. String arguments are converted to symbols. Returns an array of
   # defined method names as symbols.
   #
-  def attr_reader: (*interned arg0) -> Array[Symbol]
+  def attr_reader: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -327,7 +327,7 @@ class Module
   # *symbol*`.id2name`. String arguments are converted to symbols. Returns an
   # array of defined method names as symbols.
   #
-  def attr_writer: (*interned arg0) -> Array[Symbol]
+  def attr_writer: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -396,8 +396,7 @@ class Module
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
   #
-  def class_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                | [U] () { (self m) [self: self] -> U } -> U
+  alias class_eval module_eval
 
   # <!-- rdoc-file=vm_eval.c -->
   # Evaluates the given block in the context of the class/module. The method
@@ -416,7 +415,7 @@ class Module
   #
   #     Hello there!
   #
-  def class_exec: [U] (*untyped, **untyped) { (?) [self: self] -> U } -> U
+  alias class_exec module_exec
 
   # <!--
   #   rdoc-file=object.c
@@ -1155,8 +1154,8 @@ class Module
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
   #
-  def module_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                 | [U] () { (self m) [self: self] -> U } -> U
+  def module_eval: (string code, ?string? filename, ?int lineno) -> untyped
+                 | [U] () { (self mod) [self: self] -> U } -> U
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1222,9 +1221,11 @@ class Module
   #
   private def module_function: () -> nil
                              | (Symbol method_name) -> Symbol
-                             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                             | (string method_name) -> string
-                             | (interned, interned, *interned method_name) -> Array[interned]
+                             | [T < _ToStr] (T method_name) -> T
+                             | (interned method_name) -> interned
+                             | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                             | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                             | (interned, interned, *interned method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1299,10 +1300,14 @@ class Module
   #
   private def private: () -> nil
                      | (Symbol method_name) -> Symbol
-                     | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                     | (string method_name) -> string
-                     | (interned, interned, *interned method_name) -> Array[interned]
-                     | (Array[interned]) -> Array[interned]
+                     | [T < _ToStr] (T method_name) -> T
+                     | (interned method_name) -> interned
+                     | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                     | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                     | (interned, interned, *interned method_names) -> Array[interned]
+                     | (Array[Symbol] method_names) -> Array[Symbol]
+                     | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                     | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1324,8 +1329,8 @@ class Module
   #       end
   #     end
   #
-  def private_class_method: (*interned arg0) -> self
-                          | (Array[interned] arg0) -> self
+  def private_class_method: (*interned method_names) -> self
+                          | (Array[interned] method_names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1440,10 +1445,14 @@ class Module
   #
   private def protected: () -> nil
                        | (Symbol method_name) -> Symbol
-                       | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                       | (string method_name) -> string
-                       | (interned, interned, *interned method_name) -> Array[interned]
-                       | (Array[interned]) -> Array[interned]
+                       | [T < _ToStr] (T method_name) -> T
+                       | (interned method_name) -> interned
+                       | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                       | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                       | (interned, interned, *interned method_names) -> Array[interned]
+                       | (Array[Symbol] method_names) -> Array[Symbol]
+                       | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                       | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1500,10 +1509,14 @@ class Module
   #
   private def public: () -> nil
                     | (Symbol method_name) -> Symbol
-                    | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                    | (string method_name) -> string
-                    | (interned, interned, *interned method_name) -> Array[interned]
-                    | (Array[interned]) -> Array[interned]
+                    | [T < _ToStr] (T method_name) -> T
+                    | (interned method_name) -> interned
+                    | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                    | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                    | (interned, interned, *interned method_names) -> Array[interned]
+                    | (Array[Symbol] method_names) -> Array[Symbol]
+                    | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                    | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1516,8 +1529,8 @@ class Module
   # String arguments are converted to symbols. An Array of Symbols and/or Strings
   # is also accepted.
   #
-  def public_class_method: (*interned arg0) -> self
-                         | (Array[interned] arg0) -> self
+  def public_class_method: (*interned method_names) -> self
+                         | (Array[interned] method_names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1681,7 +1694,7 @@ class Module
   # of the `foo` method using the above approach will change so that the method
   # does not pass through keywords.
   #
-  private def ruby2_keywords: (*interned method_name) -> nil
+  private def ruby2_keywords: (interned method_name, *interned more_method_names) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -1730,7 +1743,7 @@ class Module
   #     C::M.name #=> "C::M"
   #     c.new # => #<C:0x0....>
   #
-  def set_temporary_name: (string?) -> self
+  def set_temporary_name: (string? name) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1834,8 +1847,8 @@ class Module
   # `attr_reader(name)` but deprecated. Returns an array of defined method names
   # as symbols.
   #
-  def attr: %a{deprecated} (interned, bool) -> Array[Symbol]
-          | (*interned arg0) -> Array[Symbol]
+  def attr: %a{deprecated} (interned name, bool create_writer) -> Array[Symbol]
+          | (*interned names) -> Array[Symbol]
 
   # A previous incarnation of `interned` for backward-compatibility (see #1499)
   %a{deprecated: Use `interned`}
