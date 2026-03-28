@@ -312,7 +312,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
 
     # With the array version
-    assert_send_type  '(Array[String]) -> Array[String]',
+    assert_send_type  '(Array[Symbol]) -> Array[Symbol]',
                       mod, visibility, [:foo]
     with_string 'foo' do |foo|
       assert_send_type  '[T < _ToStr] (Array[T]) -> Array[T]',
@@ -346,8 +346,10 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def self.bar; end
     end
 
-    assert_send_type  '() -> Module',
-                      mod, :private_class_method
+    disable_verbose do
+      assert_send_type  '() -> Module',
+                        mod, :private_class_method
+    end
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> Module',
@@ -368,8 +370,10 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def self.bar; end
     end
 
-    assert_send_type  '() -> Module',
-                      mod, :public_class_method
+    disable_verbose do
+      assert_send_type  '() -> Module',
+                        mod, :public_class_method
+    end
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> Module',
@@ -455,8 +459,8 @@ class ModuleInstanceTest < Test::Unit::TestCase
 
   def test_ruby2_keywords
     mod = Module.new do
-      def a(*x) = 3
-      def b(*x) = 3
+      def foo(*x) = 3
+      def bar(*x) = 3
     end
 
     assert_visibility :private,
@@ -612,7 +616,22 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_const_missing
-    omit 'todo'
+    assert_type_meth = method(:assert_type)
+    mod = Module.new do
+      define_singleton_method :const_missing do |name|
+        assert_type_meth.call('Symbol', name)
+        1r
+      end
+    end
+
+    assert_type 'Rational',
+                mod::Foo # Test the `::` syntax works
+
+    # Make sure that `const_get` also always passes a symbol
+    with_interned :Foo do |name|
+      assert_send_type  '(interned) -> Rational',
+                        mod, :const_get, name
+    end
   end
 
   def test_const_set
@@ -625,7 +644,19 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_define_method
-    omit 'todo'
+    with_interned :meth do |name|
+      assert_send_type  '(interned, ^(?) [self: top] -> untyped) -> Symbol',
+                        Module.new, :define_method, name, proc {}
+
+      assert_send_type  '(interned, Method) -> Symbol',
+                        Module.new, :define_method, name, method(:puts)
+
+      assert_send_type  '(interned, UnboundMethod) -> Symbol',
+                        Module.new, :define_method, name, method(:puts).unbind
+
+      assert_send_type  '(interned) { (?) [self: top] -> untyped } -> Symbol',
+                        Module.new, :define_method, name do end
+    end
   end
 
   def constant_visibility_helper(method)
@@ -668,11 +699,22 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize
-    omit 'todo'
+    assert_send_type  '() -> void',
+                      Module.new, :initialize
+
+    assert_send_type  '() { (Module) [self: Module] -> void } -> void',
+                      Module.new, :initialize do end
   end
 
   def test_initialize_clone
-    omit 'todo'
+    assert_send_type  '(Module) -> void',
+                      Module.new, :initialize_clone, Module.new
+
+
+    with_bool.and_nil do |freeze|
+      assert_send_type  '(Module, freeze: bool?) -> void',
+                        Module.new, :initialize_clone, Module.new, freeze: freeze
+    end
   end
 
   def test_instance_method
@@ -1027,50 +1069,74 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_append_features
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :append_features
+    omit 'todo'
   end
 
   def test_const_added
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :const_added
+    omit 'todo'
   end
 
   def test_extend_object
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :extend_object
+    omit 'todo'
   end
 
   def test_extended
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :extended
+    omit 'todo'
   end
 
   def test_included
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :included
+    omit 'todo'
   end
 
   def test_method_added
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :method_added
+    omit 'todo'
   end
 
   def test_method_removed
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :method_removed
+    omit 'todo'
   end
 
   def test_method_undefined
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :method_undefined
+    omit 'todo'
   end
 
   def test_prepend_features
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :prepend_features
+    omit 'todo'
   end
 
   def test_prepended
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :prepended
+    omit 'todo'
   end
 
   def test_remove_const
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :remove_const
+    omit 'todo'
   end
 
   def test_using
-    omit 'todo' # private
+    assert_visibility :private,
+                      Module.new, :using
+    omit 'todo'
   end
 end

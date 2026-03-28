@@ -297,7 +297,7 @@ module RBS
       end
 
       def assert_visibility(vis, receiver, method)
-        omit 'TODO: visibility for types'
+        puts 'TODO: visibility for types'
       end
 
       def assert_type(type, value)

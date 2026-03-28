@@ -735,7 +735,7 @@ class Module
   #
   # Also see Module#const_defined?.
   #
-  def constants: (?boolish inherit) -> ::Array[Symbol]
+  def constants: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=proc.c
@@ -795,8 +795,7 @@ class Module
   #     HTTP::NOT_FOUND
   #     # warning: constant HTTP::NOT_FOUND is deprecated
   #
-  def deprecate_constant: () -> self
-                        | (interned name, *interned more_names) -> self
+  def deprecate_constant: (*interned names) -> self
 
   def equal?: (untyped other) -> bool
 
@@ -830,7 +829,7 @@ class Module
 
   # <!--
   #   rdoc-file=object.c
-  #   - extended(othermod)
+  #   -   (othermod)
   # -->
   # The equivalent of `included`, but for extended modules.
   #
@@ -952,8 +951,9 @@ class Module
   # Assign the module to a constant (name starting uppercase) if you want to treat
   # it like a regular module.
   #
-  def initialize: () -> void
-                | () { (Module arg0) -> untyped } -> void
+  def initialize: () ?{ (Module mod) [self: self] -> void } -> void
+
+  def initialize_clone: (Module source, ?freeze: bool?) -> void
 
   # <!--
   #   rdoc-file=proc.c
@@ -1021,7 +1021,7 @@ class Module
   #     end
   #     C.instance_methods(false).sort               #=> [:method2, :method3, :method4]
   #
-  def instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -1339,8 +1339,7 @@ class Module
   # -->
   # Makes a list of existing constants private.
   #
-  def private_constant: () -> self
-                      | (interned name, *interned more_names) -> self
+  def private_constant: (*interned names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1357,7 +1356,7 @@ class Module
   #     Mod.instance_methods           #=> [:method2]
   #     Mod.private_instance_methods   #=> [:method1]
   #
-  def private_instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def private_instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1463,7 +1462,7 @@ class Module
   # Returns a list of the protected instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not included.
   #
-  def protected_instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def protected_instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1540,8 +1539,7 @@ class Module
   # -->
   # Makes a list of existing constants public.
   #
-  def public_constant: () -> self
-                     | (interned name, *interned more_names) -> self
+  def public_constant: (*interned names) -> self
 
   # <!--
   #   rdoc-file=proc.c
