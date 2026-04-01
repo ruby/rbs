@@ -57,4 +57,5 @@ jobs:
             --title "bundle update ($(date +'%Y-%m-%d'))" \
             --body "Automated weekly bundle update" \
             --head "$(git rev-parse --abbrev-ref HEAD)" \
-            --base "${{ github.event.repository.default_branch }}"
+            --base "${{ github.event.repository.default_branch }}" \
+            --label "no-milestone"
