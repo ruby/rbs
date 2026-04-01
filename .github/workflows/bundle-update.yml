@@ -59,3 +59,5 @@ jobs:
             --head "$(git rev-parse --abbrev-ref HEAD)" \
             --base "${{ github.event.repository.default_branch }}" \
             --label "no-milestone"
+
+          gh pr merge --auto --merge "$(git rev-parse --abbrev-ref HEAD)"
