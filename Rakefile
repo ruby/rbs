@@ -199,6 +199,9 @@ task :validate => :compile do
     libs << "rbs"
   end
 
+  libs.delete("bigdecimal-math") or raise
+  libs.delete("bigdecimal") or raise
+
   libs.each do |lib|
     args = ["-r", lib]
 
