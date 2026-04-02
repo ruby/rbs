@@ -559,41 +559,6 @@ namespace :rust do
       "ruby-rbs" => %w[config.yml],
     }
 
-    desc "Create symlinks from vendor/rbs/ to the repository root (for development/CI)"
-    task :symlink do
-      VENDOR_TARGETS.each do |crate, entries|
-        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
-
-        puts "Setting up symlinks for #{crate}..."
-        entries.each do |entry|
-          puts "  #{entry} -> repository root"
-        end
-
-        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
-        rm_rf vendor_dir, verbose: false
-        mkdir_p vendor_dir, verbose: false
-
-        entries.each do |entry|
-          ln_s File.join("..", "..", "..", "..", entry), File.join(vendor_dir, entry), verbose: false
-        end
-      end
-
-      puts "🔗 Symlinked vendor/rbs/ to repository root"
-    end
-
-    desc "Pin a specific RBS version for Rust crates (e.g., rake rust:rbs:pin[v4.0.3])"
-    task :pin, [:version] do |_t, args|
-      version = args[:version] or raise "Usage: rake rust:rbs:pin[VERSION]"
-
-      # Verify the tag exists
-      unless system("git", "rev-parse", "--verify", "#{version}^{commit}", out: File::NULL, err: File::NULL)
-        raise "Tag #{version} not found"
-      end
-
-      File.write(RBS_VERSION_FILE, "#{version}\n")
-      puts "📌 Pinned RBS version to #{version}"
-    end
-
     desc "Sync vendored RBS source from the pinned version"
     task :sync do
       unless File.exist?(RBS_VERSION_FILE)
@@ -632,6 +597,43 @@ namespace :rust do
       end
 
       puts "📦 Synced vendor/rbs/ from #{version} (read-only)"
+    end
+
+    desc "Pin a specific RBS version for Rust crates (e.g., rake rust:rbs:pin[v4.0.3])"
+    task :pin, [:version] do |_t, args|
+      version = args[:version] or raise "Usage: rake rust:rbs:pin[VERSION]"
+
+      # Verify the tag exists
+      unless system("git", "rev-parse", "--verify", "#{version}^{commit}", out: File::NULL, err: File::NULL)
+        raise "Tag #{version} not found"
+      end
+
+      File.write(RBS_VERSION_FILE, "#{version}\n")
+      puts "📌 Pinned RBS version to #{version}"
+
+      Rake::Task["rust:rbs:sync"].invoke
+    end
+
+    desc "Create symlinks from vendor/rbs/ to the repository root (for development/CI)"
+    task :symlink do
+      VENDOR_TARGETS.each do |crate, entries|
+        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
+
+        puts "Setting up symlinks for #{crate}..."
+        entries.each do |entry|
+          puts "  #{entry} -> repository root"
+        end
+
+        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
+        rm_rf vendor_dir, verbose: false
+        mkdir_p vendor_dir, verbose: false
+
+        entries.each do |entry|
+          ln_s File.join("..", "..", "..", "..", entry), File.join(vendor_dir, entry), verbose: false
+        end
+      end
+
+      puts "🔗 Symlinked vendor/rbs/ to repository root"
     end
   end
 
