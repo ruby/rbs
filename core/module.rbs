@@ -284,7 +284,7 @@ class Module
   # module to *mod* if this module has not already been added to *mod* or one of
   # its ancestors. See also Module#include.
   #
-  private def append_features: (Module arg0) -> self
+  private def append_features: (Module mod) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -348,7 +348,7 @@ class Module
   #
   # Files that are currently being loaded must not be registered for autoload.
   #
-  def autoload: (interned _module, String filename) -> NilClass
+  def autoload: (interned constant, String filename) -> NilClass
 
   # <!--
   #   rdoc-file=load.c
@@ -531,7 +531,7 @@ class Module
   #     :const_added
   #     :inherited
   #
-  private def const_added: (Symbol) -> void
+  private def const_added: (Symbol const_name) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -825,7 +825,7 @@ class Module
   #     Picky added to Array
   #     Can't add Picky to a String
   #
-  private def extend_object: (untyped arg0) -> untyped
+  private def extend_object: [T] (T object) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -843,7 +843,7 @@ class Module
   #     end
   #      # => prints "A extended in Enumerable"
   #
-  private def extended: (Module othermod) -> untyped
+  private def extended: (untyped othermod) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -901,7 +901,7 @@ class Module
   #     end
   #      # => prints "A included in Enumerable"
   #
-  private def included: (Module othermod) -> untyped
+  private def included: (Module othermod) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -1041,7 +1041,7 @@ class Module
   #
   #     Adding :some_instance_method
   #
-  private def method_added: (Symbol meth) -> untyped
+  private def method_added: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1102,7 +1102,7 @@ class Module
   #
   #     Removing :some_instance_method
   #
-  private def method_removed: (Symbol method_name) -> untyped
+  private def method_removed: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -1127,7 +1127,7 @@ class Module
   #
   #     Undefining :some_instance_method
   #
-  private def method_undefined: (Symbol method_name) -> untyped
+  private def method_undefined: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1254,7 +1254,7 @@ class Module
   # this module to *mod* if this module has not already been added to *mod* or one
   # of its ancestors. See also Module#prepend.
   #
-  private def prepend_features: (Module arg0) -> self
+  private def prepend_features: (Module mod) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1272,7 +1272,7 @@ class Module
   #     end
   #      # => prints "A prepended to Enumerable"
   #
-  private def prepended: (Module othermod) -> untyped
+  private def prepended: (Module othermod) -> void
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1648,7 +1648,7 @@ class Module
   # previous value.  If that constant referred to a module, this will not change
   # that module's name and can lead to confusion.
   #
-  private def remove_const: (interned arg0) -> untyped
+  private def remove_const: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1828,7 +1828,7 @@ class Module
   # Import class refinements from *module* into the current class or module
   # definition.
   #
-  private def using: (Module arg0) -> self
+  private def using: (Module mod) -> self
 
   # <!-- rdoc-file=object.c -->
   # Returns a string representing this module or class. For basic classes and

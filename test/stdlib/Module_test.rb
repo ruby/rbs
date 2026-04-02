@@ -55,6 +55,14 @@ class ModuleInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def with_untyped_singleton_possible
+    with_untyped do |untyped|
+      next if Integer === untyped || Float === untyped || Symbol === untyped
+      untyped = ::Kernel.instance_method(:dup).bind_call(untyped) if ::Kernel.instance_method(:frozen?).bind_call(untyped)
+      yield untyped
+    end
+  end
+
   def test_op_lt
     with Object, Float, Hash do |mod|
       assert_send_type  '(Module) -> bool?',
@@ -1071,72 +1079,191 @@ class ModuleInstanceTest < Test::Unit::TestCase
   def test_append_features
     assert_visibility :private,
                       Module.new, :append_features
-    omit 'todo'
+
+    assert_send_type  '(Module) -> Module',
+                      Module.new, :append_features, Module.new
   end
 
   def test_const_added
     assert_visibility :private,
                       Module.new, :const_added
-    omit 'todo'
+
+    # const_added directly works
+    assert_send_type  '(Symbol) -> void',
+                      Module.new, :const_added, :foo
+
+    # Setting the constant also works
+    const_added_module = proc do
+      assert_type_meth = method(:assert_type)
+      mod = Module.new do
+        define_singleton_method :const_added do |name|
+          assert_type_meth.call('Symbol', name)
+        end
+      end
+    end
+
+    # Make sure the `::` assignment passes a symbol
+    eval <<~EOS
+      const_added_module.call()::Foo = 3
+    EOS
+
+    # Make sure that `const_set` also always passes a symbol to the `const_added`
+    with_interned :Foo do |name|
+        const_added_module.call().const_set(name, 2r)
+    end
   end
 
   def test_extend_object
     assert_visibility :private,
                       Module.new, :extend_object
-    omit 'todo'
+
+    with_untyped_singleton_possible do |untyped|
+      assert_send_type  '[T] (T) -> T',
+                        Module.new, :extend_object, untyped
+    end
+
+    # No need to make sure `object.extend(module)` works because the signature
+    # is `(T) -> T`, which means it can take any type (and we aren't testing the
+    # return value of `extend`)
   end
 
   def test_extended
     assert_visibility :private,
                       Module.new, :extended
-    omit 'todo'
+
+    with_untyped_singleton_possible do |untyped|
+      assert_send_type  '(untyped) -> void',
+                        Module.new, :extended, untyped
+    end
+
+    # No need to make sure `object.extend(module)` works because the signature
+    # is `(untyped) -> void`, which means it can take any type, and we dont care
+    # about the return value.
   end
 
   def test_included
     assert_visibility :private,
                       Module.new, :included
-    omit 'todo'
+
+    assert_send_type  '(Module) -> void',
+                      Module.new, :included, Module.new
+
+    assert_send_type  '(Module) -> void',
+                      Module.new, :included, Class.new
   end
 
   def test_method_added
     assert_visibility :private,
                       Module.new, :method_added
-    omit 'todo'
+
+
+    # method_added directly works
+    assert_send_type  '(Symbol) -> void',
+                      Module.new, :method_added, :foo
+
+    # make sure using `with_intern` always passes a symbol
+    assert_type_meth = method(:assert_type)
+    mod = Module.new do
+      define_singleton_method :method_added do |name|
+        assert_type_meth.call('Symbol', name)
+      end
+    end
+
+    with_interned :foo do |name|
+      mod.define_method(:foo) {}
+      mod.undef_method(:foo) # avoid warnings
+    end
   end
 
   def test_method_removed
     assert_visibility :private,
                       Module.new, :method_removed
-    omit 'todo'
+
+    # method_removed directly works
+    assert_send_type  '(Symbol) -> void',
+                      Module.new, :method_removed, :foo
+
+    # make sure using `with_intern` always passes a symbol
+    assert_type_meth = method(:assert_type)
+    mod = Module.new do
+      define_singleton_method :method_removed do |name|
+        assert_type_meth.call('Symbol', name)
+      end
+    end
+
+    with_interned :foo do |name|
+      mod.define_method(:foo) {}
+      mod.remove_method(name)
+    end
   end
 
   def test_method_undefined
     assert_visibility :private,
                       Module.new, :method_undefined
-    omit 'todo'
+
+    # method_undefined directly works
+    assert_send_type  '(Symbol) -> void',
+                      Module.new, :method_undefined, :foo
+
+    # make sure using `with_intern` always passes a symbol
+    assert_type_meth = method(:assert_type)
+    mod = Module.new do
+      define_singleton_method :method_undefined do |name|
+        assert_type_meth.call('Symbol', name)
+      end
+    end
+
+    with_interned :foo do |name|
+      mod.define_method(:foo) {}
+      mod.undef_method(name)
+    end
   end
 
   def test_prepend_features
     assert_visibility :private,
                       Module.new, :prepend_features
-    omit 'todo'
+
+    assert_send_type  '(Module) -> Module',
+                      Module.new, :prepend_features, Module.new
+
+    assert_send_type  '(Module) -> Module',
+                      Module.new, :prepend_features, Class.new
   end
 
   def test_prepended
     assert_visibility :private,
                       Module.new, :prepended
-    omit 'todo'
+
+    assert_send_type  '(Module) -> void',
+                      Module.new, :prepended, Module.new
+
+    assert_send_type  '(Module) -> void',
+                      Module.new, :prepended, Class.new
   end
 
   def test_remove_const
     assert_visibility :private,
                       Module.new, :remove_const
-    omit 'todo'
+
+    with_interned :Foo do |name|
+      mod = Module.new
+      mod.const_set :Foo, 1r
+
+      assert_send_type  '(interned) -> untyped',
+                        mod, :remove_const, name
+    end
+  end
+
+
+  module UsingModule
+    UsingReturnValue = using Module.new
   end
 
   def test_using
     assert_visibility :private,
                       Module.new, :using
-    omit 'todo'
+
+    # Cant actually test `using` in modules, so this is the best we got
+    assert_type 'Module', UsingModule::UsingModule
   end
 end
