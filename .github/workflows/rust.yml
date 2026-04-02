@@ -63,6 +63,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Set up git identity
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
