@@ -30,7 +30,7 @@ jobs:
           ruby-version: ruby
           bundler-cache: true
       - name: Set up vendored RBS source
-        run: rake rust:rbs:sync
+        run: bundle exec rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -61,7 +61,7 @@ jobs:
           ruby-version: ruby
           bundler-cache: true
       - name: Set up vendored RBS source
-        run: rake rust:rbs:sync
+        run: bundle exec rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -76,7 +76,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
       - name: Test publish crates
-        run: rake rust:publish:dry-run
+        run: bundle exec rake rust:publish:dry-run
 
   lint:
     name: cargo:lint
@@ -89,7 +89,7 @@ jobs:
           ruby-version: ruby
           bundler-cache: true
       - name: Set up vendored RBS source
-        run: rake rust:rbs:sync
+        run: bundle exec rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
