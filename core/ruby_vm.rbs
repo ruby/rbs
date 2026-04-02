@@ -371,6 +371,46 @@ class RubyVM::InstructionSequence < Object
   # event_symbol] pair.
   #
   def trace_points: () -> Array[untyped]
+
+  # <!--
+  #   rdoc-file=iseq.c
+  #   - of(p1)
+  # -->
+  # Returns the instruction sequence containing the given proc or method.
+  #
+  # For example, using irb:
+  #
+  #     # a proc
+  #     > p = proc { num = 1 + 2 }
+  #     > RubyVM::InstructionSequence.of(p)
+  #     > #=> <RubyVM::InstructionSequence:block in irb_binding@(irb)>
+  #
+  #     # for a method
+  #     > def foo(bar); puts bar; end
+  #     > RubyVM::InstructionSequence.of(method(:foo))
+  #     > #=> <RubyVM::InstructionSequence:foo@(irb)>
+  #
+  # Using ::compile_file:
+  #
+  #     # /tmp/iseq_of.rb
+  #     def hello
+  #       puts "hello, world"
+  #     end
+  #
+  #     $a_global_proc = proc { str = 'a' + 'b' }
+  #
+  #     # in irb
+  #     > require '/tmp/iseq_of.rb'
+  #
+  #     # first the method hello
+  #     > RubyVM::InstructionSequence.of(method(:hello))
+  #     > #=> #<RubyVM::InstructionSequence:0x007fb73d7cb1d0>
+  #
+  #     # then the global proc
+  #     > RubyVM::InstructionSequence.of($a_global_proc)
+  #     > #=> #<RubyVM::InstructionSequence:0x007fb73d7caf78>
+  #
+  def self.of: (Proc | Method | UnboundMethod body) -> RubyVM::InstructionSequence?
 end
 
 # <!-- rdoc-file=ast.rb -->
