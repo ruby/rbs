@@ -659,14 +659,45 @@ namespace :rust do
       end
     end
 
-    puts "Publishing Rust crates (RBS version: #{version})"
-
-    Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-      sh "cargo", "publish"
+    # Ensure working tree is clean before publishing
+    unless `git status --porcelain`.strip.empty?
+      raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
     end
 
-    Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-      sh "cargo", "publish"
+    puts "Publishing Rust crates (RBS version: #{version})"
+
+    # Temporarily commit vendor files so cargo publish doesn't complain about dirty working tree
+    vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
+    sh "git", "add", "-f", *vendor_paths, verbose: false
+    sh "git", "commit", "-m", "Temporary commit for cargo publish (will be reverted)", verbose: false
+
+    begin
+      puts "🔰 Dry-run publishing to verify everything is set up correctly..."
+      sleep 1
+
+      Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
+        sh "cargo", "publish", "--dry-run"
+      end
+
+      Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
+        sh "cargo", "publish", "--dry-run"
+      end
+
+      puts "💪 Let's publish the crates for real now..."
+      sleep 1
+
+      Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
+        sh "cargo", "publish"
+      end
+
+      Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
+        sh "cargo", "publish"
+      end
+
+      puts "🎉 Published Rust crates successfully!"
+    ensure
+      # Revert the temporary commit, keeping vendor files on disk
+      sh "git", "reset", "--mixed", "HEAD~1"
     end
   end
 end
