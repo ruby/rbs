@@ -29,7 +29,7 @@ jobs:
         with:
           ruby-version: ruby
       - name: Set up vendored RBS source
-        run: rake rust:rbs:symlink
+        run: rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -59,7 +59,7 @@ jobs:
         with:
           ruby-version: ruby
       - name: Set up vendored RBS source
-        run: rake rust:rbs:symlink
+        run: rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -74,11 +74,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
       - name: Test publish crates
-        run: |
-          cd rust/ruby-rbs-sys
-          cargo publish --dry-run
-          cd ../ruby-rbs
-          cargo publish --dry-run --no-verify
+        run: rake rust:publish:dry-run
 
   lint:
     name: cargo:lint
@@ -90,7 +86,7 @@ jobs:
         with:
           ruby-version: ruby
       - name: Set up vendored RBS source
-        run: rake rust:rbs:symlink
+        run: rake rust:rbs:sync
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable

@@ -637,57 +637,71 @@ namespace :rust do
     end
   end
 
-  desc "Publish Rust crates (checks pinned version and real files)"
-  task :publish do
-    version_file = File.join(RUST_DIR, "rbs_version")
+  namespace :publish do
+    desc "Dry-run publish Rust crates to verify packaging"
+    task :"dry-run" do
+      version_file = File.join(RUST_DIR, "rbs_version")
 
-    unless File.exist?(version_file)
-      raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
-    end
+      unless File.exist?(version_file)
+        raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
+      end
 
-    version = File.read(version_file).strip
-    raise "#{version_file} is empty" if version.empty?
+      version = File.read(version_file).strip
+      raise "#{version_file} is empty" if version.empty?
 
-    # Check that vendor dirs contain real files, not symlinks
-    VENDOR_TARGETS.each do |crate, entries|
-      entries.each do |entry|
-        path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
-        if File.symlink?(path)
-          raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
-        end
-        unless File.exist?(path)
-          raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
+      # Check that vendor dirs contain real files, not symlinks
+      VENDOR_TARGETS.each do |crate, entries|
+        entries.each do |entry|
+          path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
+          if File.symlink?(path)
+            raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
+          end
+          unless File.exist?(path)
+            raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
+          end
         end
       end
+
+      # Ensure working tree is clean before publishing
+      unless `git status --porcelain`.strip.empty?
+        raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
+      end
+
+      puts "🔰 Dry-run publishing Rust crates (RBS version: #{version})..."
+
+      # Temporarily commit vendor files so cargo publish doesn't complain about dirty working tree
+      vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
+      sh "git", "add", "-f", *vendor_paths, verbose: false
+      sh "git", "commit", "-m", "Temporary commit for cargo publish (will be reverted)", verbose: false
+
+      begin
+        Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
+          sh "cargo", "publish", "--dry-run"
+        end
+
+        Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
+          sh "cargo", "publish", "--dry-run", "--no-verify"
+        end
+
+        puts "✅ Dry-run succeeded!"
+      ensure
+        # Revert the temporary commit, keeping vendor files on disk
+        sh "git", "reset", "--mixed", "HEAD~1"
+      end
     end
+  end
 
-    # Ensure working tree is clean before publishing
-    unless `git status --porcelain`.strip.empty?
-      raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
-    end
+  desc "Publish Rust crates to crates.io"
+  task publish: :"publish:dry-run" do
+    puts "💪 Let's publish the crates for real now..."
+    sleep 1
 
-    puts "Publishing Rust crates (RBS version: #{version})"
-
-    # Temporarily commit vendor files so cargo publish doesn't complain about dirty working tree
+    # Temporarily commit vendor files again for the real publish
     vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
     sh "git", "add", "-f", *vendor_paths, verbose: false
     sh "git", "commit", "-m", "Temporary commit for cargo publish (will be reverted)", verbose: false
 
     begin
-      puts "🔰 Dry-run publishing to verify everything is set up correctly..."
-      sleep 1
-
-      Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-        sh "cargo", "publish", "--dry-run"
-      end
-
-      Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-        sh "cargo", "publish", "--dry-run", "--no-verify"
-      end
-
-      puts "💪 Let's publish the crates for real now..."
-      sleep 1
-
       Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
         sh "cargo", "publish"
       end
