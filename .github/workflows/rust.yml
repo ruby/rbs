@@ -24,6 +24,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Set up vendored RBS source
+        run: rake rust:rbs:symlink
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -48,6 +54,12 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Set up vendored RBS source
+        run: rake rust:rbs:symlink
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable
@@ -71,6 +83,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Set up vendored RBS source
+        run: rake rust:rbs:symlink
       - name: Install Rust tools
         run: |
           rustup update --no-self-update stable

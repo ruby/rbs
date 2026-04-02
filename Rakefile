@@ -548,3 +548,125 @@ task :prepare_profiling do
   Rake::Task[:"templates"].invoke
   Rake::Task[:"compile"].invoke
 end
+
+namespace :rust do
+  namespace :rbs do
+    RUST_DIR = File.expand_path("rust", __dir__)
+    RBS_VERSION_FILE = File.join(RUST_DIR, "rbs_version")
+
+    VENDOR_TARGETS = {
+      "ruby-rbs-sys" => %w[include src],
+      "ruby-rbs" => %w[config.yml],
+    }
+
+    desc "Create symlinks from vendor/rbs/ to the repository root (for development/CI)"
+    task :symlink do
+      VENDOR_TARGETS.each do |crate, entries|
+        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
+
+        puts "Setting up symlinks for #{crate}..."
+        entries.each do |entry|
+          puts "  #{entry} -> repository root"
+        end
+
+        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
+        rm_rf vendor_dir, verbose: false
+        mkdir_p vendor_dir, verbose: false
+
+        entries.each do |entry|
+          ln_s File.join("..", "..", "..", "..", entry), File.join(vendor_dir, entry), verbose: false
+        end
+      end
+
+      puts "🔗 Symlinked vendor/rbs/ to repository root"
+    end
+
+    desc "Pin a specific RBS version for Rust crates (e.g., rake rust:rbs:pin[v4.0.3])"
+    task :pin, [:version] do |_t, args|
+      version = args[:version] or raise "Usage: rake rust:rbs:pin[VERSION]"
+
+      # Verify the tag exists
+      unless system("git", "rev-parse", "--verify", "#{version}^{commit}", out: File::NULL, err: File::NULL)
+        raise "Tag #{version} not found"
+      end
+
+      File.write(RBS_VERSION_FILE, "#{version}\n")
+      puts "📌 Pinned RBS version to #{version}"
+    end
+
+    desc "Sync vendored RBS source from the pinned version"
+    task :sync do
+      unless File.exist?(RBS_VERSION_FILE)
+        raise "#{RBS_VERSION_FILE} not found. Run `rake rust:rbs:pin[VERSION]` first."
+      end
+
+      version = File.read(RBS_VERSION_FILE).strip
+      raise "#{RBS_VERSION_FILE} is empty" if version.empty?
+
+      puts "Syncing vendor/rbs/ from #{version}..."
+
+      VENDOR_TARGETS.each do |crate, entries|
+        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
+
+        puts "  Copying files for #{crate}:"
+        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
+        rm_rf vendor_dir, verbose: false
+        mkdir_p vendor_dir, verbose: false
+
+        entries.each do |entry|
+          target = File.join(vendor_dir, entry)
+
+          # Extract the entry from the pinned git tag using git archive
+          IO.popen(["git", "archive", "--format=tar", version, "--", entry], "rb") do |tar|
+            IO.popen(["tar", "xf", "-", "-C", vendor_dir], "wb") do |extract|
+              IO.copy_stream(tar, extract)
+            end
+          end
+
+          raise "Failed to extract #{entry} from #{version}" unless File.exist?(target)
+          puts "    #{entry}"
+        end
+
+        # Make files read-only to prevent accidental edits
+        chmod_R "a-w", vendor_dir, verbose: false
+      end
+
+      puts "📦 Synced vendor/rbs/ from #{version} (read-only)"
+    end
+  end
+
+  desc "Publish Rust crates (checks pinned version and real files)"
+  task :publish do
+    version_file = File.join(RUST_DIR, "rbs_version")
+
+    unless File.exist?(version_file)
+      raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
+    end
+
+    version = File.read(version_file).strip
+    raise "#{version_file} is empty" if version.empty?
+
+    # Check that vendor dirs contain real files, not symlinks
+    VENDOR_TARGETS.each do |crate, entries|
+      entries.each do |entry|
+        path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
+        if File.symlink?(path)
+          raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
+        end
+        unless File.exist?(path)
+          raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
+        end
+      end
+    end
+
+    puts "Publishing Rust crates (RBS version: #{version})"
+
+    Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
+      sh "cargo", "publish"
+    end
+
+    Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
+      sh "cargo", "publish"
+    end
+  end
+end
