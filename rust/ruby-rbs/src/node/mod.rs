@@ -238,14 +238,18 @@ impl Iterator for RBSLocationRangeListIter {
 }
 
 #[derive(Debug)]
-pub struct RBSString {
+pub struct RBSString<'a> {
     pointer: *const rbs_string_t,
+    marker: PhantomData<&'a rbs_string_t>,
 }
 
-impl RBSString {
+impl<'a> RBSString<'a> {
     #[must_use]
     pub fn new(pointer: *const rbs_string_t) -> Self {
-        Self { pointer }
+        Self {
+            pointer,
+            marker: PhantomData,
+        }
     }
 
     #[must_use]
