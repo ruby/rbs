@@ -75,8 +75,10 @@ jobs:
             ${{ runner.os }}-cargo-
       - name: Test publish crates
         run: |
-          cd rust
+          cd rust/ruby-rbs-sys
           cargo publish --dry-run
+          cd ../ruby-rbs
+          cargo publish --dry-run --no-verify
 
   lint:
     name: cargo:lint

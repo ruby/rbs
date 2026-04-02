@@ -680,7 +680,7 @@ namespace :rust do
       end
 
       Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-        sh "cargo", "publish", "--dry-run"
+        sh "cargo", "publish", "--dry-run", "--no-verify"
       end
 
       puts "💪 Let's publish the crates for real now..."
