@@ -28,6 +28,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
+          bundler-cache: true
       - name: Set up vendored RBS source
         run: rake rust:rbs:sync
       - name: Install Rust tools
@@ -58,6 +59,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
+          bundler-cache: true
       - name: Set up vendored RBS source
         run: rake rust:rbs:sync
       - name: Install Rust tools
@@ -85,6 +87,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
+          bundler-cache: true
       - name: Set up vendored RBS source
         run: rake rust:rbs:sync
       - name: Install Rust tools
