@@ -9,10 +9,10 @@ use std::ptr::NonNull;
 /// ```rust
 /// use ruby_rbs::node::parse;
 /// let rbs_code = r#"type foo = "hello""#;
-/// let signature = parse(rbs_code.as_bytes());
+/// let signature = parse(rbs_code);
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
 /// ```
-pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
+pub fn parse(rbs_code: &str) -> Result<SignatureNode<'_>, String> {
     unsafe {
         let start_ptr = rbs_code.as_ptr().cast::<std::os::raw::c_char>();
         let end_ptr = start_ptr.add(rbs_code.len());
@@ -286,7 +286,7 @@ mod tests {
     #[test]
     fn test_parse_error_contains_actual_message() {
         let rbs_code = "class { end";
-        let result = parse(rbs_code.as_bytes());
+        let result = parse(rbs_code);
         let error_message = result.unwrap_err();
         assert_eq!(error_message, "expected one of class/module/constant name");
     }
@@ -294,18 +294,18 @@ mod tests {
     #[test]
     fn test_parse() {
         let rbs_code = r#"type foo = "hello""#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let rbs_code2 = r#"class Foo end"#;
-        let signature2 = parse(rbs_code2.as_bytes());
+        let signature2 = parse(rbs_code2);
         assert!(signature2.is_ok(), "Failed to parse RBS signature");
     }
 
     #[test]
     fn test_parse_integer() {
         let rbs_code = r#"type foo = 1"#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let signature_node = signature.unwrap();
@@ -326,7 +326,7 @@ mod tests {
     fn test_rbs_hash_via_record_type() {
         // RecordType stores its fields in an RBSHash via all_fields()
         let rbs_code = r#"type foo = { name: String, age: Integer }"#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let signature_node = signature.unwrap();
@@ -449,7 +449,7 @@ mod tests {
             end
         "#;
 
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let mut visitor = Visitor {
             visited: Vec::new(),
@@ -482,7 +482,7 @@ mod tests {
     #[test]
     fn test_node_location_ranges() {
         let rbs_code = r#"type foo = 1"#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declaration = signature.declarations().iter().next().unwrap();
         let Node::TypeAlias(type_alias) = declaration else {
@@ -510,7 +510,7 @@ mod tests {
     #[test]
     fn test_sub_locations() {
         let rbs_code = r#"class Foo < Bar end"#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declaration = signature.declarations().iter().next().unwrap();
         let Node::Class(class) = declaration else {
@@ -545,7 +545,7 @@ mod tests {
     #[test]
     fn test_type_alias_sub_locations() {
         let rbs_code = r#"type foo = String"#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declaration = signature.declarations().iter().next().unwrap();
         let Node::TypeAlias(type_alias) = declaration else {
@@ -573,7 +573,7 @@ mod tests {
     #[test]
     fn test_module_sub_locations() {
         let rbs_code = r#"module Foo[T] : Bar end"#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declaration = signature.declarations().iter().next().unwrap();
         let Node::Module(module) = declaration else {
@@ -626,7 +626,7 @@ mod tests {
             class Bar[out T, in U, V]
             end
         "#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declarations: Vec<_> = signature.declarations().iter().collect();
 
@@ -706,7 +706,7 @@ mod tests {
                 attr_writer email(@email): String
             end
         "#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let Node::Class(class) = signature.declarations().iter().next().unwrap() else {
             panic!("Expected Class");
