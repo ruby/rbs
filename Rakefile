@@ -637,36 +637,34 @@ namespace :rust do
     end
   end
 
-  desc "Publish Rust crates to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
-  task :publish do
-    dry_run = ENV["RBS_RUST_PUBLISH_DRY_RUN"]
+  namespace :publish do
+    def self.prepare_publish_branch(crate_name)
+      dry_run = ENV["RBS_RUST_PUBLISH_DRY_RUN"]
 
-    version_file = File.join(RUST_DIR, "rbs_version")
+      version_file = File.join(RUST_DIR, "rbs_version")
 
-    unless File.exist?(version_file)
-      raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
-    end
+      unless File.exist?(version_file)
+        raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
+      end
 
-    rbs_version = File.read(version_file).strip
-    raise "#{version_file} is empty" if rbs_version.empty?
+      rbs_version = File.read(version_file).strip
+      raise "#{version_file} is empty" if rbs_version.empty?
 
-    sys_crate_version = File.read(File.join(RUST_DIR, "ruby-rbs-sys", "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
-    rbs_crate_version = File.read(File.join(RUST_DIR, "ruby-rbs", "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
-    release_branch = "rust/release-#{Time.now.strftime('%Y%m%d%H%M%S')}"
+      crate_version = File.read(File.join(RUST_DIR, crate_name, "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
+      release_branch = "rust/release-#{crate_name}-#{Time.now.strftime('%Y%m%d%H%M%S')}"
 
-    puts "=" * 60
-    puts "Rust crate publish#{dry_run ? " (DRY RUN)" : ""}"
-    puts "=" * 60
-    puts "  RBS source version:  #{rbs_version}"
-    puts "  ruby-rbs-sys:        #{sys_crate_version} (tag: ruby-rbs-sys-v#{sys_crate_version})"
-    puts "  ruby-rbs:            #{rbs_crate_version} (tag: ruby-rbs-v#{rbs_crate_version})"
-    puts "  Release branch:      #{release_branch}"
-    puts "=" * 60
+      puts "=" * 60
+      puts "Rust crate publish: #{crate_name}#{dry_run ? " (DRY RUN)" : ""}"
+      puts "=" * 60
+      puts "  RBS source version:  #{rbs_version}"
+      puts "  #{crate_name}:        #{crate_version} (tag: #{crate_name}-v#{crate_version})"
+      puts "  Release branch:      #{release_branch}"
+      puts "=" * 60
 
-    # Check that vendor dirs contain real files, not symlinks
-    VENDOR_TARGETS.each do |crate, entries|
+      # Check that vendor dirs contain real files, not symlinks
+      entries = VENDOR_TARGETS.fetch(crate_name)
       entries.each do |entry|
-        path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
+        path = File.join(RUST_DIR, crate_name, "vendor", "rbs", entry)
         if File.symlink?(path)
           raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
         end
@@ -674,53 +672,83 @@ namespace :rust do
           raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
         end
       end
+
+      # Ensure working tree is clean before publishing
+      unless `git status --porcelain`.strip.empty?
+        raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
+      end
+
+      # Create a release branch with vendor files committed
+      original_branch = `git rev-parse --abbrev-ref HEAD`.strip
+
+      sh "git", "checkout", "-b", release_branch, verbose: false
+      vendor_path = File.join("rust", crate_name, "vendor", "rbs")
+      sh "git", "add", "-f", vendor_path, verbose: false
+      sh "git", "commit", "-m", "Publish #{crate_name} (RBS #{rbs_version})", verbose: false
+
+      [dry_run, crate_version, original_branch]
     end
 
-    # Ensure working tree is clean before publishing
-    unless `git status --porcelain`.strip.empty?
-      raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
+    desc "Publish ruby-rbs-sys crate to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
+    task :"ruby-rbs-sys" do
+      crate_name = "ruby-rbs-sys"
+      dry_run, crate_version, original_branch = prepare_publish_branch(crate_name)
+
+      begin
+        puts "🔰 Dry-run publishing..."
+
+        Dir.chdir(File.join(RUST_DIR, crate_name)) do
+          sh "cargo", "publish", "--dry-run"
+        end
+
+        puts "✅ Dry-run succeeded!"
+
+        unless dry_run
+          puts "💪 Publishing #{crate_name} for real..."
+
+          Dir.chdir(File.join(RUST_DIR, crate_name)) do
+            sh "cargo", "publish"
+          end
+
+          sh "git", "tag", "#{crate_name}-v#{crate_version}"
+          sh "git", "push", "origin", "#{crate_name}-v#{crate_version}"
+
+          puts "🎉 Published #{crate_name} successfully!"
+        end
+      ensure
+        sh "git", "checkout", original_branch, verbose: false
+      end
     end
 
-    # Create a release branch with vendor files committed
-    original_branch = `git rev-parse --abbrev-ref HEAD`.strip
+    desc "Publish ruby-rbs crate to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
+    task :"ruby-rbs" do
+      crate_name = "ruby-rbs"
+      dry_run, crate_version, original_branch = prepare_publish_branch(crate_name)
 
-    sh "git", "checkout", "-b", release_branch, verbose: false
-    vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
-    sh "git", "add", "-f", *vendor_paths, verbose: false
-    sh "git", "commit", "-m", "Publish Rust crates (RBS #{rbs_version})", verbose: false
+      begin
+        puts "🔰 Dry-run publishing..."
 
-    begin
-      puts "🔰 Dry-run publishing..."
-
-      Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-        sh "cargo", "publish", "--dry-run"
-      end
-
-      Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-        sh "cargo", "publish", "--dry-run", "--no-verify"
-      end
-
-      puts "✅ Dry-run succeeded!"
-
-      unless dry_run
-        puts "💪 Publishing crates for real..."
-
-        Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-          sh "cargo", "publish"
+        Dir.chdir(File.join(RUST_DIR, crate_name)) do
+          sh "cargo", "publish", "--dry-run", "--no-verify"
         end
 
-        Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-          sh "cargo", "publish"
+        puts "✅ Dry-run succeeded!"
+
+        unless dry_run
+          puts "💪 Publishing #{crate_name} for real..."
+
+          Dir.chdir(File.join(RUST_DIR, crate_name)) do
+            sh "cargo", "publish"
+          end
+
+          sh "git", "tag", "#{crate_name}-v#{crate_version}"
+          sh "git", "push", "origin", "#{crate_name}-v#{crate_version}"
+
+          puts "🎉 Published #{crate_name} successfully!"
         end
-
-        sh "git", "tag", "ruby-rbs-sys-v#{sys_crate_version}"
-        sh "git", "tag", "ruby-rbs-v#{rbs_crate_version}"
-        sh "git", "push", "origin", "ruby-rbs-sys-v#{sys_crate_version}", "ruby-rbs-v#{rbs_crate_version}"
-
-        puts "🎉 Published Rust crates successfully!"
+      ensure
+        sh "git", "checkout", original_branch, verbose: false
       end
-    ensure
-      sh "git", "checkout", original_branch, verbose: false
     end
   end
 end

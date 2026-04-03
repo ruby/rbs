@@ -56,8 +56,8 @@ jobs:
           cd rust
           cargo test --verbose
 
-  publish-dry-run:
-    name: cargo:publish-dry-run
+  publish-dry-run-ruby-rbs-sys:
+    name: rust:publish:ruby-rbs-sys
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -93,8 +93,50 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
-      - name: Test publish crates
-        run: bundle exec rake rust:publish
+      - name: Test publish ruby-rbs-sys
+        run: bundle exec rake rust:publish:ruby-rbs-sys
+        env:
+          RBS_RUST_PUBLISH_DRY_RUN: "1"
+
+  publish-dry-run-ruby-rbs:
+    name: rust:publish:ruby-rbs
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Set up git identity
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+      - name: Set up vendored RBS source
+        run: bundle exec rake rust:rbs:sync
+      - name: Install Rust tools
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Test publish ruby-rbs
+        run: bundle exec rake rust:publish:ruby-rbs
         env:
           RBS_RUST_PUBLISH_DRY_RUN: "1"
 

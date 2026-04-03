@@ -42,16 +42,16 @@ Records a git tag in `rust/rbs_version`. For example:
 rake rust:rbs:pin[v4.0.3]
 ```
 
-### `rake rust:publish`
+### `rake rust:publish:ruby-rbs-sys` / `rake rust:publish:ruby-rbs`
 
-Publishes both crates to crates.io. This task:
+Publishes each crate to crates.io individually. Each task:
 
 1. Verifies `rust/rbs_version` is set
 2. Verifies vendor directories contain real files (not symlinks)
 3. Verifies the git working tree is clean
 4. Temporarily commits the vendor files (reverted after publish)
 5. Runs a dry-run to check packaging
-6. Publishes `ruby-rbs-sys` first, then `ruby-rbs`
+6. Publishes the crate
 
 ### `rake rust:rbs:symlink`
 
@@ -86,8 +86,9 @@ If your development needs unreleased version of RBS source code, use `rake rust:
    git commit -m "Bump Rust crate versions"
    ```
 
-6. Publish:
+6. Publish each crate:
 
    ```bash
-   rake rust:publish
+   rake rust:publish:ruby-rbs-sys
+   rake rust:publish:ruby-rbs
    ```
