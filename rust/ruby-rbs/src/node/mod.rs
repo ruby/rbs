@@ -275,7 +275,7 @@ impl std::fmt::Display for RBSString<'_> {
 
 impl SymbolNode<'_> {
     #[must_use]
-    pub fn name(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
                 &(*self.parser.as_ptr()).constant_pool,
@@ -288,6 +288,17 @@ impl SymbolNode<'_> {
             let constant = &*constant_ptr;
             std::slice::from_raw_parts(constant.start, constant.length)
         }
+    }
+
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+}
+
+impl std::fmt::Display for SymbolNode<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
@@ -359,10 +370,10 @@ mod tests {
                     panic!("Expected ClassInstanceType");
                 };
 
-                let key_name = String::from_utf8(sym.name().to_vec()).unwrap();
+                let key_name = sym.to_string();
                 let type_name_node = class_type.name();
                 let type_name_sym = type_name_node.name();
-                let type_name = String::from_utf8(type_name_sym.name().to_vec()).unwrap();
+                let type_name = type_name_sym.to_string();
                 field_types.push((key_name, type_name));
             }
 
@@ -393,28 +404,19 @@ mod tests {
             }
 
             fn visit_class_node(&mut self, node: &ClassNode) {
-                self.visited.push(format!(
-                    "class:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("class:{}", node.name().name()));
 
                 crate::node::visit_class_node(self, node);
             }
 
             fn visit_class_instance_type_node(&mut self, node: &ClassInstanceTypeNode) {
-                self.visited.push(format!(
-                    "type:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("type:{}", node.name().name()));
 
                 crate::node::visit_class_instance_type_node(self, node);
             }
 
             fn visit_class_super_node(&mut self, node: &ClassSuperNode) {
-                self.visited.push(format!(
-                    "super:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("super:{}", node.name().name()));
 
                 crate::node::visit_class_super_node(self, node);
             }
@@ -428,10 +430,7 @@ mod tests {
             }
 
             fn visit_method_definition_node(&mut self, node: &MethodDefinitionNode) {
-                self.visited.push(format!(
-                    "method:{}",
-                    String::from_utf8(node.name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("method:{}", node.name()));
 
                 crate::node::visit_method_definition_node(self, node);
             }
@@ -443,10 +442,7 @@ mod tests {
             }
 
             fn visit_symbol_node(&mut self, node: &SymbolNode) {
-                self.visited.push(format!(
-                    "symbol:{}",
-                    String::from_utf8(node.name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("symbol:{node}"));
 
                 crate::node::visit_symbol_node(self, node);
             }
