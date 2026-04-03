@@ -260,6 +260,17 @@ impl<'a> RBSString<'a> {
             std::slice::from_raw_parts(s.start as *const u8, s.end.offset_from(s.start) as usize)
         }
     }
+
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+}
+
+impl std::fmt::Display for RBSString<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
 }
 
 impl SymbolNode<'_> {
@@ -314,10 +325,7 @@ mod tests {
             && let Node::LiteralType(literal) = node.type_()
             && let Node::Integer(integer) = literal.literal()
         {
-            assert_eq!(
-                "1".to_string(),
-                String::from_utf8(integer.string_representation().as_bytes().to_vec()).unwrap()
-            );
+            assert_eq!(integer.string_representation().as_str(), "1");
         } else {
             panic!("No literal type node found");
         }
