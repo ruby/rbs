@@ -33,7 +33,7 @@ fn all_included_rbs_can_be_parsed() {
     for file in &files {
         let content = std::fs::read_to_string(file).unwrap();
 
-        if let Err(e) = parse(content.as_bytes()) {
+        if let Err(e) = parse(&content) {
             failures.push(format!("{}: {}", file.display(), e));
         }
     }

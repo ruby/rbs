@@ -2,7 +2,7 @@ use ruby_rbs::node::{Node, parse};
 
 fn main() {
     let rbs_code = r#"class Foo[T] < Bar end"#;
-    let signature = parse(rbs_code.as_bytes()).unwrap();
+    let signature = parse(rbs_code).unwrap();
 
     let declaration = signature.declarations().iter().next().unwrap();
     if let Node::Class(class) = declaration {
