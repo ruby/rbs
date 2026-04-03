@@ -253,6 +253,7 @@ impl<'a> RBSString<'a> {
     }
 
     #[must_use]
+    #[allow(clippy::unnecessary_cast)]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let s = *self.pointer;
