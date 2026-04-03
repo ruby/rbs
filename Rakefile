@@ -637,83 +637,90 @@ namespace :rust do
     end
   end
 
-  namespace :publish do
-    desc "Dry-run publish Rust crates to verify packaging"
-    task :"dry-run" do
-      version_file = File.join(RUST_DIR, "rbs_version")
+  desc "Publish Rust crates to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
+  task :publish do
+    dry_run = ENV["RBS_RUST_PUBLISH_DRY_RUN"]
 
-      unless File.exist?(version_file)
-        raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
-      end
+    version_file = File.join(RUST_DIR, "rbs_version")
 
-      version = File.read(version_file).strip
-      raise "#{version_file} is empty" if version.empty?
+    unless File.exist?(version_file)
+      raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
+    end
 
-      # Check that vendor dirs contain real files, not symlinks
-      VENDOR_TARGETS.each do |crate, entries|
-        entries.each do |entry|
-          path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
-          if File.symlink?(path)
-            raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
-          end
-          unless File.exist?(path)
-            raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
-          end
+    rbs_version = File.read(version_file).strip
+    raise "#{version_file} is empty" if rbs_version.empty?
+
+    sys_crate_version = File.read(File.join(RUST_DIR, "ruby-rbs-sys", "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
+    rbs_crate_version = File.read(File.join(RUST_DIR, "ruby-rbs", "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
+    release_branch = "rust/release-#{Time.now.strftime('%Y%m%d%H%M%S')}"
+
+    puts "=" * 60
+    puts "Rust crate publish#{dry_run ? " (DRY RUN)" : ""}"
+    puts "=" * 60
+    puts "  RBS source version:  #{rbs_version}"
+    puts "  ruby-rbs-sys:        #{sys_crate_version} (tag: ruby-rbs-sys-v#{sys_crate_version})"
+    puts "  ruby-rbs:            #{rbs_crate_version} (tag: ruby-rbs-v#{rbs_crate_version})"
+    puts "  Release branch:      #{release_branch}"
+    puts "=" * 60
+
+    # Check that vendor dirs contain real files, not symlinks
+    VENDOR_TARGETS.each do |crate, entries|
+      entries.each do |entry|
+        path = File.join(RUST_DIR, crate, "vendor", "rbs", entry)
+        if File.symlink?(path)
+          raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
         end
-      end
-
-      # Ensure working tree is clean before publishing
-      unless `git status --porcelain`.strip.empty?
-        raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
-      end
-
-      puts "🔰 Dry-run publishing Rust crates (RBS version: #{version})..."
-
-      # Temporarily commit vendor files so cargo publish doesn't complain about dirty working tree
-      vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
-      sh "git", "add", "-f", *vendor_paths, verbose: false
-      sh "git", "commit", "-m", "Temporary commit for cargo publish (will be reverted)", verbose: false
-
-      begin
-        Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-          sh "cargo", "publish", "--dry-run"
+        unless File.exist?(path)
+          raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
         end
-
-        Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-          sh "cargo", "publish", "--dry-run", "--no-verify"
-        end
-
-        puts "✅ Dry-run succeeded!"
-      ensure
-        # Revert the temporary commit, keeping vendor files on disk
-        sh "git", "reset", "--mixed", "HEAD~1"
       end
     end
-  end
 
-  desc "Publish Rust crates to crates.io"
-  task publish: :"publish:dry-run" do
-    puts "💪 Let's publish the crates for real now..."
-    sleep 1
+    # Ensure working tree is clean before publishing
+    unless `git status --porcelain`.strip.empty?
+      raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
+    end
 
-    # Temporarily commit vendor files again for the real publish
+    # Create a release branch with vendor files committed
+    original_branch = `git rev-parse --abbrev-ref HEAD`.strip
+
+    sh "git", "checkout", "-b", release_branch, verbose: false
     vendor_paths = VENDOR_TARGETS.keys.map { |crate| File.join("rust", crate, "vendor", "rbs") }
     sh "git", "add", "-f", *vendor_paths, verbose: false
-    sh "git", "commit", "-m", "Temporary commit for cargo publish (will be reverted)", verbose: false
+    sh "git", "commit", "-m", "Publish Rust crates (RBS #{rbs_version})", verbose: false
 
     begin
+      puts "🔰 Dry-run publishing..."
+
       Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
-        sh "cargo", "publish"
+        sh "cargo", "publish", "--dry-run"
       end
 
       Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
-        sh "cargo", "publish"
+        sh "cargo", "publish", "--dry-run", "--no-verify"
       end
 
-      puts "🎉 Published Rust crates successfully!"
+      puts "✅ Dry-run succeeded!"
+
+      unless dry_run
+        puts "💪 Publishing crates for real..."
+
+        Dir.chdir(File.join(RUST_DIR, "ruby-rbs-sys")) do
+          sh "cargo", "publish"
+        end
+
+        Dir.chdir(File.join(RUST_DIR, "ruby-rbs")) do
+          sh "cargo", "publish"
+        end
+
+        sh "git", "tag", "ruby-rbs-sys-v#{sys_crate_version}"
+        sh "git", "tag", "ruby-rbs-v#{rbs_crate_version}"
+        sh "git", "push", "origin", "ruby-rbs-sys-v#{sys_crate_version}", "ruby-rbs-v#{rbs_crate_version}"
+
+        puts "🎉 Published Rust crates successfully!"
+      end
     ensure
-      # Revert the temporary commit, keeping vendor files on disk
-      sh "git", "reset", "--mixed", "HEAD~1"
+      sh "git", "checkout", original_branch, verbose: false
     end
   end
 end

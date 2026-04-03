@@ -94,7 +94,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
       - name: Test publish crates
-        run: bundle exec rake rust:publish:dry-run
+        run: bundle exec rake rust:publish
+        env:
+          RBS_RUST_PUBLISH_DRY_RUN: "1"
 
   lint:
     name: cargo:lint
