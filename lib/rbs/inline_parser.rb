@@ -119,38 +119,7 @@ module RBS
 
         class_decl = AST::Ruby::Declarations::ClassDecl.new(buffer, class_name, node, super_class)
         insert_declaration(class_decl)
-        push_module_nesting(class_decl) do
-          visit_child_nodes(node)
-
-          node.child_nodes.each do |child_node|
-            if child_node
-              comments.each_enclosed_block(child_node) do |block|
-                report_unused_block(block)
-              end
-            end
-          end
-        end
-
-        comments.each_enclosed_block(node) do |block|
-          unused_annotations = [] #: Array[AST::Ruby::CommentBlock::AnnotationSyntaxError | AST::Ruby::Annotations::leading_annotation]
-
-          block.each_paragraph([]) do |paragraph|
-            case paragraph
-            when AST::Ruby::Annotations::InstanceVariableAnnotation
-              class_decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, paragraph)
-            when Location
-              # Skip
-            when AST::Ruby::CommentBlock::AnnotationSyntaxError
-              unused_annotations << paragraph
-            else
-              unused_annotations << paragraph
-            end
-          end
-
-          report_unused_annotation(*unused_annotations)
-        end
-
-        class_decl.members.sort_by! { _1.location.start_line }
+        visit_class_or_module_body(class_decl, node)
       end
 
       def visit_module_node(node)
@@ -166,7 +135,11 @@ module RBS
 
         module_decl = AST::Ruby::Declarations::ModuleDecl.new(buffer, module_name, node)
         insert_declaration(module_decl)
-        push_module_nesting(module_decl) do
+        visit_class_or_module_body(module_decl, node)
+      end
+
+      def visit_class_or_module_body(decl, node)
+        push_module_nesting(decl) do
           visit_child_nodes(node)
 
           node.child_nodes.each do |child_node|
@@ -184,7 +157,7 @@ module RBS
           block.each_paragraph([]) do |paragraph|
             case paragraph
             when AST::Ruby::Annotations::InstanceVariableAnnotation
-              module_decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, paragraph)
+              decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, paragraph)
             when Location
               # Skip
             when AST::Ruby::CommentBlock::AnnotationSyntaxError
@@ -197,7 +170,7 @@ module RBS
           report_unused_annotation(*unused_annotations)
         end
 
-        module_decl.members.sort_by! { _1.location.start_line }
+        decl.members.sort_by! { _1.location.start_line }
       end
 
       def visit_def_node(node)
