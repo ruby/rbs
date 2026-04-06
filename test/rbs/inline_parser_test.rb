@@ -1502,6 +1502,28 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__instance_variable_in_module
+    result = parse(<<~RUBY)
+      module Foo
+        # @rbs @bar: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_equal 1, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@bar, member.name
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
   def test_error__instance_variable_ignored
     result = parse(<<~RUBY)
       # @rbs @global_decl: String
