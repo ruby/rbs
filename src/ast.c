@@ -89,6 +89,8 @@ const char *rbs_node_type_name(rbs_node_t *node) {
         return "RBS::AST::Ruby::Annotations::MethodTypesAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_MODULE_ALIAS_ANNOTATION:
         return "RBS::AST::Ruby::Annotations::ModuleAliasAnnotation";
+    case RBS_AST_RUBY_ANNOTATIONS_MODULE_SELF_ANNOTATION:
+        return "RBS::AST::Ruby::Annotations::ModuleSelfAnnotation";
     case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION:
         return "RBS::AST::Ruby::Annotations::NodeTypeAssertion";
     case RBS_AST_RUBY_ANNOTATIONS_PARAM_TYPE_ANNOTATION:
@@ -1011,6 +1013,28 @@ rbs_ast_ruby_annotations_module_alias_annotation_t *rbs_ast_ruby_annotations_mod
         .keyword_location = keyword_location,
         .type_name = type_name,
         .type_name_location = type_name_location,
+    };
+
+    return instance;
+}
+#line 140 "prism/templates/src/ast.c.erb"
+rbs_ast_ruby_annotations_module_self_annotation_t *rbs_ast_ruby_annotations_module_self_annotation_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_location_range colon_location, rbs_type_name_t *name, rbs_node_list_t *args, rbs_location_range open_bracket_location, rbs_location_range close_bracket_location, rbs_location_range_list_t *args_comma_locations, rbs_location_range comment_location) {
+    rbs_ast_ruby_annotations_module_self_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_module_self_annotation_t);
+
+    *instance = (rbs_ast_ruby_annotations_module_self_annotation_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_RUBY_ANNOTATIONS_MODULE_SELF_ANNOTATION,
+            .location = location,
+        },
+        .prefix_location = prefix_location,
+        .keyword_location = keyword_location,
+        .colon_location = colon_location,
+        .name = name,
+        .args = args,
+        .open_bracket_location = open_bracket_location,
+        .close_bracket_location = close_bracket_location,
+        .args_comma_locations = args_comma_locations,
+        .comment_location = comment_location,
     };
 
     return instance;
