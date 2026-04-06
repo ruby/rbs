@@ -168,11 +168,36 @@ module RBS
         insert_declaration(module_decl)
         push_module_nesting(module_decl) do
           visit_child_nodes(node)
+
+          node.child_nodes.each do |child_node|
+            if child_node
+              comments.each_enclosed_block(child_node) do |block|
+                report_unused_block(block)
+              end
+            end
+          end
         end
 
         comments.each_enclosed_block(node) do |block|
-          report_unused_block(block)
+          unused_annotations = [] #: Array[AST::Ruby::CommentBlock::AnnotationSyntaxError | AST::Ruby::Annotations::leading_annotation]
+
+          block.each_paragraph([]) do |paragraph|
+            case paragraph
+            when AST::Ruby::Annotations::InstanceVariableAnnotation
+              module_decl.members << AST::Ruby::Members::InstanceVariableMember.new(buffer, paragraph)
+            when Location
+              # Skip
+            when AST::Ruby::CommentBlock::AnnotationSyntaxError
+              unused_annotations << paragraph
+            else
+              unused_annotations << paragraph
+            end
+          end
+
+          report_unused_annotation(*unused_annotations)
         end
+
+        module_decl.members.sort_by! { _1.location.start_line }
       end
 
       def visit_def_node(node)
