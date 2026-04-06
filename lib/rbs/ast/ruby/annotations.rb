@@ -353,6 +353,48 @@ module RBS
           end
         end
 
+        class ModuleSelfAnnotation < Base
+          attr_reader :keyword_location, :colon_location, :name, :args, :open_bracket_location, :close_bracket_location, :args_comma_locations, :comment_location
+
+          def initialize(location:, prefix_location:, keyword_location:, colon_location:, name:, args:, open_bracket_location:, close_bracket_location:, args_comma_locations:, comment_location:)
+            super(location, prefix_location)
+            @keyword_location = keyword_location
+            @colon_location = colon_location
+            @name = name
+            @args = args
+            @open_bracket_location = open_bracket_location
+            @close_bracket_location = close_bracket_location
+            @args_comma_locations = args_comma_locations
+            @comment_location = comment_location
+          end
+
+          def map_type_name
+            mapped_args = args.map { |type| type.map_type_name { yield _1 } }
+
+            self.class.new(
+              location:,
+              prefix_location:,
+              keyword_location:,
+              colon_location:,
+              name: yield(name),
+              args: mapped_args,
+              open_bracket_location:,
+              close_bracket_location:,
+              args_comma_locations:,
+              comment_location:
+            ) #: self
+          end
+
+          def type_fingerprint
+            [
+              "annots/module_self",
+              name.to_s,
+              args.map(&:to_s),
+              comment_location&.source
+            ]
+          end
+        end
+
         class BlockParamTypeAnnotation < Base
           attr_reader :ampersand_location, :name_location, :colon_location, :question_location, :type_location, :type, :comment_location
 
