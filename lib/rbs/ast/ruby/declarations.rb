@@ -137,7 +137,17 @@ module RBS
 
           def type_params = []
 
-          def self_types = []
+          def self_types
+            members.filter_map do |member|
+              if member.is_a?(Members::ModuleSelfMember)
+                AST::Declarations::Module::Self.new(
+                  name: member.name,
+                  args: member.args,
+                  location: member.location
+                )
+              end
+            end
+          end
 
           def location
             rbs_location(node.location)

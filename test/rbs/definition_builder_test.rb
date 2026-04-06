@@ -3844,4 +3844,65 @@ EOF
       end
     end
   end
+
+  def test_inline_decl__module_self
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        interface _StringConvertible
+          def to_str: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        # @rbs module-self: _StringConvertible
+        module M
+          # @rbs () -> String
+          def display
+            to_str
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_equal Set[:to_str, :display], Set.new(definition.methods.keys)
+          assert_method_definition definition.methods[:to_str], ["() -> ::String"], accessibility: :public
+          assert_method_definition definition.methods[:display], ["() -> ::String"], accessibility: :public
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__module_self_multiple
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        interface _Each[T]
+          def each: () { (T) -> void } -> void
+        end
+
+        interface _Size
+          def size: () -> Integer
+        end
+      RBS
+
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        # @rbs module-self: _Each[String]
+        # @rbs module-self: _Size
+        module M
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_equal Set[:each, :size], Set.new(definition.methods.keys)
+          assert_method_definition definition.methods[:each], ["() { (::String) -> void } -> void"], accessibility: :public
+          assert_method_definition definition.methods[:size], ["() -> ::Integer"], accessibility: :public
+        end
+      end
+    end
+  end
 end

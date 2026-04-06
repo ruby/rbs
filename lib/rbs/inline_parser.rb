@@ -134,6 +134,32 @@ module RBS
         end
 
         module_decl = AST::Ruby::Declarations::ModuleDecl.new(buffer, module_name, node)
+
+        if leading_ref = comments.leading_block(node)
+          unused_annotations = [] #: Array[AST::Ruby::CommentBlock::AnnotationSyntaxError | AST::Ruby::Annotations::leading_annotation]
+
+          leading_ref.block.each_paragraph([]) do |paragraph|
+            case paragraph
+            when AST::Ruby::Annotations::ModuleSelfAnnotation
+              module_decl.members << AST::Ruby::Members::ModuleSelfMember.new(buffer, paragraph)
+            when Location
+              # Skip
+            when AST::Ruby::CommentBlock::AnnotationSyntaxError
+              unused_annotations << paragraph
+            when AST::Ruby::Annotations::SkipAnnotation
+              # Already handled by skip_node?
+            else
+              unused_annotations << paragraph
+            end
+          end
+
+          unless unused_annotations.empty?
+            report_unused_annotation(*unused_annotations)
+          end
+
+          leading_ref.associate!
+        end
+
         insert_declaration(module_decl)
         visit_class_or_module_body(module_decl, node)
       end
