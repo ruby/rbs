@@ -14,16 +14,20 @@ module RBS
 
     class Type
       attr_reader :name #: String
-      
+
       attr_reader :c_name #: String
-      
+
       def initialize(name:, c_name:)
         @name = name
         @c_name = c_name
       end
-      
+
       def c_type_name
         c_name
+      end
+
+      def pointer? #: bool
+        c_type_name.end_with?("*")
       end
     end
 
@@ -132,9 +136,14 @@ module RBS
       end
     end
 
-    FunctionParam = Data.define(:type, :name) do
+    FunctionParam = Data.define(:type, :name, :nullable) do
       def to_s
-        "#{type.c_type_name} #{name}"
+        if !nullable.nil? && type.pointer?
+          annotation = nullable ? "RBS_NULLABLE" : "RBS_NONNULL"
+          "#{type.c_type_name}#{annotation} #{name}"
+        else
+          "#{type.c_type_name} #{name}"
+        end
       end
     end
 
@@ -364,10 +373,13 @@ module RBS
           end
 
           constructor_params = [
-            FunctionParam.new(Type.new(name: "allocator", c_name: "rbs_allocator_t *"), "allocator"),
-            FunctionParam.new(types.fetch("rbs_location_range"), "location"),
-            *fields.map { FunctionParam.new(_1.type, _1.c_name) },
-            *locations&.select(&:required?)&.map { FunctionParam.new(types.fetch("rbs_location_range"), _1.attribute_name) },
+            FunctionParam.new(Type.new(name: "allocator", c_name: "rbs_allocator_t *"), "allocator", false),
+            FunctionParam.new(types.fetch("rbs_location_range"), "location", nil),
+            *fields.map {
+              nullable = _1.type.pointer? ? _1.optional? : nil
+              FunctionParam.new(_1.type, _1.c_name, nullable)
+            },
+            *locations&.select(&:required?)&.map { FunctionParam.new(types.fetch("rbs_location_range"), _1.attribute_name, nil) },
           ]
 
           Node.new(node, fields, locations, constructor_params)
