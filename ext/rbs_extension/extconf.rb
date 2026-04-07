@@ -16,6 +16,7 @@ append_cflags [
   '-Wimplicit-fallthrough',
   '-Wunused-result',
   '-Wc++-compat',
+  '-Wnullable-to-nonnull-conversion',
 ]
 
 if ENV['DEBUG']

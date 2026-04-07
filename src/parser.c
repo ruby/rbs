@@ -3324,11 +3324,7 @@ bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature) {
         rbs_ast_directives_use_t *use_node;
         CHECK_PARSE(parse_use_directive(parser, &use_node));
 
-        if (use_node == NULL) {
-            rbs_node_list_append(dirs, NULL);
-        } else {
-            rbs_node_list_append(dirs, (rbs_node_t *) use_node);
-        }
+        rbs_node_list_append(dirs, (rbs_node_t *) use_node);
     }
 
     while (parser->next_token.type != pEOF) {
