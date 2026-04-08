@@ -7,6 +7,7 @@ module RBS
                                 | SkipAnnotation
                                 | ReturnTypeAnnotation
                                 | InstanceVariableAnnotation
+                                | ModuleSelfAnnotation
                                 | ParamTypeAnnotation
                                 | SplatParamTypeAnnotation
                                 | DoubleSplatParamTypeAnnotation
@@ -229,6 +230,54 @@ module RBS
             ivar_name_location: Location,
             colon_location: Location,
             type: Types::t,
+            comment_location: Location?,
+          ) -> void
+
+          def map_type_name: () { (TypeName) -> TypeName } -> self
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `@rbs module-self: NAME[ARGS] -- comment` annotation in leading comments
+        #
+        # ```
+        # @rbs module-self: _Each[String, Integer] -- comment
+        # ^^^^                                                -- prefix_location
+        #      ^^^^^^^^^^^                                    -- keyword_location
+        #                 ^                                   -- colon_location
+        #                        ^                            -- open_bracket_location
+        #                               ^                     -- args_comma_locations[0]
+        #                                        ^            -- close_bracket_location
+        #                                          ^^^^^^^^^^ -- comment_location
+        # ```
+        #
+        class ModuleSelfAnnotation < Base
+          attr_reader keyword_location: Location
+
+          attr_reader colon_location: Location
+
+          attr_reader name: TypeName
+
+          attr_reader args: Array[Types::t]
+
+          attr_reader open_bracket_location: Location?
+
+          attr_reader close_bracket_location: Location?
+
+          attr_reader args_comma_locations: Array[Location]
+
+          attr_reader comment_location: Location?
+
+          def initialize: (
+            location: Location,
+            prefix_location: Location,
+            keyword_location: Location,
+            colon_location: Location,
+            name: TypeName,
+            args: Array[Types::t],
+            open_bracket_location: Location?,
+            close_bracket_location: Location?,
+            args_comma_locations: Array[Location],
             comment_location: Location?,
           ) -> void
 

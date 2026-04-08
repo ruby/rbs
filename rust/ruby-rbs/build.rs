@@ -565,7 +565,7 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
                 match field.c_type.as_str() {
                     "rbs_string" => {
                         writeln!(file, "    #[must_use]")?;
-                        writeln!(file, "    pub fn {}(&self) -> RBSString {{", field.name)?;
+                        writeln!(file, "    pub fn {}(&self) -> RBSString<'a> {{", field.name)?;
                         writeln!(
                             file,
                             "        RBSString::new(unsafe {{ &(*self.pointer).{} }})",

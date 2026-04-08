@@ -1484,7 +1484,7 @@ Processing `lib`...
         )
 
         assert_nil lockfile.gems["set"]
-        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
         assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
         assert_instance_of RBS::Collection::Sources::Git, lockfile.gems["ast"][:source]
       end
@@ -1517,7 +1517,6 @@ Processing `lib`...
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`set` is a part of the Ruby core library.'
-        assert_include stderr, '`pathname` is a part of the Ruby core library.'
 
         lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
           lockfile_path: dir + "rbs_collection.lock.yaml",
@@ -1525,7 +1524,7 @@ Processing `lib`...
         )
 
         assert_nil lockfile.gems["set"]
-        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
         assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
         assert_instance_of RBS::Collection::Sources::Local, lockfile.gems["true_string"][:source]
       end

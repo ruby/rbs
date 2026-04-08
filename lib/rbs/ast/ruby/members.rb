@@ -717,6 +717,34 @@ module RBS
             ]
           end
         end
+
+        class ModuleSelfMember < Base
+          attr_reader :annotation
+
+          def initialize(buffer, annotation)
+            super(buffer)
+            @annotation = annotation
+          end
+
+          def name
+            annotation.name
+          end
+
+          def args
+            annotation.args
+          end
+
+          def location
+            annotation.location
+          end
+
+          def type_fingerprint
+            [
+              "members/module_self",
+              annotation.type_fingerprint
+            ]
+          end
+        end
       end
     end
   end
