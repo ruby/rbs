@@ -13,7 +13,7 @@ module RBS
         @include_filename = true
       end
 
-      def annotate_file(path, preserve:)
+      def annotate_file(path, preserve: true)
         buffer, _, decls = Parser.parse_signature(path.read())
 
         rewriter = Rewriter.new(buffer)
