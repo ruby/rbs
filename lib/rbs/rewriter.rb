@@ -22,6 +22,32 @@ module RBS
       self
     end
 
+    def add_comment(*locations, content:)
+      earliest = locations.min_by(&:start_pos) or raise "At least one location is required"
+      insert_pos = earliest.start_pos
+      indent = " " * earliest.start_column
+
+      formatted = format_comment(content, indent)
+
+      loc = Location.new(buffer, insert_pos, insert_pos)
+      rewrite(loc, "#{formatted}\n#{indent}")
+    end
+
+    def replace_comment(comment, content:)
+      location = comment.location or raise "Comment must have a location"
+      indent = " " * location.start_column
+
+      rewrite(location, format_comment(content, indent))
+    end
+
+    def delete_comment(comment)
+      location = comment.location or raise "Comment must have a location"
+      line_start = location.start_pos - location.start_column
+      line_end = location.end_pos + 1
+      loc = Location.new(buffer, line_start, line_end)
+      rewrite(loc, "")
+    end
+
     def string
       result = buffer.content.dup
 
@@ -30,6 +56,15 @@ module RBS
       end
 
       result
+    end
+
+    private
+
+    def format_comment(content, indent)
+      content.lines.map do |line|
+        line = line.chomp
+        line.empty? ? "#" : "# #{line}"
+      end.join("\n#{indent}")
     end
   end
 end
