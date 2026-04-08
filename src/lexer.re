@@ -83,6 +83,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "interface"     { return rbs_next_token(lexer, kINTERFACE); }
       "module"        { return rbs_next_token(lexer, kMODULE); }
       "module-alias"  { return rbs_next_token(lexer, kMODULEALIAS); }
+      "module-self"   { return rbs_next_token(lexer, kMODULESELF); }
       "nil"           { return rbs_next_token(lexer, kNIL); }
       "out"           { return rbs_next_token(lexer, kOUT); }
       "prepend"       { return rbs_next_token(lexer, kPREPEND); }

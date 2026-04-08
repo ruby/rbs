@@ -1502,6 +1502,28 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__instance_variable_in_module
+    result = parse(<<~RUBY)
+      module Foo
+        # @rbs @bar: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_equal 1, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@bar, member.name
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
   def test_error__instance_variable_ignored
     result = parse(<<~RUBY)
       # @rbs @global_decl: String
@@ -1539,6 +1561,58 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_any!(result.diagnostics) do |diagnostic|
       assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs @block_decl: String", diagnostic.location.source
+    end
+  end
+
+  def test_parse__module_self
+    result = parse(<<~RUBY)
+      # @rbs module-self: _Each[String]
+      module Enumerable2
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+      assert_equal RBS::TypeName.parse("Enumerable2"), decl.module_name
+
+      assert_equal 1, decl.members.size
+      assert_equal 1, decl.self_types.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::ModuleSelfMember, member
+        assert_equal "_Each", member.name.to_s
+        assert_equal 1, member.args.size
+        assert_equal "String", member.args[0].to_s
+      end
+    end
+  end
+
+  def test_parse__module_self_multiple
+    result = parse(<<~RUBY)
+      # @rbs module-self: _Each[String]
+      # @rbs module-self: Comparable
+      module StringCollection
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_equal 2, decl.self_types.size
+
+      decl.self_types[0].tap do |member|
+        assert_equal "_Each", member.name.to_s
+        assert_equal 1, member.args.size
+      end
+
+      decl.self_types[1].tap do |member|
+        assert_equal "Comparable", member.name.to_s
+        assert_equal 0, member.args.size
+      end
     end
   end
 
