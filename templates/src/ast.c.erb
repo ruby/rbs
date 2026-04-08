@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char *rbs_node_type_name(rbs_node_t *node) {
+const char *RBS_NONNULL rbs_node_type_name(rbs_node_t *RBS_NONNULL node) {
     switch (node->type) {
     <%- nodes.each do |node| -%>
     case <%= node.c_node_enum_name %>:
@@ -19,7 +19,7 @@ const char *rbs_node_type_name(rbs_node_t *node) {
 
 /* rbs_node_list */
 
-rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
+rbs_node_list_t *RBS_NONNULL rbs_node_list_new(rbs_allocator_t *RBS_NONNULL allocator) {
     rbs_node_list_t *list = rbs_allocator_alloc(allocator, rbs_node_list_t);
     *list = (rbs_node_list_t) {
         .allocator = allocator,
@@ -31,7 +31,7 @@ rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *allocator) {
     return list;
 }
 
-void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
+void rbs_node_list_append(rbs_node_list_t *RBS_NONNULL list, rbs_node_t *RBS_NONNULL node) {
     rbs_node_list_node_t *new_node = rbs_allocator_alloc(list->allocator, rbs_node_list_node_t);
     *new_node = (rbs_node_list_node_t) {
         .node = node,
@@ -51,7 +51,7 @@ void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node) {
 
 /* rbs_hash */
 
-rbs_hash_t *rbs_hash_new(rbs_allocator_t *allocator) {
+rbs_hash_t *RBS_NONNULL rbs_hash_new(rbs_allocator_t *RBS_NONNULL allocator) {
     rbs_hash_t *hash = rbs_allocator_alloc(allocator, rbs_hash_t);
     *hash = (rbs_hash_t) {
         .allocator = allocator,
@@ -63,7 +63,7 @@ rbs_hash_t *rbs_hash_new(rbs_allocator_t *allocator) {
     return hash;
 }
 
-bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
+bool rbs_node_equal(rbs_node_t *RBS_NONNULL lhs, rbs_node_t *RBS_NONNULL rhs) {
     if (lhs == rhs) return true;
     if (lhs->type != rhs->type) return false;
 
@@ -82,7 +82,7 @@ bool rbs_node_equal(rbs_node_t *lhs, rbs_node_t *rhs) {
     }
 }
 
-rbs_hash_node_t *rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key) {
+rbs_hash_node_t *RBS_NULLABLE rbs_hash_find(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key) {
     rbs_hash_node_t *current = hash->head;
 
     while (current != NULL) {
@@ -95,7 +95,7 @@ rbs_hash_node_t *rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key) {
     return NULL;
 }
 
-void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
+void rbs_hash_set(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key, rbs_node_t *RBS_NONNULL value) {
     rbs_hash_node_t *existing_node = rbs_hash_find(hash, key);
     if (existing_node != NULL) {
         existing_node->value = value;
@@ -116,12 +116,12 @@ void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value) {
     }
 }
 
-rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key) {
+rbs_node_t *RBS_NULLABLE rbs_hash_get(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key) {
     rbs_hash_node_t *node = rbs_hash_find(hash, key);
     return node ? node->value : NULL;
 }
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_range location, rbs_constant_pool_t *constant_pool, rbs_constant_id_t constant_id) {
+rbs_ast_symbol_t *RBS_NONNULL rbs_ast_symbol_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_constant_pool_t *RBS_NONNULL constant_pool, rbs_constant_id_t constant_id) {
     rbs_ast_symbol_t *instance = rbs_allocator_alloc(allocator, rbs_ast_symbol_t);
 
     *instance = (rbs_ast_symbol_t) {
@@ -137,7 +137,7 @@ rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *allocator, rbs_location_ra
 
 <%- nodes.each do |node| -%>
 #line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
-<%= node.c_type_name %> *<%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>) {
+<%= node.c_type_name %> *RBS_NONNULL <%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>) {
     <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
 
     *instance = (<%= node.c_type_name %>) {

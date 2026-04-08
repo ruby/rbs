@@ -16,6 +16,7 @@ module RBS
                | IncludeMember | ExtendMember | PrependMember
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
                | InstanceVariableMember
+               | ModuleSelfMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -167,6 +168,20 @@ module RBS
           def name: () -> Symbol
 
           def type: () -> Types::t
+
+          def location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class ModuleSelfMember < Base
+          attr_reader annotation: Annotations::ModuleSelfAnnotation
+
+          def initialize: (Buffer, Annotations::ModuleSelfAnnotation) -> void
+
+          def name: () -> TypeName
+
+          def args: () -> Array[Types::t]
 
           def location: () -> Location
 

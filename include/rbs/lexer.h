@@ -70,6 +70,7 @@ enum RBSTokenType {
     kATRBS,        /* @rbs */
     kSKIP,         /* skip */
     kRETURN,       /* return */
+    kMODULESELF,   /* module-self */
 
     tLIDENT,    /* Identifiers starting with lower case */
     tUIDENT,    /* Identifiers starting with upper case */
