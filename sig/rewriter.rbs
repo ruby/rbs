@@ -1,0 +1,31 @@
+module RBS
+  # Rewriter performs targeted character-range replacements on Buffer content.
+  #
+  # Unlike Writer which regenerates entire source from AST, Rewriter preserves
+  # everything outside the rewritten ranges, including non-documentation comments.
+  #
+  # Rewrite requests are buffered and applied all at once when `#string` is called.
+  #
+  class Rewriter
+    attr_reader buffer: Buffer
+
+    # Initialize with a toplevel buffer.
+    # Raises if the buffer has a parent (non-toplevel).
+    #
+    def initialize: (Buffer buffer) -> void
+
+    # Register a rewrite request for the given location.
+    #
+    def rewrite: (Location[untyped, untyped] location, String string) -> self
+
+    # Apply all buffered rewrites and return the resulting string.
+    #
+    # Raises if any rewrite ranges overlap.
+    #
+    def string: () -> String
+
+    private
+
+    @rewrites: Array[[Location[untyped, untyped], String]]
+  end
+end
