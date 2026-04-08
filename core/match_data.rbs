@@ -34,12 +34,14 @@
 # Parts of last MatchData (returned by Regexp.last_match) are also aliased as
 # global variables:
 #
-# *   `$~` is Regexp.last_match;
-# *   `$&` is Regexp.last_match`[ 0 ]`;
-# *   `$1`, `$2`, and so on are Regexp.last_match`[ i ]` (captures by number);
-# *   `$`` is Regexp.last_match`.pre_match`;
-# *   `$'` is Regexp.last_match`.post_match`;
-# *   `$+` is Regexp.last_match`[ -1 ]` (the last capture).
+# *   <code>$~</code> is Regexp.last_match;
+# *   <code>$&</code> is Regexp.last_match<code>[ 0 ]</code>;
+# *   <code>$1</code>, <code>$2</code>, and so on are Regexp.last_match<code>[ i
+#     ]</code> (captures by number);
+# *   <code>$`</code> is Regexp.last_match<code>.pre_match</code>;
+# *   <code>$'</code> is Regexp.last_match<code>.post_match</code>;
+# *   <code>$+</code> is Regexp.last_match<code>[ -1 ]</code> (the last
+#     capture).
 #
 # See also Regexp@Global+Variables.
 #
@@ -230,7 +232,7 @@ class MatchData
   #   rdoc-file=re.c
   #   - captures -> array
   # -->
-  # Returns the array of captures, which are all matches except `m[0]`:
+  # Returns the array of captures, which are all matches except <code>m[0]</code>:
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
@@ -242,7 +244,7 @@ class MatchData
   def captures: () -> Array[String?]
 
   # <!-- rdoc-file=re.c -->
-  # Returns the array of captures, which are all matches except `m[0]`:
+  # Returns the array of captures, which are all matches except <code>m[0]</code>:
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
@@ -511,8 +513,8 @@ class MatchData
   #   - post_match   -> str
   # -->
   # Returns the substring of the target string from the end of the first match in
-  # `self` (that is, `self[0]`) to the end of the string; equivalent to regexp
-  # global variable `$'`:
+  # `self` (that is, <code>self[0]</code>) to the end of the string; equivalent to
+  # regexp global variable <code>$'</code>:
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138: The Movie")
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">
@@ -528,8 +530,8 @@ class MatchData
   #   - pre_match -> string
   # -->
   # Returns the substring of the target string from its beginning up to the first
-  # match in `self` (that is, `self[0]`); equivalent to regexp global variable
-  # `$``:
+  # match in `self` (that is, <code>self[0]</code>); equivalent to regexp global
+  # variable <code>$`</code>:
   #
   #     m = /(.)(.)(\d+)(\d)/.match("THX1138.")
   #     # => #<MatchData "HX1138" 1:"H" 2:"X" 3:"113" 4:"8">

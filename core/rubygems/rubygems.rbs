@@ -4,7 +4,7 @@
 #
 # For user documentation, see:
 #
-# *   `gem help` and `gem help [command]`
+# *   `gem help` and <code>gem help [command]</code>
 # *   [RubyGems User Guide](https://guides.rubygems.org/)
 # *   [Frequently Asked Questions](https://guides.rubygems.org/faqs)
 #
@@ -152,7 +152,8 @@ module Gem
   #   - activated_gem_paths()
   # -->
   # The number of paths in the +$LOAD_PATH+ from activated gems. Used to
-  # prioritize `-I` and `ENV['RUBYLIB']` entries during `require`.
+  # prioritize <code>-I</code> and <code>ENV['RUBYLIB']</code> entries during
+  # `require`.
   #
   def self.activated_gem_paths: () -> Integer
 
@@ -499,7 +500,8 @@ module Gem
   #   rdoc-file=lib/rubygems.rb
   #   - host()
   # -->
-  # Get the default RubyGems API host. This is normally `https://rubygems.org`.
+  # Get the default RubyGems API host. This is normally
+  # <code>https://rubygems.org</code>.
   #
   def self.host: () -> String
 

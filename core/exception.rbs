@@ -102,7 +102,7 @@ class Exception
   # Returns the backtrace (the list of code locations that led to the exception),
   # as an array of strings.
   #
-  # Example (assuming the code is stored in the file named `t.rb`):
+  # Example (assuming the code is stored in the file named <code>t.rb</code>):
   #
   #     def division(numerator, denominator)
   #       numerator / denominator
@@ -136,7 +136,7 @@ class Exception
   # Returns the backtrace (the list of code locations that led to the exception),
   # as an array of Thread::Backtrace::Location instances.
   #
-  # Example (assuming the code is stored in the file named `t.rb`):
+  # Example (assuming the code is stored in the file named <code>t.rb</code>):
   #
   #     def division(numerator, denominator)
   #       numerator / denominator
@@ -173,8 +173,8 @@ class Exception
   #   rdoc-file=error.c
   #   - cause -> exception or nil
   # -->
-  # Returns the previous value of global variable `$!`, which may be `nil` (see
-  # [Global Variables](rdoc-ref:exceptions.md@Global+Variables)):
+  # Returns the previous value of global variable <code>$!</code>, which may be
+  # `nil` (see [Global Variables](rdoc-ref:exceptions.md@Global+Variables)):
   #
   #     begin
   #       raise('Boom 0')
@@ -237,10 +237,10 @@ class Exception
   # An overriding method must be tolerant of passed keyword arguments, which may
   # include (but may not be limited to):
   #
-  # *   `:highlight`.
-  # *   `:did_you_mean`.
-  # *   `:error_highlight`.
-  # *   `:syntax_suggest`.
+  # *   <code>:highlight</code>.
+  # *   <code>:did_you_mean</code>.
+  # *   <code>:error_highlight</code>.
+  # *   <code>:syntax_suggest</code>.
   #
   # An overriding method should also be careful with ANSI code enhancements; see
   # [Messages](rdoc-ref:exceptions.md@Messages).
@@ -444,10 +444,10 @@ class Exception
   #     message.
   # *   Includes the [backtrace](rdoc-ref:exceptions.md@Backtraces):
   #
-  #     *   If the value of keyword `order` is `:top` (the default), lists the
-  #         error message and the innermost backtrace entry first.
-  #     *   If the value of keyword `order` is `:bottom`, lists the error message
-  #         the innermost entry last.
+  #     *   If the value of keyword `order` is <code>:top</code> (the default),
+  #         lists the error message and the innermost backtrace entry first.
+  #     *   If the value of keyword `order` is <code>:bottom</code>, lists the
+  #         error message the innermost entry last.
   #
   # Example:
   #

@@ -489,8 +489,8 @@ module URI
     #   rdoc-file=lib/uri/generic.rb
     #   - split_userinfo(ui)
     # -->
-    # Returns the userinfo `ui` as `[user, password]` if properly formatted as
-    # 'user:password'.
+    # Returns the userinfo `ui` as <code>[user, password]</code> if properly
+    # formatted as 'user:password'.
     #
     def split_userinfo: (String ui) -> Array[String | nil]
 

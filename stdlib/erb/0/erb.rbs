@@ -15,7 +15,8 @@
 # *   You can call instance method ERB#result to get the *result*.
 # ERB supports tags of three kinds:
 # *   [Expression tags](rdoc-ref:ERB@Expression+Tags):
-#      each begins with `'<%='`, ends with `'%>'`; contains a Ruby expression;
+#      each begins with <code>'<%='</code>, ends with <code>'%>'</code>;
+#     contains a Ruby expression;
 #      in the result, the value of the expression replaces the entire tag:
 #         template = 'The magic word is <%= magic_word %>.'
 #         erb = ERB.new(template)
@@ -24,20 +25,21 @@
 #
 #     The above call to #result passes argument `binding`,
 #     which contains the binding of variable `magic_word` to its string value
-#     `'xyzzy'`.
+#     <code>'xyzzy'</code>.
 #     The below call to #result need not pass a binding,
-#     because its expression `Date::DAYNAMES` is globally defined.
+#     because its expression <code>Date::DAYNAMES</code> is globally defined.
 #         ERB.new('Today is <%= Date::DAYNAMES[Date.today.wday] %>.').result # => "Today is Monday."
 #
 # *   [Execution tags](rdoc-ref:ERB@Execution+Tags):
-#      each begins with `'<%'`, ends with `'%>'`; contains Ruby code to be
-#     executed:
+#      each begins with <code>'<%'</code>, ends with <code>'%>'</code>; contains
+#     Ruby code to be executed:
 #          template = '<% File.write("t.txt", "Some stuff.") %>'
 #          ERB.new(template).result
 #          File.read('t.txt') # => "Some stuff."
 #
 # *   [Comment tags](rdoc-ref:ERB@Comment+Tags):
-#      each begins with `'<%#'`, ends with `'%>'`; contains comment text;
+#      each begins with <code>'<%#'</code>, ends with <code>'%>'</code>;
+#     contains comment text;
 #      in the result, the entire tag is omitted.
 #          template = 'Some stuff;<%# Note to self: figure out what the stuff is. %> more stuff.'
 #          ERB.new(template).result # => "Some stuff; more stuff."
@@ -51,11 +53,11 @@
 #
 # Details:
 # 1.  A plain-text string is assigned to variable `template`.
-#      Its embedded [expression tag](rdoc-ref:ERB@Expression+Tags) `'<%=
-#     Time.now %>'` includes a Ruby expression, `Time.now`.
+#      Its embedded [expression tag](rdoc-ref:ERB@Expression+Tags) <code>'<%=
+#     Time.now %>'</code> includes a Ruby expression, <code>Time.now</code>.
 # 2.  The string is put into a new ERB object, and stored in variable `erb`.
-# 3.  Method call `erb.result` generates a string that contains the run-time
-#     value of `Time.now`,
+# 3.  Method call <code>erb.result</code> generates a string that contains the
+#     run-time value of <code>Time.now</code>,
 #      as computed at the time of the call.
 # The
 # ERB object may be re-used:
@@ -71,13 +73,14 @@
 #
 # Details:
 # 1.  As before, a plain-text string is assigned to variable `template`.
-#      Its embedded [expression tag](rdoc-ref:ERB@Expression+Tags) `'<%=
-#     magic_word %>'` has a variable *name*, `magic_word`.
+#      Its embedded [expression tag](rdoc-ref:ERB@Expression+Tags) <code>'<%=
+#     magic_word %>'</code> has a variable *name*, `magic_word`.
 # 2.  The string is put into a new ERB object, and stored in variable `erb`;
 #      note that `magic_word` need not be defined before the ERB object is
 #     created.
-# 3.  `magic_word = 'abracadabra'` assigns a value to variable `magic_word`.
-# 4.  Method call `erb.result(binding)` generates a string
+# 3.  <code>magic_word = 'abracadabra'</code> assigns a value to variable
+#     `magic_word`.
+# 4.  Method call <code>erb.result(binding)</code> generates a string
 #      that contains the *value* of `magic_word`.
 # As before, the ERB object may be re-used:
 #     magic_word = 'xyzzy'
@@ -102,7 +105,7 @@
 # That binding is sufficient for an expression tag that refers only to Ruby's
 # constants and variables;
 # these expression tags refer only to Ruby's global constant `RUBY_COPYRIGHT`
-# and global variable `$0`:
+# and global variable <code>$0</code>:
 #     template = <<TEMPLATE
 # The Ruby copyright is <%= RUBY_COPYRIGHT.inspect %>.
 # The current process is <%= $0 %>.
@@ -181,7 +184,7 @@
 #      in the result, the entire tag is to be omitted.
 # ### Expression Tags
 # You can embed a Ruby expression in a template using an *expression tag*.
-# Its syntax is `<%= _expression_ %>`,
+# Its syntax is <code><%= _expression_ %></code>,
 # where *expression* is any valid Ruby expression.
 # When you call method #result,
 # the method evaluates the expression and replaces the entire expression tag
@@ -203,7 +206,7 @@
 #
 # ### Execution Tags
 # You can embed Ruby executable code in template using an *execution tag*.
-# Its syntax is `<% _code_ %>`,
+# Its syntax is <code><% _code_ %></code>,
 # where *code* is any valid Ruby code.
 # When you call method #result,
 # the method executes the code and removes the entire execution tag
@@ -268,9 +271,10 @@
 # # => "\n* 0,0\n\n* 0,1\n\n* 0,2\n\n* 1,0\n\n* 1,1\n\n* 1,2\n\n* 2,0\n\n* 2,1\n\n* 2,2\n\n"
 #
 # #### Shorthand Format for Execution Tags
-# You can use keyword argument `trim_mode: '%'` to enable a shorthand format for
-# execution tags;
-# this example uses the shorthand format `% _code_` instead of `<% _code_ %>`:
+# You can use keyword argument <code>trim_mode: '%'</code> to enable a shorthand
+# format for execution tags;
+# this example uses the shorthand format <code>% _code_</code> instead of
+# <code><% _code_ %></code>:
 #     template = <<TEMPLATE
 # % priorities.each do |priority|
 #   * <%= priority %>
@@ -285,8 +289,8 @@
 #   * Document Modules
 #   * Answer Questions on Ruby Talk
 #
-# Note that in the shorthand format, the character `'%'` must be the first
-# character in the code line
+# Note that in the shorthand format, the character <code>'%'</code> must be the
+# first character in the code line
 # (no leading whitespace).
 # #### Suppressing Unwanted Blank Lines
 # With keyword argument `trim_mode` not given,
@@ -301,8 +305,8 @@
 # "3.4.5\n"
 # "\n"
 #
-# You can give `trim_mode: '-'`, you can suppress each blank line
-# whose source line ends with `-%>` (instead of `%>`):
+# You can give <code>trim_mode: '-'</code>, you can suppress each blank line
+# whose source line ends with <code>-%></code> (instead of <code>%></code>):
 #     template = <<TEMPLATE
 # <% if true -%>
 # <%= RUBY_VERSION %>
@@ -311,7 +315,8 @@
 # ERB.new(template, trim_mode: '-').result.lines.each {|line| puts line.inspect }
 # "3.4.5\n"
 #
-# It is an error to use the trailing `'-%>'` notation without `trim_mode: '-'`:
+# It is an error to use the trailing <code>'-%>'</code> notation without
+# <code>trim_mode: '-'</code>:
 #     ERB.new(template).result.lines.each {|line| puts line.inspect } # Raises SyntaxError.
 #
 # #### Suppressing Unwanted Newlines
@@ -330,27 +335,29 @@
 # "foo \n"
 # "foo 3.4.5\n"
 #
-# You can give `trim_mode: '>'` to suppress the trailing newline
-# for each line that ends with `'%>'` (regardless of its beginning):
+# You can give <code>trim_mode: '>'</code> to suppress the trailing newline
+# for each line that ends with <code>'%>'</code> (regardless of its beginning):
 #     ERB.new(template, trim_mode: '>').result.lines.each {|line| puts line.inspect }
 # "3.4.5foo foo 3.4.5"
 #
-# You can give `trim_mode: '<>'` to suppress the trailing newline
-# for each line that both begins with `'<%'` and ends with `'%>'`:
+# You can give <code>trim_mode: '<>'</code> to suppress the trailing newline
+# for each line that both begins with <code>'<%'</code> and ends with
+# <code>'%>'</code>:
 #     ERB.new(template, trim_mode: '<>').result.lines.each {|line| puts line.inspect }
 # "3.4.5foo \n"
 # "foo 3.4.5\n"
 #
 # #### Combining Trim Modes
 # You can combine certain trim modes:
-# *   `'%-'`: Enable shorthand and omit each blank line ending with `'-%>'`.
-# *   `'%>'`: Enable shorthand and omit newline for each line ending with
-#     `'%>'`.
-# *   `'%<>'`: Enable shorthand and omit newline for each line starting with
-#     `'<%'` and ending with `'%>'`.
+# *   <code>'%-'</code>: Enable shorthand and omit each blank line ending with
+#     <code>'-%>'</code>.
+# *   <code>'%>'</code>: Enable shorthand and omit newline for each line ending
+#     with <code>'%>'</code>.
+# *   <code>'%<>'</code>: Enable shorthand and omit newline for each line
+#     starting with <code>'<%'</code> and ending with <code>'%>'</code>.
 # ### Comment Tags
 # You can embed a comment in a template using a *comment tag*;
-# its syntax is `<%# _text_ %>`,
+# its syntax is <code><%# _text_ %></code>,
 # where *text* is the text of the comment.
 # When you call method #result,
 # it removes the entire comment tag
@@ -360,9 +367,10 @@
 # ERB.new(template).result # => "Some stuff; more stuff."
 #
 # A comment tag may appear anywhere in the template.
-# Note that the beginning of the tag must be `'<%#'`, not `'<% #'`.
-# In this example, the tag begins with `'<% #'`, and so is an execution tag, not
-# a comment tag;
+# Note that the beginning of the tag must be <code>'<%#'</code>, not <code>'<%
+# #'</code>.
+# In this example, the tag begins with <code>'<% #'</code>, and so is an
+# execution tag, not a comment tag;
 # the cited code consists entirely of a Ruby-style comment (which is of course
 # ignored):
 #     ERB.new('Some stuff;<% # Note to self: figure out what the stuff is. %> more stuff.').result
@@ -404,7 +412,8 @@
 # the file name comes from method #filename, the line number from method
 # #lineno.
 # Initially, those values are `nil` and `0`, respectively;
-# these initial values are reported as `'(erb)'` and `1`, respectively:
+# these initial values are reported as <code>'(erb)'</code> and `1`,
+# respectively:
 #     erb.filename # => nil
 # erb.lineno   # => 0
 # erb.result
@@ -424,7 +433,7 @@
 #
 # ## Plain Text with Embedded Ruby
 # Here's a plain-text template;
-# it uses the literal notation `'%q{ ... }'` to define the template
+# it uses the literal notation <code>'%q{ ... }'</code> to define the template
 # (see [%q
 # literals](https://docs.ruby-lang.org/en/master/syntax/literals_rdoc.html#label
 # -25q-3A+Non-Interpolable+String+Literals));
@@ -582,23 +591,24 @@ class ERB
   #   rdoc-file=lib/erb.rb
   #   - ERB.new(template, trim_mode: nil, eoutvar: '_erbout')
   # -->
-  # Returns a new ERB object containing the given string `template`.
+  # Returns a new ERB object containing the given string +template+.
   # For details about `template`, its embedded tags, and generated results, see
   # ERB.
-  # **Keyword Argument `trim_mode`**
-  # You can use keyword argument `trim_mode: '%'`
+  # <strong>Keyword Argument `trim_mode`</strong>
+  # You can use keyword argument <code>trim_mode: '%'</code>
   # to enable the [shorthand
   # format](rdoc-ref:ERB@Shorthand+Format+for+Execution+Tags) for execution tags.
   # This value allows [blank line
   # control](rdoc-ref:ERB@Suppressing+Unwanted+Blank+Lines):
-  # *   `'-'`: Omit each blank line ending with `'%>'`.
+  # *   <code>'-'</code>: Omit each blank line ending with <code>'%>'</code>.
   # Other values allow [newline
   # control](rdoc-ref:ERB@Suppressing+Unwanted+Newlines):
-  # *   `'>'`: Omit newline for each line ending with `'%>'`.
-  # *   `'<>'`: Omit newline for each line starting with `'<%'` and ending with
-  #     `'%>'`.
+  # *   <code>'>'</code>: Omit newline for each line ending with
+  #     <code>'%>'</code>.
+  # *   <code>'<>'</code>: Omit newline for each line starting with
+  #     <code>'<%'</code> and ending with <code>'%>'</code>.
   # You can also [combine trim modes](rdoc-ref:ERB@Combining+Trim+Modes).
-  # **Keyword Argument `eoutvar`**
+  # <strong>Keyword Argument `eoutvar`</strong>
   # The string value of keyword argument `eoutvar` specifies the name of the
   # variable
   # that method #result uses to construct its result string;
@@ -607,7 +617,7 @@ class ERB
   # binding
   # and/or when you want to control where output ends up.
   # It's good practice to choose a variable name that begins with an underscore:
-  # `'_'`.
+  # <code>'_'</code>.
   #
   def initialize: (String, ?eoutvar: String, ?trim_mode: Integer | String | NilClass) -> untyped
 
@@ -760,8 +770,8 @@ class ERB
   # -->
   # Returns a new nameless class whose superclass is `super_class`,
   # and which has instance method `method_name`.
-  # Create a template from HTML that has embedded expression tags that use `@arg1`
-  # and `@arg2`:
+  # Create a template from HTML that has embedded expression tags that use
+  # <code>@arg1</code> and <code>@arg2</code>:
   #     html = <<TEMPLATE
   # <html>
   # <body>
@@ -772,7 +782,7 @@ class ERB
   # TEMPLATE
   # template = ERB.new(html)
   #
-  # Create a base class that has `@arg1` and `@arg2`:
+  # Create a base class that has <code>@arg1</code> and <code>@arg2</code>:
   #     class MyBaseClass
   #   def initialize(arg1, arg2)
   #     @arg1 = arg1
@@ -780,7 +790,8 @@ class ERB
   #   end
   # end
   #
-  # Use method #def_class to create a subclass that has method `:render`:
+  # Use method #def_class to create a subclass that has method
+  # <code>:render</code>:
   #     MySubClass = template.def_class(MyBaseClass, :render)
   #
   # Generate the result:

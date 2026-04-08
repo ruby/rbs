@@ -123,10 +123,38 @@ end
 
 This creates the types `::API`, `::API::V1`, and `::API::V1::Resources`.
 
+### `module-self` constraint
+
+The `module-self` constraint declares which classes or modules the module can be mixed into.
+
+```ruby
+# @rbs module-self: _Each[String]
+module Enumerable2
+end
+```
+
+This is equivalent to `module Enumerable2 : _Each[String]` in RBS, meaning `Enumerable2` can only be included in classes that satisfy the `_Each[String]` interface.
+
+Multiple `module-self` constraints can be declared with separate annotations:
+
+```ruby
+# @rbs module-self: _Each[String]
+# @rbs module-self: Comparable
+module StringCollection
+end
+```
+
+You can add a description after `--`:
+
+```ruby
+# @rbs module-self: Minitest::Test -- depending on assertion methods
+module TestHelper
+end
+```
+
 ### Current Limitations
 
 - Generic module definitions are not supported
-- Module self-type constraints are not supported
 
 ## Method Definitions
 
@@ -142,7 +170,9 @@ It detects method definitions and allows you to add annotation comments to descr
 
 ### Unannotated method definition
 
-Methods defined with `def` syntax are detected, but they are untyped.
+Methods defined with `def` syntax are detected, but their inferred type depends on whether a super method exists.
+
+If there is no super method, the inferred type is `(?) -> untyped` -- it accepts any arguments without type checking and returns an `untyped` object.
 
 ```ruby
 class Calculator
@@ -150,7 +180,22 @@ class Calculator
 end
 ```
 
-The type of the `Calculator#add` method is `(?) -> untyped` -- it accepts any arguments without type checking and returns an `untyped` object.
+The type of `Calculator#add` is `(?) -> untyped`.
+
+If the super class (or an included module) defines a method with the same name, the unannotated method inherits that type.
+
+```ruby
+class Calculator
+  # @rbs (Integer, Integer) -> Integer
+  def add(x, y) = x + y
+end
+
+class ScientificCalculator < Calculator
+  def add(x, y) = x + y   # No annotation
+end
+```
+
+The type of `ScientificCalculator#add` is `(Integer, Integer) -> Integer`, inherited from `Calculator#add`.
 
 ### Method type annotation syntax
 
@@ -188,15 +233,104 @@ The type of both methods is `(Integer, Integer) -> Integer | (Float, Float) -> F
 > The `@rbs METHOD-TYPE` syntax allows overloads with the `|` operator, just like in RBS files.
 > Multiple `: METHOD-TYPE` declarations are required for overloads.
 
+The `@rbs METHOD-TYPE` syntax allows having `...` at the last part.
+
+```ruby
+class Calculator2 < Calculator
+  # @rbs (Float, Float) -> Float | ...
+  def add(x, y) = x + y
+
+  # @rbs ...
+  def subtract(x, y) = super
+end
+```
+
 #### Doc-style syntax
+
+The doc-style syntax allows annotating individual method parameters and the return type using `@rbs NAME: TYPE` comments.
+
+The `@rbs PARAM_NAME: T` syntax declares the type of a parameter:
+
+```ruby
+class Calculator
+  # @rbs x: Integer
+  # @rbs y: Integer
+  # @rbs a: String
+  # @rbs b: bool
+  def add(x, y = 1, a:, b: false)
+    pp(x:, y:, a:, b:)
+  end
+end
+```
+
+You can add a description after `--`:
+
+```ruby
+class Calculator
+  # @rbs x: Integer -- required positional argument
+  # @rbs y: Integer -- optional positional argument
+  # @rbs a: String -- required keyword argument
+  # @rbs b: bool -- optional keyword argument
+  def add(x, y = 1, a:, b: false)
+    pp(x:, y:, a:, b:)
+  end
+end
+```
+
+Types of splat (`*a`) and double-splat (`**b`) parameters can be declared too.
+
+```ruby
+class Foo
+  # @rbs *a: String -- The type of `a` is `Array[String]`
+  # @rbs **b: bool -- The type of `b` is `Hash[Symbol, bool]`
+  def foo(*a, **b)
+  end
+
+  # @rbs *: String -- Parameter name is optional
+  # @rbs **: bool -- Parameter name can be omitted in Ruby too
+  def bar(*a, **)
+  end
+end
+```
+
+Types of block parameter (`&block`) can be declared.
+
+```ruby
+class Foo
+  # @rbs &block: () -> void
+  def foo(&block)
+  end
+
+  # @rbs &: () -> void -- The parameter name can be omitted
+  def bar(&)
+  end
+
+  # @rbs &block: ? () -> untyped -- The `?` prefix is for optional block
+  def baz(&block)
+  end
+end
+```
 
 The `@rbs return: T` syntax declares the return type of a method:
 
 ```ruby
 class Calculator
-  # @rbs return: String
+  # @rbs return: String -- a human-readable representation
   def to_s
     "Calculator"
+  end
+end
+```
+
+Both can be combined:
+
+```ruby
+class Calculator
+  # @rbs x: Integer -- the first operand
+  # @rbs y: Integer -- the second operand
+  # @rbs return: Integer
+  def add(x, y:)
+    x + y
   end
 end
 ```
@@ -204,7 +338,7 @@ end
 ### Current Limitations
 
 - Class methods and singleton methods are not supported
-- Parameter types are not supported with doc-style syntax
+- Only positional and keyword parameters are supported. Splat parameters (`*x`, `**y`) and block parameter (`&block`) are not supported yet.
 - Method visibility declaration is not supported yet
 
 ## Attributes

@@ -159,7 +159,7 @@ module Coverage
   #   - Coverage.peek_result  => hash
   # -->
   # Returns a hash that contains filename as key and coverage array as value. This
-  # is the same as `Coverage.result(stop: false, clear: false)`.
+  # is the same as <code>Coverage.result(stop: false, clear: false)</code>.
   #
   #     {
   #       "file.rb" => [1, 2, nil],
@@ -244,8 +244,9 @@ module Coverage
   # -->
   # Returns true if coverage measurement is supported for the given mode.
   #
-  # The mode should be one of the following symbols: `:lines`, `:oneshot_lines`,
-  # `:branches`, `:methods`, `:eval`.
+  # The mode should be one of the following symbols: <code>:lines</code>,
+  # <code>:oneshot_lines</code>, <code>:branches</code>, <code>:methods</code>,
+  # <code>:eval</code>.
   #
   # Example:
   #

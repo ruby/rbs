@@ -189,4 +189,4 @@ If the gem's RBS is included in the gem package, put it as `sig/manifest.yaml`.
 ## How it works
 
 `rbs collection` is integrated with Bundler.
-`rbs collection install` command generates `gem_rbs_collection.lock.yaml` from `gem_rbs_collection.yaml` and `Gemfile.lock`. It uses `Gemfile.lock` to detects dependencies.
+`rbs collection install` command generates `rbs_collection.lock.yaml` from `rbs_collection.yaml` and `Gemfile.lock`. It uses `Gemfile.lock` to detects dependencies.

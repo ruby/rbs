@@ -132,7 +132,7 @@ class IO
   #   rdoc-file=ext/io/console/console.c
   #   - io.cursor = [line, column]         -> io
   # -->
-  # Same as `io.goto(line, column)`
+  # Same as <code>io.goto(line, column)</code>
   #
   # See IO#goto.
   #
@@ -362,7 +362,7 @@ class IO
   # -->
   # Enables raw mode, and returns `io`.
   #
-  # If the terminal mode needs to be back, use `io.raw { ... }`.
+  # If the terminal mode needs to be back, use <code>io.raw { ... }</code>.
   #
   # See IO#raw for details on the parameters.
   #

@@ -8,14 +8,17 @@ module RBS
           "mutex_m" => ">= 0.3.0",
           "abbrev" => nil,
           "base64" => nil,
+          "benchmark" => nil,
           "bigdecimal" => nil,
           "csv" => nil,
           "kconv" => nil,
+          "logger" => nil,
           "minitest" => nil,
           "net-smtp" => nil,
           "nkf" => nil,
           "observer" => nil,
           "cgi" => nil,
+          "pstore" => nil,
         }
 
         class GemfileLockMismatchError < StandardError
@@ -185,8 +188,8 @@ module RBS
               lockfile.gems[name] = { name: name, version: "0", source: source }
             end
             return
-          when 'set', 'pathname'
-            # set and pathname is migrated to core from stdlib.
+          when 'set'
+            # set is migrated to core from stdlib.
             RBS.logger.info {
               from = from_gem || "rbs_collection.yaml"
               "`#{name}` is a part of the Ruby core library. The dependency to the library can be safely deleted from #{from}."

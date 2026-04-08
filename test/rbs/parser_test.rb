@@ -812,7 +812,7 @@ class RBS::ParserTest < Test::Unit::TestCase
 
   def test_negative_range
     assert_raises ArgumentError do
-      RBS::Parser.parse_type("a", range: -2...-1)
+      RBS::Parser.parse_type("a", byte_range: -2...-1)
     end
   end
 

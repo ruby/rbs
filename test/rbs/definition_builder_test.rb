@@ -3767,4 +3767,142 @@ EOF
       end
     end
   end
+
+  def test_inline_method_types__overloading
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+          def bar: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          # @rbs (Integer) -> String | ...
+          def foo(x = nil) = ""
+
+          # @rbs ...
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["(::Integer) -> ::String", "() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Child"), method.defs[0].defined_in
+            assert_equal type_name("::Base"), method.defs[1].defined_in
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_method_unannotated_overriding
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          def foo = ""
+        end
+
+        class Orphan
+          def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        # Unannotated method with parent definition → behaves like @rbs ...
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          definition.methods[:foo].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal type_name("::Base"), method.defs[0].defined_in
+          end
+        end
+
+        # Unannotated method without parent definition → (?) -> untyped
+        builder.build_instance(type_name("::Orphan")).tap do |definition|
+          definition.methods[:bar].tap do |method|
+            assert_equal ["(?) -> untyped"], method.method_types.map(&:to_s)
+          end
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__module_self
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        interface _StringConvertible
+          def to_str: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        # @rbs module-self: _StringConvertible
+        module M
+          # @rbs () -> String
+          def display
+            to_str
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_equal Set[:to_str, :display], Set.new(definition.methods.keys)
+          assert_method_definition definition.methods[:to_str], ["() -> ::String"], accessibility: :public
+          assert_method_definition definition.methods[:display], ["() -> ::String"], accessibility: :public
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__module_self_multiple
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        interface _Each[T]
+          def each: () { (T) -> void } -> void
+        end
+
+        interface _Size
+          def size: () -> Integer
+        end
+      RBS
+
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        # @rbs module-self: _Each[String]
+        # @rbs module-self: _Size
+        module M
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_equal Set[:each, :size], Set.new(definition.methods.keys)
+          assert_method_definition definition.methods[:each], ["() { (::String) -> void } -> void"], accessibility: :public
+          assert_method_definition definition.methods[:size], ["() -> ::Integer"], accessibility: :public
+        end
+      end
+    end
+  end
 end

@@ -81,9 +81,9 @@ class IO
   #     File.read('test.txt')
   #     # => "t--- data"
   #
-  # **The class is experimental and the interface is subject to change, this is
-  # especially true of file mappings which may be removed entirely in the
-  # future.**
+  # <strong>The class is experimental and the interface is subject to change, this
+  # is especially true of file mappings which may be removed entirely in the
+  # future.</strong>
   #
   class Buffer
     include Comparable
@@ -356,7 +356,7 @@ class IO
     #   - get_string([offset, [length, [encoding]]]) -> string
     # -->
     # Read a chunk or all of the buffer into a string, in the specified `encoding`.
-    # If no encoding is provided `Encoding::BINARY` is used.
+    # If no encoding is provided <code>Encoding::BINARY</code> is used.
     #
     #     buffer = IO::Buffer.for('test')
     #     buffer.get_string
@@ -375,32 +375,32 @@ class IO
     # Read from buffer a value of `type` at `offset`. `buffer_type` should be one of
     # symbols:
     #
-    # *   `:U8`: unsigned integer, 1 byte
-    # *   `:S8`: signed integer, 1 byte
-    # *   `:u16`: unsigned integer, 2 bytes, little-endian
-    # *   `:U16`: unsigned integer, 2 bytes, big-endian
-    # *   `:s16`: signed integer, 2 bytes, little-endian
-    # *   `:S16`: signed integer, 2 bytes, big-endian
-    # *   `:u32`: unsigned integer, 4 bytes, little-endian
-    # *   `:U32`: unsigned integer, 4 bytes, big-endian
-    # *   `:s32`: signed integer, 4 bytes, little-endian
-    # *   `:S32`: signed integer, 4 bytes, big-endian
-    # *   `:u64`: unsigned integer, 8 bytes, little-endian
-    # *   `:U64`: unsigned integer, 8 bytes, big-endian
-    # *   `:s64`: signed integer, 8 bytes, little-endian
-    # *   `:S64`: signed integer, 8 bytes, big-endian
-    # *   `:u128`: unsigned integer, 16 bytes, little-endian
-    # *   `:U128`: unsigned integer, 16 bytes, big-endian
-    # *   `:s128`: signed integer, 16 bytes, little-endian
-    # *   `:S128`: signed integer, 16 bytes, big-endian
-    # *   `:f32`: float, 4 bytes, little-endian
-    # *   `:F32`: float, 4 bytes, big-endian
-    # *   `:f64`: double, 8 bytes, little-endian
-    # *   `:F64`: double, 8 bytes, big-endian
+    # *   <code>:U8</code>: unsigned integer, 1 byte
+    # *   <code>:S8</code>: signed integer, 1 byte
+    # *   <code>:u16</code>: unsigned integer, 2 bytes, little-endian
+    # *   <code>:U16</code>: unsigned integer, 2 bytes, big-endian
+    # *   <code>:s16</code>: signed integer, 2 bytes, little-endian
+    # *   <code>:S16</code>: signed integer, 2 bytes, big-endian
+    # *   <code>:u32</code>: unsigned integer, 4 bytes, little-endian
+    # *   <code>:U32</code>: unsigned integer, 4 bytes, big-endian
+    # *   <code>:s32</code>: signed integer, 4 bytes, little-endian
+    # *   <code>:S32</code>: signed integer, 4 bytes, big-endian
+    # *   <code>:u64</code>: unsigned integer, 8 bytes, little-endian
+    # *   <code>:U64</code>: unsigned integer, 8 bytes, big-endian
+    # *   <code>:s64</code>: signed integer, 8 bytes, little-endian
+    # *   <code>:S64</code>: signed integer, 8 bytes, big-endian
+    # *   <code>:u128</code>: unsigned integer, 16 bytes, little-endian
+    # *   <code>:U128</code>: unsigned integer, 16 bytes, big-endian
+    # *   <code>:s128</code>: signed integer, 16 bytes, little-endian
+    # *   <code>:S128</code>: signed integer, 16 bytes, big-endian
+    # *   <code>:f32</code>: float, 4 bytes, little-endian
+    # *   <code>:F32</code>: float, 4 bytes, big-endian
+    # *   <code>:f64</code>: double, 8 bytes, little-endian
+    # *   <code>:F64</code>: double, 8 bytes, big-endian
     #
     # A buffer type refers specifically to the type of binary buffer that is stored
-    # in the buffer. For example, a `:u32` buffer type is a 32-bit unsigned integer
-    # in little-endian format.
+    # in the buffer. For example, a <code>:u32</code> buffer type is a 32-bit
+    # unsigned integer in little-endian format.
     #
     #     string = [1.5].pack('f')
     #     # => "\x00\x00\xC0?"
@@ -557,7 +557,7 @@ class IO
     # -->
     # Read at least `length` bytes from the `io` starting at the specified `from`
     # position, into the buffer starting at `offset`. If an error occurs, return
-    # `-errno`.
+    # <code>-errno</code>.
     #
     # If `length` is not given or `nil`, it defaults to the size of the buffer minus
     # the offset, i.e. the entire buffer.
@@ -590,7 +590,7 @@ class IO
     # -->
     # Write at least `length` bytes from the buffer starting at `offset`, into the
     # `io` starting at the specified `from` position. If an error occurs, return
-    # `-errno`.
+    # <code>-errno</code>.
     #
     # If `length` is not given or `nil`, it defaults to the size of the buffer minus
     # the offset, i.e. the entire buffer.
@@ -607,7 +607,7 @@ class IO
     #     IO::Buffer.for('1234567').pwrite(out, 2, 3, 1)
     #
     # This leads to `234` (3 bytes, starting from position 1) being written into
-    # `output.txt`, starting from file position 2.
+    # <code>output.txt</code>, starting from file position 2.
     #
     def pwrite: (untyped, untyped, untyped) -> untyped
 
@@ -616,7 +616,7 @@ class IO
     #   - read(io, [length, [offset]]) -> read length or -errno
     # -->
     # Read at least `length` bytes from the `io`, into the buffer starting at
-    # `offset`. If an error occurs, return `-errno`.
+    # `offset`. If an error occurs, return <code>-errno</code>.
     #
     # If `length` is not given or `nil`, it defaults to the size of the buffer minus
     # the offset, i.e. the entire buffer.
@@ -756,8 +756,8 @@ class IO
     # minus the specified offset. If the length is negative, it will raise an
     # ArgumentError.
     #
-    # Raises RuntimeError if the `offset+length` is out of the current buffer's
-    # bounds.
+    # Raises RuntimeError if the <code>offset+length</code> is out of the current
+    # buffer's bounds.
     #
     #     string = 'test'
     #     buffer = IO::Buffer.for(string).dup
@@ -841,7 +841,7 @@ class IO
     #   - write(io, [length, [offset]]) -> written length or -errno
     # -->
     # Write at least `length` bytes from the buffer starting at `offset`, into the
-    # `io`. If an error occurs, return `-errno`.
+    # `io`. If an error occurs, return <code>-errno</code>.
     #
     # If `length` is not given or `nil`, it defaults to the size of the buffer minus
     # the offset, i.e. the entire buffer.
@@ -854,7 +854,7 @@ class IO
     #     out = File.open('output.txt', 'wb')
     #     IO::Buffer.for('1234567').write(out, 3)
     #
-    # This leads to `123` being written into `output.txt`
+    # This leads to `123` being written into <code>output.txt</code>
     #
     def write: (untyped, untyped) -> untyped
 

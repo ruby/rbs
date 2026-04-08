@@ -76,9 +76,9 @@
 # integer. However `localtime` on some platforms doesn't supports negative
 # `time_t` (before 1970).
 #
-# `struct tm` has *tm_year* member to represent years. (`tm_year = 0` means the
-# year 1900.) It is defined as `int` in the C standard. *tm_year* can represent
-# years between -2147481748 to 2147485547 if `int` is 32 bit.
+# `struct tm` has *tm_year* member to represent years. (<code>tm_year = 0</code>
+# means the year 1900.) It is defined as `int` in the C standard. *tm_year* can
+# represent years between -2147481748 to 2147485547 if `int` is 32 bit.
 #
 # Ruby supports leap seconds as far as if the C function `localtime` and
 # `gmtime` supports it. They use the tz database in most Unix systems. The tz
@@ -259,9 +259,9 @@
 #
 # Certain `Time` methods accept arguments that specify timezones:
 #
-# *   Time.at: keyword argument `in:`.
-# *   Time.new: positional argument `zone` or keyword argument `in:`.
-# *   Time.now: keyword argument `in:`.
+# *   Time.at: keyword argument <code>in:</code>.
+# *   Time.new: positional argument `zone` or keyword argument <code>in:</code>.
+# *   Time.now: keyword argument <code>in:</code>.
 # *   Time#getlocal: positional argument `zone`.
 # *   Time#localtime: positional argument `zone`.
 #
@@ -276,11 +276,11 @@
 #
 # ### Hours/Minutes Offsets
 #
-# The zone value may be a string offset from UTC in the form `'+HH:MM'` or
-# `'-HH:MM'`, where:
+# The zone value may be a string offset from UTC in the form
+# <code>'+HH:MM'</code> or <code>'-HH:MM'</code>, where:
 #
-# *   `HH` is the 2-digit hour in the range `0..23`.
-# *   `MM` is the 2-digit minute in the range `0..59`.
+# *   `HH` is the 2-digit hour in the range <code>0..23</code>.
+# *   `MM` is the 2-digit minute in the range <code>0..59</code>.
 #
 # Examples:
 #
@@ -290,8 +290,8 @@
 #
 # ### Single-Letter Offsets
 #
-# The zone value may be a  letter in the range `'A'..'I'` or `'K'..'Z'`; see
-# [List of military time
+# The zone value may be a  letter in the range <code>'A'..'I'</code> or
+# <code>'K'..'Z'</code>; see [List of military time
 # zones](https://en.wikipedia.org/wiki/List_of_military_time_zones):
 #
 #     t = Time.utc(2000, 1, 1, 20, 15, 1) # => 2000-01-01 20:15:01 UTC
@@ -304,7 +304,7 @@
 # ### Integer Offsets
 #
 # The zone value may be an integer number of seconds in the range
-# `-86399..86399`:
+# <code>-86399..86399</code>:
 #
 #     t = Time.utc(2000, 1, 1, 20, 15, 1) # => 2000-01-01 20:15:01 UTC
 #     Time.at(t, in: -86399)              # => 1999-12-31 20:15:02 -235959
@@ -321,7 +321,7 @@
 # *   `local_to_utc`:
 #
 #     Called when Time.new is invoked with `tz` as the value of positional
-#     argument `zone` or keyword argument `in:`.
+#     argument `zone` or keyword argument <code>in:</code>.
 #
 #     Argument
 # :       a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
@@ -334,8 +334,9 @@
 # *   `utc_to_local`:
 #
 #     Called when Time.at or Time.now is invoked with `tz` as the value for
-#     keyword argument `in:`, and when Time#getlocal or Time#localtime is called
-#     with `tz` as the value for positional argument `zone`.
+#     keyword argument <code>in:</code>, and when Time#getlocal or
+#     Time#localtime is called with `tz` as the value for positional argument
+#     `zone`.
 #
 #     The UTC offset will be calculated as the difference between the original
 #     time and the returned object as an `Integer`. If the object is in fixed
@@ -354,7 +355,8 @@
 #
 # *   `abbr`:
 #
-#     Called when Time#strftime is invoked with a format involving `%Z`.
+#     Called when Time#strftime is invoked with a format involving
+#     <code>%Z</code>.
 #
 #     Argument
 # :       a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
@@ -363,11 +365,12 @@
 # :       a string abbreviation for the timezone name.
 #
 #
-# *   `dst?`:
+# *   <code>dst?</code>:
 #
 #     Called when Time.at or Time.now is invoked with `tz` as the value for
-#     keyword argument `in:`, and when Time#getlocal or Time#localtime is called
-#     with `tz` as the value for positional argument `zone`.
+#     keyword argument <code>in:</code>, and when Time#getlocal or
+#     Time#localtime is called with `tz` as the value for positional argument
+#     `zone`.
 #
 #     Argument
 # :       a [Time-like object](rdoc-ref:Time@Time-Like+Objects).
@@ -378,7 +381,7 @@
 #
 # *   `name`:
 #
-#     Called when `Marshal.dump(t)` is invoked
+#     Called when <code>Marshal.dump(t)</code> is invoked
 #
 #     Argument
 # :       none.
@@ -472,7 +475,7 @@ class Time < Object
   # Required argument `time` may be either of:
   #
   # *   A `Time` object, whose value is the basis for the returned time; also
-  #     influenced by optional keyword argument `in:` (see below).
+  #     influenced by optional keyword argument <code>in:</code> (see below).
   # *   A numeric number of [Epoch seconds](rdoc-ref:Time@Epoch+Seconds) for the
   #     returned time.
   #
@@ -490,29 +493,29 @@ class Time < Object
   # together to specify subseconds for the returned time; argument `units`
   # specifies the units for `subsec`:
   #
-  # *   `:millisecond`: `subsec` in milliseconds:
+  # *   <code>:millisecond</code>: `subsec` in milliseconds:
   #
   #         Time.at(secs, 0, :millisecond)     # => 2000-12-31 23:59:59 -0600
   #         Time.at(secs, 500, :millisecond)   # => 2000-12-31 23:59:59.5 -0600
   #         Time.at(secs, 1000, :millisecond)  # => 2001-01-01 00:00:00 -0600
   #         Time.at(secs, -1000, :millisecond) # => 2000-12-31 23:59:58 -0600
   #
-  # *   `:microsecond` or `:usec`: `subsec` in microseconds:
+  # *   <code>:microsecond</code> or <code>:usec</code>: `subsec` in microseconds:
   #
   #         Time.at(secs, 0, :microsecond)        # => 2000-12-31 23:59:59 -0600
   #         Time.at(secs, 500000, :microsecond)   # => 2000-12-31 23:59:59.5 -0600
   #         Time.at(secs, 1000000, :microsecond)  # => 2001-01-01 00:00:00 -0600
   #         Time.at(secs, -1000000, :microsecond) # => 2000-12-31 23:59:58 -0600
   #
-  # *   `:nanosecond` or `:nsec`: `subsec` in nanoseconds:
+  # *   <code>:nanosecond</code> or <code>:nsec</code>: `subsec` in nanoseconds:
   #
   #         Time.at(secs, 0, :nanosecond)           # => 2000-12-31 23:59:59 -0600
   #         Time.at(secs, 500000000, :nanosecond)   # => 2000-12-31 23:59:59.5 -0600
   #         Time.at(secs, 1000000000, :nanosecond)  # => 2001-01-01 00:00:00 -0600
   #         Time.at(secs, -1000000000, :nanosecond) # => 2000-12-31 23:59:58 -0600
   #
-  # Optional keyword argument `in: zone` specifies the timezone for the returned
-  # time:
+  # Optional keyword argument <code>in: zone</code> specifies the timezone for the
+  # returned time:
   #
   #     Time.at(secs, in: '+12:00') # => 2001-01-01 17:59:59 +1200
   #     Time.at(secs, in: '-12:00') # => 2000-12-31 17:59:59 -1200
@@ -797,7 +800,7 @@ class Time < Object
   # -->
   # Compares `self` with `other_time`; returns:
   #
-  # *   `-1`, if `self` is less than `other_time`.
+  # *   <code>-1</code>, if `self` is less than `other_time`.
   # *   `0`, if `self` is equal to `other_time`.
   # *   `1`, if `self` is greater then `other_time`.
   # *   `nil`, if `self` and `other_time` are incomparable.
@@ -825,9 +828,9 @@ class Time < Object
   def >=: (Time arg0) -> bool
 
   # <!-- rdoc-file=time.c -->
-  # Returns a string representation of `self`, formatted by `strftime('%a %b %e %T
-  # %Y')` or its shorthand version `strftime('%c')`; see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc):
+  # Returns a string representation of `self`, formatted by <code>strftime('%a %b
+  # %e %T %Y')</code> or its shorthand version <code>strftime('%c')</code>; see
+  # [Formats for Dates and Times](rdoc-ref:strftime_formatting.rdoc):
   #
   #     t = Time.new(2000, 12, 31, 23, 59, 59, 0.5)
   #     t.ctime                      # => "Sun Dec 31 23:59:59 2000"
@@ -845,9 +848,9 @@ class Time < Object
   #   rdoc-file=time.c
   #   - ctime -> string
   # -->
-  # Returns a string representation of `self`, formatted by `strftime('%a %b %e %T
-  # %Y')` or its shorthand version `strftime('%c')`; see [Formats for Dates and
-  # Times](rdoc-ref:strftime_formatting.rdoc):
+  # Returns a string representation of `self`, formatted by <code>strftime('%a %b
+  # %e %T %Y')</code> or its shorthand version <code>strftime('%c')</code>; see
+  # [Formats for Dates and Times](rdoc-ref:strftime_formatting.rdoc):
   #
   #     t = Time.new(2000, 12, 31, 23, 59, 59, 0.5)
   #     t.ctime                      # => "Sun Dec 31 23:59:59 2000"
@@ -877,8 +880,10 @@ class Time < Object
   #   - deconstruct_keys(array_of_names_or_nil) -> hash
   # -->
   # Returns a hash of the name/value pairs, to use in pattern matching. Possible
-  # keys are: `:year`, `:month`, `:day`, `:yday`, `:wday`, `:hour`, `:min`,
-  # `:sec`, `:subsec`, `:dst`, `:zone`.
+  # keys are: <code>:year</code>, <code>:month</code>, <code>:day</code>,
+  # <code>:yday</code>, <code>:wday</code>, <code>:hour</code>, <code>:min</code>,
+  # <code>:sec</code>, <code>:subsec</code>, <code>:dst</code>,
+  # <code>:zone</code>.
   #
   # Possible usages:
   #
@@ -1135,9 +1140,9 @@ class Time < Object
   #         # => ["0", "1", "1", "0", "0", "0"]
   #         Time.new(*a) # => 0000-01-01 00:00:00 -0600
   #
-  # When positional argument `zone` or keyword argument `in:` is given, the new
-  # `Time` object is in the specified timezone. For the forms of argument `zone`,
-  # see [Timezone Specifiers](rdoc-ref:Time@Timezone+Specifiers):
+  # When positional argument `zone` or keyword argument <code>in:</code> is given,
+  # the new `Time` object is in the specified timezone. For the forms of argument
+  # `zone`, see [Timezone Specifiers](rdoc-ref:Time@Timezone+Specifiers):
   #
   #     Time.new(2000, 1, 1, 0, 0, 0, '+12:00')
   #     # => 2000-01-01 00:00:00 +1200
@@ -1146,9 +1151,9 @@ class Time < Object
   #     Time.new(in: '-12:00')
   #     # => 2022-08-23 08:49:26.1941467 -1200
   #
-  # Since `in:` keyword argument just provides the default, so if the first
-  # argument in single string form contains time zone information, this keyword
-  # argument will be silently ignored.
+  # Since <code>in:</code> keyword argument just provides the default, so if the
+  # first argument in single string form contains time zone information, this
+  # keyword argument will be silently ignored.
   #
   #     Time.new('2000-01-01 00:00:00 +0100', in: '-0500').utc_offset  # => 3600
   #

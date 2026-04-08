@@ -68,6 +68,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "kATRBS",        /* @rbs */
     "kSKIP",         /* skip */
     "kRETURN",       /* return */
+    "kMODULESELF",   /* module-self */
 
     "tLIDENT",  /* Identifiers starting with lower case */
     "tUIDENT",  /* Identifiers starting with upper case */
@@ -118,7 +119,7 @@ unsigned int rbs_peek(rbs_lexer_t *lexer) {
 }
 
 bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len) {
-    if (RBS_UNLIKELY(lexer->current.char_pos == lexer->end_pos)) {
+    if (RBS_UNLIKELY(lexer->current.byte_pos == lexer->end_pos)) {
         return false;
     }
 

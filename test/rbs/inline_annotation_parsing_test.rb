@@ -227,10 +227,6 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     end
 
     assert_raises RBS::ParsingError do
-      Parser.parse_inline_leading_annotation("@rbs name: String", 0...)
-    end
-
-    assert_raises RBS::ParsingError do
       Parser.parse_inline_leading_annotation("@rbs @name: void", 0...)
     end
   end
@@ -290,6 +286,277 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     # Type variables (lowercase names) are not valid for module-alias
     assert_raises RBS::ParsingError do
       Parser.parse_inline_trailing_annotation(": module-alias element", 0...)
+    end
+  end
+
+  def test_parse__method_types_annotation
+    Parser.parse_inline_leading_annotation("@rbs (String) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (String) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 1, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(String) -> void", overload.method_type.location.source
+        assert_empty overload.annotations
+      end
+      assert_empty annot.vertical_bar_locations
+      assert_nil annot.dot3_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs (String) -> void | (Integer) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (String) -> void | (Integer) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 2, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(String) -> void", overload.method_type.location.source
+      end
+      annot.overloads[1].tap do |overload|
+        assert_equal "(Integer) -> void", overload.method_type.location.source
+      end
+      assert_equal ["|"], annot.vertical_bar_locations.map(&:source)
+      assert_nil annot.dot3_location
+    end
+  end
+
+  def test_parse__method_types_annotation__with_dot3
+    Parser.parse_inline_leading_annotation("@rbs (Float, Float) -> Float | ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs (Float, Float) -> Float | ...", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal 1, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "(Float, Float) -> Float", overload.method_type.location.source
+      end
+      assert_equal ["|"], annot.vertical_bar_locations.map(&:source)
+      assert_equal "...", annot.dot3_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs () -> void | %a{foo} () -> String | ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs () -> void | %a{foo} () -> String | ...", annot.location.source
+      assert_equal 2, annot.overloads.size
+      annot.overloads[0].tap do |overload|
+        assert_equal "() -> void", overload.method_type.location.source
+      end
+      annot.overloads[1].tap do |overload|
+        assert_equal "() -> String", overload.method_type.location.source
+        assert_equal ["foo"], overload.annotations.map(&:string)
+      end
+      assert_equal ["|", "|"], annot.vertical_bar_locations.map(&:source)
+      assert_equal "...", annot.dot3_location.source
+    end
+  end
+
+  def test_parse__method_types_annotation__only_dot3
+    Parser.parse_inline_leading_annotation("@rbs ...", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::MethodTypesAnnotation, annot
+      assert_equal "@rbs ...", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_empty annot.overloads
+      assert_empty annot.vertical_bar_locations
+      assert_equal "...", annot.dot3_location.source
+    end
+  end
+
+  def test_parse__param_type
+    Parser.parse_inline_leading_annotation("@rbs x: untyped", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs x: untyped", annot.location.source
+      assert_equal "x", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs abc: untyped -- some comment here", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs abc: untyped -- some comment here", annot.location.source
+      assert_equal "abc", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_equal "-- some comment here", annot.comment_location.source
+    end
+  end
+
+  def test_parse__splat_param_type
+    Parser.parse_inline_leading_annotation("@rbs *a: String", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *a: String", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "*", annot.star_location.source
+      assert_equal "a", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs *a: String -- The rest args", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *a: String -- The rest args", annot.location.source
+      assert_equal "*", annot.star_location.source
+      assert_equal "a", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_equal "-- The rest args", annot.comment_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs *: String", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::SplatParamTypeAnnotation, annot
+      assert_equal "@rbs *: String", annot.location.source
+      assert_equal "*", annot.star_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
+  def test_parse__double_splat_param_type
+    Parser.parse_inline_leading_annotation("@rbs **b: bool", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **b: bool", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "**", annot.star2_location.source
+      assert_equal "b", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs **opts: bool -- The keyword args", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **opts: bool -- The keyword args", annot.location.source
+      assert_equal "**", annot.star2_location.source
+      assert_equal "opts", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_equal "-- The keyword args", annot.comment_location.source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs **: bool", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::DoubleSplatParamTypeAnnotation, annot
+      assert_equal "@rbs **: bool", annot.location.source
+      assert_equal "**", annot.star2_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "bool", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
+  def test_parse__param_type__skip
+    Parser.parse_inline_leading_annotation("@rbs skip: untyped", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ParamTypeAnnotation, annot
+      assert_equal "@rbs skip: untyped", annot.location.source
+      assert_equal "skip", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "untyped", annot.param_type.location.source
+      assert_nil annot.comment_location
+    end
+  end
+
+  def test_parse__block_type_annotation
+    Parser.parse_inline_leading_annotation("@rbs &block: () [self: String] -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::BlockParamTypeAnnotation, annot
+      assert_equal "@rbs &block: () [self: String] -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "&", annot.ampersand_location.source
+      assert_equal "block", annot.name_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_nil annot.question_location
+      assert_equal "() [self: String] -> void", annot.type_location.source
+      assert_instance_of Types::Function, annot.type
+      assert_nil annot.comment_location
+      assert_equal :block, annot.name
+      assert_equal false, annot.optional?
+      assert_equal true, annot.required?
+    end
+
+      Parser.parse_inline_leading_annotation("@rbs &: ? (?) -> void", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::BlockParamTypeAnnotation, annot
+      assert_equal "@rbs &: ? (?) -> void", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "&", annot.ampersand_location.source
+      assert_nil annot.name_location
+      assert_equal ":", annot.colon_location.source
+      assert_equal "?", annot.question_location.source
+      assert_equal "(?) -> void", annot.type_location.source
+      assert_instance_of Types::UntypedFunction, annot.type
+      assert_nil annot.comment_location
+      assert_nil annot.name
+      assert_equal true, annot.optional?
+      assert_equal false, annot.required?
+    end
+  end
+
+  def test_error__block_type_annotation
+    error = assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs &block: () { () -> void } -> void", 0...)
+    end
+    assert_match(/block is not allowed in this context/, error.message)
+    assert_match(/pLBRACE/, error.message)
+    assert_equal "{", error.location.source
+  end
+
+  def test_parse__module_self
+    Parser.parse_inline_leading_annotation("@rbs module-self: _Each[String]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: _Each[String]", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "module-self", annot.keyword_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "_Each", annot.name.to_s
+      assert_equal 1, annot.args.size
+      assert_equal "String", annot.args[0].location.source
+      assert_equal "[", annot.open_bracket_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal [], annot.args_comma_locations
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: _Hash[String, Integer]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: _Hash[String, Integer]", annot.location.source
+      assert_equal "_Hash", annot.name.to_s
+      assert_equal 2, annot.args.size
+      assert_equal "String", annot.args[0].location.source
+      assert_equal "Integer", annot.args[1].location.source
+      assert_equal "[", annot.open_bracket_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal 1, annot.args_comma_locations.size
+      assert_equal ",", annot.args_comma_locations[0].source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: Comparable", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: Comparable", annot.location.source
+      assert_equal "Comparable", annot.name.to_s
+      assert_equal 0, annot.args.size
+      assert_nil annot.open_bracket_location
+      assert_nil annot.close_bracket_location
+      assert_equal [], annot.args_comma_locations
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: Minitest::Test -- depending on assertion methods", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: Minitest::Test -- depending on assertion methods", annot.location.source
+      assert_equal "Minitest::Test", annot.name.to_s
+      assert_equal 0, annot.args.size
+      assert_nil annot.open_bracket_location
+      assert_nil annot.close_bracket_location
+      assert_equal "-- depending on assertion methods", annot.comment_location.source
+    end
+  end
+
+  def test_error__module_self
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs module-self:", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs module-self: foo", 0...)
     end
   end
 end

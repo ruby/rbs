@@ -20,8 +20,8 @@ module Net
   #
   # ## About the Examples
   #
-  # Examples here assume that `net/http` has been required (which also requires
-  # `uri`):
+  # Examples here assume that <code>net/http</code> has been required (which also
+  # requires `uri`):
   #
   #     require 'net/http'
   #
@@ -129,7 +129,8 @@ module Net
   # An internet URI has a
   # [scheme](https://en.wikipedia.org/wiki/List_of_URI_schemes).
   #
-  # The two schemes supported in Net::HTTP are `'https'` and `'http'`:
+  # The two schemes supported in Net::HTTP are <code>'https'</code> and
+  # <code>'http'</code>:
   #
   #     uri.scheme                       # => "https"
   #     URI('http://example.com').scheme # => "http"
@@ -358,7 +359,7 @@ module Net
   # or method Net::HTTP.start.
   #
   # The proxy may be defined either by argument `p_addr` or by environment
-  # variable `'http_proxy'`.
+  # variable <code>'http_proxy'</code>.
   #
   # ### Proxy Using Argument `p_addr` as a String
   #
@@ -385,11 +386,12 @@ module Net
   #     http.proxy_user      # => "pname"
   #     http.proxy_pass      # => "ppass"
   #
-  # ### Proxy Using '`ENV['http_proxy']`'
+  # ### Proxy Using '<code>ENV['http_proxy']</code>'
   #
-  # When environment variable `'http_proxy'` is set to a URI string, the returned
-  # `http` will have the server at that URI as its proxy; note that the URI string
-  # must have a protocol such as `'http'` or `'https'`:
+  # When environment variable <code>'http_proxy'</code> is set to a URI string,
+  # the returned `http` will have the server at that URI as its proxy; note that
+  # the URI string must have a protocol such as <code>'http'</code> or
+  # <code>'https'</code>:
   #
   #     ENV['http_proxy'] = 'http://example.com'
   #     http = Net::HTTP.new(hostname)
@@ -447,8 +449,8 @@ module Net
   #
   # Net::HTTP does not compress the body of a request before sending.
   #
-  # By default, Net::HTTP adds header `'Accept-Encoding'` to a new [request
-  # object](rdoc-ref:Net::HTTPRequest):
+  # By default, Net::HTTP adds header <code>'Accept-Encoding'</code> to a new
+  # [request object](rdoc-ref:Net::HTTPRequest):
   #
   #     Net::HTTP::Get.new(uri)['Accept-Encoding']
   #     # => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3"
@@ -457,16 +459,16 @@ module Net
   # server is not required to do so.
   #
   # Net::HTTP does not automatically decompress a response body if the response
-  # has header `'Content-Range'`.
+  # has header <code>'Content-Range'</code>.
   #
   # Otherwise decompression (or not) depends on the value of header
   # [Content-Encoding](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#co
   # ntent-encoding-response-header):
   #
-  # *   `'deflate'`, `'gzip'`, or `'x-gzip'`: decompresses the body and deletes
-  #     the header.
-  # *   `'none'` or `'identity'`: does not decompress the body, but deletes the
-  #     header.
+  # *   <code>'deflate'</code>, <code>'gzip'</code>, or <code>'x-gzip'</code>:
+  #     decompresses the body and deletes the header.
+  # *   <code>'none'</code> or <code>'identity'</code>: does not decompress the
+  #     body, but deletes the header.
   # *   Any other value: leaves the body and header unchanged.
   #
   # ## What's Here
@@ -584,9 +586,11 @@ module Net
   # *   [:close_on_empty_response=](rdoc-ref:Net::HTTP#close_on_empty_response=):
   #     Sets whether to close connection on empty response.
   # *   [:ignore_eof](rdoc-ref:Net::HTTP#ignore_eof): Returns whether to ignore
-  #     end-of-file when reading a response body with `Content-Length` headers.
+  #     end-of-file when reading a response body with <code>Content-Length</code>
+  #     headers.
   # *   [:ignore_eof=](rdoc-ref:Net::HTTP#ignore_eof=): Sets whether to ignore
-  #     end-of-file when reading a response body with `Content-Length` headers.
+  #     end-of-file when reading a response body with <code>Content-Length</code>
+  #     headers.
   # *   [:response_body_encoding](rdoc-ref:Net::HTTP#response_body_encoding):
   #     Returns the encoding to use for the response body.
   # *   [#response_body_encoding=](rdoc-ref:Net::HTTP#response_body_encoding=):
@@ -907,8 +911,8 @@ module Net
     #
     # With no block given:
     #
-    # *   Calls `http.start` with no block (see #start), which opens a TCP
-    #     connection and HTTP session.
+    # *   Calls <code>http.start</code> with no block (see #start), which opens a
+    #     TCP connection and HTTP session.
     # *   Returns `http`.
     # *   The caller should call #finish to close the session:
     #
@@ -919,7 +923,7 @@ module Net
     #
     # With a block given:
     #
-    # *   Calls `http.start` with the block (see #start), which:
+    # *   Calls <code>http.start</code> with the block (see #start), which:
     #
     #     *   Opens a TCP connection and HTTP session.
     #     *   Calls the block, which may make any number of requests to the host.
@@ -975,8 +979,8 @@ module Net
     # *   #verify_mode
     # *   #write_timeout
     #
-    # Note: If `port` is `nil` and `opts[:use_ssl]` is a truthy value, the value
-    # passed to `new` is Net::HTTP.https_default_port, not `port`.
+    # Note: If `port` is `nil` and <code>opts[:use_ssl]</code> is a truthy value,
+    # the value passed to `new` is Net::HTTP.https_default_port, not `port`.
     #
     def self.start: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]?, **untyped opt) -> Net::HTTP
                   | [T] (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?Hash[Symbol, untyped]?, **untyped opt) { (Net::HTTP) -> T } -> T
@@ -995,8 +999,8 @@ module Net
     # Returns a new Net::HTTP object `http` (but does not open a TCP connection or
     # HTTP session).
     #
-    # With only string argument `address` given (and `ENV['http_proxy']` undefined
-    # or `nil`), the returned `http`:
+    # With only string argument `address` given (and <code>ENV['http_proxy']</code>
+    # undefined or `nil`), the returned `http`:
     #
     # *   Has the given address.
     # *   Has the default port number, Net::HTTP.default_port (80).
@@ -1112,9 +1116,8 @@ module Net
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets whether to determine the proxy from environment variable
-    # '`ENV['http_proxy']`'; see [Proxy Using
-    # ENV['http_proxy']](rdoc-ref:Net::HTTP@Proxy+Using+-27ENV-5B-27http_proxy-27-5D
-    # -27).
+    # '<code>ENV['http_proxy']</code>'; see {Proxy Using
+    # [ENV]('http_proxy')}[Net::HTTP@Proxy+Using+-27ENV-5B-27http_proxy-27-5D-27].
     #
     attr_writer proxy_from_env: untyped
 
@@ -1354,15 +1357,15 @@ module Net
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the available SSL ciphers. See
-    # [:SSL::SSLContext#ciphers=](OpenSSL::SSL::SSL::Context#ciphers=).
+    # [OpenSSL::SSL::SSLContext#ciphers=](OpenSSL::SSL::SSL::Context#ciphers=).
     #
     attr_accessor ciphers: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the extra X509 certificates to be added to the certificate
     # chain. See
-    # [:SSL::SSLContext#add_certificate](OpenSSL::SSL::SSL::Context#add_certificate)
-    # .
+    # [OpenSSL::SSL::SSLContext#add_certificate](OpenSSL::SSL::SSL::Context#add_cert
+    # ificate).
     #
     attr_accessor extra_chain_cert: untyped
 
@@ -1378,19 +1381,22 @@ module Net
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the SSL version. See
-    # [:SSL::SSLContext#ssl_version=](OpenSSL::SSL::SSL::Context#ssl_version=).
+    # [OpenSSL::SSL::SSLContext#ssl_version=](OpenSSL::SSL::SSL::Context#ssl_version
+    # =).
     #
     attr_accessor ssl_version: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the minimum SSL version. See
-    # [:SSL::SSLContext#min_version=](OpenSSL::SSL::SSL::Context#min_version=).
+    # [OpenSSL::SSL::SSLContext#min_version=](OpenSSL::SSL::SSL::Context#min_version
+    # =).
     #
     attr_accessor min_version: untyped
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns the maximum SSL version. See
-    # [:SSL::SSLContext#max_version=](OpenSSL::SSL::SSL::Context#max_version=).
+    # [OpenSSL::SSL::SSLContext#max_version=](OpenSSL::SSL::SSL::Context#max_version
+    # =).
     #
     attr_accessor max_version: untyped
 
@@ -1414,8 +1420,8 @@ module Net
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets or returns whether to verify that the server certificate is valid for the
     # hostname. See
-    # [:SSL::SSLContext#verify_hostname=](OpenSSL::SSL::SSL::Context#verify_hostname
-    # =).
+    # [OpenSSL::SSL::SSLContext#verify_hostname=](OpenSSL::SSL::SSL::Context#verify_
+    # hostname=).
     #
     attr_accessor verify_hostname: untyped
 
@@ -2005,8 +2011,8 @@ module Net
   #
   # ## About the Examples
   #
-  # Examples here assume that `net/http` has been required (which also requires
-  # `uri`):
+  # Examples here assume that <code>net/http</code> has been required (which also
+  # requires `uri`):
   #
   #     require 'net/http'
   #
@@ -2074,9 +2080,9 @@ module Net
     attr_reader uri: URI::Generic
 
     # <!-- rdoc-file=lib/net/http/generic_request.rb -->
-    # Returns `false` if the request's header `'Accept-Encoding'` has been set
-    # manually or deleted (indicating that the user intends to handle encoding in
-    # the response), `true` otherwise:
+    # Returns `false` if the request's header <code>'Accept-Encoding'</code> has
+    # been set manually or deleted (indicating that the user intends to handle
+    # encoding in the response), `true` otherwise:
     #
     #     req = Net::HTTP::Get.new(uri) # => #<Net::HTTP::Get GET>
     #     req['Accept-Encoding']        # => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3"
@@ -2207,8 +2213,8 @@ module Net
   #
   # ## About the Examples
   #
-  # Examples here assume that `net/http` has been required (which also requires
-  # `uri`):
+  # Examples here assume that <code>net/http</code> has been required (which also
+  # requires `uri`):
   #
   #     require 'net/http'
   #
@@ -2248,10 +2254,10 @@ module Net
   #
   # A field key may be:
   #
-  # *   A string: Key `'Accept'` is treated as if it were `'Accept'.downcase`;
-  #     i.e., `'accept'`.
-  # *   A symbol: Key `:Accept` is treated as if it were `:Accept.to_s.downcase`;
-  #     i.e., `'accept'`.
+  # *   A string: Key <code>'Accept'</code> is treated as if it were
+  #     <code>'Accept'.downcase</code>;  i.e., <code>'accept'</code>.
+  # *   A symbol: Key <code>:Accept</code> is treated as if it were
+  #     <code>:Accept.to_s.downcase</code>;  i.e., <code>'accept'</code>.
   #
   # Examples:
   #
@@ -2276,7 +2282,7 @@ module Net
   #         name; its value is the array value for the field.
   #
   # *   These methods return field values as string; the string value for a field
-  #     is equivalent to `self[key.downcase.to_s].join(', '))`:
+  #     is equivalent to <code>self[key.downcase.to_s].join(', '))</code>:
   #
   #     *   #[]: Returns the string value for the given key, or `nil` if it does
   #         not exist.
@@ -2339,12 +2345,15 @@ module Net
   #
   # *   #[]=: Sets the string or array value for the given key.
   # *   #add_field: Creates or adds to the array value for the given key.
-  # *   #basic_auth: Sets the string authorization header for `'Authorization'`.
-  # *   #content_length=: Sets the integer length for field `'Content-Length`.
-  # *   #content_type=: Sets the string value for field `'Content-Type'`.
+  # *   #basic_auth: Sets the string authorization header for
+  #     <code>'Authorization'</code>.
+  # *   #content_length=: Sets the integer length for field
+  #     <code>'Content-Length</code>.
+  # *   #content_type=: Sets the string value for field
+  #     <code>'Content-Type'</code>.
   # *   #proxy_basic_auth: Sets the string authorization header for
-  #     `'Proxy-Authorization'`.
-  # *   #set_range: Sets the value for field `'Range'`.
+  #     <code>'Proxy-Authorization'</code>.
+  # *   #set_range: Sets the value for field <code>'Range'</code>.
   #
   # ### Form Setters
   #
@@ -2358,28 +2367,33 @@ module Net
   # simple string value:
   #
   # *   #[]: Returns the string field value for the given key.
-  # *   #content_length: Returns the integer value of field `'Content-Length'`.
-  # *   #content_range: Returns the Range value of field `'Content-Range'`.
-  # *   #content_type: Returns the string value of field `'Content-Type'`.
+  # *   #content_length: Returns the integer value of field
+  #     <code>'Content-Length'</code>.
+  # *   #content_range: Returns the Range value of field
+  #     <code>'Content-Range'</code>.
+  # *   #content_type: Returns the string value of field
+  #     <code>'Content-Type'</code>.
   # *   #fetch: Returns the string field value for the given key.
   # *   #get_fields: Returns the array field value for the given `key`.
   # *   #main_type: Returns first part of the string value of field
-  #     `'Content-Type'`.
+  #     <code>'Content-Type'</code>.
   # *   #sub_type: Returns second part of the string value of field
-  #     `'Content-Type'`.
-  # *   #range: Returns an array of Range objects of field `'Range'`, or `nil`.
+  #     <code>'Content-Type'</code>.
+  # *   #range: Returns an array of Range objects of field <code>'Range'</code>,
+  #     or `nil`.
   # *   #range_length: Returns the integer length of the range given in field
-  #     `'Content-Range'`.
-  # *   #type_params: Returns the string parameters for `'Content-Type'`.
+  #     <code>'Content-Range'</code>.
+  # *   #type_params: Returns the string parameters for
+  #     <code>'Content-Type'</code>.
   #
   # ### Queries
   #
-  # *   #chunked?: Returns whether field `'Transfer-Encoding'` is set to
-  #     `'chunked'`.
-  # *   #connection_close?: Returns whether field `'Connection'` is set to
-  #     `'close'`.
-  # *   #connection_keep_alive?: Returns whether field `'Connection'` is set to
-  #     `'keep-alive'`.
+  # *   #chunked?: Returns whether field <code>'Transfer-Encoding'</code> is set
+  #     to <code>'chunked'</code>.
+  # *   #connection_close?: Returns whether field <code>'Connection'</code> is set
+  #     to <code>'close'</code>.
+  # *   #connection_keep_alive?: Returns whether field <code>'Connection'</code>
+  #     is set to <code>'keep-alive'</code>.
   # *   #key?: Returns whether a given key exists.
   #
   # ### Iterators
@@ -2715,8 +2729,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - range()
     # -->
-    # Returns an array of Range objects that represent the value of field `'Range'`,
-    # or `nil` if there is no such field; see [Range request
+    # Returns an array of Range objects that represent the value of field
+    # <code>'Range'</code>, or `nil` if there is no such field; see [Range request
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#range-request
     # -header):
     #
@@ -2734,7 +2748,7 @@ module Net
     #   - set_range(offset, length) -> range
     #   - set_range(begin..length) -> range
     # -->
-    # Sets the value for field `'Range'`; see [Range request
+    # Sets the value for field <code>'Range'</code>; see [Range request
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#range-request
     # -header):
     #
@@ -2769,8 +2783,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_length()
     # -->
-    # Returns the value of field `'Content-Length'` as an integer, or `nil` if there
-    # is no such field; see [Content-Length request
+    # Returns the value of field <code>'Content-Length'</code> as an integer, or
+    # `nil` if there is no such field; see [Content-Length request
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-lengt
     # h-request-header):
     #
@@ -2785,8 +2799,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_length=(len)
     # -->
-    # Sets the value of field `'Content-Length'` to the given numeric; see
-    # [Content-Length response
+    # Sets the value of field <code>'Content-Length'</code> to the given numeric;
+    # see [Content-Length response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-lengt
     # h-response-header):
     #
@@ -2807,8 +2821,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - chunked?()
     # -->
-    # Returns `true` if field `'Transfer-Encoding'` exists and has value
-    # `'chunked'`, `false` otherwise; see [Transfer-Encoding response
+    # Returns `true` if field <code>'Transfer-Encoding'</code> exists and has value
+    # <code>'chunked'</code>, `false` otherwise; see [Transfer-Encoding response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#transfer-enco
     # ding-response-header):
     #
@@ -2822,8 +2836,9 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - content_range()
     # -->
-    # Returns a Range object representing the value of field `'Content-Range'`, or
-    # `nil` if no such field exists; see [Content-Range response
+    # Returns a Range object representing the value of field
+    # <code>'Content-Range'</code>, or `nil` if no such field exists; see
+    # [Content-Range response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-range
     # -response-header):
     #
@@ -2840,8 +2855,8 @@ module Net
     #   - range_length()
     # -->
     # Returns the integer representing length of the value of field
-    # `'Content-Range'`, or `nil` if no such field exists; see [Content-Range
-    # response
+    # <code>'Content-Range'</code>, or `nil` if no such field exists; see
+    # [Content-Range response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-range
     # -response-header):
     #
@@ -2857,8 +2872,8 @@ module Net
     #   - content_type()
     # -->
     # Returns the [media type](https://en.wikipedia.org/wiki/Media_type) from the
-    # value of field `'Content-Type'`, or `nil` if no such field exists; see
-    # [Content-Type response
+    # value of field <code>'Content-Type'</code>, or `nil` if no such field exists;
+    # see [Content-Type response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
     # response-header):
     #
@@ -2874,7 +2889,8 @@ module Net
     # -->
     # Returns the leading ('type') part of the [media
     # type](https://en.wikipedia.org/wiki/Media_type) from the value of field
-    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # <code>'Content-Type'</code>, or `nil` if no such field exists; see
+    # [Content-Type response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
     # response-header):
     #
@@ -2890,7 +2906,8 @@ module Net
     # -->
     # Returns the trailing ('subtype') part of the [media
     # type](https://en.wikipedia.org/wiki/Media_type) from the value of field
-    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # <code>'Content-Type'</code>, or `nil` if no such field exists; see
+    # [Content-Type response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
     # response-header):
     #
@@ -2905,7 +2922,8 @@ module Net
     #   - type_params()
     # -->
     # Returns the trailing ('parameters') part of the value of field
-    # `'Content-Type'`, or `nil` if no such field exists; see [Content-Type response
+    # <code>'Content-Type'</code>, or `nil` if no such field exists; see
+    # [Content-Type response
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
     # response-header):
     #
@@ -2919,8 +2937,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - set_content_type(type, params = {})
     # -->
-    # Sets the value of field `'Content-Type'`; returns the new value; see
-    # [Content-Type request
+    # Sets the value of field <code>'Content-Type'</code>; returns the new value;
+    # see [Content-Type request
     # header](https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#content-type-
     # request-header):
     #
@@ -2944,8 +2962,8 @@ module Net
     #   - set_form_data(params, sep = '&')
     # -->
     # Sets the request body to a URL-encoded string derived from argument `params`,
-    # and sets request header field `'Content-Type'` to
-    # `'application/x-www-form-urlencoded'`.
+    # and sets request header field <code>'Content-Type'</code> to
+    # <code>'application/x-www-form-urlencoded'</code>.
     #
     # The resulting request is suitable for HTTP request `POST` or `PUT`.
     #
@@ -2953,7 +2971,7 @@ module Net
     # [URI.encode_www_form](rdoc-ref:URI.encode_www_form).
     #
     # With only argument `params` given, sets the body to a URL-encoded string with
-    # the default separator `'&'`:
+    # the default separator <code>'&'</code>:
     #
     #     req = Net::HTTP::Post.new('example.com')
     #
@@ -3001,7 +3019,7 @@ module Net
     #
     # Argument `params` should be an
     # [Enumerable](rdoc-ref:Enumerable@Enumerable+in+Ruby+Classes) (method
-    # `params.map` will be called), and is often an array or hash.
+    # <code>params.map</code> will be called), and is often an array or hash.
     #
     # First, we set up a request:
     #
@@ -3009,7 +3027,7 @@ module Net
     #     _uri.path ='/posts'
     #     req = Net::HTTP::Post.new(_uri)
     #
-    # **Argument `params` As an Array**
+    # <strong>Argument `params` As an Array</strong>
     #
     # When `params` is an array, each of its elements is a subarray that defines a
     # field; the subarray may contain:
@@ -3022,7 +3040,8 @@ module Net
     #
     #         req.set_form([%w[foo 0], %w[bar 1], %w[baz 2]])
     #
-    # *   When argument `enctype` (see below) is given as `'multipart/form-data'`:
+    # *   When argument `enctype` (see below) is given as
+    #     <code>'multipart/form-data'</code>:
     #
     #     *   A string name and an IO stream opened for reading:
     #
@@ -3032,8 +3051,8 @@ module Net
     #     *   A string name, an IO stream opened for reading, and an options hash,
     #         which may contain these entries:
     #
-    #         *   `:filename`: The name of the file to use.
-    #         *   `:content_type`: The content type of the uploaded file.
+    #         *   <code>:filename</code>: The name of the file to use.
+    #         *   <code>:content_type</code>: The content type of the uploaded file.
     #
     #         Example:
     #
@@ -3043,7 +3062,7 @@ module Net
     #
     #     req.set_form(['foo', %w[bar 1], ['file', file]])
     #
-    # **Argument `params` As a Hash**
+    # <strong>Argument `params` As a Hash</strong>
     #
     # When `params` is a hash, each of its entries is a name/value pair that defines
     # a field:
@@ -3054,7 +3073,7 @@ module Net
     #     *   `nil`.
     #     *   Another string.
     #     *   An IO stream opened for reading (only when argument `enctype` -- see
-    #         below -- is given as `'multipart/form-data'`).
+    #         below -- is given as <code>'multipart/form-data'</code>).
     #
     # Examples:
     #
@@ -3072,21 +3091,22 @@ module Net
     #     req.set_form({'foo' => nil, 'bar' => 1, 'file' => file})
     #
     # Optional argument `enctype` specifies the value to be given to field
-    # `'Content-Type'`, and must be one of:
+    # <code>'Content-Type'</code>, and must be one of:
     #
-    # *   `'application/x-www-form-urlencoded'` (the default).
-    # *   `'multipart/form-data'`; see [RFC
+    # *   <code>'application/x-www-form-urlencoded'</code> (the default).
+    # *   <code>'multipart/form-data'</code>; see [RFC
     #     7578](https://www.rfc-editor.org/rfc/rfc7578).
     #
     # Optional argument `formopt` is a hash of options (applicable only when
-    # argument `enctype` is `'multipart/form-data'`) that may include the following
-    # entries:
+    # argument `enctype` is <code>'multipart/form-data'</code>) that may include the
+    # following entries:
     #
-    # *   `:boundary`: The value is the boundary string for the multipart message.
-    #     If not given, the boundary is a random string. See
+    # *   <code>:boundary</code>: The value is the boundary string for the multipart
+    #     message. If not given, the boundary is a random string. See
     #     [Boundary](https://www.rfc-editor.org/rfc/rfc7578#section-4.1).
-    # *   `:charset`: Value is the character set for the form submission. Field
-    #     names and values of non-file fields should be encoded with this charset.
+    # *   <code>:charset</code>: Value is the character set for the form submission.
+    #     Field names and values of non-file fields should be encoded with this
+    #     charset.
     #
     def set_form: (Hash[untyped, untyped] params, ?String enctype, ?Hash[untyped, untyped] formopt) -> void
 
@@ -3094,8 +3114,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - basic_auth(account, password)
     # -->
-    # Sets header `'Authorization'` using the given `account` and `password`
-    # strings:
+    # Sets header <code>'Authorization'</code> using the given `account` and
+    # `password` strings:
     #
     #     req.basic_auth('my_account', 'my_password')
     #     req['Authorization']
@@ -3107,8 +3127,8 @@ module Net
     #   rdoc-file=lib/net/http/header.rb
     #   - proxy_basic_auth(account, password)
     # -->
-    # Sets header `'Proxy-Authorization'` using the given `account` and `password`
-    # strings:
+    # Sets header <code>'Proxy-Authorization'</code> using the given `account` and
+    # `password` strings:
     #
     #     req.proxy_basic_auth('my_account', 'my_password')
     #     req['Proxy-Authorization']
@@ -3743,8 +3763,8 @@ module Net
   #
   # ## About the Examples
   #
-  # Examples here assume that `net/http` has been required (which also requires
-  # `uri`):
+  # Examples here assume that <code>net/http</code> has been required (which also
+  # requires `uri`):
   #
   #     require 'net/http'
   #
@@ -3796,7 +3816,7 @@ module Net
   # Class Net::HTTPResponse includes module Net::HTTPHeader, which provides access
   # to response header values via (among others):
   #
-  # *   Hash-like method `[]`.
+  # *   Hash-like method <code>[]</code>.
   # *   Specific reader methods, such as `content_type`.
   #
   # Examples:
@@ -4280,12 +4300,13 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Non-Authoritative Information` responses (status code
-  # 203).
+  # Response class for <code>Non-Authoritative Information</code> responses
+  # (status code 203).
   #
-  # The `Non-Authoritative Information` response indicates that the server is a
-  # transforming proxy (such as a Web accelerator) that received a 200 OK response
-  # from its origin, and is returning a modified version of the origin's response.
+  # The <code>Non-Authoritative Information</code> response indicates that the
+  # server is a transforming proxy (such as a Web accelerator) that received a 200
+  # OK response from its origin, and is returning a modified version of the
+  # origin's response.
   #
   # This class also includes (indirectly) module Net::HTTPHeader, which gives
   # access to its [methods for getting headers](rdoc-ref:Net::HTTPHeader@Getters).
@@ -4365,11 +4386,12 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Multi-Status (WebDAV)` responses (status code 207).
+  # Response class for <code>Multi-Status (WebDAV)</code> responses (status code
+  # 207).
   #
-  # The `Multi-Status (WebDAV)` response indicates that the server has received
-  # the request, and that the message body can contain a number of separate
-  # response codes.
+  # The <code>Multi-Status (WebDAV)</code> response indicates that the server has
+  # received the request, and that the message body can contain a number of
+  # separate response codes.
   #
   # This class also includes (indirectly) module Net::HTTPHeader, which gives
   # access to its [methods for getting headers](rdoc-ref:Net::HTTPHeader@Getters).
@@ -4384,12 +4406,13 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Already Reported (WebDAV)` responses (status code 208).
+  # Response class for <code>Already Reported (WebDAV)</code> responses (status
+  # code 208).
   #
-  # The `Already Reported (WebDAV)` response indicates that the server has
-  # received the request, and that the members of a DAV binding have already been
-  # enumerated in a preceding part of the (multi-status) response, and are not
-  # being included again.
+  # The <code>Already Reported (WebDAV)</code> response indicates that the server
+  # has received the request, and that the members of a DAV binding have already
+  # been enumerated in a preceding part of the (multi-status) response, and are
+  # not being included again.
   #
   # This class also includes (indirectly) module Net::HTTPHeader, which gives
   # access to its [methods for getting headers](rdoc-ref:Net::HTTPHeader@Getters).
@@ -5003,7 +5026,7 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Locked (WebDAV)` responses (status code 423).
+  # Response class for <code>Locked (WebDAV)</code> responses (status code 423).
   #
   # The requested resource is locked.
   #
@@ -5020,7 +5043,8 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Failed Dependency (WebDAV)` responses (status code 424).
+  # Response class for <code>Failed Dependency (WebDAV)</code> responses (status
+  # code 424).
   #
   # The request failed because it depended on another request and that request
   # failed. See [424 Failed Dependency
@@ -5278,8 +5302,8 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Insufficient Storage (WebDAV)` responses (status code
-  # 507).
+  # Response class for <code>Insufficient Storage (WebDAV)</code> responses
+  # (status code 507).
   #
   # The server is unable to store the representation needed to complete the
   # request.
@@ -5298,7 +5322,8 @@ module Net
   end
 
   # <!-- rdoc-file=lib/net/http/responses.rb -->
-  # Response class for `Loop Detected (WebDAV)` responses (status code 508).
+  # Response class for <code>Loop Detected (WebDAV)</code> responses (status code
+  # 508).
   #
   # The server detected an infinite loop while processing the request.
   #
@@ -5357,8 +5382,8 @@ module Net
   #
   # ## About the Examples
   #
-  # Examples here assume that `net/http` has been required (which also requires
-  # `uri`):
+  # Examples here assume that <code>net/http</code> has been required (which also
+  # requires `uri`):
   #
   #     require 'net/http'
   #
@@ -5410,7 +5435,7 @@ module Net
   # Class Net::HTTPResponse includes module Net::HTTPHeader, which provides access
   # to response header values via (among others):
   #
-  # *   Hash-like method `[]`.
+  # *   Hash-like method <code>[]</code>.
   # *   Specific reader methods, such as `content_type`.
   #
   # Examples:

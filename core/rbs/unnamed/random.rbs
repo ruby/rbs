@@ -38,7 +38,7 @@ module RBS
       #     rand(1.5)       # => 0
       #
       # When `range` is a Range, `rand` returns a random number where
-      # `range.member?(number) == true`.
+      # <code>range.member?(number) == true</code>.
       #
       #     prng.rand(5..9)      # => one of [5, 6, 7, 8, 9]
       #     prng.rand(5...9)     # => one of [5, 6, 7, 8]
@@ -46,7 +46,8 @@ module RBS
       #     prng.rand(5.0...9.0) # => between 5.0 and 9.0, excluding 9.0
       #
       # Both the beginning and ending values of the range must respond to subtract
-      # (`-`) and add (`+`)methods, or rand will raise an ArgumentError.
+      # (<code>-</code>) and add (<code>+</code>)methods, or rand will raise an
+      # ArgumentError.
       #
       %a{annotate:rdoc:copy:Random#rand}
       def rand: (?0) -> Float
@@ -87,9 +88,10 @@ module RBS
     # <!-- rdoc-file=lib/random/formatter.rb -->
     # ## Random number formatter.
     #
-    # Formats generated random numbers in many manners. When `'random/formatter'` is
-    # required, several methods are added to empty core module `Random::Formatter`,
-    # making them available as Random's instance and module methods.
+    # Formats generated random numbers in many manners. When
+    # <code>'random/formatter'</code> is required, several methods are added to
+    # empty core module <code>Random::Formatter</code>, making them available as
+    # Random's instance and module methods.
     #
     # Standard library SecureRandom is also extended with the module, and the
     # methods described below are available as a module methods in it.

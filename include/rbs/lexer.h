@@ -70,6 +70,7 @@ enum RBSTokenType {
     kATRBS,        /* @rbs */
     kSKIP,         /* skip */
     kRETURN,       /* return */
+    kMODULESELF,   /* module-self */
 
     tLIDENT,    /* Identifiers starting with lower case */
     tUIDENT,    /* Identifiers starting with upper case */
@@ -136,8 +137,8 @@ typedef struct {
  * */
 typedef struct {
     rbs_string_t string;
-    int start_pos;          /* The character position that defines the start of the input */
-    int end_pos;            /* The character position that defines the end of the input */
+    int start_pos;          /* The byte position that defines the start of the input */
+    int end_pos;            /* The byte position that defines the end of the input */
     rbs_position_t current; /* The current position: just before the current_character */
     rbs_position_t start;   /* The start position of the current token */
 

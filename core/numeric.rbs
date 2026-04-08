@@ -23,10 +23,10 @@
 # two-member Array containing an object that has been coerced into an instance
 # of the new class and `self` (see #coerce).
 #
-# Inheriting classes should also implement arithmetic operator methods (`+`,
-# `-`, `*` and `/`) and the `<=>` operator (see Comparable). These methods may
-# rely on `coerce` to ensure interoperability with instances of other numeric
-# classes.
+# Inheriting classes should also implement arithmetic operator methods
+# (<code>+</code>, <code>-</code>, <code>*</code> and <code>/</code>) and the
+# <code><=></code> operator (see Comparable). These methods may rely on `coerce`
+# to ensure interoperability with instances of other numeric classes.
 #
 #     class Tally < Numeric
 #       def initialize(string)
@@ -88,7 +88,7 @@
 #
 # *   #finite?: Returns true unless `self` is infinite or not a number.
 # *   #infinite?: Returns -1, `nil` or +1, depending on whether `self` is
-#     `-Infinity<tt>, finite, or <tt>+Infinity`.
+#     <code>-Infinity<tt>, finite, or <tt>+Infinity</code>.
 # *   #integer?: Returns whether `self` is an integer.
 # *   #negative?: Returns whether `self` is negative.
 # *   #nonzero?: Returns whether `self` is not zero.
@@ -119,27 +119,29 @@
 #     Math::PI otherwise.
 # *   #ceil: Returns the smallest number greater than or equal to `self`, to a
 #     given precision.
-# *   #coerce: Returns array `[coerced_self, coerced_other]` for the given other
-#     value.
+# *   #coerce: Returns array <code>[coerced_self, coerced_other]</code> for the
+#     given other value.
 # *   #conj (aliased as #conjugate): Returns the complex conjugate of `self`.
 # *   #denominator: Returns the denominator (always positive) of the Rational
 #     representation of `self`.
 # *   #div: Returns the value of `self` divided by the given value and converted
 #     to an integer.
-# *   #divmod: Returns array `[quotient, modulus]` resulting from dividing
-#     `self` the given divisor.
+# *   #divmod: Returns array <code>[quotient, modulus]</code> resulting from
+#     dividing `self` the given divisor.
 # *   #fdiv: Returns the Float result of dividing `self` by the given divisor.
 # *   #floor: Returns the largest number less than or equal to `self`, to a
 #     given precision.
-# *   #i: Returns the Complex object `Complex(0, self)`. the given value.
+# *   #i: Returns the Complex object <code>Complex(0, self)</code>. the given
+#     value.
 # *   #imaginary (aliased as #imag): Returns the imaginary part of the `self`.
 # *   #numerator: Returns the numerator of the Rational representation of
 #     `self`; has the same sign as `self`.
-# *   #polar: Returns the array `[self.abs, self.arg]`.
+# *   #polar: Returns the array <code>[self.abs, self.arg]</code>.
 # *   #quo: Returns the value of `self` divided by the given value.
 # *   #real: Returns the real part of `self`.
-# *   #rect (aliased as #rectangular): Returns the array `[self, 0]`.
-# *   #remainder: Returns `self-arg*(self/arg).truncate` for the given `arg`.
+# *   #rect (aliased as #rectangular): Returns the array <code>[self, 0]</code>.
+# *   #remainder: Returns <code>self-arg*(self/arg).truncate</code> for the
+#     given `arg`.
 # *   #round: Returns the value of `self` rounded to the nearest value for the
 #     given a precision.
 # *   #to_c: Returns the Complex representation of `self`.
@@ -275,7 +277,7 @@ class Numeric
   # as specified by the given `ndigits`, which must be an [integer-convertible
   # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
   #
-  # Equivalent to `self.to_f.ceil(ndigits)`.
+  # Equivalent to <code>self.to_f.ceil(ndigits)</code>.
   #
   # Related: #floor, Float#ceil.
   #
@@ -343,9 +345,9 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - div(other) -> integer
   # -->
-  # Returns the quotient `self/other` as an integer (via `floor`), using method
-  # `/` as defined in the subclass of Numeric. (Numeric itself does not define
-  # `/`.)
+  # Returns the quotient <code>self/other</code> as an integer (via `floor`),
+  # using method <code>/</code> as defined in the subclass of Numeric. (Numeric
+  # itself does not define <code>/</code>.)
   #
   # Of the Core and Standard Library classes, Only Float and Rational use this
   # implementation.
@@ -356,7 +358,7 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - divmod(other) -> array
   # -->
-  # Returns a 2-element array `[q, r]`, where
+  # Returns a 2-element array <code>[q, r]</code>, where
   #
   #     q = (self/other).floor                  # Quotient
   #     r = self % other                        # Remainder
@@ -397,8 +399,8 @@ class Numeric
   #     1.eql?(Rational(1, 1)) # => false
   #     1.eql?(Complex(1, 0))  # => false
   #
-  # Method `eql?` is different from `==` in that `eql?` requires matching types,
-  # while `==` does not.
+  # Method <code>eql?</code> is different from <code>==</code> in that
+  # <code>eql?</code> requires matching types, while <code>==</code> does not.
   #
   def eql?: (untyped) -> bool
 
@@ -406,8 +408,9 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - fdiv(other) -> float
   # -->
-  # Returns the quotient `self/other` as a float, using method `/` as defined in
-  # the subclass of Numeric. (Numeric itself does not define `/`.)
+  # Returns the quotient <code>self/other</code> as a float, using method
+  # <code>/</code> as defined in the subclass of Numeric. (Numeric itself does not
+  # define <code>/</code>.)
   #
   # Of the Core and Standard Library classes, only BigDecimal uses this
   # implementation.
@@ -430,7 +433,7 @@ class Numeric
   # specified by the given `ndigits`, which must be an [integer-convertible
   # object](rdoc-ref:implicit_conversion.rdoc@Integer-Convertible+Objects).
   #
-  # Equivalent to `self.to_f.floor(ndigits)`.
+  # Equivalent to <code>self.to_f.floor(ndigits)</code>.
   #
   # Related: #ceil, Float#floor.
   #
@@ -441,7 +444,7 @@ class Numeric
   #   rdoc-file=numeric.c
   #   - i -> complex
   # -->
-  # Returns `Complex(0, self)`:
+  # Returns <code>Complex(0, self)</code>:
   #
   #     2.i              # => (0+2i)
   #     -2.i             # => (0-2i)
@@ -470,8 +473,8 @@ class Numeric
   #   rdoc-file=numeric.rb
   #   - infinite? -> -1, 1, or nil
   # -->
-  # Returns `nil`, -1, or 1 depending on whether `self` is finite, `-Infinity`, or
-  # `+Infinity`.
+  # Returns `nil`, -1, or 1 depending on whether `self` is finite,
+  # <code>-Infinity</code>, or <code>+Infinity</code>.
   #
   def infinite?: () -> Integer?
 
@@ -539,7 +542,7 @@ class Numeric
   #   - nonzero?  ->  self or nil
   # -->
   # Returns `self` if `self` is not a zero value, `nil` otherwise; uses method
-  # `zero?` for the evaluation.
+  # <code>zero?</code> for the evaluation.
   #
   # The returned `self` allows the method to be chained:
   #
@@ -571,7 +574,7 @@ class Numeric
   #   rdoc-file=complex.c
   #   - polar -> array
   # -->
-  # Returns array `[self.abs, self.arg]`.
+  # Returns array <code>[self.abs, self.arg]</code>.
   #
   def polar: () -> [ Numeric, Numeric ]
 
@@ -609,7 +612,7 @@ class Numeric
   def real?: () -> true
 
   # <!-- rdoc-file=complex.c -->
-  # Returns array `[self, 0]`.
+  # Returns array <code>[self, 0]</code>.
   #
   def rect: () -> [ Numeric, Numeric ]
 
@@ -617,7 +620,7 @@ class Numeric
   #   rdoc-file=complex.c
   #   - rect -> array
   # -->
-  # Returns array `[self, 0]`.
+  # Returns array <code>[self, 0]</code>.
   #
   alias rectangular rect
 
@@ -753,8 +756,8 @@ class Numeric
   # If all the arguments are integers, the loop operates using an integer counter.
   #
   # If any of the arguments are floating point numbers, all are converted to
-  # floats, and the loop is executed *floor(n + n*Float::EPSILON) + 1* times,
-  # where *n = (limit - self)/step*.
+  # floats, and the loop is executed <em>floor(n + n*Float::EPSILON) + 1</em>
+  # times, where <em>n = (limit - self)/step</em>.
   #
   def step: (?Numeric limit, ?Numeric step) { (Numeric) -> void } -> self
           | (?Numeric limit, ?Numeric step) -> Enumerator::ArithmeticSequence

@@ -2,7 +2,7 @@
 # A File object is a representation of a file in the underlying platform.
 #
 # Class File extends module FileTest, supporting such singleton methods as
-# `File.exist?`.
+# <code>File.exist?</code>.
 #
 # ## About the Examples
 #
@@ -93,8 +93,8 @@
 #     | 'a+' | Anywhere |    0     | End only |    End    |
 #     |------|----------|----------|----------|-----------|
 #
-# Note that modes `'r'` and `'r+'` are not allowed for a non-existent file
-# (exception raised).
+# Note that modes <code>'r'</code> and <code>'r+'</code> are not allowed for a
+# non-existent file (exception raised).
 #
 # In the tables:
 #
@@ -108,7 +108,7 @@
 #
 # ##### Read/Write Modes for Existing File
 #
-# *   `'r'`:
+# *   <code>'r'</code>:
 #
 #     *   File is not initially truncated:
 #
@@ -137,7 +137,7 @@
 #
 #             f.write('foo') # Raises IOError.
 #
-# *   `'w'`:
+# *   <code>'w'</code>:
 #
 #     *   File is initially truncated:
 #
@@ -191,7 +191,7 @@
 #
 #             f.read # Raises IOError.
 #
-# *   `'a'`:
+# *   <code>'a'</code>:
 #
 #     *   File is not initially truncated:
 #
@@ -223,7 +223,7 @@
 #
 #             f.read # Raises IOError.
 #
-# *   `'r+'`:
+# *   <code>'r+'</code>:
 #
 #     *   File is not initially truncated:
 #
@@ -278,7 +278,7 @@
 #             File.read(path)
 #             # => "WWWst lineXXXecond line\nFourth line\nFifth YYYe\n\u0000\u0000ZZZ"
 #
-# *   `'a+'`:
+# *   <code>'a+'</code>:
 #
 #     *   File is not initially truncated:
 #
@@ -319,10 +319,10 @@
 #
 # ##### Read/Write Modes for File To Be Created
 #
-# Note that modes `'r'` and `'r+'` are not allowed for a non-existent file
-# (exception raised).
+# Note that modes <code>'r'</code> and <code>'r+'</code> are not allowed for a
+# non-existent file (exception raised).
 #
-# *   `'w'`:
+# *   <code>'w'</code>:
 #
 #     *   File's initial write position is 0:
 #
@@ -372,7 +372,7 @@
 #
 #             f.read # Raises IOError.
 #
-# *   `'a'`:
+# *   <code>'a'</code>:
 #
 #     *   File's initial write position is 0:
 #
@@ -399,7 +399,7 @@
 #
 #             f.read # Raises IOError.
 #
-# *   `'w+'`:
+# *   <code>'w+'</code>:
 #
 #     *   File's initial position is 0:
 #
@@ -463,7 +463,7 @@
 #             f.read
 #             # => "bah"
 #
-# *   `'a+'`:
+# *   <code>'a+'</code>:
 #
 #     *   File's initial write position is 0:
 #
@@ -506,12 +506,13 @@
 # To specify whether data is to be treated as text or as binary data, either of
 # the following may be suffixed to any of the string read/write modes above:
 #
-# *   `'t'`: Text data; sets the default external encoding to `Encoding::UTF_8`;
-#     on Windows, enables conversion between EOL and CRLF and enables
-#     interpreting `0x1A` as an end-of-file marker.
-# *   `'b'`: Binary data; sets the default external encoding to
-#     `Encoding::ASCII_8BIT`; on Windows, suppresses conversion between EOL and
-#     CRLF and disables interpreting `0x1A` as an end-of-file marker.
+# *   <code>'t'</code>: Text data; sets the default external encoding to
+#     <code>Encoding::UTF_8</code>; on Windows, enables conversion between EOL
+#     and CRLF and enables interpreting `0x1A` as an end-of-file marker.
+# *   <code>'b'</code>: Binary data; sets the default external encoding to
+#     <code>Encoding::ASCII_8BIT</code>; on Windows, suppresses conversion
+#     between EOL and CRLF and disables interpreting `0x1A` as an end-of-file
+#     marker.
 #
 # If neither is given, the stream defaults to text data.
 #
@@ -530,8 +531,8 @@
 #
 # The following may be suffixed to any writable string mode above:
 #
-# *   `'x'`: Creates the file if it does not exist; raises an exception if the
-#     file exists.
+# *   <code>'x'</code>: Creates the file if it does not exist; raises an
+#     exception if the file exists.
 #
 # Example:
 #
@@ -546,12 +547,12 @@
 # ### Integer Access Modes
 #
 # When mode is an integer it must be one or more of the following constants,
-# which may be combined by the bitwise OR operator `|`:
+# which may be combined by the bitwise OR operator <code>|</code>:
 #
-# *   `File::RDONLY`: Open for reading only.
-# *   `File::WRONLY`: Open for writing only.
-# *   `File::RDWR`: Open for reading and writing.
-# *   `File::APPEND`: Open for appending only.
+# *   <code>File::RDONLY</code>: Open for reading only.
+# *   <code>File::WRONLY</code>: Open for writing only.
+# *   <code>File::RDWR</code>: Open for reading and writing.
+# *   <code>File::APPEND</code>: Open for appending only.
 #
 # Examples:
 #
@@ -565,19 +566,19 @@
 #
 # These constants may also be ORed into the integer mode:
 #
-# *   `File::CREAT`: Create file if it does not exist.
-# *   `File::EXCL`: Raise an exception if `File::CREAT` is given and the file
-#     exists.
+# *   <code>File::CREAT</code>: Create file if it does not exist.
+# *   <code>File::EXCL</code>: Raise an exception if <code>File::CREAT</code> is
+#     given and the file exists.
 #
 # ### Data Mode Specified as an Integer
 #
 # Data mode cannot be specified as an integer. When the stream access mode is
 # given as an integer, the data mode is always text, never binary.
 #
-# Note that although there is a constant `File::BINARY`, setting its value in an
-# integer stream mode has no effect; this is because, as documented in
-# File::Constants, the `File::BINARY` value disables line code conversion, but
-# does not change the external encoding.
+# Note that although there is a constant <code>File::BINARY</code>, setting its
+# value in an integer stream mode has no effect; this is because, as documented
+# in File::Constants, the <code>File::BINARY</code> value disables line code
+# conversion, but does not change the external encoding.
 #
 # ### Encodings
 #
@@ -608,14 +609,14 @@
 # internal to external encoding. For further details about transcoding input and
 # output, see [Encodings](rdoc-ref:encodings.rdoc@Encodings).
 #
-# If the external encoding is `'BOM|UTF-8'`, `'BOM|UTF-16LE'` or
-# `'BOM|UTF16-BE'`, Ruby checks for a Unicode BOM in the input document to help
-# determine the encoding. For UTF-16 encodings the file open mode must be
-# binary. If the BOM is found, it is stripped and the external encoding from the
-# BOM is used.
+# If the external encoding is <code>'BOM|UTF-8'</code>,
+# <code>'BOM|UTF-16LE'</code> or <code>'BOM|UTF16-BE'</code>, Ruby checks for a
+# Unicode BOM in the input document to help determine the encoding. For UTF-16
+# encodings the file open mode must be binary. If the BOM is found, it is
+# stripped and the external encoding from the BOM is used.
 #
-# Note that the BOM-style encoding option is case insensitive, so `'bom|utf-8'`
-# is also valid.
+# Note that the BOM-style encoding option is case insensitive, so
+# <code>'bom|utf-8'</code> is also valid.
 #
 # ## File Permissions
 #
@@ -669,7 +670,7 @@
 #
 # Various constants for use in File and IO methods may be found in module
 # File::Constants; an array of their names is returned by
-# `File::Constants.constants`.
+# <code>File::Constants.constants</code>.
 #
 # ## What's Here
 #
@@ -705,7 +706,7 @@
 # *   ::basename: Returns the last component of the given file path.
 # *   ::dirname: Returns all but the last component of the given file path.
 # *   ::expand_path: Returns the absolute file path for the given path,
-#     expanding `~` for a home directory.
+#     expanding <code>~</code> for a home directory.
 # *   ::extname: Returns the file extension for the given file path.
 # *   ::fnmatch? (aliased as ::fnmatch): Returns whether the given file path
 #     matches the given pattern.
@@ -879,8 +880,8 @@ class File < IO
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless *dir_string* is
   # given, in which case it will be used as the starting point. If the given
-  # pathname starts with a ```~`'' it is NOT expanded, it is treated as a normal
-  # directory name.
+  # pathname starts with a ``<code>~</code>'' it is NOT expanded, it is treated as
+  # a normal directory name.
   #
   #     File.absolute_path("~oracle/bin")       #=> "<relative_path>/~oracle/bin"
   #
@@ -966,8 +967,8 @@ class File < IO
   # -->
   # Changes permission bits on the named file(s) to the bit pattern represented by
   # *mode_int*. Actual effects are operating system dependent (see the beginning
-  # of this section). On Unix systems, see `chmod(2)` for details. Returns the
-  # number of files processed.
+  # of this section). On Unix systems, see <code>chmod(2)</code> for details.
+  # Returns the number of files processed.
   #
   #     File.chmod(0644, "testfile", "out")   #=> 2
   #
@@ -1009,9 +1010,9 @@ class File < IO
   # -->
   # Deletes the named files, returning the number of names passed as arguments.
   # Raises an exception on any error. Since the underlying implementation relies
-  # on the `unlink(2)` system call, the type of exception raised depends on its
-  # error type (see https://linux.die.net/man/2/unlink) and has the form of e.g.
-  # Errno::ENOENT.
+  # on the <code>unlink(2)</code> system call, the type of exception raised
+  # depends on its error type (see https://linux.die.net/man/2/unlink) and has the
+  # form of e.g. Errno::ENOENT.
   #
   # See also Dir::rmdir.
   #
@@ -1114,9 +1115,9 @@ class File < IO
   # Converts a pathname to an absolute pathname. Relative paths are referenced
   # from the current working directory of the process unless `dir_string` is
   # given, in which case it will be used as the starting point. The given pathname
-  # may start with a ```~`'', which expands to the process owner's home directory
-  # (the environment variable `HOME` must be set correctly). ```~`*user*'' expands
-  # to the named user's home directory.
+  # may start with a ``<code>~</code>'', which expands to the process owner's home
+  # directory (the environment variable `HOME` must be set correctly).
+  # ``<code>~</code>*user*'' expands to the named user's home directory.
   #
   #     File.expand_path("~oracle/bin")           #=> "/home/oracle/bin"
   #
@@ -1130,7 +1131,7 @@ class File < IO
   #     #=> ".../path/to/project/lib/mygem.rb"
   #
   # So first it resolves the parent of __FILE__, that is bin/, then go to the
-  # parent, the root of the project and appends `lib/mygem.rb`.
+  # parent, the root of the project and appends <code>lib/mygem.rb</code>.
   #
   def self.expand_path: (path file_name, ?path dir_string) -> String
 
@@ -1182,48 +1183,48 @@ class File < IO
   # regular expression; instead it follows rules similar to shell filename
   # globbing.  It may contain the following metacharacters:
   #
-  # `*`
+  # <code>*</code>
   # :   Matches any file. Can be restricted by other values in the glob.
-  #     Equivalent to `/.*/x` in regexp.
+  #     Equivalent to <code>/.*/x</code> in regexp.
   #
-  #     `*`
+  #     <code>*</code>
   # :       Matches all regular files
   #
-  #     `c*`
+  #     <code>c*</code>
   # :       Matches all files beginning with `c`
   #
-  #     `*c`
+  #     <code>*c</code>
   # :       Matches all files ending with `c`
   #
-  #     `*c*`
+  #     <code>*c*</code>
   # :       Matches all files that have `c` in them (including at the beginning or
   #         end).
   #
   #
-  #     To match hidden files (that start with a `.`) set the File::FNM_DOTMATCH
-  #     flag.
+  #     To match hidden files (that start with a <code>.</code>) set the
+  #     File::FNM_DOTMATCH flag.
   #
   #
-  # `**`
+  # <code>**</code>
   # :   Matches directories recursively or files expansively.
   #
   #
-  # `?`
-  # :   Matches any one character. Equivalent to `/.{1}/` in regexp.
+  # <code>?</code>
+  # :   Matches any one character. Equivalent to <code>/.{1}/</code> in regexp.
   #
   #
-  # `[set]`
+  # <code>[set]</code>
   # :   Matches any one character in `set`.  Behaves exactly like character sets
-  #     in Regexp, including set negation (`[^a-z]`).
+  #     in Regexp, including set negation (<code>[^a-z]</code>).
   #
   #
-  # `\`
+  # <code>\</code>
   # :   Escapes the next metacharacter.
   #
   #
-  # `{a,b}`
+  # <code>{a,b}</code>
   # :   Matches pattern a and pattern b if File::FNM_EXTGLOB flag is enabled.
-  #     Behaves like a Regexp union (`(?:a|b)`).
+  #     Behaves like a Regexp union (<code>(?:a|b)</code>).
   #
   #
   # `flags` is a bitwise OR of the `FNM_XXX` constants. The same glob pattern and
@@ -1333,7 +1334,7 @@ class File < IO
   #   rdoc-file=file.c
   #   - File.join(string, ...)  ->  string
   # -->
-  # Returns a new string formed by joining the strings using `"/"`.
+  # Returns a new string formed by joining the strings using <code>"/"</code>.
   #
   #     File.join("usr", "mail", "gumby")   #=> "usr/mail/gumby"
   #
@@ -1513,8 +1514,8 @@ class File < IO
   # 1.  It must be in an ASCII-compatible encoding; otherwise, an
   #     Encoding::CompatibilityError is raised.
   #
-  # 2.  It must not contain the NUL character (`\0`); otherwise, an ArgumentError
-  #     is raised.
+  # 2.  It must not contain the NUL character (<code>\0</code>); otherwise, an
+  #     ArgumentError is raised.
   #
   def self.path: (path path) -> String
 
@@ -1750,9 +1751,9 @@ class File < IO
   # -->
   # Deletes the named files, returning the number of names passed as arguments.
   # Raises an exception on any error. Since the underlying implementation relies
-  # on the `unlink(2)` system call, the type of exception raised depends on its
-  # error type (see https://linux.die.net/man/2/unlink) and has the form of e.g.
-  # Errno::ENOENT.
+  # on the <code>unlink(2)</code> system call, the type of exception raised
+  # depends on its error type (see https://linux.die.net/man/2/unlink) and has the
+  # form of e.g. Errno::ENOENT.
   #
   # See also Dir::rmdir.
   #
@@ -1775,7 +1776,7 @@ class File < IO
   # -->
   # If *file_name* is readable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the
-  # bits is platform dependent; on Unix systems, see `stat(2)`.
+  # bits is platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   # *file_name* can be an IO object.
   #
@@ -1791,7 +1792,7 @@ class File < IO
   # -->
   # If *file_name* is writable by others, returns an integer representing the file
   # permission bits of *file_name*. Returns `nil` otherwise. The meaning of the
-  # bits is platform dependent; on Unix systems, see `stat(2)`.
+  # bits is platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   # *file_name* can be an IO object.
   #
@@ -1864,7 +1865,8 @@ class File < IO
   # -->
   # Changes permission bits on *file* to the bit pattern represented by
   # *mode_int*. Actual effects are platform dependent; on Unix systems, see
-  # `chmod(2)` for details. Follows symbolic links. Also see File#lchmod.
+  # <code>chmod(2)</code> for details. Follows symbolic links. Also see
+  # File#lchmod.
   #
   #     f = File.new("out", "w");
   #     f.chmod(0644)   #=> 0
@@ -1902,18 +1904,18 @@ class File < IO
   #   rdoc-file=file.c
   #   - flock(locking_constant) -> 0 or false
   # -->
-  # Locks or unlocks file `self` according to the given `locking_constant`,
+  # Locks or unlocks file +self+ according to the given `locking_constant`,
   # a bitwise OR of the values in the table below.
   # Not available on all platforms.
-  # Returns `false` if `File::LOCK_NB` is specified and the operation would have
-  # blocked;
+  # Returns `false` if <code>File::LOCK_NB</code> is specified and the operation
+  # would have blocked;
   # otherwise returns `0`.
-  #    Constant    |    Lock    |                                                Effect
-  # ---------------|------------|-------------------------------------------------------------------------------------------------------
-  # `File::LOCK_EX`| Exclusive  |                   Only one process may hold an exclusive lock for `self` at a time.
-  # `File::LOCK_NB`|Non-blocking|No blocking; may be combined with `File::LOCK_SH` or `File::LOCK_EX` using the bitwise OR operator `|`.
-  # `File::LOCK_SH`|   Shared   |              Multiple processes may each hold a shared lock for `self` at the same time.
-  # `File::LOCK_UN`|   Unlock   |                             Remove an existing lock held by this process.
+  #    Constant    |    Lock    |                                                      Effect
+  # ---------------|------------|------------------------------------------------------------------------------------------------------------------
+  # +File::LOCK_EX+| Exclusive  |                        Only one process may hold an exclusive lock for +self+ at a time.
+  # +File::LOCK_NB+|Non-blocking|No blocking; may be combined with +File::LOCK_SH+ or +File::LOCK_EX+ using the bitwise OR operator <code>|</code>.
+  # +File::LOCK_SH+|   Shared   |                   Multiple processes may each hold a shared lock for +self+ at the same time.
+  # +File::LOCK_UN+|   Unlock   |                                  Remove an existing lock held by this process.
   # Example:
   #     # Update a counter using an exclusive lock.
   # # Don't use File::WRONLY because it truncates the file.
@@ -2039,7 +2041,7 @@ File::SEPARATOR: String
 File::Separator: String
 
 # <!-- rdoc-file=file.c -->
-# Module `File::Constants` defines file-related constants.
+# Module <code>File::Constants</code> defines file-related constants.
 #
 # There are two families of constants here:
 #
@@ -2303,14 +2305,14 @@ File::Separator: String
 #
 # #### File::FNM_DOTMATCH
 #
-# Flag File::FNM_DOTMATCH makes the `'*'` pattern match a filename starting with
-# `'.'`.
+# Flag File::FNM_DOTMATCH makes the <code>'*'</code> pattern match a filename
+# starting with <code>'.'</code>.
 #
 # #### File::FNM_EXTGLOB
 #
-# Flag File::FNM_EXTGLOB enables pattern `'{_a_,_b_}'`, which matches pattern
-# '*a*' and pattern '*b*'; behaves like a [regexp union](rdoc-ref:Regexp.union)
-# (e.g., `'(?:_a_|_b_)'`):
+# Flag File::FNM_EXTGLOB enables pattern <code>'{_a_,_b_}'</code>, which matches
+# pattern '*a*' and pattern '*b*'; behaves like a [regexp
+# union](rdoc-ref:Regexp.union) (e.g., <code>'(?:_a_|_b_)'</code>):
 #
 #     pattern = '{LEGAL,BSDL}'
 #     Dir.glob(pattern)      # => ["LEGAL", "BSDL"]
@@ -2319,12 +2321,13 @@ File::Separator: String
 #
 # #### File::FNM_NOESCAPE
 #
-# Flag File::FNM_NOESCAPE disables `'\'` escaping.
+# Flag File::FNM_NOESCAPE disables <code>'\'</code> escaping.
 #
 # #### File::FNM_PATHNAME
 #
-# Flag File::FNM_PATHNAME specifies that patterns `'*'` and `'?'` do not match
-# the directory separator (the value of constant File::SEPARATOR).
+# Flag File::FNM_PATHNAME specifies that patterns <code>'*'</code> and
+# <code>'?'</code> do not match the directory separator (the value of constant
+# File::SEPARATOR).
 #
 # #### File::FNM_SHORTNAME
 #
@@ -2343,8 +2346,8 @@ File::Separator: String
 #
 # Flag File::NULL contains the string value of the null device:
 #
-# *   On a Unix-like OS, `'/dev/null'`.
-# *   On Windows, `'NUL'`.
+# *   On a Unix-like OS, <code>'/dev/null'</code>.
+# *   On Windows, <code>'NUL'</code>.
 #
 module File::Constants
 end
@@ -2527,13 +2530,13 @@ class File::Stat < Object
   #   - self <=> other -> -1, 0, 1, or nil
   # -->
   # Compares `self` and `other`, by comparing their modification times; that is,
-  # by comparing `self.mtime` and `other.mtime`.
+  # by comparing <code>self.mtime</code> and <code>other.mtime</code>.
   #
   # Returns:
   #
-  # *   `-1`, if `self.mtime` is earlier.
+  # *   <code>-1</code>, if <code>self.mtime</code> is earlier.
   # *   `0`, if the two values are equal.
-  # *   `1`, if `self.mtime` is later.
+  # *   `1`, if <code>self.mtime</code> is later.
   # *   `nil`, if `other` is not a File::Stat object.
   #
   # Examples:
@@ -2657,7 +2660,7 @@ class File::Stat < Object
   #   rdoc-file=file.c
   #   - stat.dev_major   -> integer
   # -->
-  # Returns the major part of `File_Stat#dev` or `nil`.
+  # Returns the major part of <code>File_Stat#dev</code> or `nil`.
   #
   #     File.stat("/dev/fd1").dev_major   #=> 2
   #     File.stat("/dev/tty").dev_major   #=> 5
@@ -2668,7 +2671,7 @@ class File::Stat < Object
   #   rdoc-file=file.c
   #   - stat.dev_minor   -> integer
   # -->
-  # Returns the minor part of `File_Stat#dev` or `nil`.
+  # Returns the minor part of <code>File_Stat#dev</code> or `nil`.
   #
   #     File.stat("/dev/fd1").dev_minor   #=> 1
   #     File.stat("/dev/tty").dev_minor   #=> 0
@@ -2702,7 +2705,8 @@ class File::Stat < Object
   #   rdoc-file=file.c
   #   - stat.executable_real?    -> true or false
   # -->
-  # Same as `executable?`, but tests using the real owner of the process.
+  # Same as <code>executable?</code>, but tests using the real owner of the
+  # process.
   #
   def executable_real?: () -> bool
 
@@ -2782,7 +2786,7 @@ class File::Stat < Object
   #   - stat.mode   -> integer
   # -->
   # Returns an integer representing the permission bits of *stat*. The meaning of
-  # the bits is platform dependent; on Unix systems, see `stat(2)`.
+  # the bits is platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   #     File.chmod(0644, "testfile")   #=> 1
   #     s = File.stat("testfile")
@@ -2849,7 +2853,7 @@ class File::Stat < Object
   #   rdoc-file=file.c
   #   - stat.rdev_major   -> integer
   # -->
-  # Returns the major part of `File_Stat#rdev` or `nil`.
+  # Returns the major part of <code>File_Stat#rdev</code> or `nil`.
   #
   #     File.stat("/dev/fd1").rdev_major   #=> 2
   #     File.stat("/dev/tty").rdev_major   #=> 5
@@ -2860,7 +2864,7 @@ class File::Stat < Object
   #   rdoc-file=file.c
   #   - stat.rdev_minor   -> integer
   # -->
-  # Returns the minor part of `File_Stat#rdev` or `nil`.
+  # Returns the minor part of <code>File_Stat#rdev</code> or `nil`.
   #
   #     File.stat("/dev/fd1").rdev_minor   #=> 1
   #     File.stat("/dev/tty").rdev_minor   #=> 0
@@ -2983,7 +2987,7 @@ class File::Stat < Object
   # -->
   # If *stat* is readable by others, returns an integer representing the file
   # permission bits of *stat*. Returns `nil` otherwise. The meaning of the bits is
-  # platform dependent; on Unix systems, see `stat(2)`.
+  # platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   #     m = File.stat("/etc/passwd").world_readable?  #=> 420
   #     sprintf("%o", m)                              #=> "644"
@@ -2996,7 +3000,7 @@ class File::Stat < Object
   # -->
   # If *stat* is writable by others, returns an integer representing the file
   # permission bits of *stat*. Returns `nil` otherwise. The meaning of the bits is
-  # platform dependent; on Unix systems, see `stat(2)`.
+  # platform dependent; on Unix systems, see <code>stat(2)</code>.
   #
   #     m = File.stat("/tmp").world_writable?         #=> 511
   #     sprintf("%o", m)                              #=> "777"
