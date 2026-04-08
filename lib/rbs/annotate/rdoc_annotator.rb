@@ -14,24 +14,21 @@ module RBS
       end
 
       def annotate_file(path, preserve:)
-        content = path.read()
+        buffer, _, decls = Parser.parse_signature(path.read())
 
-        _, _, decls = Parser.parse_signature(content)
+        rewriter = Rewriter.new(buffer)
+        annotate_decls(decls, rewriter)
 
-        annotate_decls(decls)
-
-        path.open("w") do |io|
-          Writer.new(out: io).preserve!(preserve: preserve).write(decls)
-        end
+        path.write(rewriter.string)
       end
 
-      def annotate_decls(decls, outer: [])
+      def annotate_decls(decls, rewriter, outer: [])
         decls.each do |decl|
           case decl
           when AST::Declarations::Class, AST::Declarations::Module
-            annotate_class(decl, outer: outer)
+            annotate_class(decl, rewriter, outer: outer)
           when AST::Declarations::Constant
-            annotate_constant(decl, outer: outer)
+            annotate_constant(decl, rewriter, outer: outer)
           end
         end
       end
@@ -244,7 +241,7 @@ module RBS
         end
       end
 
-      def annotate_class(decl, outer:)
+      def annotate_class(decl, rewriter, outer:)
         annots = annotations(decl)
 
         full_name = resolve_name(decl.name, outer: outer)
@@ -252,7 +249,7 @@ module RBS
           text = resolve_doc_source(annots.copy_annotation, tester: annots) { doc_for_class(full_name, tester: annots) }
         end
 
-        replace_comment(decl, text)
+        replace_comment(decl, text, rewriter)
 
         unless annots.skip_all?
           outer_ = outer + [decl.name.to_namespace]
@@ -260,28 +257,28 @@ module RBS
           decl.each_member do |member|
             case member
             when AST::Members::MethodDefinition
-              annotate_method(full_name, member)
+              annotate_method(full_name, member, rewriter)
             when AST::Members::Alias
-              annotate_alias(full_name, member)
+              annotate_alias(full_name, member, rewriter)
             when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-              annotate_attribute(full_name, member)
+              annotate_attribute(full_name, member, rewriter)
             end
           end
 
-          annotate_decls(decl.each_decl.to_a, outer: outer_)
+          annotate_decls(decl.each_decl.to_a, rewriter, outer: outer_)
         end
       end
 
-      def annotate_constant(const, outer:)
+      def annotate_constant(const, rewriter, outer:)
         annots = Annotations.new([])
 
         full_name = resolve_name(const.name, outer: outer)
         text = doc_for_constant(full_name, tester: annots)
 
-        replace_comment(const, text)
+        replace_comment(const, text, rewriter)
       end
 
-      def annotate_alias(typename, als)
+      def annotate_alias(typename, als, rewriter)
         annots = annotations(als)
 
         unless annots.skip?
@@ -295,7 +292,7 @@ module RBS
           end
         end
 
-        replace_comment(als, text)
+        replace_comment(als, text, rewriter)
       end
 
       def join_docs(docs, separator: "----")
@@ -311,7 +308,7 @@ module RBS
         end
       end
 
-      def annotate_method(typename, method)
+      def annotate_method(typename, method, rewriter)
         annots = annotations(method)
 
         unless annots.skip?
@@ -337,10 +334,10 @@ module RBS
           }
         end
 
-        replace_comment(method, text)
+        replace_comment(method, text, rewriter)
       end
 
-      def annotate_attribute(typename, attr)
+      def annotate_attribute(typename, attr, rewriter)
         annots = annotations(attr)
 
         unless annots.skip?
@@ -368,18 +365,17 @@ module RBS
           end
         end
 
-        replace_comment(attr, text)
+        replace_comment(attr, text, rewriter)
       end
 
-      def replace_comment(commented, string)
+      def replace_comment(commented, string, rewriter)
         if string
           if string.empty?
-            commented.instance_variable_set(:@comment, nil)
+            rewriter.delete_comment(commented.comment) if commented.comment
+          elsif commented.comment
+            rewriter.replace_comment(commented.comment, content: string)
           else
-            commented.instance_variable_set(
-              :@comment,
-              AST::Comment.new(location: nil, string: string)
-            )
+            rewriter.add_comment(commented.location || raise, *commented.annotations.filter_map(&:location), content: string)
           end
         end
       end

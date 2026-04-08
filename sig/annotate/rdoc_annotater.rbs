@@ -10,7 +10,7 @@ module RBS
 
       def annotate_file: (Pathname, preserve: bool) -> void
 
-      def annotate_decls: (Array[AST::Declarations::t], ?outer: Array[Namespace]) -> void
+      def annotate_decls: (Array[AST::Declarations::t], Rewriter, ?outer: Array[Namespace]) -> void
 
       interface _PathTester
         def test_path: (String) -> bool
@@ -50,15 +50,15 @@ module RBS
 
       def resolve_doc_source: (Annotations::Copy?, tester: _PathTester) { () -> String? } -> String?
 
-      def annotate_class: (AST::Declarations::Class | AST::Declarations::Module, outer: Array[Namespace]) -> void
+      def annotate_class: (AST::Declarations::Class | AST::Declarations::Module, Rewriter, outer: Array[Namespace]) -> void
 
-      def annotate_constant: (AST::Declarations::Constant, outer: Array[Namespace]) -> void
+      def annotate_constant: (AST::Declarations::Constant, Rewriter, outer: Array[Namespace]) -> void
 
-      def annotate_method: (TypeName, AST::Members::MethodDefinition) -> void
+      def annotate_method: (TypeName, AST::Members::MethodDefinition, Rewriter) -> void
 
-      def annotate_alias: (TypeName, AST::Members::Alias) -> void
+      def annotate_alias: (TypeName, AST::Members::Alias, Rewriter) -> void
 
-      def annotate_attribute: (TypeName, AST::Members::AttrReader | AST::Members::AttrWriter | AST::Members::AttrAccessor) -> void
+      def annotate_attribute: (TypeName, AST::Members::AttrReader | AST::Members::AttrWriter | AST::Members::AttrAccessor, Rewriter) -> void
 
       def annotations: (_Annotated) -> Annotations
 
@@ -70,10 +70,12 @@ module RBS
       # - If empty string is given as `comment`, it deletes the original comment.
       # - If `nil` is given as `comment`, it keeps the original comment.
       #
-      def replace_comment: (Object & _Commented, String? comment) -> void
+      def replace_comment: (_Commented, String?, Rewriter) -> void
 
       interface _Commented
-        def comment: () -> AST::Comment?
+        %a{pure} def comment: () -> AST::Comment?
+        %a{pure} def location: () -> Location[untyped, untyped]?
+        def annotations: () -> Array[AST::Annotation]
       end
 
       def resolve_name: (TypeName, outer: Array[Namespace]) -> TypeName
