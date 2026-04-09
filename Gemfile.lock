@@ -1,9 +1,8 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: d9f52a5034986c2a00603ecdcf5a20fe6c899ed4
+  revision: 22d7e65f5c91e83ead052d005418f0c2abc9ab8d
   specs:
     steep (2.0.0.dev)
-      activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
       fileutils (>= 1.1.0)
@@ -12,6 +11,7 @@ GIT
       listen (~> 3.0)
       logger (>= 1.3.0)
       parser (>= 3.2)
+      prism (>= 0.25.0)
       rainbow (>= 2.2.2, < 4.0)
       rbs (~> 4.0)
       securerandom (>= 0.1)
@@ -22,7 +22,7 @@ GIT
 PATH
   remote: .
   specs:
-    rbs (4.0.2)
+    rbs (4.1.0.dev)
       logger
       prism (>= 1.6.0)
       tsort
@@ -48,13 +48,13 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
-    addressable (2.8.9)
+    addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     base64 (0.3.0)
     benchmark (0.5.0)
     benchmark-ips (2.14.0)
-    bigdecimal (4.1.0)
+    bigdecimal (4.1.1)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
     csv (3.3.5)
@@ -92,7 +92,7 @@ GEM
     logger (1.7.0)
     marcel (1.1.0)
     memory_profiler (1.1.0)
-    minitest (6.0.2)
+    minitest (6.0.3)
       drb (~> 2.0)
       prism (~> 1.5)
     minitest-mock (5.27.0)
@@ -103,7 +103,7 @@ GEM
       net-protocol
     nkf (0.2.0)
     ostruct (0.6.3)
-    parallel (1.27.0)
+    parallel (1.28.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
@@ -116,8 +116,9 @@ GEM
     psych (4.0.6)
       stringio
     public_suffix (7.0.5)
-    raap (1.3.0)
-      rbs (~> 3.9.0)
+    raap (2.0.0)
+      logger
+      rbs (~> 4.0)
       timeout (~> 0.4)
     racc (1.8.1)
     rainbow (3.1.1)
@@ -131,7 +132,7 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
-    regexp_parser (2.11.3)
+    regexp_parser (2.12.0)
     reline (0.6.3)
       io-console (~> 0.5)
     rspec (3.13.2)
@@ -174,7 +175,7 @@ GEM
     stackprof (0.2.28)
     stringio (3.2.0)
     strong_json (2.1.2)
-    strscan (3.1.7)
+    strscan (3.1.8)
     tempfile (0.3.1)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)

@@ -123,10 +123,38 @@ end
 
 This creates the types `::API`, `::API::V1`, and `::API::V1::Resources`.
 
+### `module-self` constraint
+
+The `module-self` constraint declares which classes or modules the module can be mixed into.
+
+```ruby
+# @rbs module-self: _Each[String]
+module Enumerable2
+end
+```
+
+This is equivalent to `module Enumerable2 : _Each[String]` in RBS, meaning `Enumerable2` can only be included in classes that satisfy the `_Each[String]` interface.
+
+Multiple `module-self` constraints can be declared with separate annotations:
+
+```ruby
+# @rbs module-self: _Each[String]
+# @rbs module-self: Comparable
+module StringCollection
+end
+```
+
+You can add a description after `--`:
+
+```ruby
+# @rbs module-self: Minitest::Test -- depending on assertion methods
+module TestHelper
+end
+```
+
 ### Current Limitations
 
 - Generic module definitions are not supported
-- Module self-type constraints are not supported
 
 ## Method Definitions
 

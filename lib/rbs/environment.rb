@@ -854,6 +854,12 @@ module RBS
           member.buffer,
           resolved_annotation
         )
+      when AST::Ruby::Members::ModuleSelfMember
+        resolved_annotation = member.annotation.map_type_name {|name| absolute_type_name(resolver, nil, name, context: context) }
+        AST::Ruby::Members::ModuleSelfMember.new(
+          member.buffer,
+          resolved_annotation
+        )
       else
         raise "Unknown member type: #{member.class}"
       end
