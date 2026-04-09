@@ -203,8 +203,8 @@ task :validate => :compile do
     args = ["-r", lib]
 
     if lib == "rbs"
-      args << "-r"
-      args << "prism"
+      args << "-r" << "prism"
+      args << "-r" << "logger"
     end
 
     sh "#{ruby} #{rbs} #{args.join(' ')} validate"
