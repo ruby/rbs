@@ -21,6 +21,17 @@ module RBS
           "pstore" => nil,
         }
 
+        NONGEM_STDLIBS = Set[
+          "cgi-escape",
+          "coverage",
+          "monitor",
+          "objspace",
+          "pathname",
+          "pty",
+          "ripper",
+          "socket",
+        ]
+
         class GemfileLockMismatchError < StandardError
           def initialize(expected:, actual:)
             @expected = expected
@@ -168,7 +179,9 @@ module RBS
               end
             end
           else
-            RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
+            unless NONGEM_STDLIBS.include?(name)
+              RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
+            end
           end
         end
 
