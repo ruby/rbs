@@ -8570,7 +8570,7 @@ module OpenSSL
       # The callback is invoked with an SSLSocket.  If `false` is returned the session
       # will be removed from the internal cache.
       #
-      def session_new_cb: () -> (^(SSLSocket) -> untyped | nil)
+      def session_new_cb: () -> (^(SSLSocket, Session) -> untyped | nil)
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A callback invoked when a new session was negotiated.
@@ -8578,7 +8578,7 @@ module OpenSSL
       # The callback is invoked with an SSLSocket.  If `false` is returned the session
       # will be removed from the internal cache.
       #
-      def session_new_cb=: (^(SSLSocket) -> untyped) -> ^(SSLSocket) -> untyped
+      def session_new_cb=: (^(SSLSocket, Session) -> untyped) -> ^(SSLSocket, Session) -> untyped
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
