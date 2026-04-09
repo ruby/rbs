@@ -13,7 +13,7 @@ module RBS
 
     def rewrite(location, string)
       @rewrites.each do |existing_location, _|
-        if location.start_pos < existing_location.end_pos && existing_location.start_pos < location.end_pos
+        if location.start_byte < existing_location.end_byte && existing_location.start_byte < location.end_byte
           raise "Overlapping rewrites: #{existing_location} and #{location}"
         end
       end
@@ -23,9 +23,9 @@ module RBS
     end
 
     def add_comment(*locations, content:)
-      earliest = locations.min_by(&:start_pos) or raise "At least one location is required"
-      insert_pos = earliest.start_pos
-      indent = " " * earliest.start_column
+      earliest = locations.min_by(&:start_char) or raise "At least one location is required"
+      insert_pos = earliest.start_byte
+      indent = " " * earliest.start_byte_column
 
       formatted = format_comment(content, indent)
 
@@ -35,15 +35,15 @@ module RBS
 
     def replace_comment(comment, content:)
       location = comment.location or raise "Comment must have a location"
-      indent = " " * location.start_column
+      indent = " " * location.start_byte_column
 
       rewrite(location, format_comment(content, indent))
     end
 
     def delete_comment(comment)
       location = comment.location or raise "Comment must have a location"
-      line_start = location.start_pos - location.start_column
-      line_end = location.end_pos + 1
+      line_start = location.start_byte - location.start_byte_column
+      line_end = location.end_byte + 1
       loc = Location.new(buffer, line_start, line_end)
       rewrite(loc, "")
     end
@@ -51,8 +51,8 @@ module RBS
     def string
       result = buffer.content.dup
 
-      @rewrites.sort_by { |location, _| location.start_pos }.reverse_each do |location, replacement|
-        result[location.start_pos...location.end_pos] = replacement
+      @rewrites.sort_by { |location, _| location.start_byte }.reverse_each do |location, replacement|
+        result.bytesplice(location.start_byte...location.end_byte, replacement)
       end
 
       result

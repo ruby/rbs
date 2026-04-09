@@ -27,15 +27,27 @@ module RBS
 
     def initialize: (buffer: Buffer, decls: Array[AST::Declarations::t], dirs: Array[AST::Directives::t]) -> void
 
-    # Returns list of components.
-    # Inner component comes first.
+    # Find RBS elements at the given position.
+    # Returns a list of components, inner component comes first.
     #
-    def find: (line: Integer, column: Integer) -> Array[component]
+    # `line` is the line number (1-origin).
+    # `byte_column` is the byte offset within the line (0-origin).
+    # `char_column` is the character offset within the line (0-origin), converted to byte offset internally.
+    #
+    def find: (line: Integer, byte_column: Integer) -> Array[component]
+            | (line: Integer, char_column: Integer) -> Array[component]
+            | %a{deprecated: use char_column or byte_column instead} (line: Integer, column: Integer) -> Array[component]
 
-    # Returns pair of the inner most symbol and outer components.
+    # Find RBS elements at the given position, returning the inner most symbol and outer components.
     # It ensures the array starts with a AST/type component.
     #
-    def find2: (line: Integer, column: Integer) -> [Symbol?, Array[component]]?
+    # `line` is the line number (1-origin).
+    # `byte_column` is the byte offset within the line (0-origin).
+    # `char_column` is the character offset within the line (0-origin), converted to byte offset internally.
+    #
+    def find2: (line: Integer, byte_column: Integer) -> [Symbol?, Array[component]]?
+             | (line: Integer, char_column: Integer) -> [Symbol?, Array[component]]?
+             | %a{deprecated: use char_column or byte_column instead} (line: Integer, column: Integer) -> [Symbol?, Array[component]]?
 
     def find_in_directive: (Integer pos, AST::Directives::t, Array[component]) -> bool
 
@@ -52,5 +64,16 @@ module RBS
     def find_in_loc: (Integer pos, location: Location[untyped, untyped]?, array: Array[component]) -> bool
 
     def test_loc: (Integer pos, location: Location[untyped, untyped]?) -> bool
+
+    private
+
+    # Converts a character column offset to a byte column offset within the given line.
+    #
+    def char_column_to_byte_column: (Integer line, Integer char_column) -> Integer
+
+    # Resolves line and column arguments to a byte position in the buffer.
+    # Exactly one of `byte_column`, `char_column`, or `column` must be given.
+    #
+    def resolve_position: (line: Integer, column: Integer?, byte_column: Integer?, char_column: Integer?) -> Integer
   end
 end
