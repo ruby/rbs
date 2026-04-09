@@ -23,7 +23,7 @@ SUPPRESS_RUBY_HEADER_DIAGNOSTICS_END
 extern VALUE RBS_Location;
 
 /**
- * Range of character index for `rbs_loc` locations.
+ * Range of byte index for `rbs_loc` locations.
  */
 typedef struct {
     int start;
@@ -57,7 +57,7 @@ typedef struct {
  * */
 VALUE rbs_new_location(VALUE buffer, rbs_range_t rg);
 
-VALUE rbs_new_location2(VALUE buffer, int start_char, int end_char);
+VALUE rbs_new_location2(VALUE buffer, int start_byte, int end_byte);
 
 /**
  * Return rbs_loc associated with the RBS::Location object.
