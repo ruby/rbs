@@ -1395,7 +1395,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def key: (V) -> K?
+  def key: (_Equals) -> K?
 
   # <!-- rdoc-file=hash.c -->
   # Returns whether `key` is a key in `self`:
