@@ -348,7 +348,7 @@ class Module
   #
   # Files that are currently being loaded must not be registered for autoload.
   #
-  def autoload: (interned constant, String filename) -> NilClass
+  def autoload: (interned constant, path filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -829,7 +829,7 @@ class Module
 
   # <!--
   #   rdoc-file=object.c
-  #   -   (othermod)
+  #   - extended(othermod)
   # -->
   # The equivalent of `included`, but for extended modules.
   #

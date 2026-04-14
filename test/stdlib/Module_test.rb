@@ -511,11 +511,35 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_autoload
-    omit 'todo'
+    with_interned :Constant do |constant|
+      with_path do |path|
+        assert_send_type  '(interned, path) -> nil',
+                          Module.new, :autoload, constant, path
+      end
+    end
   end
 
   def test_autoload?
-    omit 'todo'
+    autoloaded = Module.new
+    autoloaded.autoload(:Constant, 'Bar')
+
+    with_interned :Constant do |constant|
+      assert_send_type  '(interned) -> nil',
+                        Module.new, :autoload?, constant
+      assert_send_type  '(interned) -> String',
+                        autoloaded, :autoload?, constant
+      assert_send_type  '(interned) -> String',
+                        Module.new.include(autoloaded), :autoload?, constant
+
+      with_boolish do |inherit|
+        assert_send_type  '(interned, boolish) -> nil',
+                          Module.new, :autoload?, constant, inherit
+        assert_send_type  '(interned, boolish) -> String',
+                          autoloaded, :autoload?, constant, inherit
+        assert_send_type  '(interned, boolish) -> String?',
+                          Module.new.include(autoloaded), :autoload?, constant, inherit
+      end
+    end
   end
 
   def test_class_variable_defined?
@@ -1264,6 +1288,6 @@ class ModuleInstanceTest < Test::Unit::TestCase
                       Module.new, :using
 
     # Cant actually test `using` in modules, so this is the best we got
-    assert_type 'Module', UsingModule::UsingModule
+    assert_type 'Module', UsingModule::UsingReturnValue
   end
 end
