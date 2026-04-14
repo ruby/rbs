@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 22d7e65f5c91e83ead052d005418f0c2abc9ab8d
+  revision: e3924cb6220349a33b03e13866d0b87ad0905e3c
   specs:
     steep (2.0.0.dev)
       concurrent-ruby (>= 1.1.10)
@@ -103,7 +103,7 @@ GEM
       net-protocol
     nkf (0.2.0)
     ostruct (0.6.3)
-    parallel (1.28.0)
+    parallel (2.0.1)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
@@ -148,11 +148,11 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.7)
-    rubocop (1.86.0)
+    rubocop (1.86.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
-      parallel (~> 1.10)
+      parallel (>= 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.9.3, < 3.0)
