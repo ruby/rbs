@@ -498,4 +498,65 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     assert_match(/pLBRACE/, error.message)
     assert_equal "{", error.location.source
   end
+
+  def test_parse__module_self
+    Parser.parse_inline_leading_annotation("@rbs module-self: _Each[String]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: _Each[String]", annot.location.source
+      assert_equal "@rbs", annot.prefix_location.source
+      assert_equal "module-self", annot.keyword_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "_Each", annot.name.to_s
+      assert_equal 1, annot.args.size
+      assert_equal "String", annot.args[0].location.source
+      assert_equal "[", annot.open_bracket_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal [], annot.args_comma_locations
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: _Hash[String, Integer]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: _Hash[String, Integer]", annot.location.source
+      assert_equal "_Hash", annot.name.to_s
+      assert_equal 2, annot.args.size
+      assert_equal "String", annot.args[0].location.source
+      assert_equal "Integer", annot.args[1].location.source
+      assert_equal "[", annot.open_bracket_location.source
+      assert_equal "]", annot.close_bracket_location.source
+      assert_equal 1, annot.args_comma_locations.size
+      assert_equal ",", annot.args_comma_locations[0].source
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: Comparable", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: Comparable", annot.location.source
+      assert_equal "Comparable", annot.name.to_s
+      assert_equal 0, annot.args.size
+      assert_nil annot.open_bracket_location
+      assert_nil annot.close_bracket_location
+      assert_equal [], annot.args_comma_locations
+      assert_nil annot.comment_location
+    end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: Minitest::Test -- depending on assertion methods", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "@rbs module-self: Minitest::Test -- depending on assertion methods", annot.location.source
+      assert_equal "Minitest::Test", annot.name.to_s
+      assert_equal 0, annot.args.size
+      assert_nil annot.open_bracket_location
+      assert_nil annot.close_bracket_location
+      assert_equal "-- depending on assertion methods", annot.comment_location.source
+    end
+  end
+
+  def test_error__module_self
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs module-self:", 0...)
+    end
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_inline_leading_annotation("@rbs module-self: foo", 0...)
+    end
+  end
 end

@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 4.0.2 (2026-03-25)
+
+### Library changes
+
+#### rbs collection
+
+* Fix: pathname not written to lockfile. ([#2889](https://github.com/ruby/rbs/pull/2889))
+
+### Miscellaneous
+
+* Fix test failure on Windows in `ruby/ruby` ([#2900](https://github.com/ruby/rbs/pull/2900))
+* Fix test for Ruby 4.1 ([#2899](https://github.com/ruby/rbs/pull/2899))
+
+## 4.0.1 (2026-03-23)
+
+This is a minor release to fix Ruby CI failure, which was caused by symlinks included in the `rust` directory.
+
+### Library changes
+
+* Fix `() -> (void)` being rejected as SyntaxError ([#2884](https://github.com/ruby/rbs/pull/2884))
+
+### Miscellaneous
+
+* Drop crates ([#2887](https://github.com/ruby/rbs/pull/2887))
+* Add newline at eof ([#2885](https://github.com/ruby/rbs/pull/2885))
+
 ## 4.0.0 (2026-03-16)
 
 RBS 4.0 ships with experimental RBS inline syntax support, allowing you to write type annotations directly in Ruby source files. See [docs/inline.md](docs/inline.md) for the syntax details.
@@ -207,6 +233,14 @@ This release also introduces two language changes: type argument support for sin
 * Use `erb` instead of `set` for load path testing ([#2439](https://github.com/ruby/rbs/pull/2439))
 * Skip loading ruby_memcheck ([#2349](https://github.com/ruby/rbs/pull/2349))
 * Forcibly uninstall gems even if there is a dependency problem. ([#2346](https://github.com/ruby/rbs/pull/2346))
+
+## 3.10.4 (2026-03-25)
+
+### Library changes
+
+#### rbs collection
+
+* [Backport] [3.10] Fix: pathname not written to lockfile. ([#2896](https://github.com/ruby/rbs/pull/2896))
 
 ## 3.10.3 (2026-01-30)
 

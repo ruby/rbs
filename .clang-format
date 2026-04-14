@@ -51,6 +51,7 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: false
 Cpp11BracedListStyle: false
 ReflowComments: false
 SortIncludes: Never
+InsertNewlineAtEOF: true
 
 # Spaces
 SpaceAfterCStyleCast: true

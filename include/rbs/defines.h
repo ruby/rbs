@@ -83,4 +83,17 @@
 #define RBS_ATTRIBUTE_UNUSED
 #endif
 
+/**
+ * Nullability annotations for pointer types.
+ * Clang supports _Nullable and _Nonnull to indicate whether a pointer may be NULL.
+ * On other compilers, these expand to nothing.
+ */
+#ifdef __clang__
+#define RBS_NULLABLE _Nullable
+#define RBS_NONNULL _Nonnull
+#else
+#define RBS_NULLABLE
+#define RBS_NONNULL
+#endif
+
 #endif

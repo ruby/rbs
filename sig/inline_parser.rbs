@@ -110,6 +110,8 @@ module RBS
 
       def report_unused_block: (AST::Ruby::CommentBlock) -> void
 
+      def visit_class_or_module_body: (module_context, Prism::ClassNode | Prism::ModuleNode) -> void
+
       private
 
       def parse_mixin_call: (Prism::CallNode) -> void

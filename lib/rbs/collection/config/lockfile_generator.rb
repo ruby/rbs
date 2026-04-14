@@ -21,6 +21,17 @@ module RBS
           "pstore" => nil,
         }
 
+        NONGEM_STDLIBS = Set[
+          "cgi-escape",
+          "coverage",
+          "monitor",
+          "objspace",
+          "pathname",
+          "pty",
+          "ripper",
+          "socket",
+        ]
+
         class GemfileLockMismatchError < StandardError
           def initialize(expected:, actual:)
             @expected = expected
@@ -168,7 +179,9 @@ module RBS
               end
             end
           else
-            RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
+            unless NONGEM_STDLIBS.include?(name)
+              RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
+            end
           end
         end
 
@@ -188,8 +201,8 @@ module RBS
               lockfile.gems[name] = { name: name, version: "0", source: source }
             end
             return
-          when 'set', 'pathname'
-            # set and pathname is migrated to core from stdlib.
+          when 'set'
+            # set is migrated to core from stdlib.
             RBS.logger.info {
               from = from_gem || "rbs_collection.yaml"
               "`#{name}` is a part of the Ruby core library. The dependency to the library can be safely deleted from #{from}."

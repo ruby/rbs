@@ -962,8 +962,6 @@ Options:
       source = RBS::Annotate::RDocSource.new()
       annotator = RBS::Annotate::RDocAnnotator.new(source: source)
 
-      preserve = true
-
       OptionParser.new do |opts|
         opts.banner = <<-EOB
 Usage: rbs annotate [options...] [files...]
@@ -984,7 +982,7 @@ Options:
         opts.on("-d", "--dir DIRNAME", "Load RDoc from DIRNAME") {|d| source.extra_dirs << Pathname(d) }
         opts.on("--[no-]arglists", "Generate arglists section (defaults to true)") {|b| annotator.include_arg_lists = b }
         opts.on("--[no-]filename", "Include source file name in the documentation (defaults to true)") {|b| annotator.include_filename = b }
-        opts.on("--[no-]preserve", "Try preserve the format of the original file (defaults to true)") {|b| preserve = b }
+        opts.on("--[no-]preserve", "[Deprecated] It always preserves the format") { stdout.puts "The `--preserve` option is deprecated. The tool always preserves the format of RBS files." }
       end.parse!(args)
 
       source.load()
@@ -994,11 +992,11 @@ Options:
         if path.directory?
           Pathname.glob((path + "**/*.rbs").to_s).each do |path|
             stdout.puts "Processing #{path}..."
-            annotator.annotate_file(path, preserve: preserve)
+            annotator.annotate_file(path)
           end
         else
           stdout.puts "Processing #{path}..."
-          annotator.annotate_file(path, preserve: preserve)
+          annotator.annotate_file(path)
         end
       end
 

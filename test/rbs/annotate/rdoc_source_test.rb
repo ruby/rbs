@@ -72,7 +72,9 @@ end
         refute_predicate klass, :documented?
 
         assert_nil RBS::Annotate::Formatter.translate(klass.comment.parse)
-        assert_equal "", RBS::Annotate::Formatter.translate(klass.comment.parse.parts[0])
+        if part = klass.comment.parse.parts[0] # In ruby-4.1, parts is empty.
+          assert_equal "", RBS::Annotate::Formatter.translate(part)
+        end
       end
     end
 
