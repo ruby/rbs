@@ -27,7 +27,7 @@ jobs:
           echo "RBS::VERSION = $version (major=$major, minor=$minor, patch=$patch)"
 
       - name: Check milestone
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const pr = context.payload.pull_request;
