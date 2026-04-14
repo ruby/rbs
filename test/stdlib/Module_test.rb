@@ -133,11 +133,10 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_refine
+    assert_visibility :private, :refine
+
     assert_send_type "(Module) { () -> void } -> Refinement",
                      RefinedModule, :refine, Integer do nil end
-
-    assert_visibility :private,
-                      RefinedModule, :refine
   end
 
   def test_refinements
@@ -212,8 +211,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def bar; end
     end
 
-    assert_visibility :private,
-                      mod, :module_function
+    assert_visibility :private, :module_function
 
     # No arguments
     assert_send_type  '() -> nil',
@@ -281,8 +279,8 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def bar; end
     end
 
-    assert_visibility :private,
-                      mod, visibility
+    assert_visibility :private, visibility
+
     # No arguments
     assert_send_type  '() -> nil',
                       mod, visibility
@@ -471,8 +469,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
       def bar(*x) = 3
     end
 
-    assert_visibility :private,
-                      mod, :ruby2_keywords
+    assert_visibility :private, :ruby2_keywords
 
     with_interned :foo do |foo|
       assert_send_type  '(interned) -> nil',
@@ -1101,16 +1098,14 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_append_features
-    assert_visibility :private,
-                      Module.new, :append_features
+    assert_visibility :private, :append_features
 
     assert_send_type  '(Module) -> Module',
                       Module.new, :append_features, Module.new
   end
 
   def test_const_added
-    assert_visibility :private,
-                      Module.new, :const_added
+    assert_visibility :private, :const_added
 
     # const_added directly works
     assert_send_type  '(Symbol) -> void',
@@ -1138,8 +1133,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_extend_object
-    assert_visibility :private,
-                      Module.new, :extend_object
+    assert_visibility :private, :extend_object
 
     with_untyped_singleton_possible do |untyped|
       assert_send_type  '[T] (T) -> T',
@@ -1152,8 +1146,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_extended
-    assert_visibility :private,
-                      Module.new, :extended
+    assert_visibility :private, :extended
 
     with_untyped_singleton_possible do |untyped|
       assert_send_type  '(untyped) -> void',
@@ -1166,8 +1159,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_included
-    assert_visibility :private,
-                      Module.new, :included
+    assert_visibility :private, :included
 
     assert_send_type  '(Module) -> void',
                       Module.new, :included, Module.new
@@ -1177,8 +1169,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_method_added
-    assert_visibility :private,
-                      Module.new, :method_added
+    assert_visibility :private, :method_added
 
 
     # method_added directly works
@@ -1200,8 +1191,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_method_removed
-    assert_visibility :private,
-                      Module.new, :method_removed
+    assert_visibility :private, :method_removed
 
     # method_removed directly works
     assert_send_type  '(Symbol) -> void',
@@ -1222,8 +1212,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_method_undefined
-    assert_visibility :private,
-                      Module.new, :method_undefined
+    assert_visibility :private, :method_undefined
 
     # method_undefined directly works
     assert_send_type  '(Symbol) -> void',
@@ -1244,8 +1233,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_prepend_features
-    assert_visibility :private,
-                      Module.new, :prepend_features
+    assert_visibility :private, :prepend_features
 
     assert_send_type  '(Module) -> Module',
                       Module.new, :prepend_features, Module.new
@@ -1255,8 +1243,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_prepended
-    assert_visibility :private,
-                      Module.new, :prepended
+    assert_visibility :private, :prepended
 
     assert_send_type  '(Module) -> void',
                       Module.new, :prepended, Module.new
@@ -1266,8 +1253,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_remove_const
-    assert_visibility :private,
-                      Module.new, :remove_const
+    assert_visibility :private, :remove_const
 
     with_interned :Foo do |name|
       mod = Module.new
@@ -1284,8 +1270,7 @@ class ModuleInstanceTest < Test::Unit::TestCase
   end
 
   def test_using
-    assert_visibility :private,
-                      Module.new, :using
+    assert_visibility :private, :using
 
     # Cant actually test `using` in modules, so this is the best we got
     assert_type 'Module', UsingModule::UsingReturnValue

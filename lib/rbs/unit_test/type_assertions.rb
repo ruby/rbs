@@ -323,12 +323,12 @@ module RBS
         assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
       end
 
-      def assert_visibility(visibility, receiver, method)
+      def assert_visibility(visibility, method)
         _, definition = target
         method_entry = definition.methods[method]
 
         assert method_entry, "Method `#{method}` not found in RBS definition"
-        assert_equal visibility, method_entry.accessibility,
+        assert visibility == method_entry.accessibility,
           "Expected `#{method}` to be #{visibility}, but was #{method_entry.accessibility}"
       end
 
