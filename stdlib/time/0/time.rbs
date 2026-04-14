@@ -14,8 +14,9 @@ class Time
   # -->
   # Return the number of seconds the specified time zone differs from UTC.
   #
-  # Numeric time zones that include minutes, such as `-10:00` or `+1330` will
-  # work, as will simpler hour-only time zones like `-10` or `+13`.
+  # Numeric time zones that include minutes, such as <code>-10:00</code> or
+  # <code>+1330</code> will work, as will simpler hour-only time zones like
+  # <code>-10</code> or <code>+13</code>.
   #
   # Textual time zones listed in ZoneOffset are also supported.
   #
@@ -120,9 +121,10 @@ class Time
   # Based on this fact, this method only understands the time zone abbreviations
   # described in RFC 822 and the system time zone, in the order named. (i.e. a
   # definition in RFC 822 overrides the system time zone definition.)  The system
-  # time zone is taken from `Time.local(year, 1, 1).zone` and `Time.local(year, 7,
-  # 1).zone`. If the extracted time zone abbreviation does not match any of them,
-  # it is ignored and the given time is regarded as a local time.
+  # time zone is taken from <code>Time.local(year, 1, 1).zone</code> and
+  # <code>Time.local(year, 7, 1).zone</code>. If the extracted time zone
+  # abbreviation does not match any of them, it is ignored and the given time is
+  # regarded as a local time.
   #
   # ArgumentError is raised if Date._parse cannot extract information from `date`
   # or if the Time class cannot represent specified date.

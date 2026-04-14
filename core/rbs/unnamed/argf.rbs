@@ -4,7 +4,7 @@ module RBS
     # ## ARGF and `ARGV`
     #
     # The ARGF object works with the array at global variable `ARGV` to make
-    # `$stdin` and file streams available in the Ruby program:
+    # <code>$stdin</code> and file streams available in the Ruby program:
     #
     # *   **ARGV** may be thought of as the **argument vector** array.
     #
@@ -13,9 +13,9 @@ module RBS
     #
     # *   **ARGF** may be thought of as the **argument files** object.
     #
-    #     It can access file streams and/or the `$stdin` stream, based on what it
-    #     finds in `ARGV`. This provides a convenient way for the command line to
-    #     specify streams for a Ruby program to read.
+    #     It can access file streams and/or the <code>$stdin</code> stream, based on
+    #     what it finds in `ARGV`. This provides a convenient way for the command
+    #     line to specify streams for a Ruby program to read.
     #
     # ## Reading
     #
@@ -24,16 +24,16 @@ module RBS
     #
     # ### Simplest Case
     #
-    # When the *very first* ARGF read occurs with an empty `ARGV` (`[]`), the source
-    # is `$stdin`:
+    # When the *very first* ARGF read occurs with an empty `ARGV` (<code>[]</code>),
+    # the source is <code>$stdin</code>:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         p ['ARGV', ARGV]
     #         p ['ARGF.read', ARGF.read]
     #
-    # *   Commands and outputs (see below for the content of files `foo.txt` and
-    #     `bar.txt`):
+    # *   Commands and outputs (see below for the content of files
+    #     <code>foo.txt</code> and <code>bar.txt</code>):
     #
     #         $ echo "Open the pod bay doors, Hal." | ruby t.rb
     #         ["ARGV", []]
@@ -45,7 +45,8 @@ module RBS
     #
     # ### About the Examples
     #
-    # Many examples here assume the existence of files `foo.txt` and `bar.txt`:
+    # Many examples here assume the existence of files <code>foo.txt</code> and
+    # <code>bar.txt</code>:
     #
     #     $ cat foo.txt
     #     Foo 0
@@ -66,19 +67,20 @@ module RBS
     # one of:
     #
     # *   The string path to a file that may be opened as a stream.
-    # *   The character `'-'`, meaning stream `$stdin`.
+    # *   The character <code>'-'</code>, meaning stream <code>$stdin</code>.
     #
     # Each element that is *not* one of these should be removed from `ARGV` before
     # ARGF accesses that source.
     #
     # In the following example:
     #
-    # *   Filepaths `foo.txt` and `bar.txt` may be retained as potential sources.
-    # *   Options `--xyzzy` and `--mojo` should be removed.
+    # *   Filepaths <code>foo.txt</code> and <code>bar.txt</code> may be retained as
+    #     potential sources.
+    # *   Options <code>--xyzzy</code> and <code>--mojo</code> should be removed.
     #
     # Example:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         # Print arguments (and options, if any) found on command line.
     #         p ['ARGV', ARGV]
@@ -90,7 +92,7 @@ module RBS
     #
     # ARGF's stream access considers the elements of `ARGV`, left to right:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         p "ARGV: #{ARGV}"
     #         p "Read: #{ARGF.read}" # Read everything from all specified streams.
@@ -112,7 +114,7 @@ module RBS
     # Each element in `ARGV` is removed when its corresponding source is accessed;
     # when all sources have been accessed, the array is empty:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         until ARGV.empty? && ARGF.eof?
     #           p "ARGV: #{ARGV}"
@@ -142,7 +144,7 @@ module RBS
     # This program prints what it reads from files at the paths specified on the
     # command line:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         p ['ARGV', ARGV]
     #         # Read and print all content from the specified sources.
@@ -154,11 +156,12 @@ module RBS
     #         ["ARGV", [foo.txt, bar.txt]
     #         ["ARGF.read", "Foo 0\nFoo 1\nBar 0\nBar 1\nBar 2\nBar 3\n"]
     #
-    # #### Specifying `$stdin` in `ARGV`
+    # #### Specifying <code>$stdin</code> in `ARGV`
     #
-    # To specify stream `$stdin` in `ARGV`, us the character `'-'`:
+    # To specify stream <code>$stdin</code> in `ARGV`, us the character
+    # <code>'-'</code>:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         p ['ARGV', ARGV]
     #         p ['ARGF.read', ARGF.read]
@@ -169,8 +172,9 @@ module RBS
     #         ["ARGV", ["-"]]
     #         ["ARGF.read", "Open the pod bay doors, Hal.\n"]
     #
-    # When no character `'-'` is given, stream `$stdin` is ignored (exception: see
-    # [Specifying $stdin in ARGV](rdoc-ref:ARGF@Specifying+-24stdin+in+ARGV)):
+    # When no character <code>'-'</code> is given, stream <code>$stdin</code> is
+    # ignored (exception: see [Specifying $stdin in
+    # ARGV](rdoc-ref:ARGF@Specifying+-24stdin+in+ARGV)):
     #
     # *   Command and output:
     #
@@ -181,7 +185,7 @@ module RBS
     # #### Mixtures and Repetitions in `ARGV`
     #
     # For an ARGF reader, `ARGV` may contain any mixture of filepaths and character
-    # `'-'`, including repetitions.
+    # <code>'-'</code>, including repetitions.
     #
     # #### Modifications to `ARGV`
     #
@@ -208,13 +212,13 @@ module RBS
     # ### About Enumerable
     #
     # ARGF includes module Enumerable. Virtually all methods in Enumerable call
-    # method `#each` in the including class.
+    # method <code>#each</code> in the including class.
     #
     # **Note well**: In ARGF, method #each returns data from the *sources*, *not*
-    # from `ARGV`; therefore, for example, `ARGF#entries` returns an array of lines
-    # from the sources, not an array of the strings from `ARGV`:
+    # from `ARGV`; therefore, for example, <code>ARGF#entries</code> returns an
+    # array of lines from the sources, not an array of the strings from `ARGV`:
     #
-    # *   File `t.rb`:
+    # *   File <code>t.rb</code>:
     #
     #         p ['ARGV', ARGV]
     #         p ['ARGF.entries', ARGF.entries]
@@ -521,8 +525,8 @@ module RBS
       #   rdoc-file=io.c
       #   - ARGF.file  -> IO or File object
       # -->
-      # Returns the current file as an IO or File object. `$stdin` is returned when
-      # the current file is STDIN.
+      # Returns the current file as an IO or File object. <code>$stdin</code> is
+      # returned when the current file is STDIN.
       #
       # For example:
       #
@@ -630,8 +634,9 @@ module RBS
       # -->
       # Returns the next line from the current file in ARGF.
       #
-      # By default lines are assumed to be separated by `$/`; to use a different
-      # character as a separator, supply it as a String for the *sep* argument.
+      # By default lines are assumed to be separated by <code>$/</code>; to use a
+      # different character as a separator, supply it as a String for the *sep*
+      # argument.
       #
       # The optional *limit* argument specifies how many characters of each line to
       # return. By default all characters are returned.
@@ -647,7 +652,7 @@ module RBS
       # -->
       # Returns the file extension appended to the names of backup copies of modified
       # files under in-place edit mode. This value can be set using ARGF.inplace_mode=
-      # or passing the `-i` switch to the Ruby binary.
+      # or passing the <code>-i</code> switch to the Ruby binary.
       #
       %a{annotate:rdoc:copy:ARGF#inplace_mode}
       def inplace_mode: () -> String?
@@ -668,8 +673,9 @@ module RBS
       #       print line.sub("foo","bar")
       #     end
       #
-      # First, *file.txt.bak* is created as a backup copy of *file.txt*. Then, each
-      # line of *file.txt* has the first occurrence of "foo" replaced with "bar".
+      # First, <em>file.txt.bak</em> is created as a backup copy of <em>file.txt</em>.
+      # Then, each line of <em>file.txt</em> has the first occurrence of "foo"
+      # replaced with "bar".
       #
       %a{annotate:rdoc:copy:ARGF#inplace_mode=}
       def inplace_mode=: (String) -> self
@@ -684,10 +690,10 @@ module RBS
       # object.
       #
       # If ARGF.set_encoding has been called with two encoding names, the second is
-      # returned. Otherwise, if `Encoding.default_external` has been set, that value
-      # is returned. Failing that, if a default external encoding was specified on the
-      # command-line, that value is used. If the encoding is unknown, `nil` is
-      # returned.
+      # returned. Otherwise, if <code>Encoding.default_external</code> has been set,
+      # that value is returned. Failing that, if a default external encoding was
+      # specified on the command-line, that value is used. If the encoding is unknown,
+      # `nil` is returned.
       #
       %a{annotate:rdoc:copy:ARGF#internal_encoding}
       def internal_encoding: () -> Encoding
@@ -778,15 +784,15 @@ module RBS
       #   - print(*objects) -> nil
       # -->
       # Writes the given objects to the stream; returns `nil`. Appends the output
-      # record separator `$OUTPUT_RECORD_SEPARATOR` (`$\`), if it is not `nil`. See
-      # [Line IO](rdoc-ref:IO@Line+IO).
+      # record separator <code>$OUTPUT_RECORD_SEPARATOR</code> (<code>$\</code>), if
+      # it is not `nil`. See [Line IO](rdoc-ref:IO@Line+IO).
       #
       # With argument `objects` given, for each object:
       #
       # *   Converts via its method `to_s` if not a string.
       # *   Writes to the stream.
       # *   If not the last object, writes the output field separator
-      #     `$OUTPUT_FIELD_SEPARATOR` (`$,`) if it is not `nil`.
+      #     <code>$OUTPUT_FIELD_SEPARATOR</code> (<code>$,</code>) if it is not `nil`.
       #
       # With default separators:
       #
@@ -818,8 +824,8 @@ module RBS
       #
       #     "0,0.0,0/1,0+0i,zero,zero\n"
       #
-      # With no argument given, writes the content of `$_` (which is usually the most
-      # recent user input):
+      # With no argument given, writes the content of <code>$_</code> (which is
+      # usually the most recent user input):
       #
       #     f = File.open('t.tmp', 'w+')
       #     gets # Sets $_ to the most recent user input.
@@ -871,13 +877,13 @@ module RBS
       # newline sequence. If called without arguments, writes a newline. See [Line
       # IO](rdoc-ref:IO@Line+IO).
       #
-      # Note that each added newline is the character `"\n"<//tt>, not the output
-      # record separator (<tt>$\`).
+      # Note that each added newline is the character <code>"\n"<//tt>, not the output
+      # record separator (<tt>$\</code>).
       #
       # Treatment for each object:
       #
       # *   String: writes the string.
-      # *   Neither string nor array: writes `object.to_s`.
+      # *   Neither string nor array: writes <code>object.to_s</code>.
       # *   Array: writes each element of the array; arrays may be nested.
       #
       # To keep these examples brief, we define this helper method:
@@ -930,7 +936,7 @@ module RBS
       # conversion is applied, if applicable. A string is returned even if EOF is
       # encountered before any data is read.
       #
-      # If *length* is zero, it returns an empty string (`""`).
+      # If *length* is zero, it returns an empty string (<code>""</code>).
       #
       # If the optional *outbuf* argument is present, it must reference a String,
       # which will receive the data. The *outbuf* will contain only the received data
@@ -1015,8 +1021,9 @@ module RBS
       # -->
       # Returns the next line from the current file in ARGF.
       #
-      # By default lines are assumed to be separated by `$/`; to use a different
-      # character as a separator, supply it as a String for the *sep* argument.
+      # By default lines are assumed to be separated by <code>$/</code>; to use a
+      # different character as a separator, supply it as a String for the *sep*
+      # argument.
       #
       # The optional *limit* argument specifies how many characters of each line to
       # return. By default all characters are returned.
@@ -1041,7 +1048,7 @@ module RBS
       #     lines = ARGF.readlines
       #     lines[0]                #=> "This is line one\n"
       #
-      # See `IO.readlines` for a full description of all options.
+      # See <code>IO.readlines</code> for a full description of all options.
       #
       %a{annotate:rdoc:copy:ARGF#readlines}
       def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
@@ -1161,7 +1168,7 @@ module RBS
       #     lines = ARGF.readlines
       #     lines[0]                #=> "This is line one\n"
       #
-      # See `IO.readlines` for a full description of all options.
+      # See <code>IO.readlines</code> for a full description of all options.
       #
       %a{annotate:rdoc:copy:ARGF#to_a}
       def to_a: (?String sep, ?Integer limit) -> ::Array[String]

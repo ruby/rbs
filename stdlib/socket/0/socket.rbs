@@ -16,20 +16,21 @@
 #
 # Sockets have their own vocabulary:
 #
-# **domain:** The family of protocols:
+# <strong>domain:</strong> The family of protocols:
 # *   Socket::PF_INET
 # *   Socket::PF_INET6
 # *   Socket::PF_UNIX
 # *   etc.
 #
-# **type:** The type of communications between the two endpoints, typically
+# <strong>type:</strong> The type of communications between the two endpoints,
+# typically
 # *   Socket::SOCK_STREAM
 # *   Socket::SOCK_DGRAM.
 #
-# **protocol:** Typically *zero*. This may be used to identify a variant of a
-# protocol.
+# <strong>protocol:</strong> Typically *zero*. This may be used to identify a
+# variant of a protocol.
 #
-# **hostname:** The identifier of a network interface:
+# <strong>hostname:</strong> The identifier of a network interface:
 # *   a string (hostname, IPv4 or IPv6 address or `broadcast` which specifies a
 #     broadcast address)
 # *   a zero-length string which specifies INADDR_ANY
@@ -484,7 +485,7 @@ class Socket < BasicSocket
   #     The `connect_timeout` specifies the timeout in seconds from the start of
   #     the connection attempt to the last candidate.
   #     By default, all connection attempts continue until the timeout occurs.
-  #     When `fast_fallback:false` is explicitly specified,
+  #     When <code>fast_fallback:false</code> is explicitly specified,
   #     a timeout is set for each connection attempt and any connection attempt
   #     that exceeds its timeout will be canceled.
   #
@@ -845,7 +846,7 @@ class Socket < BasicSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # accept_nonblock should not raise an IO::WaitReadable exception, but return the
-  # symbol `:wait_readable` instead.
+  # symbol <code>:wait_readable</code> instead.
   #
   # ### See
   # *   Socket#accept
@@ -1099,7 +1100,7 @@ class Socket < BasicSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # connect_nonblock should not raise an IO::WaitWritable exception, but return
-  # the symbol `:wait_writable` instead.
+  # the symbol <code>:wait_writable</code> instead.
   #
   # ### See
   # *   Socket#connect
@@ -1357,7 +1358,7 @@ class Socket < BasicSocket
   #
   # By specifying a keyword argument *exception* to `false`, you can indicate that
   # recvfrom_nonblock should not raise an IO::WaitReadable exception, but return
-  # the symbol `:wait_readable` instead.
+  # the symbol <code>:wait_readable</code> instead.
   #
   # ### See
   # *   Socket#recvfrom

@@ -37,7 +37,7 @@
 #
 #         proc2 = proc {|x| x**2 }
 #
-# *   Receiving a block of code into proc argument (note the `&`):
+# *   Receiving a block of code into proc argument (note the <code>&</code>):
 #
 #         def make_proc(&block)
 #           block
@@ -149,7 +149,7 @@
 # method.
 #
 # Lambda semantics is typically preserved during the proc lifetime, including
-# `&`-deconstruction to a block of code:
+# <code>&</code>-deconstruction to a block of code:
 #
 #     p = proc {|x, y| x }
 #     l = lambda {|x, y| x }
@@ -184,7 +184,7 @@
 # ## Conversion of other objects to procs
 #
 # Any object that implements the `to_proc` method can be converted into a proc
-# by the `&` operator, and therefore can be consumed by iterators.
+# by the <code>&</code> operator, and therefore can be consumed by iterators.
 #
 #     class Greeter
 #       def initialize(greeting)
@@ -389,13 +389,13 @@ class Proc
   #     a_proc.(9, 1, 2, 3)        #=> [9, 18, 27]
   #     a_proc.yield(9, 1, 2, 3)   #=> [9, 18, 27]
   #
-  # Note that `prc.()` invokes `prc.call()` with the parameters given.  It's
-  # syntactic sugar to hide "call".
+  # Note that <code>prc.()</code> invokes <code>prc.call()</code> with the
+  # parameters given.  It's syntactic sugar to hide "call".
   #
-  # For procs created using #lambda or `->()` an error is generated if the wrong
-  # number of parameters are passed to the proc.  For procs created using Proc.new
-  # or Kernel.proc, extra parameters are silently discarded and missing parameters
-  # are set to `nil`.
+  # For procs created using #lambda or <code>->()</code> an error is generated if
+  # the wrong number of parameters are passed to the proc.  For procs created
+  # using Proc.new or Kernel.proc, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   #     a_proc = proc {|a,b| [a,b] }
   #     a_proc.call(1)   #=> [1, nil]
@@ -418,13 +418,13 @@ class Proc
   #     a_proc.(9, 1, 2, 3)        #=> [9, 18, 27]
   #     a_proc.yield(9, 1, 2, 3)   #=> [9, 18, 27]
   #
-  # Note that `prc.()` invokes `prc.call()` with the parameters given.  It's
-  # syntactic sugar to hide "call".
+  # Note that <code>prc.()</code> invokes <code>prc.call()</code> with the
+  # parameters given.  It's syntactic sugar to hide "call".
   #
-  # For procs created using #lambda or `->()` an error is generated if the wrong
-  # number of parameters are passed to the proc.  For procs created using Proc.new
-  # or Kernel.proc, extra parameters are silently discarded and missing parameters
-  # are set to `nil`.
+  # For procs created using #lambda or <code>->()</code> an error is generated if
+  # the wrong number of parameters are passed to the proc.  For procs created
+  # using Proc.new or Kernel.proc, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   #     a_proc = proc {|a,b| [a,b] }
   #     a_proc.call(1)   #=> [1, nil]
@@ -545,8 +545,8 @@ class Proc
   # lambdas and have only a finite number of optional arguments; in this latter
   # case, returns n. Keyword arguments will be considered as a single additional
   # argument, that argument being mandatory if any keyword argument is mandatory.
-  # A #proc with no argument declarations is the same as a block declaring `||` as
-  # its arguments.
+  # A #proc with no argument declarations is the same as a block declaring
+  # <code>||</code> as its arguments.
   #
   #     proc {}.arity                  #=>  0
   #     proc { || }.arity              #=>  0
@@ -605,13 +605,13 @@ class Proc
   #     a_proc.(9, 1, 2, 3)        #=> [9, 18, 27]
   #     a_proc.yield(9, 1, 2, 3)   #=> [9, 18, 27]
   #
-  # Note that `prc.()` invokes `prc.call()` with the parameters given.  It's
-  # syntactic sugar to hide "call".
+  # Note that <code>prc.()</code> invokes <code>prc.call()</code> with the
+  # parameters given.  It's syntactic sugar to hide "call".
   #
-  # For procs created using #lambda or `->()` an error is generated if the wrong
-  # number of parameters are passed to the proc.  For procs created using Proc.new
-  # or Kernel.proc, extra parameters are silently discarded and missing parameters
-  # are set to `nil`.
+  # For procs created using #lambda or <code>->()</code> an error is generated if
+  # the wrong number of parameters are passed to the proc.  For procs created
+  # using Proc.new or Kernel.proc, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   #     a_proc = proc {|a,b| [a,b] }
   #     a_proc.call(1)   #=> [1, nil]
@@ -634,13 +634,13 @@ class Proc
   #     a_proc.(9, 1, 2, 3)        #=> [9, 18, 27]
   #     a_proc.yield(9, 1, 2, 3)   #=> [9, 18, 27]
   #
-  # Note that `prc.()` invokes `prc.call()` with the parameters given.  It's
-  # syntactic sugar to hide "call".
+  # Note that <code>prc.()</code> invokes <code>prc.call()</code> with the
+  # parameters given.  It's syntactic sugar to hide "call".
   #
-  # For procs created using #lambda or `->()` an error is generated if the wrong
-  # number of parameters are passed to the proc.  For procs created using Proc.new
-  # or Kernel.proc, extra parameters are silently discarded and missing parameters
-  # are set to `nil`.
+  # For procs created using #lambda or <code>->()</code> an error is generated if
+  # the wrong number of parameters are passed to the proc.  For procs created
+  # using Proc.new or Kernel.proc, extra parameters are silently discarded and
+  # missing parameters are set to `nil`.
   #
   #     a_proc = proc {|a,b| [a,b] }
   #     a_proc.call(1)   #=> [1, nil]
@@ -747,7 +747,7 @@ class Proc
   #     Proc.new {}.lambda?          #=> false
   #
   # `lambda`, `proc` and Proc.new preserve the tricks of a Proc object given by
-  # `&` argument.
+  # <code>&</code> argument.
   #
   #     lambda(&lambda {}).lambda?   #=> true
   #     proc(&lambda {}).lambda?     #=> true
@@ -757,13 +757,13 @@ class Proc
   #     proc(&proc {}).lambda?       #=> false
   #     Proc.new(&proc {}).lambda?   #=> false
   #
-  # A Proc object generated by `&` argument has the tricks
+  # A Proc object generated by <code>&</code> argument has the tricks
   #
   #     def n(&b) b.lambda? end
   #     n {}                         #=> false
   #
-  # The `&` argument preserves the tricks if a Proc object is given by `&`
-  # argument.
+  # The <code>&</code> argument preserves the tricks if a Proc object is given by
+  # <code>&</code> argument.
   #
   #     n(&lambda {})                #=> true
   #     n(&proc {})                  #=> false
@@ -836,13 +836,14 @@ class Proc
   #   - proc.ruby2_keywords -> proc
   # -->
   # Marks the proc as passing keywords through a normal argument splat. This
-  # should only be called on procs that accept an argument splat (`*args`) but not
-  # explicit keywords or a keyword splat.  It marks the proc such that if the proc
-  # is called with keyword arguments, the final hash argument is marked with a
-  # special flag such that if it is the final element of a normal argument splat
-  # to another method call, and that method call does not include explicit
-  # keywords or a keyword splat, the final element is interpreted as keywords.  In
-  # other words, keywords will be passed through the proc to other methods.
+  # should only be called on procs that accept an argument splat
+  # (<code>*args</code>) but not explicit keywords or a keyword splat.  It marks
+  # the proc such that if the proc is called with keyword arguments, the final
+  # hash argument is marked with a special flag such that if it is the final
+  # element of a normal argument splat to another method call, and that method
+  # call does not include explicit keywords or a keyword splat, the final element
+  # is interpreted as keywords.  In other words, keywords will be passed through
+  # the proc to other methods.
   #
   # This should only be used for procs that delegate keywords to another method,
   # and only for backwards compatibility with Ruby versions before 2.7.

@@ -9,18 +9,19 @@ use std::ptr::NonNull;
 /// ```rust
 /// use ruby_rbs::node::parse;
 /// let rbs_code = r#"type foo = "hello""#;
-/// let signature = parse(rbs_code.as_bytes());
+/// let signature = parse(rbs_code);
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
 /// ```
-pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
+pub fn parse(rbs_code: &str) -> Result<SignatureNode<'_>, String> {
     unsafe {
-        let start_ptr = rbs_code.as_ptr() as *const i8;
+        let start_ptr = rbs_code.as_ptr().cast::<std::os::raw::c_char>();
         let end_ptr = start_ptr.add(rbs_code.len());
+        let bytes = rbs_code.len() as i32;
 
         let raw_rbs_string_value = rbs_string_new(start_ptr, end_ptr);
 
         let encoding_ptr = &rbs_encodings[RBS_ENCODING_UTF_8 as usize] as *const rbs_encoding_t;
-        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, rbs_code.len() as i32);
+        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, bytes);
 
         let mut signature: *mut rbs_signature_t = std::ptr::null_mut();
         let result = rbs_parse_signature(parser, &mut signature);
@@ -34,7 +35,18 @@ pub fn parse(rbs_code: &[u8]) -> Result<SignatureNode<'_>, String> {
         if result {
             Ok(signature_node)
         } else {
-            Err(String::from("Failed to parse RBS signature"))
+            let error_message = (*parser)
+                .error
+                .as_ref()
+                .filter(|error| !error.message.is_null())
+                .map(|error| {
+                    std::ffi::CStr::from_ptr(error.message)
+                        .to_string_lossy()
+                        .into_owned()
+                })
+                .unwrap_or_else(|| String::from("Failed to parse RBS signature"));
+
+            Err(error_message)
         }
     }
 }
@@ -226,28 +238,44 @@ impl Iterator for RBSLocationRangeListIter {
 }
 
 #[derive(Debug)]
-pub struct RBSString {
+pub struct RBSString<'a> {
     pointer: *const rbs_string_t,
+    marker: PhantomData<&'a rbs_string_t>,
 }
 
-impl RBSString {
+impl<'a> RBSString<'a> {
     #[must_use]
     pub fn new(pointer: *const rbs_string_t) -> Self {
-        Self { pointer }
+        Self {
+            pointer,
+            marker: PhantomData,
+        }
     }
 
     #[must_use]
+    #[allow(clippy::unnecessary_cast)]
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let s = *self.pointer;
             std::slice::from_raw_parts(s.start as *const u8, s.end.offset_from(s.start) as usize)
         }
     }
+
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+}
+
+impl std::fmt::Display for RBSString<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
 }
 
 impl SymbolNode<'_> {
     #[must_use]
-    pub fn name(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let constant_ptr = rbs_constant_pool_id_to_constant(
                 &(*self.parser.as_ptr()).constant_pool,
@@ -261,6 +289,17 @@ impl SymbolNode<'_> {
             std::slice::from_raw_parts(constant.start, constant.length)
         }
     }
+
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(self.as_bytes()) }
+    }
+}
+
+impl std::fmt::Display for SymbolNode<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
 }
 
 #[cfg(test)]
@@ -268,20 +307,28 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_parse_error_contains_actual_message() {
+        let rbs_code = "class { end";
+        let result = parse(rbs_code);
+        let error_message = result.unwrap_err();
+        assert_eq!(error_message, "expected one of class/module/constant name");
+    }
+
+    #[test]
     fn test_parse() {
         let rbs_code = r#"type foo = "hello""#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let rbs_code2 = r#"class Foo end"#;
-        let signature2 = parse(rbs_code2.as_bytes());
+        let signature2 = parse(rbs_code2);
         assert!(signature2.is_ok(), "Failed to parse RBS signature");
     }
 
     #[test]
     fn test_parse_integer() {
         let rbs_code = r#"type foo = 1"#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let signature_node = signature.unwrap();
@@ -289,10 +336,7 @@ mod tests {
             && let Node::LiteralType(literal) = node.type_()
             && let Node::Integer(integer) = literal.literal()
         {
-            assert_eq!(
-                "1".to_string(),
-                String::from_utf8(integer.string_representation().as_bytes().to_vec()).unwrap()
-            );
+            assert_eq!(integer.string_representation().as_str(), "1");
         } else {
             panic!("No literal type node found");
         }
@@ -302,7 +346,7 @@ mod tests {
     fn test_rbs_hash_via_record_type() {
         // RecordType stores its fields in an RBSHash via all_fields()
         let rbs_code = r#"type foo = { name: String, age: Integer }"#;
-        let signature = parse(rbs_code.as_bytes());
+        let signature = parse(rbs_code);
         assert!(signature.is_ok(), "Failed to parse RBS signature");
 
         let signature_node = signature.unwrap();
@@ -326,10 +370,10 @@ mod tests {
                     panic!("Expected ClassInstanceType");
                 };
 
-                let key_name = String::from_utf8(sym.name().to_vec()).unwrap();
+                let key_name = sym.to_string();
                 let type_name_node = class_type.name();
                 let type_name_sym = type_name_node.name();
-                let type_name = String::from_utf8(type_name_sym.name().to_vec()).unwrap();
+                let type_name = type_name_sym.to_string();
                 field_types.push((key_name, type_name));
             }
 
@@ -360,28 +404,19 @@ mod tests {
             }
 
             fn visit_class_node(&mut self, node: &ClassNode) {
-                self.visited.push(format!(
-                    "class:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("class:{}", node.name().name()));
 
                 crate::node::visit_class_node(self, node);
             }
 
             fn visit_class_instance_type_node(&mut self, node: &ClassInstanceTypeNode) {
-                self.visited.push(format!(
-                    "type:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("type:{}", node.name().name()));
 
                 crate::node::visit_class_instance_type_node(self, node);
             }
 
             fn visit_class_super_node(&mut self, node: &ClassSuperNode) {
-                self.visited.push(format!(
-                    "super:{}",
-                    String::from_utf8(node.name().name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("super:{}", node.name().name()));
 
                 crate::node::visit_class_super_node(self, node);
             }
@@ -395,10 +430,7 @@ mod tests {
             }
 
             fn visit_method_definition_node(&mut self, node: &MethodDefinitionNode) {
-                self.visited.push(format!(
-                    "method:{}",
-                    String::from_utf8(node.name().name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("method:{}", node.name()));
 
                 crate::node::visit_method_definition_node(self, node);
             }
@@ -410,10 +442,7 @@ mod tests {
             }
 
             fn visit_symbol_node(&mut self, node: &SymbolNode) {
-                self.visited.push(format!(
-                    "symbol:{}",
-                    String::from_utf8(node.name().to_vec()).unwrap()
-                ));
+                self.visited.push(format!("symbol:{node}"));
 
                 crate::node::visit_symbol_node(self, node);
             }
@@ -425,7 +454,7 @@ mod tests {
             end
         "#;
 
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let mut visitor = Visitor {
             visited: Vec::new(),
@@ -458,7 +487,7 @@ mod tests {
     #[test]
     fn test_node_location_ranges() {
         let rbs_code = r#"type foo = 1"#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declaration = signature.declarations().iter().next().unwrap();
         let Node::TypeAlias(type_alias) = declaration else {
@@ -484,6 +513,112 @@ mod tests {
     }
 
     #[test]
+    fn test_sub_locations() {
+        let rbs_code = r#"class Foo < Bar end"#;
+        let signature = parse(rbs_code).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Class(class) = declaration else {
+            panic!("Expected Class");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = class.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(5, keyword_loc.end());
+
+        let name_loc = class.name_location();
+        assert_eq!(6, name_loc.start());
+        assert_eq!(9, name_loc.end());
+
+        let end_loc = class.end_location();
+        assert_eq!(16, end_loc.start());
+        assert_eq!(19, end_loc.end());
+
+        // Test optional sub-location that's present
+        let lt_loc = class.lt_location();
+        assert!(lt_loc.is_some());
+        let lt = lt_loc.unwrap();
+        assert_eq!(10, lt.start());
+        assert_eq!(11, lt.end());
+
+        // Test optional sub-location that's not present (no type params in this class)
+        let type_params_loc = class.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_type_alias_sub_locations() {
+        let rbs_code = r#"type foo = String"#;
+        let signature = parse(rbs_code).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::TypeAlias(type_alias) = declaration else {
+            panic!("Expected TypeAlias");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = type_alias.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(4, keyword_loc.end());
+
+        let name_loc = type_alias.name_location();
+        assert_eq!(5, name_loc.start());
+        assert_eq!(8, name_loc.end());
+
+        let eq_loc = type_alias.eq_location();
+        assert_eq!(9, eq_loc.start());
+        assert_eq!(10, eq_loc.end());
+
+        // Test optional sub-location that's not present (no type params)
+        let type_params_loc = type_alias.type_params_location();
+        assert!(type_params_loc.is_none());
+    }
+
+    #[test]
+    fn test_module_sub_locations() {
+        let rbs_code = r#"module Foo[T] : Bar end"#;
+        let signature = parse(rbs_code).unwrap();
+
+        let declaration = signature.declarations().iter().next().unwrap();
+        let Node::Module(module) = declaration else {
+            panic!("Expected Module");
+        };
+
+        // Test required sub-locations
+        let keyword_loc = module.keyword_location();
+        assert_eq!(0, keyword_loc.start());
+        assert_eq!(6, keyword_loc.end());
+
+        let name_loc = module.name_location();
+        assert_eq!(7, name_loc.start());
+        assert_eq!(10, name_loc.end());
+
+        let end_loc = module.end_location();
+        assert_eq!(20, end_loc.start());
+        assert_eq!(23, end_loc.end());
+
+        // Test optional sub-locations that are present
+        let type_params_loc = module.type_params_location();
+        assert!(type_params_loc.is_some());
+        let tp = type_params_loc.unwrap();
+        assert_eq!(10, tp.start());
+        assert_eq!(13, tp.end());
+
+        let colon_loc = module.colon_location();
+        assert!(colon_loc.is_some());
+        let colon = colon_loc.unwrap();
+        assert_eq!(14, colon.start());
+        assert_eq!(15, colon.end());
+
+        let self_types_loc = module.self_types_location();
+        assert!(self_types_loc.is_some());
+        let st = self_types_loc.unwrap();
+        assert_eq!(16, st.start());
+        assert_eq!(19, st.end());
+    }
+
+    #[test]
     fn test_enum_types() {
         let rbs_code = r#"
             class Foo
@@ -496,7 +631,7 @@ mod tests {
             class Bar[out T, in U, V]
             end
         "#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let declarations: Vec<_> = signature.declarations().iter().collect();
 
@@ -576,7 +711,7 @@ mod tests {
                 attr_writer email(@email): String
             end
         "#;
-        let signature = parse(rbs_code.as_bytes()).unwrap();
+        let signature = parse(rbs_code).unwrap();
 
         let Node::Class(class) = signature.declarations().iter().next().unwrap() else {
             panic!("Expected Class");

@@ -6,7 +6,7 @@ module Zlib
   # When zlib returns a Z_NEED_DICT if a preset dictionary is needed at this
   # point.
   #
-  # Used by Zlib::Inflate.inflate and `Zlib.inflate`
+  # Used by Zlib::Inflate.inflate and <code>Zlib.inflate</code>
   #
   class NeedDict < Zlib::Error
   end

@@ -5,8 +5,8 @@
 #
 # ObjectSpace also provides support for object finalizers, procs that will be
 # called after a specific object was destroyed by garbage collection.  See the
-# documentation for `ObjectSpace.define_finalizer` for important information on
-# how to use this method correctly.
+# documentation for <code>ObjectSpace.define_finalizer</code> for important
+# information on how to use this method correctly.
 #
 #     a = "A"
 #     b = "B"
@@ -17,7 +17,7 @@
 #     a = nil
 #     b = nil
 #
-# *produces:*
+# <em>produces:</em>
 #
 #     Finalizer two on 537763470
 #     Finalizer one on 537763480
@@ -50,9 +50,9 @@ module ObjectSpace
   # The contents of the returned hash are implementation specific. It may be
   # changed in future.
   #
-  # The keys starting with `:T_` means live objects. For example, `:T_ARRAY` is
-  # the number of arrays. `:FREE` means object slots which is not used now.
-  # `:TOTAL` means sum of above.
+  # The keys starting with <code>:T_</code> means live objects. For example,
+  # <code>:T_ARRAY</code> is the number of arrays. <code>:FREE</code> means object
+  # slots which is not used now. <code>:TOTAL</code> means sum of above.
   #
   # If the optional argument `result_hash` is given, it is overwritten and
   # returned. This is intended to avoid probe effect.
@@ -74,7 +74,7 @@ module ObjectSpace
   # object ID of the *obj* will be passed as an argument to *aProc*. If *aProc* is
   # a lambda or method, make sure it can be called with a single argument.
   #
-  # The return value is an array `[0, aProc]`.
+  # The return value is an array <code>[0, aProc]</code>.
   #
   # The two recommended patterns are to either create the finaliser proc in a
   # non-instance method where it can safely capture the needed state, or to use a
@@ -147,7 +147,7 @@ module ObjectSpace
   #     count = ObjectSpace.each_object(Job) {|x| p x }
   #     puts "Total count: #{count}"
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     #<Job:0x000000011d6cbbf0>
   #     #<Job:0x000000011d6cbc68>
@@ -155,8 +155,9 @@ module ObjectSpace
   #
   # Due to a current Ractor implementation issue, this method does not yield
   # Ractor-unshareable objects when the process is in multi-Ractor mode.
-  # Multi-ractor mode is enabled when `Ractor.new` has been called for the first
-  # time. See https://bugs.ruby-lang.org/issues/19387 for more information.
+  # Multi-ractor mode is enabled when <code>Ractor.new</code> has been called for
+  # the first time. See https://bugs.ruby-lang.org/issues/19387 for more
+  # information.
   #
   #     a = 12345678987654321 # shareable
   #     b = [].freeze # shareable

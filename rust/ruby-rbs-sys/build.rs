@@ -33,7 +33,6 @@ fn build(include_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-
 fn source_files<P: AsRef<Path>>(root_dir: P) -> Result<Vec<String>, Box<dyn Error>> {
     let mut files = Vec::new();
 
@@ -113,6 +112,10 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_ruby_annotations_return_type_annotation_t")
         .allowlist_type("rbs_ast_ruby_annotations_skip_annotation_t")
         .allowlist_type("rbs_ast_ruby_annotations_type_application_annotation_t")
+        .allowlist_type("rbs_ast_ruby_annotations_block_param_type_annotation_t")
+        .allowlist_type("rbs_ast_ruby_annotations_param_type_annotation_t")
+        .allowlist_type("rbs_ast_ruby_annotations_splat_param_type_annotation_t")
+        .allowlist_type("rbs_ast_ruby_annotations_double_splat_param_type_annotation_t")
         .allowlist_type("rbs_ast_string_t")
         .allowlist_type("rbs_ast_symbol_t")
         .allowlist_type("rbs_ast_type_param_t")

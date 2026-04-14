@@ -2,7 +2,7 @@
 # The objspace library extends the ObjectSpace module and adds several methods
 # to get internal statistic information about object/memory management.
 #
-# You need to `require 'objspace'` to use this extension module.
+# You need to <code>require 'objspace'</code> to use this extension module.
 #
 # Generally, you **SHOULD** **NOT** use this library if you do not know about
 # the MRI implementation.  Mainly, this library is for (memory) profiler
@@ -214,12 +214,13 @@ module ObjectSpace
   # -->
   # Dump the contents of a ruby object as JSON.
   #
-  # *output* can be one of: `:stdout`, `:file`, `:string`, or IO object.
+  # *output* can be one of: <code>:stdout</code>, <code>:file</code>,
+  # <code>:string</code>, or IO object.
   #
-  # *   `:file` means dumping to a tempfile and returning corresponding File
-  #     object;
-  # *   `:stdout` means printing the dump and returning `nil`;
-  # *   `:string` means returning a string with the dump;
+  # *   <code>:file</code> means dumping to a tempfile and returning corresponding
+  #     File object;
+  # *   <code>:stdout</code> means printing the dump and returning `nil`;
+  # *   <code>:string</code> means returning a string with the dump;
   # *   if an instance of IO object is provided, the output goes there, and the
   #     object is returned.
   #
@@ -254,7 +255,7 @@ module ObjectSpace
   #
   # If *shapes* is a positive integer, only shapes newer than the provided shape
   # id are dumped. The current shape_id can be accessed using
-  # `RubyVM.stat(:next_shape_id)`.
+  # <code>RubyVM.stat(:next_shape_id)</code>.
   #
   # If *shapes* is `false`, no shapes are dumped.
   #

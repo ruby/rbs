@@ -154,9 +154,9 @@ end
 #     end
 #
 # The consumer thread waits for the producer thread to push a line to buf while
-# `buf.empty?`. The producer thread (main thread) reads a line from ARGF and
-# pushes it into buf then calls `empty_cond.signal` to notify the consumer
-# thread of new data.
+# <code>buf.empty?</code>. The producer thread (main thread) reads a line from
+# ARGF and pushes it into buf then calls <code>empty_cond.signal</code> to
+# notify the consumer thread of new data.
 #
 # ### Simple Class include
 #

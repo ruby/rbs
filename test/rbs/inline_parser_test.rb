@@ -236,6 +236,347 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__def_method_types_dot3
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs (Float, Float) -> Float | ...
+        def add(x, y)
+          x + y
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(Float, Float) -> Float"], member.overloads.map { _1.method_type.to_s }
+        assert_predicate member, :overloading?
+      end
+    end
+
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs ...
+        def add(x, y)
+          x + y
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_predicate member, :overloading?
+      end
+    end
+  end
+
+  def test_parse__def_method_docs
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs x: Integer
+        # @rbs y: Integer
+        # @rbs a: String
+        # @rbs b: String?
+        # @rbs return: String
+        def add(x, y = 3, a:, b: nil)
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(Integer x, ?Integer y, a: String, ?b: String?) -> String"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_error__def_method_docs
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs x: Integer
+        # @rbs return: void
+        def add(y)
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs x: Integer", diagnostic.location.source
+    end
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(untyped y) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_docs__splat
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs *args: String
+        # @rbs **kwargs: Integer
+        def foo(*args, **kwargs) #: void
+        end
+
+        # @rbs *: String
+        # @rbs **: Integer
+        def bar(*, **) #: void
+        end
+
+        # @rbs *args: String
+        # @rbs **kwargs: Integer
+        def baz(*, **) #: void
+        end
+
+        # @rbs *: String
+        # @rbs **: Integer
+        def baz_(*args, **kwargs) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String args, **Integer kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String, **Integer) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String args, **Integer kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String, **Integer) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_unnanotated__splat
+    result = parse(<<~RUBY)
+      class Foo
+        def foo(*args, **kwargs) #: void
+        end
+
+        def bar(*, **) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*untyped args, **untyped kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*untyped, **untyped) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_error__def_method_docs__splat
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs *foo_args: String
+        # @rbs *foo_args: Integer -- Error: duplicated annotation
+        def foo(*foo_args) #: void
+        end
+
+        # @rbs **bar_kwargs: String
+        # @rbs **bar_kwargs: Integer -- Error: duplicated annotation
+        def bar(**bar_kwargs) #: void
+        end
+
+        # @rbs baz_args: String -- Error: baz_args is a splat parameter
+        # @rbs *baz_arg: Symbol -- Error: baz_arg is not a splat parameter
+        # @rbs baz_kwargs: Integer -- Error: baz_kwargs is a double splat parameter
+        # @rbs **baz_kw: Symbol -- Error: baz_kw is not a double splat parameter
+        def baz(baz_arg, *baz_args, baz_kw:, **baz_kwargs) #: void
+        end
+      end
+    RUBY
+
+    assert_equal 6, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs *foo_args: Integer -- Error: duplicated annotation", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs **bar_kwargs: Integer -- Error: duplicated annotation", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs baz_args: String -- Error: baz_args is a splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs baz_kwargs: Integer -- Error: baz_kwargs is a double splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs *baz_arg: Symbol -- Error: baz_arg is not a splat parameter", diagnostic.location.source
+    end
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs **baz_kw: Symbol -- Error: baz_kw is not a double splat parameter", diagnostic.location.source
+    end
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(*String foo_args) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(**String bar_kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["(untyped baz_arg, *untyped baz_args, baz_kw: untyped, **untyped baz_kwargs) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_docs__block
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(&block)
+        end
+
+        # @rbs &: ? () -> void
+        def bar(&)
+        end
+
+        # @rbs &block: ? () -> untyped
+        def baz(&block)
+        end
+
+        # @rbs &: () -> void
+        def qux(&blk)
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() { () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() ?{ () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() ?{ () -> untyped } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal ["() { () -> void } -> untyped"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def_method_docs__block__no_block_param
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(x)
+        end
+      end
+    RUBY
+
+    assert_equal 0, result.diagnostics.size
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_equal "(untyped x) { () -> void } -> untyped", member.overloads[0].method_type.to_s
+      end
+    end
+  end
+
+  def test_error__def_method_docs__block__name_mismatch
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs &block: () -> void
+        def foo(&callback)
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
+      assert_equal "@rbs &block: () -> void", diagnostic.location.source
+    end
+  end
+
+  def test_parse__def_method_docs__unannotated_block_param
+    result = parse(<<~RUBY)
+      class Foo
+        def foo(&) #: void
+        end
+
+        def bar(&block) #: void
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_equal ["() ?{ (?) -> untyped } -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :bar, member.name
+        assert_equal ["() ?{ (?) -> untyped } -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
   def test_parse__skip_class_module
     result = parse(<<~RUBY)
       # @rbs skip -- not a constant
@@ -728,25 +1069,22 @@ class RBS::InlineParserTest < Test::Unit::TestCase
       end
     RUBY
 
-    # The @rbs annotations should be reported as syntax errors (invalid format)
+    # The @rbs annotations should be reported as unused (ParamTypeAnnotation is valid but not applicable to attr_*)
     assert_equal 3, result.diagnostics.size
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs name: String", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs age: Integer", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     assert_any!(result.diagnostics) do |diagnostic|
-      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, diagnostic
+      assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs data: Array[Hash[Symbol, untyped]]", diagnostic.location.source
-      assert_match(/Syntax error:/, diagnostic.message)
     end
 
     result.declarations[0].tap do |decl|
@@ -1164,6 +1502,28 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__instance_variable_in_module
+    result = parse(<<~RUBY)
+      module Foo
+        # @rbs @bar: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_equal 1, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@bar, member.name
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
   def test_error__instance_variable_ignored
     result = parse(<<~RUBY)
       # @rbs @global_decl: String
@@ -1201,6 +1561,58 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_any!(result.diagnostics) do |diagnostic|
       assert_instance_of RBS::InlineParser::Diagnostic::UnusedInlineAnnotation, diagnostic
       assert_equal "@rbs @block_decl: String", diagnostic.location.source
+    end
+  end
+
+  def test_parse__module_self
+    result = parse(<<~RUBY)
+      # @rbs module-self: _Each[String]
+      module Enumerable2
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+      assert_equal RBS::TypeName.parse("Enumerable2"), decl.module_name
+
+      assert_equal 1, decl.members.size
+      assert_equal 1, decl.self_types.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::ModuleSelfMember, member
+        assert_equal "_Each", member.name.to_s
+        assert_equal 1, member.args.size
+        assert_equal "String", member.args[0].to_s
+      end
+    end
+  end
+
+  def test_parse__module_self_multiple
+    result = parse(<<~RUBY)
+      # @rbs module-self: _Each[String]
+      # @rbs module-self: Comparable
+      module StringCollection
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_equal 2, decl.self_types.size
+
+      decl.self_types[0].tap do |member|
+        assert_equal "_Each", member.name.to_s
+        assert_equal 1, member.args.size
+      end
+
+      decl.self_types[1].tap do |member|
+        assert_equal "Comparable", member.name.to_s
+        assert_equal 0, member.args.size
+      end
     end
   end
 

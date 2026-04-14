@@ -1484,9 +1484,57 @@ Processing `lib`...
         )
 
         assert_nil lockfile.gems["set"]
-        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
         assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
         assert_instance_of RBS::Collection::Sources::Git, lockfile.gems["ast"][:source]
+      end
+    end
+  end
+
+  def test_collection_install__nongem_stdlib_no_warning
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources:
+            - name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+
+          path: #{dir.join('gem_rbs_collection')}
+
+          gems:
+          - name: socket
+          - name: pathname
+        YAML
+
+        bundle_install('ast', 'logger', 'tsort')
+
+        # First install creates the lockfile with socket as stdlib
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["socket"][:source]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
+
+        # Second install with existing lockfile should not warn about nongem stdlibs
+        _stdout, stderr = run_rbs_collection("install", bundler: true)
+
+        refute_match(/Cannot find `socket` gem/, stderr)
+        refute_match(/Cannot find `pathname` gem/, stderr)
+
+        lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
+          lockfile_path: dir + "rbs_collection.lock.yaml",
+          data: YAML.safe_load((dir + "rbs_collection.lock.yaml").read)
+        )
+
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["socket"][:source]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
       end
     end
   end
@@ -1517,7 +1565,6 @@ Processing `lib`...
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
         assert_include stderr, '`set` is a part of the Ruby core library.'
-        assert_include stderr, '`pathname` is a part of the Ruby core library.'
 
         lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
           lockfile_path: dir + "rbs_collection.lock.yaml",
@@ -1525,7 +1572,7 @@ Processing `lib`...
         )
 
         assert_nil lockfile.gems["set"]
-        assert_nil lockfile.gems["pathname"]
+        assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["pathname"][:source]
         assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
         assert_instance_of RBS::Collection::Sources::Local, lockfile.gems["true_string"][:source]
       end

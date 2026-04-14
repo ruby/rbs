@@ -28,8 +28,8 @@ class RBS::Annotate::RDocAnnotatorTest < Test::Unit::TestCase
   end
 
   def parse_rbs(src)
-    _, _, decls = RBS::Parser.parse_signature(src)
-    decls
+    buffer, _, decls = RBS::Parser.parse_signature(src)
+    [buffer, decls]
   end
 
   def tester(*false_paths)
@@ -57,7 +57,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class CLI
   class Helper
   end
@@ -66,28 +66,24 @@ end
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
 
-    decls[0].tap do |decl|
-      annotator.annotate_class(decl, outer: [])
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_class(decls[0], rewriter, outer: [])
 
-      assert_equal <<-TEXT, decl.comment.string
-<!-- rdoc-file=lib/cli.rb -->
-This is a doc for CLI.
-
-<!-- rdoc-file=lib/helper.rb -->
-This is another doc for CLI.
-
-      TEXT
-
-      decl.members[0].tap do |decl|
-        annotator.annotate_class(decl, outer: [RBS::TypeName.parse("CLI").to_namespace])
-
-        assert_equal <<-TEXT, decl.comment.string
-<!-- rdoc-file=lib/helper.rb -->
-This is a doc for CLI::Helper
-
-        TEXT
-      end
-    end
+    assert_annotated <<-RBS, rewriter
+# <!-- rdoc-file=lib/cli.rb -->
+# This is a doc for CLI.
+#
+# <!-- rdoc-file=lib/helper.rb -->
+# This is another doc for CLI.
+#
+class CLI
+  # <!-- rdoc-file=lib/helper.rb -->
+  # This is a doc for CLI::Helper
+  #
+  class Helper
+  end
+end
+    RBS
   end
 
   def test_docs_for_method_method
@@ -143,12 +139,8 @@ Doc for m3
     assert_nil annotator.doc_for_method(RBS::TypeName.parse("Foo"), instance_method: :m4=, tester: tester)
   end
 
-  def assert_annotated_decls(expected, decls)
-    strio = StringIO.new
-    writer = RBS::Writer.new(out: strio)
-    writer.write(decls)
-
-    assert_equal expected, strio.string
+  def assert_annotated(expected, rewriter)
+    assert_equal expected, rewriter.string
   end
 
   def test_annotate1_defs
@@ -197,7 +189,7 @@ end
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class Foo
   def m1: () -> void
 
@@ -235,9 +227,10 @@ class Bar
 end
 RBS
 
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 # <!-- rdoc-file=lib/foo.rb -->
 # Doc for Foo
 #
@@ -342,7 +335,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class Foo
   def m1: () -> void
 
@@ -355,9 +348,10 @@ end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 class Foo
   # <!--
   #   rdoc-file=lib/foo.rb
@@ -413,7 +407,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class Foo
   attr_accessor m1: untyped
 
@@ -424,9 +418,10 @@ end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 class Foo
   # <!-- rdoc-file=lib/foo.rb -->
   # Doc for m1 (attr_accessor)
@@ -471,7 +466,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 %a{annotate:rdoc:skip}
 class Foo
   def foo: () -> void
@@ -484,9 +479,10 @@ end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 %a{annotate:rdoc:skip}
 class Foo
   # <!--
@@ -521,7 +517,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class Foo
 end
 
@@ -535,9 +531,10 @@ end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 # <!-- rdoc-file=lib/bar.rb -->
 # Doc of Foo from bar.rb
 #
@@ -579,7 +576,7 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 %a{annotate:rdoc:copy:Foo}
 class A
   %a{annotate:rdoc:copy:Foo#foo}
@@ -591,9 +588,10 @@ end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 # <!-- rdoc-file=lib/foo.rb -->
 # This is doc for Foo
 #
@@ -632,16 +630,17 @@ end
       }
     )
 
-    decls = parse_rbs(<<-RBS)
+    buffer, decls = parse_rbs(<<-RBS)
 class Foo
   def initialize: () -> void
 end
     RBS
 
     annotator = RBS::Annotate::RDocAnnotator.new(source: source)
-    annotator.annotate_decls(decls)
+    rewriter = RBS::Rewriter.new(buffer)
+    annotator.annotate_decls(decls, rewriter)
 
-    assert_annotated_decls(<<-RBS, decls)
+    assert_annotated(<<-RBS, rewriter)
 class Foo
   # <!--
   #   rdoc-file=lib/foo.rb

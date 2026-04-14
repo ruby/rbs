@@ -1,6 +1,7 @@
 #ifndef RBS__AST_H
 #define RBS__AST_H
 
+#include "rbs/defines.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
 #include "string.h"
@@ -38,48 +39,48 @@ typedef struct rbs_node {
     rbs_location_range location;
 } rbs_node_t;
 
-const char *rbs_node_type_name(rbs_node_t *node);
+const char *RBS_NONNULL rbs_node_type_name(rbs_node_t *RBS_NONNULL node);
 
 /* rbs_node_list_node */
 
 typedef struct rbs_node_list_node {
-    rbs_node_t *node;
-    struct rbs_node_list_node *next;
+    rbs_node_t *RBS_NONNULL node;
+    struct rbs_node_list_node *RBS_NULLABLE next;
 } rbs_node_list_node_t;
 
 typedef struct rbs_node_list {
-    rbs_allocator_t *allocator;
-    rbs_node_list_node_t *head;
-    rbs_node_list_node_t *tail;
+    rbs_allocator_t *RBS_NONNULL allocator;
+    rbs_node_list_node_t *RBS_NULLABLE head;
+    rbs_node_list_node_t *RBS_NULLABLE tail;
     size_t length;
 } rbs_node_list_t;
 
-rbs_node_list_t *rbs_node_list_new(rbs_allocator_t *);
+rbs_node_list_t *RBS_NONNULL rbs_node_list_new(rbs_allocator_t *RBS_NONNULL);
 
-void rbs_node_list_append(rbs_node_list_t *list, rbs_node_t *node);
+void rbs_node_list_append(rbs_node_list_t *RBS_NONNULL list, rbs_node_t *RBS_NONNULL node);
 
 /* rbs_hash */
 
 typedef struct rbs_hash_node {
-    rbs_node_t *key;
-    rbs_node_t *value;
-    struct rbs_hash_node *next;
+    rbs_node_t *RBS_NONNULL key;
+    rbs_node_t *RBS_NONNULL value;
+    struct rbs_hash_node *RBS_NULLABLE next;
 } rbs_hash_node_t;
 
 typedef struct rbs_hash {
-    rbs_allocator_t *allocator;
-    rbs_hash_node_t *head;
-    rbs_hash_node_t *tail;
+    rbs_allocator_t *RBS_NONNULL allocator;
+    rbs_hash_node_t *RBS_NULLABLE head;
+    rbs_hash_node_t *RBS_NULLABLE tail;
     size_t length;
 } rbs_hash_t;
 
-rbs_hash_t *rbs_hash_new(rbs_allocator_t *);
+rbs_hash_t *RBS_NONNULL rbs_hash_new(rbs_allocator_t *RBS_NONNULL);
 
-void rbs_hash_set(rbs_hash_t *hash, rbs_node_t *key, rbs_node_t *value);
+void rbs_hash_set(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key, rbs_node_t *RBS_NONNULL value);
 
-rbs_hash_node_t *rbs_hash_find(rbs_hash_t *hash, rbs_node_t *key);
+rbs_hash_node_t *RBS_NULLABLE rbs_hash_find(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key);
 
-rbs_node_t *rbs_hash_get(rbs_hash_t *hash, rbs_node_t *key);
+rbs_node_t *RBS_NULLABLE rbs_hash_get(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key);
 
 /* rbs_ast_node */
 
@@ -89,9 +90,11 @@ typedef struct <%= node.c_name %> {
 
     <%- node.fields.each do |field| -%>
         <%- if field.type.is_a?(RBS::Template::NodeType) -%>
-    struct <%= field.type.c_name %> *<%= field.c_name %>;  <%= field.optional? ? "/* Optional */" : "" %>
+    struct <%= field.type.c_name %> *<%= field.optional? ? "RBS_NULLABLE" : "RBS_NONNULL" %> <%= field.c_name %>;
+        <%- elsif field.type.pointer? -%>
+    <%= field.type.c_type_name %><%= field.optional? ? "RBS_NULLABLE" : "RBS_NONNULL" %> <%= field.c_name %>;
         <%- else -%>
-    <%= field.type.c_type_name %> <%= field.c_name %>;   <%= field.optional? ? "/* Optional */" : "" %>
+    <%= field.type.c_type_name %> <%= field.c_name %>;
         <%- end -%>
     <%- end -%>
     <%- if node.locations -%>
@@ -110,6 +113,7 @@ typedef union rbs_ast_ruby_annotations {
     rbs_ast_ruby_annotations_node_type_assertion_t node_type_assertion;
     rbs_ast_ruby_annotations_return_type_annotation_t return_type_annotation;
     rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
+    rbs_ast_ruby_annotations_param_type_annotation_t param_type_annotation;
 } rbs_ast_ruby_annotations_t;
 
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.
@@ -119,10 +123,10 @@ typedef struct rbs_ast_symbol {
     rbs_constant_id_t constant_id;
 } rbs_ast_symbol_t;
 
-rbs_ast_symbol_t *rbs_ast_symbol_new(rbs_allocator_t *, rbs_location_range, rbs_constant_pool_t *, rbs_constant_id_t);
+rbs_ast_symbol_t *RBS_NONNULL rbs_ast_symbol_new(rbs_allocator_t *RBS_NONNULL, rbs_location_range, rbs_constant_pool_t *RBS_NONNULL, rbs_constant_id_t);
 
 <%- nodes.each do |node| -%>
-<%= node.c_name %>_t *<%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>);
+<%= node.c_name %>_t *RBS_NONNULL <%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>);
 <%- end -%>
 
 #endif

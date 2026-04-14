@@ -161,7 +161,7 @@ class Rational < Numeric
   #
   # Returns:
   #
-  # *   `-1`, if `self` is less than `other`.
+  # *   <code>-1</code>, if `self` is less than `other`.
   # *   `0`, if the two values are the same.
   # *   `1`, if `self` is greater than `other`.
   # *   `nil`, if the two values are incomparable.
@@ -216,7 +216,7 @@ class Rational < Numeric
   # `ndigits` decimal digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at least
-  # `ndigits.abs` trailing zeros.
+  # <code>ndigits.abs</code> trailing zeros.
   #
   # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
@@ -272,7 +272,7 @@ class Rational < Numeric
   # `ndigits` decimal digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at least
-  # `ndigits.abs` trailing zeros.
+  # <code>ndigits.abs</code> trailing zeros.
   #
   # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
@@ -392,7 +392,7 @@ class Rational < Numeric
   # decimal digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at least
-  # `ndigits.abs` trailing zeros.
+  # <code>ndigits.abs</code> trailing zeros.
   #
   # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #
@@ -482,7 +482,7 @@ class Rational < Numeric
   # digits (default: 0).
   #
   # When the precision is negative, the returned value is an integer with at least
-  # `ndigits.abs` trailing zeros.
+  # <code>ndigits.abs</code> trailing zeros.
   #
   # Returns a rational when `ndigits` is positive, otherwise returns an integer.
   #

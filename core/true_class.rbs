@@ -58,7 +58,7 @@ class TrueClass
        | (untyped obj) -> bool
 
   # <!-- rdoc-file=object.c -->
-  # Returns string `'true'`:
+  # Returns string <code>'true'</code>:
   #
   #     true.to_s # => "true"
   #
@@ -70,7 +70,7 @@ class TrueClass
   #   rdoc-file=object.c
   #   - true.to_s -> 'true'
   # -->
-  # Returns string `'true'`:
+  # Returns string <code>'true'</code>:
   #
   #     true.to_s # => "true"
   #

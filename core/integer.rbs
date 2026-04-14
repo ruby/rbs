@@ -88,7 +88,7 @@
 # *   #downto: Calls the given block with each integer value from `self` down to
 #     the given value.
 # *   #times: Calls the given block `self` times with each integer in
-#     `(0..self-1)`.
+#     <code>(0..self-1)</code>.
 # *   #upto: Calls the given block with each integer value from `self` up to the
 #     given value.
 #
@@ -114,9 +114,9 @@ class Integer < Numeric
   #     Integer.sqrt(4.0)            # => 2
   #     Integer.sqrt(3.14159)        # => 1
   #
-  # This method is equivalent to `Math.sqrt(numeric).floor`, except that the
-  # result of the latter code may differ from the true value due to the limited
-  # precision of floating point arithmetic.
+  # This method is equivalent to <code>Math.sqrt(numeric).floor</code>, except
+  # that the result of the latter code may differ from the true value due to the
+  # limited precision of floating point arithmetic.
   #
   #     Integer.sqrt(10**46)    # => 100000000000000000000000
   #     Math.sqrt(10**46).floor # => 99999999999999991611392
@@ -132,14 +132,15 @@ class Integer < Numeric
   # If `object` is an Integer object, returns `object`.
   #     Integer.try_convert(1) # => 1
   #
-  # Otherwise if `object` responds to `:to_int`, calls `object.to_int` and returns
-  # the result.
+  # Otherwise if `object` responds to <code>:to_int</code>, calls
+  # <code>object.to_int</code> and returns the result.
   #     Integer.try_convert(1.25) # => 1
   #
-  # Returns `nil` if `object` does not respond to `:to_int`
+  # Returns `nil` if `object` does not respond to <code>:to_int</code>
   #     Integer.try_convert([]) # => nil
   #
-  # Raises an exception unless `object.to_int` returns an Integer object.
+  # Raises an exception unless <code>object.to_int</code> returns an Integer
+  # object.
   #
   def self.try_convert: (int) -> Integer
                       | (untyped) -> Integer?
@@ -391,7 +392,7 @@ class Integer < Numeric
   #
   # Returns:
   #
-  # *   `-1`, if `self` is less than `other`.
+  # *   <code>-1</code>, if `self` is less than `other`.
   # *   `0`, if `self` is equal to `other`.
   # *   `1`, if `self` is greater then `other`.
   # *   `nil`, if `self` and `other` are incomparable.
@@ -502,8 +503,8 @@ class Integer < Numeric
   #     n[2]     # => 0
   #     n[3]     # => 0
   #
-  # In principle, `n[i]` is equivalent to `(n >> i) & 1`. Thus, negative index
-  # always returns zero:
+  # In principle, <code>n[i]</code> is equivalent to <code>(n >> i) & 1</code>.
+  # Thus, negative index always returns zero:
   #
   #     255[-1] # => 0
   #
@@ -514,8 +515,9 @@ class Integer < Numeric
   #     "%010b" % n[0, 10] # => "0000111000"
   #     "%010b" % n[4, 10] # => "0000000011"
   #
-  # With argument `range`, returns `range.size` bits from `self`, beginning at
-  # `range.begin` and including bits of greater significance:
+  # With argument `range`, returns <code>range.size</code> bits from `self`,
+  # beginning at <code>range.begin</code> and including bits of greater
+  # significance:
   #
   #     n = 0b111000      # => 56
   #     "%010b" % n[0..9] # => "0000111000"
@@ -611,7 +613,7 @@ class Integer < Numeric
   # significant bit has bit position 1). If there is no such bit (zero or minus
   # one), returns zero.
   #
-  # This method returns `ceil(log2(self < 0 ? -self : self + 1))`>.
+  # This method returns <code>ceil(log2(self < 0 ? -self : self + 1))</code>>.
   #
   #     (-2**1000-1).bit_length   # => 1001
   #     (-2**1000).bit_length     # => 1000
@@ -664,7 +666,7 @@ class Integer < Numeric
   #
   # *   When `self` is non-zero and `ndigits` is negative,
   #      returns a value based on a computed granularity:
-  #     *   The granularity is `10 ** ndigits.abs`.
+  #     *   The granularity is <code>10 ** ndigits.abs</code>.
   #     *   The returned value is the smallest multiple of the granularity
   #          that is greater than or equal to `self`.
   #     Examples with positive `self`:
@@ -786,7 +788,7 @@ class Integer < Numeric
   #   rdoc-file=numeric.c
   #   - divmod(other) -> array
   # -->
-  # Returns a 2-element array `[q, r]`, where
+  # Returns a 2-element array <code>[q, r]</code>, where
   #
   #     q = (self/other).floor    # Quotient
   #     r = self % other          # Remainder
@@ -875,7 +877,7 @@ class Integer < Numeric
   #
   # *   When `self` is non-zero and `ndigits` is negative,
   #      returns a value based on a computed granularity:
-  #     *   The granularity is `10 ** ndigits.abs`.
+  #     *   The granularity is <code>10 ** ndigits.abs</code>.
   #     *   The returned value is the largest multiple of the granularity
   #          that is less than or equal to `self`.
   #     Examples with positive `self`:
@@ -1000,7 +1002,7 @@ class Integer < Numeric
   def negative?: () -> bool
 
   # <!-- rdoc-file=numeric.c -->
-  # Returns the successor integer of `self` (equivalent to `self + 1`):
+  # Returns the successor integer of `self` (equivalent to <code>self + 1</code>):
   #
   #     1.succ  #=> 2
   #     -1.succ #=> 0
@@ -1080,7 +1082,7 @@ class Integer < Numeric
   #   rdoc-file=numeric.c
   #   - pred -> next_integer
   # -->
-  # Returns the predecessor of `self` (equivalent to `self - 1`):
+  # Returns the predecessor of `self` (equivalent to <code>self - 1</code>):
   #
   #     1.pred  #=> 0
   #     -1.pred #=> -2
@@ -1139,8 +1141,8 @@ class Integer < Numeric
   # Returns `self` rounded to the nearest value with a precision of `ndigits`
   # decimal digits.
   #
-  # When `ndigits` is negative, the returned value has at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, the returned value has at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     555.round(-1)      # => 560
   #     555.round(-2)      # => 600
@@ -1157,17 +1159,18 @@ class Integer < Numeric
   # If keyword argument `half` is given, and `self` is equidistant from the two
   # candidate  values, the rounding is according to the given `half` value:
   #
-  # *   `:up` or `nil`: round away from zero:
+  # *   <code>:up</code> or `nil`: round away from zero:
   #
   #         25.round(-1, half: :up)      # => 30
   #         (-25).round(-1, half: :up)   # => -30
   #
-  # *   `:down`: round toward zero:
+  # *   <code>:down</code>: round toward zero:
   #
   #         25.round(-1, half: :down)    # => 20
   #         (-25).round(-1, half: :down) # => -20
   #
-  # *   `:even`: round toward the candidate whose last nonzero digit is even:
+  # *   <code>:even</code>: round toward the candidate whose last nonzero digit is
+  #     even:
   #
   #         25.round(-1, half: :even)    # => 20
   #         15.round(-1, half: :even)    # => 20
@@ -1200,7 +1203,7 @@ class Integer < Numeric
   #   rdoc-file=numeric.c
   #   - succ -> next_integer
   # -->
-  # Returns the successor integer of `self` (equivalent to `self + 1`):
+  # Returns the successor integer of `self` (equivalent to <code>self + 1</code>):
   #
   #     1.succ  #=> 2
   #     -1.succ #=> 0
@@ -1214,7 +1217,8 @@ class Integer < Numeric
   #   - times {|i| ... } -> self
   #   - times            -> enumerator
   # -->
-  # Calls the given block `self` times with each integer in `(0..self-1)`:
+  # Calls the given block `self` times with each integer in
+  # <code>(0..self-1)</code>:
   #
   #     a = []
   #     5.times {|i| a.push(i) } # => 5
@@ -1330,8 +1334,8 @@ class Integer < Numeric
   # Returns `self` truncated (toward zero) to a precision of `ndigits` decimal
   # digits.
   #
-  # When `ndigits` is negative, the returned value has at least `ndigits.abs`
-  # trailing zeros:
+  # When `ndigits` is negative, the returned value has at least
+  # <code>ndigits.abs</code> trailing zeros:
   #
   #     555.truncate(-1)  # => 550
   #     555.truncate(-2)  # => 500

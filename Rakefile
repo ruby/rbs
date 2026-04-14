@@ -35,18 +35,6 @@ end
 
 Rake::TestTask.new(test: :compile, &test_config)
 
-unless Gem.win_platform?
-  begin
-    require "ruby_memcheck"
-
-    namespace :test do
-      RubyMemcheck::TestTask.new(valgrind: :compile, &test_config)
-    end
-  rescue LoadError => exn
-    STDERR.puts "🚨🚨🚨🚨 Skipping RubyMemcheck: #{exn.inspect} 🚨🚨🚨🚨"
-  end
-end
-
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
 task :lexer do
@@ -211,12 +199,15 @@ task :validate => :compile do
     libs << "rbs"
   end
 
+  libs.delete("bigdecimal-math") or raise
+  libs.delete("bigdecimal") or raise
+
   libs.each do |lib|
     args = ["-r", lib]
 
     if lib == "rbs"
-      args << "-r"
-      args << "prism"
+      args << "-r" << "prism"
+      args << "-r" << "logger"
     end
 
     sh "#{ruby} #{rbs} #{args.join(' ')} validate"
@@ -246,21 +237,16 @@ task :stdlib_test => :compile do
 end
 
 task :typecheck_test => :compile do
-  puts
-  puts
-  puts "⛔️⛔️⛔️⛔️⛔️⛔️ Skipping type check test because RBS is incompatible with Steep (#{__FILE__}:#{__LINE__})"
-  puts
-  puts
-  # FileList["test/typecheck/*"].each do |test|
-  #   Dir.chdir(test) do
-  #     expectations = File.join(test, "steep_expectations.yml")
-  #     if File.exist?(expectations)
-  #       sh "steep check --with_expectations"
-  #     else
-  #       sh "steep check"
-  #     end
-  #   end
-  # end
+  FileList["test/typecheck/*"].each do |test|
+    Dir.chdir(test) do
+      expectations = File.join(test, "steep_expectations.yml")
+      if File.exist?(expectations)
+        sh "steep check --with_expectations"
+      else
+        sh "steep check"
+      end
+    end
+  end
 end
 
 task :raap => :compile do
@@ -561,4 +547,208 @@ task :prepare_profiling do
   Rake::Task[:"clobber"].invoke
   Rake::Task[:"templates"].invoke
   Rake::Task[:"compile"].invoke
+end
+
+namespace :rust do
+  namespace :rbs do
+    RUST_DIR = File.expand_path("rust", __dir__)
+    RBS_VERSION_FILE = File.join(RUST_DIR, "rbs_version")
+
+    VENDOR_TARGETS = {
+      "ruby-rbs-sys" => %w[include src],
+      "ruby-rbs" => %w[config.yml],
+    }
+
+    desc "Sync vendored RBS source from the pinned version"
+    task :sync do
+      unless File.exist?(RBS_VERSION_FILE)
+        raise "#{RBS_VERSION_FILE} not found. Run `rake rust:rbs:pin[VERSION]` first."
+      end
+
+      version = File.read(RBS_VERSION_FILE).strip
+      raise "#{RBS_VERSION_FILE} is empty" if version.empty?
+
+      puts "Syncing vendor/rbs/ from #{version}..."
+
+      VENDOR_TARGETS.each do |crate, entries|
+        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
+
+        puts "  Copying files for #{crate}:"
+        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
+        rm_rf vendor_dir, verbose: false
+        mkdir_p vendor_dir, verbose: false
+
+        entries.each do |entry|
+          target = File.join(vendor_dir, entry)
+
+          # Extract the entry from the pinned git tag using git archive
+          IO.popen(["git", "archive", "--format=tar", version, "--", entry], "rb") do |tar|
+            IO.popen(["tar", "xf", "-", "-C", vendor_dir], "wb") do |extract|
+              IO.copy_stream(tar, extract)
+            end
+          end
+
+          raise "Failed to extract #{entry} from #{version}" unless File.exist?(target)
+          puts "    #{entry}"
+        end
+
+        # Make files read-only to prevent accidental edits
+        chmod_R "a-w", vendor_dir, verbose: false
+      end
+
+      puts "📦 Synced vendor/rbs/ from #{version} (read-only)"
+    end
+
+    desc "Pin a specific RBS version for Rust crates (e.g., rake rust:rbs:pin[v4.0.3])"
+    task :pin, [:version] do |_t, args|
+      version = args[:version] or raise "Usage: rake rust:rbs:pin[VERSION]"
+
+      # Verify the tag exists
+      unless system("git", "rev-parse", "--verify", "#{version}^{commit}", out: File::NULL, err: File::NULL)
+        raise "Tag #{version} not found"
+      end
+
+      File.write(RBS_VERSION_FILE, "#{version}\n")
+      puts "📌 Pinned RBS version to #{version}"
+
+      Rake::Task["rust:rbs:sync"].invoke
+    end
+
+    desc "Create symlinks from vendor/rbs/ to the repository root (for development/CI)"
+    task :symlink do
+      VENDOR_TARGETS.each do |crate, entries|
+        vendor_dir = File.join(RUST_DIR, crate, "vendor", "rbs")
+
+        puts "Setting up symlinks for #{crate}..."
+        entries.each do |entry|
+          puts "  #{entry} -> repository root"
+        end
+
+        chmod_R "u+w", vendor_dir, verbose: false if File.exist?(vendor_dir)
+        rm_rf vendor_dir, verbose: false
+        mkdir_p vendor_dir, verbose: false
+
+        entries.each do |entry|
+          ln_s File.join("..", "..", "..", "..", entry), File.join(vendor_dir, entry), verbose: false
+        end
+      end
+
+      puts "🔗 Symlinked vendor/rbs/ to repository root"
+    end
+  end
+
+  namespace :publish do
+    def self.prepare_publish_branch(crate_name)
+      dry_run = ENV["RBS_RUST_PUBLISH_DRY_RUN"]
+
+      version_file = File.join(RUST_DIR, "rbs_version")
+
+      unless File.exist?(version_file)
+        raise "#{version_file} not found. Run `rake rust:rbs:pin[VERSION]` first."
+      end
+
+      rbs_version = File.read(version_file).strip
+      raise "#{version_file} is empty" if rbs_version.empty?
+
+      crate_version = File.read(File.join(RUST_DIR, crate_name, "Cargo.toml"))[/^version\s*=\s*"(.+)"/, 1]
+      release_branch = "rust/release-#{crate_name}-#{Time.now.strftime('%Y%m%d%H%M%S')}"
+
+      puts "=" * 60
+      puts "Rust crate publish: #{crate_name}#{dry_run ? " (DRY RUN)" : ""}"
+      puts "=" * 60
+      puts "  RBS source version:  #{rbs_version}"
+      puts "  #{crate_name}:        #{crate_version} (tag: #{crate_name}-v#{crate_version})"
+      puts "  Release branch:      #{release_branch}"
+      puts "=" * 60
+
+      # Check that vendor dirs contain real files, not symlinks
+      entries = VENDOR_TARGETS.fetch(crate_name)
+      entries.each do |entry|
+        path = File.join(RUST_DIR, crate_name, "vendor", "rbs", entry)
+        if File.symlink?(path)
+          raise "#{path} is a symlink. Run `rake rust:rbs:sync` first."
+        end
+        unless File.exist?(path)
+          raise "#{path} does not exist. Run `rake rust:rbs:sync` first."
+        end
+      end
+
+      # Ensure working tree is clean before publishing
+      unless `git status --porcelain`.strip.empty?
+        raise "💢 Working tree is dirty. Please commit or stash your changes before publishing."
+      end
+
+      # Create a release branch with vendor files committed
+      original_branch = `git rev-parse --abbrev-ref HEAD`.strip
+
+      sh "git", "checkout", "-b", release_branch, verbose: false
+      vendor_path = File.join("rust", crate_name, "vendor", "rbs")
+      sh "git", "add", "-f", vendor_path, verbose: false
+      sh "git", "commit", "-m", "Publish #{crate_name} (RBS #{rbs_version})", verbose: false
+
+      [dry_run, crate_version, original_branch]
+    end
+
+    desc "Publish ruby-rbs-sys crate to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
+    task :"ruby-rbs-sys" do
+      crate_name = "ruby-rbs-sys"
+      dry_run, crate_version, original_branch = prepare_publish_branch(crate_name)
+
+      begin
+        puts "🔰 Dry-run publishing..."
+
+        Dir.chdir(File.join(RUST_DIR, crate_name)) do
+          sh "cargo", "publish", "--dry-run"
+        end
+
+        puts "✅ Dry-run succeeded!"
+
+        unless dry_run
+          puts "💪 Publishing #{crate_name} for real..."
+
+          Dir.chdir(File.join(RUST_DIR, crate_name)) do
+            sh "cargo", "publish"
+          end
+
+          sh "git", "tag", "#{crate_name}-v#{crate_version}"
+          sh "git", "push", "origin", "#{crate_name}-v#{crate_version}"
+
+          puts "🎉 Published #{crate_name} successfully!"
+        end
+      ensure
+        sh "git", "checkout", original_branch, verbose: false
+      end
+    end
+
+    desc "Publish ruby-rbs crate to crates.io (set RBS_RUST_PUBLISH_DRY_RUN=1 for dry-run only)"
+    task :"ruby-rbs" do
+      crate_name = "ruby-rbs"
+      dry_run, crate_version, original_branch = prepare_publish_branch(crate_name)
+
+      begin
+        puts "🔰 Dry-run publishing..."
+
+        Dir.chdir(File.join(RUST_DIR, crate_name)) do
+          sh "cargo", "publish", "--dry-run", "--no-verify"
+        end
+
+        puts "✅ Dry-run succeeded!"
+
+        unless dry_run
+          puts "💪 Publishing #{crate_name} for real..."
+
+          Dir.chdir(File.join(RUST_DIR, crate_name)) do
+            sh "cargo", "publish"
+          end
+
+          sh "git", "tag", "#{crate_name}-v#{crate_version}"
+          sh "git", "push", "origin", "#{crate_name}-v#{crate_version}"
+
+          puts "🎉 Published #{crate_name} successfully!"
+        end
+      ensure
+        sh "git", "checkout", original_branch, verbose: false
+      end
+    end
+  end
 end

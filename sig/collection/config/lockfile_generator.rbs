@@ -6,6 +6,8 @@ module RBS
         #
         ALUMNI_STDLIBS: Hash[String, String?]
 
+        NONGEM_STDLIBS: Set[String]
+
         class GemfileLockMismatchError < StandardError
           @expected: Pathname
 

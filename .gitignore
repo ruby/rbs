@@ -25,3 +25,7 @@ doc/
 # For clangd's editor integration
 ext/rbs_extension/compile_commands.json
 ext/rbs_extension/.cache
+
+# Rust crate vendored RBS source (managed by rake rust:rbs:sync or rust:rbs:symlink)
+rust/ruby-rbs-sys/vendor/rbs/
+rust/ruby-rbs/vendor/rbs/

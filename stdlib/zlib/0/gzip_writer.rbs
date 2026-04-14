@@ -62,8 +62,9 @@ module Zlib
     #   - flush(flush=nil)
     # -->
     # Flushes all the internal buffers of the GzipWriter object.  The meaning of
-    # `flush` is same as in Zlib::Deflate#deflate.  `Zlib::SYNC_FLUSH` is used if
-    # `flush` is omitted.  It is no use giving flush `Zlib::NO_FLUSH`.
+    # `flush` is same as in Zlib::Deflate#deflate.  <code>Zlib::SYNC_FLUSH</code> is
+    # used if `flush` is omitted.  It is no use giving flush
+    # <code>Zlib::NO_FLUSH</code>.
     #
     def flush: (?Integer flush) -> self
 
@@ -75,10 +76,10 @@ module Zlib
     #
     # Setting the mtime in the gzip header does not effect the mtime of the file
     # generated. Different utilities that expand the gzipped files may use the mtime
-    # header. For example the gunzip utility can use the `-N` flag which will set
-    # the resultant file's mtime to the value in the header. By default many tools
-    # will set the mtime of the expanded file to the mtime of the gzipped file, not
-    # the mtime in the header.
+    # header. For example the gunzip utility can use the <code>-N</code> flag which
+    # will set the resultant file's mtime to the value in the header. By default
+    # many tools will set the mtime of the expanded file to the mtime of the gzipped
+    # file, not the mtime in the header.
     #
     # If you do not set an mtime, the default value will be the time when
     # compression started. Setting a value of 0 indicates no time stamp is
@@ -159,8 +160,8 @@ module Zlib
     # that behaves the same as IO#write.
     #
     # The `options` hash may be used to set the encoding of the data.
-    # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
-    # IO::new.
+    # <code>:external_encoding</code>, <code>:internal_encoding</code> and
+    # <code>:encoding</code> may be set as in IO::new.
     #
     def initialize: (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) -> void
   end

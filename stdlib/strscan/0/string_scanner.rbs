@@ -1,6 +1,7 @@
 # <!-- rdoc-file=ext/strscan/strscan.c -->
 # Class `StringScanner` supports processing a stored string as a stream;
-# this code creates a new `StringScanner` object with string `'foobarbaz'`:
+# this code creates a new `StringScanner` object with string
+# <code>'foobarbaz'</code>:
 #     require 'strscan'
 # scanner = StringScanner.new('foobarbaz')
 #
@@ -19,13 +20,13 @@
 # ENGLISH_TEXT = 'Hello'
 #
 # Some examples here assume that certain helper methods are defined:
-# *   `put_situation(scanner)`:
+# *   <code>put_situation(scanner)</code>:
 #      Displays the values of the scanner's
 #      methods #pos, #charpos, #rest, and #rest_size.
-# *   `put_match_values(scanner)`:
+# *   <code>put_match_values(scanner)</code>:
 #      Displays the scanner's [match
 #     values](rdoc-ref:StringScanner@Match+Values).
-# *   `match_values_cleared?(scanner)`:
+# *   <code>match_values_cleared?(scanner)</code>:
 #      Returns whether the scanner's [match
 #     values](rdoc-ref:StringScanner@Match+Values) are cleared.
 # See examples at [helper methods](helper_methods.md).
@@ -45,7 +46,7 @@
 # The scanner has:
 # *   A *stored string*, which is:
 #     *   Initially set by StringScanner.new(string) to the given `string`
-#          (`'foobarbaz'` in the example above).
+#          (<code>'foobarbaz'</code> in the example above).
 #     *   Modifiable by methods #string=(new_string) and #concat(more_string).
 #     *   Returned by method #string.
 #     More at [Stored String](rdoc-ref:StringScanner@Stored+String) below.
@@ -63,7 +64,7 @@
 #      which is a trailing substring of the stored string;
 #      it extends from the current position to the end of the stored string:
 #     *   Initially set by StringScanner.new(string) to the given `string`
-#          (`'foobarbaz'` in the example above).
+#          (<code>'foobarbaz'</code> in the example above).
 #     *   Returned by method #rest.
 #     *   Modified by any modification to either the stored string or the
 #         position.
@@ -96,7 +97,7 @@
 # When the byte position is:
 # *   Zero (at the beginning), the target substring is the entire stored string.
 # *   Equal to the size of the stored string (at the end),
-#      the target substring is the empty string `''`.
+#      the target substring is the empty string <code>''</code>.
 # To get or set the byte position:
 # *   #pos: returns the byte position.
 # *   #pos=(new_pos): sets the byte position.
@@ -120,7 +121,7 @@
 # *   #charpos: the [character
 #     position](rdoc-ref:StringScanner@Character+Position).
 # *   #rest: the [target substring](rdoc-ref:StringScanner@Target+Substring).
-# *   #rest_size: `rest.size`.
+# *   #rest_size: <code>rest.size</code>.
 # ### Character Position
 # The character position is a zero-based index into the *characters*
 # in the stored string;
@@ -211,12 +212,12 @@
 # This table summarizes (details and examples at the links):
 #        Method        |                   Returns                   |Sets Match Values?
 # ---------------------|---------------------------------------------|------------------
-#    #check(pattern)   |     Matched leading substring or `nil`.     |       Yes.
-# #check_until(pattern)|   Matched substring (anywhere) or `nil`.    |       Yes.
+#    #check(pattern)   |     Matched leading substring or +nil+.     |       Yes.
+# #check_until(pattern)|   Matched substring (anywhere) or +nil+.    |       Yes.
 #   #exist?(pattern)   |   Matched substring (anywhere) end index.   |       Yes.
-#   #match?(pattern)   | Size of matched leading substring or `nil`. |       Yes.
+#   #match?(pattern)   | Size of matched leading substring or +nil+. |       Yes.
 #      #peek(size)     | Leading substring of given length (bytes).  |       No.
-#      #peek_byte      |       Integer leading byte or `nil`.        |       No.
+#      #peek_byte      |       Integer leading byte or +nil+.        |       No.
 #         #rest        |Target substring (from byte position to end).|       No.
 # ### Traversing the Target Substring
 # A *traversal* method examines the target substring,
@@ -226,24 +227,24 @@
 # This table summarizes (details and examples at links):
 #        Method       |                      Returns                       |Sets Match Values?
 # --------------------|----------------------------------------------------|------------------
-#      #get_byte      |               Leading byte or `nil`.               |       No.
-#        #getch       |            Leading character or `nil`.             |       No.
-#    #scan(pattern)   |        Matched leading substring or `nil`.         |       Yes.
-#      #scan_byte     |           Integer leading byte or `nil`.           |       No.
-# #scan_until(pattern)|       Matched substring (anywhere) or `nil`.       |       Yes.
-#    #skip(pattern)   |      Matched leading substring size or `nil`.      |       Yes.
-# #skip_until(pattern)|Position delta to end-of-matched-substring or `nil`.|       Yes.
-#       #unscan       |                      `self`.                       |       No.
+#      #get_byte      |               Leading byte or +nil+.               |       No.
+#        #getch       |            Leading character or +nil+.             |       No.
+#    #scan(pattern)   |        Matched leading substring or +nil+.         |       Yes.
+#      #scan_byte     |           Integer leading byte or +nil+.           |       No.
+# #scan_until(pattern)|       Matched substring (anywhere) or +nil+.       |       Yes.
+#    #skip(pattern)   |      Matched leading substring size or +nil+.      |       Yes.
+# #skip_until(pattern)|Position delta to end-of-matched-substring or +nil+.|       Yes.
+#       #unscan       |                      +self+.                       |       No.
 # ## Querying the Scanner
 # Each of these methods queries the scanner object
 # without modifying it (details and examples at links)
 #       Method       |            Returns
 # -------------------|--------------------------------
-# #beginning_of_line?|       `true` or `false`.
+# #beginning_of_line?|       +true+ or +false+.
 #      #charpos      |      Character position.
-#        #eos?       |       `true` or `false`.
-#   #fixed_anchor?   |       `true` or `false`.
-#      #inspect      |String representation of `self`.
+#        #eos?       |       +true+ or +false+.
+#   #fixed_anchor?   |       +true+ or +false+.
+#      #inspect      |String representation of +self+.
 #        #pos        |         Byte position.
 #        #rest       |       Target substring.
 #     #rest_size     |   Size of target substring.
@@ -290,7 +291,7 @@
 # generally contain the results of the most recent attempted match.
 # Each match value may be thought of as:
 # *   *Clear*: Initially, or after an unsuccessful match attempt:
-#      usually, `false`, `nil`, or `{}`.
+#      usually, `false`, `nil`, or <code>{}</code>.
 # *   *Set*: After a successful match attempt:
 #      `true`, string, array, or hash.
 # Each of these methods clears match values:
@@ -312,11 +313,11 @@
 # Each of these methods returns a basic match value:
 #    Method    |          Return After Match          |Return After No Match
 # -------------|--------------------------------------|---------------------
-#   #matched?  |               `true`.                |      `false`.
-# #matched_size|      Size of matched substring.      |       `nil`.
-#   #matched   |          Matched substring.          |       `nil`.
-#  #pre_match  |Substring preceding matched substring.|       `nil`.
-#  #post_match |Substring following matched substring.|       `nil`.
+#   #matched?  |               +true+.                |      +false+.
+# #matched_size|      Size of matched substring.      |       +nil+.
+#   #matched   |          Matched substring.          |       +nil+.
+#  #pre_match  |Substring preceding matched substring.|       +nil+.
+#  #post_match |Substring following matched substring.|       +nil+.
 #
 # See examples below.
 # #### Captured Match Values
@@ -326,11 +327,11 @@
 # Each of these methods returns a captured match value:
 #     Method     |          Return After Match           |Return After No Match
 # ---------------|---------------------------------------|---------------------
-#      #size     |     Count of captured substrings.     |       `nil`.
-#     #[](n)     |       `n`th captured substring.       |       `nil`.
-#    #captures   |   Array of all captured substrings.   |       `nil`.
-# #values_at(*n) |Array of specified captured substrings.|       `nil`.
-# #named_captures|        Hash of named captures.        |        `{}`.
+#      #size     |     Count of captured substrings.     |       +nil+.
+#     #[](n)     |       `n`th captured substring.       |       +nil+.
+#    #captures   |   Array of all captured substrings.   |       +nil+.
+# #values_at(*n) |Array of specified captured substrings.|       +nil+.
+# #named_captures|        Hash of named captures.        |  <code>{}</code>.
 #
 # See examples below.
 # #### Match Values Examples
@@ -401,7 +402,7 @@
 # ## Fixed-Anchor Property
 # Pattern matching in `StringScanner` is the same as in Ruby's,
 # except for its fixed-anchor property,
-# which determines the meaning of `'\A'`:
+# which determines the meaning of <code>'\A'</code>:
 # *   `false` (the default): matches the current byte position.
 #         scanner = StringScanner.new('foobar')
 # scanner.scan(/\A./) # => "f"
@@ -486,13 +487,13 @@ class StringScanner
   # scanner[:day]   # => "12"
   # scanner[:nope]  # => nil
   #
-  # When there are no captures, only `[0]` returns non-`nil`:
+  # When there are no captures, only <code>[0]</code> returns non-`nil`:
   #     scanner = StringScanner.new('foobarbaz')
   # scanner.exist?(/bar/)
   # scanner[0] # => "bar"
   # scanner[1] # => nil
   #
-  # For a failed match, even `[0]` returns `nil`:
+  # For a failed match, even <code>[0]</code> returns `nil`:
   #     scanner.scan(/nope/) # => nil
   # scanner[0]           # => nil
   # scanner[1]           # => nil
@@ -539,7 +540,8 @@ class StringScanner
   #   - captures -> substring_array or nil
   # -->
   # Returns the array of [captured match
-  # values](rdoc-ref:StringScanner@Captured+Match+Values) at indexes `(1..)`
+  # values](rdoc-ref:StringScanner@Captured+Match+Values) at indexes
+  # <code>(1..)</code>
   # if the most recent match attempt succeeded, or `nil` otherwise:
   #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
   # scanner.captures         # => nil
@@ -999,7 +1001,7 @@ class StringScanner
   #   rdoc-file=ext/strscan/strscan.c
   #   - peek(length) -> substring
   # -->
-  # Returns the substring `string[pos, length]`;
+  # Returns the substring <code>string[pos, length]</code>;
   # does not update [match values](rdoc-ref:StringScanner@Match+Values) or
   # [positions](rdoc-ref:StringScanner@Positions):
   #     scanner = StringScanner.new('foobarbaz')
@@ -1151,7 +1153,7 @@ class StringScanner
   # Sets both [byte position](rdoc-ref:StringScanner@Byte+Position+-28Position-29)
   # and [character position](rdoc-ref:StringScanner@Character+Position) to zero,
   # and clears [match values](rdoc-ref:StringScanner@Match+Values);
-  # returns `self`:
+  # returns +self+:
   #     scanner = StringScanner.new('foobarbaz')
   # scanner.exist?(/bar/)          # => 6
   # scanner.reset                  # => #<StringScanner 0/9 @ "fooba...">
@@ -1237,7 +1239,7 @@ class StringScanner
   # *   Returns the matched substring.
   # *   Increments the [byte
   #     position](rdoc-ref:StringScanner@Byte+Position+-28Position-29) by
-  #     `substring.bytesize`,
+  #     <code>substring.bytesize</code>,
   #      and may increment the [character
   #     position](rdoc-ref:StringScanner@Character+Position).
   # *   Sets [match values](rdoc-ref:StringScanner@Match+Values).
@@ -1517,7 +1519,7 @@ class StringScanner
   # call-seq:
   #  terminate -> self
   # Sets the scanner to end-of-string;
-  # returns `self`:
+  # returns +self+:
   # *   Sets both [positions](rdoc-ref:StringScanner@Positions) to end-of-stream.
   # *   Clears [match values](rdoc-ref:StringScanner@Match+Values).
   #     scanner = StringScanner.new(HIRAGANA_TEXT)
@@ -1578,7 +1580,7 @@ class StringScanner
   #   - values_at(*specifiers) -> array_of_captures or nil
   # -->
   # Returns an array of captured substrings, or `nil` of none.
-  # For each `specifier`, the returned substring is `[specifier]`;
+  # For each `specifier`, the returned substring is <code>[specifier]</code>;
   # see #[].
   #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
   # pattern = /(?<wday>\w+) (?<month>\w+) (?<day>\d+) /

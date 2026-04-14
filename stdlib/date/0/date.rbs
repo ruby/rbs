@@ -165,8 +165,8 @@ class Date
   #
   #     Date._parse('2001-02-03') # => {:year=>2001, :mon=>2, :mday=>3}
   #
-  # If `comp` is `true` and the given year is in the range `(0..99)`, the current
-  # century is supplied; otherwise, the year is taken as given:
+  # If `comp` is `true` and the given year is in the range <code>(0..99)</code>,
+  # the current century is supplied; otherwise, the year is taken as given:
   #
   #     Date._parse('01-02-03', true)  # => {:year=>2001, :mon=>2, :mday=>3}
   #     Date._parse('01-02-03', false) # => {:year=>1, :mon=>2, :mday=>3}
@@ -508,8 +508,8 @@ class Date
   #     Date.parse('20010203')     # => #<Date: 2001-02-03>
   #     Date.parse('3rd Feb 2001') # => #<Date: 2001-02-03>
   #
-  # If `comp` is `true` and the given year is in the range `(0..99)`, the current
-  # century is supplied; otherwise, the year is taken as given:
+  # If `comp` is `true` and the given year is in the range <code>(0..99)</code>,
+  # the current century is supplied; otherwise, the year is taken as given:
   #
   #     Date.parse('01-02-03', true)  # => #<Date: 2001-02-03>
   #     Date.parse('01-02-03', false) # => #<Date: 0001-02-03>
@@ -800,7 +800,7 @@ class Date
   # -->
   # Compares `self` and `other`, returning:
   #
-  # *   `-1` if `other` is larger.
+  # *   <code>-1</code> if `other` is larger.
   # *   `0` if the two are equal.
   # *   `1` if `other` is smaller.
   # *   `nil` if the two are incomparable.
@@ -822,7 +822,7 @@ class Date
   #         d <=> DateTime.new(2022, 7, 27) # => 0
   #         d <=> DateTime.new(2022, 7, 28) # => -1
   #
-  # *   A numeric (compares `self.ajd` to `other`):
+  # *   A numeric (compares <code>self.ajd</code> to `other`):
   #
   #         d <=> 2459788 # => -1
   #         d <=> 2459787 # => 1
@@ -859,7 +859,7 @@ class Date
   #         d === DateTime.new(2022, 7, 27) # => true
   #         d === DateTime.new(2022, 7, 28) # => false
   #
-  # *   A numeric (compares `self.jd` to `other`):
+  # *   A numeric (compares <code>self.jd</code> to `other`):
   #
   #         d === 2459788 # => true
   #         d === 2459787 # => false
@@ -928,9 +928,10 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - asctime -> string
   # -->
-  # Equivalent to #strftime with argument `'%a %b %e %T %Y'` (or its [shorthand
+  # Equivalent to #strftime with argument <code>'%a %b %e %T %Y'</code> (or its
+  # [shorthand
   # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
-  # rs) `'%c'`):
+  # rs) <code>'%c'</code>):
   #
   #     Date.new(2001, 2, 3).asctime # => "Sat Feb  3 00:00:00 2001"
   #
@@ -939,9 +940,10 @@ class Date
   def asctime: () -> String
 
   # <!-- rdoc-file=ext/date/date_core.c -->
-  # Equivalent to #strftime with argument `'%a %b %e %T %Y'` (or its [shorthand
+  # Equivalent to #strftime with argument <code>'%a %b %e %T %Y'</code> (or its
+  # [shorthand
   # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
-  # rs) `'%c'`):
+  # rs) <code>'%c'</code>):
   #
   #     Date.new(2001, 2, 3).asctime # => "Sat Feb  3 00:00:00 2001"
   #
@@ -993,7 +995,8 @@ class Date
   #   - deconstruct_keys(array_of_names_or_nil) -> hash
   # -->
   # Returns a hash of the name/value pairs, to use in pattern matching. Possible
-  # keys are: `:year`, `:month`, `:day`, `:wday`, `:yday`.
+  # keys are: <code>:year</code>, <code>:month</code>, <code>:day</code>,
+  # <code>:wday</code>, <code>:yday</code>.
   #
   # Possible usages:
   #
@@ -1026,7 +1029,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - downto(min){|date| ... } -> self
   # -->
-  # Equivalent to #step with arguments `min` and `-1`.
+  # Equivalent to #step with arguments `min` and <code>-1</code>.
   #
   def downto: (Date min) { (Date) -> untyped } -> Date
             | (Date min) -> Enumerator[Date, Date]
@@ -1071,8 +1074,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - httpdate -> string
   # -->
-  # Equivalent to #strftime with argument `'%a, %d %b %Y %T GMT'`; see [Formats
-  # for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%a, %d %b %Y %T GMT'</code>; see
+  # [Formats for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).httpdate # => "Sat, 03 Feb 2001 00:00:00 GMT"
   #
@@ -1093,9 +1096,10 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - iso8601    ->  string
   # -->
-  # Equivalent to #strftime with argument `'%Y-%m-%d'` (or its [shorthand
+  # Equivalent to #strftime with argument <code>'%Y-%m-%d'</code> (or its
+  # [shorthand
   # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
-  # rs) `'%F'`);
+  # rs) <code>'%F'</code>);
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
   #
@@ -1268,7 +1272,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - next_year(n = 1) -> new_date
   # -->
-  # Equivalent to #>> with argument `n * 12`.
+  # Equivalent to #>> with argument <code>n * 12</code>.
   #
   def next_year: (?Integer year) -> Date
 
@@ -1292,7 +1296,7 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - prev_year(n = 1) -> new_date
   # -->
-  # Equivalent to #<< with argument `n * 12`.
+  # Equivalent to #<< with argument <code>n * 12</code>.
   #
   def prev_year: (?Integer year) -> Date
 
@@ -1300,8 +1304,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - rfc2822 -> string
   # -->
-  # Equivalent to #strftime with argument `'%a, %-d %b %Y %T %z'`; see [Formats
-  # for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%a, %-d %b %Y %T %z'</code>; see
+  # [Formats for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
   #
@@ -1311,8 +1315,8 @@ class Date
   #   rdoc-file=ext/date/date_core.c
   #   - rfc3339 -> string
   # -->
-  # Equivalent to #strftime with argument `'%FT%T%:z'`; see [Formats for Dates and
-  # Times](rdoc-ref:language/strftime_formatting.rdoc):
+  # Equivalent to #strftime with argument <code>'%FT%T%:z'</code>; see [Formats
+  # for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
   #     Date.new(2001, 2, 3).rfc3339 # => "2001-02-03T00:00:00+00:00"
   #
@@ -1373,8 +1377,8 @@ class Date
   # Calls the block with specified dates; returns `self`.
   #
   # *   The first `date` is `self`.
-  # *   Each successive `date` is `date + step`, where `step` is the numeric step
-  #     size in days.
+  # *   Each successive `date` is <code>date + step</code>, where `step` is the
+  #     numeric step size in days.
   # *   The last date is the last one that is before or equal to `limit`, which
   #     should be a Date object.
   #
@@ -1462,7 +1466,7 @@ class Date
   # Returns a string representation of the date in `self` in [ISO 8601 extended
   # date
   # format](rdoc-ref:language/strftime_formatting.rdoc@ISO+8601+Format+Specificati
-  # ons) (`'%Y-%m-%d'`):
+  # ons) (<code>'%Y-%m-%d'</code>):
   #
   #     Date.new(2001, 2, 3).to_s # => "2001-02-03"
   #
@@ -1516,9 +1520,10 @@ class Date
   def wednesday?: () -> bool
 
   # <!-- rdoc-file=ext/date/date_core.c -->
-  # Equivalent to #strftime with argument `'%Y-%m-%d'` (or its [shorthand
+  # Equivalent to #strftime with argument <code>'%Y-%m-%d'</code> (or its
+  # [shorthand
   # form](rdoc-ref:language/strftime_formatting.rdoc@Shorthand+Conversion+Specifie
-  # rs) `'%F'`);
+  # rs) <code>'%F'</code>);
   #
   #     Date.new(2001, 2, 3).iso8601 # => "2001-02-03"
   #

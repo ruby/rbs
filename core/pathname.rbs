@@ -193,7 +193,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - getwd()
   # -->
-  # See `Dir.getwd`.  Returns the current working directory as a Pathname.
+  # See <code>Dir.getwd</code>.  Returns the current working directory as a
+  # Pathname.
   #
   def self.getwd: () -> Pathname
 
@@ -201,7 +202,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - glob(*args, **kwargs) { |pathname| ... }
   # -->
-  # See `Dir.glob`.  Returns or yields Pathname objects.
+  # See <code>Dir.glob</code>.  Returns or yields Pathname objects.
   #
   def self.glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
                | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
@@ -253,9 +254,9 @@ class Pathname
   #     Pathname.new('/usr/bin') <=> Pathname.new('/USR/BIN')
   #         #=> 1
   #
-  # It will return `-1`, `0` or `1` depending on the value of the left argument
-  # relative to the right argument. Or it will return `nil` if the arguments are
-  # not comparable.
+  # It will return <code>-1</code>, `0` or `1` depending on the value of the left
+  # argument relative to the right argument. Or it will return `nil` if the
+  # arguments are not comparable.
   #
   def <=>: (Pathname other) -> Integer
          | (untyped other) -> nil
@@ -265,8 +266,8 @@ class Pathname
   #   - ==(other)
   # -->
   # Compare this pathname with `other`.  The comparison is string-based. Be aware
-  # that two different paths (`foo.txt` and `./foo.txt`) can refer to the same
-  # file.
+  # that two different paths (<code>foo.txt</code> and <code>./foo.txt</code>) can
+  # refer to the same file.
   #
   def ==: (untyped) -> bool
 
@@ -331,7 +332,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - atime()
   # -->
-  # See `File.atime`.  Returns last access time.
+  # See <code>File.atime</code>.  Returns last access time.
   #
   def atime: () -> Time
 
@@ -339,7 +340,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - basename(...)
   # -->
-  # See `File.basename`.  Returns the last component of the path.
+  # See <code>File.basename</code>.  Returns the last component of the path.
   #
   def basename: (?String | _ToStr suffix) -> Pathname
 
@@ -347,8 +348,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - binread(...)
   # -->
-  # See `File.binread`.  Returns all the bytes from the file, or the first `N` if
-  # specified.
+  # See <code>File.binread</code>.  Returns all the bytes from the file, or the
+  # first `N` if specified.
   #
   def binread: (?Integer length, ?Integer offset) -> String
 
@@ -377,7 +378,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - blockdev?()
   # -->
-  # See `FileTest.blockdev?`.
+  # See <code>FileTest.blockdev?</code>.
   #
   def blockdev?: () -> bool
 
@@ -385,7 +386,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - chardev?()
   # -->
-  # See `FileTest.chardev?`.
+  # See <code>FileTest.chardev?</code>.
   #
   def chardev?: () -> bool
 
@@ -409,8 +410,8 @@ class Pathname
   #     pn.children(false)
   #         # -> [ Pathname:English.rb, Pathname:Env.rb, Pathname:abbrev.rb, ... ]
   #
-  # Note that the results never contain the entries `.` and `..` in the directory
-  # because they are not children.
+  # Note that the results never contain the entries <code>.</code> and
+  # <code>..</code> in the directory because they are not children.
   #
   def children: (?boolish with_directory) -> Array[Pathname]
 
@@ -418,7 +419,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - chmod(mode)
   # -->
-  # See `File.chmod`.  Changes permissions.
+  # See <code>File.chmod</code>.  Changes permissions.
   #
   def chmod: (Integer mode_int) -> Integer
 
@@ -426,7 +427,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - chown(owner, group)
   # -->
-  # See `File.chown`.  Change owner and group of file.
+  # See <code>File.chown</code>.  Change owner and group of file.
   #
   def chown: (Integer owner, Integer group) -> Integer
 
@@ -438,9 +439,9 @@ class Pathname
   # removed.  The filesystem is not accessed.
   #
   # If `consider_symlink` is `true`, then a more conservative algorithm is used to
-  # avoid breaking symbolic linkages.  This may retain more `..` entries than
-  # absolutely necessary, but without accessing the filesystem, this can't be
-  # avoided.
+  # avoid breaking symbolic linkages.  This may retain more <code>..</code>
+  # entries than absolutely necessary, but without accessing the filesystem, this
+  # can't be avoided.
   #
   # See Pathname#realpath.
   #
@@ -450,7 +451,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - ctime()
   # -->
-  # See `File.ctime`.  Returns last (directory entry, not file) change time.
+  # See <code>File.ctime</code>.  Returns last (directory entry, not file) change
+  # time.
   #
   def ctime: () -> Time
 
@@ -497,7 +499,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - directory?()
   # -->
-  # See `FileTest.directory?`.
+  # See <code>FileTest.directory?</code>.
   #
   def directory?: () -> bool
 
@@ -505,7 +507,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - dirname()
   # -->
-  # See `File.dirname`.  Returns all but the last component of the path.
+  # See <code>File.dirname</code>.  Returns all but the last component of the
+  # path.
   #
   def dirname: () -> Pathname
 
@@ -544,8 +547,8 @@ class Pathname
   #     #   #<Pathname:src>
   #     #   #<Pathname:man>
   #
-  # Note that the results never contain the entries `.` and `..` in the directory
-  # because they are not children.
+  # Note that the results never contain the entries <code>.</code> and
+  # <code>..</code> in the directory because they are not children.
   #
   # See Pathname#children
   #
@@ -626,7 +629,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - executable?()
   # -->
-  # See `FileTest.executable?`.
+  # See <code>FileTest.executable?</code>.
   #
   def executable?: () -> bool
 
@@ -634,7 +637,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - executable_real?()
   # -->
-  # See `FileTest.executable_real?`.
+  # See <code>FileTest.executable_real?</code>.
   #
   def executable_real?: () -> bool
 
@@ -642,7 +645,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - exist?()
   # -->
-  # See `FileTest.exist?`.
+  # See <code>FileTest.exist?</code>.
   #
   def exist?: () -> bool
 
@@ -650,7 +653,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - expand_path(...)
   # -->
-  # See `File.expand_path`.
+  # See <code>File.expand_path</code>.
   #
   def expand_path: (?String dir) -> Pathname
 
@@ -658,7 +661,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - extname()
   # -->
-  # See `File.extname`.  Returns the file's extension.
+  # See <code>File.extname</code>.  Returns the file's extension.
   #
   def extname: () -> String
 
@@ -666,7 +669,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - file?()
   # -->
-  # See `FileTest.file?`.
+  # See <code>FileTest.file?</code>.
   #
   def file?: () -> bool
 
@@ -674,7 +677,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - fnmatch(pattern, ...)
   # -->
-  # See `File.fnmatch`.  Return `true` if the receiver matches the given pattern.
+  # See <code>File.fnmatch</code>.  Return `true` if the receiver matches the
+  # given pattern.
   #
   def fnmatch: (String pattern, ?Integer flags) -> bool
 
@@ -682,7 +686,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - fnmatch?(pattern, ...)
   # -->
-  # See `File.fnmatch?` (same as #fnmatch).
+  # See <code>File.fnmatch?</code> (same as #fnmatch).
   #
   alias fnmatch? fnmatch
 
@@ -698,7 +702,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - ftype()
   # -->
-  # See `File.ftype`.  Returns "type" of file ("file", "directory", etc).
+  # See <code>File.ftype</code>.  Returns "type" of file ("file", "directory",
+  # etc).
   #
   def ftype: () -> String
 
@@ -720,7 +725,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - grpowned?()
   # -->
-  # See `FileTest.grpowned?`.
+  # See <code>FileTest.grpowned?</code>.
   #
   def grpowned?: () -> bool
 
@@ -749,7 +754,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - lchmod(mode)
   # -->
-  # See `File.lchmod`.
+  # See <code>File.lchmod</code>.
   #
   def lchmod: (Integer mode) -> Integer
 
@@ -757,7 +762,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - lchown(owner, group)
   # -->
-  # See `File.lchown`.
+  # See <code>File.lchown</code>.
   #
   def lchown: (Integer owner, Integer group) -> Integer
 
@@ -765,7 +770,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - lstat()
   # -->
-  # See `File.lstat`.
+  # See <code>File.lstat</code>.
   #
   def lstat: () -> ::File::Stat
 
@@ -785,7 +790,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - make_link(old)
   # -->
-  # See `File.link`.  Creates a hard link.
+  # See <code>File.link</code>.  Creates a hard link.
   #
   def make_link: (String | Pathname | _ToStr old) -> Integer
 
@@ -793,7 +798,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - make_symlink(old)
   # -->
-  # See `File.symlink`.  Creates a symbolic link.
+  # See <code>File.symlink</code>.  Creates a symbolic link.
   #
   def make_symlink: (String | Pathname | _ToStr old) -> Integer
 
@@ -801,7 +806,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - mkdir(...)
   # -->
-  # See `Dir.mkdir`.  Create the referenced directory.
+  # See <code>Dir.mkdir</code>.  Create the referenced directory.
   #
   def mkdir: (?Integer perm) -> Integer
 
@@ -828,7 +833,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - mtime()
   # -->
-  # See `File.mtime`.  Returns last modification time.
+  # See <code>File.mtime</code>.  Returns last modification time.
   #
   def mtime: () -> Time
 
@@ -836,7 +841,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - open(...) { |file| ... }
   # -->
-  # See `File.open`.  Opens the file for reading or writing.
+  # See <code>File.open</code>.  Opens the file for reading or writing.
   #
   def open: (
       ?string | int mode,
@@ -888,7 +893,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - opendir() { |dir| ... }
   # -->
-  # See `Dir.open`.
+  # See <code>Dir.open</code>.
   #
   def opendir: () -> Dir
              | [U] () { (Dir) -> U } -> U
@@ -897,7 +902,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - owned?()
   # -->
-  # See `FileTest.owned?`.
+  # See <code>FileTest.owned?</code>.
   #
   def owned?: () -> bool
 
@@ -907,7 +912,7 @@ class Pathname
   # -->
   # Returns the parent directory.
   #
-  # This is same as `self + '..'`.
+  # This is same as <code>self + '..'</code>.
   #
   def parent: () -> Pathname
 
@@ -915,7 +920,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - pipe?()
   # -->
-  # See `FileTest.pipe?`.
+  # See <code>FileTest.pipe?</code>.
   #
   def pipe?: () -> bool
 
@@ -923,8 +928,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - read(...)
   # -->
-  # See `File.read`.  Returns all data from the file, or the first `N` bytes if
-  # specified.
+  # See <code>File.read</code>.  Returns all data from the file, or the first `N`
+  # bytes if specified.
   #
   def read: (?Integer length, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> String
 
@@ -932,7 +937,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - readable?()
   # -->
-  # See `FileTest.readable?`.
+  # See <code>FileTest.readable?</code>.
   #
   def readable?: () -> bool
 
@@ -940,7 +945,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - readable_real?()
   # -->
-  # See `FileTest.readable_real?`.
+  # See <code>FileTest.readable_real?</code>.
   #
   def readable_real?: () -> bool
 
@@ -948,7 +953,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - readlines(...)
   # -->
-  # See `File.readlines`.  Returns all the lines from the file.
+  # See <code>File.readlines</code>.  Returns all the lines from the file.
   #
   def readlines: (?String sep, ?Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
                | (Integer limit, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?chomp: boolish) -> Array[String]
@@ -957,7 +962,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - readlink()
   # -->
-  # See `File.readlink`.  Read symbolic link.
+  # See <code>File.readlink</code>.  Read symbolic link.
   #
   def readlink: () -> untyped
 
@@ -967,7 +972,7 @@ class Pathname
   # -->
   # Returns the real (absolute) pathname of `self` in the actual filesystem.
   #
-  # Does not contain symlinks or useless dots, `..` and `.`.
+  # Does not contain symlinks or useless dots, <code>..</code> and <code>.</code>.
   #
   # The last component of the real pathname can be nonexistent.
   #
@@ -979,7 +984,7 @@ class Pathname
   # -->
   # Returns the real (absolute) pathname for `self` in the actual filesystem.
   #
-  # Does not contain symlinks or useless dots, `..` and `.`.
+  # Does not contain symlinks or useless dots, <code>..</code> and <code>.</code>.
   #
   # All components of the pathname must exist when this method is called.
   #
@@ -1026,7 +1031,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - rename(to)
   # -->
-  # See `File.rename`.  Rename the file.
+  # See <code>File.rename</code>.  Rename the file.
   #
   def rename: (Pathname | string new_name) -> 0
 
@@ -1034,7 +1039,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - rmdir()
   # -->
-  # See `Dir.rmdir`.  Remove the referenced directory.
+  # See <code>Dir.rmdir</code>.  Remove the referenced directory.
   #
   def rmdir: () -> 0
 
@@ -1046,7 +1051,7 @@ class Pathname
   # consists of consecutive slashes.
   #
   # It doesn't access the filesystem.  So it may return `false` for some pathnames
-  # which points to roots such as `/usr/..`.
+  # which points to roots such as <code>/usr/..</code>.
   #
   def root?: () -> bool
 
@@ -1054,7 +1059,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - setgid?()
   # -->
-  # See `FileTest.setgid?`.
+  # See <code>FileTest.setgid?</code>.
   #
   def setgid?: () -> bool
 
@@ -1062,7 +1067,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - setuid?()
   # -->
-  # See `FileTest.setuid?`.
+  # See <code>FileTest.setuid?</code>.
   #
   def setuid?: () -> bool
 
@@ -1070,7 +1075,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - size()
   # -->
-  # See `FileTest.size`.
+  # See <code>FileTest.size</code>.
   #
   def size: () -> Integer
 
@@ -1078,7 +1083,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - size?()
   # -->
-  # See `FileTest.size?`.
+  # See <code>FileTest.size?</code>.
   #
   def size?: () -> Integer?
 
@@ -1086,7 +1091,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - socket?()
   # -->
-  # See `FileTest.socket?`.
+  # See <code>FileTest.socket?</code>.
   #
   def socket?: () -> untyped
 
@@ -1094,7 +1099,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - split()
   # -->
-  # See `File.split`.  Returns the #dirname and the #basename in an Array.
+  # See <code>File.split</code>.  Returns the #dirname and the #basename in an
+  # Array.
   #
   def split: () -> [ Pathname, Pathname ]
 
@@ -1102,7 +1108,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - stat()
   # -->
-  # See `File.stat`.  Returns a `File::Stat` object.
+  # See <code>File.stat</code>.  Returns a <code>File::Stat</code> object.
   #
   def stat: () -> File::Stat
 
@@ -1110,7 +1116,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - sticky?()
   # -->
-  # See `FileTest.sticky?`.
+  # See <code>FileTest.sticky?</code>.
   #
   def sticky?: () -> untyped
 
@@ -1144,7 +1150,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - symlink?()
   # -->
-  # See `FileTest.symlink?`.
+  # See <code>FileTest.symlink?</code>.
   #
   def symlink?: () -> untyped
 
@@ -1152,7 +1158,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - sysopen(...)
   # -->
-  # See `File.sysopen`.
+  # See <code>File.sysopen</code>.
   #
   def sysopen: (?String mode, ?Integer perm) -> Integer
 
@@ -1181,7 +1187,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - truncate(length)
   # -->
-  # See `File.truncate`.  Truncate the file to `length` bytes.
+  # See <code>File.truncate</code>.  Truncate the file to `length` bytes.
   #
   def truncate: (Integer length) -> 0
 
@@ -1189,7 +1195,8 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - unlink()
   # -->
-  # Removes a file or directory, using `File.unlink` or `Dir.unlink` as necessary.
+  # Removes a file or directory, using <code>File.unlink</code> or
+  # <code>Dir.unlink</code> as necessary.
   #
   def unlink: () -> Integer
 
@@ -1205,7 +1212,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - utime(atime, mtime)
   # -->
-  # See `File.utime`.  Update the access and modification times.
+  # See <code>File.utime</code>.  Update the access and modification times.
   #
   def utime: (Integer | Time atime, Integer | Time mtime) -> Integer
 
@@ -1213,7 +1220,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - world_readable?()
   # -->
-  # See `FileTest.world_readable?`.
+  # See <code>FileTest.world_readable?</code>.
   #
   def world_readable?: () -> (Integer | nil)
 
@@ -1221,7 +1228,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - world_writable?()
   # -->
-  # See `FileTest.world_writable?`.
+  # See <code>FileTest.world_writable?</code>.
   #
   def world_writable?: () -> (Integer | nil)
 
@@ -1229,7 +1236,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - writable?()
   # -->
-  # See `FileTest.writable?`.
+  # See <code>FileTest.writable?</code>.
   #
   def writable?: () -> bool
 
@@ -1237,7 +1244,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - writable_real?()
   # -->
-  # See `FileTest.writable_real?`.
+  # See <code>FileTest.writable_real?</code>.
   #
   def writable_real?: () -> bool
 
@@ -1245,7 +1252,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - write(...)
   # -->
-  # Writes `contents` to the file. See `File.write`.
+  # Writes `contents` to the file. See <code>File.write</code>.
   #
   def write: (String content, ?Integer offset, ?mode: Integer | String, ?flags: Integer, ?external_encoding: encoding, ?internal_encoding: encoding, ?encoding: encoding, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish) -> Integer
 
@@ -1253,7 +1260,7 @@ class Pathname
   #   rdoc-file=pathname_builtin.rb
   #   - zero?()
   # -->
-  # See `FileTest.zero?`.
+  # See <code>FileTest.zero?</code>.
   #
   def zero?: () -> bool
 
@@ -1276,7 +1283,7 @@ class Pathname
   #   - new(path)
   # -->
   # Create a Pathname object from the given String (or String-like object). If
-  # `path` contains a NUL character (`\0`), an ArgumentError is raised.
+  # `path` contains a NUL character (<code>\0</code>), an ArgumentError is raised.
   #
   def initialize: (string | Pathname) -> void
 

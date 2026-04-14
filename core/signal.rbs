@@ -26,7 +26,7 @@
 #     # ...
 #     Process.kill("TERM", pid)
 #
-# *produces:*
+# <em>produces:</em>
 #     Debug now: true
 #     Debug now: false
 #     Terminating...
@@ -57,7 +57,7 @@ module Signal
   #     Signal.trap("INT") { |signo| puts Signal.signame(signo) }
   #     Process.kill("INT", 0)
   #
-  # *produces:*
+  # <em>produces:</em>
   #
   #     INT
   #
