@@ -501,7 +501,7 @@ module Kernel : BasicObject
                    | (String real_or_both, ?exception: true) -> Complex
                    | (untyped real_or_both, exception: bool) -> Complex?
                    | (Numeric | String real, Numeric | String imag, ?exception: true) -> Complex
-                   | (Numeric | String real, Integer | Float | Rational | Complex imag, exception: bool) -> Complex
+                   | (Numeric | String real, Integer | Float | Rational | Complex imag, exception: bool) -> Complex?
                    | (Numeric | String real, untyped imag, exception: bool) -> Complex?
 
   # <!--

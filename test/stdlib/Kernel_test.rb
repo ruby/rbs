@@ -62,13 +62,17 @@ class KernelSingletonTest < Test::Unit::TestCase
                        Kernel, :Complex, real_untype, exception: false
     end
 
-    with '1', 1, 1r, 1.0, (1+0i), numeric do |real|
-      with '2', 2, 2r, 2.0, (2+0i), numeric do |imag|
+    numeric_fail = Class.new(Numeric) { def to_c = fail }.new
+
+    with '1', 1, 1r, 1.0, (1+0i), numeric, numeric_fail do |real|
+      with '2', 2, 2r, 2.0, (2+0i), numeric, numeric_fail do |imag|
         # (Numeric | String real, Numeric | String imag, ?exception: true) -> Complex
-        assert_send_type "(Numeric | String, Numeric | String) -> Complex",
-                         Kernel, :Complex, real, imag
-        assert_send_type "(Numeric | String, Numeric | String, exception: true) -> Complex",
-                         Kernel, :Complex, real, imag, exception: true
+        if real != numeric_fail && imag != numeric_fail
+          assert_send_type "(Numeric | String, Numeric | String) -> Complex",
+                           Kernel, :Complex, real, imag
+          assert_send_type "(Numeric | String, Numeric | String, exception: true) -> Complex",
+                           Kernel, :Complex, real, imag, exception: true
+        end
 
         # Complex has an awkward edgecase where `exception: false` will unconditionally return `nil`
         # if the imaginary argument is not one of the builtin `Numeric`s. Oddly enough, it's not for
@@ -76,7 +80,7 @@ class KernelSingletonTest < Test::Unit::TestCase
         case imag
         when Integer, Float, Rational, Complex
           # (Numeric | String real, Integer | Float | Rational | Complex imag, exception: bool) -> Complex
-          assert_send_type "(Numeric | String, Integer | Float | Rational | Complex, exception: bool) -> Complex",
+          assert_send_type "(Numeric | String, Integer | Float | Rational | Complex, exception: bool) -> Complex?",
                            Kernel, :Complex, real, imag, exception: false
         end
       end
