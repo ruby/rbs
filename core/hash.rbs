@@ -1205,7 +1205,11 @@ class Hash[unchecked out K, unchecked out V]
   def fetch_values: (*_Key keys) -> Array[V]
                   | [K2 < _Key, T] (*K2 keys) { (K2 key) -> T } -> Array[V | T]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - select {|key, value| ... } -> new_hash
+  #   - select -> new_enumerator
+  # -->
   # With a block given, calls the block with each entry's key and value; returns a
   # new hash whose entries are those for which the block returns a truthy value:
   #
@@ -1219,7 +1223,11 @@ class Hash[unchecked out K, unchecked out V]
   def select: () -> Enumerator[[ K, V ], Hash[K, V]]
             | () { (K key, V value) -> boolish } -> Hash[K, V]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - select! {|key, value| ... } -> self or nil
+  #   - select! -> new_enumerator
+  # -->
   # With a block given, calls the block with each entry's key and value; removes
   # from `self` each entry for which the block returns `false` or `nil`.
   #
@@ -1423,8 +1431,7 @@ class Hash[unchecked out K, unchecked out V]
 
   # <!--
   #   rdoc-file=hash.c
-  #   - hash.length -> integer
-  #   - hash.size -> integer
+  #   - size -> integer
   # -->
   # Returns the count of entries in `self`:
   #
@@ -1626,11 +1633,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   def replace: (hash[K, V] other) -> self
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - select {|key, value| ... } -> new_hash
-  #   - select -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # With a block given, calls the block with each entry's key and value; returns a
   # new hash whose entries are those for which the block returns a truthy value:
   #
@@ -1643,11 +1646,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   alias filter select
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - select! {|key, value| ... } -> self or nil
-  #   - select! -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # With a block given, calls the block with each entry's key and value; removes
   # from `self` each entry for which the block returns `false` or `nil`.
   #
@@ -1680,10 +1679,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   def shift: () -> [ K, V ]?
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - size -> integer
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # Returns the count of entries in `self`:
   #
   #     {foo: 0, bar: 1, baz: 2}.size # => 3
