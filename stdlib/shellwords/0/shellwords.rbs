@@ -191,7 +191,7 @@ module Shellwords
 end
 
 %a{annotate:rdoc:skip}
-class Array[unchecked out Elem]
+class Array[unchecked out E]
   # <!--
   #   rdoc-file=lib/shellwords.rb
   #   - array.shelljoin => string
