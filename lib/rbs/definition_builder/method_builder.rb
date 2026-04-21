@@ -143,12 +143,14 @@ module RBS
                   decl.members.each do |member|
                     case member
                     when AST::Ruby::Members::DefMember
-                      build_method(
-                        methods,
-                        type,
-                        member: member,
-                        accessibility: :public
-                      )
+                      if member.instance?
+                        build_method(
+                          methods,
+                          type,
+                          member: member,
+                          accessibility: :public
+                        )
+                      end
                     when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
                       build_ruby_attribute(methods, type, member: member, accessibility: :public)
                     end
@@ -180,6 +182,10 @@ module RBS
                   when AST::Members::Alias
                     if member.kind == :singleton
                       build_alias(methods, type, member: member)
+                    end
+                  when AST::Ruby::Members::DefMember
+                    if member.singleton?
+                      build_method(methods, type, member: member, accessibility: :public)
                     end
                   end
                 end

@@ -125,18 +125,195 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     assert_empty result.declarations
   end
 
-  def test_error__def__singleton
+  def test_parse__def__singleton
     result = parse(<<~RUBY)
       module Foo
         def self.foo; end
       end
     RUBY
 
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_predicate member, :singleton?
+        refute_predicate member, :instance?
+        assert_equal :singleton, member.kind
+      end
+    end
+  end
+
+  def test_parse__def__singleton__colon_type
+    result = parse(<<~RUBY)
+      class Foo
+        #: () -> void
+        def self.hello
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :hello, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def__singleton__rbs_annotation
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs () -> void
+        def self.hello
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :hello, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def__singleton__with_params
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs n: Integer
+        # @rbs return: Integer
+        def self.double(n)
+          n * 2
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :double, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["(Integer n) -> Integer"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def__singleton__mixed_with_instance
+    result = parse(<<~RUBY)
+      class Foo
+        #: () -> void
+        def self.class_method
+        end
+
+        #: () -> String
+        def instance_method
+          ""
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 2, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :class_method, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :instance_method, member.name
+        assert_predicate member, :instance?
+        assert_equal ["() -> String"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def__singleton__skip
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        def self.skipped_method
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_error__def__singleton__non_self_receiver
+    result = parse(<<~RUBY)
+      module Foo
+        def other_obj.foo; end
+      end
+    RUBY
+
     assert_equal 1, result.diagnostics.size
     assert_any!(result.diagnostics) do |diagnostic|
       assert_instance_of RBS::InlineParser::Diagnostic::NotImplementedYet, diagnostic
-      assert_equal "self", diagnostic.location.source
-      assert_equal "Singleton method definition is not supported yet", diagnostic.message
+      assert_equal "other_obj", diagnostic.location.source
+      assert_equal "Method definition with non-self receiver is not supported", diagnostic.message
+    end
+  end
+
+  def test_parse__def__singleton__in_module
+    result = parse(<<~RUBY)
+      module Foo
+        #: () -> void
+        def self.module_method
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :module_method, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__def__instance_method_kind
+    result = parse(<<~RUBY)
+      class Foo
+        def instance_method; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :instance_method, member.name
+        assert_predicate member, :instance?
+        refute_predicate member, :singleton?
+        assert_equal :instance, member.kind
+      end
     end
   end
 

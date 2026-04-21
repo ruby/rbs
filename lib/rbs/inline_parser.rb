@@ -202,13 +202,15 @@ module RBS
       def visit_def_node(node)
         return if skip_node?(node)
 
-        if node.receiver
+        if node.receiver && !node.receiver.is_a?(Prism::SelfNode)
           diagnostics << Diagnostic::NotImplementedYet.new(
             rbs_location(node.receiver.location),
-            "Singleton method definition is not supported yet"
+            "Method definition with non-self receiver is not supported"
           )
           return
         end
+
+        kind = node.receiver ? :singleton : :instance #: :singleton | :instance
 
         case current = current_module
         when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
@@ -223,7 +225,7 @@ module RBS
           method_type, leading_unuseds, trailing_unused = AST::Ruby::Members::MethodTypeAnnotation.build(leading_block, trailing_block, [], node)
           report_unused_annotation(trailing_unused, *leading_unuseds)
 
-          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block)
+          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block, kind: kind)
           current.members << defn
 
           # Skip other comments in `def` node
