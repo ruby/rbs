@@ -219,5 +219,5 @@ class Class < Module
   #
   #     BasicObject.superclass   #=> nil
   #
-  def superclass: () -> Class?
+  # def superclass: () -> Class?
 end
