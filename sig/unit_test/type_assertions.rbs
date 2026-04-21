@@ -179,6 +179,10 @@ module RBS
       #
       def assert_type: (String | Types::t value_type, untyped value) -> void
 
+      # Asserts if given `value` has a type of `value_type`
+      #
+      def assert_visibility: (:private | :public visibility, Symbol method_name) -> void
+
       # Allow non _simple-type_ method types given to `assert_send_type` and `refute_send_type`
       #
       # ```ruby
