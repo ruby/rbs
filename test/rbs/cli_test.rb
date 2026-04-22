@@ -1044,6 +1044,22 @@ Processing `lib`...
   def test_test
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
+      dir.join('foo.rb').write(<<~RB)
+      class Foo
+        def foo(*)
+        end
+      end
+
+      module Bar
+        class Baz
+          def foo
+          end
+        end
+      end
+
+      # violates type definition
+      Foo.new.foo(1)
+      RB
       dir.join('foo.rbs').write(<<~RBS)
         class Foo
           def foo: () -> void
@@ -1059,10 +1075,12 @@ Processing `lib`...
       with_cli do |cli|
         # `exit` is a common shell built-in command.
         assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo exit))
+        assert_rbs_test_no_errors(cli, dir, %w(--target ::Foo exit), %w(--log-level debug))
 
         refute_cli_success cli.run(%w(test))
         refute_cli_success cli.run(%W(-I #{dir} test))
         refute_cli_success cli.run(%W(-I #{dir} test --target ::Foo))
+        refute_cli_success cli.run(%W(-I #{dir} test --target ::Foo ruby #{dir}/foo.rb))
       end
     end
   end
@@ -1715,8 +1733,8 @@ Processing `lib`...
     end
   end
 
-  def assert_rbs_test_no_errors cli, dir, arg_array
-    args = ['-I', dir.to_s, 'test', *arg_array]
+  def assert_rbs_test_no_errors cli, dir, arg_array, env_array = []
+    args = ['-I', dir.to_s, *env_array, 'test', *arg_array]
     exit_status = cli.run(args)
     assert_instance_of Integer, exit_status
     assert_predicate exit_status, :zero?
