@@ -38,6 +38,21 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
   def test_new
     assert_send_type "() { (Enumerator::Yielder) -> 12345 } -> Enumerator[untyped, 12345]",
                      Enumerator, :new do 12345 end
+
+    assert_send_type "(123) { (Enumerator::Yielder) -> nil } -> Enumerator[untyped, nil]",
+                     Enumerator, :new, 123 do nil end
+
+    o = Object.new
+    def o.call = 'hi'
+    assert_send_type "(Enumerator::_Call) { (Enumerator::Yielder) -> nil } -> Enumerator[untyped, nil]",
+                     Enumerator, :new, o do nil end
+    assert_send_type "(Enumerator::_Call) { (Enumerator::Yielder) -> nil } -> Enumerator[untyped, nil]",
+                     Enumerator, :new, ->{'hi'} do nil end
+
+    with_int(123) do |int|
+      assert_send_type "(_ToInt) { (Enumerator::Yielder) -> nil } -> Enumerator[untyped, nil]",
+                       Enumerator, :new, int do nil end
+    end
   end
 
   def test_produce
