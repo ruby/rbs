@@ -305,7 +305,7 @@ module RBS
 
     def write_loc_source(located)
       if preserve? && loc = located.location
-        put_lines(loc.source, leading_spaces: loc.start_column)
+        put_lines(loc.source, leading_spaces: loc.start_byte_column)
       else
         yield
       end

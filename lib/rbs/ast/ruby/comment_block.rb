@@ -25,9 +25,9 @@ module RBS
 
             offsets << tuple
 
-            start_char = comment.location.start_character_offset + tuple[1]
-            end_char = comment.location.end_character_offset
-            ranges << (start_char ... end_char)
+            start_byte = comment.location.start_offset + tuple[1]
+            end_byte = comment.location.end_offset
+            ranges << (start_byte ... end_byte)
           end
 
           @comment_buffer = source_buffer.sub_buffer(lines: ranges)
@@ -53,7 +53,7 @@ module RBS
 
         def line_starts
           offsets.map do |comment, prefix_size|
-            comment.location.start_character_offset + prefix_size
+            comment.location.start_offset + prefix_size
           end
         end
 
@@ -168,7 +168,7 @@ module RBS
 
         def text(comment_index)
           range = comment_buffer.ranges[comment_index]
-          comment_buffer.content[range] or raise
+          comment_buffer.content.byteslice(range) or raise
         end
 
         def line_location(start_line, end_line)
