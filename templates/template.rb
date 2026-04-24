@@ -385,9 +385,16 @@ module RBS
           Node.new(node, fields, locations, constructor_params)
         end
 
+        sorted_nodes = nodes.sort_by { _1.descr.ruby_full_name }
+
+        annotation_nodes = sorted_nodes
+          .select { _1.descr.ruby_full_name.start_with?("RBS::AST::Ruby::Annotations::") }
+          .sort_by(&:c_name)
+
         {
-          nodes: nodes.sort_by { _1.descr.ruby_full_name },
-          enums: enum_desc
+          nodes: sorted_nodes,
+          enums: enum_desc,
+          annotation_nodes: annotation_nodes,
         }
       end
     end
