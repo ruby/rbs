@@ -103,9 +103,10 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_members_prepend_t")
         .allowlist_type("rbs_ast_members_private_t")
         .allowlist_type("rbs_ast_members_public_t")
-        // The union pulls in every `rbs_ast_ruby_annotations_*_t` member transitively,
-        // so individual annotation structs do not need separate allowlist entries.
-        .allowlist_type("rbs_ast_ruby_annotations_t")
+        // Match every `rbs_ast_ruby_annotations_*` struct (and the union itself)
+        // so newly added annotation kinds do not require edits here. This keeps the
+        // Rust bindings in sync with `config.yml` automatically.
+        .allowlist_type("rbs_ast_ruby_annotations_.*")
         .allowlist_type("rbs_ast_string_t")
         .allowlist_type("rbs_ast_symbol_t")
         .allowlist_type("rbs_ast_type_param_t")
