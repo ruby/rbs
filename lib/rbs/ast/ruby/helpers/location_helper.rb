@@ -6,7 +6,7 @@ module RBS
       module Helpers
         module LocationHelper
           def rbs_location(location)
-            Location.new(buffer, location.start_character_offset, location.end_character_offset)
+            Location.new(buffer, location.start_offset, location.end_offset)
           end
         end
       end
