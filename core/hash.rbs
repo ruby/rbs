@@ -469,13 +469,27 @@
 # *   #transform_values: Returns a copy of `self` with modified values.
 # *   #transform_values!: Modifies values in `self`.
 #
-class Hash[unchecked out K, unchecked out V] < Object
+class Hash[unchecked out K, unchecked out V]
   include Enumerable[[ K, V ]]
 
+  # Interface that indicates a type can be used as a key to `Hash` lookup methods.
+  #
   interface _Key
     def hash: () -> Integer
 
     def eql?: (untyped rhs) -> boolish
+  end
+
+  # Interface that indicates a type convertible to `[ K, V ]` via its `#to_ary` method.
+  #
+  interface _Pair[K, V]
+    def to_ary: () -> [ K, V ]
+  end
+
+  # Interface for comparing equality of types.
+  #
+  interface _Equals
+    def ==: (untyped other) -> boolish
   end
 
   # <!--
@@ -514,9 +528,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # See also [Methods for Creating a
   # Hash](rdoc-ref:Hash@Methods+for+Creating+a+Hash).
   #
-  def self.[]: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-             | [U, V] (Array[[ U, V ]]) -> ::Hash[U, V]
-             | (*untyped) -> ::Hash[untyped, untyped]
+  def self.[]: [K, V] (hash[K, V] hash) -> instance
+             | [K, V] (array[ _Pair[K, V] ] two_element_arrays) -> instance
+             | [T] (*T objects) -> Hash[T, T]
 
   # <!--
   #   rdoc-file=hash.c
@@ -531,8 +545,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Otherwise if `object` does not respond to <code>:to_hash</code>, returns
   # `nil`.
   #
-  def self.try_convert: [U, V] (_ToHash[U, V]) -> ::Hash[U, V]
-                      | (untyped) -> (::Hash[untyped, untyped] | nil)
+  def self.try_convert: [K, V] (hash[K, V] hash) -> Hash[K, V]
+                      | (untyped) -> Hash[untyped, untyped]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -556,7 +570,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Comparing](rdoc-ref:Hash@Methods+for+Comparing).
   #
-  def <: [A, B] (::Hash[A, B]) -> bool
+  def <: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -577,7 +591,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Comparing](rdoc-ref:Hash@Methods+for+Comparing).
   #
-  def <=: [A, B] (::Hash[A, B]) -> bool
+  def <=: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -629,7 +643,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Comparing](rdoc-ref:Hash@Methods+for+Comparing).
   #
-  def >: [A, B] (::Hash[A, B]) -> bool
+  def >: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -651,7 +665,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Comparing](rdoc-ref:Hash@Methods+for+Comparing).
   #
-  def >=: [A, B] (::Hash[A, B]) -> bool
+  def >=: (hash[untyped, untyped] other_hash) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -671,7 +685,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Related: #[]=; see also [Methods for
   # Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def []: %a{implicitly-returns-nil} (K arg0) -> V
+  def []: %a{implicitly-returns-nil} (_Key key) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -701,7 +715,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Related: #[]; see also [Methods for
   # Assigning](rdoc-ref:Hash@Methods+for+Assigning).
   #
-  def []=: (K arg0, V arg1) -> V
+  def []=: (K key, V value) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -739,8 +753,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
   def any?: () -> bool
-          | (untyped pattern) -> bool
-          | () { (K, V) -> boolish } -> bool
+          | (Enumerable::_Pattern pattern) -> bool
+          | () { ([ K, V ] pair) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -756,7 +770,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def assoc: (K arg0) -> [ K, V ]?
+  def assoc: (_Equals key) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -779,7 +793,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def compact: () -> ::Hash[K, V]
+  def compact: () -> instance
 
   # <!--
   #   rdoc-file=hash.c
@@ -845,7 +859,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #   - deconstruct_keys(p1)
   # -->
   #
-  def deconstruct_keys: (Array[K] | nil) -> self
+  def deconstruct_keys: (untyped) -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -866,7 +880,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h[:foo] = "Hello"
   #     h.default(:foo) # => "No key foo"
   #
-  def default: (?K arg0) -> V?
+  def default: (?_Key key) -> V?
 
   # <!--
   #   rdoc-file=hash.c
@@ -880,7 +894,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # See [Hash Default](rdoc-ref:Hash@Hash+Default).
   #
-  def default=: (V arg0) -> V
+  def default=: (V default) -> V
 
   # <!--
   #   rdoc-file=hash.c
@@ -893,7 +907,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default_proc = proc {|hash, key| "Default value for #{key}" }
   #     h.default_proc.class # => Proc
   #
-  def default_proc: () -> (Proc | nil)
+  def default_proc: () -> (^(self, _Key key) -> V)?
 
   # <!--
   #   rdoc-file=hash.c
@@ -908,7 +922,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #     h.default_proc = nil
   #     h.default_proc # => nil
   #
-  def default_proc=: (Proc | _ToProc | nil) -> (Proc | _ToProc | nil)
+  def default_proc=: (nil) -> nil
+                   | (^(self, _Key key) -> V proc) -> ^(self, _Key) -> V
+                   | (_ToProc proc) -> Proc
 
   # <!--
   #   rdoc-file=hash.c
@@ -942,8 +958,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def delete: (K arg0) -> V?
-            | [U] (K arg0) { (K arg0) -> U } -> (U | V)
+  def delete: (_Key key) -> V?
+            | [T, K2 < _Key] (K2 key) { (K2 key) -> T } -> (T | V)
 
   # <!--
   #   rdoc-file=hash.c
@@ -960,8 +976,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def delete_if: () { (K, V) -> boolish } -> self
-               | () -> ::Enumerator[[ K, V ], self]
+  def delete_if: () -> Enumerator[[ K, V ], self]
+               | () { (K key, V value) -> boolish } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -997,7 +1013,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def dig: (K, *untyped) -> untyped
+  def dig: (_Key key, *untyped identifiers) -> untyped
 
   # <!-- rdoc-file=hash.c -->
   # With a block given, calls the block with each key-value pair; returns `self`:
@@ -1015,8 +1031,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Hash@Methods+for+Iterating).
   #
-  def each: () { ([ K, V ] arg0) -> untyped } -> self
-          | () -> ::Enumerator[[ K, V ], self]
+  def each: () -> Enumerator[[ K, V ], self]
+          | () { ([ K, V ] pair) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1037,8 +1053,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Hash@Methods+for+Iterating).
   #
-  def each_key: () { (K arg0) -> untyped } -> ::Hash[K, V]
-              | () -> ::Enumerator[K, self]
+  def each_key: () -> Enumerator[K, self]
+              | () { (K key) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1081,8 +1097,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Iterating](rdoc-ref:Hash@Methods+for+Iterating).
   #
-  def each_value: () { (V arg0) -> untyped } -> self
-                | () -> ::Enumerator[V, self]
+  def each_value: () -> Enumerator[V, self]
+                | () { (V value) -> void } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1117,7 +1133,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped object) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1132,7 +1148,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def except: (*K) -> ::Hash[K, V]
+  def except: (*_Key keys) -> Hash[K, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1161,9 +1177,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def fetch: (K arg0) -> V
-           | [X] (K arg0, X arg1) -> (V | X)
-           | [X] (K arg0) { (K arg0) -> X } -> (V | X)
+  def fetch: (_Key key) -> V
+           | [X] (_Key key, X default_value) -> (V | X)
+           | [K2 < _Key, X] (K2 key) { (K2 key) -> X } -> (V | X)
 
   # <!--
   #   rdoc-file=hash.c
@@ -1186,10 +1202,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def fetch_values: (*K) -> ::Array[V]
-                  | [X] (*K) { (K) -> X } -> ::Array[V | X]
+  def fetch_values: (*_Key keys) -> Array[V]
+                  | [K2 < _Key, T] (*K2 keys) { (K2 key) -> T } -> Array[V | T]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - select {|key, value| ... } -> new_hash
+  #   - select -> new_enumerator
+  # -->
   # With a block given, calls the block with each entry's key and value; returns a
   # new hash whose entries are those for which the block returns a truthy value:
   #
@@ -1200,10 +1220,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def filter: () { (K, V) -> boolish } -> ::Hash[K, V]
-            | () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
+  def select: () -> Enumerator[[ K, V ], Hash[K, V]]
+            | () { (K key, V value) -> boolish } -> Hash[K, V]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - select! {|key, value| ... } -> self or nil
+  #   - select! -> new_enumerator
+  # -->
   # With a block given, calls the block with each entry's key and value; removes
   # from `self` each entry for which the block returns `false` or `nil`.
   #
@@ -1217,8 +1241,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def filter!: () { (K, V) -> boolish } -> self?
-             | () -> ::Enumerator[[ K, V ], self?]
+  def select!: () -> Enumerator[[ K, V ], self?]
+             | () { (K key, V value) -> boolish } -> self?
 
   # <!--
   #   rdoc-file=hash.c
@@ -1254,9 +1278,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Converting](rdoc-ref:Hash@Methods+for+Converting).
   #
-  def flatten: () -> ::Array[K | V]
-             | (1 level) -> ::Array[K | V]
-             | (Integer level) -> Array[untyped]
+  def flatten: (?1 level) -> Array[K | V]
+             | (0 level) -> Array[[K, V]]
+             | (int level) -> Array[untyped]
 
   # <!-- rdoc-file=hash.c -->
   # Returns whether `key` is a key in `self`:
@@ -1267,7 +1291,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def has_key?: (_Key) -> bool
+  def has_key?: (_Key key) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1277,7 +1301,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def has_value?: (top arg0) -> bool
+  def has_value?: (top value) -> bool
 
   # <!--
   #   rdoc-file=hash.c
@@ -1343,7 +1367,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Related: see [Methods for Transforming Keys and
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
-  def invert: () -> ::Hash[V, K]
+  def invert: () -> Hash[V, K]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1361,8 +1385,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def keep_if: () { (K, V) -> boolish } -> self
-             | () -> ::Enumerator[[ K, V ], self]
+  def keep_if: () -> Enumerator[[ K, V ], self]
+             | () { (K key, V value) -> boolish } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1379,7 +1403,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def key: (V) -> K?
+  def key: (_Equals) -> K?
 
   # <!-- rdoc-file=hash.c -->
   # Returns whether `key` is a key in `self`:
@@ -1403,16 +1427,19 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def keys: () -> ::Array[K]
+  def keys: () -> Array[K]
 
-  # <!-- rdoc-file=hash.c -->
+  # <!--
+  #   rdoc-file=hash.c
+  #   - size -> integer
+  # -->
   # Returns the count of entries in `self`:
   #
   #     {foo: 0, bar: 1, baz: 2}.size # => 3
   #
   # Related: see [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  def length: () -> Integer
+  def size: () -> Integer
 
   # <!-- rdoc-file=hash.c -->
   # Returns whether `key` is a key in `self`:
@@ -1467,8 +1494,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Hash@Methods+for+Assigning).
   #
-  def merge: [A, B] (*::Hash[A, B] other_hashes) -> ::Hash[A | K, B | V]
-           | [A, B, C] (*::Hash[A, B] other_hashes) { (K key, V oldval, B newval) -> C } -> ::Hash[A | K, B | V | C]
+  def merge: [A, B] (*hash[A, B] other_hashes) -> Hash[A | K, B | V]
+           | [A, B, C] (*hash[A, B] other_hashes) { (K key, V oldval, B newval) -> C } -> Hash[A | K, B | V | C]
 
   # <!-- rdoc-file=hash.c -->
   # Updates values and/or adds entries to `self`; returns `self`.
@@ -1511,8 +1538,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Hash@Methods+for+Assigning).
   #
-  def merge!: (*::Hash[K, V] other_hashes) -> self
-            | (*::Hash[K, V] other_hashes) { (K key, V oldval, V newval) -> V } -> self
+  def merge!: (*hash[K, V] other_hashes) -> self
+            | (*hash[K, V] other_hashes) { (K key, V oldval, V newval) -> V } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1529,7 +1556,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def rassoc: (V) -> [ K, V ]?
+  def rassoc: (_Equals value) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -1543,6 +1570,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Key](rdoc-ref:Hash@Modifying+an+Active+Hash+Key).
   #
   def rehash: () -> self
+
+  def freeze: () -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1561,8 +1590,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def reject: () -> ::Enumerator[[ K, V ], ::Hash[K, V]]
-            | () { (K, V) -> boolish } -> ::Hash[K, V]
+  def reject: () -> Enumerator[[ K, V ], Hash[K, V]]
+            | () { (K key, V value) -> boolish } -> Hash[K, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1582,8 +1611,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def reject!: () -> ::Enumerator[[ K, V ], self?]
-             | () { (K, V) -> boolish } -> self?
+  def reject!: () -> Enumerator[[ K, V ], self?]
+             | () { (K key, V value) -> boolish } -> self?
 
   # <!-- rdoc-file=hash.c -->
   # Replaces the entire contents of `self` with the contents of `other_hash`;
@@ -1602,13 +1631,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Hash@Methods+for+Assigning).
   #
-  def replace: (Hash[K, V]) -> self
+  def replace: (hash[K, V] other) -> self
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - select {|key, value| ... } -> new_hash
-  #   - select -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # With a block given, calls the block with each entry's key and value; returns a
   # new hash whose entries are those for which the block returns a truthy value:
   #
@@ -1619,13 +1644,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  alias select filter
+  alias filter select
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - select! {|key, value| ... } -> self or nil
-  #   - select! -> new_enumerator
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # With a block given, calls the block with each entry's key and value; removes
   # from `self` each entry for which the block returns `false` or `nil`.
   #
@@ -1639,7 +1660,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  alias select! filter!
+  alias filter! select!
 
   # <!--
   #   rdoc-file=hash.c
@@ -1658,17 +1679,14 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   def shift: () -> [ K, V ]?
 
-  # <!--
-  #   rdoc-file=hash.c
-  #   - size -> integer
-  # -->
+  # <!-- rdoc-file=hash.c -->
   # Returns the count of entries in `self`:
   #
   #     {foo: 0, bar: 1, baz: 2}.size # => 3
   #
   # Related: see [Methods for Querying](rdoc-ref:Hash@Methods+for+Querying).
   #
-  alias size length
+  alias length size
 
   # <!--
   #   rdoc-file=hash.c
@@ -1682,7 +1700,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Deleting](rdoc-ref:Hash@Methods+for+Deleting).
   #
-  def slice: (*K) -> ::Hash[K, V]
+  def slice: [K2 < _Key] (*K2 keys) -> Hash[K2, V]
 
   # <!-- rdoc-file=hash.c -->
   # Associates the given `object` with the given `key`; returns `object`.
@@ -1723,7 +1741,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Converting](rdoc-ref:Hash@Methods+for+Converting).
   #
-  def to_a: () -> ::Array[[ K, V ]]
+  def to_a: () -> Array[[ K, V ]]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1746,7 +1764,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Related: see [Methods for Converting](rdoc-ref:Hash@Methods+for+Converting).
   #
   def to_h: () -> Hash[K, V]
-          | [A, B] () { (K, V) -> [ A, B ] } -> Hash[A, B]
+          | [A, B] () { (K key, V value) -> _Pair[A, B] } -> Hash[A, B]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1870,9 +1888,9 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_keys: () -> Enumerator[K, Hash[untyped, V]]
-                    | [A] (Hash[K, A]) -> Hash[A, V]
-                    | [A] () { (K) -> A } -> Hash[A, V]
-                    | [A] (Hash[K, A]) { (K) -> A } -> Hash[A, V]
+                    | [K2] (hash[_Key, K2] replacements) -> Hash[K | K2, V]
+                    | [K2] (hash[_Key, K2] replacements) { (K old_key) -> K2 } -> Hash[K2, V]
+                    | [K2] () { (K key) -> K2 } -> Hash[K2, V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -1965,9 +1983,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_keys!: () -> Enumerator[K, self]
-                     | (Hash[K, K]) -> self
-                     | () { (K) -> K } -> self
-                     | (Hash[K, K]) { (K) -> K } -> self
+                     | (hash[K, K] replacements) ?{ (K key) -> K } -> self
+                     | () { (K key) -> K } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -1988,7 +2005,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_values: () -> Enumerator[V, Hash[K, untyped]]
-                      | [A] () { (V) -> A } -> Hash[K, A]
+                      | [V2] () { (V value) -> V2 } -> Hash[K, V2]
 
   # <!--
   #   rdoc-file=hash.c
@@ -2011,7 +2028,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_values!: () -> Enumerator[V, self]
-                       | () { (V) -> V } -> self
+                       | () { (V value) -> V } -> self
 
   # <!--
   #   rdoc-file=hash.c
@@ -2078,7 +2095,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def values: () -> ::Array[V]
+  def values: () -> Array[V]
 
   # <!--
   #   rdoc-file=hash.c
@@ -2096,7 +2113,7 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def values_at: (*K arg0) -> ::Array[V?]
+  def values_at: (*_Key arg0) -> Array[V?]
 
   private
 
@@ -2139,9 +2156,8 @@ class Hash[unchecked out K, unchecked out V] < Object
   # See also [Methods for Creating a
   # Hash](rdoc-ref:Hash@Methods+for+Creating+a+Hash).
   #
-  def initialize: (?capacity: int) -> void
-                | (V default, ?capacity: int) -> void
-                | (?capacity: int) { (Hash[K, V] hash, K key) -> V } -> void
+  def initialize: (?V default_value, ?capacity: int) -> void
+                | (?capacity: int) { (instance hash, _Key key) -> V } -> void
 
   # <!--
   #   rdoc-file=hash.c
@@ -2163,5 +2179,5 @@ class Hash[unchecked out K, unchecked out V] < Object
   #
   # Related: see [Methods for Assigning](rdoc-ref:Hash@Methods+for+Assigning).
   #
-  def initialize_copy: (self object) -> self
+  alias initialize_copy replace
 end
