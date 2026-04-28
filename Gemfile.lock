@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 68c94f691b4ef1261b80bf9553260a90cdbaccac
+  revision: 575a7af507b07543edb9b3b53da69c34af9ec17e
   specs:
-    steep (2.0.0)
+    steep (2.1.0.dev)
       concurrent-ruby (>= 1.1.10)
       csv (>= 3.0.9)
       fileutils (>= 1.1.0)
@@ -62,7 +62,7 @@ GEM
     diff-lcs (1.6.2)
     digest (3.2.1)
     drb (2.2.3)
-    erb (6.0.3)
+    erb (6.0.4)
     extconf_compile_commands_json (0.0.7)
     ffi (1.17.4)
     fileutils (1.8.0)
@@ -74,7 +74,7 @@ GEM
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    irb (1.17.0)
+    irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
@@ -103,7 +103,7 @@ GEM
       net-protocol
     nkf (0.2.0)
     ostruct (0.6.3)
-    parallel (2.0.1)
+    parallel (2.1.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
