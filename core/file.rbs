@@ -810,6 +810,10 @@
 # *   #truncate: Truncates `self` to the given size.
 #
 class File < IO
+  # The string that `File.ftype` and `File::Stat#ftype` return
+  type ftype = 'file' | 'directory' | 'characterSpecial' | 'blockSpecial'
+              | 'fifo' | 'link' | 'socket' | 'unknown'
+
   # <!-- rdoc-file=file.c -->
   # platform specific alternative separator
   #

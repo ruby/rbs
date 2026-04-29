@@ -95,7 +95,7 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_ftype
-    assert_send_type "() -> File::Stat::ftype",
+    assert_send_type "() -> File::ftype",
                       File::Stat.new(File.expand_path(__FILE__)), :ftype
   end
 

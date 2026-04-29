@@ -9,10 +9,6 @@
 class File::Stat
   include Comparable
 
-  # The string that `File::Stat#ftype` returns
-  type ftype = 'file' | 'directory' | 'characterSpecial' | 'blockSpecial'
-                  | 'fifo' | 'link' | 'socket' | 'unknown'
-
   # <!--
   #   rdoc-file=file.c
   #   - File::Stat.new(file_name)  -> stat
@@ -230,7 +226,7 @@ class File::Stat
   #
   #     File.stat("/dev/tty").ftype   #=> "characterSpecial"
   #
-  def ftype: () -> ftype
+  def ftype: () -> File::ftype
 
   # <!--
   #   rdoc-file=file.c
