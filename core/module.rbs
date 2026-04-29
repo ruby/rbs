@@ -19,7 +19,7 @@
 #     Mod.constants          #=> [:CONST, :PI, :E]
 #     Mod.instance_methods   #=> [:meth]
 #
-class Module < Object
+class Module
   # <!--
   #   rdoc-file=eval.c
   #   - Module.constants   -> array
@@ -40,7 +40,7 @@ class Module < Object
   #
   # The second form calls the instance method `constants`.
   #
-  def self.constants: () -> ::Array[Integer]
+  def self.constants: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=eval.c
@@ -56,7 +56,7 @@ class Module < Object
   #     $a           #=> [M1::M2, M1]
   #     $a[0].name   #=> "M1::M2"
   #
-  def self.nesting: () -> ::Array[Module]
+  def self.nesting: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c
@@ -83,7 +83,7 @@ class Module < Object
   #
   #     [B, A]
   #
-  def self.used_modules: () -> ::Array[Module]
+  def self.used_modules: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c
@@ -163,7 +163,7 @@ class Module < Object
   #     # Class File has no relationship to class String.
   #               File <=> String     # => nil
   #
-  def <=>: (untyped other) -> Integer?
+  def <=>: (untyped other) -> (-1 | 0 | 1)?
 
   # <!--
   #   rdoc-file=object.c
@@ -254,7 +254,7 @@ class Module < Object
   #
   #     Exiting with code 99
   #
-  def alias_method: (interned new_name, interned old_name) -> ::Symbol
+  def alias_method: (interned new_name, interned old_name) -> Symbol
 
   # <!--
   #   rdoc-file=object.c
@@ -273,7 +273,7 @@ class Module < Object
   #     Math.ancestors       #=> [Math]
   #     Enumerable.ancestors #=> [Enumerable]
   #
-  def ancestors: () -> ::Array[Module]
+  def ancestors: () -> Array[Module]
 
   # <!--
   #   rdoc-file=eval.c
@@ -285,7 +285,7 @@ class Module < Object
   # module to *mod* if this module has not already been added to *mod* or one of
   # its ancestors. See also Module#include.
   #
-  private def append_features: (Module arg0) -> self
+  private def append_features: (Module mod) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -303,7 +303,7 @@ class Module < Object
   #     end
   #     Mod.instance_methods.sort   #=> [:one, :one=, :two, :two=]
   #
-  def attr_accessor: (*interned arg0) -> Array[Symbol]
+  def attr_accessor: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -317,7 +317,7 @@ class Module < Object
   # name in turn. String arguments are converted to symbols. Returns an array of
   # defined method names as symbols.
   #
-  def attr_reader: (*interned arg0) -> Array[Symbol]
+  def attr_reader: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -328,7 +328,7 @@ class Module < Object
   # *symbol*<code>.id2name</code>. String arguments are converted to symbols.
   # Returns an array of defined method names as symbols.
   #
-  def attr_writer: (*interned arg0) -> Array[Symbol]
+  def attr_writer: (*interned names) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=load.c
@@ -349,7 +349,7 @@ class Module < Object
   #
   # Files that are currently being loaded must not be registered for autoload.
   #
-  def autoload: (interned _module, String filename) -> NilClass
+  def autoload: (interned constant, path filename) -> nil
 
   # <!--
   #   rdoc-file=load.c
@@ -397,8 +397,7 @@ class Module < Object
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
   #
-  def class_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                | [U] () { (self m) [self: self] -> U } -> U
+  alias class_eval module_eval
 
   # <!-- rdoc-file=vm_eval.c -->
   # Evaluates the given block in the context of the class/module. The method
@@ -417,7 +416,7 @@ class Module < Object
   #
   #     Hello there!
   #
-  def class_exec: [U] (*untyped, **untyped) { (?) [self: self] -> U } -> U
+  alias class_exec module_exec
 
   # <!--
   #   rdoc-file=object.c
@@ -433,7 +432,7 @@ class Module < Object
   #     Fred.class_variable_defined?(:@@foo)    #=> true
   #     Fred.class_variable_defined?(:@@bar)    #=> false
   #
-  def class_variable_defined?: (interned arg0) -> bool
+  def class_variable_defined?: (interned name) -> bool
 
   # <!--
   #   rdoc-file=object.c
@@ -449,7 +448,7 @@ class Module < Object
   #     end
   #     Fred.class_variable_get(:@@foo)     #=> 99
   #
-  def class_variable_get: (interned arg0) -> untyped
+  def class_variable_get: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -468,7 +467,7 @@ class Module < Object
   #     Fred.class_variable_set(:@@foo, 101)     #=> 101
   #     Fred.new.foo                             #=> 101
   #
-  def class_variable_set: (interned arg0, untyped arg1) -> untyped
+  def class_variable_set: [T] (interned name, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -488,7 +487,7 @@ class Module < Object
   #     Two.class_variables          #=> [:@@var2, :@@var1]
   #     Two.class_variables(false)   #=> [:@@var2]
   #
-  def class_variables: (?boolish inherit) -> ::Array[Symbol]
+  def class_variables: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -533,7 +532,7 @@ class Module < Object
   #     :const_added
   #     :inherited
   #
-  private def const_added: (Symbol) -> void
+  private def const_added: (Symbol const_name) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -652,7 +651,7 @@ class Module < Object
   #       const_get(name, false)
   #     end
   #
-  def const_missing: (Symbol arg0) -> untyped
+  def const_missing: (Symbol name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -670,7 +669,7 @@ class Module < Object
   #
   #     Object.const_set('foobar', 42) #=> NameError: wrong constant name foobar
   #
-  def const_set: (interned arg0, untyped arg1) -> untyped
+  def const_set: [T] (interned name, T value) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -739,7 +738,7 @@ class Module < Object
   #
   # Also see Module#const_defined?.
   #
-  def constants: (?boolish inherit) -> ::Array[Symbol]
+  def constants: (?boolish inherit) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=proc.c
@@ -799,7 +798,7 @@ class Module < Object
   #     HTTP::NOT_FOUND
   #     # warning: constant HTTP::NOT_FOUND is deprecated
   #
-  def deprecate_constant: (*interned) -> self
+  def deprecate_constant: (*interned names) -> self
 
   def equal?: (untyped other) -> bool
 
@@ -829,7 +828,7 @@ class Module < Object
   #     Picky added to Array
   #     Can't add Picky to a String
   #
-  private def extend_object: (untyped arg0) -> untyped
+  private def extend_object: [T] (T object) -> T
 
   # <!--
   #   rdoc-file=object.c
@@ -847,7 +846,7 @@ class Module < Object
   #     end
   #      # => prints "A extended in Enumerable"
   #
-  private def extended: (Module othermod) -> untyped
+  private def extended: (untyped othermod) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -865,7 +864,7 @@ class Module < Object
   # -->
   # Invokes Module.append_features on each parameter in reverse order.
   #
-  def include: (Module, *Module arg0) -> self
+  def include: (Module module, *Module additional_modules) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -905,7 +904,7 @@ class Module < Object
   #     end
   #      # => prints "A included in Enumerable"
   #
-  private def included: (Module othermod) -> untyped
+  private def included: (Module othermod) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -928,7 +927,7 @@ class Module < Object
   #     Mixin.included_modules   #=> [Sub]
   #     Outer.included_modules   #=> [Sub, Mixin]
   #
-  def included_modules: () -> ::Array[Module]
+  def included_modules: () -> Array[Module]
 
   # <!--
   #   rdoc-file=object.c
@@ -955,8 +954,9 @@ class Module < Object
   # Assign the module to a constant (name starting uppercase) if you want to treat
   # it like a regular module.
   #
-  def initialize: () -> void
-                | () { (Module arg0) -> untyped } -> void
+  def initialize: () ?{ (Module mod) [self: self] -> void } -> void
+
+  def initialize_clone: (Module source, ?freeze: bool?) -> void
 
   # <!--
   #   rdoc-file=proc.c
@@ -987,7 +987,7 @@ class Module < Object
   #
   #     Hello there, Dave!
   #
-  def instance_method: (interned arg0) -> UnboundMethod
+  def instance_method: (interned name) -> UnboundMethod
 
   # <!--
   #   rdoc-file=object.c
@@ -1024,7 +1024,7 @@ class Module < Object
   #     end
   #     C.instance_methods(false).sort               #=> [:method2, :method3, :method4]
   #
-  def instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=object.c
@@ -1044,7 +1044,7 @@ class Module < Object
   #
   #     Adding :some_instance_method
   #
-  private def method_added: (Symbol meth) -> untyped
+  private def method_added: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1105,7 +1105,7 @@ class Module < Object
   #
   #     Removing :some_instance_method
   #
-  private def method_removed: (Symbol method_name) -> untyped
+  private def method_removed: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=object.c
@@ -1130,7 +1130,7 @@ class Module < Object
   #
   #     Undefining :some_instance_method
   #
-  private def method_undefined: (Symbol method_name) -> untyped
+  private def method_undefined: (Symbol method_name) -> void
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1158,8 +1158,8 @@ class Module < Object
   #     dummy:123:in `module_eval': undefined local variable
   #         or method `code' for Thing:Class
   #
-  def module_eval: (String arg0, ?String filename, ?Integer lineno) -> untyped
-                 | [U] () { (self m) [self: self] -> U } -> U
+  def module_eval: (string code, ?string? filename, ?int lineno) -> untyped
+                 | [U] () { (self mod) [self: self] -> U } -> U
 
   # <!--
   #   rdoc-file=vm_eval.c
@@ -1225,9 +1225,11 @@ class Module < Object
   #
   private def module_function: () -> nil
                              | (Symbol method_name) -> Symbol
-                             | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                             | (string method_name) -> string
-                             | (interned, interned, *interned method_name) -> Array[interned]
+                             | [T < _ToStr] (T method_name) -> T
+                             | (interned method_name) -> interned
+                             | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                             | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                             | (interned, interned, *interned method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1243,7 +1245,7 @@ class Module < Object
   # -->
   # Invokes Module.prepend_features on each parameter in reverse order.
   #
-  def prepend: (Module, *Module arg0) -> self
+  def prepend: (Module module, *Module additional_modules) -> self
 
   # <!--
   #   rdoc-file=eval.c
@@ -1255,7 +1257,7 @@ class Module < Object
   # this module to *mod* if this module has not already been added to *mod* or one
   # of its ancestors. See also Module#prepend.
   #
-  private def prepend_features: (Module arg0) -> self
+  private def prepend_features: (Module mod) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1273,7 +1275,7 @@ class Module < Object
   #     end
   #      # => prints "A prepended to Enumerable"
   #
-  private def prepended: (Module othermod) -> untyped
+  private def prepended: (Module othermod) -> void
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1302,10 +1304,14 @@ class Module < Object
   #
   private def private: () -> nil
                      | (Symbol method_name) -> Symbol
-                     | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                     | (string method_name) -> string
-                     | (interned, interned, *interned method_name) -> Array[interned]
-                     | (Array[interned]) -> Array[interned]
+                     | [T < _ToStr] (T method_name) -> T
+                     | (interned method_name) -> interned
+                     | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                     | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                     | (interned, interned, *interned method_names) -> Array[interned]
+                     | (Array[Symbol] method_names) -> Array[Symbol]
+                     | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                     | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1327,8 +1333,8 @@ class Module < Object
   #       end
   #     end
   #
-  def private_class_method: (*interned arg0) -> self
-                          | (Array[interned] arg0) -> self
+  def private_class_method: (*interned method_names) -> self
+                          | (Array[interned] method_names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1336,7 +1342,7 @@ class Module < Object
   # -->
   # Makes a list of existing constants private.
   #
-  def private_constant: (*interned arg0) -> self
+  def private_constant: (*interned names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1353,7 +1359,7 @@ class Module < Object
   #     Mod.instance_methods           #=> [:method2]
   #     Mod.private_instance_methods   #=> [:method1]
   #
-  def private_instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def private_instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1443,10 +1449,14 @@ class Module < Object
   #
   private def protected: () -> nil
                        | (Symbol method_name) -> Symbol
-                       | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                       | (string method_name) -> string
-                       | (interned, interned, *interned method_name) -> Array[interned]
-                       | (Array[interned]) -> Array[interned]
+                       | [T < _ToStr] (T method_name) -> T
+                       | (interned method_name) -> interned
+                       | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                       | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                       | (interned, interned, *interned method_names) -> Array[interned]
+                       | (Array[Symbol] method_names) -> Array[Symbol]
+                       | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                       | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=object.c
@@ -1455,7 +1465,7 @@ class Module < Object
   # Returns a list of the protected instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not included.
   #
-  def protected_instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def protected_instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1503,10 +1513,14 @@ class Module < Object
   #
   private def public: () -> nil
                     | (Symbol method_name) -> Symbol
-                    | (Symbol, Symbol, *Symbol method_name) -> Array[Symbol]
-                    | (string method_name) -> string
-                    | (interned, interned, *interned method_name) -> Array[interned]
-                    | (Array[interned]) -> Array[interned]
+                    | [T < _ToStr] (T method_name) -> T
+                    | (interned method_name) -> interned
+                    | (Symbol, Symbol, *Symbol method_names) -> Array[Symbol]
+                    | [T < _ToStr] (T, T, *T method_names) -> Array[T]
+                    | (interned, interned, *interned method_names) -> Array[interned]
+                    | (Array[Symbol] method_names) -> Array[Symbol]
+                    | [T < _ToStr] (Array[T] method_names) -> Array[T]
+                    | (Array[interned] method_names) -> Array[interned]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1519,8 +1533,8 @@ class Module < Object
   # String arguments are converted to symbols. An Array of Symbols and/or Strings
   # is also accepted.
   #
-  def public_class_method: (*interned arg0) -> self
-                         | (Array[interned] arg0) -> self
+  def public_class_method: (*interned method_names) -> self
+                         | (Array[interned] method_names) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1528,7 +1542,7 @@ class Module < Object
   # -->
   # Makes a list of existing constants public.
   #
-  def public_constant: (*interned arg0) -> self
+  def public_constant: (*interned names) -> self
 
   # <!--
   #   rdoc-file=proc.c
@@ -1545,7 +1559,7 @@ class Module < Object
   # Returns a list of the public instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not included.
   #
-  def public_instance_methods: (?boolish include_super) -> ::Array[Symbol]
+  def public_instance_methods: (?boolish include_super) -> Array[Symbol]
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1627,7 +1641,7 @@ class Module < Object
   #     99
   #     nil
   #
-  def remove_class_variable: (interned arg0) -> untyped
+  def remove_class_variable: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=object.c
@@ -1637,7 +1651,7 @@ class Module < Object
   # previous value.  If that constant referred to a module, this will not change
   # that module's name and can lead to confusion.
   #
-  private def remove_const: (interned arg0) -> untyped
+  private def remove_const: (interned name) -> untyped
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1647,7 +1661,7 @@ class Module < Object
   # Removes the method identified by *symbol* from the current class. For an
   # example, see Module#undef_method. String arguments are converted to symbols.
   #
-  def remove_method: (*interned arg0) -> self
+  def remove_method: (*interned method_names) -> self
 
   # <!--
   #   rdoc-file=vm_method.c
@@ -1684,7 +1698,7 @@ class Module < Object
   # of the `foo` method using the above approach will change so that the method
   # does not pass through keywords.
   #
-  private def ruby2_keywords: (*interned method_name) -> nil
+  private def ruby2_keywords: (interned method_name, *interned more_method_names) -> nil
 
   # <!--
   #   rdoc-file=object.c
@@ -1733,7 +1747,7 @@ class Module < Object
   #     C::M.name #=> "C::M"
   #     c.new # => #<C:0x0....>
   #
-  def set_temporary_name: (string?) -> self
+  def set_temporary_name: (string? name) -> self
 
   # <!--
   #   rdoc-file=object.c
@@ -1817,14 +1831,14 @@ class Module < Object
   # Import class refinements from *module* into the current class or module
   # definition.
   #
-  private def using: (Module arg0) -> self
+  private def using: (Module mod) -> self
 
   # <!-- rdoc-file=object.c -->
   # Returns a string representing this module or class. For basic classes and
   # modules, this is the name. For singletons, we show information on the thing
   # we're attached to as well.
   #
-  def inspect: () -> String
+  alias inspect to_s
 
   # <!--
   #   rdoc-file=object.c
@@ -1837,6 +1851,6 @@ class Module < Object
   # to <code>attr_reader(name)</code> but deprecated. Returns an array of defined
   # method names as symbols.
   #
-  def attr: %a{deprecated} (interned, bool) -> Array[Symbol]
-          | (*interned arg0) -> Array[Symbol]
+  def attr: %a{deprecated} (interned name, bool create_writer) -> Array[Symbol]
+          | (*interned names) -> Array[Symbol]
 end
