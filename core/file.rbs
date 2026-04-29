@@ -810,6 +810,26 @@
 # *   #truncate: Truncates `self` to the given size.
 #
 class File < IO
+  # <!-- rdoc-file=file.c -->
+  # platform specific alternative separator
+  #
+  ALT_SEPARATOR: String?
+
+  # <!-- rdoc-file=file.c -->
+  # path list separator
+  #
+  PATH_SEPARATOR: String
+
+  # <!-- rdoc-file=file.c -->
+  # separates directory parts in path
+  #
+  SEPARATOR: String
+
+  # <!-- rdoc-file=file.c -->
+  # separates directory parts in path
+  #
+  Separator: String
+
   # <!--
   #   rdoc-file=io.c
   #   - File.new(path, mode = 'r', perm = 0666, **opts) -> file
@@ -2019,26 +2039,6 @@ class File < IO
   #
   def truncate: (int length) -> 0
 end
-
-# <!-- rdoc-file=file.c -->
-# platform specific alternative separator
-#
-File::ALT_SEPARATOR: String?
-
-# <!-- rdoc-file=file.c -->
-# path list separator
-#
-File::PATH_SEPARATOR: String
-
-# <!-- rdoc-file=file.c -->
-# separates directory parts in path
-#
-File::SEPARATOR: String
-
-# <!-- rdoc-file=file.c -->
-# separates directory parts in path
-#
-File::Separator: String
 
 # <!-- rdoc-file=file.c -->
 # Module <code>File::Constants</code> defines file-related constants.
