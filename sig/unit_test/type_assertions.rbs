@@ -30,19 +30,19 @@ module RBS
       type target_type = Types::ClassInstance | Types::ClassSingleton
 
       interface _BaseAssertions
-        def assert: (untyped, ?String?) -> void
+        def assert: (untyped, ?String? | Proc) -> void
 
-        def refute: (untyped, ?String?) -> void
+        def refute: (untyped, ?String? | Proc) -> void
 
-        def assert_empty: (untyped, ?String?) -> void
+        def assert_empty: (untyped, ?String | nil | Proc) -> void
 
         def assert_operator: (untyped, Symbol, *untyped) -> void
 
         def notify: (untyped) -> void
 
-        def assert_predicate: (untyped, Symbol, ?String?) -> void
+        def assert_predicate: (untyped, Symbol, ?String? | Proc) -> void
 
-        def refute_predicate: (untyped, Symbol, ?String?) -> void
+        def refute_predicate: (untyped, Symbol, ?String? | Proc) -> void
       end
 
       module ClassMethods
