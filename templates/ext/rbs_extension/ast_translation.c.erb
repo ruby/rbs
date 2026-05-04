@@ -160,14 +160,16 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             <%- if node.locations -%>
         VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
         rbs_loc *loc = rbs_check_location(arg_location);
-        rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
+        {
+            rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
                 <%- node.locations.each do |location_field| -%>
                     <%- if location_field.required? -%>
-        rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+            rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
                     <%- else -%>
-        rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+            rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
                     <%- end -%>
                 <%- end -%>
+        }
             <%- else -%>
         VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
             <%- end -%>
