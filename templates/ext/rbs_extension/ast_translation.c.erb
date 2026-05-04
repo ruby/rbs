@@ -16,6 +16,7 @@ rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *co
         .constant_pool = constant_pool,
         .buffer = buffer,
         .encoding = ruby_encoding,
+        .reusable_kwargs_hash = rb_hash_new(),
     };
 }
 
@@ -154,54 +155,55 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         <%- else -%>
         <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
 
-        VALUE h = rb_hash_new();
+        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
         <%- if node.expose_location? -%>
             <%- if node.locations -%>
-        VALUE location = rbs_location_range_to_ruby_location(ctx, node->base.location);
-        rbs_loc *loc = rbs_check_location(location);
-        rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
+        VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+        rbs_loc *loc = rbs_check_location(arg_location);
+        {
+            rbs_loc_legacy_alloc_children(loc, <%= node.locations.size %>);
                 <%- node.locations.each do |location_field| -%>
                     <%- if location_field.required? -%>
-        rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+            rbs_loc_legacy_add_required_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
                     <%- else -%>
-        rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
+            rbs_loc_legacy_add_optional_child(loc, rb_intern("<%= location_field.name %>"), (rbs_loc_range) { .start = node-><%= location_field.attribute_name %>.start_char, .end = node-><%= location_field.attribute_name %>.end_char });
                     <%- end -%>
                 <%- end -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), location);
+        }
             <%- else -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("location")), rbs_location_range_to_ruby_location(ctx, node->base.location));
+        VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
             <%- end -%>
         <%- end -%>
         <%- node.fields.each do |field| -%>
         <%- case field.type.name -%>
         <%- when "rbs_node_list" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>));
+        VALUE arg_<%= field.name %> = rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>);
         <%- when "rbs_hash" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_hash_to_ruby_hash(ctx, node-><%= field.c_name %>));
+        VALUE arg_<%= field.name %> = rbs_hash_to_ruby_hash(ctx, node-><%= field.c_name %>);
         <%- when "rbs_ast_symbol" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // rbs_ast_symbol
+        VALUE arg_<%= field.name %> = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>); // rbs_ast_symbol
         <%- when "rbs_string" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_string_to_ruby_string(&node-><%= field.c_name %>, ctx.encoding));
+        VALUE arg_<%= field.name %> = rbs_string_to_ruby_string(&node-><%= field.c_name %>, ctx.encoding);
         <%- when "bool" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), node-><%= field.c_name %> ? Qtrue : Qfalse);
+        VALUE arg_<%= field.name %> = node-><%= field.c_name %> ? Qtrue : Qfalse;
         <%- when "rbs_location_range" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_to_ruby_location(ctx, node-><%= field.name %>));<%= field.optional? ? " // optional" : "" %>
+        VALUE arg_<%= field.name %> = rbs_location_range_to_ruby_location(ctx, node-><%= field.name %>);<%= field.optional? ? " // optional" : "" %>
         <%- when "rbs_location_range_list" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_range_list_to_ruby_array(ctx, node-><%= field.name %>));
+        VALUE arg_<%= field.name %> = rbs_location_range_list_to_ruby_array(ctx, node-><%= field.name %>);
         <%- when "rbs_location" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_loc_to_ruby_location(ctx, node-><%= field.name %>));
+        VALUE arg_<%= field.name %> = rbs_loc_to_ruby_location(ctx, node-><%= field.name %>);
         <%- when "rbs_location_list" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>));
+        VALUE arg_<%= field.name %> = rbs_location_list_to_ruby_array(ctx, node-><%= field.name %>);
         <%- when "rbs_attr_ivar_name" -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_attr_ivar_name_to_ruby(ctx, node-><%= field.c_name %>)); // rbs_attr_ivar_name_t
+        VALUE arg_<%= field.name %> = rbs_attr_ivar_name_to_ruby(ctx, node-><%= field.c_name %>); // rbs_attr_ivar_name_t
         <%- else -%>
             <%- if field.type.is_a?(RBS::Template::EnumType) -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), <%= field.type.descr.translator_name %>(node-><%= field.c_name %>));  // <%= field.type.name %>
+        VALUE arg_<%= field.name %> = <%= field.type.descr.translator_name %>(node-><%= field.c_name %>);  // <%= field.type.name %>
             <%- else -%>
                 <%- unless field.type.is_a?(RBS::Template::NodeType) -%>
         #warning unexpected type <%= field.inspect -%>
                 <%- end -%>
-        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>)); // <%= field.type.c_name %>
+        VALUE arg_<%= field.name %> = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node-><%= field.c_name %>); // <%= field.type.c_name %>
             <%- end -%>
         <%- end -%>
         <%- end -%>
@@ -212,14 +214,20 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             RBS_AST_TypeParam,
             rb_intern("resolve_variables"),
             1,
-            rb_hash_lookup(h, ID2SYM(rb_intern("type_params")))
+            arg_type_params
         );
         <%- end -%>
-        return CLASS_NEW_INSTANCE(
-            <%= node.c_constant_name %>,
-            1,
-            &h
-        );
+        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
+        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
+        VALUE h = ctx.reusable_kwargs_hash;
+        rb_hash_clear(h);
+        <%- if node.expose_location? -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
+        <%- end -%>
+        <%- node.fields.each do |field| -%>
+        rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), arg_<%= field.name %>);
+        <%- end -%>
+        return CLASS_NEW_INSTANCE(<%= node.c_constant_name %>, 1, &h);
         <%- end -%>
     }
     <%- end -%>
