@@ -194,11 +194,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("string")), arg_string);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Annotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Annotation, 1, &h);
     }
     case RBS_AST_BOOL: {
         return ((rbs_ast_bool_t *) instance)->value ? Qtrue : Qfalse;
@@ -216,11 +212,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("string")), arg_string);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Comment,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Comment, 1, &h);
     }
     case RBS_AST_DECLARATIONS_CLASS: {
         rbs_ast_declarations_class_t *node = (rbs_ast_declarations_class_t *) instance;
@@ -260,11 +252,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("members")), arg_members);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Class,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Class, 1, &h);
     }
     case RBS_AST_DECLARATIONS_CLASS_SUPER: {
         rbs_ast_declarations_class_super_t *node = (rbs_ast_declarations_class_super_t *) instance;
@@ -287,11 +275,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Class_Super,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Class_Super, 1, &h);
     }
     case RBS_AST_DECLARATIONS_CLASS_ALIAS: {
         rbs_ast_declarations_class_alias_t *node = (rbs_ast_declarations_class_alias_t *) instance;
@@ -320,11 +304,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), arg_old_name);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_ClassAlias,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_ClassAlias, 1, &h);
     }
     case RBS_AST_DECLARATIONS_CONSTANT: {
         rbs_ast_declarations_constant_t *node = (rbs_ast_declarations_constant_t *) instance;
@@ -351,11 +331,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Constant,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Constant, 1, &h);
     }
     case RBS_AST_DECLARATIONS_GLOBAL: {
         rbs_ast_declarations_global_t *node = (rbs_ast_declarations_global_t *) instance;
@@ -382,11 +358,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Global,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Global, 1, &h);
     }
     case RBS_AST_DECLARATIONS_INTERFACE: {
         rbs_ast_declarations_interface_t *node = (rbs_ast_declarations_interface_t *) instance;
@@ -423,11 +395,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("members")), arg_members);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Interface,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Interface, 1, &h);
     }
     case RBS_AST_DECLARATIONS_MODULE: {
         rbs_ast_declarations_module_t *node = (rbs_ast_declarations_module_t *) instance;
@@ -468,11 +436,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("members")), arg_members);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Module,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Module, 1, &h);
     }
     case RBS_AST_DECLARATIONS_MODULE_SELF: {
         rbs_ast_declarations_module_self_t *node = (rbs_ast_declarations_module_self_t *) instance;
@@ -495,11 +459,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_Module_Self,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Module_Self, 1, &h);
     }
     case RBS_AST_DECLARATIONS_MODULE_ALIAS: {
         rbs_ast_declarations_module_alias_t *node = (rbs_ast_declarations_module_alias_t *) instance;
@@ -528,11 +488,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("old_name")), arg_old_name);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_ModuleAlias,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_ModuleAlias, 1, &h);
     }
     case RBS_AST_DECLARATIONS_TYPE_ALIAS: {
         rbs_ast_declarations_type_alias_t *node = (rbs_ast_declarations_type_alias_t *) instance;
@@ -569,11 +525,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Declarations_TypeAlias,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_TypeAlias, 1, &h);
     }
     case RBS_AST_DIRECTIVES_USE: {
         rbs_ast_directives_use_t *node = (rbs_ast_directives_use_t *) instance;
@@ -593,11 +545,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("clauses")), arg_clauses);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Directives_Use,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use, 1, &h);
     }
     case RBS_AST_DIRECTIVES_USE_SINGLE_CLAUSE: {
         rbs_ast_directives_use_single_clause_t *node = (rbs_ast_directives_use_single_clause_t *) instance;
@@ -621,11 +569,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name")), arg_type_name);
         rb_hash_aset(h, ID2SYM(rb_intern("new_name")), arg_new_name);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Directives_Use_SingleClause,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use_SingleClause, 1, &h);
     }
     case RBS_AST_DIRECTIVES_USE_WILDCARD_CLAUSE: {
         rbs_ast_directives_use_wildcard_clause_t *node = (rbs_ast_directives_use_wildcard_clause_t *) instance;
@@ -646,11 +590,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("namespace")), arg_namespace);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Directives_Use_WildcardClause,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Directives_Use_WildcardClause, 1, &h);
     }
     case RBS_AST_INTEGER: {
         rbs_ast_integer_t *integer_node = (rbs_ast_integer_t *) instance;
@@ -690,11 +630,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("kind")), arg_kind);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Alias,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Alias, 1, &h);
     }
     case RBS_AST_MEMBERS_ATTR_ACCESSOR: {
         rbs_ast_members_attr_accessor_t *node = (rbs_ast_members_attr_accessor_t *) instance;
@@ -732,11 +668,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), arg_visibility);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_AttrAccessor,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_AttrAccessor, 1, &h);
     }
     case RBS_AST_MEMBERS_ATTR_READER: {
         rbs_ast_members_attr_reader_t *node = (rbs_ast_members_attr_reader_t *) instance;
@@ -774,11 +706,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), arg_visibility);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_AttrReader,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_AttrReader, 1, &h);
     }
     case RBS_AST_MEMBERS_ATTR_WRITER: {
         rbs_ast_members_attr_writer_t *node = (rbs_ast_members_attr_writer_t *) instance;
@@ -816,11 +744,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), arg_visibility);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_AttrWriter,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_AttrWriter, 1, &h);
     }
     case RBS_AST_MEMBERS_CLASS_INSTANCE_VARIABLE: {
         rbs_ast_members_class_instance_variable_t *node = (rbs_ast_members_class_instance_variable_t *) instance;
@@ -846,11 +770,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_ClassInstanceVariable,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_ClassInstanceVariable, 1, &h);
     }
     case RBS_AST_MEMBERS_CLASS_VARIABLE: {
         rbs_ast_members_class_variable_t *node = (rbs_ast_members_class_variable_t *) instance;
@@ -876,11 +796,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_ClassVariable,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_ClassVariable, 1, &h);
     }
     case RBS_AST_MEMBERS_EXTEND: {
         rbs_ast_members_extend_t *node = (rbs_ast_members_extend_t *) instance;
@@ -908,11 +824,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Extend,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Extend, 1, &h);
     }
     case RBS_AST_MEMBERS_INCLUDE: {
         rbs_ast_members_include_t *node = (rbs_ast_members_include_t *) instance;
@@ -940,11 +852,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Include,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Include, 1, &h);
     }
     case RBS_AST_MEMBERS_INSTANCE_VARIABLE: {
         rbs_ast_members_instance_variable_t *node = (rbs_ast_members_instance_variable_t *) instance;
@@ -970,11 +878,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_InstanceVariable,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_InstanceVariable, 1, &h);
     }
     case RBS_AST_MEMBERS_METHOD_DEFINITION: {
         rbs_ast_members_method_definition_t *node = (rbs_ast_members_method_definition_t *) instance;
@@ -1010,11 +914,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
         rb_hash_aset(h, ID2SYM(rb_intern("overloading")), arg_overloading);
         rb_hash_aset(h, ID2SYM(rb_intern("visibility")), arg_visibility);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_MethodDefinition,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_MethodDefinition, 1, &h);
     }
     case RBS_AST_MEMBERS_METHOD_DEFINITION_OVERLOAD: {
         rbs_ast_members_method_definition_overload_t *node = (rbs_ast_members_method_definition_overload_t *) instance;
@@ -1029,11 +929,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("method_type")), arg_method_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_MethodDefinition_Overload,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_MethodDefinition_Overload, 1, &h);
     }
     case RBS_AST_MEMBERS_PREPEND: {
         rbs_ast_members_prepend_t *node = (rbs_ast_members_prepend_t *) instance;
@@ -1061,11 +957,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment")), arg_comment);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Prepend,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Prepend, 1, &h);
     }
     case RBS_AST_MEMBERS_PRIVATE: {
         rbs_ast_members_private_t *node = (rbs_ast_members_private_t *) instance;
@@ -1078,11 +970,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Private,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Private, 1, &h);
     }
     case RBS_AST_MEMBERS_PUBLIC: {
         rbs_ast_members_public_t *node = (rbs_ast_members_public_t *) instance;
@@ -1095,11 +983,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Members_Public,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Public, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_BLOCK_PARAM_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_block_param_type_annotation_t *node = (rbs_ast_ruby_annotations_block_param_type_annotation_t *) instance;
@@ -1128,11 +1012,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type_location")), arg_type_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_BlockParamTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_BlockParamTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_CLASS_ALIAS_ANNOTATION: {
         rbs_ast_ruby_annotations_class_alias_annotation_t *node = (rbs_ast_ruby_annotations_class_alias_annotation_t *) instance;
@@ -1153,11 +1033,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("keyword_location")), arg_keyword_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name")), arg_type_name);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name_location")), arg_type_name_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ClassAliasAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ClassAliasAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_COLON_METHOD_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_colon_method_type_annotation_t *node = (rbs_ast_ruby_annotations_colon_method_type_annotation_t *) instance;
@@ -1176,11 +1052,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), arg_prefix_location);
         rb_hash_aset(h, ID2SYM(rb_intern("annotations")), arg_annotations);
         rb_hash_aset(h, ID2SYM(rb_intern("method_type")), arg_method_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ColonMethodTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_DOUBLE_SPLAT_PARAM_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *node = (rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *) instance;
@@ -1205,11 +1077,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), arg_colon_location);
         rb_hash_aset(h, ID2SYM(rb_intern("param_type")), arg_param_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_DoubleSplatParamTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_INSTANCE_VARIABLE_ANNOTATION: {
         rbs_ast_ruby_annotations_instance_variable_annotation_t *node = (rbs_ast_ruby_annotations_instance_variable_annotation_t *) instance;
@@ -1234,11 +1102,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), arg_colon_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_InstanceVariableAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_InstanceVariableAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_METHOD_TYPES_ANNOTATION: {
         rbs_ast_ruby_annotations_method_types_annotation_t *node = (rbs_ast_ruby_annotations_method_types_annotation_t *) instance;
@@ -1259,11 +1123,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("overloads")), arg_overloads);
         rb_hash_aset(h, ID2SYM(rb_intern("vertical_bar_locations")), arg_vertical_bar_locations);
         rb_hash_aset(h, ID2SYM(rb_intern("dot3_location")), arg_dot3_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_MethodTypesAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_MethodTypesAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_MODULE_ALIAS_ANNOTATION: {
         rbs_ast_ruby_annotations_module_alias_annotation_t *node = (rbs_ast_ruby_annotations_module_alias_annotation_t *) instance;
@@ -1284,11 +1144,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("keyword_location")), arg_keyword_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name")), arg_type_name);
         rb_hash_aset(h, ID2SYM(rb_intern("type_name_location")), arg_type_name_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ModuleAliasAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ModuleAliasAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_MODULE_SELF_ANNOTATION: {
         rbs_ast_ruby_annotations_module_self_annotation_t *node = (rbs_ast_ruby_annotations_module_self_annotation_t *) instance;
@@ -1319,11 +1175,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("close_bracket_location")), arg_close_bracket_location);
         rb_hash_aset(h, ID2SYM(rb_intern("args_comma_locations")), arg_args_comma_locations);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ModuleSelfAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ModuleSelfAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_NODE_TYPE_ASSERTION: {
         rbs_ast_ruby_annotations_node_type_assertion_t *node = (rbs_ast_ruby_annotations_node_type_assertion_t *) instance;
@@ -1340,11 +1192,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), arg_prefix_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_NodeTypeAssertion,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_NodeTypeAssertion, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_PARAM_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_param_type_annotation_t *node = (rbs_ast_ruby_annotations_param_type_annotation_t *) instance;
@@ -1367,11 +1215,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), arg_colon_location);
         rb_hash_aset(h, ID2SYM(rb_intern("param_type")), arg_param_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ParamTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ParamTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_RETURN_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_return_type_annotation_t *node = (rbs_ast_ruby_annotations_return_type_annotation_t *) instance;
@@ -1394,11 +1238,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), arg_colon_location);
         rb_hash_aset(h, ID2SYM(rb_intern("return_type")), arg_return_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_ReturnTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_ReturnTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_SKIP_ANNOTATION: {
         rbs_ast_ruby_annotations_skip_annotation_t *node = (rbs_ast_ruby_annotations_skip_annotation_t *) instance;
@@ -1417,11 +1257,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("prefix_location")), arg_prefix_location);
         rb_hash_aset(h, ID2SYM(rb_intern("skip_location")), arg_skip_location);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_SkipAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_SkipAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_SPLAT_PARAM_TYPE_ANNOTATION: {
         rbs_ast_ruby_annotations_splat_param_type_annotation_t *node = (rbs_ast_ruby_annotations_splat_param_type_annotation_t *) instance;
@@ -1446,11 +1282,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("colon_location")), arg_colon_location);
         rb_hash_aset(h, ID2SYM(rb_intern("param_type")), arg_param_type);
         rb_hash_aset(h, ID2SYM(rb_intern("comment_location")), arg_comment_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_SplatParamTypeAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_SplatParamTypeAnnotation, 1, &h);
     }
     case RBS_AST_RUBY_ANNOTATIONS_TYPE_APPLICATION_ANNOTATION: {
         rbs_ast_ruby_annotations_type_application_annotation_t *node = (rbs_ast_ruby_annotations_type_application_annotation_t *) instance;
@@ -1471,11 +1303,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type_args")), arg_type_args);
         rb_hash_aset(h, ID2SYM(rb_intern("close_bracket_location")), arg_close_bracket_location);
         rb_hash_aset(h, ID2SYM(rb_intern("comma_locations")), arg_comma_locations);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_Ruby_Annotations_TypeApplicationAnnotation,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_Ruby_Annotations_TypeApplicationAnnotation, 1, &h);
     }
     case RBS_AST_STRING: {
         rbs_ast_string_t *string_node = (rbs_ast_string_t *) instance;
@@ -1516,11 +1344,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("lower_bound")), arg_lower_bound);
         rb_hash_aset(h, ID2SYM(rb_intern("default_type")), arg_default_type);
         rb_hash_aset(h, ID2SYM(rb_intern("unchecked")), arg_unchecked);
-        return CLASS_NEW_INSTANCE(
-            RBS_AST_TypeParam,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_AST_TypeParam, 1, &h);
     }
     case RBS_METHOD_TYPE: {
         rbs_method_type_t *node = (rbs_method_type_t *) instance;
@@ -1551,11 +1375,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type_params")), arg_type_params);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("block")), arg_block);
-        return CLASS_NEW_INSTANCE(
-            RBS_MethodType,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_MethodType, 1, &h);
     }
     case RBS_NAMESPACE: {
         rbs_namespace_t *node = (rbs_namespace_t *) instance;
@@ -1570,11 +1390,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("path")), arg_path);
         rb_hash_aset(h, ID2SYM(rb_intern("absolute")), arg_absolute);
-        return CLASS_NEW_INSTANCE(
-            RBS_Namespace,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Namespace, 1, &h);
     }
     case RBS_SIGNATURE: {
         rbs_signature_t *signature = (rbs_signature_t *) instance;
@@ -1597,11 +1413,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("namespace")), arg_namespace);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
-        return CLASS_NEW_INSTANCE(
-            RBS_TypeName,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_TypeName, 1, &h);
     }
     case RBS_TYPES_ALIAS: {
         rbs_types_alias_t *node = (rbs_types_alias_t *) instance;
@@ -1624,11 +1436,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Alias,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Alias, 1, &h);
     }
     case RBS_TYPES_BASES_ANY: {
         rbs_types_bases_any_t *node = (rbs_types_bases_any_t *) instance;
@@ -1643,11 +1451,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("todo")), arg_todo);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Any,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Any, 1, &h);
     }
     case RBS_TYPES_BASES_BOOL: {
         rbs_types_bases_bool_t *node = (rbs_types_bases_bool_t *) instance;
@@ -1660,11 +1464,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Bool,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Bool, 1, &h);
     }
     case RBS_TYPES_BASES_BOTTOM: {
         rbs_types_bases_bottom_t *node = (rbs_types_bases_bottom_t *) instance;
@@ -1677,11 +1477,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Bottom,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Bottom, 1, &h);
     }
     case RBS_TYPES_BASES_CLASS: {
         rbs_types_bases_class_t *node = (rbs_types_bases_class_t *) instance;
@@ -1694,11 +1490,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Class,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Class, 1, &h);
     }
     case RBS_TYPES_BASES_INSTANCE: {
         rbs_types_bases_instance_t *node = (rbs_types_bases_instance_t *) instance;
@@ -1711,11 +1503,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Instance,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Instance, 1, &h);
     }
     case RBS_TYPES_BASES_NIL: {
         rbs_types_bases_nil_t *node = (rbs_types_bases_nil_t *) instance;
@@ -1728,11 +1516,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Nil,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Nil, 1, &h);
     }
     case RBS_TYPES_BASES_SELF: {
         rbs_types_bases_self_t *node = (rbs_types_bases_self_t *) instance;
@@ -1745,11 +1529,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Self,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Self, 1, &h);
     }
     case RBS_TYPES_BASES_TOP: {
         rbs_types_bases_top_t *node = (rbs_types_bases_top_t *) instance;
@@ -1762,11 +1542,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Top,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Top, 1, &h);
     }
     case RBS_TYPES_BASES_VOID: {
         rbs_types_bases_void_t *node = (rbs_types_bases_void_t *) instance;
@@ -1779,11 +1555,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Bases_Void,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Bases_Void, 1, &h);
     }
     case RBS_TYPES_BLOCK: {
         rbs_types_block_t *node = (rbs_types_block_t *) instance;
@@ -1802,11 +1574,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("required")), arg_required);
         rb_hash_aset(h, ID2SYM(rb_intern("self_type")), arg_self_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Block,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Block, 1, &h);
     }
     case RBS_TYPES_CLASS_INSTANCE: {
         rbs_types_class_instance_t *node = (rbs_types_class_instance_t *) instance;
@@ -1829,11 +1597,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_ClassInstance,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_ClassInstance, 1, &h);
     }
     case RBS_TYPES_CLASS_SINGLETON: {
         rbs_types_class_singleton_t *node = (rbs_types_class_singleton_t *) instance;
@@ -1856,11 +1620,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_ClassSingleton,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_ClassSingleton, 1, &h);
     }
     case RBS_TYPES_FUNCTION: {
         rbs_types_function_t *node = (rbs_types_function_t *) instance;
@@ -1887,11 +1647,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("optional_keywords")), arg_optional_keywords);
         rb_hash_aset(h, ID2SYM(rb_intern("rest_keywords")), arg_rest_keywords);
         rb_hash_aset(h, ID2SYM(rb_intern("return_type")), arg_return_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Function,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Function, 1, &h);
     }
     case RBS_TYPES_FUNCTION_PARAM: {
         rbs_types_function_param_t *node = (rbs_types_function_param_t *) instance;
@@ -1913,11 +1669,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Function_Param,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Function_Param, 1, &h);
     }
     case RBS_TYPES_INTERFACE: {
         rbs_types_interface_t *node = (rbs_types_interface_t *) instance;
@@ -1940,11 +1692,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Interface,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Interface, 1, &h);
     }
     case RBS_TYPES_INTERSECTION: {
         rbs_types_intersection_t *node = (rbs_types_intersection_t *) instance;
@@ -1959,11 +1707,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("types")), arg_types);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Intersection,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Intersection, 1, &h);
     }
     case RBS_TYPES_LITERAL: {
         rbs_types_literal_t *node = (rbs_types_literal_t *) instance;
@@ -1978,11 +1722,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("literal")), arg_literal);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Literal,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Literal, 1, &h);
     }
     case RBS_TYPES_OPTIONAL: {
         rbs_types_optional_t *node = (rbs_types_optional_t *) instance;
@@ -1997,11 +1737,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Optional,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Optional, 1, &h);
     }
     case RBS_TYPES_PROC: {
         rbs_types_proc_t *node = (rbs_types_proc_t *) instance;
@@ -2020,11 +1756,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("type")), arg_type);
         rb_hash_aset(h, ID2SYM(rb_intern("block")), arg_block);
         rb_hash_aset(h, ID2SYM(rb_intern("self_type")), arg_self_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Proc,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Proc, 1, &h);
     }
     case RBS_TYPES_RECORD: {
         rbs_types_record_t *node = (rbs_types_record_t *) instance;
@@ -2039,11 +1771,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("all_fields")), arg_all_fields);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Record,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Record, 1, &h);
     }
     case RBS_TYPES_RECORD_FIELD_TYPE: {
         rbs_types_record_field_type_t *record_fieldtype = (rbs_types_record_field_type_t *) instance;
@@ -2066,11 +1794,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("types")), arg_types);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Tuple,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Tuple, 1, &h);
     }
     case RBS_TYPES_UNION: {
         rbs_types_union_t *node = (rbs_types_union_t *) instance;
@@ -2085,11 +1809,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("types")), arg_types);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Union,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Union, 1, &h);
     }
     case RBS_TYPES_UNTYPED_FUNCTION: {
         rbs_types_untyped_function_t *node = (rbs_types_untyped_function_t *) instance;
@@ -2102,11 +1822,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("return_type")), arg_return_type);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_UntypedFunction,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_UntypedFunction, 1, &h);
     }
     case RBS_TYPES_VARIABLE: {
         rbs_types_variable_t *node = (rbs_types_variable_t *) instance;
@@ -2121,11 +1837,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
-        return CLASS_NEW_INSTANCE(
-            RBS_Types_Variable,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(RBS_Types_Variable, 1, &h);
     }
     case RBS_AST_SYMBOL: {
         rbs_constant_t *constant = rbs_constant_pool_id_to_constant(ctx.constant_pool, ((rbs_ast_symbol_t *) instance)->constant_id);
