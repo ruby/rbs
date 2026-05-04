@@ -227,11 +227,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         <%- node.fields.each do |field| -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), arg_<%= field.name %>);
         <%- end -%>
-        return CLASS_NEW_INSTANCE(
-            <%= node.c_constant_name %>,
-            1,
-            &h
-        );
+        return CLASS_NEW_INSTANCE(<%= node.c_constant_name %>, 1, &h);
         <%- end -%>
     }
     <%- end -%>
