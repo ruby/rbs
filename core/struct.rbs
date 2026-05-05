@@ -104,8 +104,8 @@
 # *   #inspect (aliased as #to_s): Returns a string representation of `self`.
 # *   #to_h: Returns a hash of the member name/value pairs in `self`.
 #
-class Struct[Elem]
-  include Enumerable[Elem]
+class Struct[E]
+  include Enumerable[E]
 
   # The types that can be used when "indexing" into a `Struct` via `[]`, `[]=`, `dig`, and
   # `deconstruct_keys`.
@@ -362,7 +362,7 @@ class Struct[Elem]
   #
   # Related: #members.
   #
-  def to_a: () -> Array[Elem]
+  def to_a: () -> Array[E]
 
   # <!--
   #   rdoc-file=struct.c
@@ -385,8 +385,8 @@ class Struct[Elem]
   #
   # Raises ArgumentError if the block returns an inappropriate value.
   #
-  def to_h: () -> Hash[Symbol, Elem]
-          | [K, V] () { (Symbol key, Elem value) -> [K, V] } -> Hash[K, V]
+  def to_h: () -> Hash[Symbol, E]
+          | [K, V] () { (Symbol key, E value) -> [K, V] } -> Hash[K, V]
 
   # <!-- rdoc-file=struct.c -->
   # Returns the values in `self` as an array:
@@ -441,8 +441,8 @@ class Struct[Elem]
   #
   # Related: #each_pair.
   #
-  def each: () -> Enumerator[Elem, self]
-          | () { (Elem value) -> void } -> self
+  def each: () -> Enumerator[E, self]
+          | () { (E value) -> void } -> self
 
   # <!--
   #   rdoc-file=struct.c
@@ -465,8 +465,8 @@ class Struct[Elem]
   #
   # Related: #each.
   #
-  def each_pair: () -> Enumerator[[Symbol, Elem], self]
-               | () { ([Symbol, Elem] key_value) -> void } -> self
+  def each_pair: () -> Enumerator[[Symbol, E], self]
+               | () { ([Symbol, E] key_value) -> void } -> self
 
   # <!--
   #   rdoc-file=struct.c
@@ -492,7 +492,7 @@ class Struct[Elem]
   #
   # Raises IndexError if `n` is out of range.
   #
-  def []: (index name_or_position) -> Elem
+  def []: (index name_or_position) -> E
 
   # <!--
   #   rdoc-file=struct.c
@@ -521,7 +521,7 @@ class Struct[Elem]
   #
   # Raises IndexError if `n` is out of range.
   #
-  def []=: (index name_or_position, Elem value) -> Elem
+  def []=: (index name_or_position, E value) -> E
 
   # <!--
   #   rdoc-file=struct.c
@@ -540,8 +540,8 @@ class Struct[Elem]
   #
   # With no block given, returns an Enumerator.
   #
-  def select: () -> Enumerator[Elem, Array[Elem]]
-            | () { (Elem value) -> boolish } -> Array[Elem]
+  def select: () -> Enumerator[E, Array[E]]
+            | () { (E value) -> boolish } -> Array[E]
 
   # <!-- rdoc-file=struct.c -->
   # With a block given, returns an array of values from `self` for which the block
@@ -591,7 +591,7 @@ class Struct[Elem]
   # Raises RangeError if any element of the range is negative and out of range;
   # see Array@Array+Indexes.
   #
-  def values_at: (*int | range[int?] positions) -> Array[Elem]
+  def values_at: (*int | range[int?] positions) -> Array[E]
 
   # <!--
   #   rdoc-file=struct.c
@@ -634,7 +634,7 @@ class Struct[Elem]
   #     f.dig(0, 0, :b, 0) # => 1
   #     f.dig(:b, 0) # => nil
   #
-  def dig: (index name_or_position) -> Elem
+  def dig: (index name_or_position) -> E
          | (index name_or_position, untyped, *untyped) -> untyped
 
   # <!-- rdoc-file=struct.c -->
@@ -664,5 +664,5 @@ class Struct[Elem]
   #     h = joe.deconstruct_keys(nil)
   #     h # => {:name=>"Joseph Smith, Jr.", :address=>"123 Maple, Anytown NC", :zip=>12345}
   #
-  def deconstruct_keys: (Array[index & Hash::_Key]? indices) -> Hash[index & Hash::_Key, Elem]
+  def deconstruct_keys: (Array[index & Hash::_Key]? indices) -> Hash[index & Hash::_Key, E]
 end
