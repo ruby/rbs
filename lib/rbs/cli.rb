@@ -1061,7 +1061,7 @@ EOB
       env_hash = {
         'RUBYOPT' => "#{ENV['RUBYOPT']} -rrbs/test/setup",
         'RBS_TEST_OPT' => test_opt(options),
-        'RBS_TEST_LOGLEVEL' => %w(DEBUG INFO WARN ERROR FATAL)[RBS.logger_level || 5] || "UNKNOWN",
+        'RBS_TEST_LOGLEVEL' => RBS.logger_level || "UNKNOWN",
         'RBS_TEST_SAMPLE_SIZE' => sample_size,
         'RBS_TEST_DOUBLE_SUITE' => double_suite,
         'RBS_TEST_UNCHECKED_CLASSES' => (unchecked_classes.join(',') unless unchecked_classes.empty?),

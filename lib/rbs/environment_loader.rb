@@ -49,6 +49,14 @@ module RBS
       case
       when path
         dirs << path
+
+        # search for manifest.yaml
+        if (manifest = path.each_entry.find { |s| s.basename.to_s == "manifest.yaml" })
+          local_lib = RBS::Collection::Sources::Local.new(path: path, base_directory: Pathname.pwd)
+          local_lib.dependencies_of("", "")&.each do |dep|
+            add(library: dep['name'], version: nil)
+          end
+        end
       when library
         if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
           resolve_dependencies(library: library, version: version)
