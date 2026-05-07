@@ -60,6 +60,19 @@ module RBS
     def rbs_location: (Prism::Location) -> Location
                     | (Prism::Location, Prism::Location) -> Location
 
+    # Translate a byte offset (into the top buffer's source) to a character offset.
+    #
+    # Resolution is delegated to the top buffer, which keeps a sparse cache of
+    # resolved (byte, char) pairs so successive calls scan only the delta from the
+    # nearest cached pair. Amortizes to O(content_size) across all calls; a single
+    # call is one byteslice + length.
+    #
+    def character_offset: (Integer byte_offset) -> Integer
+
+    # Sparse cache backing `#character_offset`: a pair `[byte_keys, char_values]`
+    # kept in ascending byte order to support binary search.
+    @character_offset_cache: [Array[Integer], Array[Integer]]?
+
     # Construct a buffer from substrings of this buffer.
     #
     # The returned buffer contains lines from given ranges.

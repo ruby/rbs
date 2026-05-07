@@ -87,11 +87,36 @@ module RBS
       "#<RBS::Buffer:#{__id__} @name=#{name}, @content=#{content.bytesize} bytes, @lines=#{ranges.size} lines,>"
     end
 
+    def character_offset(byte_offset)
+      top = top_buffer
+      return top.character_offset(byte_offset) unless top.equal?(self)
+
+      keys, vals = (@character_offset_cache ||= [[0], [0]])
+
+      idx = keys.bsearch_index { |k| k > byte_offset }
+      lo = idx ? idx - 1 : keys.size - 1
+
+      base_byte = keys[lo]
+      base_char = vals[lo]
+      delta = byte_offset - base_byte
+      return base_char if delta == 0
+
+      result = base_char + (content.byteslice(base_byte, delta) or raise).length
+
+      if base_byte == keys[-1]
+        keys << byte_offset
+        vals << result
+      end
+
+      result
+    end
+
     def rbs_location(location, loc2=nil)
+      top = top_buffer
       if loc2
-        Location.new(self.top_buffer, location.start_character_offset, loc2.end_character_offset)
+        Location.new(top, character_offset(location.start_offset), character_offset(loc2.end_offset))
       else
-        Location.new(self.top_buffer, location.start_character_offset, location.end_character_offset)
+        Location.new(top, character_offset(location.start_offset), character_offset(location.end_offset))
       end
     end
 
