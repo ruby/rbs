@@ -88,7 +88,12 @@ module RBS
     # buffer.sub_buffer(lines: [5..7])          # => Raises an error because the range contains newline
     # ```
     #
-    %a{pure} def sub_buffer: (lines: Array[Range[Integer]]) -> Buffer
+    # `byte_lines_hint:` is an optional performance hint: byte ranges corresponding
+    # to `lines:`. When provided, slicing uses `byteslice` (O(slice_size) per line)
+    # instead of `content[char_range]`, which on a multi-byte string is O(content_size)
+    # per call. Result is identical either way.
+    #
+    %a{pure} def sub_buffer: (lines: Array[Range[Integer]], ?byte_lines_hint: Array[Range[Integer]]?) -> Buffer
 
     %a{pure} def parent_buffer: () -> Buffer?
 

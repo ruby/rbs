@@ -120,17 +120,29 @@ module RBS
       end
     end
 
-    def sub_buffer(lines:)
+    def sub_buffer(lines:, byte_lines_hint: nil)
       buf = +""
-      lines.each_with_index do |range, index|
-        start_pos = range.begin
-        end_pos = range.end
-        slice = content[start_pos...end_pos] or raise
-        if slice.include?("\n")
-          raise "Line #{index + 1} cannot contain newline character."
+
+      if byte_lines_hint
+        byte_lines_hint.each_with_index do |range, index|
+          slice = content.byteslice(range.begin, range.end - range.begin) or raise
+          if slice.include?("\n")
+            raise "Line #{index + 1} cannot contain newline character."
+          end
+          buf << slice
+          buf << "\n"
         end
-        buf << slice
-        buf << "\n"
+      else
+        lines.each_with_index do |range, index|
+          start_pos = range.begin
+          end_pos = range.end
+          slice = content[start_pos...end_pos] or raise
+          if slice.include?("\n")
+            raise "Line #{index + 1} cannot contain newline character."
+          end
+          buf << slice
+          buf << "\n"
+        end
       end
 
       buf.chomp!
