@@ -44,8 +44,8 @@ module RBS
               if type_annotation
                 Location.new(
                   type_name_location.buffer,
-                  type_name_location.start_pos,
-                  type_annotation.location.end_pos
+                  type_name_location.start_byte,
+                  type_annotation.location.end_byte
                 )
               else
                 type_name_location

@@ -10,8 +10,16 @@ module RBS
       @decls = decls
     end
 
-    def find(line:, column:)
-      pos = buffer.loc_to_pos([line, column])
+    # Find RBS elements at the given position.
+    #
+    # Returns a list of components, inner component comes first.
+    #
+    # @param line [Integer] Line number (1-origin)
+    # @param byte_column [Integer] Byte offset within the line (0-origin)
+    # @param char_column [Integer] Character offset within the line (0-origin). Converted to byte offset internally.
+    # @param column [Integer] Deprecated. Treated as char column for backwards compatibility.
+    def find(line:, column: nil, byte_column: nil, char_column: nil)
+      pos = resolve_position(line: line, column: column, byte_column: byte_column, char_column: char_column)
 
       dirs.each do |dir|
         array = [] #: Array[component]
@@ -26,8 +34,14 @@ module RBS
       []
     end
 
-    def find2(line:, column:)
-      path = find(line: line, column: column)
+    # Find RBS elements at the given position, returning the inner most symbol and outer components.
+    #
+    # @param line [Integer] Line number (1-origin)
+    # @param byte_column [Integer] Byte offset within the line (0-origin)
+    # @param char_column [Integer] Character offset within the line (0-origin). Converted to byte offset internally.
+    # @param column [Integer] Deprecated. Treated as char column for backwards compatibility.
+    def find2(line:, column: nil, byte_column: nil, char_column: nil)
+      path = find(line: line, column: column, byte_column: byte_column, char_column: char_column)
 
       return if path.empty?
 
@@ -238,9 +252,32 @@ module RBS
 
     def test_loc(pos, location:)
       if location
-        location.start_pos <= pos && pos <= location.end_pos
+        location.start_byte <= pos && pos <= location.end_byte
       else
         false
+      end
+    end
+
+    private
+
+    # Converts char column to byte column within a line.
+    def char_column_to_byte_column(line, char_column) #: Integer
+      line_range = buffer.ranges[line - 1] or return 0
+      line_content = buffer.content.byteslice(line_range) or return 0
+      prefix = line_content.encode(Encoding::UTF_8).chars.first(char_column).join
+      prefix.bytesize
+    end
+
+    def resolve_position(line:, column:, byte_column:, char_column:) #: Integer
+      if byte_column
+        buffer.loc_to_pos([line, byte_column])
+      elsif char_column
+        buffer.loc_to_pos([line, char_column_to_byte_column(line, char_column)])
+      elsif column
+        RBS.print_warning { "`column` keyword argument of RBS::Locator#find is deprecated. Use `char_column` or `byte_column` instead." }
+        buffer.loc_to_pos([line, char_column_to_byte_column(line, column)])
+      else
+        raise ArgumentError, "One of `byte_column`, `char_column`, or `column` must be specified"
       end
     end
   end

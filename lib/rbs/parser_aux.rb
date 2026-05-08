@@ -23,7 +23,7 @@ module RBS
       resolved = magic_comment(buf)
       start_pos =
         if resolved
-          (resolved.location || raise).end_pos
+          (resolved.location || raise).end_byte
         else
           0
         end

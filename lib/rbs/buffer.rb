@@ -20,7 +20,7 @@ module RBS
     end
 
     def lines
-      ranges.map { self.content[_1] || raise } #$ String
+      ranges.map { content.byteslice(_1) || raise } #$ String
     end
 
     def line_count
@@ -31,7 +31,6 @@ module RBS
       @ranges ||= begin
         if content.empty?
           ranges = [0...0] #: Array[Range[Integer]]
-          lines = [""]
         else
           lines = content.lines
           lines << "" if content.end_with?("\n")
@@ -40,9 +39,9 @@ module RBS
           offset = 0
 
           lines.each do |line|
-            size0 = line.size
+            size0 = line.bytesize
             line = line.chomp
-            range = offset...(offset+line.size)
+            range = offset...(offset+line.bytesize)
             ranges << range
 
             offset += size0
@@ -89,9 +88,9 @@ module RBS
 
     def rbs_location(location, loc2=nil)
       if loc2
-        Location.new(self.top_buffer, location.start_character_offset, loc2.end_character_offset)
+        Location.new(self.top_buffer, location.start_offset, loc2.end_offset)
       else
-        Location.new(self.top_buffer, location.start_character_offset, location.end_character_offset)
+        Location.new(self.top_buffer, location.start_offset, location.end_offset)
       end
     end
 
@@ -100,7 +99,7 @@ module RBS
       lines.each_with_index do |range, index|
         start_pos = range.begin
         end_pos = range.end
-        slice = content[start_pos...end_pos] or raise
+        slice = content.byteslice(start_pos, end_pos - start_pos) or raise
         if slice.include?("\n")
           raise "Line #{index + 1} cannot contain newline character."
         end

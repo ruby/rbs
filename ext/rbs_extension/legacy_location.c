@@ -193,16 +193,16 @@ VALUE rbs_new_location(VALUE buffer, rbs_range_t rg) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
-    rbs_loc_init(loc, buffer, (rbs_loc_range) { rg.start.char_pos, rg.end.char_pos });
+    rbs_loc_init(loc, buffer, (rbs_loc_range) { rg.start.byte_pos, rg.end.byte_pos });
 
     return obj;
 }
 
-VALUE rbs_new_location2(VALUE buffer, int start_char, int end_char) {
+VALUE rbs_new_location2(VALUE buffer, int start_byte, int end_byte) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
-    rbs_loc_init(loc, buffer, (rbs_loc_range) { .start = start_char, .end = end_char });
+    rbs_loc_init(loc, buffer, (rbs_loc_range) { start_byte, end_byte });
 
     return obj;
 }

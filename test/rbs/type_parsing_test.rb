@@ -1027,6 +1027,6 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       Parser.parse_type(input, byte_range: 2...)
     end
 
-    assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
+    assert_equal "a.rbs:1:5...1:9: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
   end
 end
