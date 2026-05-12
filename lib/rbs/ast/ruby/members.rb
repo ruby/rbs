@@ -549,15 +549,25 @@ module RBS
 
           attr_reader :name
           attr_reader :node
+          attr_reader :kind
           attr_reader :method_type
           attr_reader :leading_comment
 
-          def initialize(buffer, name, node, method_type, leading_comment)
+          def initialize(buffer, name, node, method_type, leading_comment, kind: :instance)
             super(buffer)
             @name = name
             @node = node
+            @kind = kind
             @method_type = method_type
             @leading_comment = leading_comment
+          end
+
+          def singleton?
+            kind == :singleton
+          end
+
+          def instance?
+            kind == :instance
           end
 
           def location
@@ -583,6 +593,7 @@ module RBS
           def type_fingerprint
             [
               "members/def",
+              kind.to_s,
               name.to_s,
               method_type.type_fingerprint,
               leading_comment&.as_comment&.string

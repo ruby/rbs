@@ -84,10 +84,15 @@ module RBS
 
           attr_reader name: Symbol
           attr_reader node: Prism::DefNode
+          attr_reader kind: :instance | :singleton
           attr_reader method_type: MethodTypeAnnotation
           attr_reader leading_comment: CommentBlock?
 
-          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation, CommentBlock? leading_comment) -> void
+          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation, CommentBlock? leading_comment, ?kind: :instance | :singleton) -> void
+
+          def singleton?: () -> bool
+
+          def instance?: () -> bool
 
           def location: () -> Location
 
