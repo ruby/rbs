@@ -189,7 +189,7 @@ module FileUtils
   %a{deprecated: Use top-level `path` instead}
   type path = ::path
 
-  type pathlist = path | Array[path]
+  type pathlist = ::path | Array[::path]
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -228,8 +228,8 @@ module FileUtils
   #
   # Related: FileUtils.pwd.
   #
-  def self?.cd: (path dir, ?verbose: boolish) -> void
-              | [X] (path dir, ?verbose: boolish) { (String) -> X } -> X
+  def self?.cd: (::path dir, ?verbose: boolish) -> void
+              | [X] (::path dir, ?verbose: boolish) { (String) -> X } -> X
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -444,7 +444,7 @@ module FileUtils
   #
   # Related: FileUtils.compare_stream.
   #
-  def self?.compare_file: (path a, path b) -> bool
+  def self?.compare_file: (::path a, ::path b) -> bool
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -538,7 +538,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.copy_entry: (path src, path dest, ?boolish preserve, ?boolish dereference_root, ?boolish remove_destination) -> void
+  def self?.copy_entry: (::path src, ::path dest, ?boolish preserve, ?boolish dereference_root, ?boolish remove_destination) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -565,7 +565,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.copy_file: (path src, path dest, ?boolish preserve, ?boolish dereference) -> void
+  def self?.copy_file: (::path src, ::path dest, ?boolish preserve, ?boolish dereference) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -633,7 +633,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.cp: (pathlist src, path dest, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.cp: (pathlist src, ::path dest, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -750,7 +750,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.cp_lr: (pathlist src, path dest, ?noop: boolish, ?verbose: boolish, ?dereference_root: boolish, ?remove_destination: boolish) -> void
+  def self?.cp_lr: (pathlist src, ::path dest, ?noop: boolish, ?verbose: boolish, ?dereference_root: boolish, ?remove_destination: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -856,7 +856,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.cp_r: (pathlist src, path dest, ?preserve: boolish, ?noop: boolish, ?verbose: boolish, ?dereference_root: boolish, ?remove_destination: boolish) -> void
+  def self?.cp_r: (pathlist src, ::path dest, ?preserve: boolish, ?noop: boolish, ?verbose: boolish, ?dereference_root: boolish, ?remove_destination: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -937,7 +937,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.install: (path src, path dest, ?mode: mode?, ?owner: String?, ?group: String?, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.install: (::path src, ::path dest, ?mode: mode?, ?owner: String?, ?group: String?, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -986,7 +986,7 @@ module FileUtils
   #
   # Related: FileUtils.ln (has different options).
   #
-  def self?.link_entry: (path src, path dest, ?boolish dereference_root, ?boolish remove_destination) -> void
+  def self?.link_entry: (::path src, ::path dest, ?boolish dereference_root, ?boolish remove_destination) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1044,7 +1044,7 @@ module FileUtils
   #
   # Related: FileUtils.link_entry (has different options).
   #
-  def self?.ln: (pathlist src, path dest, ?force: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln: (pathlist src, ::path dest, ?force: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1131,7 +1131,7 @@ module FileUtils
   #
   # Related: FileUtils.ln_sf.
   #
-  def self?.ln_s: (pathlist src, path dest, ?force: boolish, ?relative: boolish, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln_s: (pathlist src, ::path dest, ?force: boolish, ?relative: boolish, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1154,7 +1154,7 @@ module FileUtils
   # Like FileUtils.ln_s, but always with keyword argument <code>force: true</code>
   # given.
   #
-  def self?.ln_sf: (pathlist src, path dest, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln_sf: (pathlist src, ::path dest, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1162,7 +1162,7 @@ module FileUtils
   # -->
   # Like FileUtils.ln_s, but create links relative to `dest`.
   #
-  def self?.ln_sr: (pathlist src, path dest, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln_sr: (pathlist src, ::path dest, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1339,7 +1339,7 @@ module FileUtils
   #         mv src0 dest0
   #         mv src1.txt src1 dest1
   #
-  def self?.mv: (pathlist src, path dest, ?force: boolish, ?noop: boolish, ?verbose: boolish, ?secure: boolish) -> void
+  def self?.mv: (pathlist src, ::path dest, ?force: boolish, ?noop: boolish, ?verbose: boolish, ?secure: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1418,7 +1418,7 @@ module FileUtils
   #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
-  def self?.remove_dir: (path path, ?boolish force) -> void
+  def self?.remove_dir: (::path path, ?boolish force) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1435,7 +1435,7 @@ module FileUtils
   #
   # Related: FileUtils.remove_entry_secure.
   #
-  def self?.remove_entry: (path path, ?boolish force) -> void
+  def self?.remove_entry: (::path path, ?boolish force) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1456,7 +1456,7 @@ module FileUtils
   #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
-  def self?.remove_entry_secure: (path path, ?boolish force) -> void
+  def self?.remove_entry_secure: (::path path, ?boolish force) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1473,7 +1473,7 @@ module FileUtils
   #
   # Related: [methods for deleting](rdoc-ref:FileUtils@Deleting).
   #
-  def self?.remove_file: (path path, ?boolish force) -> void
+  def self?.remove_file: (::path path, ?boolish force) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -1749,5 +1749,5 @@ module FileUtils
   #
   # Related: FileUtils.touch.
   #
-  def self?.uptodate?: (path new, _Each[path] old_list) -> bool
+  def self?.uptodate?: (::path new, _Each[::path] old_list) -> bool
 end
