@@ -235,8 +235,8 @@
 #
 #     require 'json/add/range'
 #
-class Range[out Elem] < Object
-  include Enumerable[Elem]
+class Range[out E] < Object
+  include Enumerable[E]
 
   # <!--
   #   rdoc-file=range.c
@@ -260,8 +260,8 @@ class Range[out Elem] < Object
   #     (0..7) % 2 #=> ((0..7).%(2)) -- as expected
   #     0..7 % 2 #=> 0..1 -- parsed as 0..(7 % 2)
   #
-  def %: (Numeric | int n) -> Enumerator[Elem, self]
-       | (Numeric | int n) { (Elem element) -> void } -> self
+  def %: (Numeric | int n) -> Enumerator[E, self]
+       | (Numeric | int n) { (E element) -> void } -> self
 
   # <!--
   #   rdoc-file=range.c
@@ -345,7 +345,7 @@ class Range[out Elem] < Object
   #
   # Related: Range#first, Range#end.
   #
-  def begin: () -> Elem
+  def begin: () -> E
 
   # <!--
   #   rdoc-file=range.c
@@ -355,9 +355,9 @@ class Range[out Elem] < Object
   #
   # See [Binary Searching](rdoc-ref:language/bsearch.rdoc).
   #
-  def bsearch: () -> ::Enumerator[Elem, Elem?]
-             | () { (Elem) -> (true | false) } -> Elem?
-             | () { (Elem) -> ::Integer } -> Elem?
+  def bsearch: () -> ::Enumerator[E, E?]
+             | () { (E) -> (true | false) } -> E?
+             | () { (E) -> ::Integer } -> E?
 
   # <!--
   #   rdoc-file=range.c
@@ -500,8 +500,8 @@ class Range[out Elem] < Object
   #
   # With no block given, returns an enumerator.
   #
-  def each: () { (Elem arg0) -> untyped } -> self
-          | () -> ::Enumerator[Elem, self]
+  def each: () { (E arg0) -> untyped } -> self
+          | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=range.c
@@ -515,7 +515,7 @@ class Range[out Elem] < Object
   #
   # Related: Range#begin, Range#last.
   #
-  def end: () -> Elem
+  def end: () -> E
 
   # <!--
   #   rdoc-file=range.c
@@ -551,8 +551,8 @@ class Range[out Elem] < Object
   #
   #     (..4).first # Raises RangeError
   #
-  def first: () -> Elem
-           | (Integer n) -> ::Array[Elem]
+  def first: () -> E
+           | (Integer n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=range.c
@@ -605,7 +605,7 @@ class Range[out Elem] < Object
   #     Range.new('a', 'd').to_a        # => ["a", "b", "c", "d"]
   #     Range.new('a', 'd', true).to_a  # => ["a", "b", "c"]
   #
-  def initialize: (Elem from, Elem to, ?boolish exclude_end) -> void
+  def initialize: (E from, E to, ?boolish exclude_end) -> void
 
   # <!--
   #   rdoc-file=range.c
@@ -661,8 +661,8 @@ class Range[out Elem] < Object
   #
   #     (1..).last # Raises RangeError
   #
-  def last: () -> Elem
-          | (Integer n) -> ::Array[Elem]
+  def last: () -> E
+          | (Integer n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=range.c
@@ -958,8 +958,8 @@ class Range[out Elem] < Object
   #
   # With no block given, returns an enumerator.
   #
-  def reverse_each: () { (Elem) -> void } -> self
-                  | () -> ::Enumerator[Elem, self]
+  def reverse_each: () { (E) -> void } -> self
+                  | () -> ::Enumerator[E, self]
 
   # <!--
   #   rdoc-file=range.c
@@ -1016,7 +1016,7 @@ class Range[out Elem] < Object
   #
   def count: () -> (Integer | Float)
            | (untyped) -> Integer
-           | () { (Elem) -> boolish } -> Integer
+           | () { (E) -> boolish } -> Integer
 
   # <!--
   #   rdoc-file=range.c
@@ -1096,10 +1096,10 @@ class Range[out Elem] < Object
   #     ('a'..'e').step { p _1 }
   #     # Default step 1; prints: a, b, c, d, e
   #
-  def step: (?Numeric | int) -> Enumerator[Elem, self]
-          | (?Numeric | int) { (Elem element) -> void } -> self
-          | (untyped) -> Enumerator[Elem, self]
-          | (untyped) { (Elem element) -> void } -> self
+  def step: (?Numeric | int) -> Enumerator[E, self]
+          | (?Numeric | int) { (E element) -> void } -> self
+          | (untyped) -> Enumerator[E, self]
+          | (untyped) { (E element) -> void } -> self
 
   # <!--
   #   rdoc-file=range.c

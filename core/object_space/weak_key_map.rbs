@@ -57,7 +57,7 @@ module ObjectSpace
   # attributes always, but the values that aren't needed anymore wouldn't be
   # sitting in the cache forever.
   #
-  class WeakKeyMap[Key, Value]
+  class WeakKeyMap[K, V]
     # <!--
     #   rdoc-file=weakmap.c
     #   - map[key] -> value
@@ -66,7 +66,7 @@ module ObjectSpace
     #
     # If `key` is not found, returns `nil`.
     #
-    def []: (Key) -> Value?
+    def []: (K) -> V?
 
     # <!--
     #   rdoc-file=weakmap.c
@@ -80,7 +80,7 @@ module ObjectSpace
     # If the given `key` exists, replaces its value with the given `value`; the
     # ordering is not affected
     #
-    def []=: (Key, Value?) -> Value?
+    def []=: (K, V?) -> V?
 
     # <!--
     #   rdoc-file=weakmap.c
@@ -119,8 +119,8 @@ module ObjectSpace
     #     m = ObjectSpace::WeakKeyMap.new
     #     m.delete("nosuch") { |key| "Key #{key} not found" } # => "Key nosuch not found"
     #
-    def delete: (Key) -> Value?
-              | [T] (Key) { (Key) -> T } -> (Value | T)
+    def delete: (K) -> V?
+              | [T] (K) { (K) -> T } -> (V | T)
 
     # <!--
     #   rdoc-file=weakmap.c
@@ -141,7 +141,7 @@ module ObjectSpace
     #     copy = cache.getkey({amount: 1, currency: 'USD'})
     #     copy.object_id == value.object_id #=> true
     #
-    def getkey: (untyped) -> Key?
+    def getkey: (untyped) -> K?
 
     # <!--
     #   rdoc-file=weakmap.c
@@ -161,6 +161,6 @@ module ObjectSpace
     # -->
     # Returns `true` if `key` is a key in `self`, otherwise `false`.
     #
-    def key?: (Key) -> bool
+    def key?: (K) -> bool
   end
 end
