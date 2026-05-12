@@ -63,6 +63,9 @@ jobs:
         if: ${{ contains(matrix.ruby, 'head') }}
         run: |
           bundle config set force_ruby_platform true
+      - name: Ignore Gemfile.lock's BUNDLED WITH on ruby-head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: bundle config set --local version system
       - name: Skip installing type checkers
         if: ${{ ! contains(matrix.job, 'typecheck_test') }}
         run: |
@@ -106,6 +109,9 @@ jobs:
         if: ${{ contains(matrix.ruby, 'head') }}
         run: |
           bundle config set force_ruby_platform true
+      - name: Ignore Gemfile.lock's BUNDLED WITH on ruby-head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: bundle config set --local version system
       - name: bin/setup
         run: |
           bin/setup
@@ -140,6 +146,9 @@ jobs:
         if: ${{ contains(matrix.ruby, 'head') }}
         run: |
           bundle config set force_ruby_platform true
+      - name: Ignore Gemfile.lock's BUNDLED WITH on ruby-head
+        if: ${{ contains(matrix.ruby, 'head') }}
+        run: bundle config set --local version system
       - name: bin/setup
         run: |
           bin/setup
