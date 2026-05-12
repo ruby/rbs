@@ -15,6 +15,7 @@ module RBS
           prefix_str = "# "
 
           ranges = [] #: Array[Range[Integer]]
+          byte_ranges = [] #: Array[Range[Integer]]
 
           comments.each do |comment|
             tuple = [comment, 2] #: [Prism::Comment, Integer]
@@ -25,12 +26,13 @@ module RBS
 
             offsets << tuple
 
-            start_char = comment.location.start_character_offset + tuple[1]
-            end_char = comment.location.end_character_offset
+            start_char = source_buffer.character_offset(comment.location.start_offset) + tuple[1]
+            end_char = source_buffer.character_offset(comment.location.end_offset)
             ranges << (start_char ... end_char)
+            byte_ranges << ((comment.location.start_offset + tuple[1]) ... comment.location.end_offset)
           end
 
-          @comment_buffer = source_buffer.sub_buffer(lines: ranges)
+          @comment_buffer = source_buffer.sub_buffer(lines: ranges, byte_lines_hint: byte_ranges)
         end
 
         def leading?
@@ -53,7 +55,7 @@ module RBS
 
         def line_starts
           offsets.map do |comment, prefix_size|
-            comment.location.start_character_offset + prefix_size
+            comment_buffer.character_offset(comment.location.start_offset) + prefix_size
           end
         end
 
