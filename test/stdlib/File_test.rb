@@ -6,6 +6,26 @@ class FileSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::File)"
 
+  def test_const_ALT_SEPARATOR
+    assert_const_type 'String?',
+                      'File::ALT_SEPARATOR'
+  end
+
+  def test_const_SEPARATOR
+    assert_const_type 'String',
+                      'File::SEPARATOR'
+  end
+
+  def test_const_Separator
+    assert_const_type 'String',
+                      'File::Separator'
+  end
+
+  def test_const_PATH_SEPARATOR
+    assert_const_type 'String',
+                      'File::PATH_SEPARATOR'
+  end
+
   def test_new
     assert_send_type "(String) -> File",
                      File, :new, File.expand_path(__FILE__)

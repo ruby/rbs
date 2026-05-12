@@ -17,7 +17,7 @@ class FileStatInstanceTest < Test::Unit::TestCase
   testing "::File::Stat"
 
   def test_spaceship
-    assert_send_type "(File::Stat) -> Integer",
+    assert_send_type "(File::Stat) -> (-1 | 0 | 1)",
                       File::Stat.new(File.expand_path(__FILE__)), :<=>, File::Stat.new(File.expand_path(__FILE__))
     assert_send_type "(untyped) -> nil",
                       File::Stat.new(File.expand_path(__FILE__)), :<=>, "not a File::Stat object"
@@ -65,12 +65,12 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_dev_major
-    assert_send_type "() -> Integer",
+    assert_send_type "() -> Integer?",
                       File::Stat.new(File.expand_path(__FILE__)), :dev_major
   end
 
   def test_dev_minor
-    assert_send_type "() -> Integer",
+    assert_send_type "() -> Integer?",
                       File::Stat.new(File.expand_path(__FILE__)), :dev_minor
   end
 
@@ -95,7 +95,7 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_ftype
-    assert_send_type "() -> String",
+    assert_send_type "() -> File::ftype",
                       File::Stat.new(File.expand_path(__FILE__)), :ftype
   end
 
@@ -150,12 +150,12 @@ class FileStatInstanceTest < Test::Unit::TestCase
   end
 
   def test_rdev_major
-    assert_send_type "() -> Integer",
+    assert_send_type "() -> Integer?",
                       File::Stat.new(File.expand_path(__FILE__)), :rdev_major
   end
 
   def test_rdev_minor
-    assert_send_type "() -> Integer",
+    assert_send_type "() -> Integer?",
                       File::Stat.new(File.expand_path(__FILE__)), :rdev_minor
   end
 
