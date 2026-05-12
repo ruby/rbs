@@ -35,6 +35,9 @@ jobs:
             bundled_gems = JSON.parse(res)["gems"].map{_1["gem"]}
             system "gem uninstall #{bundled_gems.join(" ")} --force", exception: true
           '
+      - name: Ignore Gemfile.lock's BUNDLED WITH on dev Ruby
+        if: ${{ matrix.ruby == 'ucrt' || matrix.ruby == 'mswin' }}
+        run: bundle config set --local version system
       - name: bundle install
         run: |
           bundle config set without profilers libs
