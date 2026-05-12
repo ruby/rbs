@@ -1,4 +1,4 @@
-#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+#line <%= __LINE__ + 1 %> "templates/src/<%= File.basename(__FILE__) %>"
 #include "rbs/ast.h"
 
 #include <stdio.h>
@@ -136,7 +136,7 @@ rbs_ast_symbol_t *RBS_NONNULL rbs_ast_symbol_new(rbs_allocator_t *RBS_NONNULL al
 }
 
 <%- nodes.each do |node| -%>
-#line <%= __LINE__ + 1 %> "prism/templates/src/<%= File.basename(__FILE__) %>"
+#line <%= __LINE__ + 1 %> "templates/src/<%= File.basename(__FILE__) %>"
 <%= node.c_type_name %> *RBS_NONNULL <%= node.c_constructor_function_name %>(<%= node.constructor_params.join(", ") %>) {
     <%= node.c_type_name %> *instance = rbs_allocator_alloc(allocator, <%= node.c_type_name %>);
 
