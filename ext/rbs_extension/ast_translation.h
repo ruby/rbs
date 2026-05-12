@@ -23,6 +23,10 @@ typedef struct rbs_translation_context {
     rbs_constant_pool_t *constant_pool;
     VALUE buffer;
     rb_encoding *encoding;
+
+    /// A reusable Hash used for calling `rb_class_new_instance_kw()` without allocating a new Hash each time.
+    /// It's vital that the various Nodes' `#initialize` methods take the kwarg values, but don't retain this reusable Hash.
+    VALUE reusable_kwargs_hash;
 } rbs_translation_context_t;
 
 rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *, VALUE buffer_string, rb_encoding *ruby_encoding);
