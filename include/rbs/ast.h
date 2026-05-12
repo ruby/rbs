@@ -941,12 +941,20 @@ typedef struct rbs_types_variable {
 
 typedef union rbs_ast_ruby_annotations {
     rbs_node_t base;
+    rbs_ast_ruby_annotations_block_param_type_annotation_t block_param_type_annotation;
+    rbs_ast_ruby_annotations_class_alias_annotation_t class_alias_annotation;
     rbs_ast_ruby_annotations_colon_method_type_annotation_t colon_method_type_annotation;
+    rbs_ast_ruby_annotations_double_splat_param_type_annotation_t double_splat_param_type_annotation;
+    rbs_ast_ruby_annotations_instance_variable_annotation_t instance_variable_annotation;
     rbs_ast_ruby_annotations_method_types_annotation_t method_types_annotation;
+    rbs_ast_ruby_annotations_module_alias_annotation_t module_alias_annotation;
+    rbs_ast_ruby_annotations_module_self_annotation_t module_self_annotation;
     rbs_ast_ruby_annotations_node_type_assertion_t node_type_assertion;
+    rbs_ast_ruby_annotations_param_type_annotation_t param_type_annotation;
     rbs_ast_ruby_annotations_return_type_annotation_t return_type_annotation;
     rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
-    rbs_ast_ruby_annotations_param_type_annotation_t param_type_annotation;
+    rbs_ast_ruby_annotations_splat_param_type_annotation_t splat_param_type_annotation;
+    rbs_ast_ruby_annotations_type_application_annotation_t type_application_annotation;
 } rbs_ast_ruby_annotations_t;
 
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.

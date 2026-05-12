@@ -108,12 +108,9 @@ typedef struct <%= node.c_name %> {
 <%- end -%>
 typedef union rbs_ast_ruby_annotations {
     rbs_node_t base;
-    rbs_ast_ruby_annotations_colon_method_type_annotation_t colon_method_type_annotation;
-    rbs_ast_ruby_annotations_method_types_annotation_t method_types_annotation;
-    rbs_ast_ruby_annotations_node_type_assertion_t node_type_assertion;
-    rbs_ast_ruby_annotations_return_type_annotation_t return_type_annotation;
-    rbs_ast_ruby_annotations_skip_annotation_t skip_annotation;
-    rbs_ast_ruby_annotations_param_type_annotation_t param_type_annotation;
+<%- annotation_nodes.each do |node| -%>
+    <%= node.c_type_name %> <%= node.c_name.delete_prefix("rbs_ast_ruby_annotations_") %>;
+<%- end -%>
 } rbs_ast_ruby_annotations_t;
 
 /// `rbs_ast_symbol_t` models user-defined identifiers like class names, method names, etc.
