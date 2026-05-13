@@ -1,0 +1,18 @@
+class ToAry[X]
+  @x: Array[X]
+  def initialize: (*X) -> void
+  def to_ary: () -> Array[X]
+end
+
+class Pair[X, Y]
+  @x: X
+  @y: Y
+
+  def initialize: (X, Y) -> void
+
+  def to_ary: () -> [X, Y]
+end
+
+class Test
+  def self.takes_pair: (Hash::_Pair[Integer, Rational]) -> Rational
+end
