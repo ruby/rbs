@@ -163,6 +163,8 @@ Inline RBS supports methods defined using the `def` syntax in Ruby.
 ```ruby
 class Calculator
   def add(x, y) = x+y
+
+  def self.zero = 0
 end
 ```
 
@@ -232,6 +234,18 @@ The type of both methods is `(Integer, Integer) -> Integer | (Float, Float) -> F
 > [!NOTE]
 > The `@rbs METHOD-TYPE` syntax allows overloads with the `|` operator, just like in RBS files.
 > Multiple `: METHOD-TYPE` declarations are required for overloads.
+
+The `#:` syntax can also be used as a trailing annotation to declare the return type of a method:
+
+```ruby
+class Calculator
+  def add(x, y) #: Integer
+    x + y
+  end
+
+  def subtract(x, y) = x - y #: Integer
+end
+```
 
 The `@rbs METHOD-TYPE` syntax allows having `...` at the last part.
 
@@ -337,9 +351,10 @@ end
 
 ### Current Limitations
 
-- Class methods and singleton methods are not supported
-- Only positional and keyword parameters are supported. Splat parameters (`*x`, `**y`) and block parameter (`&block`) are not supported yet.
 - Method visibility declaration is not supported yet
+- The `class << self` syntax is not supported
+- Top-level method definitions (outside any class/module) are not supported
+- Method definitions with a non-self receiver (e.g. `def obj.foo`) are not supported
 
 ## Attributes
 
@@ -417,6 +432,7 @@ The attribute definitions are ignored because the names are given by string lite
 ### Current Limitations
 
 - Attribute visibility is not supported yet. All attributes are _public_
+- Top-level attribute definitions (outside any class/module) are not supported
 
 ## Mixin
 
@@ -515,7 +531,7 @@ end
 ```
 
 The `@rbs @VAR-NAME: TYPE` syntax enclosed in `class`/`module` syntax declares instance variables.
-You can add the documentation of the variable followed by two hyphones (`--`).
+You can add the documentation of the variable followed by two hyphens (`--`).
 
 Instance variable declarations must be under the `class`/`module` syntax, and they are ignored if written inside method definitions.
 
@@ -547,14 +563,16 @@ The types of constants may be automatically inferred when the right-hand side co
 - **Floats**: `RATE = 3.14` → `Float`
 - **Booleans**: `ENABLED = true` → `bool`
 - **Strings**: `NAME = "test"` → `String`
-- **Symbols**: `STATUS = :ready` → `:ready`
+- **Symbols**: `STATUS = :ready` → `Symbol`
+- **Nil**: `EMPTY = nil` → `nil`
 
 ```ruby
 MAX_SIZE = 100           # Inferred as Integer
 PI = 3.14159            # Inferred as Float
 DEBUG = false           # Inferred as bool
 APP_NAME = "MyApp"      # Inferred as String
-DEFAULT_MODE = :strict  # Inferred as :strict
+DEFAULT_MODE = :strict  # Inferred as Symbol
+NONE = nil              # Inferred as nil
 ```
 
 ### Explicit Type Annotations
@@ -595,10 +613,22 @@ MyKernel = Kernel #: module-alias
 
 This creates new type names that refer to the same class or module as the original.
 
-The annotations can have optional type name to specify the class/module name, for the case it cannot be infered through the right-hand-side of the constant declaration.
+The annotations can have optional type name to specify the class/module name, for the case it cannot be inferred through the right-hand-side of the constant declaration.
 
 ```ruby
 MyObject = object #: class-alias Object
 
 MyKernel = kernel #: module-alias Kernel
+```
+
+## Skip Annotation
+
+The `@rbs skip` annotation makes inline RBS ignore the following declaration.
+
+```ruby
+class Calculator
+  # @rbs skip
+  def debug_internal
+  end
+end
 ```
