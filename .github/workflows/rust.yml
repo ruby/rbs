@@ -12,6 +12,9 @@ on:
 env:
   RUSTFLAGS: "-D warnings"
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: cargo:test
