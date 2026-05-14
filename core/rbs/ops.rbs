@@ -1,0 +1,154 @@
+module RBS
+  module Ops
+    # An interface for types implementing the `+` operator
+    interface _Add[O, R = self]
+      # Perform the `+` operation
+      def +: (O other) -> R
+    end
+
+    # An interface for types implementing the `-` operator
+    interface _Subtract[O, R = self]
+      # Perform the `-` operation
+      def -: (O other) -> R
+    end
+
+    # An interface for types implementing the `*` operator
+    interface _Times[O, R = self]
+      # Perform the `*` operation
+      def *: (O other) -> R
+    end
+
+    # An interface for types implementing the `/` operator
+    interface _Divide[O, R = self]
+      # Perform the `/` operation
+      def /: (O other) -> R
+    end
+
+    # An interface for types implementing the `%` operator
+    interface _Modulo[O, R = self]
+      # Perform the `%` operation
+      def %: (O other) -> R
+    end
+
+    # An interface for types implementing the `**` operator
+    interface _Power[O, R = self]
+      # Perform the `**` operation
+      def **: (O other) -> R
+    end
+
+    # An interface for types implementing the `<` operator
+    interface _LessThan[O, R = bool]
+      # Perform the `<` operation
+      def <: (O other) -> R
+    end
+
+    # An interface for types implementing the `>` operator
+    interface _GreaterThan[O, R = bool]
+      # Perform the `>` operation
+      def >: (O other) -> R
+    end
+
+    # An interface for types implementing the `<=` operator
+    interface _LessThanOrEqual[O, R = bool]
+      # Perform the `<=` operation
+      def <=: (O other) -> R
+    end
+
+    # An interface for types implementing the `>=` operator
+    interface _GreaterThanOrEqual[O, R = bool]
+      # Perform the `>=` operation
+      def >=: (O other) -> R
+    end
+
+    # An interface for types implementing the `<=>` operator
+    interface _Compare[O = untyped, R = (-1 | 0 | 1)?]
+      # Perform the `<=>` operation
+      def <=>: (O other) -> R
+    end
+
+    # An interface for types implementing the `&` operator
+    interface _And[O, R = self]
+      # Perform the `&` operation
+      def &: (O other) -> R
+    end
+
+    # An interface for types implementing the `|` operator
+    interface _Or[O, R = self]
+      # Perform the `|` operation
+      def |: (O other) -> R
+    end
+
+    # An interface for types implementing the `^` operator
+    interface _Xor[O, R = self]
+      # Perform the `^` operation
+      def ^: (O other) -> R
+    end
+
+    # An interface for types implementing the `<<` operator
+    interface _LeftShift[O, R = self]
+      # Perform the `<<` operation
+      def <<: (O other) -> R
+    end
+
+    # An interface for types implementing the `>>` operator
+    interface _RightShift[O, R = self]
+      # Perform the `>>` operation
+      def >>: (O other) -> R
+    end
+
+    # An interface for types implementing the `~` operator
+    interface _Not[R = self]
+      # Perform the `~` operation
+      def ~: () -> R
+    end
+
+    # An interface for types implementing the `+@` operator
+    interface _UnaryPos[R = self]
+      # Perform the `+@` operation
+      def +@: () -> R
+    end
+
+    # An interface for types implementing the `-@` operator
+    interface _UnaryNeg[R = self]
+      # Perform the `-@` operation
+      def -@: () -> R
+    end
+
+    # An interface for types implementing the `!` operator
+    interface _LogicalNot[R = bool]
+      # Perform the `!` operation
+      def !: () -> R
+    end
+
+    # An interface for types implementing the `==` operator
+    interface _Equal[O = untyped, R = bool]
+      # Perform the `==` operation
+      def ==: (O other) -> R
+    end
+
+    # An interface for types implementing the `===` operator
+    interface _CaseEqual[O, R = bool]
+      # Perform the `===` operation
+      def ===: (O other) -> R
+    end
+
+    # An interface for types implementing the `=~` operator
+    interface _Matches[O, R]
+      # Perform the `=~` operation
+      def =~: (O other) -> R
+    end
+
+    # An interface for types implementing the `!=` operator
+    interface _NotEqual[O = untyped, R = bool]
+      # Perform the `!=` operation
+      def !=: (O other) -> R
+    end
+
+    # An interface for types implementing the `!~` operator
+    interface _NotMatches[O, R = bool]
+      # Perform the `!~` operation
+      def !~: (O other) -> R
+    end
+  end
+end
+
