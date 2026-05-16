@@ -177,6 +177,30 @@ VALUE rbs_type_param_variance_to_ruby(enum rbs_type_param_variance value) {
     rb_class_new_instance(argc, argv, receiver)
 #endif
 
+// Route Namespace / TypeName construction through the Ruby-side
+// flyweight cache (`RBS::Namespace.[]` / `RBS::TypeName.[]`) so that
+// structurally equal values produced by the parser share canonical
+// instances. An in-C trie walk was tried but did not beat
+// `rb_funcallv` on Ruby 4.0+, where method dispatch is well optimized.
+static ID id_intern_brackets;
+
+static inline ID intern_brackets(void) {
+    if (!id_intern_brackets) id_intern_brackets = rb_intern("[]");
+    return id_intern_brackets;
+}
+
+static VALUE rbs_intern_namespace(rbs_translation_context_t ctx, rbs_namespace_t *node) {
+    VALUE args[2];
+    args[0] = rbs_node_list_to_ruby_array(ctx, node->path);
+    args[1] = node->absolute ? Qtrue : Qfalse;
+    return rb_funcallv(RBS_Namespace, intern_brackets(), 2, args);
+}
+
+static VALUE rbs_intern_type_name(VALUE namespace, VALUE name) {
+    VALUE args[2] = { namespace, name };
+    return rb_funcallv(RBS_TypeName, intern_brackets(), 2, args);
+}
+
 VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instance) {
     if (instance == NULL) return Qnil;
 
@@ -1378,19 +1402,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         return CLASS_NEW_INSTANCE(RBS_MethodType, 1, &h);
     }
     case RBS_NAMESPACE: {
-        rbs_namespace_t *node = (rbs_namespace_t *) instance;
-
-        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
-        VALUE arg_path = rbs_node_list_to_ruby_array(ctx, node->path);
-        VALUE arg_absolute = node->absolute ? Qtrue : Qfalse;
-
-        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
-        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
-        VALUE h = ctx.reusable_kwargs_hash;
-        rb_hash_clear(h);
-        rb_hash_aset(h, ID2SYM(rb_intern("path")), arg_path);
-        rb_hash_aset(h, ID2SYM(rb_intern("absolute")), arg_absolute);
-        return CLASS_NEW_INSTANCE(RBS_Namespace, 1, &h);
+        return rbs_intern_namespace(ctx, (rbs_namespace_t *) instance);
     }
     case RBS_SIGNATURE: {
         rbs_signature_t *signature = (rbs_signature_t *) instance;
@@ -1402,18 +1414,9 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
     }
     case RBS_TYPE_NAME: {
         rbs_type_name_t *node = (rbs_type_name_t *) instance;
-
-        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
-        VALUE arg_namespace = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->rbs_namespace); // rbs_namespace
-        VALUE arg_name = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name);               // rbs_ast_symbol
-
-        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
-        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
-        VALUE h = ctx.reusable_kwargs_hash;
-        rb_hash_clear(h);
-        rb_hash_aset(h, ID2SYM(rb_intern("namespace")), arg_namespace);
-        rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
-        return CLASS_NEW_INSTANCE(RBS_TypeName, 1, &h);
+        VALUE ns = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->rbs_namespace);
+        VALUE name = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name);
+        return rbs_intern_type_name(ns, name);
     }
     case RBS_TYPES_ALIAS: {
         rbs_types_alias_t *node = (rbs_types_alias_t *) instance;

@@ -28,6 +28,21 @@ module RBS
     #
     def initialize: (namespace: Namespace, name: Symbol) -> void
 
+    @hash: Integer?
+
+    self.@intern_mutex: Mutex
+
+    # Two-level Hash keyed by canonical Namespace identity (outer uses
+    # `compare_by_identity`) and name Symbol.
+    self.@intern_cache: Hash[Namespace, Hash[Symbol, TypeName]]
+
+    # Returns an interned `TypeName` instance.
+    #
+    # The given `namespace` is canonicalized so cached instances always hold an
+    # interned namespace. Subsequent calls with structurally equal arguments
+    # return the same object.
+    def self.[]: (Namespace namespace, Symbol name) -> TypeName
+
     def ==: (untyped other) -> bool
 
     def hash: () -> Integer

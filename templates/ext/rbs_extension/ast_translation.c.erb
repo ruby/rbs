@@ -114,6 +114,30 @@ VALUE <%= enum.translator_name %>(<%= enum.c_type_name %> value) {
     rb_class_new_instance(argc, argv, receiver)
 #endif
 
+// Route Namespace / TypeName construction through the Ruby-side
+// flyweight cache (`RBS::Namespace.[]` / `RBS::TypeName.[]`) so that
+// structurally equal values produced by the parser share canonical
+// instances. An in-C trie walk was tried but did not beat
+// `rb_funcallv` on Ruby 4.0+, where method dispatch is well optimized.
+static ID id_intern_brackets;
+
+static inline ID intern_brackets(void) {
+    if (!id_intern_brackets) id_intern_brackets = rb_intern("[]");
+    return id_intern_brackets;
+}
+
+static VALUE rbs_intern_namespace(rbs_translation_context_t ctx, rbs_namespace_t *node) {
+    VALUE args[2];
+    args[0] = rbs_node_list_to_ruby_array(ctx, node->path);
+    args[1] = node->absolute ? Qtrue : Qfalse;
+    return rb_funcallv(RBS_Namespace, intern_brackets(), 2, args);
+}
+
+static VALUE rbs_intern_type_name(VALUE namespace, VALUE name) {
+    VALUE args[2] = { namespace, name };
+    return rb_funcallv(RBS_TypeName, intern_brackets(), 2, args);
+}
+
 VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instance) {
     if (instance == NULL) return Qnil;
 
@@ -152,6 +176,15 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->directives));
         rb_ary_push(array, rbs_node_list_to_ruby_array(ctx, signature->declarations));
         return array;
+
+        <%- when "RBS::Namespace" -%>
+        return rbs_intern_namespace(ctx, (rbs_namespace_t *) instance);
+
+        <%- when "RBS::TypeName" -%>
+        rbs_type_name_t *node = (rbs_type_name_t *) instance;
+        VALUE ns = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->rbs_namespace);
+        VALUE name = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name);
+        return rbs_intern_type_name(ns, name);
         <%- else -%>
         <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
 

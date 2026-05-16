@@ -29,11 +29,9 @@ module RBS
         new(all_names, aliases)
       end
 
-      def try_cache(query)
-        cache.fetch(query) do
-          result = yield
-          cache[query] = result
-        end
+      def try_cache(type_name, context)
+        inner = cache[context] ||= {}
+        inner.fetch(type_name) { inner[type_name] = yield }
       end
 
       def resolve(type_name, context:)
@@ -41,7 +39,7 @@ module RBS
           return type_name
         end
 
-        try_cache([type_name, context]) do
+        try_cache(type_name, context) do
           if type_name.class?
             resolve_namespace0(type_name, context, Set.new) || nil
           else
@@ -51,7 +49,7 @@ module RBS
               resolve_type_name(type_name.name, context)
             else
               if namespace = resolve_namespace0(namespace.to_type_name, context, Set.new)
-                type_name = TypeName.new(name: type_name.name, namespace: namespace.to_namespace)
+                type_name = TypeName[namespace.to_namespace, type_name.name]
                 has_type_name?(type_name)
               end
             end
@@ -68,7 +66,7 @@ module RBS
           raise "Type name must be a class name: #{type_name}"
         end
 
-        try_cache([type_name, context]) do
+        try_cache(type_name, context) do
           ns = resolve_namespace0(type_name, context, Set.new) or return ns
         end
       end
@@ -93,10 +91,10 @@ module RBS
             resolve_type_name(type_name, outer)
           else
             has_type_name?(inner) or raise "Context must be normalized: #{inner.inspect}"
-            has_type_name?(TypeName.new(name: type_name, namespace: inner.to_namespace)) || resolve_type_name(type_name, outer)
+            has_type_name?(TypeName[inner.to_namespace, type_name]) || resolve_type_name(type_name, outer)
           end
         else
-          type_name = TypeName.new(name: type_name, namespace: Namespace.root)
+          type_name = TypeName[Namespace.root, type_name]
           has_type_name?(type_name)
         end
       end
@@ -109,11 +107,11 @@ module RBS
             resolve_head_namespace(head, outer)
           when TypeName
             has_type_name?(inner) or raise "Context must be normalized: #{inner.inspect}"
-            type_name = TypeName.new(name: head, namespace: inner.to_namespace)
+            type_name = TypeName[inner.to_namespace, head]
             has_type_name?(type_name) || aliased_name?(type_name) || resolve_head_namespace(head, outer)
           end
         else
-          type_name = TypeName.new(name: head, namespace: Namespace.root)
+          type_name = TypeName[Namespace.root, head]
           has_type_name?(type_name) || aliased_name?(type_name)
         end
       end
@@ -140,7 +138,7 @@ module RBS
 
         head =
           if type_name.absolute?
-            root_name = TypeName.new(name: head, namespace: Namespace.root)
+            root_name = TypeName[Namespace.root, head]
             has_type_name?(root_name) || aliased_name?(root_name)
           else
             resolve_head_namespace(head, context)
@@ -152,7 +150,7 @@ module RBS
           end
 
           tail.inject(head) do |namespace, name|
-            type_name = TypeName.new(name: name, namespace: namespace.to_namespace)
+            type_name = TypeName[namespace.to_namespace, name]
             case
             when has_type_name?(type_name)
               type_name
