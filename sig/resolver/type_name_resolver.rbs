@@ -6,8 +6,6 @@ module RBS
     # It just ignores included modules and super classes.
     #
     class TypeNameResolver
-      type query = [TypeName, context]
-
       def initialize: (Set[TypeName] all_names, Hash[TypeName, [TypeName, context]] aliases) -> void
 
       def self.build: (Environment) -> instance
@@ -32,7 +30,7 @@ module RBS
 
       attr_reader aliases: Hash[TypeName, [TypeName, context]]
 
-      attr_reader cache: Hash[query, TypeName?]
+      attr_reader cache: Hash[context, Hash[TypeName, TypeName?]]
 
       # Returns the type name if it exists in `all_names` (normalized)
       #
@@ -42,7 +40,7 @@ module RBS
       #
       def aliased_name?: (TypeName) -> TypeName?
 
-      def try_cache: (query) { () -> TypeName? } -> TypeName?
+      def try_cache: (TypeName, context) { () -> TypeName? } -> TypeName?
 
       # Translates the head module name in the context and returns an absolute type name
       #

@@ -40,9 +40,29 @@ module RBS
 
     @parent: Namespace?
 
+    @hash: Integer?
+
     self.@root: Namespace?
 
     self.@empty: Namespace?
+
+    self.@intern_mutex: Mutex
+
+    # Per-`absolute` flag tries of nested Hashes keyed on path Symbols,
+    # with the cached Namespace stored under the `INTERN_LEAF` sentinel
+    # at each path's terminal node.
+    self.@intern_trie_absolute: Hash[Symbol | Module, untyped]
+
+    self.@intern_trie_relative: Hash[Symbol | Module, untyped]
+
+    INTERN_LEAF: Module
+
+    # Returns an interned `Namespace` instance.
+    #
+    # Subsequent calls with structurally equal `path` and `absolute` arguments
+    # return the same object. The internal `path` array is duplicated and
+    # frozen before being cached.
+    def self.[]: (Array[Symbol] path, boolish absolute) -> Namespace
 
     # Returns new _empty_ namespace.
     def self.empty: () -> Namespace

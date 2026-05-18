@@ -22,14 +22,40 @@ module RBS
               end
     end
 
+    # Process-wide flyweight cache. Two-level Hash keyed by canonical
+    # Namespace identity (outer uses `compare_by_identity`) and name
+    # Symbol.
+    @intern_mutex = Mutex.new
+    @intern_cache = {}  #: Hash[Namespace, Hash[Symbol, TypeName]]
+    @intern_cache.compare_by_identity
+
+    # Returns a canonical `TypeName` instance for the given `namespace` /
+    # `name` pair. The namespace is canonicalized through `Namespace.[]`
+    # so identity-based lookup works regardless of the caller passing a
+    # fresh `Namespace.new` or an already-interned instance.
+    def self.[](namespace, name)
+      ns = Namespace[namespace.path, namespace.absolute?]
+
+      inner = @intern_cache[ns]
+      if inner && (cached = inner[name])
+        return cached
+      end
+
+      @intern_mutex.synchronize do
+        inner = (@intern_cache[ns] ||= {})
+        inner[name] ||= new(namespace: ns, name: name)
+      end
+    end
+
     def ==(other)
+      return true if equal?(other)
       other.is_a?(self.class) && other.namespace == namespace && other.name == name
     end
 
     alias eql? ==
 
     def hash
-      namespace.hash ^ name.hash
+      @hash ||= namespace.hash ^ name.hash
     end
 
     def to_s
@@ -53,7 +79,7 @@ module RBS
     end
 
     def absolute!
-      self.class.new(namespace: namespace.absolute!, name: name)
+      TypeName[namespace.absolute!, name]
     end
 
     def absolute?
@@ -61,7 +87,7 @@ module RBS
     end
 
     def relative!
-      self.class.new(namespace: namespace.relative!, name: name)
+      TypeName[namespace.relative!, name]
     end
 
     def interface?
@@ -69,7 +95,7 @@ module RBS
     end
 
     def with_prefix(namespace)
-      self.class.new(namespace: namespace + self.namespace, name: name)
+      TypeName[namespace + self.namespace, name]
     end
 
     def split
@@ -80,23 +106,17 @@ module RBS
       if other.absolute?
         other
       else
-        TypeName.new(
-          namespace: self.to_namespace + other.namespace,
-          name: other.name
-        )
+        TypeName[self.to_namespace + other.namespace, other.name]
       end
     end
-    
+
     def self.parse(string)
       absolute = string.start_with?("::")
 
       *path, name = string.delete_prefix("::").split("::").map(&:to_sym)
       raise unless name
 
-      TypeName.new(
-        name: name,
-        namespace: RBS::Namespace.new(path: path, absolute: absolute)
-      )
+      TypeName[Namespace[path, absolute], name]
     end
   end
 end

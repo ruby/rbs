@@ -173,7 +173,7 @@ module RBS
           unless type_name.namespace.empty?
             parent = type_name.namespace.to_type_name
             normalized_parent = normalize_module_name?(parent) or return
-            constant_name = TypeName.new(name: type_name.name, namespace: normalized_parent.to_namespace)
+            constant_name = TypeName[normalized_parent.to_namespace, type_name.name]
             constant_decls.fetch(constant_name, nil)
           end
         end
@@ -193,7 +193,7 @@ module RBS
           parent = normalize_module_name?(parent)
           return parent unless parent
 
-          TypeName.new(namespace: parent.to_namespace, name: name.name)
+          TypeName[parent.to_namespace, name.name]
         else
           name
         end

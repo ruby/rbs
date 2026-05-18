@@ -9,30 +9,65 @@ module RBS
       @absolute = absolute ? true : false
     end
 
+    # Process-wide flyweight cache. Two tries (one per `absolute` flag)
+    # keyed on path Symbols, with the cached Namespace stored under the
+    # `INTERN_LEAF` sentinel at each path's terminal node.
+    @intern_mutex = Mutex.new
+    @intern_trie_absolute = {}
+    @intern_trie_relative = {}
+    INTERN_LEAF = Module.new
+
+    # Returns a canonical `Namespace` instance for the given `path` /
+    # `absolute` pair. Repeated calls with structurally equal arguments
+    # return the same object, so callers can rely on `equal?` for fast
+    # equality. The path Array is duplicated and frozen on insert.
+    def self.[](path, absolute)
+      absolute = absolute ? true : false
+
+      # Lock-free fast path.
+      node = absolute ? @intern_trie_absolute : @intern_trie_relative
+      path.each do |sym|
+        node = node[sym]
+        break unless node
+      end
+      if node && (cached = node[INTERN_LEAF])
+        return cached
+      end
+
+      @intern_mutex.synchronize do
+        node = absolute ? @intern_trie_absolute : @intern_trie_relative
+        path.each { |sym| node = (node[sym] ||= {}) }
+        node[INTERN_LEAF] ||= begin
+          frozen_path = path.frozen? ? path : path.dup.freeze
+          new(path: frozen_path, absolute: absolute)
+        end
+      end
+    end
+
     def self.empty
-      @empty ||= new(path: [], absolute: false)
+      @empty ||= self[[], false]
     end
 
     def self.root
-      @root ||= new(path: [], absolute: true)
+      @root ||= self[[], true]
     end
 
     def +(other)
       if other.absolute?
         other
       else
-        self.class.new(path: path + other.path, absolute: absolute?)
+        Namespace[path + other.path, absolute?]
       end
     end
 
     def append(component)
-      self.class.new(path: path + [component], absolute: absolute?)
+      Namespace[path + [component], absolute?]
     end
 
     def parent
       @parent ||= begin
         raise "Parent with empty namespace" if empty?
-        self.class.new(path: path.take(path.size - 1), absolute: absolute?)
+        Namespace[path.take(path.size - 1), absolute?]
       end
     end
 
@@ -45,11 +80,11 @@ module RBS
     end
 
     def absolute!
-      self.class.new(path: path, absolute: true)
+      Namespace[path, true]
     end
 
     def relative!
-      self.class.new(path: path, absolute: false)
+      Namespace[path, false]
     end
 
     def empty?
@@ -57,13 +92,14 @@ module RBS
     end
 
     def ==(other)
+      return true if equal?(other)
       other.is_a?(Namespace) && other.path == path && other.absolute? == absolute?
     end
 
     alias eql? ==
 
     def hash
-      path.hash ^ absolute?.hash
+      @hash ||= path.hash ^ absolute?.hash
     end
 
     def split
@@ -87,14 +123,14 @@ module RBS
       raise unless name
       raise unless parent
 
-      TypeName.new(name: name, namespace: parent)
+      TypeName[parent, name]
     end
 
     def self.parse(string)
       if string.start_with?("::")
-        new(path: string.split("::").drop(1).map(&:to_sym), absolute: true)
+        self[string.split("::").drop(1).map(&:to_sym), true]
       else
-        new(path: string.split("::").map(&:to_sym), absolute: false)
+        self[string.split("::").map(&:to_sym), false]
       end
     end
 
