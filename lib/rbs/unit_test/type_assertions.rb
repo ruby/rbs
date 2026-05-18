@@ -180,11 +180,11 @@ module RBS
           )
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
-          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
+          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, proc { "Call trace does not match with given method type: #{trace.inspect}" }
 
           method_defs = method_defs(method)
           all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
-          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
+          assert all_errors.any? {|es| es.empty? }, proc { "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}" }
 
           raise exception if exception
 
