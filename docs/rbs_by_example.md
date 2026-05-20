@@ -107,14 +107,14 @@ end
 For now, it's safe to ignore them, but they're included for completeness.
 
 ```rbs
-class Array[Elem]
+class Array[E]
   def *: (String) -> String
-       | (Integer) -> Array[Elem]
+       | (Integer) -> Array[E]
 end
 ```
 
 `Array`'s `*` method, when given a `String` returns a `String`. When given an
-`Integer`, it returns an `Array` of the same contained type `Elem` (in our example case, `Elem` corresponds to `Integer`).
+`Integer`, it returns an `Array` of the same contained type `E` (in our example case, `E` corresponds to `Integer`).
 
 ### Union types
 
@@ -150,9 +150,9 @@ end
 ```
 
 ```rbs
-class Enumerable[Elem]
-  def first: () -> Elem?
-           | (Integer) -> Array[Elem]
+class Enumerable[E]
+  def first: () -> E?
+           | (Integer) -> Array[E]
 end
 ```
 
@@ -160,12 +160,12 @@ end
 
 When called with no arguments, the return value will either be an instance of
 whatever type is contained in the enumerable, or `nil`. We represent that with
-the type variable `Elem`, and the `?` suffix nilable marker.
+the type variable `E`, and the `?` suffix nilable marker.
 
 When called with an `Integer` positional argument, the return value will be an
 `Array` of whatever type is contained.
 
-The `?` syntax is a convenient shorthand for a union with nil. An equivalent union type would be `(Elem | nil)`.
+The `?` syntax is a convenient shorthand for a union with nil. An equivalent union type would be `(E | nil)`.
 
 ### Keyword Arguments
 
@@ -222,9 +222,9 @@ end
 ```
 
 ```rbs
-class Array[Elem]
-  def filter: () { (Elem) -> boolish } -> ::Array[Elem]
-            | () -> ::Enumerator[Elem, ::Array[Elem]]
+class Array[E]
+  def filter: () { (E) -> boolish } -> ::Array[E]
+            | () -> ::Enumerator[E, ::Array[E]]
 end
 ```
 
@@ -264,13 +264,13 @@ a.collect.with_index {|x, i| x * i}
 ```
 
 ```rbs
-class Array[Elem]
-  def collect: [U] () { (Elem) -> U } -> Array[U]
-             | () -> Enumerator[Elem, Array[untyped]]
+class Array[E]
+  def collect: [U] () { (E) -> U } -> Array[U]
+             | () -> Enumerator[E, Array[untyped]]
 end
 ```
 
-Type variables can also be introduced in methods. Here, in `Array`'s `#collect` method, we introduce a type variable `U`. The block passed to `#collect` will receive a parameter of type `Elem`, and return a value of type `U`. Then `#collect` will return an `Array` of type `U`.
+Type variables can also be introduced in methods. Here, in `Array`'s `#collect` method, we introduce a type variable `U`. The block passed to `#collect` will receive a parameter of type `E`, and return a value of type `U`. Then `#collect` will return an `Array` of type `U`.
 
 In this example, the method receives its signature from the inferred return type of the passed block. When then block is absent, as in when the method returns an `Enumerator`, we can't infer the type, and so the return value of the enumerator can only be described as `Array[untyped]`.
 
@@ -284,9 +284,9 @@ In this example, the method receives its signature from the inferred return type
 ```
 
 ```rbs
-class Enumerable[Elem]
-  def partition: () { (Elem) -> boolish } -> [Array[Elem], Array[Elem]]
-               | () -> ::Enumerator[Elem, [Array[Elem], Array[Elem] ]]
+class Enumerable[E]
+  def partition: () { (E) -> boolish } -> [Array[E], Array[E]]
+               | () -> ::Enumerator[E, [Array[E], Array[E] ]]
 end
 ```
 
@@ -300,9 +300,9 @@ Tuples can be of any size, and they can have mixed types.
 ```
 
 ```rbs
-class Enumerable[Elem]
+class Enumerable[E]
   def to_h: () -> ::Hash[untyped, untyped]
-          | [T, U] () { (Elem) -> [T, U] } -> ::Hash[T, U]
+          | [T, U] () { (E) -> [T, U] } -> ::Hash[T, U]
 end
 ```
 

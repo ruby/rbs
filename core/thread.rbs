@@ -1604,7 +1604,7 @@ end
 #
 #     consumer.join
 #
-class Thread::Queue[Elem = untyped] < Object
+class Thread::Queue[E = untyped] < Object
   # <!-- rdoc-file=thread_sync.c -->
   # Pushes the given `object` to the queue.
   #
@@ -1719,7 +1719,7 @@ class Thread::Queue[Elem = untyped] < Object
   # If `timeout` seconds have passed and no data is available `nil` is returned.
   # If `timeout` is `0` it returns immediately.
   #
-  def pop: (?boolish non_block, ?timeout: _ToF?) -> Elem?
+  def pop: (?boolish non_block, ?timeout: _ToF?) -> E?
 
   # <!--
   #   rdoc-file=thread_sync.c
@@ -1729,7 +1729,7 @@ class Thread::Queue[Elem = untyped] < Object
   # -->
   # Pushes the given `object` to the queue.
   #
-  def push: (Elem obj) -> void
+  def push: (E obj) -> void
 
   # <!--
   #   rdoc-file=thread_sync.rb
@@ -1750,7 +1750,7 @@ end
 #
 # See Thread::Queue for an example of how a Thread::SizedQueue works.
 #
-class Thread::SizedQueue[Elem = untyped] < Thread::Queue[Elem]
+class Thread::SizedQueue[E = untyped] < Thread::Queue[E]
   # <!--
   #   rdoc-file=thread_sync.rb
   #   - <<(object, non_block = false, timeout: nil)
@@ -1813,8 +1813,8 @@ class Thread::SizedQueue[Elem = untyped] < Thread::Queue[Elem]
   # If `timeout` seconds have passed and no space is available `nil` is returned.
   # If `timeout` is `0` it returns immediately. Otherwise it returns `self`.
   #
-  def push: (Elem obj, ?boolish non_block) -> void
-          | (Elem obj, timeout: _ToF?) -> self?
+  def push: (E obj, ?boolish non_block) -> void
+          | (E obj, timeout: _ToF?) -> self?
 end
 
 class ConditionVariable = Thread::ConditionVariable

@@ -170,12 +170,12 @@ interface _Inspect
   def inspect: () -> String
 end
 
-interface _Each[out E, out R = void]
-  def each: () { (E) -> void } -> R
+interface _Each[out T, out R = void]
+  def each: () { (T) -> void } -> R
 end
 
-interface _EachEntry[out E]
-  def each_entry: () { (E) -> void } -> self
+interface _EachEntry[out T]
+  def each_entry: () { (T) -> void } -> self
 end
 
 interface _Reader

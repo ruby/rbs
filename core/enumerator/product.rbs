@@ -1,5 +1,5 @@
 %a{annotate:rdoc:skip}
-class Enumerator[unchecked out Elem, out Return = void]
+class Enumerator[unchecked out E, out R = void]
   # <!-- rdoc-file=enumerator.c -->
   # Enumerator::Product generates a Cartesian product of any number of enumerable
   # objects.  Iterating over the product of enumerable objects is roughly
@@ -30,7 +30,7 @@ class Enumerator[unchecked out Elem, out Return = void]
   #
   # This type of objects can be created by Enumerator.product.
   #
-  class Product[unchecked out Elem] < Enumerator[Array[Elem], Product[Elem]]
+  class Product[unchecked out E] < Enumerator[Array[E], Product[E]]
     # <!--
     #   rdoc-file=enumerator.c
     #   - Enumerator::Product.new(*enums) -> enum
@@ -42,7 +42,7 @@ class Enumerator[unchecked out Elem, out Return = void]
     #     e.to_a #=> [[1, 4], [1, 5], [2, 4], [2, 5], [3, 4], [3, 5]]
     #     e.size #=> 6
     #
-    def initialize: (*_EachEntry[Elem]) -> void
+    def initialize: (*_EachEntry[E]) -> void
 
     # <!--
     #   rdoc-file=enumerator.c
@@ -55,7 +55,7 @@ class Enumerator[unchecked out Elem, out Return = void]
     #
     # If no block is given, returns an enumerator.  Otherwise, returns self.
     #
-    def each: () { (Array[Elem]) -> void } -> self
+    def each: () { (Array[E]) -> void } -> self
 
     # <!--
     #   rdoc-file=enumerator.c
@@ -87,6 +87,6 @@ class Enumerator[unchecked out Elem, out Return = void]
 
     private
 
-    def initialize_copy: (Product[Elem]) -> void
+    def initialize_copy: (Product[E]) -> void
   end
 end
