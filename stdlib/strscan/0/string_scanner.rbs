@@ -498,7 +498,7 @@ class StringScanner
   # scanner[0]           # => nil
   # scanner[1]           # => nil
   #
-  def []: (Integer) -> String?
+  def []: (Integer | String | Symbol) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
