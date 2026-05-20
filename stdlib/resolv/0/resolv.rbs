@@ -134,7 +134,7 @@ class Resolv
   # DNS resolver.  If `resolvers` is a hash, uses the hash as configuration for
   # the DNS resolver.
   #
-  def initialize: (?Resolv::Hosts | Resolv::DNS resolvers) -> untyped
+  def initialize: (?(Array[Resolv::Hosts | Resolv::DNS] | Hash[Symbol, untyped])? resolvers, ?use_ipv6: bool?) -> untyped
 end
 
 # <!-- rdoc-file=lib/resolv.rb -->
