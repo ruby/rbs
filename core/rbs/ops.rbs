@@ -1,37 +1,37 @@
 module RBS
   module Ops
     # An interface for types implementing the `+` operator
-    interface _Add[O, R = self]
+    interface _Add[O, R]
       # Perform the `+` operation
       def +: (O other) -> R
     end
 
     # An interface for types implementing the `-` operator
-    interface _Subtract[O, R = self]
+    interface _Subtract[O, R]
       # Perform the `-` operation
       def -: (O other) -> R
     end
 
     # An interface for types implementing the `*` operator
-    interface _Times[O, R = self]
+    interface _Times[O, R]
       # Perform the `*` operation
       def *: (O other) -> R
     end
 
     # An interface for types implementing the `/` operator
-    interface _Divide[O, R = self]
+    interface _Divide[O, R]
       # Perform the `/` operation
       def /: (O other) -> R
     end
 
     # An interface for types implementing the `%` operator
-    interface _Modulo[O, R = self]
+    interface _Modulo[O, R]
       # Perform the `%` operation
       def %: (O other) -> R
     end
 
     # An interface for types implementing the `**` operator
-    interface _Power[O, R = self]
+    interface _Power[O, R]
       # Perform the `**` operation
       def **: (O other) -> R
     end
@@ -67,49 +67,49 @@ module RBS
     end
 
     # An interface for types implementing the `&` operator
-    interface _And[O, R = self]
+    interface _And[O, R]
       # Perform the `&` operation
       def &: (O other) -> R
     end
 
     # An interface for types implementing the `|` operator
-    interface _Or[O, R = self]
+    interface _Or[O, R]
       # Perform the `|` operation
       def |: (O other) -> R
     end
 
     # An interface for types implementing the `^` operator
-    interface _Xor[O, R = self]
+    interface _Xor[O, R]
       # Perform the `^` operation
       def ^: (O other) -> R
     end
 
     # An interface for types implementing the `<<` operator
-    interface _LeftShift[O, R = self]
+    interface _LeftShift[O, R]
       # Perform the `<<` operation
       def <<: (O other) -> R
     end
 
     # An interface for types implementing the `>>` operator
-    interface _RightShift[O, R = self]
+    interface _RightShift[O, R]
       # Perform the `>>` operation
       def >>: (O other) -> R
     end
 
     # An interface for types implementing the `~` operator
-    interface _Not[R = self]
+    interface _Not[R]
       # Perform the `~` operation
       def ~: () -> R
     end
 
     # An interface for types implementing the `+@` operator
-    interface _UnaryPos[R = self]
+    interface _UnaryPos[R]
       # Perform the `+@` operation
       def +@: () -> R
     end
 
     # An interface for types implementing the `-@` operator
-    interface _UnaryNeg[R = self]
+    interface _UnaryNeg[R]
       # Perform the `-@` operation
       def -@: () -> R
     end
