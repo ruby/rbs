@@ -677,14 +677,6 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
-  #   - clear()
-  # -->
-  # Equivalent to #terminate. This method is obsolete; use #terminate instead.
-  #
-  def clear: () -> void
-
-  # <!--
-  #   rdoc-file=ext/strscan/strscan.c
   #   - concat(more_string) -> self
   # -->
   # *   Appends the given `more_string`
@@ -705,14 +697,6 @@ class StringScanner
   # #   rest_size: 6
   #
   alias concat <<
-
-  # <!--
-  #   rdoc-file=ext/strscan/strscan.c
-  #   - empty?()
-  # -->
-  # Equivalent to #eos?. This method is obsolete, use #eos? instead.
-  #
-  def empty?: () -> bool
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -817,14 +801,6 @@ class StringScanner
   # [scanner.get_byte, scanner.pos, scanner.charpos] # => [nil, 15, 5]
   #
   def get_byte: () -> String?
-
-  # <!--
-  #   rdoc-file=ext/strscan/strscan.c
-  #   - getbyte()
-  # -->
-  # Equivalent to #get_byte. This method is obsolete; use #get_byte instead.
-  #
-  def getbyte: () -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1011,14 +987,6 @@ class StringScanner
   # scanner.peek(3)   # => ""
   #
   def peek: (Integer) -> String
-
-  # <!--
-  #   rdoc-file=ext/strscan/strscan.c
-  #   - peep(p1)
-  # -->
-  # Equivalent to #peek. This method is obsolete; use #peek instead.
-  #
-  def peep: (Integer) -> String
 
   # <!-- rdoc-file=ext/strscan/strscan.c -->
   # call-seq:
@@ -1216,15 +1184,6 @@ class StringScanner
   # scanner.rest_size # => 0
   #
   def rest_size: () -> Integer
-
-  # <!--
-  #   rdoc-file=ext/strscan/strscan.c
-  #   - restsize()
-  # -->
-  # `s.restsize` is equivalent to `s.rest_size`. This method is obsolete; use
-  # #rest_size instead.
-  #
-  def restsize: () -> Integer
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
