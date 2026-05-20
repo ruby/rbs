@@ -486,8 +486,7 @@ class Hash[unchecked out K, unchecked out V]
     def to_ary: () -> [ K, V ]
   end
 
-  # Interface for comparing equality of types.
-  #
+  %a{deprecated: Use RBS::Ops::_Equals}
   interface _Equals
     def ==: (untyped other) -> boolish
   end
@@ -770,7 +769,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def assoc: (_Equals key) -> [ K, V ]?
+  def assoc: (RBS::Ops::_Equals key) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
@@ -1403,7 +1402,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def key: (_Equals) -> K?
+  def key: (RBS::Ops::_Equals) -> K?
 
   # <!-- rdoc-file=hash.c -->
   # Returns whether `key` is a key in `self`:
@@ -1556,7 +1555,7 @@ class Hash[unchecked out K, unchecked out V]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
-  def rassoc: (_Equals value) -> [ K, V ]?
+  def rassoc: (RBS::Ops::_Equals value) -> [ K, V ]?
 
   # <!--
   #   rdoc-file=hash.c
