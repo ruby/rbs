@@ -125,6 +125,13 @@ pub enum SymbolTag {}
 /// string bytes.
 pub type SymbolId = Id<SymbolTag>;
 
+/// Tag for IDs produced by the type-name interner.
+pub enum TypeNameTag {}
+
+/// Identifier for an interned type name. Content-addressed: derived from
+/// the parent type name's hash and the last segment's hash.
+pub type TypeName = Id<TypeNameTag>;
+
 #[cfg(test)]
 mod tests {
     use super::*;
