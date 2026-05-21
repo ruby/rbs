@@ -118,6 +118,13 @@ impl<T> std::fmt::Debug for Id<T> {
     }
 }
 
+/// Tag for IDs produced by the string interner.
+pub enum SymbolTag {}
+
+/// Identifier for an interned string. Content-addressed: `xxh3_64` of the
+/// string bytes.
+pub type SymbolId = Id<SymbolTag>;
+
 #[cfg(test)]
 mod tests {
     use super::*;
