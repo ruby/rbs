@@ -77,6 +77,8 @@ module RBS
       attr_accessor :outline
 
       def initialize(patterns:, env:, merge:, todo: false, owners_included: [])
+        Kernel.warn("RBS::Prototype::Runtime is deprecated. See https://github.com/ruby/rbs/issues/2841")
+
         @patterns = patterns
         @decls = nil
         @modules = {}

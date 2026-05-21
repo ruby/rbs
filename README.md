@@ -122,7 +122,7 @@ This is only a starting point, and you should edit the output to match your sign
 
 - `rb` generates from just the available Ruby code
 - `rbi` generates from Sorbet RBI
-- `runtime` generates from runtime API
+- `runtime` generates from runtime API (**deprecated**; see [#2841](https://github.com/ruby/rbs/issues/2841))
 
 ## Library
 
