@@ -851,7 +851,8 @@ class Socket < BasicSocket
   # ### See
   # *   Socket#accept
   #
-  def accept_nonblock: (?exception: boolish) -> ([ Socket, Addrinfo ] | :wait_readable)
+  def accept_nonblock: (?exception: true) -> [ Socket, Addrinfo ]
+                     | (exception: false) -> ([ Socket, Addrinfo ] | :wait_readable)
 
   # <!--
   #   rdoc-file=ext/socket/socket.c
@@ -1105,7 +1106,8 @@ class Socket < BasicSocket
   # ### See
   # *   Socket#connect
   #
-  def connect_nonblock: (untyped addr, ?exception: untyped) -> (Integer | :wait_writable)
+  def connect_nonblock: (untyped addr, ?exception: true) -> Integer
+                      | (untyped addr, exception: false) -> (Integer | :wait_writable)
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -1363,7 +1365,8 @@ class Socket < BasicSocket
   # ### See
   # *   Socket#recvfrom
   #
-  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: boolish) -> ([ String, Addrinfo ] | :wait_readable)
+  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: true) -> [ String, Addrinfo ]
+                       | (Integer maxlen, ?Integer flags, ?untyped outbuf, exception: false) -> ([ String, Addrinfo ] | :wait_readable)
 
   # <!--
   #   rdoc-file=ext/socket/socket.c
