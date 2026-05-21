@@ -12,7 +12,8 @@
 The RBS repository contains the type definitions of Core API and Standard Libraries.
 There are some discussions whether if it is the best to have them in this repository, but we have them and continue updating the files meanwhile.
 
-The target version of the bundled type definitions is the latest _release_ of Ruby -- `3.1` as of January 2022.
+The target version of the bundled type definitions is the [latest _release_ of Ruby](https://www.ruby-lang.org/en/downloads/branches/) -- `4.0` as of 2026.
+Note, however, that the CI currently retains the tests on Ruby 3.2 as well.
 
 **The core API** type definitions are in `core` directory.
 You will find the familiar class names in the directory, like `string.rbs` or `array.rbs`.
