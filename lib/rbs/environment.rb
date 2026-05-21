@@ -508,7 +508,7 @@ module RBS
         end
       end
 
-      decls = decls.map do |decl|
+      decls = RBS.map_if_changed(decls) do |decl|
         if only && !only.member?(decl)
           decl
         else
@@ -541,7 +541,7 @@ module RBS
       end
 
       each_ruby_source do |source|
-        decls = source.declarations.map do |decl|
+        decls = RBS.map_if_changed(source.declarations) do |decl|
           if only
             if only.include?(decl)
               resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
@@ -577,9 +577,11 @@ module RBS
     def resolve_declaration(resolver, map, decl, context:, prefix:)
       if decl.is_a?(AST::Declarations::Global)
         # @type var decl: AST::Declarations::Global
+        new_type = absolute_type(resolver, map, decl.type, context: nil)
+        return decl if new_type.equal?(decl.type)
         return AST::Declarations::Global.new(
           name: decl.name,
-          type: absolute_type(resolver, map, decl.type, context: nil),
+          type: new_type,
           location: decl.location,
           comment: decl.comment,
           annotations: decl.annotations
@@ -592,32 +594,42 @@ module RBS
         inner_context = append_context(outer_context, decl)
 
         prefix_ = prefix + decl.name.to_namespace
-        AST::Declarations::Class.new(
-          name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, map, decl.type_params, context: inner_context),
-          super_class: decl.super_class&.yield_self do |super_class|
+        new_name = decl.name.with_prefix(prefix)
+        new_type_params = resolve_type_params(resolver, map, decl.type_params, context: inner_context)
+        new_super_class = decl.super_class&.then do |super_class|
+          new_super_name = absolute_type_name(resolver, map, super_class.name, context: outer_context)
+          new_super_args = RBS.map_if_changed(super_class.args) {|type| absolute_type(resolver, map, type, context: outer_context) }
+          if new_super_name.equal?(super_class.name) && new_super_args.equal?(super_class.args)
+            super_class
+          else
             AST::Declarations::Class::Super.new(
-              name: absolute_type_name(resolver, map, super_class.name, context: outer_context),
-              args: super_class.args.map {|type| absolute_type(resolver, map, type, context: outer_context) },
+              name: new_super_name,
+              args: new_super_args,
               location: super_class.location
             )
-          end,
-          members: decl.members.map do |member|
-            case member
-            when AST::Members::Base
-              resolve_member(resolver, map, member, context: inner_context)
-            when AST::Declarations::Base
-              resolve_declaration(
-                resolver,
-                map,
-                member,
-                context: inner_context,
-                prefix: prefix_
-              )
-            else
-              raise
-            end
-          end,
+          end
+        end
+        new_members = RBS.map_if_changed(decl.members) do |member|
+          case member
+          when AST::Members::Base
+            resolve_member(resolver, map, member, context: inner_context)
+          when AST::Declarations::Base
+            resolve_declaration(resolver, map, member, context: inner_context, prefix: prefix_)
+          else
+            raise
+          end
+        end
+        if new_name.equal?(decl.name) &&
+           new_type_params.equal?(decl.type_params) &&
+           new_super_class.equal?(decl.super_class) &&
+           new_members.equal?(decl.members)
+          return decl
+        end
+        AST::Declarations::Class.new(
+          name: new_name,
+          type_params: new_type_params,
+          super_class: new_super_class,
+          members: new_members,
           location: decl.location,
           annotations: decl.annotations,
           comment: decl.comment
@@ -628,81 +640,122 @@ module RBS
         inner_context = append_context(outer_context, decl)
 
         prefix_ = prefix + decl.name.to_namespace
-        AST::Declarations::Module.new(
-          name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, map, decl.type_params, context: inner_context),
-          self_types: decl.self_types.map do |module_self|
+        new_name = decl.name.with_prefix(prefix)
+        new_type_params = resolve_type_params(resolver, map, decl.type_params, context: inner_context)
+        new_self_types = RBS.map_if_changed(decl.self_types) do |module_self|
+          new_self_name = absolute_type_name(resolver, map, module_self.name, context: inner_context)
+          new_self_args = RBS.map_if_changed(module_self.args) {|type| absolute_type(resolver, map, type, context: inner_context) }
+          if new_self_name.equal?(module_self.name) && new_self_args.equal?(module_self.args)
+            module_self
+          else
             AST::Declarations::Module::Self.new(
-              name: absolute_type_name(resolver, map, module_self.name, context: inner_context),
-              args: module_self.args.map {|type| absolute_type(resolver, map, type, context: inner_context) },
+              name: new_self_name,
+              args: new_self_args,
               location: module_self.location
             )
-          end,
-          members: decl.members.map do |member|
-            case member
-            when AST::Members::Base
-              resolve_member(resolver, map, member, context: inner_context)
-            when AST::Declarations::Base
-              resolve_declaration(
-                resolver,
-                map,
-                member,
-                context: inner_context,
-                prefix: prefix_
-              )
-            else
-              raise
-            end
-          end,
+          end
+        end
+        new_members = RBS.map_if_changed(decl.members) do |member|
+          case member
+          when AST::Members::Base
+            resolve_member(resolver, map, member, context: inner_context)
+          when AST::Declarations::Base
+            resolve_declaration(resolver, map, member, context: inner_context, prefix: prefix_)
+          else
+            raise
+          end
+        end
+        if new_name.equal?(decl.name) &&
+           new_type_params.equal?(decl.type_params) &&
+           new_self_types.equal?(decl.self_types) &&
+           new_members.equal?(decl.members)
+          return decl
+        end
+        AST::Declarations::Module.new(
+          name: new_name,
+          type_params: new_type_params,
+          self_types: new_self_types,
+          members: new_members,
           location: decl.location,
           annotations: decl.annotations,
           comment: decl.comment
         )
 
       when AST::Declarations::Interface
+        new_name = decl.name.with_prefix(prefix)
+        new_type_params = resolve_type_params(resolver, map, decl.type_params, context: context)
+        new_members = RBS.map_if_changed(decl.members) do |member|
+          resolve_member(resolver, map, member, context: context)
+        end
+        if new_name.equal?(decl.name) &&
+           new_type_params.equal?(decl.type_params) &&
+           new_members.equal?(decl.members)
+          return decl
+        end
         AST::Declarations::Interface.new(
-          name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, map, decl.type_params, context: context),
-          members: decl.members.map do |member|
-            resolve_member(resolver, map, member, context: context)
-          end,
+          name: new_name,
+          type_params: new_type_params,
+          members: new_members,
           comment: decl.comment,
           location: decl.location,
           annotations: decl.annotations
         )
 
       when AST::Declarations::TypeAlias
+        new_name = decl.name.with_prefix(prefix)
+        new_type_params = resolve_type_params(resolver, map, decl.type_params, context: context)
+        new_type = absolute_type(resolver, map, decl.type, context: context)
+        if new_name.equal?(decl.name) &&
+           new_type_params.equal?(decl.type_params) &&
+           new_type.equal?(decl.type)
+          return decl
+        end
         AST::Declarations::TypeAlias.new(
-          name: decl.name.with_prefix(prefix),
-          type_params: resolve_type_params(resolver, map, decl.type_params, context: context),
-          type: absolute_type(resolver, map, decl.type, context: context),
+          name: new_name,
+          type_params: new_type_params,
+          type: new_type,
           location: decl.location,
           annotations: decl.annotations,
           comment: decl.comment
         )
 
       when AST::Declarations::Constant
+        new_name = decl.name.with_prefix(prefix)
+        new_type = absolute_type(resolver, map, decl.type, context: context)
+        if new_name.equal?(decl.name) && new_type.equal?(decl.type)
+          return decl
+        end
         AST::Declarations::Constant.new(
-          name: decl.name.with_prefix(prefix),
-          type: absolute_type(resolver, map, decl.type, context: context),
+          name: new_name,
+          type: new_type,
           location: decl.location,
           comment: decl.comment,
           annotations: decl.annotations
         )
 
       when AST::Declarations::ClassAlias
+        new_name = decl.new_name.with_prefix(prefix)
+        new_old_name = absolute_type_name(resolver, map, decl.old_name, context: context)
+        if new_name.equal?(decl.new_name) && new_old_name.equal?(decl.old_name)
+          return decl
+        end
         AST::Declarations::ClassAlias.new(
-          new_name: decl.new_name.with_prefix(prefix),
-          old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
+          new_name: new_name,
+          old_name: new_old_name,
           location: decl.location,
           comment: decl.comment,
           annotations: decl.annotations
         )
 
       when AST::Declarations::ModuleAlias
+        new_name = decl.new_name.with_prefix(prefix)
+        new_old_name = absolute_type_name(resolver, map, decl.old_name, context: context)
+        if new_name.equal?(decl.new_name) && new_old_name.equal?(decl.old_name)
+          return decl
+        end
         AST::Declarations::ModuleAlias.new(
-          new_name: decl.new_name.with_prefix(prefix),
-          old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
+          new_name: new_name,
+          old_name: new_old_name,
           location: decl.location,
           comment: decl.comment,
           annotations: decl.annotations
@@ -869,14 +922,19 @@ module RBS
     def resolve_member(resolver, map, member, context:)
       case member
       when AST::Members::MethodDefinition
+        new_overloads = RBS.map_if_changed(member.overloads) do |overload|
+          new_method_type = resolve_method_type(resolver, map, overload.method_type, context: context)
+          if new_method_type.equal?(overload.method_type)
+            overload
+          else
+            overload.update(method_type: new_method_type)
+          end
+        end
+        return member if new_overloads.equal?(member.overloads)
         AST::Members::MethodDefinition.new(
           name: member.name,
           kind: member.kind,
-          overloads: member.overloads.map do |overload|
-            overload.update(
-              method_type: resolve_method_type(resolver, map, overload.method_type, context: context)
-            )
-          end,
+          overloads: new_overloads,
           comment: member.comment,
           overloading: member.overloading?,
           annotations: member.annotations,
@@ -884,9 +942,11 @@ module RBS
           visibility: member.visibility
         )
       when AST::Members::AttrAccessor
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::AttrAccessor.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -895,9 +955,11 @@ module RBS
           visibility: member.visibility
         )
       when AST::Members::AttrReader
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::AttrReader.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -906,9 +968,11 @@ module RBS
           visibility: member.visibility
         )
       when AST::Members::AttrWriter
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::AttrWriter.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           kind: member.kind,
           annotations: member.annotations,
           comment: member.comment,
@@ -917,46 +981,61 @@ module RBS
           visibility: member.visibility
         )
       when AST::Members::InstanceVariable
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::InstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassInstanceVariable
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::ClassInstanceVariable.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           comment: member.comment,
           location: member.location
         )
       when AST::Members::ClassVariable
+        new_type = absolute_type(resolver, map, member.type, context: context)
+        return member if new_type.equal?(member.type)
         AST::Members::ClassVariable.new(
           name: member.name,
-          type: absolute_type(resolver, map, member.type, context: context),
+          type: new_type,
           comment: member.comment,
           location: member.location
         )
       when AST::Members::Include
+        new_name = absolute_type_name(resolver, map, member.name, context: context)
+        new_args = RBS.map_if_changed(member.args) {|type| absolute_type(resolver, map, type, context: context) }
+        return member if new_name.equal?(member.name) && new_args.equal?(member.args)
         AST::Members::Include.new(
-          name: absolute_type_name(resolver, map, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
+          name: new_name,
+          args: new_args,
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
         )
       when AST::Members::Extend
+        new_name = absolute_type_name(resolver, map, member.name, context: context)
+        new_args = RBS.map_if_changed(member.args) {|type| absolute_type(resolver, map, type, context: context) }
+        return member if new_name.equal?(member.name) && new_args.equal?(member.args)
         AST::Members::Extend.new(
-          name: absolute_type_name(resolver, map, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
+          name: new_name,
+          args: new_args,
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
         )
       when AST::Members::Prepend
+        new_name = absolute_type_name(resolver, map, member.name, context: context)
+        new_args = RBS.map_if_changed(member.args) {|type| absolute_type(resolver, map, type, context: context) }
+        return member if new_name.equal?(member.name) && new_args.equal?(member.args)
         AST::Members::Prepend.new(
-          name: absolute_type_name(resolver, map, member.name, context: context),
-          args: member.args.map {|type| absolute_type(resolver, map, type, context: context) },
+          name: new_name,
+          args: new_args,
           comment: member.comment,
           location: member.location,
           annotations: member.annotations
@@ -975,7 +1054,7 @@ module RBS
     end
 
     def resolve_type_params(resolver, map, params, context:)
-      params.map do |param|
+      RBS.map_if_changed(params) do |param|
         param.map_type {|type| _ = absolute_type(resolver, map, type, context: context) }
       end
     end

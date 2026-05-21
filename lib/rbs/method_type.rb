@@ -63,24 +63,25 @@ module RBS
     end
 
     def map_type(&block)
+      new_type = type.map_type(&block)
+      new_block = self.block&.map_type(&block)
+      if new_type.equal?(type) && new_block.equal?(self.block)
+        return self
+      end
       self.class.new(
         type_params: type_params,
-        type: type.map_type(&block),
-        block: self.block&.map_type(&block),
+        type: new_type,
+        block: new_block,
         location: location
       )
     end
 
     def map_type_bound(&block)
-      if type_params.empty?
-        self
-      else
-        self.update(
-          type_params: type_params.map {|param|
-            param.map_type(&block)
-          }
-        )
-      end
+      return self if type_params.empty?
+
+      new_type_params = RBS.map_if_changed(type_params) {|param| param.map_type(&block) }
+      return self if new_type_params.equal?(type_params)
+      self.update(type_params: new_type_params)
     end
 
     def each_type(&block)

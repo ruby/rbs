@@ -67,25 +67,23 @@ module RBS
       end
 
       def map_type(&block)
-        if b = upper_bound_type
-          _upper_bound_type = yield(b)
-        end
+        new_upper_bound_type = upper_bound_type ? yield(upper_bound_type) : nil
+        new_lower_bound_type = lower_bound_type ? yield(lower_bound_type) : nil
+        new_default_type = default_type ? yield(default_type) : nil
 
-        if b = lower_bound_type
-          _lower_bound_type = yield(b)
-        end
-
-        if dt = default_type
-          _default_type = yield(dt)
+        if new_upper_bound_type.equal?(upper_bound_type) &&
+           new_lower_bound_type.equal?(lower_bound_type) &&
+           new_default_type.equal?(default_type)
+          return self
         end
 
         TypeParam.new(
           name: name,
           variance: variance,
-          upper_bound: _upper_bound_type,
-          lower_bound: _lower_bound_type,
+          upper_bound: new_upper_bound_type,
+          lower_bound: new_lower_bound_type,
           location: location,
-          default_type: _default_type
+          default_type: new_default_type
         ).unchecked!(unchecked?)
       end
 

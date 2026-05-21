@@ -299,20 +299,17 @@ module RBS
       end
 
       def map_type_name(&block)
-        ClassSingleton.new(
-          name: yield(name, location, self),
-          args: args.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_name = yield(name, location, self)
+        new_args = RBS.map_if_changed(args) {|type| type.map_type_name(&block) }
+        return self if new_name.equal?(name) && new_args.equal?(args)
+        ClassSingleton.new(name: new_name, args: new_args, location: location)
       end
 
       def map_type(&block)
         if block
-          ClassSingleton.new(
-            name: name,
-            args: args.map {|type| yield type },
-            location: location
-          )
+          new_args = RBS.map_if_changed(args) {|type| yield type }
+          return self if new_args.equal?(args)
+          ClassSingleton.new(name: name, args: new_args, location: location)
         else
           enum_for :map_type
         end
@@ -343,20 +340,17 @@ module RBS
       end
 
       def map_type_name(&block)
-        Interface.new(
-          name: yield(name, location, self),
-          args: args.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_name = yield(name, location, self)
+        new_args = RBS.map_if_changed(args) {|type| type.map_type_name(&block) }
+        return self if new_name.equal?(name) && new_args.equal?(args)
+        Interface.new(name: new_name, args: new_args, location: location)
       end
 
       def map_type(&block)
         if block
-          Interface.new(
-            name: name,
-            args: args.map {|type| yield type },
-            location: location
-          )
+          new_args = RBS.map_if_changed(args) {|type| yield type }
+          return self if new_args.equal?(args)
+          Interface.new(name: name, args: new_args, location: location)
         else
           enum_for(:map_type)
         end
@@ -387,20 +381,17 @@ module RBS
       end
 
       def map_type_name(&block)
-        ClassInstance.new(
-          name: yield(name, location, self),
-          args: args.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_name = yield(name, location, self)
+        new_args = RBS.map_if_changed(args) {|type| type.map_type_name(&block) }
+        return self if new_name.equal?(name) && new_args.equal?(args)
+        ClassInstance.new(name: new_name, args: new_args, location: location)
       end
 
       def map_type(&block)
         if block
-          ClassInstance.new(
-            name: name,
-            args: args.map {|type| yield type },
-            location: location
-          )
+          new_args = RBS.map_if_changed(args) {|type| yield type }
+          return self if new_args.equal?(args)
+          ClassInstance.new(name: name, args: new_args, location: location)
         else
           enum_for :map_type
         end
@@ -429,20 +420,17 @@ module RBS
       end
 
       def map_type_name(&block)
-        Alias.new(
-          name: yield(name, location, self),
-          args: args.map {|arg| arg.map_type_name(&block) },
-          location: location
-        )
+        new_name = yield(name, location, self)
+        new_args = RBS.map_if_changed(args) {|type| type.map_type_name(&block) }
+        return self if new_name.equal?(name) && new_args.equal?(args)
+        Alias.new(name: new_name, args: new_args, location: location)
       end
 
       def map_type(&block)
         if block
-          Alias.new(
-            name: name,
-            args: args.map {|type| yield type },
-            location: location
-          )
+          new_args = RBS.map_if_changed(args) {|type| yield type }
+          return self if new_args.equal?(args)
+          Alias.new(name: name, args: new_args, location: location)
         else
           enum_for :map_type
         end
@@ -504,18 +492,16 @@ module RBS
       end
 
       def map_type_name(&block)
-        Tuple.new(
-          types: types.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_types = RBS.map_if_changed(types) {|type| type.map_type_name(&block) }
+        return self if new_types.equal?(types)
+        Tuple.new(types: new_types, location: location)
       end
 
       def map_type(&block)
         if block
-          Tuple.new(
-            types: types.map {|type| yield type },
-            location: location
-          )
+          new_types = RBS.map_if_changed(types) {|type| yield type }
+          return self if new_types.equal?(types)
+          Tuple.new(types: new_types, location: location)
         else
           enum_for :map_type
         end
@@ -622,18 +608,26 @@ module RBS
       end
 
       def map_type_name(&block)
-        Record.new(
-          all_fields: all_fields.transform_values {|ty, required| [ty.map_type_name(&block), required] },
-          location: location
-        )
+        changed = false
+        new_all_fields = all_fields.transform_values do |ty, required|
+          new_ty = ty.map_type_name(&block)
+          changed ||= !new_ty.equal?(ty)
+          [new_ty, required]
+        end #: Hash[key, [t, bool]]
+        return self unless changed
+        Record.new(all_fields: new_all_fields, location: location)
       end
 
       def map_type(&block)
         if block
-          Record.new(
-            all_fields: all_fields.transform_values {|type, required| [yield(type), required] },
-            location: location
-          )
+          changed = false
+          new_all_fields = all_fields.transform_values do |type, required|
+            new_type = yield(type)
+            changed ||= !new_type.equal?(type)
+            [new_type, required]
+          end #: Hash[key, [t, bool]]
+          return self unless changed
+          Record.new(all_fields: new_all_fields, location: location)
         else
           enum_for :map_type
         end
@@ -708,18 +702,16 @@ module RBS
       end
 
       def map_type_name(&block)
-        Optional.new(
-          type: type.map_type_name(&block),
-          location: location
-        )
+        new_type = type.map_type_name(&block)
+        return self if new_type.equal?(type)
+        Optional.new(type: new_type, location: location)
       end
 
       def map_type(&block)
         if block
-          Optional.new(
-            type: yield(type),
-            location: location
-          )
+          new_type = yield(type)
+          return self if new_type.equal?(type)
+          Optional.new(type: new_type, location: location)
         else
           enum_for :map_type
         end
@@ -803,17 +795,18 @@ module RBS
 
       def map_type(&block)
         if block
-          Union.new(types: types.map(&block), location: location)
+          new_types = RBS.map_if_changed(types, &block)
+          return self if new_types.equal?(types)
+          Union.new(types: new_types, location: location)
         else
           enum_for :map_type
         end
       end
 
       def map_type_name(&block)
-        Union.new(
-          types: types.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_types = RBS.map_if_changed(types) {|type| type.map_type_name(&block) }
+        return self if new_types.equal?(types)
+        Union.new(types: new_types, location: location)
       end
 
       def has_self_type?
@@ -886,17 +879,18 @@ module RBS
 
       def map_type(&block)
         if block
-          Intersection.new(types: types.map(&block), location: location)
+          new_types = RBS.map_if_changed(types, &block)
+          return self if new_types.equal?(types)
+          Intersection.new(types: new_types, location: location)
         else
           enum_for :map_type
         end
       end
 
       def map_type_name(&block)
-        Intersection.new(
-          types: types.map {|type| type.map_type_name(&block) },
-          location: location
-        )
+        new_types = RBS.map_if_changed(types) {|type| type.map_type_name(&block) }
+        return self if new_types.equal?(types)
+        Intersection.new(types: new_types, location: location)
       end
 
       def has_self_type?
@@ -936,7 +930,9 @@ module RBS
 
         def map_type(&block)
           if block
-            Param.new(name: name, type: yield(type), location: location)
+            new_type = yield(type)
+            return self if new_type.equal?(type)
+            Param.new(name: name, type: new_type, location: location)
           else
             enum_for :map_type
           end
@@ -1035,34 +1031,38 @@ module RBS
 
       def map_type(&block)
         if block
+          new_required_positionals = RBS.map_if_changed(required_positionals) {|param| param.map_type(&block) }
+          new_optional_positionals = RBS.map_if_changed(optional_positionals) {|param| param.map_type(&block) }
+          new_rest_positionals = rest_positionals&.map_type(&block)
+          new_trailing_positionals = RBS.map_if_changed(trailing_positionals) {|param| param.map_type(&block) }
+          new_required_keywords = RBS.transform_values_if_changed(required_keywords) {|param| param.map_type(&block) }
+          new_optional_keywords = RBS.transform_values_if_changed(optional_keywords) {|param| param.map_type(&block) }
+          new_rest_keywords = rest_keywords&.map_type(&block)
+          new_return_type = yield(return_type)
+
+          if new_required_positionals.equal?(required_positionals) &&
+             new_optional_positionals.equal?(optional_positionals) &&
+             new_rest_positionals.equal?(rest_positionals) &&
+             new_trailing_positionals.equal?(trailing_positionals) &&
+             new_required_keywords.equal?(required_keywords) &&
+             new_optional_keywords.equal?(optional_keywords) &&
+             new_rest_keywords.equal?(rest_keywords) &&
+             new_return_type.equal?(return_type)
+            return self
+          end
+
           Function.new(
-            required_positionals: amap(required_positionals) {|param| param.map_type(&block) },
-            optional_positionals: amap(optional_positionals) {|param| param.map_type(&block) },
-            rest_positionals: rest_positionals&.yield_self {|param| param.map_type(&block) },
-            trailing_positionals: amap(trailing_positionals) {|param| param.map_type(&block) },
-            required_keywords: hmapv(required_keywords) {|param| param.map_type(&block) },
-            optional_keywords: hmapv(optional_keywords) {|param| param.map_type(&block) },
-            rest_keywords: rest_keywords&.yield_self {|param| param.map_type(&block) },
-            return_type: yield(return_type)
+            required_positionals: new_required_positionals,
+            optional_positionals: new_optional_positionals,
+            rest_positionals: new_rest_positionals,
+            trailing_positionals: new_trailing_positionals,
+            required_keywords: new_required_keywords,
+            optional_keywords: new_optional_keywords,
+            rest_keywords: new_rest_keywords,
+            return_type: new_return_type
           )
         else
           enum_for :map_type
-        end
-      end
-
-      def amap(array, &block)
-        if array.empty?
-          _ = array
-        else
-          array.map(&block)
-        end
-      end
-
-      def hmapv(hash, &block)
-        if hash.empty?
-          _ = hash
-        else
-          hash.transform_values(&block)
         end
       end
 
@@ -1261,16 +1261,18 @@ module RBS
 
       def map_type(&block)
         if block
-          update(return_type: yield(return_type))
+          new_return_type = yield(return_type)
+          return self if new_return_type.equal?(return_type)
+          update(return_type: new_return_type)
         else
           enum_for :map_type
         end
       end
 
       def map_type_name(&block)
-        UntypedFunction.new(
-          return_type: return_type.map_type_name(&block)
-        )
+        new_return_type = return_type.map_type_name(&block)
+        return self if new_return_type.equal?(return_type)
+        UntypedFunction.new(return_type: new_return_type)
       end
 
       def each_type(&block)
@@ -1384,10 +1386,15 @@ module RBS
       end
 
       def map_type(&block)
+        new_type = type.map_type(&block)
+        new_self_type = self_type ? yield(self_type) : nil
+        if new_type.equal?(type) && new_self_type.equal?(self_type)
+          return self
+        end
         Block.new(
           required: required,
-          type: type.map_type(&block),
-          self_type: self_type ? yield(self_type) : nil
+          type: new_type,
+          self_type: new_self_type
         )
       end
     end
@@ -1485,22 +1492,24 @@ module RBS
       end
 
       def map_type_name(&block)
-        Proc.new(
-          type: type.map_type_name(&block),
-          block: self.block&.map_type {|type| type.map_type_name(&block) },
-          self_type: self_type&.map_type_name(&block),
-          location: location
-        )
+        new_type = type.map_type_name(&block)
+        new_block = self.block&.map_type {|type| type.map_type_name(&block) }
+        new_self_type = self_type&.map_type_name(&block)
+        if new_type.equal?(type) && new_block.equal?(self.block) && new_self_type.equal?(self_type)
+          return self
+        end
+        Proc.new(type: new_type, block: new_block, self_type: new_self_type, location: location)
       end
 
       def map_type(&block)
         if block
-          Proc.new(
-            type: type.map_type(&block),
-            block: self.block&.map_type(&block),
-            self_type: self_type ? yield(self_type) : nil,
-            location: location
-          )
+          new_type = type.map_type(&block)
+          new_block = self.block&.map_type(&block)
+          new_self_type = self_type ? yield(self_type) : nil
+          if new_type.equal?(type) && new_block.equal?(self.block) && new_self_type.equal?(self_type)
+            return self
+          end
+          Proc.new(type: new_type, block: new_block, self_type: new_self_type, location: location)
         else
           enum_for :map_type
         end

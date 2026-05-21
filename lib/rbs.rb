@@ -102,5 +102,51 @@ module RBS
         logger.warn { message }
       end
     end
+
+    # Internal helper for `map_type_name` / `map_type` / `resolve_*` paths
+    # in this gem. The given block is invoked for every element. Returns
+    # the input array unchanged (the same object) when every mapped result
+    # is `equal?` to its source; otherwise returns a fresh array with the
+    # changed elements substituted in. Callers detect a no-op by comparing
+    # the return value with the input via `equal?`, which avoids
+    # allocating a `[mapped, changed]` tuple on every invocation.
+    def map_if_changed(array, &)
+      return array if array.empty?
+
+      result = array
+      changed = false
+      array.each_with_index do |element, i|
+        new_element = yield(element)
+        next if new_element.equal?(element)
+
+        unless changed
+          result = array.dup
+          changed = true
+        end
+        result[i] = new_element
+      end
+      result
+    end
+
+    # Hash counterpart of `map_if_changed`: transforms values through the
+    # block and returns the receiver unchanged when every value identity
+    # is preserved.
+    def transform_values_if_changed(hash, &)
+      return hash if hash.empty?
+
+      result = hash
+      changed = false
+      hash.each do |key, value|
+        new_value = yield(value)
+        next if new_value.equal?(value)
+
+        unless changed
+          result = hash.dup
+          changed = true
+        end
+        result[key] = new_value
+      end
+      result
+    end
   end
 end

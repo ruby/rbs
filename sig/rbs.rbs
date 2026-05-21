@@ -11,6 +11,10 @@ module RBS
 
   def self.print_warning: () { () -> String } -> void
 
+  def self.map_if_changed: [T < Object] (Array[T]) { (T) -> T } -> Array[T]
+
+  def self.transform_values_if_changed: [K, V < Object] (Hash[K, V]) { (V) -> V } -> Hash[K, V]
+
   self.@logger: Logger?
 
   self.@logger_output: IO?
