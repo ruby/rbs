@@ -1290,7 +1290,8 @@ class StringScanner
   #
   # "full" means "#scan with full parameters".
   #
-  def scan_full: (Regexp | String pattern, bool advance_pointer_p, bool return_string_p) -> (String | Integer)?
+  def scan_full: (Regexp | String pattern, bool advance_pointer_p, true return_string_p) -> String?
+               | (Regexp | String pattern, bool advance_pointer_p, false return_string_p) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/lib/strscan/strscan.rb
@@ -1369,7 +1370,8 @@ class StringScanner
   # `return_string_p` is true, otherwise returns the number of bytes advanced.
   # This method does affect the match register.
   #
-  def search_full: (Regexp | String pattern, bool advance_pointer_p, bool return_string_p) -> (String | Integer)?
+  def search_full: (Regexp | String pattern, bool advance_pointer_p, true return_string_p) -> String?
+                 | (Regexp | String pattern, bool advance_pointer_p, false return_string_p) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
