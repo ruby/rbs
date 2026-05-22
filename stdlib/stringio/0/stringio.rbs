@@ -1271,7 +1271,8 @@ class StringIO
   # -->
   # See IO#putc.
   #
-  def putc: (Numeric | String arg0) -> (Numeric | String)
+  def putc: (real) -> real
+          | (String) -> String
 
   def puts: (*untyped arg0) -> nil
 
