@@ -3466,9 +3466,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def slice: %a{implicitly-returns-nil} (int index) -> E
-           | (int start, int length) -> ::Array[E]?
-           | (::Range[::Integer] range) -> ::Array[E]?
+  alias slice []
 
   # <!--
   #   rdoc-file=array.c
@@ -4115,6 +4113,9 @@ class Array[unchecked out E]
   #
   def |: [T] (::Array[T] other_ary) -> ::Array[E | T]
 
+  def freeze: ->__todo__
+  alias detect find
+
   private
 
   # <!--
@@ -4132,7 +4133,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def initialize_copy: (self other_ary) -> void
+  alias initialize_copy replace
 end
 
 interface _Rand
