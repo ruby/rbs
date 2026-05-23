@@ -546,7 +546,7 @@
 #     given block.
 #
 %a{annotate:rdoc:source:from=array.c}
-class Array[unchecked out E] < Object
+class Array[unchecked out E]
   include Enumerable[E]
 
   # <!--
@@ -603,10 +603,10 @@ class Array[unchecked out E] < Object
   # Related: see [Methods for Creating an
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
-  def initialize: () -> void
-                | (::Array[E] ary) -> void
-                | (int size, ?E val) -> void
-                | (int size) { (::Integer index) -> E } -> void
+  def initialize: () -> void # TODO: technically array has a `Array.new` defined. do we use that?
+                | (array[E] ary) -> void
+                | (int size, ?E default_value) -> void
+                | (int size) { (int index) -> E } -> void
 
   # <!--
   #   rdoc-file=array.c
@@ -621,7 +621,7 @@ class Array[unchecked out E] < Object
   # Related: see [Methods for Creating an
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
-  def self.[]: [U] (*U) -> ::Array[U]
+  def self.[]: [U] (*U) -> Array[U] # TODO: this technically returns a subclass. How do we want to do that?
 
   # <!--
   #   rdoc-file=array.c
@@ -640,7 +640,9 @@ class Array[unchecked out E] < Object
   # Related: see [Methods for Creating an
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
-  def self.try_convert: [U] (untyped) -> ::Array[U]?
+  def self.try_convert: [A < Array[U], U] (A array) -> A
+                      | [U] (array[U] ary) -> Array[U]
+                      | [U] (untyped) -> Array[U]?
 
   # <!--
   #   rdoc-file=array.c

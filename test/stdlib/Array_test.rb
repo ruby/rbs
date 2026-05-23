@@ -3,35 +3,48 @@ require_relative "test_helper"
 class ArraySingletonTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "singleton(::Array)"
+  testing 'singleton(::Array)'
 
   def test_new
-    assert_send_type "() -> ::Array[untyped]",
+    assert_send_type '() -> Array[untyped]',
                      Array, :new
-    assert_send_type "(Array[Integer]) -> ::Array[Integer]",
-                     Array, :new, [1,2,3]
-    assert_send_type "(Integer) -> Array[untyped]",
-                     Array, :new, 3
-    assert_send_type "(ToInt) -> Array[untyped]",
-                     Array, :new, ToInt.new(3)
-    assert_send_type "(ToInt, String) -> Array[String]",
-                     Array, :new, ToInt.new(3), ""
-    assert_send_type "(ToInt) { (Integer) -> :foo } -> Array[:foo]",
-                     Array, :new, ToInt.new(3) do :foo end
+    with_array 1r, 2r do |array|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        Array, :new, array
+    end
+
+    with_int 5 do |size|
+      assert_send_type '(int) -> Array[nil]',
+                       Array, :new, size
+      assert_send_type '(int, Rational) -> Array[Rational]',
+                       Array, :new, size, 1r
+      assert_send_type '(int) { (Integer) -> Rational } -> Array[Rational]',
+                       Array, :new, size do it.to_r end
+    end
   end
 
-  def test_square_bracket
-    assert_send_type "() -> Array[untyped]",
-                     Array, :[]
-    assert_send_type "(Integer, String) -> Array[Integer | String]",
-                     Array, :[], 1, "2"
+  def test_op_aref
+    assert_send_type  '() -> Array[untyped]',
+                      Array, :[]
+    assert_send_type '(Rational, String) -> Array[Rational | String]',
+                     Array, :[], 1r, '2'
   end
 
   def test_try_convert
-    assert_send_type "(Integer) -> nil",
-                     Array, :try_convert, 3
-    assert_send_type "(ToArray) -> Array[Integer]",
-                     Array, :try_convert, ToArray.new(1,2,3)
+    with [1r, 2r], Class.new(Array).new([1r, 2r]) do |subclass|
+      assert_send_type  '[A < Array[U], U] (A) -> A',
+                        Array, :try_convert, subclass
+    end
+
+    with_array 1r, 2r do |ary|
+      assert_send_type  '[U] (array[U]) -> Array[U]',
+                        Array, :try_convert, ary
+    end
+
+    with_untyped.and [1r, 2r] do |untyped|
+      assert_send_type '[U] (untyped) -> Array[U]?',
+                       Array, :try_convert, untyped
+    end
   end
 end
 
