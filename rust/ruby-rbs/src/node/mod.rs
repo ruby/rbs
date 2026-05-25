@@ -199,6 +199,26 @@ impl RBSLocationRange {
     pub fn end(&self) -> i32 {
         self.range.end_byte
     }
+
+    #[must_use]
+    pub fn start_char(&self) -> i32 {
+        self.range.start_char
+    }
+
+    #[must_use]
+    pub fn start_byte(&self) -> i32 {
+        self.range.start_byte
+    }
+
+    #[must_use]
+    pub fn end_char(&self) -> i32 {
+        self.range.end_char
+    }
+
+    #[must_use]
+    pub fn end_byte(&self) -> i32 {
+        self.range.end_byte
+    }
 }
 
 pub struct RBSLocationRangeList<'a> {
