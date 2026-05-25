@@ -1,4 +1,5 @@
 require "test_helper"
+require "timeout"
 
 class RBS::ParserTest < Test::Unit::TestCase
   def buffer(source)
@@ -1027,5 +1028,24 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:kEND, 'end', 53...56], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:tTRIVIA, "\n", 56...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+  end
+
+  def test_invalid_position_range_raises
+    # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
+    Timeout.timeout(5) do
+      assert_raises(ArgumentError) do
+        RBS::Parser._parse_signature(buffer(""), 1, 0)
+      end
+    end
+  end
+
+  def test_invalid_byte_range_in_parse_type_raises
+    # Regression: parse_type's byte_range: keyword reaches _parse_type directly,
+    # which used to hang on reversed ranges.
+    Timeout.timeout(5) do
+      assert_raises(ArgumentError) do
+        RBS::Parser.parse_type("", byte_range: 1..0)
+      end
+    end
   end
 end
