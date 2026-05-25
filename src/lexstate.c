@@ -134,7 +134,11 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
 
     *byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
 
-    if (*byte_len == 1) {
+    if (*byte_len == 0) {
+        // Avoid infinite loop on invalid bytes.
+        *byte_len = 1;
+        *codepoint = (unsigned int) (unsigned char) *start;
+    } else if (*byte_len == 1) {
         *codepoint = (unsigned int) *start;
     } else {
         *codepoint = 12523; // Dummy data for "ル" from "ルビー" (Ruby) in Unicode
