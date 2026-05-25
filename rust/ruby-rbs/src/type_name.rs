@@ -60,48 +60,13 @@ pub enum Kind {
     Interface,
 }
 
-/// An entry rooted in the absolute namespace (`::`).
+/// `parent` and `segment` are both `None` for the two roots, both
+/// `Some` for any non-root entry.
 #[derive(Copy, Clone, Debug)]
-struct AbsoluteTypeNameEntry {
-    /// `None` for the absolute root.
+struct Entry {
     parent: Option<TypeName>,
-    /// `None` for the absolute root.
     segment: Option<SymbolId>,
-}
-
-/// An entry rooted in the relative namespace (`""`).
-#[derive(Copy, Clone, Debug)]
-struct RelativeTypeNameEntry {
-    /// `None` for the relative root.
-    parent: Option<TypeName>,
-    /// `None` for the relative root.
-    segment: Option<SymbolId>,
-}
-
-#[derive(Copy, Clone, Debug)]
-enum Entry {
-    Absolute(AbsoluteTypeNameEntry),
-    Relative(RelativeTypeNameEntry),
-}
-
-impl Entry {
-    fn parent(self) -> Option<TypeName> {
-        match self {
-            Self::Absolute(e) => e.parent,
-            Self::Relative(e) => e.parent,
-        }
-    }
-
-    fn segment(self) -> Option<SymbolId> {
-        match self {
-            Self::Absolute(e) => e.segment,
-            Self::Relative(e) => e.segment,
-        }
-    }
-
-    fn is_absolute(self) -> bool {
-        matches!(self, Self::Absolute(_))
-    }
+    absolute: bool,
 }
 
 /// Interner that flyweights [`TypeName`]s with content-addressed ids.
@@ -135,17 +100,19 @@ impl Default for TypeNameInterner {
         let mut entries = HashMap::new();
         entries.insert(
             relative_root,
-            Entry::Relative(RelativeTypeNameEntry {
+            Entry {
                 parent: None,
                 segment: None,
-            }),
+                absolute: false,
+            },
         );
         entries.insert(
             absolute_root,
-            Entry::Absolute(AbsoluteTypeNameEntry {
+            Entry {
                 parent: None,
                 segment: None,
-            }),
+                absolute: true,
+            },
         );
         Self {
             entries,
@@ -200,18 +167,14 @@ impl TypeNameInterner {
             .get(&parent)
             .copied()
             .expect("parent TypeName must be interned");
-        let entry = if parent_entry.is_absolute() {
-            Entry::Absolute(AbsoluteTypeNameEntry {
+        self.entries.insert(
+            id,
+            Entry {
                 parent: Some(parent),
                 segment: Some(segment),
-            })
-        } else {
-            Entry::Relative(RelativeTypeNameEntry {
-                parent: Some(parent),
-                segment: Some(segment),
-            })
-        };
-        self.entries.insert(id, entry);
+                absolute: parent_entry.absolute,
+            },
+        );
         id
     }
 
@@ -223,29 +186,47 @@ impl TypeNameInterner {
         segments.into_iter().fold(base, |p, s| self.append(p, s))
     }
 
+    /// Look up the entry for `name`, panicking with a self-describing
+    /// message if `name` was not interned in `self`. The most common cause
+    /// is mixing ids across two independent [`TypeNameInterner`]s (for
+    /// example, building a [`crate::namespace::Namespace`] against one
+    /// interner and querying it against another), but this also fires for
+    /// ids handed in via
+    /// [`crate::namespace::Namespace::from_type_name_unchecked`] whose
+    /// provenance the caller failed to vouch for.
+    fn entry(&self, name: TypeName) -> Entry {
+        *self.entries.get(&name).unwrap_or_else(|| {
+            panic!(
+                "TypeName {:?} not interned in this TypeNameInterner \
+                 (foreign interner id or unchecked-wrapped TypeName)",
+                name
+            )
+        })
+    }
+
     /// Returns the parent of `name`, or `None` if `name` is one of the
     /// two roots.
     #[must_use]
     pub fn parent(&self, name: TypeName) -> Option<TypeName> {
-        self.entries[&name].parent()
+        self.entry(name).parent
     }
 
     /// Returns the last segment of `name`, or `None` if `name` is one of
     /// the two roots.
     #[must_use]
     pub fn last_segment(&self, name: TypeName) -> Option<SymbolId> {
-        self.entries[&name].segment()
+        self.entry(name).segment
     }
 
     #[must_use]
     pub fn is_absolute(&self, name: TypeName) -> bool {
-        self.entries[&name].is_absolute()
+        self.entry(name).absolute
     }
 
     /// True for an empty path (the relative or absolute root).
     #[must_use]
     pub fn is_root(&self, name: TypeName) -> bool {
-        self.entries[&name].parent().is_none()
+        self.entry(name).parent.is_none()
     }
 
     /// Number of segments in `name`.
