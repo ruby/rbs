@@ -55,7 +55,7 @@
 #     *   `max` if <code>(self <=> max) > 0</code>.
 #     *   `self` otherwise.
 #
-module Comparable : _WithSpaceshipOperator
+module Comparable : RBS::Ops::_CaseEqual[untyped, Comparable::_CompareToZero?]
   # <!--
   #   rdoc-file=compar.c
   #   - self < other -> true or false
@@ -171,15 +171,8 @@ module Comparable : _WithSpaceshipOperator
            | [A] (Range[A]) -> (self | A)
 end
 
-# This interface defines the condition for Comparable mixin.
-#
+%a{deprecated: Use RBS::Ops::_Compare[untyped, Comparable::_CompareToZero?]}
 interface Comparable::_WithSpaceshipOperator
-  # `<=>` operator must return Integer or `nil`.
-  # If `other` is greater than `self`, it returns a positive Integer.
-  # If `other` equals to `self`, it returns zero.
-  # If `other` is less than `self`, it returns a positive Integer.
-  # If no comparison is defined with `other` and `self`, it returns `nil`.
-  #
   def <=>: (untyped other) -> Comparable::_CompareToZero?
 end
 
@@ -187,6 +180,5 @@ end
 #
 interface Comparable::_CompareToZero
   def <: (0) -> boolish
-
   def >: (0) -> boolish
 end
