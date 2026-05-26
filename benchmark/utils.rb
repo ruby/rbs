@@ -1,5 +1,6 @@
 require "rbs"
 require 'tmpdir'
+require 'pathname'
 
 def prepare_collection!
   tmpdir = Pathname(Dir.mktmpdir)
