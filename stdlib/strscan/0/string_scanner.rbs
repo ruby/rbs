@@ -498,7 +498,7 @@ class StringScanner
   # scanner[0]           # => nil
   # scanner[1]           # => nil
   #
-  def []: (Integer) -> String?
+  def []: (Integer | String | Symbol) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -625,7 +625,7 @@ class StringScanner
   #     scanner.check(/nope/)          # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def check: (Regexp) -> String?
+  def check: (Regexp | String) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -673,7 +673,7 @@ class StringScanner
   #     scanner.check_until(/nope/)    # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def check_until: (Regexp) -> String
+  def check_until: (Regexp | String) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -760,7 +760,7 @@ class StringScanner
   #     scanner.exist?(/nope/)         # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def exist?: (Regexp) -> Integer?
+  def exist?: (Regexp | String) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -913,7 +913,7 @@ class StringScanner
   #     scanner.match?(/nope/)         # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def match?: (Regexp) -> Integer?
+  def match?: (Regexp | String) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -975,6 +975,29 @@ class StringScanner
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
+  #   - named_captures -> hash
+  # -->
+  # Returns the array of captured match values at indexes (1..)
+  # if the most recent match attempt succeeded, or nil otherwise;
+  # see [Captured Match Values](rdoc-ref:StringScanner@Captured+Match+Values):
+  #     scanner = StringScanner.new('Fri Dec 12 1975 14:39')
+  # scanner.named_captures # => {}
+  #
+  # pattern = /(?<wday>\w+) (?<month>\w+) (?<day>\d+) /
+  # scanner.match?(pattern)
+  # scanner.named_captures # => {"wday"=>"Fri", "month"=>"Dec", "day"=>"12"}
+  #
+  # scanner.string = 'nope'
+  # scanner.match?(pattern)
+  # scanner.named_captures # => {"wday"=>nil, "month"=>nil, "day"=>nil}
+  #
+  # scanner.match?(/nosuch/)
+  # scanner.named_captures # => {}
+  #
+  def named_captures: () -> Hash[String, String?]
+
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
   #   - peek(length) -> substring
   # -->
   # Returns the substring <code>string[pos, length]</code>;
@@ -987,6 +1010,17 @@ class StringScanner
   # scanner.peek(3)   # => ""
   #
   def peek: (Integer) -> String
+
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - peek_byte()
+  # -->
+  # Peeks at the current byte and returns it as an integer.
+  #
+  #     s = StringScanner.new('ab')
+  #     s.peek_byte         # => 97
+  #
+  def peek_byte: () -> Integer?
 
   # <!-- rdoc-file=ext/strscan/strscan.c -->
   # call-seq:
@@ -1092,7 +1126,7 @@ class StringScanner
   # scanner.match?(/nope/) # => nil
   # scanner.post_match     # => nil
   #
-  def post_match: () -> String
+  def post_match: () -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1112,7 +1146,7 @@ class StringScanner
   # scanner.exist?(/nope/) # => nil
   # scanner.pre_match      # => nil
   #
-  def pre_match: () -> String
+  def pre_match: () -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1134,7 +1168,7 @@ class StringScanner
   # # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def reset: () -> void
+  def reset: () -> self
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1235,7 +1269,16 @@ class StringScanner
   #     scanner.scan(/nope/)           # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def scan: (Regexp) -> String?
+  def scan: (Regexp | String) -> String?
+
+  # <!--
+  #   rdoc-file=ext/strscan/strscan.c
+  #   - scan_byte -> integer_byte
+  # -->
+  # Scans one byte and returns it as an integer. This method is not multibyte
+  # character sensitive. See also: #getch.
+  #
+  def scan_byte: () -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1247,7 +1290,23 @@ class StringScanner
   #
   # "full" means "#scan with full parameters".
   #
-  def scan_full: (Regexp pattern, bool advance_pointer_p, bool return_string_p) -> untyped
+  def scan_full: (Regexp | String pattern, bool advance_pointer_p, true return_string_p) -> String?
+               | (Regexp | String pattern, bool advance_pointer_p, false return_string_p) -> Integer?
+
+  # <!--
+  #   rdoc-file=ext/strscan/lib/strscan/strscan.rb
+  #   - scan_integer(base: 10)
+  # -->
+  # If `base` isn't provided or is `10`, then it is equivalent to calling
+  # <code>#scan</code> with a `[+-]?d+` pattern, and returns an Integer or nil.
+  #
+  # If `base` is `16`, then it is equivalent to calling <code>#scan</code> with a
+  # `[+-]?(0x)?[0-9a-fA-F]+` pattern, and returns an Integer or nil.
+  #
+  # The scanned string must be encoded with an ASCII compatible encoding,
+  # otherwise Encoding::CompatibilityError will be raised.
+  #
+  def scan_integer: (?base: Integer) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1300,7 +1359,7 @@ class StringScanner
   #     scanner.scan_until(/nope/)     # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def scan_until: (Regexp) -> String?
+  def scan_until: (Regexp | String) -> String?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1311,7 +1370,8 @@ class StringScanner
   # `return_string_p` is true, otherwise returns the number of bytes advanced.
   # This method does affect the match register.
   #
-  def search_full: (Regexp pattern, bool advance_pointer_p, bool return_string_p) -> untyped
+  def search_full: (Regexp | String pattern, bool advance_pointer_p, true return_string_p) -> String?
+                 | (Regexp | String pattern, bool advance_pointer_p, false return_string_p) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1331,7 +1391,7 @@ class StringScanner
   # scanner.match?(/nope/)              # => nil
   # scanner.size                        # => nil
   #
-  def size: () -> Integer
+  def size: () -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1379,7 +1439,7 @@ class StringScanner
   # scanner.skip(/nope/)            # => nil
   # match_values_cleared?(scanner)  # => true
   #
-  def skip: (Regexp) -> Integer?
+  def skip: (Regexp | String) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1427,7 +1487,7 @@ class StringScanner
   #     scanner.skip_until(/nope/)     # => nil
   # match_values_cleared?(scanner) # => true
   #
-  def skip_until: (Regexp) -> Integer?
+  def skip_until: (Regexp | String) -> Integer?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1501,7 +1561,7 @@ class StringScanner
   # #   rest_size: 0
   # match_values_cleared?(scanner) # => true
   #
-  def terminate: () -> void
+  def terminate: () -> self
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1532,7 +1592,7 @@ class StringScanner
   # match_values_cleared?(scanner) # => true
   # scanner.unscan                 # Raises StringScanner::Error.
   #
-  def unscan: () -> void
+  def unscan: () -> self
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1547,7 +1607,7 @@ class StringScanner
   # scanner.values_at(*0..3)               # => ["Fri Dec 12 ", "Fri", "Dec", "12"]
   # scanner.values_at(*%i[wday month day]) # => ["Fri", "Dec", "12"]
   #
-  def values_at: (*Integer) -> Array[String]?
+  def values_at: (*Integer | String | Symbol) -> Array[String]?
 
   private
 
@@ -1570,7 +1630,7 @@ class StringScanner
   # #   rest:      "foobarbaz"
   # #   rest_size: 9
   #
-  def initialize: (String, ?bool dup, ?fixed_anchor: bool) -> untyped
+  def initialize: (String, ?fixed_anchor: bool) -> void
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
