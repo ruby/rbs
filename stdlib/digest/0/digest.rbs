@@ -319,7 +319,7 @@ class Digest::Class
   # Returns the base64 encoded hash value of a given *string*.  The return value
   # is properly padded with '=' and contains no line feeds.
   #
-  def self.base64digest: (string str, *untyped args) -> String
+  def self.base64digest: (string str) -> String
 
   # <!--
   #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
@@ -327,7 +327,7 @@ class Digest::Class
   # -->
   # Returns the BubbleBabble encoded hash value of a given *string*.
   #
-  def self.bubblebabble: (string, *untyped) -> String
+  def self.bubblebabble: (string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -338,7 +338,7 @@ class Digest::Class
   # any, are passed through to the constructor and the *string* is passed to
   # #digest().
   #
-  def self.digest: (string, *untyped) -> String
+  def self.digest: (string) -> String
 
   # <!--
   #   rdoc-file=ext/digest/lib/digest.rb
@@ -350,7 +350,7 @@ class Digest::Class
   #     p Digest::SHA256.file("X11R6.8.2-src.tar.bz2").hexdigest
   #     # => "f02e3c85572dc9ad7cb77c2a638e3be24cc1b5bea9fdbb0b0299c9668475c534"
   #
-  def self.file: (string name, *untyped args) -> instance
+  def self.file: (string name) -> instance
 
   # <!--
   #   rdoc-file=ext/digest/digest.c
@@ -359,7 +359,7 @@ class Digest::Class
   # Returns the hex-encoded hash value of a given *string*.  This is almost
   # equivalent to Digest.hexencode(Digest::Class.new(*parameters).digest(string)).
   #
-  def self.hexdigest: (string, *untyped) -> String
+  def self.hexdigest: (string) -> String
 
   private
 
