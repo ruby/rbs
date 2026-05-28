@@ -1365,8 +1365,8 @@ class Socket < BasicSocket
   # ### See
   # *   Socket#recvfrom
   #
-  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: true) -> [ String, Addrinfo ]
-                       | (Integer maxlen, ?Integer flags, ?untyped outbuf, exception: false) -> ([ String, Addrinfo ] | :wait_readable)
+  def recvfrom_nonblock: (Integer maxlen, ?Integer flags, ?untyped outbuf, ?exception: true) -> [ String, Addrinfo ]?
+                       | (Integer maxlen, ?Integer flags, ?untyped outbuf, exception: false) -> ([ String, Addrinfo ] | :wait_readable | nil)
 
   # <!--
   #   rdoc-file=ext/socket/socket.c

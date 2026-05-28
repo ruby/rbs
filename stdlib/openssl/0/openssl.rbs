@@ -9342,8 +9342,8 @@ module OpenSSL
       # Writes *string* to the SSL connection in a non-blocking manner.  Raises an
       # SSLError if writing would block.
       #
-      def syswrite_nonblock: (_ToS string, ?exception: true) -> Integer
-                           | (_ToS string, exception: false) -> (Integer | :wait_readable | :wait_writable | nil)
+      def syswrite_nonblock: (string, ?exception: true) -> Integer
+                           | (string, exception: false) -> (Integer | :wait_readable | :wait_writable)
 
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb

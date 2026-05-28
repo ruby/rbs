@@ -330,8 +330,8 @@ class BasicSocket < IO
   # ### See
   # *   Socket#recvfrom
   #
-  def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: true) -> String
-                   | (Integer maxlen, ?Integer flags, ?String buf, exception: false) -> (String | :wait_readable)
+  def recv_nonblock: (Integer maxlen, ?Integer flags, ?String buf, ?exception: true) -> String?
+                   | (Integer maxlen, ?Integer flags, ?String buf, exception: false) -> (String | :wait_readable | nil)
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -402,8 +402,8 @@ class BasicSocket < IO
   # recvmsg_nonblock should not raise an IO::WaitReadable exception, but return
   # the symbol <code>:wait_readable</code> instead.
   #
-  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: true, ?scm_rights: boolish) -> [ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ]
-                      | (?Integer dlen, ?Integer flags, ?Integer clen, exception: false, ?scm_rights: boolish) -> ([ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ] | :wait_readable)
+  def recvmsg_nonblock: (?Integer dlen, ?Integer flags, ?Integer clen, ?exception: true, ?scm_rights: boolish) -> [ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ]?
+                      | (?Integer dlen, ?Integer flags, ?Integer clen, exception: false, ?scm_rights: boolish) -> ([ String, Addrinfo, Integer?, Array[Socket::AncillaryData] ] | :wait_readable | nil)
 
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c

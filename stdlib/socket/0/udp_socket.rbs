@@ -86,8 +86,8 @@ class UDPSocket < IPSocket
   # ### See
   # *   Socket#recvfrom
   #
-  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: true) -> [ String, [ String, Integer, String, String ] ]
-                       | (Integer len, ?Integer flag, ?String outbuf, exception: false) -> ([ String, [ String, Integer, String, String ] ] | :wait_readable)
+  def recvfrom_nonblock: (Integer len, ?Integer flag, ?String outbuf, ?exception: true) -> [ String, [ String, Integer, String, String ] ]?
+                       | (Integer len, ?Integer flag, ?String outbuf, exception: false) -> ([ String, [ String, Integer, String, String ] ] | :wait_readable | nil)
 
   # <!--
   #   rdoc-file=ext/socket/udpsocket.c
