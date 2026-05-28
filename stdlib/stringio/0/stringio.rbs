@@ -560,7 +560,8 @@ class StringIO
   #
   # Related: StringIO.new.
   #
-  def self.open: [U] (?String string, ?String? mode) { (StringIO arg) -> U } -> U
+  def self.open: (?String string, ?String? mode) -> StringIO
+               | [U] (?String string, ?String? mode) { (StringIO arg) -> U } -> U
 
   def <<: (untyped arg0) -> self
 
@@ -970,7 +971,7 @@ class StringIO
   # -->
   # Raises NotImplementedError.
   #
-  def fcntl: (Integer integer_cmd, String | Integer arg) -> Integer
+  def fcntl: (*untyped) -> bot
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -994,7 +995,7 @@ class StringIO
   # -->
   # Returns 0; for compatibility with IO.
   #
-  def fsync: () -> Integer?
+  def fsync: () -> Integer
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1190,7 +1191,7 @@ class StringIO
   # -->
   # Returns `nil`; for compatibility with IO.
   #
-  def internal_encoding: () -> Encoding
+  def internal_encoding: () -> nil
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1207,7 +1208,7 @@ class StringIO
   #     strio = StringIO.new(nil, 'w+')
   #     strio.external_encoding # => nil
   #
-  def external_encoding: () -> Encoding
+  def external_encoding: () -> Encoding?
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1283,7 +1284,16 @@ class StringIO
   #
   def read: (?int? length, ?string outbuf) -> String?
 
-  def read_nonblock: (int len, ?string buf) -> String
+  # <!--
+  #   rdoc-file=ext/stringio/stringio.c
+  #   - pread(maxlen, offset)             -> string
+  #   - pread(maxlen, offset, out_string) -> string
+  # -->
+  # See IO#pread.
+  #
+  def pread: (Integer maxlen, Integer offset, ?String outbuf) -> String
+
+  def read_nonblock: (int len, ?string buf, ?exception: bool) -> String?
 
   def readbyte: () -> Integer
 
@@ -1360,6 +1370,16 @@ class StringIO
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
+  #   - strio.set_encoding_by_bom  => strio or nil
+  # -->
+  # Sets the encoding according to the BOM (Byte Order Mark) in the string.
+  #
+  # Returns `self` if the BOM is found, otherwise +nil.
+  #
+  def set_encoding_by_bom: () -> Encoding?
+
+  # <!--
+  #   rdoc-file=ext/stringio/stringio.c
   #   - string -> string
   # -->
   # Returns underlying string:
@@ -1429,7 +1449,7 @@ class StringIO
   #
   def sync=: (boolish) -> bool
 
-  def sysread: (Integer maxlen, String outbuf) -> String
+  def sysread: (Integer maxlen, ?String outbuf) -> String
 
   def syswrite: (String arg0) -> Integer
 
@@ -1472,7 +1492,7 @@ class StringIO
   # Pushes back ("unshifts") a character or integer onto the stream; see
   # [Character IO](rdoc-ref:IO@Character+IO).
   #
-  def ungetc: (String arg0) -> nil
+  def ungetc: (String | Integer arg0) -> nil
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1484,6 +1504,8 @@ class StringIO
   # a string using `to_s`. Returns the number of bytes written.  See IO#write.
   #
   def write: (*_ToS) -> Integer
+
+  def write_nonblock: (_ToS s, ?exception: bool) -> Integer
 
   # This is a deprecated alias for #each_byte.
   #

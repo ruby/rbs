@@ -1231,6 +1231,24 @@ class IO < Object
   def ioctl: (Integer integer_cmd, String | Integer argument) -> Integer
 
   # <!--
+  #   rdoc-file=ext/etc/etc.c
+  #   - pathconf(name)       ->  Integer
+  # -->
+  # Returns pathname configuration variable using fpathconf().
+  #
+  # *name* should be a constant under `Etc` which begins with `PC_`.
+  #
+  # The return value is an integer or nil. nil means indefinite limit.
+  # (fpathconf() returns -1 but errno is not set.)
+  #
+  #     require 'etc'
+  #     IO.pipe {|r, w|
+  #       p w.pathconf(Etc::PC_PIPE_BUF) #=> 4096
+  #     }
+  #
+  def pathconf: (Integer name) -> Integer?
+
+  # <!--
   #   rdoc-file=io.c
   #   - isatty -> true or false
   # -->
