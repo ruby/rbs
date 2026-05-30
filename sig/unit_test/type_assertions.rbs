@@ -179,7 +179,7 @@ module RBS
       #
       def assert_type: (String | Types::t value_type, untyped value) -> void
 
-      # Asserts if given `value` has a type of `value_type`
+      # Asserts if RBS definition declares given `method_name` with `visibility`
       #
       def assert_visibility: (:private | :public visibility, Symbol method_name) -> void
 
