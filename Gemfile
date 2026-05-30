@@ -48,6 +48,7 @@ gem "net-smtp"
 gem 'csv'
 gem 'ostruct'
 gem 'pstore'
+gem "timeout"
 
 group :minitest do
   gem "minitest"
