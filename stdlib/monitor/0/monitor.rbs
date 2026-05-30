@@ -111,7 +111,7 @@ class Monitor
   #   - wait_for_cond(p1, p2)
   # -->
   #
-  def wait_for_cond: (::MonitorMixin::ConditionVariable, Numeric? timeout) -> untyped
+  def wait_for_cond: (::MonitorMixin::ConditionVariable, Numeric? timeout) -> bool
 end
 
 # <!-- rdoc-file=ext/monitor/lib/monitor.rb -->
@@ -334,7 +334,7 @@ class MonitorMixin::ConditionVariable
   # If `timeout` is given, this method returns after `timeout` seconds passed,
   # even if no other thread doesn't signal.
   #
-  def wait: (?Numeric? timeout) -> untyped
+  def wait: (?Numeric? timeout) -> bool
 
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
@@ -342,7 +342,7 @@ class MonitorMixin::ConditionVariable
   # -->
   # Calls wait repeatedly until the given block yields a truthy value.
   #
-  def wait_until: () { () -> boolish } -> untyped
+  def wait_until: () { () -> boolish } -> nil
 
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
@@ -350,7 +350,7 @@ class MonitorMixin::ConditionVariable
   # -->
   # Calls wait repeatedly while the given block yields a truthy value.
   #
-  def wait_while: () { () -> boolish } -> untyped
+  def wait_while: () { () -> boolish } -> nil
 
   private
 
