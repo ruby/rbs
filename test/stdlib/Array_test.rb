@@ -441,7 +441,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_fill
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_find(method: :find)
@@ -475,11 +475,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_flatten
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_flatten!
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_hash
@@ -490,11 +490,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_include?
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_insert
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_inspect(method: :inspect)
@@ -509,15 +509,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_intersect?
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_intersection
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_join
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_keep_if
@@ -629,7 +629,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_product
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_push(method: :push)
@@ -792,15 +792,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_slice!
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_sort
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_sort!
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_sort_by!
@@ -808,11 +808,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_sum
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_take
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_take_while
@@ -853,15 +853,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_union
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_uniq
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_uniq!
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_unshift(method: :unshift)
@@ -878,11 +878,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_values_at
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_zip
-    omit 'todo'
+    omit 'todo -- non-enumerable'
   end
 
   def test_op_or
