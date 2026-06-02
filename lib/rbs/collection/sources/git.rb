@@ -140,6 +140,12 @@ module RBS
                 # git v2.27.0 or greater
                 git 'clone', '--filter=blob:none', remote, git_dir.to_s, chdir: nil
               rescue CommandError
+                # The failed `--filter=blob:none` clone may leave behind a
+                # partial repository (e.g. when the server returned an error
+                # mid-clone), which would cause the fallback `git clone` to
+                # fail with "destination path ... already exists and is not
+                # an empty directory". Clean it up before retrying.
+                FileUtils.rm_rf(git_dir)
                 git 'clone', remote, git_dir.to_s, chdir: nil
               end
             end

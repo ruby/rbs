@@ -1,4 +1,5 @@
 require "test_helper"
+require "timeout"
 
 class RBS::ParserTest < Test::Unit::TestCase
   def buffer(source)
@@ -1041,6 +1042,24 @@ class RBS::ParserTest < Test::Unit::TestCase
     # which used to hang on reversed ranges.
     assert_raises(ArgumentError) do
       RBS::Parser.parse_type("", byte_range: 1..0)
+    end
+  end
+
+  def test_invalid_utf8_byte_in_comment_does_not_hang
+    # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
+    source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
+    Timeout.timeout(5) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+    end
+  end
+
+  def test_invalid_utf8_byte_at_top_level_raises
+    # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
+    source = "\xFF".dup.force_encoding(Encoding::UTF_8)
+    Timeout.timeout(5) do
+      assert_raises(RBS::ParsingError) do
+        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+      end
     end
   end
 end

@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: fdaad2dee750a982a44723d0d3449e03da2ec9fd
+  revision: 727014c361ae996a80b87948510c83ca480f5e82
   specs:
     steep (2.1.0.dev)
       concurrent-ruby (>= 1.1.10)
@@ -53,7 +53,7 @@ GEM
     ast (2.4.3)
     base64 (0.3.0)
     benchmark (0.5.0)
-    benchmark-ips (2.14.0)
+    benchmark-ips (2.15.1)
     bigdecimal (4.1.2)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
@@ -79,7 +79,7 @@ GEM
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.19.5)
+    json (2.19.7)
     json-schema (6.2.0)
       addressable (~> 2.8)
       bigdecimal (>= 3.1, < 5)
@@ -90,7 +90,7 @@ GEM
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.7.0)
-    marcel (1.1.0)
+    marcel (1.2.1)
     memory_profiler (1.1.0)
     minitest (6.0.6)
       drb (~> 2.0)
@@ -148,7 +148,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.7)
-    rubocop (1.86.2)
+    rubocop (1.87.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -231,6 +231,7 @@ DEPENDENCIES
   steep!
   tempfile
   test-unit
+  timeout
 
 BUNDLED WITH
   4.0.1

@@ -148,6 +148,17 @@ module TestHelper
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods
   end
 
+  # Disables verbose mode for the duration of the passed block. Used when
+  # testing codepaths which emit warnings when run.
+  #
+  # The `verbose` variable can be used to change the verbosity if needed.
+  def disable_verbose(verbose = nil)
+    old_verbose, $VERBOSE = $VERBOSE, verbose
+    yield
+  ensure
+    $VERBOSE = old_verbose
+  end
+
   RUBY_EXECUTABLE = ENV["RUBY"] || RbConfig.ruby
 
   def silence_warning(which)

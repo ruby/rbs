@@ -303,7 +303,7 @@ module Digest::Instance
   # uninitialized.  Do not call this method from outside.  Use #digest!() instead,
   # which ensures that internal data be reset for security reasons.
   #
-  def finish: () -> self
+  def finish: () -> String
 end
 
 # <!-- rdoc-file=ext/digest/digest.c -->
