@@ -60,6 +60,13 @@ class ArrayInstanceTest < Test::Unit::TestCase
     def rand(max) = ToInt.new(Random.new.rand(max))
   end
 
+  class ComparableToZero
+    def self.for(x, y) = (x <=> y)&.then { |cmp| new(cmp) }
+    def initialize(cmp) = @cmp = cmp
+    def <(x) = 0.equal?(x) ? @cmp < x : fail
+    def >(x) = 0.equal?(x) ? @cmp > x : fail
+  end
+
   def test_op_and
     with_array [1r, 1i] do |other|
       assert_send_type  '(array[untyped]) -> Array[Rational]',
@@ -475,11 +482,52 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_max
-    omit 'todo'
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> nil',
+                      [], :max
+    assert_send_type  '() -> Rational',
+                      ary, :max
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> Rational',
+                      ary, :max do |a, b| ComparableToZero.for(a, b) end
+
+    with_int 3 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        ary, :max, count
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero? } -> Array[Rational]',
+                        ary, :max, count do |a, b| ComparableToZero.for(a, b) end
+    end
+  end
+
+  def test_min
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> nil',
+                      [], :min
+    assert_send_type  '() -> Rational',
+                      ary, :min
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> Rational',
+                      ary, :min do |a, b| ComparableToZero.for(a, b) end
+
+    with_int 3 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        ary, :min, count
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero? } -> Array[Rational]',
+                        ary, :min, count do |a, b| ComparableToZero.for(a, b) end
+    end
   end
 
   def test_minmax
-    omit 'todo'
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> [nil, nil]',
+                      [], :minmax
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> [nil, nil]',
+                      [], :minmax do end
+    assert_send_type  '() -> [Rational, Rational]',
+                      ary, :minmax
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> [Rational, Rational]',
+                      ary, :minmax do |a, b| ComparableToZero.for(a, b) end
   end
 
   def test_pack
@@ -769,10 +817,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
   def test_initialize_copy
     assert_visibility :private, :initialize_copy
     test_replace(method: :initialize_copy)
-  end
-
-  def test_min
-    omit 'todo'
   end
 
   def test_none?

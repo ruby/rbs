@@ -2511,10 +2511,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def max: %a{implicitly-returns-nil} () -> E
-         | %a{implicitly-returns-nil} () { (E a, E b) -> ::Integer? } -> E
-         | (int n) -> ::Array[E]
-         | (int n) { (E a, E b) -> ::Integer? } -> ::Array[E]
+  def max: %a{implicitly-returns-nil} () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: where `E: Comparable::_WithSpaceshipOperator`
+         | (int count) ?{ (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: i dont think these shoudl have `?` in _CompareToZero. But it would make signatures nicer?
 
   # <!--
   #   rdoc-file=array.c
@@ -2564,7 +2562,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  alias min max
+  def min: %a{implicitly-returns-nil} () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: where `E: Comparable::_WithSpaceshipOperator`
+         | (int count) ?{ (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2588,8 +2587,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def minmax: () -> [ E?, E? ]
-            | () { (E a, E b) -> ::Integer? } -> [ E?, E? ]
+  def minmax: () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> [ E?, E? ]
 
   # <!--
   #   rdoc-file=array.c
