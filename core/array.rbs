@@ -1426,9 +1426,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def count: () -> ::Integer
-           | (E obj) -> ::Integer
-           | () { (E) -> boolish } -> ::Integer
+  def count: () ?{ (E element) -> boolish } -> Integer
+           | (untyped object) -> Integer # TODO: where E: _Equal
 
   # <!--
   #   rdoc-file=array.c
@@ -1507,8 +1506,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def delete: (E obj) -> E?
-            | [S, T] (S obj) { (S) -> T } -> (E | T)
+  def delete: (untyped object) -> E? # TODO: _Comparable
+            | [S, T] (S object) { (S object) -> T } -> (E | T)
 
   # <!--
   #   rdoc-file=array.c
@@ -1576,7 +1575,7 @@ class Array[unchecked out E]
   # Related: Array#-; see also [Methods for
   # Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def difference: (*::Array[untyped] arrays) -> ::Array[E]
+  def difference: (*array[untyped] other_arrays) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -1596,8 +1595,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def dig: (int idx) -> E?
-         | (int idx, untyped, *untyped) -> untyped
+  def dig: (int index) -> E?
+         | (int index, untyped, *untyped) -> untyped
 
   # <!--
   #   rdoc-file=array.c
@@ -1616,7 +1615,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def drop: (int n) -> ::Array[E]
+  def drop: (int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -1779,7 +1778,7 @@ class Array[unchecked out E]
   #
   def fetch: (int index) -> E
            | [T] (int index, T default) -> (E | T)
-           | [T] (int index) { (int index) -> T } -> (E | T)
+           | [I < _ToInt, T] (I index) { (I index) -> T } -> (E | T)
 
   # <!--
   #   rdoc-file=array.rb

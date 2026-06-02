@@ -292,7 +292,18 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_count
-    omit 'todo'
+    assert_send_type  '() -> Integer',
+                      [], :count
+    assert_send_type  '() -> Integer',
+                      [1r], :count
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], :count do |x| x >= 2 end
+
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer',
+                        [1r, 2r], :count, untyped
+    end
   end
 
   def test_cycle
@@ -300,15 +311,30 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_deconstruct
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :deconstruct
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :deconstruct
   end
 
   def test_delete
-    omit 'todo'
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
+
+      assert_send_type  '(untyped) -> Rational?',
+                        [1r], :delete, untyped
+      assert_send_type  '[S] (S) { (S) -> Complex } -> (Rational | Complex) ',
+                        [1r], :delete, untyped do 1i end
+    end
   end
 
   def test_delete_at
-    omit 'todo'
+    with_int 2 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :delete_at, index
+      assert_send_type  '(int) -> nil',
+                        [1r, 2r], :delete_at, index
+    end
   end
 
   def test_delete_if(method: :delete_if)
@@ -316,15 +342,41 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_difference
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :difference
+
+    with_array 2r, 3r do |array1|
+      with_array 1, :a, 'b' do |array2|
+        assert_send_type  '(*array[untyped]) -> Array[Rational]',
+                          [1r, 2r], :difference, array1, array2
+      end
+    end
   end
 
   def test_dig
-    omit 'todo'
+    with_int 2 do |index|
+      assert_send_type  '(int) -> nil',
+                        [1r, 2r], :dig, index
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :dig, index
+
+      assert_send_type  '(int, untyped) -> untyped',
+                        [1r, [3]], :dig, index, 0
+      assert_send_type  '(int, untyped, *untyped) -> untyped',
+                        [1r, [[3]]], :dig, index, 0, 0
+
+      assert_send_type  '(int, untyped) -> untyped',
+                        [1r, 2r, [3]], :dig, index, 0
+      assert_send_type  '(int, untyped, *untyped) -> untyped',
+                        [1r, 2r, [[3]]], :dig, index, 0, 0
+    end
   end
 
   def test_drop
-    omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :drop, count
+    end
   end
 
   def test_drop_while
@@ -347,11 +399,27 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_eql?
-    omit 'todo'
+    with_untyped.and [1r] do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        [1r], :eql?, untyped
+    end
   end
 
   def test_fetch
-    omit 'todo'
+    with_int 2 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :fetch, index
+
+      assert_send_type  '(int, Complex) -> Complex',
+                        [1r, 2r], :fetch, index, 1i
+      assert_send_type  '(int, Complex) -> Rational',
+                        [1r, 2r, 3r], :fetch, index, 1i
+
+      assert_send_type  '[I < _ToInt] (I) { (I) -> Complex } -> Complex',
+                        [1r, 2r], :fetch, index do 1i end
+      assert_send_type  '[I < _ToInt] (I) { (I) -> Complex } -> Rational',
+                        [1r, 2r, 3r], :fetch, index do 1i end
+    end
   end
 
   def test_fetch_values
@@ -531,7 +599,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_pack
-    omit 'todo'
+    with_string 'ccc' do |fmt|
+      assert_send_type  '(string) -> String',
+                        [1, 2, 3], :pack, fmt
+
+      assert_send_type  '(string, buffer: nil) -> String',
+                        [1, 2, 3], :pack, fmt, buffer: nil
+      assert_send_type  '(string, buffer: String) -> String',
+                        [1, 2, 3], :pack, fmt, buffer: +''
+      refute_send_type  '(string, buffer: _ToStr) -> String',
+                        [1,2,3], :pack, fmt, buffer: ToStr.new(+'')
+    end
   end
 
   def test_permutation
