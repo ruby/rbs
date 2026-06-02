@@ -56,6 +56,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   class ArraySubclass < Array
   end
 
+  class RngGen
+    def rand(max) = ToInt.new(Random.new.rand(max))
+  end
+
   def test_op_and
     with_array [1r, 1i] do |other|
       assert_send_type  '(array[untyped]) -> Array[Rational]',
@@ -334,7 +338,21 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_fetch_values
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :fetch_values
+    assert_send_type  '() { (Integer) -> void } -> Array[Rational]',
+                      [1r, 2r], :fetch_values do end
+
+    with_int 1 do |index1|
+      with_int 2 do |index2|
+        assert_send_type  '(*int) -> Array[Rational]',
+                          [1r, 2r, 3r], :fetch_values, index1, index2
+        assert_send_type  '[I < _ToInt] (*I) { (I) -> void } -> Array[Rational]',
+                          [1r, 2r, 3r], :fetch_values, index1, index2 do fail end
+        assert_send_type  '[I < _ToInt] (*I) { (I) -> Complex } -> Array[Rational | Complex]',
+                          [1r, 2r], :fetch_values, index1, index2 do |x| x.to_int.i end
+      end
+    end
   end
 
   def test_fill
@@ -358,7 +376,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_first
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [], :first
+    assert_send_type  '() -> Rational',
+                      [1r, 2r], :first
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :first, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :first, count
+    end
   end
 
   def test_flatten
@@ -412,7 +440,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_last
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [], :last
+    assert_send_type  '() -> Rational',
+                      [1r, 2r], :last
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :last, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :last, count
+    end
   end
 
   def test_length(method: :length)
@@ -500,7 +538,22 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_sample
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [], :sample
+    assert_send_type  '(random: Array::_Rand) -> nil',
+                      [], :sample, random: RngGen.new
+
+    assert_send_type  '() -> Rational',
+                      [1r, 2r, 3r], :sample
+    assert_send_type  '(random: Array::_Rand) -> Rational',
+                      [1r, 2r, 3r], :sample, random: RngGen.new
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :sample, count
+      assert_send_type  '(int, random: Array::_Rand) -> Array[Rational]',
+                        [1r, 2r, 3r], :sample, count, random: RngGen.new
+    end
   end
 
   def test_select(method: :select)
@@ -524,11 +577,19 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_shuffle
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle
+
+    assert_send_type  '(random: Array::_Rand) -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle, random: RngGen.new
   end
 
   def test_shuffle!
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle!
+
+    assert_send_type  '(random: Array::_Rand) -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle!, random: RngGen.new
   end
 
   def test_slice!

@@ -549,6 +549,12 @@
 class Array[unchecked out E]
   include Enumerable[E]
 
+  # Interface for random number generations; used with `Array#shuffle`, `Array#shuffle!`, and `Array#sample`.
+  interface _Rand
+    # Generate a random number up to, but excluding, `max`
+    def rand: (Integer max) -> int
+  end
+
   # <!--
   #   rdoc-file=array.c
   #   - Array.new -> new_empty_array
@@ -1810,7 +1816,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def fetch_values: (*int indexes) -> self
+  def fetch_values: (*int indexes) -> Array[E]
+                  | [I < _ToInt, T] (*I indexes) { (I index) -> T } -> Array[E | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -2116,7 +2123,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def first: %a{implicitly-returns-nil} () -> E
-           | (int n) -> ::Array[E]
+           | (int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2411,7 +2418,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def last: %a{implicitly-returns-nil} () -> E
-          | (int n) -> ::Array[E]
+          | (int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3212,8 +3219,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def sample: %a{implicitly-returns-nil} (?random: _Rand rng) -> E
-            | (int n, ?random: _Rand rng) -> ::Array[E]
+  def sample: %a{implicitly-returns-nil} (?random: _Rand) -> E
+            | (int count, ?random: _Rand) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3322,7 +3329,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def shuffle: (?random: _Rand rng) -> ::Array[E]
+  def shuffle: (?random: _Rand) -> Array[E]
 
   # <!--
   #   rdoc-file=array.rb
@@ -3346,7 +3353,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def shuffle!: (?random: _Rand rng) -> self
+  def shuffle!: (?random: _Rand) -> self
 
   # <!-- rdoc-file=array.c -->
   # Returns the count of elements in `self`:
@@ -4140,6 +4147,7 @@ class Array[unchecked out E]
   alias initialize_copy replace
 end
 
+%a{deprecated: Use Array::_Rand}
 interface _Rand
   def rand: (::Integer max) -> ::Integer
 end
