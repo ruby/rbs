@@ -202,11 +202,21 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_assoc
-    omit 'todo'
+    with_untyped.and 1r, :a, 'b' do |object|
+      next unless defined? object.==
+
+      assert_send_type  '(untyped) -> Array[untyped]?',
+                        [{foo: 3}, [1r, 1i], [:a, :b, :c], ['b']], :assoc, object
+    end
   end
 
   def test_at
-    omit 'todo'
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], :at, index
+      assert_send_type  '(int) -> nil',
+                        [1r], :at, index
+    end
   end
 
   def test_bsearch
@@ -218,7 +228,8 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_clear
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :clear
   end
 
   def test_collect(method: :collect)
@@ -242,11 +253,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_compact
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :compact
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, nil, 3r], :compact
   end
 
   def test_compact!
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [1r, 2r, 3r], :compact!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, nil, 3r], :compact!
   end
 
   def test_concat
@@ -302,7 +319,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_empty?
-    omit 'todo'
+    assert_send_type  '() -> bool',
+                      [], :empty?
+    assert_send_type  '() -> bool',
+                      [1r], :empty?
   end
 
   def test_eql?
@@ -350,7 +370,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_hash
-    omit 'todo'
+    assert_send_type  '() -> Integer',
+                      [], :hash
+    assert_send_type  '() -> Integer',
+                      [1r, 2r], :hash
   end
 
   def test_include?
@@ -362,7 +385,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_inspect(method: :inspect)
-    omit 'todo'
+    assert_send_type  '() -> String',
+                      [], method
+    assert_send_type  '() -> String',
+                      [1r, 2r], method
   end
 
   def test_to_s
@@ -619,7 +645,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_rassoc
-    omit 'todo'
+    with_untyped.and 1r, :a, 'b' do |object|
+      next unless defined? object.==
+      assert_send_type  '(untyped) -> Array[untyped]?',
+                        [{foo: 3}, [1r, 1i], [:a, :b, :c], ['b']], :rassoc, object
+    end
   end
 
   def test_reject

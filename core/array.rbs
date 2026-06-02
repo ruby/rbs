@@ -1189,7 +1189,7 @@ class Array[unchecked out E]
   # Related: Array#rassoc; see also [Methods for
   # Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def assoc: (untyped) -> ::Array[untyped]?
+  def assoc: (untyped object) -> Array[untyped]? # TODO: where `E: _ToAry[X]`, and object: _Equal
 
   # <!--
   #   rdoc-file=array.c
@@ -1360,7 +1360,7 @@ class Array[unchecked out E]
   # Related: Array#compact!; see also [Methods for
   # Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def compact: () -> ::Array[E]
+  def compact: () -> Array[E] # TODO: it'd be nice if there was a way to do `Array[E - nil]`
 
   # <!--
   #   rdoc-file=array.c
@@ -2202,7 +2202,7 @@ class Array[unchecked out E]
   #     ['a', 'b'].hash == ['a', 'c'].hash # => false
   #     ['a', 'b'].hash == ['a'].hash      # => false
   #
-  def hash: () -> ::Integer
+  def hash: () -> Integer # TODO: where `E: _Hash`
 
   # <!--
   #   rdoc-file=array.c
@@ -2295,7 +2295,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def inspect: () -> String
+  def inspect: () -> String # TODO: where E: _Inspect
 
   # <!--
   #   rdoc-file=array.c
@@ -2849,7 +2849,7 @@ class Array[unchecked out E]
   # Related: Array#assoc; see also [Methods for
   # Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  alias rassoc assoc
+  def rassoc: (untyped object) -> Array[untyped]? # TODO: where `E: _ToAry[X]`, and object: _Equal
 
   # <!--
   #   rdoc-file=array.c
