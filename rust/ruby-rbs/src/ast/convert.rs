@@ -1,6 +1,23 @@
+use crate::ast::annotation::Annotation;
+use crate::ast::comment::Comment;
+use crate::ast::declarations::{
+    ClassAliasDeclaration, ClassDeclaration, ClassMember, ClassSuper, ConstantDeclaration,
+    Declaration, GlobalDeclaration, InterfaceDeclaration, ModuleAliasDeclaration,
+    ModuleDeclaration, ModuleMember, ModuleSelf, TypeAliasDeclaration,
+};
 use crate::ast::location::{
-    AliasLocation, ClassInstanceLocation, ClassSingletonLocation, FunctionParamLocation,
-    InterfaceLocation, LocationRange, MethodTypeLocation, TypeParamLocation,
+    AliasDeclarationLocation, AliasLocation, AliasMemberLocation, AttributeMemberLocation,
+    ClassDeclarationLocation, ClassInstanceLocation, ClassSingletonLocation, ClassSuperLocation,
+    ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
+    InterfaceDeclarationLocation, InterfaceLocation, LocationRange, MethodDefinitionLocation,
+    MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation, ModuleSelfLocation,
+    TypeAliasDeclarationLocation, TypeParamLocation, VariableMemberLocation,
+};
+use crate::ast::members::{
+    AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
+    ClassInstanceVariableMember, ClassVariableMember, ExtendMember, IncludeMember,
+    InstanceVariableMember, IvarName, Member, MethodDefinitionMember, MethodDefinitionOverload,
+    MethodKind, PrependMember, PrivateMember, PublicMember, Visibility,
 };
 use crate::ast::method_type::MethodType;
 use crate::ast::type_param::{TypeParam, Variance};
@@ -13,9 +30,17 @@ use crate::ast::types::{
 use crate::ids::{SymbolId, TypeName};
 use crate::interner::StringInterner;
 use crate::node::{
-    AliasTypeNode, BlockTypeNode, ClassInstanceTypeNode, ClassSingletonTypeNode, FunctionParamNode,
-    FunctionTypeNode, InterfaceTypeNode, MethodTypeNode, Node, RBSLocationRange, SymbolNode,
-    TypeNameNode, TypeParamNode, TypeParamVariance, UntypedFunctionTypeNode,
+    AliasKind as NodeAliasKind, AliasNode, AliasTypeNode, AnnotationNode, AttrAccessorNode,
+    AttrIvarName, AttrReaderNode, AttrWriterNode, AttributeKind as NodeAttributeKind,
+    AttributeVisibility as NodeAttributeVisibility, BlockTypeNode, ClassAliasNode,
+    ClassInstanceTypeNode, ClassInstanceVariableNode, ClassNode, ClassSingletonTypeNode,
+    ClassSuperNode, ClassVariableNode, CommentNode, ConstantNode, ExtendNode, FunctionParamNode,
+    FunctionTypeNode, GlobalNode, IncludeNode, InstanceVariableNode, InterfaceNode,
+    InterfaceTypeNode, MethodDefinitionKind as NodeMethodDefinitionKind, MethodDefinitionNode,
+    MethodDefinitionOverloadNode, MethodDefinitionVisibility as NodeMethodDefinitionVisibility,
+    MethodTypeNode, ModuleAliasNode, ModuleNode, ModuleSelfNode, Node, PrependNode, PrivateNode,
+    PublicNode, RBSLocationRange, SymbolNode, TypeAliasNode, TypeNameNode, TypeParamNode,
+    TypeParamVariance, UntypedFunctionTypeNode,
 };
 use crate::type_name::TypeNameInterner;
 
@@ -29,6 +54,57 @@ impl<'a> AstConverter<'a> {
         Self {
             strings,
             type_names,
+        }
+    }
+
+    pub fn convert_declaration(&mut self, node: &Node<'_>) -> Declaration {
+        match node {
+            Node::Class(node) => Declaration::Class(self.convert_class_declaration(node)),
+            Node::Module(node) => Declaration::Module(self.convert_module_declaration(node)),
+            Node::Interface(node) => {
+                Declaration::Interface(self.convert_interface_declaration(node))
+            }
+            Node::Constant(node) => Declaration::Constant(self.convert_constant_declaration(node)),
+            Node::Global(node) => Declaration::Global(self.convert_global_declaration(node)),
+            Node::TypeAlias(node) => {
+                Declaration::TypeAlias(self.convert_type_alias_declaration(node))
+            }
+            Node::ClassAlias(node) => {
+                Declaration::ClassAlias(self.convert_class_alias_declaration(node))
+            }
+            Node::ModuleAlias(node) => {
+                Declaration::ModuleAlias(self.convert_module_alias_declaration(node))
+            }
+            _ => panic_expected("declaration node while converting declaration", node),
+        }
+    }
+
+    pub fn convert_member(&mut self, node: &Node<'_>) -> Member {
+        match node {
+            Node::MethodDefinition(node) => {
+                Member::MethodDefinition(self.convert_method_definition_member(node))
+            }
+            Node::InstanceVariable(node) => {
+                Member::InstanceVariable(self.convert_instance_variable_member(node))
+            }
+            Node::ClassInstanceVariable(node) => {
+                Member::ClassInstanceVariable(self.convert_class_instance_variable_member(node))
+            }
+            Node::ClassVariable(node) => {
+                Member::ClassVariable(self.convert_class_variable_member(node))
+            }
+            Node::Include(node) => Member::Include(self.convert_include_member(node)),
+            Node::Extend(node) => Member::Extend(self.convert_extend_member(node)),
+            Node::Prepend(node) => Member::Prepend(self.convert_prepend_member(node)),
+            Node::AttrReader(node) => Member::AttrReader(self.convert_attr_reader_member(node)),
+            Node::AttrWriter(node) => Member::AttrWriter(self.convert_attr_writer_member(node)),
+            Node::AttrAccessor(node) => {
+                Member::AttrAccessor(self.convert_attr_accessor_member(node))
+            }
+            Node::Public(node) => Member::Public(self.convert_public_member(node)),
+            Node::Private(node) => Member::Private(self.convert_private_member(node)),
+            Node::Alias(node) => Member::Alias(self.convert_alias_member(node)),
+            _ => panic_expected("member node while converting member", node),
         }
     }
 
@@ -134,6 +210,396 @@ impl<'a> AstConverter<'a> {
             kind,
             location: Some(convert_range(location)),
         })
+    }
+
+    fn convert_class_declaration(&mut self, node: &ClassNode<'_>) -> ClassDeclaration {
+        ClassDeclaration {
+            name: self.convert_type_name(&node.name()),
+            type_params: self.convert_type_params(node.type_params()),
+            members: self.convert_class_members(node.members()),
+            super_class: node
+                .super_class()
+                .map(|super_class| self.convert_class_super(&super_class)),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(ClassDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                name_range: convert_range(node.name_location()),
+                end_range: convert_range(node.end_location()),
+                type_params_range: convert_optional_range(node.type_params_location()),
+                lt_range: convert_optional_range(node.lt_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_class_super(&mut self, node: &ClassSuperNode<'_>) -> ClassSuper {
+        ClassSuper {
+            name: self.convert_type_name(&node.name()),
+            args: self.convert_type_list(node.args()),
+            location: Some(ClassSuperLocation {
+                range: convert_range(node.location()),
+                name_range: convert_range(node.name_location()),
+                args_range: convert_optional_range(node.args_location()),
+            }),
+        }
+    }
+
+    fn convert_module_declaration(&mut self, node: &ModuleNode<'_>) -> ModuleDeclaration {
+        ModuleDeclaration {
+            name: self.convert_type_name(&node.name()),
+            type_params: self.convert_type_params(node.type_params()),
+            members: self.convert_module_members(node.members()),
+            location: Some(ModuleDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                name_range: convert_range(node.name_location()),
+                end_range: convert_range(node.end_location()),
+                type_params_range: convert_optional_range(node.type_params_location()),
+                colon_range: convert_optional_range(node.colon_location()),
+                self_types_range: convert_optional_range(node.self_types_location()),
+            }),
+            annotations: self.convert_annotations(node.annotations()),
+            self_types: self.convert_module_selfs(node.self_types()),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_module_self(&mut self, node: &ModuleSelfNode<'_>) -> ModuleSelf {
+        ModuleSelf {
+            name: self.convert_type_name(&node.name()),
+            args: self.convert_type_list(node.args()),
+            location: Some(ModuleSelfLocation {
+                range: convert_range(node.location()),
+                name_range: convert_range(node.name_location()),
+                args_range: convert_optional_range(node.args_location()),
+            }),
+        }
+    }
+
+    fn convert_interface_declaration(&mut self, node: &InterfaceNode<'_>) -> InterfaceDeclaration {
+        InterfaceDeclaration {
+            name: self.convert_type_name(&node.name()),
+            type_params: self.convert_type_params(node.type_params()),
+            members: self.convert_members(node.members()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(InterfaceDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                name_range: convert_range(node.name_location()),
+                end_range: convert_range(node.end_location()),
+                type_params_range: convert_optional_range(node.type_params_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_type_alias_declaration(&mut self, node: &TypeAliasNode<'_>) -> TypeAliasDeclaration {
+        TypeAliasDeclaration {
+            name: self.convert_type_name(&node.name()),
+            type_params: self.convert_type_params(node.type_params()),
+            ty: self.convert_type(&node.type_()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(TypeAliasDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                name_range: convert_range(node.name_location()),
+                eq_range: convert_range(node.eq_location()),
+                type_params_range: convert_optional_range(node.type_params_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_constant_declaration(&mut self, node: &ConstantNode<'_>) -> ConstantDeclaration {
+        ConstantDeclaration {
+            name: self.convert_type_name(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            location: Some(ConstantDeclarationLocation {
+                range: convert_range(node.location()),
+                name_range: convert_range(node.name_location()),
+                colon_range: convert_range(node.colon_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+            annotations: self.convert_annotations(node.annotations()),
+        }
+    }
+
+    fn convert_global_declaration(&mut self, node: &GlobalNode<'_>) -> GlobalDeclaration {
+        GlobalDeclaration {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            location: Some(GlobalDeclarationLocation {
+                range: convert_range(node.location()),
+                name_range: convert_range(node.name_location()),
+                colon_range: convert_range(node.colon_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+            annotations: self.convert_annotations(node.annotations()),
+        }
+    }
+
+    fn convert_class_alias_declaration(
+        &mut self,
+        node: &ClassAliasNode<'_>,
+    ) -> ClassAliasDeclaration {
+        ClassAliasDeclaration {
+            new_name: self.convert_type_name(&node.new_name()),
+            old_name: self.convert_type_name(&node.old_name()),
+            location: Some(AliasDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                new_name_range: convert_range(node.new_name_location()),
+                eq_range: convert_range(node.eq_location()),
+                old_name_range: convert_range(node.old_name_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+            annotations: self.convert_annotations(node.annotations()),
+        }
+    }
+
+    fn convert_module_alias_declaration(
+        &mut self,
+        node: &ModuleAliasNode<'_>,
+    ) -> ModuleAliasDeclaration {
+        ModuleAliasDeclaration {
+            new_name: self.convert_type_name(&node.new_name()),
+            old_name: self.convert_type_name(&node.old_name()),
+            location: Some(AliasDeclarationLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                new_name_range: convert_range(node.new_name_location()),
+                eq_range: convert_range(node.eq_location()),
+                old_name_range: convert_range(node.old_name_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+            annotations: self.convert_annotations(node.annotations()),
+        }
+    }
+
+    fn convert_method_definition_member(
+        &mut self,
+        node: &MethodDefinitionNode<'_>,
+    ) -> MethodDefinitionMember {
+        MethodDefinitionMember {
+            name: self.intern_symbol(&node.name()),
+            kind: convert_method_kind(node.kind()),
+            overloads: self.convert_method_definition_overloads(node.overloads()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(MethodDefinitionLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                name_range: convert_range(node.name_location()),
+                kind_range: convert_optional_range(node.kind_location()),
+                overloading_range: convert_optional_range(node.overloading_location()),
+                visibility_range: convert_optional_range(node.visibility_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+            overloading: node.overloading(),
+            visibility: convert_method_visibility(node.visibility()),
+        }
+    }
+
+    fn convert_method_definition_overload(
+        &mut self,
+        node: &MethodDefinitionOverloadNode<'_>,
+    ) -> MethodDefinitionOverload {
+        MethodDefinitionOverload {
+            method_type: self.convert_method_type_node(&node.method_type()),
+            annotations: self.convert_annotations(node.annotations()),
+        }
+    }
+
+    fn convert_instance_variable_member(
+        &mut self,
+        node: &InstanceVariableNode<'_>,
+    ) -> InstanceVariableMember {
+        InstanceVariableMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            location: Some(variable_member_location(
+                node.location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_class_instance_variable_member(
+        &mut self,
+        node: &ClassInstanceVariableNode<'_>,
+    ) -> ClassInstanceVariableMember {
+        ClassInstanceVariableMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            location: Some(variable_member_location(
+                node.location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_class_variable_member(
+        &mut self,
+        node: &ClassVariableNode<'_>,
+    ) -> ClassVariableMember {
+        ClassVariableMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            location: Some(variable_member_location(
+                node.location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_include_member(&mut self, node: &IncludeNode<'_>) -> IncludeMember {
+        IncludeMember {
+            name: self.convert_type_name(&node.name()),
+            args: self.convert_type_list(node.args()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(mixin_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.args_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_extend_member(&mut self, node: &ExtendNode<'_>) -> ExtendMember {
+        ExtendMember {
+            name: self.convert_type_name(&node.name()),
+            args: self.convert_type_list(node.args()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(mixin_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.args_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_prepend_member(&mut self, node: &PrependNode<'_>) -> PrependMember {
+        PrependMember {
+            name: self.convert_type_name(&node.name()),
+            args: self.convert_type_list(node.args()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(mixin_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.args_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+        }
+    }
+
+    fn convert_attr_reader_member(&mut self, node: &AttrReaderNode<'_>) -> AttrReaderMember {
+        AttrReaderMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            ivar_name: self.convert_ivar_name(node.ivar_name(), node.ivar_name_string()),
+            kind: convert_attribute_kind(node.kind()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(attribute_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+                node.ivar_location(),
+                node.ivar_name_location(),
+                node.visibility_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+            visibility: convert_attribute_visibility(node.visibility()),
+        }
+    }
+
+    fn convert_attr_accessor_member(&mut self, node: &AttrAccessorNode<'_>) -> AttrAccessorMember {
+        AttrAccessorMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            ivar_name: self.convert_ivar_name(node.ivar_name(), node.ivar_name_string()),
+            kind: convert_attribute_kind(node.kind()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(attribute_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+                node.ivar_location(),
+                node.ivar_name_location(),
+                node.visibility_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+            visibility: convert_attribute_visibility(node.visibility()),
+        }
+    }
+
+    fn convert_attr_writer_member(&mut self, node: &AttrWriterNode<'_>) -> AttrWriterMember {
+        AttrWriterMember {
+            name: self.intern_symbol(&node.name()),
+            ty: self.convert_type(&node.type_()),
+            ivar_name: self.convert_ivar_name(node.ivar_name(), node.ivar_name_string()),
+            kind: convert_attribute_kind(node.kind()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(attribute_member_location(
+                node.location(),
+                node.keyword_location(),
+                node.name_location(),
+                node.colon_location(),
+                node.kind_location(),
+                node.ivar_location(),
+                node.ivar_name_location(),
+                node.visibility_location(),
+            )),
+            comment: self.convert_optional_comment(node.comment()),
+            visibility: convert_attribute_visibility(node.visibility()),
+        }
+    }
+
+    fn convert_public_member(&mut self, node: &PublicNode<'_>) -> PublicMember {
+        PublicMember {
+            location: Some(convert_range(node.location())),
+        }
+    }
+
+    fn convert_private_member(&mut self, node: &PrivateNode<'_>) -> PrivateMember {
+        PrivateMember {
+            location: Some(convert_range(node.location())),
+        }
+    }
+
+    fn convert_alias_member(&mut self, node: &AliasNode<'_>) -> AliasMember {
+        AliasMember {
+            new_name: self.intern_symbol(&node.new_name()),
+            old_name: self.intern_symbol(&node.old_name()),
+            kind: convert_alias_kind(node.kind()),
+            annotations: self.convert_annotations(node.annotations()),
+            location: Some(AliasMemberLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+                new_name_range: convert_range(node.new_name_location()),
+                old_name_range: convert_range(node.old_name_location()),
+                new_kind_range: convert_optional_range(node.new_kind_location()),
+                old_kind_range: convert_optional_range(node.old_kind_location()),
+            }),
+            comment: self.convert_optional_comment(node.comment()),
+        }
     }
 
     fn convert_alias_type(&mut self, node: &AliasTypeNode<'_>) -> AliasType {
@@ -291,6 +757,101 @@ impl<'a> AstConverter<'a> {
             .collect()
     }
 
+    fn convert_class_members(&mut self, list: crate::node::NodeList<'_>) -> Vec<ClassMember> {
+        list.iter()
+            .map(|node| match node {
+                Node::Class(_)
+                | Node::Module(_)
+                | Node::Interface(_)
+                | Node::Constant(_)
+                | Node::Global(_)
+                | Node::TypeAlias(_)
+                | Node::ClassAlias(_)
+                | Node::ModuleAlias(_) => ClassMember::Declaration(self.convert_declaration(&node)),
+                Node::Alias(_)
+                | Node::AttrAccessor(_)
+                | Node::AttrReader(_)
+                | Node::AttrWriter(_)
+                | Node::ClassInstanceVariable(_)
+                | Node::ClassVariable(_)
+                | Node::Extend(_)
+                | Node::Include(_)
+                | Node::InstanceVariable(_)
+                | Node::MethodDefinition(_)
+                | Node::Prepend(_)
+                | Node::Private(_)
+                | Node::Public(_) => ClassMember::Member(self.convert_member(&node)),
+                _ => panic_expected("class member while converting class declaration", &node),
+            })
+            .collect()
+    }
+
+    fn convert_module_members(&mut self, list: crate::node::NodeList<'_>) -> Vec<ModuleMember> {
+        list.iter()
+            .map(|node| match node {
+                Node::Class(_)
+                | Node::Module(_)
+                | Node::Interface(_)
+                | Node::Constant(_)
+                | Node::Global(_)
+                | Node::TypeAlias(_)
+                | Node::ClassAlias(_)
+                | Node::ModuleAlias(_) => {
+                    ModuleMember::Declaration(self.convert_declaration(&node))
+                }
+                Node::Alias(_)
+                | Node::AttrAccessor(_)
+                | Node::AttrReader(_)
+                | Node::AttrWriter(_)
+                | Node::ClassInstanceVariable(_)
+                | Node::ClassVariable(_)
+                | Node::Extend(_)
+                | Node::Include(_)
+                | Node::InstanceVariable(_)
+                | Node::MethodDefinition(_)
+                | Node::Prepend(_)
+                | Node::Private(_)
+                | Node::Public(_) => ModuleMember::Member(self.convert_member(&node)),
+                _ => panic_expected("module member while converting module declaration", &node),
+            })
+            .collect()
+    }
+
+    fn convert_members(&mut self, list: crate::node::NodeList<'_>) -> Vec<Member> {
+        list.iter().map(|node| self.convert_member(&node)).collect()
+    }
+
+    fn convert_module_selfs(&mut self, list: crate::node::NodeList<'_>) -> Vec<ModuleSelf> {
+        list.iter()
+            .map(|node| {
+                let Node::ModuleSelf(node) = node else {
+                    panic_expected(
+                        "module self type while converting module declaration",
+                        &node,
+                    );
+                };
+                self.convert_module_self(&node)
+            })
+            .collect()
+    }
+
+    fn convert_method_definition_overloads(
+        &mut self,
+        list: crate::node::NodeList<'_>,
+    ) -> Vec<MethodDefinitionOverload> {
+        list.iter()
+            .map(|node| {
+                let Node::MethodDefinitionOverload(node) = node else {
+                    panic_expected(
+                        "method definition overload while converting method definition",
+                        &node,
+                    );
+                };
+                self.convert_method_definition_overload(&node)
+            })
+            .collect()
+    }
+
     fn convert_keyword_params(&mut self, hash: crate::node::RBSHash<'_>) -> Vec<KeywordParam> {
         hash.iter()
             .map(|(key, value)| {
@@ -329,6 +890,58 @@ impl<'a> AstConverter<'a> {
             Node::Symbol(symbol) => Literal::Symbol(self.intern_symbol(symbol)),
             Node::Bool(boolean) => Literal::Bool(boolean.value()),
             _ => panic_expected("literal value while converting literal type", node),
+        }
+    }
+
+    fn convert_method_type_node(&mut self, node: &Node<'_>) -> MethodType {
+        let Node::MethodType(node) = node else {
+            panic_expected(
+                "method type node while converting method definition overload",
+                node,
+            );
+        };
+        self.convert_method_type(node)
+    }
+
+    fn convert_annotations(&mut self, list: crate::node::NodeList<'_>) -> Vec<Annotation> {
+        list.iter()
+            .map(|node| {
+                let Node::Annotation(node) = node else {
+                    panic_expected("annotation node while converting annotations", &node);
+                };
+                self.convert_annotation(&node)
+            })
+            .collect()
+    }
+
+    fn convert_annotation(&mut self, node: &AnnotationNode<'_>) -> Annotation {
+        Annotation {
+            string: self.strings.intern(node.string().as_str()),
+            location: Some(convert_range(node.location())),
+        }
+    }
+
+    fn convert_optional_comment(&mut self, node: Option<CommentNode<'_>>) -> Option<Comment> {
+        node.map(|node| self.convert_comment(&node))
+    }
+
+    fn convert_comment(&mut self, node: &CommentNode<'_>) -> Comment {
+        Comment {
+            string: self.strings.intern(node.string().as_str()),
+            location: Some(convert_range(node.location())),
+        }
+    }
+
+    fn convert_ivar_name(&mut self, ivar_name: AttrIvarName, name: Option<String>) -> IvarName {
+        match ivar_name {
+            AttrIvarName::Unspecified => IvarName::Unspecified,
+            AttrIvarName::Empty => IvarName::Empty,
+            AttrIvarName::Name(_) => {
+                let name = name.unwrap_or_else(|| {
+                    panic!("invalid RBS AST while converting to owned AST: explicit ivar name is missing from the constant pool")
+                });
+                IvarName::Name(self.strings.intern(&name))
+            }
         }
     }
 
@@ -386,11 +999,100 @@ fn convert_optional_range(range: Option<RBSLocationRange>) -> Option<LocationRan
     range.map(convert_range)
 }
 
+fn variable_member_location(
+    range: RBSLocationRange,
+    name_range: RBSLocationRange,
+    colon_range: RBSLocationRange,
+    kind_range: Option<RBSLocationRange>,
+) -> VariableMemberLocation {
+    VariableMemberLocation {
+        range: convert_range(range),
+        name_range: convert_range(name_range),
+        colon_range: convert_range(colon_range),
+        kind_range: convert_optional_range(kind_range),
+    }
+}
+
+fn mixin_member_location(
+    range: RBSLocationRange,
+    keyword_range: RBSLocationRange,
+    name_range: RBSLocationRange,
+    args_range: Option<RBSLocationRange>,
+) -> MixinMemberLocation {
+    MixinMemberLocation {
+        range: convert_range(range),
+        keyword_range: convert_range(keyword_range),
+        name_range: convert_range(name_range),
+        args_range: convert_optional_range(args_range),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn attribute_member_location(
+    range: RBSLocationRange,
+    keyword_range: RBSLocationRange,
+    name_range: RBSLocationRange,
+    colon_range: RBSLocationRange,
+    kind_range: Option<RBSLocationRange>,
+    ivar_range: Option<RBSLocationRange>,
+    ivar_name_range: Option<RBSLocationRange>,
+    visibility_range: Option<RBSLocationRange>,
+) -> AttributeMemberLocation {
+    AttributeMemberLocation {
+        range: convert_range(range),
+        keyword_range: convert_range(keyword_range),
+        name_range: convert_range(name_range),
+        colon_range: convert_range(colon_range),
+        kind_range: convert_optional_range(kind_range),
+        ivar_range: convert_optional_range(ivar_range),
+        ivar_name_range: convert_optional_range(ivar_name_range),
+        visibility_range: convert_optional_range(visibility_range),
+    }
+}
+
 fn convert_variance(variance: TypeParamVariance) -> Variance {
     match variance {
         TypeParamVariance::Invariant => Variance::Invariant,
         TypeParamVariance::Covariant => Variance::Covariant,
         TypeParamVariance::Contravariant => Variance::Contravariant,
+    }
+}
+
+fn convert_method_kind(kind: NodeMethodDefinitionKind) -> MethodKind {
+    match kind {
+        NodeMethodDefinitionKind::Instance => MethodKind::Instance,
+        NodeMethodDefinitionKind::Singleton => MethodKind::Singleton,
+        NodeMethodDefinitionKind::SingletonInstance => MethodKind::SingletonInstance,
+    }
+}
+
+fn convert_method_visibility(visibility: NodeMethodDefinitionVisibility) -> Option<Visibility> {
+    match visibility {
+        NodeMethodDefinitionVisibility::Unspecified => None,
+        NodeMethodDefinitionVisibility::Public => Some(Visibility::Public),
+        NodeMethodDefinitionVisibility::Private => Some(Visibility::Private),
+    }
+}
+
+fn convert_attribute_kind(kind: NodeAttributeKind) -> AttributeKind {
+    match kind {
+        NodeAttributeKind::Instance => AttributeKind::Instance,
+        NodeAttributeKind::Singleton => AttributeKind::Singleton,
+    }
+}
+
+fn convert_attribute_visibility(visibility: NodeAttributeVisibility) -> Option<Visibility> {
+    match visibility {
+        NodeAttributeVisibility::Unspecified => None,
+        NodeAttributeVisibility::Public => Some(Visibility::Public),
+        NodeAttributeVisibility::Private => Some(Visibility::Private),
+    }
+}
+
+fn convert_alias_kind(kind: NodeAliasKind) -> AliasKind {
+    match kind {
+        NodeAliasKind::Instance => AliasKind::Instance,
+        NodeAliasKind::Singleton => AliasKind::Singleton,
     }
 }
 

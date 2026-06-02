@@ -322,6 +322,56 @@ impl std::fmt::Display for SymbolNode<'_> {
     }
 }
 
+fn constant_id_to_string(parser: NonNull<rbs_parser_t>, constant_id: rbs_constant_id_t) -> String {
+    unsafe {
+        let constant_ptr =
+            rbs_constant_pool_id_to_constant(&(*parser.as_ptr()).constant_pool, constant_id);
+        if constant_ptr.is_null() {
+            panic!("Constant ID is not present in the pool");
+        }
+
+        let constant = &*constant_ptr;
+        let bytes = std::slice::from_raw_parts(constant.start, constant.length);
+        std::str::from_utf8_unchecked(bytes).to_owned()
+    }
+}
+
+impl AttrAccessorNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
+    }
+}
+
+impl AttrReaderNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
+    }
+}
+
+impl AttrWriterNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
