@@ -1030,11 +1030,16 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 
-  def test_invalid_utf8_byte_in_comment_does_not_hang
-    # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
+  def test_invalid_utf8_byte_in_comment_raises
+    # Regression: invalid UTF-8 byte in a comment used to loop forever in the
+    # lexer. It is now reported as a parsing error instead of being silently
+    # swallowed by the comment. (Timeout guards against a regression to the
+    # original hang.)
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
     Timeout.timeout(5) do
-      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+      assert_raises(RBS::ParsingError) do
+        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+      end
     end
   end
 
