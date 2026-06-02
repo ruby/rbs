@@ -1397,7 +1397,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def concat: (*::Array[E] arrays) -> self
+  def concat: (*array[E] other_arrays) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2750,7 +2750,7 @@ class Array[unchecked out E]
   # Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def pop: () -> E?
-         | (int n) -> ::Array[E]
+         | (int count) -> Array[E]
 
   # <!-- rdoc-file=array.c -->
   # Prepends the given `objects` to `self`:
@@ -2838,7 +2838,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def push: (*E obj) -> self
+  def push: (*E objects) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3001,7 +3001,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def reverse: () -> ::Array[E]
+  def reverse: () -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3015,7 +3015,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def reverse!: () -> ::Array[E]
+  def reverse!: () -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3133,7 +3133,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def rotate: (?int count) -> ::Array[E]
+  def rotate: (?int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3305,7 +3305,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def shift: %a{implicitly-returns-nil} () -> E
-           | (int n) -> ::Array[E]
+           | (int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.rb
@@ -3746,7 +3746,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def to_a: () -> ::Array[E]
+  def to_a: () -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3902,7 +3902,7 @@ class Array[unchecked out E]
   # Related: Array#shift; see also [Methods for
   # Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def unshift: (*E obj) -> self
+  def unshift: (*E objects) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -4124,7 +4124,7 @@ class Array[unchecked out E]
   #
   def |: [T] (array[T] other_array) -> Array[E | T] # TODO: where E: _Eql[T]
 
-  def freeze: ->__todo__
+  def freeze: () -> self
   alias detect find
 
   private

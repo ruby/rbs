@@ -271,7 +271,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_concat
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :concat
+    with_array 3r do |array1|
+      assert_send_type  '(*array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :concat, array1
+
+      with_array 4r do |array2|
+        assert_send_type  '(*array[Rational]) -> Array[Rational]',
+                          [1r, 2r], :concat, array1, array2
+      end
+    end
   end
 
   def test_count
@@ -294,7 +304,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
     omit 'todo'
   end
 
-  def test_delete_if
+  def test_delete_if(method: :delete_if)
     omit 'todo'
   end
 
@@ -454,7 +464,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_length(method: :length)
-    omit 'todo'
+    assert_send_type  '() -> Integer',
+                      [], method
+    assert_send_type  '() -> Integer',
+                      [1r, 2r], method
   end
 
   def test_size
@@ -478,7 +491,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_pop
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [], :pop
+    assert_send_type  '() -> Rational',
+                      [1r], :pop
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :pop, count
+    end
   end
 
   def test_product
@@ -486,7 +507,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_push(method: :push)
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], method
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 2r
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 2r, 3r
   end
 
   def test_append
@@ -510,11 +536,21 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_reverse
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [], :reverse
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :reverse
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :reverse
   end
 
   def test_reverse!
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [], :reverse!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :reverse!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :reverse!
   end
 
   def test_reverse_each
@@ -530,11 +566,37 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_rotate
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [], :rotate
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :rotate
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :rotate
+    with_int 1 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :rotate, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r], :rotate, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :rotate, count
+    end
   end
 
   def test_rotate!
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [], :rotate!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :rotate!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :rotate!
+    with_int 1 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :rotate!, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r], :rotate!, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :rotate!, count
+    end
   end
 
   def test_sample
@@ -573,7 +635,15 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_shift
-    omit 'todo'
+    assert_send_type  '() -> nil',
+                      [], :shift
+    assert_send_type  '() -> Rational',
+                      [1r], :shift
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :shift, count
+    end
   end
 
   def test_shuffle
@@ -621,11 +691,17 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_a
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :to_a
+    assert_send_type  '() -> Array[Rational]',
+                      ArraySubclass.new([1r, 2r]), :to_a
   end
 
   def test_to_ary
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :to_ary
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :to_ary
   end
 
   def test_to_h
@@ -649,7 +725,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_unshift(method: :unshift)
-    omit 'todo'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], method
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 0r
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, -1r, 0r
   end
 
   def test_prepend
@@ -701,10 +782,6 @@ class ArrayInstanceTest < Test::Unit::TestCase
                      [1r, 2r, 3r], :one? do :true end
   end
 
-  def test_prepend
-    omit 'todo'
-  end
-
   def test_rassoc
     with_untyped.and 1r, :a, 'b' do |object|
       next unless defined? object.==
@@ -714,6 +791,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_reject
-    omit 'todo'
+    test_delete_if(method: :reject)
+  end
+
+  def test_freeze
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :freeze
   end
 end
