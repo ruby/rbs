@@ -666,7 +666,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def &: (::Array[untyped] | _ToAry[untyped]) -> ::Array[E]
+  def &: (array[untyped] other_array) -> Array[E] # TODO: `where E: _Eql?[T]`
 
   # <!--
   #   rdoc-file=array.c
@@ -684,8 +684,8 @@ class Array[unchecked out E]
   #
   #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {foo: 0}"
   #
-  def *: (string str) -> ::String
-       | (int int) -> ::Array[E]
+  def *: (string string_separator) -> String # TODO: where E: _ToS
+       | (int n) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -699,7 +699,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def +: [U] (_ToAry[U]) -> ::Array[E | U]
+  def +: [U] (array[U] other_array) -> Array[E | U]
 
   # <!--
   #   rdoc-file=array.c
@@ -717,7 +717,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def -: (_ToAry[untyped]) -> ::Array[E]
+  def -: (array[untyped] other_array) -> Array[E]  # TODO: `where E: _Eql?[T]`
 
   # <!--
   #   rdoc-file=array.c
@@ -733,7 +733,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def <<: (E) -> self
+  def <<: (E object) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -772,7 +772,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Comparing](rdoc-ref:Array@Methods+for+Comparing).
   #
-  def <=>: (untyped) -> ::Integer?
+  def <=>: (untyped) -> Integer? # Until we can do `where E: RBS::Ops::_Compare`, this is always going to return `Integer?~
 
   # <!--
   #   rdoc-file=array.c
@@ -921,8 +921,8 @@ class Array[unchecked out E]
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def []: %a{implicitly-returns-nil} (int index) -> E
-        | (int start, int length) -> ::Array[E]?
-        | (::Range[::Integer?] range) -> ::Array[E]?
+        | (int start, int length) -> Array[E]?
+        | (range[int] range) -> Array[E]?
 
   # <!--
   #   rdoc-file=array.c
@@ -1070,13 +1070,11 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def []=: (int index, E obj) -> E
-         | (int start, int length, E obj) -> E
-         | (int start, int length, ::Array[E]) -> ::Array[E]
-         | (int start, int length, nil) -> nil
-         | (::Range[::Integer?], E obj) -> E
-         | (::Range[::Integer?], ::Array[E]) -> ::Array[E]
-         | (::Range[::Integer?], nil) -> nil
+  def []=: (int index, E object) -> E
+         | [T < _ToAry[E]] (range[int?] range, T array) -> T
+         | (range[int?] range, E object) -> E
+         | [T < _ToAry[E]] (int start, int length, T array) -> T
+         | (int start, int length, E object) -> E
 
   # <!--
   #   rdoc-file=array.c
@@ -4111,7 +4109,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def |: [T] (::Array[T] other_ary) -> ::Array[E | T]
+  def |: [T] (array[T] other_array) -> Array[E | T] # TODO: where E: _Eql[T]
 
   def freeze: ->__todo__
   alias detect find

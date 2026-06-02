@@ -53,36 +53,97 @@ class ArrayInstanceTest < Test::Unit::TestCase
 
   testing 'Array[Rational]'
 
+  class ArraySubclass < Array
+  end
+
   def test_op_and
-    omit 'todo'
+    with_array [1r, 1i] do |other|
+      assert_send_type  '(array[untyped]) -> Array[Rational]',
+                        [1r, 2r], :&, other
+    end
   end
 
-  def test_op_mul
-    omit 'todo'
+  def test_op_times
+    with_string do |sep|
+      assert_send_type  '(string) -> String',
+                        [1r, 2r], :*, sep
+    end
+
+    with_int 3 do |n|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :*, n
+    end
   end
 
-  def test_op_add
-    omit 'todo'
+  def test_op_plus
+    with_array 3r, 4r do |ary|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :+, ary
+    end
+
+    with_array 'a', 'b' do |ary|
+      assert_send_type  '(array[String]) -> Array[Rational | String]',
+                        [1r, 2r], :+, ary
+    end
   end
 
   def test_op_sub
-    omit 'todo'
+    with_array 1r, 3r do |ary|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :-, ary
+    end
+
+    with_untyped do |untyped|
+      with_array untyped do |ary|
+        assert_send_type  '(array[untyped]) -> Array[Rational]',
+                          [1r, 2r], :-, ary
+      end
+    end
   end
 
   def test_op_lsh
-    omit 'todo'
+    assert_send_type '(Rational) -> Array[Rational]',
+                     [1r, 2r, 3r], :<<, 4r
+
+    assert_send_type '(Rational) -> ArrayInstanceTest::ArraySubclass[Rational]',
+                     ArraySubclass.new([1r, 2r, 3r]), :<<, 4r
   end
 
   def test_op_cmp
-    omit 'todo'
+    with_untyped.and [2r], [1r, 3r], [1r, 2r], [1r, 0r] do |other|
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r], :<=>, other
+    end
   end
 
   def test_op_eq
-    omit 'todo'
+    with_untyped.and [1r] do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        [1r], :==, untyped
+    end
   end
 
   def test_op_aref(method: :[])
-    omit 'todo'
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], method, index
+      assert_send_type  '(int) -> nil',
+                        [1r], method, index
+    end
+
+    with_int 2 do |start|
+      with_int 1 do |length|
+        assert_send_type  '(int, int) -> Array[Rational]',
+                          [1r, 2r, 3r], method, start, length
+        assert_send_type  '(int, int) -> nil',
+                          [1r], method, start, length
+      end
+    end
+
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      assert_send_type  '(range[int?]) -> Array[Rational]?',
+                        [1r, 2r, 3r], method, range
+    end
   end
 
   def test_slice
@@ -90,7 +151,32 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_aset
-    omit 'todo'
+    with_int 1 do |index|
+      assert_send_type  '(int, Rational) -> Rational',
+                        [1r, 2r], :[]=, index, 3r
+    end
+
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      with_array 4r do |ary|
+        assert_send_type  '[T < _ToAry[Rational]] (range[int?], T) -> T',
+                          [1r, 2r, 3r], :[]=, range, ary
+      end
+
+      assert_send_type  '(range[int?], Rational) -> Rational',
+                        [1r, 2r, 3r], :[]=, range, 4r
+    end
+
+    with_int 2 do |start|
+      with_int 1 do |length|
+        with_array 4r do |ary|
+          assert_send_type  '[T < _ToAry[Rational]] (int, int, T) -> T',
+                            [1r, 2r, 3r], :[]=, start, length, ary
+        end
+
+        assert_send_type  '(int, int, Rational) -> Rational',
+                          [1r, 2r, 3r], :[]=, start, length, 4r
+      end
+    end
   end
 
   def test_all?
@@ -474,7 +560,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_or
-    omit 'todo'
+    with_array 1r, 1i do |other|
+      assert_send_type  '(array[Complex]) -> Array[Rational | Complex]',
+                        [1r, 2r], :|, other
+    end
   end
 
   def test_initialize_copy
