@@ -2989,7 +2989,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def replace: (::Array[E]) -> self
+  def replace: (array[E] other_array) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3781,7 +3781,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
   def to_h: () -> Hash[untyped, untyped]
-          | [T, S] () { (E) -> [ T, S ] } -> Hash[T, S]
+          | [K, V] () { (E element) -> Hash::_Pair[K, V] } -> Hash[K, V]
 
   # <!-- rdoc-file=array.c -->
   # Returns the new string formed by calling method <code>#inspect</code> on each
@@ -3808,7 +3808,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def transpose: () -> ::Array[::Array[untyped]]
+  def transpose: () -> Array[Array[untyped]]
 
   # <!--
   #   rdoc-file=array.c
@@ -3831,7 +3831,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def union: [T] (*::Array[T] other_arys) -> ::Array[T | E]
+  def union: [T] (*array[T] other_arrays) -> Array[T | E]
 
   # <!--
   #   rdoc-file=array.c

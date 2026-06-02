@@ -532,7 +532,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_replace(method: :replace)
-    omit 'todo'
+    with_array 3r, 4r do |array|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], method, array
+    end
   end
 
   def test_reverse
@@ -705,11 +708,22 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_h
-    omit 'todo'
+    assert_send_type  '() -> Hash[untyped, untyped]',
+                      [], :to_h
+    assert_send_type  '() -> Hash[untyped, untyped]',
+                      [[:a, 1]], :to_h
+
+    assert_send_type  '() { (Rational) -> Hash::_Pair[Rational, Complex] } -> Hash[Rational, Complex]',
+                      [1r, 2r], :to_h do |x| ToArray.new(x, x.i) end
   end
 
   def test_transpose
-    omit 'todo'
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [], :transpose
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [[1r]], :transpose
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [[1r, 2r, 3r], [4r, 5r, 6r]], :transpose
   end
 
   def test_union
@@ -753,6 +767,7 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize_copy
+    assert_visibility :private, :initialize_copy
     test_replace(method: :initialize_copy)
   end
 
