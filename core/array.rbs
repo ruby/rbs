@@ -1115,7 +1115,7 @@ class Array[unchecked out E]
   #
   def all?: () -> bool
           | (_Pattern[E] pattern) -> bool
-          | () { (E obj) -> boolish } -> bool
+          | () { (E element) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=array.c
@@ -1155,7 +1155,9 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  alias any? all?
+  def any?: () -> bool
+          | (_Pattern[E] pattern) -> bool
+          | () { (E element) -> boolish } -> bool
 
   # <!-- rdoc-file=array.c -->
   # Appends each argument in `objects` to `self`; returns `self`:
@@ -2615,7 +2617,9 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  alias none? all?
+  def none?: () -> bool
+           | (_Pattern[E] pattern) -> bool
+           | () { (E element) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=array.c
@@ -2652,7 +2656,9 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  alias one? none?
+  def one?: () -> bool
+          | (_Pattern[E] pattern) -> bool
+          | () { (E element) -> boolish } -> bool
 
   # <!--
   #   rdoc-file=pack.rb

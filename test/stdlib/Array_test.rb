@@ -179,8 +179,26 @@ class ArrayInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_any?
+    assert_send_type '() -> bool',
+                     [], :any?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :any?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :any?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :any? do :true end
+  end
+
   def test_all?
-    omit 'todo'
+    assert_send_type '() -> bool',
+                     [], :all?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :all?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :all?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :all? do :true end
   end
 
   def test_assoc
@@ -570,20 +588,30 @@ class ArrayInstanceTest < Test::Unit::TestCase
     test_replace(method: :initialize_copy)
   end
 
-  def test_any?
-    omit 'todo'
-  end
-
   def test_min
     omit 'todo'
   end
 
   def test_none?
-    omit 'todo'
+    assert_send_type '() -> bool',
+                     [], :none?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :none?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :none?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :none? do :true end
   end
 
   def test_one?
-    omit 'todo'
+    assert_send_type '() -> bool',
+                     [], :one?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :one?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :one?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :one? do :true end
   end
 
   def test_prepend
