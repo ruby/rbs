@@ -475,11 +475,27 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_flatten
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[untyped]',
+                      [[1r, 2r]], :flatten
+
+    with_int(1).and_nil do |level|
+      assert_send_type  '(int?) -> Array[untyped]',
+                        [[1r, 2r]], :flatten, level
+    end
   end
 
   def test_flatten!
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> nil',
+                      ArraySubclass.new([1r, 2r]), :flatten!
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[untyped]',
+                      ArraySubclass.new([[1r, 2r]]), :flatten!
+
+    with_int(1).and_nil do |level|
+      assert_send_type  '(int?) -> nil',
+                        ArraySubclass.new([1r, 2r]), :flatten!, level
+      assert_send_type  '(int?) -> ArrayInstanceTest::ArraySubclass[untyped]',
+                        ArraySubclass.new([[1r, 2r]]), :flatten!, level
+    end
   end
 
   def test_hash
@@ -490,7 +506,11 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_include?
-    omit 'todo -- non-enumerable'
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(top) -> bool',
+                        [1r, 2r], :include?, untyped
+    end
   end
 
   def test_insert
@@ -517,7 +537,13 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_join
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> String',
+                      [1r, 2r], :join
+
+    with_string("x").and_nil do |sep|
+      assert_send_type  '(string?) -> String',
+                        [1r, 2r], :join, sep
+    end
   end
 
   def test_keep_if
@@ -629,7 +655,31 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_product
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[[Rational]]',
+                      [1r, 2r], :product
+    assert_send_type  '() { ([Rational]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :product do end
+
+    with_array 1i, 2i do |array1|
+      assert_send_type  '(array[Complex]) -> Array[[Rational, Complex]]',
+                        [1r, 2r], :product, array1
+      assert_send_type  '(array[Complex]) { ([Rational, Complex]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                        ArraySubclass.new([1r, 2r]), :product, array1 do end
+
+      with_array 1.0, 2.0 do |array2|
+        assert_send_type  '(array[Complex], array[Float]) -> Array[[Rational, Complex, Float]]',
+                          [1r, 2r], :product, array1, array2
+        assert_send_type  '(array[Complex], array[Float]) { ([Rational, Complex, Float]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                          ArraySubclass.new([1r, 2r]), :product, array1, array2 do end
+
+        with_array 1, 2 do |array3|
+          assert_send_type  '(*array[Complex | Float | Integer]) -> Array[Array[Rational | Complex | Float | Integer]]',
+                            [1r, 2r], :product, array1, array2, array3
+          assert_send_type  '(*array[Complex | Float | Integer]) { (Array[Rational | Complex | Float | Integer]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                            ArraySubclass.new([1r, 2r]), :product, array1, array2, array3 do end
+        end
+      end
+    end
   end
 
   def test_push(method: :push)
@@ -812,7 +862,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_take
-    omit 'todo -- non-enumerable'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :take, count
+    end
   end
 
   def test_take_while

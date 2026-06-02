@@ -2157,7 +2157,7 @@ class Array[unchecked out E]
   # Related: Array#flatten!; see also [Methods for
   # Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def flatten: (?int level) -> ::Array[untyped]
+  def flatten: (?int? level) -> Array[untyped]
 
   # <!--
   #   rdoc-file=array.c
@@ -2193,7 +2193,7 @@ class Array[unchecked out E]
   # Related: Array#flatten; see also [Methods for
   # Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def flatten!: (?int level) -> self?
+  def flatten!: (?int? level) -> self?
 
   # <!--
   #   rdoc-file=array.c
@@ -2223,7 +2223,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def include?: (top object) -> bool
+  def include?: (top object) -> bool # TODO: E: _Equals
 
   # <!-- rdoc-file=array.c -->
   # Returns the zero-based integer index of a specified element, or `nil`.
@@ -2371,7 +2371,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def join: (?string separator) -> String
+  def join: (?string? separator) -> String # TODO: where E: _ToS
 
   # <!--
   #   rdoc-file=array.c
@@ -2813,10 +2813,14 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def product: () -> ::Array[[ E ]]
-             | [X] (::Array[X] other_ary) -> ::Array[[ E, X ]]
-             | [X, Y] (::Array[X] other_ary1, ::Array[Y] other_ary2) -> ::Array[[ E, X, Y ]]
-             | [U] (*::Array[U] other_arys) -> ::Array[::Array[E | U]]
+  def product: () -> Array[[ E ]]
+             | () { ([E] combination) -> void } -> self
+             | [X] (array[X] other_ary) -> Array[[ E, X ]]
+             | [X] (array[X] other_ary) { ([E, X] combination) -> void } -> self
+             | [X, Y] (array[X] other_ary1, array[Y] other_ary2) -> Array[[ E, X, Y ]]
+             | [X, Y] (array[X] other_ary1, array[Y] other_ary2) { ([E, X, Y] combination) -> void } -> self
+             | [U] (*array[U] other_arys) -> Array[Array[E | U]]
+             | [U] (*array[U] other_arys) { (Array[E | U] combination) -> void } -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3702,7 +3706,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def take: (int n) -> ::Array[E]
+  def take: (int count) -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
