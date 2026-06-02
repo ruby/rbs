@@ -231,7 +231,6 @@ DEPENDENCIES
   steep!
   tempfile
   test-unit
-  timeout
 
 BUNDLED WITH
   4.0.1
