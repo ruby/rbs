@@ -1030,6 +1030,21 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 
+  def test_invalid_position_range_raises
+    # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
+    assert_raises(ArgumentError) do
+      RBS::Parser._parse_signature(buffer(""), 1, 0)
+    end
+  end
+
+  def test_invalid_byte_range_in_parse_type_raises
+    # Regression: parse_type's byte_range: keyword reaches _parse_type directly,
+    # which used to hang on reversed ranges.
+    assert_raises(ArgumentError) do
+      RBS::Parser.parse_type("", byte_range: 1..0)
+    end
+  end
+
   def test_invalid_utf8_byte_in_comment_does_not_hang
     # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
