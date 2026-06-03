@@ -3570,8 +3570,8 @@ class Array[unchecked out E]
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def slice!: %a{implicitly-returns-nil} (int index) -> E
-            | (int start, int length) -> ::Array[E]?
-            | (::Range[::Integer] range) -> ::Array[E]?
+            | (int start, int length) -> Array[E]?
+            | (range[int?] range) -> Array[E]?
 
   # <!--
   #   rdoc-file=array.c
@@ -3685,8 +3685,7 @@ class Array[unchecked out E]
   # *   Array#sum method may not respect method redefinition of "+" methods such
   #     as Integer#+.
   #
-  def sum: (?untyped init) -> untyped
-         | (?untyped init) { (E e) -> untyped } -> untyped
+  def sum: (?untyped init) ?{ (E e) -> untyped } -> untyped # This would be usable if we had `where E < Complex`, etc
 
   # <!--
   #   rdoc-file=array.c
@@ -4100,10 +4099,14 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def zip: [U] (_Each[U] arg) -> Array[[ E, U? ]]
-         | (_Each[untyped] arg, *_Each[untyped] args) -> Array[Array[untyped]]
-         | [U] (_Each[U] arg) { ([ E, U? ]) -> void } -> nil
-         | (_Each[untyped] arg, *_Each[untyped] args) { (Array[untyped]) -> void } -> nil
+  def zip: () -> Array[[ E ]]
+         | [X] (_Each[X] iterable) -> Array[[ E, X? ]]
+         | [X, Y] (_Each[X] iterable1, _Each[Y] iterable2) -> Array[[ E, X?, Y? ]]
+         | [U] (*_Each[U] iterables) -> Array[Array[E | U?]]
+         | () { ([ E ]) -> void } -> nil
+         | [X] (_Each[X] iterable) { ([ E, X? ]) -> void } -> nil
+         | [X, Y] (_Each[X] iterable1, _Each[Y] iterable2) { ([ E, X?, Y? ]) -> void } -> nil
+         | [U] (*_Each[U] iterables) { (Array[E | U?]) -> void } -> nil
 
   # <!--
   #   rdoc-file=array.c

@@ -73,6 +73,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
     def eql?(other) = HashKey === other && @key.eql?(other.key)
   end
 
+  def with_each(*eles)
+    yield Each.new(*eles)
+  end
+
   def test_op_and
     with_array [1r, 1i] do |other|
       assert_send_type  '(array[untyped]) -> Array[Rational]',
@@ -897,7 +901,26 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_slice!
-    omit 'todo -- non-enumerable'
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], :slice!, index
+      assert_send_type  '(int) -> nil',
+                        [1r], :slice!, index
+    end
+
+    with_int 2 do |start|
+      with_int 1 do |length|
+        assert_send_type  '(int, int) -> Array[Rational]',
+                          [1r, 2r, 3r], :slice!, start, length
+        assert_send_type  '(int, int) -> nil',
+                          [1r], :slice!, start, length
+      end
+    end
+
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      assert_send_type  '(range[int?]) -> Array[Rational]?',
+                        [1r, 2r, 3r], :slice!, range
+    end
   end
 
   def test_sort
@@ -923,7 +946,33 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_sum
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> untyped',
+                      [1, 2r, 3.0, 4i], :sum
+
+    with 5, 6r, 7.0, 8i do |init|
+      assert_send_type  '(untyped) -> untyped',
+                        [1, 2r, 3.0, 4i], :sum, init
+    end
+
+    assert_send_type  '() { (Rational) -> untyped } -> untyped',
+                      [1r, 2r, 3r], :sum do |ele| ele.i end
+
+    with 5, 6r, 7.0, 8i do |init|
+      assert_send_type  '(untyped) { (Rational) -> untyped } -> untyped',
+                        [1r, 2r, 3r], :sum, init do |ele| ele.i end
+    end
+
+    # Test an extremely esoteric edgecase, which any updates to the signature will have to allow for
+    outer = BlankSlate.new
+    def outer.+(rhs)
+      inner = BlankSlate.new
+      ::Kernel.instance_method(:instance_variable_set).bind_call(inner, :@rhs, rhs)
+      def inner.+(rhs) = [:innermost, @rhs, rhs]
+      inner
+    end
+
+    assert_send_type  '(untyped) -> [:innermost, 1, 2]',
+                      [1, 2], :sum, outer
   end
 
   def test_take
@@ -1031,7 +1080,31 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_zip
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[[Rational]]',
+                      [1r, 2r, 3r], :zip
+    assert_send_type  '() { ([Rational]) -> void } -> nil',
+                      [1r, 2r, 3r], :zip do end
+
+    with_each 1, 2 do |iter1|
+      assert_send_type  '(_Each[Integer]) -> Array[[Rational, Integer?]]',
+                        [1r, 2r, 3r], :zip, iter1
+      assert_send_type  '(_Each[Integer]) { ([Rational, Integer?]) -> void } -> nil',
+                        [1r, 2r, 3r], :zip, iter1 do end
+
+      with_each 1i, 2i do |iter2|
+        assert_send_type  '(_Each[Integer], _Each[Complex]) -> Array[[Rational, Integer?, Complex?]]',
+                          [1r, 2r, 3r], :zip, iter1, iter2
+        assert_send_type  '(_Each[Integer], _Each[Complex]) { ([Rational, Integer?, Complex?]) -> void } -> nil',
+                          [1r, 2r, 3r], :zip, iter1, iter2 do end
+
+        with_each 1.0, 2.0 do |iter3|
+          assert_send_type  '(*_Each[Integer | Complex | Float]) -> Array[Array[Rational | Integer | Complex | Float | nil]]',
+                            [1r, 2r, 3r], :zip, iter1, iter2, iter3
+          assert_send_type  '(*_Each[Integer | Complex | Float]) { (Array[Rational | Integer | Complex | Float | nil]) -> void } -> nil',
+                            [1r, 2r, 3r], :zip, iter1, iter2, iter3 do end
+        end
+      end
+    end
   end
 
   def test_op_or
