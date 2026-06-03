@@ -385,3 +385,55 @@ pub struct AliasMemberLocation {
     pub new_kind_range: Option<LocationRange>,
     pub old_kind_range: Option<LocationRange>,
 }
+
+/// ```rbs
+/// use Foo
+/// ^^^       keyword
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct UseDirectiveLocation {
+    pub range: LocationRange,
+    pub keyword_range: LocationRange,
+}
+
+/// ```rbs
+/// Foo::Bar
+/// ^^^^^^^^       type_name
+///
+/// Foo::Bar as X
+///          ^^    keyword
+///             ^  new_name
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct UseSingleClauseLocation {
+    pub range: LocationRange,
+    pub type_name_range: LocationRange,
+    pub keyword_range: Option<LocationRange>,
+    pub new_name_range: Option<LocationRange>,
+}
+
+/// ```rbs
+/// Foo::Bar::*
+/// ^^^^^^^^^^    namespace
+///           ^   star
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct UseWildcardClauseLocation {
+    pub range: LocationRange,
+    pub namespace_range: LocationRange,
+    pub star_range: LocationRange,
+}
+
+/// ```rbs
+/// # resolve-type-names: false
+///   ^^^^^^^^^^^^^^^^^^          keyword
+///                     ^         colon
+///                       ^^^^^   value
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct ResolveTypeNamesDirectiveLocation {
+    pub range: LocationRange,
+    pub keyword_range: LocationRange,
+    pub colon_range: LocationRange,
+    pub value_range: LocationRange,
+}

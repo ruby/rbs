@@ -5,13 +5,17 @@ use crate::ast::declarations::{
     Declaration, GlobalDeclaration, InterfaceDeclaration, ModuleAliasDeclaration,
     ModuleDeclaration, ModuleMember, ModuleSelf, TypeAliasDeclaration,
 };
+use crate::ast::directives::{
+    Directive, UseClause, UseDirective, UseSingleClause, UseWildcardClause,
+};
 use crate::ast::location::{
     AliasDeclarationLocation, AliasLocation, AliasMemberLocation, AttributeMemberLocation,
     ClassDeclarationLocation, ClassInstanceLocation, ClassSingletonLocation, ClassSuperLocation,
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
     InterfaceDeclarationLocation, InterfaceLocation, LocationRange, MethodDefinitionLocation,
     MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation, ModuleSelfLocation,
-    TypeAliasDeclarationLocation, TypeParamLocation, VariableMemberLocation,
+    TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation, UseSingleClauseLocation,
+    UseWildcardClauseLocation, VariableMemberLocation,
 };
 use crate::ast::members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -38,9 +42,10 @@ use crate::node::{
     FunctionTypeNode, GlobalNode, IncludeNode, InstanceVariableNode, InterfaceNode,
     InterfaceTypeNode, MethodDefinitionKind as NodeMethodDefinitionKind, MethodDefinitionNode,
     MethodDefinitionOverloadNode, MethodDefinitionVisibility as NodeMethodDefinitionVisibility,
-    MethodTypeNode, ModuleAliasNode, ModuleNode, ModuleSelfNode, Node, PrependNode, PrivateNode,
-    PublicNode, RBSLocationRange, SymbolNode, TypeAliasNode, TypeNameNode, TypeParamNode,
-    TypeParamVariance, UntypedFunctionTypeNode,
+    MethodTypeNode, ModuleAliasNode, ModuleNode, ModuleSelfNode, NamespaceNode, Node, PrependNode,
+    PrivateNode, PublicNode, RBSLocationRange, SymbolNode, TypeAliasNode, TypeNameNode,
+    TypeParamNode, TypeParamVariance, UntypedFunctionTypeNode, UseNode, UseSingleClauseNode,
+    UseWildcardClauseNode,
 };
 use crate::type_name::TypeNameInterner;
 
@@ -105,6 +110,13 @@ impl<'a> AstConverter<'a> {
             Node::Private(node) => Member::Private(self.convert_private_member(node)),
             Node::Alias(node) => Member::Alias(self.convert_alias_member(node)),
             _ => panic_expected("member node while converting member", node),
+        }
+    }
+
+    pub fn convert_directive(&mut self, node: &Node<'_>) -> Directive {
+        match node {
+            Node::Use(node) => Directive::Use(self.convert_use_directive(node)),
+            _ => panic_expected("directive node while converting directive", node),
         }
     }
 
@@ -241,6 +253,53 @@ impl<'a> AstConverter<'a> {
                 range: convert_range(node.location()),
                 name_range: convert_range(node.name_location()),
                 args_range: convert_optional_range(node.args_location()),
+            }),
+        }
+    }
+
+    fn convert_use_directive(&mut self, node: &UseNode<'_>) -> UseDirective {
+        UseDirective {
+            clauses: self.convert_use_clauses(node.clauses()),
+            location: Some(UseDirectiveLocation {
+                range: convert_range(node.location()),
+                keyword_range: convert_range(node.keyword_location()),
+            }),
+        }
+    }
+
+    fn convert_use_clause(&mut self, node: &Node<'_>) -> UseClause {
+        match node {
+            Node::UseSingleClause(node) => UseClause::Single(self.convert_use_single_clause(node)),
+            Node::UseWildcardClause(node) => {
+                UseClause::Wildcard(self.convert_use_wildcard_clause(node))
+            }
+            _ => panic_expected("use clause node while converting use directive", node),
+        }
+    }
+
+    fn convert_use_single_clause(&mut self, node: &UseSingleClauseNode<'_>) -> UseSingleClause {
+        UseSingleClause {
+            type_name: self.convert_type_name(&node.type_name()),
+            new_name: node.new_name().map(|name| self.intern_symbol(&name)),
+            location: Some(UseSingleClauseLocation {
+                range: convert_range(node.location()),
+                type_name_range: convert_range(node.type_name_location()),
+                keyword_range: convert_optional_range(node.keyword_location()),
+                new_name_range: convert_optional_range(node.new_name_location()),
+            }),
+        }
+    }
+
+    fn convert_use_wildcard_clause(
+        &mut self,
+        node: &UseWildcardClauseNode<'_>,
+    ) -> UseWildcardClause {
+        UseWildcardClause {
+            namespace: self.convert_namespace(&node.namespace()),
+            location: Some(UseWildcardClauseLocation {
+                range: convert_range(node.location()),
+                namespace_range: convert_range(node.namespace_location()),
+                star_range: convert_range(node.star_location()),
             }),
         }
     }
@@ -757,6 +816,12 @@ impl<'a> AstConverter<'a> {
             .collect()
     }
 
+    fn convert_use_clauses(&mut self, list: crate::node::NodeList<'_>) -> Vec<UseClause> {
+        list.iter()
+            .map(|node| self.convert_use_clause(&node))
+            .collect()
+    }
+
     fn convert_class_members(&mut self, list: crate::node::NodeList<'_>) -> Vec<ClassMember> {
         list.iter()
             .map(|node| match node {
@@ -946,9 +1011,14 @@ impl<'a> AstConverter<'a> {
     }
 
     fn convert_type_name(&mut self, node: &TypeNameNode<'_>) -> TypeName {
-        let namespace = node.namespace();
-        let mut name = self.type_names.root(namespace.absolute());
-        for segment_node in namespace.path().iter() {
+        let name = self.convert_namespace(&node.namespace());
+        let final_segment = self.intern_symbol(&node.name());
+        self.type_names.append(name, final_segment)
+    }
+
+    fn convert_namespace(&mut self, node: &NamespaceNode<'_>) -> TypeName {
+        let mut name = self.type_names.root(node.absolute());
+        for segment_node in node.path().iter() {
             match segment_node {
                 Node::Symbol(segment) => {
                     let segment = self.intern_symbol(&segment);
@@ -960,8 +1030,7 @@ impl<'a> AstConverter<'a> {
                 ),
             }
         }
-        let final_segment = self.intern_symbol(&node.name());
-        self.type_names.append(name, final_segment)
+        name
     }
 
     fn intern_symbol(&mut self, node: &SymbolNode<'_>) -> SymbolId {

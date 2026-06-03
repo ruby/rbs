@@ -11,6 +11,7 @@ pub mod annotation;
 pub mod comment;
 pub mod convert;
 pub mod declarations;
+pub mod directives;
 pub mod location;
 pub mod members;
 pub mod method_type;
@@ -25,13 +26,19 @@ pub use declarations::{
     Declaration, GlobalDeclaration, InterfaceDeclaration, ModuleAliasDeclaration,
     ModuleDeclaration, ModuleMember, ModuleSelf, TypeAliasDeclaration,
 };
+pub use directives::{
+    Directive, ResolveTypeNamesDirective, UseClause, UseDirective, UseSingleClause,
+    UseWildcardClause,
+};
 pub use location::{
     AliasDeclarationLocation, AliasLocation, AliasMemberLocation, AttributeMemberLocation,
     ClassDeclarationLocation, ClassInstanceLocation, ClassSingletonLocation, ClassSuperLocation,
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
     InterfaceDeclarationLocation, InterfaceLocation, LocationRange, MethodDefinitionLocation,
     MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation, ModuleSelfLocation,
-    TypeAliasDeclarationLocation, TypeParamLocation, VariableMemberLocation,
+    ResolveTypeNamesDirectiveLocation, TypeAliasDeclarationLocation, TypeParamLocation,
+    UseDirectiveLocation, UseSingleClauseLocation, UseWildcardClauseLocation,
+    VariableMemberLocation,
 };
 pub use members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -51,8 +58,8 @@ pub use types::{
 #[cfg(test)]
 mod tests {
     use crate::ast::{
-        AstConverter, BaseType, BaseTypeKind, ClassMember, Declaration, IvarName, Literal, Member,
-        MethodKind, ModuleMember, RecordKey, Type,
+        AstConverter, BaseType, BaseTypeKind, ClassMember, Declaration, Directive, IvarName,
+        Literal, Member, MethodKind, ModuleMember, RecordKey, Type, UseClause,
     };
     use crate::interner::StringInterner;
     use crate::node::{Node, parse};
@@ -266,5 +273,55 @@ mod tests {
             panic!("expected module alias declaration");
         };
         assert_eq!(type_names.display(module_alias.old_name, &strings), "NewM");
+    }
+
+    #[test]
+    fn converts_directives_to_owned_ast() {
+        let signature = parse(
+            r#"
+                use Foo, Foo::Bar as FBar, Foo::Baz::*
+
+                class Foo
+                end
+            "#,
+        )
+        .unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let directives = signature
+            .directives()
+            .iter()
+            .map(|node| converter.convert_directive(&node))
+            .collect::<Vec<_>>();
+
+        assert_eq!(directives.len(), 1);
+
+        let Directive::Use(use_directive) = &directives[0] else {
+            panic!("expected use directive");
+        };
+        assert_eq!(use_directive.clauses.len(), 3);
+        assert!(use_directive.location.is_some());
+
+        let UseClause::Single(single) = &use_directive.clauses[0] else {
+            panic!("expected single use clause");
+        };
+        assert_eq!(type_names.display(single.type_name, &strings), "Foo");
+        assert_eq!(single.new_name, None);
+
+        let UseClause::Single(aliased) = &use_directive.clauses[1] else {
+            panic!("expected aliased single use clause");
+        };
+        assert_eq!(type_names.display(aliased.type_name, &strings), "Foo::Bar");
+        assert_eq!(aliased.new_name, Some(strings.intern("FBar")));
+        assert!(aliased.location.as_ref().unwrap().keyword_range.is_some());
+        assert!(aliased.location.as_ref().unwrap().new_name_range.is_some());
+
+        let UseClause::Wildcard(wildcard) = &use_directive.clauses[2] else {
+            panic!("expected wildcard use clause");
+        };
+        assert_eq!(type_names.display(wildcard.namespace, &strings), "Foo::Baz");
+        assert!(wildcard.location.is_some());
     }
 }
