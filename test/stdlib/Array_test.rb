@@ -241,11 +241,51 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_bsearch
-    omit 'todo'
+    ary = [0r, 4r, 7r, 10r, 12r]
+
+    # Bool-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| ele >= 2 ? true : nil end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| ele >= 100 ? true : nil end
+
+    # Numeric-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| ele <=> 7 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| 7.0 - ele end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| ele <=> 100 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| 100.0 - ele end
+
+    # Enumerator
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      ary, :bsearch
   end
 
   def test_bsearch_index
-    omit 'todo'
+    ary = [0r, 4r, 7r, 10r, 12r]
+
+    # Bool-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| ele >= 2 ? true : nil end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| ele >= 100 ? true : nil end
+
+    # Numeric-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| ele <=> 7 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| 7.0 - ele end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| ele <=> 100 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| 100.0 - ele end
+
+    # Enumerator
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      ary, :bsearch_index
   end
 
   def test_clear
@@ -254,7 +294,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_collect(method: :collect)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> Complex } -> Array[Complex]',
+                      [1r, 2r, 3r], method do |ele| Complex(ele) end
+    assert_send_type  '() -> Enumerator[Rational, Array[untyped]]',
+                      [1r, 2r, 3r], method
   end
 
   def test_map
@@ -262,7 +305,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_collect!(method: :collect!)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> Rational } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele + 1 end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [], method
   end
 
   def test_map!
@@ -270,7 +316,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_combination
-    omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :combination, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :combination, count
+    end
   end
 
   def test_compact
@@ -317,7 +368,24 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_cycle
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> void } -> nil',
+                      [1r, 2r, 3r], :cycle do break_from_block end
+
+    # Unfortunately you can't test the enumerator branch because it'll infinitely loop
+    raise unless [1r, 2r, 3r].cycle.instance_of? Enumerator
+
+    with_int(2).and_nil do |count|
+      assert_send_type  '(int?) { (Rational) -> void } -> nil',
+                        [1r, 2r, 3r], :cycle, count do break_from_block end
+
+      if nil === count
+        raise unless [1r, 2r, 3r].cycle(test_count).instance_of? Enumerator
+        next
+      end
+
+      assert_send_type  '(int) -> Enumerator[Rational, nil]',
+                        [1r, 2r, 3r], :cycle, count
+    end
   end
 
   def test_deconstruct
@@ -348,7 +416,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_delete_if(method: :delete_if)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do false end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], method
   end
 
   def test_difference
@@ -390,15 +463,24 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_drop_while
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :take_while do |ele| ele >= 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :take_while
   end
 
   def test_each
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :each do end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :each
   end
 
   def test_each_index
-    omit 'todo'
+    assert_send_type  '() { (Integer) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :each_index do end
+    assert_send_type  '() -> Enumerator[Integer, Array[Rational]]',
+                      [1r, 2r, 3r], :each_index
   end
 
   def test_empty?
@@ -483,7 +565,19 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_find(method: :find)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], method do it > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do false end
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      [1r, 2r, 3r], method
+
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], method, ->{ "" } do it > 2 ? :truthy : nil end
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> String',
+                      [1r, 2r, 3r], method, ->{ "" } do false end
+    assert_send_type  '(Enumerable::_NotFound[String]) -> Enumerator[Rational, Rational | String]',
+                      [1r, 2r, 3r], method, ->{ "" }
   end
 
   def test_detect
@@ -491,7 +585,19 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_find_index(method: :find_index)
-    omit 'todo'
+    with_untyped.and 2r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r, 3r], method, untyped
+    end
+
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], method do :true end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do false end
+
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      [1r, 2r, 3r], method
   end
 
   def test_index
@@ -606,7 +712,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_keep_if
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :keep_if do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :keep_if
   end
 
   def test_last
@@ -698,7 +807,26 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_permutation
-    omit 'todo'
+    assert_send_type  '() { (Array[Rational]) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :permutation do end
+    assert_send_type  '() -> Enumerator[Array[Rational], Array[Rational]]',
+                      [1r, 2r, 3r], :permutation
+
+    with_int(2).and_nil do |count|
+      assert_send_type  '(int?) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :permutation, count do end
+    end
+
+    # Unfortunately ruby 4.0 and before had a bug where `Array#permutation` with a `nil`
+    # argument didn't have a correct size. cf https://github.com/ruby/ruby/pull/17197.
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :permutation, count
+    end
+    if_ruby '4.2'... do
+      assert_send_type  '(nil) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :permutation, nil
+    end
   end
 
   def test_pop
@@ -755,15 +883,30 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_reject!
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :reject! do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :reject! do false end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], :reject!
   end
 
   def test_repeated_combination
-    omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :repeated_combination, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :repeated_combination, count
+    end
   end
 
   def test_repeated_permutation
-    omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :repeated_permutation, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :repeated_permutation, count
+    end
   end
 
   def test_replace(method: :replace)
@@ -792,15 +935,42 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_reverse_each
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :reverse_each do end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :reverse_each
   end
 
   def test_rfind
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], :rfind do it > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :rfind do false end
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      [1r, 2r, 3r], :rfind
+
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], :rfind, ->{ "" } do it > 2 ? :truthy : nil end
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> String',
+                      [1r, 2r, 3r], :rfind, ->{ "" } do false end
+    assert_send_type  '(Enumerable::_NotFound[String]) -> Enumerator[Rational, Rational | String]',
+                      [1r, 2r, 3r], :rfind, ->{ "" }
   end
 
   def test_rindex
-    omit 'todo'
+    with_untyped.and 2r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r, 3r], :rindex, untyped
+    end
+
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], :rindex do :true end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :rindex do false end
+
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      [1r, 2r, 3r], :rindex
   end
 
   def test_rotate
@@ -857,7 +1027,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_select(method: :select)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], method
   end
 
   def test_filter
@@ -865,7 +1038,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_select!(method: :select!)
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do true end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], method
   end
 
   def test_filter!
@@ -942,7 +1120,27 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_sort_by!
-    omit 'todo'
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() { (Rational) -> Comparable::_WithSpaceshipOperator } -> Array[Rational]',
+                      ary, :sort_by! do |x|
+                        bs = BlankSlate.new
+                        ::Kernel.instance_method(:instance_variable_set).bind_call(bs, :@x, x)
+                        def bs.x = @x
+                        def bs.<=>(r)
+                          cmp = BlankSlate.new
+                          ::Kernel.instance_method(:instance_variable_set)
+                            .bind_call(cmp, :@cmp, @x <=> r.x)
+                          def cmp.<(x) = 0.equal?(x) ? @cmp < 0 : fail
+                          def cmp.>(x) = 0.equal?(x) ? @cmp > 0 : fail
+                          cmp
+                        end
+                        bs
+                      end
+
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      ary, :sort_by!
+
   end
 
   def test_sum
@@ -983,7 +1181,10 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_take_while
-    omit 'todo'
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :take_while do |ele| ele <= 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :take_while
   end
 
   def test_to_a

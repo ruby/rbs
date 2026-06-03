@@ -723,7 +723,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def -: (array[untyped] other_array) -> Array[E]  # TODO: `where E: _Eql?[T]`
+  def -: (array[untyped] other_array) -> Array[E] # TODO: `where E: _Eql?[T]`
 
   # <!--
   #   rdoc-file=array.c
@@ -1233,9 +1233,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch: () -> ::Enumerator[E, E?]
-             | () { (E) -> (true | false) } -> E?
-             | () { (E) -> ::Integer } -> E?
+  def bsearch: () { (E element) -> (Numeric | bool?) } -> E?
+             | () -> Enumerator[E, E?]
 
   # <!--
   #   rdoc-file=array.c
@@ -1249,8 +1248,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch_index: () { (E) -> (true | false) } -> ::Integer?
-                   | () { (E) -> ::Integer } -> ::Integer?
+  def bsearch_index: () { (E element) -> (Numeric | bool?) } -> Integer?
+                   | () -> Enumerator[E, Integer?]
 
   # <!--
   #   rdoc-file=array.c
@@ -1284,8 +1283,8 @@ class Array[unchecked out E]
   # Related: #collect!; see also [Methods for
   # Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def collect: [U] () { (E item) -> U } -> ::Array[U]
-             | () -> ::Enumerator[E, ::Array[untyped]]
+  def collect: [T] () { (E item) -> T } -> Array[T]
+             | () -> Enumerator[E, Array[untyped]]
 
   # <!--
   #   rdoc-file=array.c
@@ -1305,8 +1304,8 @@ class Array[unchecked out E]
   # Related: #collect; see also [Methods for
   # Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def collect!: () { (E item) -> E } -> self
-              | () -> ::Enumerator[E, self]
+  def collect!: () { (E element) -> E } -> self
+              | () -> Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1350,8 +1349,8 @@ class Array[unchecked out E]
   # Related: Array#permutation; see also [Methods for
   # Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def combination: (int n) { (::Array[E]) -> void } -> self
-                 | (int n) -> ::Enumerator[::Array[E], self]
+  def combination: (int count) { (Array[E] combination) -> void } -> self
+                 | (int count) -> Enumerator[Array[E], self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1461,8 +1460,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def cycle: (?int? n) { (E) -> void } -> nil
-           | (?int? n) -> ::Enumerator[E, nil]
+  def cycle: (?int? n) { (E element) -> void } -> nil
+           | (?int? n) -> Enumerator[E, nil]
 
   # <!--
   #   rdoc-file=array.c
@@ -1555,7 +1554,24 @@ class Array[unchecked out E]
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def delete_if: () { (E item) -> boolish } -> self
-               | () -> ::Enumerator[E, self]
+               | () -> Enumerator[E, self]
+
+  # <!-- rdoc-file=array.c -->
+  # Returns the first element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array;
+  # returns the first element for which the block returns a truthy value:
+  #
+  #     [1, 3, 5].find {|element| element > 2}                # => 3
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value.
+  #
+  #     [1, 3, 5].find(proc {-1}) {|element| element > 12} # => -1
+  #
+  # With no block given, returns an Enumerator.
+  #
+  alias detect find
 
   # <!--
   #   rdoc-file=array.c
@@ -1634,8 +1650,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def drop_while: () { (E obj) -> boolish } -> ::Array[E]
-                | () -> ::Enumerator[E, ::Array[E]]
+  def drop_while: () { (E element) -> boolish } -> Array[E]
+                | () -> Enumerator[E, Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -1668,8 +1684,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def each: () -> ::Enumerator[E, self]
-          | () { (E item) -> void } -> self
+  def each: () { (E element) -> void } -> self
+          | () -> Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1703,8 +1719,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def each_index: () { (::Integer index) -> void } -> self
-                | () -> ::Enumerator[::Integer, self]
+  def each_index: () { (Integer index) -> void } -> self
+                | () -> Enumerator[Integer, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -1996,8 +2012,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def fill: (E obj, ?int? start, ?int? length) -> self
-          | (E obj, range[int?] range) -> self
+  def fill: (E object, ?int? start, ?int? length) -> self
+          | (E object, range[int?] range) -> self
           | (?int? start, ?int? length) { (Integer index) -> E } -> self
           | (range[int?] range) { (Integer index) -> E } -> self
 
@@ -2014,8 +2030,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def filter: () { (E item) -> boolish } -> ::Array[E]
-            | () -> ::Enumerator[E, ::Array[E]]
+  alias filter select
 
   # <!-- rdoc-file=array.c -->
   # With a block given, calls the block with each element of `self`; removes from
@@ -2032,8 +2047,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def filter!: () { (E item) -> boolish } -> self?
-             | () -> ::Enumerator[E, self?]
+  alias filter! select!
 
   # <!--
   #   rdoc-file=array.c
@@ -2055,9 +2069,9 @@ class Array[unchecked out E]
   # With no block given, returns an Enumerator.
   #
   def find: () { (E) -> boolish } -> E?
-          | () -> ::Enumerator[E, E?]
-          | [T] (Enumerable::_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
-          | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
+          | () -> Enumerator[E, E?]
+          | [T] (Enumerable::_NotFound[T]? ifnone) { (E) -> boolish } -> (E | T)
+          | [T] (Enumerable::_NotFound[T]? ifnone) -> Enumerator[E, E | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -2090,9 +2104,9 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def find_index: (untyped obj) -> ::Integer?
-                | () { (E item) -> boolish } -> ::Integer?
-                | () -> ::Enumerator[E, ::Integer?]
+  def find_index: (untyped object) -> Integer? # TODO: _Equal
+                | () { (E element) -> boolish } -> Integer?
+                | () -> Enumerator[E, Integer?]
 
   # <!--
   #   rdoc-file=array.rb
@@ -2193,6 +2207,24 @@ class Array[unchecked out E]
   # Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
   def flatten!: (?int? level) -> self?
+
+  # <!--
+  #   rdoc-file=array.c
+  #   - freeze -> self
+  # -->
+  # Freezes `self` (if not already frozen); returns `self`:
+  #
+  #     a = []
+  #     a.frozen? # => false
+  #     a.freeze
+  #     a.frozen? # => true
+  #
+  # No further changes may be made to `self`; raises FrozenError if a change is
+  # attempted.
+  #
+  # Related: Kernel#frozen?.
+  #
+  def freeze: () -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2387,8 +2419,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def keep_if: () { (E item) -> boolish } -> self
-             | () -> ::Enumerator[E, self]
+  def keep_if: () { (E element) -> boolish } -> self
+             | () -> Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.rb
@@ -2430,7 +2462,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def length: () -> ::Integer
+  def length: () -> Integer
 
   # <!-- rdoc-file=array.c -->
   # With a block given, calls the block with each element of `self`; returns a new
@@ -2713,8 +2745,8 @@ class Array[unchecked out E]
   #
   # Related: [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def permutation: (?int n) -> ::Enumerator[::Array[E], ::Array[E]]
-                 | (?int n) { (::Array[E] p) -> void } -> ::Array[E]
+  def permutation: (?int? count) { (Array[E] permutation) -> void } -> self
+                 | (?int? count) -> Enumerator[Array[E], self]
 
   # <!--
   #   rdoc-file=array.c
@@ -2896,7 +2928,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
   def reject!: () { (E item) -> boolish } -> self?
-             | () -> ::Enumerator[E, self?]
+             | () -> Enumerator[E, self?]
 
   # <!--
   #   rdoc-file=array.c
@@ -2935,8 +2967,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def repeated_combination: (int n) { (::Array[E] c) -> void } -> self
-                          | (int n) -> ::Enumerator[::Array[E], self]
+  def repeated_combination: (int size) { (Array[E] combination) -> void } -> self
+                          | (int size) -> Enumerator[Array[E], self]
 
   # <!--
   #   rdoc-file=array.c
@@ -2975,8 +3007,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def repeated_permutation: (int n) { (::Array[E] p) -> void } -> self
-                          | (int n) -> ::Enumerator[::Array[E], self]
+  def repeated_permutation: (int size) { (Array[E] permutation) -> void } -> self
+                          | (int size) -> Enumerator[Array[E], self]
 
   # <!-- rdoc-file=array.c -->
   # Replaces the elements of `self` with the elements of `other_array`, which must
@@ -3039,8 +3071,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Iterating](rdoc-ref:Array@Methods+for+Iterating).
   #
-  def reverse_each: () { (E item) -> void } -> self
-                  | () -> ::Enumerator[E, self]
+  def reverse_each: () { (E element) -> void } -> self
+                  | () -> Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -3063,9 +3095,9 @@ class Array[unchecked out E]
   # With no block given, returns an Enumerator.
   #
   def rfind: () { (E) -> boolish } -> E?
-           | () -> ::Enumerator[E, E?]
-           | [T] (Enumerable::_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
-           | [T] (Enumerable::_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
+           | () -> Enumerator[E, E?]
+           | [T] (Enumerable::_NotFound[T]? ifnone) { (E) -> boolish } -> (E | T)
+           | [T] (Enumerable::_NotFound[T]? ifnone) -> Enumerator[E, E | T]
 
   # <!--
   #   rdoc-file=array.c
@@ -3096,9 +3128,9 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def rindex: (untyped obj) -> ::Integer?
-            | () { (E item) -> boolish } -> ::Integer?
-            | () -> ::Enumerator[E, ::Integer?]
+  def rindex: (untyped object) -> Integer? # TODO: _Equal
+            | () { (E element) -> boolish } -> Integer?
+            | () -> Enumerator[E, Integer?]
 
   # <!--
   #   rdoc-file=array.c
@@ -3241,8 +3273,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def select: () { (E item) -> boolish } -> ::Array[E]
-            | () -> ::Enumerator[E, ::Array[E]]
+  def select: () { (E element) -> boolish } -> Array[E]
+            | () -> Enumerator[E, Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -3265,8 +3297,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def select!: () { (E item) -> boolish } -> self?
-             | () -> ::Enumerator[E, self?]
+  def select!: () { (E element) -> boolish } -> self?
+             | () -> Enumerator[E, self?]
 
   # <!--
   #   rdoc-file=array.c
@@ -3640,8 +3672,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def sort_by!: [U] () { (E obj) -> U } -> ::Array[E]
-              | () -> ::Enumerator[E, ::Array[E]]
+  def sort_by!: () { (E element) -> Comparable::_WithSpaceshipOperator } -> self # TODO: use RBS::Ops
+              | () -> Enumerator[E, self]
 
   # <!--
   #   rdoc-file=array.c
@@ -3724,8 +3756,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def take_while: () { (E obj) -> boolish } -> ::Array[E]
-                | () -> ::Enumerator[E, ::Array[E]]
+  def take_while: () { (E element) -> boolish } -> Array[E]
+                | () -> Enumerator[E, Array[E]]
 
   # <!--
   #   rdoc-file=array.c
@@ -4123,9 +4155,6 @@ class Array[unchecked out E]
   #
   def |: [T] (array[T] other_array) -> Array[E | T] # TODO: where E: _Eql[T]
 
-  def freeze: () -> self
-  alias detect find
-
   private
 
   # <!--
@@ -4148,7 +4177,7 @@ end
 
 %a{deprecated: Use Array::_Rand}
 interface _Rand
-  def rand: (::Integer max) -> ::Integer
+  def rand: (Integer max) -> Integer
 end
 
 interface Array::_Pattern[T]
