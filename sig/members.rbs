@@ -5,14 +5,14 @@ module RBS
              | InstanceVariable | ClassInstanceVariable | ClassVariable
              | Include | Extend | Prepend
              | AttrReader | AttrWriter | AttrAccessor
-             | Public | Private
+             | Public | Private | Protected
              | Alias
 
       # Base class for members.
       class Base
       end
 
-      type visibility = :public | :private
+      type visibility = :public | :private | :protected
 
       class MethodDefinition < Base
         class Overload
@@ -216,6 +216,11 @@ module RBS
       end
 
       class Private < Base
+        include LocationOnly
+        include _ToJson
+      end
+
+      class Protected < Base
         include LocationOnly
         include _ToJson
       end

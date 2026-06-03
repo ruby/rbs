@@ -655,6 +655,128 @@ end
     SIG
   end
 
+  def test_protected
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
+      class Foo
+        protected
+      end
+    SIG
+
+      decls[0].yield_self do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 1, decl.members.size
+
+        decl.members[0].yield_self do |m|
+          assert_instance_of Members::Protected, m
+        end
+      end
+    end
+  end
+
+  def test_protected_def
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
+      class Foo
+        protected def foo: () -> void
+        def bar: () -> void
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 2, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :foo, m.name
+          assert_equal :protected, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::MethodDefinition, m
+          assert_equal :bar, m.name
+          assert_nil m.visibility
+        end
+      end
+    end
+  end
+
+  def test_protected_def_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        protected def self?.foo: () -> void
+      end
+    SIG
+    end
+  end
+
+  def test_protected_attr
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
+      class Foo
+        protected attr_reader foo: String
+        protected attr_writer bar: String
+        protected attr_accessor baz: String
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+
+        assert_equal 3, decl.members.size
+
+        decl.members[0].tap do |m|
+          assert_instance_of Members::AttrReader, m
+          assert_equal :foo, m.name
+          assert_equal :protected, m.visibility
+        end
+
+        decl.members[1].tap do |m|
+          assert_instance_of Members::AttrWriter, m
+          assert_equal :bar, m.name
+          assert_equal :protected, m.visibility
+        end
+
+        decl.members[2].tap do |m|
+          assert_instance_of Members::AttrAccessor, m
+          assert_equal :baz, m.name
+          assert_equal :protected, m.visibility
+        end
+      end
+    end
+  end
+
+  def test_protected_modifier_error
+    assert_raises RBS::ParsingError do
+      Parser.parse_signature(<<~SIG)
+      class Foo
+        protected alias foo bar
+      end
+    SIG
+    end
+  end
+
+  def test_public_private_protected_modifier
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
+      class Foo
+        public
+        private
+        protected
+      end
+    SIG
+
+      decls[0].tap do |decl|
+        assert_instance_of Declarations::Class, decl
+        assert_equal 3, decl.members.size
+
+        assert_instance_of Members::Public, decl.members[0]
+        assert_instance_of Members::Private, decl.members[1]
+        assert_instance_of Members::Protected, decl.members[2]
+      end
+    end
+  end
+
   def test_alias
     Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Foo

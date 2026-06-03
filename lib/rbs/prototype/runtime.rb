@@ -379,6 +379,48 @@ module RBS
           end
         end
 
+        protected_instance_methods = mod.protected_instance_methods.select {|name| target_method?(mod, instance: name) }
+        unless protected_instance_methods.empty?
+          added = false
+          members << AST::Members::Protected.new(location: nil)
+
+          protected_instance_methods.sort.each do |name|
+            method = mod.instance_method(name)
+            next if todo_object&.skip_instance_method?(module_name: module_name_absolute, method: method, accessibility: :protected)
+
+            added = true
+            if can_alias?(mod, method)
+              members << AST::Members::Alias.new(
+                new_name: method.name,
+                old_name: method.original_name,
+                kind: :instance,
+                location: nil,
+                comment: nil,
+                annotations: [],
+              )
+            else
+              merge_rbs(module_name, members, instance: name) do
+                RBS.logger.info "missing #{module_name}##{name} #{method.source_location}"
+
+                members << AST::Members::MethodDefinition.new(
+                  name: method.name,
+                  overloads: [
+                    AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: method_type(method))
+                  ],
+                  kind: :instance,
+                  location: nil,
+                  comment: nil,
+                  annotations: [],
+                  overloading: false,
+                  visibility: nil
+                )
+              end
+            end
+          end
+
+          members.pop unless added
+        end
+
         private_instance_methods = mod.private_instance_methods.select {|name| target_method?(mod, instance: name) }
         unless private_instance_methods.empty?
           added = false

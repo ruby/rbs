@@ -436,6 +436,8 @@ nodes:
       - optional: args
   - name: RBS::AST::Members::Private
     rust_name: PrivateNode
+  - name: RBS::AST::Members::Protected
+    rust_name: ProtectedNode
   - name: RBS::AST::Members::Public
     rust_name: PublicNode
   - name: RBS::AST::TypeParam
@@ -887,6 +889,7 @@ enums:
       - unspecified
       - public
       - private
+      - protected
   attribute_kind:
     symbols:
       - instance
@@ -906,6 +909,7 @@ enums:
       - unspecified
       - public
       - private
+      - protected
   type_param_variance:
     symbols:
       - invariant

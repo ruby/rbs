@@ -164,6 +164,10 @@ module RBS
         @accessibility == :private
       end
 
+      def protected?
+        @accessibility == :protected
+      end
+
       def sub(s)
         return self if s.empty?
 

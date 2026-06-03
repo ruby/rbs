@@ -266,6 +266,8 @@ module RBS
         puts "public"
       when AST::Members::Private
         puts "private"
+      when AST::Members::Protected
+        puts "protected"
       when AST::Members::Alias
         write_comment member.comment
         write_annotation member.annotations
@@ -318,6 +320,8 @@ module RBS
           "public "
         when :private
           "private "
+        when :protected
+          "protected "
         else
           ""
         end
@@ -370,6 +374,8 @@ module RBS
           "public "
         when :private
           "private "
+        when :protected
+          "protected "
         else
           ""
         end
