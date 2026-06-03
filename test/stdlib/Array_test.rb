@@ -56,15 +56,21 @@ class ArrayInstanceTest < Test::Unit::TestCase
   class ArraySubclass < Array
   end
 
-  class RngGen
-    def rand(max) = ToInt.new(Random.new.rand(max))
+  class RngGen < BlankSlate
+    def rand(max) = ::RBS::UnitTest::Convertibles::ToInt.new(::Random.new.rand(max))
   end
 
-  class ComparableToZero
-    def self.for(x, y) = (x <=> y)&.then { |cmp| new(cmp) }
+  class ComparableToZero < BlankSlate
     def initialize(cmp) = @cmp = cmp
     def <(x) = 0.equal?(x) ? @cmp < x : fail
     def >(x) = 0.equal?(x) ? @cmp > x : fail
+  end
+
+  class HashKey < BlankSlate
+    protected attr_reader :key
+    def initialize(key) = @key = key
+    def hash = @key.hash
+    def eql?(other) = HashKey === other && @key.eql?(other.key)
   end
 
   def test_op_and
@@ -441,7 +447,35 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_fill
-    omit 'todo -- non-enumerable'
+    assert_send_type  '(Rational) -> Array[Rational]',
+                      [1r, 2r, 3r, 4r], :fill, 2r
+    with_int(1).and_nil do |start|
+      assert_send_type  '(Rational, int?) -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, 2r, start
+
+      with_int(3).and_nil do |length|
+        assert_send_type  '(Rational, int?, int?) -> Array[Rational]',
+                          [1r, 2r, 3r, 4r], :fill, 2r, start, length
+      end
+    end
+
+    with_range with_int(1).and_nil, with_int(3).and_nil do |range|
+      assert_send_type  '(Rational, range[int?]) -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, 2r, range
+    end
+
+    assert_send_type  '() { (Integer) -> Rational } -> Array[Rational]',
+                      [1r, 2r, 3r, 4r], :fill do 1r end
+
+    with_int(1).and_nil do |start|
+      assert_send_type  '(int?) { (Integer) -> Rational } -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, start do 1r end
+
+      with_int(3).and_nil do |length|
+        assert_send_type  '(int?, int?) { (Integer) -> Rational } -> Array[Rational]',
+                          [1r, 2r, 3r, 4r], :fill, start, length do 1r end
+      end
+    end
   end
 
   def test_find(method: :find)
@@ -514,7 +548,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_insert
-    omit 'todo -- non-enumerable'
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :insert, index
+      assert_send_type  '(int, *Rational) -> Array[Rational]',
+                        [1r, 2r, 3r], :insert, index, 3r, 4r
+    end
   end
 
   def test_inspect(method: :inspect)
@@ -529,11 +568,27 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_intersect?
-    omit 'todo -- non-enumerable'
+    with_array 1r, 3r do |array|
+      assert_send_type  '(array[untyped]) -> bool',
+                        [1r, 2r, 3r], :intersect?, array
+    end
+
+    with_array :a, :b do |array|
+      assert_send_type  '(array[untyped]) -> bool',
+                        [1r, 2r, 3r], :intersect?, array
+    end
   end
 
   def test_intersection
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :intersection
+
+    with_array 1r, 2r, 4r do |array1|
+      with_array 1, 2, 4 do |array2|
+        assert_send_type  '(*array[untyped]) -> Array[Rational]',
+                          [1r, 2r, 3r], :intersection, array1, array2
+      end
+    end
   end
 
   def test_join
@@ -582,14 +637,14 @@ class ArrayInstanceTest < Test::Unit::TestCase
                       [], :max
     assert_send_type  '() -> Rational',
                       ary, :max
-    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> Rational',
-                      ary, :max do |a, b| ComparableToZero.for(a, b) end
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Rational',
+                      ary, :max do |a, b| ComparableToZero.new(a <=> b) end
 
     with_int 3 do |count|
       assert_send_type  '(int) -> Array[Rational]',
                         ary, :max, count
-      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero? } -> Array[Rational]',
-                        ary, :max, count do |a, b| ComparableToZero.for(a, b) end
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                        ary, :max, count do |a, b| ComparableToZero.new(a <=> b) end
     end
   end
 
@@ -600,14 +655,14 @@ class ArrayInstanceTest < Test::Unit::TestCase
                       [], :min
     assert_send_type  '() -> Rational',
                       ary, :min
-    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> Rational',
-                      ary, :min do |a, b| ComparableToZero.for(a, b) end
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Rational',
+                      ary, :min do |a, b| ComparableToZero.new(a <=> b) end
 
     with_int 3 do |count|
       assert_send_type  '(int) -> Array[Rational]',
                         ary, :min, count
-      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero? } -> Array[Rational]',
-                        ary, :min, count do |a, b| ComparableToZero.for(a, b) end
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                        ary, :min, count do |a, b| ComparableToZero.new(a <=> b) end
     end
   end
 
@@ -616,12 +671,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
 
     assert_send_type  '() -> [nil, nil]',
                       [], :minmax
-    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> [nil, nil]',
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> [nil, nil]',
                       [], :minmax do end
     assert_send_type  '() -> [Rational, Rational]',
                       ary, :minmax
-    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero? } -> [Rational, Rational]',
-                      ary, :minmax do |a, b| ComparableToZero.for(a, b) end
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> [Rational, Rational]',
+                      ary, :minmax do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_pack
@@ -846,11 +901,21 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_sort
-    omit 'todo -- non-enumerable'
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :sort
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                      ary, :sort do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_sort!
-    omit 'todo -- non-enumerable'
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :sort!
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                      ary, :sort! do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_sort_by!
@@ -906,15 +971,34 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_union
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :union
+
+    with_array 2r, 3r do |array1|
+      with_array 1, :a, 'b' do |array2|
+        assert_send_type  '[T] (*array[T]) -> Array[Rational | T]',
+                          [1r, 2r], :union, array1, array2
+      end
+    end
+
   end
 
   def test_uniq
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq do |x| HashKey.new x end
   end
 
   def test_uniq!
-    omit 'todo -- non-enumerable'
+    assert_send_type  '() -> nil',
+                      [1r, 2r, 3r], :uniq!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq!
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> nil',
+                      [1r, 2r, 3r], :uniq! do |x| HashKey.new x end
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq! do |x| HashKey.new x end
   end
 
   def test_unshift(method: :unshift)
@@ -931,7 +1015,19 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_values_at
-    omit 'todo -- non-enumerable'
+    ary = 10.times.map { |x| Rational(x) }
+
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :values_at
+
+    with_int 3 do |index1|
+      with_int 99999 do |index2|
+        with_range with_int(3).and_nil, with_int(-2).and_nil do |range|
+          assert_send_type  '(*int | range[int?]) -> Array[Rational?]',
+                            ary, :values_at, index1, index2, range
+        end
+      end
+    end
   end
 
   def test_zip

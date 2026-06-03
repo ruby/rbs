@@ -1996,11 +1996,10 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def fill: (E obj) -> self
-          | (E obj, int? start, ?int? length) -> self
-          | (E obj, ::Range[::Integer] range) -> self
-          | (?int? start, ?int? length) { (::Integer index) -> E } -> self
-          | (::Range[::Integer] range) { (::Integer index) -> E } -> self
+  def fill: (E obj, ?int? start, ?int? length) -> self
+          | (E obj, range[int?] range) -> self
+          | (?int? start, ?int? length) { (Integer index) -> E } -> self
+          | (range[int?] range) { (Integer index) -> E } -> self
 
   # <!-- rdoc-file=array.c -->
   # With a block given, calls the block with each element of `self`; returns a new
@@ -2286,7 +2285,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def insert: (int index, *E obj) -> self
+  def insert: (int index, *E objects) -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -2317,7 +2316,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def intersect?: (_ToAry[untyped]) -> bool
+  def intersect?: (array[untyped] other_array) -> bool # Todo: where E: _Eql
 
   # <!--
   #   rdoc-file=array.c
@@ -2339,7 +2338,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def intersection: (*::Array[untyped] | _ToAry[untyped] other_ary) -> ::Array[E]
+  def intersection: (*array[untyped] other_arrays) -> Array[E] # Todo: where E: _Eql
 
   # <!--
   #   rdoc-file=array.c
@@ -3607,8 +3606,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def sort: () -> ::Array[E]
-          | () { (E a, E b) -> ::Integer } -> ::Array[E]
+  def sort: () ?{ (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3619,8 +3617,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def sort!: () -> self
-           | () { (E a, E b) -> ::Integer } -> self
+  def sort!: () ?{ (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3832,7 +3829,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def union: [T] (*array[T] other_arrays) -> Array[T | E]
+  def union: [T] (*array[T] other_arrays) -> Array[T | E] # TODO: where E: _Eql
 
   # <!--
   #   rdoc-file=array.c
@@ -3858,8 +3855,7 @@ class Array[unchecked out E]
   #
   # Related: [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def uniq: () -> ::Array[E]
-          | () { (E item) -> untyped } -> ::Array[E]
+  def uniq: () ?{ (E element) -> Hash::_Key } -> Array[E] # TODO: E: Hash::_Key
 
   # <!--
   #   rdoc-file=array.c
@@ -3887,8 +3883,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def uniq!: () -> self?
-           | () { (E) -> untyped } -> self?
+  def uniq!: () ?{ (E element) -> Hash::_Key } -> self? # TODO: E: Hash::_Key
 
   # <!--
   #   rdoc-file=array.c
@@ -4011,7 +4006,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def values_at: (*int | ::Range[::Integer] selector) -> ::Array[E?]
+  def values_at: (*int | range[int?] selector) -> Array[E?]
 
   # <!--
   #   rdoc-file=array.c
