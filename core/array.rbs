@@ -609,7 +609,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Creating an
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
-  def initialize: () -> void # TODO: technically array has a `Array.new` defined. do we use that?
+  def initialize: () -> void
                 | (array[E] ary) -> void
                 | (int size, ?E default_value) -> void
                 | (int size) { (int index) -> E } -> void
@@ -627,7 +627,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Creating an
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
-  def self.[]: [U] (*U) -> Array[U] # TODO: this technically returns a subclass. How do we want to do that?
+  def self.[]: [U] (*U) -> Array[U] # this technically returns a subclass, but `instance(self)` isn't a thing
 
   # <!--
   #   rdoc-file=array.c
@@ -672,7 +672,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def &: (array[untyped] other_array) -> Array[E] # TODO: `where E: _Eql?[T]`
+  def &: (array[untyped] other_array) -> Array[E] # where E: _Eql?[T]
 
   # <!--
   #   rdoc-file=array.c
@@ -690,8 +690,8 @@ class Array[unchecked out E]
   #
   #     [0, [0, 1], {foo: 0}] * ', ' # => "0, 0, 1, {foo: 0}"
   #
-  def *: (string string_separator) -> String # TODO: where E: _ToS
-       | (int n) -> Array[E]
+  def *: (string string_separator) -> String # where E: _ToS
+       | (int n) -> Array[E] # where E: _ToS
 
   # <!--
   #   rdoc-file=array.c
@@ -723,7 +723,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def -: (array[untyped] other_array) -> Array[E] # TODO: `where E: _Eql?[T]`
+  def -: (array[untyped] other_array) -> Array[E] # where E: _Eql?[T]
 
   # <!--
   #   rdoc-file=array.c
@@ -1195,7 +1195,7 @@ class Array[unchecked out E]
   # Related: Array#rassoc; see also [Methods for
   # Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def assoc: (untyped object) -> Array[untyped]? # TODO: where `E: _ToAry[X]`, and object: _Equal
+  def assoc: (untyped object) -> Array[untyped]? # where E: _ToAry[X], object: _Equal
 
   # <!--
   #   rdoc-file=array.c
@@ -1365,7 +1365,7 @@ class Array[unchecked out E]
   # Related: Array#compact!; see also [Methods for
   # Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def compact: () -> Array[E] # TODO: it'd be nice if there was a way to do `Array[E - nil]`
+  def compact: () -> Array[E] # it'd be nice if there was a way to do `Array[E - nil]`
 
   # <!--
   #   rdoc-file=array.c
@@ -1426,7 +1426,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def count: () ?{ (E element) -> boolish } -> Integer
-           | (untyped object) -> Integer # TODO: where E: _Equal
+           | (untyped object) -> Integer # where E: RBS::Ops::_Equal
 
   # <!--
   #   rdoc-file=array.c
@@ -1505,7 +1505,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def delete: (untyped object) -> E? # TODO: _Comparable
+  def delete: (untyped object) -> E? # where E: _Comparable
             | [S, T] (S object) { (S object) -> T } -> (E | T)
 
   # <!--
@@ -2104,7 +2104,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def find_index: (untyped object) -> Integer? # TODO: _Equal
+  def find_index: (untyped object) -> Integer? # where E: RBS::Ops::_Equal
                 | () { (E element) -> boolish } -> Integer?
                 | () -> Enumerator[E, Integer?]
 
@@ -2239,7 +2239,7 @@ class Array[unchecked out E]
   #     ['a', 'b'].hash == ['a', 'c'].hash # => false
   #     ['a', 'b'].hash == ['a'].hash      # => false
   #
-  def hash: () -> Integer # TODO: where `E: _Hash`
+  def hash: () -> Integer # where E: _Hash
 
   # <!--
   #   rdoc-file=array.c
@@ -2254,7 +2254,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def include?: (top object) -> bool # TODO: E: _Equals
+  def include?: (untyped object) -> bool # where E: RBS::Ops::_Equals
 
   # <!-- rdoc-file=array.c -->
   # Returns the zero-based integer index of a specified element, or `nil`.
@@ -2332,7 +2332,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def inspect: () -> String # TODO: where E: _Inspect
+  def inspect: () -> String # where E: _Inspect
 
   # <!--
   #   rdoc-file=array.c
@@ -2348,7 +2348,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def intersect?: (array[untyped] other_array) -> bool # Todo: where E: _Eql
+  def intersect?: (array[untyped] other_array) -> bool # where E: _Eql?
 
   # <!--
   #   rdoc-file=array.c
@@ -2370,7 +2370,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def intersection: (*array[untyped] other_arrays) -> Array[E] # Todo: where E: _Eql
+  def intersection: (*array[untyped] other_arrays) -> Array[E] # where E: _Eql?
 
   # <!--
   #   rdoc-file=array.c
@@ -2402,7 +2402,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Converting](rdoc-ref:Array@Methods+for+Converting).
   #
-  def join: (?string? separator) -> String # TODO: where E: _ToS
+  def join: (?string? separator) -> String # where E: _ToS
 
   # <!--
   #   rdoc-file=array.c
@@ -2541,8 +2541,10 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def max: %a{implicitly-returns-nil} () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: where `E: Comparable::_WithSpaceshipOperator`
-         | (int count) ?{ (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: i dont think these shoudl have `?` in _CompareToZero. But it would make signatures nicer?
+  def max: %a{implicitly-returns-nil} () -> E # where E: Comparable::_WithSpaceshipOperator
+         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: `?`
+         | (int count) -> Array[E] # where E: Comparable::_WithSpaceshipOperator
+         | (int count) { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: `?`
 
   # <!--
   #   rdoc-file=array.c
@@ -2592,8 +2594,11 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def min: %a{implicitly-returns-nil} () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: where `E: Comparable::_WithSpaceshipOperator`
-         | (int count) ?{ (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
+  def min: %a{implicitly-returns-nil} () -> E # where E: Comparable::_WithSpaceshipOperator
+         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: `?`
+         | (int count) -> Array[E] # where E: Comparable::_WithSpaceshipOperator
+         | (int count) { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: `?`
+
 
   # <!--
   #   rdoc-file=array.c
@@ -2617,7 +2622,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def minmax: () ?{ (E a, E b) -> Comparable::_CompareToZero? } -> [ E?, E? ]
+  def minmax: () -> [ E?, E? ] # where E: Comparable::_WithSpaceshipOperator
+            | () { (E a, E b) -> Comparable::_CompareToZero? } -> [ E?, E? ] # TODO: `?`
 
   # <!--
   #   rdoc-file=array.c
@@ -2888,7 +2894,7 @@ class Array[unchecked out E]
   # Related: Array#assoc; see also [Methods for
   # Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def rassoc: (untyped object) -> Array[untyped]? # TODO: where `E: _ToAry[X]`, and object: _Equal
+  def rassoc: (untyped object) -> Array[untyped]? # where E: _ToAry, object: _Equal
 
   # <!--
   #   rdoc-file=array.c
@@ -3128,7 +3134,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def rindex: (untyped object) -> Integer? # TODO: _Equal
+  def rindex: (untyped object) -> Integer? # where E: _Equal
             | () { (E element) -> boolish } -> Integer?
             | () -> Enumerator[E, Integer?]
 
@@ -3638,7 +3644,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def sort: () ?{ (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
+  def sort: () -> Array[E] # where E: Comparable::_WithSpaceshipOperator
+          | () { (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3649,7 +3656,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def sort!: () ?{ (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
+  def sort!: () -> self # where E: Comparable::_WithSpaceshipOperator
+           | () { (E a, E b) -> Comparable::_CompareToZero } -> self
 
   # <!--
   #   rdoc-file=array.c
@@ -3860,7 +3868,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def union: [T] (*array[T] other_arrays) -> Array[T | E] # TODO: where E: _Eql
+  def union: [T] (*array[T] other_arrays) -> Array[T | E] # where E: _Eql?[T]
 
   # <!--
   #   rdoc-file=array.c
@@ -3886,7 +3894,8 @@ class Array[unchecked out E]
   #
   # Related: [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def uniq: () ?{ (E element) -> Hash::_Key } -> Array[E] # TODO: E: Hash::_Key
+  def uniq: () -> Array[E] # where E: Hash::_Key
+          | () { (E element) -> Hash::_Key } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3914,7 +3923,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Deleting](rdoc-ref:Array@Methods+for+Deleting).
   #
-  def uniq!: () ?{ (E element) -> Hash::_Key } -> self? # TODO: E: Hash::_Key
+  def uniq!: () -> self? # where E: Hash::_Key
+           | () { (E element) -> Hash::_Key } -> self?
 
   # <!--
   #   rdoc-file=array.c
@@ -4153,7 +4163,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Combining](rdoc-ref:Array@Methods+for+Combining).
   #
-  def |: [T] (array[T] other_array) -> Array[E | T] # TODO: where E: _Eql[T]
+  def |: [T] (array[T] other_array) -> Array[E | T] # where E: _Eql?[T]
 
   private
 
