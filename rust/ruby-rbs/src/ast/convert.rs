@@ -1212,7 +1212,6 @@ fn node_kind(node: &Node<'_>) -> &'static str {
         Node::InstanceVariableAnnotation(_) => "InstanceVariableAnnotation",
         Node::MethodTypesAnnotation(_) => "MethodTypesAnnotation",
         Node::ModuleAliasAnnotation(_) => "ModuleAliasAnnotation",
-        Node::ModuleSelfAnnotation(_) => "ModuleSelfAnnotation",
         Node::NodeTypeAssertion(_) => "NodeTypeAssertion",
         Node::ParamTypeAnnotation(_) => "ParamTypeAnnotation",
         Node::ReturnTypeAnnotation(_) => "ReturnTypeAnnotation",
