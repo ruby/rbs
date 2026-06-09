@@ -6,6 +6,7 @@ class ArraySingletonTest < Test::Unit::TestCase
   testing 'singleton(Array)'
 
   def test_new
+    # Technically array has its own `Array.new` defined, but we don't actually define that as a signatuer
     assert_send_type '() -> Array[untyped]',
                      Array, :new
     with_array 1r, 2r do |array|

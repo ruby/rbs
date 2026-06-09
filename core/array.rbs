@@ -610,9 +610,9 @@ class Array[unchecked out E]
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
   def initialize: () -> void
-                | (array[E] ary) -> void
+                | (array[E] array) -> void
                 | (int size, ?E default_value) -> void
-                | (int size) { (int index) -> E } -> void
+                | (int size) { (Integer index) -> E } -> void
 
   # <!--
   #   rdoc-file=array.c
@@ -778,7 +778,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Comparing](rdoc-ref:Array@Methods+for+Comparing).
   #
-  def <=>: (untyped) -> Integer? # Until we can do `where E: RBS::Ops::_Compare`, this is always going to return `Integer?~
+  def <=>: (untyped) -> Integer? # Until we can do `where E: RBS::Ops::_Compare`, this is always going to return `Integer?`
 
   # <!--
   #   rdoc-file=array.c
@@ -2603,7 +2603,6 @@ class Array[unchecked out E]
          | (int count) { (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
          | %a{warning: returning `nil` will always raise at runtime} (int count) { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
 
-
   # <!--
   #   rdoc-file=array.c
   #   - minmax -> array
@@ -3651,6 +3650,7 @@ class Array[unchecked out E]
   #
   def sort: () -> Array[E] # where E: Comparable::_WithSpaceshipOperator
           | () { (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
+          | %a{warning: returning `nil` will always raise at runtime} () { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -3663,6 +3663,7 @@ class Array[unchecked out E]
   #
   def sort!: () -> self # where E: Comparable::_WithSpaceshipOperator
            | () { (E a, E b) -> Comparable::_CompareToZero } -> self
+           | %a{warning: returning `nil` will always raise at runtime} () { (E a, E b) -> Comparable::_CompareToZero? } -> self
 
   # <!--
   #   rdoc-file=array.c
