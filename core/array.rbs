@@ -1120,7 +1120,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def all?: () -> bool
-          | (_Pattern[E] pattern) -> bool
+          | (RBS::Ops::_CaseEqual[E, boolish] pattern) -> bool
           | () { (E element) -> boolish } -> bool
 
   # <!--
@@ -1162,7 +1162,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def any?: () -> bool
-          | (_Pattern[E] pattern) -> bool
+          | (RBS::Ops::_CaseEqual[E, boolish] pattern) -> bool
           | () { (E element) -> boolish } -> bool
 
   # <!-- rdoc-file=array.c -->
@@ -2664,7 +2664,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def none?: () -> bool
-           | (_Pattern[E] pattern) -> bool
+           | (RBS::Ops::_CaseEqual[E, boolish] pattern) -> bool
            | () { (E element) -> boolish } -> bool
 
   # <!--
@@ -2703,7 +2703,7 @@ class Array[unchecked out E]
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def one?: () -> bool
-          | (_Pattern[E] pattern) -> bool
+          | (RBS::Ops::_CaseEqual[E, boolish] pattern) -> bool
           | () { (E element) -> boolish } -> bool
 
   # <!--
@@ -4191,12 +4191,12 @@ class Array[unchecked out E]
   alias initialize_copy replace
 end
 
-%a{deprecated: Use Array::_Rand}
+%a{deprecated: Use Array::_Rand, or make your own}
 interface _Rand
   def rand: (Integer max) -> Integer
 end
 
-# %a{deprecated: Use RBS::Ops::_Matches[E, boolish]}
+%a{deprecated: Use RBS::Ops::_CaseEqual[E, boolish]}
 interface Array::_Pattern[T]
   def ===: (T) -> bool
 end
