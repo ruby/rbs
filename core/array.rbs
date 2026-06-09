@@ -2542,9 +2542,11 @@ class Array[unchecked out E]
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def max: %a{implicitly-returns-nil} () -> E # where E: Comparable::_WithSpaceshipOperator
-         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: `?`
+         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero } -> E
+         | %a{implicitly-returns-nil} () %a{warning: returning `nil` will always raise at runtime} { (E a, E b) -> Comparable::_CompareToZero? } -> E
          | (int count) -> Array[E] # where E: Comparable::_WithSpaceshipOperator
-         | (int count) { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: `?`
+         | (int count) { (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
+         | (int count) %a{warning: returning `nil` will always raise at runtime} { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
 
   # <!--
   #   rdoc-file=array.c
@@ -2595,9 +2597,11 @@ class Array[unchecked out E]
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def min: %a{implicitly-returns-nil} () -> E # where E: Comparable::_WithSpaceshipOperator
-         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero? } -> E # TODO: `?`
+         | %a{implicitly-returns-nil} () { (E a, E b) -> Comparable::_CompareToZero } -> E
+         | %a{implicitly-returns-nil} () %a{warning: returning `nil` will always raise at runtime} { (E a, E b) -> Comparable::_CompareToZero? } -> E
          | (int count) -> Array[E] # where E: Comparable::_WithSpaceshipOperator
-         | (int count) { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E] # TODO: `?`
+         | (int count) { (E a, E b) -> Comparable::_CompareToZero } -> Array[E]
+         | (int count) %a{warning: returning `nil` will always raise at runtime} { (E a, E b) -> Comparable::_CompareToZero? } -> Array[E]
 
 
   # <!--
@@ -2623,7 +2627,8 @@ class Array[unchecked out E]
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
   def minmax: () -> [ E?, E? ] # where E: Comparable::_WithSpaceshipOperator
-            | () { (E a, E b) -> Comparable::_CompareToZero? } -> [ E?, E? ] # TODO: `?`
+            | () { (E a, E b) -> Comparable::_CompareToZero } -> [ E?, E? ]
+            | () %a{warning: returning `nil` will always raise at runtime} { (E a, E b) -> Comparable::_CompareToZero? } -> [ E?, E? ]
 
   # <!--
   #   rdoc-file=array.c
@@ -3680,7 +3685,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Assigning](rdoc-ref:Array@Methods+for+Assigning).
   #
-  def sort_by!: () { (E element) -> Comparable::_WithSpaceshipOperator } -> self # TODO: use RBS::Ops
+  def sort_by!: () { (E element) -> Comparable::_WithSpaceshipOperator } -> self
+              | %a{warning: returning `nil` will always raise at runtime} () { (E element) -> Comparable::_WithSpaceshipOperator? } -> self
               | () -> Enumerator[E, self]
 
   # <!--
