@@ -69,7 +69,7 @@ require "rbs/type_alias_dependency"
 require "rbs/type_alias_regularity"
 require "rbs/collection"
 
-if RUBY_ENGINE == "ruby" && !ENV["RBS_FFI_BACKEND"]
+if RUBY_ENGINE == "ruby" && ENV["RBS_FFI_BACKEND"].to_s.empty?
   require "rbs_extension"
 else
   # Non-MRI implementations cannot load the C extension. Load the FFI-based

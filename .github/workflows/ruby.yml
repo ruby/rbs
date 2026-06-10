@@ -83,6 +83,36 @@ jobs:
       - name: Run test
         run: |
           bundle exec rake ${{ matrix.job }}
+  ffi_backend:
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The FFI backend on MRI, forced with RBS_FFI_BACKEND=1. This is
+          # the cheap lane that catches most FFI backend regressions.
+          - ruby: "4.0"
+            rbs_ffi_backend: "1"
+          # The FFI backend on JRuby, where it is the only backend.
+          - ruby: jruby
+            rbs_ffi_backend: ""
+    env:
+      RBS_FFI_BACKEND: ${{ matrix.rbs_ffi_backend }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
+      - name: Skip gems not needed by the parser tests
+        run: bundle config set --local without 'libs profilers typecheck_test minitest'
+      - name: Install dependencies
+        run: bundle install --jobs 4 --retry 3
+      - name: Run parser tests
+        run: bundle exec rake test:parser
+
   C99_compile:
     runs-on: macos-latest
     strategy:

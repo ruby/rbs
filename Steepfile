@@ -6,6 +6,13 @@ target :lib do
   ignore(
     "lib/rbs/test",
     # "lib/rbs/test.rb"
+
+    # The FFI backend depends on the ffi gem, which has no RBS signatures,
+    # and the deserializer is generated code. The pure-Ruby Location mirrors
+    # the C extension implementation, which is not type checked either.
+    "lib/rbs/parser/ffi.rb",
+    "lib/rbs/parser/deserializer.rb",
+    "lib/rbs/location.rb",
   )
 
   library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'prettyprint', 'yaml', "psych", "securerandom"

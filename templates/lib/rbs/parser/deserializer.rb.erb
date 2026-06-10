@@ -1,0 +1,190 @@
+module RBS
+  class Parser
+    # Decodes the binary AST representation produced by src/serializer.c
+    # (generated from templates/src/serializer.c.erb) into Ruby AST objects,
+    # mirroring the translation done in C by
+    # ext/rbs_extension/ast_translation.c for the MRI extension.
+    #
+    # Used by the FFI parser backend (lib/rbs/parser/ffi.rb) on non-MRI Ruby
+    # implementations.
+    class Deserializer
+      EMPTY_ARRAY = [].freeze
+      EMPTY_HASH = {}.freeze
+
+      <%- enums.each do |enum| -%>
+      <%= enum.name.upcase %> = [<%= enum.symbols.each_with_index.map {|sym, index| (enum.optional? && index == 0) ? "nil" : sym.to_sym.inspect }.join(", ") %>].freeze
+      <%- end -%>
+
+      def initialize(buffer:, reader:)
+        @buffer = buffer
+        @reader = reader
+        @encoding = buffer.content.encoding
+      end
+
+      def read_node
+        tag = @reader.read_u8
+        case tag
+        when 0
+          nil
+        <%- nodes.each_with_index do |node, index| -%>
+        when <%= index + 1 %> # <%= node.ruby_full_name %>
+          read_<%= node.c_name %>
+        <%- end -%>
+        when <%= nodes.size + 1 %> # Symbol
+          read_symbol
+        else
+          raise "Unknown node tag: #{tag}"
+        end
+      end
+
+      def read_node_list
+        Array.new(@reader.read_u32) { read_node }
+      end
+
+      private
+
+      def read_symbol
+        @reader.read_string.force_encoding(@encoding).to_sym
+      end
+
+      def read_location
+        start_char = @reader.read_i32
+        end_char = @reader.read_i32
+        if start_char == -1
+          nil
+        else
+          Location.new(@buffer, start_char, end_char)
+        end
+      end
+
+      def add_required_child(location, name)
+        start_char = @reader.read_i32
+        end_char = @reader.read_i32
+        location.add_required_child(name, start_char...end_char)
+      end
+
+      def add_optional_child(location, name)
+        start_char = @reader.read_i32
+        end_char = @reader.read_i32
+        if start_char == -1
+          location.add_optional_child(name, nil)
+        else
+          location.add_optional_child(name, start_char...end_char)
+        end
+      end
+
+      def read_hash
+        count = @reader.read_u32
+        if count == 0
+          EMPTY_HASH
+        else
+          hash = {}
+          count.times do
+            key = read_node
+            hash[key] = read_node
+          end
+          hash
+        end
+      end
+
+      def read_location_range_list
+        if @reader.read_u8 == 0
+          EMPTY_ARRAY
+        else
+          Array.new(@reader.read_u32) { read_location }
+        end
+      end
+
+      def read_ivar_name
+        case @reader.read_u8
+        when 0 # unspecified
+          nil
+        when 1 # empty
+          false
+        else
+          read_symbol
+        end
+      end
+
+      <%- nodes.each do |node| -%>
+      def read_<%= node.c_name %>
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Bool" -%>
+        @reader.read_u8 != 0
+        <%- when "RBS::AST::Integer" -%>
+        @reader.read_string.force_encoding(Encoding::UTF_8).to_i
+        <%- when "RBS::AST::String" -%>
+        @reader.read_string.force_encoding(Encoding::UTF_8)
+        <%- when "RBS::Types::Record::FieldType" -%>
+        type = read_node
+        required = @reader.read_u8 != 0
+        [type, required]
+        <%- when "RBS::Signature" -%>
+        directives = read_node_list
+        declarations = read_node_list
+        [directives, declarations]
+        <%- when "RBS::Namespace" -%>
+        path = read_node_list
+        absolute = @reader.read_u8 != 0
+        Namespace[path, absolute]
+        <%- when "RBS::TypeName" -%>
+        namespace = read_node
+        name = read_node
+        TypeName[namespace, name]
+        <%- else -%>
+        <%- if node.expose_location? -%>
+        location = read_location
+        <%- end -%>
+        <%- if node.locations -%>
+        raise "location is missing" unless location
+        <%- node.locations.each do |location_field| -%>
+        <%- if location_field.required? -%>
+        add_required_child(location, :<%= location_field.name %>)
+        <%- else -%>
+        add_optional_child(location, :<%= location_field.name %>)
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        <%- node.fields.each do |field| -%>
+        <%- case field.type.name -%>
+        <%- when "rbs_node_list" -%>
+        <%= field.name %> = read_node_list
+        <%- when "rbs_hash" -%>
+        <%= field.name %> = read_hash
+        <%- when "rbs_string" -%>
+        <%= field.name %> = @reader.read_string.force_encoding(@encoding)
+        <%- when "bool" -%>
+        <%= field.name %> = @reader.read_u8 != 0
+        <%- when "rbs_location_range" -%>
+        <%= field.name %> = read_location
+        <%- when "rbs_location_range_list" -%>
+        <%= field.name %> = read_location_range_list
+        <%- when "rbs_attr_ivar_name" -%>
+        <%= field.name %> = read_ivar_name
+        <%- else -%>
+        <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        <%= field.name %> = <%= field.type.descr.name.upcase %>.fetch(@reader.read_u8)
+        <%- else -%>
+        <%= field.name %> = read_node # <%= field.type.c_name %>
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Declarations::Class", "RBS::AST::Declarations::Module", "RBS::AST::Declarations::Interface", "RBS::AST::Declarations::TypeAlias", "RBS::MethodType" -%>
+        AST::TypeParam.resolve_variables(type_params)
+        <%- end -%>
+        <%= node.ruby_full_name %>.new(
+          <%- if node.expose_location? -%>
+          location: location,
+          <%- end -%>
+          <%- node.fields.each do |field| -%>
+          <%= field.name %>: <%= field.name %>,
+          <%- end -%>
+        )
+        <%- end -%>
+      end
+
+      <%- end -%>
+    end
+  end
+end

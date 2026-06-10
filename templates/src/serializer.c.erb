@@ -1,0 +1,165 @@
+#include "rbs/serializer.h"
+
+#include "rbs/util/rbs_assert.h"
+
+#include <string.h>
+
+void rbs_serializer_write_u8(rbs_serializer_t *serializer, uint8_t value) {
+    rbs_buffer_append_string(serializer->allocator, serializer->buffer, (const char *) &value, 1);
+}
+
+void rbs_serializer_write_u32(rbs_serializer_t *serializer, uint32_t value) {
+    char bytes[4] = {
+        (char) (value & 0xff),
+        (char) ((value >> 8) & 0xff),
+        (char) ((value >> 16) & 0xff),
+        (char) ((value >> 24) & 0xff),
+    };
+    rbs_buffer_append_string(serializer->allocator, serializer->buffer, bytes, 4);
+}
+
+void rbs_serializer_write_i32(rbs_serializer_t *serializer, int32_t value) {
+    rbs_serializer_write_u32(serializer, (uint32_t) value);
+}
+
+void rbs_serializer_write_string(rbs_serializer_t *serializer, rbs_string_t string) {
+    size_t length = rbs_string_len(string);
+    rbs_serializer_write_u32(serializer, (uint32_t) length);
+    rbs_buffer_append_string(serializer->allocator, serializer->buffer, string.start, length);
+}
+
+static void write_constant(rbs_serializer_t *serializer, rbs_constant_id_t id) {
+    rbs_constant_t *constant = rbs_constant_pool_id_to_constant((rbs_constant_pool_t *) serializer->constant_pool, id);
+    RBS_ASSERT(constant != NULL, "constant is NULL");
+    RBS_ASSERT(constant->start != NULL, "constant->start is NULL");
+
+    rbs_serializer_write_u32(serializer, (uint32_t) constant->length);
+    rbs_buffer_append_string(serializer->allocator, serializer->buffer, (const char *) constant->start, constant->length);
+}
+
+/* A location range is encoded as its character positions only, which is all
+ * the Ruby side consumes. A null range is encoded as (-1, -1). */
+static void write_range(rbs_serializer_t *serializer, rbs_location_range range) {
+    rbs_serializer_write_i32(serializer, range.start_char);
+    rbs_serializer_write_i32(serializer, range.end_char);
+}
+
+void rbs_serializer_write_node_list(rbs_serializer_t *serializer, rbs_node_list_t *list) {
+    rbs_serializer_write_u32(serializer, (uint32_t) list->length);
+    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
+        rbs_serializer_write_node(serializer, n->node);
+    }
+}
+
+static void write_hash(rbs_serializer_t *serializer, rbs_hash_t *hash) {
+    rbs_serializer_write_u32(serializer, (uint32_t) hash->length);
+    for (rbs_hash_node_t *n = hash->head; n != NULL; n = n->next) {
+        rbs_serializer_write_node(serializer, n->key);
+        rbs_serializer_write_node(serializer, n->value);
+    }
+}
+
+/* The leading byte distinguishes a NULL list (0) from a present list (1):
+ * the Ruby side maps NULL to a shared frozen empty array, mirroring
+ * ext/rbs_extension/ast_translation.c. */
+static void write_range_list(rbs_serializer_t *serializer, rbs_location_range_list_t *list) {
+    if (list == NULL) {
+        rbs_serializer_write_u8(serializer, 0);
+        return;
+    }
+
+    rbs_serializer_write_u8(serializer, 1);
+    rbs_serializer_write_u32(serializer, (uint32_t) list->length);
+    for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
+        write_range(serializer, n->range);
+    }
+}
+
+static void write_ivar_name(rbs_serializer_t *serializer, rbs_attr_ivar_name_t ivar_name) {
+    rbs_serializer_write_u8(serializer, (uint8_t) ivar_name.tag);
+    if (ivar_name.tag == RBS_ATTR_IVAR_NAME_TAG_NAME) {
+        write_constant(serializer, ivar_name.name);
+    }
+}
+
+void rbs_serializer_write_node(rbs_serializer_t *serializer, const rbs_node_t *instance) {
+    if (instance == NULL) {
+        rbs_serializer_write_u8(serializer, 0);
+        return;
+    }
+
+    /* Node tags are the `enum rbs_node_type` values; the deserializer derives
+     * the same numbering from config.yml. */
+    rbs_serializer_write_u8(serializer, (uint8_t) instance->type);
+
+    switch (instance->type) {
+    <%- nodes.each do |node| -%>
+    case <%= node.c_node_enum_name %>: {
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Bool" -%>
+        rbs_serializer_write_u8(serializer, ((rbs_ast_bool_t *) instance)->value ? 1 : 0);
+        <%- when "RBS::AST::Integer" -%>
+        rbs_serializer_write_string(serializer, ((rbs_ast_integer_t *) instance)->string_representation);
+        <%- when "RBS::AST::String" -%>
+        rbs_serializer_write_string(serializer, ((rbs_ast_string_t *) instance)->string);
+        <%- when "RBS::Types::Record::FieldType" -%>
+        rbs_types_record_field_type_t *node = (rbs_types_record_field_type_t *) instance;
+        rbs_serializer_write_node(serializer, node->type);
+        rbs_serializer_write_u8(serializer, node->required ? 1 : 0);
+        <%- when "RBS::Signature" -%>
+        rbs_signature_t *node = (rbs_signature_t *) instance;
+        rbs_serializer_write_node_list(serializer, node->directives);
+        rbs_serializer_write_node_list(serializer, node->declarations);
+        <%- when "RBS::Namespace" -%>
+        rbs_namespace_t *node = (rbs_namespace_t *) instance;
+        rbs_serializer_write_node_list(serializer, node->path);
+        rbs_serializer_write_u8(serializer, node->absolute ? 1 : 0);
+        <%- when "RBS::TypeName" -%>
+        rbs_type_name_t *node = (rbs_type_name_t *) instance;
+        rbs_serializer_write_node(serializer, (rbs_node_t *) node->rbs_namespace);
+        rbs_serializer_write_node(serializer, (rbs_node_t *) node->name);
+        <%- else -%>
+        <%- needs_cast = !node.fields.empty? || node.locations -%>
+        <%- if needs_cast -%>
+        <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
+        <%- end -%>
+        <%- if node.expose_location? -%>
+        write_range(serializer, instance->location);
+        <%- end -%>
+        <%- node.locations&.each do |location_field| -%>
+        write_range(serializer, node-><%= location_field.attribute_name %>);
+        <%- end -%>
+        <%- node.fields.each do |field| -%>
+        <%- case field.type.name -%>
+        <%- when "rbs_node_list" -%>
+        rbs_serializer_write_node_list(serializer, node-><%= field.c_name %>);
+        <%- when "rbs_hash" -%>
+        write_hash(serializer, node-><%= field.c_name %>);
+        <%- when "rbs_string" -%>
+        rbs_serializer_write_string(serializer, node-><%= field.c_name %>);
+        <%- when "bool" -%>
+        rbs_serializer_write_u8(serializer, node-><%= field.c_name %> ? 1 : 0);
+        <%- when "rbs_location_range" -%>
+        write_range(serializer, node-><%= field.name %>);<%= field.optional? ? " /* optional */" : "" %>
+        <%- when "rbs_location_range_list" -%>
+        write_range_list(serializer, node-><%= field.name %>);
+        <%- when "rbs_attr_ivar_name" -%>
+        write_ivar_name(serializer, node-><%= field.c_name %>);
+        <%- else -%>
+        <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        rbs_serializer_write_u8(serializer, (uint8_t) node-><%= field.c_name %>); /* <%= field.type.name %> */
+        <%- else -%>
+        rbs_serializer_write_node(serializer, (rbs_node_t *) node-><%= field.c_name %>); /* <%= field.type.c_name %> */
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        break;
+    }
+    <%- end -%>
+    case RBS_AST_SYMBOL: {
+        write_constant(serializer, ((rbs_ast_symbol_t *) instance)->constant_id);
+        break;
+    }
+    }
+}

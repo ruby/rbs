@@ -1,4 +1,4 @@
-if RUBY_ENGINE == "ruby" && !ENV["RBS_FFI_BACKEND"]
+if RUBY_ENGINE == "ruby" && ENV["RBS_FFI_BACKEND"].to_s.empty?
   require 'mkmf'
 
   $INCFLAGS << " -I$(top_srcdir)" if $extmk
