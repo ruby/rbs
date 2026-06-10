@@ -92,7 +92,7 @@ class MatchData
   #     #<MatchData "hoge" foo:nil foo:"oge" foo:nil>
   #     m[:foo] #=> "oge"
   #
-  def []: (capture backref, ?nil) -> String?
+  def []: %a{implicitly-returns-nil} (capture backref, ?nil) -> String
         | (int start, int length) -> Array[String?]
         | (range[int?] range) -> Array[String?]
 
