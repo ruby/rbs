@@ -199,6 +199,26 @@ impl RBSLocationRange {
     pub fn end(&self) -> i32 {
         self.range.end_byte
     }
+
+    #[must_use]
+    pub fn start_char(&self) -> i32 {
+        self.range.start_char
+    }
+
+    #[must_use]
+    pub fn start_byte(&self) -> i32 {
+        self.range.start_byte
+    }
+
+    #[must_use]
+    pub fn end_char(&self) -> i32 {
+        self.range.end_char
+    }
+
+    #[must_use]
+    pub fn end_byte(&self) -> i32 {
+        self.range.end_byte
+    }
 }
 
 pub struct RBSLocationRangeList<'a> {
@@ -299,6 +319,56 @@ impl SymbolNode<'_> {
 impl std::fmt::Display for SymbolNode<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.as_str())
+    }
+}
+
+fn constant_id_to_string(parser: NonNull<rbs_parser_t>, constant_id: rbs_constant_id_t) -> String {
+    unsafe {
+        let constant_ptr =
+            rbs_constant_pool_id_to_constant(&(*parser.as_ptr()).constant_pool, constant_id);
+        if constant_ptr.is_null() {
+            panic!("Constant ID is not present in the pool");
+        }
+
+        let constant = &*constant_ptr;
+        let bytes = std::slice::from_raw_parts(constant.start, constant.length);
+        std::str::from_utf8_unchecked(bytes).to_owned()
+    }
+}
+
+impl AttrAccessorNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
+    }
+}
+
+impl AttrReaderNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
+    }
+}
+
+impl AttrWriterNode<'_> {
+    #[must_use]
+    pub fn ivar_name_string(&self) -> Option<String> {
+        match self.ivar_name() {
+            AttrIvarName::Name(constant_id) => {
+                Some(constant_id_to_string(self.parser, constant_id))
+            }
+            AttrIvarName::Unspecified | AttrIvarName::Empty => None,
+        }
     }
 }
 
