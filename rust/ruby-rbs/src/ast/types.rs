@@ -17,7 +17,7 @@ pub enum Type {
     Optional(OptionalType),
     Union(UnionType),
     Intersection(IntersectionType),
-    Proc(ProcType),
+    Proc(Box<ProcType>),
     Literal(LiteralType),
 }
 

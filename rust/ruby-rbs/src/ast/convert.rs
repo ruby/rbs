@@ -154,12 +154,12 @@ impl<'a> AstConverter<'a> {
                 ty: Box::new(self.convert_type(&node.type_())),
                 location: Some(convert_range(node.location())),
             }),
-            Node::ProcType(node) => Type::Proc(ProcType {
+            Node::ProcType(node) => Type::Proc(Box::new(ProcType {
                 function: self.convert_function_type(&node.type_()),
                 block: node.block().map(|block| self.convert_block_type(&block)),
                 self_type: node.self_type().map(|ty| Box::new(self.convert_type(&ty))),
                 location: Some(convert_range(node.location())),
-            }),
+            })),
             Node::RecordType(node) => {
                 let mut fields = Vec::new();
                 for (key, value) in node.all_fields().iter() {
