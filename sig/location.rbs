@@ -130,6 +130,15 @@ module RBS
     def _optional_keys: () -> Array[Symbol]
     def _required_keys: () -> Array[Symbol]
 
+    def initialize_copy: (instance) -> void
+
+    # Instance variables of the pure-Ruby implementation (lib/rbs/location.rb),
+    # which is loaded instead of the C extension on non-MRI Ruby implementations.
+    @buffer: Buffer
+    @rg_start: Integer
+    @rg_end: Integer
+    @children: Array[[Symbol, Integer, Integer, bool]]?
+
     WithChildren: singleton(Location)
   end
 end
