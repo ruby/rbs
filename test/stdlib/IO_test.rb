@@ -1,5 +1,6 @@
 require_relative "test_helper"
 require 'tempfile'
+require 'etc'
 
 require "io/wait"
 
@@ -225,6 +226,15 @@ class IOInstanceTest < Test::Unit::TestCase
                          io, :<<, Object.new
       end
     end
+  end
+
+  def test_pathconf
+    IO.pipe do |r, w|
+      assert_send_type "(Integer) -> Integer",
+                       w, :pathconf, Etc::PC_PIPE_BUF
+    end
+  rescue NotImplementedError
+    omit "Not implemented"
   end
 
   def test_advise
