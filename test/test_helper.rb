@@ -6,7 +6,12 @@ require "open3"
 require "bundler" # Explicitly require bundler because ruby CI runs without bundler
 
 require "rbs"
-require "rbs/annotate"
+begin
+  require "rbs/annotate"
+rescue LoadError
+  # rbs/annotate needs rdoc, which is not installed in the FFI backend CI
+  # lane (gemfiles/ffi_backend.gemfile). The parser tests don't use it.
+end
 require "test_skip"
 
 unless ENV["XDG_CACHE_HOME"]

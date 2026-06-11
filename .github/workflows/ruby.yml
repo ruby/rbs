@@ -98,6 +98,9 @@ jobs:
             rbs_ffi_backend: ""
     env:
       RBS_FFI_BACKEND: ${{ matrix.rbs_ffi_backend }}
+      # The main Gemfile pulls in development gems whose C extensions cannot
+      # be built on JRuby; this lane only needs the parser test subset.
+      BUNDLE_GEMFILE: gemfiles/ffi_backend.gemfile
     steps:
       - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
@@ -106,8 +109,6 @@ jobs:
           bundler: none
       - name: Set working directory as safe
         run: git config --global --add safe.directory $(pwd)
-      - name: Skip gems not needed by the parser tests
-        run: bundle config set --local without 'libs profilers typecheck_test minitest'
       - name: Install dependencies
         run: bundle install --jobs 4 --retry 3
       - name: Run parser tests
