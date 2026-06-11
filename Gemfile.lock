@@ -204,6 +204,7 @@ DEPENDENCIES
   dbm
   digest
   extconf_compile_commands_json
+  ffi
   fileutils
   goodcheck
   irb

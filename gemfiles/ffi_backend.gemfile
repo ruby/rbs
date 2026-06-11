@@ -1,0 +1,19 @@
+# Minimal Gemfile for the FFI parser backend CI lane (`rake test:parser` on
+# JRuby, or on MRI with RBS_FFI_BACKEND=1).
+#
+# The main Gemfile pulls in development gems whose C extensions cannot be
+# built on JRuby (e.g. zlib via rubocop-on-rbs, bigdecimal via
+# activesupport), so this lane installs only what the parser test subset
+# needs.
+
+source "https://rubygems.org"
+
+gemspec path: "../"
+
+gem "rake"
+gem "rake-compiler" # Required by the Rakefile (rake/extensiontask)
+gem "test-unit"
+
+# Used by the backend when forced on MRI with RBS_FFI_BACKEND=1; JRuby and
+# TruffleRuby bundle ffi as a default gem.
+gem "ffi", require: false

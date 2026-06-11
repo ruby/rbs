@@ -23,6 +23,9 @@ gem "activesupport", "~> 7.0"
 gem "extconf_compile_commands_json"
 gem "irb"
 
+# FFI parser backend (non-MRI implementations, or RBS_FFI_BACKEND=1 on MRI)
+gem "ffi", require: false
+
 group :libs do
   # Libraries required for stdlib test
   gem "abbrev"

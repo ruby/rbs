@@ -37,6 +37,37 @@ Rake::TestTask.new(test: :compile, &test_config)
 
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
+namespace :compile do
+  desc "Build the core parser as a shared library (librbs) for the FFI backend"
+  task :librbs do
+    require "tmpdir"
+    extconf = File.join(__dir__, "ext/rbs_extension/extconf.rb")
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        sh({ "RBS_FFI_BACKEND" => "1" }, ruby, extconf)
+      end
+    end
+  end
+end
+
+# The parser-focused test subset, used as the acceptance suite for the FFI
+# backend (RBS_FFI_BACKEND=1 on MRI, or non-MRI implementations).
+Rake::TestTask.new(:"test:parser") do |t|
+  t.libs << "test"
+  t.libs << "lib"
+  t.test_files = FileList[
+    "test/rbs/buffer_test.rb",
+    "test/rbs/location_test.rb",
+    "test/rbs/parser_test.rb",
+    "test/rbs/type_parsing_test.rb",
+    "test/rbs/method_type_parsing_test.rb",
+    "test/rbs/signature_parsing_test.rb",
+    "test/rbs/inline_annotation_parsing_test.rb",
+    "test/rbs/inline_parser_test.rb",
+  ]
+end
+task :"test:parser" => (RUBY_ENGINE != "ruby" || !ENV["RBS_FFI_BACKEND"].to_s.empty? ? :"compile:librbs" : :compile)
+
 task :lexer do
   sh "re2c -W --no-generation-date -o src/lexer.c src/lexer.re"
   sh "clang-format -i -style=file src/lexer.c"
@@ -48,8 +79,8 @@ task :confirm_lexer => :lexer do
 end
 
 task :confirm_templates => :templates do
-  puts "Testing if generated code under include and src is updated with respect to templates"
-  sh "git diff --exit-code -- include src"
+  puts "Testing if generated code under include, src and lib is updated with respect to templates"
+  sh "git diff --exit-code -- include src lib/rbs/parser/deserializer.rb"
 end
 
 # Task to format C code using clang-format
@@ -159,6 +190,9 @@ task :templates do
 
   sh "#{ruby} templates/template.rb include/rbs/ast.h"
   sh "#{ruby} templates/template.rb src/ast.c"
+
+  sh "#{ruby} templates/template.rb src/serializer.c"
+  sh "#{ruby} templates/template.rb lib/rbs/parser/deserializer.rb"
 
   # Format the generated files
   Rake::Task["format:c"].invoke
