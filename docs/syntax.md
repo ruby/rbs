@@ -428,7 +428,7 @@ _attribute-member_ ::= _visibility_ _attribute-type_ _method-name_ `:` _type_   
                      | _visibility_ _attribute-type_ `self.` _method-name_ `:` _type_                     # Singleton attribute
                      | _visibility_ _attribute-type_ `self.` _method-name_ `(` _ivar-name_ `) :` _type_   # Singleton attribute with variable name specification
                      | _visibility_ _attribute-type_ `self.` _method-name_ `() :` _type_                  # Singleton attribute without variable
-_visibility_ ::= `public` | `private`
+_visibility_ ::= `public` | `private` | `protected`
 
 _attribute-type_ ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
@@ -502,10 +502,12 @@ def +: (Float | Integer) -> (Float | Integer)
      | (Numeric) -> Numeric
 ```
 
-Adding `public` and `private` modifier changes the visibility of the method.
+Adding `public`, `private`, and `protected` modifiers changes the visibility of the method.
 
 ```rbs
 private def puts: (*untyped) -> void       # Defines private instance method
+
+protected def size: () -> Integer          # Defines protected instance method
 
 public def self.puts: (*untyped) -> void   # Defines public singleton method
 
@@ -537,10 +539,12 @@ attr_accessor people (): Array[Person]
 # def people=: (Array[Person]) -> Array[Person]
 ```
 
-Attribute definitions can have the `public` and `private` modifiers like method definitions:
+Attribute definitions can have the `public`, `private`, and `protected` modifiers like method definitions:
 
 ```rbs
 private attr_accessor id: Integer
+
+protected attr_reader path: String
 
 private attr_reader self.name: String
 ```
@@ -593,6 +597,12 @@ private
 def bar: () -> void          # private instance method
 
 attr_reader email: String    # private instance attribute
+
+protected
+
+def baz: () -> void          # protected instance method
+
+attr_reader path: String     # protected instance attribute
 ```
 
 The visibility _modifiers_ overwrite the default visibility per member bases.

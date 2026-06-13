@@ -36,25 +36,28 @@ class RBS::SorterTest < Test::Unit::TestCase
         attr_accessor self.a: String
         attr_reader self.b: String
         attr_writer self.c: String
+        protected attr_reader self.protected_attr: String
 
         def self.new: () -> instance
         alias self.bb self.xx
         def self.foo: () -> void
         def self.pub: () -> void
-
-        private
-
-        def self.prv: () -> void
-
-        public
+        protected def self.prot: () -> void
+        private def self.prv: () -> void
 
         attr_accessor x: String
+        protected attr_reader y: String
+        private attr_writer z: String
         def initialize: () -> void
         def a: () -> void
         def b: () -> void
         alias bb xx
         def c: () -> void
         def pub: () -> void
+
+        protected
+
+        def prot: () -> void
 
         private
 
@@ -82,9 +85,15 @@ class RBS::SorterTest < Test::Unit::TestCase
 
         attr_reader self.b: String
 
+        protected attr_reader self.protected_attr: String
+
         attr_writer self.c: String
 
         attr_accessor x: String
+
+        private attr_writer z: String
+
+        protected attr_reader y: String
 
         def self.new: () -> instance
 
@@ -122,6 +131,8 @@ class RBS::SorterTest < Test::Unit::TestCase
         private def prv: () -> void
         public def pub: () -> void
         private def self.prv: () -> void
+        protected def prot: () -> void
+        protected def self.prot: () -> void
         public def self.pub: () -> void
       end
     RUBY_ORIG

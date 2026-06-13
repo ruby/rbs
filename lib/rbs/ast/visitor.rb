@@ -48,6 +48,8 @@ module RBS
           visit_member_instance_variable(node)
         when Members::Private
           visit_member_private(node)
+        when Members::Protected
+          visit_member_protected(node)
         when Members::Public
           visit_member_public(node)
         when Members::MethodDefinition
@@ -107,6 +109,9 @@ module RBS
       end
 
       def visit_member_private(node)
+      end
+
+      def visit_member_protected(node)
       end
 
       def visit_member_public(node)

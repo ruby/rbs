@@ -67,6 +67,8 @@ class Foo::Bar[X] < Array[String]
 
   private
 
+  protected
+
   alias self.id self.identifier
 
   alias to_s to_str
@@ -308,9 +310,15 @@ class Foo
 
   public def bar: () -> String
 
+  protected def qux: () -> String
+
   def baz: () -> String
 
   private attr_reader name: String
+
+  protected attr_writer secret: String
+
+  protected attr_accessor data: Integer
 end
     SIG
   end

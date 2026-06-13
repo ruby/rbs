@@ -799,6 +799,13 @@ class PathnameInstanceTest < Test::Unit::TestCase
     assert_send_type '() -> bool',
                      Pathname(File.expand_path(__FILE__)), :zero?
   end
+
+  def test_path
+    # `path` is a protected attr_reader, so it must be invoked via `send`
+    # (or from another Pathname instance).
+    assert_send_type '() -> String',
+                     Pathname('foo'), :path
+  end
 end
 
 class PathnameKernelTest < Test::Unit::TestCase
