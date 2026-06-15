@@ -1030,26 +1030,34 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 
-  def test_invalid_utf8_byte_in_comment_raises
-    # Regression: invalid UTF-8 byte in a comment used to loop forever in the
-    # lexer. It is now reported as a parsing error instead of being silently
-    # swallowed by the comment. (Timeout guards against a regression to the
-    # original hang.)
+  def test_invalid_position_range_raises
+    # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
+    assert_raises(ArgumentError) do
+      RBS::Parser._parse_signature(buffer(""), 1, 0)
+    end
+  end
+
+  def test_invalid_byte_range_in_parse_type_raises
+    # Regression: parse_type's byte_range: keyword reaches _parse_type directly,
+    # which used to hang on reversed ranges.
+    assert_raises(ArgumentError) do
+      RBS::Parser.parse_type("", byte_range: 1..0)
+    end
+  end
+
+  def test_invalid_utf8_byte_in_comment_does_not_hang
+    # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
-      assert_raises(RBS::ParsingError) do
-        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
-      end
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
 
   def test_invalid_utf8_byte_at_top_level_raises
     # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
     source = "\xFF".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
-      assert_raises(RBS::ParsingError) do
-        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
-      end
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
 end

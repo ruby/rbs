@@ -145,10 +145,17 @@ static VALUE parse_type_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, type);
 }
 
-static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
+static void validate_position_range(int start_pos, int end_pos) {
     if (start_pos < 0 || end_pos < 0) {
         rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
     }
+    if (start_pos > end_pos) {
+        rb_raise(rb_eArgError, "invalid position range: %d...%d", start_pos, end_pos);
+    }
+}
+
+static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
+    validate_position_range(start_pos, end_pos);
 
     const char *encoding_name = rb_enc_name(encoding);
 
@@ -162,9 +169,7 @@ static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE st
 }
 
 static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
-    if (start_pos < 0 || end_pos < 0) {
-        rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
-    }
+    validate_position_range(start_pos, end_pos);
 
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
