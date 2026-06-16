@@ -25,10 +25,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <fcntl.h>
+#include <unistd.h> // for sysconf()
 #endif
 
 typedef struct rbs_allocator_page {
