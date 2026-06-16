@@ -5,6 +5,8 @@ require "logger"
 return unless Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
 
 class RBS::Test::RuntimeTestTest < Test::Unit::TestCase
+  omit_on_truffle_ruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on TruffleRuby"
+
   include TestHelper
 
   def test_runtime_success

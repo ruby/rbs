@@ -1054,6 +1054,8 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_invalid_utf8_byte_at_top_level_raises
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
     # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
     source = "\xFF".dup.force_encoding(Encoding::UTF_8)
     Timeout.timeout(5) do

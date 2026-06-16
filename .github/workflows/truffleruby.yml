@@ -13,9 +13,6 @@ permissions:
 jobs:
   test:
     runs-on: "ubuntu-latest"
-    # TruffleRuby support is experimental. The job is allowed to fail so that it
-    # reports the current status without blocking the build.
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
