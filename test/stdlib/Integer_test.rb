@@ -270,22 +270,18 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_ceildiv
-    # assert_send_type  '(Integer) -> Integer',
-    #                   38, :ceildiv, 12
-    # assert_send_type  '(Rational) -> Integer',
-    #                   38, :ceildiv, 12r
-    # assert_send_type  '(Float) -> Integer',
-    #                   38, :ceildiv, 12.0
-    # # Notably not `Complex` as complex doesn't define `div`
+    assert_send_type  '(Integer) -> Integer',
+                      38, :ceildiv, 12
+    assert_send_type  '(Rational) -> Integer',
+                      38, :ceildiv, 12r
+    assert_send_type  '(Float) -> Integer',
+                      38, :ceildiv, 12.0
+    # Notably not `Complex` as complex doesn't define `div`
 
-    # assert_send_type  '(Coercable) -> Coercable::OpReturn',
-    #                   38, :div, Coercable.for_op(:-, result: (
-
-    # ))
-
-    #          | [O < _Div[S, RBS::Ops::_UnaryNeg[R]], S, R] (Numeric::_Coerce[0, O, S] other) -> R2
-
-    # omit 'todo'
+    uneg = BlankSlate.new
+    def uneg.-@ = ::Coercable::OpReturn.new
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :ceildiv, Coercable.for_op(:-, result: Coercable.for_op(:div, result: uneg))
   end
 
   def test_chr
@@ -337,7 +333,16 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_divmod
-    # omit 'todo'
+    assert_send_type  '(Integer) -> [Integer, Integer]',
+                      38, :divmod, 12
+    assert_send_type  '(Rational) -> [Integer, Rational]',
+                      38, :divmod, 12r
+    assert_send_type  '(Float) -> [Integer, Float]',
+                      38, :divmod, 12.0
+    # Notably not `Complex` as complex doesn't define `divmod`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :divmod, Coercable.for_op(:divmod)
   end
 
   def test_downto
