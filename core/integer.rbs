@@ -190,7 +190,8 @@ class Integer < Numeric
   #
   # Related: Integer#| (bitwise OR), Integer#^ (bitwise EXCLUSIVE OR).
   #
-  def &: (Integer) -> Integer
+  def &: (Integer other) -> Integer
+       | [O < RBS::Ops::_And[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -356,7 +357,7 @@ class Integer < Numeric
   #
   # Related: Integer#>>.
   #
-  def <<: (int) -> Integer
+  def <<: (int count) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -478,7 +479,7 @@ class Integer < Numeric
   #
   # Related: Integer#<<.
   #
-  def >>: (int) -> Integer
+  def >>: (int count) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c
@@ -536,7 +537,8 @@ class Integer < Numeric
   #
   # Related: Integer#& (bitwise AND), Integer#| (bitwise OR).
   #
-  def ^: (Integer) -> Integer
+  def ^: (Integer other) -> Integer
+       | [O < RBS::Ops::_Xor[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -1349,7 +1351,8 @@ class Integer < Numeric
   #
   # Related: Integer#& (bitwise AND), Integer#^ (bitwise EXCLUSIVE OR).
   #
-  def |: (Integer) -> Integer
+  def |: (Integer other) -> Integer
+       | [O < RBS::Ops::_Or[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb

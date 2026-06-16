@@ -44,7 +44,11 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_and
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :&, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :&, Coercable.for_op(:&)
   end
 
   def test_op_mul
@@ -136,7 +140,10 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_lsh
-    # omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Integer',
+                        38, :<<, count
+    end
   end
 
   def test_op_leq
@@ -203,7 +210,10 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_rsh
-    # omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Integer',
+                        38, :>>, count
+    end
   end
 
   def test_op_aref
@@ -211,7 +221,11 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_xor
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :^, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :^, Coercable.for_op(:^)
   end
 
   def test_abs(method: :magnitude)
@@ -506,7 +520,11 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_or
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :|, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :|, Coercable.for_op(:|)
   end
 
   def test_op_not
