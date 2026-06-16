@@ -913,7 +913,7 @@ class Integer < Numeric
   #     3.gcd(-7)                   #=> 1
   #     ((1<<31)-1).gcd((1<<61)-1)  #=> 1
   #
-  def gcd: (Integer) -> Integer
+  def gcd: (Integer other_int) -> Integer
 
   # <!--
   #   rdoc-file=rational.c
@@ -927,7 +927,7 @@ class Integer < Numeric
   #     3.gcdlcm(-7)                   #=> [1, 21]
   #     ((1<<31)-1).gcdlcm((1<<61)-1)  #=> [1, 4951760154835678088235319297]
   #
-  def gcdlcm: (Integer) -> [ Integer, Integer ]
+  def gcdlcm: (Integer other_int) -> [ Integer, Integer ]
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing the place-value representation of `self` in radix
@@ -965,7 +965,7 @@ class Integer < Numeric
   #     3.lcm(-7)                   #=> 21
   #     ((1<<31)-1).lcm((1<<61)-1)  #=> 4951760154835678088235319297
   #
-  def lcm: (Integer) -> Integer
+  def lcm: (Integer other_int) -> Integer
 
   # <!--
   #   rdoc-file=numeric.rb
