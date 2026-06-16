@@ -174,10 +174,8 @@ class Integer < Numeric
   #     10 % 3.0            # => 1.0
   #     10 % Rational(3, 1) # => (1/1)
   #
-  def %: (Float) -> Float
-       | (Rational) -> Rational
-       | (Integer) -> Integer
-       | (Numeric) -> Numeric
+  def %: (Integer other) -> Integer
+       | [O < RBS::Ops::_Modulo[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -207,10 +205,8 @@ class Integer < Numeric
   #     4 * Rational(1, 3) # => (4/3)
   #     4 * Complex(2, 0)  # => (8+0i)
   #
-  def *: (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
-       | (Integer) -> Integer
+  def *: (Integer other) -> Integer
+       | [O < RBS::Ops::_Times[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -256,10 +252,8 @@ class Integer < Numeric
   #     2 ** Rational(-3, 1)  # => (1/8)
   #     -2 ** Rational(-3, 1) # => (-1/8)
   #
-  def **: (Integer) -> Numeric
-        | (Float) -> Numeric
-        | (Rational) -> Numeric
-        | (Complex) -> Complex
+  def **: (Integer other) -> Integer
+        | [O < RBS::Ops::_Power[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -278,10 +272,8 @@ class Integer < Numeric
   #
   #     1 + 3.14           # => 4.140000000000001
   #
-  def +: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def +: (Integer other) -> Integer
+       | [O < RBS::Ops::_Add[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -296,10 +288,8 @@ class Integer < Numeric
   #     4 - Rational(2, 1) # => (2/1)
   #     4 - Complex(2, 0)  # => (2+0i)
   #
-  def -: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def -: (Integer other) -> Integer
+       | [O < RBS::Ops::_Subtract[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -332,10 +322,8 @@ class Integer < Numeric
   #     4 / Rational(3, 1) # => (4/3)
   #     4 / Complex(3, 0)  # => ((4/3)+0i)
   #
-  def /: (Integer) -> Integer
-       | (Float) -> Float
-       | (Rational) -> Rational
-       | (Complex) -> Complex
+  def /: (Integer other) -> Integer
+       | [O < RBS::Ops::_Divide[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -742,7 +730,8 @@ class Integer < Numeric
   #
   #     (0x3FFFFFFFFFFFFFFF+1).coerce(42)   #=> [42, 4611686018427387904]
   #
-  def coerce: (Numeric) -> [ Numeric, Numeric ]
+  def coerce: (Integer numeric) -> [Integer, self]
+            | (_ToF float) -> [Float, Float]
 
   # <!--
   #   rdoc-file=numeric.rb

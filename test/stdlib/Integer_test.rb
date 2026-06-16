@@ -31,7 +31,16 @@ class IntegerInstanceTest < Test::Unit::TestCase
   testing 'Integer'
 
   def test_op_mod(method: :%)
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, method, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, method, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, method, 12.0
+    # Notably not `Complex` as complex doesn't define `%`
+
+    assert_send_type  '[O < RBS::Ops::_Subtract[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, method, Coercable.new('fmt: %s', &:to_s)
   end
 
   def test_op_and
@@ -39,19 +48,59 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_mul
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :*, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :*, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :*, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :*, 12i
+
+    assert_send_type  '[O < RBS::Ops::_Times[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :*, Coercable.new(%w[a b], &:to_s)
   end
 
   def test_op_pow
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :**, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :**, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :**, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :**, 12i
+
+    assert_send_type  '[O < RBS::Ops::_Power[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :**, Coercable.new(10i, &:i)
   end
 
   def test_op_add
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :+, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :+, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :+, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :+, 12i
+
+    assert_send_type  '[O < RBS::Ops::_Add[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :+, Coercable.new('foo', &:to_s)
   end
 
   def test_op_sub
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :-, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :-, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :-, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :-, 12i
+
+    assert_send_type  '[O < RBS::Ops::_Subtract[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :-, Coercable.new([3], &:digits)
   end
 
   def test_op_uneg
@@ -60,7 +109,17 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_div
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :/, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :/, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :/, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :/, 12i
+
+    assert_send_type  '[O < RBS::Ops::_Times[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :/, Coercable.new(10i, &:i)
   end
 
   def test_op_lt
@@ -167,7 +226,13 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_coerce
-    # omit 'todo'
+    assert_send_type  '(Integer) -> [Integer, 38]',
+                      38, :coerce, 4
+
+    with_float do |float|
+      assert_send_type  '(_ToF) -> [Float, Float]',
+                        38, :coerce, float
+    end
   end
 
   def test_denominator

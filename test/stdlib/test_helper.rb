@@ -80,6 +80,17 @@ module WithStdlibAliases
   end
 end
 
+class Coercable < RBS::UnitTest::Convertibles::BlankSlate
+  def initialize(self_ret, &converter)
+    @self_ret = self_ret
+    @converter = converter || ->(x) { x }
+  end
+
+  def coerce(rhs)
+    [@self_ret, @converter.(rhs)]
+  end
+end
+
 class Writer
   attr_reader :buffer
 
