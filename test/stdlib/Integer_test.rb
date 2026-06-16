@@ -31,27 +31,27 @@ class IntegerInstanceTest < Test::Unit::TestCase
   testing 'Integer'
 
   def test_op_mod(method: :%)
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_and
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_mul
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_pow
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_add
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_sub
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_uneg
@@ -60,23 +60,23 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_div
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_lt
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_lsh
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_leq
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_cmp
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_eq(method: :==)
@@ -92,23 +92,23 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_gt
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_geq
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_rsh
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_aref
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_xor
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_abs(method: :magnitude)
@@ -153,7 +153,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_ceildiv
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_chr
@@ -167,7 +167,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_coerce
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_denominator
@@ -186,15 +186,15 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_div
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_divmod
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_downto
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_even?
@@ -205,7 +205,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_fdiv
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_floor
@@ -218,14 +218,14 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_gcd
-    assert_send_type  '() -> Integer',
+    assert_send_type  '(Integer) -> Integer',
                       38, :gcd, 2
     refute_send_type  '(_ToInt) -> Integer',
                       39, :gcd, ToInt.new(2) # explicitly only supports ints
   end
 
   def test_gcdlcm
-    assert_send_type  '() -> [Integer, Integer]',
+    assert_send_type  '(Integer) -> [Integer, Integer]',
                       38, :gcdlcm, 2
     refute_send_type  '(_ToInt) -> [Integer, Integer]',
                       39, :gcdlcm, ToInt.new(2) # explicitly only supports ints
@@ -241,7 +241,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_lcm
-    assert_send_type  '() -> Integer',
+    assert_send_type  '(Integer) -> Integer',
                       38, :lcm, 2
     refute_send_type  '(_ToInt) -> Integer',
                       39, :lcm, ToInt.new(2) # explicitly only supports ints
@@ -286,7 +286,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_pow
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_pred
@@ -305,7 +305,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_remainder
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_round
@@ -341,7 +341,7 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_times
-    assert_send_type  '() { (Integer) -> 38',
+    assert_send_type  '() { (Integer) -> void } -> 38',
                       38, :times do end
     assert_send_type  '() -> Enumerator[Integer, 38]',
                       38, :times
@@ -386,18 +386,18 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_upto
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_zero?
-    assert_send_type  '() -> Integer',
+    assert_send_type  '() -> bool',
                       0, :zero?
-    assert_send_type  '() -> Integer',
+    assert_send_type  '() -> bool',
                       38, :zero?
   end
 
   def test_op_or
-    omit 'todo'
+    # omit 'todo'
   end
 
   def test_op_not
