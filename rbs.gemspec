@@ -35,7 +35,18 @@ Gem::Specification.new do |spec|
       ].any? {|r| f.match(r) }
     end
   end
-  spec.extensions = %w{ext/rbs_extension/extconf.rb}
+
+  # JRuby cannot load the MRI C extension. The `java` platform gem ships the
+  # prebuilt WebAssembly parser and the Chicory jars instead (assembled by
+  # `rake wasm:jruby_setup`), and RBS loads the WebAssembly-backed parser.
+  if ENV["RBS_PLATFORM"] == "java" || (defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby")
+    spec.platform = "java"
+    spec.files += Dir.chdir(File.expand_path('..', __FILE__)) do
+      Dir.glob("lib/rbs/wasm/rbs_parser.wasm") + Dir.glob("lib/rbs/wasm/jars/*.jar")
+    end
+  else
+    spec.extensions = %w{ext/rbs_extension/extconf.rb}
+  end
 
   if false
     spec.required_ruby_version = ">= 3.4"

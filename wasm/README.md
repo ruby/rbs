@@ -5,10 +5,12 @@ on the Ruby C API, so it can be compiled to WebAssembly as-is. This directory
 holds the small entry-point shim ([`rbs_wasm.c`](rbs_wasm.c)) that exposes a
 stable ABI to a WebAssembly host.
 
-The motivating use case is running RBS on Ruby implementations that cannot load
-the MRI C extension (notably JRuby): the host loads `rbs_parser.wasm`, runs the
-parser over a source buffer, and reads the result back out — no native build per
-platform required.
+This is how RBS runs on Ruby implementations that cannot load the MRI C
+extension (notably JRuby): the host loads `rbs_parser.wasm`, runs the parser over
+a source buffer, and reads the serialized AST back out. The Ruby side then
+rebuilds `RBS::AST` objects with `RBS::WASM::Deserializer` — no native build per
+platform required. See [`lib/rbs/wasm`](../lib/rbs/wasm) and
+[`docs/wasm_serialization.md`](../docs/wasm_serialization.md).
 
 ## Building
 
@@ -17,16 +19,9 @@ The build needs the [WASI SDK](https://github.com/WebAssembly/wasi-sdk/releases)
 
 ```console
 $ export WASI_SDK_PATH=/path/to/wasi-sdk
-$ rake wasm:build
-Built .../wasm/rbs_parser.wasm
-```
-
-To also run the smoke test you need [wasmtime](https://wasmtime.dev/) (or another
-WASI runtime, via the `WASMTIME` environment variable):
-
-```console
-$ rake wasm:check
-WebAssembly selftest passed.
+$ rake wasm:build       # compile rbs_parser.wasm
+$ rake wasm:check       # also smoke-test it (needs wasmtime)
+$ rake wasm:jruby_setup # assemble lib/rbs/wasm/ for JRuby (wasm + Chicory jars)
 ```
 
 The compiled `rbs_parser.wasm` is a build artifact and is not checked in.
@@ -36,14 +31,28 @@ The compiled `rbs_parser.wasm` is a build artifact and is not checked in.
 The module is built as a "reactor": it has no `main`, and the host calls
 `_initialize` once before invoking any export.
 
-| Export                     | Signature             | Description                                                              |
-| -------------------------- | --------------------- | ------------------------------------------------------------------------ |
-| `rbs_wasm_alloc`           | `(i32) -> i32`        | Allocate N bytes in linear memory and return the offset.                 |
-| `rbs_wasm_free`            | `(i32) -> ()`         | Free a region returned by `rbs_wasm_alloc`.                              |
-| `rbs_wasm_parse_signature` | `(i32 ptr, i32 len) -> i32` | Parse the UTF-8 source at `ptr`/`len`. Returns 0 on success, 1 on error. |
-| `rbs_wasm_selftest`        | `() -> i32`           | Parse a small fixed signature. Returns 0 on success, 1 otherwise.        |
+Memory management and results:
 
-This is the foundation step: it proves the parser builds and runs under
-WebAssembly. Subsequent steps add a compact serialization of the parsed AST so
-the host can reconstruct `RBS::AST` objects, and wire the module into RBS on
-JRuby through a JVM WebAssembly runtime.
+| Export | Signature | Description |
+| --- | --- | --- |
+| `rbs_wasm_alloc` | `(i32) -> i32` | Allocate N bytes in linear memory, return the offset. |
+| `rbs_wasm_free` | `(i32) -> ()` | Free a region from `rbs_wasm_alloc`. |
+| `rbs_wasm_result_ptr` | `() -> i32` | Offset of the most recent result. |
+| `rbs_wasm_result_len` | `() -> i32` | Length of the most recent result. |
+
+Parsing — each takes the whole buffer (`ptr`/`len`) plus the character range to
+parse (`start`/`end`), and returns `1` on success or `0` on a parse error. On
+success the result is the serialized AST; on error it is an error blob (start/end
+positions, syntax flag, token type, message). Type/method-type parsing also takes
+a buffer of newline-separated type-variable names (`vars`/`vars_len`, with
+`vars_len < 0` meaning "none"):
+
+| Export | Signature |
+| --- | --- |
+| `rbs_wasm_parse_signature` | `(ptr, len, start, end) -> i32` |
+| `rbs_wasm_parse_type` | `(ptr, len, start, end, vars, vars_len, require_eof, void_allowed, self_allowed, classish_allowed) -> i32` |
+| `rbs_wasm_parse_method_type` | `(ptr, len, start, end, vars, vars_len, require_eof) -> i32` |
+| `rbs_wasm_selftest` | `() -> i32` (parses a fixed sample; `1` on success) |
+
+For type and method-type parsing, a successful result of length 0 means the input
+was empty (`nil`).

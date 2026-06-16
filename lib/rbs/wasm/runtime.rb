@@ -1,0 +1,150 @@
+# frozen_string_literal: true
+
+require "java"
+require "monitor"
+
+module RBS
+  module WASM
+    # Loads rbs_parser.wasm into a JVM WebAssembly runtime (Chicory) and drives
+    # it. This is the JRuby counterpart of the C extension's main.c: it copies a
+    # source string into the module's linear memory, runs the parser, and returns
+    # the serialized result for RBS::WASM::Deserializer to rebuild.
+    #
+    # Chicory is a pure-Java runtime, so there is no native dependency: only the
+    # `.wasm` and the Chicory jars need to ship with the gem.
+    class Runtime
+      include MonitorMixin
+
+      # The Chicory jars the runtime needs at load time.
+      JARS = %w[wasm runtime log wasi].freeze
+
+      class << self
+        def instance
+          @instance ||= new
+        end
+
+        def wasm_path
+          ENV["RBS_WASM_PARSER"] || File.expand_path("rbs_parser.wasm", __dir__)
+        end
+
+        def jars_dir
+          ENV["RBS_WASM_JARS"] || File.expand_path("jars", __dir__)
+        end
+      end
+
+      def initialize
+        super()
+        load_jars
+        @wasm = build_instance
+        @memory = @wasm.memory
+        @alloc = @wasm.export("rbs_wasm_alloc")
+        @free = @wasm.export("rbs_wasm_free")
+        @result_ptr = @wasm.export("rbs_wasm_result_ptr")
+        @result_len = @wasm.export("rbs_wasm_result_len")
+        @parse_signature = @wasm.export("rbs_wasm_parse_signature")
+        @parse_type = @wasm.export("rbs_wasm_parse_type")
+        @parse_method_type = @wasm.export("rbs_wasm_parse_method_type")
+      end
+
+      # `content` is the whole buffer; `start_pos`/`end_pos` are the character
+      # range within it to parse. Each method returns [success, bytes]: on success
+      # `bytes` is the serialized AST, otherwise it is the error blob (see
+      # set_error_result in rbs_wasm.c).
+
+      def parse_signature(content, start_pos, end_pos)
+        run(content) { |ptr, len| @parse_signature.apply(ptr, len, start_pos, end_pos)[0] }
+      end
+
+      def parse_type(content, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+        with_variables(variables) do |vars_ptr, vars_len|
+          run(content) do |ptr, len|
+            @parse_type.apply(ptr, len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof), bool(void_allowed), bool(self_allowed), bool(classish_allowed))[0]
+          end
+        end
+      end
+
+      def parse_method_type(content, start_pos, end_pos, variables, require_eof)
+        with_variables(variables) do |vars_ptr, vars_len|
+          run(content) do |ptr, len|
+            @parse_method_type.apply(ptr, len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof))[0]
+          end
+        end
+      end
+
+      private
+
+      # Copies `source` into linear memory, yields its pointer/length to the block
+      # (which invokes the parser and returns its status), then reads the result
+      # back out. Serialized through the monitor because the module keeps its
+      # result in a single shared location.
+      def run(source)
+        synchronize do
+          bytes = source.b
+          length = bytes.bytesize
+          source_ptr = @alloc.apply(length)[0]
+          begin
+            @memory.write(source_ptr, bytes.to_java_bytes)
+            status = yield(source_ptr, length)
+            [status == 1, read_result]
+          ensure
+            @free.apply(source_ptr)
+          end
+        end
+      end
+
+      def read_result
+        pointer = @result_ptr.apply[0]
+        length = @result_len.apply[0]
+        return "".b if length.zero?
+
+        String.from_java_bytes(@memory.read_bytes(pointer, length)).b
+      end
+
+      # Allocates a buffer of newline-separated variable names and yields its
+      # pointer/length. A nil `variables` is passed as length -1 ("no variables").
+      def with_variables(variables)
+        names = variables&.map(&:to_s)&.join("\n")
+
+        if names.nil? || names.empty?
+          return yield(0, variables.nil? ? -1 : 0)
+        end
+
+        bytes = names.b
+        length = bytes.bytesize
+        synchronize do
+          pointer = @alloc.apply(length)[0]
+          begin
+            @memory.write(pointer, bytes.to_java_bytes)
+            yield(pointer, length)
+          ensure
+            @free.apply(pointer)
+          end
+        end
+      end
+
+      def bool(value)
+        value ? 1 : 0
+      end
+
+      def build_instance
+        parser = Java::ComDylibsoChicoryWasm::Parser
+        instance_class = Java::ComDylibsoChicoryRuntime::Instance
+        import_values = Java::ComDylibsoChicoryRuntime::ImportValues
+        wasi_preview1 = Java::ComDylibsoChicoryWasi::WasiPreview1
+        wasi_options = Java::ComDylibsoChicoryWasi::WasiOptions
+
+        wasm_module = parser.parse(java.io.File.new(self.class.wasm_path))
+        wasi = wasi_preview1.builder.with_options(wasi_options.builder.build).build
+        imports = import_values.builder.add_function(wasi.to_host_functions).build
+
+        wasm = instance_class.builder(wasm_module).with_import_values(imports).build
+        wasm.export("_initialize").apply
+        wasm
+      end
+
+      def load_jars
+        JARS.each { |name| require File.join(self.class.jars_dir, "#{name}.jar") }
+      end
+    end
+  end
+end

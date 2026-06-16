@@ -69,7 +69,14 @@ require "rbs/type_alias_dependency"
 require "rbs/type_alias_regularity"
 require "rbs/collection"
 
-require "rbs_extension"
+if RUBY_ENGINE == "jruby"
+  # JRuby cannot load the MRI C extension. Run the parser in WebAssembly and
+  # provide pure-Ruby implementations of RBS::Location and RBS::Parser instead.
+  require "rbs/wasm/location"
+  require "rbs/wasm/parser"
+else
+  require "rbs_extension"
+end
 require "rbs/parser_aux"
 require "rbs/location_aux"
 
