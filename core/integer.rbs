@@ -520,9 +520,9 @@ class Integer < Numeric
   #
   # Raises an exception if the slice cannot be constructed.
   #
-  def []: (int) -> Integer
-        | (int i, int len) -> Integer
-        | (Range[int]) -> Integer
+  def []: (int offset) -> (0 | 1)
+        | (int offset, int size) -> Integer
+        | (range[int?] range) -> Integer # Technically needs to have things beyond `int` (eg `<=>` and `coerce`), but too cumbersome to annotate
 
   # <!--
   #   rdoc-file=numeric.c
@@ -819,7 +819,6 @@ class Integer < Numeric
     def divmod: (O other) -> R
   end
 
-
   # <!--
   #   rdoc-file=numeric.c
   #   - downto(limit) {|i| ... } -> self
@@ -838,8 +837,10 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def downto: (Numeric limit) { (Integer) -> void } -> Integer
-            | (Numeric limit) -> ::Enumerator[Integer, self]
+  def downto: (Integer limit) { (Integer i) -> void } -> self
+            | (Integer limit) -> Enumerator[Integer, self]
+            | [S] (Numeric::_Coerce[self, RBS::Ops::_LessThan[S, boolish], S] other) { (Integer i) -> void } -> self
+            | [S] (Numeric::_Coerce[self, RBS::Ops::_LessThan[S, boolish], S] other) -> Enumerator[Integer, self] # Technically, need more bounds for `size`?
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -1341,8 +1342,10 @@ class Integer < Numeric
   #
   # With no block given, returns an Enumerator.
   #
-  def upto: (Numeric limit) { (Integer) -> void } -> Integer
-          | (Numeric limit) -> ::Enumerator[Integer, self]
+  def upto: (Integer limit) { (Integer i) -> void } -> self
+          | (Integer limit) -> Enumerator[Integer, self]
+          | [S] (Numeric::_Coerce[self, RBS::Ops::_GreaterThan[S, boolish], S] other) { (Integer i) -> void } -> self
+          | [S] (Numeric::_Coerce[self, RBS::Ops::_GreaterThan[S, boolish], S] other) -> Enumerator[Integer, self] # Technically, need more bounds for `size`?
 
   # <!--
   #   rdoc-file=numeric.rb

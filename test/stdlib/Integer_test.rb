@@ -217,7 +217,30 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_aref
-    # omit 'todo'
+    with_int 3 do |offset|
+      assert_send_type  '(int) -> (0 | 1)',
+                        38, :[], offset
+
+      with_int 5 do |size|
+        assert_send_type  '(int, int) -> Integer',
+                          38, :[], offset, size
+      end
+    end
+
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 3..nil
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], nil..0
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 1r..3r
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 1.0..3.0
+
+    start = ToInt.new(1)
+    def start.<=>(other) = to_int <=> other.to_int
+    def start.coerce(other) = [other.to_int, to_int]
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], CustomRange.new(start, ToInt.new(3))
   end
 
   def test_op_xor
@@ -346,7 +369,26 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_downto
-    # omit 'todo'
+    assert_send_type  '(Integer) { (Integer) -> void } -> 38',
+                      38, :downto, 35 do end
+    assert_send_type  '(Integer) -> Enumerator[Integer, 38]',
+                      38, :downto, 35
+    assert_send_type  '(Rational) { (Integer) -> void } -> 38',
+                      38, :downto, 35r do end
+    assert_send_type  '(Rational) -> Enumerator[Integer, 38]',
+                      38, :downto, 35r
+    assert_send_type  '(Float) { (Integer) -> void } -> 38',
+                      38, :downto, 35.0 do end
+    assert_send_type  '(Float) -> Enumerator[Integer, 38]',
+                      38, :downto, 35.0
+
+    assert_send_type  '(Coercable) { (Integer) -> void } -> 38',
+                      38, :downto, Coercable.for_op(:<) { it.__value__ < 35 } do end
+
+    coercable = Coercable.for_op(:<) { it.__value__ < 35 }
+    def coercable.-(rhs) = 35 - rhs # Required by `Enumerator#size`, which the unit test harness uses
+    assert_send_type  '(Coercable) -> Enumerator[Integer, 38]',
+                      38, :downto, coercable
   end
 
   def test_even?
@@ -568,7 +610,26 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_upto
-    # omit 'todo'
+    assert_send_type  '(Integer) { (Integer) -> void } -> 38',
+                      38, :upto, 40 do end
+    assert_send_type  '(Integer) -> Enumerator[Integer, 38]',
+                      38, :upto, 40
+    assert_send_type  '(Rational) { (Integer) -> void } -> 38',
+                      38, :upto, 40r do end
+    assert_send_type  '(Rational) -> Enumerator[Integer, 38]',
+                      38, :upto, 40r
+    assert_send_type  '(Float) { (Integer) -> void } -> 38',
+                      38, :upto, 40.0 do end
+    assert_send_type  '(Float) -> Enumerator[Integer, 38]',
+                      38, :upto, 40.0
+
+    assert_send_type  '(Coercable) { (Integer) -> void } -> 38',
+                      38, :upto, Coercable.for_op(:>) { it.__value__ > 40 } do end
+
+    coercable = Coercable.for_op(:>) { it.__value__ > 40 }
+    def coercable.-(rhs) = 40 - rhs # Required by `Enumerator#size`, which the unit test harness uses
+    assert_send_type  '(Coercable) -> Enumerator[Integer, 38]',
+                      38, :upto, coercable
   end
 
   def test_zero?
