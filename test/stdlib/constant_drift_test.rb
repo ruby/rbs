@@ -25,9 +25,14 @@ class ConstantDriftTest < Test::Unit::TestCase
   ].freeze
 
   # Known, intentional exceptions keyed by "::Name" => [:CONST, ...]. Use this
-  # for runtime constants that are `private_constant` or otherwise legitimately
-  # undeclared, so the gate stays green there without being weakened elsewhere.
-  SKIP = {}.freeze
+  # for build- or platform-conditional constants (and `private_constant`s) that
+  # are legitimately undeclared, so the gate stays green across CI platforms
+  # without being weakened elsewhere.
+  SKIP = {
+    # Defined only when Ruby is built with GMP (USE_GMP): present on the Linux
+    # CI build, absent on e.g. macOS.
+    "::Integer" => [:GMP_VERSION]
+  }.freeze
 
   def env
     StdlibTest::DEFAULT_ENV
