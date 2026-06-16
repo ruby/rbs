@@ -402,8 +402,8 @@ class Integer < Numeric
   # Class Integer includes module Comparable, each of whose methods uses
   # Integer#<=> for comparison.
   #
-  def <=>: (Integer | Rational) -> Integer
-         | (untyped) -> Integer?
+  def <=>: (Integer | Rational other) -> (-1 | 0 | 1)
+         | (untyped other) -> Integer? # todo: technically uses same coerce mechanism as other methods. That'd get rid of `| Rational`.
 
   # <!-- rdoc-file=numeric.c -->
   # Returns `true` if `self` is numerically equal to `other`; `false` otherwise.

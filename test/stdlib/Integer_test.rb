@@ -39,8 +39,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
                       38, method, 12.0
     # Notably not `Complex` as complex doesn't define `%`
 
-    assert_send_type  '[O < RBS::Ops::_Subtract[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, method, Coercable.new('fmt: %s', &:to_s)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, method, Coercable.for_op(:%)
   end
 
   def test_op_and
@@ -57,8 +57,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
     assert_send_type  '(Complex) -> Complex',
                       38, :*, 12i
 
-    assert_send_type  '[O < RBS::Ops::_Times[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :*, Coercable.new(%w[a b], &:to_s)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :*, Coercable.for_op(:*)
   end
 
   def test_op_pow
@@ -71,8 +71,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
     assert_send_type  '(Complex) -> Complex',
                       38, :**, 12i
 
-    assert_send_type  '[O < RBS::Ops::_Power[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :**, Coercable.new(10i, &:i)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :**, Coercable.for_op(:**)
   end
 
   def test_op_add
@@ -85,8 +85,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
     assert_send_type  '(Complex) -> Complex',
                       38, :+, 12i
 
-    assert_send_type  '[O < RBS::Ops::_Add[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :+, Coercable.new('foo', &:to_s)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :+, Coercable.for_op(:+)
   end
 
   def test_op_sub
@@ -99,8 +99,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
     assert_send_type  '(Complex) -> Complex',
                       38, :-, 12i
 
-    assert_send_type  '[O < RBS::Ops::_Subtract[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :-, Coercable.new([3], &:digits)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :-, Coercable.for_op(:-)
   end
 
   def test_op_uneg
@@ -118,8 +118,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
     assert_send_type  '(Complex) -> Complex',
                       38, :/, 12i
 
-    assert_send_type  '[O < RBS::Ops::_Times[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :/, Coercable.new(10i, &:i)
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :/, Coercable.for_op(:/)
   end
 
   def test_op_lt
@@ -131,8 +131,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
                       38, :<, 12.0
     # Notably not `Complex` as complex doesn't define `<`
 
-    assert_send_type  '[O < RBS::Ops::_LessThan[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :<, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :<, Coercable.for_op(:<)
   end
 
   def test_op_lsh
@@ -148,12 +148,20 @@ class IntegerInstanceTest < Test::Unit::TestCase
                       38, :<=, 12.0
     # Notably not `Complex` as complex doesn't define `<=`
 
-    assert_send_type  '[O < RBS::Ops::_LessThanOrEqual[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :<=, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :<=, Coercable.for_op(:<=)
   end
 
   def test_op_cmp
-    # omit 'todo'
+    assert_send_type  '(Integer) -> (-1 | 0 | 1)',
+                      38, :<=>, 12
+    assert_send_type  '(Rational) -> (-1 | 0 | 1)',
+                      38, :<=>, 12r
+
+    with_untyped.and 12, 12r, 12.0, 12i, Coercable.new(Set[8, 4]){ |n| n.digits.to_set } do |other|
+      assert_send_type  '(untyped) -> Integer?',
+                        38, :<=>, other
+    end
   end
 
   def test_op_eq(method: :==)
@@ -177,8 +185,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
                       38, :>, 12.0
     # Notably not `Complex` as complex doesn't define `>`
 
-    assert_send_type  '[O < RBS::Ops::_GreaterThan[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :>, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :>, Coercable.for_op(:>)
   end
 
   def test_op_geq
@@ -190,8 +198,8 @@ class IntegerInstanceTest < Test::Unit::TestCase
                       38, :>=, 12.0
     # Notably not `Complex` as complex doesn't define `>`
 
-    assert_send_type  '[O < RBS::Ops::_GreaterThanOrEqual[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
-                      38, :>=, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :>=, Coercable.for_op(:>=)
   end
 
   def test_op_rsh

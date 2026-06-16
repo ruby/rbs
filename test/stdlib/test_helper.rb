@@ -81,6 +81,24 @@ module WithStdlibAliases
 end
 
 class Coercable < RBS::UnitTest::Convertibles::BlankSlate
+  class OpReturn < ::RBS::UnitTest::Convertibles::BlankSlate
+  end
+
+  class CoerceOther < ::RBS::UnitTest::Convertibles::BlankSlate
+  end
+
+  class CoerceSelf < ::RBS::UnitTest::Convertibles::BlankSlate
+    def initialize(method = nil)
+      if method
+        ::Kernel.instance_method(:define_singleton_method).bind_call(self, method) { |other| OpReturn.new }
+      end
+    end
+  end
+
+  def self.for_op(method)
+    new(CoerceSelf.new(method)){ |x| CoerceOther.new }
+  end
+
   def initialize(self_ret, &converter)
     @self_ret = self_ret
     @converter = converter || ->(x) { x }
