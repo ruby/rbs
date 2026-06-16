@@ -88,15 +88,13 @@ class Coercable < RBS::UnitTest::Convertibles::BlankSlate
   end
 
   class CoerceSelf < ::RBS::UnitTest::Convertibles::BlankSlate
-    def initialize(method = nil)
-      if method
-        ::Kernel.instance_method(:define_singleton_method).bind_call(self, method) { |other| OpReturn.new }
-      end
+    def initialize(method, result:)
+      ::Kernel.instance_method(:define_singleton_method).bind_call(self, method) { |other| result }
     end
   end
 
-  def self.for_op(method)
-    new(CoerceSelf.new(method)){ |x| CoerceOther.new }
+  def self.for_op(method, result: OpReturn.new)
+    new(CoerceSelf.new(method, result:)){ |x| CoerceOther.new }
   end
 
   def initialize(self_ret, &converter)
