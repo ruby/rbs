@@ -13,6 +13,10 @@ require "rbs/wasm/deserializer"
 # is what gives us confidence that the same format, produced inside WebAssembly,
 # will rebuild correct objects on JRuby.
 class RBS::WASM::SerializationTest < Test::Unit::TestCase
+  # The round-trip is driven by the C extension's `_parse_*_to_bytes`, which only
+  # exists on CRuby. JRuby's end-to-end coverage lives in jruby_parser_test.rb.
+  omit_on_jruby! "Uses the C extension's _parse_*_to_bytes helpers"
+
   ROOT = File.expand_path("../../..", __dir__)
 
   def buffer(source)

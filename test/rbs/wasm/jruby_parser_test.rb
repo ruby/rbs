@@ -15,7 +15,8 @@ module RBS
     #
     # Nested modules (rather than `class RBS::WASM::JRubyParserTest`) so the file
     # also loads on CRuby, where RBS::WASM is otherwise absent and the test omits.
-    class JRubyParserTest < Test::Unit::TestCase
+    # Test::Unit is fully qualified because RBS::Test exists and would shadow it.
+    class JRubyParserTest < ::Test::Unit::TestCase
       ROOT = File.expand_path("../../..", __dir__)
 
       def setup
