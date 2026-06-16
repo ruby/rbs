@@ -40,18 +40,19 @@ Memory management and results:
 | `rbs_wasm_result_ptr` | `() -> i32` | Offset of the most recent result. |
 | `rbs_wasm_result_len` | `() -> i32` | Length of the most recent result. |
 
-Parsing — each takes the whole buffer (`ptr`/`len`) plus the character range to
-parse (`start`/`end`), and returns `1` on success or `0` on a parse error. On
-success the result is the serialized AST; on error it is an error blob (start/end
-positions, syntax flag, token type, message). Type/method-type parsing also takes
-a buffer of newline-separated type-variable names (`vars`/`vars_len`, with
-`vars_len < 0` meaning "none"):
+Parsing — each takes the whole buffer (`ptr`/`len`), its Ruby encoding name
+(`enc`/`enc_len`, e.g. `"UTF-8"` or `"EUC-JP"`; falls back to UTF-8 when empty or
+unknown), and the character range to parse (`start`/`end`). Each returns `1` on
+success or `0` on a parse error. On success the result is the serialized AST; on
+error it is an error blob (start/end positions, syntax flag, token type,
+message). Type/method-type parsing also takes a buffer of newline-separated
+type-variable names (`vars`/`vars_len`, with `vars_len < 0` meaning "none"):
 
 | Export | Signature |
 | --- | --- |
-| `rbs_wasm_parse_signature` | `(ptr, len, start, end) -> i32` |
-| `rbs_wasm_parse_type` | `(ptr, len, start, end, vars, vars_len, require_eof, void_allowed, self_allowed, classish_allowed) -> i32` |
-| `rbs_wasm_parse_method_type` | `(ptr, len, start, end, vars, vars_len, require_eof) -> i32` |
+| `rbs_wasm_parse_signature` | `(ptr, len, enc, enc_len, start, end) -> i32` |
+| `rbs_wasm_parse_type` | `(ptr, len, enc, enc_len, start, end, vars, vars_len, require_eof, void_allowed, self_allowed, classish_allowed) -> i32` |
+| `rbs_wasm_parse_method_type` | `(ptr, len, enc, enc_len, start, end, vars, vars_len, require_eof) -> i32` |
 | `rbs_wasm_selftest` | `() -> i32` (parses a fixed sample; `1` on success) |
 
 For type and method-type parsing, a successful result of length 0 means the input

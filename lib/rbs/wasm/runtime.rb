@@ -51,43 +51,48 @@ module RBS
       # `bytes` is the serialized AST, otherwise it is the error blob (see
       # set_error_result in rbs_wasm.c).
 
-      def parse_signature(content, start_pos, end_pos)
-        run(content) { |ptr, len| @parse_signature.apply(ptr, len, start_pos, end_pos)[0] }
+      def parse_signature(content, encoding, start_pos, end_pos)
+        run(content, encoding) { |ptr, len, enc_ptr, enc_len| @parse_signature.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos)[0] }
       end
 
-      def parse_type(content, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+      def parse_type(content, encoding, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
         with_variables(variables) do |vars_ptr, vars_len|
-          run(content) do |ptr, len|
-            @parse_type.apply(ptr, len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof), bool(void_allowed), bool(self_allowed), bool(classish_allowed))[0]
+          run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+            @parse_type.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof), bool(void_allowed), bool(self_allowed), bool(classish_allowed))[0]
           end
         end
       end
 
-      def parse_method_type(content, start_pos, end_pos, variables, require_eof)
+      def parse_method_type(content, encoding, start_pos, end_pos, variables, require_eof)
         with_variables(variables) do |vars_ptr, vars_len|
-          run(content) do |ptr, len|
-            @parse_method_type.apply(ptr, len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof))[0]
+          run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+            @parse_method_type.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof))[0]
           end
         end
       end
 
       private
 
-      # Copies `source` into linear memory, yields its pointer/length to the block
-      # (which invokes the parser and returns its status), then reads the result
-      # back out. Serialized through the monitor because the module keeps its
-      # result in a single shared location.
-      def run(source)
+      # Copies `source` and its encoding name into linear memory, yields their
+      # pointers/lengths to the block (which invokes the parser and returns its
+      # status), then reads the result back out. Serialized through the monitor
+      # because the module keeps its result in a single shared location.
+      def run(source, encoding)
         synchronize do
           bytes = source.b
           length = bytes.bytesize
+          name = encoding.to_s.b
+          name_length = name.bytesize
           source_ptr = @alloc.apply(length)[0]
+          name_ptr = @alloc.apply(name_length)[0]
           begin
             @memory.write(source_ptr, bytes.to_java_bytes)
-            status = yield(source_ptr, length)
+            @memory.write(name_ptr, name.to_java_bytes) unless name_length.zero?
+            status = yield(source_ptr, length, name_ptr, name_length)
             [status == 1, read_result]
           ensure
             @free.apply(source_ptr)
+            @free.apply(name_ptr)
           end
         end
       end

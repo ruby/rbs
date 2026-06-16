@@ -119,6 +119,16 @@ static int set_serialized_result(rbs_parser_t *parser, rbs_node_t *node) {
     return 1;
 }
 
+// Resolve a Ruby encoding name (e.g. "UTF-8", "EUC-JP") to an rbs encoding,
+// falling back to UTF-8 when none is given or the name is not recognised.
+static const rbs_encoding_t *resolve_encoding(const char *name, int name_length) {
+    if (name_length > 0) {
+        const rbs_encoding_t *encoding = rbs_encoding_find((const uint8_t *) name, (const uint8_t *) (name + name_length));
+        if (encoding != NULL) return encoding;
+    }
+    return RBS_ENCODING_UTF_8_ENTRY;
+}
+
 // Declare type variables from a buffer of newline-separated names. A negative
 // length means "no variables given" (the parser keeps its default table).
 static void declare_variables(rbs_parser_t *parser, const char *variables, int variables_length) {
@@ -146,18 +156,19 @@ static void declare_variables(rbs_parser_t *parser, const char *variables, int v
 }
 
 /**
- * Parse an RBS signature from a UTF-8 source buffer.
+ * Parse an RBS signature from a source buffer.
  *
- * `source`/`length` is the whole buffer content; `start_pos`/`end_pos` are the
- * character range within it to parse, so reported locations are absolute (this
- * mirrors RBS::Parser._parse_signature).
+ * `source`/`length` is the whole buffer content; `encoding`/`encoding_length` is
+ * its Ruby encoding name; `start_pos`/`end_pos` are the character range within it
+ * to parse, so reported locations are absolute (this mirrors
+ * RBS::Parser._parse_signature).
  *
  * @return 1 on success (result is the serialized AST), 0 on a parse error
  *         (result is an error blob).
  */
-__attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_signature(const char *source, int length, int start_pos, int end_pos) {
+__attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_signature(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos) {
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, RBS_ENCODING_UTF_8_ENTRY, start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
 
     rbs_signature_t *signature = NULL;
     rbs_parse_signature(parser, &signature);
@@ -180,9 +191,9 @@ __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_sign
  * @return 1 on success, 0 on a parse error. On success with an empty result
  *         (`rbs_wasm_result_len` == 0), the input was empty (`nil`).
  */
-__attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(const char *source, int length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof, int void_allowed, int self_allowed, int classish_allowed) {
+__attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof, int void_allowed, int self_allowed, int classish_allowed) {
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, RBS_ENCODING_UTF_8_ENTRY, start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
     declare_variables(parser, variables, variables_length);
 
     int status;
@@ -214,9 +225,9 @@ __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(cons
  * @return 1 on success, 0 on a parse error. On success with an empty result,
  *         the input was empty (`nil`).
  */
-__attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_method_type(const char *source, int length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof) {
+__attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_method_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof) {
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, RBS_ENCODING_UTF_8_ENTRY, start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
     declare_variables(parser, variables, variables_length);
 
     int status;
@@ -248,5 +259,5 @@ __attribute__((export_name("rbs_wasm_selftest"))) int rbs_wasm_selftest(void) {
         "end\n";
 
     int length = (int) (sizeof(source) - 1);
-    return rbs_wasm_parse_signature(source, length, 0, length);
+    return rbs_wasm_parse_signature(source, length, "UTF-8", 5, 0, length);
 }

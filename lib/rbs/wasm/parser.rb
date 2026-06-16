@@ -13,21 +13,24 @@ module RBS
   class Parser
     class << self
       def _parse_signature(buffer, start_pos, end_pos)
-        success, bytes = WASM::Runtime.instance.parse_signature(buffer.content, start_pos, end_pos)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_signature(buffer.content, encoding, start_pos, end_pos)
         raise_parsing_error(buffer, bytes) unless success
 
         WASM::Deserializer.deserialize(bytes, buffer)
       end
 
       def _parse_type(buffer, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
-        success, bytes = WASM::Runtime.instance.parse_type(buffer.content, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_type(buffer.content, encoding, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
         raise_parsing_error(buffer, bytes) unless success
 
         deserialize_or_nil(bytes, buffer)
       end
 
       def _parse_method_type(buffer, start_pos, end_pos, variables, require_eof)
-        success, bytes = WASM::Runtime.instance.parse_method_type(buffer.content, start_pos, end_pos, variables, require_eof)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_method_type(buffer.content, encoding, start_pos, end_pos, variables, require_eof)
         raise_parsing_error(buffer, bytes) unless success
 
         deserialize_or_nil(bytes, buffer)
