@@ -8,6 +8,8 @@ class RBS::NodeUsageTest < Test::Unit::TestCase
   end
 
   def test_conditional
+    omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
+
     NodeUsage.new(parse(<<~RB))
       def block
         yield

@@ -891,6 +891,8 @@ singleton(::BasicObject)
   end
 
   def test_prototype_no_parser
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+
     Dir.mktmpdir do |dir|
       with_cli do |cli|
         def cli.has_parser?
@@ -907,6 +909,8 @@ singleton(::BasicObject)
   end
 
   def test_prototype_batch
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -968,6 +972,8 @@ Processing `Gemfile`...
   end
 
   def test_prototype_batch_outer
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -994,6 +1000,8 @@ Processing `test/a_test.rb`...
   end
 
   def test_prototype_batch_syntax_error
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -1042,6 +1050,8 @@ Processing `lib`...
 
 
   def test_test
+    omit_on_truffle_ruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on TruffleRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
       dir.join('foo.rbs').write(<<~RBS)
