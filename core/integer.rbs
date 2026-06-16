@@ -338,7 +338,8 @@ class Integer < Numeric
   #     1 < 0.5            # => false
   #     1 < Rational(1, 2) # => false
   #
-  def <: (Numeric) -> bool
+  def <: (Integer other) -> bool
+       | [O < RBS::Ops::_LessThan[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -372,7 +373,8 @@ class Integer < Numeric
   #
   #     Raises an exception if the comparison cannot be made.
   #
-  def <=: (Numeric) -> bool
+  def <=: (Integer other) -> bool
+        | [O < RBS::Ops::_LessThanOrEqual[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -440,7 +442,8 @@ class Integer < Numeric
   #
   #     Raises an exception if the comparison cannot be made.
   #
-  def >: (Numeric) -> bool
+  def >: (Integer other) -> bool
+       | [O < RBS::Ops::_GreaterThan[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -457,7 +460,8 @@ class Integer < Numeric
   #
   # Raises an exception if the comparison cannot be made.
   #
-  def >=: (Numeric) -> bool
+  def >=: (Integer other) -> bool
+        | [O < RBS::Ops::_GreaterThanOrEquaul[S, R], S, R] (Numeric::_Coerce[self, O, S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c

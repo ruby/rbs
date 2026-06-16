@@ -123,7 +123,16 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_lt
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :<, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :<, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :<, 12.0
+    # Notably not `Complex` as complex doesn't define `<`
+
+    assert_send_type  '[O < RBS::Ops::_LessThan[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :<, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
   end
 
   def test_op_lsh
@@ -131,7 +140,16 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_leq
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :<=, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :<=, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :<=, 12.0
+    # Notably not `Complex` as complex doesn't define `<=`
+
+    assert_send_type  '[O < RBS::Ops::_LessThanOrEqual[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :<=, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
   end
 
   def test_op_cmp
@@ -151,11 +169,29 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_gt
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :>, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :>, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :>, 12.0
+    # Notably not `Complex` as complex doesn't define `>`
+
+    assert_send_type  '[O < RBS::Ops::_GreaterThan[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :>, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
   end
 
   def test_op_geq
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :>=, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :>=, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :>=, 12.0
+    # Notably not `Complex` as complex doesn't define `>`
+
+    assert_send_type  '[O < RBS::Ops::_GreaterThanOrEqual[S, R], S, R] (Numeric::_Coerce[38, O, S]) -> R',
+                      38, :>=, Coercable.new(Set[8, 4]){ |n| n.digits.to_set }
   end
 
   def test_op_rsh
