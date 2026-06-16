@@ -160,6 +160,10 @@ task :templates do
   sh "#{ruby} templates/template.rb include/rbs/ast.h"
   sh "#{ruby} templates/template.rb src/ast.c"
 
+  sh "#{ruby} templates/template.rb include/rbs/serialize.h"
+  sh "#{ruby} templates/template.rb src/serialize.c"
+  sh "#{ruby} templates/template.rb lib/rbs/wasm/serialization_schema.rb"
+
   # Format the generated files
   Rake::Task["format:c"].invoke
 end
