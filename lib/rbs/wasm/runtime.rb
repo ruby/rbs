@@ -16,7 +16,14 @@ module RBS
       include MonitorMixin
 
       # The Chicory jars the runtime needs at load time.
+      # Jars Chicory needs to load and run the module.
       JARS = %w[wasm runtime log wasi].freeze
+
+      # Jars for Chicory's ahead-of-time compiler (wasm -> JVM bytecode), which
+      # runs the parser ~8x faster than the interpreter. Optional: the runtime
+      # falls back to the interpreter when they are absent. asm* are the ow2 ASM
+      # libraries the compiler depends on.
+      OPTIONAL_JARS = %w[compiler asm asm-tree asm-util asm-commons asm-analysis].freeze
 
       class << self
         def instance
@@ -142,13 +149,34 @@ module RBS
         wasi = wasi_preview1.builder.with_options(wasi_options.builder.build).build
         imports = import_values.builder.add_function(wasi.to_host_functions).build
 
-        wasm = instance_class.builder(wasm_module).with_import_values(imports).build
+        builder = instance_class.builder(wasm_module).with_import_values(imports)
+        if (factory = machine_factory(wasm_module))
+          builder = builder.with_machine_factory(factory)
+        end
+
+        wasm = builder.build
         wasm.export("_initialize").apply
         wasm
       end
 
+      # Chicory's AOT compiler when its jars are present, otherwise nil (the
+      # builder then uses the interpreter).
+      def machine_factory(wasm_module)
+        Java::ComDylibsoChicoryCompiler::MachineFactoryCompiler.compile(wasm_module)
+      rescue NameError
+        nil
+      end
+
       def load_jars
-        JARS.each { |name| require File.join(self.class.jars_dir, "#{name}.jar") }
+        JARS.each { |name| require jar_path(name) }
+        OPTIONAL_JARS.each do |name|
+          path = jar_path(name)
+          require path if File.exist?(path)
+        end
+      end
+
+      def jar_path(name)
+        File.join(self.class.jars_dir, "#{name}.jar")
       end
     end
   end
