@@ -396,10 +396,8 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  def %: (Integer) -> Float
-       | (Float) -> Float
-       | (Rational) -> Float
-       | (Numeric) -> Numeric
+  def %: (Integer | Float other) -> Float
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Modulo[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -413,8 +411,8 @@ class Float < Numeric
   #     f * Rational(1, 2) # => 1.57
   #     f * Complex(2, 0)  # => (6.28+0.0i)
   #
-  def *: (Complex) -> Complex
-       | (Numeric) -> Float
+  def *: (Integer | Float other) -> Float
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Times[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -429,8 +427,9 @@ class Float < Numeric
   #     f ** Rational(2, 1) # => 9.8596
   #     f ** Complex(2, 0)  # => (9.8596+0i)
   #
-  def **: (Complex) -> Complex
-        | (Numeric) -> Float
+  def **: (Integer other) -> Float
+        | (Float other) -> (Float | Complex)
+        | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Power[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -449,8 +448,8 @@ class Float < Numeric
   #     3.14 + Complex(1, 0)   # => (4.140000000000001+0i)
   #     3.14 + Rational(1, 1)  # => 4.140000000000001
   #
-  def +: (Complex) -> Complex
-       | (Numeric) -> Float
+  def +: (Integer | Float other) -> Float
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Add[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -464,8 +463,8 @@ class Float < Numeric
   #     f - Rational(1, 1)    # => 2.14
   #     f - Complex(1, 0)     # => (2.14+0i)
   #
-  def -: (Complex) -> Complex
-       | (Numeric) -> Float
+  def -: (Integer | Float other) -> Float
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Subtract[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -491,8 +490,8 @@ class Float < Numeric
   #     f / Rational(2, 1) # => 1.57
   #     f / Complex(2, 0)  # => (1.57+0.0i)
   #
-  def /: (Complex) -> Complex
-       | (Numeric) -> Float
+  def /: (Integer | Float other) -> Float
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Divide[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -509,7 +508,8 @@ class Float < Numeric
   # <code>Float::NAN < Float::NAN</code> returns an implementation-dependent
   # value.
   #
-  def <: (Numeric) -> bool
+  def <: (Integer | Float other) -> bool
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_LessThan[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -527,7 +527,8 @@ class Float < Numeric
   # <code>Float::NAN <= Float::NAN</code> returns an implementation-dependent
   # value.
   #
-  def <=: (Numeric) -> bool
+  def <=: (Integer | Float other) -> bool
+        | [S, R] (Numeric::_Coerce[self, RBS::Ops::_LessThanOrEqual[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -558,7 +559,8 @@ class Float < Numeric
   # Class Float includes module Comparable, each of whose methods uses Float#<=>
   # for comparison.
   #
-  def <=>: (Numeric) -> Integer?
+  def <=>: (Float other) -> (-1 | 0 | 1)?
+         | (untyped other) -> Integer?
 
   # <!--
   #   rdoc-file=numeric.c
@@ -607,7 +609,8 @@ class Float < Numeric
   # <code>Float::NAN > Float::NAN</code> returns an implementation-dependent
   # value.
   #
-  def >: (Numeric) -> bool
+  def >: (Integer | Float other) -> bool
+       | [S, R] (Numeric::_Coerce[self, RBS::Ops::_GreaterThan[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.c
@@ -624,7 +627,8 @@ class Float < Numeric
   # <code>Float::NAN >= Float::NAN</code> returns an implementation-dependent
   # value.
   #
-  def >=: (Numeric) -> bool
+  def >=: (Integer | Float other) -> bool
+        | [S, R] (Numeric::_Coerce[self, RBS::Ops::_GreaterThanOrEqual[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=numeric.rb
@@ -641,7 +645,7 @@ class Float < Numeric
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
-  def angle: ...
+  alias angle arg
 
   # <!--
   #   rdoc-file=complex.c
@@ -649,7 +653,7 @@ class Float < Numeric
   # -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
-  alias arg angle
+  def arg: () -> (0 | Float) # NB: Can also return `NaN` if self is NaN
 
   # <!--
   #   rdoc-file=numeric.c
@@ -711,7 +715,7 @@ class Float < Numeric
   # Related: Float#floor.
   #
   def ceil: () -> Integer
-          | (int digits) -> (Integer | Float)
+          | (int ndigits) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -763,8 +767,13 @@ class Float < Numeric
   #     13.0.divmod(4.0)            # => [3, 1.0]
   #     13.0.divmod(Rational(4, 1)) # => [3, 1.0]
   #
-  def divmod: (Integer | Float | Rational) -> [ Integer, Float ]
-            | (Numeric) -> [ Numeric, Numeric ]
+  def divmod: (Integer | Float other) -> [ Integer, Float ]
+            | [S, R] (Numeric::_Coerce[self, _DivMod[S, R], S] other) -> R
+
+ # An interface for defining the `divmod` method. Used in `Integer#divmod`
+  interface _DivMod[O, R]
+    def divmod: (O other) -> R
+  end
 
   # <!--
   #   rdoc-file=numeric.c
@@ -876,7 +885,7 @@ class Float < Numeric
   # Related: Float#ceil.
   #
   def floor: () -> Integer
-           | (int digits) -> (Integer | Numeric)
+           | (int ndigits) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1043,12 +1052,12 @@ class Float < Numeric
   #
   # See also Float#denominator.
   #
-  def numerator: () -> Integer
+  def numerator: () -> (Integer | Float)
 
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.
   #
-  alias phase angle
+  alias phase arg
 
   def polar: () -> [ Float, Integer | Float ]
 
@@ -1108,8 +1117,8 @@ class Float < Numeric
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
   #
-  def quo: (Complex) -> Complex
-         | (Numeric) -> Float
+  def quo: (Integer | Float other) -> Float
+         | [S, R] (Numeric::_Coerce[self, RBS::Ops::_Divide[S, R], S] other) -> R
 
   # <!--
   #   rdoc-file=rational.c
@@ -1125,7 +1134,7 @@ class Float < Numeric
   #
   # See also Float#to_r.
   #
-  def rationalize: (?Numeric eps) -> Rational
+  def rationalize: (?Numeric eps) -> Rational # NB: `rationalize` has a bug in its logic, so `Numeric` is the safe choice
 
   def rect: () -> [ Float, Numeric ]
 
@@ -1305,7 +1314,7 @@ class Float < Numeric
   # Related: Float#round.
   #
   def truncate: () -> Integer
-              | (Integer ndigits) -> (Integer | Float)
+              | (int ndigits) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.rb

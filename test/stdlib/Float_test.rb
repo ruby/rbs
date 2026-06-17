@@ -90,23 +90,88 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_mod(method: :%)
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, method, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, method, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, method, 12.0
+      # no `Complex` as it doesnt have `%`
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, method, Coercable.for_op(:%) # Note: `.for_op(:%)` is correct
+    end
   end
 
   def test_op_mul
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, :*, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, :*, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, :*, 12.0
+      assert_send_type  '(Complex) -> Complex',
+                        float, :*, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :*, Coercable.for_op(:*)
+    end
   end
 
   def test_op_pow
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, :**, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, :**, 12r
+      assert_send_type  '(Rational) -> (Float | Complex)',
+                        float, :**, 1/2r
+      assert_send_type  '(Float) -> Float',
+                        float, :**, 12.0
+      assert_send_type  '(Float) -> (Float | Complex)',
+                        float, :**, 0.5
+      assert_send_type  '(Complex) -> Complex',
+                        float, :**, 0i
+      assert_send_type  '(Complex) -> Complex',
+                        float, :**, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :**, Coercable.for_op(:**)
+    end
   end
 
   def test_op_add
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, :+, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, :+, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, :+, 12.0
+      assert_send_type  '(Complex) -> Complex',
+                        float, :+, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :+, Coercable.for_op(:+)
+    end
   end
 
   def test_op_sub
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, :-, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, :-, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, :-, 12.0
+      assert_send_type  '(Complex) -> Complex',
+                        float, :-, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :-, Coercable.for_op(:-)
+    end
   end
 
   def test_op_uneg
@@ -117,19 +182,63 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_div
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, :/, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, :/, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, :/, 12.0
+      assert_send_type  '(Complex) -> Complex',
+                        float, :/, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :/, Coercable.for_op(:/)
+    end
   end
 
   def test_op_lth
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> bool',
+                        float, :<, 12
+      assert_send_type  '(Rational) -> bool',
+                        float, :<, 12r
+      assert_send_type  '(Float) -> bool',
+                        float, :<, 12.0
+      # Notably not `Complex` as complex doesn't define `<`
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :<, Coercable.for_op(:<)
+    end
   end
 
   def test_op_leq
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> bool',
+                        float, :<=, 12
+      assert_send_type  '(Rational) -> bool',
+                        float, :<=, 12r
+      assert_send_type  '(Float) -> bool',
+                        float, :<=, 12.0
+      # Notably not `Complex` as complex doesn't define `<=`
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :<=, Coercable.for_op(:<=)
+    end
   end
 
   def test_op_cmp
-    omit 'todo'
+    with_floats do |float|
+      with_floats do |float2|
+        assert_send_type  '(Float) -> (-1 | 0 | 1)?',
+                          float, :<=>, float2
+      end
+
+      with_untyped.and float do |other|
+        assert_send_type  '(untyped) -> Integer?',
+                          float, :<=>, other
+      end
+    end
   end
 
   def test_op_eq(method: :==)
@@ -147,11 +256,33 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_gth
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> bool',
+                        float, :>, 12
+      assert_send_type  '(Rational) -> bool',
+                        float, :>, 12r
+      assert_send_type  '(Float) -> bool',
+                        float, :>, 12.0
+      # Notably not `Complex` as complex doesn't define `>`
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :>, Coercable.for_op(:>)
+    end
   end
 
   def test_op_geq
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '(Integer) -> bool',
+                        float, :>=, 12
+      assert_send_type  '(Rational) -> bool',
+                        float, :>=, 12r
+      assert_send_type  '(Float) -> bool',
+                        float, :>=, 12.0
+      # Notably not `Complex` as complex doesn't define `>=`
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, :>=, Coercable.for_op(:>=)
+    end
   end
 
   def test_abs(method: :abs)
@@ -162,15 +293,26 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_angle
-    omit 'todo'
+    test_arg(method: :angle)
   end
 
-  def test_arg
-    omit 'todo'
+  def test_arg(method: :arg)
+    with_floats do |float|
+      assert_send_type  '() -> (0 | Float)',
+                        float, method
+    end
   end
 
   def test_ceil
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Integer',
+                        float, :ceil
+
+      with_int(-1).and with_int(1) do |ndigits|
+        assert_send_type  '(int) -> (Float | Integer)',
+                          float, :ceil, ndigits
+      end
+    end
   end
 
   def test_coerce
@@ -183,11 +325,23 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_denominator
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Integer',
+                        float, :denominator
+    end
   end
 
   def test_divmod
-    omit 'todo'
+    assert_send_type  '(Integer) -> [Integer, Float]',
+                      38.0, :divmod, 12
+    assert_send_type  '(Rational) -> [Integer, Float]',
+                      38.0, :divmod, 12r
+    assert_send_type  '(Float) -> [Integer, Float]',
+                      38.0, :divmod, 12.0
+    # Notably not `Complex` as complex doesn't define `divmod`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38.0, :divmod, Coercable.for_op(:divmod)
   end
 
   def test_eql?
@@ -211,7 +365,15 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_floor
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Integer',
+                        float, :floor
+
+      with_int(-1).and with_int(1) do |ndigits|
+        assert_send_type  '(int) -> (Float | Integer)',
+                          float, :floor, ndigits
+      end
+    end
   end
 
   def test_hash
@@ -262,11 +424,19 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_numerator
-    omit 'todo'
+    with_floats do |float|
+      if float.nan? || float.infinite?
+        assert_send_type  '() -> Float',
+                          float, :numerator
+      else
+        assert_send_type  '() -> Integer',
+                          float, :numerator
+      end
+    end
   end
 
   def test_phase
-    omit 'todo'
+    test_arg(method: :phase)
   end
 
   def test_positive?
@@ -284,11 +454,33 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_quo(method: :quo)
-    omit 'todo'
+    # note: `quo` (and `fdiv`) actually is just a thin wrapper around `/`.
+    with_floats do |float|
+      assert_send_type  '(Integer) -> Float',
+                        float, method, 12
+      assert_send_type  '(Rational) -> Float',
+                        float, method, 12r
+      assert_send_type  '(Float) -> Float',
+                        float, method, 12.0
+      assert_send_type  '(Complex) -> Complex',
+                        float, method, 12i
+
+      assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                        float, method, Coercable.for_op(:/)
+    end
   end
 
   def test_rationalize
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '(Integer) -> Rational',
+                        float, :rationalize, 1
+      assert_send_type  '(Rational) -> Rational',
+                        float, :rationalize, 1r
+      assert_send_type  '(Float) -> Rational',
+                        float, :rationalize, 1.2
+      assert_send_type  '(Complex) -> Rational',
+                        float, :rationalize, 1i
+    end
   end
 
   def test_round
@@ -314,7 +506,10 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_r
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Rational',
+                        float, :to_r
+    end
   end
 
   def test_to_s(method: :to_s)
@@ -325,7 +520,15 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_truncate
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Integer',
+                        float, :truncate
+
+      with_int(-1).and with_int(1) do |ndigits|
+        assert_send_type  '(int) -> (Float | Integer)',
+                          float, :truncate, ndigits
+      end
+    end
   end
 
   def test_zero?
