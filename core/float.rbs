@@ -1193,8 +1193,8 @@ class Float < Numeric
   #
   # Related: Float#truncate.
   #
-  def round: (?half: :up | :down | :even) -> Integer
-           | (int digits, ?half: :up | :down | :even) -> (Integer | Float)
+  def round: (?half: Numeric::round_mode) -> Integer
+           | (int digits, ?half: Numeric::round_mode) -> (Integer | Float)
 
   # <!--
   #   rdoc-file=numeric.rb

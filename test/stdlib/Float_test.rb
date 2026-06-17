@@ -484,7 +484,25 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_round
-    omit 'todo'
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Integer',
+                        float, :round
+
+      with_round_mode do |mode|
+        assert_send_type  '(half: Numeric::round_mode) -> Integer',
+                          float, :round, half: mode
+      end
+
+      with_int(-1).and with_int(1) do |digits|
+        assert_send_type  '(int) -> (Integer | Float)',
+                          float, :round, digits
+
+        with_round_mode do |mode|
+          assert_send_type  '(int, half: Numeric::round_mode) -> (Integer | Float)',
+                            float, :round, digits, half: mode
+        end
+      end
+    end
   end
 
   def test_to_f
