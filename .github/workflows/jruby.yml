@@ -60,4 +60,6 @@ jobs:
       - name: Install runtime and test gems
         run: gem install prism test-unit --no-document
       - name: Run RBS's parser on JRuby
-        run: jruby -Ilib -Itest test/rbs/wasm/jruby_parser_test.rb
+        run: |
+          jruby -Ilib -Itest test/rbs/wasm/jruby_parser_test.rb
+          jruby -Ilib -Itest test/rbs/parser_test.rb

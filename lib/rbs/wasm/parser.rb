@@ -13,6 +13,7 @@ module RBS
   class Parser
     class << self
       def _parse_signature(buffer, start_pos, end_pos)
+        validate_position_range(start_pos, end_pos)
         encoding = buffer.content.encoding.name
         success, bytes = WASM::Runtime.instance.parse_signature(buffer.content, encoding, start_pos, end_pos)
         raise_parsing_error(buffer, bytes) unless success
@@ -21,6 +22,8 @@ module RBS
       end
 
       def _parse_type(buffer, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
+        validate_position_range(start_pos, end_pos)
+        validate_variables(variables)
         encoding = buffer.content.encoding.name
         success, bytes = WASM::Runtime.instance.parse_type(buffer.content, encoding, start_pos, end_pos, variables, require_eof, void_allowed, self_allowed, classish_allowed)
         raise_parsing_error(buffer, bytes) unless success
@@ -29,6 +32,8 @@ module RBS
       end
 
       def _parse_method_type(buffer, start_pos, end_pos, variables, require_eof)
+        validate_position_range(start_pos, end_pos)
+        validate_variables(variables)
         encoding = buffer.content.encoding.name
         success, bytes = WASM::Runtime.instance.parse_method_type(buffer.content, encoding, start_pos, end_pos, variables, require_eof)
         raise_parsing_error(buffer, bytes) unless success
@@ -53,6 +58,34 @@ module RBS
       end
 
       private
+
+      # Reject negative or reversed ranges before handing them to the parser,
+      # matching validate_position_range in the C extension (main.c). A reversed
+      # range would otherwise make the lexer loop forever inside WebAssembly.
+      def validate_position_range(start_pos, end_pos)
+        if start_pos < 0 || end_pos < 0
+          raise ArgumentError, "negative position range: #{start_pos}...#{end_pos}"
+        end
+        if start_pos > end_pos
+          raise ArgumentError, "invalid position range: #{start_pos}...#{end_pos}"
+        end
+      end
+
+      # Reject anything that is not nil or an Array of Symbols, matching
+      # declare_type_variables in the C extension (main.c).
+      def validate_variables(variables)
+        return if variables.nil?
+
+        unless variables.is_a?(Array)
+          raise TypeError, "wrong argument type #{variables.class} (must be an Array of Symbols or nil)"
+        end
+
+        variables.each do |variable|
+          unless variable.is_a?(Symbol)
+            raise TypeError, "Type variables Array contains invalid value #{variable.inspect} of type #{variable.class} (must be an Array of Symbols or nil)"
+          end
+        end
+      end
 
       # An empty result means the parser reached EOF immediately (`nil`).
       def deserialize_or_nil(bytes, buffer)

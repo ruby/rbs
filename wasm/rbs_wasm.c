@@ -119,6 +119,13 @@ static int set_serialized_result(rbs_parser_t *parser, rbs_node_t *node) {
     return 1;
 }
 
+// A reversed or out-of-bounds range would make the lexer loop forever, which
+// would hang the whole host. Hosts are expected to validate too (RBS::Parser
+// raises on bad ranges), but guard here so a stray caller can never wedge the VM.
+static bool range_is_valid(int start_pos, int end_pos, int length) {
+    return start_pos >= 0 && end_pos >= 0 && start_pos <= end_pos && end_pos <= length;
+}
+
 // Resolve a Ruby encoding name (e.g. "UTF-8", "EUC-JP") to an rbs encoding,
 // falling back to UTF-8 when none is given or the name is not recognised.
 static const rbs_encoding_t *resolve_encoding(const char *name, int name_length) {
@@ -167,6 +174,11 @@ static void declare_variables(rbs_parser_t *parser, const char *variables, int v
  *         (result is an error blob).
  */
 __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_signature(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos) {
+    if (!range_is_valid(start_pos, end_pos, length)) {
+        allocate_result(0);
+        return 0;
+    }
+
     rbs_string_t string = rbs_string_new(source, source + length);
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
 
@@ -192,6 +204,11 @@ __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_sign
  *         (`rbs_wasm_result_len` == 0), the input was empty (`nil`).
  */
 __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof, int void_allowed, int self_allowed, int classish_allowed) {
+    if (!range_is_valid(start_pos, end_pos, length)) {
+        allocate_result(0);
+        return 0;
+    }
+
     rbs_string_t string = rbs_string_new(source, source + length);
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
     declare_variables(parser, variables, variables_length);
@@ -226,6 +243,11 @@ __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(cons
  *         the input was empty (`nil`).
  */
 __attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_method_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof) {
+    if (!range_is_valid(start_pos, end_pos, length)) {
+        allocate_result(0);
+        return 0;
+    }
+
     rbs_string_t string = rbs_string_new(source, source + length);
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
     declare_variables(parser, variables, variables_length);
