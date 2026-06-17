@@ -253,6 +253,122 @@
 # *   #truncate: Returns `self` truncated to a given precision.
 #
 class Float < Numeric
+  # <!-- rdoc-file=numeric.c -->
+  # The minimum number of significant decimal digits in a double-precision
+  # floating point.
+  #
+  # Usually defaults to 15.
+  #
+  DIG: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The difference between 1 and the smallest double-precision floating point
+  # number greater than 1.
+  #
+  # Usually defaults to 2.2204460492503131e-16.
+  #
+  EPSILON: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # An expression representing positive infinity.
+  #
+  INFINITY: Float
+
+  %a{deprecated:Does not actually exist}
+  Infinity: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The number of base digits for the `double` data type.
+  #
+  # Usually defaults to 53.
+  #
+  MANT_DIG: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest possible integer in a double-precision floating point number.
+  #
+  # Usually defaults to 1.7976931348623157e+308.
+  #
+  MAX: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest positive exponent in a double-precision floating point where 10
+  # raised to this power minus 1.
+  #
+  # Usually defaults to 308.
+  #
+  MAX_10_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The largest possible exponent value in a double-precision floating point.
+  #
+  # Usually defaults to 1024.
+  #
+  MAX_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest positive normalized number in a double-precision floating point.
+  #
+  # Usually defaults to 2.2250738585072014e-308.
+  #
+  # If the platform supports denormalized numbers, there are numbers between zero
+  # and Float::MIN. <code>0.0.next_float</code> returns the smallest positive
+  # floating point number including denormalized numbers.
+  #
+  MIN: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest negative exponent in a double-precision floating point where 10
+  # raised to this power minus 1.
+  #
+  # Usually defaults to -307.
+  #
+  MIN_10_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # The smallest possible exponent value in a double-precision floating point.
+  #
+  # Usually defaults to -1021.
+  #
+  MIN_EXP: Integer
+
+  # <!-- rdoc-file=numeric.c -->
+  # An expression representing a value which is "not a number".
+  #
+  NAN: Float
+
+  # <!-- rdoc-file=numeric.c -->
+  # The base of the floating point, or number of unique digits used to represent
+  # the number.
+  #
+  # Usually defaults to 2 on most systems, which would represent a base-10
+  # decimal.
+  #
+  RADIX: Integer
+
+  # Deprecated, do not use.
+  #
+  # Represents the rounding mode for floating point addition at the start time.
+  #
+  # Usually defaults to 1, rounding to the nearest number.
+  #
+  # Other modes include:
+  #
+  # -1
+  # :   Indeterminable
+  # 0
+  # :   Rounding towards zero
+  # 1
+  # :   Rounding to the nearest number
+  # 2
+  # :   Rounding towards positive infinity
+  # 3
+  # :   Rounding towards negative infinity
+  #
+  #
+  %a{deprecated}
+  ROUNDS: Integer
+
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> float
@@ -1200,117 +1316,3 @@ class Float < Numeric
   #
   def zero?: () -> bool
 end
-
-# <!-- rdoc-file=numeric.c -->
-# The minimum number of significant decimal digits in a double-precision
-# floating point.
-#
-# Usually defaults to 15.
-#
-Float::DIG: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The difference between 1 and the smallest double-precision floating point
-# number greater than 1.
-#
-# Usually defaults to 2.2204460492503131e-16.
-#
-Float::EPSILON: Float
-
-# <!-- rdoc-file=numeric.c -->
-# An expression representing positive infinity.
-#
-Float::INFINITY: Float
-
-Float::Infinity: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The number of base digits for the `double` data type.
-#
-# Usually defaults to 53.
-#
-Float::MANT_DIG: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The largest possible integer in a double-precision floating point number.
-#
-# Usually defaults to 1.7976931348623157e+308.
-#
-Float::MAX: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The largest positive exponent in a double-precision floating point where 10
-# raised to this power minus 1.
-#
-# Usually defaults to 308.
-#
-Float::MAX_10_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The largest possible exponent value in a double-precision floating point.
-#
-# Usually defaults to 1024.
-#
-Float::MAX_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest positive normalized number in a double-precision floating point.
-#
-# Usually defaults to 2.2250738585072014e-308.
-#
-# If the platform supports denormalized numbers, there are numbers between zero
-# and Float::MIN. <code>0.0.next_float</code> returns the smallest positive
-# floating point number including denormalized numbers.
-#
-Float::MIN: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest negative exponent in a double-precision floating point where 10
-# raised to this power minus 1.
-#
-# Usually defaults to -307.
-#
-Float::MIN_10_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# The smallest possible exponent value in a double-precision floating point.
-#
-# Usually defaults to -1021.
-#
-Float::MIN_EXP: Integer
-
-# <!-- rdoc-file=numeric.c -->
-# An expression representing a value which is "not a number".
-#
-Float::NAN: Float
-
-# <!-- rdoc-file=numeric.c -->
-# The base of the floating point, or number of unique digits used to represent
-# the number.
-#
-# Usually defaults to 2 on most systems, which would represent a base-10
-# decimal.
-#
-Float::RADIX: Integer
-
-# Deprecated, do not use.
-#
-# Represents the rounding mode for floating point addition at the start time.
-#
-# Usually defaults to 1, rounding to the nearest number.
-#
-# Other modes include:
-#
-# -1
-# :   Indeterminable
-# 0
-# :   Rounding towards zero
-# 1
-# :   Rounding to the nearest number
-# 2
-# :   Rounding towards positive infinity
-# 3
-# :   Rounding towards negative infinity
-#
-#
-Float::ROUNDS: Integer
