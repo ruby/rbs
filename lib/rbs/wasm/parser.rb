@@ -42,19 +42,39 @@ module RBS
       end
 
       def _parse_type_params(buffer, start_pos, end_pos, module_type_params)
-        raise NotImplementedError, "RBS::Parser._parse_type_params is not yet supported on #{RUBY_ENGINE}"
+        validate_position_range(start_pos, end_pos)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_type_params(buffer.content, encoding, start_pos, end_pos, module_type_params)
+        raise_parsing_error(buffer, bytes) unless success
+
+        bytes.empty? ? nil : WASM::Deserializer.deserialize_node_list(bytes, buffer)
       end
 
       def _lex(buffer, end_pos)
-        raise NotImplementedError, "RBS::Parser._lex is not yet supported on #{RUBY_ENGINE}"
+        encoding = buffer.content.encoding.name
+        _success, bytes = WASM::Runtime.instance.lex(buffer.content, encoding, end_pos)
+
+        WASM::Deserializer.deserialize_tokens(bytes, buffer)
       end
 
       def _parse_inline_leading_annotation(buffer, start_pos, end_pos, variables)
-        raise NotImplementedError, "RBS::Parser._parse_inline_leading_annotation is not yet supported on #{RUBY_ENGINE}"
+        validate_position_range(start_pos, end_pos)
+        validate_variables(variables)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_inline_leading_annotation(buffer.content, encoding, start_pos, end_pos, variables)
+        raise_parsing_error(buffer, bytes) unless success
+
+        deserialize_or_nil(bytes, buffer)
       end
 
       def _parse_inline_trailing_annotation(buffer, start_pos, end_pos, variables)
-        raise NotImplementedError, "RBS::Parser._parse_inline_trailing_annotation is not yet supported on #{RUBY_ENGINE}"
+        validate_position_range(start_pos, end_pos)
+        validate_variables(variables)
+        encoding = buffer.content.encoding.name
+        success, bytes = WASM::Runtime.instance.parse_inline_trailing_annotation(buffer.content, encoding, start_pos, end_pos, variables)
+        raise_parsing_error(buffer, bytes) unless success
+
+        deserialize_or_nil(bytes, buffer)
       end
 
       private

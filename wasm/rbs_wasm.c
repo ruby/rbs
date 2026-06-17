@@ -26,6 +26,7 @@
 #include "rbs/parser.h"
 #include "rbs/serialize.h"
 #include "rbs/string.h"
+#include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_encoding.h"
 
 // The result of the most recent parse, living in linear memory until the next
@@ -265,6 +266,131 @@ __attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_me
 
     rbs_parser_free(parser);
     return status;
+}
+
+/**
+ * Parse a type parameter list (e.g. `[T < Comparable]`). On success the result
+ * is a serialized node list; an empty result means the input was empty (`nil`).
+ */
+__attribute__((export_name("rbs_wasm_parse_type_params"))) int rbs_wasm_parse_type_params(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, int module_type_params) {
+    if (!range_is_valid(start_pos, end_pos, length)) {
+        allocate_result(0);
+        return 0;
+    }
+
+    rbs_string_t string = rbs_string_new(source, source + length);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+
+    int status;
+    if (parser->next_token.type == pEOF) {
+        allocate_result(0);
+        status = 1;
+    } else {
+        rbs_node_list_t *params = NULL;
+        rbs_parse_type_params(parser, module_type_params != 0, &params);
+
+        if (parser->error == NULL) {
+            rbs_string_t bytes = rbs_serialize_node_list(parser->allocator, &parser->constant_pool, params);
+            size_t n = rbs_string_len(bytes);
+            memcpy(allocate_result(n), bytes.start, n);
+            status = 1;
+        } else {
+            status = set_error_result(parser);
+        }
+    }
+
+    rbs_parser_free(parser);
+    return status;
+}
+
+// Shared body for the leading/trailing inline annotation parsers.
+static int parse_inline_annotation(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, bool leading) {
+    if (!range_is_valid(start_pos, end_pos, length)) {
+        allocate_result(0);
+        return 0;
+    }
+
+    rbs_string_t string = rbs_string_new(source, source + length);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    declare_variables(parser, variables, variables_length);
+
+    rbs_ast_ruby_annotations_t *annotation = NULL;
+    bool success = leading ? rbs_parse_inline_leading_annotation(parser, &annotation) : rbs_parse_inline_trailing_annotation(parser, &annotation);
+
+    int status;
+    if (parser->error != NULL) {
+        status = set_error_result(parser);
+    } else if (!success || annotation == NULL) {
+        allocate_result(0);
+        status = 1;
+    } else {
+        status = set_serialized_result(parser, (rbs_node_t *) annotation);
+    }
+
+    rbs_parser_free(parser);
+    return status;
+}
+
+/**
+ * Parse an inline leading annotation. On success the result is a serialized
+ * node; an empty result means there was no annotation (`nil`).
+ */
+__attribute__((export_name("rbs_wasm_parse_inline_leading_annotation"))) int rbs_wasm_parse_inline_leading_annotation(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length) {
+    return parse_inline_annotation(source, length, encoding, encoding_length, start_pos, end_pos, variables, variables_length, true);
+}
+
+/**
+ * Parse an inline trailing annotation. See rbs_wasm_parse_inline_leading_annotation.
+ */
+__attribute__((export_name("rbs_wasm_parse_inline_trailing_annotation"))) int rbs_wasm_parse_inline_trailing_annotation(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length) {
+    return parse_inline_annotation(source, length, encoding, encoding_length, start_pos, end_pos, variables, variables_length, false);
+}
+
+static void w_lex_u32(rbs_allocator_t *allocator, rbs_buffer_t *buffer, uint32_t value) {
+    unsigned char bytes[4] = {
+        (unsigned char) (value & 0xff),
+        (unsigned char) ((value >> 8) & 0xff),
+        (unsigned char) ((value >> 16) & 0xff),
+        (unsigned char) ((value >> 24) & 0xff),
+    };
+    rbs_buffer_append_string(allocator, buffer, (const char *) bytes, 4);
+}
+
+/**
+ * Lex the source into tokens. The result is a sequence of records, with no
+ * leading count (the host reads until the buffer is exhausted):
+ *
+ *   [u32 type_name_len][type_name bytes][i32 start_char][i32 end_char]
+ *
+ * The final token is always pEOF, mirroring RBS::Parser._lex.
+ *
+ * @return 1 always (lexing does not report parse errors here).
+ */
+__attribute__((export_name("rbs_wasm_lex"))) int rbs_wasm_lex(const char *source, int length, const char *encoding, int encoding_length, int end_pos) {
+    rbs_allocator_t *allocator = rbs_allocator_init();
+    rbs_lexer_t *lexer = rbs_lexer_new(allocator, rbs_string_new(source, source + length), resolve_encoding(encoding, encoding_length), 0, end_pos);
+
+    rbs_buffer_t buffer;
+    rbs_buffer_init(allocator, &buffer);
+
+    rbs_token_t token = NullToken;
+    while (token.type != pEOF) {
+        token = rbs_lexer_next_token(lexer);
+
+        const char *type_name = rbs_token_type_str(token.type);
+        uint32_t type_name_length = (uint32_t) strlen(type_name);
+        w_lex_u32(allocator, &buffer, type_name_length);
+        rbs_buffer_append_string(allocator, &buffer, type_name, type_name_length);
+        w_lex_u32(allocator, &buffer, (uint32_t) token.range.start.char_pos);
+        w_lex_u32(allocator, &buffer, (uint32_t) token.range.end.char_pos);
+    }
+
+    rbs_string_t bytes = rbs_buffer_to_string(&buffer);
+    size_t n = rbs_string_len(bytes);
+    memcpy(allocate_result(n), bytes.start, n);
+
+    rbs_allocator_free(allocator);
+    return 1;
 }
 
 /**

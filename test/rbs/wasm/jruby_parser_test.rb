@@ -60,6 +60,19 @@ module RBS
         assert_equal "[T] (T, ?Integer) { (T) -> void } -> T", RBS::Parser.parse_method_type("[T] (T, ?Integer) { (T) -> void } -> T").to_s
       end
 
+      def test_parse_type_params
+        params = RBS::Parser.parse_type_params("[T < Comparable, unchecked out U]")
+        assert_equal [:T, :U], params.map(&:name)
+        assert_equal "Comparable", params[0].upper_bound&.name&.to_s
+        assert_equal :covariant, params[1].variance
+      end
+
+      def test_lex
+        types = RBS::Parser.lex("class Foo\nend\n").value.map(&:type)
+        assert_include types, :kCLASS
+        assert_equal :pEOF, types.last
+      end
+
       def test_parse_error_raises_parsing_error
         error = assert_raises(RBS::ParsingError) do
           RBS::Parser.parse_signature("class 123 Broken end")

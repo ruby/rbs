@@ -51,6 +51,10 @@ module RBS
         @parse_signature = @wasm.export("rbs_wasm_parse_signature")
         @parse_type = @wasm.export("rbs_wasm_parse_type")
         @parse_method_type = @wasm.export("rbs_wasm_parse_method_type")
+        @parse_type_params = @wasm.export("rbs_wasm_parse_type_params")
+        @parse_inline_leading_annotation = @wasm.export("rbs_wasm_parse_inline_leading_annotation")
+        @parse_inline_trailing_annotation = @wasm.export("rbs_wasm_parse_inline_trailing_annotation")
+        @lex = @wasm.export("rbs_wasm_lex")
       end
 
       # `content` is the whole buffer; `start_pos`/`end_pos` are the character
@@ -75,6 +79,34 @@ module RBS
           run(content, encoding) do |ptr, len, enc_ptr, enc_len|
             @parse_method_type.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, vars_ptr, vars_len, bool(require_eof))[0]
           end
+        end
+      end
+
+      def parse_type_params(content, encoding, start_pos, end_pos, module_type_params)
+        run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+          @parse_type_params.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, bool(module_type_params))[0]
+        end
+      end
+
+      def parse_inline_leading_annotation(content, encoding, start_pos, end_pos, variables)
+        with_variables(variables) do |vars_ptr, vars_len|
+          run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+            @parse_inline_leading_annotation.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, vars_ptr, vars_len)[0]
+          end
+        end
+      end
+
+      def parse_inline_trailing_annotation(content, encoding, start_pos, end_pos, variables)
+        with_variables(variables) do |vars_ptr, vars_len|
+          run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+            @parse_inline_trailing_annotation.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos, vars_ptr, vars_len)[0]
+          end
+        end
+      end
+
+      def lex(content, encoding, end_pos)
+        run(content, encoding) do |ptr, len, enc_ptr, enc_len|
+          @lex.apply(ptr, len, enc_ptr, enc_len, end_pos)[0]
         end
       end
 
@@ -159,11 +191,13 @@ module RBS
         wasm
       end
 
-      # Chicory's AOT compiler when its jars are present, otherwise nil (the
-      # builder then uses the interpreter).
+      # Chicory's AOT compiler when its jars are present and usable, otherwise nil
+      # (the builder then uses the interpreter). NameError covers a missing
+      # compiler class; LinkageError covers an incompatible/missing ASM (so a bad
+      # jar set degrades to the interpreter instead of crashing).
       def machine_factory(wasm_module)
         Java::ComDylibsoChicoryCompiler::MachineFactoryCompiler.compile(wasm_module)
-      rescue NameError
+      rescue NameError, Java::JavaLang::LinkageError
         nil
       end
 
