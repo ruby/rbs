@@ -576,7 +576,7 @@ class Float < Numeric
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
-  def ==: (untyped) -> bool
+  def ==: (untyped other) -> bool
 
   # <!-- rdoc-file=numeric.c -->
   # Returns `true` if `other` has the same value as `self`, `false` otherwise:
@@ -591,7 +591,7 @@ class Float < Numeric
   #
   # Related: Float#eql? (requires `other` to be a Float).
   #
-  def ===: (untyped) -> bool
+  alias === ==
 
   # <!--
   #   rdoc-file=numeric.c
@@ -727,7 +727,7 @@ class Float < Numeric
   #
   # Raises an exception if a type conversion fails.
   #
-  def coerce: (Numeric) -> [ Float, Float ]
+  def coerce: (_ToF) -> [ Float, self ]
 
   # <!--
   #   rdoc-file=rational.c
@@ -784,7 +784,7 @@ class Float < Numeric
   #
   # Related: Float#== (performs type conversions).
   #
-  def eql?: (untyped) -> bool
+  def eql?: (untyped other) -> bool
 
   # <!-- rdoc-file=numeric.c -->
   # Returns the quotient from dividing `self` by `other`:
@@ -795,8 +795,7 @@ class Float < Numeric
   #     f.quo(Rational(2, 1)) # => 1.57
   #     f.quo(Complex(2, 0))  # => (1.57+0.0i)
   #
-  def fdiv: (Complex) -> Complex
-          | (Numeric) -> Float
+  alias fdiv quo
 
   # <!--
   #   rdoc-file=numeric.c
@@ -910,7 +909,7 @@ class Float < Numeric
   #     f = 0.0/0.0  # => NaN
   #     f.infinite?  # => nil
   #
-  def infinite?: () -> Integer?
+  def infinite?: () -> (-1 | 1)?
 
   # <!-- rdoc-file=numeric.c -->
   # Returns a string containing a representation of `self`; depending of the value
@@ -964,7 +963,7 @@ class Float < Numeric
   #     10.0 % 4.0            # => 2.0
   #     10.0 % Rational(4, 1) # => 2.0
   #
-  def modulo: (Numeric) -> Float
+  alias modulo %
 
   # <!--
   #   rdoc-file=numeric.c
@@ -1194,7 +1193,7 @@ class Float < Numeric
   # -->
   # Returns `self` (which is already a Float).
   #
-  def to_f: () -> Float
+  def to_f: () -> self
 
   # <!--
   #   rdoc-file=numeric.c

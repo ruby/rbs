@@ -77,7 +77,19 @@ class FloatInstanceTest < Test::Unit::TestCase
 
   testing 'Float'
 
-  def test_op_mod
+  def with_floats(infinity: true, nan: true)
+    yield 0.0
+    yield -0.0
+    yield 12.34
+    yield -38e99
+    yield Float::MIN
+    yield Float::MAX
+    yield Float::INFINITY if infinity
+    yield -Float::INFINITY if infinity
+    yield Float::NAN if nan
+  end
+
+  def test_op_mod(method: :%)
     omit 'todo'
   end
 
@@ -98,7 +110,10 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_uneg
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Float',
+                        float, :-@
+    end
   end
 
   def test_op_div
@@ -117,12 +132,18 @@ class FloatInstanceTest < Test::Unit::TestCase
     omit 'todo'
   end
 
-  def test_op_eq
-    omit 'todo'
+  def test_op_eq(method: :==)
+    with_floats do |float|
+      with_untyped.and float do |other|
+        next unless defined? other.==
+        assert_send_type  '(untyped) -> bool',
+                          float, method, other
+      end
+    end
   end
 
   def test_op_eqq
-    omit 'todo'
+    test_op_eq(method: :===)
   end
 
   def test_op_gth
@@ -133,8 +154,11 @@ class FloatInstanceTest < Test::Unit::TestCase
     omit 'todo'
   end
 
-  def test_abs
-    omit 'todo'
+  def test_abs(method: :abs)
+    with_floats do |float|
+      assert_send_type  '() -> Float',
+                        float, method
+    end
   end
 
   def test_angle
@@ -150,7 +174,12 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_coerce
-    omit 'todo'
+    with_floats do |float|
+      with_float do |other|
+        assert_send_type  '(_ToF) -> [Float, Float]',
+                          float, :coerce, other
+      end
+    end
   end
 
   def test_denominator
@@ -162,15 +191,23 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_eql?
-    omit 'todo'
+    with_floats do |float|
+      with_untyped.and float do |other|
+        assert_send_type  '(untyped) -> bool',
+                          float, :eql?, other
+      end
+    end
   end
 
   def test_fdiv
-    omit 'todo'
+    test_quo(method: :fdiv)
   end
 
   def test_finite?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> bool',
+                        float, :finite?
+    end
   end
 
   def test_floor
@@ -178,35 +215,50 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_hash
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Integer',
+                        float, :hash
+    end
   end
 
   def test_infinite?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> (-1 | 1)?',
+                        float, :infinite?
+    end
   end
 
   def test_inspect
-    omit 'todo'
+    test_to_s(method: :inspect)
   end
 
   def test_magnitude
-    omit 'todo'
+    test_abs(method: :magnitude)
   end
 
   def test_modulo
-    omit 'todo'
+    test_op_mod(method: :modulo)
   end
 
   def test_nan?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> bool',
+                        float, :nan?
+    end
   end
 
   def test_negative?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> bool',
+                        float, :negative?
+    end
   end
 
   def test_next_float
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Float',
+                        float, :next_float
+    end
   end
 
   def test_numerator
@@ -218,14 +270,20 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_positive?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> bool',
+                        float, :positive?
+    end
   end
 
   def test_prev_float
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Float',
+                        float, :next_float
+    end
   end
 
-  def test_quo
+  def test_quo(method: :quo)
     omit 'todo'
   end
 
@@ -238,23 +296,32 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_f
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> Float',
+                        float, :to_f
+    end
   end
 
-  def test_to_i
-    omit 'todo'
+  def test_to_i(method: :to_i)
+    with_floats infinity: false, nan: false do |float|
+      assert_send_type  '() -> Integer',
+                        float, method
+    end
   end
 
   def test_to_int
-    omit 'todo'
+    test_to_i(method: :to_int)
   end
 
   def test_to_r
     omit 'todo'
   end
 
-  def test_to_s
-    omit 'todo'
+  def test_to_s(method: :to_s)
+    with_floats do |float|
+      assert_send_type  '() -> String',
+                        float, method
+    end
   end
 
   def test_truncate
@@ -262,6 +329,9 @@ class FloatInstanceTest < Test::Unit::TestCase
   end
 
   def test_zero?
-    omit 'todo'
+    with_floats do |float|
+      assert_send_type  '() -> bool',
+                        float, :zero?
+    end
   end
 end
