@@ -41,6 +41,15 @@ module VersionHelper
 end
 
 module WithStdlibAliases
+  def with_round_mode(&block)
+    block.call(nil)
+
+    %i[up down even].each do |mode|
+      block.call(mode)
+      with_string(mode.to_s, &block)
+    end
+  end
+
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?
       return RBS::UnitTest::WithAliases::WithEnum.new(
@@ -68,6 +77,43 @@ module WithStdlibAliases
         yield timeout_obj
       end
     end
+  end
+end
+
+class Coercable < RBS::UnitTest::Convertibles::BlankSlate
+  class OpReturn < ::RBS::UnitTest::Convertibles::BlankSlate
+  end
+
+  class CoerceOther < ::RBS::UnitTest::Convertibles::BlankSlate
+    attr_reader :__value__
+    def initialize(value) = @__value__ = value
+  end
+
+  class CoerceSelf < ::RBS::UnitTest::Convertibles::BlankSlate
+    def initialize(method, &block)
+      ::Kernel.instance_method(:define_singleton_method).bind_call(self, method, &block)
+    end
+  end
+
+  def self.for_op(method, result: noresult = true, &block)
+    if block_given?
+      unless noresult
+        raise ArgumentError, "cannot provide both a block and a result"
+      end
+    else
+      block = proc { |other| noresult ? OpReturn.new : result }
+    end
+
+    new(CoerceSelf.new(method, &block)) { |x| CoerceOther.new(x) }
+  end
+
+  def initialize(self_ret, &converter)
+    @self_ret = self_ret
+    @converter = converter || ->(x) { x }
+  end
+
+  def coerce(rhs)
+    [@self_ret, @converter.(rhs)]
   end
 end
 
