@@ -13,12 +13,6 @@ permissions:
 jobs:
   compile:
     runs-on: "windows-latest"
-    env:
-      # The mswin (MSVC) build uses `nmake`, which aborts with
-      # "NMAKE : fatal error U1065: invalid option '-'" when it inherits a
-      # GNU-make-style MAKEFLAGS from the environment. Clear it so nmake gets no
-      # flags; this is a harmless no-op for the mingw/UCRT GNU make builds.
-      MAKEFLAGS: ""
     strategy:
       fail-fast: false
       matrix:
@@ -49,7 +43,13 @@ jobs:
         run: bundle config set --local version system
       - name: bundle install
         run: |
+          # TEMP DIAGNOSTIC: print the inherited MAKEFLAGS before clearing it.
+          echo "DEBUG MAKEFLAGS=[$env:MAKEFLAGS]"
+          echo "DEBUG MFLAGS=[$env:MFLAGS]"
+          $env:MAKEFLAGS = ''
           bundle config set without profilers libs
           bundle install
       - name: compile
-        run: bundle exec rake compile
+        run: |
+          $env:MAKEFLAGS = ''
+          bundle exec rake compile
