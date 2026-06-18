@@ -13,6 +13,12 @@ permissions:
 jobs:
   compile:
     runs-on: "windows-latest"
+    env:
+      # The mswin (MSVC) build uses `nmake`, which aborts with
+      # "NMAKE : fatal error U1065: invalid option '-'" when it inherits a
+      # GNU-make-style MAKEFLAGS from the environment. Clear it so nmake gets no
+      # flags; this is a harmless no-op for the mingw/UCRT GNU make builds.
+      MAKEFLAGS: ""
     strategy:
       fail-fast: false
       matrix:
