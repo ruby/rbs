@@ -29,7 +29,7 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
       path = File.join(tmpdir, "test.gz")
       Zlib::GzipWriter.open(path) { _1.puts "hello" }
 
-      File.open(path) do |io|
+      File.open(path, "rb") do |io|
         assert_send_type "(IO io) -> Zlib::GzipReader",
                          Zlib::GzipReader, :wrap, io
 
