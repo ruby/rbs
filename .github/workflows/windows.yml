@@ -43,7 +43,11 @@ jobs:
         run: bundle config set --local version system
       - name: bundle install
         run: |
-          bundle config set without profilers libs
+          # This job only compiles the C extension via `rake compile`; it does not
+          # run Steep or the test suite. Exclude `typecheck_test` so that Steep (and
+          # its `strscan` dependency, whose native extension fails to build on mswin)
+          # is not installed here.
+          bundle config set without profilers libs typecheck_test
           bundle install
       - name: compile
         run: bundle exec rake compile
