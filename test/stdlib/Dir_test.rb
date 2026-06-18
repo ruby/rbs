@@ -104,7 +104,8 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_fchdir
-    fd = Dir.new(Dir.pwd).fileno
+    dir = Dir.new(Dir.pwd)
+    fd = dir.fileno
 
     with_int(fd) do |int|
       assert_send_type(
@@ -117,6 +118,8 @@ class DirSingletonTest < Test::Unit::TestCase
         Dir, :fchdir, int, &proc { "string" }
       )
     end
+  ensure
+    dir&.close
   end
 
   def test_foreach
