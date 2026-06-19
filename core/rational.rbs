@@ -135,7 +135,7 @@ class Rational < Numeric
   #     -(1/3r)   # => (-1/3)
   #     -(-1/3r)  # => (1/3)
   #
-  def -@: () -> Rational
+  def -@: () -> instance
 
   # <!--
   #   rdoc-file=rational.c
@@ -206,7 +206,7 @@ class Rational < Numeric
   #     (1/2r).abs    #=> (1/2)
   #     (-1/2r).abs   #=> (1/2)
   #
-  def abs: () -> Rational
+  def abs: () -> instance
 
   # <!--
   #   rdoc-file=rational.c
@@ -460,7 +460,7 @@ class Rational < Numeric
   #     Rational(2).to_r      #=> (2/1)
   #     Rational(-8, 6).to_r  #=> (-4/3)
   #
-  def to_r: () -> Rational
+  def to_r: () -> self
 
   # <!--
   #   rdoc-file=rational.c
@@ -499,4 +499,6 @@ class Rational < Numeric
   #
   def truncate: () -> Integer
               | (Integer ndigits) -> (Integer | Rational)
+
+  private def marshal_dump: () -> [ Integer, Integer ]
 end

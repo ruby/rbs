@@ -22,7 +22,8 @@ class RationalInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_uneg
-    omit
+    assert_send_type  '() -> Rational',
+                      3/8r, :-@
   end
 
   def test_op_div
@@ -37,8 +38,11 @@ class RationalInstanceTest < Test::Unit::TestCase
     omit
   end
 
-  def test_abs
-    omit
+  def test_abs(method: :abs)
+    assert_send_type  '() -> Rational',
+                      3/8r, method
+    assert_send_type  '() -> Rational',
+                      -3/8r, method
   end
 
   def test_ceil
@@ -50,7 +54,8 @@ class RationalInstanceTest < Test::Unit::TestCase
   end
 
   def test_denominator
-    omit
+    assert_send_type  '() -> Integer',
+                      3/8r, :denominator
   end
 
   def test_fdiv
@@ -62,27 +67,36 @@ class RationalInstanceTest < Test::Unit::TestCase
   end
 
   def test_hash
-    omit
+    assert_send_type  '() -> Integer',
+                      3/8r, :hash
   end
 
   def test_inspect
-    omit
+    assert_send_type  '() -> String',
+                      3/8r, :inspect
   end
 
   def test_magnitude
-    omit
+    test_abs(method: :magnitude)
   end
 
   def test_negative?
-    omit
+    assert_send_type  '() -> bool',
+                      3/8r, :negative?
+    assert_send_type  '() -> bool',
+                      -3/8r, :negative?
   end
 
   def test_numerator
-    omit
+    assert_send_type  '() -> Integer',
+                      3/8r, :numerator
   end
 
   def test_positive?
-    omit
+    assert_send_type  '() -> bool',
+                      3/8r, :positive?
+    assert_send_type  '() -> bool',
+                      -3/8r, :positive?
   end
 
   def test_quo
@@ -98,22 +112,32 @@ class RationalInstanceTest < Test::Unit::TestCase
   end
 
   def test_to_f
-    omit
+    assert_send_type  '() -> Float',
+                      3/8r, :to_f
   end
 
   def test_to_i
-    omit
+    assert_send_type  '() -> Integer',
+                      3/8r, :to_i
+    assert_send_type  '() -> Integer',
+                      -38/8r, :to_i
   end
 
   def test_to_r
-    omit
+    assert_send_type  '() -> Rational',
+                      3/8r, :to_r
   end
 
   def test_to_s
-    omit
+    assert_send_type  '() -> String',
+                      3/8r, :to_s
   end
 
   def test_truncate
+    omit
+  end
+
+  def test_marshal_dump
     omit
   end
 end
