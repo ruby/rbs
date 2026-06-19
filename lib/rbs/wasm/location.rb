@@ -55,7 +55,7 @@ module RBS
         return range && Location.new(@buffer, range[0], range[1])
       end
 
-      nil
+      raise "Unknown child name given: #{name}"
     end
   end
 end

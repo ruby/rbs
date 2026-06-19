@@ -11,6 +11,7 @@ class RBS::Test::TypeCheckTest < Test::Unit::TestCase
 
   def test_type_check
     omit_on_truffle_ruby! "Type checking a block-less `loop` Enumerator behaves differently on TruffleRuby"
+    omit_on_jruby! "Type checking a block-less `loop` Enumerator behaves differently on JRuby"
 
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -337,6 +338,7 @@ EOF
 
   def test_type_check_enumerator_sampling
     omit_on_truffle_ruby! "Type checking a block-less `loop` Enumerator behaves differently on TruffleRuby"
+    omit_on_jruby! "Type checking a block-less `loop` Enumerator behaves differently on JRuby"
 
     SignatureManager.new do |manager|
       manager.build do |env|

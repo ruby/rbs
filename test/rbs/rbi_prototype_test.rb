@@ -2,6 +2,7 @@ require "test_helper"
 
 class RBS::RbiPrototypeTest < Test::Unit::TestCase
   omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
+  omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
 
   RBI = RBS::Prototype::RBI
 
