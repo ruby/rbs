@@ -648,7 +648,7 @@ class Array[unchecked out E]
   #
   def self.try_convert: [A < Array[U], U] (A array) -> A
                       | [U] (array[U] ary) -> Array[U]
-                      | [U] (untyped) -> Array[U]?
+                      | (untyped) -> Array[untyped]?
 
   # <!--
   #   rdoc-file=array.c
