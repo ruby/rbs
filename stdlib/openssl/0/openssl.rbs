@@ -2100,7 +2100,7 @@ module OpenSSL
     #
     # See IO#read for full details.
     #
-    def read: (?Integer? size, ?String buf) -> String?
+    def read: (?Integer? size, ?String? buf) -> String?
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
@@ -2139,8 +2139,8 @@ module OpenSSL
     # symbol <code>:wait_writable</code> or <code>:wait_readable</code> instead. At
     # EOF, it will return `nil` instead of raising EOFError.
     #
-    def read_nonblock: (Integer maxlen, ?String buf, ?exception: true) -> String
-                     | (Integer maxlen, ?String buf, exception: false) -> (String | :wait_writable | :wait_readable | nil)
+    def read_nonblock: (Integer maxlen, ?String? buf, ?exception: true) -> String
+                     | (Integer maxlen, ?String? buf, exception: false) -> (String | :wait_writable | :wait_readable | nil)
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
@@ -2180,7 +2180,7 @@ module OpenSSL
     #
     # See IO#readpartial for full details.
     #
-    def readpartial: (Integer maxlen, ?String buf) -> String
+    def readpartial: (Integer maxlen, ?String? buf) -> String
 
     # <!-- rdoc-file=ext/openssl/lib/openssl/buffering.rb -->
     # The "sync mode" of the SSLSocket.
@@ -9235,7 +9235,7 @@ module OpenSSL
       # Reads *length* bytes from the SSL connection.  If a pre-allocated *buffer* is
       # provided the data will be written into it.
       #
-      def sysread: (Integer length, ?String buffer) -> String
+      def sysread: (Integer length, ?String? buffer) -> String
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c

@@ -68,6 +68,33 @@ class StringIOTypeTest < Test::Unit::TestCase
                      io, :write, "a", "b"
   end
 
+  def test_read
+    assert_send_type "(nil, nil) -> ::String?",
+                     StringIO.new("a"), :read, nil, nil
+    assert_send_type "(::Integer, nil) -> ::String?",
+                     StringIO.new("a"), :read, 1, nil
+  end
+
+  def test_pread
+    assert_send_type "(::Integer, ::Integer, nil) -> ::String",
+                     StringIO.new("a"), :pread, 1, 0, nil
+  end
+
+  def test_read_nonblock
+    assert_send_type "(::int, nil) -> ::String?",
+                     StringIO.new("a"), :read_nonblock, 1, nil
+  end
+
+  def test_readpartial
+    assert_send_type "(::int, nil) -> ::String",
+                     StringIO.new("a"), :readpartial, 1, nil
+  end
+
+  def test_sysread
+    assert_send_type "(::Integer, nil) -> ::String",
+                     StringIO.new("a"), :sysread, 1, nil
+  end
+
   def test_truncate
     io = StringIO.new
 

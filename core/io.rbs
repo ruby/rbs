@@ -1492,7 +1492,7 @@ class IO < Object
   #
   # Not available on some platforms.
   #
-  def pread: (int maxlen, int offset, ?string out_string) -> String
+  def pread: (int maxlen, int offset, ?string? out_string) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1589,8 +1589,8 @@ class IO < Object
   #
   # Related: IO#write.
   #
-  def read: (?nil, ?string outbuf) -> String
-          | (int? length, ?string outbuf) -> String?
+  def read: (?nil, ?string? outbuf) -> String
+          | (int? length, ?string? outbuf) -> String?
 
   # <!--
   #   rdoc-file=io.rb
@@ -1645,8 +1645,8 @@ class IO < Object
   # symbol <code>:wait_readable</code> instead. At EOF, it will return nil instead
   # of raising EOFError.
   #
-  def read_nonblock: (int len, ?string buf, ?exception: true) -> String
-                   | (int len, ?string buf, exception: false) -> (String | :wait_readable | nil)
+  def read_nonblock: (int len, ?string? buf, ?exception: true) -> String
+                   | (int len, ?string? buf, exception: false) -> (String | :wait_readable | nil)
 
   # <!--
   #   rdoc-file=io.c
@@ -1846,7 +1846,7 @@ class IO < Object
   #     r.readpartial(4096)      # => "def\n"    ""                "ghi\n"
   #     r.readpartial(4096)      # => "ghi\n"    ""                ""
   #
-  def readpartial: (int maxlen, ?string outbuf) -> String
+  def readpartial: (int maxlen, ?string? outbuf) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -2067,7 +2067,7 @@ class IO < Object
   #
   # This method should not be used with other stream-reader methods.
   #
-  def sysread: (Integer maxlen, String outbuf) -> String
+  def sysread: (Integer maxlen, ?String? outbuf) -> String
 
   # <!--
   #   rdoc-file=io.c

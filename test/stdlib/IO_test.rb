@@ -337,10 +337,14 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :read, 1
       assert_send_type "(nil) -> String",
                        io, :read, nil
+      assert_send_type "(nil, nil) -> String",
+                       io, :read, nil, nil
       assert_send_type "(Integer, String) -> String",
                        io, :read, 0, +"buffer"
       assert_send_type "(Integer, String) -> nil",
                        io, :read, 1, +"buffer"
+      assert_send_type "(Integer, nil) -> String?",
+                       io, :read, 0, nil
       assert_send_type "(nil, String) -> String",
                        io, :read, nil, +"buffer"
     end
@@ -350,8 +354,38 @@ class IOInstanceTest < Test::Unit::TestCase
     IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
       assert_send_type "(Integer) -> String",
                        io, :readpartial, 10
+      assert_send_type "(Integer, nil) -> String",
+                       io, :readpartial, 10, nil
       assert_send_type "(Integer, String) -> String",
                        io, :readpartial, 10, +"buffer"
+    end
+  end
+
+  def test_read_nonblock
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type "(Integer) -> String",
+                       io, :read_nonblock, 10
+      assert_send_type "(Integer, nil) -> String",
+                       io, :read_nonblock, 10, nil
+      assert_send_type "(Integer, String) -> String",
+                       io, :read_nonblock, 10, +"buffer"
+    end
+  end
+
+  def test_sysread
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type "(Integer) -> String",
+                       io, :sysread, 1
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type "(Integer, nil) -> String",
+                       io, :sysread, 1, nil
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type "(Integer, String) -> String",
+                       io, :sysread, 1, +"buffer"
     end
   end
 
@@ -515,6 +549,10 @@ class IOInstanceTest < Test::Unit::TestCase
           assert_send_type(
             "(int, int) -> String",
             io, :pread, maxlen, offset
+          )
+          assert_send_type(
+            "(int, int, nil) -> String",
+            io, :pread, maxlen, offset, nil
           )
           with_string(+"buffer") do |buffer|
             assert_send_type(

@@ -187,7 +187,7 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def read: (?int? length, ?string outbuf) -> String?
+    def read: (?int? length, ?string? outbuf) -> String?
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -230,7 +230,7 @@ module Zlib
     # argument is present, it must reference a String, which will receive the data.
     # It raises `EOFError` on end of file.
     #
-    def readpartial: (int maxlen, ?string outbuf) -> String
+    def readpartial: (int maxlen, ?string? outbuf) -> String
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
