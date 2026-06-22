@@ -19,6 +19,18 @@ module RBS
         new(bytes, buffer).read_node
       end
 
+      # Deserialize a bare node list (rbs_serialize_node_list), e.g. the result
+      # of RBS::Parser._parse_type_params.
+      def self.deserialize_node_list(bytes, buffer)
+        new(bytes, buffer).read_node_list
+      end
+
+      # Deserialize the token stream produced by rbs_wasm_lex into the
+      # [type, location] pairs RBS::Parser._lex returns.
+      def self.deserialize_tokens(bytes, buffer)
+        new(bytes, buffer).read_tokens
+      end
+
       def initialize(bytes, buffer)
         @bytes = bytes
         @buffer = buffer
@@ -48,6 +60,23 @@ module RBS
         when :type_name then RBS::TypeName[read_node, read_node]
         else raise "Unknown schema entry kind: #{entry[0].inspect}"
         end
+      end
+
+      def read_node_list
+        Array.new(read_count) { read_node }
+      end
+
+      # The lex stream has no leading count: read records until the buffer is
+      # exhausted. Each is a token type name followed by its character range.
+      def read_tokens
+        tokens = [] #: Array[[ Symbol, Location ]]
+        until @pos >= @bytes.bytesize
+          type = read_string(Encoding::UTF_8).to_sym
+          start_char = read_i32
+          end_char = read_i32
+          tokens << [type, RBS::Location.new(@buffer, start_char, end_char)]
+        end
+        tokens
       end
 
       private
@@ -85,10 +114,6 @@ module RBS
         else # [:enum, [value_or_nil, ...]]
           reader[1][read_u8]
         end
-      end
-
-      def read_node_list
-        Array.new(read_count) { read_node }
       end
 
       def read_hash

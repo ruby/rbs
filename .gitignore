@@ -32,3 +32,7 @@ rust/ruby-rbs/vendor/rbs/
 
 # Compiled WebAssembly module (built by rake wasm:build)
 wasm/*.wasm
+
+# JRuby runtime artifacts (assembled by rake wasm:jruby_setup, bundled in the JRuby gem)
+lib/rbs/wasm/*.wasm
+lib/rbs/wasm/jars/

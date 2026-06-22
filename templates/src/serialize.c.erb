@@ -219,3 +219,15 @@ rbs_string_t rbs_serialize_node(rbs_allocator_t *allocator, rbs_constant_pool_t 
 
     return rbs_buffer_to_string(&state.buffer);
 }
+
+rbs_string_t rbs_serialize_node_list(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_node_list_t *list) {
+    rbs_serialize_state state = {
+        .allocator = allocator,
+        .constant_pool = constant_pool,
+    };
+    rbs_buffer_init(allocator, &state.buffer);
+
+    w_node_list(&state, list);
+
+    return rbs_buffer_to_string(&state.buffer);
+}

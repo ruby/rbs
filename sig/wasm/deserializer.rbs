@@ -17,18 +17,26 @@ module RBS
       # `[directives, declarations]` to match RBS::Parser._parse_signature.
       def self.deserialize: (String bytes, Buffer buffer) -> untyped
 
+      # Deserialize a bare node list (RBS::Parser._parse_type_params).
+      def self.deserialize_node_list: (String bytes, Buffer buffer) -> Array[untyped]
+
+      # Deserialize the token stream from rbs_wasm_lex (RBS::Parser._lex).
+      def self.deserialize_tokens: (String bytes, Buffer buffer) -> Array[[ Symbol, Location ]]
+
       def initialize: (String bytes, Buffer buffer) -> void
 
       # Reads the next node and returns the reconstructed Ruby value.
       def read_node: () -> untyped
+
+      def read_node_list: () -> Array[untyped]
+
+      def read_tokens: () -> Array[[ Symbol, Location ]]
 
       private
 
       def read_struct: (Array[untyped] entry) -> untyped
 
       def read_field: (untyped reader) -> untyped
-
-      def read_node_list: () -> Array[untyped]
 
       def read_hash: () -> Hash[untyped, untyped]
 

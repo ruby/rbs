@@ -609,15 +609,51 @@ namespace :wasm do
   task :check => :build do
     wasmtime = ENV["WASMTIME"] || "wasmtime"
 
-    # `rbs_wasm_selftest` parses a small fixed signature and returns 0 on
+    # `rbs_wasm_selftest` parses a small fixed signature and returns 1 on
     # success. `--invoke` prints the return value to stdout.
     output = IO.popen([wasmtime, "run", "--invoke", "rbs_wasm_selftest", WASM_OUTPUT], err: File::NULL, &:read).to_s.strip
 
-    if output == "0"
+    if output == "1"
       puts "WebAssembly selftest passed."
     else
-      raise "WebAssembly selftest failed: rbs_wasm_selftest returned #{output.inspect} (expected \"0\")"
+      raise "WebAssembly selftest failed: rbs_wasm_selftest returned #{output.inspect} (expected \"1\")"
     end
+  end
+
+  # Where the runtime looks for the module and jars by default (see
+  # RBS::WASM::Runtime). These are build artifacts, bundled into the JRuby gem.
+  JRUBY_WASM_DIR = File.expand_path("lib/rbs/wasm", __dir__)
+  CHICORY_VERSION = ENV.fetch("CHICORY_VERSION", "1.7.5")
+  # `compiler` is Chicory's AOT compiler (wasm -> JVM bytecode); the asm* jars
+  # are the ow2 ASM libraries it depends on. Keep ASM_VERSION in sync with what
+  # the pinned Chicory release declares.
+  CHICORY_JARS = %w[wasm runtime log wasi compiler].freeze
+  ASM_VERSION = ENV.fetch("ASM_VERSION", "9.9.1")
+  ASM_JARS = %w[asm asm-tree asm-util asm-commons asm-analysis].freeze
+
+  desc "Download the Chicory and ASM jars the JRuby runtime needs into lib/rbs/wasm/jars"
+  task :vendor_jars do
+    require "open-uri"
+    require "fileutils"
+
+    jars_dir = File.join(JRUBY_WASM_DIR, "jars")
+    FileUtils.mkdir_p(jars_dir)
+
+    downloads = CHICORY_JARS.map { |name| ["#{name}.jar", "https://repo1.maven.org/maven2/com/dylibso/chicory/#{name}/#{CHICORY_VERSION}/#{name}-#{CHICORY_VERSION}.jar"] }
+    downloads += ASM_JARS.map { |name| ["#{name}.jar", "https://repo1.maven.org/maven2/org/ow2/asm/#{name}/#{ASM_VERSION}/#{name}-#{ASM_VERSION}.jar"] }
+
+    downloads.each do |filename, url|
+      puts "Downloading #{url}"
+      URI.open(url) { |io| File.binwrite(File.join(jars_dir, filename), io.read) } # steep:ignore
+    end
+
+    puts "Vendored Chicory #{CHICORY_VERSION} + ASM #{ASM_VERSION} into #{jars_dir}"
+  end
+
+  desc "Assemble everything the JRuby gem needs: the .wasm and the Chicory jars"
+  task :jruby_setup => [:build, :vendor_jars] do
+    cp WASM_OUTPUT, File.join(JRUBY_WASM_DIR, "rbs_parser.wasm")
+    puts "JRuby runtime is ready under #{JRUBY_WASM_DIR}"
   end
 end
 

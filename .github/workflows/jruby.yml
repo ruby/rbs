@@ -1,0 +1,65 @@
+name: JRuby
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/jruby.yml"
+      - "include/**"
+      - "src/**"
+      - "wasm/**"
+      - "lib/rbs/wasm/**"
+      - "lib/rbs.rb"
+      - "Rakefile"
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with .github/workflows/wasm.yml.
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+
+jobs:
+  test:
+    name: jruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      # Build the .wasm and fetch the Chicory jars with CRuby + the WASI SDK,
+      # then run RBS itself on JRuby against those artifacts.
+      - name: Set up Ruby (to assemble the WebAssembly runtime)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Assemble the JRuby runtime (rbs_parser.wasm + Chicory jars)
+        run: bundle exec rake wasm:jruby_setup
+
+      - name: Set up JRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby
+          bundler: none
+      - name: Install runtime and test gems
+        run: gem install prism test-unit --no-document
+      - name: Run RBS's parser on JRuby
+        run: |
+          jruby -Ilib -Itest test/rbs/wasm/jruby_parser_test.rb
+          jruby -Ilib -Itest test/rbs/parser_test.rb

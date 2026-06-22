@@ -30,4 +30,10 @@
  */
 rbs_string_t rbs_serialize_node(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_node_t *node);
 
+/**
+ * Like rbs_serialize_node, but for a bare node list (e.g. the result of
+ * rbs_parse_type_params). Decoded by RBS::WASM::Deserializer.deserialize_node_list.
+ */
+rbs_string_t rbs_serialize_node_list(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_node_list_t *list);
+
 #endif
