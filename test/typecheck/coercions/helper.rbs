@@ -1,0 +1,34 @@
+class MyCoerce[T]
+  def coerce: (T) -> [MySelf, MyOther]
+end
+
+class MyOther
+end
+
+class MySelf
+  def +: (MyOther) -> MyReturn
+end
+
+class MyReturn
+end
+
+interface _Classish[T]
+  def allocate: () -> T
+end
+
+module T
+  def self.assert_integer: (Integer) -> void
+                         | { () -> Integer } -> void
+
+  def self.assert_float: (Float) -> void
+                       | { () -> Float } -> void
+
+  def self.assert_rational: (Rational) -> void
+                          | { () -> Rational } -> void
+
+  def self.assert_complex: (Complex) -> void
+                         | { () -> Complex } -> void
+
+  def self.assert_class: [T] (T, _Classish[T]) -> void
+                       | [T] (_Classish[T]) { () -> T } -> void
+end
