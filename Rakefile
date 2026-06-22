@@ -549,6 +549,74 @@ task :prepare_profiling do
   Rake::Task[:"compile"].invoke
 end
 
+namespace :wasm do
+  WASM_DIR = File.expand_path("wasm", __dir__)
+  WASM_OUTPUT = File.join(WASM_DIR, "rbs_parser.wasm")
+
+  # The parser under src/ is plain, self-contained C with no dependency on the
+  # Ruby C API, so it can be compiled to WebAssembly as-is. The only extra
+  # translation unit is the entry-point shim under wasm/.
+  def wasm_source_files
+    Dir.glob(File.join(__dir__, "src/**/*.c")).sort + [File.join(WASM_DIR, "rbs_wasm.c")]
+  end
+
+  # Locate the clang shipped with the WASI SDK.
+  #
+  # The system clang can target wasm32, but the WASI SDK additionally provides
+  # the wasi-libc sysroot and the wasm32 compiler-rt builtins that the link
+  # step needs, so we require it explicitly.
+  def wasi_clang
+    sdk = ENV["WASI_SDK_PATH"]
+    if sdk.nil? || sdk.empty?
+      raise <<~MSG
+        WASI_SDK_PATH is not set.
+
+        Install the WASI SDK from https://github.com/WebAssembly/wasi-sdk/releases
+        and point WASI_SDK_PATH at the extracted directory, for example:
+
+            export WASI_SDK_PATH=/opt/wasi-sdk
+            rake wasm:build
+      MSG
+    end
+
+    clang = File.join(sdk, "bin", "clang")
+    raise "clang not found at #{clang} (is WASI_SDK_PATH correct?)" unless File.executable?(clang)
+
+    clang
+  end
+
+  desc "Build the RBS parser as a WebAssembly module (requires WASI_SDK_PATH)"
+  task :build do
+    mkdir_p WASM_DIR
+    sh wasi_clang,
+       "--target=wasm32-wasip1",
+       # No `main`; the host calls `_initialize` and then the exported functions.
+       "-mexec-model=reactor",
+       "-std=gnu11",
+       "-O2",
+       "-Wno-unused-parameter",
+       "-I#{File.join(__dir__, "include")}",
+       "-o", WASM_OUTPUT,
+       *wasm_source_files
+    puts "Built #{WASM_OUTPUT}"
+  end
+
+  desc "Build and smoke-test the WebAssembly module (requires wasmtime)"
+  task :check => :build do
+    wasmtime = ENV["WASMTIME"] || "wasmtime"
+
+    # `rbs_wasm_selftest` parses a small fixed signature and returns 0 on
+    # success. `--invoke` prints the return value to stdout.
+    output = IO.popen([wasmtime, "run", "--invoke", "rbs_wasm_selftest", WASM_OUTPUT], err: File::NULL, &:read).to_s.strip
+
+    if output == "0"
+      puts "WebAssembly selftest passed."
+    else
+      raise "WebAssembly selftest failed: rbs_wasm_selftest returned #{output.inspect} (expected \"0\")"
+    end
+  end
+end
+
 namespace :rust do
   namespace :rbs do
     RUST_DIR = File.expand_path("rust", __dir__)
