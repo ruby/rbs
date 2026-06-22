@@ -33,7 +33,14 @@ test_config = lambda do |t|
   end
 end
 
-Rake::TestTask.new(test: :compile, &test_config)
+if RUBY_ENGINE == "jruby"
+  # JRuby runs the parser in WebAssembly instead of the C extension, so there is
+  # nothing to compile. The wasm runtime must be assembled first with
+  # `rake wasm:jruby_setup` (which needs CRuby + the WASI SDK).
+  Rake::TestTask.new(:test, &test_config)
+else
+  Rake::TestTask.new(test: :compile, &test_config)
+end
 
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 

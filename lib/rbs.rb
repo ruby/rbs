@@ -4,7 +4,11 @@ require "rbs/version"
 
 require "set"
 require "json"
-require "pathname" unless defined?(Pathname)
+# Always require pathname: `Pathname()` (Kernel#Pathname) is only defined once
+# pathname is loaded. Guarding on `defined?(Pathname)` is wrong because another
+# library (e.g. Bundler) can define the Pathname constant without that method,
+# which left RBS::EnvironmentLoader's `Pathname(...)` undefined on JRuby.
+require "pathname"
 require "pp"
 require "logger"
 require "tsort"

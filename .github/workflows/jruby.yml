@@ -10,9 +10,13 @@ on:
       - "include/**"
       - "src/**"
       - "wasm/**"
-      - "lib/rbs/wasm/**"
-      - "lib/rbs.rb"
+      - "lib/**"
+      - "sig/**"
+      - "core/**"
+      - "stdlib/**"
+      - "test/**"
       - "Rakefile"
+      - "rbs.gemspec"
 
 permissions:
   contents: read
@@ -58,8 +62,6 @@ jobs:
           ruby-version: jruby
           bundler: none
       - name: Install runtime and test gems
-        run: gem install prism test-unit --no-document
-      - name: Run RBS's parser on JRuby
-        run: |
-          jruby -Ilib -Itest test/rbs/wasm/jruby_parser_test.rb
-          jruby -Ilib -Itest test/rbs/parser_test.rb
+        run: gem install prism rake rake-compiler test-unit rdoc rspec minitest json-schema pry --no-document
+      - name: Run the test suite on JRuby
+        run: jruby -S rake test
