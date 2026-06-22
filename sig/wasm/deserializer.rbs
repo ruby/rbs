@@ -1,0 +1,58 @@
+module RBS
+  module WASM
+    # Rebuilds RBS::AST objects from the binary buffer produced by
+    # `rbs_serialize_node` (src/serialize.c), driven by SerializationSchema.
+    class Deserializer
+      @bytes: String
+
+      @buffer: Buffer
+
+      @encoding: Encoding
+
+      @pos: Integer
+
+      @class_cache: Hash[String, untyped]
+
+      # Deserialize a buffer produced for a whole signature, returning
+      # `[directives, declarations]` to match RBS::Parser._parse_signature.
+      def self.deserialize: (String bytes, Buffer buffer) -> untyped
+
+      def initialize: (String bytes, Buffer buffer) -> void
+
+      # Reads the next node and returns the reconstructed Ruby value.
+      def read_node: () -> untyped
+
+      private
+
+      def read_struct: (Array[untyped] entry) -> untyped
+
+      def read_field: (untyped reader) -> untyped
+
+      def read_node_list: () -> Array[untyped]
+
+      def read_hash: () -> Hash[untyped, untyped]
+
+      def read_count: () -> Integer
+
+      def read_location: (Array[untyped]? loc_children) -> Location?
+
+      def read_location_value: () -> Location?
+
+      def read_location_value_list: () -> Array[Location?]
+
+      def read_attr_ivar_name: () -> (Symbol | false | nil)
+
+      def read_range: () -> [ Integer, Integer ]?
+
+      def read_u8: () -> Integer
+
+      def read_u32: () -> Integer
+
+      def read_i32: () -> Integer
+
+      def read_string: (Encoding encoding) -> String
+
+      def class_for: (String name) -> untyped
+    end
+  end
+end

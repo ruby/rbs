@@ -140,6 +140,16 @@ module RBS
 
     def self._parse_signature: (Buffer, Integer start_pos, Integer end_pos) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
 
+    # Parse and serialize the result to the binary format consumed by
+    # RBS::WASM::Deserializer (see ext/rbs_extension/main.c and
+    # docs/wasm_serialization.md). The `_to_bytes` variants exist so the
+    # round-trip can be exercised on CRuby.
+    def self._parse_type_to_bytes: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof, bool void_allowed, bool self_allowed, bool classish_allowed) -> String?
+
+    def self._parse_method_type_to_bytes: (Buffer, Integer start_pos, Integer end_pos, Array[Symbol] variables, bool require_eof) -> String?
+
+    def self._parse_signature_to_bytes: (Buffer, Integer start_pos, Integer end_pos) -> String
+
     def self._parse_type_params: (Buffer, Integer start_pos, Integer end_pos, bool module_type_params) -> Array[AST::TypeParam]
 
     def self._lex: (Buffer, Integer end_pos) -> Array[[Symbol, Location[untyped, untyped]]]

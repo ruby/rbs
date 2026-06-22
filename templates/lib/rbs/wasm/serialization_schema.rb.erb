@@ -1,0 +1,82 @@
+<%-
+  # Node types that need `RBS::AST::TypeParam.resolve_variables` applied to
+  # their `type_params` before construction (matches ast_translation.c.erb).
+  resolve_type_params = %w[
+    RBS::AST::Declarations::Class
+    RBS::AST::Declarations::Module
+    RBS::AST::Declarations::Interface
+    RBS::AST::Declarations::TypeAlias
+    RBS::MethodType
+  ]
+
+  # How the deserializer should read a single field, derived from its c_type.
+  reader_for = ->(field) {
+    case field.type.name
+    when "rbs_node_list" then ":node_list"
+    when "rbs_hash" then ":hash"
+    when "rbs_string" then ":string"
+    when "bool" then ":bool"
+    when "rbs_location_range" then ":location_range"
+    when "rbs_location_range_list" then ":location_range_list"
+    when "rbs_attr_ivar_name" then ":attr_ivar_name"
+    else
+      if field.type.is_a?(RBS::Template::EnumType)
+        symbols = []
+        field.type.descr.each_symbol { |_sym, _const, ruby_value| symbols << (ruby_value.nil? ? "nil" : ":#{ruby_value}") }
+        "[:enum, [#{symbols.join(", ")}]]"
+      else
+        ":node"
+      end
+    end
+  }
+
+  entry_for = ->(node) {
+    case node.ruby_full_name
+    when "RBS::AST::Bool" then "[:bool]"
+    when "RBS::AST::Integer" then "[:integer]"
+    when "RBS::AST::String" then "[:string_value]"
+    when "RBS::Types::Record::FieldType" then "[:record_field]"
+    when "RBS::Signature" then "[:signature]"
+    when "RBS::Namespace" then "[:namespace]"
+    when "RBS::TypeName" then "[:type_name]"
+    else
+      children = (node.locations || []).map { |loc| "[:#{loc.name}, #{loc.required?}]" }
+      fields = node.fields.map { |field| "[:#{field.name}, #{reader_for.call(field)}]" }
+      # Emit `nil` rather than `[]` for empty lists, so the generated file has no
+      # unannotated empty collections for Steep to flag.
+      children_literal = children.empty? ? "nil" : "[#{children.join(", ")}]"
+      fields_literal = fields.empty? ? "nil" : "[#{fields.join(", ")}]"
+      "[:node, #{node.ruby_full_name.inspect}, #{node.expose_location?}, #{children_literal}, #{fields_literal}, #{resolve_type_params.include?(node.ruby_full_name)}]"
+    end
+  }
+-%>
+module RBS
+  module WASM
+    # Describes how to decode the binary buffer produced by `rbs_serialize_node`
+    # (src/serialize.c) back into RBS::AST objects. RBS::WASM::Deserializer walks
+    # this table; the matching encoder is generated from the same config.yml, so
+    # the two stay in sync.
+    #
+    # SCHEMA is indexed by node tag: tag 0 is NULL and SYMBOL_TAG is the
+    # interned-symbol tag. Each remaining entry is one of:
+    #
+    #   [:node, class_name, expose_location, loc_children, fields, resolve_type_params]
+    #   [:bool] / [:integer] / [:string_value] / [:record_field]
+    #   [:signature] / [:namespace] / [:type_name]
+    #
+    # where loc_children is [[name, required?], ...] and fields is
+    # [[name, reader], ...] with reader one of :node, :node_list, :hash, :string,
+    # :bool, :location_range, :location_range_list, :attr_ivar_name, or
+    # [:enum, [value_or_nil, ...]].
+    module SerializationSchema
+      SYMBOL_TAG = <%= nodes.size + 1 %>
+
+      SCHEMA = [
+        nil, # tag 0 is reserved for NULL
+      <%- nodes.each do |node| -%>
+        <%= entry_for.call(node) %>,
+      <%- end -%>
+      ].freeze
+    end
+  end
+end
