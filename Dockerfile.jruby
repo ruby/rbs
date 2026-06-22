@@ -1,0 +1,54 @@
+# JRuby verification image for RBS.
+#
+# RBS can't load its MRI C extension on JRuby, so it parses through a
+# WebAssembly build of the parser (see lib/rbs/wasm and docs/wasm_serialization.md).
+# This single-stage image installs the WASI SDK, compiles rbs_parser.wasm and
+# vendors the Chicory/ASM jars into lib/rbs/wasm/, then runs the test suite on
+# JRuby. It mirrors .github/workflows/jruby.yml but is fully self-contained.
+#
+#   docker build -f Dockerfile.jruby -t rbs-jruby .
+#   docker run --rm rbs-jruby                                  # run the test suite
+#   docker run --rm -e RBS_PLATFORM=java rbs-jruby \
+#     gem build rbs.gemspec                                    # build the -java gem
+#
+# Bundler is intentionally not used: the development Gemfile pulls in CRuby-only
+# C extensions (bigdecimal, stackprof, ...) that cannot build on JRuby. The few
+# gems the suite needs are installed directly, exactly as the CI does.
+
+FROM jruby:10.0.6-jdk21
+
+# Keep in sync with .github/workflows/wasm.yml and .github/workflows/jruby.yml.
+ARG WASI_SDK_VERSION=33
+ARG WASI_SDK_RELEASE=33.0
+
+# build-essential supplies cc/make: on JRuby the prism gem builds libprism.so
+# (loaded via FFI) instead of an MRI C extension, so it needs a C toolchain.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git curl ca-certificates build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# The WASI SDK provides clang, the wasi-libc sysroot and the wasm32 compiler-rt
+# builtins that `rake wasm:build` needs to compile src/**/*.c to WebAssembly.
+RUN set -eux; \
+    case "$(uname -m)" in \
+      x86_64 | amd64)  wasi_arch=x86_64 ;; \
+      aarch64 | arm64) wasi_arch=arm64  ;; \
+      *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;; \
+    esac; \
+    mkdir -p /opt/wasi-sdk; \
+    curl -fsSL "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-${wasi_arch}-linux.tar.gz" \
+      | tar xz --strip-components=1 -C /opt/wasi-sdk
+ENV WASI_SDK_PATH=/opt/wasi-sdk
+
+# Runtime/test gems the suite needs on JRuby (same set as the jruby.yml CI).
+RUN gem install prism rake rake-compiler test-unit rdoc rspec minitest json-schema pry --no-document
+
+WORKDIR /rbs
+COPY . .
+
+# Assemble the JRuby runtime: compile rbs_parser.wasm and download the
+# Chicory + ASM jars into lib/rbs/wasm/. Runs on JRuby (clang is a subprocess,
+# so the build is engine independent).
+RUN rake wasm:jruby_setup
+
+CMD ["rake", "test"]
