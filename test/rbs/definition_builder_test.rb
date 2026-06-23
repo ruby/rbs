@@ -281,6 +281,37 @@ EOF
     end
   end
 
+  def test_build_singleton_including_autoextending_module
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+%a{autoextend:Mod::ClassMethods}
+module Mod
+  module ClassMethods
+    def count: -> Integer
+  end
+end
+
+class Class
+  include Mod
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::Class")).yield_self do |definition|
+          assert_instance_of Definition, definition
+
+          assert_equal [:__id__, :count, :initialize, :new, :puts, :respond_to_missing?, :to_i], definition.methods.keys.sort
+          assert_method_definition definition.methods[:__id__], ["() -> ::Integer"]
+          assert_method_definition definition.methods[:initialize], ["() -> void"]
+          assert_method_definition definition.methods[:puts], ["(*untyped) -> nil"]
+          assert_method_definition definition.methods[:respond_to_missing?], ["(::Symbol, bool) -> bool"]
+        end
+      end
+    end
+  end
+
+
   def test_build_instance_module_include_module
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
