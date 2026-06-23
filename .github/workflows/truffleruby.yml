@@ -24,7 +24,7 @@ jobs:
       # TruffleRuby warns and falls back to US-ASCII unless the locale is UTF-8.
       LANG: "en_US.UTF-8"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
