@@ -1302,8 +1302,9 @@ class String
   # Related: see [Querying](rdoc-ref:String@Querying).
   #
   def =~: (Regexp regex) -> Integer?
-        | [T] (_MatchAgainst[self, T] object) -> T
+        | [T] (RBS::Ops::_Matches[self, T] object) -> T
 
+  %a{deprecated: Use RBS::Ops::_Matches[O, T]}
   interface _MatchAgainst[O, T]
     def =~: (O string) -> T
   end

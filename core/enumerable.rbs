@@ -272,11 +272,6 @@
 # file, not the number of lines.
 #
 module Enumerable[unchecked out E] : _Each[E]
-  %a{private}
-  interface _Pattern
-    def ===: (untyped) -> bool
-  end
-
   # <!--
   #   rdoc-file=enum.c
   #   - all?                  -> true or false
@@ -319,7 +314,7 @@ module Enumerable[unchecked out E] : _Each[E]
   # Related: #any?, #none? #one?.
   #
   def all?: () -> bool
-          | (_Pattern) -> bool
+          | (RBS::Ops::_CaseEqual[untyped]) -> bool
           | () { (E) -> boolish } -> bool
 
   # <!--
@@ -363,7 +358,7 @@ module Enumerable[unchecked out E] : _Each[E]
   # Related: #all?, #none?, #one?.
   #
   def any?: () -> bool
-          | (_Pattern) -> bool
+          | (RBS::Ops::_CaseEqual[untyped]) -> bool
           | () { (E) -> boolish } -> bool
 
   # <!--
@@ -1265,7 +1260,7 @@ module Enumerable[unchecked out E] : _Each[E]
   # Related: #one?, #all?, #any?.
   #
   def none?: () -> bool
-           | (_Pattern) -> bool
+           | (RBS::Ops::_CaseEqual[untyped]) -> bool
            | () { (E) -> boolish } -> bool
 
   # <!--
@@ -1309,7 +1304,7 @@ module Enumerable[unchecked out E] : _Each[E]
   # Related: #none?, #all?, #any?.
   #
   def one?: () -> bool
-          | (_Pattern) -> bool
+          | (RBS::Ops::_CaseEqual[untyped]) -> bool
           | () { (E) -> boolish } -> bool
 
   # <!--

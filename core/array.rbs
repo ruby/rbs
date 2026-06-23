@@ -1114,7 +1114,7 @@ class Array[unchecked out E] < Object
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
   def all?: () -> bool
-          | (_Pattern[E] pattern) -> bool
+          | (RBS::Ops::_CaseEqual[E] pattern) -> bool
           | () { (E obj) -> boolish } -> bool
 
   # <!--
@@ -4137,6 +4137,7 @@ interface _Rand
   def rand: (::Integer max) -> ::Integer
 end
 
+%a{deprecated: Use RBS::Ops::_CaseEqual[T]}
 interface Array::_Pattern[T]
   def ===: (T) -> bool
 end
