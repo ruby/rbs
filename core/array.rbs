@@ -1233,7 +1233,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch: () { (E element) -> (Numeric | bool?) } -> E?
+  def bsearch: () { (E element) -> bool? } -> E?
+             | () { (E element) -> Numeric? } -> E?
              | () -> Enumerator[E, E?]
 
   # <!--
@@ -1248,7 +1249,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  def bsearch_index: () { (E element) -> (Numeric | bool?) } -> Integer?
+  def bsearch_index: () { (E element) -> bool? } -> Integer?
+                   | () { (E element) -> Numeric? } -> Integer?
                    | () -> Enumerator[E, Integer?]
 
   # <!--
