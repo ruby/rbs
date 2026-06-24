@@ -1048,7 +1048,7 @@ class RBS::ParserTest < Test::Unit::TestCase
   def test_invalid_utf8_byte_in_comment_does_not_hang
     # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
+    assert_raises(RBS::ParsingError) do
       RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
@@ -1058,10 +1058,8 @@ class RBS::ParserTest < Test::Unit::TestCase
 
     # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
     source = "\xFF".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
-      assert_raises(RBS::ParsingError) do
-        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
-      end
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
 end
