@@ -26,7 +26,7 @@ jobs:
     name: wasm:check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

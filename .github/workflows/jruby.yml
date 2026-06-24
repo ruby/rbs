@@ -31,7 +31,7 @@ jobs:
     name: jruby
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       # Build the .wasm and fetch the Chicory jars with CRuby + the WASI SDK,
