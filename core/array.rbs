@@ -647,7 +647,7 @@ class Array[unchecked out E]
   # Array](rdoc-ref:Array@Methods+for+Creating+an+Array).
   #
   def self.try_convert: [A < Array[U], U] (A array) -> A
-                      | [U] (array[U] ary) -> Array[U]
+                      | [U] (array[U] ary) -> Array[U]?
                       | (untyped) -> Array[untyped]?
 
   # <!--
