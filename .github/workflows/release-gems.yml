@@ -4,6 +4,10 @@ name: Release gems
 # manual release process (forgetting the `java` platform gem, version typos,
 # releasing from a dirty/local environment).
 #
+# On a real run it pushes both platform gems, pushes the `vX.Y.Z` tag, and
+# creates a draft GitHub Release (notes drawn from CHANGELOG.md) for a human
+# to review and publish.
+#
 # This workflow targets the active development line on `master`. Maintenance
 # releases (e.g. 4.0.x cut from `aaa-4.0.x`) are released by hand with
 # `rake release` and intentionally do NOT use this workflow.
@@ -122,3 +126,28 @@ jobs:
         run: |
           git tag "v${RBS_VERSION}"
           git push origin "v${RBS_VERSION}"
+
+      # Mirrors `rake release:note`: a draft release whose notes are the top
+      # CHANGELOG.md section plus a link to the wiki release note. Left as a
+      # draft so a human reviews and publishes it.
+      - name: Create a draft GitHub Release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes_file="$(mktemp)"
+          ruby -e '
+            version = ENV.fetch("RBS_VERSION")
+            major, minor, * = version.split(".")
+            content = File.read("CHANGELOG.md", encoding: "UTF-8")
+            section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or abort "Could not find a release section in CHANGELOG.md"
+            body = section.sub(/^.*\n^.*\n/, "").rstrip
+            puts "[Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})"
+            puts
+            puts body
+          ' > "$notes_file"
+          args=(--draft --verify-tag --title "${RBS_VERSION}" --notes-file "$notes_file")
+          if ruby -e 'exit Gem::Version.new(ENV.fetch("RBS_VERSION")).prerelease? ? 0 : 1'; then
+            args+=(--prerelease)
+          fi
+          gh release create "v${RBS_VERSION}" "${args[@]}"
