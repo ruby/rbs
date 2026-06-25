@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "pathname" unless defined?(Pathname)
 
 module RBS
   class Repository
