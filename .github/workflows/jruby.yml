@@ -53,7 +53,7 @@ jobs:
           mkdir -p "$HOME/wasi-sdk"
           curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
           echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
-      - name: Assemble the JRuby runtime (rbs_parser.wasm + Chicory jars)
+      - name: Build rbs_parser.wasm
         run: bundle exec rake wasm:jruby_setup
 
       - name: Set up JRuby
@@ -63,5 +63,9 @@ jobs:
           bundler: none
       - name: Install runtime and test gems
         run: gem install prism rake rake-compiler test-unit rdoc rspec minitest json-schema pry --no-document
+      # jar-dependencies resolves through the JVM, so download the Chicory/ASM
+      # jars into ~/.m2 here on JRuby (not in the CRuby step above).
+      - name: Download the Chicory and ASM jars
+        run: jruby -S rake wasm:install_jars
       - name: Run the test suite on JRuby
         run: jruby -S rake test

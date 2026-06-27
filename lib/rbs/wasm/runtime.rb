@@ -2,7 +2,6 @@
 
 require "java"
 require "monitor"
-require_relative "jars"
 
 module RBS
   module WASM
@@ -11,8 +10,9 @@ module RBS
     # source string into the module's linear memory, runs the parser, and returns
     # the serialized result for RBS::WASM::Deserializer to rebuild.
     #
-    # Chicory is a pure-Java runtime, so there is no native dependency: only the
-    # `.wasm` and the Chicory jars need to ship with the gem.
+    # Chicory is a pure-Java runtime, so there is no native dependency. The
+    # `.wasm` ships in the gem; the Chicory jars are fetched from Maven by
+    # jar-dependencies (see load_jars and rbs.gemspec).
     class Runtime
       include MonitorMixin
 
@@ -23,14 +23,6 @@ module RBS
 
         def wasm_path
           ENV["RBS_WASM_PARSER"] || File.expand_path("rbs_parser.wasm", __dir__)
-        end
-
-        # A directory of jars vendored for running from source (development/CI),
-        # set by `rake wasm:vendor_jars` or `RBS_WASM_JARS`. Returns nil for an
-        # installed gem, where the jars come from Maven via jar-dependencies.
-        def local_jars_dir
-          dir = ENV["RBS_WASM_JARS"] || File.expand_path("jars", __dir__)
-          File.directory?(dir) ? dir : nil
         end
       end
 
@@ -196,29 +188,31 @@ module RBS
         nil
       end
 
-      # Puts the Chicory/ASM jars on the classpath. When running from source the
-      # jars are vendored into a local directory (see `rake wasm:vendor_jars`) and
-      # loaded by path; in the installed `-java` gem they are fetched from Maven
-      # by jar-dependencies and loaded with `require_jar`. The optional AOT
-      # compiler jars degrade gracefully: a missing or incompatible jar just
-      # leaves Chicory on the interpreter (see #machine_factory).
+      # Loads the Chicory/ASM jars onto the classpath. jar-dependencies finds them
+      # in the local Maven repository (~/.m2); they get there when the gem is
+      # installed, or via `rake wasm:install_jars` when running from source. Keep
+      # these versions in sync with the `jar` requirements in rbs.gemspec.
       def load_jars
-        if (dir = self.class.local_jars_dir)
-          RBS::WASM::REQUIRED_JARS.each { |_group, artifact, _version| require File.join(dir, "#{artifact}.jar") }
-          RBS::WASM::OPTIONAL_JARS.each do |_group, artifact, _version|
-            path = File.join(dir, "#{artifact}.jar")
-            require path if File.exist?(path)
-          end
-        else
-          require "jar_dependencies"
-          RBS::WASM::REQUIRED_JARS.each { |group, artifact, version| require_jar(group, artifact, version) }
-          RBS::WASM::OPTIONAL_JARS.each do |group, artifact, version|
-            begin
-              require_jar(group, artifact, version)
-            rescue LoadError, StandardError, Java::JavaLang::LinkageError
-              # AOT compiler unavailable; the interpreter is used instead.
-            end
-          end
+        require "jar_dependencies"
+
+        # Needed to load and run the module.
+        require_jar "com.dylibso.chicory", "wasm", "1.7.5"
+        require_jar "com.dylibso.chicory", "runtime", "1.7.5"
+        require_jar "com.dylibso.chicory", "log", "1.7.5"
+        require_jar "com.dylibso.chicory", "wasi", "1.7.5"
+
+        # Chicory's ahead-of-time compiler (and the ASM libraries it depends on)
+        # runs the parser ~8x faster than the interpreter. Optional: if a jar is
+        # missing or incompatible, fall back to the interpreter (see machine_factory).
+        begin
+          require_jar "com.dylibso.chicory", "compiler", "1.7.5"
+          require_jar "org.ow2.asm", "asm", "9.9.1"
+          require_jar "org.ow2.asm", "asm-tree", "9.9.1"
+          require_jar "org.ow2.asm", "asm-util", "9.9.1"
+          require_jar "org.ow2.asm", "asm-commons", "9.9.1"
+          require_jar "org.ow2.asm", "asm-analysis", "9.9.1"
+        rescue LoadError, StandardError, Java::JavaLang::LinkageError
+          # AOT compiler unavailable; the interpreter is used instead.
         end
       end
     end

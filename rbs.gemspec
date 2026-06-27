@@ -46,8 +46,6 @@ Gem::Specification.new do |spec|
   on_jruby = defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
 
   if building_java_gem || on_jruby
-    require "rbs/wasm/jars"
-
     # Only stamp the platform when building the release gem; leave it unset for
     # local development on JRuby so it still matches a `ruby` platform lockfile.
     spec.platform = "java" if building_java_gem
@@ -57,8 +55,18 @@ Gem::Specification.new do |spec|
 
     # jar-dependencies (bundled with JRuby) downloads these jars from Maven when
     # the gem is installed, keeping the gem small and avoiding conflicting copies.
+    # Keep the versions in sync with RBS::WASM::Runtime#load_jars.
     spec.add_dependency "jar-dependencies", ">= 0.1.7"
-    RBS::WASM.jar_requirements.each { |requirement| spec.requirements << requirement }
+    spec.requirements << "jar com.dylibso.chicory:wasm, 1.7.5"
+    spec.requirements << "jar com.dylibso.chicory:runtime, 1.7.5"
+    spec.requirements << "jar com.dylibso.chicory:log, 1.7.5"
+    spec.requirements << "jar com.dylibso.chicory:wasi, 1.7.5"
+    spec.requirements << "jar com.dylibso.chicory:compiler, 1.7.5"
+    spec.requirements << "jar org.ow2.asm:asm, 9.9.1"
+    spec.requirements << "jar org.ow2.asm:asm-tree, 9.9.1"
+    spec.requirements << "jar org.ow2.asm:asm-util, 9.9.1"
+    spec.requirements << "jar org.ow2.asm:asm-commons, 9.9.1"
+    spec.requirements << "jar org.ow2.asm:asm-analysis, 9.9.1"
   else
     spec.extensions = %w{ext/rbs_extension/extconf.rb}
   end

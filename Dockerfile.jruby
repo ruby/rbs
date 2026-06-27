@@ -3,8 +3,8 @@
 # RBS can't load its MRI C extension on JRuby, so it parses through a
 # WebAssembly build of the parser (see lib/rbs/wasm and docs/wasm_serialization.md).
 # This single-stage image installs the WASI SDK, compiles rbs_parser.wasm and
-# vendors the Chicory/ASM jars into lib/rbs/wasm/, then runs the test suite on
-# JRuby. It mirrors .github/workflows/jruby.yml but is fully self-contained.
+# downloads the Chicory/ASM jars into ~/.m2 (via jar-dependencies), then runs the
+# test suite on JRuby. It mirrors .github/workflows/jruby.yml but is self-contained.
 #
 #   docker build -f Dockerfile.jruby -t rbs-jruby .
 #   docker run --rm rbs-jruby                                  # run the test suite
@@ -46,9 +46,8 @@ RUN gem install prism rake rake-compiler test-unit rdoc rspec minitest json-sche
 WORKDIR /rbs
 COPY . .
 
-# Assemble the JRuby runtime: compile rbs_parser.wasm and download the
-# Chicory + ASM jars into lib/rbs/wasm/. Runs on JRuby (clang is a subprocess,
-# so the build is engine independent).
-RUN rake wasm:jruby_setup
+# Compile rbs_parser.wasm (clang is a subprocess, so the build is engine
+# independent) and download the Chicory + ASM jars into ~/.m2 via jar-dependencies.
+RUN rake wasm:jruby_setup wasm:install_jars
 
 CMD ["rake", "test"]

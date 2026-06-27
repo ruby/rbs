@@ -630,31 +630,20 @@ namespace :wasm do
   # Where the runtime looks for the module by default (see RBS::WASM::Runtime).
   JRUBY_WASM_DIR = File.expand_path("lib/rbs/wasm", __dir__)
 
-  desc "Download the Chicory and ASM jars the JRuby runtime needs into lib/rbs/wasm/jars (for running the test suite from source; not shipped in the gem)"
-  task :vendor_jars do
-    require "open-uri"
-    require "fileutils"
-    # Coordinates live in the runtime so the gem (jar-dependencies) and this
-    # source-only download stay in sync. The released gem fetches these from
-    # Maven via jar-dependencies instead; this directory is gitignored.
-    require_relative "lib/rbs/wasm/jars"
-
-    jars_dir = File.join(JRUBY_WASM_DIR, "jars")
-    FileUtils.mkdir_p(jars_dir)
-
-    RBS::WASM::ALL_JARS.each do |group, artifact, version|
-      url = RBS::WASM.maven_url(group, artifact, version)
-      puts "Downloading #{url}"
-      URI.open(url) { |io| File.binwrite(File.join(jars_dir, "#{artifact}.jar"), io.read) } # steep:ignore
-    end
-
-    puts "Vendored Chicory #{RBS::WASM::CHICORY_VERSION} + ASM #{RBS::WASM::ASM_VERSION} into #{jars_dir}"
+  desc "Download the Chicory and ASM jars into the local Maven repository (~/.m2) for running the test suite from source. Run on JRuby."
+  task :install_jars do
+    # Reads the `jar` requirements from rbs.gemspec and downloads them (and their
+    # transitive deps) into ~/.m2, the same way `gem install` does. The jars are
+    # not copied into the gem, so nothing is shipped; RBS::WASM::Runtime loads
+    # them from ~/.m2 with require_jar.
+    require "jars/installer"
+    Jars::Installer.new("rbs.gemspec").install_jars(write_require_file: false)
   end
 
-  desc "Assemble what the test suite needs to run on JRuby from source: the .wasm and the Chicory jars"
-  task :jruby_setup => [:build, :vendor_jars] do
+  desc "Build rbs_parser.wasm and copy it next to RBS::WASM::Runtime"
+  task :jruby_setup => [:build] do
     cp WASM_OUTPUT, File.join(JRUBY_WASM_DIR, "rbs_parser.wasm")
-    puts "JRuby runtime is ready under #{JRUBY_WASM_DIR}"
+    puts "rbs_parser.wasm is ready under #{JRUBY_WASM_DIR}"
   end
 end
 
