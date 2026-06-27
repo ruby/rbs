@@ -2,6 +2,7 @@
 
 require "java"
 require "monitor"
+require_relative "jars"
 
 module RBS
   module WASM
@@ -15,16 +16,6 @@ module RBS
     class Runtime
       include MonitorMixin
 
-      # The Chicory jars the runtime needs at load time.
-      # Jars Chicory needs to load and run the module.
-      JARS = %w[wasm runtime log wasi].freeze
-
-      # Jars for Chicory's ahead-of-time compiler (wasm -> JVM bytecode), which
-      # runs the parser ~8x faster than the interpreter. Optional: the runtime
-      # falls back to the interpreter when they are absent. asm* are the ow2 ASM
-      # libraries the compiler depends on.
-      OPTIONAL_JARS = %w[compiler asm asm-tree asm-util asm-commons asm-analysis].freeze
-
       class << self
         def instance
           @instance ||= new
@@ -34,8 +25,12 @@ module RBS
           ENV["RBS_WASM_PARSER"] || File.expand_path("rbs_parser.wasm", __dir__)
         end
 
-        def jars_dir
-          ENV["RBS_WASM_JARS"] || File.expand_path("jars", __dir__)
+        # A directory of jars vendored for running from source (development/CI),
+        # set by `rake wasm:vendor_jars` or `RBS_WASM_JARS`. Returns nil for an
+        # installed gem, where the jars come from Maven via jar-dependencies.
+        def local_jars_dir
+          dir = ENV["RBS_WASM_JARS"] || File.expand_path("jars", __dir__)
+          File.directory?(dir) ? dir : nil
         end
       end
 
@@ -201,16 +196,30 @@ module RBS
         nil
       end
 
+      # Puts the Chicory/ASM jars on the classpath. When running from source the
+      # jars are vendored into a local directory (see `rake wasm:vendor_jars`) and
+      # loaded by path; in the installed `-java` gem they are fetched from Maven
+      # by jar-dependencies and loaded with `require_jar`. The optional AOT
+      # compiler jars degrade gracefully: a missing or incompatible jar just
+      # leaves Chicory on the interpreter (see #machine_factory).
       def load_jars
-        JARS.each { |name| require jar_path(name) }
-        OPTIONAL_JARS.each do |name|
-          path = jar_path(name)
-          require path if File.exist?(path)
+        if (dir = self.class.local_jars_dir)
+          RBS::WASM::REQUIRED_JARS.each { |_group, artifact, _version| require File.join(dir, "#{artifact}.jar") }
+          RBS::WASM::OPTIONAL_JARS.each do |_group, artifact, _version|
+            path = File.join(dir, "#{artifact}.jar")
+            require path if File.exist?(path)
+          end
+        else
+          require "jar_dependencies"
+          RBS::WASM::REQUIRED_JARS.each { |group, artifact, version| require_jar(group, artifact, version) }
+          RBS::WASM::OPTIONAL_JARS.each do |group, artifact, version|
+            begin
+              require_jar(group, artifact, version)
+            rescue LoadError, StandardError, Java::JavaLang::LinkageError
+              # AOT compiler unavailable; the interpreter is used instead.
+            end
+          end
         end
-      end
-
-      def jar_path(name)
-        File.join(self.class.jars_dir, "#{name}.jar")
       end
     end
   end
