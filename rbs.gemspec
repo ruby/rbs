@@ -49,13 +49,16 @@ Gem::Specification.new do |spec|
     # Only stamp the platform when building the release gem; leave it unset for
     # local development on JRuby so it still matches a `ruby` platform lockfile.
     spec.platform = "java" if building_java_gem
+    # rbs_parser.wasm and the generated rbs_jars.rb (the require_jar calls the
+    # runtime loads) are build artifacts produced by `rake wasm:jruby_setup` and
+    # `rake wasm:install_jars`; they are not tracked in git, so add them here.
     spec.files += Dir.chdir(File.expand_path('..', __FILE__)) do
-      Dir.glob("lib/rbs/wasm/rbs_parser.wasm")
+      Dir.glob("lib/rbs/wasm/rbs_parser.wasm") + Dir.glob("lib/rbs_jars.rb")
     end
 
     # jar-dependencies (bundled with JRuby) downloads these jars from Maven when
     # the gem is installed, keeping the gem small and avoiding conflicting copies.
-    # Keep the versions in sync with RBS::WASM::Runtime#load_jars.
+    # `rake wasm:install_jars` turns these requirements into lib/rbs_jars.rb.
     spec.add_dependency "jar-dependencies", ">= 0.1.7"
     spec.requirements << "jar com.dylibso.chicory:wasm, 1.7.5"
     spec.requirements << "jar com.dylibso.chicory:runtime, 1.7.5"

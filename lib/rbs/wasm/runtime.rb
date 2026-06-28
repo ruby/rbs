@@ -188,32 +188,12 @@ module RBS
         nil
       end
 
-      # Loads the Chicory/ASM jars onto the classpath. jar-dependencies finds them
-      # in the local Maven repository (~/.m2); they get there when the gem is
-      # installed, or via `rake wasm:install_jars` when running from source. Keep
-      # these versions in sync with the `jar` requirements in rbs.gemspec.
+      # Loads the Chicory/ASM jars onto the classpath. lib/rbs_jars.rb is generated
+      # from the `jar` requirements in rbs.gemspec (by `rake wasm:install_jars`, and
+      # refreshed by jar-dependencies at gem install); it require_jars each jar from
+      # the local Maven repository (~/.m2).
       def load_jars
-        require "jar_dependencies"
-
-        # Needed to load and run the module.
-        require_jar "com.dylibso.chicory", "wasm", "1.7.5"
-        require_jar "com.dylibso.chicory", "runtime", "1.7.5"
-        require_jar "com.dylibso.chicory", "log", "1.7.5"
-        require_jar "com.dylibso.chicory", "wasi", "1.7.5"
-
-        # Chicory's ahead-of-time compiler (and the ASM libraries it depends on)
-        # runs the parser ~8x faster than the interpreter. Optional: if a jar is
-        # missing or incompatible, fall back to the interpreter (see machine_factory).
-        begin
-          require_jar "com.dylibso.chicory", "compiler", "1.7.5"
-          require_jar "org.ow2.asm", "asm", "9.9.1"
-          require_jar "org.ow2.asm", "asm-tree", "9.9.1"
-          require_jar "org.ow2.asm", "asm-util", "9.9.1"
-          require_jar "org.ow2.asm", "asm-commons", "9.9.1"
-          require_jar "org.ow2.asm", "asm-analysis", "9.9.1"
-        rescue LoadError, StandardError, Java::JavaLang::LinkageError
-          # AOT compiler unavailable; the interpreter is used instead.
-        end
+        require "rbs_jars"
       end
     end
   end

@@ -19,8 +19,10 @@ doc/
 datasets/
 tmp/
 
-# Build artifact — rebuilt inside the image by `rake wasm:jruby_setup`
+# Build artifacts — rebuilt inside the image by `rake wasm:jruby_setup` and
+# `rake wasm:install_jars`
 lib/rbs/wasm/*.wasm
+lib/rbs_jars.rb
 *.gem
 ext/**/*.o
 ext/**/*.so

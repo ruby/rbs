@@ -33,6 +33,8 @@ rust/ruby-rbs/vendor/rbs/
 # Compiled WebAssembly module (built by rake wasm:build)
 wasm/*.wasm
 
-# JRuby runtime artifact (built by rake wasm:jruby_setup, bundled in the -java
-# gem). The Chicory/ASM jars are not here; they live in ~/.m2 (jar-dependencies).
+# JRuby runtime artifacts, bundled in the -java gem: the parser (rake
+# wasm:jruby_setup) and the generated require_jar file (rake wasm:install_jars).
+# The Chicory/ASM jars themselves live in ~/.m2 (jar-dependencies), not here.
 lib/rbs/wasm/*.wasm
+lib/rbs_jars.rb
