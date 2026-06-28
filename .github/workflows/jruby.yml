@@ -64,9 +64,9 @@ jobs:
       - name: Install runtime and test gems
         run: gem install prism rake rake-compiler test-unit rdoc rspec minitest json-schema pry --no-document
       # jar-dependencies resolves through the JVM, so download the Chicory/ASM
-      # jars into ~/.m2 and generate lib/rbs_jars.rb here on JRuby (jar-dependencies
-      # is not available in the CRuby step above).
-      - name: Download the jars and generate rbs_jars.rb
+      # jars into ~/.m2 here on JRuby (jar-dependencies is not available in the
+      # CRuby step above).
+      - name: Download the Chicory and ASM jars
         run: jruby -S rake wasm:install_jars
       - name: Run the test suite on JRuby
         run: jruby -S rake test

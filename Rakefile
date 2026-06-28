@@ -630,14 +630,18 @@ namespace :wasm do
   # Where the runtime looks for the module by default (see RBS::WASM::Runtime).
   JRUBY_WASM_DIR = File.expand_path("lib/rbs/wasm", __dir__)
 
-  desc "Download the Chicory/ASM jars into ~/.m2 and generate lib/rbs_jars.rb. Run on JRuby."
+  desc "Download the Chicory/ASM jars into the local Maven repository (~/.m2). Run on JRuby."
   task :install_jars do
-    # Reads the `jar` requirements from rbs.gemspec and downloads them (and their
-    # transitive deps) into ~/.m2, the same way `gem install` does, then writes
-    # lib/rbs_jars.rb with the require_jar calls RBS::WASM::Runtime loads. The jars
-    # themselves are not copied into the gem, so nothing extra is shipped.
+    # Resolves the `jar` requirements from rbs.gemspec via Maven and downloads
+    # them (and their transitive deps) into ~/.m2, the same way `gem install`
+    # does; the jars are not copied into the gem. The platform is forced to java
+    # because Jars::Installer skips non-java gems, and write_require_file is false
+    # because lib/rbs_jars.rb is hand-maintained (the generator mangles the
+    # `com.dylibso.chicory:runtime` artifact id).
     require "jars/installer"
-    Jars::Installer.new("rbs.gemspec").install_jars
+    spec = Gem::Specification.load("rbs.gemspec")
+    spec.platform = "java"
+    Jars::Installer.new(spec).install_jars(write_require_file: false)
   end
 
   desc "Build rbs_parser.wasm and copy it next to RBS::WASM::Runtime"

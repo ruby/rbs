@@ -12,7 +12,7 @@ module RBS
     #
     # Chicory is a pure-Java runtime, so there is no native dependency. The
     # `.wasm` ships in the gem; the Chicory jars are fetched from Maven by
-    # jar-dependencies (see load_jars and rbs.gemspec).
+    # jar-dependencies (see lib/rbs_jars.rb and rbs.gemspec).
     class Runtime
       include MonitorMixin
 
@@ -28,7 +28,10 @@ module RBS
 
       def initialize
         super()
-        load_jars
+        # rbs_jars.rb require_jars the Chicory/ASM jars from the local Maven
+        # repository (~/.m2), where jar-dependencies puts them at gem install (or
+        # `rake wasm:install_jars` when running from source).
+        require "rbs_jars"
         @wasm = build_instance
         @memory = @wasm.memory
         @alloc = @wasm.export("rbs_wasm_alloc")
@@ -188,13 +191,6 @@ module RBS
         nil
       end
 
-      # Loads the Chicory/ASM jars onto the classpath. lib/rbs_jars.rb is generated
-      # from the `jar` requirements in rbs.gemspec (by `rake wasm:install_jars`, and
-      # refreshed by jar-dependencies at gem install); it require_jars each jar from
-      # the local Maven repository (~/.m2).
-      def load_jars
-        require "rbs_jars"
-      end
     end
   end
 end

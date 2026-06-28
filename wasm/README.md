@@ -22,8 +22,7 @@ $ export WASI_SDK_PATH=/path/to/wasi-sdk
 $ rake wasm:build        # compile rbs_parser.wasm
 $ rake wasm:check        # also smoke-test it (needs wasmtime)
 $ rake wasm:jruby_setup  # copy rbs_parser.wasm into lib/rbs/wasm/ for JRuby
-$ rake wasm:install_jars # download the Chicory/ASM jars into ~/.m2 and
-                         # generate lib/rbs_jars.rb (run on JRuby)
+$ rake wasm:install_jars # download the Chicory/ASM jars into ~/.m2 (run on JRuby)
 ```
 
 The compiled `rbs_parser.wasm` is a build artifact and is not checked in.
