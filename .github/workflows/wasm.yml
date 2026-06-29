@@ -26,10 +26,10 @@ jobs:
     name: wasm:check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@9eb537ca036ebaed86729dcb9309076e4c5c3b74 # v1.314.0
         with:
           ruby-version: ruby
           bundler: none
@@ -46,7 +46,7 @@ jobs:
           curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
           echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
       - name: Install wasmtime
-        uses: bytecodealliance/actions/wasmtime/setup@v1
+        uses: bytecodealliance/actions/wasmtime/setup@9152e710e9f7182e4c29ad218e4f335a7b203613 # v1.1.3
         with:
           version: ${{ env.WASMTIME_VERSION }}
       - name: Build and smoke-test the WebAssembly module
