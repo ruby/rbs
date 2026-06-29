@@ -31,13 +31,13 @@ jobs:
     name: jruby
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       # Build the .wasm and fetch the Chicory jars with CRuby + the WASI SDK,
       # then run RBS itself on JRuby against those artifacts.
       - name: Set up Ruby (to assemble the WebAssembly runtime)
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@9eb537ca036ebaed86729dcb9309076e4c5c3b74 # v1.314.0
         with:
           ruby-version: ruby
           bundler: none
@@ -57,7 +57,7 @@ jobs:
         run: bundle exec rake wasm:jruby_setup
 
       - name: Set up JRuby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@9eb537ca036ebaed86729dcb9309076e4c5c3b74 # v1.314.0
         with:
           ruby-version: jruby
           bundler: none
