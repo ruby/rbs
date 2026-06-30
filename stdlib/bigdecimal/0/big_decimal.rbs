@@ -1238,7 +1238,8 @@ module Kernel
   # Raises an exception if `value` evaluates to a Float and `digits` is larger
   # than Float::DIG + 1.
   #
-  def self?.BigDecimal: (real | string | BigDecimal initial, ?int digits, ?exception: bool) -> BigDecimal
+  def self?.BigDecimal: (real | string | BigDecimal initial, ?int digits, ?exception: true) -> BigDecimal
+                      | (real | string | BigDecimal initial, ?int digits, exception: false) -> BigDecimal?
 end
 
 %a{annotate:rdoc:skip}

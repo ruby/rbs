@@ -1719,7 +1719,8 @@ class Thread::Queue[E = untyped] < Object
   # If `timeout` seconds have passed and no data is available `nil` is returned.
   # If `timeout` is `0` it returns immediately.
   #
-  def pop: (?boolish non_block, ?timeout: _ToF?) -> E?
+  def pop: (?false non_block, ?timeout: _ToF?) -> E?
+         | (true non_block) -> E
 
   # <!--
   #   rdoc-file=thread_sync.c
