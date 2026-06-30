@@ -619,7 +619,7 @@ class ERB
   # It's good practice to choose a variable name that begins with an underscore:
   # <code>'_'</code>.
   #
-  def initialize: (String, ?eoutvar: String, ?trim_mode: Integer | String | NilClass) -> untyped
+  def initialize: (String, ?eoutvar: String, ?trim_mode: Integer | String | NilClass) -> void
 
   # <!-- rdoc-file=lib/erb.rb -->
   # Returns the Ruby code that, when executed, generates the result;
@@ -702,7 +702,7 @@ class ERB
   # Like #result, but prints the result string (instead of returning it);
   # returns `nil`.
   #
-  def run: (?Binding) -> untyped
+  def run: (?Binding) -> nil
 
   # <!--
   #   rdoc-file=lib/erb.rb
@@ -746,7 +746,7 @@ class ERB
   # class MyClass; include MyModule; end
   # MyClass.new.render('foo', 123)                      # => "foo 123"
   #
-  def def_method: (Module, String, ?String) -> untyped
+  def def_method: (Module, String, ?String) -> Symbol
 
   # <!--
   #   rdoc-file=lib/erb.rb
@@ -913,7 +913,7 @@ class ERB
     # define *methodname* as instance method of current module, using ERB object or
     # eRuby file
     #
-    def self.def_erb_method: (String methodname, (String | ERB) erb_or_fname) -> untyped
+    def self.def_erb_method: (String methodname, (String | ERB) erb_or_fname) -> Symbol
   end
 
   # <!-- rdoc-file=lib/erb/util.rb -->
