@@ -73,6 +73,8 @@ const char *RBS_NONNULL rbs_node_type_name(rbs_node_t *RBS_NONNULL node) {
         return "RBS::AST::Members::Prepend";
     case RBS_AST_MEMBERS_PRIVATE:
         return "RBS::AST::Members::Private";
+    case RBS_AST_MEMBERS_PROTECTED:
+        return "RBS::AST::Members::Protected";
     case RBS_AST_MEMBERS_PUBLIC:
         return "RBS::AST::Members::Public";
     case RBS_AST_RUBY_ANNOTATIONS_BLOCK_PARAM_TYPE_ANNOTATION:
@@ -872,6 +874,19 @@ rbs_ast_members_private_t *RBS_NONNULL rbs_ast_members_private_new(rbs_allocator
     *instance = (rbs_ast_members_private_t) {
         .base = (rbs_node_t) {
             .type = RBS_AST_MEMBERS_PRIVATE,
+            .location = location,
+        },
+    };
+
+    return instance;
+}
+#line 140 "templates/src/ast.c.erb"
+rbs_ast_members_protected_t *RBS_NONNULL rbs_ast_members_protected_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location) {
+    rbs_ast_members_protected_t *instance = rbs_allocator_alloc(allocator, rbs_ast_members_protected_t);
+
+    *instance = (rbs_ast_members_protected_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_MEMBERS_PROTECTED,
             .location = location,
         },
     };

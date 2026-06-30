@@ -59,6 +59,40 @@ class RBS::AST::VisitorTest < Test::Unit::TestCase
     assert_equal(["RBS::AST::Members::MethodDefinition"], visitor.nodes.map(&:class).map(&:name))
   end
 
+  def test_visit_member_protected
+    visitor_class = Class.new(RBS::AST::Visitor) do
+      attr_reader :nodes
+
+      def initialize
+        super()
+        @nodes = []
+      end
+
+      def visit_member_protected(node)
+        @nodes << node
+      end
+    end
+
+    rbs = <<~RBS
+      class Foo
+        public
+
+        private
+
+        protected
+
+        def hello: () -> void
+      end
+    RBS
+
+    declarations = parse_rbs_string(rbs)
+    visitor = visitor_class.new
+    visitor.visit_all(declarations)
+
+    assert_equal(1, visitor.nodes.size)
+    assert_instance_of RBS::AST::Members::Protected, visitor.nodes[0]
+  end
+
   private
 
   def parse_rbs_string(rbs)

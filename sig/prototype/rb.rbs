@@ -82,7 +82,11 @@ module RBS
 
       @public: AST::Members::Public?
 
-      def current_accessibility: (Array[decl] decls, ?Integer index) -> (AST::Members::Private | AST::Members::Public)
+      def protected: () -> AST::Members::Protected
+
+      @protected: AST::Members::Protected?
+
+      def current_accessibility: (Array[decl] decls, ?Integer index) -> (AST::Members::Private | AST::Members::Public | AST::Members::Protected)
 
       def remove_unnecessary_accessibility_methods!: (Array[decl]) -> void
 

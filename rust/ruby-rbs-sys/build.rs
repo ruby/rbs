@@ -102,6 +102,7 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_ast_members_method_definition_t")
         .allowlist_type("rbs_ast_members_prepend_t")
         .allowlist_type("rbs_ast_members_private_t")
+        .allowlist_type("rbs_ast_members_protected_t")
         .allowlist_type("rbs_ast_members_public_t")
         // Match every `rbs_ast_ruby_annotations_*` struct (and the union itself)
         // so newly added annotation kinds do not require edits here. This keeps the

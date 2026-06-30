@@ -1,6 +1,6 @@
 module RBS
   class Definition
-    type accessibility = :public | :private
+    type accessibility = :public | :private | :protected
 
     class Variable
       attr_reader parent_variable: Variable?
@@ -125,6 +125,8 @@ module RBS
       def public?: () -> bool
 
       def private?: () -> bool
+
+      def protected?: () -> bool
 
       # Substitutes type variables to some types.
       # Takes care of type parameter bounds.

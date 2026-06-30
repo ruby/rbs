@@ -52,6 +52,7 @@
     case kATTRACCESSOR: \
     case kPUBLIC:       \
     case kPRIVATE:      \
+    case kPROTECTED:    \
     case kUNTYPED:      \
     case kUSE:          \
     case kAS:           \
@@ -89,6 +90,7 @@
     case kATTRACCESSOR:  \
     case kPUBLIC:        \
     case kPRIVATE:       \
+    case kPROTECTED:     \
     case kUNTYPED:       \
     case kUSE:           \
     case kAS:            \
@@ -199,8 +201,7 @@ static bool parse_type_name(rbs_parser_t *parser, TypeNameKind kind, rbs_range_t
     rbs_node_list_t *path = rbs_node_list_new(ALLOCATOR());
 
     while (
-        parser->current_token.type == tUIDENT && parser->next_token.type == pCOLON2 && parser->current_token.range.end.byte_pos == parser->next_token.range.start.byte_pos && parser->next_token.range.end.byte_pos == parser->next_token2.range.start.byte_pos
-    ) {
+        parser->current_token.type == tUIDENT && parser->next_token.type == pCOLON2 && parser->current_token.range.end.byte_pos == parser->next_token.range.start.byte_pos && parser->next_token.range.end.byte_pos == parser->next_token2.range.start.byte_pos) {
         rbs_constant_id_t symbol_value = INTERN_TOKEN(parser, parser->current_token);
         rbs_location_range symbol_range = RBS_RANGE_LEX2AST(parser->next_token.range);
         rbs_ast_symbol_t *symbol = rbs_ast_symbol_new(ALLOCATOR(), symbol_range, &parser->constant_pool, symbol_value);
@@ -1914,6 +1915,7 @@ static InstanceSingletonKind parse_instance_singleton_kind(rbs_parser_t *parser,
  * def_member ::= {kDEF} method_name `:` <method_types>
  *              | {kPRIVATE} kDEF method_name `:` <method_types>
  *              | {kPUBLIC} kDEF method_name `:` <method_types>
+ *              | {kPROTECTED} kDEF method_name `:` <method_types>
  *
  * method_types ::= {} <method_type>
  *                | {} <`...`>
@@ -1943,6 +1945,13 @@ static bool parse_member_def(rbs_parser_t *parser, bool instance_only, bool acce
     case kPUBLIC: {
         visibility_range = parser->current_token.range;
         visibility = RBS_METHOD_DEFINITION_VISIBILITY_PUBLIC;
+        member_range.start = visibility_range.start;
+        rbs_parser_advance(parser);
+        break;
+    }
+    case kPROTECTED: {
+        visibility_range = parser->current_token.range;
+        visibility = RBS_METHOD_DEFINITION_VISIBILITY_PROTECTED;
         member_range.start = visibility_range.start;
         rbs_parser_advance(parser);
         break;
@@ -2343,6 +2352,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
 /*
   visibility_member ::= {<`public`>}
                       | {<`private`>}
+                      | {<`protected`>}
 */
 NODISCARD
 static bool parse_visibility_member(rbs_parser_t *parser, rbs_node_list_t *annotations, rbs_node_t **visibility_member) {
@@ -2362,6 +2372,10 @@ static bool parse_visibility_member(rbs_parser_t *parser, rbs_node_list_t *annot
         *visibility_member = (rbs_node_t *) rbs_ast_members_private_new(ALLOCATOR(), location);
         return true;
     }
+    case kPROTECTED: {
+        *visibility_member = (rbs_node_t *) rbs_ast_members_protected_new(ALLOCATOR(), location);
+        return true;
+    }
     default:
         rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
         return false;
@@ -2376,7 +2390,7 @@ static bool parse_visibility_member(rbs_parser_t *parser, rbs_node_list_t *annot
 
   attr_keyword ::= `attr_reader` | `attr_writer` | `attr_accessor`
 
-  visibility ::= `public` | `private`
+  visibility ::= `public` | `private` | `protected`
 
   attr_var ::=                    # empty
              | `(` tAIDENT `)`    # Ivar name
@@ -2403,6 +2417,12 @@ static bool parse_attribute_member(rbs_parser_t *parser, rbs_position_t comment_
     case kPUBLIC: {
         visibility_range = parser->current_token.range;
         visibility = RBS_ATTRIBUTE_VISIBILITY_PUBLIC;
+        rbs_parser_advance(parser);
+        break;
+    }
+    case kPROTECTED: {
+        visibility_range = parser->current_token.range;
+        visibility = RBS_ATTRIBUTE_VISIBILITY_PROTECTED;
         rbs_parser_advance(parser);
         break;
     }
@@ -2655,6 +2675,7 @@ static bool parse_nested_decl(rbs_parser_t *parser, const char *nested_in, rbs_p
                   | attribute_member
                   | `public`
                   | `private`
+                  | `protected`
 */
 NODISCARD
 static bool parse_module_members(rbs_parser_t *parser, rbs_node_list_t **members) {
@@ -2705,6 +2726,7 @@ static bool parse_module_members(rbs_parser_t *parser, rbs_node_list_t **members
 
         case kPUBLIC:
         case kPRIVATE:
+        case kPROTECTED:
             if (parser->next_token.range.start.line == parser->current_token.range.start.line) {
                 switch (parser->next_token.type) {
                 case kDEF: {

@@ -161,8 +161,13 @@ class Foo
   attr_accessor age (@age): Integer
   attr_writer email(): String?
 
+  protected attr_reader path: String
+
+  protected def secret: () -> String
+
   private
   public
+  protected
 
   alias foo bar
   alias self.foo self.bar
@@ -183,11 +188,15 @@ EOF
     assert_member members[8], :attribute
     assert_member members[9], :attribute
 
-    assert_member members[10], :visibility
-    assert_member members[11], :visibility
+    assert_member members[10], :attribute
+    assert_member members[11], :methodDefinition
 
-    assert_member members[12], :alias
-    assert_member members[13], :alias
+    assert_member members[12], :visibility
+    assert_member members[13], :visibility
+    assert_member members[14], :visibility
+
+    assert_member members[15], :alias
+    assert_member members[16], :alias
   end
 
   def test_class_decl

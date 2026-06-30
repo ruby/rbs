@@ -308,7 +308,7 @@ module RBS
                 end
               end
             end
-          when :public, :private
+          when :public, :private, :protected
             accessibility = __send__(node.children[0])
             if args.empty?
               decls << accessibility
@@ -744,9 +744,13 @@ module RBS
         @public ||= AST::Members::Public.new(location: nil)
       end
 
+      def protected
+        @protected ||= AST::Members::Protected.new(location: nil)
+      end
+
       def current_accessibility(decls, index = decls.size)
         slice = decls.slice(0, index) or raise
-        idx = slice.rindex { |decl| decl == private || decl == public }
+        idx = slice.rindex { |decl| decl == private || decl == public || decl == protected }
         if idx
           _ = decls[idx]
         else
@@ -781,7 +785,7 @@ module RBS
       end
 
       def is_accessibility?(decl)
-        decl == public || decl == private
+        decl == public || decl == private || decl == protected
       end
 
       def find_def_index_by_name(decls, name)

@@ -101,6 +101,8 @@ VALUE rbs_attribute_visibility_to_ruby(enum rbs_attribute_visibility value) {
         return rb_id2sym(rb_intern("public"));
     case RBS_ATTRIBUTE_VISIBILITY_PRIVATE:
         return rb_id2sym(rb_intern("private"));
+    case RBS_ATTRIBUTE_VISIBILITY_PROTECTED:
+        return rb_id2sym(rb_intern("protected"));
     default:
         rb_fatal("unknown enum rbs_attribute_visibility value: %d", value);
     }
@@ -149,6 +151,8 @@ VALUE rbs_method_definition_visibility_to_ruby(enum rbs_method_definition_visibi
         return rb_id2sym(rb_intern("public"));
     case RBS_METHOD_DEFINITION_VISIBILITY_PRIVATE:
         return rb_id2sym(rb_intern("private"));
+    case RBS_METHOD_DEFINITION_VISIBILITY_PROTECTED:
+        return rb_id2sym(rb_intern("protected"));
     default:
         rb_fatal("unknown enum rbs_method_definition_visibility value: %d", value);
     }
@@ -995,6 +999,19 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         return CLASS_NEW_INSTANCE(RBS_AST_Members_Private, 1, &h);
+    }
+    case RBS_AST_MEMBERS_PROTECTED: {
+        rbs_ast_members_protected_t *node = (rbs_ast_members_protected_t *) instance;
+
+        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
+        VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+
+        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
+        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
+        VALUE h = ctx.reusable_kwargs_hash;
+        rb_hash_clear(h);
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
+        return CLASS_NEW_INSTANCE(RBS_AST_Members_Protected, 1, &h);
     }
     case RBS_AST_MEMBERS_PUBLIC: {
         rbs_ast_members_public_t *node = (rbs_ast_members_public_t *) instance;

@@ -27,6 +27,8 @@ module RBS
 
       def visit_member_private: (Members::Private node) -> void
 
+      def visit_member_protected: (Members::Protected node) -> void
+
       def visit_member_public: (Members::Public node) -> void
 
       def visit_member_method_definition: (Members::MethodDefinition node) -> void
