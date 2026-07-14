@@ -62,7 +62,12 @@ jobs:
           ruby-version: jruby
           bundler: none
       - name: Install runtime and test gems
-        run: gem install prism rake rake-compiler test-unit rdoc rspec minitest json-schema pry --no-document
+        # rdoc 8.0.0 added a runtime dependency on rbs, which pulls the released
+        # C-extension rbs gem and fails to build on JRuby. Pin rdoc below 8 until
+        # a -java rbs gem is published.
+        run: |
+          gem install prism rake rake-compiler test-unit rspec minitest json-schema pry --no-document
+          gem install rdoc -v "< 8" --no-document
       # jar-dependencies resolves through the JVM, so download the Chicory/ASM
       # jars into ~/.m2 here on JRuby (jar-dependencies is not available in the
       # CRuby step above).
