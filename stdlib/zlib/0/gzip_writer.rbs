@@ -125,7 +125,8 @@ module Zlib
     # -->
     # Same as IO.
     #
-    def putc: (Numeric | String arg0) -> untyped
+    def putc: (real) -> real
+            | (String) -> String
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
