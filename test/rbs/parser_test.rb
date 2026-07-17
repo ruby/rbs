@@ -1046,6 +1046,8 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_invalid_utf8_byte_in_comment_does_not_hang
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
     # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
     assert_raises(RBS::ParsingError) do
