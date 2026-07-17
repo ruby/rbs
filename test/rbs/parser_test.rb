@@ -1060,4 +1060,14 @@ class RBS::ParserTest < Test::Unit::TestCase
       RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
+
+  def test_utf8_replacement_character_in_comment_parses
+    # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
+    # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the
+    # sentinel that marks an invalid byte. A comment containing it must parse fine.
+    source = "# \u{FFFD}\ntype x = untyped\n".dup.force_encoding(Encoding::UTF_8)
+    _, decls = RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+    assert_equal 1, decls.size
+    assert_instance_of RBS::AST::Declarations::TypeAlias, decls[0]
+  end
 end
