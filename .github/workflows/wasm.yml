@@ -1,0 +1,53 @@
+name: WebAssembly
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/wasm.yml"
+      - "Rakefile"
+      - "include/**"
+      - "src/**"
+      - "wasm/**"
+
+permissions:
+  contents: read
+
+env:
+  # Pinned so the smoke test is reproducible. Bump together when upgrading.
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+  WASMTIME_VERSION: "v45.0.2"
+
+jobs:
+  build:
+    name: wasm:check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Install wasmtime
+        uses: bytecodealliance/actions/wasmtime/setup@v1
+        with:
+          version: ${{ env.WASMTIME_VERSION }}
+      - name: Build and smoke-test the WebAssembly module
+        run: bundle exec rake wasm:check
