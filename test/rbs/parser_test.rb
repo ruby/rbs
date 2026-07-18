@@ -1046,9 +1046,11 @@ class RBS::ParserTest < Test::Unit::TestCase
   end
 
   def test_invalid_utf8_byte_in_comment_does_not_hang
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
     # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
+    assert_raises(RBS::ParsingError) do
       RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
   end
@@ -1058,10 +1060,18 @@ class RBS::ParserTest < Test::Unit::TestCase
 
     # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
     source = "\xFF".dup.force_encoding(Encoding::UTF_8)
-    Timeout.timeout(5) do
-      assert_raises(RBS::ParsingError) do
-        RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
-      end
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
     end
+  end
+
+  def test_utf8_replacement_character_in_comment_parses
+    # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
+    # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the
+    # sentinel that marks an invalid byte. A comment containing it must parse fine.
+    source = "# \u{FFFD}\ntype x = untyped\n".dup.force_encoding(Encoding::UTF_8)
+    _, decls = RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+    assert_equal 1, decls.size
+    assert_instance_of RBS::AST::Declarations::TypeAlias, decls[0]
   end
 end
