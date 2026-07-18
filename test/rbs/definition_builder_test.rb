@@ -2377,6 +2377,42 @@ end
     end
   end
 
+  def test_protected_visibility
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class C
+  protected
+  def a: () -> void
+  attr_accessor b: String
+
+  public def c: () -> void
+  protected def d: () -> void
+  protected attr_accessor e: Integer
+  protected def self.f: () -> void
+  protected attr_reader self.g: String
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:a], :protected?
+          assert_predicate definition.methods[:b], :protected?
+          assert_predicate definition.methods[:b=], :protected?
+          assert_predicate definition.methods[:c], :public?
+          assert_predicate definition.methods[:d], :protected?
+          assert_predicate definition.methods[:e], :protected?
+          assert_predicate definition.methods[:e=], :protected?
+        end
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          assert_predicate definition.methods[:f], :protected?
+          assert_predicate definition.methods[:g], :protected?
+        end
+      end
+    end
+  end
+
   def test_new_alias
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)

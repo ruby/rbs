@@ -88,6 +88,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "out"           { return rbs_next_token(lexer, kOUT); }
       "prepend"       { return rbs_next_token(lexer, kPREPEND); }
       "private"       { return rbs_next_token(lexer, kPRIVATE); }
+      "protected"     { return rbs_next_token(lexer, kPROTECTED); }
       "public"        { return rbs_next_token(lexer, kPUBLIC); }
       "self"          { return rbs_next_token(lexer, kSELF); }
       "singleton"     { return rbs_next_token(lexer, kSINGLETON); }

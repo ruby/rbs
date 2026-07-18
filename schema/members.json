@@ -47,7 +47,7 @@
           "type": "boolean"
         },
         "visibility": {
-          "enum": ["public", "private", null]
+          "enum": ["public", "private", "protected", null]
         }
       },
       "required": ["member", "name", "kind", "overloads", "comment", "annotations", "location", "visibility", "overloading"]
@@ -209,19 +209,19 @@
           "$ref": "location.json"
         },
         "visibility": {
-          "enum": ["public", "private", null]
+          "enum": ["public", "private", "protected", null]
         }
       },
       "required": ["member", "name", "ivar_name", "type", "annotations", "kind", "comment", "location", "visibility"]
     },
     "visibility": {
       "title": "Visibility specifier",
-      "description": "`public` and `private`.",
+      "description": "`public`, `private`, and `protected`.",
       "type": "object",
       "properties": {
         "member": {
           "type": "string",
-          "enum": ["public", "private"]
+          "enum": ["public", "private", "protected"]
         },
         "location": {
           "$ref": "location.json"

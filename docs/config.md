@@ -120,10 +120,11 @@ enums:
       - unspecified
       - public
       - private
+      - protected
 ```
 
 For example, the `attribute_visibility` enum is a data type for `visibility` attribute of `attr_reader`, `attr_writer`, and `attr_accessor` definitions.
-The `visibility` attribute can be one of `unspecified`, `public`, and `private`.
+The `visibility` attribute can be one of `unspecified`, `public`, `private`, and `protected`.
 
 ### Symbol enums
 
@@ -137,6 +138,7 @@ enums:
       - unspecified
       - public
       - private
+      - protected
 ```
 
 It defines an `enum` in C AST definition.
@@ -146,6 +148,7 @@ enum RBS_ATTRIBUTE_VISIBILITY_TAG {
     RBS_ATTRIBUTE_VISIBILITY_TAG_UNSPECIFIED,
     RBS_ATTRIBUTE_VISIBILITY_TAG_PUBLIC,
     RBS_ATTRIBUTE_VISIBILITY_TAG_PRIVATE,
+    RBS_ATTRIBUTE_VISIBILITY_TAG_PROTECTED,
 };
 ```
 
@@ -160,12 +163,14 @@ VALUE rbs_attribute_visibility_to_ruby(enum rbs_attribute_visibility value) {
         return rb_id2sym(rb_intern("public"));
     case RBS_ATTRIBUTE_VISIBILITY_PRIVATE:
         return rb_id2sym(rb_intern("private"));
+    case RBS_ATTRIBUTE_VISIBILITY_PROTECTED:
+        return rb_id2sym(rb_intern("protected"));
     default:
         rb_fatal("unknown enum rbs_attribute_visibility value: %d", value);
     }
 }
 ```
 
-`RBS_ATTRIBUTE_VISIBILITY_PUBLIC` and `RBS_ATTRIBUTE_VISIBILITY_PRIVATE` are translated to Ruby symbols `:public` and `:private` respectively. 
+`RBS_ATTRIBUTE_VISIBILITY_PUBLIC`, `RBS_ATTRIBUTE_VISIBILITY_PRIVATE`, and `RBS_ATTRIBUTE_VISIBILITY_PROTECTED` are translated to Ruby symbols `:public`, `:private`, and `:protected` respectively.
 
 Note that the first `RBS_ATTRIBUTE_VISIBILITY_UNSPECIFIED` is translated to `nil` in Ruby. This is specified by the `optional: true` attribute in YAML. When `optional: true` is set, the first enum value is translated to `nil`.

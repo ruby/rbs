@@ -693,7 +693,10 @@ mod tests {
         let rbs_code = r#"
             class Foo
                 attr_reader name: String
+                protected attr_reader token: String
                 def self.process: () -> void
+                protected def secret: () -> void
+                protected
                 alias instance_method target_method
                 alias self.singleton_method self.target_method
             end
@@ -720,23 +723,45 @@ mod tests {
             panic!("Expected AttrReader");
         }
 
+        // protected attr_reader - should preserve protected visibility
+        if let Node::AttrReader(attr) = &members[1] {
+            assert_eq!(attr.kind(), AttributeKind::Instance);
+            assert_eq!(attr.visibility(), AttributeVisibility::Protected);
+        } else {
+            panic!("Expected AttrReader");
+        }
+
         // def self.process - should be singleton method with unspecified visibility (default)
-        if let Node::MethodDefinition(method) = &members[1] {
+        if let Node::MethodDefinition(method) = &members[2] {
             assert_eq!(method.kind(), MethodDefinitionKind::Singleton);
             assert_eq!(method.visibility(), MethodDefinitionVisibility::Unspecified);
         } else {
             panic!("Expected MethodDefinition");
         }
 
+        // protected def - should preserve protected visibility
+        if let Node::MethodDefinition(method) = &members[3] {
+            assert_eq!(method.kind(), MethodDefinitionKind::Instance);
+            assert_eq!(method.visibility(), MethodDefinitionVisibility::Protected);
+        } else {
+            panic!("Expected MethodDefinition");
+        }
+
+        // standalone protected visibility member
+        if let Node::Protected(_) = &members[4] {
+        } else {
+            panic!("Expected Protected");
+        }
+
         // alias instance_method
-        if let Node::Alias(alias) = &members[2] {
+        if let Node::Alias(alias) = &members[5] {
             assert_eq!(alias.kind(), AliasKind::Instance);
         } else {
             panic!("Expected Alias");
         }
 
         // alias self.singleton_method
-        if let Node::Alias(alias) = &members[3] {
+        if let Node::Alias(alias) = &members[6] {
             assert_eq!(alias.kind(), AliasKind::Singleton);
         } else {
             panic!("Expected Alias");

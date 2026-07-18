@@ -1,0 +1,28 @@
+# Acceptance test for the `protected` visibility modifier in all three forms:
+#   - standalone marker
+#   - `protected def ...` prefix
+#   - `protected attr_*` prefix
+
+class Account
+  @balance: Integer
+  @pin: Integer
+
+  attr_reader name: String
+
+  def initialize: (String name, Integer balance) -> void
+
+  # `protected def` prefix
+  protected def balance: () -> Integer
+
+  # `protected attr_*` prefix
+  protected attr_accessor pin: Integer
+
+  # Standalone `protected` marker: methods after it inherit protected visibility.
+  protected
+
+  def transfer_to: (Account other, Integer amount) -> void
+end
+
+class CheckingAccount < Account
+  def richer_than?: (Account other) -> bool
+end
