@@ -41,6 +41,15 @@ module VersionHelper
 end
 
 module WithStdlibAliases
+  def with_round_mode(&block)
+    block.call(nil)
+
+    %i[up down even].each do |mode|
+      block.call(mode)
+      with_string(mode.to_s, &block)
+    end
+  end
+
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?
       return RBS::UnitTest::WithAliases::WithEnum.new(

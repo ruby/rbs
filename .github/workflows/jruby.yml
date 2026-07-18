@@ -1,0 +1,77 @@
+name: JRuby
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - ".github/workflows/jruby.yml"
+      - "include/**"
+      - "src/**"
+      - "wasm/**"
+      - "lib/**"
+      - "sig/**"
+      - "core/**"
+      - "stdlib/**"
+      - "test/**"
+      - "Rakefile"
+      - "rbs.gemspec"
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with .github/workflows/wasm.yml.
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+
+jobs:
+  test:
+    name: jruby
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      # Build the .wasm and fetch the Chicory jars with CRuby + the WASI SDK,
+      # then run RBS itself on JRuby against those artifacts.
+      - name: Set up Ruby (to assemble the WebAssembly runtime)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Build rbs_parser.wasm
+        run: bundle exec rake wasm:jruby_setup
+
+      - name: Set up JRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby
+          bundler: none
+      - name: Install runtime and test gems
+        # rdoc 8.0.0 added a runtime dependency on rbs, which pulls the released
+        # C-extension rbs gem and fails to build on JRuby. Pin rdoc below 8 until
+        # a -java rbs gem is published.
+        run: |
+          gem install prism rake rake-compiler test-unit rspec minitest json-schema pry --no-document
+          gem install rdoc -v "< 8" --no-document
+      # jar-dependencies resolves through the JVM, so download the Chicory/ASM
+      # jars into ~/.m2 here on JRuby (jar-dependencies is not available in the
+      # CRuby step above).
+      - name: Download the Chicory and ASM jars
+        run: jruby -S rake wasm:install_jars
+      - name: Run the test suite on JRuby
+        run: jruby -S rake test

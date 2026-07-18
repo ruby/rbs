@@ -1,0 +1,13 @@
+module RBS
+  module WASM
+    # Generated from config.yml. See `templates/lib/rbs/wasm/serialization_schema.rb.erb`.
+    module SerializationSchema
+      # The node tag used for interned symbols (`rbs_ast_symbol`).
+      SYMBOL_TAG: Integer
+
+      # Indexed by node tag. Each entry describes how to decode one node; see the
+      # generated file for the exact shape.
+      SCHEMA: Array[Array[untyped]?]
+    end
+  end
+end

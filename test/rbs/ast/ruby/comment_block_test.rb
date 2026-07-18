@@ -60,6 +60,9 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
   end
 
   def test_build
+    omit_on_truffle_ruby! "`Prism::Location#start_line_slice` returns `nil` on TruffleRuby's prism"
+    omit_on_jruby! "`Prism::Location#start_line_slice` returns `nil` on JRuby's prism"
+
     buffer, comments = parse_comments(<<~RUBY)
       # Comment1
       # Comment2
@@ -188,6 +191,9 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
   end
 
   def test_trailing_annotation
+    omit_on_truffle_ruby! "`Prism::Location#start_line_slice` returns `nil` on TruffleRuby's prism"
+    omit_on_jruby! "`Prism::Location#start_line_slice` returns `nil` on JRuby's prism"
+
     buffer, comments = parse_comments(<<~RUBY)
       foo #: String
 
@@ -218,6 +224,9 @@ class RBS::AST::Ruby::CommentBlockTest < Test::Unit::TestCase
   end
 
   def test_trailing_annotation_type_application
+    omit_on_truffle_ruby! "`Prism::Location#start_line_slice` returns `nil` on TruffleRuby's prism"
+    omit_on_jruby! "`Prism::Location#start_line_slice` returns `nil` on JRuby's prism"
+
     buffer, comments = parse_comments(<<~RUBY)
       foo #[String]
 

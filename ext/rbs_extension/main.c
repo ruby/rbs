@@ -2,6 +2,7 @@
 #include "rbs/util/rbs_assert.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
+#include "rbs/serialize.h"
 #include "ast_translation.h"
 #include "legacy_location.h"
 #include "rbs_string_bridging.h"
@@ -290,6 +291,132 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
     return result;
 }
 
+// Serialize a parsed node into a binary Ruby string using the same encoder the
+// WebAssembly build uses. These `_*_to_bytes` entry points exist so the
+// round-trip (parse -> serialize -> deserialize) can be exercised on CRuby,
+// where it can be compared against the direct C -> Ruby translation.
+static VALUE serialized_node_to_string(rbs_parser_t *parser, rbs_node_t *node) {
+    rbs_string_t bytes = rbs_serialize_node(parser->allocator, &parser->constant_pool, node);
+    return rb_str_new(bytes.start, (long) rbs_string_len(bytes));
+}
+
+static VALUE parse_type_to_bytes_try(VALUE a) {
+    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    if (parser->next_token.type == pEOF) {
+        return Qnil;
+    }
+
+    rbs_node_t *type;
+    rbs_parse_type(parser, &type, RTEST(arg->void_allowed), RTEST(arg->self_allowed), RTEST(arg->classish_allowed));
+
+    raise_error_if_any(parser, arg->buffer);
+
+    if (RB_TEST(arg->require_eof)) {
+        rbs_parser_advance(parser);
+        if (parser->current_token.type != pEOF) {
+            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+            raise_error(parser->error, arg->buffer);
+        }
+    }
+
+    return serialized_node_to_string(parser, type);
+}
+
+static VALUE rbsparser_parse_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    declare_type_variables(parser, variables, buffer);
+    struct parse_type_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = require_eof,
+        .void_allowed = void_allowed,
+        .self_allowed = self_allowed,
+        .classish_allowed = classish_allowed
+    };
+
+    VALUE result = rb_ensure(parse_type_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
+static VALUE parse_method_type_to_bytes_try(VALUE a) {
+    struct parse_method_type_arg *arg = (struct parse_method_type_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    if (parser->next_token.type == pEOF) {
+        return Qnil;
+    }
+
+    rbs_method_type_t *method_type = NULL;
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof), true);
+
+    raise_error_if_any(parser, arg->buffer);
+
+    return serialized_node_to_string(parser, (rbs_node_t *) method_type);
+}
+
+static VALUE rbsparser_parse_method_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    declare_type_variables(parser, variables, buffer);
+    struct parse_method_type_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = require_eof
+    };
+
+    VALUE result = rb_ensure(parse_method_type_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
+static VALUE parse_signature_to_bytes_try(VALUE a) {
+    struct parse_signature_arg *arg = (struct parse_signature_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    rbs_signature_t *signature = NULL;
+    rbs_parse_signature(parser, &signature);
+
+    raise_error_if_any(parser, arg->buffer);
+
+    return serialized_node_to_string(parser, (rbs_node_t *) signature);
+}
+
+static VALUE rbsparser_parse_signature_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    struct parse_signature_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = false
+    };
+
+    VALUE result = rb_ensure(parse_signature_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
 struct parse_type_params_arg {
     VALUE buffer;
     rb_encoding *encoding;
@@ -462,6 +589,9 @@ void rbs__init_parser(void) {
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 8);
     rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
     rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+    rb_define_singleton_method(RBS_Parser, "_parse_type_to_bytes", rbsparser_parse_type_to_bytes, 8);
+    rb_define_singleton_method(RBS_Parser, "_parse_method_type_to_bytes", rbsparser_parse_method_type_to_bytes, 5);
+    rb_define_singleton_method(RBS_Parser, "_parse_signature_to_bytes", rbsparser_parse_signature_to_bytes, 3);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);

@@ -1,6 +1,9 @@
 require "test_helper"
 
 class RBS::RuntimePrototypeTest < Test::Unit::TestCase
+  omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
+  omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
+
   Runtime = RBS::Prototype::Runtime
   DefinitionBuilder = RBS::DefinitionBuilder
 

@@ -111,3 +111,68 @@ class EtcSingletonTest < Test::Unit::TestCase
                       Etc, :uname
   end
 end
+
+class EtcGroupSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "etc"
+  testing "singleton(::Etc::Group)"
+
+  def test_each
+    assert_send_type  "() { (::Etc::Group) -> void } -> singleton(::Etc::Group)",
+                      Etc::Group, :each do |_g| end
+    assert_send_type  "() -> ::Enumerator[::Etc::Group]",
+                      Etc::Group, :each
+  end
+end
+
+class EtcPasswdSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "etc"
+  testing "singleton(::Etc::Passwd)"
+
+  def test_each
+    assert_send_type  "() { (::Etc::Passwd) -> void } -> singleton(::Etc::Passwd)",
+                      Etc::Passwd, :each do |_u| end
+    assert_send_type  "() -> ::Enumerator[::Etc::Passwd]",
+                      Etc::Passwd, :each
+  end
+end
+
+class EtcPasswdInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "etc"
+  testing "::Etc::Passwd"
+
+  def test_age
+    omit "no age member on this platform" unless Etc::Passwd.members.include?(:age)
+    pw = Etc.getpwuid
+
+    assert_send_type  "() -> ::Integer",
+                      pw, :age
+    assert_send_type  "(::Integer) -> void",
+                      pw, :age=, pw.age
+  end
+
+  def test_comment
+    omit "no comment member on this platform" unless Etc::Passwd.members.include?(:comment)
+    pw = Etc.getpwuid
+
+    assert_send_type  "() -> ::String",
+                      pw, :comment
+    assert_send_type  "(::String) -> void",
+                      pw, :comment=, pw.comment
+  end
+
+  def test_quota
+    omit "no quota member on this platform" unless Etc::Passwd.members.include?(:quota)
+    pw = Etc.getpwuid
+
+    assert_send_type  "() -> ::Integer",
+                      pw, :quota
+    assert_send_type  "(::Integer) -> void",
+                      pw, :quota=, pw.quota
+  end
+end
