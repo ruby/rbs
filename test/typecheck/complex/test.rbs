@@ -1,0 +1,7 @@
+class Raises
+  def to_c: () -> bot
+end
+
+class RaisesNumeric < Numeric
+  def to_c: () -> bot
+end
