@@ -303,14 +303,29 @@ impl TypeNameInterner {
     }
 
     /// Kind of the trailing segment. `None` for roots.
+    ///
+    /// Follows the same semantics as Ruby's constant detection (Onigmo's
+    /// `ONIGENC_CTYPE_UPPER`, i.e. the Unicode `Uppercase` property): a
+    /// leading `_` is an interface, a leading Unicode uppercase code point
+    /// is a class, everything else is an alias.
+    ///
+    /// The ASCII path — hit by virtually every identifier — is a single
+    /// byte comparison. Non-ASCII names pay one UTF-8 code point decode
+    /// plus a `char::is_uppercase` table lookup.
     #[must_use]
     pub fn kind(&self, name: TypeName, strings: &StringInterner) -> Option<Kind> {
         let seg = self.last_segment(name)?;
-        let bytes = strings.resolve(seg).as_bytes();
-        let first = *bytes.first()?;
-        Some(if first == b'_' {
+        let s = strings.resolve(seg);
+        let first_byte = *s.as_bytes().first()?;
+        Some(if first_byte == b'_' {
             Kind::Interface
-        } else if first.is_ascii_uppercase() {
+        } else if first_byte < 0x80 {
+            if first_byte.is_ascii_uppercase() {
+                Kind::Class
+            } else {
+                Kind::Alias
+            }
+        } else if s.chars().next().is_some_and(char::is_uppercase) {
             Kind::Class
         } else {
             Kind::Alias
@@ -608,6 +623,32 @@ mod tests {
         assert_eq!(t.kind(als, &s), Some(Kind::Alias));
         assert_eq!(t.kind(iface, &s), Some(Kind::Interface));
         assert_eq!(t.kind(root, &s), None);
+    }
+
+    #[test]
+    fn kind_uses_unicode_uppercase_property() {
+        let (mut s, mut t) = setup();
+
+        // Non-ASCII uppercase code points (Lu / Lt / Other_Uppercase) count
+        // as constants, matching Ruby's `rb_sym_constant_char_p`.
+        let ultima = t.parse(&mut s, "Última");
+        let omega = t.parse(&mut s, "Ωmega");
+        let n_tilde = t.parse(&mut s, "Ñoño");
+        assert_eq!(t.kind(ultima, &s), Some(Kind::Class));
+        assert_eq!(t.kind(omega, &s), Some(Kind::Class));
+        assert_eq!(t.kind(n_tilde, &s), Some(Kind::Class));
+
+        // Non-ASCII lowercase (Ll) and Other_Letter (kanji etc.) are local
+        // identifiers in Ruby, so they belong to `Alias` here.
+        let alpha = t.parse(&mut s, "αlpha");
+        let kanji = t.parse(&mut s, "日本語");
+        assert_eq!(t.kind(alpha, &s), Some(Kind::Alias));
+        assert_eq!(t.kind(kanji, &s), Some(Kind::Alias));
+
+        // A leading underscore keeps interface semantics regardless of the
+        // rest of the name.
+        let iface = t.parse(&mut s, "_Únicos");
+        assert_eq!(t.kind(iface, &s), Some(Kind::Interface));
     }
 
     #[test]

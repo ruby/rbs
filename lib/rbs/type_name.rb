@@ -16,9 +16,10 @@ module RBS
                 :alias
               when name.start_with?("_")
                 :interface
-              else
-                # Defaults to :class
+              when name.match?(/\A\p{Uppercase}/)
                 :class
+              else
+                :alias
               end
     end
 

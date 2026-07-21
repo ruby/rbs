@@ -180,6 +180,19 @@ void rbs_skip(rbs_lexer_t *lexer) {
     }
 }
 
+rbs_token_t rbs_next_mb_ident_token(rbs_lexer_t *lexer, size_t skip_bytes, bool underscore_prefixed) {
+    const uint8_t *ptr = (const uint8_t *) (lexer->string.start + lexer->start.byte_pos + skip_bytes);
+    ptrdiff_t remaining = (ptrdiff_t) (lexer->end_pos - lexer->start.byte_pos - skip_bytes);
+    bool upper = lexer->encoding->isupper_char(ptr, remaining);
+    enum RBSTokenType type;
+    if (underscore_prefixed) {
+        type = upper ? tULIDENT : tULLIDENT;
+    } else {
+        type = upper ? tUIDENT : tLIDENT;
+    }
+    return rbs_next_token(lexer, type);
+}
+
 rbs_token_t rbs_next_token(rbs_lexer_t *lexer, enum RBSTokenType type) {
     rbs_token_t t;
 
