@@ -2,7 +2,17 @@ module RBS
   module Prototype
     class RBI
       include Helpers
-      
+
+      type visibility = :private | :protected | :public
+
+      class Context
+        attr_accessor singleton: bool
+
+        attr_accessor visibility: visibility
+
+        def initialize: (singleton: bool, visibility: visibility) -> void
+      end
+
       attr_reader decls: Array[AST::Declarations::t]
 
       type module_decl = AST::Declarations::Class | AST::Declarations::Module
@@ -13,13 +23,15 @@ module RBS
       # Last subsequent `sig` calls
       attr_reader last_sig: Array[RubyVM::AbstractSyntaxTree::Node]?
 
+      @contexts: Array[Context]
+
+      @emitted_visibility: Hash[Integer, visibility]
+
       def initialize: () -> void
 
       def parse: (String) -> void
 
-      def nested_name: (RubyVM::AbstractSyntaxTree::Node name) -> TypeName
-
-      def current_namespace: () -> Namespace
+      def append_decl: (AST::Declarations::t decl) -> void
 
       def push_class: (
         RubyVM::AbstractSyntaxTree::Node name,
@@ -35,6 +47,12 @@ module RBS
       # The inner most module/class definition, raises on toplevel
       def current_module!: () -> module_decl
 
+      def current_context: () -> Context?
+
+      def current_context!: () -> Context
+
+      def sync_visibility: (visibility) -> void
+
       # Put a `sig` call to current list.
       def push_sig: (RubyVM::AbstractSyntaxTree::Node node) -> void
 
@@ -44,6 +62,12 @@ module RBS
       def join_comments: (Array[RubyVM::AbstractSyntaxTree::Node] nodes, Hash[Integer, AST::Comment] comments) -> AST::Comment
 
       def process: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment], ?outer: Array[RubyVM::AbstractSyntaxTree::Node]) -> void
+
+      def process_visibility: (RubyVM::AbstractSyntaxTree::Node node, outer: Array[RubyVM::AbstractSyntaxTree::Node], comments: Hash[Integer, AST::Comment]) -> void
+
+      def process_attribute: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment]) -> void
+
+      def attribute_type: (:attr_reader | :attr_writer | :attr_accessor kind, Array[RubyVM::AbstractSyntaxTree::Node]? sigs) -> Types::t
 
       def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
 

@@ -70,9 +70,8 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
-end
-
-module Foo::Bar
+  module Bar
+  end
 end
     EOF
   end
@@ -91,9 +90,8 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
-end
-
-module Bar
+  module ::Bar
+  end
 end
     EOF
   end
@@ -112,11 +110,10 @@ end
 
     assert_write parser.decls, <<-EOF
 module Foo
+  ABBR_DAYNAMES: Array
+
+  ABBR_MONTHNAMES: Integer
 end
-
-Foo::ABBR_DAYNAMES: Array
-
-Foo::ABBR_MONTHNAMES: Integer
     EOF
   end
 
@@ -550,6 +547,251 @@ end
     EOF
   end
 
+  def test_nested_declarations_preserve_lexical_resolution
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Demo
+  class Parent; end
+  module Helpers; end
+  class Value; end
+
+  class Child < Parent
+    include Helpers
+
+    sig { params(value: Value).returns(Value) }
+    def convert(value); end
+  end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+module Demo
+  class Parent
+  end
+
+  module Helpers
+  end
+
+  class Value
+  end
+
+  class Child < Parent
+    include Helpers
+
+    def convert: (Value value) -> Value
+  end
+end
+    EOF
+  end
+
+  def test_nested_constant
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Demo
+  module Modes
+    VALUE = T.let(:value, Symbol)
+  end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+module Demo
+  module Modes
+    VALUE: Symbol
+  end
+end
+    EOF
+  end
+
+  def test_ignores_t_helpers
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Factory
+  extend T::Helpers
+  extend OtherHelpers
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+module Factory
+  extend OtherHelpers
+end
+    EOF
+  end
+
+  def test_t_class_falls_back_to_untyped
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Factory
+  sig do
+    type_parameters(:Config)
+      .params(config_class: T::Class[T.type_parameter(:Config)])
+      .returns(T.type_parameter(:Config))
+  end
+  def make(config_class); end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+module Factory
+  def make: [Config] (untyped config_class) -> Config
+end
+    EOF
+  end
+
+  def test_singleton_class_method
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Registry
+  class << self
+    sig { returns(T.attached_class) }
+    def build; end
+  end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Registry
+  def self.build: () -> instance
+end
+    EOF
+  end
+
+  def test_typed_attribute_consumes_signature
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Cache
+  sig { returns(T.nilable(Integer)) }
+  attr_reader :size
+
+  sig { returns(String) }
+  attr_accessor :name
+
+  sig { params(value: Integer).void }
+  attr_writer :count
+
+  sig { params(size: T.nilable(Integer)).void }
+  def initialize(size: nil); end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Cache
+  attr_reader size: Integer?
+
+  attr_accessor name: String
+
+  attr_writer count: Integer
+
+  def initialize: (?size: Integer? size) -> void
+end
+    EOF
+  end
+
+  def test_method_visibility
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Factory
+  private
+
+  sig { void }
+  def helper; end
+
+  public
+
+  sig { void }
+  def make; end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+module Factory
+  private
+
+  def helper: () -> void
+
+  public
+
+  def make: () -> void
+end
+    EOF
+  end
+
+  def test_generated_reproduction_can_be_loaded
+    parser = RBI.new
+
+    parser.parse <<-EOF
+module Demo
+  class Parent; end
+  module Helpers; end
+
+  class Child < Parent
+    include Helpers
+  end
+
+  module Modes
+    VALUE = T.let(:value, Symbol)
+  end
+
+  class Registry
+    class << self
+      sig { returns(T.attached_class) }
+      def build; end
+    end
+  end
+
+  class Cache
+    sig { returns(T.nilable(Integer)) }
+    attr_reader :size
+
+    sig { params(size: T.nilable(Integer)).void }
+    def initialize(size: nil); end
+  end
+
+  module Factory
+    extend T::Helpers
+
+    sig do
+      type_parameters(:Config)
+        .params(config_class: T::Class[T.type_parameter(:Config)])
+        .returns(T.type_parameter(:Config))
+    end
+    def make(config_class); end
+
+    private
+
+    sig { void }
+    def helper; end
+  end
+end
+    EOF
+
+    out = StringIO.new
+    RBS::Writer.new(out: out).write(parser.decls)
+    refute_match(/\bT::/, out.string)
+
+    SignatureManager.new do |manager|
+      manager.add_file("repro.rbs", out.string)
+      manager.build do |env|
+        builder = RBS::DefinitionBuilder.new(env: env)
+
+        ["::Demo::Child", "::Demo::Registry", "::Demo::Cache", "::Demo::Factory"].each do |name|
+          builder.build_instance(type_name(name))
+          builder.build_singleton(type_name(name))
+        end
+
+        assert_include env.constant_decls.keys, type_name("::Demo::Modes::VALUE")
+      end
+    end
+  end
+
   def test_masgn
     parser = RBI.new
 
@@ -561,13 +803,12 @@ end
 
     assert_write parser.decls, <<-EOF
 class Test
+  A: untyped
+
+  B: untyped
+
+  C: untyped
 end
-
-Test::A: untyped
-
-Test::B: untyped
-
-Test::C: untyped
     EOF
   end
 end
