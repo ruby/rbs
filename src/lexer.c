@@ -12,184 +12,142 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         unsigned int yych;
         unsigned int yyaccept = 0;
         yych = rbs_peek(lexer);
-        switch (yych) {
-        case 0x00000000:
-            goto yy1;
-        case '\t':
-        case ' ':
-            goto yy4;
-        case '\n':
-        case '\r':
-            goto yy6;
-        case '!':
-            goto yy7;
-        case '"':
-            goto yy9;
-        case '#':
-            goto yy10;
-        case '$':
-            goto yy12;
-        case '%':
-            goto yy13;
-        case '&':
-            goto yy14;
-        case '\'':
-            goto yy15;
-        case '(':
-            goto yy16;
-        case ')':
-            goto yy17;
-        case '*':
-            goto yy18;
-        case '+':
-            goto yy19;
-        case ',':
-            goto yy20;
-        case '-':
-            goto yy21;
-        case '.':
-            goto yy22;
-        case '/':
-        case '~':
-            goto yy24;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            goto yy25;
-        case ':':
-            goto yy27;
-        case '<':
-            goto yy29;
-        case '=':
-            goto yy31;
-        case '>':
-            goto yy33;
-        case '?':
-            goto yy35;
-        case '@':
-            goto yy36;
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'H':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'L':
-        case 'M':
-        case 'N':
-        case 'O':
-        case 'P':
-        case 'Q':
-        case 'R':
-        case 'S':
-        case 'T':
-        case 'U':
-        case 'V':
-        case 'W':
-        case 'X':
-        case 'Y':
-        case 'Z':
-            goto yy37;
-        case '[':
-            goto yy39;
-        case ']':
-            goto yy40;
-        case '^':
-            goto yy41;
-        case '_':
-            goto yy42;
-        case '`':
-            goto yy44;
-        case 'a':
-            goto yy46;
-        case 'b':
-            goto yy48;
-        case 'c':
-            goto yy49;
-        case 'd':
-            goto yy50;
-        case 'e':
-            goto yy51;
-        case 'f':
-            goto yy52;
-        case 'g':
-        case 'h':
-        case 'j':
-        case 'k':
-        case 'l':
-        case 'q':
-        case 'w':
-        case 'x':
-        case 'y':
-        case 'z':
-            goto yy53;
-        case 'i':
-            goto yy55;
-        case 'm':
-            goto yy56;
-        case 'n':
-            goto yy57;
-        case 'o':
-            goto yy58;
-        case 'p':
-            goto yy59;
-        case 'r':
-            goto yy60;
-        case 's':
-            goto yy61;
-        case 't':
-            goto yy62;
-        case 'u':
-            goto yy63;
-        case 'v':
-            goto yy64;
-        case '{':
-            goto yy65;
-        case '|':
-            goto yy66;
-        case '}':
-            goto yy67;
-        default:
-            goto yy2;
+        if (yych <= 'Z') {
+            if (yych <= '(') {
+                if (yych <= ' ') {
+                    if (yych <= '\n') {
+                        if (yych <= 0x00000000) goto yy1;
+                        if (yych <= 0x00000008) goto yy2;
+                        if (yych <= '\t') goto yy4;
+                        goto yy6;
+                    } else {
+                        if (yych == '\r') goto yy6;
+                        if (yych <= 0x0000001F) goto yy2;
+                        goto yy4;
+                    }
+                } else {
+                    if (yych <= '$') {
+                        if (yych <= '!') goto yy7;
+                        if (yych <= '"') goto yy9;
+                        if (yych <= '#') goto yy10;
+                        goto yy12;
+                    } else {
+                        if (yych <= '%') goto yy13;
+                        if (yych <= '&') goto yy14;
+                        if (yych <= '\'') goto yy15;
+                        goto yy16;
+                    }
+                }
+            } else {
+                if (yych <= '9') {
+                    if (yych <= ',') {
+                        if (yych <= ')') goto yy17;
+                        if (yych <= '*') goto yy18;
+                        if (yych <= '+') goto yy19;
+                        goto yy20;
+                    } else {
+                        if (yych <= '-') goto yy21;
+                        if (yych <= '.') goto yy22;
+                        if (yych <= '/') goto yy24;
+                        goto yy25;
+                    }
+                } else {
+                    if (yych <= '=') {
+                        if (yych <= ':') goto yy27;
+                        if (yych <= ';') goto yy2;
+                        if (yych <= '<') goto yy29;
+                        goto yy31;
+                    } else {
+                        if (yych <= '>') goto yy33;
+                        if (yych <= '?') goto yy35;
+                        if (yych <= '@') goto yy36;
+                        goto yy37;
+                    }
+                }
+            }
+        } else {
+            if (yych <= 'm') {
+                if (yych <= 'b') {
+                    if (yych <= '^') {
+                        if (yych <= '[') goto yy38;
+                        if (yych <= '\\') goto yy2;
+                        if (yych <= ']') goto yy39;
+                        goto yy40;
+                    } else {
+                        if (yych <= '_') goto yy41;
+                        if (yych <= '`') goto yy42;
+                        if (yych <= 'a') goto yy44;
+                        goto yy46;
+                    }
+                } else {
+                    if (yych <= 'f') {
+                        if (yych <= 'c') goto yy47;
+                        if (yych <= 'd') goto yy48;
+                        if (yych <= 'e') goto yy49;
+                        goto yy50;
+                    } else {
+                        if (yych == 'i') goto yy53;
+                        if (yych <= 'l') goto yy51;
+                        goto yy54;
+                    }
+                }
+            } else {
+                if (yych <= 'u') {
+                    if (yych <= 'q') {
+                        if (yych <= 'n') goto yy55;
+                        if (yych <= 'o') goto yy56;
+                        if (yych <= 'p') goto yy57;
+                        goto yy51;
+                    } else {
+                        if (yych <= 'r') goto yy58;
+                        if (yych <= 's') goto yy59;
+                        if (yych <= 't') goto yy60;
+                        goto yy61;
+                    }
+                } else {
+                    if (yych <= '|') {
+                        if (yych <= 'v') goto yy62;
+                        if (yych <= 'z') goto yy51;
+                        if (yych <= '{') goto yy63;
+                        goto yy64;
+                    } else {
+                        if (yych <= '~') {
+                            if (yych <= '}') goto yy65;
+                            goto yy24;
+                        } else {
+                            if (yych == 0x000030EB) goto yy66;
+                            goto yy2;
+                        }
+                    }
+                }
+            }
         }
     yy1:
         rbs_skip(lexer);
-#line 152 "src/lexer.re"
+#line 159 "src/lexer.re"
         {
             return rbs_next_eof_token(lexer);
         }
-#line 121 "src/lexer.c"
+#line 131 "src/lexer.c"
     yy2:
         rbs_skip(lexer);
     yy3:
-#line 153 "src/lexer.re"
+#line 160 "src/lexer.re"
     {
         return rbs_next_token(lexer, ErrorToken);
     }
-#line 127 "src/lexer.c"
+#line 137 "src/lexer.c"
     yy4:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych == '\t') goto yy4;
         if (yych == ' ') goto yy4;
     yy5:
-#line 151 "src/lexer.re"
+#line 158 "src/lexer.re"
     {
         return rbs_next_token(lexer, tTRIVIA);
     }
-#line 136 "src/lexer.c"
+#line 146 "src/lexer.c"
     yy6:
         rbs_skip(lexer);
         goto yy5;
@@ -199,18 +157,18 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         if (yych == '=') goto yy24;
         if (yych == '~') goto yy24;
     yy8:
-#line 49 "src/lexer.re"
+#line 53 "src/lexer.re"
     {
         return rbs_next_token(lexer, tOPERATOR);
     }
-#line 148 "src/lexer.c"
+#line 158 "src/lexer.c"
     yy9:
         yyaccept = 0;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
         if (yych <= 0x00000000) goto yy3;
-        goto yy69;
+        goto yy68;
     yy10:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -221,14 +179,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
             if (yych != 0x0000FFFD) goto yy10;
         }
     yy11:
-#line 61 "src/lexer.re"
+#line 65 "src/lexer.re"
     {
         return rbs_next_token(
             lexer,
             lexer->first_token_of_line ? tLINECOMMENT : tCOMMENT
         );
     }
-#line 173 "src/lexer.c"
+#line 183 "src/lexer.c"
     yy12:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -236,42 +194,42 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
             if (yych <= 0x0000001F) {
                 if (yych <= '\n') {
                     if (yych <= 0x00000000) goto yy3;
-                    if (yych <= 0x00000008) goto yy73;
+                    if (yych <= 0x00000008) goto yy72;
                     goto yy3;
                 } else {
                     if (yych == '\r') goto yy3;
-                    goto yy73;
+                    goto yy72;
                 }
             } else {
                 if (yych <= '#') {
                     if (yych <= ' ') goto yy3;
-                    if (yych <= '"') goto yy75;
-                    goto yy73;
+                    if (yych <= '"') goto yy74;
+                    goto yy72;
                 } else {
                     if (yych == '%') goto yy3;
-                    if (yych <= '\'') goto yy75;
+                    if (yych <= '\'') goto yy74;
                     goto yy3;
                 }
             }
         } else {
             if (yych <= 'Z') {
                 if (yych <= '/') {
-                    if (yych == '-') goto yy73;
-                    goto yy75;
+                    if (yych == '-') goto yy72;
+                    goto yy74;
                 } else {
-                    if (yych <= '9') goto yy73;
-                    if (yych <= '>') goto yy75;
-                    goto yy73;
+                    if (yych <= '9') goto yy72;
+                    if (yych <= '>') goto yy74;
+                    goto yy72;
                 }
             } else {
                 if (yych <= '^') {
-                    if (yych == '\\') goto yy75;
+                    if (yych == '\\') goto yy74;
                     goto yy3;
                 } else {
-                    if (yych <= 'z') goto yy73;
+                    if (yych <= 'z') goto yy72;
                     if (yych <= '}') goto yy3;
-                    if (yych <= '~') goto yy75;
-                    goto yy73;
+                    if (yych <= '~') goto yy74;
+                    goto yy72;
                 }
             }
         }
@@ -280,45 +238,45 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy76;
+        if (yych == 'a') goto yy75;
         goto yy8;
     yy14:
         rbs_skip(lexer);
-#line 33 "src/lexer.re"
+#line 37 "src/lexer.re"
         {
             return rbs_next_token(lexer, pAMP);
         }
-#line 231 "src/lexer.c"
+#line 241 "src/lexer.c"
     yy15:
         yyaccept = 0;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
         if (yych <= 0x00000000) goto yy3;
-        goto yy78;
+        goto yy77;
     yy16:
         rbs_skip(lexer);
-#line 24 "src/lexer.re"
+#line 28 "src/lexer.re"
         {
             return rbs_next_token(lexer, pLPAREN);
         }
-#line 243 "src/lexer.c"
+#line 253 "src/lexer.c"
     yy17:
         rbs_skip(lexer);
-#line 25 "src/lexer.re"
+#line 29 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRPAREN);
         }
-#line 248 "src/lexer.c"
+#line 258 "src/lexer.c"
     yy18:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '*') goto yy82;
-#line 35 "src/lexer.re"
+        if (yych == '*') goto yy81;
+#line 39 "src/lexer.re"
         {
             return rbs_next_token(lexer, pSTAR);
         }
-#line 255 "src/lexer.c"
+#line 265 "src/lexer.c"
     yy19:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -328,17 +286,17 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         goto yy8;
     yy20:
         rbs_skip(lexer);
-#line 30 "src/lexer.re"
+#line 34 "src/lexer.re"
         {
             return rbs_next_token(lexer, pCOMMA);
         }
-#line 267 "src/lexer.c"
+#line 277 "src/lexer.c"
     yy21:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         switch (yych) {
         case '-':
-            goto yy83;
+            goto yy82;
         case '0':
         case '1':
         case '2':
@@ -351,7 +309,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         case '9':
             goto yy25;
         case '>':
-            goto yy84;
+            goto yy83;
         case '@':
             goto yy24;
         default:
@@ -362,13 +320,13 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        if (yych == '.') goto yy85;
+        if (yych == '.') goto yy84;
     yy23:
-#line 37 "src/lexer.re"
+#line 41 "src/lexer.re"
     {
         return rbs_next_token(lexer, pDOT);
     }
-#line 296 "src/lexer.c"
+#line 306 "src/lexer.c"
     yy24:
         rbs_skip(lexer);
         goto yy8;
@@ -379,439 +337,426 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         if (yych <= '9') goto yy25;
         if (yych == '_') goto yy25;
     yy26:
-#line 53 "src/lexer.re"
+#line 57 "src/lexer.re"
     {
         return rbs_next_token(lexer, tINTEGER);
     }
-#line 309 "src/lexer.c"
+#line 319 "src/lexer.c"
     yy27:
         yyaccept = 3;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        switch (yych) {
-        case '!':
-            goto yy86;
-        case '"':
-            goto yy88;
-        case '$':
-            goto yy89;
-        case '%':
-        case '&':
-        case '/':
-        case '^':
-        case '`':
-        case '|':
-        case '~':
-            goto yy90;
-        case '\'':
-            goto yy91;
-        case '*':
-            goto yy92;
-        case '+':
-        case '-':
-            goto yy93;
-        case ':':
-            goto yy94;
-        case '<':
-            goto yy95;
-        case '=':
-            goto yy96;
-        case '>':
-            goto yy97;
-        case '@':
-            goto yy98;
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'H':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'L':
-        case 'M':
-        case 'N':
-        case 'O':
-        case 'P':
-        case 'Q':
-        case 'R':
-        case 'S':
-        case 'T':
-        case 'U':
-        case 'V':
-        case 'W':
-        case 'X':
-        case 'Y':
-        case 'Z':
-        case '_':
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-        case 'h':
-        case 'i':
-        case 'j':
-        case 'k':
-        case 'l':
-        case 'm':
-        case 'n':
-        case 'o':
-        case 'p':
-        case 'q':
-        case 'r':
-        case 's':
-        case 't':
-        case 'u':
-        case 'v':
-        case 'w':
-        case 'x':
-        case 'y':
-        case 'z':
-            goto yy99;
-        case '[':
-            goto yy101;
-        default:
-            goto yy28;
+        if (yych <= '<') {
+            if (yych <= '*') {
+                if (yych <= '#') {
+                    if (yych <= ' ') goto yy28;
+                    if (yych <= '!') goto yy85;
+                    if (yych <= '"') goto yy87;
+                } else {
+                    if (yych <= '&') {
+                        if (yych <= '$') goto yy88;
+                        goto yy89;
+                    } else {
+                        if (yych <= '\'') goto yy90;
+                        if (yych >= '*') goto yy91;
+                    }
+                }
+            } else {
+                if (yych <= '.') {
+                    if (yych == ',') goto yy28;
+                    if (yych <= '-') goto yy92;
+                } else {
+                    if (yych <= '9') {
+                        if (yych <= '/') goto yy89;
+                    } else {
+                        if (yych <= ':') goto yy93;
+                        if (yych >= '<') goto yy94;
+                    }
+                }
+            }
+        } else {
+            if (yych <= '_') {
+                if (yych <= '@') {
+                    if (yych <= '=') goto yy95;
+                    if (yych <= '>') goto yy96;
+                    if (yych >= '@') goto yy97;
+                } else {
+                    if (yych <= '[') {
+                        if (yych <= 'Z') goto yy98;
+                        goto yy100;
+                    } else {
+                        if (yych <= ']') goto yy28;
+                        if (yych <= '^') goto yy89;
+                        goto yy98;
+                    }
+                }
+            } else {
+                if (yych <= '|') {
+                    if (yych <= '`') goto yy89;
+                    if (yych <= 'z') goto yy98;
+                    if (yych >= '|') goto yy89;
+                } else {
+                    if (yych <= '~') {
+                        if (yych >= '~') goto yy89;
+                    } else {
+                        if (yych == 0x000030EB) goto yy98;
+                    }
+                }
+            }
         }
     yy28:
-#line 44 "src/lexer.re"
+#line 48 "src/lexer.re"
     {
         return rbs_next_token(lexer, pCOLON);
     }
-#line 394 "src/lexer.c"
+#line 386 "src/lexer.c"
     yy29:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= ';') goto yy30;
         if (yych <= '<') goto yy24;
-        if (yych <= '=') goto yy102;
+        if (yych <= '=') goto yy101;
     yy30:
-#line 46 "src/lexer.re"
+#line 50 "src/lexer.re"
     {
         return rbs_next_token(lexer, pLT);
     }
-#line 404 "src/lexer.c"
+#line 396 "src/lexer.c"
     yy31:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '>') {
             if (yych <= '<') goto yy32;
-            if (yych <= '=') goto yy103;
-            goto yy104;
+            if (yych <= '=') goto yy102;
+            goto yy103;
         } else {
             if (yych == '~') goto yy24;
         }
     yy32:
-#line 43 "src/lexer.re"
+#line 47 "src/lexer.re"
     {
         return rbs_next_token(lexer, pEQ);
     }
-#line 418 "src/lexer.c"
+#line 410 "src/lexer.c"
     yy33:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '<') goto yy34;
         if (yych <= '>') goto yy24;
     yy34:
-#line 47 "src/lexer.re"
+#line 51 "src/lexer.re"
     {
         return rbs_next_token(lexer, pGT);
     }
-#line 427 "src/lexer.c"
+#line 419 "src/lexer.c"
     yy35:
         rbs_skip(lexer);
-#line 34 "src/lexer.re"
+#line 38 "src/lexer.re"
         {
             return rbs_next_token(lexer, pQUESTION);
         }
-#line 432 "src/lexer.c"
+#line 424 "src/lexer.c"
     yy36:
         yyaccept = 0;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        if (yych <= '_') {
-            if (yych <= '@') {
+        if (yych <= '`') {
+            if (yych <= 'Z') {
                 if (yych <= '?') goto yy3;
+                if (yych <= '@') goto yy104;
                 goto yy105;
             } else {
-                if (yych <= 'Z') goto yy106;
-                if (yych <= '^') goto yy3;
-                goto yy106;
+                if (yych == '_') goto yy105;
+                goto yy3;
             }
         } else {
-            if (yych <= 'q') {
-                if (yych <= '`') goto yy3;
-                goto yy106;
+            if (yych <= 'z') {
+                if (yych == 'r') goto yy108;
+                goto yy105;
             } else {
-                if (yych <= 'r') goto yy109;
-                if (yych <= 'z') goto yy106;
+                if (yych == 0x000030EB) goto yy105;
                 goto yy3;
             }
         }
     yy37:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
                 if (yych <= '9') goto yy37;
-                if (yych >= '=') goto yy111;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy38;
+            if (yych <= '`') {
                 if (yych <= 'Z') goto yy37;
+                if (yych == '_') goto yy37;
             } else {
-                if (yych == '`') goto yy38;
                 if (yych <= 'z') goto yy37;
+                if (yych == 0x000030EB) goto yy37;
             }
         }
+#line 141 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tUIDENT);
+        }
+#line 469 "src/lexer.c"
     yy38:
-#line 137 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, tUIDENT);
-    }
-#line 479 "src/lexer.c"
-    yy39:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == ']') goto yy112;
-#line 26 "src/lexer.re"
+        if (yych == ']') goto yy111;
+#line 30 "src/lexer.re"
         {
             return rbs_next_token(lexer, pLBRACKET);
         }
-#line 486 "src/lexer.c"
-    yy40:
+#line 476 "src/lexer.c"
+    yy39:
         rbs_skip(lexer);
-#line 27 "src/lexer.re"
+#line 31 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRBRACKET);
         }
-#line 491 "src/lexer.c"
-    yy41:
+#line 481 "src/lexer.c"
+    yy40:
         rbs_skip(lexer);
-#line 32 "src/lexer.re"
+#line 36 "src/lexer.re"
         {
             return rbs_next_token(lexer, pHAT);
         }
-#line 496 "src/lexer.c"
-    yy42:
+#line 486 "src/lexer.c"
+    yy41:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy113;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy112;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy43;
-                if (yych <= 'Z') goto yy116;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy114;
+                if (yych == '_') goto yy115;
             } else {
-                if (yych <= '_') goto yy118;
-                if (yych <= '`') goto yy43;
-                if (yych <= 'z') goto yy113;
+                if (yych <= 'z') goto yy112;
+                if (yych == 0x000030EB) goto yy116;
             }
         }
-    yy43:
-#line 140 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, tULLIDENT);
-    }
-#line 520 "src/lexer.c"
-    yy44:
+#line 144 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tULLIDENT);
+        }
+#line 508 "src/lexer.c"
+    yy42:
         yyaccept = 4;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
         if (yych <= ' ') {
-            if (yych <= 0x00000000) goto yy45;
-            if (yych <= 0x0000001F) goto yy119;
+            if (yych <= 0x00000000) goto yy43;
+            if (yych <= 0x0000001F) goto yy117;
         } else {
-            if (yych != ':') goto yy119;
+            if (yych != ':') goto yy117;
         }
-    yy45:
-#line 39 "src/lexer.re"
+    yy43:
+#line 43 "src/lexer.re"
     {
         return rbs_next_token(lexer, tOPERATOR);
     }
-#line 535 "src/lexer.c"
-    yy46:
+#line 523 "src/lexer.c"
+    yy44:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= 'r') {
-            if (yych == 'l') goto yy120;
-            goto yy54;
+            if (yych == 'l') goto yy118;
+            goto yy52;
         } else {
-            if (yych <= 's') goto yy121;
-            if (yych <= 't') goto yy123;
-            goto yy54;
+            if (yych <= 's') goto yy119;
+            if (yych <= 't') goto yy120;
+            goto yy52;
         }
-    yy47:
-#line 136 "src/lexer.re"
+    yy45:
+#line 140 "src/lexer.re"
     {
         return rbs_next_token(lexer, tLIDENT);
     }
-#line 550 "src/lexer.c"
+#line 538 "src/lexer.c"
+    yy46:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'o') goto yy121;
+        goto yy52;
+    yy47:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy122;
+        goto yy52;
     yy48:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy124;
-        goto yy54;
+        if (yych == 'e') goto yy123;
+        goto yy52;
     yy49:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy125;
-        goto yy54;
+        if (yych == 'n') goto yy124;
+        if (yych == 'x') goto yy125;
+        goto yy52;
     yy50:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy126;
-        goto yy54;
+        if (yych == 'a') goto yy126;
+        goto yy52;
     yy51:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy127;
-        if (yych == 'x') goto yy128;
-        goto yy54;
     yy52:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy129;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+                goto yy45;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+                goto yy45;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+                goto yy45;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+                goto yy45;
+            }
+        }
     yy53:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy127;
+        goto yy52;
     yy54:
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-                goto yy47;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych <= '<') goto yy47;
-                goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy47;
-                if (yych <= 'Z') goto yy53;
-                goto yy47;
-            } else {
-                if (yych == '`') goto yy47;
-                if (yych <= 'z') goto yy53;
-                goto yy47;
-            }
-        }
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'o') goto yy129;
+        goto yy52;
     yy55:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy130;
-        goto yy54;
+        if (yych == 'i') goto yy130;
+        goto yy52;
     yy56:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy132;
-        goto yy54;
+        if (yych == 'u') goto yy131;
+        goto yy52;
     yy57:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy133;
-        goto yy54;
+        if (yych == 'r') goto yy132;
+        if (yych == 'u') goto yy133;
+        goto yy52;
     yy58:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy134;
-        goto yy54;
+        if (yych == 'e') goto yy134;
+        goto yy52;
     yy59:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy135;
-        if (yych == 'u') goto yy136;
-        goto yy54;
+        if (yych <= 'h') {
+            if (yych == 'e') goto yy135;
+            goto yy52;
+        } else {
+            if (yych <= 'i') goto yy136;
+            if (yych == 'k') goto yy137;
+            goto yy52;
+        }
     yy60:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy137;
-        goto yy54;
+        if (yych <= 'q') {
+            if (yych == 'o') goto yy138;
+            goto yy52;
+        } else {
+            if (yych <= 'r') goto yy139;
+            if (yych == 'y') goto yy140;
+            goto yy52;
+        }
     yy61:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 'h') {
-            if (yych == 'e') goto yy138;
-            goto yy54;
-        } else {
-            if (yych <= 'i') goto yy139;
-            if (yych == 'k') goto yy140;
-            goto yy54;
-        }
+        if (yych == 'n') goto yy141;
+        if (yych == 's') goto yy142;
+        goto yy52;
     yy62:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 'q') {
-            if (yych == 'o') goto yy141;
-            goto yy54;
-        } else {
-            if (yych <= 'r') goto yy142;
-            if (yych == 'y') goto yy143;
-            goto yy54;
-        }
+        if (yych == 'o') goto yy143;
+        goto yy52;
     yy63:
         rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy144;
-        if (yych == 's') goto yy145;
-        goto yy54;
-    yy64:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy146;
-        goto yy54;
-    yy65:
-        rbs_skip(lexer);
-#line 28 "src/lexer.re"
+#line 32 "src/lexer.re"
         {
             return rbs_next_token(lexer, pLBRACE);
         }
-#line 669 "src/lexer.c"
-    yy66:
+#line 657 "src/lexer.c"
+    yy64:
         rbs_skip(lexer);
-#line 31 "src/lexer.re"
+#line 35 "src/lexer.re"
         {
             return rbs_next_token(lexer, pBAR);
         }
-#line 674 "src/lexer.c"
-    yy67:
+#line 662 "src/lexer.c"
+    yy65:
         rbs_skip(lexer);
-#line 29 "src/lexer.re"
+#line 33 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRBRACE);
         }
-#line 679 "src/lexer.c"
-    yy68:
+#line 667 "src/lexer.c"
+    yy66:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-    yy69:
-        if (yych <= '"') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '!') goto yy68;
-            goto yy71;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy66;
+                if (yych == '=') goto yy110;
+            }
         } else {
-            if (yych == '\\') goto yy72;
-            goto yy68;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy66;
+                if (yych == '_') goto yy66;
+            } else {
+                if (yych <= 'z') goto yy66;
+                if (yych == 0x000030EB) goto yy66;
+            }
         }
-    yy70:
+#line 148 "src/lexer.re"
+        {
+            return rbs_next_mb_ident_token(lexer, 0, false);
+        }
+#line 689 "src/lexer.c"
+    yy67:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+    yy68:
+        if (yych <= '"') {
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '!') goto yy67;
+            goto yy70;
+        } else {
+            if (yych == '\\') goto yy71;
+            goto yy67;
+        }
+    yy69:
         *lexer = backup;
         if (yyaccept <= 4) {
             if (yyaccept <= 2) {
@@ -825,2397 +770,2439 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
             } else {
                 if (yyaccept == 3) goto yy28;
                 else
-                    goto yy45;
+                    goto yy43;
             }
         } else {
             if (yyaccept <= 6) {
-                if (yyaccept == 5) goto yy80;
+                if (yyaccept == 5) goto yy79;
                 else
-                    goto yy162;
+                    goto yy159;
             } else {
-                if (yyaccept == 7) goto yy262;
+                if (yyaccept == 7) goto yy245;
                 else
-                    goto yy290;
+                    goto yy271;
             }
         }
-    yy71:
+    yy70:
         rbs_skip(lexer);
-#line 114 "src/lexer.re"
+#line 118 "src/lexer.re"
         {
             return rbs_next_token(lexer, tDQSTRING);
         }
-#line 719 "src/lexer.c"
-    yy72:
+#line 729 "src/lexer.c"
+    yy71:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy147;
-        if (yych == 'x') goto yy148;
-        goto yy68;
-    yy73:
+        if (yych == 'u') goto yy144;
+        if (yych == 'x') goto yy145;
+        goto yy67;
+    yy72:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= ',') {
             if (yych <= '\f') {
-                if (yych <= 0x00000000) goto yy74;
-                if (yych <= 0x00000008) goto yy73;
-                if (yych >= '\v') goto yy73;
+                if (yych <= 0x00000000) goto yy73;
+                if (yych <= 0x00000008) goto yy72;
+                if (yych >= '\v') goto yy72;
             } else {
                 if (yych <= 0x0000001F) {
-                    if (yych >= 0x0000000E) goto yy73;
+                    if (yych >= 0x0000000E) goto yy72;
                 } else {
-                    if (yych == '#') goto yy73;
+                    if (yych == '#') goto yy72;
                 }
             }
         } else {
             if (yych <= '>') {
-                if (yych <= '-') goto yy73;
-                if (yych <= '/') goto yy74;
-                if (yych <= '9') goto yy73;
+                if (yych <= '-') goto yy72;
+                if (yych <= '/') goto yy73;
+                if (yych <= '9') goto yy72;
             } else {
                 if (yych <= '^') {
-                    if (yych <= 'Z') goto yy73;
+                    if (yych <= 'Z') goto yy72;
                 } else {
-                    if (yych <= 'z') goto yy73;
-                    if (yych >= 0x0000007F) goto yy73;
+                    if (yych <= 'z') goto yy72;
+                    if (yych >= 0x0000007F) goto yy72;
                 }
             }
         }
-    yy74:
-#line 147 "src/lexer.re"
+    yy73:
+#line 154 "src/lexer.re"
     {
         return rbs_next_token(lexer, tGIDENT);
     }
-#line 758 "src/lexer.c"
-    yy75:
+#line 768 "src/lexer.c"
+    yy74:
         rbs_skip(lexer);
-        goto yy74;
-    yy76:
+        goto yy73;
+    yy75:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= 'Z') {
             if (yych <= '(') {
-                if (yych <= '\'') goto yy70;
-                goto yy149;
+                if (yych <= '\'') goto yy69;
+                goto yy146;
             } else {
-                if (yych == '<') goto yy150;
-                goto yy70;
+                if (yych == '<') goto yy147;
+                goto yy69;
             }
         } else {
             if (yych <= 'z') {
-                if (yych <= '[') goto yy151;
-                goto yy70;
+                if (yych <= '[') goto yy148;
+                goto yy69;
             } else {
-                if (yych <= '{') goto yy152;
-                if (yych <= '|') goto yy153;
-                goto yy70;
+                if (yych <= '{') goto yy149;
+                if (yych <= '|') goto yy150;
+                goto yy69;
             }
         }
-    yy77:
+    yy76:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-    yy78:
+    yy77:
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '&') goto yy77;
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '&') goto yy76;
         } else {
-            if (yych == '\\') goto yy81;
-            goto yy77;
+            if (yych == '\\') goto yy80;
+            goto yy76;
         }
-    yy79:
+    yy78:
         rbs_skip(lexer);
-    yy80:
-#line 115 "src/lexer.re"
+    yy79:
+#line 119 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSQSTRING);
     }
-#line 799 "src/lexer.c"
-    yy81:
+#line 809 "src/lexer.c"
+    yy80:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '&') goto yy77;
-            goto yy154;
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '&') goto yy76;
+            goto yy151;
         } else {
-            if (yych == '\\') goto yy81;
-            goto yy77;
+            if (yych == '\\') goto yy80;
+            goto yy76;
         }
-    yy82:
+    yy81:
         rbs_skip(lexer);
-#line 36 "src/lexer.re"
+#line 40 "src/lexer.re"
         {
             return rbs_next_token(lexer, pSTAR2);
         }
-#line 815 "src/lexer.c"
-    yy83:
+#line 825 "src/lexer.c"
+    yy82:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych >= 0x00000001) goto yy83;
-#line 50 "src/lexer.re"
+        if (yych >= 0x00000001) goto yy82;
+#line 54 "src/lexer.re"
         {
             return rbs_next_token(lexer, tINLINECOMMENT);
         }
-#line 822 "src/lexer.c"
-    yy84:
+#line 832 "src/lexer.c"
+    yy83:
         rbs_skip(lexer);
-#line 41 "src/lexer.re"
+#line 45 "src/lexer.re"
         {
             return rbs_next_token(lexer, pARROW);
         }
-#line 827 "src/lexer.c"
+#line 837 "src/lexer.c"
+    yy84:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '.') goto yy152;
+        goto yy69;
     yy85:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '.') goto yy155;
-        goto yy70;
+        if (yych == '=') goto yy89;
+        if (yych == '~') goto yy89;
     yy86:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == '=') goto yy90;
-        if (yych == '~') goto yy90;
-    yy87:
-#line 134 "src/lexer.re"
+#line 138 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 841 "src/lexer.c"
-    yy88:
+#line 851 "src/lexer.c"
+    yy87:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '"') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '!') goto yy88;
-            goto yy156;
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '!') goto yy87;
+            goto yy153;
         } else {
-            if (yych == '\\') goto yy157;
-            goto yy88;
+            if (yych == '\\') goto yy154;
+            goto yy87;
         }
-    yy89:
+    yy88:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= ')') {
             if (yych <= 0x0000001F) {
                 if (yych <= '\n') {
-                    if (yych <= 0x00000000) goto yy70;
-                    if (yych <= 0x00000008) goto yy158;
-                    goto yy70;
+                    if (yych <= 0x00000000) goto yy69;
+                    if (yych <= 0x00000008) goto yy155;
+                    goto yy69;
                 } else {
-                    if (yych == '\r') goto yy70;
-                    goto yy158;
+                    if (yych == '\r') goto yy69;
+                    goto yy155;
                 }
             } else {
                 if (yych <= '#') {
-                    if (yych <= ' ') goto yy70;
-                    if (yych <= '"') goto yy160;
-                    goto yy158;
+                    if (yych <= ' ') goto yy69;
+                    if (yych <= '"') goto yy157;
+                    goto yy155;
                 } else {
-                    if (yych == '%') goto yy70;
-                    if (yych <= '\'') goto yy160;
-                    goto yy70;
+                    if (yych == '%') goto yy69;
+                    if (yych <= '\'') goto yy157;
+                    goto yy69;
                 }
             }
         } else {
             if (yych <= 'Z') {
                 if (yych <= '/') {
-                    if (yych == '-') goto yy158;
-                    goto yy160;
+                    if (yych == '-') goto yy155;
+                    goto yy157;
                 } else {
-                    if (yych <= '9') goto yy158;
-                    if (yych <= '>') goto yy160;
-                    goto yy158;
+                    if (yych <= '9') goto yy155;
+                    if (yych <= '>') goto yy157;
+                    goto yy155;
                 }
             } else {
                 if (yych <= '^') {
-                    if (yych == '\\') goto yy160;
-                    goto yy70;
+                    if (yych == '\\') goto yy157;
+                    goto yy69;
                 } else {
-                    if (yych <= 'z') goto yy158;
-                    if (yych <= '}') goto yy70;
-                    if (yych <= '~') goto yy160;
-                    goto yy158;
+                    if (yych <= 'z') goto yy155;
+                    if (yych <= '}') goto yy69;
+                    if (yych <= '~') goto yy157;
+                    goto yy155;
                 }
             }
         }
-    yy90:
+    yy89:
         rbs_skip(lexer);
-        goto yy87;
-    yy91:
+        goto yy86;
+    yy90:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '&') goto yy91;
-            goto yy161;
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '&') goto yy90;
+            goto yy158;
         } else {
-            if (yych == '\\') goto yy163;
-            goto yy91;
+            if (yych == '\\') goto yy160;
+            goto yy90;
         }
+    yy91:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '*') goto yy89;
+        goto yy86;
     yy92:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '*') goto yy90;
-        goto yy87;
+        if (yych == '@') goto yy89;
+        goto yy86;
     yy93:
         rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == '@') goto yy90;
-        goto yy87;
-    yy94:
-        rbs_skip(lexer);
-#line 45 "src/lexer.re"
+#line 49 "src/lexer.re"
         {
             return rbs_next_token(lexer, pCOLON2);
         }
-#line 927 "src/lexer.c"
+#line 937 "src/lexer.c"
+    yy94:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= ';') goto yy86;
+        if (yych <= '<') goto yy89;
+        if (yych <= '=') goto yy161;
+        goto yy86;
     yy95:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= ';') goto yy87;
-        if (yych <= '<') goto yy90;
-        if (yych <= '=') goto yy164;
-        goto yy87;
+        if (yych == '=') goto yy162;
+        if (yych == '~') goto yy89;
+        goto yy69;
     yy96:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '=') goto yy165;
-        if (yych == '~') goto yy90;
-        goto yy70;
+        if (yych <= '<') goto yy86;
+        if (yych <= '>') goto yy89;
+        goto yy86;
     yy97:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '<') goto yy87;
-        if (yych <= '>') goto yy90;
-        goto yy87;
+        if (yych <= '_') {
+            if (yych <= '@') {
+                if (yych <= '?') goto yy69;
+                goto yy163;
+            } else {
+                if (yych <= 'Z') goto yy164;
+                if (yych <= '^') goto yy69;
+                goto yy164;
+            }
+        } else {
+            if (yych <= 'z') {
+                if (yych <= '`') goto yy69;
+                goto yy164;
+            } else {
+                if (yych == 0x000030EB) goto yy164;
+                goto yy69;
+            }
+        }
     yy98:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '^') {
-            if (yych <= '?') goto yy70;
-            if (yych <= '@') goto yy166;
-            if (yych <= 'Z') goto yy167;
-            goto yy70;
+        if (yych <= '?') {
+            if (yych <= '9') {
+                if (yych == '!') goto yy166;
+                if (yych >= '0') goto yy98;
+            } else {
+                if (yych == '=') goto yy166;
+                if (yych >= '?') goto yy166;
+            }
         } else {
-            if (yych == '`') goto yy70;
-            if (yych <= 'z') goto yy167;
-            goto yy70;
+            if (yych <= '_') {
+                if (yych <= '@') goto yy99;
+                if (yych <= 'Z') goto yy98;
+                if (yych >= '_') goto yy98;
+            } else {
+                if (yych <= 'z') {
+                    if (yych >= 'a') goto yy98;
+                } else {
+                    if (yych == 0x000030EB) goto yy98;
+                }
+            }
         }
     yy99:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '>') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy169;
-            } else {
-                if (yych <= '9') goto yy99;
-                if (yych == '=') goto yy169;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '?') goto yy169;
-                if (yych <= '@') goto yy100;
-                if (yych <= 'Z') goto yy99;
-            } else {
-                if (yych == '`') goto yy100;
-                if (yych <= 'z') goto yy99;
-            }
-        }
-    yy100:
-#line 130 "src/lexer.re"
+#line 134 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 983 "src/lexer.c"
-    yy101:
+#line 1005 "src/lexer.c"
+    yy100:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == ']') goto yy165;
-        goto yy70;
-    yy102:
+        if (yych == ']') goto yy162;
+        goto yy69;
+    yy101:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych == '>') goto yy24;
         goto yy8;
-    yy103:
+    yy102:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych == '=') goto yy24;
         goto yy8;
-    yy104:
+    yy103:
         rbs_skip(lexer);
-#line 42 "src/lexer.re"
+#line 46 "src/lexer.re"
         {
             return rbs_next_token(lexer, pFATARROW);
         }
-#line 1003 "src/lexer.c"
+#line 1025 "src/lexer.c"
+    yy104:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '_') {
+            if (yych <= '@') goto yy69;
+            if (yych <= 'Z') goto yy167;
+            if (yych <= '^') goto yy69;
+            goto yy167;
+        } else {
+            if (yych <= 'z') {
+                if (yych <= '`') goto yy69;
+                goto yy167;
+            } else {
+                if (yych == 0x000030EB) goto yy167;
+                goto yy69;
+            }
+        }
     yy105:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '^') {
-            if (yych <= '@') goto yy70;
-            if (yych <= 'Z') goto yy170;
-            goto yy70;
-        } else {
-            if (yych == '`') goto yy70;
-            if (yych <= 'z') goto yy170;
-            goto yy70;
-        }
     yy106:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-    yy107:
-        if (yych <= 'Z') {
-            if (yych <= '/') goto yy108;
-            if (yych <= '9') goto yy106;
-            if (yych >= 'A') goto yy106;
-        } else {
-            if (yych <= '_') {
-                if (yych >= '_') goto yy106;
+        if (yych <= '^') {
+            if (yych <= '9') {
+                if (yych >= '0') goto yy105;
             } else {
-                if (yych <= '`') goto yy108;
-                if (yych <= 'z') goto yy106;
+                if (yych <= '@') goto yy107;
+                if (yych <= 'Z') goto yy105;
+            }
+        } else {
+            if (yych <= 'z') {
+                if (yych != '`') goto yy105;
+            } else {
+                if (yych == 0x000030EB) goto yy105;
             }
         }
-    yy108:
-#line 144 "src/lexer.re"
+    yy107:
+#line 151 "src/lexer.re"
     {
         return rbs_next_token(lexer, tAIDENT);
     }
-#line 1035 "src/lexer.c"
-    yy109:
+#line 1064 "src/lexer.c"
+    yy108:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'b') goto yy172;
-        goto yy107;
-    yy110:
+        if (yych == 'b') goto yy169;
+        goto yy106;
+    yy109:
         rbs_skip(lexer);
-#line 141 "src/lexer.re"
+#line 145 "src/lexer.re"
         {
             return rbs_next_token(lexer, tBANGIDENT);
         }
-#line 1045 "src/lexer.c"
-    yy111:
+#line 1074 "src/lexer.c"
+    yy110:
         rbs_skip(lexer);
-#line 142 "src/lexer.re"
+#line 146 "src/lexer.re"
         {
             return rbs_next_token(lexer, tEQIDENT);
         }
-#line 1050 "src/lexer.c"
-    yy112:
+#line 1079 "src/lexer.c"
+    yy111:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych == '=') goto yy24;
-#line 48 "src/lexer.re"
+#line 52 "src/lexer.re"
         {
             return rbs_next_token(lexer, pAREF_OPR);
         }
-#line 1057 "src/lexer.c"
+#line 1086 "src/lexer.c"
+    yy112:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
     yy113:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy112;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy112;
+                if (yych == '_') goto yy112;
+            } else {
+                if (yych <= 'z') goto yy112;
+                if (yych == 0x000030EB) goto yy112;
+            }
+        }
+#line 142 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tULLIDENT);
+        }
+#line 1109 "src/lexer.c"
     yy114:
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy113;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy115;
-                if (yych <= 'Z') goto yy113;
-            } else {
-                if (yych == '`') goto yy115;
-                if (yych <= 'z') goto yy113;
-            }
-        }
-    yy115:
-#line 138 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, tULLIDENT);
-    }
-#line 1081 "src/lexer.c"
-    yy116:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy116;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy117;
-                if (yych <= 'Z') goto yy116;
-            } else {
-                if (yych == '`') goto yy117;
-                if (yych <= 'z') goto yy116;
-            }
-        }
-    yy117:
-#line 139 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, tULIDENT);
-    }
-#line 1104 "src/lexer.c"
-    yy118:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy173;
-        goto yy114;
-    yy119:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == '`') goto yy174;
-        goto yy119;
-    yy120:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy175;
-        goto yy54;
-    yy121:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy122;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy122;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy122:
-#line 101 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kAS);
-    }
-#line 1143 "src/lexer.c"
-    yy123:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy176;
-        goto yy54;
-    yy124:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy177;
-        if (yych == 't') goto yy178;
-        goto yy54;
-    yy125:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy180;
-        goto yy54;
-    yy126:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'f') goto yy181;
-        goto yy54;
-    yy127:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy183;
-        goto yy54;
-    yy128:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy185;
-        goto yy54;
-    yy129:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy186;
-        goto yy54;
-    yy130:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '^') {
-            if (yych <= '9') {
-                if (yych == '!') goto yy110;
-                if (yych >= '0') goto yy53;
-            } else {
-                if (yych <= '=') {
-                    if (yych >= '=') goto yy111;
-                } else {
-                    if (yych <= '@') goto yy131;
-                    if (yych <= 'Z') goto yy53;
-                }
-            }
-        } else {
-            if (yych <= 'c') {
-                if (yych == '`') goto yy131;
-                if (yych <= 'b') goto yy53;
-                goto yy187;
-            } else {
-                if (yych <= 's') {
-                    if (yych <= 'r') goto yy53;
-                    goto yy188;
-                } else {
-                    if (yych <= 't') goto yy189;
-                    if (yych <= 'z') goto yy53;
-                }
-            }
-        }
-    yy131:
-#line 80 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kIN);
-    }
-#line 1213 "src/lexer.c"
-    yy132:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy190;
-        goto yy54;
-    yy133:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy191;
-        goto yy54;
-    yy134:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy193;
-        goto yy54;
-    yy135:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy195;
-        if (yych == 'i') goto yy196;
-        goto yy54;
-    yy136:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'b') goto yy197;
-        goto yy54;
-    yy137:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy198;
-        goto yy54;
-    yy138:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy199;
-        goto yy54;
-    yy139:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy200;
-        goto yy54;
-    yy140:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy201;
-        goto yy54;
-    yy141:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'p') goto yy202;
-        goto yy54;
-    yy142:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy204;
-        goto yy54;
-    yy143:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'p') goto yy205;
-        goto yy54;
-    yy144:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy206;
-        if (yych == 't') goto yy207;
-        goto yy54;
-    yy145:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy208;
-        goto yy54;
-    yy146:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy210;
-        goto yy54;
-    yy147:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy211;
-            goto yy70;
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy114;
+                if (yych == '=') goto yy110;
+            }
         } else {
-            if (yych <= 'F') goto yy211;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy211;
-            goto yy70;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy114;
+                if (yych == '_') goto yy114;
+            } else {
+                if (yych <= 'z') goto yy114;
+                if (yych == 0x000030EB) goto yy114;
+            }
         }
+#line 143 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tULIDENT);
+        }
+#line 1131 "src/lexer.c"
+    yy115:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy170;
+        goto yy113;
+    yy116:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy116;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy116;
+                if (yych == '_') goto yy116;
+            } else {
+                if (yych <= 'z') goto yy116;
+                if (yych == 0x000030EB) goto yy116;
+            }
+        }
+#line 149 "src/lexer.re"
+        {
+            return rbs_next_mb_ident_token(lexer, 1, true);
+        }
+#line 1158 "src/lexer.c"
+    yy117:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == '`') goto yy171;
+        goto yy117;
+    yy118:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'i') goto yy172;
+        goto yy52;
+    yy119:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 105 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kAS);
+        }
+#line 1191 "src/lexer.c"
+    yy120:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy173;
+        goto yy52;
+    yy121:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'o') goto yy174;
+        if (yych == 't') goto yy175;
+        goto yy52;
+    yy122:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy176;
+        goto yy52;
+    yy123:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'f') goto yy177;
+        goto yy52;
+    yy124:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy178;
+        goto yy52;
+    yy125:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy179;
+        goto yy52;
+    yy126:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy180;
+        goto yy52;
+    yy127:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '_') {
+            if (yych <= '<') {
+                if (yych <= '!') {
+                    if (yych >= '!') goto yy109;
+                } else {
+                    if (yych <= '/') goto yy128;
+                    if (yych <= '9') goto yy51;
+                }
+            } else {
+                if (yych <= '@') {
+                    if (yych <= '=') goto yy110;
+                } else {
+                    if (yych <= 'Z') goto yy51;
+                    if (yych >= '_') goto yy51;
+                }
+            }
+        } else {
+            if (yych <= 's') {
+                if (yych <= 'b') {
+                    if (yych >= 'a') goto yy51;
+                } else {
+                    if (yych <= 'c') goto yy181;
+                    if (yych <= 'r') goto yy51;
+                    goto yy182;
+                }
+            } else {
+                if (yych <= 'z') {
+                    if (yych <= 't') goto yy183;
+                    goto yy51;
+                } else {
+                    if (yych == 0x000030EB) goto yy51;
+                }
+            }
+        }
+    yy128:
+#line 84 "src/lexer.re"
+    {
+        return rbs_next_token(lexer, kIN);
+    }
+#line 1268 "src/lexer.c"
+    yy129:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy184;
+        goto yy52;
+    yy130:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy185;
+        goto yy52;
+    yy131:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy186;
+        goto yy52;
+    yy132:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy187;
+        if (yych == 'i') goto yy188;
+        goto yy52;
+    yy133:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'b') goto yy189;
+        goto yy52;
+    yy134:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy190;
+        goto yy52;
+    yy135:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy191;
+        goto yy52;
+    yy136:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy192;
+        goto yy52;
+    yy137:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'i') goto yy193;
+        goto yy52;
+    yy138:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'p') goto yy194;
+        goto yy52;
+    yy139:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'u') goto yy195;
+        goto yy52;
+    yy140:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'p') goto yy196;
+        goto yy52;
+    yy141:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy197;
+        if (yych == 't') goto yy198;
+        goto yy52;
+    yy142:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy199;
+        goto yy52;
+    yy143:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'i') goto yy200;
+        goto yy52;
+    yy144:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy201;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy201;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy201;
+            goto yy69;
+        }
+    yy145:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '/') goto yy69;
+        if (yych <= '9') goto yy67;
+        if (yych <= '`') goto yy69;
+        if (yych <= 'f') goto yy67;
+        goto yy69;
+    yy146:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == ')') goto yy202;
+        goto yy146;
+    yy147:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == '>') goto yy203;
+        goto yy147;
     yy148:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '/') goto yy70;
-        if (yych <= '9') goto yy68;
-        if (yych <= '`') goto yy70;
-        if (yych <= 'f') goto yy68;
-        goto yy70;
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == ']') goto yy204;
+        goto yy148;
     yy149:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == ')') goto yy212;
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == '}') goto yy205;
         goto yy149;
     yy150:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == '>') goto yy213;
+        if (yych <= 0x00000000) goto yy69;
+        if (yych == '|') goto yy206;
         goto yy150;
     yy151:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == ']') goto yy214;
-        goto yy151;
-    yy152:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == '}') goto yy215;
-        goto yy152;
-    yy153:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy70;
-        if (yych == '|') goto yy216;
-        goto yy153;
-    yy154:
         yyaccept = 5;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy80;
-            if (yych <= '&') goto yy77;
-            goto yy79;
+            if (yych <= 0x00000000) goto yy79;
+            if (yych <= '&') goto yy76;
+            goto yy78;
         } else {
-            if (yych == '\\') goto yy81;
-            goto yy77;
+            if (yych == '\\') goto yy80;
+            goto yy76;
         }
-    yy155:
+    yy152:
         rbs_skip(lexer);
-#line 38 "src/lexer.re"
+#line 42 "src/lexer.re"
         {
             return rbs_next_token(lexer, pDOT3);
         }
-#line 1359 "src/lexer.c"
-    yy156:
+#line 1414 "src/lexer.c"
+    yy153:
         rbs_skip(lexer);
-#line 116 "src/lexer.re"
+#line 120 "src/lexer.re"
         {
             return rbs_next_token(lexer, tDQSYMBOL);
         }
-#line 1364 "src/lexer.c"
-    yy157:
+#line 1419 "src/lexer.c"
+    yy154:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy217;
-        if (yych == 'x') goto yy218;
-        goto yy88;
-    yy158:
+        if (yych == 'u') goto yy207;
+        if (yych == 'x') goto yy208;
+        goto yy87;
+    yy155:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= ',') {
             if (yych <= '\f') {
-                if (yych <= 0x00000000) goto yy159;
-                if (yych <= 0x00000008) goto yy158;
-                if (yych >= '\v') goto yy158;
+                if (yych <= 0x00000000) goto yy156;
+                if (yych <= 0x00000008) goto yy155;
+                if (yych >= '\v') goto yy155;
             } else {
                 if (yych <= 0x0000001F) {
-                    if (yych >= 0x0000000E) goto yy158;
+                    if (yych >= 0x0000000E) goto yy155;
                 } else {
-                    if (yych == '#') goto yy158;
+                    if (yych == '#') goto yy155;
                 }
             }
         } else {
             if (yych <= '>') {
-                if (yych <= '-') goto yy158;
-                if (yych <= '/') goto yy159;
-                if (yych <= '9') goto yy158;
+                if (yych <= '-') goto yy155;
+                if (yych <= '/') goto yy156;
+                if (yych <= '9') goto yy155;
             } else {
                 if (yych <= '^') {
-                    if (yych <= 'Z') goto yy158;
+                    if (yych <= 'Z') goto yy155;
                 } else {
-                    if (yych <= 'z') goto yy158;
-                    if (yych >= 0x0000007F) goto yy158;
+                    if (yych <= 'z') goto yy155;
+                    if (yych >= 0x0000007F) goto yy155;
                 }
             }
         }
-    yy159:
-#line 133 "src/lexer.re"
+    yy156:
+#line 137 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1403 "src/lexer.c"
-    yy160:
+#line 1458 "src/lexer.c"
+    yy157:
         rbs_skip(lexer);
-        goto yy159;
-    yy161:
+        goto yy156;
+    yy158:
         rbs_skip(lexer);
-    yy162:
-#line 117 "src/lexer.re"
+    yy159:
+#line 121 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSQSYMBOL);
     }
-#line 1412 "src/lexer.c"
-    yy163:
+#line 1467 "src/lexer.c"
+    yy160:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy70;
-            if (yych <= '&') goto yy91;
-            goto yy219;
+            if (yych <= 0x00000000) goto yy69;
+            if (yych <= '&') goto yy90;
+            goto yy209;
         } else {
-            if (yych == '\\') goto yy163;
-            goto yy91;
+            if (yych == '\\') goto yy160;
+            goto yy90;
+        }
+    yy161:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '>') goto yy89;
+        goto yy86;
+    yy162:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '=') goto yy89;
+        goto yy86;
+    yy163:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '_') {
+            if (yych <= '@') goto yy69;
+            if (yych <= 'Z') goto yy210;
+            if (yych <= '^') goto yy69;
+            goto yy210;
+        } else {
+            if (yych <= 'z') {
+                if (yych <= '`') goto yy69;
+                goto yy210;
+            } else {
+                if (yych == 0x000030EB) goto yy210;
+                goto yy69;
+            }
         }
     yy164:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '>') goto yy90;
-        goto yy87;
+        if (yych <= '?') {
+            if (yych <= '9') {
+                if (yych == '!') goto yy212;
+                if (yych >= '0') goto yy164;
+            } else {
+                if (yych == '=') goto yy212;
+                if (yych >= '?') goto yy212;
+            }
+        } else {
+            if (yych <= '_') {
+                if (yych <= '@') goto yy165;
+                if (yych <= 'Z') goto yy164;
+                if (yych >= '_') goto yy164;
+            } else {
+                if (yych <= 'z') {
+                    if (yych >= 'a') goto yy164;
+                } else {
+                    if (yych == 0x000030EB) goto yy164;
+                }
+            }
+        }
     yy165:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == '=') goto yy90;
-        goto yy87;
-    yy166:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '^') {
-            if (yych <= '@') goto yy70;
-            if (yych <= 'Z') goto yy220;
-            goto yy70;
-        } else {
-            if (yych == '`') goto yy70;
-            if (yych <= 'z') goto yy220;
-            goto yy70;
-        }
-    yy167:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '>') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy222;
-            } else {
-                if (yych <= '9') goto yy167;
-                if (yych == '=') goto yy222;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '?') goto yy222;
-                if (yych <= '@') goto yy168;
-                if (yych <= 'Z') goto yy167;
-            } else {
-                if (yych == '`') goto yy168;
-                if (yych <= 'z') goto yy167;
-            }
-        }
-    yy168:
-#line 131 "src/lexer.re"
+#line 135 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1469 "src/lexer.c"
-    yy169:
+#line 1533 "src/lexer.c"
+    yy166:
         rbs_skip(lexer);
-        goto yy100;
-    yy170:
+        goto yy99;
+    yy167:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 'Z') {
-            if (yych <= '/') goto yy171;
-            if (yych <= '9') goto yy170;
-            if (yych >= 'A') goto yy170;
-        } else {
-            if (yych <= '_') {
-                if (yych >= '_') goto yy170;
+        if (yych <= '^') {
+            if (yych <= '9') {
+                if (yych >= '0') goto yy167;
             } else {
-                if (yych <= '`') goto yy171;
-                if (yych <= 'z') goto yy170;
+                if (yych <= '@') goto yy168;
+                if (yych <= 'Z') goto yy167;
+            }
+        } else {
+            if (yych <= 'z') {
+                if (yych != '`') goto yy167;
+            } else {
+                if (yych == 0x000030EB) goto yy167;
             }
         }
-    yy171:
-#line 145 "src/lexer.re"
+    yy168:
+#line 152 "src/lexer.re"
     {
         return rbs_next_token(lexer, tA2IDENT);
     }
-#line 1491 "src/lexer.c"
-    yy172:
+#line 1557 "src/lexer.c"
+    yy169:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy223;
-        goto yy107;
-    yy173:
+        if (yych == 's') goto yy213;
+        goto yy106;
+    yy170:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy225;
-        goto yy114;
-    yy174:
+        if (yych == 'o') goto yy215;
+        goto yy113;
+    yy171:
         rbs_skip(lexer);
-#line 40 "src/lexer.re"
+#line 44 "src/lexer.re"
         {
             return rbs_next_token(lexer, tQIDENT);
         }
-#line 1506 "src/lexer.c"
+#line 1572 "src/lexer.c"
+    yy172:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy216;
+        goto yy52;
+    yy173:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'r') goto yy217;
+        goto yy52;
+    yy174:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy218;
+        goto yy52;
     yy175:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy226;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 77 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kBOT);
+        }
+#line 1609 "src/lexer.c"
     yy176:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy227;
-        goto yy54;
+        if (yych == 's') goto yy219;
+        goto yy52;
     yy177:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy228;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 80 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kDEF);
+        }
+#line 1636 "src/lexer.c"
     yy178:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy179;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
             } else {
-                if (yych == '`') goto yy179;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
             }
         }
+#line 81 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kEND);
+        }
+#line 1658 "src/lexer.c"
     yy179:
-#line 73 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kBOT);
-    }
-#line 1544 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy220;
+        goto yy52;
     yy180:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy230;
-        goto yy54;
+        if (yych == 's') goto yy221;
+        goto yy52;
     yy181:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy182;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy182;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'l') goto yy222;
+        goto yy52;
     yy182:
-#line 76 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kDEF);
-    }
-#line 1572 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy223;
+        goto yy52;
     yy183:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy184;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy184;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'e') goto yy224;
+        goto yy52;
     yy184:
-#line 77 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kEND);
-    }
-#line 1595 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'u') goto yy225;
+        goto yy52;
     yy185:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy231;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 91 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kNIL);
+        }
+#line 1710 "src/lexer.c"
     yy186:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy232;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 92 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kOUT);
+        }
+#line 1732 "src/lexer.c"
     yy187:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy233;
-        goto yy54;
+        if (yych == 'p') goto yy226;
+        goto yy52;
     yy188:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 't') goto yy234;
-        goto yy54;
+        if (yych == 'v') goto yy227;
+        goto yy52;
     yy189:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy235;
-        goto yy54;
+        if (yych == 'l') goto yy228;
+        goto yy52;
     yy190:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy236;
-        goto yy54;
+        if (yych == 'u') goto yy229;
+        goto yy52;
     yy191:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy192;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy192;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'f') goto yy230;
+        goto yy52;
     yy192:
-#line 87 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kNIL);
-    }
-#line 1648 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'g') goto yy231;
+        goto yy52;
     yy193:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy194;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy194;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'p') goto yy232;
+        goto yy52;
     yy194:
-#line 88 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kOUT);
-    }
-#line 1671 "src/lexer.c"
-    yy195:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'p') goto yy237;
-        goto yy54;
-    yy196:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'v') goto yy238;
-        goto yy54;
-    yy197:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy239;
-        goto yy54;
-    yy198:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy240;
-        goto yy54;
-    yy199:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'f') goto yy241;
-        goto yy54;
-    yy200:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'g') goto yy243;
-        goto yy54;
-    yy201:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'p') goto yy244;
-        goto yy54;
-    yy202:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy203;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy203;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy203:
-#line 94 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kTOP);
-    }
-#line 1729 "src/lexer.c"
-    yy204:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy246;
-        goto yy54;
-    yy205:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy248;
-        goto yy54;
-    yy206:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'h') goto yy250;
-        goto yy54;
-    yy207:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'y') goto yy251;
-        goto yy54;
-    yy208:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy209;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy209;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy209:
-#line 100 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kUSE);
-    }
-#line 1772 "src/lexer.c"
-    yy210:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy252;
-        goto yy54;
-    yy211:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy254;
-            goto yy70;
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
         } else {
-            if (yych <= 'F') goto yy254;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy254;
-            goto yy70;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
         }
-    yy212:
+#line 98 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kTOP);
+        }
+#line 1789 "src/lexer.c"
+    yy195:
         rbs_skip(lexer);
-#line 56 "src/lexer.re"
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy233;
+        goto yy52;
+    yy196:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy234;
+        goto yy52;
+    yy197:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'h') goto yy235;
+        goto yy52;
+    yy198:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'y') goto yy236;
+        goto yy52;
+    yy199:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 104 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kUSE);
+        }
+#line 1831 "src/lexer.c"
+    yy200:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy237;
+        goto yy52;
+    yy201:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy238;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy238;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy238;
+            goto yy69;
+        }
+    yy202:
+        rbs_skip(lexer);
+#line 60 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1795 "src/lexer.c"
-    yy213:
+#line 1854 "src/lexer.c"
+    yy203:
+        rbs_skip(lexer);
+#line 63 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tANNOTATION);
+        }
+#line 1859 "src/lexer.c"
+    yy204:
+        rbs_skip(lexer);
+#line 61 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, tANNOTATION);
+        }
+#line 1864 "src/lexer.c"
+    yy205:
         rbs_skip(lexer);
 #line 59 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1800 "src/lexer.c"
-    yy214:
+#line 1869 "src/lexer.c"
+    yy206:
         rbs_skip(lexer);
-#line 57 "src/lexer.re"
+#line 62 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1805 "src/lexer.c"
-    yy215:
-        rbs_skip(lexer);
-#line 55 "src/lexer.re"
-        {
-            return rbs_next_token(lexer, tANNOTATION);
-        }
-#line 1810 "src/lexer.c"
-    yy216:
-        rbs_skip(lexer);
-#line 58 "src/lexer.re"
-        {
-            return rbs_next_token(lexer, tANNOTATION);
-        }
-#line 1815 "src/lexer.c"
-    yy217:
+#line 1874 "src/lexer.c"
+    yy207:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy255;
-            goto yy70;
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy239;
+            goto yy69;
         } else {
-            if (yych <= 'F') goto yy255;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy255;
-            goto yy70;
+            if (yych <= 'F') goto yy239;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy239;
+            goto yy69;
         }
-    yy218:
+    yy208:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '/') goto yy70;
-        if (yych <= '9') goto yy88;
-        if (yych <= '`') goto yy70;
-        if (yych <= 'f') goto yy88;
-        goto yy70;
-    yy219:
+        if (yych <= '/') goto yy69;
+        if (yych <= '9') goto yy87;
+        if (yych <= '`') goto yy69;
+        if (yych <= 'f') goto yy87;
+        goto yy69;
+    yy209:
         yyaccept = 6;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
         if (yych <= '\'') {
-            if (yych <= 0x00000000) goto yy162;
-            if (yych <= '&') goto yy91;
-            goto yy161;
+            if (yych <= 0x00000000) goto yy159;
+            if (yych <= '&') goto yy90;
+            goto yy158;
         } else {
-            if (yych == '\\') goto yy163;
-            goto yy91;
+            if (yych == '\\') goto yy160;
+            goto yy90;
         }
-    yy220:
+    yy210:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '>') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy256;
+        if (yych <= '?') {
+            if (yych <= '9') {
+                if (yych == '!') goto yy240;
+                if (yych >= '0') goto yy210;
             } else {
-                if (yych <= '9') goto yy220;
-                if (yych == '=') goto yy256;
+                if (yych == '=') goto yy240;
+                if (yych >= '?') goto yy240;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '?') goto yy256;
-                if (yych <= '@') goto yy221;
-                if (yych <= 'Z') goto yy220;
+            if (yych <= '_') {
+                if (yych <= '@') goto yy211;
+                if (yych <= 'Z') goto yy210;
+                if (yych >= '_') goto yy210;
             } else {
-                if (yych == '`') goto yy221;
-                if (yych <= 'z') goto yy220;
+                if (yych <= 'z') {
+                    if (yych >= 'a') goto yy210;
+                } else {
+                    if (yych == 0x000030EB) goto yy210;
+                }
             }
         }
-    yy221:
-#line 132 "src/lexer.re"
+    yy211:
+#line 136 "src/lexer.re"
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1873 "src/lexer.c"
-    yy222:
+#line 1936 "src/lexer.c"
+    yy212:
         rbs_skip(lexer);
-        goto yy168;
-    yy223:
+        goto yy165;
+    yy213:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 'Z') {
-            if (yych <= '/') goto yy224;
-            if (yych <= '9') goto yy106;
-            if (yych >= 'A') goto yy106;
-        } else {
-            if (yych <= '_') {
-                if (yych >= '_') goto yy106;
+        if (yych <= '^') {
+            if (yych <= '9') {
+                if (yych >= '0') goto yy105;
             } else {
-                if (yych <= '`') goto yy224;
-                if (yych <= 'z') goto yy106;
+                if (yych <= '@') goto yy214;
+                if (yych <= 'Z') goto yy105;
+            }
+        } else {
+            if (yych <= 'z') {
+                if (yych != '`') goto yy105;
+            } else {
+                if (yych == 0x000030EB) goto yy105;
             }
         }
-    yy224:
-#line 103 "src/lexer.re"
+    yy214:
+#line 107 "src/lexer.re"
     {
         return rbs_next_token(lexer, kATRBS);
     }
-#line 1895 "src/lexer.c"
+#line 1960 "src/lexer.c"
+    yy215:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy241;
+        goto yy113;
+    yy216:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 's') goto yy242;
+        goto yy52;
+    yy217:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '_') goto yy243;
+        goto yy52;
+    yy218:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 76 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kBOOL);
+        }
+#line 1997 "src/lexer.c"
+    yy219:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 's') goto yy244;
+        goto yy52;
+    yy220:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy246;
+        goto yy52;
+    yy221:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy247;
+        goto yy52;
+    yy222:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'u') goto yy248;
+        goto yy52;
+    yy223:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy249;
+        goto yy52;
+    yy224:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'r') goto yy250;
+        goto yy52;
     yy225:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy257;
-        goto yy114;
+        if (yych == 'l') goto yy251;
+        goto yy52;
     yy226:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy258;
-        goto yy54;
+        if (yych == 'e') goto yy252;
+        goto yy52;
     yy227:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '_') goto yy260;
-        goto yy54;
+        if (yych == 'a') goto yy253;
+        goto yy52;
     yy228:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy229;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy229;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'i') goto yy254;
+        goto yy52;
     yy229:
-#line 72 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kBOOL);
-    }
-#line 1933 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'r') goto yy255;
+        goto yy52;
     yy230:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy261;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 96 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kSELF);
+        }
+#line 2074 "src/lexer.c"
     yy231:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy263;
-        goto yy54;
+        if (yych == 'l') goto yy256;
+        goto yy52;
     yy232:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy264;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 108 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kSKIP);
+        }
+#line 2101 "src/lexer.c"
     yy233:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'u') goto yy266;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 99 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kTRUE);
+        }
+#line 2123 "src/lexer.c"
     yy234:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy267;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 100 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kTYPE);
+        }
+#line 2145 "src/lexer.c"
     yy235:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy268;
-        goto yy54;
+        if (yych == 'e') goto yy257;
+        goto yy52;
     yy236:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy269;
-        goto yy54;
+        if (yych == 'p') goto yy258;
+        goto yy52;
     yy237:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy270;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 103 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kVOID);
+        }
+#line 2177 "src/lexer.c"
     yy238:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy271;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy259;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy259;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy259;
+            goto yy69;
+        }
     yy239:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy272;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy260;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy260;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy260;
+            goto yy69;
+        }
     yy240:
         rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy273;
-        goto yy54;
+        goto yy211;
     yy241:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych == 'o') goto yy261;
+        goto yy113;
+    yy242:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy242;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
             } else {
-                if (yych == '`') goto yy242;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
             }
         }
-    yy242:
-#line 92 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kSELF);
-    }
-#line 2011 "src/lexer.c"
+#line 72 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kALIAS);
+        }
+#line 2233 "src/lexer.c"
     yy243:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy274;
-        goto yy54;
-    yy244:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy245;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy245;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy245:
-#line 104 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kSKIP);
-    }
-#line 2039 "src/lexer.c"
-    yy246:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy247;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy247;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy247:
-#line 95 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kTRUE);
-    }
-#line 2062 "src/lexer.c"
-    yy248:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy249;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy249;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy249:
-#line 96 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kTYPE);
-    }
-#line 2085 "src/lexer.c"
-    yy250:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy275;
-        goto yy54;
-    yy251:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'p') goto yy276;
-        goto yy54;
-    yy252:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy253;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy253;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy253:
-#line 99 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kVOID);
-    }
-#line 2118 "src/lexer.c"
-    yy254:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy277;
-            goto yy70;
-        } else {
-            if (yych <= 'F') goto yy277;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy277;
-            goto yy70;
-        }
-    yy255:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy278;
-            goto yy70;
-        } else {
-            if (yych <= 'F') goto yy278;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy278;
-            goto yy70;
-        }
-    yy256:
-        rbs_skip(lexer);
-        goto yy221;
-    yy257:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy279;
-        goto yy114;
-    yy258:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy259;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy259;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy259:
-#line 68 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kALIAS);
-    }
-#line 2175 "src/lexer.c"
-    yy260:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
         if (yych <= 'q') {
-            if (yych == 'a') goto yy280;
-            goto yy54;
+            if (yych == 'a') goto yy262;
+            goto yy52;
         } else {
-            if (yych <= 'r') goto yy281;
-            if (yych == 'w') goto yy282;
-            goto yy54;
+            if (yych <= 'r') goto yy263;
+            if (yych == 'w') goto yy264;
+            goto yy52;
         }
-    yy261:
+    yy244:
         yyaccept = 7;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        if (yych <= '<') {
-            if (yych <= ',') {
-                if (yych == '!') goto yy110;
+        if (yych <= '=') {
+            if (yych <= '-') {
+                if (yych == '!') goto yy109;
+                if (yych >= '-') goto yy265;
             } else {
-                if (yych <= '-') goto yy283;
-                if (yych <= '/') goto yy262;
-                if (yych <= '9') goto yy53;
+                if (yych <= '/') goto yy245;
+                if (yych <= '9') goto yy51;
+                if (yych >= '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '=') goto yy111;
-                if (yych <= '@') goto yy262;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '_') {
+                if (yych <= '@') goto yy245;
+                if (yych <= 'Z') goto yy51;
+                if (yych >= '_') goto yy51;
             } else {
-                if (yych == '`') goto yy262;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') {
+                    if (yych >= 'a') goto yy51;
+                } else {
+                    if (yych == 0x000030EB) goto yy51;
+                }
             }
         }
-    yy262:
-#line 74 "src/lexer.re"
+    yy245:
+#line 78 "src/lexer.re"
     {
         return rbs_next_token(lexer, kCLASS);
     }
-#line 2213 "src/lexer.c"
+#line 2275 "src/lexer.c"
+    yy246:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy266;
+        goto yy52;
+    yy247:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 83 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kFALSE);
+        }
+#line 2302 "src/lexer.c"
+    yy248:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy267;
+        goto yy52;
+    yy249:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy268;
+        goto yy52;
+    yy250:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'f') goto yy269;
+        goto yy52;
+    yy251:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy270;
+        goto yy52;
+    yy252:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy272;
+        goto yy52;
+    yy253:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy273;
+        goto yy52;
+    yy254:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy274;
+        goto yy52;
+    yy255:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'n') goto yy275;
+        goto yy52;
+    yy256:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy276;
+        goto yy52;
+    yy257:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy277;
+        goto yy52;
+    yy258:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy278;
+        goto yy52;
+    yy259:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy67;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy67;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy67;
+            goto yy69;
+        }
+    yy260:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy279;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy279;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy279;
+            goto yy69;
+        }
+    yy261:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '_') goto yy280;
+        goto yy113;
+    yy262:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy281;
+        goto yy52;
     yy263:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy284;
-        goto yy54;
+        if (yych == 'e') goto yy282;
+        goto yy52;
     yy264:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy265;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy265;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'r') goto yy283;
+        goto yy52;
     yy265:
-#line 79 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kFALSE);
-    }
-#line 2241 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy284;
+        goto yy69;
     yy266:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy286;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 82 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kEXTEND);
+        }
+#line 2430 "src/lexer.c"
     yy267:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy287;
-        goto yy54;
+        if (yych == 'e') goto yy285;
+        goto yy52;
     yy268:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'f') goto yy288;
-        goto yy54;
+        if (yych == 'c') goto yy286;
+        goto yy52;
     yy269:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy289;
-        goto yy54;
+        if (yych == 'a') goto yy287;
+        goto yy52;
     yy270:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy291;
-        goto yy54;
-    yy271:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy292;
-        goto yy54;
-    yy272:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy293;
-        goto yy54;
-    yy273:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy295;
-        goto yy54;
-    yy274:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy297;
-        goto yy54;
-    yy275:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy298;
-        goto yy54;
-    yy276:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy299;
-        goto yy54;
-    yy277:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy68;
-            goto yy70;
-        } else {
-            if (yych <= 'F') goto yy68;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy68;
-            goto yy70;
-        }
-    yy278:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy300;
-            goto yy70;
-        } else {
-            if (yych <= 'F') goto yy300;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy300;
-            goto yy70;
-        }
-    yy279:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == '_') goto yy301;
-        goto yy114;
-    yy280:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy302;
-        goto yy54;
-    yy281:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy303;
-        goto yy54;
-    yy282:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy304;
-        goto yy54;
-    yy283:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy305;
-        goto yy70;
-    yy284:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy285;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy285;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy285:
-#line 78 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kEXTEND);
-    }
-#line 2370 "src/lexer.c"
-    yy286:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy306;
-        goto yy54;
-    yy287:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy308;
-        goto yy54;
-    yy288:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy309;
-        goto yy54;
-    yy289:
         yyaccept = 8;
         rbs_skip(lexer);
         backup = *lexer;
         yych = rbs_peek(lexer);
-        if (yych <= '<') {
-            if (yych <= ',') {
-                if (yych == '!') goto yy110;
+        if (yych <= '=') {
+            if (yych <= '-') {
+                if (yych == '!') goto yy109;
+                if (yych >= '-') goto yy288;
             } else {
-                if (yych <= '-') goto yy310;
-                if (yych <= '/') goto yy290;
-                if (yych <= '9') goto yy53;
+                if (yych <= '/') goto yy271;
+                if (yych <= '9') goto yy51;
+                if (yych >= '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '=') goto yy111;
-                if (yych <= '@') goto yy290;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '_') {
+                if (yych <= '@') goto yy271;
+                if (yych <= 'Z') goto yy51;
+                if (yych >= '_') goto yy51;
             } else {
-                if (yych == '`') goto yy290;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') {
+                    if (yych >= 'a') goto yy51;
+                } else {
+                    if (yych == 0x000030EB) goto yy51;
+                }
             }
         }
-    yy290:
-#line 84 "src/lexer.re"
+    yy271:
+#line 88 "src/lexer.re"
     {
         return rbs_next_token(lexer, kMODULE);
     }
-#line 2412 "src/lexer.c"
-    yy291:
+#line 2476 "src/lexer.c"
+    yy272:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy311;
-        goto yy54;
-    yy292:
+        if (yych == 'd') goto yy289;
+        goto yy52;
+    yy273:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy313;
-        goto yy54;
-    yy293:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy294;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy294;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy294:
-#line 91 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kPUBLIC);
-    }
-#line 2445 "src/lexer.c"
-    yy295:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy296;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy296;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy296:
-#line 105 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kRETURN);
-    }
-#line 2468 "src/lexer.c"
-    yy297:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy315;
-        goto yy54;
-    yy298:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'k') goto yy316;
-        goto yy54;
-    yy299:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy317;
-        goto yy54;
-    yy300:
+        if (yych == 'e') goto yy290;
+        goto yy52;
+    yy274:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
         if (yych <= '@') {
-            if (yych <= '/') goto yy70;
-            if (yych <= '9') goto yy88;
-            goto yy70;
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
         } else {
-            if (yych <= 'F') goto yy88;
-            if (yych <= '`') goto yy70;
-            if (yych <= 'f') goto yy88;
-            goto yy70;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
         }
+#line 95 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kPUBLIC);
+        }
+#line 2508 "src/lexer.c"
+    yy275:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 109 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kRETURN);
+        }
+#line 2530 "src/lexer.c"
+    yy276:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy291;
+        goto yy52;
+    yy277:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'k') goto yy292;
+        goto yy52;
+    yy278:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy293;
+        goto yy52;
+    yy279:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') goto yy69;
+            if (yych <= '9') goto yy87;
+            goto yy69;
+        } else {
+            if (yych <= 'F') goto yy87;
+            if (yych <= '`') goto yy69;
+            if (yych <= 'f') goto yy87;
+            goto yy69;
+        }
+    yy280:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == '_') goto yy294;
+        goto yy113;
+    yy281:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy295;
+        goto yy52;
+    yy282:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy296;
+        goto yy52;
+    yy283:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'i') goto yy297;
+        goto yy52;
+    yy284:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'l') goto yy298;
+        goto yy69;
+    yy285:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 85 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kINCLUDE);
+        }
+#line 2605 "src/lexer.c"
+    yy286:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy299;
+        goto yy52;
+    yy287:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'c') goto yy300;
+        goto yy52;
+    yy288:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy301;
+        if (yych == 's') goto yy302;
+        goto yy69;
+    yy289:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 93 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kPREPEND);
+        }
+#line 2643 "src/lexer.c"
+    yy290:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 94 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kPRIVATE);
+        }
+#line 2665 "src/lexer.c"
+    yy291:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'o') goto yy303;
+        goto yy52;
+    yy292:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy304;
+        goto yy52;
+    yy293:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 102 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kUNTYPED);
+        }
+#line 2697 "src/lexer.c"
+    yy294:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy112;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy112;
+                if (yych == '_') goto yy112;
+            } else {
+                if (yych <= 'z') goto yy112;
+                if (yych == 0x000030EB) goto yy112;
+            }
+        }
+#line 106 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, k__TODO__);
+        }
+#line 2719 "src/lexer.c"
+    yy295:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy305;
+        goto yy52;
+    yy296:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'd') goto yy306;
+        goto yy52;
+    yy297:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 't') goto yy307;
+        goto yy52;
+    yy298:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'i') goto yy308;
+        goto yy69;
+    yy299:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 86 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kINSTANCE);
+        }
+#line 2761 "src/lexer.c"
+    yy300:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy309;
+        goto yy52;
     yy301:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == '_') goto yy319;
-        goto yy114;
+        if (yych == 'l') goto yy310;
+        goto yy69;
     yy302:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy321;
-        goto yy54;
+        if (yych == 'e') goto yy311;
+        goto yy69;
     yy303:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy322;
-        goto yy54;
+        if (yych == 'n') goto yy312;
+        goto yy52;
     yy304:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy323;
-        goto yy54;
+        if (yych == 'd') goto yy313;
+        goto yy52;
     yy305:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy324;
-        goto yy70;
+        if (yych == 's') goto yy314;
+        goto yy52;
     yy306:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy307;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy307;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 'e') goto yy315;
+        goto yy52;
     yy307:
-#line 81 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kINCLUDE);
-    }
-#line 2544 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'e') goto yy316;
+        goto yy52;
     yy308:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy325;
-        goto yy54;
+        if (yych == 'a') goto yy317;
+        goto yy69;
     yy309:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'c') goto yy327;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 87 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kINTERFACE);
+        }
+#line 2828 "src/lexer.c"
     yy310:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy328;
-        if (yych == 's') goto yy329;
-        goto yy70;
+        if (yych == 'i') goto yy318;
+        goto yy69;
     yy311:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych == 'l') goto yy319;
+        goto yy69;
+    yy312:
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy312;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
             } else {
-                if (yych == '`') goto yy312;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
             }
         }
-    yy312:
-#line 89 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kPREPEND);
-    }
-#line 2583 "src/lexer.c"
+#line 97 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kSINGLETON);
+        }
+#line 2860 "src/lexer.c"
     yy313:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy314;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
             } else {
-                if (yych == '`') goto yy314;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
             }
         }
+#line 101 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kUNCHECKED);
+        }
+#line 2882 "src/lexer.c"
     yy314:
-#line 90 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kPRIVATE);
-    }
-#line 2606 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 's') goto yy320;
+        goto yy52;
     yy315:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy330;
-        goto yy54;
+        if (yych == 'r') goto yy321;
+        goto yy52;
     yy316:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy331;
-        goto yy54;
+        if (yych == 'r') goto yy322;
+        goto yy52;
     yy317:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy318;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy318;
-                if (yych <= 'z') goto yy53;
-            }
-        }
+        if (yych == 's') goto yy323;
+        goto yy69;
     yy318:
-#line 98 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kUNTYPED);
-    }
-#line 2639 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'a') goto yy324;
+        goto yy69;
     yy319:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy113;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy320;
-                if (yych <= 'Z') goto yy113;
-            } else {
-                if (yych == '`') goto yy320;
-                if (yych <= 'z') goto yy113;
-            }
-        }
+        if (yych == 'f') goto yy325;
+        goto yy69;
     yy320:
-#line 102 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, k__TODO__);
-    }
-#line 2662 "src/lexer.c"
+        rbs_skip(lexer);
+        yych = rbs_peek(lexer);
+        if (yych == 'o') goto yy326;
+        goto yy52;
     yy321:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy332;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 74 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kATTRREADER);
+        }
+#line 2939 "src/lexer.c"
     yy322:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy333;
-        goto yy54;
+        if (yych <= '@') {
+            if (yych <= '/') {
+                if (yych == '!') goto yy109;
+            } else {
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
+            }
+        } else {
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
+            } else {
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
+            }
+        }
+#line 75 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kATTRWRITER);
+        }
+#line 2961 "src/lexer.c"
     yy323:
         rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 't') goto yy334;
-        goto yy54;
-    yy324:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy335;
-        goto yy70;
-    yy325:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy326;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy326;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy326:
-#line 82 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kINSTANCE);
-    }
-#line 2705 "src/lexer.c"
-    yy327:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy336;
-        goto yy54;
-    yy328:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy338;
-        goto yy70;
-    yy329:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy339;
-        goto yy70;
-    yy330:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'n') goto yy340;
-        goto yy54;
-    yy331:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'd') goto yy342;
-        goto yy54;
-    yy332:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 's') goto yy344;
-        goto yy54;
-    yy333:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy345;
-        goto yy54;
-    yy334:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'e') goto yy346;
-        goto yy54;
-    yy335:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy347;
-        goto yy70;
-    yy336:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy337;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy337;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy337:
-#line 83 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kINTERFACE);
-    }
-#line 2773 "src/lexer.c"
-    yy338:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'i') goto yy348;
-        goto yy70;
-    yy339:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'l') goto yy349;
-        goto yy70;
-    yy340:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy341;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy341;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy341:
-#line 93 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kSINGLETON);
-    }
-#line 2806 "src/lexer.c"
-    yy342:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy343;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy343;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy343:
-#line 97 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kUNCHECKED);
-    }
-#line 2829 "src/lexer.c"
-    yy344:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 's') goto yy350;
-        goto yy54;
-    yy345:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy351;
-        goto yy54;
-    yy346:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy353;
-        goto yy54;
-    yy347:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 's') goto yy355;
-        goto yy70;
-    yy348:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'a') goto yy356;
-        goto yy70;
-    yy349:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'f') goto yy357;
-        goto yy70;
-    yy350:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych == 'o') goto yy358;
-        goto yy54;
-    yy351:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy352;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy352;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy352:
-#line 70 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kATTRREADER);
-    }
-#line 2887 "src/lexer.c"
-    yy353:
-        rbs_skip(lexer);
-        yych = rbs_peek(lexer);
-        if (yych <= '=') {
-            if (yych <= '/') {
-                if (yych == '!') goto yy110;
-            } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
-            }
-        } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy354;
-                if (yych <= 'Z') goto yy53;
-            } else {
-                if (yych == '`') goto yy354;
-                if (yych <= 'z') goto yy53;
-            }
-        }
-    yy354:
-#line 71 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kATTRWRITER);
-    }
-#line 2910 "src/lexer.c"
-    yy355:
-        rbs_skip(lexer);
-#line 75 "src/lexer.re"
+#line 79 "src/lexer.re"
         {
             return rbs_next_token(lexer, kCLASSALIAS);
         }
-#line 2915 "src/lexer.c"
-    yy356:
+#line 2966 "src/lexer.c"
+    yy324:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 's') goto yy359;
-        goto yy70;
-    yy357:
+        if (yych == 's') goto yy327;
+        goto yy69;
+    yy325:
         rbs_skip(lexer);
-#line 86 "src/lexer.re"
+#line 90 "src/lexer.re"
         {
             return rbs_next_token(lexer, kMODULESELF);
         }
-#line 2925 "src/lexer.c"
-    yy358:
+#line 2976 "src/lexer.c"
+    yy326:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych == 'r') goto yy360;
-        goto yy54;
-    yy359:
+        if (yych == 'r') goto yy328;
+        goto yy52;
+    yy327:
         rbs_skip(lexer);
-#line 85 "src/lexer.re"
+#line 89 "src/lexer.re"
         {
             return rbs_next_token(lexer, kMODULEALIAS);
         }
-#line 2935 "src/lexer.c"
-    yy360:
+#line 2986 "src/lexer.c"
+    yy328:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= '=') {
+        if (yych <= '@') {
             if (yych <= '/') {
-                if (yych == '!') goto yy110;
+                if (yych == '!') goto yy109;
             } else {
-                if (yych <= '9') goto yy53;
-                if (yych >= '=') goto yy111;
+                if (yych <= '9') goto yy51;
+                if (yych == '=') goto yy110;
             }
         } else {
-            if (yych <= '^') {
-                if (yych <= '@') goto yy361;
-                if (yych <= 'Z') goto yy53;
+            if (yych <= '`') {
+                if (yych <= 'Z') goto yy51;
+                if (yych == '_') goto yy51;
             } else {
-                if (yych == '`') goto yy361;
-                if (yych <= 'z') goto yy53;
+                if (yych <= 'z') goto yy51;
+                if (yych == 0x000030EB) goto yy51;
             }
         }
-    yy361:
-#line 69 "src/lexer.re"
-    {
-        return rbs_next_token(lexer, kATTRACCESSOR);
+#line 73 "src/lexer.re"
+        {
+            return rbs_next_token(lexer, kATTRACCESSOR);
+        }
+#line 3008 "src/lexer.c"
     }
-#line 2958 "src/lexer.c"
-    }
-#line 154 "src/lexer.re"
+#line 161 "src/lexer.re"
 }

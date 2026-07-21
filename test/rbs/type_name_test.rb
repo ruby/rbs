@@ -52,4 +52,23 @@ class RBS::TypeNameTest < Test::Unit::TestCase
     assert_equal :alias,     aliased.kind
     assert_equal :interface, interface.kind
   end
+
+  def test_kind_uses_unicode_uppercase_property
+    ns = Namespace.root
+
+    # Non-ASCII uppercase code points (Lu / Lt / Other_Uppercase) count as
+    # constants, matching Ruby's `rb_sym_constant_char_p`.
+    assert_equal :class, TypeName[ns, :"Última"].kind
+    assert_equal :class, TypeName[ns, :"Ωmega"].kind
+    assert_equal :class, TypeName[ns, :"Ñoño"].kind
+
+    # Non-ASCII lowercase (Ll) and Other_Letter (kanji etc.) are local
+    # identifiers in Ruby, so they belong to :alias here.
+    assert_equal :alias, TypeName[ns, :"αlpha"].kind
+    assert_equal :alias, TypeName[ns, :"日本語"].kind
+
+    # A leading underscore keeps interface semantics regardless of the
+    # rest of the name.
+    assert_equal :interface, TypeName[ns, :"_Únicos"].kind
+  end
 end

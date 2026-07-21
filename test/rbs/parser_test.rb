@@ -1065,6 +1065,70 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_non_ascii_identifiers
+    # Class / module / constant names starting with a Unicode uppercase code point
+    # are classified as tUIDENT and accepted where a constant is expected.
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class ServicioÚltimaVez
+        end
+
+        class Ωmega
+        end
+
+        module MiMódulo
+          MI_CONSTANTE_Ñ: Integer
+          def enviar_últimas_interacciones: () -> void
+          def 日本語: () -> void
+          def únicos!: () -> void
+
+          @日本語: Integer
+          @@クラス変数: Integer
+
+          attr_reader nombre_único: String
+        end
+      RBS
+
+      assert_equal RBS::TypeName.parse("ServicioÚltimaVez"), decls[0].name
+      assert_equal RBS::TypeName.parse("Ωmega"), decls[1].name
+      assert_equal RBS::TypeName.parse("MiMódulo"), decls[2].name
+
+      module_members = decls[2].members
+      assert_equal RBS::TypeName.parse("MI_CONSTANTE_Ñ"), module_members[0].name
+      assert_equal :enviar_últimas_interacciones, module_members[1].name
+      assert_equal :日本語, module_members[2].name
+      assert_equal :"únicos!", module_members[3].name
+      assert_equal :@日本語, module_members[4].name
+      assert_equal :@@クラス変数, module_members[5].name
+      assert_equal :nombre_único, module_members[6].name
+    end
+
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Únicos
+          def foo: () -> void
+        end
+
+        $グローバル: Integer
+      RBS
+
+      assert_equal RBS::TypeName.parse("_Únicos"), decls[0].name
+      assert_equal :$グローバル, decls[1].name
+    end
+  end
+
+  def test_non_ascii_identifier_lowercase_is_not_a_constant
+    # In Ruby a constant must start with a Unicode uppercase code point.
+    # Greek lowercase (α) and characters with the Other_Letter category
+    # (e.g. kanji) are local identifiers and must be rejected where a
+    # constant name is expected.
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer("class αlpha\nend\n"))
+    end
+
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer("class 日本語\nend\n"))
+    end
+  end
+
   def test_utf8_replacement_character_in_comment_parses
     # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
     # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the

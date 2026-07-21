@@ -194,6 +194,15 @@ void rbs_skipn(rbs_lexer_t *lexer, size_t size);
 rbs_token_t rbs_next_token(rbs_lexer_t *lexer, enum RBSTokenType type);
 
 /**
+ * Return new rbs_token_t for a multibyte-leading identifier.
+ * The token type is decided by the encoding's isupper_char on the first
+ * multibyte character (located at skip_bytes offset from the token start).
+ * When underscore_prefixed is true, returns tULIDENT / tULLIDENT;
+ * otherwise returns tUIDENT / tLIDENT.
+ * */
+rbs_token_t rbs_next_mb_ident_token(rbs_lexer_t *lexer, size_t skip_bytes, bool underscore_prefixed);
+
+/**
  * Return new rbs_token_t with EOF type.
  * */
 rbs_token_t rbs_next_eof_token(rbs_lexer_t *lexer);
