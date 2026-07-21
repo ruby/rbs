@@ -9,7 +9,15 @@ module RBS
       attr_reader :modules
       attr_reader :last_sig
 
-      Context = Struct.new(:singleton, :visibility, keyword_init: true)
+      class Context
+        attr_accessor :singleton
+        attr_accessor :visibility
+
+        def initialize(singleton:, visibility:)
+          @singleton = singleton
+          @visibility = visibility
+        end
+      end
 
       def initialize
         @decls = []
@@ -25,8 +33,8 @@ module RBS
       end
 
       def append_decl(decl)
-        if current_module
-          current_module.members << decl
+        if mod = current_module
+          mod.members << decl
         else
           decls << decl
         end
