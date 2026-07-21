@@ -9,10 +9,14 @@ module RBS
       attr_reader :modules
       attr_reader :last_sig
 
+      Context = Struct.new(:singleton, :visibility, keyword_init: true)
+
       def initialize
         @decls = []
 
         @modules = []
+        @contexts = []
+        @emitted_visibility = {}
       end
 
       def parse(string)
@@ -20,19 +24,17 @@ module RBS
         process RubyVM::AbstractSyntaxTree.parse(string), comments: comments
       end
 
-      def nested_name(name)
-        (current_namespace + const_to_name(name).to_namespace).to_type_name.relative!
-      end
-
-      def current_namespace
-        modules.inject(Namespace.empty) do |parent, mod|
-          parent + mod.name.to_namespace
+      def append_decl(decl)
+        if current_module
+          current_module.members << decl
+        else
+          decls << decl
         end
       end
 
       def push_class(name, super_class, comment:)
         class_decl = AST::Declarations::Class.new(
-          name: nested_name(name),
+          name: const_to_name(name),
           super_class: super_class && AST::Declarations::Class::Super.new(name: const_to_name(super_class), args: [], location: nil),
           type_params: [],
           members: [],
@@ -41,17 +43,20 @@ module RBS
           comment: comment
         )
 
+        append_decl class_decl
         modules << class_decl
-        decls << class_decl
+        @contexts << Context.new(singleton: false, visibility: :public)
+        @emitted_visibility[class_decl.object_id] = :public
 
         yield
       ensure
+        @contexts.pop
         modules.pop
       end
 
       def push_module(name, comment:)
         module_decl = AST::Declarations::Module.new(
-          name: nested_name(name),
+          name: const_to_name(name),
           type_params: [],
           members: [],
           annotations: [],
@@ -60,11 +65,14 @@ module RBS
           comment: comment
         )
 
+        append_decl module_decl
         modules << module_decl
-        decls << module_decl
+        @contexts << Context.new(singleton: false, visibility: :public)
+        @emitted_visibility[module_decl.object_id] = :public
 
         yield
       ensure
+        @contexts.pop
         modules.pop
       end
 
@@ -74,6 +82,34 @@ module RBS
 
       def current_module!
         current_module or raise
+      end
+
+      def current_context
+        @contexts.last
+      end
+
+      def current_context!
+        current_context or raise
+      end
+
+      def sync_visibility(visibility)
+        # RBS has no protected visibility. Private is the conservative fallback.
+        visibility = :private if visibility == :protected
+
+        mod = current_module!
+        return if @emitted_visibility[mod.object_id] == visibility
+
+        member = case visibility
+                 when :public
+                   AST::Members::Public.new(location: nil)
+                 when :private
+                   AST::Members::Private.new(location: nil)
+                 else
+                   raise "Unexpected visibility: #{visibility}"
+                 end
+
+        mod.members << member
+        @emitted_visibility[mod.object_id] = visibility
       end
 
       def push_sig(node)
@@ -107,6 +143,15 @@ module RBS
           push_module node.children[0], comment: comment do
             process node.children[1], outer: outer + [node], comments: comments
           end
+        when :SCLASS
+          if node.children[0].type == :SELF
+            @contexts << Context.new(singleton: true, visibility: :public)
+            begin
+              process node.children[1], outer: outer + [node], comments: comments
+            ensure
+              @contexts.pop
+            end
+          end
         when :FCALL
           case node.children[0]
           when :include
@@ -125,9 +170,9 @@ module RBS
             end
           when :extend
             each_arg node.children[1] do |arg|
-              if arg.type == :CONST || arg.type == :COLON2
+              if arg.type == :CONST || arg.type == :COLON2 || arg.type == :COLON3
                 name = const_to_name(arg)
-                unless name.to_s == "T::Generic" || name.to_s == "T::Sig"
+                unless ["T::Generic", "T::Helpers", "T::Sig"].include?(name.to_s.delete_prefix("::"))
                   member = AST::Members::Extend.new(
                     name: name,
                     args: [],
@@ -142,6 +187,10 @@ module RBS
           when :sig
             out = outer.last or raise
             push_sig out.children.last.children.last
+          when :attr_reader, :attr_writer, :attr_accessor
+            process_attribute node, comments: comments
+          when :private, :protected, :public
+            process_visibility node, outer: outer, comments: comments
           when :alias_method
             new, old = each_arg(node.children[1]).map {|x| x.children[0] }
             current_module!.members << AST::Members::Alias.new(
@@ -149,14 +198,20 @@ module RBS
               old_name: old,
               location: nil,
               annotations: [],
-              kind: :instance,
+              kind: current_context!.singleton ? :singleton : :instance,
               comment: nil
             )
+          end
+        when :VCALL
+          case node.children[0]
+          when :private, :protected, :public
+            current_context!.visibility = node.children[0]
           end
         when :DEFS
           sigs = pop_sig
 
           if sigs
+            sync_visibility(:public)
             comment = join_comments(sigs, comments)
 
             args = node.children[2]
@@ -178,6 +233,8 @@ module RBS
           sigs = pop_sig
 
           if sigs
+            context = current_context!
+            sync_visibility(context.visibility)
             comment = join_comments(sigs, comments)
 
             args = node.children[1]
@@ -188,7 +245,7 @@ module RBS
               location: nil,
               annotations: [],
               overloads: types.map {|type| AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: type) },
-              kind: :instance,
+              kind: context.singleton ? :singleton : :instance,
               comment: comment,
               overloading: false,
               visibility: nil
@@ -222,11 +279,7 @@ module RBS
             end
           else
             name = node.children[0].yield_self do |n|
-              if n.is_a?(Symbol)
-                TypeName.new(namespace: current_namespace, name: n)
-              else
-                const_to_name(n)
-              end
+              n.is_a?(Symbol) ? TypeName.new(namespace: Namespace.empty, name: n) : const_to_name(n)
             end
             value_node = node.children.last
             type = if value_node && value_node.type == :CALL && value_node.children[1] == :let
@@ -235,7 +288,7 @@ module RBS
                    else
                      Types::Bases::Any.new(location: nil)
                    end
-            decls << AST::Declarations::Constant.new(
+            append_decl AST::Declarations::Constant.new(
               name: name,
               type: type,
               location: nil,
@@ -244,18 +297,106 @@ module RBS
             )
           end
         when :ALIAS
+          sync_visibility(current_context!.visibility)
           current_module!.members << AST::Members::Alias.new(
             new_name: node.children[0].children[0],
             old_name: node.children[1].children[0],
             location: nil,
             annotations: [],
-            kind: :instance,
+            kind: current_context!.singleton ? :singleton : :instance,
             comment: nil
           )
         else
           each_child node do |child|
             process child, outer: outer + [node], comments: comments
           end
+        end
+      end
+
+      def process_visibility(node, outer:, comments:)
+        visibility = node.children[0]
+        args = each_arg(node.children[1]).to_a
+        context = current_context!
+
+        if args.empty?
+          context.visibility = visibility
+        else
+          previous_visibility = context.visibility
+          context.visibility = visibility
+
+          begin
+            args.each do |arg|
+              if arg.type == :DEFN || arg.type == :DEFS
+                process arg, outer: outer + [node], comments: comments
+              end
+            end
+          ensure
+            context.visibility = previous_visibility
+          end
+        end
+      end
+
+      def process_attribute(node, comments:)
+        sigs = pop_sig
+        kind = node.children[0]
+        context = current_context!
+        sync_visibility(context.visibility)
+
+        type = attribute_type(kind, sigs)
+        comment = join_comments(sigs, comments) if sigs
+        member_class = case kind
+                       when :attr_reader
+                         AST::Members::AttrReader
+                       when :attr_writer
+                         AST::Members::AttrWriter
+                       when :attr_accessor
+                         AST::Members::AttrAccessor
+                       else
+                         raise "Unexpected attribute kind: #{kind}"
+                       end
+
+        each_arg node.children[1] do |arg|
+          if name = symbol_literal_node?(arg)
+            current_module!.members << member_class.new(
+              name: name,
+              type: type,
+              ivar_name: nil,
+              kind: context.singleton ? :singleton : :instance,
+              annotations: [],
+              location: nil,
+              comment: comment,
+              visibility: nil
+            )
+          end
+        end
+      end
+
+      def attribute_type(kind, sigs)
+        any = Types::Bases::Any.new(location: nil)
+        return any unless sigs
+
+        method_types = sigs.filter_map do |sig|
+          method_type(nil, sig, variables: current_module!.type_params, overloads: sigs.size)
+        end
+        function = method_types.last&.type
+        return any unless function.is_a?(Types::Function)
+
+        parameter_type = function.required_positionals.first&.type
+        return_type = function.return_type
+
+        case kind
+        when :attr_reader
+          return_type
+        when :attr_writer
+          parameter_type || return_type
+        when :attr_accessor
+          if return_type.is_a?(Types::Bases::Any) || return_type.is_a?(Types::Bases::Void)
+            parameter_type || any
+          else
+            return_type
+          end
+        else
+          any
         end
       end
 
@@ -463,8 +604,10 @@ module RBS
         case
         when type.is_a?(Types::ClassInstance) && type.name.name == BuiltinNames::BasicObject.name.name
           Types::Bases::Any.new(location: nil)
-        when type.is_a?(Types::ClassInstance) && type.name.to_s == "T::Boolean"
+        when type.is_a?(Types::ClassInstance) && type.name.to_s.delete_prefix("::") == "T::Boolean"
           Types::Bases::Bool.new(location: nil)
+        when type.is_a?(Types::ClassInstance) && type.name.to_s.delete_prefix("::") == "T::Class"
+          Types::Bases::Any.new(location: nil)
         else
           type
         end
@@ -482,6 +625,11 @@ module RBS
           Types::ClassInstance.new(name: const_to_name(type_node), args: [], location: nil)
         when call_node?(type_node, name: :[], receiver: -> (_) { true })
           # The type_node represents a type application
+          receiver = type_node.children[0]
+          if [:CONST, :COLON2, :COLON3].include?(receiver.type) && const_to_name(receiver).to_s.delete_prefix("::") == "T::Class"
+            return Types::Bases::Any.new(location: nil)
+          end
+
           type = type_of(type_node.children[0], variables: variables)
           type.is_a?(Types::ClassInstance) or raise
 
@@ -559,7 +707,7 @@ module RBS
 
           type_name = TypeName.new(name: node.children[1], namespace: namespace)
 
-          case type_name.to_s
+          case type_name.to_s.delete_prefix("::")
           when "T::Array"
             BuiltinNames::Array.name
           when "T::Hash"
