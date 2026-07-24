@@ -39,15 +39,24 @@ typedef struct rbs_allocator_page {
     size_t used;
 } rbs_allocator_page_t;
 
+// Normalize a raw page size to a safe value for payload_size subtraction.
+// Falls back to 4096 when the raw value is <= 0 or smaller than the page
+// header struct, preventing underflow in rbs_allocator_init.
+// Internal API, intentionally omitted from the public header.
+size_t rbs_allocator_normalize_page_size(long raw) {
+    if (raw <= 0) return 4096;
+    size_t page_size = (size_t) raw;
+    if (page_size <= sizeof(rbs_allocator_page_t)) return 4096;
+    return page_size;
+}
+
 static size_t get_system_page_size(void) {
 #ifdef _WIN32
     SYSTEM_INFO si;
     GetSystemInfo(&si);
-    return si.dwPageSize;
+    return rbs_allocator_normalize_page_size((long) si.dwPageSize);
 #else
-    long sz = sysconf(_SC_PAGESIZE);
-    if (sz == -1) return 4096; // Fallback to the common 4KB page size
-    return (size_t) sz;
+    return rbs_allocator_normalize_page_size(sysconf(_SC_PAGESIZE));
 #endif
 }
 
