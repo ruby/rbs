@@ -124,6 +124,9 @@ module Singleton
   #
   def dup: () -> bot
 
+  module SingletonInstanceMethods
+  end
+
   module SingletonClassMethods
   end
 end
