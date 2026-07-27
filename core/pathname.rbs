@@ -234,11 +234,6 @@ class Pathname
   #
   def +: (Pathname | String | _ToStr other) -> Pathname
 
-  # <!--
-  #   rdoc-file=pathname_builtin.rb
-  #   - /(other)
-  # -->
-  #
   alias / +
 
   # <!--
@@ -271,11 +266,6 @@ class Pathname
   #
   def ==: (untyped) -> bool
 
-  # <!--
-  #   rdoc-file=pathname_builtin.rb
-  #   - ===(other)
-  # -->
-  #
   def ===: (untyped) -> bool
 
   # <!--

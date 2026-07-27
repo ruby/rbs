@@ -909,11 +909,6 @@ module URI
     #
     def merge: (URI::Generic | string oth) -> URI::Generic
 
-    # <!--
-    #   rdoc-file=lib/uri/generic.rb
-    #   - +(oth)
-    # -->
-    #
     alias + merge
 
     # :stopdoc:

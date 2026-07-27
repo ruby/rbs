@@ -94,7 +94,7 @@ class Delegator < BasicObject
   #   rdoc-file=lib/delegate.rb
   #   - freeze()
   # -->
-  # :method: freeze Freeze both the object returned by `__getobj__` and self.
+  # Freeze both the object returned by `__getobj__` and self.
   #
   def freeze: () -> self
 
@@ -118,6 +118,7 @@ class Delegator < BasicObject
   #   rdoc-file=lib/delegate.rb
   #   - method_missing(m, *args, &block)
   # -->
+  # Handles the magic of delegation through `__getobj__`.
   #
   def method_missing: (Symbol m, *untyped args, **untyped) { (*untyped, **untyped) -> untyped } -> untyped
 

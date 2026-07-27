@@ -5913,10 +5913,17 @@ module OpenSSL
       def initialize_copy: (self) -> void
     end
 
-    # <!-- rdoc-file=ext/openssl/ossl_pkey_dh.c -->
-    # Generic exception that is raised if an operation on a DH PKey fails
-    # unexpectedly or in case an instantiation of an instance of DH fails due to
-    # non-conformant input data.
+    # <!-- rdoc-file=ext/openssl/ossl_pkey.c -->
+    # Raised when errors occur during PKey#sign or PKey#verify.
+    #
+    # Before version 4.0.0, OpenSSL::PKey::PKeyError had the following subclasses.
+    # These subclasses have been removed and the constants are now defined as
+    # aliases of OpenSSL::PKey::PKeyError.
+    #
+    # *   OpenSSL::PKey::DHError
+    # *   OpenSSL::PKey::DSAError
+    # *   OpenSSL::PKey::ECError
+    # *   OpenSSL::PKey::RSAError
     #
     class DHError < OpenSSL::PKey::PKeyError
     end
@@ -6304,10 +6311,17 @@ module OpenSSL
       def initialize_copy: (self) -> void
     end
 
-    # <!-- rdoc-file=ext/openssl/ossl_pkey_dsa.c -->
-    # Generic exception that is raised if an operation on a DSA PKey fails
-    # unexpectedly or in case an instantiation of an instance of DSA fails due to
-    # non-conformant input data.
+    # <!-- rdoc-file=ext/openssl/ossl_pkey.c -->
+    # Raised when errors occur during PKey#sign or PKey#verify.
+    #
+    # Before version 4.0.0, OpenSSL::PKey::PKeyError had the following subclasses.
+    # These subclasses have been removed and the constants are now defined as
+    # aliases of OpenSSL::PKey::PKeyError.
+    #
+    # *   OpenSSL::PKey::DHError
+    # *   OpenSSL::PKey::DSAError
+    # *   OpenSSL::PKey::ECError
+    # *   OpenSSL::PKey::RSAError
     #
     class DSAError < OpenSSL::PKey::PKeyError
     end
@@ -7011,6 +7025,18 @@ module OpenSSL
       end
     end
 
+    # <!-- rdoc-file=ext/openssl/ossl_pkey.c -->
+    # Raised when errors occur during PKey#sign or PKey#verify.
+    #
+    # Before version 4.0.0, OpenSSL::PKey::PKeyError had the following subclasses.
+    # These subclasses have been removed and the constants are now defined as
+    # aliases of OpenSSL::PKey::PKeyError.
+    #
+    # *   OpenSSL::PKey::DHError
+    # *   OpenSSL::PKey::DSAError
+    # *   OpenSSL::PKey::ECError
+    # *   OpenSSL::PKey::RSAError
+    #
     class ECError < OpenSSL::PKey::PKeyError
     end
 
@@ -9282,12 +9308,17 @@ module OpenSSL
       #   rdoc-file=ext/openssl/ossl_ssl.c
       #   - SSLSocket.new(io) => aSSLSocket
       #   - SSLSocket.new(io, ctx) => aSSLSocket
+      #   - SSLSocket.new(io, ctx, sync_close:) => aSSLSocket
       # -->
       # Creates a new SSL socket from *io* which must be a real IO object (not an
       # IO-like object that responds to read/write).
       #
       # If *ctx* is provided the SSL Sockets initial params will be taken from the
       # context.
+      #
+      # The optional *sync_close* keyword parameter sets the *sync_close* instance
+      # variable. Setting this to `true` will cause the underlying socket to be closed
+      # when the SSL/TLS connection is shut down.
       #
       # The OpenSSL::Buffering module provides additional IO methods.
       #
@@ -10390,11 +10421,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
-      #   - ==(other)
-      # -->
-      #
       def ==: (self other) -> bool
 
       # <!--
@@ -10462,11 +10488,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
-      #   - ==(other)
-      # -->
-      #
       def ==: (self other) -> bool
 
       # <!--
@@ -10982,11 +11003,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
-      #   - ==(other)
-      # -->
-      #
       def ==: (self other) -> bool
 
       # <!--
@@ -11610,11 +11626,6 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
-      # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
-      #   - ==(other)
-      # -->
-      #
       def ==: (untyped other) -> bool
 
       # <!--
@@ -11755,11 +11766,6 @@ module OpenSSL
     end
 
     class Revoked
-      # <!--
-      #   rdoc-file=ext/openssl/lib/openssl/x509.rb
-      #   - ==(other)
-      # -->
-      #
       def ==: (untyped other) -> bool
 
       # <!--

@@ -470,11 +470,6 @@ class Ractor
   #
   def self.store_if_absent: [A] (Symbol) { (nil) -> A } -> A
 
-  # <!--
-  #   rdoc-file=ractor.rb
-  #   - <<(...)
-  # -->
-  #
   alias << send
 
   # <!--
@@ -746,11 +741,6 @@ class Ractor
   # Port objects transmit messages between Ractors.
   #
   class Port[T = untyped]
-    # <!--
-    #   rdoc-file=ractor.rb
-    #   - <<(obj, move: false)
-    # -->
-    #
     alias << send
 
     # <!--
