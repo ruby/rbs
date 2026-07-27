@@ -8,6 +8,8 @@ on:
     paths:
       - ".github/workflows/rust.yml"
       - "rust/**"
+  # `merge_group` has no `paths` filter, so this runs on every queue entry.
+  merge_group: {}
 
 env:
   RUSTFLAGS: "-D warnings"
