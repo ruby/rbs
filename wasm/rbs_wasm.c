@@ -399,7 +399,19 @@ __attribute__((export_name("rbs_wasm_lex"))) int rbs_wasm_lex(const char *source
  *
  * @return 1 if the sample parsed successfully, 0 otherwise.
  */
+// Internal: defined in rbs_allocator.c, not declared in the public header.
+extern size_t rbs_allocator_normalize_page_size(long raw);
+
 __attribute__((export_name("rbs_wasm_selftest"))) int rbs_wasm_selftest(void) {
+    // Regression test: normalize_page_size must return a safe value
+    // (>= sizeof(rbs_allocator_page_t)) for inputs that would underflow
+    // payload_size. On WASI in a Rust cdylib, sysconf(_SC_PAGESIZE)
+    // returns 0; the normalization must catch that.
+    if (rbs_allocator_normalize_page_size(-1) != 4096) return 0;
+    if (rbs_allocator_normalize_page_size(0) != 4096) return 0;
+    if (rbs_allocator_normalize_page_size(1) != 4096) return 0;
+    if (rbs_allocator_normalize_page_size(65536) != 65536) return 0;
+
     static const char source[] =
         "class User\n"
         "  attr_reader name: String\n"
