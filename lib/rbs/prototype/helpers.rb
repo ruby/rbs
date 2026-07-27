@@ -8,7 +8,7 @@ module RBS
       # Prism can't parse Ruby 3.2 code
       if RUBY_VERSION >= "3.3"
         def parse_comments(string, include_trailing:)
-          Prism.parse_comments(string, version: "current").yield_self do |prism_comments| # steep:ignore UnexpectedKeywordArgument
+          Prism.parse_comments(string, version: "current").yield_self do |prism_comments|
             prism_comments.each_with_object({}) do |comment, hash| #$ Hash[Integer, AST::Comment]
               # Skip EmbDoc comments
               next unless comment.is_a?(Prism::InlineComment)
