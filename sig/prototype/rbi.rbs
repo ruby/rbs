@@ -51,6 +51,11 @@ module RBS
 
       def current_context!: () -> Context
 
+      # Visibility of a member, given as `private def ...` in RBS
+      #
+      # Returns `nil` for members in a visibility _section_, which `sync_visibility` emits instead.
+      def member_visibility: (Context) -> AST::Members::visibility?
+
       def sync_visibility: (visibility) -> void
 
       # Put a `sig` call to current list.

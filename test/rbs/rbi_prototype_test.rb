@@ -724,6 +724,51 @@ end
     EOF
   end
 
+  def test_singleton_method_visibility
+    parser = RBI.new
+
+    parser.parse <<-EOF
+class Registry
+  private
+
+  sig { void }
+  def helper; end
+
+  sig { void }
+  def self.build; end
+
+  sig { void }
+  def setup; end
+
+  class << self
+    private
+
+    sig { void }
+    def internal; end
+
+    sig { returns(Integer) }
+    attr_reader :count
+  end
+end
+    EOF
+
+    assert_write parser.decls, <<-EOF
+class Registry
+  private
+
+  def helper: () -> void
+
+  def self.build: () -> void
+
+  def setup: () -> void
+
+  private def self.internal: () -> void
+
+  private attr_reader self.count: Integer
+end
+    EOF
+  end
+
   def test_generated_reproduction_can_be_loaded
     parser = RBI.new
 
