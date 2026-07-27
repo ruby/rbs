@@ -27,8 +27,13 @@ jobs:
           sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool
       - name: Install clang-format from LLVM
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"
+          # The codename must match the `runs-on` image: `ubuntu-latest` is 24.04 (noble).
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key \
+            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-archive-keyring.gpg
+          # Written directly rather than through `apt-add-repository`, which cannot
+          # parse `[signed-by=...]` inside a one-line `deb` shortcut.
+          echo "deb [signed-by=/usr/share/keyrings/llvm-archive-keyring.gpg] http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" \
+            | sudo tee /etc/apt/sources.list.d/llvm.list
           sudo apt-get update
           sudo apt-get install -y clang-format-20
           sudo ln -sf /usr/bin/clang-format-20 /usr/local/bin/clang-format
@@ -38,9 +43,9 @@ jobs:
       - name: Install Re2c
         run: |
           cd /tmp
-          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.3.tar.gz > re2c-4.3.tar.gz
-          tar xf re2c-4.3.tar.gz
-          cd re2c-4.3
+          curl -L https://github.com/skvadrik/re2c/archive/refs/tags/4.5.1.tar.gz > re2c-4.5.1.tar.gz
+          tar xf re2c-4.5.1.tar.gz
+          cd re2c-4.5.1
           cmake --preset=linux-gcc-release-ootree-skeleton-fast
           cmake --build --preset=linux-gcc-release-ootree-skeleton-fast --parallel="$(nproc)"
           sudo ln -sf "$(pwd)"/.build/linux-gcc-release-ootree-skeleton-fast/re2c /usr/local/bin/re2c

@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4', '4.0', head]
+        ruby: ['3.3', '3.4', '4.0', head]
         rubyopt: [""]
         job:
           - test
