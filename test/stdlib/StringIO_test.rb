@@ -39,6 +39,23 @@ class StringIOTest < StdlibTest
   end
 end
 
+class StringIOSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing 'singleton(::StringIO)'
+
+  def test_open
+    assert_send_type "() -> ::StringIO",
+                     StringIO, :open
+    assert_send_type "(::String) -> ::StringIO",
+                     StringIO, :open, "abc"
+    assert_send_type "(::String, ::String) -> ::StringIO",
+                     StringIO, :open, "abc", "r"
+    assert_send_type "() { (::StringIO) -> ::Integer } -> ::Integer",
+                     StringIO, :open do |io| io.write("a") end
+  end
+end
+
 class StringIOTypeTest < Test::Unit::TestCase
   include TestHelper
 
@@ -49,6 +66,18 @@ class StringIOTypeTest < Test::Unit::TestCase
 
     assert_send_type "(*String data) -> Integer",
                      io, :write, "a", "b"
+  end
+
+  def test_read
+    assert_send_type "(nil, nil) -> ::String?",
+                     StringIO.new("a"), :read, nil, nil
+    assert_send_type "(::Integer, nil) -> ::String?",
+                     StringIO.new("a"), :read, 1, nil
+  end
+
+  def test_readpartial
+    assert_send_type "(::int, nil) -> ::String",
+                     StringIO.new("a"), :readpartial, 1, nil
   end
 
   def test_truncate
@@ -84,5 +113,81 @@ class StringIOTypeTest < Test::Unit::TestCase
                       StringIO.new("\n"), :readlines, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]",
                       StringIO.new("\n"), :readlines, "\n", 1, chomp: true
+  end
+
+  def test_pread
+    assert_send_type "(Integer, Integer) -> String",
+                     StringIO.new("abcdef"), :pread, 3, 0
+    assert_send_type "(Integer, Integer, String) -> String",
+                     StringIO.new("abcdef"), :pread, 3, 0, +"buf"
+    assert_send_type "(::Integer, ::Integer, nil) -> ::String",
+                     StringIO.new("a"), :pread, 1, 0, nil
+  end
+
+  def test_read_nonblock
+    assert_send_type "(int) -> String",
+                     StringIO.new("abc"), :read_nonblock, 2
+    assert_send_type "(int, string) -> String",
+                     StringIO.new("abc"), :read_nonblock, 2, +"buf"
+    assert_send_type "(int, exception: true) -> String",
+                     StringIO.new("abc"), :read_nonblock, 2, exception: true
+    assert_send_type "(int, exception: false) -> String",
+                     StringIO.new("abc"), :read_nonblock, 2, exception: false
+    assert_send_type "(int, exception: false) -> nil",
+                     StringIO.new(""), :read_nonblock, 2, exception: false
+    assert_send_type "(::int, nil) -> ::String?",
+                     StringIO.new("a"), :read_nonblock, 1, nil
+  end
+
+  def test_write_nonblock
+    assert_send_type "(_ToS) -> Integer",
+                     StringIO.new(+""), :write_nonblock, "abc"
+    assert_send_type "(_ToS, exception: true) -> Integer",
+                     StringIO.new(+""), :write_nonblock, "abc", exception: true
+    assert_send_type "(_ToS, exception: false) -> Integer",
+                     StringIO.new(+""), :write_nonblock, "abc", exception: false
+  end
+
+  def test_sysread
+    assert_send_type "(Integer) -> String",
+                     StringIO.new("abc"), :sysread, 2
+    assert_send_type "(Integer, String) -> String",
+                     StringIO.new("abc"), :sysread, 2, +"buf"
+    assert_send_type "(::Integer, nil) -> ::String",
+                     StringIO.new("a"), :sysread, 1, nil
+  end
+
+  def test_ungetc
+    assert_send_type "(String) -> nil",
+                     StringIO.new(+"abc"), :ungetc, "x"
+    assert_send_type "(Integer) -> nil",
+                     StringIO.new(+"abc"), :ungetc, 65
+  end
+
+  def test_set_encoding_by_bom
+    assert_send_type "() -> Encoding",
+                     StringIO.new("\u{FEFF}abc"), :set_encoding_by_bom
+    assert_send_type "() -> nil",
+                     StringIO.new("abc"), :set_encoding_by_bom
+  end
+
+  def test_fcntl
+    assert_send_type_error "(*untyped) -> bot", NotImplementedError,
+                           StringIO.new("abc"), :fcntl, 1, 1
+  end
+
+  def test_fsync
+    assert_send_type "() -> Integer",
+                     StringIO.new("abc"), :fsync
+  end
+
+  def test_internal_encoding
+    assert_send_type "() -> nil",
+                     StringIO.new("abc"), :internal_encoding
+  end
+
+  def test_external_encoding
+    assert_send_type "() -> Encoding",
+                     StringIO.new("abc"), :external_encoding
   end
 end

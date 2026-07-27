@@ -6,6 +6,15 @@ target :lib do
   ignore(
     "lib/rbs/test",
     # "lib/rbs/test.rb"
+
+    # JRuby-only implementations of RBS::Location and RBS::Parser. Like the C
+    # extension, these implement interfaces already described in sig/, and
+    # runtime.rb is Java interop, so they are not type-checked here.
+    "lib/rbs/wasm/location.rb",
+    "lib/rbs/wasm/runtime.rb",
+    "lib/rbs/wasm/parser.rb",
+    # jar-dependencies require_jar calls for the JRuby runtime; not type-checked.
+    "lib/rbs_jars.rb",
   )
 
   library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'prettyprint', 'yaml', "psych", "securerandom"

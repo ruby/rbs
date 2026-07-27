@@ -14,6 +14,11 @@ module RBS
       end
 
       def scan
+        Kernel.warn(
+          "The RBS RDoc parser plugin is deprecated and will be removed from RBS. " \
+          "RDoc 8.0 provides RBS parsing directly."
+        )
+
         _, _, decls = ::RBS::Parser.parse_signature(@content)
         decls.each do |decl|
           parse_member(decl: decl, context: @top_level)

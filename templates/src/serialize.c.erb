@@ -1,0 +1,233 @@
+#include "rbs/serialize.h"
+
+#include "rbs/location.h"
+#include "rbs/util/rbs_assert.h"
+#include "rbs/util/rbs_buffer.h"
+
+#include <stdint.h>
+
+/**
+ * State threaded through the recursive serializer: the arena the output buffer
+ * grows in, the constant pool used to resolve interned ids, and the buffer
+ * itself.
+ */
+typedef struct {
+    rbs_allocator_t *allocator;
+    rbs_constant_pool_t *constant_pool;
+    rbs_buffer_t buffer;
+} rbs_serialize_state;
+
+/* All multi-byte integers are written little-endian. */
+
+static void w_bytes(rbs_serialize_state *state, const char *value, size_t length) {
+    if (length > 0) {
+        rbs_buffer_append_string(state->allocator, &state->buffer, value, length);
+    }
+}
+
+static void w_u8(rbs_serialize_state *state, uint8_t value) {
+    w_bytes(state, (const char *) &value, 1);
+}
+
+static void w_u32(rbs_serialize_state *state, uint32_t value) {
+    unsigned char bytes[4] = {
+        (unsigned char) (value & 0xff),
+        (unsigned char) ((value >> 8) & 0xff),
+        (unsigned char) ((value >> 16) & 0xff),
+        (unsigned char) ((value >> 24) & 0xff),
+    };
+    w_bytes(state, (const char *) bytes, 4);
+}
+
+static void w_i32(rbs_serialize_state *state, int32_t value) {
+    w_u32(state, (uint32_t) value);
+}
+
+static void w_string(rbs_serialize_state *state, rbs_string_t string) {
+    size_t length = rbs_string_len(string);
+    w_u32(state, (uint32_t) length);
+    w_bytes(state, string.start, length);
+}
+
+static void w_constant(rbs_serialize_state *state, rbs_constant_id_t id) {
+    rbs_constant_t *constant = rbs_constant_pool_id_to_constant(state->constant_pool, id);
+    RBS_ASSERT(constant != NULL, "constant is NULL");
+    w_u32(state, (uint32_t) constant->length);
+    w_bytes(state, (const char *) constant->start, constant->length);
+}
+
+// A location range is encoded as a presence byte, followed by the start/end
+// character positions when present. A null range encodes as a single 0 byte
+// (it becomes `nil` on the Ruby side).
+static void w_loc_range(rbs_serialize_state *state, rbs_location_range range) {
+    if (RBS_LOCATION_NULL_RANGE_P(range)) {
+        w_u8(state, 0);
+    } else {
+        w_u8(state, 1);
+        w_i32(state, range.start_char);
+        w_i32(state, range.end_char);
+    }
+}
+
+static void w_loc_range_list(rbs_serialize_state *state, rbs_location_range_list_t *list) {
+    if (list == NULL) {
+        w_u32(state, 0);
+        return;
+    }
+
+    w_u32(state, (uint32_t) list->length);
+    for (rbs_location_range_list_node_t *n = list->head; n != NULL; n = n->next) {
+        w_loc_range(state, n->range);
+    }
+}
+
+static void w_attr_ivar_name(rbs_serialize_state *state, rbs_attr_ivar_name_t ivar_name) {
+    w_u8(state, (uint8_t) ivar_name.tag);
+    if (ivar_name.tag == RBS_ATTR_IVAR_NAME_TAG_NAME) {
+        w_constant(state, ivar_name.name);
+    }
+}
+
+static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance);
+
+static void w_node_list(rbs_serialize_state *state, rbs_node_list_t *list) {
+    if (list == NULL) {
+        w_u32(state, 0);
+        return;
+    }
+
+    w_u32(state, (uint32_t) list->length);
+    for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
+        serialize_node(state, n->node);
+    }
+}
+
+static void w_hash(rbs_serialize_state *state, rbs_hash_t *hash) {
+    if (hash == NULL) {
+        w_u32(state, 0);
+        return;
+    }
+
+    // rbs_hash_t does not maintain its `length` field (unlike rbs_node_list_t),
+    // so count the entries by walking the list.
+    uint32_t count = 0;
+    for (rbs_hash_node_t *n = hash->head; n != NULL; n = n->next) {
+        count++;
+    }
+    w_u32(state, count);
+
+    for (rbs_hash_node_t *n = hash->head; n != NULL; n = n->next) {
+        serialize_node(state, n->key);
+        serialize_node(state, n->value);
+    }
+}
+
+// The node tag written ahead of every node. Tag 0 is reserved for NULL, tags
+// 1..N are the nodes below (in the same order the Ruby schema is generated),
+// and the final tag is `rbs_ast_symbol`, which is not a config.yml node.
+#define RBS_SERIALIZE_TAG_SYMBOL <%= nodes.size + 1 %>
+
+static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
+    if (instance == NULL) {
+        w_u8(state, 0);
+        return;
+    }
+
+    switch (instance->type) {
+    <%- nodes.each_with_index do |node, index| -%>
+    case <%= node.c_node_enum_name %>: {
+        w_u8(state, <%= index + 1 %>);
+        <%- case node.ruby_full_name -%>
+        <%- when "RBS::AST::Bool" -%>
+        w_u8(state, ((rbs_ast_bool_t *) instance)->value ? 1 : 0);
+        <%- when "RBS::AST::Integer" -%>
+        w_string(state, ((rbs_ast_integer_t *) instance)->string_representation);
+        <%- when "RBS::AST::String" -%>
+        w_string(state, ((rbs_ast_string_t *) instance)->string);
+        <%- when "RBS::Types::Record::FieldType" -%>
+        rbs_types_record_field_type_t *node = (rbs_types_record_field_type_t *) instance;
+        serialize_node(state, node->type);
+        w_u8(state, node->required ? 1 : 0);
+        <%- when "RBS::Signature" -%>
+        rbs_signature_t *node = (rbs_signature_t *) instance;
+        w_node_list(state, node->directives);
+        w_node_list(state, node->declarations);
+        <%- when "RBS::Namespace" -%>
+        rbs_namespace_t *node = (rbs_namespace_t *) instance;
+        w_node_list(state, node->path);
+        w_u8(state, node->absolute ? 1 : 0);
+        <%- when "RBS::TypeName" -%>
+        rbs_type_name_t *node = (rbs_type_name_t *) instance;
+        serialize_node(state, (rbs_node_t *) node->rbs_namespace);
+        serialize_node(state, (rbs_node_t *) node->name);
+        <%- else -%>
+        <%= node.c_type_name %> *node = (<%= node.c_type_name %> *) instance;
+        <%- if node.expose_location? -%>
+        w_loc_range(state, node->base.location);
+        <%- if node.locations -%>
+        <%- node.locations.each do |location_field| -%>
+        w_loc_range(state, node-><%= location_field.attribute_name %>);
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        <%- node.fields.each do |field| -%>
+        <%- case field.type.name -%>
+        <%- when "rbs_node_list" -%>
+        w_node_list(state, node-><%= field.c_name %>);
+        <%- when "rbs_hash" -%>
+        w_hash(state, node-><%= field.c_name %>);
+        <%- when "rbs_string" -%>
+        w_string(state, node-><%= field.c_name %>);
+        <%- when "bool" -%>
+        w_u8(state, node-><%= field.c_name %> ? 1 : 0);
+        <%- when "rbs_location_range" -%>
+        w_loc_range(state, node-><%= field.c_name %>);
+        <%- when "rbs_location_range_list" -%>
+        w_loc_range_list(state, node-><%= field.c_name %>);
+        <%- when "rbs_attr_ivar_name" -%>
+        w_attr_ivar_name(state, node-><%= field.c_name %>);
+        <%- else -%>
+        <%- if field.type.is_a?(RBS::Template::EnumType) -%>
+        w_u8(state, (uint8_t) node-><%= field.c_name %>);
+        <%- else -%>
+        serialize_node(state, (rbs_node_t *) node-><%= field.c_name %>);
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        <%- end -%>
+        return;
+    }
+    <%- end -%>
+    case RBS_AST_SYMBOL: {
+        w_u8(state, RBS_SERIALIZE_TAG_SYMBOL);
+        w_constant(state, ((rbs_ast_symbol_t *) instance)->constant_id);
+        return;
+    }
+    }
+
+    RBS_ASSERT(false, "rbs_serialize_node: unknown node type: %d", instance->type);
+}
+
+rbs_string_t rbs_serialize_node(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_node_t *node) {
+    rbs_serialize_state state = {
+        .allocator = allocator,
+        .constant_pool = constant_pool,
+    };
+    rbs_buffer_init(allocator, &state.buffer);
+
+    serialize_node(&state, node);
+
+    return rbs_buffer_to_string(&state.buffer);
+}
+
+rbs_string_t rbs_serialize_node_list(rbs_allocator_t *allocator, rbs_constant_pool_t *constant_pool, rbs_node_list_t *list) {
+    rbs_serialize_state state = {
+        .allocator = allocator,
+        .constant_pool = constant_pool,
+    };
+    rbs_buffer_init(allocator, &state.buffer);
+
+    w_node_list(&state, list);
+
+    return rbs_buffer_to_string(&state.buffer);
+}

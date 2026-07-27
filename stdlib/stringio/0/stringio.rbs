@@ -1282,7 +1282,7 @@ class StringIO
   # -->
   # See IO#read.
   #
-  def read: (?int? length, ?string outbuf) -> String?
+  def read: (?int? length, ?string? outbuf) -> String?
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1291,9 +1291,9 @@ class StringIO
   # -->
   # See IO#pread.
   #
-  def pread: (Integer maxlen, Integer offset, ?String outbuf) -> String
+  def pread: (Integer maxlen, Integer offset, ?String? outbuf) -> String
 
-  def read_nonblock: (int len, ?string buf, ?exception: bool) -> String?
+  def read_nonblock: (int len, ?string? buf, ?exception: bool) -> String?
 
   def readbyte: () -> Integer
 
@@ -1311,7 +1311,7 @@ class StringIO
   #
   def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
 
-  def readpartial: (int maxlen, ?string outbuf) -> String
+  def readpartial: (int maxlen, ?string? outbuf) -> String
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1449,7 +1449,7 @@ class StringIO
   #
   def sync=: (boolish) -> bool
 
-  def sysread: (Integer maxlen, ?String outbuf) -> String
+  def sysread: (Integer maxlen, ?String? outbuf) -> String
 
   def syswrite: (String arg0) -> Integer
 

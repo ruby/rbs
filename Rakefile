@@ -33,7 +33,14 @@ test_config = lambda do |t|
   end
 end
 
-Rake::TestTask.new(test: :compile, &test_config)
+if RUBY_ENGINE == "jruby"
+  # JRuby runs the parser in WebAssembly instead of the C extension, so there is
+  # nothing to compile. The wasm runtime must be assembled first with
+  # `rake wasm:jruby_setup` (which needs CRuby + the WASI SDK).
+  Rake::TestTask.new(:test, &test_config)
+else
+  Rake::TestTask.new(test: :compile, &test_config)
+end
 
 multitask :default => [:test, :stdlib_test, :typecheck_test, :rubocop, :validate, :test_doc]
 
@@ -159,6 +166,10 @@ task :templates do
 
   sh "#{ruby} templates/template.rb include/rbs/ast.h"
   sh "#{ruby} templates/template.rb src/ast.c"
+
+  sh "#{ruby} templates/template.rb include/rbs/serialize.h"
+  sh "#{ruby} templates/template.rb src/serialize.c"
+  sh "#{ruby} templates/template.rb lib/rbs/wasm/serialization_schema.rb"
 
   # Format the generated files
   Rake::Task["format:c"].invoke
@@ -547,6 +558,97 @@ task :prepare_profiling do
   Rake::Task[:"clobber"].invoke
   Rake::Task[:"templates"].invoke
   Rake::Task[:"compile"].invoke
+end
+
+namespace :wasm do
+  WASM_DIR = File.expand_path("wasm", __dir__)
+  WASM_OUTPUT = File.join(WASM_DIR, "rbs_parser.wasm")
+
+  # The parser under src/ is plain, self-contained C with no dependency on the
+  # Ruby C API, so it can be compiled to WebAssembly as-is. The only extra
+  # translation unit is the entry-point shim under wasm/.
+  def wasm_source_files
+    Dir.glob(File.join(__dir__, "src/**/*.c")).sort + [File.join(WASM_DIR, "rbs_wasm.c")]
+  end
+
+  # Locate the clang shipped with the WASI SDK.
+  #
+  # The system clang can target wasm32, but the WASI SDK additionally provides
+  # the wasi-libc sysroot and the wasm32 compiler-rt builtins that the link
+  # step needs, so we require it explicitly.
+  def wasi_clang
+    sdk = ENV["WASI_SDK_PATH"]
+    if sdk.nil? || sdk.empty?
+      raise <<~MSG
+        WASI_SDK_PATH is not set.
+
+        Install the WASI SDK from https://github.com/WebAssembly/wasi-sdk/releases
+        and point WASI_SDK_PATH at the extracted directory, for example:
+
+            export WASI_SDK_PATH=/opt/wasi-sdk
+            rake wasm:build
+      MSG
+    end
+
+    clang = File.join(sdk, "bin", "clang")
+    raise "clang not found at #{clang} (is WASI_SDK_PATH correct?)" unless File.executable?(clang)
+
+    clang
+  end
+
+  desc "Build the RBS parser as a WebAssembly module (requires WASI_SDK_PATH)"
+  task :build do
+    mkdir_p WASM_DIR
+    sh wasi_clang,
+       "--target=wasm32-wasip1",
+       # No `main`; the host calls `_initialize` and then the exported functions.
+       "-mexec-model=reactor",
+       "-std=gnu11",
+       "-O2",
+       "-Wno-unused-parameter",
+       "-I#{File.join(__dir__, "include")}",
+       "-o", WASM_OUTPUT,
+       *wasm_source_files
+    puts "Built #{WASM_OUTPUT}"
+  end
+
+  desc "Build and smoke-test the WebAssembly module (requires wasmtime)"
+  task :check => :build do
+    wasmtime = ENV["WASMTIME"] || "wasmtime"
+
+    # `rbs_wasm_selftest` parses a small fixed signature and returns 1 on
+    # success. `--invoke` prints the return value to stdout.
+    output = IO.popen([wasmtime, "run", "--invoke", "rbs_wasm_selftest", WASM_OUTPUT], err: File::NULL, &:read).to_s.strip
+
+    if output == "1"
+      puts "WebAssembly selftest passed."
+    else
+      raise "WebAssembly selftest failed: rbs_wasm_selftest returned #{output.inspect} (expected \"1\")"
+    end
+  end
+
+  # Where the runtime looks for the module by default (see RBS::WASM::Runtime).
+  JRUBY_WASM_DIR = File.expand_path("lib/rbs/wasm", __dir__)
+
+  desc "Download the Chicory/ASM jars into the local Maven repository (~/.m2). Run on JRuby."
+  task :install_jars do
+    # Resolves the `jar` requirements from rbs.gemspec via Maven and downloads
+    # them (and their transitive deps) into ~/.m2, the same way `gem install`
+    # does; the jars are not copied into the gem. The platform is forced to java
+    # because Jars::Installer skips non-java gems, and write_require_file is false
+    # because lib/rbs_jars.rb is hand-maintained (the generator mangles the
+    # `com.dylibso.chicory:runtime` artifact id).
+    require "jars/installer"
+    spec = Gem::Specification.load("rbs.gemspec")
+    spec.platform = "java"
+    Jars::Installer.new(spec).install_jars(write_require_file: false)
+  end
+
+  desc "Build rbs_parser.wasm and copy it next to RBS::WASM::Runtime"
+  task :jruby_setup => [:build] do
+    cp WASM_OUTPUT, File.join(JRUBY_WASM_DIR, "rbs_parser.wasm")
+    puts "rbs_parser.wasm is ready under #{JRUBY_WASM_DIR}"
+  end
 end
 
 namespace :rust do

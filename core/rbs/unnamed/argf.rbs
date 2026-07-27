@@ -959,7 +959,7 @@ module RBS
       # ARGF#readpartial or ARGF#read_nonblock.
       #
       %a{annotate:rdoc:copy:ARGF#read}
-      def read: (?int? length, ?string outbuf) -> String?
+      def read: (?int? length, ?string? outbuf) -> String?
 
       # <!--
       #   rdoc-file=io.c
@@ -969,7 +969,7 @@ module RBS
       # Reads at most *maxlen* bytes from the ARGF stream in non-blocking mode.
       #
       %a{annotate:rdoc:copy:ARGF#read_nonblock}
-      def read_nonblock: (int maxlen, ?string buf, **untyped options) -> String
+      def read_nonblock: (int maxlen, ?string? buf, **untyped options) -> String
 
       # <!--
       #   rdoc-file=io.c
@@ -1070,7 +1070,7 @@ module RBS
       # last one.
       #
       %a{annotate:rdoc:copy:ARGF#readpartial}
-      def readpartial: (int maxlen, ?string outbuf) -> String
+      def readpartial: (int maxlen, ?string? outbuf) -> String
 
       # <!--
       #   rdoc-file=io.c

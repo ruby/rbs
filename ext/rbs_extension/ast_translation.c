@@ -196,8 +196,8 @@ static VALUE rbs_intern_namespace(rbs_translation_context_t ctx, rbs_namespace_t
     return rb_funcallv(RBS_Namespace, intern_brackets(), 2, args);
 }
 
-static VALUE rbs_intern_type_name(VALUE namespace, VALUE name) {
-    VALUE args[2] = { namespace, name };
+static VALUE rbs_intern_type_name(VALUE type_namespace, VALUE name) {
+    VALUE args[2] = { type_namespace, name };
     return rb_funcallv(RBS_TypeName, intern_brackets(), 2, args);
 }
 

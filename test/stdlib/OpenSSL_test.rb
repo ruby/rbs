@@ -13,6 +13,38 @@ module OpenSSL::TestUtils
   end
 end
 
+class OpenSSLBufferingTestIO
+  include OpenSSL::Buffering
+
+  def initialize
+    @eof = true
+    @rbuffer = +"hello"
+  end
+end
+
+class OpenSSLBufferingTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::Buffering"
+
+  def test_read
+    assert_send_type "(nil, nil) -> String?",
+                     OpenSSLBufferingTestIO.new, :read, nil, nil
+    assert_send_type "(Integer, nil) -> String?",
+                     OpenSSLBufferingTestIO.new, :read, 1, nil
+  end
+
+  def test_read_nonblock
+    assert_send_type "(Integer, nil) -> String",
+                     OpenSSLBufferingTestIO.new, :read_nonblock, 1, nil
+  end
+
+  def test_readpartial
+    assert_send_type "(Integer, nil) -> String",
+                     OpenSSLBufferingTestIO.new, :readpartial, 1, nil
+  end
+end
+
 class OpenSSLSingletonTest < Test::Unit::TestCase
   include TestHelper
   library "openssl"

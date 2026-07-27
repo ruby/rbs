@@ -214,8 +214,12 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     yy10:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
-        if (yych <= 0x00000000) goto yy11;
-        if (yych != '\n') goto yy10;
+        if (yych <= '\n') {
+            if (yych <= 0x00000000) goto yy11;
+            if (yych <= '\t') goto yy10;
+        } else {
+            if (yych != 0x0000FFFD) goto yy10;
+        }
     yy11:
 #line 61 "src/lexer.re"
     {
@@ -224,7 +228,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
             lexer->first_token_of_line ? tLINECOMMENT : tCOMMENT
         );
     }
-#line 169 "src/lexer.c"
+#line 173 "src/lexer.c"
     yy12:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -284,7 +288,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pAMP);
         }
-#line 227 "src/lexer.c"
+#line 231 "src/lexer.c"
     yy15:
         yyaccept = 0;
         rbs_skip(lexer);
@@ -298,14 +302,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pLPAREN);
         }
-#line 239 "src/lexer.c"
+#line 243 "src/lexer.c"
     yy17:
         rbs_skip(lexer);
 #line 25 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRPAREN);
         }
-#line 244 "src/lexer.c"
+#line 248 "src/lexer.c"
     yy18:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -314,7 +318,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pSTAR);
         }
-#line 251 "src/lexer.c"
+#line 255 "src/lexer.c"
     yy19:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -328,7 +332,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pCOMMA);
         }
-#line 263 "src/lexer.c"
+#line 267 "src/lexer.c"
     yy21:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -364,7 +368,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, pDOT);
     }
-#line 292 "src/lexer.c"
+#line 296 "src/lexer.c"
     yy24:
         rbs_skip(lexer);
         goto yy8;
@@ -379,7 +383,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tINTEGER);
     }
-#line 305 "src/lexer.c"
+#line 309 "src/lexer.c"
     yy27:
         yyaccept = 3;
         rbs_skip(lexer);
@@ -481,7 +485,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, pCOLON);
     }
-#line 390 "src/lexer.c"
+#line 394 "src/lexer.c"
     yy29:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -493,7 +497,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, pLT);
     }
-#line 400 "src/lexer.c"
+#line 404 "src/lexer.c"
     yy31:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -509,7 +513,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, pEQ);
     }
-#line 414 "src/lexer.c"
+#line 418 "src/lexer.c"
     yy33:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -520,14 +524,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, pGT);
     }
-#line 423 "src/lexer.c"
+#line 427 "src/lexer.c"
     yy35:
         rbs_skip(lexer);
 #line 34 "src/lexer.re"
         {
             return rbs_next_token(lexer, pQUESTION);
         }
-#line 428 "src/lexer.c"
+#line 432 "src/lexer.c"
     yy36:
         yyaccept = 0;
         rbs_skip(lexer);
@@ -576,7 +580,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tUIDENT);
     }
-#line 475 "src/lexer.c"
+#line 479 "src/lexer.c"
     yy39:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -585,21 +589,21 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pLBRACKET);
         }
-#line 482 "src/lexer.c"
+#line 486 "src/lexer.c"
     yy40:
         rbs_skip(lexer);
 #line 27 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRBRACKET);
         }
-#line 487 "src/lexer.c"
+#line 491 "src/lexer.c"
     yy41:
         rbs_skip(lexer);
 #line 32 "src/lexer.re"
         {
             return rbs_next_token(lexer, pHAT);
         }
-#line 492 "src/lexer.c"
+#line 496 "src/lexer.c"
     yy42:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -625,7 +629,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tULLIDENT);
     }
-#line 516 "src/lexer.c"
+#line 520 "src/lexer.c"
     yy44:
         yyaccept = 4;
         rbs_skip(lexer);
@@ -642,7 +646,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tOPERATOR);
     }
-#line 531 "src/lexer.c"
+#line 535 "src/lexer.c"
     yy46:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -659,7 +663,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tLIDENT);
     }
-#line 546 "src/lexer.c"
+#line 550 "src/lexer.c"
     yy48:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -780,21 +784,21 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pLBRACE);
         }
-#line 665 "src/lexer.c"
+#line 669 "src/lexer.c"
     yy66:
         rbs_skip(lexer);
 #line 31 "src/lexer.re"
         {
             return rbs_next_token(lexer, pBAR);
         }
-#line 670 "src/lexer.c"
+#line 674 "src/lexer.c"
     yy67:
         rbs_skip(lexer);
 #line 29 "src/lexer.re"
         {
             return rbs_next_token(lexer, pRBRACE);
         }
-#line 675 "src/lexer.c"
+#line 679 "src/lexer.c"
     yy68:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -840,7 +844,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, tDQSTRING);
         }
-#line 715 "src/lexer.c"
+#line 719 "src/lexer.c"
     yy72:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -881,7 +885,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tGIDENT);
     }
-#line 754 "src/lexer.c"
+#line 758 "src/lexer.c"
     yy75:
         rbs_skip(lexer);
         goto yy74;
@@ -924,7 +928,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSQSTRING);
     }
-#line 795 "src/lexer.c"
+#line 799 "src/lexer.c"
     yy81:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -942,7 +946,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pSTAR2);
         }
-#line 811 "src/lexer.c"
+#line 815 "src/lexer.c"
     yy83:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -951,14 +955,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, tINLINECOMMENT);
         }
-#line 818 "src/lexer.c"
+#line 822 "src/lexer.c"
     yy84:
         rbs_skip(lexer);
 #line 41 "src/lexer.re"
         {
             return rbs_next_token(lexer, pARROW);
         }
-#line 823 "src/lexer.c"
+#line 827 "src/lexer.c"
     yy85:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -974,7 +978,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 837 "src/lexer.c"
+#line 841 "src/lexer.c"
     yy88:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1062,7 +1066,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pCOLON2);
         }
-#line 923 "src/lexer.c"
+#line 927 "src/lexer.c"
     yy95:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1120,7 +1124,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 979 "src/lexer.c"
+#line 983 "src/lexer.c"
     yy101:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1142,7 +1146,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pFATARROW);
         }
-#line 999 "src/lexer.c"
+#line 1003 "src/lexer.c"
     yy105:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1176,7 +1180,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tAIDENT);
     }
-#line 1031 "src/lexer.c"
+#line 1035 "src/lexer.c"
     yy109:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1188,14 +1192,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, tBANGIDENT);
         }
-#line 1041 "src/lexer.c"
+#line 1045 "src/lexer.c"
     yy111:
         rbs_skip(lexer);
 #line 142 "src/lexer.re"
         {
             return rbs_next_token(lexer, tEQIDENT);
         }
-#line 1046 "src/lexer.c"
+#line 1050 "src/lexer.c"
     yy112:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1204,7 +1208,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pAREF_OPR);
         }
-#line 1053 "src/lexer.c"
+#line 1057 "src/lexer.c"
     yy113:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1230,7 +1234,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tULLIDENT);
     }
-#line 1077 "src/lexer.c"
+#line 1081 "src/lexer.c"
     yy116:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1255,7 +1259,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tULIDENT);
     }
-#line 1100 "src/lexer.c"
+#line 1104 "src/lexer.c"
     yy118:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1296,7 +1300,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kAS);
     }
-#line 1139 "src/lexer.c"
+#line 1143 "src/lexer.c"
     yy123:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1368,7 +1372,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kIN);
     }
-#line 1209 "src/lexer.c"
+#line 1213 "src/lexer.c"
     yy132:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1516,14 +1520,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, pDOT3);
         }
-#line 1355 "src/lexer.c"
+#line 1359 "src/lexer.c"
     yy156:
         rbs_skip(lexer);
 #line 116 "src/lexer.re"
         {
             return rbs_next_token(lexer, tDQSYMBOL);
         }
-#line 1360 "src/lexer.c"
+#line 1364 "src/lexer.c"
     yy157:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1564,7 +1568,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1399 "src/lexer.c"
+#line 1403 "src/lexer.c"
     yy160:
         rbs_skip(lexer);
         goto yy159;
@@ -1575,7 +1579,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSQSYMBOL);
     }
-#line 1408 "src/lexer.c"
+#line 1412 "src/lexer.c"
     yy163:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1634,7 +1638,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1465 "src/lexer.c"
+#line 1469 "src/lexer.c"
     yy169:
         rbs_skip(lexer);
         goto yy100;
@@ -1658,7 +1662,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tA2IDENT);
     }
-#line 1487 "src/lexer.c"
+#line 1491 "src/lexer.c"
     yy172:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1675,7 +1679,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, tQIDENT);
         }
-#line 1502 "src/lexer.c"
+#line 1506 "src/lexer.c"
     yy175:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1715,7 +1719,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kBOT);
     }
-#line 1540 "src/lexer.c"
+#line 1544 "src/lexer.c"
     yy180:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1745,7 +1749,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kDEF);
     }
-#line 1568 "src/lexer.c"
+#line 1572 "src/lexer.c"
     yy183:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1770,7 +1774,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kEND);
     }
-#line 1591 "src/lexer.c"
+#line 1595 "src/lexer.c"
     yy185:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1825,7 +1829,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kNIL);
     }
-#line 1644 "src/lexer.c"
+#line 1648 "src/lexer.c"
     yy193:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1850,7 +1854,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kOUT);
     }
-#line 1667 "src/lexer.c"
+#line 1671 "src/lexer.c"
     yy195:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1910,7 +1914,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kTOP);
     }
-#line 1725 "src/lexer.c"
+#line 1729 "src/lexer.c"
     yy204:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1955,7 +1959,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kUSE);
     }
-#line 1768 "src/lexer.c"
+#line 1772 "src/lexer.c"
     yy210:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -1980,35 +1984,35 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1791 "src/lexer.c"
+#line 1795 "src/lexer.c"
     yy213:
         rbs_skip(lexer);
 #line 59 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1796 "src/lexer.c"
+#line 1800 "src/lexer.c"
     yy214:
         rbs_skip(lexer);
 #line 57 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1801 "src/lexer.c"
+#line 1805 "src/lexer.c"
     yy215:
         rbs_skip(lexer);
 #line 55 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1806 "src/lexer.c"
+#line 1810 "src/lexer.c"
     yy216:
         rbs_skip(lexer);
 #line 58 "src/lexer.re"
         {
             return rbs_next_token(lexer, tANNOTATION);
         }
-#line 1811 "src/lexer.c"
+#line 1815 "src/lexer.c"
     yy217:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2068,7 +2072,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, tSYMBOL);
     }
-#line 1869 "src/lexer.c"
+#line 1873 "src/lexer.c"
     yy222:
         rbs_skip(lexer);
         goto yy168;
@@ -2092,7 +2096,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kATRBS);
     }
-#line 1891 "src/lexer.c"
+#line 1895 "src/lexer.c"
     yy225:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2132,7 +2136,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kBOOL);
     }
-#line 1929 "src/lexer.c"
+#line 1933 "src/lexer.c"
     yy230:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2212,7 +2216,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kSELF);
     }
-#line 2007 "src/lexer.c"
+#line 2011 "src/lexer.c"
     yy243:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2242,7 +2246,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kSKIP);
     }
-#line 2035 "src/lexer.c"
+#line 2039 "src/lexer.c"
     yy246:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2267,7 +2271,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kTRUE);
     }
-#line 2058 "src/lexer.c"
+#line 2062 "src/lexer.c"
     yy248:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2292,7 +2296,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kTYPE);
     }
-#line 2081 "src/lexer.c"
+#line 2085 "src/lexer.c"
     yy250:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2327,7 +2331,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kVOID);
     }
-#line 2114 "src/lexer.c"
+#line 2118 "src/lexer.c"
     yy254:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2386,7 +2390,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kALIAS);
     }
-#line 2171 "src/lexer.c"
+#line 2175 "src/lexer.c"
     yy260:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2426,7 +2430,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kCLASS);
     }
-#line 2209 "src/lexer.c"
+#line 2213 "src/lexer.c"
     yy263:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2456,7 +2460,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kFALSE);
     }
-#line 2237 "src/lexer.c"
+#line 2241 "src/lexer.c"
     yy266:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2587,7 +2591,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kEXTEND);
     }
-#line 2366 "src/lexer.c"
+#line 2370 "src/lexer.c"
     yy286:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2631,7 +2635,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kMODULE);
     }
-#line 2408 "src/lexer.c"
+#line 2412 "src/lexer.c"
     yy291:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2666,7 +2670,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kPUBLIC);
     }
-#line 2441 "src/lexer.c"
+#line 2445 "src/lexer.c"
     yy295:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2691,7 +2695,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kRETURN);
     }
-#line 2464 "src/lexer.c"
+#line 2468 "src/lexer.c"
     yy297:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2769,7 +2773,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kINCLUDE);
     }
-#line 2540 "src/lexer.c"
+#line 2544 "src/lexer.c"
     yy308:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2810,7 +2814,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kPREPEND);
     }
-#line 2579 "src/lexer.c"
+#line 2583 "src/lexer.c"
     yy313:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2835,7 +2839,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kPRIVATE);
     }
-#line 2602 "src/lexer.c"
+#line 2606 "src/lexer.c"
     yy315:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2870,7 +2874,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kUNTYPED);
     }
-#line 2635 "src/lexer.c"
+#line 2639 "src/lexer.c"
     yy319:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2895,7 +2899,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, k__TODO__);
     }
-#line 2658 "src/lexer.c"
+#line 2662 "src/lexer.c"
     yy321:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -2940,7 +2944,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kINSTANCE);
     }
-#line 2701 "src/lexer.c"
+#line 2705 "src/lexer.c"
     yy327:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3010,7 +3014,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kINTERFACE);
     }
-#line 2769 "src/lexer.c"
+#line 2773 "src/lexer.c"
     yy338:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3045,7 +3049,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kSINGLETON);
     }
-#line 2802 "src/lexer.c"
+#line 2806 "src/lexer.c"
     yy342:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3070,7 +3074,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kUNCHECKED);
     }
-#line 2825 "src/lexer.c"
+#line 2829 "src/lexer.c"
     yy344:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3130,7 +3134,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kATTRREADER);
     }
-#line 2883 "src/lexer.c"
+#line 2887 "src/lexer.c"
     yy353:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3155,14 +3159,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kATTRWRITER);
     }
-#line 2906 "src/lexer.c"
+#line 2910 "src/lexer.c"
     yy355:
         rbs_skip(lexer);
 #line 75 "src/lexer.re"
         {
             return rbs_next_token(lexer, kCLASSALIAS);
         }
-#line 2911 "src/lexer.c"
+#line 2915 "src/lexer.c"
     yy356:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3174,7 +3178,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, kMODULESELF);
         }
-#line 2921 "src/lexer.c"
+#line 2925 "src/lexer.c"
     yy358:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3186,7 +3190,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
         {
             return rbs_next_token(lexer, kMODULEALIAS);
         }
-#line 2931 "src/lexer.c"
+#line 2935 "src/lexer.c"
     yy360:
         rbs_skip(lexer);
         yych = rbs_peek(lexer);
@@ -3211,7 +3215,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
     {
         return rbs_next_token(lexer, kATTRACCESSOR);
     }
-#line 2954 "src/lexer.c"
+#line 2958 "src/lexer.c"
     }
 #line 154 "src/lexer.re"
 }
