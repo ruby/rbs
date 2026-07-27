@@ -1565,10 +1565,10 @@ class Thread::Mutex < Object
 
   # <!--
   #   rdoc-file=thread_sync.rb
-  #   - mutex.lock  -> self
+  #   - mutex.unlock  -> self
   # -->
-  # Attempts to grab the lock and waits if it isn't available. Raises
-  # `ThreadError` if `mutex` was locked by the current thread.
+  # Releases the lock. Raises `ThreadError` if `mutex` wasn't locked by the
+  # current thread.
   #
   def unlock: () -> self
 end
@@ -1751,11 +1751,6 @@ end
 # See Thread::Queue for an example of how a Thread::SizedQueue works.
 #
 class Thread::SizedQueue[E = untyped] < Thread::Queue[E]
-  # <!--
-  #   rdoc-file=thread_sync.rb
-  #   - <<(object, non_block = false, timeout: nil)
-  # -->
-  #
   alias << push
 
   # <!--

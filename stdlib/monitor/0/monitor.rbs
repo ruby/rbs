@@ -338,7 +338,7 @@ class MonitorMixin::ConditionVariable
 
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
-  #   - wait_until()
+  #   - wait_until() { || ... }
   # -->
   # Calls wait repeatedly until the given block yields a truthy value.
   #
@@ -346,7 +346,7 @@ class MonitorMixin::ConditionVariable
 
   # <!--
   #   rdoc-file=ext/monitor/lib/monitor.rb
-  #   - wait_while()
+  #   - wait_while() { || ... }
   # -->
   # Calls wait repeatedly while the given block yields a truthy value.
   #

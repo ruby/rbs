@@ -153,7 +153,6 @@ module Zlib
     #   rdoc-file=ext/zlib/zlib.c
     #   - flush_next_in -> input
     # -->
-    # Flushes input buffer and returns all data in that buffer.
     #
     def flush_next_in: () -> String
 
