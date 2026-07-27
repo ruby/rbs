@@ -91,7 +91,7 @@ static rb_data_type_t location_type = {
     { rbs_loc_mark, (RUBY_DATA_FUNC) rbs_loc_free, rbs_loc_memsize },
     0,
     0,
-    RUBY_TYPED_FREE_IMMEDIATELY
+    RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED
 };
 
 static VALUE location_s_allocate(VALUE klass) {
@@ -114,10 +114,11 @@ static VALUE location_initialize(VALUE self, VALUE buffer, VALUE start_pos, VALU
     int end = FIX2INT(end_pos);
 
     *loc = (rbs_loc) {
-        .buffer = buffer,
+        .buffer = Qnil,
         .rg = (rbs_loc_range) { start, end },
         .children = NULL,
     };
+    RB_OBJ_WRITE(self, &loc->buffer, buffer);
 
     return Qnil;
 }
@@ -127,10 +128,11 @@ static VALUE location_initialize_copy(VALUE self, VALUE other) {
     rbs_loc *other_loc = rbs_check_location(other);
 
     *self_loc = (rbs_loc) {
-        .buffer = other_loc->buffer,
+        .buffer = Qnil,
         .rg = other_loc->rg,
         .children = NULL,
     };
+    RB_OBJ_WRITE(self, &self_loc->buffer, other_loc->buffer);
 
     if (other_loc->children != NULL) {
         rbs_loc_legacy_alloc_children(self_loc, other_loc->children->cap);
@@ -193,7 +195,8 @@ VALUE rbs_new_location(VALUE buffer, rbs_range_t rg) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
-    rbs_loc_init(loc, buffer, (rbs_loc_range) { rg.start.char_pos, rg.end.char_pos });
+    rbs_loc_init(loc, Qnil, (rbs_loc_range) { rg.start.char_pos, rg.end.char_pos });
+    RB_OBJ_WRITE(obj, &loc->buffer, buffer);
 
     return obj;
 }
@@ -202,7 +205,8 @@ VALUE rbs_new_location2(VALUE buffer, int start_char, int end_char) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
-    rbs_loc_init(loc, buffer, (rbs_loc_range) { .start = start_char, .end = end_char });
+    rbs_loc_init(loc, Qnil, (rbs_loc_range) { .start = start_char, .end = end_char });
+    RB_OBJ_WRITE(obj, &loc->buffer, buffer);
 
     return obj;
 }
@@ -211,7 +215,8 @@ static VALUE rbs_new_location_from_loc_range(VALUE buffer, rbs_loc_range rg) {
     rbs_loc *loc;
     VALUE obj = TypedData_Make_Struct(RBS_Location, rbs_loc, &location_type, loc);
 
-    rbs_loc_init(loc, buffer, rg);
+    rbs_loc_init(loc, Qnil, rg);
+    RB_OBJ_WRITE(obj, &loc->buffer, buffer);
 
     return obj;
 }

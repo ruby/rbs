@@ -10,20 +10,11 @@ module RBS
     # source string into the module's linear memory, runs the parser, and returns
     # the serialized result for RBS::WASM::Deserializer to rebuild.
     #
-    # Chicory is a pure-Java runtime, so there is no native dependency: only the
-    # `.wasm` and the Chicory jars need to ship with the gem.
+    # Chicory is a pure-Java runtime, so there is no native dependency. The
+    # `.wasm` ships in the gem; the Chicory jars are fetched from Maven by
+    # jar-dependencies (see lib/rbs_jars.rb and rbs.gemspec).
     class Runtime
       include MonitorMixin
-
-      # The Chicory jars the runtime needs at load time.
-      # Jars Chicory needs to load and run the module.
-      JARS = %w[wasm runtime log wasi].freeze
-
-      # Jars for Chicory's ahead-of-time compiler (wasm -> JVM bytecode), which
-      # runs the parser ~8x faster than the interpreter. Optional: the runtime
-      # falls back to the interpreter when they are absent. asm* are the ow2 ASM
-      # libraries the compiler depends on.
-      OPTIONAL_JARS = %w[compiler asm asm-tree asm-util asm-commons asm-analysis].freeze
 
       class << self
         def instance
@@ -33,15 +24,14 @@ module RBS
         def wasm_path
           ENV["RBS_WASM_PARSER"] || File.expand_path("rbs_parser.wasm", __dir__)
         end
-
-        def jars_dir
-          ENV["RBS_WASM_JARS"] || File.expand_path("jars", __dir__)
-        end
       end
 
       def initialize
         super()
-        load_jars
+        # rbs_jars.rb require_jars the Chicory/ASM jars from the local Maven
+        # repository (~/.m2), where jar-dependencies puts them at gem install (or
+        # `rake wasm:install_jars` when running from source).
+        require "rbs_jars"
         @wasm = build_instance
         @memory = @wasm.memory
         @alloc = @wasm.export("rbs_wasm_alloc")
@@ -201,17 +191,6 @@ module RBS
         nil
       end
 
-      def load_jars
-        JARS.each { |name| require jar_path(name) }
-        OPTIONAL_JARS.each do |name|
-          path = jar_path(name)
-          require path if File.exist?(path)
-        end
-      end
-
-      def jar_path(name)
-        File.join(self.class.jars_dir, "#{name}.jar")
-      end
     end
   end
 end

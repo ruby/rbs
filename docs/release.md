@@ -7,9 +7,10 @@ Each release ships **two gems**:
 | `rbs-X.Y.Z.gem` | `ruby` (MRI) | C extension | `rake release` (re-builds it) |
 | `rbs-X.Y.Z-java.gem` | `java` (JRuby) | WebAssembly (`lib/rbs/wasm`) | Docker image, pushed manually |
 
-The `-java` gem contains no native code — just `rbs_parser.wasm` plus the
-Chicory/ASM jars — so it can be built once in any environment and runs on every
-JRuby.
+The `-java` gem contains no native code — just `rbs_parser.wasm`. The Chicory/ASM
+jars it needs are not shipped in the gem; they are declared as `jar-dependencies`
+requirements and fetched from Maven when the gem is installed. So the gem can be
+built once in any environment and runs on every JRuby.
 
 ## Prerequisites
 
@@ -44,7 +45,8 @@ The `java` gem is not built by `rake release`, so build and push it manually:
 # Build from the committed state (the gemspec's file list comes from `git ls-files`).
 $ docker build -f Dockerfile.jruby -t rbs-jruby .
 
-# Assemble rbs_parser.wasm + jars and build the -java gem into ./pkg on the host.
+# Build rbs_parser.wasm and the -java gem into ./pkg on the host. The Chicory/ASM
+# jars are not bundled; they are fetched from Maven when the gem is installed.
 $ docker run --rm -e RBS_PLATFORM=java -v "$PWD/pkg:/out" rbs-jruby \
     gem build rbs.gemspec -o /out/rbs-X.Y.Z-java.gem
 

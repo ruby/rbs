@@ -162,6 +162,8 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_function("rbs_parse_signature")
         .allowlist_function("rbs_parser_free")
         .allowlist_function("rbs_parser_new")
+        .allowlist_function("rbs_parse_inline_leading_annotation")
+        .allowlist_function("rbs_parse_inline_trailing_annotation")
         // String functions
         .allowlist_function("rbs_string_new")
         // Location functions

@@ -38,8 +38,10 @@ Gem::Specification.new do |spec|
 
   # JRuby cannot load the MRI C extension. On JRuby (and in the `java` platform
   # gem, built with RBS_PLATFORM=java) RBS runs the WebAssembly-backed parser, so
-  # ship the prebuilt parser and the Chicory jars (assembled by
-  # `rake wasm:jruby_setup`) and skip the C extension.
+  # ship the prebuilt parser (built by `rake wasm:build`) and skip the C
+  # extension. The Chicory/ASM jars the runtime needs are NOT shipped in the gem:
+  # they are declared as `jar-dependencies` requirements below and fetched from
+  # Maven Central at install time (see lib/rbs/wasm/jars.rb).
   building_java_gem = ENV["RBS_PLATFORM"] == "java"
   on_jruby = defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
 
@@ -47,9 +49,20 @@ Gem::Specification.new do |spec|
     # Only stamp the platform when building the release gem; leave it unset for
     # local development on JRuby so it still matches a `ruby` platform lockfile.
     spec.platform = "java" if building_java_gem
+    # rbs_parser.wasm is a build artifact (not tracked in git), so add it
+    # explicitly. lib/rbs_jars.rb is committed, so git ls-files already has it.
     spec.files += Dir.chdir(File.expand_path('..', __FILE__)) do
-      Dir.glob("lib/rbs/wasm/rbs_parser.wasm") + Dir.glob("lib/rbs/wasm/jars/*.jar")
+      Dir.glob("lib/rbs/wasm/rbs_parser.wasm")
     end
+
+    # jar-dependencies (bundled with JRuby) downloads these jars from Maven when
+    # the gem is installed, keeping the gem small and avoiding conflicting copies.
+    # Only the top-level artifacts are declared; Maven resolves the rest (runtime,
+    # wasm, asm, ...) transitively. lib/rbs_jars.rb require_jars the full resolved
+    # set at load time.
+    spec.add_dependency "jar-dependencies", ">= 0.1.7"
+    spec.requirements << "jar com.dylibso.chicory:compiler, 1.7.5"
+    spec.requirements << "jar com.dylibso.chicory:wasi, 1.7.5"
   else
     spec.extensions = %w{ext/rbs_extension/extconf.rb}
   end

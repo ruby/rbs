@@ -13,6 +13,8 @@ target :lib do
     "lib/rbs/wasm/location.rb",
     "lib/rbs/wasm/runtime.rb",
     "lib/rbs/wasm/parser.rb",
+    # jar-dependencies require_jar calls for the JRuby runtime; not type-checked.
+    "lib/rbs_jars.rb",
   )
 
   library "pathname", "json", "logger", "monitor", "tsort", "uri", 'dbm', 'pstore', 'singleton', 'shellwords', 'fileutils', 'find', 'digest', 'prettyprint', 'yaml', "psych", "securerandom"
