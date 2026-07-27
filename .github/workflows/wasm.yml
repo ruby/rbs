@@ -11,6 +11,8 @@ on:
       - "include/**"
       - "src/**"
       - "wasm/**"
+  # `merge_group` has no `paths` filter, so this runs on every queue entry.
+  merge_group: {}
 
 permissions:
   contents: read

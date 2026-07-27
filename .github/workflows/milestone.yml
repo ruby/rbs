@@ -3,6 +3,7 @@ name: Check milestone
 on:
   pull_request:
     types: [opened, edited, labeled, unlabeled, milestoned, demilestoned, synchronize]
+  merge_group: {}
 
 permissions:
   contents: read
@@ -12,10 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # The milestone is a property of the pull request, so there is nothing to
+      # check once it enters the merge queue. This job still has to run there
+      # because `check` is a required status check -- it just reports success
+      # without doing anything.
       - uses: actions/checkout@v7
+        if: github.event_name == 'pull_request'
 
       - name: Extract RBS::Version
         id: version
+        if: github.event_name == 'pull_request'
         run: |
           # Extract version string from lib/rbs/version.rb
           version=$(ruby -e 'load "lib/rbs/version.rb"; print RBS::VERSION')
@@ -30,6 +37,7 @@ jobs:
           echo "RBS::VERSION = $version (major=$major, minor=$minor, patch=$patch)"
 
       - name: Check milestone
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v9
         with:
           script: |
