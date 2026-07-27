@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.4', ucrt, mswin]
+        ruby: ['4.0', ucrt, mswin]
     steps:
       - uses: actions/checkout@v7
       - name: load ruby

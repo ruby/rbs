@@ -15,7 +15,7 @@
 # C extensions (bigdecimal, stackprof, ...) that cannot build on JRuby. The few
 # gems the suite needs are installed directly, exactly as the CI does.
 
-FROM jruby:10.0.6-jdk21
+FROM jruby:10.1.1.0-jdk21
 
 # Keep in sync with .github/workflows/wasm.yml and .github/workflows/jruby.yml.
 ARG WASI_SDK_VERSION=33

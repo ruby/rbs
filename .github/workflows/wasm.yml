@@ -21,7 +21,7 @@ env:
   # Pinned so the smoke test is reproducible. Bump together when upgrading.
   WASI_SDK_VERSION: "33"
   WASI_SDK_RELEASE: "33.0"
-  WASMTIME_VERSION: "v45.0.2"
+  WASMTIME_VERSION: "v47.0.2"
 
 jobs:
   build:
