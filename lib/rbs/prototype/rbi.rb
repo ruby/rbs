@@ -100,7 +100,20 @@ module RBS
         current_context or raise
       end
 
+      # Visibility of a member, given as `private def ...` in RBS
+      #
+      # Returns `nil` for members in a visibility _section_, which `sync_visibility` emits instead.
+      def member_visibility(context)
+        # RBS visibility sections don't apply to singleton members, so they need their own visibility.
+        if context.singleton && context.visibility != :public
+          :private
+        end
+      end
+
       def sync_visibility(visibility)
+        # Visibility sections don't apply to singleton members in RBS.
+        return if current_context!.singleton
+
         # RBS has no protected visibility. Private is the conservative fallback.
         visibility = :private if visibility == :protected
 
@@ -219,7 +232,6 @@ module RBS
           sigs = pop_sig
 
           if sigs
-            sync_visibility(:public)
             comment = join_comments(sigs, comments)
 
             args = node.children[2]
@@ -256,7 +268,7 @@ module RBS
               kind: context.singleton ? :singleton : :instance,
               comment: comment,
               overloading: false,
-              visibility: nil
+              visibility: member_visibility(context)
             )
           end
 
@@ -373,7 +385,7 @@ module RBS
               annotations: [],
               location: nil,
               comment: comment,
-              visibility: nil
+              visibility: member_visibility(context)
             )
           end
         end
