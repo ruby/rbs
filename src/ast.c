@@ -913,7 +913,7 @@ rbs_ast_ruby_annotations_block_param_type_annotation_t *RBS_NONNULL rbs_ast_ruby
     return instance;
 }
 #line 140 "templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location) {
+rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location) {
     rbs_ast_ruby_annotations_class_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_class_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_class_alias_annotation_t) {
@@ -1001,7 +1001,7 @@ rbs_ast_ruby_annotations_method_types_annotation_t *RBS_NONNULL rbs_ast_ruby_ann
     return instance;
 }
 #line 140 "templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location) {
+rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location) {
     rbs_ast_ruby_annotations_module_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_module_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_module_alias_annotation_t) {

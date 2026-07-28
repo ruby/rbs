@@ -583,7 +583,7 @@ typedef struct rbs_ast_ruby_annotations_class_alias_annotation {
 
     rbs_location_range prefix_location;
     rbs_location_range keyword_location;
-    struct rbs_type_name *RBS_NONNULL type_name;
+    struct rbs_type_name *RBS_NULLABLE type_name;
     rbs_location_range type_name_location;
 } rbs_ast_ruby_annotations_class_alias_annotation_t;
 
@@ -631,7 +631,7 @@ typedef struct rbs_ast_ruby_annotations_module_alias_annotation {
 
     rbs_location_range prefix_location;
     rbs_location_range keyword_location;
-    struct rbs_type_name *RBS_NONNULL type_name;
+    struct rbs_type_name *RBS_NULLABLE type_name;
     rbs_location_range type_name_location;
 } rbs_ast_ruby_annotations_module_alias_annotation_t;
 
@@ -998,12 +998,12 @@ rbs_ast_members_prepend_t *RBS_NONNULL rbs_ast_members_prepend_new(rbs_allocator
 rbs_ast_members_private_t *RBS_NONNULL rbs_ast_members_private_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location);
 rbs_ast_members_public_t *RBS_NONNULL rbs_ast_members_public_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location);
 rbs_ast_ruby_annotations_block_param_type_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_block_param_type_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range ampersand_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_location_range question_location, rbs_location_range type_location, rbs_node_t *RBS_NONNULL type_, rbs_location_range comment_location);
-rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location);
+rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location);
 rbs_ast_ruby_annotations_colon_method_type_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_colon_method_type_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *RBS_NONNULL annotations, rbs_node_t *RBS_NONNULL method_type);
 rbs_ast_ruby_annotations_double_splat_param_type_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_double_splat_param_type_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range star2_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_node_t *RBS_NONNULL param_type, rbs_location_range comment_location);
 rbs_ast_ruby_annotations_instance_variable_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_instance_variable_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_ast_symbol_t *RBS_NONNULL ivar_name, rbs_location_range ivar_name_location, rbs_location_range colon_location, rbs_node_t *RBS_NONNULL type, rbs_location_range comment_location);
 rbs_ast_ruby_annotations_method_types_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_method_types_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_list_t *RBS_NONNULL overloads, rbs_location_range_list_t *RBS_NONNULL vertical_bar_locations, rbs_location_range dot3_location);
-rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location);
+rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location);
 rbs_ast_ruby_annotations_module_self_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_self_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_location_range colon_location, rbs_type_name_t *RBS_NONNULL name, rbs_node_list_t *RBS_NONNULL args, rbs_location_range open_bracket_location, rbs_location_range close_bracket_location, rbs_location_range_list_t *RBS_NONNULL args_comma_locations, rbs_location_range comment_location);
 rbs_ast_ruby_annotations_node_type_assertion_t *RBS_NONNULL rbs_ast_ruby_annotations_node_type_assertion_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_node_t *RBS_NONNULL type);
 rbs_ast_ruby_annotations_param_type_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_param_type_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range name_location, rbs_location_range colon_location, rbs_node_t *RBS_NONNULL param_type, rbs_location_range comment_location);
