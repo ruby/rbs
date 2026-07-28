@@ -959,6 +959,33 @@ module RBS
         end
       end
 
+      class ForwardingParam
+        attr_reader :location
+
+        def initialize(location:)
+          @location = location
+        end
+
+        def ==(other)
+          other.is_a?(ForwardingParam)
+        end
+
+        alias eql? ==
+
+        def hash
+          self.class.hash
+        end
+
+        def to_json(state = nil)
+          json = {} #: Hash[Symbol, untyped]
+          json.to_json(state)
+        end
+
+        def to_s
+          "..."
+        end
+      end
+
       attr_reader :required_positionals
       attr_reader :optional_positionals
       attr_reader :rest_positionals
@@ -966,9 +993,10 @@ module RBS
       attr_reader :required_keywords
       attr_reader :optional_keywords
       attr_reader :rest_keywords
+      attr_reader :forwarding
       attr_reader :return_type
 
-      def initialize(required_positionals:, optional_positionals:, rest_positionals:, trailing_positionals:, required_keywords:, optional_keywords:, rest_keywords:, return_type:)
+      def initialize(required_positionals:, optional_positionals:, rest_positionals:, trailing_positionals:, required_keywords:, optional_keywords:, rest_keywords:, return_type:, forwarding: nil)
         @return_type = return_type
         @required_positionals = required_positionals
         @optional_positionals = optional_positionals
@@ -977,6 +1005,7 @@ module RBS
         @required_keywords = required_keywords
         @optional_keywords = optional_keywords
         @rest_keywords = rest_keywords
+        @forwarding = forwarding
       end
 
       def ==(other)
@@ -988,6 +1017,7 @@ module RBS
           other.required_keywords == required_keywords &&
           other.optional_keywords == optional_keywords &&
           other.rest_keywords == rest_keywords &&
+          other.forwarding == forwarding &&
           other.return_type == return_type
       end
 
@@ -1002,6 +1032,7 @@ module RBS
           required_keywords.hash ^
           optional_keywords.hash ^
           rest_keywords.hash ^
+          forwarding.hash ^
           return_type.hash
       end
 
@@ -1043,6 +1074,7 @@ module RBS
             required_keywords: hmapv(required_keywords) {|param| param.map_type(&block) },
             optional_keywords: hmapv(optional_keywords) {|param| param.map_type(&block) },
             rest_keywords: rest_keywords&.yield_self {|param| param.map_type(&block) },
+            forwarding: forwarding,
             return_type: yield(return_type)
           )
         else
@@ -1110,6 +1142,7 @@ module RBS
           required_keywords: required_keywords,
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
+          forwarding: forwarding,
           return_type: return_type
         }.to_json(state)
       end
@@ -1129,6 +1162,7 @@ module RBS
           required_keywords: {},
           optional_keywords: {},
           rest_keywords: nil,
+          forwarding: nil,
           return_type: return_type
         )
       end
@@ -1142,12 +1176,13 @@ module RBS
           required_keywords: required_keywords,
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
+          forwarding: forwarding,
           return_type: type
         )
       end
 
       def update(required_positionals: self.required_positionals, optional_positionals: self.optional_positionals, rest_positionals: self.rest_positionals, trailing_positionals: self.trailing_positionals,
-                 required_keywords: self.required_keywords, optional_keywords: self.optional_keywords, rest_keywords: self.rest_keywords, return_type: self.return_type)
+                 required_keywords: self.required_keywords, optional_keywords: self.optional_keywords, rest_keywords: self.rest_keywords, forwarding: self.forwarding, return_type: self.return_type)
         Function.new(
           required_positionals: required_positionals,
           optional_positionals: optional_positionals,
@@ -1156,6 +1191,7 @@ module RBS
           required_keywords: required_keywords,
           optional_keywords: optional_keywords,
           rest_keywords: rest_keywords,
+          forwarding: forwarding,
           return_type: return_type
         )
       end
@@ -1167,6 +1203,7 @@ module RBS
           trailing_positionals.empty? &&
           required_keywords.empty? &&
           optional_keywords.empty? &&
+          !forwarding? &&
           !rest_keywords
       end
 
@@ -1175,6 +1212,7 @@ module RBS
         params = []
 
         params.push(*required_positionals.map(&:to_s))
+        params.push(forwarding.to_s) if forwarding
         params.push(*optional_positionals.map {|p| "?#{p}"})
         params.push("*#{rest_positionals}") if rest_positionals
         params.push(*trailing_positionals.map(&:to_s))
@@ -1183,6 +1221,10 @@ module RBS
         params.push("**#{rest_keywords}") if rest_keywords
 
         params.join(", ")
+      end
+
+      def forwarding?
+        !forwarding.nil?
       end
 
       def return_to_s

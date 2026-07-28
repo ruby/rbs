@@ -87,6 +87,7 @@ extern VALUE RBS_Types_Block;
 extern VALUE RBS_Types_ClassInstance;
 extern VALUE RBS_Types_ClassSingleton;
 extern VALUE RBS_Types_Function;
+extern VALUE RBS_Types_Function_ForwardingParam;
 extern VALUE RBS_Types_Function_Param;
 extern VALUE RBS_Types_Interface;
 extern VALUE RBS_Types_Intersection;

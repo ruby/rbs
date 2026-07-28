@@ -132,7 +132,7 @@ static void w_hash(rbs_serialize_state *state, rbs_hash_t *hash) {
 // The node tag written ahead of every node. Tag 0 is reserved for NULL, tags
 // 1..N are the nodes below (in the same order the Ruby schema is generated),
 // and the final tag is `rbs_ast_symbol`, which is not a config.yml node.
-#define RBS_SERIALIZE_TAG_SYMBOL 78
+#define RBS_SERIALIZE_TAG_SYMBOL 79
 
 static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
     if (instance == NULL) {
@@ -830,11 +830,18 @@ static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
         w_hash(state, node->required_keywords);
         w_hash(state, node->optional_keywords);
         serialize_node(state, (rbs_node_t *) node->rest_keywords);
+        serialize_node(state, (rbs_node_t *) node->forwarding);
         serialize_node(state, (rbs_node_t *) node->return_type);
         return;
     }
-    case RBS_TYPES_FUNCTION_PARAM: {
+    case RBS_TYPES_FUNCTION_FORWARDING_PARAM: {
         w_u8(state, 66);
+        rbs_types_function_forwarding_param_t *node = (rbs_types_function_forwarding_param_t *) instance;
+        w_loc_range(state, node->base.location);
+        return;
+    }
+    case RBS_TYPES_FUNCTION_PARAM: {
+        w_u8(state, 67);
         rbs_types_function_param_t *node = (rbs_types_function_param_t *) instance;
         w_loc_range(state, node->base.location);
         w_loc_range(state, node->name_range);
@@ -843,7 +850,7 @@ static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
         return;
     }
     case RBS_TYPES_INTERFACE: {
-        w_u8(state, 67);
+        w_u8(state, 68);
         rbs_types_interface_t *node = (rbs_types_interface_t *) instance;
         w_loc_range(state, node->base.location);
         w_loc_range(state, node->name_range);
@@ -853,28 +860,28 @@ static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
         return;
     }
     case RBS_TYPES_INTERSECTION: {
-        w_u8(state, 68);
+        w_u8(state, 69);
         rbs_types_intersection_t *node = (rbs_types_intersection_t *) instance;
         w_loc_range(state, node->base.location);
         w_node_list(state, node->types);
         return;
     }
     case RBS_TYPES_LITERAL: {
-        w_u8(state, 69);
+        w_u8(state, 70);
         rbs_types_literal_t *node = (rbs_types_literal_t *) instance;
         w_loc_range(state, node->base.location);
         serialize_node(state, (rbs_node_t *) node->literal);
         return;
     }
     case RBS_TYPES_OPTIONAL: {
-        w_u8(state, 70);
+        w_u8(state, 71);
         rbs_types_optional_t *node = (rbs_types_optional_t *) instance;
         w_loc_range(state, node->base.location);
         serialize_node(state, (rbs_node_t *) node->type);
         return;
     }
     case RBS_TYPES_PROC: {
-        w_u8(state, 71);
+        w_u8(state, 72);
         rbs_types_proc_t *node = (rbs_types_proc_t *) instance;
         w_loc_range(state, node->base.location);
         serialize_node(state, (rbs_node_t *) node->type);
@@ -883,41 +890,41 @@ static void serialize_node(rbs_serialize_state *state, rbs_node_t *instance) {
         return;
     }
     case RBS_TYPES_RECORD: {
-        w_u8(state, 72);
+        w_u8(state, 73);
         rbs_types_record_t *node = (rbs_types_record_t *) instance;
         w_loc_range(state, node->base.location);
         w_hash(state, node->all_fields);
         return;
     }
     case RBS_TYPES_RECORD_FIELD_TYPE: {
-        w_u8(state, 73);
+        w_u8(state, 74);
         rbs_types_record_field_type_t *node = (rbs_types_record_field_type_t *) instance;
         serialize_node(state, node->type);
         w_u8(state, node->required ? 1 : 0);
         return;
     }
     case RBS_TYPES_TUPLE: {
-        w_u8(state, 74);
+        w_u8(state, 75);
         rbs_types_tuple_t *node = (rbs_types_tuple_t *) instance;
         w_loc_range(state, node->base.location);
         w_node_list(state, node->types);
         return;
     }
     case RBS_TYPES_UNION: {
-        w_u8(state, 75);
+        w_u8(state, 76);
         rbs_types_union_t *node = (rbs_types_union_t *) instance;
         w_loc_range(state, node->base.location);
         w_node_list(state, node->types);
         return;
     }
     case RBS_TYPES_UNTYPED_FUNCTION: {
-        w_u8(state, 76);
+        w_u8(state, 77);
         rbs_types_untyped_function_t *node = (rbs_types_untyped_function_t *) instance;
         serialize_node(state, (rbs_node_t *) node->return_type);
         return;
     }
     case RBS_TYPES_VARIABLE: {
-        w_u8(state, 77);
+        w_u8(state, 78);
         rbs_types_variable_t *node = (rbs_types_variable_t *) instance;
         w_loc_range(state, node->base.location);
         serialize_node(state, (rbs_node_t *) node->name);

@@ -1636,6 +1636,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         VALUE arg_required_keywords = rbs_hash_to_ruby_hash(ctx, node->required_keywords);
         VALUE arg_optional_keywords = rbs_hash_to_ruby_hash(ctx, node->optional_keywords);
         VALUE arg_rest_keywords = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->rest_keywords); // rbs_node
+        VALUE arg_forwarding = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->forwarding);       // rbs_node
         VALUE arg_return_type = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->return_type);     // rbs_node
 
         // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
@@ -1649,8 +1650,22 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("required_keywords")), arg_required_keywords);
         rb_hash_aset(h, ID2SYM(rb_intern("optional_keywords")), arg_optional_keywords);
         rb_hash_aset(h, ID2SYM(rb_intern("rest_keywords")), arg_rest_keywords);
+        rb_hash_aset(h, ID2SYM(rb_intern("forwarding")), arg_forwarding);
         rb_hash_aset(h, ID2SYM(rb_intern("return_type")), arg_return_type);
         return CLASS_NEW_INSTANCE(RBS_Types_Function, 1, &h);
+    }
+    case RBS_TYPES_FUNCTION_FORWARDING_PARAM: {
+        rbs_types_function_forwarding_param_t *node = (rbs_types_function_forwarding_param_t *) instance;
+
+        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
+        VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+
+        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
+        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
+        VALUE h = ctx.reusable_kwargs_hash;
+        rb_hash_clear(h);
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
+        return CLASS_NEW_INSTANCE(RBS_Types_Function_ForwardingParam, 1, &h);
     }
     case RBS_TYPES_FUNCTION_PARAM: {
         rbs_types_function_param_t *node = (rbs_types_function_param_t *) instance;
