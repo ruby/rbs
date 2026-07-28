@@ -55,8 +55,15 @@ task :confirm_lexer => :lexer do
 end
 
 task :confirm_templates => :templates do
-  puts "Testing if generated code under include and src is updated with respect to templates"
-  sh "git diff --exit-code -- include src"
+  puts "Testing if generated code is updated with respect to templates"
+
+  # Every template generates the file it is named after: `templates/<path>.erb` generates `<path>`.
+  generated = Dir.glob("templates/**/*.erb").sort.map { _1.delete_prefix("templates/").delete_suffix(".erb") }
+
+  missing = generated.reject { File.exist?(_1) }
+  raise "Templates without a generated file: #{missing.join(", ")}. Is the `templates` task missing an entry?" unless missing.empty?
+
+  sh "git diff --exit-code -- #{generated.join(" ")}"
 end
 
 # Task to format C code using clang-format
@@ -145,6 +152,9 @@ rule %r{^src/(.*)\.c} => 'templates/%X.c.erb' do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake templates` ⚠️⚠️⚠️"
 end
 rule %r{^include/(.*)\.c} => 'templates/%X.c.erb' do |t|
+  puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake templates` ⚠️⚠️⚠️"
+end
+rule %r{^ext/(.*)\.c} => 'templates/%X.c.erb' do |t|
   puts "⚠️⚠️⚠️ #{t.name} is older than #{t.source}. You may need to run `rake templates` ⚠️⚠️⚠️"
 end
 
