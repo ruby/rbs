@@ -36,9 +36,9 @@ pub use location::{
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
     InterfaceDeclarationLocation, InterfaceLocation, KeywordParamLocation, LocationRange,
     MethodDefinitionLocation, MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation,
-    ModuleSelfLocation, ResolveTypeNamesDirectiveLocation, TypeAliasDeclarationLocation,
-    TypeParamLocation, UseDirectiveLocation, UseSingleClauseLocation, UseWildcardClauseLocation,
-    VariableMemberLocation,
+    ModuleSelfLocation, RecordFieldLocation, ResolveTypeNamesDirectiveLocation,
+    TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation, UseSingleClauseLocation,
+    UseWildcardClauseLocation, VariableMemberLocation,
 };
 pub use members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -361,5 +361,38 @@ mod tests {
         assert_eq!(optional.name, strings.intern("size"));
         assert_eq!(text(&optional_location.range), "size: Integer bytes");
         assert_eq!(text(&optional_location.name_range), "size");
+    }
+
+    #[test]
+    fn converts_record_field_locations() {
+        let source = "type t = { name: String, ?age: Integer, \"id\" => Integer }\n";
+        let signature = parse(source).unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::TypeAlias(alias) = &declaration else {
+            panic!("expected type alias declaration");
+        };
+        let Type::Record(record) = &alias.ty else {
+            panic!("expected record type");
+        };
+
+        let text =
+            |range: &LocationRange| &source[range.start_byte as usize..range.end_byte as usize];
+        let location = |index: usize| record.fields[index].location.as_ref().unwrap();
+
+        assert_eq!(text(&location(0).range), "name: String");
+        assert_eq!(text(&location(0).key_range), "name");
+
+        // The `?` marker belongs to the record type, not to the field.
+        assert_eq!(text(&location(1).range), "age: Integer");
+        assert_eq!(text(&location(1).key_range), "age");
+
+        assert_eq!(text(&location(2).range), "\"id\" => Integer");
+        assert_eq!(text(&location(2).key_range), "\"id\"");
     }
 }

@@ -1,6 +1,6 @@
 use crate::ast::location::{
     AliasLocation, ClassInstanceLocation, ClassSingletonLocation, FunctionParamLocation,
-    InterfaceLocation, KeywordParamLocation, LocationRange,
+    InterfaceLocation, KeywordParamLocation, LocationRange, RecordFieldLocation,
 };
 use crate::ids::{SymbolId, TypeName};
 
@@ -99,6 +99,7 @@ pub struct RecordField {
     pub key: RecordKey,
     pub ty: Type,
     pub required: bool,
+    pub location: Option<RecordFieldLocation>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]

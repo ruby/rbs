@@ -89,6 +89,22 @@ pub struct KeywordParamLocation {
 }
 
 /// ```rbs
+/// { name: String, "id" => Integer }
+///   ^^^^^^^^^^^^                     range
+///   ^^^^                             key
+///                 ^^^^^^^^^^^^^^^    range
+///                 ^^^^               key
+/// ```
+///
+/// The `?` marker of an optional field is not part of `range`: it belongs to
+/// the enclosing record type, not to the field itself.
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct RecordFieldLocation {
+    pub range: LocationRange,
+    pub key_range: LocationRange,
+}
+
+/// ```rbs
 /// _Foo
 /// ^^^^ name
 ///

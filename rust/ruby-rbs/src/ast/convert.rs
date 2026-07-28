@@ -14,8 +14,9 @@ use crate::ast::location::{
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
     InterfaceDeclarationLocation, InterfaceLocation, KeywordParamLocation, LocationRange,
     MethodDefinitionLocation, MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation,
-    ModuleSelfLocation, TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation,
-    UseSingleClauseLocation, UseWildcardClauseLocation, VariableMemberLocation,
+    ModuleSelfLocation, RecordFieldLocation, TypeAliasDeclarationLocation, TypeParamLocation,
+    UseDirectiveLocation, UseSingleClauseLocation, UseWildcardClauseLocation,
+    VariableMemberLocation,
 };
 use crate::ast::members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -163,6 +164,7 @@ impl<'a> AstConverter<'a> {
             Node::RecordType(node) => {
                 let mut fields = Vec::new();
                 for (key, value) in node.all_fields().iter() {
+                    let key_range = key.location();
                     let key = self.convert_record_key(&key);
                     let Node::RecordFieldType(field) = value else {
                         panic_expected("record field value while converting record type", &value);
@@ -171,6 +173,7 @@ impl<'a> AstConverter<'a> {
                         key,
                         ty: self.convert_type(&field.type_()),
                         required: field.required(),
+                        location: Some(record_field_location(key_range, field.location())),
                     });
                 }
                 Type::Record(RecordType {
@@ -1080,6 +1083,20 @@ fn keyword_param_location(
     KeywordParamLocation {
         range: span_range(name_range, convert_range(param_range)),
         name_range,
+    }
+}
+
+/// Builds the location of a record field, which the C AST keeps as a pair of a
+/// key node and a field type node instead of a single node.
+fn record_field_location(
+    key_range: RBSLocationRange,
+    field_range: RBSLocationRange,
+) -> RecordFieldLocation {
+    let key_range = convert_range(key_range);
+
+    RecordFieldLocation {
+        range: span_range(key_range, convert_range(field_range)),
+        key_range,
     }
 }
 
