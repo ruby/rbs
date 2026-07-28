@@ -469,6 +469,7 @@ impl<'a> AstConverter<'a> {
         MethodDefinitionOverload {
             method_type: self.convert_method_type_node(&node.method_type()),
             annotations: self.convert_annotations(node.annotations()),
+            location: Some(convert_range(node.location())),
         }
     }
 

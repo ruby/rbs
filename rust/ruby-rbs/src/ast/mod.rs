@@ -395,4 +395,31 @@ mod tests {
         assert_eq!(text(&location(2).range), "\"id\" => Integer");
         assert_eq!(text(&location(2).key_range), "\"id\"");
     }
+
+    #[test]
+    fn converts_method_definition_overload_locations() {
+        let source = "class Foo\n  def bar: () -> void\n        | (Integer) -> String\nend\n";
+        let signature = parse(source).unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::Class(class_decl) = &declaration else {
+            panic!("expected class declaration");
+        };
+        let ClassMember::Member(Member::MethodDefinition(method)) = &class_decl.members[0] else {
+            panic!("expected method definition member");
+        };
+
+        let text =
+            |range: &LocationRange| &source[range.start_byte as usize..range.end_byte as usize];
+        let location = |index: usize| method.overloads[index].location.as_ref().unwrap();
+
+        // The leading `:`/`|` separator is part of the overload range.
+        assert_eq!(text(location(0)), ": () -> void");
+        assert_eq!(text(location(1)), "| (Integer) -> String");
+    }
 }
