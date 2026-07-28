@@ -1074,4 +1074,23 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     assert_equal RBS::TypeName.parse("Foo"),
                  Parser.parse_type(euc, byte_range: 2...).name
   end
+
+  def test_parse__byte_range_ending_mid_character
+    source = '"日本語" | Integer'
+
+    # Character count 5 as a byte offset lands inside `本` (bytes 4...7). The
+    # lexer used to step over the boundary and read the whole string instead.
+    assert_raises RBS::ParsingError do
+      Parser.parse_type(source, byte_range: 0...'"日本語"'.size)
+    end
+
+    Parser.parse_type(source, byte_range: 0...'"日本語"'.bytesize, require_eof: true).tap do |type|
+      assert_instance_of Types::Literal, type
+      assert_equal "日本語", type.literal
+    end
+
+    Parser.parse_type("Integer", byte_range: 0...9999).tap do |type|
+      assert_instance_of Types::ClassInstance, type
+    end
+  end
 end
