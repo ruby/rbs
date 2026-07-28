@@ -100,6 +100,10 @@ enum RBSTokenType {
     tANNOTATION, /* Annotation */
 };
 
+/* Arbitrary values, kept in sync by hand with the classes in src/lexer.re. */
+#define RBS_MB_UPPER_CODE_POINT 0x30EB /* ル */
+#define RBS_MB_OTHER_CODE_POINT 0x30D3 /* ビ */
+
 /**
  * The `byte_pos` (or `char_pos`) is the primary data.
  * The rest are cache.

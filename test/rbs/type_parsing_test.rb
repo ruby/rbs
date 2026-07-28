@@ -1019,14 +1019,18 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_parse__byte_range_incorrect
-    # We want a better error handling ergonomics, but currently simply raises a syntax error.
+    # A byte_range starting mid-character is rounded up to the next boundary,
+    # so this no longer errors; `require_eof: true` is what catches the rest.
 
     input = '"🐕🐈"'
 
-    exn = assert_raises RBS::ParsingError do
-      Parser.parse_type(input, byte_range: 2...)
+    Parser.parse_type(input, byte_range: 2...).tap do |type|
+      assert_instance_of Types::Alias, type
+      assert_equal RBS::TypeName.parse("🐈"), type.name
     end
 
-    assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
+    assert_raises RBS::ParsingError do
+      Parser.parse_type(input, byte_range: 2..., require_eof: true)
+    end
   end
 end

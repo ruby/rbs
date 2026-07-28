@@ -10,15 +10,12 @@ module RBS
       @namespace = namespace
       @name = name
       @kind = case
-              when name.match?(/\A[A-Z]/)
-                :class
-              when name.match?(/\A[a-z]/)
-                :alias
               when name.start_with?("_")
                 :interface
-              else
-                # Defaults to :class
+              when Prism::StringQuery.constant?(name.name)
                 :class
+              else
+                :alias
               end
     end
 

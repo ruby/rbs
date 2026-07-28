@@ -1065,6 +1065,111 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_non_ascii_identifiers
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class ServicioÚltimaVez
+        end
+
+        class Ωmega
+        end
+
+        module MiMódulo
+          MI_CONSTANTE_Ñ: Integer
+          def enviar_últimas_interacciones: () -> void
+          def 日本語: () -> void
+          def únicos!: () -> void
+
+          @日本語: Integer
+          @@クラス変数: Integer
+
+          attr_reader nombre_único: String
+        end
+      RBS
+
+      assert_equal RBS::TypeName.parse("ServicioÚltimaVez"), decls[0].name
+      assert_equal RBS::TypeName.parse("Ωmega"), decls[1].name
+      assert_equal RBS::TypeName.parse("MiMódulo"), decls[2].name
+
+      # `TypeName#==` ignores `kind`.
+      assert_equal [:class, :class, :class], decls.take(3).map { |d| d.name.kind }
+
+      module_members = decls[2].members
+      assert_equal RBS::TypeName.parse("MI_CONSTANTE_Ñ"), module_members[0].name
+      assert_equal :enviar_últimas_interacciones, module_members[1].name
+      assert_equal :日本語, module_members[2].name
+      assert_equal :"únicos!", module_members[3].name
+      assert_equal :@日本語, module_members[4].name
+      assert_equal :@@クラス変数, module_members[5].name
+      assert_equal :nombre_único, module_members[6].name
+    end
+
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Únicos
+          def foo: () -> void
+        end
+
+        $グローバル: Integer
+      RBS
+
+      assert_equal RBS::TypeName.parse("_Únicos"), decls[0].name
+      assert_equal :$グローバル, decls[1].name
+    end
+  end
+
+  def test_titlecase_identifier_is_a_constant
+    # Titlecase is outside `Uppercase`, but Ruby starts a constant on it.
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class ǅFoo
+        end
+
+        class ᾼBar
+        end
+      RBS
+
+      assert_equal RBS::TypeName.parse("ǅFoo"), decls[0].name
+      assert_equal RBS::TypeName.parse("ᾼBar"), decls[1].name
+      assert_equal [:class, :class], decls.map { |d| d.name.kind }
+      assert decls.all? { |d| d.name.class? }
+    end
+  end
+
+  def test_non_ascii_identifier_lowercase_is_not_a_constant
+    # Kanji has no case at all, which Ruby also treats as a local identifier.
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer("class αlpha\nend\n"))
+    end
+
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer("class 日本語\nend\n"))
+    end
+  end
+
+  def test_non_ascii_identifier_in_single_byte_encoding
+    # In ISO-8859-1 these are single bytes: `À` is 0xC0, `à` is 0xE0.
+    upper = "class \xC0bc\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(upper))
+    assert_equal 1, decls.size
+    assert_instance_of RBS::AST::Declarations::Class, decls[0]
+    assert_equal "\xC0bc".b, decls[0].name.name.to_s.b
+
+    lower = "class \xE0bc\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer(lower))
+    end
+  end
+
+  def test_high_byte_in_ascii_8bit_is_not_an_identifier
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid byte on TruffleRuby"
+
+    source = "class \x80 end".dup.force_encoding(Encoding::ASCII_8BIT)
+    assert_equal :ErrorToken, RBS::Parser.lex(source).value[2].type
+
+    # ISO-8859-1 shares `single_char_width` but does define characters here.
+    latin1 = "class \xC0bc\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(latin1))
+    assert_equal 1, decls.size
+  end
+
   def test_utf8_replacement_character_in_comment_parses
     # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
     # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the

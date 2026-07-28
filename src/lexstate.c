@@ -132,7 +132,16 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
         return true;
     }
 
-    *byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
+    // `char_width` reports 1 for every byte here, so the path below would fold
+    // arbitrary binary into identifiers.
+    if (RBS_UNLIKELY(lexer->encoding == RBS_ENCODING_ASCII_8BIT_ENTRY)) {
+        *byte_len = 1;
+        *codepoint = 0xFFFD;
+        return true;
+    }
+
+    ptrdiff_t remaining = (ptrdiff_t) (lexer->string.end - start);
+    *byte_len = lexer->encoding->char_width((const uint8_t *) start, remaining);
 
     if (*byte_len == 0) {
         // Invalid byte under the active encoding. Map it to a sentinel code
@@ -142,10 +151,10 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
         // being silently swallowed.
         *byte_len = 1;
         *codepoint = 0xFFFD;
-    } else if (*byte_len == 1) {
-        *codepoint = (unsigned int) *start;
     } else {
-        *codepoint = 12523; // Dummy data for "ル" from "ルビー" (Ruby) in Unicode
+        *codepoint = lexer->encoding->isupper_char((const uint8_t *) start, remaining)
+                         ? RBS_MB_UPPER_CODE_POINT
+                         : RBS_MB_OTHER_CODE_POINT;
     }
 
     return true;

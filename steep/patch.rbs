@@ -7,3 +7,10 @@ end
 class Proc
   def ruby2_keywords: () -> self
 end
+
+module Prism
+  class StringQuery
+    # < 1.9.0
+    def self.constant?: (String) -> bool
+  end
+end

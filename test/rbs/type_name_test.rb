@@ -52,4 +52,21 @@ class RBS::TypeNameTest < Test::Unit::TestCase
     assert_equal :alias,     aliased.kind
     assert_equal :interface, interface.kind
   end
+
+  def test_kind_uses_unicode_uppercase_property
+    ns = Namespace.root
+
+    assert_equal :class, TypeName[ns, :"Última"].kind
+    assert_equal :class, TypeName[ns, :"Ωmega"].kind
+    assert_equal :class, TypeName[ns, :"Ñoño"].kind
+
+    # Lt is outside `Uppercase`, but Ruby starts a constant on it.
+    assert_equal :class, TypeName[ns, :"ǅfoo"].kind
+    assert_equal :class, TypeName[ns, :"ᾼfoo"].kind
+
+    assert_equal :alias, TypeName[ns, :"αlpha"].kind
+    assert_equal :alias, TypeName[ns, :"日本語"].kind
+
+    assert_equal :interface, TypeName[ns, :"_Únicos"].kind
+  end
 end
