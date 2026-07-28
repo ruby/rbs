@@ -12,10 +12,10 @@ use crate::ast::location::{
     AliasDeclarationLocation, AliasLocation, AliasMemberLocation, AttributeMemberLocation,
     ClassDeclarationLocation, ClassInstanceLocation, ClassSingletonLocation, ClassSuperLocation,
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
-    InterfaceDeclarationLocation, InterfaceLocation, LocationRange, MethodDefinitionLocation,
-    MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation, ModuleSelfLocation,
-    TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation, UseSingleClauseLocation,
-    UseWildcardClauseLocation, VariableMemberLocation,
+    InterfaceDeclarationLocation, InterfaceLocation, KeywordParamLocation, LocationRange,
+    MethodDefinitionLocation, MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation,
+    ModuleSelfLocation, TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation,
+    UseSingleClauseLocation, UseWildcardClauseLocation, VariableMemberLocation,
 };
 use crate::ast::members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -929,6 +929,7 @@ impl<'a> AstConverter<'a> {
                 KeywordParam {
                     name: self.intern_symbol(&symbol),
                     param: self.convert_function_param_node(&value),
+                    location: Some(keyword_param_location(symbol.location(), value.location())),
                 }
             })
             .collect()
@@ -1066,6 +1067,30 @@ fn convert_range_component(name: &str, value: i32, range: &RBSLocationRange) -> 
 
 fn convert_optional_range(range: Option<RBSLocationRange>) -> Option<LocationRange> {
     range.map(convert_range)
+}
+
+/// Builds the location of a keyword parameter, which the C AST keeps as a pair
+/// of a key symbol and a function param node instead of a single node.
+fn keyword_param_location(
+    name_range: RBSLocationRange,
+    param_range: RBSLocationRange,
+) -> KeywordParamLocation {
+    let name_range = convert_range(name_range);
+
+    KeywordParamLocation {
+        range: span_range(name_range, convert_range(param_range)),
+        name_range,
+    }
+}
+
+/// Returns the range starting where `start` starts and ending where `end` ends.
+fn span_range(start: LocationRange, end: LocationRange) -> LocationRange {
+    LocationRange {
+        start_char: start.start_char,
+        start_byte: start.start_byte,
+        end_char: end.end_char,
+        end_byte: end.end_byte,
+    }
 }
 
 fn variable_member_location(

@@ -71,6 +71,24 @@ pub struct FunctionParamLocation {
 }
 
 /// ```rbs
+/// (name: String) -> void
+///  ^^^^^^^^^^^^            range
+///  ^^^^                    name
+///
+/// (?size: Integer bytes) -> void
+///   ^^^^^^^^^^^^^^^^^^^            range
+///   ^^^^                           name
+/// ```
+///
+/// The `?` marker of an optional keyword is not part of `range`: it belongs to
+/// the enclosing function type, not to the keyword parameter itself.
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct KeywordParamLocation {
+    pub range: LocationRange,
+    pub name_range: LocationRange,
+}
+
+/// ```rbs
 /// _Foo
 /// ^^^^ name
 ///

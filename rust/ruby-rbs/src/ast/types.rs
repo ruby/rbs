@@ -1,6 +1,6 @@
 use crate::ast::location::{
     AliasLocation, ClassInstanceLocation, ClassSingletonLocation, FunctionParamLocation,
-    InterfaceLocation, LocationRange,
+    InterfaceLocation, KeywordParamLocation, LocationRange,
 };
 use crate::ids::{SymbolId, TypeName};
 
@@ -136,6 +136,7 @@ pub struct FunctionType {
 pub struct KeywordParam {
     pub name: SymbolId,
     pub param: FunctionParam,
+    pub location: Option<KeywordParamLocation>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
