@@ -1,0 +1,153 @@
+name: Release gems
+
+# Publishes the `rbs` gem to RubyGems.org from CI to avoid mistakes in the
+# manual release process (forgetting the `java` platform gem, version typos,
+# releasing from a dirty/local environment).
+#
+# On a real run it pushes both platform gems, pushes the `vX.Y.Z` tag, and
+# creates a draft GitHub Release (notes drawn from CHANGELOG.md) for a human
+# to review and publish.
+#
+# This workflow targets the active development line on `master`. Maintenance
+# releases (e.g. 4.0.x cut from `aaa-4.0.x`) are released by hand with
+# `rake release` and intentionally do NOT use this workflow.
+#
+# Prerequisite (one-time, on RubyGems.org): configure a Trusted Publisher for
+# the `rbs` gem with owner `ruby`, repository `rbs`, and workflow filename
+# `release-gems.yml`. No long-lived API token is stored as a secret.
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_version:
+        description: "Version you intend to release. Must match lib/rbs/version.rb (e.g. 4.1.0 or 4.1.0.pre.3)."
+        required: true
+        type: string
+      dry_run:
+        description: "Build and verify only. Do not push gems to RubyGems or push the git tag."
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Keep in sync with .github/workflows/wasm.yml and .github/workflows/jruby.yml.
+env:
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+
+concurrency:
+  group: release-gems
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish (ruby + java)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the git tag
+      id-token: write # RubyGems trusted publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v6
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+
+      - name: Verify version matches the input
+        run: |
+          file_version="$(ruby -e 'require "./lib/rbs/version"; print RBS::VERSION')"
+          if [ "$file_version" != "${{ inputs.expected_version }}" ]; then
+            echo "::error::lib/rbs/version.rb is '$file_version' but you requested '${{ inputs.expected_version }}'. Aborting."
+            exit 1
+          fi
+          echo "Releasing RBS $file_version (dry_run=${{ inputs.dry_run }})"
+          echo "RBS_VERSION=$file_version" >> "$GITHUB_ENV"
+
+      - name: Ensure the tag does not already exist
+        run: |
+          if git rev-parse "v${RBS_VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag v${RBS_VERSION} already exists. Aborting."
+            exit 1
+          fi
+
+      # Build both platform gems BEFORE pushing either, so a release is
+      # all-or-nothing rather than leaving one platform behind.
+      - name: Build the ruby platform gem (C extension)
+        run: gem build rbs.gemspec
+
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Assemble the JRuby runtime (rbs_parser.wasm + Chicory jars)
+        run: bundle exec rake wasm:jruby_setup
+      - name: Build the java platform gem (JRuby)
+        run: RBS_PLATFORM=java gem build rbs.gemspec
+
+      - name: Show built gems
+        run: ls -l "rbs-${RBS_VERSION}.gem" "rbs-${RBS_VERSION}-java.gem"
+
+      - name: Upload built gems as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gems
+          path: |
+            rbs-${{ env.RBS_VERSION }}.gem
+            rbs-${{ env.RBS_VERSION }}-java.gem
+          if-no-files-found: error
+
+      - name: Configure RubyGems trusted publishing
+        if: ${{ !inputs.dry_run }}
+        uses: rubygems/configure-rubygems-credentials@main
+
+      - name: Push gems to RubyGems.org
+        if: ${{ !inputs.dry_run }}
+        run: |
+          for gem in "rbs-${RBS_VERSION}.gem" "rbs-${RBS_VERSION}-java.gem"; do
+            echo "Pushing $gem"
+            gem push "$gem"
+          done
+
+      - name: Create and push the git tag
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git tag "v${RBS_VERSION}"
+          git push origin "v${RBS_VERSION}"
+
+      # Mirrors `rake release:note`: a draft release whose notes are the top
+      # CHANGELOG.md section plus a link to the wiki release note. Left as a
+      # draft so a human reviews and publishes it.
+      - name: Create a draft GitHub Release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes_file="$(mktemp)"
+          ruby -e '
+            version = ENV.fetch("RBS_VERSION")
+            major, minor, * = version.split(".")
+            content = File.read("CHANGELOG.md", encoding: "UTF-8")
+            section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or abort "Could not find a release section in CHANGELOG.md"
+            body = section.sub(/^.*\n^.*\n/, "").rstrip
+            puts "[Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})"
+            puts
+            puts body
+          ' > "$notes_file"
+          args=(--draft --verify-tag --title "${RBS_VERSION}" --notes-file "$notes_file")
+          if ruby -e 'exit Gem::Version.new(ENV.fetch("RBS_VERSION")).prerelease? ? 0 : 1'; then
+            args+=(--prerelease)
+          fi
+          gh release create "v${RBS_VERSION}" "${args[@]}"
