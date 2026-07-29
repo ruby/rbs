@@ -152,9 +152,11 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
         *byte_len = 1;
         *codepoint = 0xFFFD;
     } else {
-        *codepoint = lexer->encoding->isupper_char((const uint8_t *) start, remaining)
-                         ? RBS_MB_UPPER_CODE_POINT
-                         : RBS_MB_OTHER_CODE_POINT;
+        // Every non-ASCII character folds to one sentinel, so the grammar can
+        // accept it without spelling out Unicode ranges. The rules that need to
+        // tell a constant from a local read the original bytes back once per
+        // identifier; see `rbs_mb_ident_type` in src/lexer.re.
+        *codepoint = RBS_MB_CODE_POINT;
     }
 
     return true;

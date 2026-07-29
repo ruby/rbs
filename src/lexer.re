@@ -1,5 +1,21 @@
 #include "rbs/lexer.h"
 
+/**
+ * Returns `upper` or `lower` depending on whether the character `offset` bytes
+ * into the current token is uppercase under the active encoding.
+ *
+ * `rbs_next_char` folds every non-ASCII character into a single sentinel code
+ * point, so the grammar alone cannot tell `class Última` from `def última`. The
+ * original bytes are still in the buffer, and reading them back here costs one
+ * `isupper_char` per identifier rather than one per character scanned.
+ */
+static enum RBSTokenType rbs_mb_ident_type(rbs_lexer_t *lexer, size_t offset, enum RBSTokenType upper, enum RBSTokenType lower) {
+  const char *start = lexer->string.start + lexer->start.byte_pos + offset;
+  ptrdiff_t remaining = (ptrdiff_t) (lexer->string.end - start);
+
+  return lexer->encoding->isupper_char((const uint8_t *) start, remaining) ? upper : lower;
+}
+
 rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
   rbs_lexer_t backup;
 
@@ -16,11 +32,15 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       re2c:define:YYRESTORE = "*lexer = backup;";
       re2c:yyfill:enable  = 0;
 
-      // Sentinels from rbs_next_char; keep in sync with RBS_MB_*_CODE_POINT.
-      mb_upper = [\u30EB];
-      mb_other = [\u30D3];
-      mb_char = mb_upper | mb_other;
-      word = [a-zA-Z0-9_] | mb_char;
+      // One non-ASCII character, whichever it was: rbs_next_char reports them
+      // all as this code point so that the grammar needs no Unicode tables.
+      // U+D800 is an unpaired surrogate, so decoding cannot produce it and it
+      // cannot collide with real input. Matching the whole non-ASCII range
+      // instead would say the same thing, but it turns every identifier state
+      // of the DFA into a span of range checks and costs ~25% even on ASCII.
+      // Keep in sync with RBS_MB_CODE_POINT.
+      mb = [\uD800];
+      word = [a-zA-Z0-9_] | mb;
 
       operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
@@ -120,7 +140,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":" dqstring { return rbs_next_token(lexer, tDQSYMBOL); }
       ":" sqstring { return rbs_next_token(lexer, tSQSYMBOL); }
 
-      identifier = ([a-zA-Z_] | mb_char) word* [!?=]?;
+      identifier = ([a-zA-Z_] | mb) word* [!?=]?;
       symbol_opr = ":|" | ":&" | ":/" | ":%" | ":~" | ":`" | ":^"
                  | ":==" | ":=~" | ":===" | ":!" | ":!=" | ":!~"
                  | ":<" | ":<=" | ":<<" | ":<=>" | ":>" | ":>=" | ":>>"
@@ -137,16 +157,18 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":$" global_ident  { return rbs_next_token(lexer, tSYMBOL); }
       symbol_opr         { return rbs_next_token(lexer, tSYMBOL); }
 
-      ([a-z] | mb_other) word*         { return rbs_next_token(lexer, tLIDENT); }
-      ([A-Z] | mb_upper) word*         { return rbs_next_token(lexer, tUIDENT); }
-      "_" ([a-z0-9_] | mb_other) word* { return rbs_next_token(lexer, tULLIDENT); }
-      "_" ([A-Z] | mb_upper) word*     { return rbs_next_token(lexer, tULIDENT); }
-      "_"                              { return rbs_next_token(lexer, tULLIDENT); }
-      ([a-zA-Z_] | mb_char) word* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
-      ([a-zA-Z_] | mb_char) word* "="  { return rbs_next_token(lexer, tEQIDENT); }
+      [a-z] word*           { return rbs_next_token(lexer, tLIDENT); }
+      [A-Z] word*           { return rbs_next_token(lexer, tUIDENT); }
+      mb word*              { return rbs_next_token(lexer, rbs_mb_ident_type(lexer, 0, tUIDENT, tLIDENT)); }
+      "_" [a-z0-9_] word*   { return rbs_next_token(lexer, tULLIDENT); }
+      "_" [A-Z] word*       { return rbs_next_token(lexer, tULIDENT); }
+      "_" mb word*          { return rbs_next_token(lexer, rbs_mb_ident_type(lexer, 1, tULIDENT, tULLIDENT)); }
+      "_"                   { return rbs_next_token(lexer, tULLIDENT); }
+      ([a-zA-Z_] | mb) word* "!"   { return rbs_next_token(lexer, tBANGIDENT); }
+      ([a-zA-Z_] | mb) word* "="   { return rbs_next_token(lexer, tEQIDENT); }
 
-      "@" ([a-zA-Z_] | mb_char) word*  { return rbs_next_token(lexer, tAIDENT); }
-      "@@" ([a-zA-Z_] | mb_char) word* { return rbs_next_token(lexer, tA2IDENT); }
+      "@" ([a-zA-Z_] | mb) word*   { return rbs_next_token(lexer, tAIDENT); }
+      "@@" ([a-zA-Z_] | mb) word*  { return rbs_next_token(lexer, tA2IDENT); }
 
       "$" global_ident      { return rbs_next_token(lexer, tGIDENT); }
 
