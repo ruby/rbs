@@ -594,20 +594,54 @@ def changelog_commits(from, paths: [])
   output.lines.map(&:chomp).reject(&:empty?)
 end
 
-# Finds the pull requests the commits came from, keeping the order of `commits`.
-#
-# Returns the pull requests for the changelog and the ones omitted by `skip_labels`.
-#
-def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
-  pull_requests = {}
-  skipped = {}
+# What `git cherry-pick -x` appends to the message of the commit it creates.
+CHERRY_PICK_ORIGIN = /^\(cherry picked from commit ([0-9a-f]{40})\)$/
 
-  commits.each_slice(50) do |slice|
-    # Ask GitHub which pull requests the commits came from, so that any merge strategy -- merge
-    # commit, squash, or rebase -- is handled without parsing commit messages.
-    aliases = slice.map.with_index do |commit, index|
+# Maps the commits that record where they were cherry-picked from to that commit.
+#
+# A backport is a cherry-pick, so on a release branch it is the recorded origin, not the commit
+# itself, that leads to the pull request the change was written and reviewed in. Without this a
+# backported change is attributed to the pull request that carried the backport, which says
+# nothing about the change and is the same for every commit it brought over.
+#
+# A commit backported twice -- the development line, then a release branch -- carries one line
+# per hop, appended in order, so the first one is where the change started.
+#
+def changelog_origins(commits)
+  return {} if commits.empty?
+
+  require "open3"
+
+  # `--no-walk` prints these commits and nothing else. NUL delimiters keep a commit message --
+  # which can contain anything, including what this format looks like -- from being read as the
+  # format itself.
+  output, status = Open3.capture2("git", "log", "--no-walk", "--format=%H%x00%B%x00", *commits, binmode: true)
+  raise status.inspect unless status.success?
+
+  # Commit messages are UTF-8, while the default external encoding follows the locale. Without
+  # this, splitting a message that is not ASCII fails under `LANG=C`, as in GitHub Actions.
+  output.force_encoding(Encoding::UTF_8)
+
+  output.split("\0").each_slice(2).each_with_object({}) do |(commit, message), origins|
+    commit = commit.to_s.strip
+    next if commit.empty?
+
+    origin = message.to_s[CHERRY_PICK_ORIGIN, 1] or next
+    origins[commit] = origin
+  end
+end
+
+# Asks GitHub which pull requests each commit came from, so that any merge strategy -- merge
+# commit, squash, or rebase -- is handled without parsing commit messages.
+#
+# Returns `{ oid => [pull request, ...] }`, with an empty array for the commits GitHub has no
+# merged pull request for, including the ones it does not know at all.
+#
+def changelog_associated_pull_requests(oids)
+  oids.uniq.each_slice(50).each_with_object({}) do |slice, found|
+    aliases = slice.map.with_index do |oid, index|
       <<~GRAPHQL
-        c#{index}: object(oid: "#{commit}") {
+        c#{index}: object(oid: "#{oid}") {
           ... on Commit {
             associatedPullRequests(first: 10) {
               nodes {
@@ -620,18 +654,44 @@ def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
       GRAPHQL
     end
 
-    changelog_graphql(aliases.join("\n")).each_value do |commit|
-      next unless commit
+    response = changelog_graphql(aliases.join("\n"))
 
-      commit.dig(:associatedPullRequests, :nodes).each do |pr|
-        next unless pr[:merged]
+    slice.each_with_index do |oid, index|
+      nodes = response.dig(:"c#{index}", :associatedPullRequests, :nodes) || []
 
-        pr = { number: pr[:number], title: pr[:title], url: pr[:url], labels: pr.dig(:labels, :nodes).map { |label| label[:name] } }
-        if (pr[:labels] & skip_labels).empty?
-          pull_requests[pr[:number]] ||= pr
-        else
-          skipped[pr[:number]] ||= pr
-        end
+      found[oid] = nodes.select { |pr| pr[:merged] }.map do |pr|
+        { number: pr[:number], title: pr[:title], url: pr[:url], labels: pr.dig(:labels, :nodes).map { |label| label[:name] } }
+      end
+    end
+  end
+end
+
+# Finds the pull requests the commits came from, keeping the order of `commits`.
+#
+# Returns the pull requests for the changelog and the ones omitted by `skip_labels`.
+#
+def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
+  origins = changelog_origins(commits)
+  found = changelog_associated_pull_requests(commits.map { |commit| origins[commit] || commit })
+
+  # An origin that leads nowhere -- a commit cherry-picked from a fork, or one that went to the
+  # default branch without a pull request -- falls back to the commit in this history, which is
+  # at least the backport that brought it here.
+  fallbacks = commits.select { |commit| origins[commit] && found.fetch(origins[commit], []).empty? }
+  found.update(changelog_associated_pull_requests(fallbacks)) unless fallbacks.empty?
+
+  pull_requests = {}
+  skipped = {}
+
+  commits.each do |commit|
+    prs = found.fetch(origins[commit] || commit, [])
+    prs = found.fetch(commit, []) if prs.empty?
+
+    prs.each do |pr|
+      if (pr[:labels] & skip_labels).empty?
+        pull_requests[pr[:number]] ||= pr
+      else
+        skipped[pr[:number]] ||= pr
       end
     end
   end

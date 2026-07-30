@@ -142,6 +142,21 @@ Without it the version on `master` keeps claiming to be the released version for
 development period, and `rake gem:changelog` reads that version to decide where the next changelog
 starts.
 
+## Backports
+
+A patch release is cut from a release branch (`aaa-X.Y.x`), and what it carries beyond the previous
+release is cherry-picked from the development line. Cherry-pick with `-x`:
+
+```console
+$ git cherry-pick -x <commit>
+```
+
+`-x` records the commit the change was copied from, and that recorded line is what `rake
+gem:changelog` follows to reach the pull request the change was written and reviewed in. Without
+it, the only pull request a backported commit is associated with is the one that carried the
+backport, which says nothing about the change and is the same for every commit it brought over —
+that is why the 4.0.3 changelog credits its three entries to the same pull request.
+
 ## Notes
 
 - Prereleases (`X.Y.Z.pre.N`) are only installed with `gem install rbs --pre`;
