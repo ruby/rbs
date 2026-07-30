@@ -505,46 +505,259 @@ NOTES
 end
 
 
-desc "Generate changelog template from GH pull requests"
-task :changelog do
-  major, minor, patch, _pre = RBS::VERSION.split(".", 4)
-  major = major.to_i
-  minor = minor.to_i
-  patch = patch.to_i
+# Pull requests with one of these labels are omitted from the changelog.
+CHANGELOG_SKIP_LABELS = ["skip-changelog"]
 
-  if patch == 0
-    milestone = "RBS #{major}.#{minor}"
-  else
-    milestone = "RBS #{major}.#{minor}.x"
-  end
-
-  puts "🔍 Finding pull requests that is associated to milestone `#{milestone}`..."
-
-  command = [
-    "gh",
-    "pr",
-    "list",
-    "--limit=10000",
-    "--json",
-    "url,title,number",
-    "--search" ,
-    "milestone:\"#{milestone}\" is:merged sort:updated-desc -label:Released"
-  ]
-
+# Resolves the commit-ish the changelog starts from.
+#
+# `version` is a version number, a tag, or any commit-ish. When it is omitted, the latest tag
+# matching `tag_glob` is used.
+#
+def resolve_changelog_base(version, tag_glob:)
   require "open3"
+
+  from =
+    if version
+      # `4.1.0` and `v4.1.0` both mean the tag `v4.1.0`, while `master` or a SHA is used as is.
+      version.match?(/\A\d/) ? "v#{version}" : version
+    else
+      output, status = Open3.capture2("git", "describe", "--tags", "--match", tag_glob, "--abbrev=0")
+      raise "🚨 Cannot detect the latest tag matching `#{tag_glob}`. Give the previous version explicitly." unless status.success?
+      output.chomp
+    end
+
+  _, status = Open3.capture2("git", "rev-parse", "--verify", "--quiet", "#{from}^{commit}")
+  raise "🚨 No such commit-ish: `#{from}`" unless status.success?
+
+  from
+end
+
+# Runs a GraphQL query against the repository of the working directory.
+#
+# `body` is the selection set inside `repository`, so a query can use the `$owner` and `$name`
+# variables. Returns the contents of `data.repository`.
+#
+def changelog_graphql(body)
+  require "open3"
+  require "json"
+
+  @changelog_repository ||=
+    begin
+      output, status = Open3.capture2("gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner")
+      raise status.inspect unless status.success?
+      output.chomp.split("/", 2)
+    end
+  owner, name = @changelog_repository
+
+  query = <<~GRAPHQL
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        #{body}
+      }
+    }
+  GRAPHQL
+
+  output, status = Open3.capture2(
+    "gh", "api", "graphql",
+    "-f", "query=#{query}",
+    "-f", "owner=#{owner}",
+    "-f", "name=#{name}",
+    binmode: true
+  )
+  raise status.inspect unless status.success?
+
+  # GitHub always answers in UTF-8, while the default external encoding follows the locale. Without
+  # this, a pull request body with an emoji fails to parse under `LANG=C`, as in GitHub Actions.
+  JSON.parse(output.force_encoding(Encoding::UTF_8), symbolize_names: true).dig(:data, :repository)
+end
+
+# Lists the commits between `from` and `HEAD`, newest first.
+#
+# Giving `paths` limits the commits to the ones touching the paths.
+#
+def changelog_commits(from, paths: [])
+  require "open3"
+
+  command = ["git", "log", "--format=%H", "#{from}..HEAD"]
+  # `--simplify-merges` keeps the default history simplification from following only one parent of
+  # a merge commit, which can drop the other side. Note that `--full-history` alone is wrong here:
+  # it also lists merge commits that do not touch the paths, bringing back the excluded pull
+  # requests. The two flags produce the same commits as the default mode for this repository today.
+  command.push("--full-history", "--simplify-merges", "--", *paths) unless paths.empty?
+
   output, status = Open3.capture2(*command)
   raise status.inspect unless status.success?
 
-  require "json"
-  json = JSON.parse(output, symbolize_names: true)
+  output.lines.map(&:chomp).reject(&:empty?)
+end
 
-  unless json.empty?
-    puts
-    json.each do |line|
-      puts "* #{line[:title]} ([##{line[:number]}](#{line[:url]}))"
+# Finds the pull requests the commits came from, keeping the order of `commits`.
+#
+# Returns the pull requests for the changelog and the ones omitted by `skip_labels`.
+#
+def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
+  pull_requests = {}
+  skipped = {}
+
+  commits.each_slice(50) do |slice|
+    # Ask GitHub which pull requests the commits came from, so that any merge strategy -- merge
+    # commit, squash, or rebase -- is handled without parsing commit messages.
+    aliases = slice.map.with_index do |commit, index|
+      <<~GRAPHQL
+        c#{index}: object(oid: "#{commit}") {
+          ... on Commit {
+            associatedPullRequests(first: 10) {
+              nodes {
+                number title url merged
+                labels(first: 100) { nodes { name } }
+              }
+            }
+          }
+        }
+      GRAPHQL
     end
+
+    changelog_graphql(aliases.join("\n")).each_value do |commit|
+      next unless commit
+
+      commit.dig(:associatedPullRequests, :nodes).each do |pr|
+        next unless pr[:merged]
+
+        pr = { number: pr[:number], title: pr[:title], url: pr[:url], labels: pr.dig(:labels, :nodes).map { |label| label[:name] } }
+        if (pr[:labels] & skip_labels).empty?
+          pull_requests[pr[:number]] ||= pr
+        else
+          skipped[pr[:number]] ||= pr
+        end
+      end
+    end
+  end
+
+  [pull_requests.values, skipped.values]
+end
+
+# Fetches the details that help classifying the pull requests: the changed files and the body.
+#
+def changelog_pull_request_details(pull_requests)
+  pull_requests.each_slice(50).flat_map do |slice|
+    aliases = slice.map do |pr|
+      <<~GRAPHQL
+        p#{pr[:number]}: pullRequest(number: #{pr[:number]}) {
+          body
+          author { login }
+          files(first: 100) {
+            nodes { path }
+            pageInfo { hasNextPage }
+          }
+        }
+      GRAPHQL
+    end
+
+    details = changelog_graphql(aliases.join("\n"))
+
+    slice.map do |pr|
+      detail = details[:"p#{pr[:number]}"] or next pr
+
+      pr.merge(
+        author: detail.dig(:author, :login),
+        # The body is a hint for writing the changelog, not a copy source. Keep it short.
+        body: detail[:body].to_s.strip.slice(0, 1000),
+        files: detail.dig(:files, :nodes).map { |file| file[:path] },
+        files_truncated: detail.dig(:files, :pageInfo, :hasNextPage)
+      )
+    end
+  end
+end
+
+# Reports the pull requests omitted by their label, so that they do not disappear silently.
+#
+def warn_skipped_pull_requests(skipped, skip_labels)
+  return if skipped.empty?
+
+  numbers = skipped.map { |pr| "##{pr[:number]}" }
+  numbers = numbers.take(20).push("and #{numbers.size - 20} more") if numbers.size > 20
+
+  $stderr.puts
+  $stderr.puts "  (⏭️  Skipped #{skipped.size} pull request(s) labeled #{skip_labels.map { |label| "`#{label}`" }.join(" or ")}: #{numbers.join(", ")})"
+end
+
+# Prints the changelog template listing the pull requests merged between `from` and `HEAD`.
+#
+# The changelog goes to STDOUT and everything else goes to STDERR, so that the output can be
+# piped to another command: `rake gem:changelog | pbcopy`
+#
+def print_changelog(from, paths: [], skip_labels: CHANGELOG_SKIP_LABELS)
+  $stderr.puts "🔍 Finding pull requests merged between `#{from}` and `HEAD`..."
+
+  commits = changelog_commits(from, paths: paths)
+  if commits.empty?
+    $stderr.puts "  (🤔 There is no commit after `#{from}`.)"
+    return
+  end
+
+  pull_requests, skipped = changelog_pull_requests(commits, skip_labels: skip_labels)
+
+  if pull_requests.empty?
+    $stderr.puts "  (🤔 No pull request is associated to the commits after `#{from}`.)"
   else
-    puts "  (🤑 There is no *unreleased* pull request associated to the milestone.)"
+    $stderr.puts
+    pull_requests.each do |pr|
+      puts "* #{pr[:title]} ([##{pr[:number]}](#{pr[:url]}))"
+    end
+    $stdout.flush
+  end
+
+  warn_skipped_pull_requests(skipped, skip_labels)
+end
+
+# Prints the same pull requests as `print_changelog` as JSON, with the details that help
+# classifying them into the sections of CHANGELOG.md.
+#
+# This is the input for the release automation, so it always prints a valid JSON document.
+#
+def print_changelog_json(from, paths: [], skip_labels: CHANGELOG_SKIP_LABELS)
+  require "json"
+
+  $stderr.puts "🔍 Finding pull requests merged between `#{from}` and `HEAD`..."
+
+  commits = changelog_commits(from, paths: paths)
+  pull_requests, skipped = changelog_pull_requests(commits, skip_labels: skip_labels)
+  pull_requests = changelog_pull_request_details(pull_requests)
+
+  $stderr.puts "  (📋 #{pull_requests.size} pull request(s))"
+
+  puts JSON.pretty_generate(
+    {
+      from: from,
+      to: "HEAD",
+      pull_requests: pull_requests,
+      skipped: skipped
+    }
+  )
+  $stdout.flush
+
+  warn_skipped_pull_requests(skipped, skip_labels)
+end
+
+namespace :gem do
+  # The gem is developed in the whole repository except the Rust crate, which has its own release
+  # cycle. Note that this is an *exclusion*, not a list of the directories shipped in the gem:
+  # changes in `test/` or `.github/` are part of the gem's changelog too.
+  # A constant defined in a `namespace` block is a top-level constant, so it needs the prefix.
+  GEM_CHANGELOG_PATHS = [".", ":(exclude)rust"]
+
+  desc "Generate changelog template from GH pull requests merged after the given version (defaults to the latest tag)"
+  task :changelog, [:version] do |_task, args|
+    from = resolve_changelog_base(args[:version], tag_glob: "v*")
+    print_changelog(from, paths: GEM_CHANGELOG_PATHS)
+  end
+
+  namespace :changelog do
+    desc "Print the pull requests of `gem:changelog` as JSON, with the changed files and body of each"
+    task :json, [:version] do |_task, args|
+      from = resolve_changelog_base(args[:version], tag_glob: "v*")
+      print_changelog_json(from, paths: GEM_CHANGELOG_PATHS)
+    end
   end
 end
 

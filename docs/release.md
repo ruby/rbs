@@ -21,9 +21,64 @@ built once in any environment and runs on every JRuby.
 
 ## Steps
 
-### 1. Release the `ruby` gem
+### 1. Prepare the release
 
-Once the version is bumped and committed, run on CRuby:
+Open a pull request that carries everything the release needs:
+
+- `lib/rbs/version.rb` — set `RBS::VERSION` to the version being released.
+- `Gemfile.lock` — run `bundle install` after the bump; the lockfile records the version too, and
+  `rake release` refuses to run with a dirty working tree.
+- `CHANGELOG.md` — add a section for the new version.
+
+`rake gem:changelog` lists the pull requests merged since the last release, already formatted:
+
+```console
+$ bundle exec rake gem:changelog | pbcopy
+```
+
+It starts from the latest `v*` tag; pass a version to start somewhere else
+(`rake 'gem:changelog[4.1.0]'`). Only the list goes to STDOUT, so it pipes cleanly. Pull requests
+labeled `skip-changelog` are left out and reported on STDERR, and pull requests that only touch
+`rust/` are left out because the crates have their own release cycle.
+
+Sort the list into the sections below. `rake gem:changelog:json` prints the same pull requests with
+the changed files, labels, and body of each, which is what the sorting is based on.
+
+```markdown
+## X.Y.Z (YYYY-MM-DD)
+
+### Signature updates
+
+### Language updates
+
+### Library changes
+
+#### rbs prototype
+
+#### rbs collection
+
+### Miscellaneous
+```
+
+The sections always appear in this order; delete the ones that end up empty, which is most of them
+on a small release. Two things scale with the size of the release:
+
+- **Summary paragraphs**, above the first section. A patch release usually has none, 4.1.0 has four
+  paragraphs, and 4.0.0 has nine.
+- **A list of the types whose signatures changed**, as the first line of `### Signature updates`,
+  written as `**Updated classes/modules/methods:**` followed by the names in backticks. Used on
+  `X.Y.0` releases only.
+
+The date is the day the gem is released, matching the `vX.Y.Z` tag — not the day this pull request
+is opened. Fix it up before step 2 if the pull request sat for a few days.
+
+> While `.github/workflows/milestone.yml` is a required check, the release pull request needs a
+> milestone matching the new version (`RBS X.Y` for a `.0` release, `RBS X.Y.x` otherwise). Create
+> the milestone on GitHub first if the minor version changes.
+
+### 2. Release the `ruby` gem
+
+Once the release pull request is merged and `master` is checked out, run on CRuby:
 
 ```console
 $ bundle exec rake release
@@ -37,7 +92,7 @@ This re-builds the `ruby`-platform gem and then:
 - runs `release:note`, which opens a GitHub **draft** release (with
   `--prerelease` for `*.pre.*` versions) and prints the remaining manual steps.
 
-### 2. Build and push the `java` gem
+### 3. Build and push the `java` gem
 
 The `java` gem is not built by `rake release`, so build and push it manually:
 
@@ -59,6 +114,13 @@ Optionally confirm it installs and runs on JRuby before pushing:
 $ docker run --rm -v "$PWD/pkg:/pkg" -w /tmp rbs-jruby bash -c \
     'gem install /pkg/rbs-X.Y.Z-java.gem && ruby -e "require %q{rbs}; puts [RUBY_ENGINE, RBS::VERSION].join(%q{ })"'
 ```
+
+### 4. Start the next development cycle
+
+Open another pull request setting `RBS::VERSION` to the next prerelease (`4.1.1` → `4.1.2.pre`),
+with `Gemfile.lock` regenerated. Without it the version on `master` keeps claiming to be the
+released version for the whole development period — and, while the milestone check is in place,
+pull requests are checked against the released version's milestone.
 
 ## Notes
 
