@@ -232,8 +232,11 @@ that is why the 4.0.3 changelog credits its three entries to the same pull reque
 - Prereleases (`X.Y.Z.pre.N`) are only installed with `gem install rbs --pre`;
   a plain `gem install rbs` is unaffected. On JRuby, `gem install rbs [--pre]`
   resolves to the `-java` gem automatically.
-- `Dockerfile.jruby` pins the WASI SDK / Chicory / ASM versions to match the
-  `wasm`, `jruby`, and `release-gems` workflows. Keep them in sync when bumping.
+- The WASI SDK version is pinned in `wasm.yml`, `jruby.yml`, `release-gems.yml`, and
+  `Dockerfile.jruby`, each carrying its own copy. Keep them in sync when bumping. The
+  Chicory/ASM versions are not duplicated: they are the `jar` requirements in
+  `rbs.gemspec`, which is where the workflow, `Dockerfile.jruby` and `gem install` all
+  read them from.
 - `rake 'gem:check_release[X.Y.Z]'` and `rake gem:tag` are what the workflow runs to
   check the release and to create the tag. Both work locally, which is the fallback
   if the tag ever has to be created by hand.
