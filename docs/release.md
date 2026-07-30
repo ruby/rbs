@@ -1,8 +1,8 @@
 # Releasing RBS
 
-A release is a pull request, a tag, and one workflow run. Everything that leaves
-the repository — both gems and the GitHub release — is produced by the `Release
-gems` workflow, so nothing has to be built or pushed from a laptop.
+A release is a pull request and one workflow run. Everything that leaves the
+repository — the tag, both gems, and the GitHub release — is produced by the
+`Release gems` workflow, so nothing has to be built or pushed from a laptop.
 
 Each release ships **two gems**:
 
@@ -97,26 +97,29 @@ on a small release. Two things scale with the size of the release:
 The date is the day the gem is released, matching the `vX.Y.Z` tag — not the day this pull request
 is opened. Fix it up before step 2 if the pull request sat for a few days.
 
-### 2. Tag the release
+### 2. Run the `Release gems` workflow
 
-Once the pull request is merged, tag the merge commit and push the tag:
+Once the pull request is merged, dispatch
+[`release-gems.yml`](../.github/workflows/release-gems.yml) from the Actions tab with two inputs:
 
-```console
-$ git switch master && git pull
-$ git tag "v$(ruby -e 'load "lib/rbs/version.rb"; print RBS::VERSION')"
-$ git push origin --tags
-```
+| Input | Value |
+| --- | --- |
+| `commit` | The full 40-character SHA of the merge commit, taken from the merged pull request |
+| `version` | `X.Y.Z`, without the leading `v` |
 
-The tag comes before anything is published, so that the gems and the release notes describe a
-commit that is already immutable — and because a tag can be deleted, while a version pushed to
-RubyGems can only be yanked.
+The ref selector picks which copy of the workflow file runs, not what gets released — leave it on
+`master`. Everything is built from `commit`, so the run is unaffected by whatever lands on `master`
+in the meantime, and a patch release cut from a release branch is dispatched the same way as any
+other: the workflow does not care which branch the commit is on.
 
-### 3. Run the `Release gems` workflow against the tag
+The two inputs say the same thing twice, once as a commit and once as a name, and the run stops
+before anything is built unless they agree with each other and with the repository:
 
-Dispatch [`release-gems.yml`](../.github/workflows/release-gems.yml) from the Actions tab, picking
-the `vX.Y.Z` tag — **not** a branch — in the ref selector. The trusted publisher has no branch
-condition, so the ref you pick is what decides what gets published; the workflow refuses to run
-unless the tag matches `RBS::VERSION`.
+- `commit` has to be a full SHA that some branch contains,
+- `version` has to be the `RBS::VERSION` that commit declares,
+- CHANGELOG.md has to start with a section for `version` (skipped for `.dev.N`, which is not
+  written up),
+- `vX.Y.Z` must not exist yet.
 
 It then:
 
@@ -127,14 +130,19 @@ It then:
 - installs the `java` gem on JRuby and parses with it, so the WebAssembly runtime is exercised
   before anything is published,
 - uploads both gems as an artifact,
-- pushes both to RubyGems through trusted publishing,
+- tags `commit` as `vX.Y.Z` and pushes the tag,
+- pushes both gems to RubyGems through trusted publishing,
 - publishes the GitHub release with the notes from CHANGELOG.md, skipping this last step for
   `.dev.N` versions.
 
-Dispatching against a branch runs everything up to the artifact and stops, which is how the build
-is exercised without releasing.
+The tag is created once both gems are known to build and run, and before anything is published: a
+tag can be deleted, while a version pushed to RubyGems can only be yanked.
 
-### 4. Start the next development cycle
+Checking the `dry_run` box runs everything up to the artifact and stops — no tag, no gems pushed,
+no release — which is how the build is exercised without releasing. `version` still has to match
+the commit, so a dry run is also how a release is rehearsed before it is cut.
+
+### 3. Start the next development cycle
 
 Open another pull request setting `RBS::VERSION` to the next prerelease (`4.1.1` → `4.1.2.pre`),
 with `Gemfile.lock` regenerated, labeled `skip-changelog` like the release pull request itself.
@@ -164,3 +172,11 @@ that is why the 4.0.3 changelog credits its three entries to the same pull reque
   resolves to the `-java` gem automatically.
 - `Dockerfile.jruby` pins the WASI SDK / Chicory / ASM versions to match the
   `wasm`, `jruby`, and `release-gems` workflows. Keep them in sync when bumping.
+- `rake 'gem:check_release[X.Y.Z]'` and `rake gem:tag` are what the workflow runs to
+  check the release and to create the tag. Both work locally, which is the fallback
+  if the tag ever has to be created by hand.
+- Those two tasks and `rake gem:gh_release` come from the Rakefile of the commit
+  being released, not from the branch the workflow was dispatched from. Releasing
+  from a release branch (`aaa-X.Y.x`) therefore needs the release tooling on that
+  branch as well; without it the run fails on the missing task, before publishing
+  anything.

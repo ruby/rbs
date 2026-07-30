@@ -1,12 +1,17 @@
 name: Release gems
 
-# Builds, publishes, and announces a release. Dispatch it against the `vX.Y.Z` tag
-# of the release: the tag is created first so that everything published afterwards
-# traces back to an immutable ref, and so the reversible step comes before the
-# irreversible one.
+# Builds, publishes, and announces a release. Dispatch it with the commit being
+# released and the version that commit declares.
 #
-# Dispatching against a branch builds and verifies the gems and stops there, which
-# is how the build is exercised without releasing anything.
+# Everything is built from `commit`, not from wherever the default branch happens to
+# be when the run starts, so the release describes a state that is already immutable.
+# `version` is the same fact stated a second time -- the run stops before anything is
+# built unless it matches the `RBS::VERSION` of that commit, so dispatching the wrong
+# commit, or the right one under the wrong name, is a failed run rather than a gem
+# that has to be yanked.
+#
+# `dry_run` builds and checks both gems and stops before the tag, which is how the
+# build is exercised without releasing anything.
 #
 # | Gem                  | Platform      | Parser                           |
 # | -------------------- | ------------- | -------------------------------- |
@@ -19,11 +24,26 @@ name: Release gems
 #
 # One job on purpose. Tagging, pushing the gems, and opening the GitHub release
 # all belong to a single release, and keeping them in one place keeps their order
-# readable -- the tag is created before anything is published, so the reversible
-# step comes before the irreversible one.
+# readable -- the tag is created once both gems are known to build and run, and
+# before anything is published, so the reversible step comes before the irreversible
+# one.
+#
+# The file name is what the RubyGems trusted publisher for `rbs` is registered
+# against, so it cannot be renamed without registering the new name first.
 
 on:
   workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to release, as a full 40-character SHA"
+        required: true
+      version:
+        description: "Version to release, without the leading `v` (e.g. `4.1.2`)"
+        required: true
+      dry_run:
+        description: "Build and check the gems without tagging or publishing anything"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -38,12 +58,60 @@ jobs:
     name: release
     runs-on: ubuntu-latest
     permissions:
-      contents: write # publish the GitHub release
+      contents: write # push the tag, publish the GitHub release
       id-token: write # trusted publishing to RubyGems
+    env:
+      # The inputs are read through the environment rather than interpolated into
+      # the scripts below.
+      COMMIT: ${{ inputs.commit }}
+      VERSION: ${{ inputs.version }}
+      TAG: v${{ inputs.version }}
     steps:
       # The gemspec takes its file list from `git ls-files`, so both gems are built
-      # from the committed state.
+      # from the committed state -- of the dispatched commit, since that is what is
+      # checked out. The full history is needed to tell which branches contain it.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.commit }}
+          fetch-depth: 0
+
+      # Before anything is installed or built: these are the two things the release
+      # is named after and built from, and a mistake in either is cheapest to catch
+      # here.
+      - name: Check the inputs
+        run: |
+          if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::\`$COMMIT\` is not a full 40-character SHA. A release names one exact commit."
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9][0-9a-zA-Z.]*$ ]]; then
+            echo "::error::\`$VERSION\` is not a version number. Pass it without the leading \`v\`."
+            exit 1
+          fi
+
+          # A release proper is cut from the default branch, while a patch release can
+          # be cut from a release branch, so which branch the commit is on is not this
+          # workflow's business. That it is on one is: a commit no branch contains is
+          # one that nothing in the repository leads to any more.
+          git fetch --no-tags origin "+refs/heads/*:refs/remotes/origin/*"
+          branches=$(git branch --remotes --contains "$COMMIT" --format "%(refname:lstrip=3)")
+          if [ -z "$branches" ]; then
+            echo "::error::$COMMIT is not on any branch."
+            exit 1
+          fi
+          echo "Branches containing $COMMIT:"
+          printf '%s\n' "$branches"
+
+      # A tag that already exists is a version that has already been released, and
+      # pushing it would fail after the build rather than before it.
+      - name: Check that the tag does not exist
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null; then
+            echo "::error::$TAG already exists, so $VERSION has been released."
+            exit 1
+          fi
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -56,25 +124,16 @@ jobs:
           bundle config set --local without libs:profilers
           bundle install --jobs 4 --retry 3
 
-      - name: Read the version
-        id: version
-        run: echo "version=$(ruby -e 'load "lib/rbs/version.rb"; print RBS::VERSION')" >> "$GITHUB_OUTPUT"
-
-      # Fail before spending a minute on the build, and before anything is pushed:
-      # the tag is what the release is named after, so it has to be the version the
-      # tagged commit actually declares.
-      - name: Check the tag against RBS::VERSION
-        if: github.ref_type == 'tag'
-        run: |
-          if [ "${{ github.ref_name }}" != "v${{ steps.version.outputs.version }}" ]; then
-            echo "::error::tag ${{ github.ref_name }} does not match RBS::VERSION ${{ steps.version.outputs.version }}"
-            exit 1
-          fi
+      # Fails before a minute is spent on the build, and before anything is pushed:
+      # the version has to be the one the released commit declares, and -- unless
+      # this is a `.dev.N` release -- the one CHANGELOG.md is written up for.
+      - name: Check the version and the changelog
+        run: bundle exec rake "gem:check_release[$VERSION]"
 
       - name: Build the ruby gem
         run: |
           mkdir -p pkg
-          gem build rbs.gemspec -o "pkg/rbs-${{ steps.version.outputs.version }}.gem"
+          gem build rbs.gemspec -o "pkg/rbs-$VERSION.gem"
 
       # `rake wasm:jruby_setup` compiles src/**/*.c to WebAssembly and copies the
       # result to lib/rbs/wasm/, where the gemspec picks it up. clang runs as a
@@ -91,7 +150,7 @@ jobs:
       - name: Build the java gem
         env:
           RBS_PLATFORM: java
-        run: gem build rbs.gemspec -o "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+        run: gem build rbs.gemspec -o "pkg/rbs-$VERSION-java.gem"
 
       # `git ls-files` vouches for everything else, but rbs_parser.wasm is a build
       # artifact, so the java gem is the one that can come out quietly wrong.
@@ -108,8 +167,7 @@ jobs:
             raise "the java gem must not declare an extension" unless java_gem.extensions.empty?
 
             [ruby_gem, java_gem].each { puts "#{_1.full_name}: #{_1.files.size} files" }
-          ' "pkg/rbs-${{ steps.version.outputs.version }}.gem" \
-            "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+          ' "pkg/rbs-$VERSION.gem" "pkg/rbs-$VERSION-java.gem"
 
       # The checks above cannot tell whether rbs_parser.wasm actually runs. Install
       # the gem the way a user would -- jar-dependencies fetches Chicory and ASM
@@ -122,7 +180,7 @@ jobs:
           bundler: none
       - name: Check the java gem on JRuby
         run: |
-          gem install "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+          gem install "pkg/rbs-$VERSION-java.gem"
           ruby -e '
             require "rbs"
             _, _, decls = RBS::Parser.parse_signature("class Foo end")
@@ -138,27 +196,40 @@ jobs:
           bundler: none
 
       # Uploaded before publishing, so a failed push still leaves the gems behind.
+      # This is also where a dry run ends.
       - uses: actions/upload-artifact@v7
         with:
           name: gems
           path: pkg/*.gem
           if-no-files-found: error
 
-      # Everything below runs only for a release tag.
+      # Everything below runs only for a real release.
+
+      # The tag comes after the gems are known to build and run, and before anything
+      # is published: a tag can be deleted, while a version pushed to RubyGems can
+      # only be yanked. What it names was decided by the checkout rather than by the
+      # tagging, so nothing rests on it being created first.
+      - name: Tag the release
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          bundle exec rake gem:tag
+
       - name: Configure RubyGems credentials
-        if: github.ref_type == 'tag'
+        if: ${{ !inputs.dry_run }}
         # No floating major tag on this action, so the exact release is pinned.
         uses: rubygems/configure-rubygems-credentials@v2.1.0
 
       - name: Push the gems
-        if: github.ref_type == 'tag'
+        if: ${{ !inputs.dry_run }}
         run: |
-          gem push "pkg/rbs-${{ steps.version.outputs.version }}.gem"
-          gem push "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+          gem push "pkg/rbs-$VERSION.gem"
+          gem push "pkg/rbs-$VERSION-java.gem"
 
       # Last, so that a failed push never announces a release that has no gems.
       - name: Publish the GitHub release
-        if: github.ref_type == 'tag'
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: bundle exec rake gem:gh_release
