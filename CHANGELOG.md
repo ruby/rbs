@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 4.1.1.pre.1 (2026-07-30)
+
+### Library changes
+
+* Include the trailing `?` in a keyword key's symbol location ([#3043](https://github.com/ruby/rbs/pull/3043))
+* Mark `type_name` as optional on the alias annotations ([#3039](https://github.com/ruby/rbs/pull/3039))
+
+### Miscellaneous
+
+* Fix template drift for ext/rbs_extension/ast_translation.c ([#3038](https://github.com/ruby/rbs/pull/3038))
+
 ## 4.1.0 (2026-07-27)
 
 RBS 4.1 ships with JRuby support. The RBS parser is written in plain C without depending on the Ruby C API, so it is compiled to WebAssembly and runs on a Wasm runtime, with the parsed AST serialized in a binary format and decoded into RBS objects. The full test suite runs on JRuby in CI.
