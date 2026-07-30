@@ -99,6 +99,14 @@ This release also introduces `RBS::Rewriter`, an API to edit RBS source text whi
 * ci: skip Gemfile.lock BUNDLED WITH on ruby-head ([#2952](https://github.com/ruby/rbs/pull/2952))
 * Remove `logger` from sig dependencies ([#2904](https://github.com/ruby/rbs/pull/2904))
 
+## 4.0.3 (2026-06-18)
+
+### Miscellaneous
+
+* Fix Ruby CI failure with compressed `Zlib::GzipReader` test fixtures. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix flaky `DirSingletonTest#test_fchdir` and `DirSingletonTest#test_for_fd` under aggressive GC. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix Ruby head CI failure caused by the lockfile-pinned Bundler version. ([#3005](https://github.com/ruby/rbs/pull/3005))
+
 ## 4.0.2 (2026-03-25)
 
 ### Library changes
