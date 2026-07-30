@@ -839,6 +839,60 @@ namespace :gem do
     end
   end
 
+  # There are three kinds of release: `X.Y.Z`, `X.Y.Z.pre.N`, and `X.Y.Z.dev.N`. The
+  # `.dev.N` ones are cut from the development line for people who need a specific
+  # change early; they are not written up in the changelog, so there are no notes to
+  # publish and nothing worth announcing.
+  def dev_release?(version)
+    Gem::Version.new(version).segments.include?("dev")
+  end
+
+  # The body of the topmost section of CHANGELOG.md, which is the release being
+  # prepared, minus its own heading.
+  #
+  # The encoding is explicit because the default external encoding follows the
+  # locale, and the changelog is not ASCII.
+  #
+  def changelog_section(version)
+    content = File.read(File.join(__dir__, "CHANGELOG.md"), encoding: Encoding::UTF_8)
+    section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or raise "🚨 Cannot find a release section in CHANGELOG.md"
+    heading, _, body = section.partition("\n")
+    heading.include?(version) or raise "🚨 CHANGELOG.md starts with `#{heading.strip}`, which is not #{version}"
+    body.strip
+  end
+
+  desc "Check that the working tree is ready to be released as the given version"
+  task :check_release, [:version] do |_task, args|
+    version = args[:version] or raise "🚨 Pass the version being released: `rake 'gem:check_release[4.1.2]'`"
+    Gem::Version.correct?(version) or raise "🚨 `#{version}` is not a version number."
+
+    # The version being released and the version the commit declares are stated
+    # separately -- one by whoever starts the release, one by the commit itself --
+    # so that releasing the wrong commit, or releasing the right one under the wrong
+    # name, fails here rather than on RubyGems.
+    version == RBS::VERSION or
+      raise "🚨 Releasing #{version}, but this commit declares `RBS::VERSION = #{RBS::VERSION.inspect}`."
+
+    if dev_release?(version)
+      puts "✅ #{version} is the version of this commit. It is a dev release, so CHANGELOG.md is not checked."
+    else
+      changelog_section(version)
+      puts "✅ #{version} is the version of this commit, and CHANGELOG.md documents it."
+    end
+  end
+
+  desc "Create and push the `vX.Y.Z` tag for RBS::VERSION"
+  task :tag do
+    tag = "v#{RBS::VERSION}"
+
+    # Annotated, so that the tag carries its own author and date rather than
+    # borrowing the tagged commit's.
+    sh "git", "tag", "--annotate", "--message", "RBS #{RBS::VERSION}", tag
+    sh "git", "push", "origin", tag
+
+    puts "🏷️  Pushed #{tag}."
+  end
+
   desc "Publish the GitHub release for RBS::VERSION, unless it is a `.dev.` version"
   task :gh_release do
     require "open3"
@@ -847,11 +901,7 @@ namespace :gem do
     major, minor, *_ = RBS::VERSION.split(".")
     tag = "v#{RBS::VERSION}"
 
-    # There are three kinds of release: `X.Y.Z`, `X.Y.Z.pre.N`, and `X.Y.Z.dev.N`.
-    # The `.dev.N` ones are cut from the development line for people who need a
-    # specific change early; they are not written up in the changelog, so there are
-    # no notes to publish and nothing worth announcing.
-    if version.segments.include?("dev")
+    if dev_release?(RBS::VERSION)
       puts "⏭️  #{RBS::VERSION} is a dev release, so there is no GitHub release to publish."
       next
     end
@@ -861,18 +911,10 @@ namespace :gem do
     _, status = Open3.capture2("git", "rev-parse", "--verify", "--quiet", "#{tag}^{commit}")
     raise "🚨 No such tag: `#{tag}`. Tag the release before creating the GitHub release." unless status.success?
 
-    # The topmost section of the changelog is this release, minus its own heading.
-    # The encoding is explicit because the default external encoding follows the
-    # locale, and the changelog is not ASCII.
-    content = File.read(File.join(__dir__, "CHANGELOG.md"), encoding: Encoding::UTF_8)
-    section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or raise "🚨 Cannot find a release section in CHANGELOG.md"
-    heading, _, body = section.partition("\n")
-    heading.include?(RBS::VERSION) or raise "🚨 CHANGELOG.md starts with `#{heading.strip}`, which is not #{RBS::VERSION}"
-
     notes = <<~NOTES
       [Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})
 
-      #{body.strip}
+      #{changelog_section(RBS::VERSION)}
     NOTES
 
     # Published rather than drafted: the notes are the changelog section that was
