@@ -1,0 +1,397 @@
+pub mod gem_sig_resolver;
+pub mod manifest;
+
+pub use gem_sig_resolver::{GemSigResolver, NoGemSigs};
+
+use std::collections::HashSet;
+use std::fmt;
+use std::io;
+use std::path::{Path, PathBuf};
+
+use crate::ast::AstConverter;
+use crate::buffer::Buffer;
+use crate::environment::{Environment, Source, SourceKind};
+use crate::file_finder;
+use crate::gem_version::GemVersion;
+use crate::interners::Interners;
+use crate::node;
+use crate::repository::Repository;
+
+/// Errors raised while resolving and loading signature files,
+/// mirroring `RBS::EnvironmentLoader::UnknownLibraryError` and friends.
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum LoadError {
+    /// No signature directory was found for the library
+    /// (`RBS::EnvironmentLoader::UnknownLibraryError`).
+    UnknownLibrary {
+        name: String,
+        version: Option<String>,
+    },
+    /// A requested library version is not a valid `Gem::Version`, where the
+    /// Ruby implementation raises `ArgumentError`.
+    InvalidVersion {
+        name: String,
+        version: String,
+    },
+    Io {
+        path: PathBuf,
+        source: io::Error,
+    },
+    Parse {
+        path: PathBuf,
+        message: String,
+    },
+    Manifest {
+        path: PathBuf,
+        message: String,
+    },
+}
+
+impl fmt::Display for LoadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LoadError::UnknownLibrary { name, version } => write!(
+                f,
+                "Cannot find type definitions for library: {} ({})",
+                name,
+                version.as_deref().unwrap_or("[nil]")
+            ),
+            LoadError::InvalidVersion { name, version } => {
+                write!(
+                    f,
+                    "Malformed version number string {version} for library {name}"
+                )
+            }
+            LoadError::Io { path, source } => {
+                write!(f, "IO error on {}: {}", path.display(), source)
+            }
+            LoadError::Parse { path, message } => {
+                write!(f, "Syntax error in {}: {}", path.display(), message)
+            }
+            LoadError::Manifest { path, message } => {
+                write!(f, "Invalid manifest {}: {}", path.display(), message)
+            }
+        }
+    }
+}
+
+impl std::error::Error for LoadError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            LoadError::Io { source, .. } => Some(source),
+            _ => None,
+        }
+    }
+}
+
+/// A library requested by name and optional version
+/// (`RBS::EnvironmentLoader::Library` equivalent).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Library {
+    pub name: String,
+    pub version: Option<String>,
+}
+
+/// A file loaded by [`EnvironmentLoader::load`], in load order.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoadedFile {
+    pub path: PathBuf,
+    pub kind: SourceKind,
+}
+
+/// Resolves core, library, and explicit signature directories, parses every
+/// `.rbs` file exactly once, and feeds the results into an [`Environment`],
+/// mirroring `RBS::EnvironmentLoader`.
+///
+/// `Send + Sync`, because [`GemSigResolver`] is: a future parallel parse stage
+/// hands `&self` to worker threads.
+pub struct EnvironmentLoader {
+    core_root: Option<PathBuf>,
+    stdlib_root: Option<PathBuf>,
+    repository: Repository,
+    libs: Vec<Library>,
+    dirs: Vec<PathBuf>,
+    resolver: Box<dyn GemSigResolver>,
+}
+
+impl EnvironmentLoader {
+    pub fn new() -> Self {
+        EnvironmentLoader {
+            core_root: None,
+            stdlib_root: None,
+            repository: Repository::new(),
+            libs: Vec::new(),
+            dirs: Vec::new(),
+            resolver: Box::new(NoGemSigs),
+        }
+    }
+
+    /// Sets the directory containing core signatures. `None` (the default)
+    /// skips core.
+    pub fn core_root(mut self, path: Option<PathBuf>) -> Self {
+        self.core_root = path;
+        self
+    }
+
+    /// Sets the stdlib signature directory used for dependency expansion,
+    /// mirroring `Collection::Sources::Stdlib` (which Ruby pins to its
+    /// bundled `stdlib/`). Independent of [`EnvironmentLoader::repository`]:
+    /// add the same directory there to make the expanded libraries loadable.
+    pub fn stdlib_root(mut self, path: Option<PathBuf>) -> Self {
+        self.stdlib_root = path;
+        self
+    }
+
+    pub fn repository(mut self, repository: Repository) -> Self {
+        self.repository = repository;
+        self
+    }
+
+    /// Requests a library. Its `manifest.yaml` dependencies are resolved
+    /// transitively at load time.
+    pub fn add_library(mut self, name: &str, version: Option<&str>) -> Self {
+        self.libs.push(Library {
+            name: name.to_string(),
+            version: version.map(str::to_string),
+        });
+        self
+    }
+
+    /// Adds an explicit signature directory. Unlike libraries, `_`-prefixed
+    /// subdirectories are not skipped.
+    pub fn add_dir(mut self, path: PathBuf) -> Self {
+        self.dirs.push(path);
+        self
+    }
+
+    pub fn gem_sig_resolver(mut self, resolver: impl GemSigResolver + 'static) -> Self {
+        self.resolver = Box::new(resolver);
+        self
+    }
+
+    /// Loads every signature file into `env` and returns the loaded files in
+    /// load order (`RBS::EnvironmentLoader#load` equivalent).
+    ///
+    /// On `Err` the sources read before the failure are already in `env`, same
+    /// as the Ruby implementation adding sources as it walks the directories.
+    pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
+        let stdlib = self.stdlib_repository()?;
+
+        let mut loaded = Vec::new();
+        let mut seen_files: HashSet<PathBuf> = HashSet::new();
+
+        for (kind, dir, skip_hidden) in self.each_dir(&stdlib)? {
+            let files =
+                file_finder::each_file(&dir, skip_hidden).map_err(|source| LoadError::Io {
+                    path: dir.clone(),
+                    source,
+                })?;
+
+            for path in files {
+                if !seen_files.insert(path.clone()) {
+                    continue;
+                }
+                // `parse_one` is a free function so this loop can later be
+                // spread over worker threads with worker-local `Interners`;
+                // `add_source` stays in file order.
+                let source = parse_one(&path, &kind, env.interners_mut())?;
+                env.add_source(source);
+                loaded.push(LoadedFile {
+                    path,
+                    kind: kind.clone(),
+                });
+            }
+        }
+
+        Ok(loaded)
+    }
+
+    /// Resolves directories in the Ruby implementation's order:
+    /// core, then libraries (with dependencies), then explicit directories.
+    fn each_dir(&self, stdlib: &Repository) -> Result<Vec<(SourceKind, PathBuf, bool)>, LoadError> {
+        let mut result = Vec::new();
+
+        if let Some(core) = &self.core_root {
+            result.push((SourceKind::Core, core.clone(), true));
+        }
+
+        for library in self.resolved_libraries(stdlib)? {
+            let dir = self
+                .library_dir(&library)
+                .ok_or_else(|| LoadError::UnknownLibrary {
+                    name: library.name.clone(),
+                    version: library.version.clone(),
+                })?;
+            let kind = SourceKind::Library {
+                name: library.name,
+                version: library.version,
+            };
+            result.push((kind, dir, true));
+        }
+
+        for dir in &self.dirs {
+            result.push((SourceKind::Dir { path: dir.clone() }, dir.clone(), false));
+        }
+
+        Ok(result)
+    }
+
+    /// The repository backing dependency expansion, mirroring
+    /// `Collection::Sources::Stdlib`'s dedicated repository. Built from
+    /// `stdlib_root` on each load; independent of the loading repository.
+    fn stdlib_repository(&self) -> Result<Repository, LoadError> {
+        let mut repository = Repository::new();
+        if let Some(root) = &self.stdlib_root {
+            repository.add(root).map_err(|source| LoadError::Io {
+                path: root.clone(),
+                source,
+            })?;
+        }
+        Ok(repository)
+    }
+
+    /// Expands manifest dependencies depth-first in request order, matching
+    /// the Ruby implementation's insertion-ordered `Set` of libraries.
+    fn resolved_libraries(&self, stdlib: &Repository) -> Result<Vec<Library>, LoadError> {
+        let mut seen: HashSet<Library> = HashSet::new();
+        let mut result = Vec::new();
+
+        for library in &self.libs {
+            self.add_library_recursive(library.clone(), stdlib, &mut seen, &mut result)?;
+        }
+
+        // Loading core implies stringio (stdlib migration), unconditionally,
+        // same as Ruby; an unresolvable stringio is an UnknownLibrary error.
+        if self.core_root.is_some() && !seen.iter().any(|library| library.name == "stringio") {
+            let stringio = Library {
+                name: "stringio".to_string(),
+                version: None,
+            };
+            self.add_library_recursive(stringio, stdlib, &mut seen, &mut result)?;
+        }
+
+        Ok(result)
+    }
+
+    fn add_library_recursive(
+        &self,
+        library: Library,
+        stdlib: &Repository,
+        seen: &mut HashSet<Library>,
+        result: &mut Vec<Library>,
+    ) -> Result<(), LoadError> {
+        if let Some(version) = &library.version {
+            // Ruby raises ArgumentError from Gem::Version/Gem::Requirement
+            // while resolving; fail before any lookup can misinterpret it.
+            if GemVersion::parse(version).is_none() {
+                return Err(LoadError::InvalidVersion {
+                    name: library.name.clone(),
+                    version: version.clone(),
+                });
+            }
+        }
+
+        if !seen.insert(library.clone()) {
+            return Ok(());
+        }
+        result.push(library.clone());
+
+        // Mirrors Ruby's resolve_dependencies: the gem sig resolver first,
+        // then the stdlib repository. The loading repository is deliberately
+        // not consulted, so a library that only exists in a custom
+        // repository loads without dependency expansion, same as Ruby.
+        let dependency_dir = self
+            .resolver
+            .sig_path(&library.name, library.version.as_deref())
+            .or_else(|| {
+                stdlib
+                    .lookup(&library.name, library.version.as_deref())
+                    .map(Path::to_path_buf)
+            });
+        if let Some(dir) = dependency_dir {
+            for name in manifest::dependencies(&dir)? {
+                self.add_library_recursive(
+                    Library {
+                        name,
+                        version: None,
+                    },
+                    stdlib,
+                    seen,
+                    result,
+                )?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// The gem sig resolver wins over the repository, same as
+    /// `RBS::EnvironmentLoader#each_dir`.
+    fn library_dir(&self, library: &Library) -> Option<PathBuf> {
+        if let Some(path) = self
+            .resolver
+            .sig_path(&library.name, library.version.as_deref())
+        {
+            return Some(path);
+        }
+        self.repository
+            .lookup(&library.name, library.version.as_deref())
+            .map(Path::to_path_buf)
+    }
+}
+
+impl Default for EnvironmentLoader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Reads, parses, and converts a single signature file into an owned
+/// [`Source`].
+///
+/// Deliberately a free function taking only the interners, so the load loop
+/// can later be parallelised by handing each worker its own [`Interners`].
+/// The parser's `SignatureNode` holds raw pointers and is not `Send`, so it
+/// must not escape this function — only the owned `Source` does.
+///
+/// Crate-private: a caller outside the crate has no way to merge its
+/// worker-local [`Interners`] into the environment, so the `Source` it
+/// produced would carry ids that environment cannot resolve.
+pub(crate) fn parse_one(
+    path: &Path,
+    kind: &SourceKind,
+    interners: &mut Interners,
+) -> Result<Source, LoadError> {
+    let content = std::fs::read_to_string(path).map_err(|source| LoadError::Io {
+        path: path.to_path_buf(),
+        source,
+    })?;
+
+    let signature = node::parse(&content).map_err(|message| LoadError::Parse {
+        path: path.to_path_buf(),
+        message,
+    })?;
+
+    let mut converter = AstConverter::new(&mut interners.strings, &mut interners.type_names);
+    let directives = signature
+        .directives()
+        .iter()
+        .map(|node| converter.convert_directive(&node))
+        .collect();
+    let declarations = signature
+        .declarations()
+        .iter()
+        .map(|node| converter.convert_declaration(&node))
+        .collect();
+    // SignatureNode borrows `content` and has a Drop impl; drop it
+    // explicitly before moving `content` into the Buffer.
+    drop(signature);
+
+    Ok(Source {
+        buffer: Buffer::new(path.to_path_buf(), content),
+        directives,
+        declarations,
+        kind: kind.clone(),
+    })
+}
