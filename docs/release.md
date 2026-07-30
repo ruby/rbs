@@ -36,6 +36,14 @@ is what lets you dispatch the workflow.
 
 ## Steps
 
+The release pull request in step 1 is merged by a person who has reviewed it. Its merge commit is
+what step 2 dispatches, tags, and pushes to RubyGems, and none of that can be taken back — so
+prepare that pull request and stop there, rather than merging it and carrying on to step 2.
+
+The bump that starts a new minor is the only other pull request that sets `RBS::VERSION`. It
+publishes nothing and another bump undoes it, so one opened on an explicit request can go through
+on its own.
+
 ### 1. Prepare the release
 
 Open a pull request that carries everything the release needs:
@@ -142,13 +150,67 @@ Checking the `dry_run` box runs everything up to the artifact and stops — no t
 no release — which is how the build is exercised without releasing. `version` still has to match
 the commit, so a dry run is also how a release is rehearsed before it is cut.
 
-### 3. Start the next development cycle
+## The version on `master`
 
-Open another pull request setting `RBS::VERSION` to the next prerelease (`4.1.1` → `4.1.2.pre`),
-with `Gemfile.lock` regenerated, labeled `skip-changelog` like the release pull request itself.
-Without it the version on `master` keeps claiming to be the released version for the whole
-development period, and `rake gem:changelog` reads that version to decide where the next changelog
-starts.
+`RBS::VERSION` on `master` is read one of two ways, told apart by how the version ends:
+
+| On `master` | Means |
+| --- | --- |
+| `X.Y.0.dev` — a bare `.dev` | `X.Y.0` is being developed |
+| A complete version — `X.Y.Z`, `X.Y.Z.pre.N`, `X.Y.Z.dev.N` | The version *after* the one named is being developed |
+
+So `4.1.1` on `master` is not a claim that `master` is 4.1.1. It says 4.1.1 has shipped and what
+comes after it is being worked on. `4.1.2.dev.1` says the same thing about itself: that release is
+out, and the line continues towards 4.1.2.
+
+Both become true the moment the release is tagged, so **nothing has to be done to `master` after a
+release**. `4.0.1` was followed by `4.0.2` with no version change in between, and `4.1.2.dev.1` is
+what `master` carries today.
+
+The bare `X.Y.0.dev` is the exception because it is the one version that names a target rather than
+a predecessor: a new minor is developed towards `X.Y.0` for a long time, before it is known whether
+the next thing to ship is `X.Y.0.pre.1` or `X.Y.0` itself. Setting it is the only version change
+that has to be made deliberately.
+
+`rake gem:changelog` reads `RBS::VERSION` too, to decide where the next changelog starts — but the
+version is set to the one being released before the changelog is generated, so it sees that rather
+than whatever `master` was carrying.
+
+## Starting a new minor
+
+`master` is the development line of one minor at a time. Moving it from `X.Y` to `X.(Y+1)` is not
+part of any one release — it is the decision that the `X.Y` line is done, taken whenever that
+becomes true — and it is the one moment the version on `master` is changed by hand. Two changes, in
+opposite places:
+
+1. **Branch the line being left behind**, from the last `master` commit that belongs to it:
+
+   ```console
+   $ git switch --create aaa-X.Y.x <that commit>
+   $ git push -u origin aaa-X.Y.x
+   ```
+
+   Branch from the commit *before* the bump below, so the branch keeps the version its line was
+   released under. Patch releases of `X.Y` are cut from here from now on, with their changes
+   cherry-picked from `master` — see [Backports](#backports). The `aaa-` prefix carries no meaning
+   beyond sorting the release branches to the top of the branch list.
+
+2. **Bump `master`** to `X.(Y+1).0.dev`, in a pull request with `Gemfile.lock` regenerated and
+   labeled `skip-changelog` like the release pull request itself. `4.1` was started exactly this
+   way: `aaa-4.0.x` was branched at the commit before `Start 4.1 development`, which set
+   `RBS::VERSION` to `4.1.0.dev`.
+
+Two loose ends that are easy to forget:
+
+- **The release note of the new line.** `rake gem:gh_release` links every published release to
+  `https://github.com/ruby/rbs/wiki/Release-Note-X.Y`, built from the version number without
+  checking that the page is there. Nothing has to be written when the line starts — the page comes
+  together as the first release proper of the line comes into view — but it does have to exist by
+  the time that release is published, or its notes link to an empty page.
+- **Release branches that are done.** A branch is worth keeping only while its line might still
+  get a patch. The ones that exist do not cover every line that ever had one — `3.8.1` shipped and
+  there is no `aaa-3.8.x` — so this is housekeeping rather than a rule, but starting a new minor is
+  the natural moment to look at the bottom of the branch list and delete what has been superseded.
 
 ## Backports
 
@@ -170,8 +232,11 @@ that is why the 4.0.3 changelog credits its three entries to the same pull reque
 - Prereleases (`X.Y.Z.pre.N`) are only installed with `gem install rbs --pre`;
   a plain `gem install rbs` is unaffected. On JRuby, `gem install rbs [--pre]`
   resolves to the `-java` gem automatically.
-- `Dockerfile.jruby` pins the WASI SDK / Chicory / ASM versions to match the
-  `wasm`, `jruby`, and `release-gems` workflows. Keep them in sync when bumping.
+- The WASI SDK version is pinned in `wasm.yml`, `jruby.yml`, `release-gems.yml`, and
+  `Dockerfile.jruby`, each carrying its own copy. Keep them in sync when bumping. The
+  Chicory/ASM versions are not duplicated: they are the `jar` requirements in
+  `rbs.gemspec`, which is where the workflow, `Dockerfile.jruby` and `gem install` all
+  read them from.
 - `rake 'gem:check_release[X.Y.Z]'` and `rake gem:tag` are what the workflow runs to
   check the release and to create the tag. Both work locally, which is the fallback
   if the tag ever has to be created by hand.

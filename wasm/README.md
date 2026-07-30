@@ -27,6 +27,39 @@ $ rake wasm:install_jars # download the Chicory/ASM jars into ~/.m2 (run on JRub
 
 The compiled `rbs_parser.wasm` is a build artifact and is not checked in.
 
+The WASI SDK is needed for the *build*, not for running the result — the host clang already
+knows the `wasm32` target, but there is no wasm32 libc on a normal machine, so it picks up the
+host headers and fails on the first `#include`. That is what the SDK supplies, along with the
+builtins the link step needs.
+
+## Running the suite on JRuby
+
+[`Dockerfile.jruby`](../Dockerfile.jruby) builds an image that has everything this needs, so no
+JRuby, JDK or WASI SDK has to be installed to work on the JRuby side:
+
+```console
+$ docker build -f Dockerfile.jruby -t rbs-jruby .
+$ docker run --rm rbs-jruby                                  # run the test suite
+$ docker run --rm -e RBS_PLATFORM=java rbs-jruby \
+    gem build rbs.gemspec                                    # build the -java gem
+```
+
+Two things in it are not obvious:
+
+- `build-essential` is for prism, which builds `libprism.so` and loads it through FFI on JRuby
+  rather than as an MRI C extension. It needs `cc` and `make`.
+- Bundler is skipped. The development `Gemfile` pulls in CRuby-only C extensions (bigdecimal,
+  stackprof, …) that cannot build on JRuby, so the few gems the suite needs are installed
+  directly, in the same set as [`jruby.yml`](../.github/workflows/jruby.yml).
+
+The image compiles `rbs_parser.wasm` itself, which is why it carries the WASI SDK. That is not
+the only arrangement: the build needs the SDK but not JRuby, and running the suite needs JRuby
+but not the SDK, so `jruby.yml` splits them instead — it compiles the module on CRuby and then
+switches engines to test against the result.
+
+`rake wasm:install_jars` is the step that has to be on JRuby either way: it resolves the `jar`
+requirements from `rbs.gemspec` through the JVM.
+
 ## Exported functions
 
 The module is built as a "reactor": it has no `main`, and the host calls
