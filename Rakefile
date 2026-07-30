@@ -759,6 +759,57 @@ namespace :gem do
       print_changelog_json(from, paths: GEM_CHANGELOG_PATHS)
     end
   end
+
+  desc "Publish the GitHub release for RBS::VERSION, unless it is a `.dev.` version"
+  task :gh_release do
+    require "open3"
+
+    version = Gem::Version.new(RBS::VERSION)
+    major, minor, *_ = RBS::VERSION.split(".")
+    tag = "v#{RBS::VERSION}"
+
+    # There are three kinds of release: `X.Y.Z`, `X.Y.Z.pre.N`, and `X.Y.Z.dev.N`.
+    # The `.dev.N` ones are cut from the development line for people who need a
+    # specific change early; they are not written up in the changelog, so there are
+    # no notes to publish and nothing worth announcing.
+    if version.segments.include?("dev")
+      puts "⏭️  #{RBS::VERSION} is a dev release, so there is no GitHub release to publish."
+      next
+    end
+
+    # The release is created against an existing tag, so that the artifacts and the
+    # notes describe a commit that is already immutable.
+    _, status = Open3.capture2("git", "rev-parse", "--verify", "--quiet", "#{tag}^{commit}")
+    raise "🚨 No such tag: `#{tag}`. Tag the release before creating the GitHub release." unless status.success?
+
+    # The topmost section of the changelog is this release, minus its own heading.
+    # The encoding is explicit because the default external encoding follows the
+    # locale, and the changelog is not ASCII.
+    content = File.read(File.join(__dir__, "CHANGELOG.md"), encoding: Encoding::UTF_8)
+    section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or raise "🚨 Cannot find a release section in CHANGELOG.md"
+    heading, _, body = section.partition("\n")
+    heading.include?(RBS::VERSION) or raise "🚨 CHANGELOG.md starts with `#{heading.strip}`, which is not #{RBS::VERSION}"
+
+    notes = <<~NOTES
+      [Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})
+
+      #{body.strip}
+    NOTES
+
+    # Published rather than drafted: the notes are the changelog section that was
+    # already reviewed in the release pull request, so there is nothing left to edit.
+    command = [
+      "gh", "release", "create", tag,
+      "--title=#{RBS::VERSION}",
+      "--notes=#{notes}"
+    ]
+    command << "--prerelease" if version.prerelease?
+
+    output, status = Open3.capture2(*command)
+    raise "🚨 `gh release create` failed: #{status.inspect}" unless status.success?
+
+    puts "📝 Released #{tag}: #{output.chomp}"
+  end
 end
 
 desc "Compile extension without C23 extensions"
