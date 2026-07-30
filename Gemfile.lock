@@ -22,7 +22,7 @@ GIT
 PATH
   remote: .
   specs:
-    rbs (4.1.1)
+    rbs (4.1.2.dev.1)
       logger
       prism (>= 1.6.0)
       tsort
