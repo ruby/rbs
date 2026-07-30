@@ -109,12 +109,13 @@ Once the pull request is merged, dispatch
 
 The ref selector picks which copy of the workflow file runs, not what gets released — leave it on
 `master`. Everything is built from `commit`, so the run is unaffected by whatever lands on `master`
-in the meantime.
+in the meantime, and a patch release cut from a release branch is dispatched the same way as any
+other: the workflow does not care which branch the commit is on.
 
 The two inputs say the same thing twice, once as a commit and once as a name, and the run stops
 before anything is built unless they agree with each other and with the repository:
 
-- `commit` has to be a full SHA that is on `master`,
+- `commit` has to be a full SHA that some branch contains,
 - `version` has to be the `RBS::VERSION` that commit declares,
 - CHANGELOG.md has to start with a section for `version` (skipped for `.dev.N`, which is not
   written up),
@@ -174,3 +175,8 @@ that is why the 4.0.3 changelog credits its three entries to the same pull reque
 - `rake 'gem:check_release[X.Y.Z]'` and `rake gem:tag` are what the workflow runs to
   check the release and to create the tag. Both work locally, which is the fallback
   if the tag ever has to be created by hand.
+- Those two tasks and `rake gem:gh_release` come from the Rakefile of the commit
+  being released, not from the branch the workflow was dispatched from. Releasing
+  from a release branch (`aaa-X.Y.x`) therefore needs the release tooling on that
+  branch as well; without it the run fails on the missing task, before publishing
+  anything.

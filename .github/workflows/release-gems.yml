@@ -66,12 +66,10 @@ jobs:
       COMMIT: ${{ inputs.commit }}
       VERSION: ${{ inputs.version }}
       TAG: v${{ inputs.version }}
-      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
       # The gemspec takes its file list from `git ls-files`, so both gems are built
       # from the committed state -- of the dispatched commit, since that is what is
-      # checked out. The full history is needed to tell whether it is on the default
-      # branch.
+      # checked out. The full history is needed to tell which branches contain it.
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.commit }}
@@ -91,13 +89,18 @@ jobs:
             exit 1
           fi
 
-          # A release is cut from the default branch. Anywhere else means the commit
-          # is not the one that was reviewed and merged.
-          git fetch --no-tags origin "$DEFAULT_BRANCH"
-          if ! git merge-base --is-ancestor "$COMMIT" FETCH_HEAD; then
-            echo "::error::$COMMIT is not on $DEFAULT_BRANCH."
+          # A release proper is cut from the default branch, while a patch release can
+          # be cut from a release branch, so which branch the commit is on is not this
+          # workflow's business. That it is on one is: a commit no branch contains is
+          # one that nothing in the repository leads to any more.
+          git fetch --no-tags origin "+refs/heads/*:refs/remotes/origin/*"
+          branches=$(git branch --remotes --contains "$COMMIT" --format "%(refname:lstrip=3)")
+          if [ -z "$branches" ]; then
+            echo "::error::$COMMIT is not on any branch."
             exit 1
           fi
+          echo "Branches containing $COMMIT:"
+          printf '%s\n' "$branches"
 
       # A tag that already exists is a version that has already been released, and
       # pushing it would fail after the build rather than before it.
