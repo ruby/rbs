@@ -36,6 +36,11 @@ is what lets you dispatch the workflow.
 
 ## Steps
 
+Every pull request that changes `RBS::VERSION` is merged by a person who has reviewed it — the
+release itself, the bump that starts the next cycle, and the one that starts a new minor alike.
+This is deliberately not automatic: prepare the pull request and stop there. Do not merge a version
+bump and carry on to the next step on your own.
+
 ### 1. Prepare the release
 
 Open a pull request that carries everything the release needs:
@@ -144,11 +149,63 @@ the commit, so a dry run is also how a release is rehearsed before it is cut.
 
 ### 3. Start the next development cycle
 
-Open another pull request setting `RBS::VERSION` to the next prerelease (`4.1.1` → `4.1.2.pre`),
+The version on `master` names the release being worked towards, not the one that just shipped. A
+prerelease already does that — after `4.1.1.dev.1` is cut, `master` saying `4.1.1.dev.1` still
+means "on the way to 4.1.1", and the next release pull request bumps it — so `X.Y.Z.pre.N` and
+`X.Y.Z.dev.N` leave nothing to do here.
+
+A release proper does not: left alone, every commit after `4.1.1` claims to be `4.1.1` for the
+whole development period. So open another pull request setting `RBS::VERSION` to `X.Y.(Z+1).pre`,
 with `Gemfile.lock` regenerated, labeled `skip-changelog` like the release pull request itself.
-Without it the version on `master` keeps claiming to be the released version for the whole
-development period, and `rake gem:changelog` reads that version to decide where the next changelog
-starts.
+`4.1.0` → `4.1.1.pre` is the usual shape. The bare `.pre` is not a version that ships: the numbered
+`X.Y.Z.pre.N` and `X.Y.Z.dev.N` are the ones released, while `X.Y.Z.pre` only ever lives on
+`master`.
+
+`rake gem:changelog` reads `RBS::VERSION` too, to decide where the next changelog starts, but the
+version is bumped before the changelog is generated — so that follows from this bump rather than
+driving it.
+
+None of this has to be its own pull request. A short patch cycle can leave `master` on the released
+version and let the next release carry the bump, which is what `4.0.1` → `4.0.2` did two days
+later.
+
+If the line just released is not the one being continued, the bump belongs to
+[Starting a new minor](#starting-a-new-minor) instead.
+
+## Starting a new minor
+
+`master` is the development line of one minor at a time. Moving it from `X.Y` to `X.(Y+1)` is not
+part of any one release — it is the decision that the `X.Y` line is done, taken whenever that
+becomes true, and it is two changes in opposite places:
+
+1. **Branch the line being left behind**, from the last `master` commit that belongs to it:
+
+   ```console
+   $ git switch --create aaa-X.Y.x <that commit>
+   $ git push -u origin aaa-X.Y.x
+   ```
+
+   Branch from the commit *before* the bump below, so the branch keeps the version its line was
+   released under. Patch releases of `X.Y` are cut from here from now on, with their changes
+   cherry-picked from `master` — see [Backports](#backports). The `aaa-` prefix carries no meaning
+   beyond sorting the release branches to the top of the branch list.
+
+2. **Bump `master`** to `X.(Y+1).0.dev`, in a pull request with `Gemfile.lock` regenerated and
+   labeled `skip-changelog`, as in step 3 above. `4.1` was started exactly this way: `aaa-4.0.x`
+   was branched at the commit before `Start 4.1 development`, which set `RBS::VERSION` to
+   `4.1.0.dev`.
+
+Two loose ends that are easy to forget:
+
+- **The release note of the new line.** `rake gem:gh_release` links every published release to
+  `https://github.com/ruby/rbs/wiki/Release-Note-X.Y`, built from the version number without
+  checking that the page is there. Nothing has to be written when the line starts — the page comes
+  together as the first release proper of the line comes into view — but it does have to exist by
+  the time that release is published, or its notes link to an empty page.
+- **Release branches that are done.** A branch is worth keeping only while its line might still
+  get a patch. The ones that exist do not cover every line that ever had one — `3.8.1` shipped and
+  there is no `aaa-3.8.x` — so this is housekeeping rather than a rule, but starting a new minor is
+  the natural moment to look at the bottom of the branch list and delete what has been superseded.
 
 ## Backports
 
