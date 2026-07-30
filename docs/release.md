@@ -28,7 +28,12 @@ Open a pull request that carries everything the release needs:
 - `lib/rbs/version.rb` — set `RBS::VERSION` to the version being released.
 - `Gemfile.lock` — run `bundle install` after the bump; the lockfile records the version too, and
   `rake release` refuses to run with a dirty working tree.
-- `CHANGELOG.md` — add a section for the new version.
+- `CHANGELOG.md` — add a section for the new version, directly under the `# CHANGELOG` heading.
+  Sections are newest first.
+
+Label the pull request `skip-changelog`. It carries no change of its own, and without the label it
+shows up in the next release's list — that is why 4.1.0's changelog contains a `Version 4.1.0`
+entry.
 
 `rake gem:changelog` lists the pull requests merged since the last release, already formatted:
 
@@ -118,9 +123,10 @@ $ docker run --rm -v "$PWD/pkg:/pkg" -w /tmp rbs-jruby bash -c \
 ### 4. Start the next development cycle
 
 Open another pull request setting `RBS::VERSION` to the next prerelease (`4.1.1` → `4.1.2.pre`),
-with `Gemfile.lock` regenerated. Without it the version on `master` keeps claiming to be the
-released version for the whole development period — and, while the milestone check is in place,
-pull requests are checked against the released version's milestone.
+with `Gemfile.lock` regenerated, labeled `skip-changelog` like the release pull request itself.
+Without it the version on `master` keeps claiming to be the released version for the whole
+development period — and, while the milestone check is in place, pull requests are checked against
+the released version's milestone.
 
 ## Notes
 
