@@ -1,0 +1,164 @@
+name: Release gems
+
+# Builds, publishes, and announces a release. Dispatch it against the `vX.Y.Z` tag
+# of the release: the tag is created first so that everything published afterwards
+# traces back to an immutable ref, and so the reversible step comes before the
+# irreversible one.
+#
+# Dispatching against a branch builds and verifies the gems and stops there, which
+# is how the build is exercised without releasing anything.
+#
+# | Gem                  | Platform      | Parser                           |
+# | -------------------- | ------------- | -------------------------------- |
+# | `rbs-X.Y.Z.gem`      | `ruby` (MRI)  | C extension, compiled on install |
+# | `rbs-X.Y.Z-java.gem` | `java` (JRuby)| `rbs_parser.wasm`, prebuilt here |
+#
+# See docs/release.md. The `java` gem is built on CRuby: the platform comes from
+# `RBS_PLATFORM`, not from the engine running `gem build`. JRuby is only needed to
+# run the result, which the workflow does before it would publish anything.
+#
+# One job on purpose. Tagging, pushing the gems, and opening the GitHub release
+# all belong to a single release, and keeping them in one place keeps their order
+# readable -- the tag is created before anything is published, so the reversible
+# step comes before the irreversible one.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with .github/workflows/wasm.yml and .github/workflows/jruby.yml.
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # publish the GitHub release
+      id-token: write # trusted publishing to RubyGems
+    steps:
+      # The gemspec takes its file list from `git ls-files`, so both gems are built
+      # from the committed state.
+      - uses: actions/checkout@v7
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+
+      - name: Read the version
+        id: version
+        run: echo "version=$(ruby -e 'load "lib/rbs/version.rb"; print RBS::VERSION')" >> "$GITHUB_OUTPUT"
+
+      # Fail before spending a minute on the build, and before anything is pushed:
+      # the tag is what the release is named after, so it has to be the version the
+      # tagged commit actually declares.
+      - name: Check the tag against RBS::VERSION
+        if: github.ref_type == 'tag'
+        run: |
+          if [ "${{ github.ref_name }}" != "v${{ steps.version.outputs.version }}" ]; then
+            echo "::error::tag ${{ github.ref_name }} does not match RBS::VERSION ${{ steps.version.outputs.version }}"
+            exit 1
+          fi
+
+      - name: Build the ruby gem
+        run: |
+          mkdir -p pkg
+          gem build rbs.gemspec -o "pkg/rbs-${{ steps.version.outputs.version }}.gem"
+
+      # `rake wasm:jruby_setup` compiles src/**/*.c to WebAssembly and copies the
+      # result to lib/rbs/wasm/, where the gemspec picks it up. clang runs as a
+      # subprocess, so this works on CRuby.
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Build rbs_parser.wasm
+        run: bundle exec rake wasm:jruby_setup
+
+      - name: Build the java gem
+        env:
+          RBS_PLATFORM: java
+        run: gem build rbs.gemspec -o "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+
+      # `git ls-files` vouches for everything else, but rbs_parser.wasm is a build
+      # artifact, so the java gem is the one that can come out quietly wrong.
+      - name: Check the built gems
+        run: |
+          ruby -rrubygems/package -e '
+            ruby_gem, java_gem = ARGV.map { Gem::Package.new(_1).spec }
+
+            raise "unexpected platform: #{ruby_gem.platform}" unless ruby_gem.platform.to_s == "ruby"
+            raise "the C extension is not declared" if ruby_gem.extensions.empty?
+
+            raise "unexpected platform: #{java_gem.platform}" unless java_gem.platform.to_s == "java"
+            raise "rbs_parser.wasm is missing" unless java_gem.files.include?("lib/rbs/wasm/rbs_parser.wasm")
+            raise "the java gem must not declare an extension" unless java_gem.extensions.empty?
+
+            [ruby_gem, java_gem].each { puts "#{_1.full_name}: #{_1.files.size} files" }
+          ' "pkg/rbs-${{ steps.version.outputs.version }}.gem" \
+            "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+
+      # The checks above cannot tell whether rbs_parser.wasm actually runs. Install
+      # the gem the way a user would -- jar-dependencies fetches Chicory and ASM
+      # from Maven during the install -- and parse something with it, so the
+      # WebAssembly runtime is exercised end to end before anything is published.
+      - name: Set up JRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby
+          bundler: none
+      - name: Check the java gem on JRuby
+        run: |
+          gem install "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+          ruby -e '
+            require "rbs"
+            _, _, decls = RBS::Parser.parse_signature("class Foo end")
+            names = decls.map { _1.name.to_s }
+            raise "parsed #{names.inspect}, expected [\"Foo\"]" unless names == ["Foo"]
+            puts "#{RUBY_ENGINE} #{RUBY_VERSION}: rbs #{RBS::VERSION} parses through the WebAssembly runtime"
+          '
+
+      - name: Switch back to CRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+
+      # Uploaded before publishing, so a failed push still leaves the gems behind.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gems
+          path: pkg/*.gem
+          if-no-files-found: error
+
+      # Everything below runs only for a release tag.
+      - name: Configure RubyGems credentials
+        if: github.ref_type == 'tag'
+        # No floating major tag on this action, so the exact release is pinned.
+        uses: rubygems/configure-rubygems-credentials@v2.1.0
+
+      - name: Push the gems
+        if: github.ref_type == 'tag'
+        run: |
+          gem push "pkg/rbs-${{ steps.version.outputs.version }}.gem"
+          gem push "pkg/rbs-${{ steps.version.outputs.version }}-java.gem"
+
+      # Last, so that a failed push never announces a release that has no gems.
+      - name: Publish the GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bundle exec rake gem:gh_release
