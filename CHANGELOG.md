@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 4.1.1.pre.1 (2026-07-30)
+## 4.1.1 (2026-07-30)
 
 ### Library changes
 
