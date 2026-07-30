@@ -511,9 +511,9 @@ CHANGELOG_SKIP_LABELS = ["skip-changelog"]
 # Resolves the commit-ish the changelog starts from.
 #
 # `version` is a version number, a tag, or any commit-ish. When it is omitted, the latest tag
-# matching `tag_glob` is used.
+# matching `tag_glob` is used, skipping the ones matching `exclude_globs`.
 #
-def resolve_changelog_base(version, tag_glob:)
+def resolve_changelog_base(version, tag_glob:, exclude_globs: [])
   require "open3"
 
   from =
@@ -521,7 +521,10 @@ def resolve_changelog_base(version, tag_glob:)
       # `4.1.0` and `v4.1.0` both mean the tag `v4.1.0`, while `master` or a SHA is used as is.
       version.match?(/\A\d/) ? "v#{version}" : version
     else
-      output, status = Open3.capture2("git", "describe", "--tags", "--match", tag_glob, "--abbrev=0")
+      command = ["git", "describe", "--tags", "--match", tag_glob, "--abbrev=0"]
+      exclude_globs.each { |glob| command.push("--exclude", glob) }
+
+      output, status = Open3.capture2(*command)
       raise "🚨 Cannot detect the latest tag matching `#{tag_glob}`. Give the previous version explicitly." unless status.success?
       output.chomp
     end
@@ -746,17 +749,33 @@ namespace :gem do
   # A constant defined in a `namespace` block is a top-level constant, so it needs the prefix.
   GEM_CHANGELOG_PATHS = [".", ":(exclude)rust"]
 
-  desc "Generate changelog template from GH pull requests merged after the given version (defaults to the latest tag)"
+  # The tags a release proper starts *after*, rather than at.
+  GEM_PRERELEASE_TAGS = ["v*.pre*", "v*.dev*"]
+
+  # Where the changelog of the release being prepared starts, derived from `RBS::VERSION`:
+  #
+  # * `X.Y.Z.pre.N` documents what changed since `X.Y.Z.pre.N-1`, so it starts from the latest tag.
+  # * `X.Y.Z` documents the whole cycle, the prereleases included, so it skips the prerelease tags
+  #   in between and starts from the previous release proper.
+  #
+  # This is the step that is easy to get wrong by hand: on a release proper the latest tag is a
+  # prerelease, so the obvious default would produce only the tail of the cycle. Passing a version
+  # explicitly overrides all of it.
+  #
+  def changelog_base(version)
+    excluded = Gem::Version.new(RBS::VERSION).prerelease? ? [] : GEM_PRERELEASE_TAGS
+    resolve_changelog_base(version, tag_glob: "v*", exclude_globs: excluded)
+  end
+
+  desc "Generate changelog template from GH pull requests merged since the previous release"
   task :changelog, [:version] do |_task, args|
-    from = resolve_changelog_base(args[:version], tag_glob: "v*")
-    print_changelog(from, paths: GEM_CHANGELOG_PATHS)
+    print_changelog(changelog_base(args[:version]), paths: GEM_CHANGELOG_PATHS)
   end
 
   namespace :changelog do
     desc "Print the pull requests of `gem:changelog` as JSON, with the changed files and body of each"
     task :json, [:version] do |_task, args|
-      from = resolve_changelog_base(args[:version], tag_glob: "v*")
-      print_changelog_json(from, paths: GEM_CHANGELOG_PATHS)
+      print_changelog_json(changelog_base(args[:version]), paths: GEM_CHANGELOG_PATHS)
     end
   end
 end
