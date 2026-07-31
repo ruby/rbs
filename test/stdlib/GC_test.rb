@@ -44,12 +44,12 @@ class GCSingletonTest < Test::Unit::TestCase
   end
 
   def test_enable
-    was_enabled = GC.enable
+    was_disabled = GC.enable
 
     assert_send_type  '() -> bool',
                       GC, :enable
   ensure
-    GC.disable unless was_enabled
+    GC.disable if was_disabled
   end
 
   def test_start
