@@ -1,0 +1,235 @@
+name: Release gems
+
+# Builds, publishes, and announces a release. Dispatch it with the commit being
+# released and the version that commit declares.
+#
+# Everything is built from `commit`, not from wherever the default branch happens to
+# be when the run starts, so the release describes a state that is already immutable.
+# `version` is the same fact stated a second time -- the run stops before anything is
+# built unless it matches the `RBS::VERSION` of that commit, so dispatching the wrong
+# commit, or the right one under the wrong name, is a failed run rather than a gem
+# that has to be yanked.
+#
+# `dry_run` builds and checks both gems and stops before the tag, which is how the
+# build is exercised without releasing anything.
+#
+# | Gem                  | Platform      | Parser                           |
+# | -------------------- | ------------- | -------------------------------- |
+# | `rbs-X.Y.Z.gem`      | `ruby` (MRI)  | C extension, compiled on install |
+# | `rbs-X.Y.Z-java.gem` | `java` (JRuby)| `rbs_parser.wasm`, prebuilt here |
+#
+# See docs/release.md. The `java` gem is built on CRuby: the platform comes from
+# `RBS_PLATFORM`, not from the engine running `gem build`. JRuby is only needed to
+# run the result, which the workflow does before it would publish anything.
+#
+# One job on purpose. Tagging, pushing the gems, and opening the GitHub release
+# all belong to a single release, and keeping them in one place keeps their order
+# readable -- the tag is created once both gems are known to build and run, and
+# before anything is published, so the reversible step comes before the irreversible
+# one.
+#
+# The file name is what the RubyGems trusted publisher for `rbs` is registered
+# against, so it cannot be renamed without registering the new name first.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit to release, as a full 40-character SHA"
+        required: true
+      version:
+        description: "Version to release, without the leading `v` (e.g. `4.1.2`)"
+        required: true
+      dry_run:
+        description: "Build and check the gems without tagging or publishing anything"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with .github/workflows/wasm.yml and .github/workflows/jruby.yml.
+  WASI_SDK_VERSION: "33"
+  WASI_SDK_RELEASE: "33.0"
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the tag, publish the GitHub release
+      id-token: write # trusted publishing to RubyGems
+    env:
+      # The inputs are read through the environment rather than interpolated into
+      # the scripts below.
+      COMMIT: ${{ inputs.commit }}
+      VERSION: ${{ inputs.version }}
+      TAG: v${{ inputs.version }}
+    steps:
+      # The gemspec takes its file list from `git ls-files`, so both gems are built
+      # from the committed state -- of the dispatched commit, since that is what is
+      # checked out. The full history is needed to tell which branches contain it.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.commit }}
+          fetch-depth: 0
+
+      # Before anything is installed or built: these are the two things the release
+      # is named after and built from, and a mistake in either is cheapest to catch
+      # here.
+      - name: Check the inputs
+        run: |
+          if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::\`$COMMIT\` is not a full 40-character SHA. A release names one exact commit."
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9][0-9a-zA-Z.]*$ ]]; then
+            echo "::error::\`$VERSION\` is not a version number. Pass it without the leading \`v\`."
+            exit 1
+          fi
+
+          # A release proper is cut from the default branch, while a patch release can
+          # be cut from a release branch, so which branch the commit is on is not this
+          # workflow's business. That it is on one is: a commit no branch contains is
+          # one that nothing in the repository leads to any more.
+          git fetch --no-tags origin "+refs/heads/*:refs/remotes/origin/*"
+          branches=$(git branch --remotes --contains "$COMMIT" --format "%(refname:lstrip=3)")
+          if [ -z "$branches" ]; then
+            echo "::error::$COMMIT is not on any branch."
+            exit 1
+          fi
+          echo "Branches containing $COMMIT:"
+          printf '%s\n' "$branches"
+
+      # A tag that already exists is a version that has already been released, and
+      # pushing it would fail after the build rather than before it.
+      - name: Check that the tag does not exist
+        if: ${{ !inputs.dry_run }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null; then
+            echo "::error::$TAG already exists, so $VERSION has been released."
+            exit 1
+          fi
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+
+      # Fails before a minute is spent on the build, and before anything is pushed:
+      # the version has to be the one the released commit declares, and -- unless
+      # this is a `.dev.N` release -- the one CHANGELOG.md is written up for.
+      - name: Check the version and the changelog
+        run: bundle exec rake "gem:check_release[$VERSION]"
+
+      - name: Build the ruby gem
+        run: |
+          mkdir -p pkg
+          gem build rbs.gemspec -o "pkg/rbs-$VERSION.gem"
+
+      # `rake wasm:jruby_setup` compiles src/**/*.c to WebAssembly and copies the
+      # result to lib/rbs/wasm/, where the gemspec picks it up. clang runs as a
+      # subprocess, so this works on CRuby.
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$HOME/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$HOME/wasi-sdk"
+          echo "WASI_SDK_PATH=$HOME/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Build rbs_parser.wasm
+        run: bundle exec rake wasm:jruby_setup
+
+      - name: Build the java gem
+        env:
+          RBS_PLATFORM: java
+        run: gem build rbs.gemspec -o "pkg/rbs-$VERSION-java.gem"
+
+      # `git ls-files` vouches for everything else, but rbs_parser.wasm is a build
+      # artifact, so the java gem is the one that can come out quietly wrong.
+      - name: Check the built gems
+        run: |
+          ruby -rrubygems/package -e '
+            ruby_gem, java_gem = ARGV.map { Gem::Package.new(_1).spec }
+
+            raise "unexpected platform: #{ruby_gem.platform}" unless ruby_gem.platform.to_s == "ruby"
+            raise "the C extension is not declared" if ruby_gem.extensions.empty?
+
+            raise "unexpected platform: #{java_gem.platform}" unless java_gem.platform.to_s == "java"
+            raise "rbs_parser.wasm is missing" unless java_gem.files.include?("lib/rbs/wasm/rbs_parser.wasm")
+            raise "the java gem must not declare an extension" unless java_gem.extensions.empty?
+
+            [ruby_gem, java_gem].each { puts "#{_1.full_name}: #{_1.files.size} files" }
+          ' "pkg/rbs-$VERSION.gem" "pkg/rbs-$VERSION-java.gem"
+
+      # The checks above cannot tell whether rbs_parser.wasm actually runs. Install
+      # the gem the way a user would -- jar-dependencies fetches Chicory and ASM
+      # from Maven during the install -- and parse something with it, so the
+      # WebAssembly runtime is exercised end to end before anything is published.
+      - name: Set up JRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: jruby
+          bundler: none
+      - name: Check the java gem on JRuby
+        run: |
+          gem install "pkg/rbs-$VERSION-java.gem"
+          ruby -e '
+            require "rbs"
+            _, _, decls = RBS::Parser.parse_signature("class Foo end")
+            names = decls.map { _1.name.to_s }
+            raise "parsed #{names.inspect}, expected [\"Foo\"]" unless names == ["Foo"]
+            puts "#{RUBY_ENGINE} #{RUBY_VERSION}: rbs #{RBS::VERSION} parses through the WebAssembly runtime"
+          '
+
+      - name: Switch back to CRuby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler: none
+
+      # Uploaded before publishing, so a failed push still leaves the gems behind.
+      # This is also where a dry run ends.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gems
+          path: pkg/*.gem
+          if-no-files-found: error
+
+      # Everything below runs only for a real release.
+
+      # The tag comes after the gems are known to build and run, and before anything
+      # is published: a tag can be deleted, while a version pushed to RubyGems can
+      # only be yanked. What it names was decided by the checkout rather than by the
+      # tagging, so nothing rests on it being created first.
+      - name: Tag the release
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          bundle exec rake gem:tag
+
+      - name: Configure RubyGems credentials
+        if: ${{ !inputs.dry_run }}
+        # No floating major tag on this action, so the exact release is pinned.
+        uses: rubygems/configure-rubygems-credentials@v2.1.0
+
+      - name: Push the gems
+        if: ${{ !inputs.dry_run }}
+        run: |
+          gem push "pkg/rbs-$VERSION.gem"
+          gem push "pkg/rbs-$VERSION-java.gem"
+
+      # Last, so that a failed push never announces a release that has no gems.
+      - name: Publish the GitHub release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bundle exec rake gem:gh_release

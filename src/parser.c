@@ -405,18 +405,21 @@ NODISCARD
 static bool parse_keyword_key(rbs_parser_t *parser, rbs_ast_symbol_t **key) {
     rbs_parser_advance(parser);
 
-    rbs_location_range symbol_range = rbs_location_range_current_token(parser);
+    rbs_range_t symbol_range = parser->current_token.range;
 
     if (parser->next_token.type == pQUESTION) {
+        // The `?` is part of the key, so it is part of the location too.
+        symbol_range.end = parser->next_token.range.end;
+
         *key = rbs_ast_symbol_new(
             ALLOCATOR(),
-            symbol_range,
+            RBS_RANGE_LEX2AST(symbol_range),
             &parser->constant_pool,
             intern_token_start_end(parser, parser->current_token, parser->next_token)
         );
         rbs_parser_advance(parser);
     } else {
-        *key = rbs_ast_symbol_new(ALLOCATOR(), symbol_range, &parser->constant_pool, INTERN_TOKEN(parser, parser->current_token));
+        *key = rbs_ast_symbol_new(ALLOCATOR(), RBS_RANGE_LEX2AST(symbol_range), &parser->constant_pool, INTERN_TOKEN(parser, parser->current_token));
     }
 
     return true;

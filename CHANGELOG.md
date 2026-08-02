@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 4.1.1 (2026-07-30)
+
+### Library changes
+
+* Include the trailing `?` in a keyword key's symbol location ([#3043](https://github.com/ruby/rbs/pull/3043))
+* Mark `type_name` as optional on the alias annotations ([#3039](https://github.com/ruby/rbs/pull/3039))
+
+### Miscellaneous
+
+* Fix template drift for ext/rbs_extension/ast_translation.c ([#3038](https://github.com/ruby/rbs/pull/3038))
+
 ## 4.1.0 (2026-07-27)
 
 RBS 4.1 ships with JRuby support. The RBS parser is written in plain C without depending on the Ruby C API, so it is compiled to WebAssembly and runs on a Wasm runtime, with the parsed AST serialized in a binary format and decoded into RBS objects. The full test suite runs on JRuby in CI.
@@ -87,6 +98,14 @@ This release also introduces `RBS::Rewriter`, an API to edit RBS source text whi
 * Update docs/inline.md to match current inline parser behavior ([#2953](https://github.com/ruby/rbs/pull/2953))
 * ci: skip Gemfile.lock BUNDLED WITH on ruby-head ([#2952](https://github.com/ruby/rbs/pull/2952))
 * Remove `logger` from sig dependencies ([#2904](https://github.com/ruby/rbs/pull/2904))
+
+## 4.0.3 (2026-06-18)
+
+### Miscellaneous
+
+* Fix Ruby CI failure with compressed `Zlib::GzipReader` test fixtures. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix flaky `DirSingletonTest#test_fchdir` and `DirSingletonTest#test_for_fd` under aggressive GC. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix Ruby head CI failure caused by the lockfile-pinned Bundler version. ([#3005](https://github.com/ruby/rbs/pull/3005))
 
 ## 4.0.2 (2026-03-25)
 

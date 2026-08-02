@@ -21,4 +21,4 @@ updates:
     schedule:
       interval: 'weekly'
     labels:
-      - 'no-milestone'
+      - 'skip-changelog'
