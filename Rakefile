@@ -926,6 +926,12 @@ namespace :wasm do
 
   desc "Build the RBS parser as a WebAssembly module (requires WASI_SDK_PATH)"
   task :build do
+    # `-DNDEBUG` compiles out `RBS_ASSERT`, the same way ext/rbs_extension does
+    # for the MRI extension. The assertions sit in the lexer and the constant
+    # pool, so keeping them costs about 20% of parse time; set `DEBUG=1` to keep
+    # them when debugging the module itself.
+    debug_flags = ENV["DEBUG"] ? [] : ["-DNDEBUG"]
+
     mkdir_p WASM_DIR
     sh wasi_clang,
        "--target=wasm32-wasip1",
@@ -933,6 +939,7 @@ namespace :wasm do
        "-mexec-model=reactor",
        "-std=gnu11",
        "-O2",
+       *debug_flags,
        "-Wno-unused-parameter",
        "-I#{File.join(__dir__, "include")}",
        "-o", WASM_OUTPUT,
