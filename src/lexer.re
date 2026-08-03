@@ -16,7 +16,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       re2c:define:YYRESTORE = "*lexer = backup;";
       re2c:yyfill:enable  = 0;
 
-      word = [a-zA-Z0-9_];
+      ident_char = [a-zA-Z0-9_];
 
       operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
@@ -116,7 +116,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":" dqstring { return rbs_next_token(lexer, tDQSYMBOL); }
       ":" sqstring { return rbs_next_token(lexer, tSQSYMBOL); }
 
-      identifier = [a-zA-Z_] word* [!?=]?;
+      identifier = [a-zA-Z_] ident_char* [!?=]?;
       symbol_opr = ":|" | ":&" | ":/" | ":%" | ":~" | ":`" | ":^"
                  | ":==" | ":=~" | ":===" | ":!" | ":!=" | ":!~"
                  | ":<" | ":<=" | ":<<" | ":<=>" | ":>" | ":>=" | ":>>"
@@ -133,16 +133,16 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":$" global_ident  { return rbs_next_token(lexer, tSYMBOL); }
       symbol_opr         { return rbs_next_token(lexer, tSYMBOL); }
 
-      [a-z] word*           { return rbs_next_token(lexer, tLIDENT); }
-      [A-Z] word*           { return rbs_next_token(lexer, tUIDENT); }
-      "_" [a-z0-9_] word*   { return rbs_next_token(lexer, tULLIDENT); }
-      "_" [A-Z] word*       { return rbs_next_token(lexer, tULIDENT); }
-      "_"                   { return rbs_next_token(lexer, tULLIDENT); }
-      [a-zA-Z_] word* "!"   { return rbs_next_token(lexer, tBANGIDENT); }
-      [a-zA-Z_] word* "="   { return rbs_next_token(lexer, tEQIDENT); }
+      [a-z] ident_char*          { return rbs_next_token(lexer, tLIDENT); }
+      [A-Z] ident_char*          { return rbs_next_token(lexer, tUIDENT); }
+      "_" [a-z0-9_] ident_char*  { return rbs_next_token(lexer, tULLIDENT); }
+      "_" [A-Z] ident_char*      { return rbs_next_token(lexer, tULIDENT); }
+      "_"                        { return rbs_next_token(lexer, tULLIDENT); }
+      [a-zA-Z_] ident_char* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
+      [a-zA-Z_] ident_char* "="  { return rbs_next_token(lexer, tEQIDENT); }
 
-      "@" [a-zA-Z_] word*   { return rbs_next_token(lexer, tAIDENT); }
-      "@@" [a-zA-Z_] word*  { return rbs_next_token(lexer, tA2IDENT); }
+      "@" [a-zA-Z_] ident_char*  { return rbs_next_token(lexer, tAIDENT); }
+      "@@" [a-zA-Z_] ident_char* { return rbs_next_token(lexer, tA2IDENT); }
 
       "$" global_ident      { return rbs_next_token(lexer, tGIDENT); }
 
