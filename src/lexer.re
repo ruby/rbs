@@ -24,6 +24,12 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       // which is how a non-ASCII character gets in.
       ident_char = . \ ([\x00-\x7F] \ [a-zA-Z0-9_]) \ [\uFFFD];
 
+      // An ASCII digit cannot lead an identifier, but a non-ASCII one can --
+      // Ruby accepts a name made of full-width digits. Since `rbs_next_char`
+      // never reports a non-ASCII character as `[0-9]`, subtracting the ASCII
+      // digits from `ident_char` is the whole of that rule.
+      ident_start = ident_char \ [0-9];
+
       operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
 
@@ -122,7 +128,6 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":" dqstring { return rbs_next_token(lexer, tDQSYMBOL); }
       ":" sqstring { return rbs_next_token(lexer, tSQSYMBOL); }
 
-      identifier = [a-zA-Z_] ident_char* [!?=]?;
       symbol_opr = ":|" | ":&" | ":/" | ":%" | ":~" | ":`" | ":^"
                  | ":==" | ":=~" | ":===" | ":!" | ":!=" | ":!~"
                  | ":<" | ":<=" | ":<<" | ":<=>" | ":>" | ":>=" | ":>>"
@@ -133,11 +138,9 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
                    | [~*$?!@\\/;,.=:<>"&'`+]
                    | [^ \t\r\n:;=.,!"$%&()-+~|\\'[\]{}*/<>^\x00]+;
 
-      ":" identifier     { return rbs_next_token(lexer, tSYMBOL); }
-      ":@" identifier    { return rbs_next_token(lexer, tSYMBOL); }
-      ":@@" identifier   { return rbs_next_token(lexer, tSYMBOL); }
-      ":$" global_ident  { return rbs_next_token(lexer, tSYMBOL); }
-      symbol_opr         { return rbs_next_token(lexer, tSYMBOL); }
+      ":" "@"{0,2} ident_start ident_char* [!?=]?  { return rbs_next_token(lexer, tSYMBOL); }
+      ":$" global_ident                            { return rbs_next_token(lexer, tSYMBOL); }
+      symbol_opr                                   { return rbs_next_token(lexer, tSYMBOL); }
 
       [a-z] ident_char*          { return rbs_next_token(lexer, tLIDENT); }
       [A-Z] ident_char*          { return rbs_next_token(lexer, tUIDENT); }
