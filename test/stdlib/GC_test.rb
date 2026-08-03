@@ -76,6 +76,10 @@ class GCSingletonTest < Test::Unit::TestCase
 
   def test_stress_and_stress=
     old_stress = GC.stress
+    # Stress mode runs a full GC on every allocation, and the assertions below allocate
+    # heavily while parsing and type checking. Only the types of the return values matter
+    # here, so keep GC disabled and let stress mode stay inert.
+    was_disabled = GC.disable
 
     assert_send_type  '() -> (Integer | bool)',
                       GC, :stress
@@ -92,6 +96,7 @@ class GCSingletonTest < Test::Unit::TestCase
     end
   ensure
     GC.stress = old_stress
+    GC.enable unless was_disabled
   end
 
   def test_total_time
