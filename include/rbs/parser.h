@@ -80,7 +80,7 @@ void rbs_parser_push_typevar_table(rbs_parser_t *parser, bool reset);
 /**
  * Insert new type variable into the latest table.
  * */
-NODISCARD bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
+RBS_NODISCARD bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_id_t id);
 
 /**
  * Allocate new rbs_lexer_t object.
