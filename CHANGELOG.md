@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.1.2 (2026-08-03)
+
+### Miscellaneous
+
+* Keep GC disabled during GC_test#test_stress_and_stress= ([#3061](https://github.com/ruby/rbs/pull/3061))
+* Fix GC_test#test_enable leaving GC disabled for the rest of the suite ([#3059](https://github.com/ruby/rbs/pull/3059))
+
 ## 4.1.1 (2026-07-30)
 
 ### Library changes
