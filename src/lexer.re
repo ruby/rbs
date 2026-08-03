@@ -147,11 +147,14 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "_" [a-z0-9_] ident_char*  { return rbs_next_token(lexer, tULLIDENT); }
       "_" [A-Z] ident_char*      { return rbs_next_token(lexer, tULIDENT); }
       "_"                        { return rbs_next_token(lexer, tULLIDENT); }
-      [a-zA-Z_] ident_char* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
-      [a-zA-Z_] ident_char* "="  { return rbs_next_token(lexer, tEQIDENT); }
 
-      "@" [a-zA-Z_] ident_char*  { return rbs_next_token(lexer, tAIDENT); }
-      "@@" [a-zA-Z_] ident_char* { return rbs_next_token(lexer, tA2IDENT); }
+      // None of these four needs to know the case of the first character, so
+      // widening the leading position to `ident_start` is all they need.
+      ident_start ident_char* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
+      ident_start ident_char* "="  { return rbs_next_token(lexer, tEQIDENT); }
+
+      "@" ident_start ident_char*  { return rbs_next_token(lexer, tAIDENT); }
+      "@@" ident_start ident_char* { return rbs_next_token(lexer, tA2IDENT); }
 
       "$" global_ident      { return rbs_next_token(lexer, tGIDENT); }
 
