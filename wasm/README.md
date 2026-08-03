@@ -27,6 +27,11 @@ $ rake wasm:install_jars # download the Chicory/ASM jars into ~/.m2 (run on JRub
 
 The compiled `rbs_parser.wasm` is a build artifact and is not checked in.
 
+Like the MRI extension, the module is compiled with `-DNDEBUG`, which removes the
+`RBS_ASSERT` checks — they sit in the lexer and the constant pool, so leaving them
+in costs around 20% of parse time. `DEBUG=1 rake wasm:build` keeps them, which is
+what you want when debugging the parser itself through the module.
+
 The WASI SDK is needed for the *build*, not for running the result — the host clang already
 knows the `wasm32` target, but there is no wasm32 libc on a normal machine, so it picks up the
 host headers and fails on the first `#include`. That is what the SDK supplies, along with the
