@@ -69,9 +69,9 @@
  **********************************************************************************************************************/
 
 #if defined(_MSC_VER)
-#define NODISCARD _Check_return_
+#define RBS_NODISCARD _Check_return_
 #else
-#define NODISCARD __attribute__((warn_unused_result))
+#define RBS_NODISCARD __attribute__((warn_unused_result))
 #endif
 
 /**
