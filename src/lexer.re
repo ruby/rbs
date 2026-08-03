@@ -16,7 +16,13 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       re2c:define:YYRESTORE = "*lexer = backup;";
       re2c:yyfill:enable  = 0;
 
-      ident_char = [a-zA-Z0-9_];
+      // Ruby's rule for what an identifier is made of is `ISALNUM(c) ||
+      // (c) == '_' || !ISASCII(c)`, so define the class by what it leaves
+      // out: every ASCII character that is not a word character, and the
+      // sentinel `rbs_next_char` reports for a byte that is invalid under
+      // the active encoding. Everything else can appear in an identifier,
+      // which is how a non-ASCII character gets in.
+      ident_char = . \ ([\x00-\x7F] \ [a-zA-Z0-9_]) \ [\uFFFD];
 
       operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
