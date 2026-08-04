@@ -124,6 +124,7 @@ typedef struct {
     rbs_hash_t *required_keywords;
     rbs_hash_t *optional_keywords;
     rbs_node_t *rest_keywords;
+    rbs_node_t *forwarding;
 } method_params;
 
 /**
@@ -487,10 +488,12 @@ static bool parser_advance_if(rbs_parser_t *parser, enum RBSTokenType type) {
 /*
   params ::= {} `)`
            | {} `?` `)`               -- Untyped function params (assign params.required = nil)
+           | {} `...` `)`             -- Forwarding params
            | <required_params> `)`
            | <required_params> `,` `)`
 
   required_params ::= {} function_param `,` <required_params>
+                    | {} function_param `,` `...`
                     | {} <function_param>
                     | {} <optional_params>
 
@@ -514,7 +517,7 @@ static bool parser_advance_if(rbs_parser_t *parser, enum RBSTokenType type) {
              | {} `**` <function_param>
 */
 RBS_NODISCARD
-static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_allowed, bool classish_allowed) {
+static bool parse_params(rbs_parser_t *parser, method_params *params, bool forwarding_allowed, bool self_allowed, bool classish_allowed) {
     if (parser->next_token.type == pQUESTION && parser->next_token2.type == pRPAREN) {
         params->required_positionals = NULL;
         rbs_parser_advance(parser);
@@ -537,6 +540,19 @@ static bool parse_params(rbs_parser_t *parser, method_params *params, bool self_
         case pRPAREN:
             goto EOP;
 
+        case pDOT3: {
+            if (!forwarding_allowed) {
+                rbs_parser_set_error(parser, parser->next_token, true, "forwarding parameter is not allowed in this context");
+                return false;
+            }
+
+            rbs_parser_advance(parser);
+            params->forwarding = (rbs_node_t *) rbs_types_function_forwarding_param_new(
+                ALLOCATOR(),
+                rbs_location_range_current_token(parser)
+            );
+            goto EOP;
+        }
         default:
             if (is_keyword(parser)) {
                 goto PARSE_KEYWORDS;
@@ -713,6 +729,7 @@ static void initialize_method_params(method_params *params, rbs_allocator_t *all
         .required_keywords = rbs_hash_new(allocator),
         .optional_keywords = rbs_hash_new(allocator),
         .rest_keywords = NULL,
+        .forwarding = NULL,
     };
 }
 
@@ -749,7 +766,7 @@ typedef struct {
              | {} self_type_binding? `->` <optional>
 */
 RBS_NODISCARD
-static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool block_allowed, parse_function_result **result, bool self_allowed, bool classish_allowed) {
+static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool block_allowed, bool forwarding_allowed, parse_function_result **result, bool self_allowed, bool classish_allowed) {
     rbs_node_t *function = NULL;
     rbs_types_block_t *block = NULL;
     rbs_node_t *function_self_type = NULL;
@@ -761,7 +778,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool 
 
     if (parser->next_token.type == pLPAREN) {
         rbs_parser_advance(parser);
-        CHECK_PARSE(parse_params(parser, &params, self_allowed, classish_allowed));
+        CHECK_PARSE(parse_params(parser, &params, forwarding_allowed, self_allowed, classish_allowed));
         ADVANCE_ASSERT(parser, pRPAREN);
     }
 
@@ -779,8 +796,14 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool 
 
     bool required = true;
     rbs_range_t block_range;
+    bool has_block = parser->next_token.type == pLBRACE || (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE);
 
-    if (!block_allowed && (parser->next_token.type == pLBRACE || (parser->next_token.type == pQUESTION && parser->next_token2.type == pLBRACE))) {
+    if (params.forwarding && has_block) {
+        rbs_parser_set_error(parser, parser->next_token, true, "method type with forwarding parameter cannot have block");
+        return false;
+    }
+
+    if (!block_allowed && has_block) {
         rbs_parser_set_error(parser, parser->next_token, true, "block is not allowed in this context");
         return false;
     }
@@ -802,7 +825,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool 
 
         if (parser->next_token.type == pLPAREN) {
             rbs_parser_advance(parser);
-            CHECK_PARSE(parse_params(parser, &block_params, self_allowed, classish_allowed));
+            CHECK_PARSE(parse_params(parser, &block_params, false, self_allowed, classish_allowed));
             ADVANCE_ASSERT(parser, pRPAREN);
         }
 
@@ -831,6 +854,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool 
                 block_params.required_keywords,
                 block_params.optional_keywords,
                 block_params.rest_keywords,
+                block_params.forwarding,
                 block_return_type
             );
         }
@@ -856,6 +880,7 @@ static bool parse_function(rbs_parser_t *parser, bool accept_type_binding, bool 
             params.required_keywords,
             params.optional_keywords,
             params.rest_keywords,
+            params.forwarding,
             type
         );
     }
@@ -873,7 +898,7 @@ RBS_NODISCARD
 static bool parse_proc_type(rbs_parser_t *parser, rbs_types_proc_t **proc, bool self_allowed, bool classish_allowed) {
     rbs_position_t start = parser->current_token.range.start;
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, true, true, &result, self_allowed, classish_allowed));
+    CHECK_PARSE(parse_function(parser, true, true, false, &result, self_allowed, classish_allowed));
 
     rbs_position_t end = parser->current_token.range.end;
     rbs_location_range range = { .start_char = start.char_pos, .start_byte = start.byte_pos, .end_char = end.char_pos, .end_byte = end.byte_pos };
@@ -1605,7 +1630,7 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
     type_range.start = parser->next_token.range.start;
 
     parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-    CHECK_PARSE(parse_function(parser, false, true, &result, true, classish_allowed));
+    CHECK_PARSE(parse_function(parser, false, true, true, &result, true, classish_allowed));
 
     CHECK_PARSE(parser_pop_typevar_table(parser));
 
@@ -4021,7 +4046,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             type_range.start = parser->next_token.range.start;
 
             parse_function_result *result = rbs_allocator_alloc(ALLOCATOR(), parse_function_result);
-            if (!parse_function(parser, true, false, &result, true, true)) {
+            if (!parse_function(parser, true, false, false, &result, true, true)) {
                 return false;
             }
 

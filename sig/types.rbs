@@ -385,6 +385,12 @@ module RBS
                     | -> Enumerator[t, Param]
       end
 
+      class ForwardingParam
+        attr_reader location: Location?
+
+        def initialize: (location: Location) -> void
+      end
+
       attr_reader required_positionals: Array[Param]
       attr_reader optional_positionals: Array[Param]
       attr_reader rest_positionals: Param?
@@ -392,6 +398,7 @@ module RBS
       attr_reader required_keywords: Hash[Symbol, Param]
       attr_reader optional_keywords: Hash[Symbol, Param]
       attr_reader rest_keywords: Param?
+      attr_reader forwarding: ForwardingParam?
       attr_reader return_type: t
 
       def initialize: (required_positionals: Array[Param],
@@ -401,7 +408,8 @@ module RBS
                        required_keywords: Hash[Symbol, Param],
                        optional_keywords: Hash[Symbol, Param],
                        rest_keywords: Param?,
-                       return_type: t) -> void
+                       return_type: t,
+                       ?forwarding: ForwardingParam?) -> void
 
       def free_variables: (?Set[Symbol]) -> Set[Symbol]
 
@@ -431,9 +439,11 @@ module RBS
                    ?required_keywords: Hash[Symbol, Param],
                    ?optional_keywords: Hash[Symbol, Param],
                    ?rest_keywords: Param?,
+                   ?forwarding: ForwardingParam?,
                    ?return_type: t) -> Function
 
       def empty?: () -> bool
+      def forwarding?: () -> bool
 
       def param_to_s: () -> String
       def return_to_s: () -> String

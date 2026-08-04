@@ -109,6 +109,7 @@ class RBS::WASM::SerializationTest < Test::Unit::TestCase
       "(Integer) -> String",
       "[T] (T) -> T",
       "(Integer, ?String, *Symbol, foo: bool, ?bar: Integer, **untyped) -> void",
+      "(String message, ...) -> void",
       "() { (Integer) -> void } -> bool",
       "() ?{ () -> void } -> void",
       "[A, B < Comparable[A]] (A) -> B",
