@@ -177,9 +177,22 @@ module RBS
 
         return if with_super_classes.size <= 1
 
+        entry_param_names = entry.type_params.map(&:name)
+
         super_types = with_super_classes.map do |decl|
           super_class = decl.super_class or raise
-          Types::ClassInstance.new(name: super_class.name, args: super_class.args, location: nil)
+          args = super_class.args
+
+          decl_param_names = decl.type_params.map(&:name)
+          unless decl_param_names == entry_param_names || args.empty?
+            align_params = Substitution.build(
+              decl_param_names,
+              entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
+            )
+            args = args.map {|type| type.sub(align_params) }
+          end
+
+          Types::ClassInstance.new(name: super_class.name, args: args, location: nil)
         end
 
         super_types.uniq!

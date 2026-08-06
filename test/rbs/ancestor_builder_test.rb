@@ -452,6 +452,45 @@ end
     end
   end
 
+  def test_instance_ancestors_super_class_validation_renamed_params
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Base[T]
+end
+
+class A[X] < Base[X]
+end
+
+class B[X] < Base[X]
+end
+
+class B[Y] < Base[Integer]
+end
+      EOF
+
+      manager.files.merge!(Pathname("foo2.rbs") => <<-EOF)
+class A[Y] < Base[Y]
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        # ::A is valid: the declarations declare the same superclass modulo type parameter renaming.
+        builder.one_instance_ancestors(type_name("::A")).tap do |a|
+          assert_equal Ancestor::Instance.new(name: type_name("::Base"), args: [parse_type("X", variables: [:X])], source: :super),
+                       a.super_class
+        end
+
+        # ::B is invalid: the superclass args are different.
+        error = assert_raises SuperclassMismatchError do
+          builder.one_instance_ancestors(type_name("::B"))
+        end
+        assert_equal error.name, type_name("::B")
+      end
+    end
+  end
+
   def test_singleton_ancestors
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
