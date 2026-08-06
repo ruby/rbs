@@ -70,7 +70,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "%a|" [^|\x00]* "|"  { return rbs_next_token(lexer, tANNOTATION); }
       "%a<" [^>\x00]* ">"  { return rbs_next_token(lexer, tANNOTATION); }
 
-      "#" (. \ [\x00\uFFFD])*    {
+      "#" (. \ [\x00\r\uFFFD])*    {
         return rbs_next_token(
           lexer,
           lexer->first_token_of_line ? tLINECOMMENT : tCOMMENT
