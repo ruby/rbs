@@ -1030,6 +1030,36 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
   end
 
+  def test__lex_crlf
+    content = "# LineComment\r\nclass Foo[T < Integer] < Bar # Comment\r\nend\r\n"
+    tokens = RBS::Parser._lex(buffer(content), content.length)
+    assert_equal [:tLINECOMMENT, '# LineComment', 0...13], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 13...14], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 14...15], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kCLASS, 'class', 15...20], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 20...21], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Foo', 21...24], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLBRACKET, '[', 24...25], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'T', 25...26], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 26...27], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 27...28], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 28...29], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Integer', 29...36], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pRBRACKET, ']', 36...37], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 37...38], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 38...39], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 39...40], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Bar', 40...43], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 43...44], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tCOMMENT, '# Comment', 44...53], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 53...54], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 54...55], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kEND, 'end', 55...58], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 58...59], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 59...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pEOF, '', 60...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+  end
+
   def test_invalid_position_range_raises
     # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
     assert_raises(ArgumentError) do
