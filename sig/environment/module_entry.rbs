@@ -44,6 +44,15 @@ module RBS
       #
       def validate_type_params: () -> void
 
+      # Returns the self types of the declarations
+      #
+      # The type variables in the self types are aligned to `#type_params`,
+      # so that the self types from declarations with different type parameter
+      # names can be compared and used with `#type_params`.
+      #
+      # Note that the returned objects may be different from the ones in the
+      # declarations, but `#location` points to the original declaration.
+      #
       def self_types: () -> Array[AST::Declarations::Module::Self]
     end
   end

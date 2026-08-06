@@ -316,6 +316,51 @@ EOF
     end
   end
 
+  def test_module_self_type_type_param_alignment
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+interface _Animal[T]
+  def bark: () -> T
+end
+
+module Foo[A] : _Animal[A]
+end
+
+module Foo[B] : _Animal[B]
+end
+
+module Foo[C] : _Animal[Integer]
+end
+EOF
+
+    Environment.new.tap do |env|
+      decls.each do |decl|
+        env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
+      end
+
+      foo = env.class_decls[type_name("::Foo")]
+
+      assert_equal [:A], foo.type_params.map(&:name)
+
+      # Self types are aligned to the primary declaration's type parameters, and
+      # `_Animal[A]` and `_Animal[B]` are deduplicated
+      assert_equal [
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("_Animal"),
+                       args: [RBS::Types::Variable.new(name: :A, location: nil)],
+                       location: nil
+                     ),
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("_Animal"),
+                       args: [RBS::Types::ClassInstance.new(name: type_name("Integer"), args: [], location: nil)],
+                       location: nil
+                     ),
+                   ], foo.self_types
+
+      # The locations of the self types point to the original declarations
+      assert_equal ["_Animal[A]", "_Animal[Integer]"], foo.self_types.map {|self_type| self_type.location&.source }
+    end
+  end
+
   def test_absolute_type
     env = Environment.new
 

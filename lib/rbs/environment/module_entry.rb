@@ -41,8 +41,31 @@ module RBS
       end
 
       def self_types
+        params = type_params
+        param_names = params.map(&:name)
+
         each_decl.flat_map do |decl|
-          decl.self_types
+          self_types = decl.self_types
+          decl_param_names = decl.type_params.map(&:name)
+
+          if self_types.empty? || decl_param_names == param_names
+            self_types
+          else
+            # The declaration uses different type parameter names from the primary declaration.
+            # Rename the type variables in the self types, so that they are aligned to `#type_params`.
+            subst = Substitution.build(
+              decl_param_names,
+              params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
+            )
+
+            self_types.map do |self_type|
+              AST::Declarations::Module::Self.new(
+                name: self_type.name,
+                args: self_type.args.map {|type| type.sub(subst) },
+                location: self_type.location
+              )
+            end
+          end
         end.uniq
       end
 

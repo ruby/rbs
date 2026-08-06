@@ -141,6 +141,51 @@ EOF
     end
   end
 
+  def test_one_ancestors_module_self_types_type_param_alignment
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("a.rbs")] = <<EOF
+interface _EachItem[out T]
+end
+
+interface _FooItem[out T]
+end
+
+module M[out A] : _EachItem[A]
+end
+EOF
+      manager.files[Pathname("b.rbs")] = <<EOF
+module M[out B] : _EachItem[B], _FooItem[Array[B]]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::M")).tap do |a|
+          assert_equal type_name("::M"), a.type_name
+          assert_equal [:A], a.params
+
+          # Type parameters in self types are renamed to the primary declaration's type parameters,
+          # and `_EachItem[A]`/`_EachItem[B]` are deduplicated
+          assert_equal [
+                         Ancestor::Instance.new(name: type_name("::_EachItem"), args: [parse_type("A", variables: [:A])], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_FooItem"), args: [parse_type("::Array[A]", variables: [:A])], source: nil)
+                       ],
+                       a.self_types
+
+          # The source of each self type keeps pointing to the original declaration
+          a.self_types or raise
+          a.self_types.each do |self_type|
+            source = self_type.source
+            assert_instance_of AST::Declarations::Module::Self, source
+            location = source.location or raise
+            expected_file = source.name == type_name("::_FooItem") ? "b.rbs" : "a.rbs"
+            assert_equal expected_file, Pathname(location.buffer.name).basename.to_s
+          end
+        end
+      end
+    end
+  end
+
   def test_one_ancestors_module_no_self_type
     SignatureManager.new(system_builtin: true) do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
