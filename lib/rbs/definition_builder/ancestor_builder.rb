@@ -177,18 +177,11 @@ module RBS
 
         return if with_super_classes.size <= 1
 
-        entry_param_names = entry.type_params.map(&:name)
-
         super_types = with_super_classes.map do |decl|
           super_class = decl.super_class or raise
           args = super_class.args
 
-          decl_param_names = decl.type_params.map(&:name)
-          unless decl_param_names == entry_param_names || args.empty?
-            align_params = Substitution.build(
-              decl_param_names,
-              entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
-            )
+          if align_params = entry.align_params(decl)
             args = args.map {|type| type.sub(align_params) }
           end
 
@@ -486,10 +479,7 @@ module RBS
 
       def mixin_ancestors(entry, type_name, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         entry.each_decl do |decl|
-          align_params = Substitution.build(
-            decl.type_params.each.map(&:name),
-            entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
-          )
+          align_params = entry.align_params(decl)
 
           mixin_ancestors0(decl,
                            type_name,

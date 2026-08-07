@@ -45,6 +45,12 @@ module RBS
       # * Raises `GenericParameterMismatchError` if incompatible declaration is detected.
       #
       def validate_type_params: () -> void
+
+      # Returns a substitution that renames the type parameters of the declaration to the entry's type parameters (`#type_params`)
+      #
+      # Returns `nil` if the declaration uses the same type parameter names as `#type_params`.
+      #
+      def align_params: (declaration | ModuleEntry::declaration) -> Substitution?
     end
   end
 end

@@ -54,6 +54,12 @@ module RBS
       # declarations, but `#location` points to the original declaration.
       #
       def self_types: () -> Array[AST::Declarations::Module::Self]
+
+      # Returns a substitution that renames the type parameters of the declaration to the entry's type parameters (`#type_params`)
+      #
+      # Returns `nil` if the declaration uses the same type parameter names as `#type_params`.
+      #
+      def align_params: (declaration | ClassEntry::declaration) -> Substitution?
     end
   end
 end

@@ -124,10 +124,13 @@ module RBS
       end
 
       entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
-      args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
 
       entry.each_decl do |decl|
-        subst_ = subst + Substitution.build(decl.type_params.each.map(&:name), args)
+        if align_params = entry.align_params(decl)
+          subst_ = subst + align_params
+        else
+          subst_ = subst
+        end
 
         decl.members.each do |member|
           case member

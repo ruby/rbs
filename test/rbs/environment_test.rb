@@ -361,6 +361,30 @@ EOF
     end
   end
 
+  def test_module_entry_align_params
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+module Foo[A, B]
+end
+
+module Foo[X, Y]
+end
+EOF
+
+    Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
+      entry << [nil, decls[0]]
+      entry << [nil, decls[1]]
+
+      # Aligned to the primary declaration's names, so no substitution is needed
+      assert_nil entry.align_params(decls[0])
+
+      entry.align_params(decls[1]).tap do |subst|
+        subst or raise
+        assert_equal RBS::Types::Variable.new(name: :A, location: nil), subst[RBS::Types::Variable.new(name: :X, location: nil)]
+        assert_equal RBS::Types::Variable.new(name: :B, location: nil), subst[RBS::Types::Variable.new(name: :Y, location: nil)]
+      end
+    end
+  end
+
   def test_absolute_type
     env = Environment.new
 
