@@ -375,6 +375,36 @@ EOF
     end
   end
 
+  def test_build_instance_module_self_types_type_param_alignment
+    SignatureManager.new do |manager|
+      manager.files[Pathname("a.rbs")] = <<EOF
+interface _Reader[T]
+  def read: () -> T
+end
+
+module M[A] : _Reader[A]
+end
+EOF
+      manager.files[Pathname("b.rbs")] = <<EOF
+module M[B] : _Reader[B]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_instance_of Definition, definition
+          assert_equal type_name("::M"), definition.type_name
+          assert_equal [:A], definition.type_params
+
+          # The self type from `b.rbs` is aligned to the primary declaration's type parameters
+          assert_equal Set[:read], Set.new(definition.methods.keys)
+          assert_method_definition definition.methods[:read], ["() -> A"], accessibility: :public
+        end
+      end
+    end
+  end
+
   def test_build_instance_class_basic_object
     SignatureManager.new do |manager|
       manager.build do |env|
