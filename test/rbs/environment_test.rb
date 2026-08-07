@@ -368,6 +368,9 @@ end
 
 module Foo[X, Y]
 end
+
+module Foo[X]
+end
 EOF
 
     Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
@@ -381,6 +384,16 @@ EOF
         subst or raise
         assert_equal RBS::Types::Variable.new(name: :A, location: nil), subst[RBS::Types::Variable.new(name: :X, location: nil)]
         assert_equal RBS::Types::Variable.new(name: :B, location: nil), subst[RBS::Types::Variable.new(name: :Y, location: nil)]
+      end
+    end
+
+    Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
+      entry << [nil, decls[0]]
+      entry << [nil, decls[2]]
+
+      # The type params validation runs before the alignment, so the arity mismatch is detected first
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.align_params(decls[2])
       end
     end
   end
