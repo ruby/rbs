@@ -325,15 +325,11 @@ namespace :generate do
     class TestTemplateBuilder
       attr_reader :target, :env
 
-      def initialize(target)
+      def initialize(target, paths:)
         @target = target
 
         loader = RBS::EnvironmentLoader.new
-        Dir['stdlib/*'].each do |lib|
-          next if lib.end_with?('builtin')
-
-          loader.add(library: File.basename(lib))
-        end
+        paths.each { loader.add(path: Pathname(_1)) }
         @env = RBS::Environment.from_loader(loader).resolve_type_names
       end
 
@@ -425,7 +421,7 @@ namespace :generate do
       end
     end
 
-    path.write TestTemplateBuilder.new(target).call
+    path.write TestTemplateBuilder.new(target, paths: args.extras).call
 
     puts "Created: #{path}"
   end
@@ -436,6 +432,8 @@ task :test_generate_stdlib do
   sh "ruby -c /tmp/Array_test.rb"
   sh "RBS_GENERATE_TEST_PATH=/tmp/Thread_Mutex_test.rb rake 'generate:stdlib_test[Thread::Mutex]'"
   sh "ruby -c /tmp/Thread_Mutex_test.rb"
+  sh "RBS_GENERATE_TEST_PATH=/tmp/Kconv_test.rb rake 'generate:stdlib_test[Kconv,stdlib/nkf/0,stdlib/kconv/0]'"
+  sh "ruby -c /tmp/Kconv_test.rb"
 end
 
 # Pull requests with one of these labels are omitted from the changelog.
