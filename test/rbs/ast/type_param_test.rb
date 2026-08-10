@@ -66,4 +66,28 @@ class RBS::AST::TypeParamTest < Test::Unit::TestCase
       assert_equal ["::Integer", "::Array[::Integer]", "::Array[::Array[::Integer]]"], args.map(&:to_s)
     end
   end
+
+  def test_rename
+    params = [
+      TypeParam.new(name: :A, variance: :covariant, upper_bound: nil, lower_bound: nil, location: nil),
+      TypeParam.new(
+        name: :B,
+        variance: :invariant,
+        upper_bound: parse_type("::Array[A]"),
+        lower_bound: nil,
+        default_type: parse_type("::Hash[A, B]"),
+        location: nil
+      ).unchecked!
+    ]
+
+    TypeParam.rename(params, new_names: [:X, :Y]).tap do |renamed|
+      assert_equal [:X, :Y], renamed.map(&:name)
+      assert_equal :covariant, renamed[0].variance
+      assert_equal :invariant, renamed[1].variance
+      assert_predicate renamed[1], :unchecked?
+
+      assert_equal parse_type("::Array[X]", variables: [:X]), renamed[1].upper_bound_type
+      assert_equal parse_type("::Hash[X, Y]", variables: [:X, :Y]), renamed[1].default_type
+    end
+  end
 end
