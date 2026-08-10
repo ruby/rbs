@@ -1065,6 +1065,119 @@ class RBS::ParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_non_ascii_identifiers
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class ServicioÚltimaVez
+        end
+
+        module MiMódulo
+          MI_CONSTANTE_Ñ: Integer
+          def enviar_últimas_interacciones: () -> void
+          def 日本語: () -> void
+          def únicos!: () -> void
+
+          def con_parametros: (Integer 引数, キーワード: String) -> void
+
+          @日本語: Integer
+          @@クラス変数: Integer
+
+          attr_reader nombre_único: String
+        end
+      RBS
+
+      assert_equal RBS::TypeName.parse("ServicioÚltimaVez"), decls[0].name
+      assert_equal RBS::TypeName.parse("MiMódulo"), decls[1].name
+
+      module_members = decls[1].members
+      assert_equal RBS::TypeName.parse("MI_CONSTANTE_Ñ"), module_members[0].name
+      assert_equal :enviar_últimas_interacciones, module_members[1].name
+      assert_equal :日本語, module_members[2].name
+      assert_equal :"únicos!", module_members[3].name
+
+      function = module_members[4].overloads[0].method_type.type
+      assert_equal :引数, function.required_positionals[0].name
+      assert_equal :キーワード, function.required_keywords.keys[0]
+
+      assert_equal :@日本語, module_members[5].name
+      assert_equal :@@クラス変数, module_members[6].name
+      assert_equal :nombre_único, module_members[7].name
+    end
+
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Unicós
+          def foo: () -> void
+        end
+
+        type nombre_único = Integer
+
+        $グローバル: Integer
+      RBS
+
+      assert_equal RBS::TypeName.parse("_Unicós"), decls[0].name
+      assert_equal RBS::TypeName.parse("nombre_único"), decls[1].name
+      assert_equal :$グローバル, decls[2].name
+    end
+  end
+
+  def test_type_name_must_start_with_ascii
+    # RBS reads the case of the first character to tell a class name from an
+    # interface name from an alias name, and outside ASCII there is no reading
+    # of it that both the lexer and `TypeName#kind` can agree on. So the first
+    # character of a name in one of those positions has to be ASCII. Ruby asks
+    # for no such thing -- every one of these opens a constant or a local
+    # variable there -- and this is where RBS takes less than Ruby gives.
+    ["日本語", "Ωmega", "ǅFoo"].each do |name|
+      [
+        "class #{name}\nend\n",
+        "module #{name}\nend\n",
+        "interface _#{name}\nend\n",
+        "type #{name} = Integer\n",
+        "#{name}: Integer\n",
+        "class Foo[#{name}]\nend\n",
+        "class Foo\n  def f: () -> #{name}\nend\n",
+      ].each do |source|
+        assert_raises(RBS::ParsingError, source) do
+          RBS::Parser.parse_signature(buffer(source))
+        end
+      end
+    end
+  end
+
+  def test_non_ascii_identifier_in_single_byte_encoding
+    # In ISO-8859-1 this is one byte: `A` with a grave accent is 0xC0. The rule
+    # is about the character being outside ASCII, not about it taking more than
+    # one byte, so a single-byte encoding reaches it the same way.
+    inside = "class Abc\xC0\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(inside))
+    assert_equal "Abc\xC0".b, decls[0].name.name.to_s.b
+
+    leading = "class \xC0bc\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer(leading))
+    end
+
+    method_name = "class Foo\n  def \xC0bc: () -> void\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(method_name))
+    assert_equal "\xC0bc".b, decls[0].members[0].name.to_s.b
+  end
+
+  def test_high_byte_in_ascii_8bit_is_an_identifier
+    # Every byte is a character in ASCII-8BIT, and Ruby takes any non-ASCII one
+    # into an identifier: `\x80abc = 1` assigns a local variable there. None of
+    # those bytes is ASCII, so a name may not open with one.
+    source = "class \x80 end".dup.force_encoding(Encoding::ASCII_8BIT)
+    assert_equal :tNONASCIIIDENT, RBS::Parser.lex(source).value[2].type
+
+    method_name = "class Foo\n  def \x80abc: () -> void\nend\n".dup.force_encoding(Encoding::ASCII_8BIT)
+    _, _, decls = RBS::Parser.parse_signature(buffer(method_name))
+    assert_equal "\x80abc".b, decls[0].members[0].name.to_s.b
+
+    alias_decl = "type \x80abc = Integer\n".dup.force_encoding(Encoding::ASCII_8BIT)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer(alias_decl))
+    end
+  end
+
   def test_utf8_replacement_character_in_comment_parses
     # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
     # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the

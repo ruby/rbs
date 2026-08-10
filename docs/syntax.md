@@ -48,6 +48,18 @@ _proc_ ::= `^` _parameters?_ _self-type-binding?_ _block?_ `->` _type_
          | `^` `(` `?` `)` `->` _type_                                   # Proc type with untyped parameter
 ```
 
+`\w` above, and everywhere else in this document, is `[a-zA-Z0-9_]` together
+with every character outside ASCII -- the same set Ruby takes into an
+identifier. So `ServicioÚltimaVez` is a class name and `nombre_único` is an
+alias name.
+
+The leading character is the exception. RBS reads it to tell a class name from
+an interface name from an alias name, so where it makes that distinction it has
+to be ASCII: `class 日本語` is a class in Ruby but not a name RBS can write.
+Nowhere else is restricted -- a method name, a variable name, an instance
+variable name and a class variable name may all open with any character Ruby
+accepts.
+
 ### Class instance type
 
 Class instance type denotes _an instance of a class_.
