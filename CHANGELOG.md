@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 4.1.3 (2026-08-10)
+
+### Miscellaneous
+
+* Don't use Clang nullability qualifiers in strict ISO C mode ([#3074](https://github.com/ruby/rbs/pull/3074), Backported in [#3075](https://github.com/ruby/rbs/pull/3075))
+* Avoid eagerly inspecting call traces in type assertions ([#3073](https://github.com/ruby/rbs/pull/3073), Backported in [#3076](https://github.com/ruby/rbs/pull/3076))
+
 ## 4.1.2 (2026-08-03)
 
 ### Miscellaneous
