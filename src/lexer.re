@@ -148,6 +148,17 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "_" [A-Z] ident_char*      { return rbs_next_token(lexer, tULIDENT); }
       "_"                        { return rbs_next_token(lexer, tULLIDENT); }
 
+      // Every ASCII spelling is covered by one of the rules above, which match
+      // exactly as far, and re2c settles a tie of equal length in favour of the
+      // rule written first. So this one is left with the names that open with a
+      // character outside ASCII.
+      //
+      // RBS reads the case of that character to tell a class name from an alias
+      // name, and outside ASCII there is no reading of it that both the lexer
+      // and `TypeName#kind` can agree on. Those names get a token of their own
+      // and the parser takes it only where the question does not come up.
+      ident_start ident_char* { return rbs_next_token(lexer, tNONASCIIIDENT); }
+
       // None of these four needs to know the case of the first character, so
       // widening the leading position to `ident_start` is all they need.
       ident_start ident_char* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
