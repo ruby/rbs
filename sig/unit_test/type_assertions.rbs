@@ -30,11 +30,11 @@ module RBS
       type target_type = Types::ClassInstance | Types::ClassSingleton
 
       interface _BaseAssertions
-        def assert: (untyped, ?String?) -> void
+        def assert: (untyped, ?(String | ^() -> String)?) -> void
 
         def refute: (untyped, ?String?) -> void
 
-        def assert_empty: (untyped, ?String?) -> void
+        def assert_empty: (untyped, ?(String | ^() -> String)?) -> void
 
         def assert_operator: (untyped, Symbol, *untyped) -> void
 
