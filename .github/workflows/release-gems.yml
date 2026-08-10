@@ -70,7 +70,7 @@ jobs:
       # The gemspec takes its file list from `git ls-files`, so both gems are built
       # from the committed state -- of the dispatched commit, since that is what is
       # checked out. The full history is needed to tell which branches contain it.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.commit }}
           fetch-depth: 0
@@ -113,7 +113,7 @@ jobs:
           fi
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
@@ -174,7 +174,7 @@ jobs:
       # from Maven during the install -- and parse something with it, so the
       # WebAssembly runtime is exercised end to end before anything is published.
       - name: Set up JRuby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: jruby
           bundler: none
@@ -190,14 +190,14 @@ jobs:
           '
 
       - name: Switch back to CRuby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
 
       # Uploaded before publishing, so a failed push still leaves the gems behind.
       # This is also where a dry run ends.
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: gems
           path: pkg/*.gem
@@ -218,8 +218,7 @@ jobs:
 
       - name: Configure RubyGems credentials
         if: ${{ !inputs.dry_run }}
-        # No floating major tag on this action, so the exact release is pinned.
-        uses: rubygems/configure-rubygems-credentials@v2.1.0
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
 
       - name: Push the gems
         if: ${{ !inputs.dry_run }}
