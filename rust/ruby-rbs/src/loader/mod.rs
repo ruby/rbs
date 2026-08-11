@@ -109,30 +109,23 @@ pub struct EnvironmentLoader {
 }
 
 impl EnvironmentLoader {
-    pub fn new() -> Self {
+    /// `core_root` is `None` to skip core; `stdlib_root` is the stdlib
+    /// signature directory used for dependency expansion, mirroring
+    /// `Collection::Sources::Stdlib` (which Ruby pins to its bundled
+    /// `stdlib/`) — `None` disables manifest-based dependency expansion.
+    /// Both are required arguments, not builder defaults, so callers decide
+    /// them explicitly instead of silently getting `None`.
+    ///
+    /// `stdlib_root` is independent of [`EnvironmentLoader::repository`]:
+    /// add the same directory there to make the expanded libraries loadable.
+    pub fn new(core_root: Option<PathBuf>, stdlib_root: Option<PathBuf>) -> Self {
         EnvironmentLoader {
-            core_root: None,
-            stdlib_root: None,
+            core_root,
+            stdlib_root,
             repository: Repository::new(),
             libs: Vec::new(),
             dirs: Vec::new(),
         }
-    }
-
-    /// Sets the directory containing core signatures. `None` (the default)
-    /// skips core.
-    pub fn core_root(mut self, path: Option<PathBuf>) -> Self {
-        self.core_root = path;
-        self
-    }
-
-    /// Sets the stdlib signature directory used for dependency expansion,
-    /// mirroring `Collection::Sources::Stdlib` (which Ruby pins to its
-    /// bundled `stdlib/`). Independent of [`EnvironmentLoader::repository`]:
-    /// add the same directory there to make the expanded libraries loadable.
-    pub fn stdlib_root(mut self, path: Option<PathBuf>) -> Self {
-        self.stdlib_root = path;
-        self
     }
 
     pub fn repository(mut self, repository: Repository) -> Self {
@@ -312,12 +305,6 @@ impl EnvironmentLoader {
         self.repository
             .lookup(&library.name, library.version.as_deref())
             .map(Path::to_path_buf)
-    }
-}
-
-impl Default for EnvironmentLoader {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
