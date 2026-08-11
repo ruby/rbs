@@ -103,33 +103,31 @@ pub struct LoadedFile {
 pub struct EnvironmentLoader {
     core_root: Option<PathBuf>,
     stdlib_root: Option<PathBuf>,
-    repository: Repository,
+    repository_dirs: Vec<PathBuf>,
     libs: Vec<Library>,
     dirs: Vec<PathBuf>,
 }
 
 impl EnvironmentLoader {
     /// `core_root` is `None` to skip core; `stdlib_root` is the stdlib
-    /// signature directory used for dependency expansion, mirroring
-    /// `Collection::Sources::Stdlib` (which Ruby pins to its bundled
-    /// `stdlib/`) — `None` disables manifest-based dependency expansion.
+    /// signature directory used for dependency expansion and for resolving
+    /// requested libraries — `None` disables both.
     /// Both are required arguments, not builder defaults, so callers decide
     /// them explicitly instead of silently getting `None`.
-    ///
-    /// `stdlib_root` is independent of [`EnvironmentLoader::repository`]:
-    /// add the same directory there to make the expanded libraries loadable.
     pub fn new(core_root: Option<PathBuf>, stdlib_root: Option<PathBuf>) -> Self {
         EnvironmentLoader {
             core_root,
             stdlib_root,
-            repository: Repository::new(),
+            repository_dirs: Vec::new(),
             libs: Vec::new(),
             dirs: Vec::new(),
         }
     }
 
-    pub fn repository(mut self, repository: Repository) -> Self {
-        self.repository = repository;
+    /// Adds a repository root for resolving libraries, searched after
+    /// `stdlib_root`; a later root wins for the same gem and version.
+    pub fn add_repository_dir(mut self, path: PathBuf) -> Self {
+        self.repository_dirs.push(path);
         self
     }
 
@@ -157,11 +155,12 @@ impl EnvironmentLoader {
     /// as the Ruby implementation adding sources as it walks the directories.
     pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
         let stdlib = self.stdlib_repository()?;
+        let repository = self.loading_repository()?;
 
         let mut loaded = Vec::new();
         let mut seen_files: HashSet<PathBuf> = HashSet::new();
 
-        for (kind, dir, skip_hidden) in self.each_dir(&stdlib)? {
+        for (kind, dir, skip_hidden) in self.each_dir(&stdlib, &repository)? {
             let files =
                 file_finder::each_file(&dir, skip_hidden).map_err(|source| LoadError::Io {
                     path: dir.clone(),
@@ -189,7 +188,11 @@ impl EnvironmentLoader {
 
     /// Resolves directories in the Ruby implementation's order:
     /// core, then libraries (with dependencies), then explicit directories.
-    fn each_dir(&self, stdlib: &Repository) -> Result<Vec<(SourceKind, PathBuf, bool)>, LoadError> {
+    fn each_dir(
+        &self,
+        stdlib: &Repository,
+        repository: &Repository,
+    ) -> Result<Vec<(SourceKind, PathBuf, bool)>, LoadError> {
         let mut result = Vec::new();
 
         if let Some(core) = &self.core_root {
@@ -197,9 +200,8 @@ impl EnvironmentLoader {
         }
 
         for library in self.resolved_libraries(stdlib)? {
-            let dir = self
-                .library_dir(&library)
-                .ok_or_else(|| LoadError::UnknownLibrary {
+            let dir =
+                library_dir(repository, &library).ok_or_else(|| LoadError::UnknownLibrary {
                     name: library.name.clone(),
                     version: library.version.clone(),
                 })?;
@@ -225,6 +227,25 @@ impl EnvironmentLoader {
         if let Some(root) = &self.stdlib_root {
             repository.add(root).map_err(|source| LoadError::Io {
                 path: root.clone(),
+                source,
+            })?;
+        }
+        Ok(repository)
+    }
+
+    /// `stdlib_root` is registered first, standing in for Ruby's
+    /// `Repository.new` auto-registering `DEFAULT_STDLIB_ROOT`.
+    fn loading_repository(&self) -> Result<Repository, LoadError> {
+        let mut repository = Repository::new();
+        if let Some(root) = &self.stdlib_root {
+            repository.add(root).map_err(|source| LoadError::Io {
+                path: root.clone(),
+                source,
+            })?;
+        }
+        for dir in &self.repository_dirs {
+            repository.add(dir).map_err(|source| LoadError::Io {
+                path: dir.clone(),
                 source,
             })?;
         }
@@ -300,12 +321,12 @@ impl EnvironmentLoader {
 
         Ok(())
     }
+}
 
-    fn library_dir(&self, library: &Library) -> Option<PathBuf> {
-        self.repository
-            .lookup(&library.name, library.version.as_deref())
-            .map(Path::to_path_buf)
-    }
+fn library_dir(repository: &Repository, library: &Library) -> Option<PathBuf> {
+    repository
+        .lookup(&library.name, library.version.as_deref())
+        .map(Path::to_path_buf)
 }
 
 /// Reads, parses, and converts a single signature file into an owned

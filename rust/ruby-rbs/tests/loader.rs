@@ -44,7 +44,6 @@ fn loads_core_stdlib_and_dependencies_in_ruby_order() {
         Some(repo_root().join("core")),
         Some(repo_root().join("stdlib")),
     )
-    .repository(stdlib_repository())
     .add_library("bigdecimal-math", None);
 
     let mut env = Environment::new();
@@ -72,8 +71,7 @@ fn from_loader_is_the_primary_entry_point() {
     let loader = EnvironmentLoader::new(
         Some(repo_root().join("core")),
         Some(repo_root().join("stdlib")),
-    )
-    .repository(stdlib_repository());
+    );
 
     let env = Environment::from_loader(&loader).unwrap();
 
@@ -140,6 +138,19 @@ fn parse_errors_carry_the_file_path() {
 }
 
 #[test]
+fn default_configuration_loads_without_extra_repository_wiring() {
+    let loader = EnvironmentLoader::new(
+        Some(repo_root().join("core")),
+        Some(repo_root().join("stdlib")),
+    );
+
+    let mut env = Environment::new();
+    let loaded = loader.load(&mut env).unwrap();
+
+    assert!(loaded.iter().any(|f| f.kind == lib("stringio")));
+}
+
+#[test]
 fn core_requires_resolvable_stringio() {
     let loader = EnvironmentLoader::new(Some(repo_root().join("core")), None);
 
@@ -157,7 +168,7 @@ fn custom_repository_manifests_do_not_expand_dependencies() {
     // Without stdlib_root the bigdecimal-math manifest is ignored even
     // though the loading repository resolves the library itself.
     let loader = EnvironmentLoader::new(None, None)
-        .repository(stdlib_repository())
+        .add_repository_dir(repo_root().join("stdlib"))
         .add_library("bigdecimal-math", None);
 
     let mut env = Environment::new();
@@ -205,11 +216,8 @@ fn library_dirs_skip_underscore_directories() {
         ("gem1/1.2.3/_private/b.rbs", "class Person::Internal\nend\n"),
     ]);
 
-    let mut repository = Repository::new();
-    repository.add(dir.path()).unwrap();
-
     let loader = EnvironmentLoader::new(None, None)
-        .repository(repository)
+        .add_repository_dir(dir.path().to_path_buf())
         .add_library("gem1", Some("1.2.3"));
 
     let mut env = Environment::new();
