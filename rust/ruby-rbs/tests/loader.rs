@@ -19,7 +19,10 @@ fn stdlib_repository() -> Repository {
 fn lib(name: &str) -> SourceKind {
     SourceKind::Library {
         name: name.to_string(),
-        version: None,
+        path: stdlib_repository()
+            .lookup(name, None)
+            .expect("test library must resolve in the stdlib repository")
+            .to_path_buf(),
     }
 }
 
@@ -218,7 +221,7 @@ fn library_dirs_skip_underscore_directories() {
         loaded[0].kind,
         SourceKind::Library {
             name: "gem1".to_string(),
-            version: Some("1.2.3".to_string()),
+            path: dir.path().join("gem1/1.2.3"),
         }
     );
 }

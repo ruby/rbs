@@ -11,13 +11,10 @@ pub enum SourceKind {
     Core,
     /// A library resolved through the repository.
     ///
-    /// Carries the requested version as well as the name: Ruby keys its
-    /// library set on the `(name, version)` pair, so `uri` and `uri` 1.0 are
-    /// distinct entries yielded separately by `each_dir`.
-    Library {
-        name: String,
-        version: Option<String>,
-    },
+    /// `path` is the resolved version directory
+    /// ([`Repository::lookup`](crate::repository::Repository::lookup)), which
+    /// holds the library's RBS files directly.
+    Library { name: String, path: PathBuf },
     /// An explicitly added signature directory.
     Dir { path: PathBuf },
 }

@@ -205,7 +205,7 @@ impl EnvironmentLoader {
                 })?;
             let kind = SourceKind::Library {
                 name: library.name,
-                version: library.version,
+                path: dir.clone(),
             };
             result.push((kind, dir, true));
         }
