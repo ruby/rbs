@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/bigdecimal"
-
-class JSONBigDecimalSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::BigDecimal)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String]) -> BigDecimal",
-                     BigDecimal, :json_create, BigDecimal("0").as_json
-  end
-end
 
 class JSONBigDecimalInstanceTest < Test::Unit::TestCase
   include TestHelper

@@ -1,20 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/struct"
-
-class JSONStructSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  Foo = Struct.new(:a)
-
-  library "json"
-  testing "singleton(::Struct)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Array[Integer]]) -> Struct[Integer]",
-                     Foo, :json_create, Foo.new(1).as_json
-  end
-end
 
 class JSONStructInstanceTest < Test::Unit::TestCase
   include TestHelper

@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/regexp"
-
-class JSONRegexpSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Regexp)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Integer]) -> Regexp",
-                     Regexp, :json_create, /foo/.as_json
-  end
-end
 
 class JSONRegexpInstanceTest < Test::Unit::TestCase
   include TestHelper

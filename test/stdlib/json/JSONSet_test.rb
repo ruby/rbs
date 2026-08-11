@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/set"
-
-class JSONSetSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Set)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Array[Integer]]) -> Set[Integer]",
-                     Set, :json_create, Set[1, 2].as_json
-  end
-end
 
 class JSONSetInstanceTest < Test::Unit::TestCase
   include TestHelper

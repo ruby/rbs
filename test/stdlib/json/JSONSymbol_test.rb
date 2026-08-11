@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/symbol"
-
-class JSONSymbolSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Symbol)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String]) -> Symbol",
-                     Symbol, :json_create, :foo.as_json
-  end
-end
 
 class JSONSymbolInstanceTest < Test::Unit::TestCase
   include TestHelper

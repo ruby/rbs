@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/time"
-
-class JSONTimeSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Time)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Integer]) -> Time",
-                     Time, :json_create, Time.now.as_json
-  end
-end
 
 class JSONTimeInstanceTest < Test::Unit::TestCase
   include TestHelper

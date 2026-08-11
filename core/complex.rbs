@@ -126,18 +126,6 @@
 # *   #fdiv: Returns <code>Complex.rect(self.real/numeric,
 #     self.imag/numeric)</code>.
 #
-# ### Working with JSON
-#
-# *   ::json_create: Returns a new Complex object, deserialized from the given
-#     serialized hash.
-# *   #as_json: Returns a serialized hash constructed from `self`.
-# *   #to_json: Returns a JSON string representing `self`.
-#
-# These methods are provided by the [JSON gem](https://github.com/ruby/json). To
-# make these methods available:
-#
-#     require 'json/add/complex'
-#
 class Complex < Numeric
   # <!--
   #   rdoc-file=complex.c

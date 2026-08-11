@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/complex"
-
-class JSONComplexSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Complex)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Numeric]) -> Complex",
-                     Complex, :json_create, Complex(0).as_json
-  end
-end
 
 class JSONComplexInstanceTest < Test::Unit::TestCase
   include TestHelper

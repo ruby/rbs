@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/range"
-
-class JSONRangeSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::Range)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | [Integer, Integer, bool]]) -> Range[Integer]",
-                     Range, :json_create, (0..9).as_json
-  end
-end
 
 class JSONRangeInstanceTest < Test::Unit::TestCase
   include TestHelper

@@ -1,18 +1,5 @@
 require_relative "../test_helper"
 require "json"
-require "json/add/ostruct"
-
-class JSONOpenStructSingletonTest < Test::Unit::TestCase
-  include TestHelper
-
-  library "json"
-  testing "singleton(::OpenStruct)"
-
-  def test_json_create
-    assert_send_type "(Hash[String, String | Hash[Symbol, untyped]]) -> OpenStruct",
-                     OpenStruct, :json_create, OpenStruct.new("foo" => 1).as_json
-  end
-end
 
 class JSONOpenStructInstanceTest < Test::Unit::TestCase
   include TestHelper
