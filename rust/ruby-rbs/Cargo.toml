@@ -17,6 +17,8 @@ include = [
 [dependencies]
 ruby-rbs-sys = { version = "0.3", path = "../ruby-rbs-sys" }
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
