@@ -9,7 +9,7 @@ use crate::buffer::Buffer;
 pub enum SourceKind {
     /// Core library signatures (`:core` in Ruby).
     Core,
-    /// A library resolved through the repository or a `GemSigResolver`.
+    /// A library resolved through the repository.
     ///
     /// Carries the requested version as well as the name: Ruby keys its
     /// library set on the `(name, version)` pair, so `uri` and `uri` 1.0 are

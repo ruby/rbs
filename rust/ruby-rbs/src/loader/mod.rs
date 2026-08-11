@@ -1,7 +1,4 @@
-pub mod gem_sig_resolver;
 pub mod manifest;
-
-pub use gem_sig_resolver::{GemSigResolver, NoGemSigs};
 
 use std::collections::HashSet;
 use std::fmt;
@@ -103,16 +100,12 @@ pub struct LoadedFile {
 /// Resolves core, library, and explicit signature directories, parses every
 /// `.rbs` file exactly once, and feeds the results into an [`Environment`],
 /// mirroring `RBS::EnvironmentLoader`.
-///
-/// `Send + Sync`, because [`GemSigResolver`] is: a future parallel parse stage
-/// hands `&self` to worker threads.
 pub struct EnvironmentLoader {
     core_root: Option<PathBuf>,
     stdlib_root: Option<PathBuf>,
     repository: Repository,
     libs: Vec<Library>,
     dirs: Vec<PathBuf>,
-    resolver: Box<dyn GemSigResolver>,
 }
 
 impl EnvironmentLoader {
@@ -123,7 +116,6 @@ impl EnvironmentLoader {
             repository: Repository::new(),
             libs: Vec::new(),
             dirs: Vec::new(),
-            resolver: Box::new(NoGemSigs),
         }
     }
 
@@ -162,11 +154,6 @@ impl EnvironmentLoader {
     /// subdirectories are not skipped.
     pub fn add_dir(mut self, path: PathBuf) -> Self {
         self.dirs.push(path);
-        self
-    }
-
-    pub fn gem_sig_resolver(mut self, resolver: impl GemSigResolver + 'static) -> Self {
-        self.resolver = Box::new(resolver);
         self
     }
 
@@ -297,18 +284,13 @@ impl EnvironmentLoader {
         }
         result.push(library.clone());
 
-        // Mirrors Ruby's resolve_dependencies: the gem sig resolver first,
-        // then the stdlib repository. The loading repository is deliberately
-        // not consulted, so a library that only exists in a custom
-        // repository loads without dependency expansion, same as Ruby.
-        let dependency_dir = self
-            .resolver
-            .sig_path(&library.name, library.version.as_deref())
-            .or_else(|| {
-                stdlib
-                    .lookup(&library.name, library.version.as_deref())
-                    .map(Path::to_path_buf)
-            });
+        // Mirrors Ruby's resolve_dependencies: the stdlib repository is
+        // consulted, not the loading repository, so a library that only
+        // exists in a custom repository loads without dependency expansion,
+        // same as Ruby.
+        let dependency_dir = stdlib
+            .lookup(&library.name, library.version.as_deref())
+            .map(Path::to_path_buf);
         if let Some(dir) = dependency_dir {
             for name in manifest::dependencies(&dir)? {
                 self.add_library_recursive(
@@ -326,15 +308,7 @@ impl EnvironmentLoader {
         Ok(())
     }
 
-    /// The gem sig resolver wins over the repository, same as
-    /// `RBS::EnvironmentLoader#each_dir`.
     fn library_dir(&self, library: &Library) -> Option<PathBuf> {
-        if let Some(path) = self
-            .resolver
-            .sig_path(&library.name, library.version.as_deref())
-        {
-            return Some(path);
-        }
         self.repository
             .lookup(&library.name, library.version.as_deref())
             .map(Path::to_path_buf)

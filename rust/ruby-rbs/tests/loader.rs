@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use ruby_rbs::ast::{Declaration, Directive};
 use ruby_rbs::environment::{Environment, SourceKind};
-use ruby_rbs::loader::{EnvironmentLoader, GemSigResolver, LoadError};
+use ruby_rbs::loader::{EnvironmentLoader, LoadError};
 use ruby_rbs::repository::Repository;
 
 fn repo_root() -> PathBuf {
@@ -33,21 +33,6 @@ fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
         fs::write(path, content).unwrap();
     }
     dir
-}
-
-/// Stands in for `Gem::Specification.find_by_name(...).full_gem_path + "/sig"`.
-///
-/// Matching on the requested version as well as the name keeps the tests
-/// honest about what the loader passes through.
-struct FakeGemSigs(Vec<(&'static str, Option<&'static str>, PathBuf)>);
-
-impl GemSigResolver for FakeGemSigs {
-    fn sig_path(&self, name: &str, version: Option<&str>) -> Option<PathBuf> {
-        self.0
-            .iter()
-            .find(|(gem, gem_version, _)| *gem == name && *gem_version == version)
-            .map(|(_, _, path)| path.clone())
-    }
 }
 
 #[test]
@@ -234,61 +219,6 @@ fn library_dirs_skip_underscore_directories() {
             version: Some("1.2.3".to_string()),
         }
     );
-}
-
-#[test]
-fn gem_sig_resolver_wins_over_the_repository() {
-    let gem_sigs = tree(&[("sig/from_resolver.rbs", "class FromResolver\nend\n")]);
-    let repository_root = tree(&[("gem1/1.0.0/from_repository.rbs", "class FromRepo\nend\n")]);
-
-    let mut repository = Repository::new();
-    repository.add(repository_root.path()).unwrap();
-
-    let loader = EnvironmentLoader::new()
-        .repository(repository)
-        .gem_sig_resolver(FakeGemSigs(vec![(
-            "gem1",
-            None,
-            gem_sigs.path().join("sig"),
-        )]))
-        .add_library("gem1", None);
-
-    let mut env = Environment::new();
-    let loaded = loader.load(&mut env).unwrap();
-
-    assert_eq!(loaded.len(), 1);
-    assert!(loaded[0].path.ends_with("from_resolver.rbs"));
-}
-
-#[test]
-fn gem_sig_resolver_manifests_expand_dependencies() {
-    // resolve_dependencies consults the resolver first, so a manifest in an
-    // installed gem's sig/ directory pulls its dependencies in too.
-    let gem_sigs = tree(&[
-        ("gem1/sig/manifest.yaml", "dependencies:\n  - name: gem2\n"),
-        ("gem1/sig/a.rbs", "class Gem1\nend\n"),
-        ("gem2/sig/b.rbs", "class Gem2\nend\n"),
-    ]);
-
-    let loader = EnvironmentLoader::new()
-        .gem_sig_resolver(FakeGemSigs(vec![
-            ("gem1", Some("1.2.3"), gem_sigs.path().join("gem1/sig")),
-            ("gem2", None, gem_sigs.path().join("gem2/sig")),
-        ]))
-        .add_library("gem1", Some("1.2.3"));
-
-    let mut env = Environment::new();
-    let loaded = loader.load(&mut env).unwrap();
-
-    assert_eq!(loaded.len(), 2);
-    assert_eq!(
-        loaded[0].kind,
-        SourceKind::Library {
-            name: "gem1".to_string(),
-            version: Some("1.2.3".to_string()),
-        }
-    );
-    assert_eq!(loaded[1].kind, lib("gem2"));
 }
 
 #[test]
