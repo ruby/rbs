@@ -81,10 +81,21 @@ Memory management and results:
 
 Parsing — each takes the whole buffer (`ptr`/`len`), its Ruby encoding name
 (`enc`/`enc_len`, e.g. `"UTF-8"` or `"EUC-JP"`; falls back to UTF-8 when empty or
-unknown), and the character range to parse (`start`/`end`). Each returns `1` on
-success or `0` on a parse error. On success the result is the serialized AST; on
-error it is an error blob (start/end positions, syntax flag, token type,
-message). Type/method-type parsing also takes a buffer of newline-separated
+unknown), and the character range to parse (`start`/`end`). Each returns:
+
+| Status | Meaning | Result |
+| --- | --- | --- |
+| `1` | Parsed. | The serialized AST. |
+| `0` | Parse error. | An error blob (start/end positions, syntax flag, token type, message). |
+| `-1` | Negative or reversed range. | Empty. |
+| `-2` | `start` is not a position the lexer can start on — inside a character, or past the end of the buffer. | Empty. |
+
+An `end` past the end of the buffer is not an error: it is clamped to the
+buffer, which is where lexing stops anyway. The two negative statuses are about
+the range the caller asked for rather than the source text, and `RBS::Parser`
+turns both into an `ArgumentError`, as the C extension does.
+
+Type/method-type parsing also takes a buffer of newline-separated
 type-variable names (`vars`/`vars_len`, with `vars_len < 0` meaning "none"):
 
 | Export | Signature |
