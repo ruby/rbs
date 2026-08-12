@@ -26,10 +26,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
@@ -45,7 +45,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup default stable
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -64,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up git identity
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
@@ -87,7 +87,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup default stable
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -106,14 +106,14 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up git identity
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
@@ -129,7 +129,7 @@ jobs:
         run: |
           rustup update --no-self-update stable
           rustup default stable
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -147,10 +147,10 @@ jobs:
     name: cargo:lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ruby
           bundler: none
@@ -167,7 +167,7 @@ jobs:
           rustup update --no-self-update stable
           rustup default stable
           rustup component add --toolchain stable clippy rustfmt
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry

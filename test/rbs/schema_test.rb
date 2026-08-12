@@ -120,6 +120,10 @@ class RBS::SchemaTest < Test::Unit::TestCase
     JSONValidator.method_type.validate!(
       parse_method_type("[G] (A a, ?B, *C, d: D, ?e: E e, **f) ?{ (G) -> void } -> String").to_json
     )
+
+    JSONValidator.method_type.validate!(
+      parse_method_type("(String message, ...) -> void").to_json
+    )
   end
 
   def test_decls

@@ -23,7 +23,7 @@ module RBS
     # :bool, :location_range, :location_range_list, :attr_ivar_name, or
     # [:enum, [value_or_nil, ...]].
     module SerializationSchema
-      SYMBOL_TAG = 78
+      SYMBOL_TAG = 79
 
       SCHEMA = [
         nil, # tag 0 is reserved for NULL
@@ -91,7 +91,8 @@ module RBS
         [:node, "RBS::Types::Block", true, nil, [[:type, :node], [:required, :bool], [:self_type, :node]], false],
         [:node, "RBS::Types::ClassInstance", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
         [:node, "RBS::Types::ClassSingleton", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
-        [:node, "RBS::Types::Function", false, nil, [[:required_positionals, :node_list], [:optional_positionals, :node_list], [:rest_positionals, :node], [:trailing_positionals, :node_list], [:required_keywords, :hash], [:optional_keywords, :hash], [:rest_keywords, :node], [:return_type, :node]], false],
+        [:node, "RBS::Types::Function", false, nil, [[:required_positionals, :node_list], [:optional_positionals, :node_list], [:rest_positionals, :node], [:trailing_positionals, :node_list], [:required_keywords, :hash], [:optional_keywords, :hash], [:rest_keywords, :node], [:forwarding, :node], [:return_type, :node]], false],
+        [:node, "RBS::Types::Function::ForwardingParam", true, nil, nil, false],
         [:node, "RBS::Types::Function::Param", true, [[:name, false]], [[:type, :node], [:name, :node]], false],
         [:node, "RBS::Types::Interface", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
         [:node, "RBS::Types::Intersection", true, nil, [[:types, :node_list]], false],

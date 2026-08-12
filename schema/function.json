@@ -78,10 +78,21 @@
         }
       ]
     },
+    "forwarding": {
+      "title": "Forwarding parameter",
+      "oneOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "return_type": {
       "title": "Return type of a function",
       "$ref": "types.json"
     }
   },
-  "required": ["required_positionals", "optional_positionals", "rest_positionals", "trailing_positionals", "required_keywords", "optional_keywords", "rest_keywords", "return_type"]
+  "required": ["required_positionals", "optional_positionals", "rest_positionals", "trailing_positionals", "required_keywords", "optional_keywords", "rest_keywords", "forwarding", "return_type"]
 }

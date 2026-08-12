@@ -29,6 +29,19 @@
 #include "rbs/util/rbs_buffer.h"
 #include "rbs/util/rbs_encoding.h"
 
+// Status returned by the parse entry points.
+//
+// A negative status is about the range the caller asked for rather than the
+// source text, and leaves the result empty: `RBS_WASM_INVALID_START_POS` is
+// the `NULL` `rbs_parser_new` returns for a byte position no character starts
+// at -- inside a character, or past the end of the buffer. `RBS::Parser`
+// raises ArgumentError for both, as the C extension does for the same `NULL`
+// (main.c).
+#define RBS_WASM_INVALID_START_POS (-2)
+#define RBS_WASM_INVALID_RANGE (-1)
+#define RBS_WASM_PARSE_ERROR 0
+#define RBS_WASM_OK 1
+
 // The result of the most recent parse, living in linear memory until the next
 // call replaces it. WebAssembly is little-endian, so the multi-byte integers
 // written below match the little-endian format the Ruby decoder expects.
@@ -82,7 +95,7 @@ rbs_wasm_result_len(void) {
 //   [i32 start_char][i32 end_char][u8 syntax_error]
 //   [u32 token_type_len][token_type bytes][u32 message_len][message bytes]
 //
-// Always returns 0, the failure status for the parse functions.
+// Always returns RBS_WASM_PARSE_ERROR, the failure status for the parse functions.
 static int set_error_result(rbs_parser_t *parser) {
     rbs_error_t *error = parser->error;
     const char *token_type = rbs_token_type_str(error->token.type);
@@ -110,21 +123,30 @@ static int set_error_result(rbs_parser_t *parser) {
     p += 4;
     memcpy(p, message, message_len);
 
-    return 0;
+    return RBS_WASM_PARSE_ERROR;
 }
 
 static int set_serialized_result(rbs_parser_t *parser, rbs_node_t *node) {
     rbs_string_t bytes = rbs_serialize_node(parser->allocator, &parser->constant_pool, node);
     size_t length = rbs_string_len(bytes);
     memcpy(allocate_result(length), bytes.start, length);
-    return 1;
+    return RBS_WASM_OK;
 }
 
-// A reversed or out-of-bounds range would make the lexer loop forever, which
-// would hang the whole host. Hosts are expected to validate too (RBS::Parser
-// raises on bad ranges), but guard here so a stray caller can never wedge the VM.
-static bool range_is_valid(int start_pos, int end_pos, int length) {
-    return start_pos >= 0 && end_pos >= 0 && start_pos <= end_pos && end_pos <= length;
+// A negative or reversed range is the caller's mistake rather than anything
+// about the source text. Hosts are expected to reject it too (RBS::Parser
+// raises on bad ranges), but the ABI is public, so check here as well.
+static bool range_is_valid(int start_pos, int end_pos) {
+    return start_pos >= 0 && end_pos >= 0 && start_pos <= end_pos;
+}
+
+// An `end_pos` past the end of the buffer is how a caller clamps without
+// measuring, and the lexer stops at the end of the input on its own -- but it
+// only recognises the end where it can read a NUL. The C extension has the
+// Ruby string's terminator for that; a buffer the host wrote into linear
+// memory has nothing behind it, so its size is where lexing has to stop.
+static int clamp_end_pos(int end_pos, int length) {
+    return end_pos < length ? end_pos : length;
 }
 
 // Resolve a Ruby encoding name (e.g. "UTF-8", "EUC-JP") to an rbs encoding,
@@ -171,17 +193,22 @@ static void declare_variables(rbs_parser_t *parser, const char *variables, int v
  * to parse, so reported locations are absolute (this mirrors
  * RBS::Parser._parse_signature).
  *
- * @return 1 on success (result is the serialized AST), 0 on a parse error
- *         (result is an error blob).
+ * @return RBS_WASM_OK on success (result is the serialized AST),
+ *         RBS_WASM_PARSE_ERROR on a parse error (result is an error blob), or
+ *         a negative status for a range the parser will not take.
  */
 __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_signature(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos) {
-    if (!range_is_valid(start_pos, end_pos, length)) {
+    if (!range_is_valid(start_pos, end_pos)) {
         allocate_result(0);
-        return 0;
+        return RBS_WASM_INVALID_RANGE;
     }
 
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
+    if (parser == NULL) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_START_POS;
+    }
 
     rbs_signature_t *signature = NULL;
     rbs_parse_signature(parser, &signature);
@@ -201,23 +228,30 @@ __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_sign
  * Parse a single RBS type.
  *
  * @param variables Newline-separated type variable names (length < 0 for none).
- * @return 1 on success, 0 on a parse error. On success with an empty result
- *         (`rbs_wasm_result_len` == 0), the input was empty (`nil`).
+ * @return RBS_WASM_OK on success, RBS_WASM_PARSE_ERROR on a parse error, or a
+ *         negative status for a range the parser will not take. On success
+ *         with an empty result (`rbs_wasm_result_len` == 0), the input was
+ *         empty (`nil`).
  */
 __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof, int void_allowed, int self_allowed, int classish_allowed) {
-    if (!range_is_valid(start_pos, end_pos, length)) {
+    if (!range_is_valid(start_pos, end_pos)) {
         allocate_result(0);
-        return 0;
+        return RBS_WASM_INVALID_RANGE;
     }
 
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
+    if (parser == NULL) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_START_POS;
+    }
+
     declare_variables(parser, variables, variables_length);
 
     int status;
     if (parser->next_token.type == pEOF) {
         allocate_result(0);
-        status = 1;
+        status = RBS_WASM_OK;
     } else {
         rbs_node_t *type = NULL;
         rbs_parse_type(parser, &type, void_allowed != 0, self_allowed != 0, classish_allowed != 0);
@@ -240,23 +274,29 @@ __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(cons
  * Parse a single RBS method type.
  *
  * @param variables Newline-separated type variable names (length < 0 for none).
- * @return 1 on success, 0 on a parse error. On success with an empty result,
- *         the input was empty (`nil`).
+ * @return RBS_WASM_OK on success, RBS_WASM_PARSE_ERROR on a parse error, or a
+ *         negative status for a range the parser will not take. On success
+ *         with an empty result, the input was empty (`nil`).
  */
 __attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_method_type(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, int require_eof) {
-    if (!range_is_valid(start_pos, end_pos, length)) {
+    if (!range_is_valid(start_pos, end_pos)) {
         allocate_result(0);
-        return 0;
+        return RBS_WASM_INVALID_RANGE;
     }
 
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
+    if (parser == NULL) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_START_POS;
+    }
+
     declare_variables(parser, variables, variables_length);
 
     int status;
     if (parser->next_token.type == pEOF) {
         allocate_result(0);
-        status = 1;
+        status = RBS_WASM_OK;
     } else {
         rbs_method_type_t *method_type = NULL;
         rbs_parse_method_type(parser, &method_type, require_eof != 0, true);
@@ -273,18 +313,22 @@ __attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_me
  * is a serialized node list; an empty result means the input was empty (`nil`).
  */
 __attribute__((export_name("rbs_wasm_parse_type_params"))) int rbs_wasm_parse_type_params(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, int module_type_params) {
-    if (!range_is_valid(start_pos, end_pos, length)) {
+    if (!range_is_valid(start_pos, end_pos)) {
         allocate_result(0);
-        return 0;
+        return RBS_WASM_INVALID_RANGE;
     }
 
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
+    if (parser == NULL) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_START_POS;
+    }
 
     int status;
     if (parser->next_token.type == pEOF) {
         allocate_result(0);
-        status = 1;
+        status = RBS_WASM_OK;
     } else {
         rbs_node_list_t *params = NULL;
         rbs_parse_type_params(parser, module_type_params != 0, &params);
@@ -293,7 +337,7 @@ __attribute__((export_name("rbs_wasm_parse_type_params"))) int rbs_wasm_parse_ty
             rbs_string_t bytes = rbs_serialize_node_list(parser->allocator, &parser->constant_pool, params);
             size_t n = rbs_string_len(bytes);
             memcpy(allocate_result(n), bytes.start, n);
-            status = 1;
+            status = RBS_WASM_OK;
         } else {
             status = set_error_result(parser);
         }
@@ -305,13 +349,18 @@ __attribute__((export_name("rbs_wasm_parse_type_params"))) int rbs_wasm_parse_ty
 
 // Shared body for the leading/trailing inline annotation parsers.
 static int parse_inline_annotation(const char *source, int length, const char *encoding, int encoding_length, int start_pos, int end_pos, const char *variables, int variables_length, bool leading) {
-    if (!range_is_valid(start_pos, end_pos, length)) {
+    if (!range_is_valid(start_pos, end_pos)) {
         allocate_result(0);
-        return 0;
+        return RBS_WASM_INVALID_RANGE;
     }
 
     rbs_string_t string = rbs_string_new(source, source + length);
-    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, end_pos);
+    rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
+    if (parser == NULL) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_START_POS;
+    }
+
     declare_variables(parser, variables, variables_length);
 
     rbs_ast_ruby_annotations_t *annotation = NULL;
@@ -322,7 +371,7 @@ static int parse_inline_annotation(const char *source, int length, const char *e
         status = set_error_result(parser);
     } else if (!success || annotation == NULL) {
         allocate_result(0);
-        status = 1;
+        status = RBS_WASM_OK;
     } else {
         status = set_serialized_result(parser, (rbs_node_t *) annotation);
     }
@@ -364,11 +413,18 @@ static void w_lex_u32(rbs_allocator_t *allocator, rbs_buffer_t *buffer, uint32_t
  *
  * The final token is always pEOF, mirroring RBS::Parser._lex.
  *
- * @return 1 always (lexing does not report parse errors here).
+ * @return RBS_WASM_OK, or RBS_WASM_INVALID_RANGE for a negative `end_pos`
+ *         (lexing does not report parse errors here).
  */
 __attribute__((export_name("rbs_wasm_lex"))) int rbs_wasm_lex(const char *source, int length, const char *encoding, int encoding_length, int end_pos) {
+    if (!range_is_valid(0, end_pos)) {
+        allocate_result(0);
+        return RBS_WASM_INVALID_RANGE;
+    }
+
     rbs_allocator_t *allocator = rbs_allocator_init();
-    rbs_lexer_t *lexer = rbs_lexer_new(allocator, rbs_string_new(source, source + length), resolve_encoding(encoding, encoding_length), 0, end_pos);
+    // Byte 0 is always a position the lexer can start on, so this is never NULL.
+    rbs_lexer_t *lexer = rbs_lexer_new(allocator, rbs_string_new(source, source + length), resolve_encoding(encoding, encoding_length), 0, clamp_end_pos(end_pos, length));
 
     rbs_buffer_t buffer;
     rbs_buffer_init(allocator, &buffer);
@@ -390,7 +446,7 @@ __attribute__((export_name("rbs_wasm_lex"))) int rbs_wasm_lex(const char *source
     memcpy(allocate_result(n), bytes.start, n);
 
     rbs_allocator_free(allocator);
-    return 1;
+    return RBS_WASM_OK;
 }
 
 /**

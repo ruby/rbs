@@ -325,15 +325,11 @@ namespace :generate do
     class TestTemplateBuilder
       attr_reader :target, :env
 
-      def initialize(target)
+      def initialize(target, paths:)
         @target = target
 
         loader = RBS::EnvironmentLoader.new
-        Dir['stdlib/*'].each do |lib|
-          next if lib.end_with?('builtin')
-
-          loader.add(library: File.basename(lib))
-        end
+        paths.each { loader.add(path: Pathname(_1)) }
         @env = RBS::Environment.from_loader(loader).resolve_type_names
       end
 
@@ -425,7 +421,7 @@ namespace :generate do
       end
     end
 
-    path.write TestTemplateBuilder.new(target).call
+    path.write TestTemplateBuilder.new(target, paths: args.extras).call
 
     puts "Created: #{path}"
   end
@@ -436,74 +432,9 @@ task :test_generate_stdlib do
   sh "ruby -c /tmp/Array_test.rb"
   sh "RBS_GENERATE_TEST_PATH=/tmp/Thread_Mutex_test.rb rake 'generate:stdlib_test[Thread::Mutex]'"
   sh "ruby -c /tmp/Thread_Mutex_test.rb"
+  sh "RBS_GENERATE_TEST_PATH=/tmp/Kconv_test.rb rake 'generate:stdlib_test[Kconv,stdlib/nkf/0,stdlib/kconv/0]'"
+  sh "ruby -c /tmp/Kconv_test.rb"
 end
-
-Rake::Task[:release].enhance do
-  Rake::Task[:"release:note"].invoke
-end
-
-namespace :release do
-  desc "Explain the post-release steps automatically"
-  task :note do
-    version = Gem::Version.new(RBS::VERSION)
-    major, minor, patch, *_ = RBS::VERSION.split(".")
-    major = major.to_i
-    minor = minor.to_i
-    patch = patch.to_i
-
-    puts "🎉🎉🎉🎉 Congratulations for **#{version}** release! 🎉🎉🎉🎉"
-    puts
-    puts "There are a few things left to complete the release. 💪"
-    puts
-
-    if patch == 0 || version.prerelease?
-      puts "* [ ] Update release note: https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor}"
-    end
-
-    if patch == 0 && !version.prerelease?
-      puts "* [ ] Delete `RBS XYZ is the latest version of...` from release note: https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor}"
-    end
-
-    puts "* [ ] Publish a release at GitHub"
-    puts "* [ ] Make some announcements on Twitter/Mustdon/Slack/???"
-
-    puts
-    puts
-
-    puts "✏️ Making a draft release on GitHub..."
-
-    content = File.read(File.join(__dir__, "CHANGELOG.md"))
-    changelog = content.scan(/^## \d.*?(?=^## \d)/m)[0]
-    changelog = changelog.sub(/^.*\n^.*\n/, "").rstrip
-
-    notes = <<NOTES
-[Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})
-
-#{changelog}
-NOTES
-
-    command = [
-      "gh",
-      "release",
-      "create",
-      "--draft",
-      "v#{RBS::VERSION}",
-      "--title=#{RBS::VERSION}",
-      "--notes=#{notes}"
-    ]
-
-    if version.prerelease?
-      command << "--prerelease"
-    end
-
-    require "open3"
-    output, status = Open3.capture2(*command)
-    if status.success?
-      puts "  >> Done! Open #{output.chomp} and publish the release!"
-    end
-  end
-end
-
 
 # Pull requests with one of these labels are omitted from the changelog.
 CHANGELOG_SKIP_LABELS = ["skip-changelog"]
@@ -511,9 +442,9 @@ CHANGELOG_SKIP_LABELS = ["skip-changelog"]
 # Resolves the commit-ish the changelog starts from.
 #
 # `version` is a version number, a tag, or any commit-ish. When it is omitted, the latest tag
-# matching `tag_glob` is used.
+# matching `tag_glob` is used, skipping the ones matching `exclude_globs`.
 #
-def resolve_changelog_base(version, tag_glob:)
+def resolve_changelog_base(version, tag_glob:, exclude_globs: [])
   require "open3"
 
   from =
@@ -521,7 +452,10 @@ def resolve_changelog_base(version, tag_glob:)
       # `4.1.0` and `v4.1.0` both mean the tag `v4.1.0`, while `master` or a SHA is used as is.
       version.match?(/\A\d/) ? "v#{version}" : version
     else
-      output, status = Open3.capture2("git", "describe", "--tags", "--match", tag_glob, "--abbrev=0")
+      command = ["git", "describe", "--tags", "--match", tag_glob, "--abbrev=0"]
+      exclude_globs.each { |glob| command.push("--exclude", glob) }
+
+      output, status = Open3.capture2(*command)
       raise "🚨 Cannot detect the latest tag matching `#{tag_glob}`. Give the previous version explicitly." unless status.success?
       output.chomp
     end
@@ -591,20 +525,54 @@ def changelog_commits(from, paths: [])
   output.lines.map(&:chomp).reject(&:empty?)
 end
 
-# Finds the pull requests the commits came from, keeping the order of `commits`.
-#
-# Returns the pull requests for the changelog and the ones omitted by `skip_labels`.
-#
-def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
-  pull_requests = {}
-  skipped = {}
+# What `git cherry-pick -x` appends to the message of the commit it creates.
+CHERRY_PICK_ORIGIN = /^\(cherry picked from commit ([0-9a-f]{40})\)$/
 
-  commits.each_slice(50) do |slice|
-    # Ask GitHub which pull requests the commits came from, so that any merge strategy -- merge
-    # commit, squash, or rebase -- is handled without parsing commit messages.
-    aliases = slice.map.with_index do |commit, index|
+# Maps the commits that record where they were cherry-picked from to that commit.
+#
+# A backport is a cherry-pick, so on a release branch it is the recorded origin, not the commit
+# itself, that leads to the pull request the change was written and reviewed in. Without this a
+# backported change is attributed to the pull request that carried the backport, which says
+# nothing about the change and is the same for every commit it brought over.
+#
+# A commit backported twice -- the development line, then a release branch -- carries one line
+# per hop, appended in order, so the first one is where the change started.
+#
+def changelog_origins(commits)
+  return {} if commits.empty?
+
+  require "open3"
+
+  # `--no-walk` prints these commits and nothing else. NUL delimiters keep a commit message --
+  # which can contain anything, including what this format looks like -- from being read as the
+  # format itself.
+  output, status = Open3.capture2("git", "log", "--no-walk", "--format=%H%x00%B%x00", *commits, binmode: true)
+  raise status.inspect unless status.success?
+
+  # Commit messages are UTF-8, while the default external encoding follows the locale. Without
+  # this, splitting a message that is not ASCII fails under `LANG=C`, as in GitHub Actions.
+  output.force_encoding(Encoding::UTF_8)
+
+  output.split("\0").each_slice(2).each_with_object({}) do |(commit, message), origins|
+    commit = commit.to_s.strip
+    next if commit.empty?
+
+    origin = message.to_s[CHERRY_PICK_ORIGIN, 1] or next
+    origins[commit] = origin
+  end
+end
+
+# Asks GitHub which pull requests each commit came from, so that any merge strategy -- merge
+# commit, squash, or rebase -- is handled without parsing commit messages.
+#
+# Returns `{ oid => [pull request, ...] }`, with an empty array for the commits GitHub has no
+# merged pull request for, including the ones it does not know at all.
+#
+def changelog_associated_pull_requests(oids)
+  oids.uniq.each_slice(50).each_with_object({}) do |slice, found|
+    aliases = slice.map.with_index do |oid, index|
       <<~GRAPHQL
-        c#{index}: object(oid: "#{commit}") {
+        c#{index}: object(oid: "#{oid}") {
           ... on Commit {
             associatedPullRequests(first: 10) {
               nodes {
@@ -617,18 +585,44 @@ def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
       GRAPHQL
     end
 
-    changelog_graphql(aliases.join("\n")).each_value do |commit|
-      next unless commit
+    response = changelog_graphql(aliases.join("\n"))
 
-      commit.dig(:associatedPullRequests, :nodes).each do |pr|
-        next unless pr[:merged]
+    slice.each_with_index do |oid, index|
+      nodes = response.dig(:"c#{index}", :associatedPullRequests, :nodes) || []
 
-        pr = { number: pr[:number], title: pr[:title], url: pr[:url], labels: pr.dig(:labels, :nodes).map { |label| label[:name] } }
-        if (pr[:labels] & skip_labels).empty?
-          pull_requests[pr[:number]] ||= pr
-        else
-          skipped[pr[:number]] ||= pr
-        end
+      found[oid] = nodes.select { |pr| pr[:merged] }.map do |pr|
+        { number: pr[:number], title: pr[:title], url: pr[:url], labels: pr.dig(:labels, :nodes).map { |label| label[:name] } }
+      end
+    end
+  end
+end
+
+# Finds the pull requests the commits came from, keeping the order of `commits`.
+#
+# Returns the pull requests for the changelog and the ones omitted by `skip_labels`.
+#
+def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
+  origins = changelog_origins(commits)
+  found = changelog_associated_pull_requests(commits.map { |commit| origins[commit] || commit })
+
+  # An origin that leads nowhere -- a commit cherry-picked from a fork, or one that went to the
+  # default branch without a pull request -- falls back to the commit in this history, which is
+  # at least the backport that brought it here.
+  fallbacks = commits.select { |commit| origins[commit] && found.fetch(origins[commit], []).empty? }
+  found.update(changelog_associated_pull_requests(fallbacks)) unless fallbacks.empty?
+
+  pull_requests = {}
+  skipped = {}
+
+  commits.each do |commit|
+    prs = found.fetch(origins[commit] || commit, [])
+    prs = found.fetch(commit, []) if prs.empty?
+
+    prs.each do |pr|
+      if (pr[:labels] & skip_labels).empty?
+        pull_requests[pr[:number]] ||= pr
+      else
+        skipped[pr[:number]] ||= pr
       end
     end
   end
@@ -746,18 +740,127 @@ namespace :gem do
   # A constant defined in a `namespace` block is a top-level constant, so it needs the prefix.
   GEM_CHANGELOG_PATHS = [".", ":(exclude)rust"]
 
-  desc "Generate changelog template from GH pull requests merged after the given version (defaults to the latest tag)"
+  # The tags a release proper starts *after*, rather than at.
+  GEM_PRERELEASE_TAGS = ["v*.pre*", "v*.dev*"]
+
+  # Where the changelog of the release being prepared starts, derived from `RBS::VERSION`:
+  #
+  # * `X.Y.Z.pre.N` documents what changed since `X.Y.Z.pre.N-1`, so it starts from the latest tag.
+  # * `X.Y.Z` documents the whole cycle, the prereleases included, so it skips the prerelease tags
+  #   in between and starts from the previous release proper.
+  #
+  # This is the step that is easy to get wrong by hand: on a release proper the latest tag is a
+  # prerelease, so the obvious default would produce only the tail of the cycle. Passing a version
+  # explicitly overrides all of it.
+  #
+  def changelog_base(version)
+    excluded = Gem::Version.new(RBS::VERSION).prerelease? ? [] : GEM_PRERELEASE_TAGS
+    resolve_changelog_base(version, tag_glob: "v*", exclude_globs: excluded)
+  end
+
+  desc "Generate changelog template from GH pull requests merged since the previous release"
   task :changelog, [:version] do |_task, args|
-    from = resolve_changelog_base(args[:version], tag_glob: "v*")
-    print_changelog(from, paths: GEM_CHANGELOG_PATHS)
+    print_changelog(changelog_base(args[:version]), paths: GEM_CHANGELOG_PATHS)
   end
 
   namespace :changelog do
     desc "Print the pull requests of `gem:changelog` as JSON, with the changed files and body of each"
     task :json, [:version] do |_task, args|
-      from = resolve_changelog_base(args[:version], tag_glob: "v*")
-      print_changelog_json(from, paths: GEM_CHANGELOG_PATHS)
+      print_changelog_json(changelog_base(args[:version]), paths: GEM_CHANGELOG_PATHS)
     end
+  end
+
+  # There are three kinds of release: `X.Y.Z`, `X.Y.Z.pre.N`, and `X.Y.Z.dev.N`. The
+  # `.dev.N` ones are cut from the development line for people who need a specific
+  # change early; they are not written up in the changelog, so there are no notes to
+  # publish and nothing worth announcing.
+  def dev_release?(version)
+    Gem::Version.new(version).segments.include?("dev")
+  end
+
+  # The body of the topmost section of CHANGELOG.md, which is the release being
+  # prepared, minus its own heading.
+  #
+  # The encoding is explicit because the default external encoding follows the
+  # locale, and the changelog is not ASCII.
+  #
+  def changelog_section(version)
+    content = File.read(File.join(__dir__, "CHANGELOG.md"), encoding: Encoding::UTF_8)
+    section = content.scan(/^## \d.*?(?=^## \d)/m)[0] or raise "🚨 Cannot find a release section in CHANGELOG.md"
+    heading, _, body = section.partition("\n")
+    heading.include?(version) or raise "🚨 CHANGELOG.md starts with `#{heading.strip}`, which is not #{version}"
+    body.strip
+  end
+
+  desc "Check that the working tree is ready to be released as the given version"
+  task :check_release, [:version] do |_task, args|
+    version = args[:version] or raise "🚨 Pass the version being released: `rake 'gem:check_release[4.1.2]'`"
+    Gem::Version.correct?(version) or raise "🚨 `#{version}` is not a version number."
+
+    # The version being released and the version the commit declares are stated
+    # separately -- one by whoever starts the release, one by the commit itself --
+    # so that releasing the wrong commit, or releasing the right one under the wrong
+    # name, fails here rather than on RubyGems.
+    version == RBS::VERSION or
+      raise "🚨 Releasing #{version}, but this commit declares `RBS::VERSION = #{RBS::VERSION.inspect}`."
+
+    if dev_release?(version)
+      puts "✅ #{version} is the version of this commit. It is a dev release, so CHANGELOG.md is not checked."
+    else
+      changelog_section(version)
+      puts "✅ #{version} is the version of this commit, and CHANGELOG.md documents it."
+    end
+  end
+
+  desc "Create and push the `vX.Y.Z` tag for RBS::VERSION"
+  task :tag do
+    tag = "v#{RBS::VERSION}"
+
+    # Annotated, so that the tag carries its own author and date rather than
+    # borrowing the tagged commit's.
+    sh "git", "tag", "--annotate", "--message", "RBS #{RBS::VERSION}", tag
+    sh "git", "push", "origin", tag
+
+    puts "🏷️  Pushed #{tag}."
+  end
+
+  desc "Publish the GitHub release for RBS::VERSION, unless it is a `.dev.` version"
+  task :gh_release do
+    require "open3"
+
+    version = Gem::Version.new(RBS::VERSION)
+    major, minor, *_ = RBS::VERSION.split(".")
+    tag = "v#{RBS::VERSION}"
+
+    if dev_release?(RBS::VERSION)
+      puts "⏭️  #{RBS::VERSION} is a dev release, so there is no GitHub release to publish."
+      next
+    end
+
+    # The release is created against an existing tag, so that the artifacts and the
+    # notes describe a commit that is already immutable.
+    _, status = Open3.capture2("git", "rev-parse", "--verify", "--quiet", "#{tag}^{commit}")
+    raise "🚨 No such tag: `#{tag}`. Tag the release before creating the GitHub release." unless status.success?
+
+    notes = <<~NOTES
+      [Release note](https://github.com/ruby/rbs/wiki/Release-Note-#{major}.#{minor})
+
+      #{changelog_section(RBS::VERSION)}
+    NOTES
+
+    # Published rather than drafted: the notes are the changelog section that was
+    # already reviewed in the release pull request, so there is nothing left to edit.
+    command = [
+      "gh", "release", "create", tag,
+      "--title=#{RBS::VERSION}",
+      "--notes=#{notes}"
+    ]
+    command << "--prerelease" if version.prerelease?
+
+    output, status = Open3.capture2(*command)
+    raise "🚨 `gh release create` failed: #{status.inspect}" unless status.success?
+
+    puts "📝 Released #{tag}: #{output.chomp}"
   end
 end
 
@@ -821,6 +924,12 @@ namespace :wasm do
 
   desc "Build the RBS parser as a WebAssembly module (requires WASI_SDK_PATH)"
   task :build do
+    # `-DNDEBUG` compiles out `RBS_ASSERT`, the same way ext/rbs_extension does
+    # for the MRI extension. The assertions sit in the lexer and the constant
+    # pool, so keeping them costs about 20% of parse time; set `DEBUG=1` to keep
+    # them when debugging the module itself.
+    debug_flags = ENV["DEBUG"] ? [] : ["-DNDEBUG"]
+
     mkdir_p WASM_DIR
     sh wasi_clang,
        "--target=wasm32-wasip1",
@@ -828,6 +937,7 @@ namespace :wasm do
        "-mexec-model=reactor",
        "-std=gnu11",
        "-O2",
+       *debug_flags,
        "-Wno-unused-parameter",
        "-I#{File.join(__dir__, "include")}",
        "-o", WASM_OUTPUT,

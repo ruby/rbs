@@ -48,6 +48,90 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_forwarding_parameter
+    parse_method_type("(...) -> void").tap do |type|
+      assert_equal "(...) -> void", type.to_s
+      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
+      assert_equal "...", type.type.forwarding.location.source
+      assert_empty type.type.required_positionals
+      assert_nil type.block
+    end
+
+    parse_method_type("(String message, ...) -> void").tap do |type|
+      assert_equal "(String message, ...) -> void", type.to_s
+      assert_equal 1, type.type.required_positionals.size
+      assert_predicate type.type, :forwarding?
+      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
+    end
+  end
+
+  def test_forwarding_parameter_with_overload_continuation
+    _, _, declarations = parse_signature(<<~RBS)
+      class Foo
+        def foo: (...) -> void
+               | ...
+      end
+    RBS
+
+    method = declarations.fetch(0).members.fetch(0)
+    assert_predicate method, :overloading?
+    assert_predicate method.overloads.fetch(0).method_type.type, :forwarding?
+  end
+
+  def test_forwarding_parameter_rejects_nonleading_parameters
+    [
+      "(?String value, ...) -> void",
+      "(*String values, ...) -> void",
+      "(value: String, ...) -> void",
+      "(?value: String, ...) -> void",
+      "(**String values, ...) -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_must_be_last
+    [
+      "(..., String) -> void",
+      "(..., ...) -> void",
+      "(...,) -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_cannot_have_explicit_block
+    [
+      "(...) { () -> void } -> void",
+      "(...) ?{ () -> void } -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_is_not_allowed_in_block_types
+    assert_raise(RBS::ParsingError) do
+      parse_method_type("() { (...) -> void } -> void")
+    end
+  end
+
+  def test_forwarding_parameter_is_not_allowed_in_proc_types
+    [
+      "^(...) -> void",
+      "^(String, ...) -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_type(source)
+      end
+    end
+  end
+
   def test_method_type_location
     Parser.parse_method_type("(untyped _)->void").yield_self do |type|
       assert_nil type.location[:type_params]

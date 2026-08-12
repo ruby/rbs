@@ -104,7 +104,7 @@ module RBS
             type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
             Methods.new(type: type).tap do |methods|
               entry.each_decl do |decl|
-                subst = Substitution.build(decl.type_params.each.map(&:name), args)
+                subst = entry.align_params(decl)
                 case decl
                 when AST::Declarations::Base
                   each_rbs_member_with_accessibility(decl.members) do |member, accessibility|
@@ -115,14 +115,14 @@ module RBS
                         build_method(
                           methods,
                           type,
-                          member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
+                          member: subst ? member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }) : member,
                           accessibility: member.visibility || accessibility
                         )
                       when :singleton_instance
                         build_method(
                           methods,
                           type,
-                          member: member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }),
+                          member: subst ? member.update(overloads: member.overloads.map {|overload| overload.sub(subst) }) : member,
                           accessibility: :private
                         )
                       end
@@ -130,7 +130,7 @@ module RBS
                       if member.kind == :instance
                         build_attribute(methods,
                                         type,
-                                        member: member.update(type: member.type.sub(subst)),
+                                        member: subst ? member.update(type: member.type.sub(subst)) : member,
                                         accessibility: member.visibility || accessibility)
                       end
                     when AST::Members::Alias

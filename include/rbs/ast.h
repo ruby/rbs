@@ -125,18 +125,19 @@ enum rbs_node_type {
     RBS_TYPES_CLASS_INSTANCE = 63,
     RBS_TYPES_CLASS_SINGLETON = 64,
     RBS_TYPES_FUNCTION = 65,
-    RBS_TYPES_FUNCTION_PARAM = 66,
-    RBS_TYPES_INTERFACE = 67,
-    RBS_TYPES_INTERSECTION = 68,
-    RBS_TYPES_LITERAL = 69,
-    RBS_TYPES_OPTIONAL = 70,
-    RBS_TYPES_PROC = 71,
-    RBS_TYPES_RECORD = 72,
-    RBS_TYPES_RECORD_FIELD_TYPE = 73,
-    RBS_TYPES_TUPLE = 74,
-    RBS_TYPES_UNION = 75,
-    RBS_TYPES_UNTYPED_FUNCTION = 76,
-    RBS_TYPES_VARIABLE = 77,
+    RBS_TYPES_FUNCTION_FORWARDING_PARAM = 66,
+    RBS_TYPES_FUNCTION_PARAM = 67,
+    RBS_TYPES_INTERFACE = 68,
+    RBS_TYPES_INTERSECTION = 69,
+    RBS_TYPES_LITERAL = 70,
+    RBS_TYPES_OPTIONAL = 71,
+    RBS_TYPES_PROC = 72,
+    RBS_TYPES_RECORD = 73,
+    RBS_TYPES_RECORD_FIELD_TYPE = 74,
+    RBS_TYPES_TUPLE = 75,
+    RBS_TYPES_UNION = 76,
+    RBS_TYPES_UNTYPED_FUNCTION = 77,
+    RBS_TYPES_VARIABLE = 78,
     RBS_AST_SYMBOL,
 };
 
@@ -854,8 +855,14 @@ typedef struct rbs_types_function {
     struct rbs_hash *RBS_NONNULL required_keywords;
     struct rbs_hash *RBS_NONNULL optional_keywords;
     struct rbs_node *RBS_NULLABLE rest_keywords;
+    struct rbs_node *RBS_NULLABLE forwarding;
     struct rbs_node *RBS_NONNULL return_type;
 } rbs_types_function_t;
+
+typedef struct rbs_types_function_forwarding_param {
+    rbs_node_t base;
+
+} rbs_types_function_forwarding_param_t;
 
 typedef struct rbs_types_function_param {
     rbs_node_t base;
@@ -1030,7 +1037,8 @@ rbs_types_bases_void_t *RBS_NONNULL rbs_types_bases_void_new(rbs_allocator_t *RB
 rbs_types_block_t *RBS_NONNULL rbs_types_block_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_t *RBS_NONNULL type, bool required, rbs_node_t *RBS_NULLABLE self_type);
 rbs_types_class_instance_t *RBS_NONNULL rbs_types_class_instance_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_type_name_t *RBS_NONNULL name, rbs_node_list_t *RBS_NONNULL args, rbs_location_range name_range);
 rbs_types_class_singleton_t *RBS_NONNULL rbs_types_class_singleton_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_type_name_t *RBS_NONNULL name, rbs_node_list_t *RBS_NONNULL args, rbs_location_range name_range);
-rbs_types_function_t *RBS_NONNULL rbs_types_function_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_list_t *RBS_NONNULL required_positionals, rbs_node_list_t *RBS_NONNULL optional_positionals, rbs_node_t *RBS_NULLABLE rest_positionals, rbs_node_list_t *RBS_NONNULL trailing_positionals, rbs_hash_t *RBS_NONNULL required_keywords, rbs_hash_t *RBS_NONNULL optional_keywords, rbs_node_t *RBS_NULLABLE rest_keywords, rbs_node_t *RBS_NONNULL return_type);
+rbs_types_function_t *RBS_NONNULL rbs_types_function_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_list_t *RBS_NONNULL required_positionals, rbs_node_list_t *RBS_NONNULL optional_positionals, rbs_node_t *RBS_NULLABLE rest_positionals, rbs_node_list_t *RBS_NONNULL trailing_positionals, rbs_hash_t *RBS_NONNULL required_keywords, rbs_hash_t *RBS_NONNULL optional_keywords, rbs_node_t *RBS_NULLABLE rest_keywords, rbs_node_t *RBS_NULLABLE forwarding, rbs_node_t *RBS_NONNULL return_type);
+rbs_types_function_forwarding_param_t *RBS_NONNULL rbs_types_function_forwarding_param_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location);
 rbs_types_function_param_t *RBS_NONNULL rbs_types_function_param_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_t *RBS_NONNULL type, rbs_ast_symbol_t *RBS_NULLABLE name);
 rbs_types_interface_t *RBS_NONNULL rbs_types_interface_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_type_name_t *RBS_NONNULL name, rbs_node_list_t *RBS_NONNULL args, rbs_location_range name_range);
 rbs_types_intersection_t *RBS_NONNULL rbs_types_intersection_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_list_t *RBS_NONNULL types);
