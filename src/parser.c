@@ -3539,11 +3539,17 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
         lexer->current_character_bytes = 1;
     }
 
-    if (start_pos > 0) {
-        while (lexer->current.byte_pos < start_pos) {
-            rbs_skip(lexer);
-        }
+    // `rbs_skip` moves a whole character at a time, and moves nothing at all
+    // once the input is spent, so this walk can only ever stand on the first
+    // byte of a character.
+    while (lexer->current.byte_pos < start_pos && lexer->current_code_point != '\0') {
+        rbs_skip(lexer);
     }
+
+    // Stopping anywhere else means `start_pos` is a position the lexer cannot
+    // start from: over it, and the walk stepped across a character that
+    // straddles it; short of it, and the input ran out first.
+    if (lexer->current.byte_pos != start_pos) return NULL;
 
     lexer->start = lexer->current;
 
@@ -3554,6 +3560,11 @@ rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding
     rbs_allocator_t *allocator = rbs_allocator_init();
 
     rbs_lexer_t *lexer = rbs_lexer_new(allocator, string, encoding, start_pos, end_pos);
+    if (lexer == NULL) {
+        rbs_allocator_free(allocator);
+        return NULL;
+    }
+
     rbs_parser_t *parser = rbs_allocator_alloc(allocator, rbs_parser_t);
 
     *parser = (rbs_parser_t) {

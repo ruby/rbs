@@ -146,44 +146,66 @@ static VALUE parse_type_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, type);
 }
 
-static void validate_position_range(int start_pos, int end_pos) {
+/**
+ * `end_pos` may point past the end of the buffer: clamping with a large
+ * number instead of measuring the buffer is ordinary, and the lexer stops at
+ * the end on its own.
+ * */
+static void validate_position_range(VALUE string, int start_pos, int end_pos) {
     if (start_pos < 0 || end_pos < 0) {
         rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
     }
     if (start_pos > end_pos) {
         rb_raise(rb_eArgError, "invalid position range: %d...%d", start_pos, end_pos);
     }
+
+    long size = RSTRING_LEN(string);
+    if ((long) start_pos > size) {
+        rb_raise(rb_eArgError, "position range starts past the end of the buffer: %d...%d, buffer is %ld bytes", start_pos, end_pos, size);
+    }
 }
 
 static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
-    validate_position_range(start_pos, end_pos);
+    validate_position_range(string, start_pos, end_pos);
 
     const char *encoding_name = rb_enc_name(encoding);
 
-    return rbs_lexer_new(
+    rbs_lexer_t *lexer = rbs_lexer_new(
         allocator,
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
         end_pos
     );
+
+    if (lexer == NULL) {
+        rb_raise(rb_eArgError, "position range starts inside a character: %d...%d", start_pos, end_pos);
+    }
+
+    return lexer;
 }
 
 static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
-    validate_position_range(start_pos, end_pos);
-
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
+
+    validate_position_range(string, start_pos, end_pos);
 
     rb_encoding *encoding = rb_enc_get(string);
     const char *encoding_name = rb_enc_name(encoding);
 
-    return rbs_parser_new(
+    rbs_parser_t *parser = rbs_parser_new(
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
         end_pos
     );
+
+    if (parser == NULL) {
+        rb_raise(rb_eArgError, "position range starts inside a character: %d...%d", start_pos, end_pos);
+    }
+
+    return parser;
 }
 
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {

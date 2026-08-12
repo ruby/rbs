@@ -89,8 +89,13 @@ RBS_NODISCARD bool rbs_parser_insert_typevar(rbs_parser_t *parser, rbs_constant_
  * VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
  * rbs_lexer_new(string, 0, 31)    // New rbs_lexer_t with buffer content
  * ```
+ *
+ * Returns `NULL` when `start_pos` is not the first byte of a character in
+ * `string` -- inside one, or past the end of the buffer. The lexer reaches
+ * `start_pos` a character at a time, so nowhere else is a position it can
+ * start from.
  * */
-rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+RBS_NODISCARD rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 
 /**
  * Allocate new rbs_parser_t object.
@@ -98,8 +103,10 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string, const rbs_enc
  * ```
  * rbs_parser_new(buffer, string, encoding, 0, 1);
  * ```
+ *
+ * Returns `NULL` for a `start_pos` that `rbs_lexer_new` rejects.
  * */
-rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+RBS_NODISCARD rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
 void rbs_parser_free(rbs_parser_t *parser);
 
 /**

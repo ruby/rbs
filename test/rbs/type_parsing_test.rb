@@ -1019,14 +1019,58 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
   end
 
   def test_parse__byte_range_incorrect
-    # We want a better error handling ergonomics, but currently simply raises a syntax error.
+    # `"🐕🐈"` is 10 bytes: `"` then two four-byte characters then `"`. Bytes 2
+    # to 4 are inside the first of them, and the lexer can only ever stop on a
+    # character boundary, so there is no honest answer to give.
 
     input = '"🐕🐈"'
 
+    (2..4).each do |start|
+      exn = assert_raises ArgumentError do
+        Parser.parse_type(input, byte_range: start...)
+      end
+
+      assert_equal "position range starts inside a character: #{start}...10", exn.message
+    end
+
+    # Byte 5 opens `🐈`, so lexing starts exactly where it was asked to. This
+    # is the error the three positions above used to be silently rounded up
+    # to.
     exn = assert_raises RBS::ParsingError do
-      Parser.parse_type(input, byte_range: 2...)
+      Parser.parse_type(input, byte_range: 5...)
     end
 
     assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
+  end
+
+  def test_parse__byte_range_starting_past_the_end
+    # Reaching `start_pos` means stepping to it, and there is nothing left to
+    # step over here, so the lexer used to walk forever.
+    exn = assert_raises ArgumentError do
+      Parser.parse_type("Integer", byte_range: 20...30)
+    end
+
+    assert_equal "position range starts past the end of the buffer: 20...30, buffer is 7 bytes", exn.message
+
+    # The end of the buffer itself is a boundary like any other, and an
+    # `end_pos` past it is how a caller clamps without measuring.
+    assert_nil Parser.parse_type("Integer", byte_range: 7...7)
+    assert_equal "Integer", Parser.parse_type("Integer", byte_range: 0...9999).to_s
+  end
+
+  def test_parse__byte_range_incorrect_in_euc_jp
+    # In EUC-JP the second byte of a character sits in the same range as a
+    # first byte, so decoding at the offset would happily report a character.
+    # Only the walk from the start of the buffer knows byte 1 is inside one.
+    euc = (+"\xC6\xFCFoo").force_encoding(Encoding::EUC_JP) # 日Foo
+
+    exn = assert_raises ArgumentError do
+      Parser.parse_type(euc, byte_range: 1...)
+    end
+
+    assert_equal "position range starts inside a character: 1...5", exn.message
+
+    assert_equal RBS::TypeName.parse("Foo"),
+                 Parser.parse_type(euc, byte_range: 2...).name
   end
 end
