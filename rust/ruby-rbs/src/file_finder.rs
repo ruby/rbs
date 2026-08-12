@@ -1,19 +1,12 @@
 use std::io;
 use std::path::{Path, PathBuf};
 
-/// Enumerates `.rbs` entries under `path` in a deterministic (path-sorted)
-/// order, mirroring `RBS::FileFinder.each_file` and its `Dir.glob`
-/// semantics: entries whose name starts with `.` are neither listed nor
-/// descended into, symlinked directories are not descended into, and any
-/// entry named `*.rbs` is listed regardless of its file type.
+/// Enumerates `.rbs` entries under `path` in path-sorted order, mirroring
+/// `RBS::FileFinder.each_file` and its `Dir.glob` semantics.
 ///
-/// When `path` is a file it is returned as-is. When `skip_hidden` is true,
-/// entries under a directory whose name starts with `_` are skipped; the
-/// entry's own name is not checked, same as the Ruby implementation.
-///
-/// One divergence: Ruby sorts the `/`-joined strings `Dir.glob` returns, while
-/// the sort here compares the platform separator. The two agree except on
-/// Windows for names containing a character below `/`.
+/// Divergences: the sort compares the platform separator rather than
+/// `/`-joined strings, and only `PermissionDenied`/`NotFound` are skipped
+/// where Ruby skips every open/stat failure.
 pub fn each_file(path: &Path, skip_hidden: bool) -> io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
 
@@ -27,9 +20,26 @@ pub fn each_file(path: &Path, skip_hidden: bool) -> io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
+fn is_skippable(error: &io::Error) -> bool {
+    matches!(
+        error.kind(),
+        io::ErrorKind::PermissionDenied | io::ErrorKind::NotFound
+    )
+}
+
 fn collect(dir: &Path, skip_hidden: bool, files: &mut Vec<PathBuf>) -> io::Result<()> {
-    for entry in std::fs::read_dir(dir)? {
-        let entry = entry?;
+    let entries = match std::fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(error) if is_skippable(&error) => return Ok(()),
+        Err(error) => return Err(error),
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(error) if is_skippable(&error) => continue,
+            Err(error) => return Err(error),
+        };
         let path = entry.path();
 
         if entry.file_name().to_string_lossy().starts_with('.') {
@@ -40,9 +50,13 @@ fn collect(dir: &Path, skip_hidden: bool, files: &mut Vec<PathBuf>) -> io::Resul
             files.push(path.clone());
         }
 
-        // `file_type()` does not follow symlinks, so this naturally skips
-        // symlinked directories.
-        if entry.file_type()?.is_dir() {
+        // `file_type()` does not follow symlinks, which skips symlinked dirs.
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(error) if is_skippable(&error) => continue,
+            Err(error) => return Err(error),
+        };
+        if file_type.is_dir() {
             let hidden = path
                 .file_name()
                 .is_some_and(|name| name.to_string_lossy().starts_with('_'));
@@ -70,8 +84,6 @@ mod tests {
         dir
     }
 
-    /// Paths relative to `root`, always `/`-joined so the expectations below
-    /// read the same on Windows.
     fn relative(paths: Vec<PathBuf>, root: &Path) -> Vec<String> {
         paths
             .iter()
@@ -150,6 +162,57 @@ mod tests {
 
         let found = each_file(dir.path(), false).unwrap();
         assert_eq!(relative(found, dir.path()), vec!["normal/ok.rbs"]);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn unreadable_directories_are_skipped() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = fixture(&["a.rbs", "readable/b.rbs", "locked/c.rbs"]);
+        let locked = dir.path().join("locked");
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o000)).unwrap();
+
+        // Permission bits do not deny root (common in CI containers).
+        if fs::read_dir(&locked).is_ok() {
+            fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).unwrap();
+            return;
+        }
+
+        let found = each_file(dir.path(), false);
+
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o755)).unwrap();
+
+        assert_eq!(
+            relative(found.unwrap(), dir.path()),
+            vec!["a.rbs", "readable/b.rbs"]
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn unstattable_entries_are_skipped() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = fixture(&["a.rbs", "listable/b.rbs", "listable/nested/c.rbs"]);
+        let listable = dir.path().join("listable");
+        fs::set_permissions(&listable, fs::Permissions::from_mode(0o444)).unwrap();
+
+        // Permission bits do not deny root (common in CI containers).
+        if fs::metadata(listable.join("b.rbs")).is_ok() {
+            fs::set_permissions(&listable, fs::Permissions::from_mode(0o755)).unwrap();
+            return;
+        }
+
+        let found = each_file(dir.path(), false);
+
+        fs::set_permissions(&listable, fs::Permissions::from_mode(0o755)).unwrap();
+
+        // `b.rbs` is listed by name; `nested` cannot be identified as a dir.
+        assert_eq!(
+            relative(found.unwrap(), dir.path()),
+            vec!["a.rbs", "listable/b.rbs"]
+        );
     }
 
     #[test]
