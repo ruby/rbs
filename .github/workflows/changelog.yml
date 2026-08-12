@@ -1,0 +1,121 @@
+name: Changelog
+
+# Prints the changelog template for a release, which is otherwise `rake gem:changelog`
+# on a laptop.
+#
+# The task asks GitHub which pull requests the commits came from, and it asks through
+# `gh`. A Claude Code on the web session cannot reach `api.github.com` at all -- the
+# refusal is keyed on the session, so neither installing `gh` nor rewriting the task
+# against REST gets around it -- and a runner has both `gh` and `github.token`. So the
+# same task runs here, and the release is prepared from a session that could not
+# otherwise produce this list.
+#
+# The ref selector picks the branch the changelog is for *and* the copy of the task
+# that computes it, which are the same thing: dispatch it on `aaa-X.Y.x` for a patch
+# release, on `master` otherwise.
+#
+# Nothing is written. The run reads the repository and prints.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Where the changelog starts, if not the RBS::VERSION of the ref (e.g. 4.1.0)"
+        required: false
+        type: string
+      format:
+        description: "The changelog template, or the JSON its sections are sorted from"
+        required: false
+        default: list
+        type: choice
+        options:
+          - list
+          - json
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    name: changelog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # the history and the tags
+      pull-requests: read # what the commits came from
+    env:
+      # The inputs are read through the environment rather than interpolated into
+      # the script below.
+      VERSION: ${{ inputs.version }}
+      FORMAT: ${{ inputs.format }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # `changelog_base` resolves the previous release with `git describe`, the task
+      # walks the history back to it, and on a release branch it reads the `-x`
+      # trailers of the commits it finds -- so the full history and the tags are all
+      # needed. `fetch-depth: 0` fetches both.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Before the gems are installed, since a version that cannot be a version is
+      # cheapest to reject here.
+      - name: Check the input
+        run: |
+          version_pattern='^[0-9]+\.[0-9]+\.[0-9]+(\.(pre|dev)\.[0-9]+)?$'
+          if [ -n "$VERSION" ] && ! [[ "$VERSION" =~ $version_pattern ]]; then
+            echo "::error::\`$VERSION\` is not a version number."
+            exit 1
+          fi
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+
+      # Only the changelog goes to STDOUT; the task reports what it is doing, and
+      # which pull requests it skipped, on STDERR. `tee` keeps both in the log, in
+      # order, and puts the changelog on its own where the next step can read it.
+      - name: Print the changelog
+        run: |
+          if [ "$FORMAT" = "json" ]; then
+            task="gem:changelog:json"
+          else
+            task="gem:changelog"
+          fi
+          if [ -n "$VERSION" ]; then
+            task="$task[$VERSION]"
+          fi
+
+          echo "Running \`rake $task\` on $(git rev-parse --abbrev-ref HEAD)"
+          bundle exec rake "$task" | tee changelog.out
+
+      # Uploaded before it is rendered, so that the changelog survives whatever the
+      # summary makes of it. This is also what to reach for when the JSON is long
+      # enough to be truncated in the log.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: changelog
+          path: changelog.out
+
+      # The log carries this too, but the summary renders it. A step summary is
+      # capped at 1MiB and the step fails if that is exceeded, which a long JSON
+      # could manage -- so past a comfortable fraction of it, link the artifact
+      # rather than lose the run over formatting.
+      - name: Render the changelog
+        run: |
+          if [ "$(wc -c < changelog.out)" -gt 900000 ]; then
+            echo "The changelog is too long to render here. Download the \`changelog\` artifact." \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          {
+            echo '```markdown'
+            cat changelog.out
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
