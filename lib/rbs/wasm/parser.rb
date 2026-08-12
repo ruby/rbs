@@ -125,11 +125,11 @@ module RBS
       # A negative status is about the range rather than the source text, so it
       # comes with an empty result and an ArgumentError, as in the C extension
       # (main.c). Starting past the end of the buffer is plain from the
-      # buffer's size and rejected above, so an unreachable start that comes
-      # back from the parser can only mean a start inside a character.
+      # buffer's size and rejected above, so a start position that comes back
+      # rejected can only be one inside a character.
       def raise_parse_failure(buffer, status, bytes, start_pos, end_pos)
         case status
-        when WASM::Runtime::UNREACHABLE_START
+        when WASM::Runtime::INVALID_START_POS
           raise ArgumentError, "position range starts inside a character: #{start_pos}...#{end_pos}"
         when WASM::Runtime::INVALID_RANGE
           raise ArgumentError, "invalid position range: #{start_pos}...#{end_pos}"

@@ -19,7 +19,7 @@ module RBS
       # Statuses the parse entry points return (see rbs_wasm.c). A negative one
       # is about the range the caller asked for rather than the source text,
       # and comes with an empty result.
-      UNREACHABLE_START = -2
+      INVALID_START_POS = -2
       INVALID_RANGE = -1
       PARSE_ERROR = 0
       OK = 1

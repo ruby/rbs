@@ -32,12 +32,12 @@
 // Status returned by the parse entry points.
 //
 // A negative status is about the range the caller asked for rather than the
-// source text, and leaves the result empty: `RBS_WASM_UNREACHABLE_START` is
-// the `NULL` `rbs_parser_new` returns for a `start_pos` the lexer cannot start
-// on -- inside a character, or past the end of the buffer. `RBS::Parser`
+// source text, and leaves the result empty: `RBS_WASM_INVALID_START_POS` is
+// the `NULL` `rbs_parser_new` returns for a byte position no character starts
+// at -- inside a character, or past the end of the buffer. `RBS::Parser`
 // raises ArgumentError for both, as the C extension does for the same `NULL`
 // (main.c).
-#define RBS_WASM_UNREACHABLE_START (-2)
+#define RBS_WASM_INVALID_START_POS (-2)
 #define RBS_WASM_INVALID_RANGE (-1)
 #define RBS_WASM_PARSE_ERROR 0
 #define RBS_WASM_OK 1
@@ -207,7 +207,7 @@ __attribute__((export_name("rbs_wasm_parse_signature"))) int rbs_wasm_parse_sign
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
     if (parser == NULL) {
         allocate_result(0);
-        return RBS_WASM_UNREACHABLE_START;
+        return RBS_WASM_INVALID_START_POS;
     }
 
     rbs_signature_t *signature = NULL;
@@ -243,7 +243,7 @@ __attribute__((export_name("rbs_wasm_parse_type"))) int rbs_wasm_parse_type(cons
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
     if (parser == NULL) {
         allocate_result(0);
-        return RBS_WASM_UNREACHABLE_START;
+        return RBS_WASM_INVALID_START_POS;
     }
 
     declare_variables(parser, variables, variables_length);
@@ -288,7 +288,7 @@ __attribute__((export_name("rbs_wasm_parse_method_type"))) int rbs_wasm_parse_me
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
     if (parser == NULL) {
         allocate_result(0);
-        return RBS_WASM_UNREACHABLE_START;
+        return RBS_WASM_INVALID_START_POS;
     }
 
     declare_variables(parser, variables, variables_length);
@@ -322,7 +322,7 @@ __attribute__((export_name("rbs_wasm_parse_type_params"))) int rbs_wasm_parse_ty
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
     if (parser == NULL) {
         allocate_result(0);
-        return RBS_WASM_UNREACHABLE_START;
+        return RBS_WASM_INVALID_START_POS;
     }
 
     int status;
@@ -358,7 +358,7 @@ static int parse_inline_annotation(const char *source, int length, const char *e
     rbs_parser_t *parser = rbs_parser_new(string, resolve_encoding(encoding, encoding_length), start_pos, clamp_end_pos(end_pos, length));
     if (parser == NULL) {
         allocate_result(0);
-        return RBS_WASM_UNREACHABLE_START;
+        return RBS_WASM_INVALID_START_POS;
     }
 
     declare_variables(parser, variables, variables_length);

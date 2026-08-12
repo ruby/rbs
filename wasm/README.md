@@ -88,7 +88,7 @@ unknown), and the character range to parse (`start`/`end`). Each returns:
 | `1` | Parsed. | The serialized AST. |
 | `0` | Parse error. | An error blob (start/end positions, syntax flag, token type, message). |
 | `-1` | Negative or reversed range. | Empty. |
-| `-2` | `start` is not a position the lexer can start on — inside a character, or past the end of the buffer. | Empty. |
+| `-2` | `start` is a byte position no character starts at — inside a character, or past the end of the buffer. | Empty. |
 
 An `end` past the end of the buffer is not an error: it is clamped to the
 buffer, which is where lexing stops anyway. The two negative statuses are about
