@@ -85,6 +85,14 @@ pub struct Library {
     pub version: Option<String>,
 }
 
+/// A [`Library`] paired with its parsed `version`, keeping the two from
+/// drifting apart as they travel through dependency expansion and the final
+/// `Repository::lookup`.
+struct ResolvedLibrary {
+    library: Library,
+    version: Option<GemVersion>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadedFile {
     pub path: PathBuf,
@@ -183,14 +191,16 @@ impl EnvironmentLoader {
             result.push((SourceKind::Core, core.clone(), true));
         }
 
-        for library in self.resolved_libraries(stdlib)? {
-            let dir =
-                library_dir(repository, &library).ok_or_else(|| LoadError::UnknownLibrary {
-                    name: library.name.clone(),
-                    version: library.version.clone(),
+        for resolved in self.resolved_libraries(stdlib)? {
+            let dir = repository
+                .lookup(&resolved.library.name, resolved.version.as_ref())
+                .map(Path::to_path_buf)
+                .ok_or_else(|| LoadError::UnknownLibrary {
+                    name: resolved.library.name.clone(),
+                    version: resolved.library.version.clone(),
                 })?;
             let kind = SourceKind::Library {
-                name: library.name,
+                name: resolved.library.name,
                 path: dir.clone(),
             };
             result.push((kind, dir, true));
@@ -238,7 +248,7 @@ impl EnvironmentLoader {
 
     /// Expands manifest dependencies depth-first in request order, matching
     /// the Ruby implementation's insertion-ordered `Set` of libraries.
-    fn resolved_libraries(&self, stdlib: &Repository) -> Result<Vec<Library>, LoadError> {
+    fn resolved_libraries(&self, stdlib: &Repository) -> Result<Vec<ResolvedLibrary>, LoadError> {
         let mut seen: HashSet<Library> = HashSet::new();
         let mut result = Vec::new();
 
@@ -264,31 +274,36 @@ impl EnvironmentLoader {
         library: Library,
         stdlib: &Repository,
         seen: &mut HashSet<Library>,
-        result: &mut Vec<Library>,
+        result: &mut Vec<ResolvedLibrary>,
     ) -> Result<(), LoadError> {
-        if let Some(version) = &library.version {
-            // Ruby raises ArgumentError from Gem::Version/Gem::Requirement
-            // while resolving; fail before any lookup can misinterpret it.
-            if GemVersion::parse(version).is_none() {
-                return Err(LoadError::InvalidVersion {
-                    name: library.name.clone(),
-                    version: version.clone(),
-                });
-            }
-        }
-
         if !seen.insert(library.clone()) {
             return Ok(());
         }
-        result.push(library.clone());
+
+        // Ruby raises ArgumentError from Gem::Version/Gem::Requirement while
+        // resolving; parse here, once, so an invalid version can never be
+        // misread by `Repository::lookup` as "not found".
+        let version = library
+            .version
+            .as_deref()
+            .map(|version| {
+                GemVersion::parse(version).ok_or_else(|| LoadError::InvalidVersion {
+                    name: library.name.clone(),
+                    version: version.to_string(),
+                })
+            })
+            .transpose()?;
 
         // Mirrors Ruby's resolve_dependencies: the stdlib repository is
         // consulted, not the loading repository, so a library that only
         // exists in a custom repository loads without dependency expansion,
         // same as Ruby.
         let dependency_dir = stdlib
-            .lookup(&library.name, library.version.as_deref())
+            .lookup(&library.name, version.as_ref())
             .map(Path::to_path_buf);
+
+        result.push(ResolvedLibrary { library, version });
+
         if let Some(dir) = dependency_dir {
             for name in manifest::dependencies(&dir)? {
                 self.add_library_recursive(
@@ -305,12 +320,6 @@ impl EnvironmentLoader {
 
         Ok(())
     }
-}
-
-fn library_dir(repository: &Repository, library: &Library) -> Option<PathBuf> {
-    repository
-        .lookup(&library.name, library.version.as_deref())
-        .map(Path::to_path_buf)
 }
 
 /// Deliberately a free function taking only the interners, so the load loop

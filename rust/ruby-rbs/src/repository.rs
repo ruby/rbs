@@ -76,20 +76,18 @@ impl Repository {
     /// string* sorts last — Ruby's `latest_version` sorts by the version
     /// string, so `1.2` beats `1.11`.
     ///
-    /// Returns `None` when `version` is not a valid `Gem::Version`; the
-    /// loader reports this as `InvalidVersion` instead of silently using the
-    /// latest version.
-    pub fn lookup(&self, gem: &str, version: Option<&str>) -> Option<&Path> {
+    /// Takes an already-parsed `GemVersion` rather than a raw string: an
+    /// invalid version string is a caller error (Ruby raises `ArgumentError`
+    /// resolving it), not a "not found" result, so it must be rejected
+    /// before it can reach `lookup` at all.
+    pub fn lookup(&self, gem: &str, version: Option<&GemVersion>) -> Option<&Path> {
         let gem = self.gems.get(gem)?;
         if gem.versions.is_empty() {
             return None;
         }
 
         match version {
-            Some(version) => {
-                let requested = GemVersion::parse(version)?;
-                find_best_version(&gem.versions, &requested.release())
-            }
+            Some(requested) => find_best_version(&gem.versions, &requested.release()),
             None => gem
                 .versions
                 .last_key_value()
@@ -129,8 +127,9 @@ mod tests {
     }
 
     fn lookup_name(repository: &Repository, gem: &str, version: Option<&str>) -> Option<String> {
+        let version = version.map(|v| GemVersion::parse(v).unwrap());
         repository
-            .lookup(gem, version)
+            .lookup(gem, version.as_ref())
             .map(|path| path.file_name().unwrap().to_string_lossy().into_owned())
     }
 
@@ -177,7 +176,6 @@ mod tests {
             lookup_name(&repository, "uri", Some("1.0.pre")),
             Some("1.0".to_string())
         );
-        assert_eq!(repository.lookup("uri", Some("junk")), None);
     }
 
     #[test]
