@@ -1252,6 +1252,5 @@ fn node_kind(node: &Node<'_>) -> &'static str {
         Node::UnionType(_) => "UnionType",
         Node::UntypedFunctionType(_) => "UntypedFunctionType",
         Node::VariableType(_) => "VariableType",
-        Node::ModuleSelfAnnotation(_) => "ModuleSelfAnnotation",
     }
 }
