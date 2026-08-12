@@ -74,6 +74,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "tUIDENT",  /* Identifiers starting with upper case */
     "tULIDENT", /* Identifiers starting with `_` */
     "tULLIDENT",
+    "tNONASCIIIDENT",
     "tGIDENT",  /* Identifiers starting with `$` */
     "tAIDENT",  /* Identifiers starting with `@` */
     "tA2IDENT", /* Identifiers starting with `@@` */

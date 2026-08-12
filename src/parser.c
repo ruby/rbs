@@ -337,6 +337,7 @@ static bool is_keyword_token(enum RBSTokenType type) {
     case tUIDENT:
     case tULIDENT:
     case tULLIDENT:
+    case tNONASCIIIDENT:
     case tQIDENT:
     case tBANGIDENT:
         KEYWORD_CASES
@@ -344,6 +345,15 @@ static bool is_keyword_token(enum RBSTokenType type) {
     default:
         return false;
     }
+}
+
+/**
+ * Ruby lets a local variable name open with a character outside ASCII, and a
+ * parameter name is a local variable name. Nothing here reads the case of that
+ * character, so both spellings are a name.
+ * */
+static bool is_param_name_token(enum RBSTokenType type) {
+    return type == tLIDENT || type == tNONASCIIIDENT;
 }
 
 /*
@@ -664,6 +674,7 @@ PARSE_KEYWORDS:
         case tQIDENT:
         case tULIDENT:
         case tULLIDENT:
+        case tNONASCIIIDENT:
         case tBANGIDENT:
             KEYWORD_CASES
             if (is_keyword(parser)) {
@@ -1841,6 +1852,7 @@ static bool parse_method_name(rbs_parser_t *parser, rbs_range_t *range, rbs_ast_
     case tLIDENT:
     case tULIDENT:
     case tULLIDENT:
+    case tNONASCIIIDENT:
         KEYWORD_CASES
         if (parser->next_token.type == pQUESTION && parser->current_token.range.end.byte_pos == parser->next_token.range.start.byte_pos) {
             range->start = parser->current_token.range.start;
@@ -3951,6 +3963,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             return true;
         }
         case tLIDENT:
+        case tNONASCIIIDENT:
             PARAM_NAME_CASES {
                 return parse_inline_param_type_annotation(parser, annotation, rbs_range);
             }
@@ -3959,7 +3972,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_range star_loc = rbs_location_range_current_token(parser);
 
             rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
-            if (parser->next_token.type == tLIDENT) {
+            if (is_param_name_token(parser->next_token.type)) {
                 rbs_parser_advance(parser);
                 name_loc = rbs_location_range_current_token(parser);
             }
@@ -3999,7 +4012,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_range star2_loc = rbs_location_range_current_token(parser);
 
             rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
-            if (parser->next_token.type == tLIDENT) {
+            if (is_param_name_token(parser->next_token.type)) {
                 rbs_parser_advance(parser);
                 name_loc = rbs_location_range_current_token(parser);
             }
@@ -4039,7 +4052,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
             rbs_location_range ampersand_loc = rbs_location_range_current_token(parser);
 
             rbs_location_range name_loc = RBS_LOCATION_NULL_RANGE;
-            if (parser->next_token.type == tLIDENT) {
+            if (is_param_name_token(parser->next_token.type)) {
                 rbs_parser_advance(parser);
                 name_loc = rbs_location_range_current_token(parser);
             }

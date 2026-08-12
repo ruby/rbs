@@ -1033,14 +1033,15 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_equal "position range starts inside a character: #{start}...10", exn.message
     end
 
-    # Byte 5 opens `🐈`, so lexing starts exactly where it was asked to. This
-    # is the error the three positions above used to be silently rounded up
-    # to.
+    # Byte 5 opens `🐈`, so lexing starts exactly where it was asked to. The
+    # character is an identifier now, but a type name may not open outside
+    # ASCII, so this is still a syntax error -- reported against a real token
+    # rather than `ErrorToken`. We want better ergonomics here eventually.
     exn = assert_raises RBS::ParsingError do
       Parser.parse_type(input, byte_range: 5...)
     end
 
-    assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (ErrorToken)", exn.message
+    assert_equal "a.rbs:1:2...1:3: Syntax error: unexpected token for simple type, token=`🐈` (tNONASCIIIDENT)", exn.message
   end
 
   def test_parse__byte_range_starting_past_the_end
