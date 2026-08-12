@@ -2,9 +2,6 @@ use crate::interner::StringInterner;
 use crate::type_name::TypeNameInterner;
 
 /// The pair of interners that an owned AST's ids refer to.
-///
-/// An [`crate::environment::Environment`] owns one of these, giving a single
-/// value the same role as the Ruby implementation's global name pool.
 #[derive(Default)]
 pub struct Interners {
     pub strings: StringInterner,
@@ -17,7 +14,6 @@ impl Interners {
         Self::default()
     }
 
-    /// Absorbs every entry of `other`, keeping the ones already present.
     pub fn merge(&mut self, other: Interners) {
         self.strings.merge(other.strings);
         self.type_names.merge(other.type_names);

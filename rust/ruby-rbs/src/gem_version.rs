@@ -30,15 +30,14 @@ impl Segment {
 }
 
 impl GemVersion {
-    /// Parses a version string. Returns `None` when the string is not a valid
-    /// `Gem::Version` (i.e. `Gem::Version.correct?` would return false).
+    /// Returns `None` when the string is not a valid `Gem::Version`
+    /// (`Gem::Version.correct?`).
     pub fn parse(source: &str) -> Option<GemVersion> {
         let trimmed = source.trim();
         if !is_correct(trimmed) {
             return None;
         }
 
-        // Same normalization as Gem::Version#initialize.
         let version = if trimmed.is_empty() {
             "0".to_string()
         } else {
@@ -59,8 +58,6 @@ impl GemVersion {
         self.prerelease
     }
 
-    /// Returns the release version, dropping prerelease segments
-    /// (`1.2.0.a` -> `1.2.0`), same as `Gem::Version#release`.
     pub fn release(&self) -> GemVersion {
         if !self.prerelease {
             return self.clone();
@@ -88,9 +85,6 @@ impl GemVersion {
         }
     }
 
-    /// Canonical segments for comparison: the numeric prefix and the part
-    /// starting at the first string segment, each with trailing zeros removed
-    /// (`Gem::Version#canonical_segments`).
     fn canonical_segments(&self) -> Vec<&Segment> {
         let split = self
             .segments
@@ -159,8 +153,6 @@ impl Ord for GemVersion {
     }
 }
 
-/// `Gem::Version.correct?`: optional `digits ('.' alnum+)* ('-' pre)?`,
-/// surrounded by optional whitespace.
 fn is_correct(trimmed: &str) -> bool {
     if trimmed.is_empty() {
         return true;
@@ -193,7 +185,6 @@ fn is_correct(trimmed: &str) -> bool {
     true
 }
 
-/// Splits into numeric and alphabetic runs, like `@version.scan(/[0-9]+|[a-z]+/i)`.
 fn scan_segments(version: &str) -> Vec<Segment> {
     let bytes = version.as_bytes();
     let mut segments = Vec::new();
@@ -307,10 +298,8 @@ mod tests {
 
     #[test]
     fn numeric_segments_compare_with_arbitrary_precision() {
-        // Beyond u64::MAX; RubyGems compares these as bignums.
         assert!(v("18446744073709551616") > v("18446744073709551615"));
         assert!(v("1.99999999999999999999999999") < v("1.100000000000000000000000000"));
-        // Leading zeros are normalized like Ruby's `"007".to_i`.
         assert_eq!(v("1.007"), v("1.7.0"));
         assert_eq!(v("1.007.a").release(), v("1.7"));
     }

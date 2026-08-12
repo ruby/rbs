@@ -5,8 +5,6 @@ pub use source::{Source, SourceKind};
 use crate::interners::Interners;
 use crate::loader::{EnvironmentLoader, LoadError};
 
-/// Owns the interners and the loaded sources.
-///
 /// Owning the interners here gives a single `Environment` value the same
 /// role as the Ruby implementation's global name pool: names interned while
 /// loading stay resolvable and displayable for the environment's lifetime.
@@ -31,8 +29,6 @@ impl Environment {
         &self.sources
     }
 
-    /// Crate-private: only a caller that interned the source's names into
-    /// *this* environment can safely add it.
     pub(crate) fn interners_mut(&mut self) -> &mut Interners {
         &mut self.interners
     }
@@ -41,11 +37,6 @@ impl Environment {
         self.sources.push(source);
     }
 
-    /// Loads every signature file the loader resolves, in load order
-    /// (equivalent to Ruby's `Environment.from_loader(loader)`).
-    ///
-    /// On `Err` the environment is dropped, so the partially loaded state
-    /// `load` leaves behind is not observable here.
     pub fn from_loader(loader: &EnvironmentLoader) -> Result<Environment, LoadError> {
         let mut env = Environment::new();
         loader.load(&mut env)?;

@@ -4,10 +4,6 @@ use serde::Deserialize;
 
 use super::LoadError;
 
-/// Reads dependency library names from `manifest.yaml` directly under `dir`,
-/// as used by stdlib and gem signature directories. Returns an empty list
-/// when the file does not exist.
-///
 /// Reads exactly what Ruby reads — `manifest['dependencies'][*]['name']` —
 /// and nothing else about the notation, so any YAML that `YAML.safe_load`
 /// accepts is accepted here too.
@@ -40,8 +36,6 @@ struct Dependency {
 }
 
 fn parse(content: &str) -> Result<Vec<String>, String> {
-    // An empty or all-comment file has no document; Ruby's YAML.safe_load
-    // returns nil for it, which yields no dependencies.
     if content.trim().is_empty() {
         return Ok(Vec::new());
     }
@@ -116,15 +110,12 @@ mod tests {
 
     #[test]
     fn flow_style_dependencies_are_accepted() {
-        // Rejecting this would break a gem that loads fine under Ruby.
         let dir = manifest("dependencies: [{name: uri}, {name: 'csv'}]\n");
         assert_eq!(dependencies(dir.path()).unwrap(), vec!["uri", "csv"]);
     }
 
     #[test]
     fn multi_line_flow_style_is_accepted() {
-        // The hand-rolled parser this replaced rejected multi-line flow
-        // style; Ruby's YAML.safe_load accepts it.
         let dir = manifest("dependencies: [\n  {name: uri}\n]\n");
         assert_eq!(dependencies(dir.path()).unwrap(), vec!["uri"]);
     }
@@ -138,21 +129,14 @@ mod tests {
         ));
     }
 
-    // The tests below all cover input `YAML.safe_load` reads without
-    // complaint, verified against Ruby. Rejecting or silently dropping any of
-    // it would make a gem that loads under the Ruby implementation fail here.
-
     #[test]
     fn sequence_at_the_keys_own_indent_is_accepted() {
-        // Reading `- name: uri` as the next top-level key silently returned
-        // no dependencies at all.
         let dir = manifest("dependencies:\n- name: uri\n- name: csv\n");
         assert_eq!(dependencies(dir.path()).unwrap(), vec!["uri", "csv"]);
     }
 
     #[test]
     fn document_and_directive_markers_are_accepted() {
-        // `YAML.dump` always emits `---`.
         let dir = manifest("%YAML 1.1\n---\ndependencies:\n  - name: uri\n...\n");
         assert_eq!(dependencies(dir.path()).unwrap(), vec!["uri"]);
     }

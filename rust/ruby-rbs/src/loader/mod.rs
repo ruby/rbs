@@ -14,13 +14,9 @@ use crate::interners::Interners;
 use crate::node;
 use crate::repository::Repository;
 
-/// Errors raised while resolving and loading signature files,
-/// mirroring `RBS::EnvironmentLoader::UnknownLibraryError` and friends.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum LoadError {
-    /// No signature directory was found for the library
-    /// (`RBS::EnvironmentLoader::UnknownLibraryError`).
     UnknownLibrary {
         name: String,
         version: Option<String>,
@@ -82,15 +78,13 @@ impl std::error::Error for LoadError {
     }
 }
 
-/// A library requested by name and optional version
-/// (`RBS::EnvironmentLoader::Library` equivalent).
+/// `RBS::EnvironmentLoader::Library` equivalent.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Library {
     pub name: String,
     pub version: Option<String>,
 }
 
-/// A file loaded by [`EnvironmentLoader::load`], in load order.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadedFile {
     pub path: PathBuf,
@@ -112,8 +106,6 @@ impl EnvironmentLoader {
     /// `core_root` is `None` to skip core; `stdlib_root` is the stdlib
     /// signature directory used for dependency expansion and for resolving
     /// requested libraries — `None` disables both.
-    /// Both are required arguments, not builder defaults, so callers decide
-    /// them explicitly instead of silently getting `None`.
     pub fn new(core_root: Option<PathBuf>, stdlib_root: Option<PathBuf>) -> Self {
         EnvironmentLoader {
             core_root,
@@ -131,7 +123,7 @@ impl EnvironmentLoader {
         self
     }
 
-    /// Requests a library. Its `manifest.yaml` dependencies are resolved
+    /// A requested library's `manifest.yaml` dependencies are resolved
     /// transitively at load time.
     pub fn add_library(mut self, name: &str, version: Option<&str>) -> Self {
         self.libs.push(Library {
@@ -148,9 +140,6 @@ impl EnvironmentLoader {
         self
     }
 
-    /// Loads every signature file into `env` and returns the loaded files in
-    /// load order (`RBS::EnvironmentLoader#load` equivalent).
-    ///
     /// On `Err` the sources read before the failure are already in `env`, same
     /// as the Ruby implementation adding sources as it walks the directories.
     pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
@@ -171,9 +160,6 @@ impl EnvironmentLoader {
                 if !seen_files.insert(path.clone()) {
                     continue;
                 }
-                // `parse_one` is a free function so this loop can later be
-                // spread over worker threads with worker-local `Interners`;
-                // `add_source` stays in file order.
                 let source = parse_one(&path, &kind, env.interners_mut())?;
                 env.add_source(source);
                 loaded.push(LoadedFile {
@@ -186,8 +172,6 @@ impl EnvironmentLoader {
         Ok(loaded)
     }
 
-    /// Resolves directories in the Ruby implementation's order:
-    /// core, then libraries (with dependencies), then explicit directories.
     fn each_dir(
         &self,
         stdlib: &Repository,
@@ -329,9 +313,6 @@ fn library_dir(repository: &Repository, library: &Library) -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
-/// Reads, parses, and converts a single signature file into an owned
-/// [`Source`].
-///
 /// Deliberately a free function taking only the interners, so the load loop
 /// can later be parallelised by handing each worker its own [`Interners`].
 /// The parser's `SignatureNode` holds raw pointers and is not `Send`, so it

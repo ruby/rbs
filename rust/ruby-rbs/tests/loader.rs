@@ -26,8 +26,6 @@ fn lib(name: &str) -> SourceKind {
     }
 }
 
-/// Writes `files` (relative path to content) under a fresh temporary
-/// directory.
 fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     for (path, content) in files {
@@ -50,7 +48,6 @@ fn loads_core_stdlib_and_dependencies_in_ruby_order() {
     let loaded = loader.load(&mut env).unwrap();
 
     assert_eq!(loaded.first().unwrap().kind, SourceKind::Core);
-    // bigdecimal-math pulls bigdecimal via manifest.yaml, after itself
     let first_math = loaded
         .iter()
         .position(|f| f.kind == lib("bigdecimal-math"))
@@ -60,7 +57,6 @@ fn loads_core_stdlib_and_dependencies_in_ruby_order() {
         .position(|f| f.kind == lib("bigdecimal"))
         .unwrap();
     assert!(first_math < first_dep);
-    // loading core implies stringio (stdlib migration compatibility)
     assert!(loaded.iter().any(|f| f.kind == lib("stringio")));
     assert_eq!(env.sources().len(), loaded.len());
     assert!(!env.interners().strings.is_empty());
@@ -165,8 +161,6 @@ fn core_requires_resolvable_stringio() {
 
 #[test]
 fn custom_repository_manifests_do_not_expand_dependencies() {
-    // Without stdlib_root the bigdecimal-math manifest is ignored even
-    // though the loading repository resolves the library itself.
     let loader = EnvironmentLoader::new(None, None)
         .add_repository_dir(repo_root().join("stdlib"))
         .add_library("bigdecimal-math", None);
@@ -198,8 +192,7 @@ fn loaded_sources_carry_converted_declarations_and_directives() {
             source.declarations
         );
     };
-    // Names stay as written; Ruby absolutises them in `insert_rbs_decl`,
-    // which comes with declaration indexing later.
+    // Names stay as written; Ruby absolutises them in `insert_rbs_decl`.
     let interners = env.interners();
     assert_eq!(
         interners.type_names.display(class.name, &interners.strings),
@@ -210,7 +203,6 @@ fn loaded_sources_carry_converted_declarations_and_directives() {
 
 #[test]
 fn library_dirs_skip_underscore_directories() {
-    // Ruby passes skip_hidden: true for libraries, unlike explicit dirs.
     let dir = tree(&[
         ("gem1/1.2.3/a.rbs", "class Person\nend\n"),
         ("gem1/1.2.3/_private/b.rbs", "class Person::Internal\nend\n"),

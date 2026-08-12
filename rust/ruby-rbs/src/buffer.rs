@@ -8,10 +8,6 @@ use std::path::{Path, PathBuf};
 /// Positions and columns are byte offsets, unlike Ruby's character offsets;
 /// they agree on ASCII-only content. Use the parser's `RBSLocationRange` when
 /// character offsets are needed.
-///
-/// The line table is built on first use, not in [`Buffer::new`]: a normal
-/// load never converts a position, and eagerly scanning every file would
-/// cost more than the parse it accompanies.
 #[derive(Debug, Clone)]
 pub struct Buffer {
     name: PathBuf,
@@ -51,24 +47,17 @@ impl Buffer {
         Some(&self.content[range.clone()])
     }
 
-    /// Converts a byte position into `(line, column)`.
-    ///
     /// A position past the end of the content maps to `(line_count + 1, 0)`,
     /// same as the Ruby implementation.
     pub fn pos_to_loc(&self, pos: usize) -> (usize, usize) {
         let ranges = self.line_ranges();
         let index = ranges.partition_point(|range| range.end < pos);
         match ranges.get(index) {
-            // saturating_sub: positions inside a line terminator do not occur
-            // for parser-produced token boundaries.
             Some(range) => (index + 1, pos.saturating_sub(range.start)),
             None => (ranges.len() + 1, 0),
         }
     }
 
-    /// Converts `(line, column)` into a byte position. Line 0 maps into the
-    /// last line, mirroring the Ruby implementation's `Array#fetch(-1)`
-    /// negative indexing; lines past the end map to `last_position`.
     pub fn loc_to_pos(&self, line: usize, column: usize) -> usize {
         let ranges = self.line_ranges();
         let range = match line.checked_sub(1) {
@@ -91,8 +80,6 @@ fn compute_line_ranges(content: &str) -> Vec<Range<usize>> {
     let mut offset = 0;
 
     for line in content.split_inclusive('\n') {
-        // Like Ruby's String#chomp: strip "\r\n" or "\n", and a bare
-        // trailing "\r" (which can only occur on the final line).
         let without_terminator = match line.strip_suffix('\n') {
             Some(l) => l.strip_suffix('\r').unwrap_or(l),
             None => line.strip_suffix('\r').unwrap_or(line),
@@ -101,8 +88,6 @@ fn compute_line_ranges(content: &str) -> Vec<Range<usize>> {
         offset += line.len();
     }
 
-    // Empty content is one empty line, and content ending in a newline has an
-    // empty line after it; both are the same trailing empty range.
     if content.is_empty() || content.ends_with('\n') {
         ranges.push(offset..offset);
     }

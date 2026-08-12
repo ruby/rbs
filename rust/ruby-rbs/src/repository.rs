@@ -33,14 +33,10 @@ impl Repository {
         Self::default()
     }
 
-    /// Directories registered via [`Repository::add`], in insertion order.
     pub fn dirs(&self) -> &[PathBuf] {
         &self.dirs
     }
 
-    /// Indexes `{dir}/{gem}/{version}/` entries. Non-version and prerelease
-    /// directory names are ignored. Later additions overwrite earlier ones
-    /// for the same gem and version.
     pub fn add(&mut self, dir: &Path) -> io::Result<()> {
         self.dirs.push(dir.to_path_buf());
 
@@ -94,8 +90,6 @@ impl Repository {
                 let requested = GemVersion::parse(version)?;
                 find_best_version(&gem.versions, &requested.release())
             }
-            // Ruby's `latest_version` sorts by the version *string*
-            // (`sort_by(&:version)`): the string-wise greatest key wins.
             None => gem
                 .versions
                 .last_key_value()
@@ -150,7 +144,6 @@ mod tests {
             lookup_name(&repository, "uri", None),
             Some("1.0".to_string())
         );
-        // prerelease directories are ignored
         assert_eq!(
             lookup_name(&repository, "csv", None),
             Some("2.0".to_string())
@@ -176,17 +169,14 @@ mod tests {
             lookup_name(&repository, "uri", Some("3.0")),
             Some("2.0".to_string())
         );
-        // older than every candidate: fall back to the oldest
         assert_eq!(
             lookup_name(&repository, "uri", Some("0.0.1")),
             Some("0".to_string())
         );
-        // prerelease requests match on their release version
         assert_eq!(
             lookup_name(&repository, "uri", Some("1.0.pre")),
             Some("1.0".to_string())
         );
-        // an invalid version string finds nothing rather than the latest
         assert_eq!(repository.lookup("uri", Some("junk")), None);
     }
 
@@ -221,12 +211,10 @@ mod tests {
         let mut repository = Repository::new();
         repository.add(dir.path()).unwrap();
 
-        // Ruby's latest_version sorts by version string: "1.11" < "1.2".
         assert_eq!(
             lookup_name(&repository, "uri", None),
             Some("1.2".to_string())
         );
-        // A requested version searches semantically instead.
         assert_eq!(
             lookup_name(&repository, "uri", Some("99")),
             Some("1.11".to_string())
@@ -239,7 +227,6 @@ mod tests {
         let mut repository = Repository::new();
         repository.add(dir.path()).unwrap();
 
-        // Deterministic tie-break: the string-wise last spelling wins.
         assert_eq!(
             lookup_name(&repository, "uri", Some("1.0")),
             Some("1.0.0".to_string())
