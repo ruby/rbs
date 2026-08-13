@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## 4.2.0 (2026-08-13)
+
+RBS 4.2 ships with two syntax extensions. Method types support Ruby's forwarding parameter — `def request: (...) -> Response` — where the `...` may follow required positional parameters and subsumes the block. Identifiers are no longer restricted to ASCII: method names, parameter names, variables, and symbols can be written in any script Ruby accepts, as in `def 日本語: () -> void`. The exception is names whose first character decides their kind — class, module, interface, and type alias names, and generics type parameters — which must still begin with an ASCII character.
+
+Generics now resolve consistently when a class or module has multiple declarations: module-self types and superclass validation align each declaration's type parameters, and `TypeParam#rename` substitutes type variables in bounds and default types. The parser gets a round of robustness fixes, from `Location#end_line` on files with CRLF line endings to the source locations that were missing from the AST the JRuby parser decodes.
+
+### Language updates
+
+* Support non-ASCII identifiers ([#3082](https://github.com/ruby/rbs/pull/3082))
+* Support forwarding parameters in method types ([#3042](https://github.com/ruby/rbs/pull/3042))
+
+### Library changes
+
+* Exclude CR from comment tokens to fix an off-by-one `Location#end_line` on CRLF files ([#3069](https://github.com/ruby/rbs/pull/3069))
+* Add the missing source locations to the owned AST ([#3044](https://github.com/ruby/rbs/pull/3044))
+* Handle the NULL parser in the WebAssembly shim ([#3085](https://github.com/ruby/rbs/pull/3085))
+* Reject a byte position the lexer cannot start on ([#3083](https://github.com/ruby/rbs/pull/3083))
+* Fix `TypeParam.rename` to substitute variables in bounds and default types ([#3068](https://github.com/ruby/rbs/pull/3068))
+* Align type params across declarations in module-self types and superclass validation ([#3067](https://github.com/ruby/rbs/pull/3067))
+* Build the wasm module with `-DNDEBUG` ([#3066](https://github.com/ruby/rbs/pull/3066))
+* Rename NODISCARD macro to RBS_NODISCARD ([#3065](https://github.com/ruby/rbs/pull/3065))
+* Include the trailing `?` in a keyword key's symbol location ([#3043](https://github.com/ruby/rbs/pull/3043))
+* Mark `type_name` as optional on the alias annotations ([#3039](https://github.com/ruby/rbs/pull/3039))
+
+### Miscellaneous
+
+* Skip JSON 2-only tests with JSON 3 ([#3084](https://github.com/ruby/rbs/pull/3084))
+* Pin GitHub Actions to commit hashes ([#3020](https://github.com/ruby/rbs/pull/3020))
+* Don't use Clang nullability qualifiers in strict ISO C mode ([#3074](https://github.com/ruby/rbs/pull/3074))
+* Avoid eagerly inspecting call traces in type assertions ([#3073](https://github.com/ruby/rbs/pull/3073))
+* Keep GC disabled during GC_test#test_stress_and_stress= ([#3061](https://github.com/ruby/rbs/pull/3061))
+* Fix GC_test#test_enable leaving GC disabled for the rest of the suite ([#3059](https://github.com/ruby/rbs/pull/3059))
+* Fix template drift for ext/rbs_extension/ast_translation.c ([#3038](https://github.com/ruby/rbs/pull/3038))
+
 ## 4.1.3 (2026-08-10)
 
 ### Miscellaneous
