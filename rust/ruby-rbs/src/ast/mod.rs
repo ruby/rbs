@@ -34,11 +34,11 @@ pub use location::{
     AliasDeclarationLocation, AliasLocation, AliasMemberLocation, AttributeMemberLocation,
     ClassDeclarationLocation, ClassInstanceLocation, ClassSingletonLocation, ClassSuperLocation,
     ConstantDeclarationLocation, FunctionParamLocation, GlobalDeclarationLocation,
-    InterfaceDeclarationLocation, InterfaceLocation, LocationRange, MethodDefinitionLocation,
-    MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation, ModuleSelfLocation,
-    ResolveTypeNamesDirectiveLocation, TypeAliasDeclarationLocation, TypeParamLocation,
-    UseDirectiveLocation, UseSingleClauseLocation, UseWildcardClauseLocation,
-    VariableMemberLocation,
+    InterfaceDeclarationLocation, InterfaceLocation, KeywordParamLocation, LocationRange,
+    MethodDefinitionLocation, MethodTypeLocation, MixinMemberLocation, ModuleDeclarationLocation,
+    ModuleSelfLocation, RecordFieldLocation, ResolveTypeNamesDirectiveLocation,
+    TypeAliasDeclarationLocation, TypeParamLocation, UseDirectiveLocation, UseSingleClauseLocation,
+    UseWildcardClauseLocation, VariableMemberLocation,
 };
 pub use members::{
     AliasKind, AliasMember, AttrAccessorMember, AttrReaderMember, AttrWriterMember, AttributeKind,
@@ -58,8 +58,9 @@ pub use types::{
 #[cfg(test)]
 mod tests {
     use crate::ast::{
-        AstConverter, BaseType, BaseTypeKind, ClassMember, Declaration, Directive, IvarName,
-        Literal, Member, MethodKind, ModuleMember, RecordKey, Type, UseClause,
+        AstConverter, BaseType, BaseTypeKind, ClassMember, Declaration, Directive, Function,
+        IvarName, Literal, LocationRange, Member, MethodKind, ModuleMember, RecordKey, Type,
+        UseClause,
     };
     use crate::interner::StringInterner;
     use crate::node::{Node, parse};
@@ -323,5 +324,102 @@ mod tests {
         };
         assert_eq!(type_names.display(wildcard.namespace, &strings), "Foo::Baz");
         assert!(wildcard.location.is_some());
+    }
+
+    #[test]
+    fn converts_keyword_param_locations() {
+        let source = "class Foo\n  def bar: (name: String, ?size: Integer bytes) -> void\nend\n";
+        let signature = parse(source).unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::Class(class_decl) = &declaration else {
+            panic!("expected class declaration");
+        };
+        let ClassMember::Member(Member::MethodDefinition(method)) = &class_decl.members[0] else {
+            panic!("expected method definition member");
+        };
+        let Function::Typed(function) = &method.overloads[0].method_type.function else {
+            panic!("expected typed function");
+        };
+
+        let text =
+            |range: &LocationRange| &source[range.start_byte as usize..range.end_byte as usize];
+
+        let required = &function.required_keywords[0];
+        let required_location = required.location.as_ref().unwrap();
+        assert_eq!(required.name, strings.intern("name"));
+        assert_eq!(text(&required_location.range), "name: String");
+        assert_eq!(text(&required_location.name_range), "name");
+
+        let optional = &function.optional_keywords[0];
+        let optional_location = optional.location.as_ref().unwrap();
+        assert_eq!(optional.name, strings.intern("size"));
+        assert_eq!(text(&optional_location.range), "size: Integer bytes");
+        assert_eq!(text(&optional_location.name_range), "size");
+    }
+
+    #[test]
+    fn converts_record_field_locations() {
+        let source = "type t = { name: String, ?age: Integer, \"id\" => Integer }\n";
+        let signature = parse(source).unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::TypeAlias(alias) = &declaration else {
+            panic!("expected type alias declaration");
+        };
+        let Type::Record(record) = &alias.ty else {
+            panic!("expected record type");
+        };
+
+        let text =
+            |range: &LocationRange| &source[range.start_byte as usize..range.end_byte as usize];
+        let location = |index: usize| record.fields[index].location.as_ref().unwrap();
+
+        assert_eq!(text(&location(0).range), "name: String");
+        assert_eq!(text(&location(0).key_range), "name");
+
+        // The `?` marker belongs to the record type, not to the field.
+        assert_eq!(text(&location(1).range), "age: Integer");
+        assert_eq!(text(&location(1).key_range), "age");
+
+        assert_eq!(text(&location(2).range), "\"id\" => Integer");
+        assert_eq!(text(&location(2).key_range), "\"id\"");
+    }
+
+    #[test]
+    fn converts_method_definition_overload_locations() {
+        let source = "class Foo\n  def bar: () -> void\n        | (Integer) -> String\nend\n";
+        let signature = parse(source).unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::Class(class_decl) = &declaration else {
+            panic!("expected class declaration");
+        };
+        let ClassMember::Member(Member::MethodDefinition(method)) = &class_decl.members[0] else {
+            panic!("expected method definition member");
+        };
+
+        let text =
+            |range: &LocationRange| &source[range.start_byte as usize..range.end_byte as usize];
+        let location = |index: usize| method.overloads[index].location.as_ref().unwrap();
+
+        // The leading `:`/`|` separator is part of the overload range.
+        assert_eq!(text(location(0)), ": () -> void");
+        assert_eq!(text(location(1)), "| (Integer) -> String");
     }
 }

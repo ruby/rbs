@@ -1,8 +1,8 @@
 use crate::ast::annotation::Annotation;
 use crate::ast::comment::Comment;
 use crate::ast::location::{
-    AliasMemberLocation, AttributeMemberLocation, MethodDefinitionLocation, MixinMemberLocation,
-    VariableMemberLocation,
+    AliasMemberLocation, AttributeMemberLocation, LocationRange, MethodDefinitionLocation,
+    MixinMemberLocation, VariableMemberLocation,
 };
 use crate::ast::method_type::MethodType;
 use crate::ast::types::Type;
@@ -54,6 +54,9 @@ pub struct MethodDefinitionMember {
 pub struct MethodDefinitionOverload {
     pub method_type: MethodType,
     pub annotations: Vec<Annotation>,
+    /// Starts at the `:` or `|` separator preceding the overload, so that the
+    /// overloads of a method definition tile its whole type without gaps.
+    pub location: Option<LocationRange>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
