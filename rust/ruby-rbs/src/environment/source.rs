@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use crate::ast::{Declaration, Directive};
-use crate::buffer::Buffer;
 
 /// Where a loaded signature file came from, corresponding to the `source`
 /// values yielded by `RBS::EnvironmentLoader#each_dir`.
@@ -31,7 +30,7 @@ impl SourceKind {
 /// `RBS::Source::RBS` equivalent.
 #[derive(Debug)]
 pub struct Source {
-    pub buffer: Buffer,
+    pub path: PathBuf,
     pub directives: Vec<Directive>,
     pub declarations: Vec<Declaration>,
     pub kind: SourceKind,

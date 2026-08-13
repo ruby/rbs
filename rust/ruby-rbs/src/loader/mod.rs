@@ -4,7 +4,6 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::ast::AstConverter;
-use crate::buffer::Buffer;
 use crate::environment::{Environment, Source, SourceKind};
 use crate::file_finder;
 use crate::interners::Interners;
@@ -175,12 +174,9 @@ pub(crate) fn parse_one(
         .iter()
         .map(|node| converter.convert_declaration(&node))
         .collect();
-    // SignatureNode borrows `content` and has a Drop impl; drop it
-    // explicitly before moving `content` into the Buffer.
-    drop(signature);
 
     Ok(Source {
-        buffer: Buffer::new(path.to_path_buf(), content),
+        path: path.to_path_buf(),
         directives,
         declarations,
         kind: kind.clone(),

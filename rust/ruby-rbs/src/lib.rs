@@ -1,5 +1,4 @@
 pub mod ast;
-pub mod buffer;
 pub mod environment;
 pub(crate) mod file_finder;
 pub mod ids;

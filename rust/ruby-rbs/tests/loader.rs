@@ -120,7 +120,7 @@ fn loaded_sources_carry_converted_declarations_and_directives() {
     let env = Environment::from_loader(&loader).unwrap();
 
     let source = &env.sources()[0];
-    assert!(source.buffer.name().ends_with("person.rbs"));
+    assert!(source.path.ends_with("person.rbs"));
     assert!(matches!(source.directives.as_slice(), [Directive::Use(_)]));
 
     let [Declaration::Class(class)] = source.declarations.as_slice() else {
