@@ -1032,6 +1032,10 @@ class RBS::ParserTest < Test::Unit::TestCase
 
   def test__lex_crlf
     content = "# LineComment\r\nclass Foo[T < Integer] < Bar # Comment\r\nend\r\n"
+
+    comments = RBS::Parser.lex(content).value.select { %i[tLINECOMMENT tCOMMENT].include?(_1.type) }
+    assert_equal [["# LineComment", 1], ["# Comment", 2]], comments.map { [_1.location.source, _1.location.end_line] }
+
     tokens = RBS::Parser._lex(buffer(content), content.length)
     assert_equal [:tLINECOMMENT, '# LineComment', 0...13], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:tTRIVIA, "\r", 13...14], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
@@ -1058,6 +1062,14 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:tTRIVIA, "\r", 58...59], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:tTRIVIA, "\n", 59...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:pEOF, '', 60...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+  end
+
+  def test__lex_comment_with_bare_cr
+    content = "# Comment\rclass Foo"
+    tokens = RBS::Parser.lex(content).value
+
+    assert_equal [:tLINECOMMENT, :pEOF], tokens.map(&:type)
+    assert_equal content, tokens.first.location.source
   end
 
   def test_invalid_position_range_raises

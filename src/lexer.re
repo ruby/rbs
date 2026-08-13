@@ -70,7 +70,16 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "%a|" [^|\x00]* "|"  { return rbs_next_token(lexer, tANNOTATION); }
       "%a<" [^>\x00]* ">"  { return rbs_next_token(lexer, tANNOTATION); }
 
-      "#" (. \ [\x00\r\uFFFD])*    {
+      "#" (. \ [\x00\uFFFD])*    {
+        // Keep a bare CR in the comment, but leave the CR in CRLF for a trivia token.
+        if (rbs_peek(lexer) == '\n' && lexer->string.start[lexer->current.byte_pos - 1] == '\r') {
+          lexer->current.byte_pos -= 1;
+          lexer->current.char_pos -= 1;
+          lexer->current.column -= 1;
+          lexer->current_code_point = '\r';
+          lexer->current_character_bytes = 1;
+        }
+
         return rbs_next_token(
           lexer,
           lexer->first_token_of_line ? tLINECOMMENT : tCOMMENT
