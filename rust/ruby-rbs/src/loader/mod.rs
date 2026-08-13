@@ -5,13 +5,9 @@ use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use crate::ast::AstConverter;
-use crate::buffer::Buffer;
-use crate::environment::{Environment, Source, SourceKind};
+use crate::environment::{Environment, SourceKind};
 use crate::file_finder;
 use crate::gem_version::GemVersion;
-use crate::interners::Interners;
-use crate::node;
 use crate::repository::Repository;
 
 #[derive(Debug)]
@@ -168,8 +164,7 @@ impl EnvironmentLoader {
                 if !seen_files.insert(path.clone()) {
                     continue;
                 }
-                let source = parse_one(&path, &kind, env.interners_mut())?;
-                env.add_source(source);
+                env.add_rbs_file(&path, kind.clone())?;
                 loaded.push(LoadedFile {
                     path,
                     kind: kind.clone(),
@@ -320,50 +315,4 @@ impl EnvironmentLoader {
 
         Ok(())
     }
-}
-
-/// Deliberately a free function taking only the interners, so the load loop
-/// can later be parallelised by handing each worker its own [`Interners`].
-/// The parser's `SignatureNode` holds raw pointers and is not `Send`, so it
-/// must not escape this function — only the owned `Source` does.
-///
-/// Crate-private: a caller outside the crate has no way to merge its
-/// worker-local [`Interners`] into the environment, so the `Source` it
-/// produced would carry ids that environment cannot resolve.
-pub(crate) fn parse_one(
-    path: &Path,
-    kind: &SourceKind,
-    interners: &mut Interners,
-) -> Result<Source, LoadError> {
-    let content = std::fs::read_to_string(path).map_err(|source| LoadError::Io {
-        path: path.to_path_buf(),
-        source,
-    })?;
-
-    let signature = node::parse(&content).map_err(|message| LoadError::Parse {
-        path: path.to_path_buf(),
-        message,
-    })?;
-
-    let mut converter = AstConverter::new(&mut interners.strings, &mut interners.type_names);
-    let directives = signature
-        .directives()
-        .iter()
-        .map(|node| converter.convert_directive(&node))
-        .collect();
-    let declarations = signature
-        .declarations()
-        .iter()
-        .map(|node| converter.convert_declaration(&node))
-        .collect();
-    // SignatureNode borrows `content` and has a Drop impl; drop it
-    // explicitly before moving `content` into the Buffer.
-    drop(signature);
-
-    Ok(Source {
-        buffer: Buffer::new(path.to_path_buf(), content),
-        directives,
-        declarations,
-        kind: kind.clone(),
-    })
 }
