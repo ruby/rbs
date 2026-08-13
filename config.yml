@@ -598,6 +598,9 @@ nodes:
       - name: rest_keywords
         c_type: rbs_node
         optional: true  # NULL when no double-splat (e.g., `() -> void` vs `(**String) -> void`)
+      - name: forwarding
+        c_type: rbs_node
+        optional: true  # NULL when no forwarding parameter (e.g., `() -> void` vs `(...) -> void`)
       - name: return_type
         c_type: rbs_node
   - name: RBS::Types::Function::Param
@@ -610,6 +613,8 @@ nodes:
         optional: true  # NULL when param is unnamed (e.g., `(String) -> void` vs `(String name) -> void`)
     locations:
       - optional: name
+  - name: RBS::Types::Function::ForwardingParam
+    rust_name: FunctionForwardingParamNode
   - name: RBS::Types::Interface
     rust_name: InterfaceTypeNode
     fields:

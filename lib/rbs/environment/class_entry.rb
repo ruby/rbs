@@ -64,6 +64,18 @@ module RBS
           end
         end
       end
+
+      def align_params(decl)
+        entry_params = type_params
+        decl_param_names = decl.type_params.map(&:name)
+
+        return nil if decl_param_names == entry_params.map(&:name)
+
+        Substitution.build(
+          decl_param_names,
+          entry_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
+        )
+      end
     end
   end
 end

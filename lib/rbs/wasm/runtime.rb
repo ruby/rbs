@@ -16,6 +16,14 @@ module RBS
     class Runtime
       include MonitorMixin
 
+      # Statuses the parse entry points return (see rbs_wasm.c). A negative one
+      # is about the range the caller asked for rather than the source text,
+      # and comes with an empty result.
+      INVALID_START_POS = -2
+      INVALID_RANGE = -1
+      PARSE_ERROR = 0
+      OK = 1
+
       class << self
         def instance
           @instance ||= new
@@ -48,9 +56,9 @@ module RBS
       end
 
       # `content` is the whole buffer; `start_pos`/`end_pos` are the character
-      # range within it to parse. Each method returns [success, bytes]: on success
-      # `bytes` is the serialized AST, otherwise it is the error blob (see
-      # set_error_result in rbs_wasm.c).
+      # range within it to parse. Each method returns [status, bytes]: with OK
+      # `bytes` is the serialized AST, with PARSE_ERROR it is the error blob (see
+      # set_error_result in rbs_wasm.c), and with a negative status it is empty.
 
       def parse_signature(content, encoding, start_pos, end_pos)
         run(content, encoding) { |ptr, len, enc_ptr, enc_len| @parse_signature.apply(ptr, len, enc_ptr, enc_len, start_pos, end_pos)[0] }
@@ -118,7 +126,7 @@ module RBS
             @memory.write(source_ptr, bytes.to_java_bytes)
             @memory.write(name_ptr, name.to_java_bytes) unless name_length.zero?
             status = yield(source_ptr, length, name_ptr, name_length)
-            [status == 1, read_result]
+            [i32(status), read_result]
           ensure
             @free.apply(source_ptr)
             @free.apply(name_ptr)
@@ -154,6 +162,13 @@ module RBS
             @free.apply(pointer)
           end
         end
+      end
+
+      # A WebAssembly i32 comes back in a JVM long, so read the low 32 bits as
+      # signed: the negative statuses have to stay negative on this side.
+      def i32(value)
+        value &= 0xFFFF_FFFF
+        value >= 0x8000_0000 ? value - 0x1_0000_0000 : value
       end
 
       def bool(value)

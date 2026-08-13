@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: '4.0'
 
@@ -58,6 +58,6 @@ jobs:
             --body "Automated weekly bundle update" \
             --head "$(git rev-parse --abbrev-ref HEAD)" \
             --base "${{ github.event.repository.default_branch }}" \
-            --label "no-milestone"
+            --label "skip-changelog"
 
           gh pr merge --auto --merge "$(git rev-parse --abbrev-ref HEAD)"

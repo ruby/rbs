@@ -52,4 +52,17 @@ class RBS::TypeNameTest < Test::Unit::TestCase
     assert_equal :alias,     aliased.kind
     assert_equal :interface, interface.kind
   end
+
+  def test_kind_reads_only_the_leading_ascii_character
+    ns = Namespace.root
+
+    # The parser never hands `kind` a name that opens outside ASCII, because a
+    # type name has to start with an ASCII character to be one. A name built by
+    # hand still can, and `kind` reads nothing there -- no Unicode table on this
+    # side, which is the whole point of that restriction.
+    assert_equal :class, TypeName[ns, :Foo日本語].kind
+    assert_equal :alias, TypeName[ns, :foo日本語].kind
+    assert_equal :interface, TypeName[ns, :_Foo日本語].kind
+    assert_equal :class, TypeName[ns, :日本語].kind
+  end
 end

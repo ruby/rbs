@@ -316,6 +316,88 @@ EOF
     end
   end
 
+  def test_module_self_type_type_param_alignment
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+interface _Animal[T]
+  def bark: () -> T
+end
+
+module Foo[A] : _Animal[A]
+end
+
+module Foo[B] : _Animal[B]
+end
+
+module Foo[C] : _Animal[Integer]
+end
+EOF
+
+    Environment.new.tap do |env|
+      decls.each do |decl|
+        env.insert_rbs_decl(decl, context: nil, namespace: RBS::Namespace.root)
+      end
+
+      foo = env.class_decls[type_name("::Foo")]
+
+      assert_equal [:A], foo.type_params.map(&:name)
+
+      # Self types are aligned to the primary declaration's type parameters, and
+      # `_Animal[A]` and `_Animal[B]` are deduplicated
+      assert_equal [
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("_Animal"),
+                       args: [RBS::Types::Variable.new(name: :A, location: nil)],
+                       location: nil
+                     ),
+                     RBS::AST::Declarations::Module::Self.new(
+                       name: type_name("_Animal"),
+                       args: [RBS::Types::ClassInstance.new(name: type_name("Integer"), args: [], location: nil)],
+                       location: nil
+                     ),
+                   ], foo.self_types
+
+      # The locations of the self types point to the original declarations
+      assert_equal ["_Animal[A]", "_Animal[Integer]"], foo.self_types.map {|self_type| self_type.location&.source }
+    end
+  end
+
+  def test_module_entry_align_params
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+module Foo[A, B]
+end
+
+module Foo[X, Y]
+end
+
+module Foo[X]
+end
+EOF
+
+    Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
+      entry << [nil, decls[0]]
+      entry << [nil, decls[1]]
+
+      # Aligned to the primary declaration's names, so no substitution is needed
+      assert_nil entry.align_params(decls[0])
+
+      entry.align_params(decls[1]).tap do |subst|
+        subst or raise
+        assert_equal RBS::Types::Variable.new(name: :A, location: nil), subst[RBS::Types::Variable.new(name: :X, location: nil)]
+        assert_equal RBS::Types::Variable.new(name: :B, location: nil), subst[RBS::Types::Variable.new(name: :Y, location: nil)]
+      end
+    end
+
+    Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
+      entry << [nil, decls[0]]
+      entry << [nil, decls[2]]
+
+      # The type params validation runs before the alignment, so the arity mismatch is detected first
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.align_params(decls[2])
+      end
+    end
+  end
+
   def test_absolute_type
     env = Environment.new
 

@@ -69,9 +69,9 @@
  **********************************************************************************************************************/
 
 #if defined(_MSC_VER)
-#define NODISCARD _Check_return_
+#define RBS_NODISCARD _Check_return_
 #else
-#define NODISCARD __attribute__((warn_unused_result))
+#define RBS_NODISCARD __attribute__((warn_unused_result))
 #endif
 
 /**
@@ -87,8 +87,13 @@
  * Nullability annotations for pointer types.
  * Clang supports _Nullable and _Nonnull to indicate whether a pointer may be NULL.
  * On other compilers, these expand to nothing.
+ *
+ * They are Clang extensions, so a strict ISO C compilation rejects them with
+ * `-Wnullability-extension`, which is an error under `-pedantic-errors`. Expand
+ * them to nothing in that case, so that embedders compiling these headers with a
+ * conforming dialect (`-std=c99` and friends define `__STRICT_ANSI__`) still build.
  */
-#ifdef __clang__
+#if defined(__clang__) && !defined(__STRICT_ANSI__)
 #define RBS_NULLABLE _Nullable
 #define RBS_NONNULL _Nonnull
 #else

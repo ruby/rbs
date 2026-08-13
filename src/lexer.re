@@ -16,7 +16,19 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       re2c:define:YYRESTORE = "*lexer = backup;";
       re2c:yyfill:enable  = 0;
 
-      word = [a-zA-Z0-9_];
+      // Ruby's rule for what an identifier is made of is `ISALNUM(c) ||
+      // (c) == '_' || !ISASCII(c)`, so define the class by what it leaves
+      // out: every ASCII character that is not a word character, and the
+      // sentinel `rbs_next_char` reports for a byte that is invalid under
+      // the active encoding. Everything else can appear in an identifier,
+      // which is how a non-ASCII character gets in.
+      ident_char = . \ ([\x00-\x7F] \ [a-zA-Z0-9_]) \ [\uFFFD];
+
+      // An ASCII digit cannot lead an identifier, but a non-ASCII one can --
+      // Ruby accepts a name made of full-width digits. Since `rbs_next_char`
+      // never reports a non-ASCII character as `[0-9]`, subtracting the ASCII
+      // digits from `ident_char` is the whole of that rule.
+      ident_start = ident_char \ [0-9];
 
       operator = "/" | "~" | "[]=" | "!" | "!=" | "!~" | "-" | "-@" | "+" | "+@"
                | "==" | "===" | "=~" | "<<" | "<=" | "<=>" | ">" | ">=" | ">>" | "%";
@@ -116,7 +128,6 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       ":" dqstring { return rbs_next_token(lexer, tDQSYMBOL); }
       ":" sqstring { return rbs_next_token(lexer, tSQSYMBOL); }
 
-      identifier = [a-zA-Z_] word* [!?=]?;
       symbol_opr = ":|" | ":&" | ":/" | ":%" | ":~" | ":`" | ":^"
                  | ":==" | ":=~" | ":===" | ":!" | ":!=" | ":!~"
                  | ":<" | ":<=" | ":<<" | ":<=>" | ":>" | ":>=" | ":>>"
@@ -127,22 +138,34 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
                    | [~*$?!@\\/;,.=:<>"&'`+]
                    | [^ \t\r\n:;=.,!"$%&()-+~|\\'[\]{}*/<>^\x00]+;
 
-      ":" identifier     { return rbs_next_token(lexer, tSYMBOL); }
-      ":@" identifier    { return rbs_next_token(lexer, tSYMBOL); }
-      ":@@" identifier   { return rbs_next_token(lexer, tSYMBOL); }
-      ":$" global_ident  { return rbs_next_token(lexer, tSYMBOL); }
-      symbol_opr         { return rbs_next_token(lexer, tSYMBOL); }
+      ":" "@"{0,2} ident_start ident_char* [!?=]?  { return rbs_next_token(lexer, tSYMBOL); }
+      ":$" global_ident                            { return rbs_next_token(lexer, tSYMBOL); }
+      symbol_opr                                   { return rbs_next_token(lexer, tSYMBOL); }
 
-      [a-z] word*           { return rbs_next_token(lexer, tLIDENT); }
-      [A-Z] word*           { return rbs_next_token(lexer, tUIDENT); }
-      "_" [a-z0-9_] word*   { return rbs_next_token(lexer, tULLIDENT); }
-      "_" [A-Z] word*       { return rbs_next_token(lexer, tULIDENT); }
-      "_"                   { return rbs_next_token(lexer, tULLIDENT); }
-      [a-zA-Z_] word* "!"   { return rbs_next_token(lexer, tBANGIDENT); }
-      [a-zA-Z_] word* "="   { return rbs_next_token(lexer, tEQIDENT); }
+      [a-z] ident_char*          { return rbs_next_token(lexer, tLIDENT); }
+      [A-Z] ident_char*          { return rbs_next_token(lexer, tUIDENT); }
+      "_" [a-z0-9_] ident_char*  { return rbs_next_token(lexer, tULLIDENT); }
+      "_" [A-Z] ident_char*      { return rbs_next_token(lexer, tULIDENT); }
+      "_"                        { return rbs_next_token(lexer, tULLIDENT); }
 
-      "@" [a-zA-Z_] word*   { return rbs_next_token(lexer, tAIDENT); }
-      "@@" [a-zA-Z_] word*  { return rbs_next_token(lexer, tA2IDENT); }
+      // Every ASCII spelling is covered by one of the rules above, which match
+      // exactly as far, and re2c settles a tie of equal length in favour of the
+      // rule written first. So this one is left with the names that open with a
+      // character outside ASCII.
+      //
+      // RBS reads the case of that character to tell a class name from an alias
+      // name, and outside ASCII there is no reading of it that both the lexer
+      // and `TypeName#kind` can agree on. Those names get a token of their own
+      // and the parser takes it only where the question does not come up.
+      ident_start ident_char* { return rbs_next_token(lexer, tNONASCIIIDENT); }
+
+      // None of these four needs to know the case of the first character, so
+      // widening the leading position to `ident_start` is all they need.
+      ident_start ident_char* "!"  { return rbs_next_token(lexer, tBANGIDENT); }
+      ident_start ident_char* "="  { return rbs_next_token(lexer, tEQIDENT); }
+
+      "@" ident_start ident_char*  { return rbs_next_token(lexer, tAIDENT); }
+      "@@" ident_start ident_char* { return rbs_next_token(lexer, tA2IDENT); }
 
       "$" global_ident      { return rbs_next_token(lexer, tGIDENT); }
 
