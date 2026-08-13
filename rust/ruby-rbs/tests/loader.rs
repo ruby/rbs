@@ -4,25 +4,19 @@ use std::path::{Path, PathBuf};
 use ruby_rbs::ast::{Declaration, Directive};
 use ruby_rbs::environment::{Environment, SourceKind};
 use ruby_rbs::loader::{EnvironmentLoader, LoadError};
-use ruby_rbs::repository::Repository;
 
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
-fn stdlib_repository() -> Repository {
-    let mut repository = Repository::new();
-    repository.add(&repo_root().join("stdlib")).unwrap();
-    repository
+fn stdlib_dir(name: &str) -> PathBuf {
+    repo_root().join("stdlib").join(name).join("0")
 }
 
 fn lib(name: &str) -> SourceKind {
     SourceKind::Library {
         name: name.to_string(),
-        path: stdlib_repository()
-            .lookup(name, None)
-            .expect("test library must resolve in the stdlib repository")
-            .to_path_buf(),
+        path: stdlib_dir(name),
     }
 }
 
@@ -37,12 +31,10 @@ fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
 }
 
 #[test]
-fn loads_core_stdlib_and_dependencies_in_ruby_order() {
-    let loader = EnvironmentLoader::new(
-        Some(repo_root().join("core")),
-        Some(repo_root().join("stdlib")),
-    )
-    .add_library("bigdecimal-math", None);
+fn loads_registered_sources_in_registration_order() {
+    let loader = EnvironmentLoader::new(Some(repo_root().join("core")))
+        .add_library("bigdecimal-math", stdlib_dir("bigdecimal-math"))
+        .add_library("bigdecimal", stdlib_dir("bigdecimal"));
 
     let mut env = Environment::new();
     let loaded = loader.load(&mut env).unwrap();
@@ -57,17 +49,14 @@ fn loads_core_stdlib_and_dependencies_in_ruby_order() {
         .position(|f| f.kind == lib("bigdecimal"))
         .unwrap();
     assert!(first_math < first_dep);
-    assert!(loaded.iter().any(|f| f.kind == lib("stringio")));
     assert_eq!(env.sources().len(), loaded.len());
     assert!(!env.interners().strings.is_empty());
 }
 
 #[test]
 fn from_loader_is_the_primary_entry_point() {
-    let loader = EnvironmentLoader::new(
-        Some(repo_root().join("core")),
-        Some(repo_root().join("stdlib")),
-    );
+    let loader = EnvironmentLoader::new(Some(repo_root().join("core")))
+        .add_library("stringio", stdlib_dir("stringio"));
 
     let env = Environment::from_loader(&loader).unwrap();
 
@@ -79,7 +68,7 @@ fn files_are_loaded_once_first_wins() {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("a.rbs"), "class Foo\nend\n").unwrap();
 
-    let loader = EnvironmentLoader::new(None, None)
+    let loader = EnvironmentLoader::new(None)
         .add_dir(dir.path().to_path_buf())
         .add_dir(dir.path().to_path_buf());
 
@@ -96,7 +85,7 @@ fn explicit_dirs_do_not_skip_underscore_directories() {
     fs::create_dir(dir.path().join("_private")).unwrap();
     fs::write(dir.path().join("_private/a.rbs"), "class Foo\nend\n").unwrap();
 
-    let loader = EnvironmentLoader::new(None, None).add_dir(dir.path().to_path_buf());
+    let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
 
     let mut env = Environment::new();
     let loaded = loader.load(&mut env).unwrap();
@@ -105,24 +94,11 @@ fn explicit_dirs_do_not_skip_underscore_directories() {
 }
 
 #[test]
-fn unknown_library_is_an_error() {
-    let loader = EnvironmentLoader::new(None, None).add_library("no_such_gem", None);
-
-    let mut env = Environment::new();
-    let error = loader.load(&mut env).unwrap_err();
-
-    assert!(matches!(
-        error,
-        LoadError::UnknownLibrary { ref name, version: None } if name == "no_such_gem"
-    ));
-}
-
-#[test]
 fn parse_errors_carry_the_file_path() {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("broken.rbs"), "class\n").unwrap();
 
-    let loader = EnvironmentLoader::new(None, None).add_dir(dir.path().to_path_buf());
+    let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
 
     let mut env = Environment::new();
     let error = loader.load(&mut env).unwrap_err();
@@ -134,52 +110,13 @@ fn parse_errors_carry_the_file_path() {
 }
 
 #[test]
-fn default_configuration_loads_without_extra_repository_wiring() {
-    let loader = EnvironmentLoader::new(
-        Some(repo_root().join("core")),
-        Some(repo_root().join("stdlib")),
-    );
-
-    let mut env = Environment::new();
-    let loaded = loader.load(&mut env).unwrap();
-
-    assert!(loaded.iter().any(|f| f.kind == lib("stringio")));
-}
-
-#[test]
-fn core_requires_resolvable_stringio() {
-    let loader = EnvironmentLoader::new(Some(repo_root().join("core")), None);
-
-    let mut env = Environment::new();
-    let error = loader.load(&mut env).unwrap_err();
-
-    assert!(matches!(
-        error,
-        LoadError::UnknownLibrary { ref name, version: None } if name == "stringio"
-    ));
-}
-
-#[test]
-fn custom_repository_manifests_do_not_expand_dependencies() {
-    let loader = EnvironmentLoader::new(None, None)
-        .add_repository_dir(repo_root().join("stdlib"))
-        .add_library("bigdecimal-math", None);
-
-    let mut env = Environment::new();
-    let loaded = loader.load(&mut env).unwrap();
-
-    assert!(!loaded.is_empty());
-    assert!(loaded.iter().all(|f| f.kind == lib("bigdecimal-math")));
-}
-
-#[test]
 fn loaded_sources_carry_converted_declarations_and_directives() {
     let dir = tree(&[(
         "person.rbs",
         "use Foo::Bar\n\nclass Person\n  def name: () -> String\nend\n",
     )]);
 
-    let loader = EnvironmentLoader::new(None, None).add_dir(dir.path().to_path_buf());
+    let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
     let env = Environment::from_loader(&loader).unwrap();
 
     let source = &env.sources()[0];
@@ -208,9 +145,7 @@ fn library_dirs_skip_underscore_directories() {
         ("gem1/1.2.3/_private/b.rbs", "class Person::Internal\nend\n"),
     ]);
 
-    let loader = EnvironmentLoader::new(None, None)
-        .add_repository_dir(dir.path().to_path_buf())
-        .add_library("gem1", Some("1.2.3"));
+    let loader = EnvironmentLoader::new(None).add_library("gem1", dir.path().join("gem1/1.2.3"));
 
     let mut env = Environment::new();
     let loaded = loader.load(&mut env).unwrap();
@@ -224,17 +159,4 @@ fn library_dirs_skip_underscore_directories() {
             path: dir.path().join("gem1/1.2.3"),
         }
     );
-}
-
-#[test]
-fn invalid_library_version_is_reported_distinctly() {
-    let loader = EnvironmentLoader::new(None, None).add_library("uri", Some("junk"));
-
-    let mut env = Environment::new();
-    let error = loader.load(&mut env).unwrap_err();
-
-    assert!(matches!(
-        error,
-        LoadError::InvalidVersion { ref name, ref version } if name == "uri" && version == "junk"
-    ));
 }

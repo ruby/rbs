@@ -8,9 +8,9 @@ use crate::buffer::Buffer;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SourceKind {
     Core,
-    /// `path` is the resolved version directory
-    /// ([`Repository::lookup`](crate::repository::Repository::lookup)), which
-    /// holds the library's RBS files directly.
+    /// `path` is the library's version directory, already resolved by the
+    /// caller (Ruby's `Repository#lookup` / `gem_sig_path`), holding the
+    /// library's RBS files directly.
     Library {
         name: String,
         path: PathBuf,
@@ -18,6 +18,14 @@ pub enum SourceKind {
     Dir {
         path: PathBuf,
     },
+}
+
+impl SourceKind {
+    /// Whether `_`-prefixed subdirectories are skipped while scanning.
+    /// Only a user-specified [`SourceKind::Dir`] does not skip them.
+    pub fn skips_hidden(&self) -> bool {
+        !matches!(self, SourceKind::Dir { .. })
+    }
 }
 
 /// `RBS::Source::RBS` equivalent.
