@@ -603,29 +603,40 @@ end
 #
 def changelog_pull_requests(commits, skip_labels: CHANGELOG_SKIP_LABELS)
   origins = changelog_origins(commits)
-  found = changelog_associated_pull_requests(commits.map { |commit| origins[commit] || commit })
 
-  # An origin that leads nowhere -- a commit cherry-picked from a fork, or one that went to the
-  # default branch without a pull request -- falls back to the commit in this history, which is
-  # at least the backport that brought it here.
-  fallbacks = commits.select { |commit| origins[commit] && found.fetch(origins[commit], []).empty? }
-  found.update(changelog_associated_pull_requests(fallbacks)) unless fallbacks.empty?
+  # Both ends of each commit, in one query: the origin a cherry-pick records, which is where the
+  # change was written and reviewed, and the commit as it sits in this history, whose pull request
+  # is the backport that brought it here. On the development line there are no origins and the
+  # second end is the only one.
+  found = changelog_associated_pull_requests(commits + origins.values)
 
   pull_requests = {}
   skipped = {}
 
   commits.each do |commit|
-    prs = found.fetch(origins[commit] || commit, [])
-    prs = found.fetch(commit, []) if prs.empty?
+    carriers = found.fetch(commit, [])
+    prs = origins[commit] ? found.fetch(origins[commit], []) : []
+
+    # An origin that leads nowhere -- a commit cherry-picked from a fork, or one that went to the
+    # default branch without a pull request -- falls back to the commit in this history, which is
+    # at least the backport that brought it here. It is the entry itself then, not an annotation.
+    backports = prs.empty? ? [] : carriers
+    prs = carriers if prs.empty?
 
     prs.each do |pr|
-      if (pr[:labels] & skip_labels).empty?
-        pull_requests[pr[:number]] ||= pr
-      else
-        skipped[pr[:number]] ||= pr
-      end
+      bucket = (pr[:labels] & skip_labels).empty? ? pull_requests : skipped
+      entry = (bucket[pr[:number]] ||= pr.merge(backports: []))
+      entry[:backports] |= backports.map { |backport| backport.slice(:number, :url) }
     end
   end
+
+  # A backport is how a change reached this line, not a change of its own, so it belongs in the
+  # entries it carried rather than beside them. It can still arrive as one: the merge commit of the
+  # backport is in the history too, and carries no `-x` trailer to resolve, so it looks like an
+  # ordinary commit of its own pull request. Drop the ones that annotate something.
+  carried = (pull_requests.each_value.to_a + skipped.each_value.to_a).flat_map { |pr| pr[:backports] }
+  carried = carried.map { |backport| backport[:number] }.uniq
+  carried.each { |number| pull_requests.delete(number) }
 
   [pull_requests.values, skipped.values]
 end
@@ -675,6 +686,19 @@ def warn_skipped_pull_requests(skipped, skip_labels)
   $stderr.puts "  (⏭️  Skipped #{skipped.size} pull request(s) labeled #{skip_labels.map { |label| "`#{label}`" }.join(" or ")}: #{numbers.join(", ")})"
 end
 
+# The links of one changelog entry: the pull request the change was written in, and on a release
+# branch the backport that carried it onto the line.
+#
+# The second link is what keeps a backported entry from reading as a mistake. Its first link is a
+# pull request against the development line, so the same link is listed again when that line ships,
+# and nothing else tells the two occurrences apart.
+#
+def changelog_links(pr)
+  links = ["[##{pr[:number]}](#{pr[:url]})"]
+  links.concat(pr[:backports].to_a.map { |backport| "Backported in [##{backport[:number]}](#{backport[:url]})" })
+  links.join(", ")
+end
+
 # Prints the changelog template listing the pull requests merged between `from` and `HEAD`.
 #
 # The changelog goes to STDOUT and everything else goes to STDERR, so that the output can be
@@ -696,7 +720,7 @@ def print_changelog(from, paths: [], skip_labels: CHANGELOG_SKIP_LABELS)
   else
     $stderr.puts
     pull_requests.each do |pr|
-      puts "* #{pr[:title]} ([##{pr[:number]}](#{pr[:url]}))"
+      puts "* #{pr[:title]} (#{changelog_links(pr)})"
     end
     $stdout.flush
   end

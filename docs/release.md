@@ -78,8 +78,8 @@ Sort the list into the sections below. `rake gem:changelog:json` prints the same
 the changed files, labels, and body of each, which is what the sorting is based on.
 
 Both tasks reach GitHub through `gh`, which a Claude Code on the web session cannot do. See
-[Assembling the changelog without `gh`](#assembling-the-changelog-without-gh) for how the same list
-is produced there.
+[Assembling the changelog without `gh`](#assembling-the-changelog-without-gh), which runs them on a
+runner instead.
 
 ```markdown
 ## X.Y.Z (YYYY-MM-DD)
@@ -199,6 +199,11 @@ opposite places:
    cherry-picked from `master` — see [Backports](#backports). The `aaa-` prefix carries no meaning
    beyond sorting the release branches to the top of the branch list.
 
+   The branch carries its own release tooling, since that is read from the ref rather than from
+   `master`: the `gem:` tasks, and `changelog.yml` for the changelog. Branching from `master`
+   brings both along; what needs watching is a later change to either, which reaches this line
+   only if it is cherry-picked here too.
+
 2. **Bump `master`** to `X.(Y+1).0.dev`, in a pull request with `Gemfile.lock` regenerated and
    labeled `skip-changelog` like the release pull request itself. `4.1` was started exactly this
    way: `aaa-4.0.x` was branched at the commit before `Start 4.1 development`, which set
@@ -231,80 +236,51 @@ it, the only pull request a backported commit is associated with is the one that
 backport, which says nothing about the change and is the same for every commit it brought over —
 that is why the 4.0.3 changelog credits its three entries to the same pull request.
 
-## Assembling the changelog without `gh`
-
-A release can be prepared from a Claude Code on the web session, with one exception:
-`gem:changelog` and `gem:changelog:json` cannot run there. Both go through `gh`, and in such a
-session `api.github.com` is blocked at the agent proxy for anything the shell does. `gh` is not
-installed, installing it does not help, and rewriting the tasks against REST or Net::HTTP would be
-blocked the same way — the refusal is keyed on the session rather than on the client:
-
-```console
-$ curl -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/ruby/rbs
-{"message":"GitHub access is not enabled for this session. ..."}   # HTTP 403
-```
-
-Nothing else in the release is affected. `gem:check_release` and `gem:tag` read git and the working
-tree, and `gem:gh_release` runs on a runner, where `gh` and `github.token` both work.
-
-What the session does have is the GitHub MCP server, which reaches the API through its own
-credentials. The changelog is assembled with its tools, in the three steps the rake task takes.
-
-**1. Where the changelog starts.** The rule is `changelog_base`: a prerelease starts from the
-latest tag, a release proper skips the prerelease tags. Tags are not fetched by default.
-
-```console
-$ git fetch origin --tags
-$ git describe --tags --match 'v*' --abbrev=0 --exclude 'v*.pre*' --exclude 'v*.dev*'
-v4.1.1
-```
-
-Drop the two `--exclude` flags for a prerelease, which starts at the latest tag whatever it is.
-
-**2. The commits.**
-
-```console
-$ git log --format=%H v4.1.1..HEAD
-```
-
-**3. The pull requests they came from.** List the merged pull requests with `list_pull_requests`
-(`base: master`, `state: closed`, `sort: updated`, `direction: desc`, and `fields: number, title,
-labels, merged_at, head`), paging back until `merged_at` predates the base tag, and keep the ones
-whose `head.sha` appears in the commit list from step 2. That intersection is what the task's
-GraphQL `associatedPullRequests` query answers, reached from the other side.
-
-Then drop the pull requests labeled `skip-changelog` and format the rest newest first, which is the
-order of step 2:
+The entry names that pull request and adds the one that carried the backport:
 
 ```markdown
-* {title} ([#{number}](https://github.com/ruby/rbs/pull/{number}))
+* {title} ([#{original}](https://github.com/ruby/rbs/pull/{original}), Backported in [#{backport}](https://github.com/ruby/rbs/pull/{backport}))
 ```
 
-Sorting them into sections needs the changed files, which `gem:changelog:json` would have supplied:
-`pull_request_read` with `get_files` per pull request, or `get` for the body.
+`gem:changelog` prints this form on its own, from the same `-x` trailer: the origin it resolves is
+the first link, and the pull request of the cherry-pick in front of it is the second. On the
+development line nothing is a cherry-pick, so entries there keep the plain single link.
 
-Four things about that matching, the first of which is a trap:
+The second link is what keeps the entry from reading as a mistake. The original pull request is
+against `master`, so it is listed again when the development line ships — and with nothing to tell
+the two apart, the same link under two version headings looks like a change written into the wrong
+section. #1923 is the pair to look at: plain under 3.6.0.pre.1, annotated under 3.5.2, which
+backported it.
 
-- **Do not read the numbers from `Merge pull request #N` commit subjects.** It looks like it works
-  on this repository, and it silently loses pull requests. Applying the path filter the task uses
-  (`git log --full-history --simplify-merges -- . ':(exclude)rust'`) drops the merge commits while
-  keeping the commits they merged, so on the 4.1.2 cycle five of the eight numbers disappeared with
-  them. A squashed or rebased pull request never writes that subject at all. Matching `head.sha`
-  has neither failure mode.
-- `head.sha` is in the history because this repository merges pull requests with merge commits. A
-  squashed or rebased one would need its `merge_commit_sha`, which the listing does not carry.
-- The listing reports `merged: false` for pull requests that are merged — the field is not
-  populated by that endpoint. Read `merged_at` instead.
-- On a release branch the commits are cherry-picks, so resolve the `(cherry picked from commit
-  <sha>)` trailer first and match the recorded origin, as `changelog_origins` does. Matching the
-  cherry-pick itself attributes every backport to the pull request that carried it.
+## Assembling the changelog without `gh`
 
-Pull requests confined to `rust/` are left out too, which the task does by filtering the commits in
-step 2 with `-- . ':(exclude)rust'`. Leave step 2 unfiltered here and drop those pull requests by
-their `get_files` instead. The filter decides which commits are listed, and a pull request is found
-by one specific commit — its head — so a pull request whose last commit happens to touch only
-`rust/` would lose that head and disappear even though the rest of it belongs in the changelog.
-Matching against every commit and filtering afterwards cannot go wrong that way.
+`gem:changelog` and `gem:changelog:json` reach GitHub through `gh`, so they cannot run from a
+Claude Code on the web session. `api.github.com` refuses anything the shell does there, and the
+refusal is keyed on the session rather than on the client, so installing `gh` does not help:
+
+```console
+$ curl -s -o /dev/null -w '%{http_code}' https://api.github.com/repos/ruby/rbs
+403
+```
+
+Nothing else about the release is affected. `gem:check_release` and `gem:tag` read git and the
+working tree, `gem:gh_release` runs on a runner, and git itself reaches github.com normally —
+clone, fetch and push all work.
+
+So the task is run where it does work. Dispatch
+[`changelog.yml`](../.github/workflows/changelog.yml), which runs it on a runner, and read the list
+from the run summary, the log, or the `changelog` artifact.
+
+| Input | Value |
+| --- | --- |
+| The ref selector | The branch the changelog is for: `aaa-X.Y.x` for a patch release, `master` otherwise |
+| `version` | Where the changelog starts, when that should not follow `RBS::VERSION`. It names the release before the one being written, so `4.1.2` produces the 4.1.3 changelog |
+| `format` | `list` for the template, `json` for the pull request details the sections are sorted from |
+
+The ref is not incidental the way it is for `release-gems.yml`: it picks the history being
+described *and* the copy of the task that describes it. So a release branch needs `changelog.yml`
+on it, the same way it needs the release tasks — dispatching on a ref without the file fails with
+`Workflow does not have 'workflow_dispatch' trigger`, since the trigger is read from the ref.
 
 ## Notes
 
