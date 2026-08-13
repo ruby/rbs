@@ -48,34 +48,29 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
   end
 
-  def test_forwarding_parameter
-    parse_method_type("(...) -> void").tap do |type|
-      assert_equal "(...) -> void", type.to_s
-      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
-      assert_equal "...", type.type.forwarding.location.source
-      assert_empty type.type.required_positionals
-      assert_nil type.block
+  def test_forwarding_parameter_syntax_is_not_enabled
+    # `(...)` forwarding parameters are gated behind a C-level parser option
+    # (`rbs_parser_options_t`) that the Ruby API doesn't expose, so parsing
+    # them from Ruby is always an error.
+    error = assert_raise(RBS::ParsingError) do
+      parse_method_type("(...) -> void")
     end
+    assert_include error.message, "forwarding parameter syntax is not enabled"
 
-    parse_method_type("(String message, ...) -> void").tap do |type|
-      assert_equal "(String message, ...) -> void", type.to_s
-      assert_equal 1, type.type.required_positionals.size
-      assert_predicate type.type, :forwarding?
-      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
+    assert_raise(RBS::ParsingError) do
+      parse_method_type("(String message, ...) -> void")
     end
   end
 
-  def test_forwarding_parameter_with_overload_continuation
-    _, _, declarations = parse_signature(<<~RBS)
-      class Foo
-        def foo: (...) -> void
-               | ...
-      end
-    RBS
-
-    method = declarations.fetch(0).members.fetch(0)
-    assert_predicate method, :overloading?
-    assert_predicate method.overloads.fetch(0).method_type.type, :forwarding?
+  def test_forwarding_parameter_syntax_is_not_enabled_in_signature
+    assert_raise(RBS::ParsingError) do
+      parse_signature(<<~RBS)
+        class Foo
+          def foo: (...) -> void
+                 | ...
+        end
+      RBS
+    end
   end
 
   def test_forwarding_parameter_rejects_nonleading_parameters
