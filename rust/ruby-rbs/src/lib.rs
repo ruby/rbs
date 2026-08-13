@@ -1,12 +1,10 @@
 pub mod ast;
 pub mod buffer;
 pub mod environment;
-pub mod file_finder;
-pub mod gem_version;
+pub(crate) mod file_finder;
 pub mod ids;
 pub mod interner;
 pub mod interners;
 pub mod loader;
 pub mod node;
-pub mod repository;
 pub mod type_name;
