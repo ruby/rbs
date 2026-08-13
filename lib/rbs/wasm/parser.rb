@@ -12,8 +12,9 @@ module RBS
   # RBS::Parser API on top, exactly as it does for the C extension.
   class Parser
     class << self
-      def _parse_signature(buffer, start_pos, end_pos)
+      def _parse_signature(buffer, start_pos, end_pos, enable_forwarding_params)
         validate_position_range(buffer, start_pos, end_pos)
+        validate_parser_options(enable_forwarding_params)
         encoding = buffer.content.encoding.name
         status, bytes = WASM::Runtime.instance.parse_signature(buffer.content, encoding, start_pos, end_pos)
         raise_parse_failure(buffer, status, bytes, start_pos, end_pos) unless status == WASM::Runtime::OK
@@ -31,9 +32,10 @@ module RBS
         deserialize_or_nil(bytes, buffer)
       end
 
-      def _parse_method_type(buffer, start_pos, end_pos, variables, require_eof)
+      def _parse_method_type(buffer, start_pos, end_pos, variables, require_eof, enable_forwarding_params)
         validate_position_range(buffer, start_pos, end_pos)
         validate_variables(variables)
+        validate_parser_options(enable_forwarding_params)
         encoding = buffer.content.encoding.name
         status, bytes = WASM::Runtime.instance.parse_method_type(buffer.content, encoding, start_pos, end_pos, variables, require_eof)
         raise_parse_failure(buffer, status, bytes, start_pos, end_pos) unless status == WASM::Runtime::OK
@@ -96,6 +98,15 @@ module RBS
         size = buffer.content.bytesize
         if start_pos > size
           raise ArgumentError, "position range starts past the end of the buffer: #{start_pos}...#{end_pos}, buffer is #{size} bytes"
+        end
+      end
+
+      # The WebAssembly entry points (rbs_wasm.c) build their parsers with the
+      # default options, so the optional syntax the C extension can enable is
+      # not reachable here. The public RBS::Parser API never enables it.
+      def validate_parser_options(enable_forwarding_params)
+        if enable_forwarding_params
+          raise NotImplementedError, "forwarding parameter syntax is not supported by the WebAssembly parser"
         end
       end
 

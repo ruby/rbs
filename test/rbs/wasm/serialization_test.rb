@@ -24,8 +24,8 @@ class RBS::WASM::SerializationTest < Test::Unit::TestCase
   end
 
   def assert_round_trips(buf)
-    directives, decls = RBS::Parser._parse_signature(buf, 0, buf.content.bytesize)
-    bytes = RBS::Parser._parse_signature_to_bytes(buf, 0, buf.content.bytesize)
+    directives, decls = RBS::Parser._parse_signature(buf, 0, buf.content.bytesize, false)
+    bytes = RBS::Parser._parse_signature_to_bytes(buf, 0, buf.content.bytesize, false)
     actual = RBS::WASM::Deserializer.deserialize(bytes, buf)
 
     diff = ast_diff([directives, decls], actual)
@@ -109,6 +109,7 @@ class RBS::WASM::SerializationTest < Test::Unit::TestCase
       "(Integer) -> String",
       "[T] (T) -> T",
       "(Integer, ?String, *Symbol, foo: bool, ?bar: Integer, **untyped) -> void",
+      "(String message, ...) -> void",
       "() { (Integer) -> void } -> bool",
       "() ?{ () -> void } -> void",
       "[A, B < Comparable[A]] (A) -> B",
@@ -116,8 +117,8 @@ class RBS::WASM::SerializationTest < Test::Unit::TestCase
 
     method_types.each do |source|
       buf = buffer(source)
-      expected = RBS::Parser._parse_method_type(buf, 0, source.bytesize, nil, true)
-      bytes = RBS::Parser._parse_method_type_to_bytes(buf, 0, source.bytesize, nil, true)
+      expected = RBS::Parser._parse_method_type(buf, 0, source.bytesize, nil, true, true)
+      bytes = RBS::Parser._parse_method_type_to_bytes(buf, 0, source.bytesize, nil, true, true)
       actual = RBS::WASM::Deserializer.deserialize(bytes, buf)
 
       assert_nil ast_diff(expected, actual), "method type round-trip mismatch for #{source.inspect}"

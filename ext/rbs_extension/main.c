@@ -185,7 +185,16 @@ static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE st
     return lexer;
 }
 
-static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
+// Build the parser options from the arguments the `_parse_*` entry points
+// receive. The optional syntax these enable is not part of the public
+// `RBS::Parser` API, so only the private entry points pass them through.
+static rbs_parser_options_t parser_options(VALUE enable_forwarding_params) {
+    return (rbs_parser_options_t) {
+        .enable_forwarding_params = RB_TEST(enable_forwarding_params),
+    };
+}
+
+static rbs_parser_t *alloc_parser_from_buffer_with_options(VALUE buffer, int start_pos, int end_pos, rbs_parser_options_t options) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
 
@@ -194,11 +203,12 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     rb_encoding *encoding = rb_enc_get(string);
     const char *encoding_name = rb_enc_name(encoding);
 
-    rbs_parser_t *parser = rbs_parser_new(
+    rbs_parser_t *parser = rbs_parser_new_with_options(
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
-        end_pos
+        end_pos,
+        options
     );
 
     if (parser == NULL) {
@@ -206,6 +216,10 @@ static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int e
     }
 
     return parser;
+}
+
+static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
+    return alloc_parser_from_buffer_with_options(buffer, start_pos, end_pos, (rbs_parser_options_t) { 0 });
 }
 
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {
@@ -254,12 +268,12 @@ static VALUE parse_method_type_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) method_type);
 }
 
-static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     declare_type_variables(parser, variables, buffer);
     struct parse_method_type_arg arg = {
         .buffer = buffer,
@@ -293,12 +307,12 @@ static VALUE parse_signature_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) signature);
 }
 
-static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
+static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     struct parse_signature_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
@@ -386,12 +400,12 @@ static VALUE parse_method_type_to_bytes_try(VALUE a) {
     return serialized_node_to_string(parser, (rbs_node_t *) method_type);
 }
 
-static VALUE rbsparser_parse_method_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+static VALUE rbsparser_parse_method_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     declare_type_variables(parser, variables, buffer);
     struct parse_method_type_arg arg = {
         .buffer = buffer,
@@ -419,12 +433,12 @@ static VALUE parse_signature_to_bytes_try(VALUE a) {
     return serialized_node_to_string(parser, (rbs_node_t *) signature);
 }
 
-static VALUE rbsparser_parse_signature_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
+static VALUE rbsparser_parse_signature_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     struct parse_signature_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
@@ -609,11 +623,11 @@ void rbs__init_parser(void) {
     rb_gc_register_mark_object(EMPTY_HASH);
 
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 8);
-    rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
-    rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+    rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 6);
+    rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_type_to_bytes", rbsparser_parse_type_to_bytes, 8);
-    rb_define_singleton_method(RBS_Parser, "_parse_method_type_to_bytes", rbsparser_parse_method_type_to_bytes, 5);
-    rb_define_singleton_method(RBS_Parser, "_parse_signature_to_bytes", rbsparser_parse_signature_to_bytes, 3);
+    rb_define_singleton_method(RBS_Parser, "_parse_method_type_to_bytes", rbsparser_parse_method_type_to_bytes, 6);
+    rb_define_singleton_method(RBS_Parser, "_parse_signature_to_bytes", rbsparser_parse_signature_to_bytes, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);

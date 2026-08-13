@@ -121,15 +121,11 @@ class RBS::SchemaTest < Test::Unit::TestCase
       parse_method_type("[G] (A a, ?B, *C, d: D, ?e: E e, **f) ?{ (G) -> void } -> String").to_json
     )
 
-    # Forwarding parameters can't be parsed from Ruby, so build the node directly
+    # Forwarding parameters are only parsed when explicitly enabled
+    source = "(String message, ...) -> void"
     JSONValidator.method_type.validate!(
-      RBS::MethodType.new(
-        type_params: [],
-        type: RBS::Types::Function.empty(RBS::Types::Bases::Void.new(location: nil)).update(
-          forwarding: RBS::Types::Function::ForwardingParam.new(location: nil)
-        ),
-        block: nil,
-        location: nil
+      RBS::Parser._parse_method_type(
+        RBS::Buffer.new(content: source, name: "test.rbs"), 0, source.bytesize, nil, true, true
       ).to_json
     )
   end
