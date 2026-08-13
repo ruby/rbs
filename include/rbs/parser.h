@@ -41,6 +41,21 @@ typedef struct rbs_error_t {
 } rbs_error_t;
 
 /**
+ * Options that control which syntax the parser accepts.
+ *
+ * Zero-initializing the struct gives the default configuration, where
+ * every optional syntax is disabled.
+ * */
+typedef struct {
+    /**
+     * Accept `(...)` forwarding parameters in method types.
+     *
+     * The syntax is experimental and disabled by default.
+     * */
+    bool enable_forwarding_params;
+} rbs_parser_options_t;
+
+/**
  * An RBS parser is a LL(3) parser.
  * */
 typedef struct {
@@ -57,6 +72,8 @@ typedef struct {
     rbs_constant_pool_t constant_pool;
     rbs_allocator_t *allocator;
     rbs_error_t *error;
+
+    rbs_parser_options_t options;
 } rbs_parser_t;
 
 /**
@@ -107,6 +124,16 @@ RBS_NODISCARD rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *, rbs_string_t string,
  * Returns `NULL` for a `start_pos` that `rbs_lexer_new` rejects.
  * */
 RBS_NODISCARD rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos);
+
+/**
+ * Allocate new rbs_parser_t object with the given options.
+ *
+ * `rbs_parser_new` is equivalent to passing a zero-initialized
+ * `rbs_parser_options_t`, which disables every optional syntax.
+ *
+ * Returns `NULL` for a `start_pos` that `rbs_lexer_new` rejects.
+ * */
+RBS_NODISCARD rbs_parser_t *rbs_parser_new_with_options(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, rbs_parser_options_t options);
 void rbs_parser_free(rbs_parser_t *parser);
 
 /**

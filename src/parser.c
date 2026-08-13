@@ -556,6 +556,11 @@ static bool parse_params(rbs_parser_t *parser, method_params *params, bool forwa
                 return false;
             }
 
+            if (!parser->options.enable_forwarding_params) {
+                rbs_parser_set_error(parser, parser->next_token, true, "forwarding parameter syntax is not enabled");
+                return false;
+            }
+
             rbs_parser_advance(parser);
             params->forwarding = (rbs_node_t *) rbs_types_function_forwarding_param_new(
                 ALLOCATOR(),
@@ -3569,6 +3574,10 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
 }
 
 rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
+    return rbs_parser_new_with_options(string, encoding, start_pos, end_pos, (rbs_parser_options_t) { 0 });
+}
+
+rbs_parser_t *rbs_parser_new_with_options(rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos, rbs_parser_options_t options) {
     rbs_allocator_t *allocator = rbs_allocator_init();
 
     rbs_lexer_t *lexer = rbs_lexer_new(allocator, string, encoding, start_pos, end_pos);
@@ -3593,6 +3602,8 @@ rbs_parser_t *rbs_parser_new(rbs_string_t string, const rbs_encoding_t *encoding
         .constant_pool = { 0 },
         .allocator = allocator,
         .error = NULL,
+
+        .options = options,
     };
 
     // The parser's constant pool is mainly used for storing the names of type variables, which usually aren't many.

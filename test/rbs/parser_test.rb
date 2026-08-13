@@ -1075,7 +1075,7 @@ class RBS::ParserTest < Test::Unit::TestCase
   def test_invalid_position_range_raises
     # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
     assert_raises(ArgumentError) do
-      RBS::Parser._parse_signature(buffer(""), 1, 0)
+      RBS::Parser._parse_signature(buffer(""), 1, 0, false)
     end
   end
 
@@ -1093,7 +1093,7 @@ class RBS::ParserTest < Test::Unit::TestCase
     # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
     source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
     assert_raises(RBS::ParsingError) do
-      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
     end
   end
 
@@ -1103,7 +1103,7 @@ class RBS::ParserTest < Test::Unit::TestCase
     # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
     source = "\xFF".dup.force_encoding(Encoding::UTF_8)
     assert_raises(RBS::ParsingError) do
-      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
     end
   end
 
@@ -1225,7 +1225,7 @@ class RBS::ParserTest < Test::Unit::TestCase
     # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the
     # sentinel that marks an invalid byte. A comment containing it must parse fine.
     source = "# \u{FFFD}\ntype x = untyped\n".dup.force_encoding(Encoding::UTF_8)
-    _, decls = RBS::Parser._parse_signature(buffer(source), 0, source.bytesize)
+    _, decls = RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
     assert_equal 1, decls.size
     assert_instance_of RBS::AST::Declarations::TypeAlias, decls[0]
   end

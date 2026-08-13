@@ -23,6 +23,19 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     RBS::Parser.parse_signature(buffer)
   end
 
+  # `(...)` forwarding parameters are gated behind a parser option that the
+  # public API deliberately doesn't expose, so the tests below reach for the
+  # private entry points to exercise the syntax itself.
+  def parse_method_type_with_forwarding(string)
+    buffer = Buffer.new(content: string.encode(Encoding::UTF_8), name: "sample.rbs")
+    RBS::Parser._parse_method_type(buffer, 0, buffer.content.bytesize, nil, true, true)
+  end
+
+  def parse_signature_with_forwarding(string)
+    buffer = Buffer.new(content: string.encode(Encoding::UTF_8), name: "sample.rbs")
+    RBS::Parser._parse_signature(buffer, 0, buffer.content.bytesize, true)
+  end
+
   def test_method_type
     Parser.parse_method_type("()->void").yield_self do |type|
       assert_equal "() -> void", type.to_s
@@ -48,8 +61,29 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_forwarding_parameter_syntax_is_not_enabled_by_default
+    # The syntax has no type checking semantics yet, so the public API never
+    # enables it. Signatures shipped in the wild can't use it.
+    error = assert_raise(RBS::ParsingError) do
+      parse_method_type("(...) -> void")
+    end
+    assert_include error.message, "forwarding parameter syntax is not enabled"
+
+    assert_raise(RBS::ParsingError) do
+      parse_method_type("(String message, ...) -> void")
+    end
+
+    assert_raise(RBS::ParsingError) do
+      parse_signature(<<~RBS)
+        class Foo
+          def foo: (...) -> void
+        end
+      RBS
+    end
+  end
+
   def test_forwarding_parameter
-    parse_method_type("(...) -> void").tap do |type|
+    parse_method_type_with_forwarding("(...) -> void").tap do |type|
       assert_equal "(...) -> void", type.to_s
       assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
       assert_equal "...", type.type.forwarding.location.source
@@ -57,7 +91,7 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
       assert_nil type.block
     end
 
-    parse_method_type("(String message, ...) -> void").tap do |type|
+    parse_method_type_with_forwarding("(String message, ...) -> void").tap do |type|
       assert_equal "(String message, ...) -> void", type.to_s
       assert_equal 1, type.type.required_positionals.size
       assert_predicate type.type, :forwarding?
@@ -66,7 +100,7 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_with_overload_continuation
-    _, _, declarations = parse_signature(<<~RBS)
+    _, declarations = parse_signature_with_forwarding(<<~RBS)
       class Foo
         def foo: (...) -> void
                | ...
@@ -87,7 +121,7 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
       "(**String values, ...) -> void",
     ].each do |source|
       assert_raise(RBS::ParsingError) do
-        parse_method_type(source)
+        parse_method_type_with_forwarding(source)
       end
     end
   end
@@ -99,7 +133,7 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
       "(...,) -> void",
     ].each do |source|
       assert_raise(RBS::ParsingError) do
-        parse_method_type(source)
+        parse_method_type_with_forwarding(source)
       end
     end
   end
@@ -110,25 +144,29 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
       "(...) ?{ () -> void } -> void",
     ].each do |source|
       assert_raise(RBS::ParsingError) do
-        parse_method_type(source)
+        parse_method_type_with_forwarding(source)
       end
     end
   end
 
   def test_forwarding_parameter_is_not_allowed_in_block_types
-    assert_raise(RBS::ParsingError) do
-      parse_method_type("() { (...) -> void } -> void")
+    error = assert_raise(RBS::ParsingError) do
+      parse_method_type_with_forwarding("() { (...) -> void } -> void")
     end
+    assert_include error.message, "forwarding parameter is not allowed in this context"
   end
 
   def test_forwarding_parameter_is_not_allowed_in_proc_types
+    # Proc types are parsed by `_parse_type`, which has no way to enable the
+    # syntax, but the context restriction is checked before the option anyway.
     [
       "^(...) -> void",
       "^(String, ...) -> void",
     ].each do |source|
-      assert_raise(RBS::ParsingError) do
+      error = assert_raise(RBS::ParsingError) do
         parse_type(source)
       end
+      assert_include error.message, "forwarding parameter is not allowed in this context"
     end
   end
 
