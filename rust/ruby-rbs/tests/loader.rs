@@ -55,18 +55,17 @@ fn loads_registered_sources_in_registration_order() {
 
 #[test]
 fn from_loader_is_the_primary_entry_point() {
-    let loader = EnvironmentLoader::new(Some(repo_root().join("core")))
-        .add_library("stringio", stdlib_dir("stringio"));
+    let dir = tree(&[("a.rbs", "class Foo\nend\n")]);
 
+    let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
     let env = Environment::from_loader(&loader).unwrap();
 
-    assert!(!env.sources().is_empty());
+    assert_eq!(env.sources().len(), 1);
 }
 
 #[test]
 fn files_are_loaded_once_first_wins() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(dir.path().join("a.rbs"), "class Foo\nend\n").unwrap();
+    let dir = tree(&[("a.rbs", "class Foo\nend\n")]);
 
     let loader = EnvironmentLoader::new(None)
         .add_dir(dir.path().to_path_buf())
@@ -80,10 +79,30 @@ fn files_are_loaded_once_first_wins() {
 }
 
 #[test]
+fn load_reports_only_what_this_call_added() {
+    let first = tree(&[("a.rbs", "class Foo\nend\n")]);
+    let second = tree(&[("b.rbs", "class Bar\nend\n")]);
+
+    let mut env = Environment::new();
+    EnvironmentLoader::new(None)
+        .add_dir(first.path().to_path_buf())
+        .load(&mut env)
+        .unwrap();
+    let loaded = EnvironmentLoader::new(None)
+        .add_dir(second.path().to_path_buf())
+        .load(&mut env)
+        .unwrap();
+
+    assert_eq!(env.sources().len(), 2);
+    let [only] = loaded.as_slice() else {
+        panic!("expected one loaded file, got {loaded:?}");
+    };
+    assert!(only.path.ends_with("b.rbs"));
+}
+
+#[test]
 fn explicit_dirs_do_not_skip_underscore_directories() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::create_dir(dir.path().join("_private")).unwrap();
-    fs::write(dir.path().join("_private/a.rbs"), "class Foo\nend\n").unwrap();
+    let dir = tree(&[("_private/a.rbs", "class Foo\nend\n")]);
 
     let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
 
@@ -95,8 +114,7 @@ fn explicit_dirs_do_not_skip_underscore_directories() {
 
 #[test]
 fn parse_errors_carry_the_file_path() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(dir.path().join("broken.rbs"), "class\n").unwrap();
+    let dir = tree(&[("broken.rbs", "class\n")]);
 
     let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
 
@@ -150,10 +168,12 @@ fn library_dirs_skip_underscore_directories() {
     let mut env = Environment::new();
     let loaded = loader.load(&mut env).unwrap();
 
-    assert_eq!(loaded.len(), 1);
-    assert!(loaded[0].path.ends_with("a.rbs"));
+    let [only] = loaded.as_slice() else {
+        panic!("expected one loaded file, got {loaded:?}");
+    };
+    assert!(only.path.ends_with("a.rbs"));
     assert_eq!(
-        loaded[0].kind,
+        only.kind,
         SourceKind::Library {
             name: "gem1".to_string(),
             path: dir.path().join("gem1/1.2.3"),

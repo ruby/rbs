@@ -38,6 +38,8 @@ impl std::error::Error for LoadError {
     }
 }
 
+/// Corresponds to one entry of the array `RBS::EnvironmentLoader#load`
+/// returns, at file rather than declaration granularity.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadedFile {
     pub path: PathBuf,
@@ -77,8 +79,10 @@ impl EnvironmentLoader {
         self
     }
 
-    /// On `Err` the sources read before the failure are already in `env`, same
-    /// as the Ruby implementation adding sources as it walks the directories.
+    /// Returns what this call read, in the order it read it, so a caller
+    /// appending to a non-empty `env` still learns what it added. On `Err` the
+    /// sources read before the failure are already in `env`, same as the Ruby
+    /// implementation adding sources as it walks the directories.
     pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
         let mut loaded = Vec::new();
         let mut seen_files: HashSet<PathBuf> = HashSet::new();
