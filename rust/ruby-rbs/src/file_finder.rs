@@ -19,29 +19,37 @@ pub fn each_file(path: &Path, skip_hidden: bool) -> io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-fn is_skippable(error: &io::Error) -> bool {
-    matches!(
-        error.kind(),
-        io::ErrorKind::PermissionDenied | io::ErrorKind::NotFound
-    )
+/// `None` for the failures Ruby swallows by letting `Dir.glob` skip the entry.
+fn skippable<T>(result: io::Result<T>) -> io::Result<Option<T>> {
+    match result {
+        Ok(value) => Ok(Some(value)),
+        Err(error)
+            if matches!(
+                error.kind(),
+                io::ErrorKind::PermissionDenied | io::ErrorKind::NotFound
+            ) =>
+        {
+            Ok(None)
+        }
+        Err(error) => Err(error),
+    }
 }
 
 fn collect(dir: &Path, skip_hidden: bool, files: &mut Vec<PathBuf>) -> io::Result<()> {
-    let entries = match std::fs::read_dir(dir) {
-        Ok(entries) => entries,
-        Err(error) if is_skippable(&error) => return Ok(()),
-        Err(error) => return Err(error),
+    let Some(entries) = skippable(std::fs::read_dir(dir))? else {
+        return Ok(());
     };
 
     for entry in entries {
-        let entry = match entry {
-            Ok(entry) => entry,
-            Err(error) if is_skippable(&error) => continue,
-            Err(error) => return Err(error),
+        let Some(entry) = skippable(entry)? else {
+            continue;
         };
         let path = entry.path();
+        let Some(name) = path.file_name().map(|name| name.to_string_lossy()) else {
+            continue;
+        };
 
-        if entry.file_name().to_string_lossy().starts_with('.') {
+        if name.starts_with('.') {
             continue;
         }
 
@@ -50,16 +58,11 @@ fn collect(dir: &Path, skip_hidden: bool, files: &mut Vec<PathBuf>) -> io::Resul
         }
 
         // `file_type()` does not follow symlinks, which skips symlinked dirs.
-        let file_type = match entry.file_type() {
-            Ok(file_type) => file_type,
-            Err(error) if is_skippable(&error) => continue,
-            Err(error) => return Err(error),
+        let Some(file_type) = skippable(entry.file_type())? else {
+            continue;
         };
         if file_type.is_dir() {
-            let hidden = path
-                .file_name()
-                .is_some_and(|name| name.to_string_lossy().starts_with('_'));
-            if skip_hidden && hidden {
+            if skip_hidden && name.starts_with('_') {
                 continue;
             }
             collect(&path, skip_hidden, files)?;
