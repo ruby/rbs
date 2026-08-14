@@ -9,7 +9,8 @@ pub enum SourceKind {
     Core,
     /// `path` is the library's version directory, already resolved by the
     /// caller (Ruby's `Repository#lookup` / `gem_sig_path`), holding the
-    /// library's RBS files directly.
+    /// library's RBS files directly. Version alone could not recover where a
+    /// library's signatures came from; the path can.
     Library {
         name: String,
         path: PathBuf,
@@ -20,7 +21,7 @@ pub enum SourceKind {
 }
 
 impl SourceKind {
-    pub fn skips_hidden(&self) -> bool {
+    pub(crate) fn skips_hidden(&self) -> bool {
         !matches!(self, SourceKind::Dir { .. })
     }
 }
