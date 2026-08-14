@@ -2,7 +2,7 @@
 
 ## 4.2.0 (2026-08-13)
 
-RBS 4.2 ships with two syntax extensions. Method types support Ruby's forwarding parameter — `def request: (...) -> Response` — where the `...` may follow required positional parameters and subsumes the block. Identifiers are no longer restricted to ASCII: method names, parameter names, variables, and symbols can be written in any script Ruby accepts, as in `def 日本語: () -> void`. The exception is names whose first character decides their kind — class, module, interface, and type alias names, and generics type parameters — which must still begin with an ASCII character.
+RBS 4.2 ships with two syntax extensions. Identifiers are no longer restricted to ASCII: method names, parameter names, variables, and symbols can be written in any script Ruby accepts, as in `def 日本語: () -> void`. The exception is names whose first character decides their kind — class, module, interface, and type alias names, and generics type parameters — which must still begin with an ASCII character. Method types also support Ruby's forwarding parameter — `def request: (...) -> Response` — as an experimental feature: this release ships the syntax and the AST, and the rest of the library does little with them yet.
 
 Generics now resolve consistently when a class or module has multiple declarations: module-self types and superclass validation align each declaration's type parameters, and `TypeParam#rename` substitutes type variables in bounds and default types. The parser gets a round of robustness fixes, from `Location#end_line` on files with CRLF line endings to the source locations that were missing from the AST the JRuby parser decodes.
 
