@@ -8,17 +8,16 @@ use crate::loader::{EnvironmentLoader, LoadError};
 /// Owning the interners here gives a single `Environment` value the same
 /// role as the Ruby implementation's global name pool: names interned while
 /// loading stay resolvable and displayable for the environment's lifetime.
+#[derive(Default)]
 pub struct Environment {
     interners: Interners,
     sources: Vec<Source>,
 }
 
 impl Environment {
+    #[must_use]
     pub fn new() -> Self {
-        Environment {
-            interners: Interners::new(),
-            sources: Vec::new(),
-        }
+        Self::default()
     }
 
     pub fn interners(&self) -> &Interners {
@@ -41,12 +40,6 @@ impl Environment {
         let mut env = Environment::new();
         loader.load(&mut env)?;
         Ok(env)
-    }
-}
-
-impl Default for Environment {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
