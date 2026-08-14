@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use crate::ast::{Declaration, Directive};
 
-/// Where a loaded signature file came from, corresponding to the `source`
-/// values yielded by `RBS::EnvironmentLoader#each_dir`.
+/// Corresponds to the `source` values yielded by
+/// `RBS::EnvironmentLoader#each_dir`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SourceKind {
     Core,
@@ -20,14 +20,11 @@ pub enum SourceKind {
 }
 
 impl SourceKind {
-    /// Whether `_`-prefixed subdirectories are skipped while scanning.
-    /// Only a user-specified [`SourceKind::Dir`] does not skip them.
     pub fn skips_hidden(&self) -> bool {
         !matches!(self, SourceKind::Dir { .. })
     }
 }
 
-/// `RBS::Source::RBS` equivalent.
 #[derive(Debug)]
 pub struct Source {
     pub path: PathBuf,

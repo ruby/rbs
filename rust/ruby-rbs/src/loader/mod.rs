@@ -44,9 +44,7 @@ pub struct LoadedFile {
     pub kind: SourceKind,
 }
 
-/// Enumerates core, library, and explicit signature directories, parses
-/// every `.rbs` file exactly once, and feeds the results into an
-/// [`Environment`], mirroring `RBS::EnvironmentLoader`.
+/// Mirrors `RBS::EnvironmentLoader`.
 ///
 /// Unlike the Ruby implementation, this does not resolve gem names or
 /// versions to directories, and does not expand `manifest.yaml`
@@ -61,7 +59,6 @@ pub struct EnvironmentLoader {
 }
 
 impl EnvironmentLoader {
-    /// `core_root` is `None` to skip core.
     pub fn new(core_root: Option<PathBuf>) -> Self {
         EnvironmentLoader {
             core_root,
@@ -70,14 +67,11 @@ impl EnvironmentLoader {
         }
     }
 
-    /// Adds a library by name and its already-resolved signature directory.
     pub fn add_library(mut self, name: &str, path: PathBuf) -> Self {
         self.libs.push((name.to_string(), path));
         self
     }
 
-    /// Adds an explicit signature directory. Unlike libraries, `_`-prefixed
-    /// subdirectories are not skipped.
     pub fn add_dir(mut self, path: PathBuf) -> Self {
         self.dirs.push(path);
         self
@@ -113,8 +107,6 @@ impl EnvironmentLoader {
         Ok(loaded)
     }
 
-    /// Groups directories core → libs → dirs, matching
-    /// `RBS::EnvironmentLoader#each_dir`'s enumeration order.
     fn each_dir(&self) -> Vec<(SourceKind, PathBuf)> {
         let mut result = Vec::new();
 
@@ -144,10 +136,6 @@ impl EnvironmentLoader {
 /// can later be parallelised by handing each worker its own [`Interners`].
 /// The parser's `SignatureNode` holds raw pointers and is not `Send`, so it
 /// must not escape this function — only the owned `Source` does.
-///
-/// Crate-private: a caller outside the crate has no way to merge its
-/// worker-local [`Interners`] into the environment, so the `Source` it
-/// produced would carry ids that environment cannot resolve.
 pub(crate) fn parse_one(
     path: &Path,
     kind: &SourceKind,

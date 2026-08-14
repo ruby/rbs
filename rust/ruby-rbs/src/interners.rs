@@ -1,7 +1,6 @@
 use crate::interner::StringInterner;
 use crate::type_name::TypeNameInterner;
 
-/// The pair of interners that an owned AST's ids refer to.
 #[derive(Default)]
 pub struct Interners {
     pub strings: StringInterner,

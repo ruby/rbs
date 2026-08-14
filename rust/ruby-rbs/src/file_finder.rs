@@ -1,8 +1,7 @@
 use std::io;
 use std::path::{Path, PathBuf};
 
-/// Enumerates `.rbs` entries under `path` in path-sorted order, mirroring
-/// `RBS::FileFinder.each_file` and its `Dir.glob` semantics.
+/// Mirrors `RBS::FileFinder.each_file` and its `Dir.glob` semantics.
 ///
 /// Divergences: the sort compares the platform separator rather than
 /// `/`-joined strings, and only `PermissionDenied`/`NotFound` are skipped
