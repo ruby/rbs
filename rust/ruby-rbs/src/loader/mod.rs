@@ -84,9 +84,9 @@ impl EnvironmentLoader {
         let mut seen_files: HashSet<PathBuf> = HashSet::new();
 
         for (kind, dir) in self.each_dir() {
-            let files = file_finder::each_file(&dir, kind.skips_hidden()).map_err(|source| {
+            let files = file_finder::each_file(dir, kind.skips_hidden()).map_err(|source| {
                 LoadError::Io {
-                    path: dir.clone(),
+                    path: dir.to_path_buf(),
                     source,
                 }
             })?;
@@ -107,28 +107,24 @@ impl EnvironmentLoader {
         Ok(loaded)
     }
 
-    fn each_dir(&self) -> Vec<(SourceKind, PathBuf)> {
-        let mut result = Vec::new();
+    fn each_dir(&self) -> impl Iterator<Item = (SourceKind, &Path)> {
+        let core = self
+            .core_root
+            .iter()
+            .map(|path| (SourceKind::Core, path.as_path()));
+        let libs = self.libs.iter().map(|(name, path)| {
+            let kind = SourceKind::Library {
+                name: name.clone(),
+                path: path.clone(),
+            };
+            (kind, path.as_path())
+        });
+        let dirs = self
+            .dirs
+            .iter()
+            .map(|path| (SourceKind::Dir { path: path.clone() }, path.as_path()));
 
-        if let Some(core) = &self.core_root {
-            result.push((SourceKind::Core, core.clone()));
-        }
-
-        for (name, path) in &self.libs {
-            result.push((
-                SourceKind::Library {
-                    name: name.clone(),
-                    path: path.clone(),
-                },
-                path.clone(),
-            ));
-        }
-
-        for dir in &self.dirs {
-            result.push((SourceKind::Dir { path: dir.clone() }, dir.clone()));
-        }
-
-        result
+        core.chain(libs).chain(dirs)
     }
 }
 
