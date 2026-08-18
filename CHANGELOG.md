@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## 4.2.0.pre.1 (2026-08-18)
+
+### Language updates
+
+* Gate forwarding parameter syntax behind parser option ([#3087](https://github.com/ruby/rbs/pull/3087))
+* Support non-ASCII identifiers ([#3082](https://github.com/ruby/rbs/pull/3082))
+* Support forwarding parameters in method types ([#3042](https://github.com/ruby/rbs/pull/3042))
+
+### Library changes
+
+* Stop the lexer reading past the end of a byte_range ([#3040](https://github.com/ruby/rbs/pull/3040))
+* Exclude CR from comment tokens to fix an off-by-one Location#end_line on CRLF files ([#3069](https://github.com/ruby/rbs/pull/3069))
+* Handle the NULL parser in the WebAssembly shim ([#3085](https://github.com/ruby/rbs/pull/3085))
+* Reject a byte position the lexer cannot start on ([#3083](https://github.com/ruby/rbs/pull/3083))
+* Don't use Clang nullability qualifiers in strict ISO C mode ([#3074](https://github.com/ruby/rbs/pull/3074))
+* Avoid eagerly inspecting call traces in type assertions ([#3073](https://github.com/ruby/rbs/pull/3073))
+* Fix TypeParam.rename to substitute variables in bounds and default types ([#3068](https://github.com/ruby/rbs/pull/3068))
+* Extract per-declaration type param alignment into entry-level align_params ([#3070](https://github.com/ruby/rbs/pull/3070))
+* Align type params across declarations in module-self types and superclass validation ([#3067](https://github.com/ruby/rbs/pull/3067))
+* Build the wasm module with -DNDEBUG ([#3066](https://github.com/ruby/rbs/pull/3066))
+* Rename NODISCARD macro to RBS_NODISCARD ([#3065](https://github.com/ruby/rbs/pull/3065))
+
+### Miscellaneous
+
+* Skip JSON 2-only tests with JSON 3 ([#3084](https://github.com/ruby/rbs/pull/3084))
+* Pin GitHub Actions to commit hashes ([#3020](https://github.com/ruby/rbs/pull/3020))
+
 ## 4.1.3 (2026-08-10)
 
 ### Miscellaneous
