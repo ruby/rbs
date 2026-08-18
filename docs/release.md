@@ -101,7 +101,8 @@ The sections always appear in this order; delete the ones that end up empty, whi
 on a small release. Two things scale with the size of the release:
 
 - **Summary paragraphs**, above the first section. A patch release usually has none, 4.1.0 has four
-  paragraphs, and 4.0.0 has nine.
+  paragraphs, and 4.0.0 has nine. A prerelease has none whatever its size: the cycle it belongs to
+  is summarized once, on the release proper that folds it in.
 - **A list of the types whose signatures changed**, as the first line of `### Signature updates`,
   written as `**Updated classes/modules/methods:**` followed by the names in backticks. Used on
   `X.Y.0` releases only.
