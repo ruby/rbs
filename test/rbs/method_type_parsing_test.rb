@@ -83,6 +83,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     parse_method_type_with_forwarding("(...) -> void").tap do |type|
       assert_equal "(...) -> void", type.to_s
       assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
@@ -100,6 +102,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_with_overload_continuation
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     _, declarations = parse_signature_with_forwarding(<<~RBS)
       class Foo
         def foo: (...) -> void
@@ -113,6 +117,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_rejects_nonleading_parameters
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     [
       "(?String value, ...) -> void",
       "(*String values, ...) -> void",
@@ -127,6 +133,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_must_be_last
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     [
       "(..., String) -> void",
       "(..., ...) -> void",
@@ -139,6 +147,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_cannot_have_explicit_block
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     [
       "(...) { () -> void } -> void",
       "(...) ?{ () -> void } -> void",
@@ -150,6 +160,8 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
   end
 
   def test_forwarding_parameter_is_not_allowed_in_block_types
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
     error = assert_raise(RBS::ParsingError) do
       parse_method_type_with_forwarding("() { (...) -> void } -> void")
     end

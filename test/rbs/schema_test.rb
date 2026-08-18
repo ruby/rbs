@@ -120,6 +120,10 @@ class RBS::SchemaTest < Test::Unit::TestCase
     JSONValidator.method_type.validate!(
       parse_method_type("[G] (A a, ?B, *C, d: D, ?e: E e, **f) ?{ (G) -> void } -> String").to_json
     )
+  end
+
+  def test_method_type_schema_with_forwarding_parameter
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
 
     # Forwarding parameters are only parsed when explicitly enabled
     source = "(String message, ...) -> void"
