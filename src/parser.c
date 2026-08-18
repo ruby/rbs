@@ -3523,6 +3523,23 @@ rbs_ast_comment_t *rbs_parser_get_comment(rbs_parser_t *parser, int subject_line
     }
 }
 
+/**
+ * Decodes the character the lexer stands on, or marks the input spent when
+ * there is no character left to read.
+ * */
+static void lexer_read_current_char(rbs_lexer_t *lexer) {
+    unsigned int codepoint;
+    size_t bytes;
+
+    if (rbs_next_char(lexer, &codepoint, &bytes)) {
+        lexer->current_code_point = codepoint;
+        lexer->current_character_bytes = bytes;
+    } else {
+        lexer->current_code_point = '\0';
+        lexer->current_character_bytes = 1;
+    }
+}
+
 rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, const rbs_encoding_t *encoding, int start_pos, int end_pos) {
     rbs_lexer_t *lexer = rbs_allocator_alloc(allocator, rbs_lexer_t);
 
@@ -3536,7 +3553,12 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
     *lexer = (rbs_lexer_t) {
         .string = string,
         .start_pos = start_pos,
-        .end_pos = end_pos,
+        // Where characters begin is a property of the buffer, not of the range
+        // being parsed, so the walk below reads to the end of the buffer. A
+        // range that both starts and ends inside one character still starts
+        // inside it, and has to be reported that way. The real `end_pos` goes
+        // in once the walk has landed.
+        .end_pos = (int) rbs_string_len(string),
         .current = start_position,
         .start = { 0 },
         .first_token_of_line = true,
@@ -3545,16 +3567,7 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
         .encoding = encoding,
     };
 
-    unsigned int codepoint;
-    size_t bytes;
-
-    if (rbs_next_char(lexer, &codepoint, &bytes)) {
-        lexer->current_code_point = codepoint;
-        lexer->current_character_bytes = bytes;
-    } else {
-        lexer->current_code_point = '\0';
-        lexer->current_character_bytes = 1;
-    }
+    lexer_read_current_char(lexer);
 
     // `rbs_skip` moves a whole character at a time, and moves nothing at all
     // once the input is spent, so this walk can only ever stand on the first
@@ -3567,6 +3580,11 @@ rbs_lexer_t *rbs_lexer_new(rbs_allocator_t *allocator, rbs_string_t string, cons
     // start from: over it, and the walk stepped across a character that
     // straddles it; short of it, and the input ran out first.
     if (lexer->current.byte_pos != start_pos) return NULL;
+
+    // Read the first character again now that the input ends where the caller
+    // asked it to: it is as liable to be cut short by `end_pos` as any other.
+    lexer->end_pos = end_pos;
+    lexer_read_current_char(lexer);
 
     lexer->start = lexer->current;
 

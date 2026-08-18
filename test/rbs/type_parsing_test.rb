@@ -1093,4 +1093,58 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
       assert_instance_of Types::ClassInstance, type
     end
   end
+
+  def test_parse__byte_range_ending_inside_a_character
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
+    # `byte_range` names bytes, so a range ending inside a character leaves an
+    # incomplete one at the end of the input, exactly like a byte that is
+    # invalid on its own. Reading the rest of the character instead would build
+    # a type out of bytes the caller kept out of the range.
+    source = "Integer日本" # `日` is bytes 7...10, `本` is bytes 10...13
+
+    [8, 9].each do |end_pos|
+      assert_raises RBS::ParsingError do
+        Parser.parse_type(source, byte_range: 0...end_pos, require_eof: true)
+      end
+    end
+
+    # A range ending on a character boundary keeps every character it covers.
+    assert_equal TypeName.parse("Integer"),
+                 Parser.parse_type(source, byte_range: 0...7, require_eof: true).name
+    assert_equal TypeName.parse("Integer日"),
+                 Parser.parse_type(source, byte_range: 0...10, require_eof: true).name
+    assert_equal TypeName.parse("Integer日本"),
+                 Parser.parse_type(source, byte_range: 0...source.bytesize, require_eof: true).name
+
+    # Only characters get cut short, never the buffer itself.
+    assert_equal TypeName.parse("Integer日本"),
+                 Parser.parse_type(source, byte_range: 0...9999, require_eof: true).name
+  end
+
+  def test_parse__byte_range_ending_inside_a_character_in_euc_jp
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
+    euc = (+"Foo\xC6\xFC").force_encoding(Encoding::EUC_JP) # Foo日, `日` is bytes 3...5
+
+    assert_raises RBS::ParsingError do
+      Parser.parse_type(euc, byte_range: 0...4, require_eof: true)
+    end
+
+    assert_equal TypeName.parse("Foo"),
+                 Parser.parse_type(euc, byte_range: 0...3, require_eof: true).name
+    assert_equal euc,
+                 Parser.parse_type(euc, byte_range: 0...5, require_eof: true).name.to_s
+  end
+
+  def test_parse__byte_range_starting_and_ending_inside_one_character
+    # Where a character begins is a property of the buffer, not of the range:
+    # a range that stops before the character it starts inside still starts
+    # inside it, and is reported the same way as any other such range.
+    exn = assert_raises ArgumentError do
+      Parser.parse_type("日Foo", byte_range: 1...2)
+    end
+
+    assert_equal "position range starts inside a character: 1...2", exn.message
+  end
 end

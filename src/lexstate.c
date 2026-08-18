@@ -133,14 +133,25 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
         return true;
     }
 
-    *byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
+    // Decode inside the input range rather than the whole buffer. A character
+    // the range cuts in half is not one the lexer may read, and stopping the
+    // decoder at `end_pos` is what makes it say so: it reports the bytes that
+    // are left as an undecodable character, which the branch below turns into
+    // the error any other invalid byte gets. `end_pos` is allowed to point
+    // past the end of the buffer, so the buffer still has the final say.
+    ptrdiff_t readable = lexer->string.end - start;
+    ptrdiff_t in_range = (ptrdiff_t) (lexer->end_pos - lexer->current.byte_pos);
+    if (in_range < readable) readable = in_range;
+
+    *byte_len = lexer->encoding->char_width((const uint8_t *) start, readable);
 
     if (*byte_len == 0) {
-        // Invalid byte under the active encoding. Map it to a sentinel code
-        // point (U+FFFD) and advance one byte so the lexer always makes
-        // progress. Token rules that scan until a delimiter exclude this
-        // sentinel, so an invalid byte surfaces as an ErrorToken instead of
-        // being silently swallowed.
+        // Invalid byte under the active encoding, or the last character of the
+        // input cut short by `end_pos`. Map it to a sentinel code point
+        // (U+FFFD) and advance one byte so the lexer always makes progress.
+        // Token rules that scan until a delimiter exclude this sentinel, so an
+        // invalid byte surfaces as an ErrorToken instead of being silently
+        // swallowed.
         *byte_len = 1;
         *codepoint = 0xFFFD;
     } else if (*byte_len == 1) {
