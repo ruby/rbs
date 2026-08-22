@@ -76,6 +76,12 @@ module RBS
 
     def run_collection: (Array[String], LibraryOptions) -> Integer
 
+    # Returns `true` if the collection config exists, otherwise prints a message to `stderr` and returns `false`
+    def collection_config_available?: (Pathname) -> bool
+
+    # Returns `nil` if `Gemfile` or `Gemfile.lock` is not found, after printing a message to `stderr`
+    def bundler_definition: () -> Bundler::Definition?
+
     def run_annotate: (Array[String], top) -> Integer
 
     def run_subtract: (Array[String], top) -> Integer
