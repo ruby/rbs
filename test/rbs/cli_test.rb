@@ -1082,6 +1082,30 @@ Processing `lib`...
     end
   end
 
+  def test_collection_init
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          assert_cli_success do
+            cli.run(%w(collection init))
+          end
+
+          config = Pathname(dir).join(RBS::Collection::Config::PATH).read
+          assert_match(/gems in your Gemfile\.lock/, config)
+          assert_match(/rbs collection install/, config)
+
+          yaml = YAML.load(config)
+          assert_equal ".gem_rbs_collection", yaml["path"]
+          assert_equal ["ruby/gem_rbs_collection"], yaml["sources"].map {|source| source["name"] }
+
+          assert_match(/created: .*rbs_collection\.yaml/, stdout.string)
+          assert_match(/gems in your Gemfile\.lock/, stdout.string)
+          assert_match(/\$ rbs collection install/, stdout.string)
+        end
+      end
+    end
+  end
+
   def test_collection_install
     omit_on_jruby! "`rbs collection install` runs `bundle install`, which builds native gem extensions that do not compile on JRuby"
 

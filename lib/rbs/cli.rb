@@ -1104,6 +1104,9 @@ EOB
         end
 
         config_path.write(<<~'YAML')
+          # rbs collection installs RBS files for the gems in your Gemfile.lock.
+          # Run `rbs collection install` to resolve them into rbs_collection.lock.yaml and install them.
+
           # Download sources
           sources:
             - type: git
@@ -1120,11 +1123,23 @@ EOB
           path: .gem_rbs_collection
 
           # gems:
+          #   # RBS for a library that doesn't appear in Gemfile.lock, such as a non-gem standard library.
+          #   - name: socket
+          #
           #   # If you want to avoid installing rbs files for gems, you can specify them here.
           #   - name: GEM_NAME
           #     ignore: true
         YAML
-        stdout.puts "created: #{config_path}"
+        stdout.puts <<~MESSAGE
+          created: #{config_path}
+
+          rbs collection installs RBS files for the gems in your Gemfile.lock.
+          Gems in Gemfile.lock don't need to be listed anywhere.
+
+          Next steps:
+            $ echo "/.gem_rbs_collection/" >> .gitignore
+            $ rbs collection install    # writes rbs_collection.lock.yaml; keep it in version control
+        MESSAGE
       when 'clean'
         unless lock_path.exist?
           puts "#{lock_path} should exist to clean"
