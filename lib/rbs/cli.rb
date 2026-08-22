@@ -1089,17 +1089,30 @@ EOB
 
       case args[0]
       when 'install', 'instal', 'insta', 'inst', 'ins', 'in', 'i'
-        unless params[:frozen]
-          Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition)
+        if params[:frozen]
+          unless lock_path.exist?
+            if config_path.exist?
+              stderr.puts "#{lock_path} not found. Run `rbs collection install` without `--frozen` to generate it."
+            else
+              stderr.puts "#{lock_path} not found. Run `rbs collection init` and `rbs collection install` to generate it."
+            end
+            return 1
+          end
+        else
+          return 1 unless collection_config_available?(config_path)
+          definition = bundler_definition or return 1
+          Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
         end
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'update', 'updat', 'upda', 'upd', 'up', 'u'
+        return 1 unless collection_config_available?(config_path)
+        definition = bundler_definition or return 1
         # TODO: Be aware of argv to update only specified gem
-        Collection::Config.generate_lockfile(config_path: config_path, definition: Bundler.definition, with_lockfile: false)
+        Collection::Config.generate_lockfile(config_path: config_path, definition: definition, with_lockfile: false)
         Collection::Installer.new(lockfile_path: lock_path, stdout: stdout).install_from_lockfile
       when 'init'
         if config_path.exist?
-          puts "#{config_path} already exists"
+          stderr.puts "#{config_path} already exists"
           return 1
         end
 
@@ -1142,18 +1155,36 @@ EOB
         MESSAGE
       when 'clean'
         unless lock_path.exist?
-          puts "#{lock_path} should exist to clean"
+          stderr.puts "#{lock_path} should exist to clean"
           return 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
       when 'help', 'hel', 'he', 'h'
-        puts opts.help
+        stdout.puts opts.help
       else
-        puts opts.help
+        stdout.puts opts.help
         return 1
       end
 
       0
+    end
+
+    def collection_config_available?(config_path)
+      return true if config_path.exist?
+
+      stderr.puts "#{config_path} not found. Run `rbs collection init` to generate it."
+      false
+    end
+
+    def bundler_definition
+      definition = Bundler.definition
+      return definition if definition.lockfile.file?
+
+      stderr.puts "#{definition.lockfile} not found. Run `bundle install` to generate it."
+      nil
+    rescue Bundler::GemfileNotFound
+      stderr.puts "Gemfile not found. `rbs collection` reads the gems to install from Gemfile.lock."
+      nil
     end
 
     def collection_options(args)
