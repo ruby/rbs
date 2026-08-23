@@ -1417,7 +1417,8 @@ class IO < Object
   #
   #     AA
   #
-  def putc: (Numeric | String object) -> (Numeric | String)
+  def putc: (real) -> real
+          | (String) -> String
 
   # <!--
   #   rdoc-file=io.c
