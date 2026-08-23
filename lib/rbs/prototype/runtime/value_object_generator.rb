@@ -212,7 +212,6 @@ module RBS
 
       class DataGenerator < ValueObjectBase
         def self.generatable?(target)
-          return false unless RUBY_VERSION >= '3.2'
           return false unless target < Data
           # Avoid direct inherited class like `class Option < Data`
           return false unless target.respond_to?(:members)
