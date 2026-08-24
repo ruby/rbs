@@ -10,11 +10,13 @@ module RBS
       def initialize(name)
         @name = name
         @context_decls = []
+        @type_params_validated = false
       end
 
       def <<(context_decl)
         context_decls << context_decl
         @primary_decl = nil
+        @type_params_validated = false
         self
       end
 
@@ -50,6 +52,8 @@ module RBS
       end
 
       def validate_type_params
+        return if @type_params_validated
+
         unless context_decls.empty?
           first_decl, *rest_decls = each_decl.to_a
           first_decl or raise
@@ -63,6 +67,8 @@ module RBS
             end
           end
         end
+
+        @type_params_validated = true
       end
 
       def align_params(decl)

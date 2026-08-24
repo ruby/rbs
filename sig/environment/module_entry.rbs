@@ -17,6 +17,12 @@ module RBS
 
       attr_reader context_decls: Array[context_decl]
 
+      # `true` if the type params are already validated by `#validate_type_params`
+      #
+      # Reset to `false` when a new declaration is added.
+      #
+      @type_params_validated: bool
+
       def initialize: (TypeName) -> void
 
       def <<: (context_decl) -> self
@@ -41,6 +47,8 @@ module RBS
       # Confirms if the type parameters in the declaration are compatible
       #
       # * Raises `GenericParameterMismatchError` if incompatible declaration is detected.
+      #
+      # The result is memoized, and the validation is skipped until a new declaration is added.
       #
       def validate_type_params: () -> void
 

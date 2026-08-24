@@ -250,6 +250,66 @@ EOF
     end
   end
 
+  def test_validate_type_params_memoization
+    _, _, decls = RBS::Parser.parse_signature(<<EOF)
+module Foo[A, out B]
+end
+
+module Foo[X, out Y]
+end
+
+module Foo[A]
+end
+
+class Bar[A, out B]
+end
+
+class Bar[X, out Y]
+end
+
+class Bar[A]
+end
+EOF
+
+    Environment::ModuleEntry.new(type_name("::Foo")).tap do |entry|
+      entry << [nil, decls[0]]
+      entry << [nil, decls[1]]
+
+      entry.validate_type_params
+      entry.validate_type_params
+
+      # Adding a declaration discards the memoized result
+      entry << [nil, decls[2]]
+
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.validate_type_params
+      end
+
+      # The error is reported again, because the failed validation is not memoized
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.validate_type_params
+      end
+    end
+
+    Environment::ClassEntry.new(type_name("::Bar")).tap do |entry|
+      entry << [nil, decls[3]]
+      entry << [nil, decls[4]]
+
+      entry.validate_type_params
+      entry.validate_type_params
+
+      entry << [nil, decls[5]]
+
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.validate_type_params
+      end
+
+      assert_raises RBS::GenericParameterMismatchError do
+        entry.validate_type_params
+      end
+    end
+  end
+
   def test_insert_global
     env = Environment.new
 
