@@ -143,7 +143,7 @@ module Zlib
     # `flush` method.  While `sync` mode is `true`, the compression ratio decreases
     # sharply.
     #
-    def sync=: (boolish) -> untyped
+    def sync=: (boolish) -> boolish
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c

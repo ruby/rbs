@@ -1,6 +1,27 @@
 # CHANGELOG
 
-## 4.2.0.pre.1 (2026-08-18)
+## 4.2.0 (2026-08-23)
+
+RBS 4.2 accepts non-ASCII characters in identifiers. Method names, instance variable names and parameter names can be written in any script, and other names may contain non-ASCII characters as long as they start with an ASCII letter, which is what tells a constant from a method name.
+
+```rbs
+class Greeter
+  @挨拶: String
+
+  def こんにちは: () -> String
+end
+```
+
+The parser and the AST support Ruby-style `...` forwarding parameters in method types, but the layers built on top of the parser do not yet. The syntax is disabled by default in 4.2 and is not enabled by the public `RBS::Parser` API, so it cannot be used in regular RBS signatures yet.
+
+Ruby 3.2 reached EOL on 2026-04-01, and this release requires Ruby 3.3 or later. Applications on 3.2 stay on the 4.1 line.
+
+### Signature updates
+
+**Updated classes/modules/methods:** `ERB`, `ERB::DefMethod`, `IO`, `Monitor`, `MonitorMixin::ConditionVariable`, `Singleton`, `StringIO`, `Zlib::GzipFile`, `Zlib::GzipWriter`
+
+* Replace deterministic `untyped` return types with concrete types ([#2966](https://github.com/ruby/rbs/pull/2966))
+* Declare Singleton::SingletonInstanceMethods ([#3037](https://github.com/ruby/rbs/pull/3037))
 
 ### Language updates
 
@@ -10,6 +31,7 @@
 
 ### Library changes
 
+* Drop runtime support for Ruby 3.2 ([#3095](https://github.com/ruby/rbs/pull/3095))
 * Stop the lexer reading past the end of a byte_range ([#3040](https://github.com/ruby/rbs/pull/3040))
 * Exclude CR from comment tokens to fix an off-by-one Location#end_line on CRLF files ([#3069](https://github.com/ruby/rbs/pull/3069))
 * Handle the NULL parser in the WebAssembly shim ([#3085](https://github.com/ruby/rbs/pull/3085))
@@ -24,6 +46,7 @@
 
 ### Miscellaneous
 
+* Omit forwarding parameter tests on JRuby ([#3092](https://github.com/ruby/rbs/pull/3092))
 * Skip JSON 2-only tests with JSON 3 ([#3084](https://github.com/ruby/rbs/pull/3084))
 * Pin GitHub Actions to commit hashes ([#3020](https://github.com/ruby/rbs/pull/3020))
 
