@@ -1,4 +1,7 @@
 module Bundler
+  class GemfileNotFound < StandardError
+  end
+
   class LockfileParser
     def initialize: (String) -> void
 

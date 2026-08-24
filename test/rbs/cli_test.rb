@@ -1082,6 +1082,134 @@ Processing `lib`...
     end
   end
 
+  def test_collection_init
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          assert_cli_success do
+            cli.run(%w(collection init))
+          end
+
+          config = Pathname(dir).join(RBS::Collection::Config::PATH).read
+          assert_match(/gems in your Gemfile\.lock/, config)
+          assert_match(/rbs collection install/, config)
+
+          yaml = YAML.load(config)
+          assert_equal ".gem_rbs_collection", yaml["path"]
+          assert_equal ["ruby/gem_rbs_collection"], yaml["sources"].map {|source| source["name"] }
+
+          assert_match(/created: .*rbs_collection\.yaml/, stdout.string)
+          assert_match(/gems in your Gemfile\.lock/, stdout.string)
+          assert_match(/\$ rbs collection install/, stdout.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_without_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install))
+          end
+
+          assert_match(/rbs_collection\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_update_without_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection update))
+          end
+
+          assert_match(/rbs_collection\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_without_gemfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Pathname(dir).join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+
+        _stdout, stderr = run_rbs_collection("install", bundler: false) do |status|
+          refute_predicate status, :success?
+        end
+
+        assert_match(/Gemfile not found/, stderr)
+      end
+    end
+  end
+
+  def test_collection_install_without_gemfile_lock
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+        dir.join("Gemfile").write(<<~RUBY)
+          source "https://rubygems.org"
+        RUBY
+
+        _stdout, stderr = run_rbs_collection("install", bundler: false) do |status|
+          refute_predicate status, :success?
+        end
+
+        assert_match(/Gemfile\.lock not found/, stderr)
+        assert_match(/bundle install/, stderr)
+      end
+    end
+  end
+
+  def test_collection_install_frozen_without_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Pathname(dir).join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install --frozen))
+          end
+
+          assert_match(/rbs_collection\.lock\.yaml not found/, stderr.string)
+          assert_match(/without `--frozen`/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_frozen_without_config_and_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install --frozen))
+          end
+
+          assert_match(/rbs_collection\.lock\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
   def test_collection_install
     omit_on_jruby! "`rbs collection install` runs `bundle install`, which builds native gem extensions that do not compile on JRuby"
 
