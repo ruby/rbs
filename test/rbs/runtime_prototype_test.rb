@@ -775,74 +775,72 @@ end
     end
   end
 
-  if RUBY_VERSION >= '3.2'
-    class DataInherit < Data.define(:foo, :bar, :baz?)
-    end
-    DataConst = Data.define(:foo, :bar)
-    class DataDirectInherit < Data
-    end
+  class DataInherit < Data.define(:foo, :bar, :baz?)
+  end
+  DataConst = Data.define(:foo, :bar)
+  class DataDirectInherit < Data
+  end
 
-    def test_data
-      SignatureManager.new do |manager|
-        manager.build do |env|
-          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataInherit"], env: env, merge: false)
-          assert_write p.decls, <<~RBS
-            module RBS
-              class RuntimePrototypeTest < ::Test::Unit::TestCase
-                class DataInherit < ::Data
-                  def self.new: (untyped foo, untyped bar, untyped `baz?`) -> instance
-                              | (foo: untyped, bar: untyped, baz?: untyped) -> instance
+  def test_data
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataInherit"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DataInherit < ::Data
+                def self.new: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                            | (foo: untyped, bar: untyped, baz?: untyped) -> instance
 
-                  def self.[]: (untyped foo, untyped bar, untyped `baz?`) -> instance
-                             | (foo: untyped, bar: untyped, baz?: untyped) -> instance
+                def self.[]: (untyped foo, untyped bar, untyped `baz?`) -> instance
+                           | (foo: untyped, bar: untyped, baz?: untyped) -> instance
 
-                  def self.members: () -> [ :foo, :bar, :baz? ]
+                def self.members: () -> [ :foo, :bar, :baz? ]
 
-                  def members: () -> [ :foo, :bar, :baz? ]
+                def members: () -> [ :foo, :bar, :baz? ]
 
-                  attr_reader foo: untyped
+                attr_reader foo: untyped
 
-                  attr_reader bar: untyped
+                attr_reader bar: untyped
 
-                  attr_reader baz?: untyped
-                end
+                attr_reader baz?: untyped
               end
             end
-          RBS
+          end
+        RBS
 
-          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataConst"], env: env, merge: false)
-          assert_write p.decls, <<~RBS
-            module RBS
-              class RuntimePrototypeTest < ::Test::Unit::TestCase
-                class DataConst < ::Data
-                  def self.new: (untyped foo, untyped bar) -> instance
-                              | (foo: untyped, bar: untyped) -> instance
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataConst"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DataConst < ::Data
+                def self.new: (untyped foo, untyped bar) -> instance
+                            | (foo: untyped, bar: untyped) -> instance
 
-                  def self.[]: (untyped foo, untyped bar) -> instance
-                             | (foo: untyped, bar: untyped) -> instance
+                def self.[]: (untyped foo, untyped bar) -> instance
+                           | (foo: untyped, bar: untyped) -> instance
 
-                  def self.members: () -> [ :foo, :bar ]
+                def self.members: () -> [ :foo, :bar ]
 
-                  def members: () -> [ :foo, :bar ]
+                def members: () -> [ :foo, :bar ]
 
-                  attr_reader foo: untyped
+                attr_reader foo: untyped
 
-                  attr_reader bar: untyped
-                end
+                attr_reader bar: untyped
               end
             end
-          RBS
+          end
+        RBS
 
-          p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataDirectInherit"], env: env, merge: false)
-          assert_write p.decls, <<~RBS
-            module RBS
-              class RuntimePrototypeTest < ::Test::Unit::TestCase
-                class DataDirectInherit < ::Data
-                end
+        p = Runtime.new(patterns: ["RBS::RuntimePrototypeTest::DataDirectInherit"], env: env, merge: false)
+        assert_write p.decls, <<~RBS
+          module RBS
+            class RuntimePrototypeTest < ::Test::Unit::TestCase
+              class DataDirectInherit < ::Data
               end
             end
-          RBS
-        end
+          end
+        RBS
       end
     end
   end

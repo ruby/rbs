@@ -323,8 +323,6 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_byteindex
-    omit_if RUBY_VERSION < '3.2'
-
     with_string('e').and /e/ do |pattern|
       assert_send_type  '(Regexp | string) -> Integer',
                         'hello', :byteindex, pattern
@@ -341,8 +339,6 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_byterindex
-    omit_if RUBY_VERSION < '3.2'
-
     with_string('e').and /e/ do |pattern|
       assert_send_type  '(Regexp | string) -> Integer',
                         'hello', :byterindex, pattern
@@ -389,32 +385,22 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_bytesplice
-    omit_if(RUBY_VERSION < '3.2', 'String#bytesplice was added in 3.2')
-
-    # In 3.3 and onwards (and backported to 3.2.16), the return type is `self`. This variable
-    # is in case the test suite is run in a version under 3.2.16; tests for the variants only
-    # supported in 3.3 and onwards use `self`. If we ever stop supporting 3.2, we can remove this.
-
     with_string ', world! :-D' do |string|
       assert_send_type  "(Integer, Integer, string) -> String",
                         +'hello', :bytesplice,  1, 2, string
 
-      if RUBY_VERSION >= "3.3.0"
-        with_int 1 do |start|
-          assert_send_type  '(int, Integer, string, Integer, Integer) -> String',
-                            +'hello', :bytesplice,  start, 2, string, 3, 4
-        end
+      with_int 1 do |start|
+        assert_send_type  '(int, Integer, string, Integer, Integer) -> String',
+                          +'hello', :bytesplice,  start, 2, string, 3, 4
       end
 
       with_range with_int(1).and_nil, with_int(2).and_nil do |range|
         assert_send_type  "(range[int?], string) -> String",
                           +'hello', :bytesplice, range, string
 
-        if RUBY_VERSION >= '3.3.0'
-          with_range with_int(3).and_nil, with_int(4).and_nil do |string_range|
-            assert_send_type  '(range[int?], string, range[int?]) -> String',
-                              +'hello', :bytesplice, range, string, string_range
-          end
+        with_range with_int(3).and_nil, with_int(4).and_nil do |string_range|
+          assert_send_type  '(range[int?], string, range[int?]) -> String',
+                            +'hello', :bytesplice, range, string, string_range
         end
       end
     end
@@ -574,7 +560,6 @@ class StringInstanceTest < Test::Unit::TestCase
   end
 
   def test_dedup
-    omit_if RUBY_VERSION < '3.2.0'
     test_uneg :dedup
   end
 
