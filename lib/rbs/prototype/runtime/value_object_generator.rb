@@ -99,8 +99,6 @@ module RBS
 
         private
 
-        CAN_CALL_KEYWORD_INIT_P = Struct.new(:tmp).respond_to?(:keyword_init?)
-
         def build_super_class
           AST::Declarations::Class::Super.new(name: TypeName.parse("::Struct"), args: [untyped], location: nil)
         end
@@ -118,21 +116,16 @@ module RBS
           [:new, :[]].map do |name|
             new_overloads = [] #: Array[AST::Members::MethodDefinition::Overload]
 
-            if CAN_CALL_KEYWORD_INIT_P
-              case @target_class.keyword_init?
-              when false
-                new_overloads << build_overload_for_positional_arguments
-              when true
-                new_overloads << build_overload_for_keyword_arguments
-              when nil
-                new_overloads << build_overload_for_positional_arguments
-                new_overloads << build_overload_for_keyword_arguments
-              else
-                raise
-              end
-            else
+            case @target_class.keyword_init?
+            when false
+              new_overloads << build_overload_for_positional_arguments
+            when true
+              new_overloads << build_overload_for_keyword_arguments
+            when nil
               new_overloads << build_overload_for_positional_arguments
               new_overloads << build_overload_for_keyword_arguments
+            else
+              raise
             end
 
             AST::Members::MethodDefinition.new(
@@ -178,8 +171,6 @@ module RBS
 
         # def self.keyword_init?: () -> bool?
         def build_s_keyword_init_p
-          return [] unless CAN_CALL_KEYWORD_INIT_P
-
           return_type = @target_class.keyword_init?.nil? \
                       ? Types::Bases::Nil.new(location: nil)
                       : Types::Literal.new(literal: @target_class.keyword_init?, location: nil)
