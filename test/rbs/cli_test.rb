@@ -27,6 +27,14 @@ class RBS::CliTest < Test::Unit::TestCase
     assert_predicate exit_status, :nonzero?, "Expected CLI to succeed, but it failed with status: #{exit_status.inspect}"
   end
 
+  # Command to run `bundle` with the Ruby running the tests
+  #
+  # The `bundle` executable found in `PATH` may belong to another Ruby installation, which aborts
+  # with a version mismatch error when `RUBYLIB` points at the standard library of the running Ruby.
+  # That is what happens in ruby/ruby CI, where the tests run with a freshly built `ruby`.
+  #
+  BUNDLE_COMMAND = [RbConfig.ruby, "-S", "bundle"]
+
   # Run `rbs collection` with fresh bundler environment
   #
   # You need this method to test `rbs collection` features.
@@ -35,20 +43,18 @@ class RBS::CliTest < Test::Unit::TestCase
   # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
   # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
   #
-  # We cannot run tests that uses this method in ruby CI.
-  #
   def run_rbs_collection(*commands, bundler:)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         bundle_exec = []
-        bundle_exec = ["bundle", "exec"] if bundler
+        bundle_exec = [*BUNDLE_COMMAND, "exec"] if bundler
 
         rbs_path = Pathname("#{__dir__}/../../lib").cleanpath.to_s
         if rblib = ENV["RUBYLIB"]
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, RbConfig.ruby, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
@@ -83,7 +89,7 @@ class RBS::CliTest < Test::Unit::TestCase
           #{gems.join("\n")}
         RUBY
 
-        Open3.capture3("bundle", "install", chdir: Dir.pwd)
+        Open3.capture3(*BUNDLE_COMMAND, "install", chdir: Dir.pwd)
       end
 
     assert_predicate status, :success?, stderr
