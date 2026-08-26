@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 4.2.1.pre.1 (2026-08-26)
+
+### Library changes
+
+* Remove some obsolete ruby version guards ([#3100](https://github.com/ruby/rbs/pull/3100))
+
+#### rbs collection
+
+* Make `rbs collection` say where the gem list comes from ([#3094](https://github.com/ruby/rbs/pull/3094))
+
+### Miscellaneous
+
+* Run `bundle` with the Ruby running the tests ([#3099](https://github.com/ruby/rbs/pull/3099))
+* docs: fix typo prefered -> preferred ([#3098](https://github.com/ruby/rbs/pull/3098))
+
 ## 4.2.0 (2026-08-23)
 
 RBS 4.2 accepts non-ASCII characters in identifiers. Method names, instance variable names and parameter names can be written in any script, and other names may contain non-ASCII characters as long as they start with an ASCII letter, which is what tells a constant from a method name.
