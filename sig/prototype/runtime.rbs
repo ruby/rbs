@@ -64,8 +64,6 @@ module RBS
         def build_s_new: () -> Array[AST::Members::MethodDefinition]
 
         def build_super_class: () -> AST::Declarations::Class::Super
-
-        CAN_CALL_KEYWORD_INIT_P: bool
       end
 
       class DataGenerator < ValueObjectBase

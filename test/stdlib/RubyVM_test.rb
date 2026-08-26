@@ -21,11 +21,9 @@ class RubyVM::AbstractSyntaxTreeSingletonTest < Test::Unit::TestCase
                      RubyVM::AbstractSyntaxTree, :of, method(:test_of)
   end
 
-  if RUBY_VERSION >= '3.2'
-    def test_node_id_for_backtrace_location
-      assert_send_type "(::Thread::Backtrace::Location backtrace_location) -> ::Integer",
-                      RubyVM::AbstractSyntaxTree, :node_id_for_backtrace_location, caller_locations[0]
-    end
+  def test_node_id_for_backtrace_location
+    assert_send_type "(::Thread::Backtrace::Location backtrace_location) -> ::Integer",
+                    RubyVM::AbstractSyntaxTree, :node_id_for_backtrace_location, caller_locations[0]
   end
 end
 
@@ -66,16 +64,14 @@ class RubyVM::AbstractSyntaxTree::NodeTest < Test::Unit::TestCase
     end
   end
 
-  if RUBY_VERSION >= '3.2'
-    def test_tokens
-      assert_send_type "() -> ::Array[[ ::Integer, ::Symbol, ::String, [ ::Integer, ::Integer, ::Integer, ::Integer ] ]]?",
-                      RubyVM::AbstractSyntaxTree.parse("1 + 2", keep_tokens: true), :tokens
-    end
+  def test_tokens
+    assert_send_type "() -> ::Array[[ ::Integer, ::Symbol, ::String, [ ::Integer, ::Integer, ::Integer, ::Integer ] ]]?",
+                    RubyVM::AbstractSyntaxTree.parse("1 + 2", keep_tokens: true), :tokens
+  end
 
-    def test_all_tokens
-      assert_send_type "() -> ::Array[[ ::Integer, ::Symbol, ::String, [ ::Integer, ::Integer, ::Integer, ::Integer ] ]]?",
-                      RubyVM::AbstractSyntaxTree.parse("1 + 2", keep_tokens: true), :all_tokens
-    end
+  def test_all_tokens
+    assert_send_type "() -> ::Array[[ ::Integer, ::Symbol, ::String, [ ::Integer, ::Integer, ::Integer, ::Integer ] ]]?",
+                    RubyVM::AbstractSyntaxTree.parse("1 + 2", keep_tokens: true), :all_tokens
   end
 
   def test_children
