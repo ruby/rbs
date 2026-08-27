@@ -44,7 +44,7 @@ module RBS
 
     def parse_logging_options: (OptionParser) -> void
 
-    def has_parser?: () -> bool
+    def has_parser?: (String format) -> bool
 
     def run: (Array[String] args) -> Integer
 
