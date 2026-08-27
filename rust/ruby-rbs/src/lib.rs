@@ -4,5 +4,6 @@ pub(crate) mod file_finder;
 pub mod ids;
 pub mod interner;
 pub mod interners;
+pub mod loader;
 pub mod node;
 pub mod type_name;

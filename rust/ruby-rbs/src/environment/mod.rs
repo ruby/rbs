@@ -3,6 +3,7 @@ pub mod source;
 pub use source::{Source, SourceKind};
 
 use crate::interners::Interners;
+use crate::loader::{EnvironmentLoader, LoadError};
 
 /// Owning the interners here gives a single `Environment` value the same
 /// role as the Ruby implementation's global name pool: names interned while
@@ -33,6 +34,12 @@ impl Environment {
 
     pub(crate) fn add_source(&mut self, source: Source) {
         self.sources.push(source);
+    }
+
+    pub fn from_loader(loader: &EnvironmentLoader) -> Result<Environment, LoadError> {
+        let mut env = Environment::new();
+        loader.load(&mut env)?;
+        Ok(env)
     }
 }
 
