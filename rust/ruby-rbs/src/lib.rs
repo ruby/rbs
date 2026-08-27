@@ -1,4 +1,5 @@
 pub mod ast;
+pub mod environment;
 pub mod ids;
 pub mod interner;
 pub mod interners;
