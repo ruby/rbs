@@ -108,7 +108,8 @@ module RBS
       opts
     end
 
-    def has_parser?
+    def has_parser?(format)
+      return true if format == "rbi"
       defined?(RubyVM::AbstractSyntaxTree) ? true : false
     end
 
@@ -685,7 +686,7 @@ EOU
     end
 
     def run_prototype_file(format, args)
-      availability = unless has_parser?
+      availability = unless has_parser?(format)
                        "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
                      end
 
@@ -730,7 +731,7 @@ EOU
 
       opts.parse!(args)
 
-      unless has_parser?
+      unless has_parser?(format)
         stdout.puts "Not supported on this interpreter (#{RUBY_ENGINE})."
         return 1
       end
@@ -743,7 +744,7 @@ EOU
       new_parser = -> do
         case format
         when "rbi"
-          Prototype::RBI.new()
+          Prototype::RBI
         when "rb"
           Prototype::RB.new()
         else
@@ -798,7 +799,7 @@ EOU
 
             parser = new_parser[]
             begin
-              parser.parse file_path.read()
+              decls = parser.parse file_path.read()
             rescue SyntaxError
               stdout.puts "  ⚠️  Unable to parse due to SyntaxError: `#{file_path}`"
               next
@@ -819,7 +820,7 @@ EOU
             (output_path.parent).mkpath
             output_path.open("w") do |io|
               writer = Writer.new(out: io)
-              writer.write(parser.decls)
+              writer.write(decls)
             end
           end
         end
@@ -839,13 +840,12 @@ EOU
       else
         # file mode
         parser = new_parser[]
+        writer = Writer.new(out: stdout)
 
         input_paths.each do |file|
-          parser.parse file.read()
+          writer.write parser.parse(file.read())
         end
 
-        writer = Writer.new(out: stdout)
-        writer.write parser.decls
       end
 
       0
