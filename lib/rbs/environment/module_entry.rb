@@ -14,6 +14,7 @@ module RBS
 
       def <<(context_decl)
         context_decls << context_decl
+        @type_params_validated = nil
         self
       end
 
@@ -72,6 +73,10 @@ module RBS
       end
 
       def validate_type_params
+        # The entry only changes with `<<`, which resets the memo -- a failed
+        # validation is not recorded and raises again
+        return if @type_params_validated
+
         unless context_decls.empty?
           first_decl, *rest_decls = each_decl.to_a
           first_decl or raise
@@ -85,6 +90,8 @@ module RBS
             end
           end
         end
+
+        @type_params_validated = true
       end
     end
   end
