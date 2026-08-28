@@ -1053,9 +1053,10 @@ module RBS
     end
 
     def validate_type_name(name, location)
-      name = name.absolute! unless name.absolute?
-      return if env.type_name?(env.normalize_type_name(name))
+      absolute = name.absolute? ? name : name.absolute!
+      return if env.type_name?(env.normalize_type_name(absolute))
 
+      # Report the name as it is written in the signature
       raise NoTypeFoundError.new(type_name: name, location: location)
     end
   end
