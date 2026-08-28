@@ -46,48 +46,47 @@ module RBS
           self
         end
 
-        def each
-          if block_given?
-            # The topological sort exists to yield the original method of an alias first,
-            # and without an alias every method is its own SCC in insertion order
+        def each(&block)
+          if block
+            # Yields the original method of an alias before the alias, like the
+            # topological sort did, and detects recursive alias definitions on the way
             if methods.each_value.any? {|defn| defn.original.is_a?(AST::Members::Alias) }
-              Sorter.new(methods).each_strongly_connected_component do |scc|
-                if scc.size > 1
-                  raise RecursiveAliasDefinitionError.new(type: type, defs: scc)
-                end
-
-                yield scc[0]
+              # @type var done: Hash[Definition, bool]
+              done = {}.compare_by_identity
+              methods.each_value do |defn|
+                each_alias_first(defn, done, [], &block)
               end
             else
-              methods.each_value do |defn|
-                yield defn
-              end
+              methods.each_value(&block)
             end
           else
             enum_for :each
           end
         end
 
-        class Sorter
-          include TSort
+        private
 
-          attr_reader :methods
+        def each_alias_first(defn, done, visiting, &block)
+          return if done[defn]
 
-          def initialize(methods)
-            @methods = methods
+          if visiting.any? {|other| other.equal?(defn) }
+            index = visiting.index {|other| other.equal?(defn) } or raise
+            raise RecursiveAliasDefinitionError.new(type: type, defs: visiting[index..] || raise)
           end
 
-          def tsort_each_node(&block)
-            methods.each_value(&block)
-          end
-
-          def tsort_each_child(defn)
-            if (member = defn.original).is_a?(AST::Members::Alias)
-              if old = methods[member.old_name]
-                yield old
+          if (member = defn.original).is_a?(AST::Members::Alias)
+            if old = methods.fetch(member.old_name, nil)
+              # A self alias forms a size-1 SCC that the topological sort yielded as is
+              unless old.equal?(defn)
+                visiting.push(defn)
+                each_alias_first(old, done, visiting, &block)
+                visiting.pop
               end
             end
           end
+
+          done[defn] = true
+          yield defn
         end
       end
 
