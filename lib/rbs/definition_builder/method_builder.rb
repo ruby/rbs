@@ -48,12 +48,20 @@ module RBS
 
         def each
           if block_given?
-            Sorter.new(methods).each_strongly_connected_component do |scc|
-              if scc.size > 1
-                raise RecursiveAliasDefinitionError.new(type: type, defs: scc)
-              end
+            # The topological sort exists to yield the original method of an alias first,
+            # and without an alias every method is its own SCC in insertion order
+            if methods.each_value.any? {|defn| defn.original.is_a?(AST::Members::Alias) }
+              Sorter.new(methods).each_strongly_connected_component do |scc|
+                if scc.size > 1
+                  raise RecursiveAliasDefinitionError.new(type: type, defs: scc)
+                end
 
-              yield scc[0]
+                yield scc[0]
+              end
+            else
+              methods.each_value do |defn|
+                yield defn
+              end
             end
           else
             enum_for :each
