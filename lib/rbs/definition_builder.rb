@@ -346,7 +346,7 @@ module RBS
           if entry.is_a?(Environment::ClassEntry)
             new_method = definition.methods[:new]
 
-            if new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
+            if new_method && new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
               # The method is _untyped new_.
 
               alias_methods = definition.methods.each.with_object([]) do |entry, array|
