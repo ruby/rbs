@@ -11,6 +11,10 @@ module RBS
 
     private def filter_members: (decl_with_members, context: Resolver::context) -> decl_with_members?
 
+    private def subtract_member: (TypeName owner, AST::Members::t member, context: Resolver::context) -> AST::Members::t?
+
+    private def accessor_part: (AST::Members::AttrAccessor member, singleton(AST::Members::AttrReader) | singleton(AST::Members::AttrWriter) member_class) -> (AST::Members::AttrReader | AST::Members::AttrWriter)
+
     private def member_exist?: (TypeName owner, AST::Members::t, context: Resolver::context) -> boolish
 
     private def method_exist?: (TypeName owner, Symbol method_name, AST::Members::MethodDefinition::kind) -> boolish
