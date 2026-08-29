@@ -43,7 +43,7 @@ module RBS
       end
 
       def version_names
-        versions.keys.sort_by(&:version)
+        versions.keys.sort
       end
 
       def oldest_version
