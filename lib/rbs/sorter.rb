@@ -97,9 +97,10 @@ module RBS
           when Members::AttrAccessor, Members::AttrWriter, Members::AttrReader
             if member.kind == :singleton
               partitioned[:singleton_attributes] << member
+            elsif member.visibility == :private
+              partitioned[:private_instance_attributes] << member.update(visibility: nil)
             else
-              key = member.visibility == :private ? :private_instance_attributes : :public_instance_attributes
-              partitioned[key] << member.update(visibility: nil)
+              partitioned[:public_instance_attributes] << member.update(visibility: nil)
             end
           when Members::MethodDefinition
             case member.kind
