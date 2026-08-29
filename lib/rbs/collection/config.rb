@@ -24,8 +24,8 @@ module RBS
         loop do
           config_path = current.join(PATH)
           return config_path if config_path.exist?
-          current = current.join('..')
           return nil if current.root?
+          current = current.join('..')
         end
       end
 
