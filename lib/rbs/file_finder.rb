@@ -12,7 +12,7 @@ module RBS
         yield path
 
       when path.directory?
-        paths = Pathname.glob("#{path}/**/*.rbs")
+        paths = path.glob("**/*.rbs")
 
         if skip_hidden
           paths.select! do |child|
