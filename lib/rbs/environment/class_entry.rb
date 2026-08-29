@@ -14,6 +14,7 @@ module RBS
 
       def initialize_copy(other)
         @context_decls = other.context_decls.dup
+        self
       end
 
       def <<(context_decl)
