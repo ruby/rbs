@@ -14,7 +14,7 @@ rbs_string_t rbs_string_new(const char *start, const char *end) {
 
 rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     const char *new_start = self->start;
-    while (isspace(*new_start) && new_start < self->end) {
+    while (new_start < self->end && isspace((unsigned char) *new_start)) {
         new_start++;
     }
 
@@ -23,7 +23,7 @@ rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     }
 
     const char *new_end = self->end - 1;
-    while (isspace(*new_end) && new_start < new_end) {
+    while (new_start < new_end && isspace((unsigned char) *new_end)) {
         new_end--;
     }
 
