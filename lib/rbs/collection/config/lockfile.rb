@@ -31,7 +31,7 @@ module RBS
           data = {
             "path" => path.to_s,
             "gems" => gems.each_value.sort_by {|g| g[:name] }.map {|hash| library_data(hash) },
-            "gemfile_lock_path" => gemfile_lock_path.to_s
+            "gemfile_lock_path" => gemfile_lock_path&.to_s
           }
 
           data.delete("gems") if gems.empty?
