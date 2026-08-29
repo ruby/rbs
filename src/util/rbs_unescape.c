@@ -29,7 +29,8 @@ static const struct {
 static int hex_to_int(const char *hex, int length) {
     int result = 0;
     for (int i = 0; i < length; i++) {
-        result = result * 16 + (isdigit(hex[i]) ? hex[i] - '0' : tolower(hex[i]) - 'a' + 10);
+        unsigned char digit = (unsigned char) hex[i];
+        result = result * 16 + (isdigit(digit) ? digit - '0' : tolower(digit) - 'a' + 10);
     }
     return result;
 }
@@ -88,17 +89,17 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
     while (i < len) {
         if (input[i] == '\\' && i + 1 < len) {
             if (is_double_quote) {
-                if (isdigit(input[i + 1])) {
+                if (input[i + 1] >= '0' && input[i + 1] <= '7') {
                     // Octal escape
                     int octal_len = 1;
-                    while (octal_len < 3 && i + 1 + octal_len < len && isdigit(input[i + 1 + octal_len]))
+                    while (octal_len < 3 && i + 1 + octal_len < len && input[i + 1 + octal_len] >= '0' && input[i + 1 + octal_len] <= '7')
                         octal_len++;
                     int value = octal_to_int(input + i + 1, octal_len);
                     output[j++] = (char) value;
                     i += octal_len + 1;
-                } else if (input[i + 1] == 'x' && i + 3 < len) {
+                } else if (input[i + 1] == 'x' && i + 2 < len) {
                     // Hex escape
-                    int hex_len = isxdigit(input[i + 3]) ? 2 : 1;
+                    int hex_len = i + 3 < len && isxdigit((unsigned char) input[i + 3]) ? 2 : 1;
                     int value = hex_to_int(input + i + 2, hex_len);
                     output[j++] = (char) value;
                     i += hex_len + 2;
@@ -124,7 +125,9 @@ rbs_string_t unescape_string(rbs_allocator_t *allocator, const rbs_string_t stri
                     int found = 0;
                     for (size_t k = 0; k < sizeof(TABLE) / sizeof(TABLE[0]); k++) {
                         if (strncmp(input + i, TABLE[k].from, strlen(TABLE[k].from)) == 0) {
-                            output[j++] = TABLE[k].to[0];
+                            size_t replacement_length = strlen(TABLE[k].to);
+                            memcpy(output + j, TABLE[k].to, replacement_length);
+                            j += replacement_length;
                             i += strlen(TABLE[k].from);
                             found = 1;
                             break;
