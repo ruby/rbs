@@ -280,7 +280,9 @@ module RBS
               value(key, type.args[0]) && value(val[key], type.args[1])
             end
           when klass == ::Range
-            Test.call(val, IS_AP, klass) && value(val.begin, type.args[0]) && value(val.end, type.args[0])
+            Test.call(val, IS_AP, klass) &&
+              (val.begin.nil? || value(val.begin, type.args[0])) &&
+              (val.end.nil? || value(val.end, type.args[0]))
           when klass == ::Enumerator
             if Test.call(val, IS_AP, klass)
               case val.size
