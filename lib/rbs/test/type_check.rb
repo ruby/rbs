@@ -376,7 +376,10 @@ module RBS
             type.types.map.with_index {|ty, index| value(val[index], ty) }.all?
         when Types::Record
           Test::call(val, IS_AP, ::Hash) &&
-            type.fields.map {|key, type| value(val[key], type) }.all?
+            type.fields.all? {|key, type| value(val[key], type) } &&
+            type.optional_fields.all? do |key, type|
+              !val.key?(key) || value(val[key], type)
+            end
         when Types::Proc
           Test::call(val, IS_AP, ::Proc)
         else
