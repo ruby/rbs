@@ -419,6 +419,8 @@ class RBS::SubtractorTest < Test::Unit::TestCase
         attr_writer b: untyped
         attr_writer c: untyped
         attr_accessor d: untyped
+        attr_accessor e: untyped
+        attr_accessor f: untyped
       end
     RBS
 
@@ -428,6 +430,9 @@ class RBS::SubtractorTest < Test::Unit::TestCase
         def b=: (String) -> String
         def c: (String) -> String
         def d: (String) -> String
+        def e=: (String) -> String
+        def f: () -> String
+        def f=: (String) -> String
       end
     RBS
 
@@ -436,6 +441,8 @@ class RBS::SubtractorTest < Test::Unit::TestCase
     assert_subtracted <<~RBS, subtracted
       class C
         attr_writer c: untyped
+        attr_writer d: untyped
+        attr_reader e: untyped
       end
     RBS
   end
