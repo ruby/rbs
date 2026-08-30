@@ -281,8 +281,8 @@ module RBS
             end
           when klass == ::Range
             Test.call(val, IS_AP, klass) &&
-              (val.begin.nil? || value(val.begin, type.args[0])) &&
-              (val.end.nil? || value(val.end, type.args[0]))
+              (Test.call(val.begin, IS_AP, ::NilClass) || value(val.begin, type.args[0])) &&
+              (Test.call(val.end, IS_AP, ::NilClass) || value(val.end, type.args[0]))
           when klass == ::Enumerator
             if Test.call(val, IS_AP, klass)
               case val.size
