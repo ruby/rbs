@@ -1407,6 +1407,12 @@ module RBS
           other.self_type == self_type
       end
 
+      alias eql? ==
+
+      def hash
+        self.class.hash ^ type.hash ^ required.hash ^ self_type.hash
+      end
+
       def to_json(state = nil)
         {
           type: type,
