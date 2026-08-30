@@ -81,7 +81,7 @@ module RBS
 
         alias bar foo
 
-        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped d) -> untyped
 
         private
 
@@ -148,7 +148,7 @@ module RBS
 
         alias bar foo
 
-        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped) -> untyped
+        def foo: (untyped foo, ?untyped bar, *untyped baz, untyped a, b: untyped, ?c: untyped, **untyped d) -> untyped
 
         private
 
