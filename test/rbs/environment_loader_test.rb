@@ -82,6 +82,22 @@ end
     end
   end
 
+    def test_loading_stdlib_via_manifest
+    mktmpdir do |path|
+      path.join("manifest.yaml").write(<<-RBS)
+dependencies:
+ - name: uri
+    RBS
+      loader = EnvironmentLoader.new
+      loader.add(path: path)
+
+      env = Environment.new
+      loader.load(env: env)
+
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::URI")
+    end
+  end
+
   def test_loading_library_from_gem_repo
     mktmpdir do |path|
       (path + "gems").mkdir
