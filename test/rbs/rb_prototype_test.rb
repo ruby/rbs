@@ -49,6 +49,8 @@ class Hello
   end
 
   def kw_req(a:) end
+
+  def empty_array_opt(a = []) end
 end
     EOR
 
@@ -59,6 +61,8 @@ class Hello
   def self.world: () { (untyped, untyped, untyped, x: untyped, y: untyped) -> untyped } -> untyped
 
   def kw_req: (a: untyped) -> nil
+
+  def empty_array_opt: (?::Array[untyped] a) -> nil
 end
     EOF
   end

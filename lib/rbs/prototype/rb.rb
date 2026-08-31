@@ -838,12 +838,7 @@ module RBS
           when Prism::TrueNode, Prism::FalseNode
             Types::Bases::Bool.new(location: nil)
           when Prism::ArrayNode
-            # FIXME bug replicating empty array untyped
-            if node.elements.any?
-              BuiltinNames::Array.instance_type(default)
-            else
-              default
-            end
+            BuiltinNames::Array.instance_type(default)
           when Prism::HashNode
             BuiltinNames::Hash.instance_type(default, default)
           else
