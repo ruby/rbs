@@ -175,6 +175,16 @@ module RBS
       def can_alias?: (Module, UnboundMethod) -> bool
 
       def type_params: (Module) -> Array[AST::TypeParam]
+
+      def args_from_node: (RubyVM::AbstractSyntaxTree::Node?) -> Array[untyped]
+
+      def any_node?: (RubyVM::AbstractSyntaxTree::Node, ?nodes: Array[RubyVM::AbstractSyntaxTree::Node]) { (RubyVM::AbstractSyntaxTree::Node) -> bool } -> Array[RubyVM::AbstractSyntaxTree::Node]?
+
+      def keyword_hash?: (RubyVM::AbstractSyntaxTree::Node) -> bool
+
+      # Returns a symbol if the node is a symbol literal node
+      # 
+      def symbol_literal_node?: (RubyVM::AbstractSyntaxTree::Node) -> Symbol?
     end
   end
 end

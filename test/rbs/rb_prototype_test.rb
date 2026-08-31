@@ -1,16 +1,11 @@
 require "test_helper"
 
 class RBS::RbPrototypeTest < Test::Unit::TestCase
-  omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
-  omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
-
   RB = RBS::Prototype::RB
 
   include TestHelper
 
   def test_class_module
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
 end
@@ -25,7 +20,7 @@ class Bar < Struct.new(:bar)
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
 end
 
@@ -41,8 +36,6 @@ end
   end
 
   def test_defs
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   def hello(a, b = 3, *c, d, e:, f: 3, **g, &h)
@@ -59,7 +52,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) { (?) -> untyped } -> nil
 
@@ -71,8 +64,6 @@ end
   end
 
   def test_defs_return_type
-    parser = RB.new
-
     rb = <<-'EOR'
 class Hello
   def initialize() 'foo' end
@@ -115,7 +106,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   def initialize: () -> void
 
@@ -177,8 +168,6 @@ end
   end
 
   def test_defs_return_type_with_block
-    parser = RB.new
-
     rb = <<-'EOR'
 class Hello
   def with_return
@@ -213,7 +202,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   def with_return: () -> (1 | "2" | :x)
 
@@ -229,8 +218,6 @@ end
   end
 
   def test_defs_return_type_with_block_optional
-    parser = RB.new
-
     rb = <<~'EOR'
       class Hello
         def with_optional_block1
@@ -249,7 +236,7 @@ end
       end
     EOR
 
-    assert_write parser.parse(rb), <<~EOF
+    assert_write RB.parse(rb), <<~EOF
       class Hello
         def with_optional_block1: () ?{ (untyped) -> untyped } -> (untyped | nil)
 
@@ -259,8 +246,6 @@ end
   end
 
   def test_defs_return_type_with_if
-    parser = RB.new
-
     rb = <<-EOR
 class ReturnTypeWithIF
   def with_if
@@ -318,7 +303,7 @@ class ReturnTypeWithIF
 end
 EOR
 
-    assert_write parser.parse(rb), <<-EOR
+    assert_write RB.parse(rb), <<-EOR
 class ReturnTypeWithIF
   def with_if: () -> (true | nil)
 
@@ -336,8 +321,6 @@ EOR
   end
 
   def test_sclass
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   class << self
@@ -346,7 +329,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   def self.hello: () -> nil
 end
@@ -354,8 +337,6 @@ end
   end
 
   def test_meta_programming
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   include Foo
@@ -384,7 +365,7 @@ module Mod
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   include Foo
 
@@ -426,8 +407,6 @@ end
   end
 
   def test_module_function
-    parser = RB.new
-
     rb = <<-EOR
 module Hello
   def foo() end
@@ -445,7 +424,7 @@ module Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 module Hello
   def foo: () -> nil
 
@@ -459,8 +438,6 @@ end
   end
 
   def test_accessibility
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   attr_reader :private_attr
@@ -487,7 +464,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   private
 
@@ -517,8 +494,6 @@ end
   end
 
   def test_accessibility_and_sclass
-    parser = RB.new
-
     rb = <<~RUBY
       class C
         class << self
@@ -531,7 +506,7 @@ end
       end
     RUBY
 
-    assert_write parser.parse(rb), <<~RBS
+    assert_write RB.parse(rb), <<~RBS
       class C
         private
 
@@ -545,8 +520,6 @@ end
   end
 
   def test_aliases
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   alias a b
@@ -562,7 +535,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   alias a b
 
@@ -576,8 +549,6 @@ end
   end
 
   def test_comments
-    parser = RB.new
-
     rb = <<-EOR
 # Comments for class.
 # This is a comment.
@@ -609,7 +580,7 @@ class Hello # :nodoc:
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 # Comments for class.
 # This is a comment.
 class Hello
@@ -641,14 +612,12 @@ end
   end
 
   def test_toplevel
-    parser = RB.new
-
     rb = <<-EOR
 def hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Object
   def hello: () -> nil
 end
@@ -656,8 +625,6 @@ end
   end
 
   def test_const
-    parser = RB.new
-
     rb = <<-EOR
 module Foo
   VERSION = '0.1.1'
@@ -667,7 +634,7 @@ module Foo
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 module Foo
   VERSION: "0.1.1"
 
@@ -681,15 +648,13 @@ end
   end
 
   def test_const_with_multi_assign
-    parser = RB.new
-
     rb = <<-EOR
 module Foo
   MAJOR, MINOR, PATCH = ['0', '1', '1']
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 module Foo
   MAJOR: untyped
 
@@ -700,9 +665,25 @@ end
     EOF
   end
 
-  def test_literal_types
-    parser = RB.new
+  def test_const_with_multi_assign_ivar
+    rb = <<~RUBY
+      module Foo
+        @major, @minor, @patch = ['0', '1', '1']
+      end
+    RUBY
 
+    assert_write RB.parse(rb), <<~RBS
+      module Foo
+        self.@major: untyped
+
+        self.@minor: untyped
+
+        self.@patch: untyped
+      end
+    RBS
+  end
+
+  def test_literal_types
     rb = <<-'EOR'
 A = 1
 B = 1.0
@@ -715,7 +696,7 @@ H = { id: 123 }
 I = self
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 A: 1
 
 B: ::Float
@@ -737,14 +718,11 @@ I: untyped
   end
 
   def test_invalid_byte_sequence_in_utf8
-    parser = RB.new
     rb = 'A = "\xff"'
-    assert_write parser.parse(rb), "A: ::String\n"
+    assert_write RB.parse(rb), "A: ::String\n"
   end
 
-  def test_argumentless_fcall
-    parser = RB.new
-
+  def test_argumentless_call
     rb = <<-'EOR'
 class C
   included do
@@ -753,15 +731,13 @@ class C
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class C
 end
     EOF
   end
 
-  def test_method_definition_in_fcall
-    parser = RB.new
-
+  def test_method_definition_in_call
     rb = <<-'EOR'
 class C
   some_method_takes_method_name def foo
@@ -769,7 +745,7 @@ class C
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class C
   def foo: () -> nil
 end
@@ -777,8 +753,6 @@ end
   end
 
   def test_multiple_nested_class
-    parser = RB.new
-
     rb = <<-'EOR'
 module Foo
   class Bar
@@ -791,7 +765,7 @@ module Foo
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 module Foo
   class Bar
   end
@@ -805,8 +779,6 @@ end
   end
 
   def test_duplicate_methods
-    parser = RB.new
-
     rb = <<-'EOR'
 class C
   def foo(x, y, z)
@@ -815,16 +787,14 @@ class C
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class C
   def foo: (untyped x, untyped y, untyped z) -> untyped
 end
     EOF
   end
 
-  def test_ITER
-    parser = RB.new
-
+  def test_block_content
     rb = <<~'RUBY'
 module M
   def not_refinements
@@ -842,7 +812,7 @@ module M
 end
     RUBY
 
-    assert_write parser.parse(rb), <<~RBS
+    assert_write RB.parse(rb), <<~RBS
 module M
   def not_refinements: () -> nil
 end
@@ -850,8 +820,6 @@ end
   end
 
   def test_calling_class_method_from_instance
-    parser = RB.new
-
     rb = <<~'RUBY'
 class HelloWorld
   def self.world(str)
@@ -864,7 +832,7 @@ class HelloWorld
 end
     RUBY
 
-    assert_write parser.parse(rb), <<~RBS
+    assert_write RB.parse(rb), <<~RBS
 class HelloWorld
   def self.world: (untyped str) -> untyped
 
@@ -874,21 +842,29 @@ end
   end
 
   def test_instance_variables
-    parser = RB.new
-
     rb = <<-EOR
 class Hello
   def message(message)
     # comment for ivar
     @message = message
+
+    @a ||= 1
+    @b &&= 2
+    @c += 3
   end
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   # comment for ivar
   @message: untyped
+
+  @a: untyped
+
+  @b: untyped
+
+  @c: untyped
 
   def message: (untyped message) -> untyped
 end
@@ -896,8 +872,6 @@ end
   end
 
   def test_instance_variables_in_module
-    parser = RB.new
-
     rb = <<-EOR
 module Hello
   def message(message)
@@ -911,7 +885,7 @@ module Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 module Hello
   # comment for ivar
   @message: untyped
@@ -925,9 +899,25 @@ end
     EOF
   end
 
-  def test_class_variables
-    parser = RB.new
+  def test_instance_variable_in_receiver
+    rb = <<~RUBY
+      class Hello
+        def options(options = {})
+          (@options ||= { key: SecureRandom.hex }).merge!(options)
+        end
+      end
+    RUBY
 
+    assert_write RB.parse(rb), <<~RBS
+      class Hello
+        @options: untyped
+
+        def options: (?::Hash[untyped, untyped] options) -> untyped
+      end
+    RBS
+  end
+
+  def test_class_variables
     rb = <<-EOR
 class Hello
   def self.foo
@@ -951,7 +941,7 @@ class Hello
 end
     EOR
 
-    assert_write parser.parse(rb), <<-EOF
+    assert_write RB.parse(rb), <<-EOF
 class Hello
   # comment for cvar
   @@message: untyped
@@ -971,25 +961,52 @@ end
     EOF
   end
 
+  def test_class_variables_conditional_assign
+    rb = <<~RUBY
+      class Hello
+        @@foo &&= 1
+        @@bar ||= 2
+        @@baz += 3
+      end
+    RUBY
+
+    assert_write RB.parse(rb), <<~RBS
+      class Hello
+        @@foo: untyped
+
+        @@bar: untyped
+
+        @@baz: untyped
+      end
+    RBS
+  end
+
   def test_literal_to_type
-    parser = RBS::Prototype::RB.new
+    visitor = RB::Visitor.new([])
     [
       [%{"abc"}, %{"abc"}],
+      [%{"abc\#{d}"}, %{::String}],
+      [%{`abc`}, %{::String}],
+      [%{`abc\#{d}`}, %{::String}],
       [%{:abc}, %{:abc}],
+      [%{:"abc\#{d}"}, %{::Symbol}],
+      [%{/abc/}, %{::Regexp}],
+      [%{/abc\#{d}/}, %{::Regexp}],
       [%{[]}, %{::Array[untyped]}],
       [%{[true]}, %{::Array[true]}],
+      [%{[foo: true]}, %{::Array[{foo: true}]}],
       [%{1..2}, %{::Range[::Integer]}],
       [%{{}}, %{::Hash[untyped, untyped]}],
       [%{{a: nil}}, %{ { a: nil } }],
       [%({"a" => /b/}), %({ 'a' => ::Regexp })],
     ].each do |rb, rbs|
-      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
-      assert_equal RBS::Parser.parse_type(rbs), parser.literal_to_type(node.children[1])
+      node = Prism.parse(rb).value.statements.body[0]
+      assert_equal RBS::Parser.parse_type(rbs), visitor.literal_to_type(node)
     end
   end
 
   def test_const_to_name
-    parser = RBS::Prototype::RB.new
+    visitor = RB::Visitor.new([])
     [
       ["self", RBS::TypeName.parse("::Foo")],
       ["Bar", RBS::TypeName.parse("Bar")],
@@ -997,50 +1014,82 @@ end
       ["Bar::Baz", RBS::TypeName.parse("Bar::Baz")],
       ["obj::Baz", nil],
     ].each do |rb, name|
-      node = RubyVM::AbstractSyntaxTree.parse("_ = #{rb}").children[2]
+      node = Prism.parse(rb).value.statements.body[0]
       context = RBS::Prototype::RB::Context.initial(namespace: RBS::Namespace.new(path: [:Foo], absolute: true))
-      assert_equal name, parser.const_to_name(node.children[1], context: context)
+      assert_equal name, visitor.const_to_name(node, context: context)
     end
   end
 
   def test_argument_forwarding
-    parser = RB.new
-
     rb = <<~'RUBY'
-module M
-def foo(...) end
-end
+      module M
+        def block_unused(...) end
+
+        def block_optional(...)
+          yield 1 if block_given?
+        end
+      end
     RUBY
 
-    if RUBY_VERSION < '3.4'
-      # Ruby <=3.3 generates AST without kwrest args for `...` args
-      assert_write parser.parse(rb), <<~RBS
+    assert_write RB.parse(rb), <<~RBS
         module M
-          def foo: (*untyped) ?{ (?) -> untyped } -> nil
+          def block_unused: (*untyped, **untyped) ?{ (?) -> untyped } -> nil
+
+          def block_optional: (*untyped, **untyped) ?{ (untyped) -> untyped } -> (untyped | nil)
         end
       RBS
-    else
-      # Ruby 3.4 generates AST with kwrest args for `...` args
-      assert_write parser.parse(rb), <<~RBS
-        module M
-          def foo: (*untyped, **untyped) ?{ (?) -> untyped } -> nil
-        end
-      RBS
-    end
   end
 
   def test_endless_method_definition
-    parser = RB.new
     rb = <<~'RUBY'
 module M
   def foo = 42
 end
     RUBY
 
-    assert_write parser.parse(rb), <<~RBS
+    assert_write RB.parse(rb), <<~RBS
 module M
   def foo: () -> 42
 end
+    RBS
+  end
+
+  def test_ignores_anonymous_modules
+    rb = <<~RUBY
+      Module.new do
+        def hook(name, path)
+          super
+        end
+      end
+    RUBY
+
+    assert_write RB.parse(rb), ''
+  end
+
+  def test_anonymous_block
+    rb = <<~RUBY
+      module M
+        def block_optional(&)
+          yield if block_given?
+        end
+
+        def block_required(&)
+          yield
+        end
+
+        def block_unused(&)
+        end
+      end
+    RUBY
+
+    assert_write RB.parse(rb), <<~RBS
+      module M
+        def block_optional: () ?{ () -> untyped } -> (untyped | nil)
+
+        def block_required: () { () -> untyped } -> untyped
+
+        def block_unused: () { (?) -> untyped } -> nil
+      end
     RBS
   end
 end

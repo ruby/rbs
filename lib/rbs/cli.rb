@@ -108,11 +108,6 @@ module RBS
       opts
     end
 
-    def has_parser?(format)
-      return true if format == "rbi"
-      defined?(RubyVM::AbstractSyntaxTree) ? true : false
-    end
-
     def run(args)
       @original_args = args.dup
 
@@ -684,10 +679,6 @@ EOU
     end
 
     def run_prototype_file(format, args)
-      availability = unless has_parser?(format)
-                       "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
-                     end
-
       # @type var output_dir: Pathname?
       output_dir = nil
       # @type var base_dir: Pathname?
@@ -698,7 +689,7 @@ EOU
       opts = OptionParser.new
       opts.banner = <<EOU
 Usage: rbs prototype #{format} [files...]
-#{availability}
+
 Generate RBS prototype from source code.
 It parses specified Ruby code and and generates RBS prototypes.
 
@@ -729,11 +720,6 @@ EOU
 
       opts.parse!(args)
 
-      unless has_parser?(format)
-        stdout.puts "Not supported on this interpreter (#{RUBY_ENGINE})."
-        return 1
-      end
-
       if args.empty?
         stdout.puts opts
         return 1
@@ -744,7 +730,7 @@ EOU
         when "rbi"
           Prototype::RBI
         when "rb"
-          Prototype::RB.new()
+          Prototype::RB
         else
           raise
         end

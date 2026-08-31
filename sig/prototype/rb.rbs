@@ -1,7 +1,7 @@
 module RBS
   module Prototype
     class RB
-      include Helpers
+      extend Helpers
 
       class Context
         type method_kind = :singleton | :singleton_instance | :instance
@@ -29,68 +29,76 @@ module RBS
 
       type decl = AST::Declarations::t | AST::Members::t
 
-      attr_reader source_decls: Array[decl]
+      def self.parse: (String) -> Array[AST::Declarations::t]
 
-      def initialize: () -> void
+      def self.process_decls: (Array[AST::Declarations::t | AST::Members::t]) -> Array[AST::Declarations::t]
 
-      def decls: () -> Array[AST::Declarations::t]
+      class Visitor < Prism::Visitor
+        attr_reader context: Context
 
-      def parse: (String) -> Array[AST::Declarations::t]
+        attr_reader comments: Hash[Integer, AST::Comment]
 
-      def process: (untyped node, decls: Array[AST::Declarations::t | AST::Members::t], comments: Hash[Integer, AST::Comment], context: Context) -> void
+        attr_reader decls: Array[decl]
 
-      def process_children: (RubyVM::AbstractSyntaxTree::Node node, decls: Array[decl], comments: Hash[Integer, AST::Comment], context: Context) -> void
+        def initialize: (Hash[Integer, AST::Comment] comments) -> void
 
-      # Returns a type name that represents the name of the constant.
-      # `node` must be _constant_ node, `CONST`, `COLON2`, or `COLON3` node.
-      #
-      def const_to_name!: (RubyVM::AbstractSyntaxTree::Node node, ?context: Context?) -> TypeName
+        def with: (decls: Array[decl], context: Context) { () -> untyped } -> void
 
-      # Returns a type name that represents the name of the constant.
-      # `node` can be `SELF` for `extend self` pattern.
-      #
-      def const_to_name: (RubyVM::AbstractSyntaxTree::Node? node, context: Context) -> TypeName?
+        # Returns a type name that represents the name of the constant.
+        def const_to_name!: (Prism::Node node, ?context: Context?) -> TypeName
 
-      def literal_to_symbol: (RubyVM::AbstractSyntaxTree::Node node) -> Symbol?
+        # Returns a type name that represents the name of the constant.
+        # `node` can be `SELF` for `extend self` pattern.
+        #
+        def const_to_name: (Prism::Node? node, context: Context) -> TypeName?
 
-      def function_type_from_body: (RubyVM::AbstractSyntaxTree::Node node, Symbol def_name) -> Types::Function
+        def literal_to_symbol: (Prism::Node node) -> Symbol?
 
-      def function_return_type_from_body: (RubyVM::AbstractSyntaxTree::Node node) -> Types::t
+        def function_type_from_def_node: (Prism::DefNode node) -> Types::Function
 
-      def body_type: (RubyVM::AbstractSyntaxTree::Node node) -> Types::t
+        def block_from_body: (Prism::StatementsNode | Prism::BeginNode | nil, Prism::ParametersNode | nil) -> Types::Block
 
-      def if_unless_type: (RubyVM::AbstractSyntaxTree::Node node) -> Types::t
+        def body_type: (Prism::Node? node) -> Types::t
 
-      def block_type: (RubyVM::AbstractSyntaxTree::Node node) -> Types::t
+        def block_type: (Prism::Node node) -> Types::t
 
-      def literal_to_type: (RubyVM::AbstractSyntaxTree::Node node) -> Types::t
+        def literal_to_type: (Prism::Node node) -> Types::t
 
-      def types_to_union_type: (Array[Types::t] types) -> Types::t
+        def types_to_union_type: (Array[Types::t] types) -> Types::t
 
-      def range_element_type: (Array[Types::t] types) -> Types::t
+        def range_element_type: (Array[Types::t] types) -> Types::t
 
-      def param_type: (RubyVM::AbstractSyntaxTree::Node node, ?default: Types::Bases::Any) -> Types::t
+        def param_type: (Prism::Node node, ?default: Types::Bases::Any) -> Types::t
 
-      # backward compatible
-      alias node_type param_type
+        def any_node?: (Prism::Node node, ?nodes: Array[Prism::Node]) { (Prism::Node) -> bool } -> untyped
 
-      def private: () -> AST::Members::Private
+        def keyword_hash?: (Prism::Node) -> bool
 
-      @private: AST::Members::Private?
+        # backward compatible
+        alias node_type param_type
 
-      def public: () -> AST::Members::Public
+        def private: () -> AST::Members::Private
 
-      @public: AST::Members::Public?
+        @private: AST::Members::Private?
 
-      def current_accessibility: (Array[decl] decls, ?Integer index) -> (AST::Members::Private | AST::Members::Public)
+        def public: () -> AST::Members::Public
 
-      def remove_unnecessary_accessibility_methods!: (Array[decl]) -> void
+        @public: AST::Members::Public?
 
-      def is_accessibility?: (decl) -> bool
+        def untyped: () -> Types::Bases::Any
 
-      def find_def_index_by_name: (Array[decl] decls, Symbol name) -> [Integer, AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrWriter]?
+        @untyped: Types::Bases::Any?
 
-      def sort_members!: (Array[decl] decls) -> void
+        def current_accessibility: (Array[decl] decls, ?Integer index) -> (AST::Members::Private | AST::Members::Public)
+
+        def remove_unnecessary_accessibility_methods!: (Array[decl]) -> void
+
+        def is_accessibility?: (decl) -> bool
+
+        def find_def_index_by_name: (Array[decl] decls, Symbol name) -> [Integer, AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrWriter]?
+
+        def sort_members!: (Array[decl] decls) -> void
+      end
     end
   end
 end

@@ -4,14 +4,11 @@ class RBS::NodeUsageTest < Test::Unit::TestCase
   include RBS::Prototype
 
   def parse(string)
-    RubyVM::AbstractSyntaxTree.parse(string)
+    Prism.parse(string).value
   end
 
   def test_conditional
-    omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
-    omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
-
-    NodeUsage.new(parse(<<~RB))
+    usage = NodeUsage.new(parse(<<~RB))
       def block
         yield
       end
@@ -46,5 +43,7 @@ class RBS::NodeUsageTest < Test::Unit::TestCase
         (foo(); bar; baz)
       ]
     RB
+
+    assert_equal(8, usage.conditional_nodes.size)
   end
 end

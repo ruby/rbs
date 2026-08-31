@@ -3,7 +3,43 @@
 module RBS
   module Prototype
     class RB
-      include Helpers
+      extend Helpers
+
+      def self.parse(string)
+        parse_result = Prism.parse(string, version: "current")
+        raise SyntaxError unless parse_result.success?
+
+        comments = process_comments(parse_result.comments, include_trailing: false)
+        visitor = Visitor.new(comments)
+        visitor.visit(parse_result.value)
+        process_decls(visitor.decls)
+      end
+
+      def self.process_decls(decls)
+        # @type var processed_decls: Array[AST::Declarations::t]
+        processed_decls = []
+
+        # @type var top_decls: Array[AST::Declarations::t]
+        # @type var top_members: Array[AST::Members::t]
+        top_decls, top_members = _ = decls.partition {|decl| decl.is_a?(AST::Declarations::Base) }
+
+        processed_decls.push(*top_decls)
+
+        unless top_members.empty?
+          top = AST::Declarations::Class.new(
+            name: TypeName.new(name: :Object, namespace: Namespace.empty),
+            super_class: nil,
+            members: top_members,
+            annotations: [],
+            comment: nil,
+            location: nil,
+            type_params: []
+          )
+          processed_decls << top
+        end
+
+        processed_decls
+      end
 
       class Context < Struct.new(:module_function, :singleton, :namespace, :in_def, keyword_init: true)
         # @implements Context
@@ -39,52 +75,19 @@ module RBS
         end
       end
 
-      attr_reader :source_decls
-      attr_reader :toplevel_members
+      class Visitor < Prism::Visitor
+        attr_reader :context
+        attr_reader :comments
+        attr_reader :decls
 
-      def initialize
-        @source_decls = []
-      end
-
-      def decls
-        # @type var decls: Array[AST::Declarations::t]
-        decls = []
-
-        # @type var top_decls: Array[AST::Declarations::t]
-        # @type var top_members: Array[AST::Members::t]
-        top_decls, top_members = _ = source_decls.partition {|decl| decl.is_a?(AST::Declarations::Base) }
-
-        decls.push(*top_decls)
-
-        unless top_members.empty?
-          top = AST::Declarations::Class.new(
-            name: TypeName.new(name: :Object, namespace: Namespace.empty),
-            super_class: nil,
-            members: top_members,
-            annotations: [],
-            comment: nil,
-            location: nil,
-            type_params: []
-          )
-          decls << top
+        def initialize(comments)
+          @comments = comments
+          @decls = []
+          @context = Context.initial
         end
 
-        decls
-      end
-
-      def parse(string)
-        # @type var comments: Hash[Integer, AST::Comment]
-        comments = parse_comments(string, include_trailing: false)
-
-        process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, context: Context.initial
-        decls
-      end
-
-      def process(node, decls:, comments:, context:)
-        case node.type
-        when :CLASS
-          class_name, super_class_node, *class_body = node.children
-          super_class_name = const_to_name(super_class_node, context: context)
+        def visit_class_node(node)
+          super_class_name = const_to_name(node.superclass, context: context)
           super_class =
             if super_class_name
               AST::Declarations::Class::Super.new(name: super_class_name, args: [], location: nil)
@@ -93,87 +96,82 @@ module RBS
               nil
             end
           kls = AST::Declarations::Class.new(
-            name: const_to_name!(class_name),
+            name: const_to_name!(node.constant_path),
             super_class: super_class,
             type_params: [],
             members: [],
             annotations: [],
             location: nil,
-            comment: comments[node.first_lineno - 1]
+            comment: comments[node.start_line - 1]
           )
 
           decls.push kls
 
           new_ctx = context.enter_namespace(kls.name.to_namespace)
-          each_node class_body do |child|
-            process child, decls: kls.members, comments: comments, context: new_ctx
+          with(decls: kls.members, context: new_ctx) do
+            visit(node.body)            
           end
           remove_unnecessary_accessibility_methods! kls.members
           sort_members! kls.members
+        end
 
-        when :MODULE
-          module_name, *module_body = node.children
-
+        def visit_module_node(node)
           mod = AST::Declarations::Module.new(
-            name: const_to_name!(module_name),
+            name: const_to_name!(node.constant_path),
             type_params: [],
             self_types: [],
             members: [],
             annotations: [],
             location: nil,
-            comment: comments[node.first_lineno - 1]
+            comment: comments[node.start_line - 1]
           )
 
           decls.push mod
 
           new_ctx = context.enter_namespace(mod.name.to_namespace)
-          each_node module_body do |child|
-            process child, decls: mod.members, comments: comments, context: new_ctx
+          with(decls: mod.members, context: new_ctx) do
+            visit(node.body)
           end
+
           remove_unnecessary_accessibility_methods! mod.members
           sort_members! mod.members
+        end
 
-        when :SCLASS
-          this, body = node.children
-
-          if this.type != :SELF
-            RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{this}"
+        def visit_singleton_class_node(node)
+          unless node.expression.is_a?(Prism::SelfNode)
+            RBS.logger.warn "`class <<` syntax with not-self may be compiled to incorrect code: #{node.expression.slice}"
           end
 
           accessibility = current_accessibility(decls)
 
           ctx = Context.initial.tap { |ctx| ctx.singleton = true }
-          process_children(body, decls: decls, comments: comments, context: ctx)
+          with(decls: decls, context: ctx) do
+            visit(node.body)
+          end
 
           decls << accessibility
+        end
 
-        when :DEFN, :DEFS
+        def visit_def_node(node)
           # @type var kind: Context::method_kind
-
-          if node.type == :DEFN
-            def_name, def_body = node.children
-            kind = context.method_kind
-          else
-            _, def_name, def_body = node.children
-            kind = :singleton
-          end
+          kind = node.receiver ? :singleton : context.method_kind
 
           types = [
             MethodType.new(
               type_params: [],
-              type: function_type_from_body(def_body, def_name),
-              block: block_from_body(def_body),
+              type: function_type_from_def_node(node),
+              block: block_from_body(node.body, node.parameters),
               location: nil
             )
           ]
 
           member = AST::Members::MethodDefinition.new(
-            name: def_name,
+            name: node.name,
             location: nil,
             annotations: [],
             overloads: types.map {|type| AST::Members::MethodDefinition::Overload.new(annotations: [], method_type: type )},
             kind: kind,
-            comment: comments[node.first_lineno - 1],
+            comment: comments[node.start_line - 1],
             overloading: false,
             visibility: nil
           )
@@ -181,27 +179,35 @@ module RBS
           decls.push member unless decls.include?(member)
 
           new_ctx = context.update(singleton: kind == :singleton, in_def: true)
-          each_node def_body.children do |child|
-            process child, decls: decls, comments: comments, context: new_ctx
+          with(decls: decls, context: new_ctx) do
+            visit(node.body)
           end
+        end
 
-        when :ALIAS
-          new_name, old_name = node.children.map { |c| literal_to_symbol(c) }
-          member = AST::Members::Alias.new(
-            new_name: new_name,
-            old_name: old_name,
-            kind: context.singleton ? :singleton : :instance,
-            annotations: [],
-            location: nil,
-            comment: comments[node.first_lineno - 1],
-          )
-          decls.push member unless decls.include?(member)
+        def visit_alias_method_node(node)
+          new_name = literal_to_symbol(node.new_name)
+          old_name = literal_to_symbol(node.old_name)
+          if new_name && old_name
+            member = AST::Members::Alias.new(
+              new_name: new_name,
+              old_name: old_name,
+              kind: context.singleton ? :singleton : :instance,
+              annotations: [],
+              location: nil,
+              comment: comments[node.start_line - 1],
+            )
+            decls.push member unless decls.include?(member)
+          end
+        end
 
-        when :FCALL, :VCALL
+        def visit_call_node(node)
+          visit(node.receiver)
+          return if node.block || node.receiver
+
           # Inside method definition cannot reach here.
-          args = node.children[1]&.children || []
+          args = node.arguments&.arguments || []
 
-          case node.children[0]
+          case node.name
           when :include
             args.each do |arg|
               if (name = const_to_name(arg, context: context))
@@ -211,7 +217,7 @@ module RBS
                   args: [],
                   annotations: [],
                   location: nil,
-                  comment: comments[node.first_lineno - 1]
+                  comment: comments[node.start_line - 1]
                 )
               end
             end
@@ -223,7 +229,7 @@ module RBS
                   args: [],
                   annotations: [],
                   location: nil,
-                  comment: comments[node.first_lineno - 1]
+                  comment: comments[node.start_line - 1]
                 )
               end
             end
@@ -235,34 +241,34 @@ module RBS
                   args: [],
                   annotations: [],
                   location: nil,
-                  comment: comments[node.first_lineno - 1]
+                  comment: comments[node.start_line - 1]
                 )
               end
             end
           when :attr_reader
             args.each do |arg|
-              if arg && (name = literal_to_symbol(arg))
+              if (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrReader.new(
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   kind: context.attribute_kind,
                   location: nil,
-                  comment: comments[node.first_lineno - 1],
+                  comment: comments[node.start_line - 1],
                   annotations: []
                 )
               end
             end
           when :attr_accessor
             args.each do |arg|
-              if arg && (name = literal_to_symbol(arg))
+              if (name = literal_to_symbol(arg))
                 decls << AST::Members::AttrAccessor.new(
                   name: name,
                   ivar_name: nil,
                   type: Types::Bases::Any.new(location: nil),
                   kind: context.attribute_kind,
                   location: nil,
-                  comment: comments[node.first_lineno - 1],
+                  comment: comments[node.start_line - 1],
                   annotations: []
                 )
               end
@@ -276,20 +282,20 @@ module RBS
                   type: Types::Bases::Any.new(location: nil),
                   kind: context.attribute_kind,
                   location: nil,
-                  comment: comments[node.first_lineno - 1],
+                  comment: comments[node.start_line - 1],
                   annotations: []
                 )
               end
             end
           when :alias_method
-            if args[0] && args[1] && (new_name = literal_to_symbol(args[0])) && (old_name = literal_to_symbol(args[1]))
+            if args.size == 2 && (new_name = literal_to_symbol(args[0])) && (old_name = literal_to_symbol(args[1]))
               decls << AST::Members::Alias.new(
                 new_name: new_name,
                 old_name: old_name,
                 kind: context.singleton ? :singleton : :instance,
                 annotations: [],
                 location: nil,
-                comment: comments[node.first_lineno - 1],
+                comment: comments[node.start_line - 1],
               )
             end
           when :module_function
@@ -298,24 +304,26 @@ module RBS
             else
               module_func_context = context.update(module_function: true)
               args.each do |arg|
-                if arg && (name = literal_to_symbol(arg))
+                if (name = literal_to_symbol(arg))
                   if (i, defn = find_def_index_by_name(decls, name))
                     if defn.is_a?(AST::Members::MethodDefinition)
                       decls[i] = defn.update(kind: :singleton_instance)
                     end
                   end
                 elsif arg
-                  process arg, decls: decls, comments: comments, context: module_func_context
+                  with(decls: decls, context: module_func_context) do
+                    visit(arg)
+                  end
                 end
               end
             end
           when :public, :private
-            accessibility = __send__(node.children[0])
+            accessibility = __send__(node.name)
             if args.empty?
               decls << accessibility
             else
               args.each do |arg|
-                if arg && (name = literal_to_symbol(arg))
+                if (name = literal_to_symbol(arg))
                   if (i, _ = find_def_index_by_name(decls, name))
                     current = current_accessibility(decls, i)
                     if current != accessibility
@@ -329,27 +337,20 @@ module RBS
               # For `private def foo` syntax
               current = current_accessibility(decls)
               decls << accessibility
-              process_children(node, decls: decls, comments: comments, context: context)
+              visit(node.arguments)
               decls << current
             end
           else
-            process_children(node, decls: decls, comments: comments, context: context)
+            visit(node.arguments)
           end
+        end
 
-        when :ITER
-          # ignore
+        def visit_constant_write_node(node)
+          const_name = const_to_name!(node, context: context)
 
-        when :CDECL
-          const_name = case
-                       when node.children[0].is_a?(Symbol)
-                         TypeName.new(name: node.children[0], namespace: Namespace.empty)
-                       else
-                         const_to_name!(node.children[0], context: context)
-                       end
-
-          value_node = node.children.last
-          type = if value_node.nil? || value_node.type == :SELF
-                  # Give up type prediction when node is MASGN or SELF.
+          value_node = node.value
+          type = if value_node.is_a?(Prism::SelfNode)
+                  # Give up type prediction.
                   Types::Bases::Any.new(location: nil)
                 else
                   literal_to_type(value_node)
@@ -358,25 +359,37 @@ module RBS
             name: const_name,
             type: type,
             location: nil,
-            comment: comments[node.first_lineno - 1],
+            comment: comments[node.start_line - 1],
             annotations: []
           )
+        end
+        alias visit_constant_path_write_node visit_constant_write_node
 
-        when :IASGN
+        def visit_constant_target_node(node)
+          decls << AST::Declarations::Constant.new(
+            name: TypeName.new(name: node.name, namespace: Namespace.empty),
+            type: Types::Bases::Any.new(location: nil),
+            location: nil,
+            comment: comments[node.start_line - 1],
+            annotations: []
+          )
+        end
+
+        def visit_instance_variable_write_node(node)
           case [context.singleton, context.in_def]
           when [true, true], [false, false]
             member = AST::Members::ClassInstanceVariable.new(
-              name: node.children.first,
+              name: node.name,
               type: Types::Bases::Any.new(location: nil),
               location: nil,
-              comment: comments[node.first_lineno - 1]
+              comment: comments[node.start_line - 1]
             )
           when [false, true]
             member = AST::Members::InstanceVariable.new(
-              name: node.children.first,
+              name: node.name,
               type: Types::Bases::Any.new(location: nil),
               location: nil,
-              comment: comments[node.first_lineno - 1]
+              comment: comments[node.start_line - 1]
             )
           when [true, false]
             # The variable is for the singleton class of the class object.
@@ -386,431 +399,480 @@ module RBS
           end
 
           decls.push member if member && !decls.include?(member)
+        end
+        alias visit_instance_variable_or_write_node visit_instance_variable_write_node
+        alias visit_instance_variable_and_write_node visit_instance_variable_write_node
+        alias visit_instance_variable_operator_write_node visit_instance_variable_write_node
+        alias visit_instance_variable_target_node visit_instance_variable_write_node
 
-        when :CVASGN
+        def visit_class_variable_write_node(node)
           member = AST::Members::ClassVariable.new(
-            name: node.children.first,
+            name: node.name,
             type: Types::Bases::Any.new(location: nil),
             location: nil,
-            comment: comments[node.first_lineno - 1]
+            comment: comments[node.start_line - 1]
           )
           decls.push member unless decls.include?(member)
-        else
-          process_children(node, decls: decls, comments: comments, context: context)
         end
-      end
+        alias visit_class_variable_or_write_node visit_class_variable_write_node
+        alias visit_class_variable_and_write_node visit_class_variable_write_node
+        alias visit_class_variable_operator_write_node visit_class_variable_write_node
+        alias visit_class_variable_target_node visit_class_variable_write_node
 
-      def process_children(node, decls:, comments:, context:)
-        each_child node do |child|
-          process child, decls: decls, comments: comments, context: context
+        def with(decls:, context:)
+          orig_decls, orig_context = @decls, @context
+          @decls, @context = decls, context
+          yield
+        ensure
+          @decls, @context = orig_decls, orig_context
         end
-      end
 
-      def const_to_name!(node, context: nil)
-        case node.type
-        when :CONST
-          TypeName.new(name: node.children[0], namespace: Namespace.empty)
-        when :COLON2
-          if node.children[0]
-            namespace = const_to_name!(node.children[0], context: context).to_namespace
+        def untyped
+          @untyped ||= Types::Bases::Any.new(location: nil)
+        end
+
+        def private
+          @private ||= AST::Members::Private.new(location: nil)
+        end
+
+        def public
+          @public ||= AST::Members::Public.new(location: nil)
+        end
+
+        def current_accessibility(decls, index = decls.size)
+          slice = decls.slice(0, index) or raise
+          idx = slice.rindex { |decl| decl == private || decl == public }
+          if idx
+            _ = decls[idx]
           else
-            namespace = Namespace.empty
+            public
+          end
+        end
+
+        def remove_unnecessary_accessibility_methods!(decls)
+          # @type var current: decl
+          current = public
+          idx = 0
+
+          loop do
+            decl = decls[idx] or break
+            if current == decl
+              decls.delete_at(idx)
+              next
+            end
+
+            if 0 < idx && is_accessibility?(decls[idx - 1]) && is_accessibility?(decl)
+              decls.delete_at(idx - 1)
+              idx -= 1
+              current = current_accessibility(decls, idx)
+              next
+            end
+
+            current = decl if is_accessibility?(decl)
+            idx += 1
           end
 
-          TypeName.new(name: node.children[1], namespace: namespace)
-        when :COLON3
-          TypeName.new(name: node.children[0], namespace: Namespace.root)
-        when :SELF
-          raise if context.nil?
-
-          context.namespace.to_type_name
-        else
-          raise
+          decls.pop while decls.last && is_accessibility?(decls.last || raise)
         end
-      end
 
-      def const_to_name(node, context:)
-        if node
-          case node.type
-          when :SELF
+        def is_accessibility?(decl)
+          decl == public || decl == private
+        end
+
+        def find_def_index_by_name(decls, name)
+          index = decls.find_index do |decl|
+            case decl
+            when AST::Members::MethodDefinition, AST::Members::AttrReader
+              decl.name == name
+            when AST::Members::AttrWriter
+              :"#{decl.name}=" == name
+            end
+          end
+
+          if index
+            [
+              index,
+              _ = decls[index]
+            ]
+          end
+        end
+
+        def sort_members!(decls)
+          i = 0
+          orders = {
+            AST::Members::ClassVariable => -3,
+            AST::Members::ClassInstanceVariable => -2,
+            AST::Members::InstanceVariable => -1,
+          } #: Hash[Class, Integer]
+          decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
+        end
+
+        def const_to_name!(node, context: nil)
+          case node
+          when Prism::ConstantReadNode, Prism::ConstantWriteNode
+            TypeName.new(name: node.name, namespace: Namespace.empty)
+          when Prism::ConstantPathWriteNode
+            const_to_name!(node.target, context: context)
+          when Prism::ConstantPathNode
+            if node.parent
+              namespace = const_to_name!(node.parent, context: context).to_namespace
+            else
+              namespace = Namespace.root
+            end
+
+            TypeName.new(name: node.name || raise, namespace: namespace)
+          when Prism::SelfNode
+            raise if context.nil?
+
             context.namespace.to_type_name
-          when :CONST, :COLON2, :COLON3
+          else
+            raise node.class.to_s
+          end
+        end
+
+        def const_to_name(node, context:)
+          case node
+          when Prism::SelfNode
+            context.namespace.to_type_name
+          when Prism::ConstantReadNode, Prism::ConstantPathNode
             const_to_name!(node) rescue nil
           end
         end
-      end
 
-      def literal_to_symbol(node)
-        case node.type
-        when :SYM
-          node.children[0]
-        when :LIT
-          node.children[0] if node.children[0].is_a?(Symbol)
-        when :STR
-          node.children[0].to_sym
+        def function_type_from_def_node(node)
+          return_type = if node.name == :initialize
+                          Types::Bases::Void.new(location: nil)
+                        else
+                          body_type(node.body)
+                        end
+
+          fun = Types::Function.empty(return_type)
+
+          node.parameters&.requireds&.each do |arg|
+            next unless arg.is_a?(Prism::RequiredParameterNode)
+            fun.required_positionals << Types::Function::Param.new(name: arg.name, type: untyped)
+          end
+
+          node.parameters&.optionals&.each do |arg|
+            fun.optional_positionals << Types::Function::Param.new(
+              name: arg.name,
+              type: param_type(arg.value)
+            )
+          end
+
+          if (rest = node.parameters&.rest)
+            rest_name = rest.is_a?(Prism::RestParameterNode) ? rest.name : nil
+            fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
+          end
+
+          node.parameters&.posts&.each do |post|
+            next unless post.is_a?(Prism::RequiredParameterNode)
+            fun.trailing_positionals << Types::Function::Param.new(name: post.name, type: untyped)
+          end
+
+          node.parameters&.keywords&.each do |kw|
+            if kw.is_a?(Prism::RequiredKeywordParameterNode)
+              fun.required_keywords[kw.name] = Types::Function::Param.new(name: nil, type: untyped)
+            else
+              fun.optional_keywords[kw.name] = Types::Function::Param.new(name: nil, type: param_type(kw.value))
+            end
+          end
+
+          if (kw_rest = node.parameters&.keyword_rest)
+            case kw_rest
+            when Prism::KeywordRestParameterNode
+              fun = fun.update(rest_keywords: Types::Function::Param.new(name: kw_rest.name, type: untyped))
+            when Prism::ForwardingParameterNode
+              fun = fun.update(rest_positionals: Types::Function::Param.new(name: nil, type: untyped))
+              fun = fun.update(rest_keywords: Types::Function::Param.new(name: nil, type: untyped))
+            end
+          end
+
+          fun
         end
-      end
 
-      def function_type_from_body(node, def_name)
-        table_node, args_node, *_ = node.children
+        def block_from_body(body_node, parameters)
+          # @type var body_node: node?
+          if body_node
+            yields = any_node?(body_node) {|n| n.is_a?(Prism::YieldNode) }
+          end
+          triple_dot = parameters&.keyword_rest.is_a?(Prism::ForwardingParameterNode)
 
-        pre_num, _pre_init, opt, _first_post, post_num, _post_init, rest, kw, kwrest, _block = args_from_node(args_node)
+          if yields || parameters&.block || triple_dot
+            block_var = parameters&.block&.name
+            required = !triple_dot
 
-        return_type = if def_name == :initialize
-                        Types::Bases::Void.new(location: nil)
-                      else
-                        function_return_type_from_body(node)
-                      end
+            if body_node
+              if any_node?(body_node) {|n| n.is_a?(Prism::CallNode) && n.name == :block_given? && !n.receiver && !n.arguments }
+                required = false
+              end
+            end
 
-        fun = Types::Function.empty(return_type)
+            if block_var && body_node
+              usage = NodeUsage.new(body_node)
+              if usage.each_conditional_node.any? {|n| n.is_a?(Prism::LocalVariableReadNode) && n.name == block_var }
+                required = false
+              end
+            end
 
-        table_node.take(pre_num).each do |name|
-          fun.required_positionals << Types::Function::Param.new(name: name, type: untyped)
-        end
+            if yields
+              function = Types::Function.empty(untyped)
 
-        while opt&.type == :OPT_ARG
-          lvasgn, opt = opt.children
-          name = lvasgn.children[0]
-          fun.optional_positionals << Types::Function::Param.new(
-            name: name,
-            type: param_type(lvasgn.children[1])
-          )
-        end
+              yields.each do |yield_node|
+                yield_args = yield_node.arguments&.arguments || []
 
-        if rest
-          rest_name = rest == :* ? nil : rest # `def f(...)` syntax has `*` name
-          fun = fun.update(rest_positionals: Types::Function::Param.new(name: rest_name, type: untyped))
-        end
+                # @type var keywords: node?
+                positionals, keywords = if keyword_hash?(yield_args.last)
+                                          [yield_args.take(yield_args.size - 1), yield_args.last]
+                                        else
+                                          [yield_args, nil]
+                                        end
 
-        table_node.drop(fun.required_positionals.size + fun.optional_positionals.size + (fun.rest_positionals ? 1 : 0)).take(post_num).each do |name|
-          fun.trailing_positionals << Types::Function::Param.new(name: name, type: untyped)
-        end
+                if (diff = positionals.size - function.required_positionals.size) > 0
+                  diff.times do
+                    function.required_positionals << Types::Function::Param.new(
+                      type: untyped,
+                      name: nil
+                    )
+                  end
+                end
 
-        while kw
-          lvasgn, kw = kw.children
-          name, value = lvasgn.children
+                if keywords
+                  keywords.elements.each do |assoc_node|
+                    key = assoc_node.key.value.to_sym
+                    function.required_keywords[key] ||=
+                      Types::Function::Param.new(
+                        type: untyped,
+                        name: nil
+                      )
+                  end
+                end
+              end
+            else
+              function = Types::UntypedFunction.new(return_type: untyped)
+            end
 
-          case value
-          when nil, :NODE_SPECIAL_REQUIRED_KEYWORD
-            fun.required_keywords[name] = Types::Function::Param.new(name: nil, type: untyped)
-          when RubyVM::AbstractSyntaxTree::Node
-            fun.optional_keywords[name] = Types::Function::Param.new(name: nil, type: param_type(value))
-          else
-            raise "Unexpected keyword arg value: #{value}"
+            Types::Block.new(required: required, type: function, self_type: nil)
           end
         end
 
-        if kwrest && kwrest.children.any?
-          kwrest_name = kwrest.children[0] #: Symbol?
-          kwrest_name = nil if kwrest_name == :** # `def f(...)` syntax has `**` name
-          fun = fun.update(rest_keywords: Types::Function::Param.new(name: kwrest_name, type: untyped))
-        end
+        def body_type(node)
+          return Types::Bases::Nil.new(location: nil) unless node
 
-        fun
-      end
-
-      def function_return_type_from_body(node)
-        body = node.children[2]
-        body_type(body)
-      end
-
-      def body_type(node)
-        return Types::Bases::Nil.new(location: nil) unless node
-
-        case node.type
-        when :IF, :UNLESS
-          if_unless_type(node)
-        when :BLOCK
-          block_type(node)
-        else
-          literal_to_type(node)
-        end
-      end
-
-      def if_unless_type(node)
-        raise unless node.type == :IF || node.type == :UNLESS
-
-        _exp_node, true_node, false_node = node.children
-        types_to_union_type([body_type(true_node), body_type(false_node)])
-      end
-
-      def block_type(node)
-        raise unless node.type == :BLOCK
-
-        return_stmts = any_node?(node) do |n|
-          n.type == :RETURN
-        end&.map do |return_node|
-          returned_value = return_node.children[0]
-          returned_value ? literal_to_type(returned_value) : Types::Bases::Nil.new(location: nil)
-        end || []
-        last_node = node.children.last
-        last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
-        types_to_union_type([*return_stmts, last_evaluated])
-      end
-
-      def literal_to_type(node)
-        case node.type
-        when :STR
-          lit = node.children[0]
-          if lit.ascii_only?
-            Types::Literal.new(literal: lit, location: nil)
+          node = node.body.first if node.is_a?(Prism::StatementsNode) && node.body.size == 1
+          case node
+          when Prism::IfNode
+            types_to_union_type([body_type(node.statements), body_type(node.subsequent)])
+          when Prism::UnlessNode
+            types_to_union_type([body_type(node.statements), body_type(node.else_clause)])
+          when Prism::ElseNode
+            body_type(node.statements)
+          when Prism::StatementsNode
+            block_type(node)
           else
+            literal_to_type(node)
+          end
+        end
+
+        def block_type(node)
+          return_stmts = any_node?(node) do |n|
+            n.is_a?(Prism::ReturnNode)
+          end&.map do |return_node|
+            return_args = return_node.arguments&.arguments || []
+            return_types =  return_args.map { |arg| literal_to_type(arg) }
+
+            if return_types.size >= 2
+              t = types_to_union_type(return_types)
+              BuiltinNames::Array.instance_type(t)
+            else
+              return_types.first || Types::Bases::Nil.new(location: nil)
+            end
+          end || []
+
+          last_node = node.compact_child_nodes.last
+          last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
+          # FIXME: Skipt if last_evaluated ReturnNode
+          types_to_union_type([*return_stmts, last_evaluated])
+        end
+
+        def literal_to_symbol(node)
+          case node
+          when Prism::SymbolNode, Prism::StringNode
+            node.unescaped.to_sym
+          end
+        end
+
+        def literal_to_type(node)
+          case node
+          in Prism::StringNode
+            lit = node.unescaped
+            if lit.ascii_only?
+              Types::Literal.new(literal: lit, location: nil)
+            else
+              BuiltinNames::String.instance_type
+            end
+          in Prism::InterpolatedStringNode | Prism::XStringNode | Prism::InterpolatedXStringNode
             BuiltinNames::String.instance_type
-          end
-        when :DSTR, :XSTR
-          BuiltinNames::String.instance_type
-        when :SYM
-          lit = node.children[0]
-          if lit.to_s.ascii_only?
-            Types::Literal.new(literal: lit, location: nil)
-          else
-            BuiltinNames::Symbol.instance_type
-          end
-        when :DSYM
-          BuiltinNames::Symbol.instance_type
-        when :DREGX, :REGX
-          BuiltinNames::Regexp.instance_type
-        when :TRUE
-          Types::Literal.new(literal: true, location: nil)
-        when :FALSE
-          Types::Literal.new(literal: false, location: nil)
-        when :NIL
-          Types::Bases::Nil.new(location: nil)
-        when :INTEGER
-          Types::Literal.new(literal: node.children[0], location: nil)
-        when :FLOAT
-          BuiltinNames::Float.instance_type
-        when :RATIONAL, :IMAGINARY
-          lit = node.children[0]
-          type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
-          Types::ClassInstance.new(name: type_name, args: [], location: nil)
-        when :LIT
-          lit = node.children[0]
-          case lit
-          when Symbol
+          in Prism::SymbolNode
+            lit = node.unescaped.to_sym
             if lit.to_s.ascii_only?
               Types::Literal.new(literal: lit, location: nil)
             else
               BuiltinNames::Symbol.instance_type
             end
-          when Integer
-            Types::Literal.new(literal: lit, location: nil)
-          when String
-            # For Ruby <=3.3 which generates `LIT` node for string literals inside Hash literal.
-            # "a"             => STR node
-            # { "a" => nil }  => LIT node
-            Types::Literal.new(literal: lit, location: nil)
-          else
+          in Prism::InterpolatedSymbolNode
+            BuiltinNames::Symbol.instance_type
+          in Prism::RegularExpressionNode | Prism::InterpolatedRegularExpressionNode
+            BuiltinNames::Regexp.instance_type
+          in Prism::TrueNode
+            Types::Literal.new(literal: true, location: nil)
+          in Prism::FalseNode
+            Types::Literal.new(literal: false, location: nil)
+          in Prism::NilNode
+            Types::Bases::Nil.new(location: nil)
+          in Prism::IntegerNode
+            Types::Literal.new(literal: node.value, location: nil)
+          in Prism::FloatNode
+            BuiltinNames::Float.instance_type
+          in Prism::RationalNode | Prism::ImaginaryNode
+            lit = node.value
             type_name = TypeName.new(name: lit.class.name.to_sym, namespace: Namespace.root)
             Types::ClassInstance.new(name: type_name, args: [], location: nil)
-          end
-        when :ZLIST, :ZARRAY
-          BuiltinNames::Array.instance_type(untyped)
-        when :LIST, :ARRAY
-          elem_types = node.children.compact.map { |e| literal_to_type(e) }
-          t = types_to_union_type(elem_types)
-          BuiltinNames::Array.instance_type(t)
-        when :DOT2, :DOT3
-          types = node.children.map { |c| literal_to_type(c) }
-          type = range_element_type(types)
-          BuiltinNames::Range.instance_type(type)
-        when :HASH
-          list = node.children[0]
-          if list
-            children = list.children
-            children.pop
-          else
-            children = [] #: Array[untyped]
-          end
-
-          key_types = [] #: Array[Types::t]
-          value_types = [] #: Array[Types::t]
-          children.each_slice(2) do |k, v|
-            if k
-              key_types << literal_to_type(k)
-              value_types << literal_to_type(v)
-            else
-              key_types << untyped
-              value_types << untyped
+          in Prism::ArrayNode
+            elem_types = node.compact_child_nodes.map { |e| literal_to_type(e) }
+            t = types_to_union_type(elem_types)
+            BuiltinNames::Array.instance_type(t)
+          in Prism::RangeNode
+            types = [literal_to_type(node.left), literal_to_type(node.right)]
+            type = range_element_type(types)
+            BuiltinNames::Range.instance_type(type)
+          in Prism::HashNode | Prism::KeywordHashNode
+            key_types = [] #: Array[Types::t]
+            value_types = [] #: Array[Types::t]
+            node.elements.each do |element|
+              if element.is_a?(Prism::AssocNode)
+                key_types << literal_to_type(element.key)
+                value_types << literal_to_type(element.value)
+              else
+                key_types << untyped
+                value_types << untyped
+              end
             end
-          end
 
-          if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
-            fields = key_types.map {|t|
-              t.is_a?(Types::Literal) or raise
-              t.literal
-            }.zip(value_types).to_h #: Hash[Types::Literal::literal, Types::t]
-            Types::Record.new(fields: fields, location: nil)
-          else
-            key_type = types_to_union_type(key_types)
-            value_type = types_to_union_type(value_types)
-            BuiltinNames::Hash.instance_type(key_type, value_type)
-          end
-        when :SELF
-          Types::Bases::Self.new(location: nil)
-        when :CALL
-          receiver, method_name, * = node.children
-          case method_name
-          when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
-            literal_to_type(receiver)
+            if !key_types.empty? && key_types.all? { |t| t.is_a?(Types::Literal) }
+              fields = key_types.map {|t|
+                t.is_a?(Types::Literal) or raise
+                t.literal
+              }.zip(value_types).to_h #: Hash[Types::Literal::literal, Types::t]
+              Types::Record.new(fields: fields, location: nil)
+            else
+              key_type = types_to_union_type(key_types)
+              value_type = types_to_union_type(value_types)
+              BuiltinNames::Hash.instance_type(key_type, value_type)
+            end
+          in Prism::SelfNode
+            Types::Bases::Self.new(location: nil)
+          in Prism::CallNode[receiver: receiver]
+            case node.name
+            when :freeze, :tap, :itself, :dup, :clone, :taint, :untaint, :extend
+              literal_to_type(receiver)
+            else
+              untyped
+            end
           else
             untyped
           end
-        else
-          untyped
-        end
-      end
-
-      def types_to_union_type(types)
-        return untyped if types.empty?
-
-        uniq = types.uniq
-        if uniq.size == 1
-          return uniq.first || raise
         end
 
-        Types::Union.new(types: uniq, location: nil)
-      end
+        def types_to_union_type(types)
+          return untyped if types.empty?
 
-      def range_element_type(types)
-        types = types.reject { |t| t == untyped }
-        return untyped if types.empty?
-
-        types = types.map do |t|
-          if t.is_a?(Types::Literal)
-            type_name = TypeName.new(name: t.literal.class.name&.to_sym || raise, namespace: Namespace.root)
-            Types::ClassInstance.new(name: type_name, args: [], location: nil)
-          else
-            t
+          uniq = types.uniq
+          if uniq.size == 1
+            return uniq.first || raise
           end
-        end.uniq
 
-        if types.size == 1
-          types.first or raise
-        else
-          untyped
+          Types::Union.new(types: uniq, location: nil)
         end
-      end
 
-      def param_type(node, default: Types::Bases::Any.new(location: nil))
-        case node.type
-        when :INTEGER
-          BuiltinNames::Integer.instance_type
-        when :FLOAT
-          BuiltinNames::Float.instance_type
-        when :RATIONAL
-          Types::ClassInstance.new(name: TypeName.parse("::Rational"), args: [], location: nil)
-        when :IMAGINARY
-          Types::ClassInstance.new(name: TypeName.parse("::Complex"), args: [], location: nil)
-        when :LIT
-          case node.children[0]
-          when Symbol
-            BuiltinNames::Symbol.instance_type
-          when Integer
+        def range_element_type(types)
+          types = types.reject { |t| t == untyped }
+          return untyped if types.empty?
+
+          types = types.map do |t|
+            if t.is_a?(Types::Literal)
+              type_name = TypeName.new(name: t.literal.class.name&.to_sym || raise, namespace: Namespace.root)
+              Types::ClassInstance.new(name: type_name, args: [], location: nil)
+            else
+              t
+            end
+          end.uniq
+
+          if types.size == 1
+            types.first or raise
+          else
+            untyped
+          end
+        end
+
+        def param_type(node, default: Types::Bases::Any.new(location: nil))
+          case node
+          when Prism::IntegerNode
             BuiltinNames::Integer.instance_type
-          when Float
+          when Prism::FloatNode
             BuiltinNames::Float.instance_type
+          when Prism::RationalNode
+            Types::ClassInstance.new(name: TypeName.parse("::Rational"), args: [], location: nil)
+          when Prism::ImaginaryNode
+            Types::ClassInstance.new(name: TypeName.parse("::Complex"), args: [], location: nil)
+          when Prism::SymbolNode, Prism::InterpolatedSymbolNode
+            BuiltinNames::Symbol.instance_type
+          when Prism::StringNode, Prism::InterpolatedStringNode, Prism::XStringNode, Prism::InterpolatedStringNode
+            BuiltinNames::String.instance_type
+          when Prism::NilNode
+            # This type is technical non-sense, but may help practically.
+            Types::Optional.new(
+              type: Types::Bases::Any.new(location: nil),
+              location: nil
+            )
+          when Prism::TrueNode, Prism::FalseNode
+            Types::Bases::Bool.new(location: nil)
+          when Prism::ArrayNode
+            # FIXME bug replicating empty array untyped
+            if node.elements.any?
+              BuiltinNames::Array.instance_type(default)
+            else
+              default
+            end
+          when Prism::HashNode
+            BuiltinNames::Hash.instance_type(default, default)
           else
             default
           end
-        when :SYM
-          BuiltinNames::Symbol.instance_type
-        when :STR, :DSTR
-          BuiltinNames::String.instance_type
-        when :NIL
-          # This type is technical non-sense, but may help practically.
-          Types::Optional.new(
-            type: Types::Bases::Any.new(location: nil),
-            location: nil
-          )
-        when :TRUE, :FALSE
-          Types::Bases::Bool.new(location: nil)
-        when :ARRAY, :LIST
-          BuiltinNames::Array.instance_type(default)
-        when :HASH
-          BuiltinNames::Hash.instance_type(default, default)
-        else
-          default
         end
-      end
 
-      # backward compatible
-      alias node_type param_type
+        # backward compatible
+        alias node_type param_type
 
-      def private
-        @private ||= AST::Members::Private.new(location: nil)
-      end
-
-      def public
-        @public ||= AST::Members::Public.new(location: nil)
-      end
-
-      def current_accessibility(decls, index = decls.size)
-        slice = decls.slice(0, index) or raise
-        idx = slice.rindex { |decl| decl == private || decl == public }
-        if idx
-          _ = decls[idx]
-        else
-          public
-        end
-      end
-
-      def remove_unnecessary_accessibility_methods!(decls)
-        # @type var current: decl
-        current = public
-        idx = 0
-
-        loop do
-          decl = decls[idx] or break
-          if current == decl
-            decls.delete_at(idx)
-            next
+        def any_node?(node, nodes: [], &block)
+          if yield(node)
+            nodes << node
           end
 
-          if 0 < idx && is_accessibility?(decls[idx - 1]) && is_accessibility?(decl)
-            decls.delete_at(idx - 1)
-            idx -= 1
-            current = current_accessibility(decls, idx)
-            next
+          node.compact_child_nodes.each do |child|
+            any_node? child, nodes: nodes, &block
           end
 
-          current = decl if is_accessibility?(decl)
-          idx += 1
+          nodes.empty? ? nil : nodes
         end
 
-        decls.pop while decls.last && is_accessibility?(decls.last || raise)
-      end
+        def keyword_hash?(node)
+          return false unless node.is_a?(Prism::KeywordHashNode)
 
-      def is_accessibility?(decl)
-        decl == public || decl == private
-      end
-
-      def find_def_index_by_name(decls, name)
-        index = decls.find_index do |decl|
-          case decl
-          when AST::Members::MethodDefinition, AST::Members::AttrReader
-            decl.name == name
-          when AST::Members::AttrWriter
-            :"#{decl.name}=" == name
+          node.elements.all? do |element|
+            element.is_a?(Prism::AssocNode) && element.key.is_a?(Prism::SymbolNode)
           end
         end
-
-        if index
-          [
-            index,
-            _ = decls[index]
-          ]
-        end
-      end
-
-      def sort_members!(decls)
-        i = 0
-        orders = {
-          AST::Members::ClassVariable => -3,
-          AST::Members::ClassInstanceVariable => -2,
-          AST::Members::InstanceVariable => -1,
-        } #: Hash[Class, Integer]
-        decls.sort_by! { |decl| [orders.fetch(decl.class, 0), i += 1] }
       end
     end
   end
