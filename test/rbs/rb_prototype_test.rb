@@ -324,6 +324,29 @@ end
 EOR
   end
 
+  def test_defs_return_type_multiple
+    rb = <<~RUBY
+      class Hello
+        def one_statement
+          return 1, ""
+        end
+
+        def multiple_statements
+          foo
+          return 1, ""
+        end
+      end
+    RUBY
+
+    assert_write RB.parse(rb), <<~RBS
+      class Hello
+        def one_statement: () -> ::Array[1 | \"\"]
+
+        def multiple_statements: () -> ::Array[1 | \"\"]
+      end
+    RBS
+  end
+
   def test_sclass
     rb = <<-EOR
 class Hello

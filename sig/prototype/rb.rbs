@@ -62,6 +62,8 @@ module RBS
 
         def block_type: (Prism::Node node) -> Types::t
 
+        def return_node_to_type: (Prism::ReturnNode) -> Types::t
+
         def literal_to_type: (Prism::Node node) -> Types::t
 
         def types_to_union_type: (Array[Types::t] types) -> Types::t

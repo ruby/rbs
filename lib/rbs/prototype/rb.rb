@@ -669,6 +669,8 @@ module RBS
             body_type(node.statements)
           when Prism::StatementsNode
             block_type(node)
+          when Prism::ReturnNode
+            return_node_to_type(node)
           else
             literal_to_type(node)
           end
@@ -678,21 +680,16 @@ module RBS
           return_stmts = any_node?(node) do |n|
             n.is_a?(Prism::ReturnNode)
           end&.map do |return_node|
-            return_args = return_node.arguments&.arguments || []
-            return_types =  return_args.map { |arg| literal_to_type(arg) }
-
-            if return_types.size >= 2
-              t = types_to_union_type(return_types)
-              BuiltinNames::Array.instance_type(t)
-            else
-              return_types.first || Types::Bases::Nil.new(location: nil)
-            end
+            return_node_to_type(return_node)
           end || []
 
           last_node = node.compact_child_nodes.last
-          last_evaluated =  last_node ? literal_to_type(last_node) : Types::Bases::Nil.new(location: nil)
-          # FIXME: Skipt if last_evaluated ReturnNode
-          types_to_union_type([*return_stmts, last_evaluated])
+          case last_node
+          when nil, Prism::ReturnNode
+            types_to_union_type(return_stmts)
+          else
+            types_to_union_type([*return_stmts, literal_to_type(last_node)])
+          end
         end
 
         def literal_to_symbol(node)
@@ -781,6 +778,18 @@ module RBS
             end
           else
             untyped
+          end
+        end
+
+        def return_node_to_type(node)
+          return_args = node.arguments&.arguments || []
+          return_types =  return_args.map { |arg| literal_to_type(arg) }
+
+          if return_types.size >= 2
+            t = types_to_union_type(return_types)
+            BuiltinNames::Array.instance_type(t)
+          else
+            return_types.first || Types::Bases::Nil.new(location: nil)
           end
         end
 
