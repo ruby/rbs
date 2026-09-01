@@ -2275,4 +2275,374 @@ COMMENT
 
     assert_empty result.declarations
   end
+
+  def test_parse__class_singleton_class__def
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          #: () -> void
+          def hello; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :hello, member.name
+        assert_predicate member, :singleton?
+        refute_predicate member, :instance?
+        assert_equal :singleton, member.kind
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__rbs_annotation
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          # @rbs () -> void
+          def hello; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :hello, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__mixed_with_instance
+    result = parse(<<~RUBY)
+      class Foo
+        #: () -> String
+        def instance_method
+          ""
+        end
+
+        class << self
+          #: () -> void
+          def class_method; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 2, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :instance_method, member.name
+        assert_predicate member, :instance?
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :class_method, member.name
+        assert_predicate member, :singleton?
+        assert_equal ["() -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+    end
+  end
+
+  def test_error__class_singleton_class__def_self
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          def self.nested; end
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NestedSingletonScope, diagnostic
+      assert_equal "Method definition with self receiver inside `class << self` targets the singleton class of a singleton class, which has no representation in RBS", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_error__class_singleton_class__nested_singleton_class
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          class << self
+            def deep; end
+          end
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NestedSingletonScope, diagnostic
+      assert_equal "Nested `class << self` opens the singleton class of a singleton class, which has no representation in RBS", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_error__class_singleton_class__include
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          include M
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NotImplementedYet, diagnostic
+      assert_equal "Mixin call inside `class << self` is not supported", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_error__class_singleton_class__attr_reader
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          attr_reader :x
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NotImplementedYet, diagnostic
+      assert_equal "Attribute definition inside `class << self` is not supported", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_parse__class_singleton_class__constant_flatten
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          BAR = 1 #: Integer
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ConstantDecl, member
+        assert_equal "BAR", member.constant_name.to_s
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__nested_class_flatten
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          class Inner; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, member
+        assert_equal "Inner", member.class_name.to_s
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__nested_module_flatten
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          module Inner; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, member
+        assert_equal "Inner", member.module_name.to_s
+      end
+    end
+  end
+
+  def test_error__class_singleton_class__non_self_expression
+    result = parse(<<~RUBY)
+      class Foo
+        OBJ = Object.new
+        class << OBJ
+          def hello; end
+        end
+      end
+    RUBY
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NonSelfSingletonScope, diagnostic
+      assert_equal "Non-self expression in `class << ...` opens an anonymous singleton class, which has no representation in RBS", diagnostic.message
+    end
+
+    result.declarations[0].tap do |decl|
+      refute decl.members.any? { |m| m.is_a?(RBS::AST::Ruby::Members::DefMember) && m.name == :hello }
+    end
+  end
+
+  def test_error__class_singleton_class__top_level
+    result = parse(<<~RUBY)
+      class << self
+        def hello; end
+      end
+    RUBY
+
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::TopLevelSingletonScope, diagnostic
+      assert_equal "Top-level `class << self` opens the singleton class of `main`, which has no representation in RBS", diagnostic.message
+    end
+
+    assert_empty result.declarations
+  end
+
+  def test_parse__class_singleton_class__skip
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        class << self
+          def hello; end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_empty decl.members
+    end
+  end
+
+  def test_parse__class_singleton_class__nested_class_resets_singleton_context
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          class Inner
+            #: () -> void
+            def m; end
+          end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      inner = decl.members.find { _1.is_a?(RBS::AST::Ruby::Declarations::ClassDecl) }
+      refute_nil inner
+      inner.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :m, member.name
+        assert_predicate member, :instance?
+        refute_predicate member, :singleton?
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__nested_module_resets_singleton_context
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          module Inner
+            #: () -> void
+            def m; end
+          end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      inner = decl.members.find { _1.is_a?(RBS::AST::Ruby::Declarations::ModuleDecl) }
+      refute_nil inner
+      inner.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :m, member.name
+        assert_predicate member, :instance?
+      end
+    end
+  end
+
+  def test_parse__class_singleton_class__inner_class_own_singleton_is_independent
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          class Inner
+            class << self
+              #: () -> Integer
+              def baz; 42; end
+            end
+          end
+        end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      inner = decl.members.find { _1.is_a?(RBS::AST::Ruby::Declarations::ClassDecl) }
+      refute_nil inner
+      inner.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :baz, member.name
+        assert_predicate member, :singleton?
+      end
+    end
+  end
+
+  def test_error__class_singleton_class__def_self_with_leading_annotation_single_diagnostic
+    result = parse(<<~RUBY)
+      class Foo
+        class << self
+          #: () -> void
+          def self.nested; end
+        end
+      end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_any!(result.diagnostics) do |diagnostic|
+      assert_instance_of RBS::InlineParser::Diagnostic::NestedSingletonScope, diagnostic
+    end
+  end
 end
