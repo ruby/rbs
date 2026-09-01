@@ -1,64 +1,23 @@
 require "test_helper"
 
 class RBS::RbiPrototypeTest < Test::Unit::TestCase
-  omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
-  omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
-
   RBI = RBS::Prototype::RBI
 
   include TestHelper
 
-  def test_1
-    parser = RBI.new
-
-    rbi = <<-EOR
-class Array < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-
-  sig do
-    type_parameters(:U).params(
-        arg0: T.type_parameter(:U),
-        foo: String,
-        bar: Integer,
-        baz: Object,
-        blk: T.proc.params(arg0: Elem).returns(BasicObject)
-    )
-    .returns(T::Array[T.type_parameter(:U)])
-  end
-  def self.[](*arg0, foo:, bar: 1, **baz, &blk); end
-end
-    EOR
-
-    parser.parse(rbi)
-
-    parser.decls
-
-    # decls = parser.decls
-    # pp parser.decls
-  end
-
   def test_module
-    parser = RBI.new
-
     rbi = <<-EOR
 module Foo
 end
 EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Foo
 end
     EOF
   end
 
   def test_nested_module
-    parser = RBI.new
-
     rbi = <<-EOR
 module Foo
   module Bar
@@ -66,9 +25,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Foo
   module Bar
   end
@@ -77,8 +34,6 @@ end
   end
 
   def test_nested_module2
-    parser = RBI.new
-
     rbi = <<-EOR
 module Foo
   module ::Bar
@@ -86,9 +41,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Foo
   module ::Bar
   end
@@ -97,8 +50,6 @@ end
   end
 
   def test_constant
-    parser = RBI.new
-
     rbi = <<-EOR
 module Foo
   ABBR_DAYNAMES = T.let(T.unsafe(nil), Array)
@@ -106,9 +57,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Foo
   ABBR_DAYNAMES: Array
 
@@ -118,8 +67,6 @@ end
   end
 
   def test_alias
-    parser = RBI.new
-
     rbi = <<-EOR
 module Foo
   alias_method(:foo, :Bar)
@@ -127,9 +74,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Foo
   alias foo Bar
 
@@ -139,8 +84,6 @@ end
   end
 
   def test_block_args
-    parser = RBI.new
-
     rbi = <<-EOR
 class Hello
   sig do
@@ -154,9 +97,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Hello
   def hello: [U] (U arg0) { (Elem arg0) -> untyped } -> ::Array[U]
 end
@@ -164,16 +105,14 @@ end
   end
 
   def test_untyped_block
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig { params(blk: T.untyped).void }
   def self.split(&blk); end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: () { () -> untyped } -> void
 end
@@ -181,8 +120,6 @@ end
   end
 
   def test_implicit_block
-    parser = RBI.new
-
     rbi = <<-EOR
 class Hello
   sig do
@@ -192,9 +129,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rbi)
-
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Hello
   def hello: (String arg0) ?{ () -> untyped } -> void
 end
@@ -202,26 +137,57 @@ end
   end
 
   def test_optional_block
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig { params(blk: T.nilable(T.proc.void)).void }
   def self.split(&blk); end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: () ?{ () -> void } -> void
 end
     EOF
   end
 
-  def test_overloading
-    parser = RBI.new
+  def test_various_parameters
+    rbi = <<-EOF
+class Test
+  sig { params(req_pos: String, opt_pos: String, pos_splat: Object, post_pos: String).void }
+  def positional(req_pos, opt_pos = "", *pos_splat, post_pos); end
 
-    parser.parse(<<-EOF)
+  sig { params(kw_req: String, kw_opt: String, kw_splat: Hash).void }
+  def keywords(kw_req:, kw_opt: "", **kw_splat); end
+end
+    EOF
+
+    assert_write RBI.parse(rbi), <<-EOF
+class Test
+  def positional: (String req_pos, ?String opt_pos, *Object pos_splat, String post_pos) -> void
+
+  def keywords: (?kw_req: String kw_req, ?kw_opt: String kw_opt, **Hash kw_splat) -> void
+end
+    EOF
+  end
+
+  def test_anonymous_parameters_are_ignored
+    rbi = <<-EOF
+class Test
+  def foo(a, *, b:, **, &); end
+
+  def foo(...); end
+end
+    EOF
+
+    assert_write RBI.parse(rbi), <<-EOF
+class Test
+end
+    EOF
+  end
+
+  def test_overloading
+    rbi = <<-EOF
 class Class
   sig {void}
   sig do
@@ -248,7 +214,7 @@ end
     EOF
 
     # Maybe, the argument `superclass` does not look like an optional parameter, but cannot detect if it is required or optional.
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Class
   def initialize: () -> void
                 | (?Class superclass) -> void
@@ -259,9 +225,7 @@ end
   end
 
   def test_tuple
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig do
     params(
@@ -273,7 +237,7 @@ class File
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: (String file) -> [ String, String ]
 end
@@ -281,9 +245,7 @@ end
   end
 
   def test_all
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig do
     params(
@@ -295,7 +257,7 @@ class File
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: (String & Integer file) -> void
 end
@@ -303,16 +265,14 @@ end
   end
 
   def test_self_type
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig { returns(T.self_type) }
   def self.split; end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: () -> self
 end
@@ -320,9 +280,7 @@ end
   end
 
   def test_colon
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class Test
   sig { returns(Foo) }
   def m1; end
@@ -338,7 +296,7 @@ class Test
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Test
   def m1: () -> Foo
 
@@ -352,16 +310,14 @@ end
   end
 
   def test_attached_class
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig { returns(T.attached_class) }
   def self.split; end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: () -> instance
 end
@@ -369,9 +325,7 @@ end
   end
 
   def test_noreturn
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class File
   sig do
     params(
@@ -383,7 +337,7 @@ class File
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class File
   def self.split: (String & Integer file) -> bot
 end
@@ -391,9 +345,7 @@ end
   end
 
   def test_class_of
-    parser = RBI.new
-
-    parser.parse(<<-EOF)
+    rbi = <<-EOF
 class Foo
   sig do
     returns(T.class_of(String))
@@ -402,7 +354,7 @@ class Foo
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Foo
   def foo: () -> singleton(String)
 end
@@ -410,9 +362,7 @@ end
   end
 
   def test_parameter
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Array
   include Enumerable
 
@@ -421,7 +371,7 @@ class Array
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Array[out Elem]
   include Enumerable
 end
@@ -429,16 +379,14 @@ end
   end
 
   def test_basic_object
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Foo
   sig { returns(BasicObject) }
   def hello; end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Foo
   def hello: () -> untyped
 end
@@ -446,16 +394,14 @@ end
   end
 
   def test_bool
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Foo
   sig { returns(T::Boolean) }
   def hello; end
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Foo
   def hello: () -> bool
 end
@@ -463,9 +409,7 @@ end
   end
 
   def test_comment
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 # This is a class.
 #
 #   It is super useful.
@@ -486,7 +430,7 @@ module Bar
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 # This is a class.
 #
 #   It is super useful.
@@ -507,9 +451,7 @@ end
   end
 
   def test_non_parameter_type_member
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Dir
   extend T::Generic
 
@@ -518,7 +460,7 @@ class Dir
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Dir
   include Enumerable
 end
@@ -526,31 +468,59 @@ end
   end
 
   def test_parameter_type_member_variance
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Dir
   extend T::Generic
 
   X = type_member(:out)
   Y = type_member(:in)
   Z = type_member()
+  Elem = type_member
 
   include Enumerable
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
-class Dir[out X, in Y, Z]
+    assert_write RBI.parse(rbi), <<-EOF
+class Dir[out X, in Y, Z, Elem]
   include Enumerable
 end
     EOF
   end
 
-  def test_nested_declarations_preserve_lexical_resolution
-    parser = RBI.new
+  def test_parameter_type_member_as_param
+    rbi = <<-EOR
+class Array < Object
+  include Enumerable
 
-    parser.parse <<-EOF
+  extend T::Generic
+  Elem = type_member(:out)
+
+  sig do
+    type_parameters(:U).params(
+        arg0: T.type_parameter(:U),
+        foo: String,
+        bar: Integer,
+        baz: Object,
+        blk: T.proc.params(arg0: Elem).returns(BasicObject)
+    )
+    .returns(T::Array[T.type_parameter(:U)])
+  end
+  def self.[](*arg0, foo:, bar: 1, **baz, &blk); end
+end
+    EOR
+
+    assert_write RBI.parse(rbi), <<-EOF
+class Array[out Elem] < Object
+  include Enumerable
+
+  def self.[]: [U] (*U arg0, ?foo: String foo, ?bar: Integer bar, **Object baz) { (Elem arg0) -> untyped } -> ::Array[U]
+end
+    EOF
+  end
+
+  def test_nested_declarations_preserve_lexical_resolution
+    rbi = <<-EOF
 module Demo
   class Parent; end
   module Helpers; end
@@ -565,7 +535,7 @@ module Demo
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Demo
   class Parent
   end
@@ -585,10 +555,21 @@ end
     EOF
   end
 
-  def test_nested_constant
-    parser = RBI.new
+  def test_include_with_receiver_is_ignored
+    rbi = <<-EOF
+module Foo
+  Bar.singleton_class.include(Foo)
+end
+    EOF
 
-    parser.parse <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
+module Foo
+end
+    EOF
+  end
+
+  def test_nested_constant
+    rbi = <<-EOF
 module Demo
   module Modes
     VALUE = T.let(:value, Symbol)
@@ -596,7 +577,7 @@ module Demo
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Demo
   module Modes
     VALUE: Symbol
@@ -606,16 +587,14 @@ end
   end
 
   def test_ignores_t_helpers
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 module Factory
   extend T::Helpers
   extend OtherHelpers
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Factory
   extend OtherHelpers
 end
@@ -623,9 +602,7 @@ end
   end
 
   def test_t_class_falls_back_to_untyped
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 module Factory
   sig do
     type_parameters(:Config)
@@ -636,7 +613,7 @@ module Factory
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Factory
   def make: [Config] (untyped config_class) -> Config
 end
@@ -644,9 +621,7 @@ end
   end
 
   def test_singleton_class_method
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Registry
   class << self
     sig { returns(T.attached_class) }
@@ -655,7 +630,7 @@ class Registry
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Registry
   def self.build: () -> instance
 end
@@ -663,9 +638,7 @@ end
   end
 
   def test_typed_attribute_consumes_signature
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Cache
   sig { returns(T.nilable(Integer)) }
   attr_reader :size
@@ -681,7 +654,7 @@ class Cache
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Cache
   attr_reader size: Integer?
 
@@ -695,9 +668,7 @@ end
   end
 
   def test_method_visibility
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 module Factory
   private
 
@@ -711,7 +682,7 @@ module Factory
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 module Factory
   private
 
@@ -724,10 +695,34 @@ end
     EOF
   end
 
-  def test_singleton_method_visibility
-    parser = RBI.new
+  def test_inline_visibility
+    rbi = <<-EOF
+class Cache
+  sig { params(value: Integer).void }
+  private def foo(value)
+  end
 
-    parser.parse <<-EOF
+  sig { params(value: Integer).void }
+  def bar(value)
+  end
+end
+    EOF
+
+    assert_write RBI.parse(rbi), <<-EOF
+class Cache
+  private
+
+  def foo: (Integer value) -> void
+
+  public
+
+  def bar: (Integer value) -> void
+end
+    EOF
+  end
+
+  def test_singleton_method_visibility
+    rbi = <<-EOF
 class Registry
   private
 
@@ -752,7 +747,7 @@ class Registry
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Registry
   private
 
@@ -770,9 +765,7 @@ end
   end
 
   def test_generated_reproduction_can_be_loaded
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 module Demo
   class Parent; end
   module Helpers; end
@@ -819,7 +812,7 @@ end
     EOF
 
     out = StringIO.new
-    RBS::Writer.new(out: out).write(parser.decls)
+    RBS::Writer.new(out: out).write(RBI.parse(rbi))
     refute_match(/\bT::/, out.string)
 
     SignatureManager.new do |manager|
@@ -838,15 +831,13 @@ end
   end
 
   def test_masgn
-    parser = RBI.new
-
-    parser.parse <<-EOF
+    rbi = <<-EOF
 class Test
   A, B, C = [1, 2, 3]
 end
     EOF
 
-    assert_write parser.decls, <<-EOF
+    assert_write RBI.parse(rbi), <<-EOF
 class Test
   A: untyped
 
