@@ -56,7 +56,8 @@ class UNIXServer < UNIXSocket
   # *   UNIXServer#accept
   # *   Socket#accept
   #
-  def accept_nonblock: (?exception: boolish) -> (UNIXSocket | :wait_readable)
+  def accept_nonblock: (?exception: true) -> UNIXSocket
+                     | (exception: false) -> (UNIXSocket | :wait_readable)
 
   # <!--
   #   rdoc-file=ext/socket/unixserver.c
