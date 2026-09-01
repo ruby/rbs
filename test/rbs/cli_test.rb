@@ -896,29 +896,7 @@ singleton(::BasicObject)
     end
   end
 
-  def test_prototype_no_parser
-    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
-    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
-
-    Dir.mktmpdir do |dir|
-      with_cli do |cli|
-        def cli.has_parser?
-          false
-        end
-
-        refute_cli_success cli.run(%w(prototype rb))
-        refute_cli_success cli.run(%w(prototype rbi))
-
-        assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[0]
-        assert_equal "Not supported on this interpreter (ruby).\n", stdout.string.lines[1]
-      end
-    end
-  end
-
   def test_prototype_batch
-    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
-    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
-
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -980,9 +958,6 @@ Processing `Gemfile`...
   end
 
   def test_prototype_batch_outer
-    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
-    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
-
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -1009,9 +984,6 @@ Processing `test/a_test.rb`...
   end
 
   def test_prototype_batch_syntax_error
-    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
-    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
-
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -1060,8 +1032,8 @@ Processing `lib`...
 
 
   def test_test
-    omit_on_truffle_ruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on TruffleRuby"
-    omit_on_jruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on JRuby"
+    omit_on_jruby! "Errno::ENOENT: No such file or directory - exit"
+    omit_on_truffle_ruby! "Errno::ENOENT: No such file or directory - exit"
 
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)

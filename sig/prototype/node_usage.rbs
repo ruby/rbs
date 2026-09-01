@@ -2,19 +2,17 @@ module RBS
   module Prototype
     class NodeUsage
       include Helpers
-      
-      type node = RubyVM::AbstractSyntaxTree::Node
 
-      attr_reader node: node
+      @node: Prism::Node
 
-      attr_reader conditional_nodes: Set[node]
+      attr_reader conditional_nodes: Set[Prism::Node]
 
-      def initialize: (node) -> void
+      def initialize: (Prism::Node) -> void
 
-      def calculate: (node, conditional: bool) -> void
+      def calculate: (Prism::Node, conditional: bool) -> void
 
-      def each_conditional_node: () { (node) -> void } -> void
-                               | () -> Enumerator[node, void]
+      def each_conditional_node: () { (Prism::Node) -> void } -> void
+                               | () -> Enumerator[Prism::Node, void]
     end
   end
 end

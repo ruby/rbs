@@ -27,69 +27,54 @@ module RBS
           conditional_nodes << node
         end
 
-        case node.type
-        when :IF, :UNLESS
-          cond_node, true_node, false_node = node.children
-          calculate(cond_node, conditional: true)
-          calculate(true_node, conditional: conditional) if true_node
-          calculate(false_node, conditional: conditional) if false_node
-        when :AND, :OR
-          left, right = node.children
-          calculate(left, conditional: true)
-          calculate(right, conditional: conditional)
-        when :QCALL
-          receiver, _, args = node.children
-          calculate(receiver, conditional: true)
-          calculate(args, conditional: false) if args
-        when :WHILE
-          cond, body = node.children
-          calculate(cond, conditional: true)
-          calculate(body, conditional: false) if body
-        when :OP_ASGN_OR, :OP_ASGN_AND
-          var, _, asgn = node.children
-          calculate(var, conditional: true)
-          calculate(asgn, conditional: conditional)
-        when :LASGN, :IASGN, :GASGN
-          _, lhs = node.children
-          calculate(lhs, conditional: conditional) if lhs
-        when :MASGN
-          lhs, _ = node.children
-          calculate(lhs, conditional: conditional)
-        when :CDECL
-          if node.children.size == 2
-            _, lhs = node.children
-            calculate(lhs, conditional: conditional)
-          else
-            const, _, lhs = node.children
-            calculate(const, conditional: false)
-            calculate(lhs, conditional: conditional)
-          end
-        when :SCOPE
-          _, _, body = node.children
-          calculate(body, conditional: conditional)
-        when :CASE2
-          _, *branches = node.children
-          branches.each do |branch|
-            if branch.type == :WHEN
-              list, body = branch.children
-              list.children.each do |child|
-                if child
-                  calculate(child, conditional: true)
-                end
-              end
-              calculate(body, conditional: conditional)
-            else
-              calculate(branch, conditional: conditional)
+        case node
+        in Prism::IfNode
+          calculate(node.predicate, conditional: true)
+          calculate(node.statements, conditional: conditional) if node.statements
+          calculate(node.subsequent, conditional: conditional) if node.subsequent
+        in Prism::UnlessNode
+          calculate(node.predicate, conditional: true)
+          calculate(node.statements, conditional: conditional) if node.statements
+          calculate(node.else_clause, conditional: conditional) if node.else_clause
+        in Prism::AndNode | Prism::OrNode
+          calculate(node.left, conditional: true)
+          calculate(node.right, conditional: conditional)
+        in Prism::CallNode if node.safe_navigation?
+          calculate(node.receiver, conditional: true) if node.receiver
+          calculate(node.arguments, conditional: false) if node.arguments
+        in Prism::WhileNode
+          calculate(node.predicate, conditional: true)
+          calculate(node.statements, conditional: false) if node.statements
+        in Prism::ConstantOrWriteNode | Prism::ConstantAndWriteNode |
+             Prism::GlobalVariableOrWriteNode | Prism::GlobalVariableAndWriteNode |
+             Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableAndWriteNode |
+             Prism::LocalVariableOrWriteNode | Prism::LocalVariableAndWriteNode
+          conditional_nodes << node
+          calculate(node.value, conditional: conditional)
+        in Prism::ConstantWriteNode | Prism::MultiWriteNode |
+           Prism::LocalVariableWriteNode | Prism::InstanceVariableWriteNode | Prism::GlobalVariableWriteNode
+          calculate(node.value, conditional: conditional)
+        in Prism::ConstantPathWriteNode
+          calculate(node.target, conditional: false)
+          calculate(node.value, conditional: conditional)
+        in Prism::BlockNode | Prism::ClassNode | Prism::DefNode | Prism::LambdaNode | Prism::ModuleNode | Prism::SingletonClassNode
+          # Anything with locals
+          calculate(node.body, conditional: conditional) if node.body
+        in Prism::CaseNode[predicate: predicate] unless predicate
+          node.conditions.each do |when_node|
+            when_node.conditions.each do |child|
+              calculate(child, conditional: true)
             end
+            calculate(when_node.statements, conditional: conditional) if when_node.statements
           end
-        when :BLOCK
-          *nodes, last = node.children
+        in Prism::StatementsNode
+          *nodes, last = node.body
           nodes.each do |no|
             calculate(no, conditional: false)
           end
           calculate(last, conditional: conditional) if last
         else
-          each_child(node) do |child|
+          node.compact_child_nodes.each do |child|
             calculate(child, conditional: false)
           end
         end

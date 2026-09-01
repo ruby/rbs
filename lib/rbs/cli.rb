@@ -108,10 +108,6 @@ module RBS
       opts
     end
 
-    def has_parser?
-      defined?(RubyVM::AbstractSyntaxTree) ? true : false
-    end
-
     def run(args)
       @original_args = args.dup
 
@@ -683,10 +679,6 @@ EOU
     end
 
     def run_prototype_file(format, args)
-      availability = unless has_parser?
-                       "\n** This command does not work on this interpreter (#{RUBY_ENGINE}) **\n"
-                     end
-
       # @type var output_dir: Pathname?
       output_dir = nil
       # @type var base_dir: Pathname?
@@ -697,7 +689,7 @@ EOU
       opts = OptionParser.new
       opts.banner = <<EOU
 Usage: rbs prototype #{format} [files...]
-#{availability}
+
 Generate RBS prototype from source code.
 It parses specified Ruby code and and generates RBS prototypes.
 
@@ -728,11 +720,6 @@ EOU
 
       opts.parse!(args)
 
-      unless has_parser?
-        stdout.puts "Not supported on this interpreter (#{RUBY_ENGINE})."
-        return 1
-      end
-
       if args.empty?
         stdout.puts opts
         return 1
@@ -741,9 +728,9 @@ EOU
       new_parser = -> do
         case format
         when "rbi"
-          Prototype::RBI.new()
+          Prototype::RBI
         when "rb"
-          Prototype::RB.new()
+          Prototype::RB
         else
           raise
         end
@@ -796,7 +783,7 @@ EOU
 
             parser = new_parser[]
             begin
-              parser.parse file_path.read()
+              decls = parser.parse file_path.read()
             rescue SyntaxError
               stdout.puts "  ⚠️  Unable to parse due to SyntaxError: `#{file_path}`"
               next
@@ -817,7 +804,7 @@ EOU
             (output_path.parent).mkpath
             output_path.open("w") do |io|
               writer = Writer.new(out: io)
-              writer.write(parser.decls)
+              writer.write(decls)
             end
           end
         end
@@ -837,13 +824,12 @@ EOU
       else
         # file mode
         parser = new_parser[]
+        writer = Writer.new(out: stdout)
 
         input_paths.each do |file|
-          parser.parse file.read()
+          writer.write parser.parse(file.read())
         end
 
-        writer = Writer.new(out: stdout)
-        writer.write parser.decls
       end
 
       0
