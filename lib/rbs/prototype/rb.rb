@@ -315,9 +315,16 @@ module RBS
             else
               args.each do |arg|
                 if arg && (name = literal_to_symbol(arg))
-                  if (i, _ = find_def_index_by_name(decls, name))
+                  if (i, defn = find_def_index_by_name(decls, name))
                     current = current_accessibility(decls, i)
                     if current != accessibility
+                      if defn.is_a?(AST::Members::AttrAccessor)
+                        reader = build_attribute_member(AST::Members::AttrReader, defn)
+                        writer = build_attribute_member(AST::Members::AttrWriter, defn)
+                        targeted, remaining = name == defn.name ? [reader, writer] : [writer, reader]
+                        decls[i, 1] = [targeted, remaining]
+                      end
+
                       decls.insert(i + 1, current)
                       decls.insert(i, accessibility)
                     end
@@ -791,6 +798,8 @@ module RBS
             decl.name == name
           when AST::Members::AttrWriter
             :"#{decl.name}=" == name
+          when AST::Members::AttrAccessor
+            decl.name == name || :"#{decl.name}=" == name
           end
         end
 
@@ -800,6 +809,19 @@ module RBS
             _ = decls[index]
           ]
         end
+      end
+
+      def build_attribute_member(klass, member)
+        klass.new(
+          name: member.name,
+          type: member.type,
+          ivar_name: member.ivar_name,
+          kind: member.kind,
+          annotations: member.annotations,
+          location: member.location,
+          comment: member.comment,
+          visibility: member.visibility
+        )
       end
 
       def sort_members!(decls)
