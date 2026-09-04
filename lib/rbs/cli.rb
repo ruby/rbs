@@ -1084,7 +1084,15 @@ EOB
       opts = collection_options(args)
       params = {} #: Hash[Symbol, untyped]
       opts.order args.drop(1), into: params
-      config_path = options.config_path or raise
+      if %w[help hel he h].include?(args[0])
+        stdout.puts opts.help
+        return 0
+      end
+
+      unless config_path = options.config_path
+        stderr.puts "`rbs collection` cannot be used with `--no-collection`."
+        return 1
+      end
       lock_path = Collection::Config.to_lockfile_path(config_path)
 
       case args[0]
@@ -1159,8 +1167,6 @@ EOB
           return 1
         end
         Collection::Cleaner.new(lockfile_path: lock_path)
-      when 'help', 'hel', 'he', 'h'
-        stdout.puts opts.help
       else
         stdout.puts opts.help
         return 1
