@@ -17,7 +17,7 @@ module RBS
         end
 
         def versions(name)
-          REPO.gems[name].versions.keys.map(&:to_s)
+          REPO.gems[name].version_names.map(&:to_s)
         end
 
         def install(dest:, name:, version:, stdout:)
