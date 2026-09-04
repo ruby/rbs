@@ -11,9 +11,8 @@ module RBS
 
       def clean
         lock.repo_path.glob('*/*') do |dir|
-          *_, gem_name, version = dir.to_s.split('/')
-          gem_name or raise
-          version or raise
+          gem_name = dir.parent.basename.to_s
+          version = dir.basename.to_s
           next if needed? gem_name, version
 
           case
