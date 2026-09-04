@@ -37,5 +37,5 @@ size_t rbs_string_len(const rbs_string_t self) {
 bool rbs_string_equal(const rbs_string_t lhs, const rbs_string_t rhs) {
     if (lhs.start == rhs.start && lhs.end == rhs.end) return true;
     if (rbs_string_len(lhs) != rbs_string_len(rhs)) return false;
-    return strncmp(lhs.start, rhs.start, rbs_string_len(lhs)) == 0;
+    return memcmp(lhs.start, rhs.start, rbs_string_len(lhs)) == 0;
 }
