@@ -36,17 +36,13 @@ class RBS::SorterTest < Test::Unit::TestCase
         attr_accessor self.a: String
         attr_reader self.b: String
         attr_writer self.c: String
+        private attr_reader self.private_singleton: String
 
         def self.new: () -> instance
         alias self.bb self.xx
         def self.foo: () -> void
-        def self.pub: () -> void
-
-        private
-
-        def self.prv: () -> void
-
-        public
+        public def self.pub: () -> void
+        private def self.prv: () -> void
 
         attr_accessor x: String
         def initialize: () -> void
@@ -58,6 +54,7 @@ class RBS::SorterTest < Test::Unit::TestCase
 
         private
 
+        attr_reader private_instance: String
         def prv: () -> void
       end
     RUBY_EXPECTED
@@ -84,7 +81,11 @@ class RBS::SorterTest < Test::Unit::TestCase
 
         attr_writer self.c: String
 
+        private attr_reader self.private_singleton: String
+
         attr_accessor x: String
+
+        private attr_reader private_instance: String
 
         def self.new: () -> instance
 
