@@ -354,11 +354,12 @@ module RBS
       end
 
       def allow_non_simple_method_type()
+        previous = @allows_non_simple_method_type
         begin
           @allows_non_simple_method_type = true
           yield
-        rescue
-          @allows_non_simple_method_type = false
+        ensure
+          @allows_non_simple_method_type = previous
         end
       end
 
