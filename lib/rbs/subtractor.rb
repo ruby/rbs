@@ -50,11 +50,44 @@ module RBS
 
       context = _ = [context, decl.name]
       children = call(decl.each_decl.to_a, context: context) +
-        decl.each_member.reject { |m| member_exist?(owner, m, context: context) }
+        decl.each_member.filter_map { |m| subtract_member(owner, m, context: context) }
       children = filter_redundant_access_modifiers(children)
       return nil if children.empty?
 
       update_decl(decl, members: children)
+    end
+
+    private def subtract_member(owner, member, context:)
+      if member.is_a?(AST::Members::AttrAccessor)
+        reader_exists = method_exist?(owner, member.name, member.kind)
+        writer_exists = method_exist?(owner, :"#{member.name}=", member.kind)
+
+        case
+        when reader_exists && writer_exists
+          nil
+        when reader_exists
+          accessor_part(member, AST::Members::AttrWriter)
+        when writer_exists
+          accessor_part(member, AST::Members::AttrReader)
+        else
+          member
+        end
+      else
+        member unless member_exist?(owner, member, context: context)
+      end
+    end
+
+    private def accessor_part(member, member_class)
+      member_class.new(
+        name: member.name,
+        type: member.type,
+        ivar_name: member.ivar_name,
+        kind: member.kind,
+        annotations: member.annotations,
+        location: member.location,
+        comment: member.comment,
+        visibility: member.visibility
+      )
     end
 
     private def member_exist?(owner, member, context:)
@@ -67,9 +100,6 @@ module RBS
         method_exist?(owner, member.name, member.kind)
       when AST::Members::AttrWriter
         method_exist?(owner, :"#{member.name}=", member.kind)
-      when AST::Members::AttrAccessor
-        # TODO: It unexpectedly removes attr_accessor even if either reader or writer does not exist in the subtrahend.
-        method_exist?(owner, member.name, member.kind) || method_exist?(owner, :"#{member.name}=", member.kind)
       when AST::Members::InstanceVariable
         ivar_exist?(owner, member.name, :instance)
       when AST::Members::ClassInstanceVariable
