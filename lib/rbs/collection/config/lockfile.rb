@@ -82,7 +82,9 @@ module RBS
               raise CollectionNotAvailable unless meta_path.exist?
               raise CollectionNotAvailable unless library_data(gem) == YAML.load(meta_path.read)
             when Sources::Local
-              raise CollectionNotAvailable unless fullpath.join(gem[:name], gem[:version]).symlink?
+              installed_path = fullpath.join(gem[:name], gem[:version])
+              source_path = source.full_path.join(gem[:name], gem[:version])
+              raise CollectionNotAvailable unless installed_path.symlink? && File.identical?(installed_path, source_path)
             end
           end
         end
