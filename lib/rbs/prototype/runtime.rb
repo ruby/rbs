@@ -211,7 +211,8 @@ module RBS
             name or raise
             optional_keywords[name] = Types::Function::Param.new(name: nil, type: untyped)
           when :keyrest
-            rest_keywords = Types::Function::Param.new(name: nil, type: untyped)
+            name = nil if name == :** # For `def f(...) end` syntax
+            rest_keywords = Types::Function::Param.new(name: name, type: untyped)
           when :block
             block = Types::Block.new(
               type: Types::Function.empty(untyped).update(rest_positionals: Types::Function::Param.new(name: nil, type: untyped)),
