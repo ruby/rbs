@@ -549,10 +549,10 @@ module RBS
         while kw
           name, value = kw.children[0].children
           if (type = vars[name])
-            if value
-              optional_keywords[name] = Types::Function::Param.new(type: type, name: name)
-            else
+            if value.nil? || value == :NODE_SPECIAL_REQUIRED_KEYWORD
               required_keywords[name] = Types::Function::Param.new(type: type, name: name)
+            else
+              optional_keywords[name] = Types::Function::Param.new(type: type, name: name)
             end
           end
 
