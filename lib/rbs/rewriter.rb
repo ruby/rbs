@@ -43,7 +43,9 @@ module RBS
     def delete_comment(comment)
       location = comment.location or raise "Comment must have a location"
       line_start = location.start_pos - location.start_column
-      line_end = location.end_pos + 1
+      line_end = location.end_pos
+      line_end += 1 if buffer.content[line_end] == "\r"
+      line_end += 1 if buffer.content[line_end] == "\n"
       loc = Location.new(buffer, line_start, line_end)
       rewrite(loc, "")
     end
