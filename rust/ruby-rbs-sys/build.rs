@@ -11,21 +11,46 @@ fn main() -> Result<(), Box<dyn Error>> {
     let include = vendor_rbs.join("include");
     let c_src = vendor_rbs.join("src");
 
-    build(&include, &c_src)?;
+    let target = env::var("TARGET").unwrap_or_default();
+    let is_wasi = target.contains("wasm32") && target.contains("wasi");
 
-    let bindings = generate_bindings(&include)?;
+    build(&include, &c_src, is_wasi)?;
+
+    let bindings = generate_bindings(&include, is_wasi)?;
     write_bindings(&bindings)?;
 
     Ok(())
 }
 
-fn build(include_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn Error>> {
+fn build(include_dir: &Path, src_dir: &Path, is_wasi: bool) -> Result<(), Box<dyn Error>> {
     let mut build = cc::Build::new();
 
     build.include(include_dir);
 
     // Suppress unused parameter warnings from C code
     build.flag_if_supported("-Wno-unused-parameter");
+
+    if is_wasi {
+        // Compile the C parser with the WASI SDK so that its headers and
+        // runtime support match the target platform.
+        println!("cargo:rerun-if-env-changed=WASI_SDK_PATH");
+
+        let wasi_sdk = PathBuf::from(
+            env::var("WASI_SDK_PATH").expect("WASI_SDK_PATH must be set for wasm builds"),
+        );
+        build.compiler(wasi_sdk.join("bin").join("clang"));
+
+        let sysroot = wasi_sdk.join("share").join("wasi-sysroot");
+        build.flag(format!("--sysroot={}", sysroot.display()));
+        build.include(sysroot.join("include"));
+
+        println!(
+            "cargo:rustc-link-search=native={}",
+            sysroot.join("lib/wasm32-wasi").display()
+        );
+        build.define("_WASI_EMULATED_MMAN", "1");
+        println!("cargo:rustc-link-lib=wasi-emulated-mman");
+    }
 
     build.files(source_files(src_dir)?);
     build.try_compile("rbs")?;
@@ -64,8 +89,11 @@ fn source_files<P: AsRef<Path>>(root_dir: P) -> Result<Vec<String>, Box<dyn Erro
     Ok(files)
 }
 
-fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn Error>> {
-    let bindings = bindgen::Builder::default()
+fn generate_bindings(
+    include_path: &Path,
+    is_wasi: bool,
+) -> Result<bindgen::Bindings, Box<dyn Error>> {
+    let mut builder = bindgen::Builder::default()
         .header("wrapper.h")
         .clang_arg(format!("-I{}", include_path.display()))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
@@ -172,7 +200,20 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         // Constant pool functions
         .allowlist_function("rbs_constant_pool_free")
         .allowlist_function("rbs_constant_pool_id_to_constant")
-        .allowlist_function("rbs_constant_pool_init")
+        .allowlist_function("rbs_constant_pool_init");
+
+    if is_wasi {
+        // wasm-target bindgen output depends on the libclang implementation
+        // and may drop declarations or make structs opaque. Generate the
+        // ABI declarations with the host target instead; rustc will compile
+        // them for the actual target. Host layout tests are not valid here.
+        let host = env::var("HOST").expect("HOST is not set");
+        builder = builder
+            .clang_arg(format!("--target={host}"))
+            .layout_tests(false);
+    }
+
+    let bindings = builder
         .generate()
         .map_err(|_| "Unable to generate rbs bindings")?;
 
