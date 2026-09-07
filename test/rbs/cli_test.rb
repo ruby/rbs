@@ -402,7 +402,7 @@ singleton(::BasicObject)
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_include stdout.string, "a.rbs:2:13...2:14: Could not find ::A (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:2:13...2:14: Could not find A (RBS::NoTypeFoundError)"
       end
     end
   end

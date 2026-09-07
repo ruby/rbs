@@ -24,7 +24,6 @@ target :lib do
   signature "stdlib/rdoc/0/"
   signature "stdlib/ripper/0"
   signature "stdlib/pp/0"
-  signature "steep/patch.rbs"
 
   # configure_code_diagnostics do |config|
   #   config[D::Ruby::MethodDefinitionMissing] = :hint
