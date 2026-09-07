@@ -1075,7 +1075,7 @@ EOB
       stdout.print(out)
       stderr.print(err)
 
-      status.to_i
+      status.exitstatus || 128 + (status.termsig or raise)
     end
 
     def run_collection(args, options)
