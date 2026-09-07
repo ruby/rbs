@@ -50,6 +50,7 @@ module RBS
           instance_initialize_methods: [],
           public_instance_methods: [],
           private_instance_methods: [],
+          other_decls: [],
         } #: partitioned
 
         members = decl.members.map { |m| sort_decl m }
