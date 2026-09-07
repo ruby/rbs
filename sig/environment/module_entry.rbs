@@ -17,6 +17,8 @@ module RBS
 
       attr_reader context_decls: Array[context_decl]
 
+      @type_params_validated: bool?
+
       def initialize: (TypeName) -> void
 
       def <<: (context_decl) -> self
