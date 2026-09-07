@@ -18,6 +18,8 @@ module RBS
 
       @primary_decl: declaration?
 
+      @type_params_validated: bool?
+
       def initialize: (TypeName) -> void
 
       def <<: (context_decl) -> self

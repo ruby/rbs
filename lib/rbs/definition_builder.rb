@@ -504,6 +504,11 @@ module RBS
     def validate_type_params(definition, ancestors:, methods:)
       type_params = definition.type_params_decl
 
+      # Without type params nothing can violate the variance: the ancestor validation
+      # iterates the (empty) params, and the type params of the methods themselves are
+      # invariant, which `Result#compatible?` always accepts
+      return if type_params.empty?
+
       calculator = VarianceCalculator.new(builder: self)
       param_names = type_params.each.map(&:name)
 
@@ -1048,9 +1053,10 @@ module RBS
     end
 
     def validate_type_name(name, location)
-      name = name.absolute! unless name.absolute?
-      return if env.type_name?(env.normalize_type_name(name))
+      absolute = name.absolute? ? name : name.absolute!
+      return if env.type_name?(env.normalize_type_name(absolute))
 
+      # Report the name as it is written in the signature
       raise NoTypeFoundError.new(type_name: name, location: location)
     end
   end
