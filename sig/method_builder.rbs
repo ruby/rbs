@@ -47,17 +47,14 @@ module RBS
         def each: () { (Definition) -> void } -> void
                 | () -> Enumerator[Definition, void]
 
-        class Sorter
-          include TSort[Definition]
+        private
 
-          attr_reader methods: Hash[Symbol, Definition]
-
-          def initialize: (Hash[Symbol, Definition]) -> void
-
-          def tsort_each_node: { (Definition) -> void } -> void
-
-          def tsort_each_child: (Definition) { (Definition) -> void } -> void
-        end
+        # Yields the definition, recursively yielding the original of an alias first
+        #
+        # Raises `RecursiveAliasDefinitionError` when the aliases form a cycle of two or
+        # more methods.
+        #
+        def each_alias_first: (Definition, Hash[Definition, bool] done, Array[Definition] visiting) { (Definition) -> void } -> void
       end
 
       attr_reader env: Environment

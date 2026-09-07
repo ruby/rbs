@@ -73,10 +73,10 @@ module RBS
       def with_int: (?Integer value) { (int) -> void } -> void
                   | (?Integer value) -> WithEnum[int]
 
-      # Yields `::float` objects
+      # Yields `::_ToF` objects
       #
-      def with_float: (?Float value) { (float) -> void } -> void
-                    | (?Float value) -> WithEnum[float]
+      def with_float: (?Float value) { (_ToF) -> void } -> void
+                    | (?Float value) -> WithEnum[_ToF]
 
       # Yields `::string` objects
       #
