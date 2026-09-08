@@ -126,7 +126,7 @@ rbs_token_t rbs_lexer_next_token(rbs_lexer_t *lexer) {
       "return"        { return rbs_next_token(lexer, kRETURN); }
 
       unicode_char = "\\u" [0-9a-fA-F]{4};
-      oct_char = "\\x" [0-9a-f]{1,2};
+      oct_char = "\\x" [0-9a-fA-F]{1,2};
       hex_char = "\\" [0-7]{1,3};
 
       dqstring = ["] (unicode_char | oct_char | hex_char | "\\" [^xu] | [^\\"\x00])* ["];
