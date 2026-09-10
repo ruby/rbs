@@ -1158,7 +1158,7 @@ EOB
           stderr.puts "#{lock_path} should exist to clean"
           return 1
         end
-        Collection::Cleaner.new(lockfile_path: lock_path)
+        Collection::Cleaner.new(lockfile_path: lock_path).clean
       when 'help', 'hel', 'he', 'h'
         stdout.puts opts.help
       else

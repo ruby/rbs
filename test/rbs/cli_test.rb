@@ -1734,6 +1734,42 @@ Processing `lib`...
     end
   end
 
+  def test_collection_clean
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      config_path = dir + RBS::Collection::Config::PATH
+      config_path.write("")
+
+      RBS::Collection::Config.to_lockfile_path(config_path).write(<<~YAML)
+        path: .gem_rbs_collection
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              type: git
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+      YAML
+
+      collection_dir = dir + ".gem_rbs_collection"
+      (collection_dir + "ast/2.4").mkpath
+      (collection_dir + "ast/2.4/ast.rbs").write("class Ast end")
+      (collection_dir + "ast/2.3").mkpath
+      (collection_dir + "rainbow/3.0").mkpath
+
+      with_cli do |cli|
+        assert_cli_success cli.run(["--collection", config_path.to_s, "collection", "clean"])
+      end
+
+      assert_predicate(collection_dir + "ast/2.4/ast.rbs", :file?)
+      refute_predicate(collection_dir + "ast/2.3", :exist?)
+      refute_predicate(collection_dir + "rainbow/3.0", :exist?)
+    end
+  end
+
   def test_subtract
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
