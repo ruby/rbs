@@ -31,27 +31,80 @@ class IntegerInstanceTest < Test::Unit::TestCase
   testing 'Integer'
 
   def test_op_mod(method: :%)
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, method, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, method, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, method, 12.0
+    # Notably not `Complex` as complex doesn't define `%`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, method, Coercable.for_op(:%)
   end
 
   def test_op_and
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :&, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :&, Coercable.for_op(:&)
   end
 
   def test_op_mul
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :*, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :*, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :*, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :*, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :*, Coercable.for_op(:*)
   end
 
   def test_op_pow
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :**, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :**, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :**, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :**, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :**, Coercable.for_op(:**)
   end
 
   def test_op_add
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :+, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :+, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :+, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :+, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :+, Coercable.for_op(:+)
   end
 
   def test_op_sub
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :-, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :-, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :-, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :-, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :-, Coercable.for_op(:-)
   end
 
   def test_op_uneg
@@ -60,23 +113,62 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_div
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :/, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :/, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :/, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :/, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :/, Coercable.for_op(:/)
   end
 
   def test_op_lt
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :<, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :<, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :<, 12.0
+    # Notably not `Complex` as complex doesn't define `<`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :<, Coercable.for_op(:<)
   end
 
   def test_op_lsh
-    # omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Integer',
+                        38, :<<, count
+    end
   end
 
   def test_op_leq
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :<=, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :<=, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :<=, 12.0
+    # Notably not `Complex` as complex doesn't define `<=`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :<=, Coercable.for_op(:<=)
   end
 
   def test_op_cmp
-    # omit 'todo'
+    assert_send_type  '(Integer) -> (-1 | 0 | 1)',
+                      38, :<=>, 12
+    assert_send_type  '(Rational) -> (-1 | 0 | 1)',
+                      38, :<=>, 12r
+
+    with_untyped.and 12, 12r, 12.0, 12i, Coercable.new(Set[8, 4]){ |n| n.digits.to_set } do |other|
+      assert_send_type  '(untyped) -> Integer?',
+                        38, :<=>, other
+    end
   end
 
   def test_op_eq(method: :==)
@@ -92,23 +184,71 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_gt
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :>, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :>, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :>, 12.0
+    # Notably not `Complex` as complex doesn't define `>`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :>, Coercable.for_op(:>)
   end
 
   def test_op_geq
-    # omit 'todo'
+    assert_send_type  '(Integer) -> bool',
+                      38, :>=, 12
+    assert_send_type  '(Rational) -> bool',
+                      38, :>=, 12r
+    assert_send_type  '(Float) -> bool',
+                      38, :>=, 12.0
+    # Notably not `Complex` as complex doesn't define `>`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :>=, Coercable.for_op(:>=)
   end
 
   def test_op_rsh
-    # omit 'todo'
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Integer',
+                        38, :>>, count
+    end
   end
 
   def test_op_aref
-    # omit 'todo'
+    with_int 3 do |offset|
+      assert_send_type  '(int) -> (0 | 1)',
+                        38, :[], offset
+
+      with_int 5 do |size|
+        assert_send_type  '(int, int) -> Integer',
+                          38, :[], offset, size
+      end
+    end
+
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 3..nil
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], nil..0
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 1r..3r
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], 1.0..3.0
+
+    start = ToInt.new(1)
+    def start.<=>(other) = to_int <=> other.to_int
+    def start.coerce(other) = [other.to_int, to_int]
+    assert_send_type  '(range[int?]) -> Integer',
+                      38, :[], CustomRange.new(start, ToInt.new(3))
   end
 
   def test_op_xor
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :^, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :^, Coercable.for_op(:^)
   end
 
   def test_abs(method: :magnitude)
@@ -153,7 +293,18 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_ceildiv
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :ceildiv, 12
+    assert_send_type  '(Rational) -> Integer',
+                      38, :ceildiv, 12r
+    assert_send_type  '(Float) -> Integer',
+                      38, :ceildiv, 12.0
+    # Notably not `Complex` as complex doesn't define `div`
+
+    uneg = BlankSlate.new
+    def uneg.-@ = ::Coercable::OpReturn.new
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :ceildiv, Coercable.for_op(:-, result: Coercable.for_op(:div, result: uneg))
   end
 
   def test_chr
@@ -167,7 +318,13 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_coerce
-    # omit 'todo'
+    assert_send_type  '(Integer) -> [Integer, 38]',
+                      38, :coerce, 4
+
+    with_float do |float|
+      assert_send_type  '(_ToF) -> [Float, Float]',
+                        38, :coerce, float
+    end
   end
 
   def test_denominator
@@ -186,15 +343,52 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_div
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :div, 12
+    assert_send_type  '(Rational) -> Integer',
+                      38, :div, 12r
+    assert_send_type  '(Float) -> Integer',
+                      38, :div, 12.0
+    # Notably not `Complex` as complex doesn't define `div`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :div, Coercable.for_op(:div)
   end
 
   def test_divmod
-    # omit 'todo'
+    assert_send_type  '(Integer) -> [Integer, Integer]',
+                      38, :divmod, 12
+    assert_send_type  '(Rational) -> [Integer, Rational]',
+                      38, :divmod, 12r
+    assert_send_type  '(Float) -> [Integer, Float]',
+                      38, :divmod, 12.0
+    # Notably not `Complex` as complex doesn't define `divmod`
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :divmod, Coercable.for_op(:divmod)
   end
 
   def test_downto
-    # omit 'todo'
+    assert_send_type  '(Integer) { (Integer) -> void } -> 38',
+                      38, :downto, 35 do end
+    assert_send_type  '(Integer) -> Enumerator[Integer, 38]',
+                      38, :downto, 35
+    assert_send_type  '(Rational) { (Integer) -> void } -> 38',
+                      38, :downto, 35r do end
+    assert_send_type  '(Rational) -> Enumerator[Integer, 38]',
+                      38, :downto, 35r
+    assert_send_type  '(Float) { (Integer) -> void } -> 38',
+                      38, :downto, 35.0 do end
+    assert_send_type  '(Float) -> Enumerator[Integer, 38]',
+                      38, :downto, 35.0
+
+    assert_send_type  '(Coercable) { (Integer) -> void } -> 38',
+                      38, :downto, Coercable.for_op(:<) { it.__value__ < 35 } do end
+
+    coercable = Coercable.for_op(:<) { it.__value__ < 35 }
+    def coercable.-(rhs) = 35 - rhs # Required by `Enumerator#size`, which the unit test harness uses
+    assert_send_type  '(Coercable) -> Enumerator[Integer, 38]',
+                      38, :downto, coercable
   end
 
   def test_even?
@@ -205,7 +399,16 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_fdiv
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Float',
+                      38, :fdiv, 12
+    assert_send_type  '(Rational) -> Float',
+                      38, :fdiv, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :fdiv, 12.0
+    # Notably not `Complex` as complex doesn't define `fdiv`
+
+    assert_send_type  '(Coercable) -> Float',
+                      38, :fdiv, Coercable.for_op(:fdiv, result: ToF.new(3.4))
   end
 
   def test_floor
@@ -286,7 +489,20 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_pow
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :pow, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :pow, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :pow, 12.0
+    assert_send_type  '(Complex) -> Complex',
+                      38, :pow, 12i
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :pow, Coercable.for_op(:**)
+
+    assert_send_type  '(Integer, Integer) -> Integer',
+                      38, :pow, 12, 34
   end
 
   def test_pred
@@ -305,7 +521,15 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_remainder
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :remainder, 12
+    assert_send_type  '(Rational) -> Rational',
+                      38, :remainder, 12r
+    assert_send_type  '(Float) -> Float',
+                      38, :remainder, 12.0
+    # Notably not `Complex` as complex doesn't define `%`
+
+    # TODO: when `Numeric#remainder` is finished, update this with more "coerce" edge cases
   end
 
   def test_round
@@ -386,7 +610,26 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_upto
-    # omit 'todo'
+    assert_send_type  '(Integer) { (Integer) -> void } -> 38',
+                      38, :upto, 40 do end
+    assert_send_type  '(Integer) -> Enumerator[Integer, 38]',
+                      38, :upto, 40
+    assert_send_type  '(Rational) { (Integer) -> void } -> 38',
+                      38, :upto, 40r do end
+    assert_send_type  '(Rational) -> Enumerator[Integer, 38]',
+                      38, :upto, 40r
+    assert_send_type  '(Float) { (Integer) -> void } -> 38',
+                      38, :upto, 40.0 do end
+    assert_send_type  '(Float) -> Enumerator[Integer, 38]',
+                      38, :upto, 40.0
+
+    assert_send_type  '(Coercable) { (Integer) -> void } -> 38',
+                      38, :upto, Coercable.for_op(:>) { it.__value__ > 40 } do end
+
+    coercable = Coercable.for_op(:>) { it.__value__ > 40 }
+    def coercable.-(rhs) = 40 - rhs # Required by `Enumerator#size`, which the unit test harness uses
+    assert_send_type  '(Coercable) -> Enumerator[Integer, 38]',
+                      38, :upto, coercable
   end
 
   def test_zero?
@@ -397,7 +640,11 @@ class IntegerInstanceTest < Test::Unit::TestCase
   end
 
   def test_op_or
-    # omit 'todo'
+    assert_send_type  '(Integer) -> Integer',
+                      38, :|, 12
+
+    assert_send_type  '(Coercable) -> Coercable::OpReturn',
+                      38, :|, Coercable.for_op(:|)
   end
 
   def test_op_not
