@@ -784,6 +784,13 @@ class RBS::TypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_record_key_with_nul
+    Parser.parse_type('{ "a\x00b" => Integer, "a\x00c" => String }').yield_self do |type|
+      assert_instance_of Types::Record, type
+      assert_equal ["a\x00b", "a\x00c"], type.fields.keys
+    end
+  end
+
   def test_type_var
     Parser.parse_type("Array[A]", variables: []).yield_self do |type|
       assert_instance_of Types::ClassInstance, type
