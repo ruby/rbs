@@ -161,6 +161,11 @@ class Numeric
   # The direction you can round
   type round_mode = :up | :down | :even | 'up' | 'down' | 'even' | string | nil
 
+  # An interface that indicates a type can be coerced.
+  interface _Coerce[O, Other, Self]
+    def coerce: (O other) -> [Other, Self]
+  end
+
   # <!--
   #   rdoc-file=numeric.c
   #   - self % other -> real_numeric
