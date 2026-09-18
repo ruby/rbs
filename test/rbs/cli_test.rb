@@ -325,6 +325,23 @@ singleton(::BasicObject)
 
   end
 
+  def test_missing_class
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(ancestors ::NoSuchClass)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(methods ::NoSuchClass)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(method ::NoSuchClass foo)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+  end
+
   def test_validate
     with_cli do |cli|
       assert_cli_success cli.run(%w(--log-level=info validate))

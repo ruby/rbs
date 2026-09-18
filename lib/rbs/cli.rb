@@ -322,6 +322,7 @@ EOU
         end
       else
         stdout.puts "Cannot find class: #{type_name}"
+        return 1
       end
 
       0
@@ -380,6 +381,7 @@ EOU
         end
       else
         stdout.puts "Cannot find class: #{type_name}"
+        return 1
       end
 
       0
