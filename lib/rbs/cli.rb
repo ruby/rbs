@@ -990,7 +990,7 @@ Options:
       args.each do |file|
         path = Pathname(file)
         if path.directory?
-          Pathname.glob((path + "**/*.rbs").to_s).each do |path|
+          path.glob("**/*.rbs").each do |path|
             stdout.puts "Processing #{path}..."
             annotator.annotate_file(path)
           end
