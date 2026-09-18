@@ -1313,6 +1313,39 @@ EOF
     end
   end
 
+  def test_initialize_new_without_class_new
+    SignatureManager.new do |manager|
+      manager.files[Pathname("builtin.rbs")] = <<EOF
+class BasicObject
+end
+
+class Object < BasicObject
+end
+
+class Module
+end
+
+class Class < Module
+end
+EOF
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class C
+  def initialize: (Integer) -> void
+end
+EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::C")).tap do |definition|
+          assert_instance_of Definition, definition
+
+          refute_operator definition.methods, :key?, :new
+        end
+      end
+    end
+  end
+
   def test_initialize_new_generic
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
