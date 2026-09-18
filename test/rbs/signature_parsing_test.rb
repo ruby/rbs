@@ -827,6 +827,24 @@ end
     end
   end
 
+  def test_annotation_strip_whitespace
+    Parser.parse_signature(<<~SIG).tap do |_, _, decls|
+      %a{}
+      %a{   }
+      %a{ ä }
+      %a{ä}
+      class Hello end
+    SIG
+
+      decls[0].yield_self do |decl|
+        assert_equal "", decl.annotations[0].string
+        assert_equal "", decl.annotations[1].string
+        assert_equal "ä", decl.annotations[2].string
+        assert_equal "ä", decl.annotations[3].string
+      end
+    end
+  end
+
   def test_attributes
     Parser.parse_signature(<<~SIG).tap do |_, _, decls|
       class Hello
