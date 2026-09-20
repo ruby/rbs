@@ -40,6 +40,9 @@ module RBS
       MixinNonConstantModule = _ = Class.new(Base)
       AttributeNonSymbolName = _ = Class.new(Base)
       ClassModuleAliasDeclarationMissingTypeName = _ = Class.new(Base)
+      NestedSingletonScope = _ = Class.new(Base)
+      TopLevelSingletonScope = _ = Class.new(Base)
+      NonSelfSingletonScope = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -63,6 +66,7 @@ module RBS
       def initialize(result)
         @result = result
         @module_nesting = []
+        @singleton_class_depth = 0
         @comments = CommentAssociation.build(result.buffer, result.prism_result)
       end
 
@@ -164,17 +168,65 @@ module RBS
         visit_class_or_module_body(module_decl, node)
       end
 
-      def visit_class_or_module_body(decl, node)
-        push_module_nesting(decl) do
-          visit_child_nodes(node)
+      def visit_singleton_class_node(node)
+        return if skip_node?(node)
 
-          node.child_nodes.each do |child_node|
-            if child_node
-              comments.each_enclosed_block(child_node) do |block|
-                report_unused_block(block)
+        if in_singleton_class?
+          diagnostics << Diagnostic::NestedSingletonScope.new(
+            rbs_location(node.class_keyword_loc),
+            "Nested `class << self` opens the singleton class of a singleton class, which has no representation in RBS"
+          )
+          return
+        end
+
+        unless node.expression.is_a?(Prism::SelfNode)
+          diagnostics << Diagnostic::NonSelfSingletonScope.new(
+            rbs_location(node.expression.location),
+            "Non-self expression in `class << ...` opens an anonymous singleton class, which has no representation in RBS"
+          )
+          return
+        end
+
+        unless current_module
+          diagnostics << Diagnostic::TopLevelSingletonScope.new(
+            rbs_location(node.class_keyword_loc),
+            "Top-level `class << self` opens the singleton class of `main`, which has no representation in RBS"
+          )
+          return
+        end
+
+        @singleton_class_depth += 1
+        begin
+          visit_child_nodes(node)
+        ensure
+          @singleton_class_depth -= 1
+        end
+      end
+
+      def in_singleton_class?
+        @singleton_class_depth > 0
+      end
+
+      def visit_class_or_module_body(decl, node)
+        # Entering a new class/module body establishes a fresh metaclass context;
+        # any singleton_class_depth from an enclosing `class << self` does not apply here.
+        saved_depth = @singleton_class_depth
+        @singleton_class_depth = 0
+
+        begin
+          push_module_nesting(decl) do
+            visit_child_nodes(node)
+
+            node.child_nodes.each do |child_node|
+              if child_node
+                comments.each_enclosed_block(child_node) do |block|
+                  report_unused_block(block)
+                end
               end
             end
           end
+        ensure
+          @singleton_class_depth = saved_depth
         end
 
         comments.each_enclosed_block(node) do |block|
@@ -210,7 +262,23 @@ module RBS
           return
         end
 
-        kind = node.receiver ? :singleton : :instance #: :singleton | :instance
+        if in_singleton_class? && node.receiver
+          diagnostics << Diagnostic::NestedSingletonScope.new(
+            rbs_location(node.receiver.location),
+            "Method definition with self receiver inside `class << self` targets the singleton class of a singleton class, which has no representation in RBS"
+          )
+          # Consume the leading block so the annotation isn't re-reported as UnusedInlineAnnotation;
+          # the NestedSingletonScope diagnostic above is the only diagnostic for this construct.
+          comments.leading_block!(node)
+          return
+        end
+
+        kind =
+          if in_singleton_class?
+            :singleton
+          else
+            node.receiver ? :singleton : :instance
+          end #: :singleton | :instance
 
         case current = current_module
         when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
@@ -247,12 +315,28 @@ module RBS
         when :include, :extend, :prepend
           return if skip_node?(node)
 
+          if in_singleton_class?
+            diagnostics << Diagnostic::NotImplementedYet.new(
+              rbs_location(node.message_loc || node.location),
+              "Mixin call inside `class << self` is not supported"
+            )
+            return
+          end
+
           case current = current_module
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
             parse_mixin_call(node)
           end
         when :attr_reader, :attr_writer, :attr_accessor
           return if skip_node?(node)
+
+          if in_singleton_class?
+            diagnostics << Diagnostic::NotImplementedYet.new(
+              rbs_location(node.message_loc || node.location),
+              "Attribute definition inside `class << self` is not supported"
+            )
+            return
+          end
 
           case current = current_module
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
