@@ -212,6 +212,7 @@ class Enumerator[unchecked out E, out R = void] < Object
   # returns `nil`.
   #
   def self.product: [E] (*_EachEntry[E]) -> Product[E]
+                  | [E] (*_EachEntry[E]) { (Array[E]) -> void } -> nil
 
   # <!--
   #   rdoc-file=enumerator.c
