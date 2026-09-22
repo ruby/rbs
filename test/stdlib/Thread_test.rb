@@ -42,6 +42,8 @@ class ThreadTest < Test::Unit::TestCase
       "() -> Integer",
       Thread.current, :native_thread_id
     )
+
+    assert_send_type "() -> nil", Thread.new{}.join, :native_thread_id
   end
 
   def test_raise
