@@ -113,7 +113,7 @@ jobs:
           fi
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
           ruby-version: ruby
           bundler: none
@@ -174,7 +174,7 @@ jobs:
       # from Maven during the install -- and parse something with it, so the
       # WebAssembly runtime is exercised end to end before anything is published.
       - name: Set up JRuby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
           ruby-version: jruby
           bundler: none
@@ -190,7 +190,7 @@ jobs:
           '
 
       - name: Switch back to CRuby
-        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:
           ruby-version: ruby
           bundler: none
