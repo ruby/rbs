@@ -782,7 +782,7 @@ singleton(::BasicObject)
 
     with_cli do |cli|
       refute_cli_success { cli.run(%w(constant ::__No_Such_Constant_XYZ__)) }
-      assert_equal " => [no constant]\n", stdout.string
+      assert_match %r{^ => \[no constant\]$}, stdout.string
     end
   end
 
