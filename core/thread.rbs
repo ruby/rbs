@@ -356,7 +356,7 @@ class Thread < Object
   # is specified, then that will be run and its result returned.  See Thread#[]
   # and Hash#fetch.
   #
-  def fetch: (*untyped sym) -> untyped
+  def fetch: (interned sym, ?untyped default) ?{ (interned sym) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=thread.c

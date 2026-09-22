@@ -44,6 +44,13 @@ class ThreadTest < Test::Unit::TestCase
     )
   end
 
+  def test_fetch
+    th = Thread.new { Thread.current[:cat] = 'meow' }.join
+    assert_send_type "(Symbol) -> String", th, :fetch, :cat
+    assert_send_type "(Symbol) { (Symbol) -> true } -> true", th, :fetch, :dog do true end
+    assert_send_type "(Symbol, false) -> false", th, :fetch, :dog, false
+  end
+
   def test_raise
     t = Thread.new do
       begin
