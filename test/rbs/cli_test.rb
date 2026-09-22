@@ -779,6 +779,11 @@ singleton(::BasicObject)
       assert_cli_success cli.run(%w(constant Pathname))
       assert_cli_success cli.run(%w(constant --context File IO))
     end
+
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(constant ::__No_Such_Constant_XYZ__)) }
+      assert_equal " => [no constant]\n", stdout.string
+    end
   end
 
   def test_version
