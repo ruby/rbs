@@ -52,6 +52,9 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
       "(Array[String], Array[Integer]) -> Enumerator::Product[String | Integer]",
       Enumerator, :product, ["a", "b"], [1, 2]
     )
+
+    assert_send_type "(Range[Integer], Array[Integer]) { (Array[Integer]) -> void } -> nil",
+                     Enumerator, :product, 1..3, [1, 2] do end
   end
 end
 
