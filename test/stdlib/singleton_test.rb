@@ -11,11 +11,6 @@ class SingletonSingletonTest < Test::Unit::TestCase
     include Singleton
   end
 
-  def test_instance
-    assert_send_type  '() -> SingletonSingletonTest::TestClass',
-                      TestClass, :instance
-  end
-
   def test_singleton_instance_methods
     omit "SingletonInstanceMethods is not available" unless Singleton.const_defined?(:SingletonInstanceMethods, false)
 

@@ -90,48 +90,26 @@
 #     p a.strip #  => nil
 #
 module Singleton
-  def self.__init__: (Class klass) -> Class
-
-  # <!--
-  #   rdoc-file=lib/singleton.rb
-  #   - instance()
-  # -->
-  # Returns the singleton instance.
+  # <!-- rdoc-file=lib/singleton.rb -->
+  # The version string
   #
-  def self.instance: () -> instance
-
-  # <!--
-  #   rdoc-file=lib/singleton.rb
-  #   - _dump(depth = -1)
-  # -->
-  # By default, do not retain any state when marshalling.
-  #
-  def _dump: (?Integer depth) -> String
-
-  # <!--
-  #   rdoc-file=lib/singleton.rb
-  #   - clone()
-  # -->
-  # Raises a TypeError to prevent cloning.
-  #
-  def clone: () -> bot
-
-  # <!--
-  #   rdoc-file=lib/singleton.rb
-  #   - dup()
-  # -->
-  # Raises a TypeError to prevent duping.
-  #
-  def dup: () -> bot
+  VERSION: String
 
   module SingletonInstanceMethods
+    def clone: () -> bot
+
+    def dup: () -> bot
+
+    def _dump: (?Integer depth) -> String
   end
+  include SingletonInstanceMethods
 
   module SingletonClassMethods
+    def instance: () -> instance
   end
-end
 
-# <!-- rdoc-file=lib/singleton.rb -->
-# The version string
-#
-Singleton::VERSION: String
+  module SingletonClassProperties
+    def __init__: (Class klass) -> Class
+  end
+  extend SingletonClassProperties
+end
