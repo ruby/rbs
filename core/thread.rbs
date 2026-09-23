@@ -495,7 +495,7 @@ class Thread < Object
   # native thread, it returns *nil*. If the Ruby implementation uses M:N thread
   # model, the ID may change depending on the timing.
   #
-  def native_thread_id: () -> Integer
+  def native_thread_id: () -> Integer?
 
   # <!--
   #   rdoc-file=thread.c
