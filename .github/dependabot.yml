@@ -26,6 +26,6 @@ updates:
   - package-ecosystem: 'cargo'
     directory: '/rust'
     schedule:
-      interval: 'weekly'
+      interval: 'daily'
     labels:
       - 'skip-changelog'
