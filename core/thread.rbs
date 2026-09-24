@@ -1013,7 +1013,7 @@ class Thread < Object
   #     #<Thread:0x401b3fb0 sleep>
   #     #<Thread:0x401bdf4c run>
   #
-  def self.list: () -> untyped
+  def self.list: () -> Array[Thread]
 
   # <!--
   #   rdoc-file=thread.c
