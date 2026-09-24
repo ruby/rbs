@@ -954,7 +954,7 @@ class Thread < Object
   # For handling all interrupts, use `Object` and not `Exception` as the
   # ExceptionClass, as kill/terminate interrupts are not handled by `Exception`.
   #
-  def self.handle_interrupt: (untyped hash) -> untyped
+  def self.handle_interrupt: [T] (Hash[Class, :immediate | :on_blocking | :never] hash) { (nil) -> T } -> T
 
   # <!--
   #   rdoc-file=thread.c
