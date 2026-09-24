@@ -5,6 +5,14 @@ class ThreadSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Thread)"
 
+  def test_abort_on_exception
+    assert_send_type "() -> bool", Thread, :abort_on_exception
+  end
+
+  def test_report_on_exception
+    assert_send_type "() -> bool", Thread, :report_on_exception
+  end
+
   def test_new
     assert_send_type  "() { () -> untyped } -> Thread",
                       Thread, :new do 1 end

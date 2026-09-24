@@ -799,7 +799,7 @@ class Thread < Object
   # There is also an instance level method to set this for a specific thread, see
   # #abort_on_exception.
   #
-  def self.abort_on_exception: () -> untyped
+  def self.abort_on_exception: () -> bool
 
   # <!--
   #   rdoc-file=thread.c
@@ -1120,7 +1120,7 @@ class Thread < Object
   # There is also an instance level method to set this for a specific thread, see
   # #report_on_exception=.
   #
-  def self.report_on_exception: () -> untyped
+  def self.report_on_exception: () -> bool
 
   # <!--
   #   rdoc-file=thread.c
