@@ -13,6 +13,13 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type "() -> bool", Thread, :report_on_exception
   end
 
+  def test_handle_interrupt
+    assert_send_type  "(Hash[Class, :never]) { (nil) -> Integer } -> Integer",
+                      Thread, :handle_interrupt, { RuntimeError => :never } do 1 end
+    assert_send_type  "(Hash[Class, :immediate | :on_blocking]) { (nil) -> String } -> String",
+                      Thread, :handle_interrupt, { Object => :immediate, RuntimeError => :on_blocking } do "x" end
+  end
+
   def test_new
     assert_send_type  "() { () -> untyped } -> Thread",
                       Thread, :new do 1 end
