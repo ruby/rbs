@@ -30,6 +30,10 @@ class ThreadSingletonTest < Test::Unit::TestCase
       Thread, :each_caller_location, &-> (loc) { 3 }
     )
   end
+
+  def test_list
+    assert_send_type "() -> Array[Thread]", Thread, :list
+  end
 end
 
 class ThreadTest < Test::Unit::TestCase
