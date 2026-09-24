@@ -53,6 +53,12 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "(Symbol, false) -> false", th, :fetch, :dog, false
   end
 
+  def test_join
+    assert_send_type "() -> Thread", Thread.new{}, :join
+    assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
+    assert_send_type "(0) -> nil", Thread.new { sleep 10 }, :join, 0
+  end
+
   def test_raise
     t = Thread.new do
       begin

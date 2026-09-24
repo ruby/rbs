@@ -428,7 +428,8 @@ class Thread < Object
   #     tick...
   #     tick...
   #
-  def join: (*untyped limit) -> Thread
+  def join: () -> Thread
+          | (_ToF limit) -> Thread?
 
   # <!--
   #   rdoc-file=thread.c
