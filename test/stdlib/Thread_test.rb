@@ -3,6 +3,9 @@ require_relative "test_helper"
 class ThreadSingletonTest < Test::Unit::TestCase
   include TestHelper
 
+  class Sub < Thread
+  end
+
   testing "singleton(::Thread)"
 
   def test_abort_on_exception
@@ -35,8 +38,16 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type  "() { () -> Integer } -> Thread",
                       Thread, :start do 1 end
 
-    assert_send_type "() { () -> Integer } -> untyped",
-                     Class.new(Thread), :start do 1 end
+    assert_send_type "() { () -> Integer } -> ThreadSingletonTest::Sub",
+                     Sub, :start do 1 end
+  end
+
+  def test_fork
+    assert_send_type  "() { () -> Integer } -> Thread",
+                      Thread, :fork do 1 end
+
+    assert_send_type "() { () -> Integer } -> ThreadSingletonTest::Sub",
+                     Sub, :fork do 1 end
   end
 
   def test_each_caller_location
