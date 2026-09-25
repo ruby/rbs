@@ -5,6 +5,8 @@ module RBS
 
       def parse_comments: (String, include_trailing: bool) -> Hash[Integer, AST::Comment]
 
+      def process_comments: (Array[Prism::Comment] comments, include_trailing: bool) -> Hash[Integer, AST::Comment]
+
       def block_from_body: (node) -> Types::Block?
 
       def each_node: (Array[untyped] nodes) { (node) -> void } -> void

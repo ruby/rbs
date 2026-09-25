@@ -35,7 +35,7 @@ module RBS
 
       def decls: () -> Array[AST::Declarations::t]
 
-      def parse: (String) -> void
+      def parse: (String) -> Array[AST::Declarations::t]
 
       def process: (untyped node, decls: Array[AST::Declarations::t | AST::Members::t], comments: Hash[Integer, AST::Comment], context: Context) -> void
 
