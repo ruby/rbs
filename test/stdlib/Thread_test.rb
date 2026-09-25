@@ -72,12 +72,6 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "(Symbol, false) -> false", th, :fetch, :dog, false
   end
 
-  def test_join
-    assert_send_type "() -> Thread", Thread.new{}, :join
-    assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
-    assert_send_type "(0) -> nil", Thread.new { sleep 10 }, :join, 0
-  end
-
   def test_raise
     t = Thread.new do
       begin
@@ -118,5 +112,34 @@ class ThreadTest < Test::Unit::TestCase
     end
 
     t.kill
+  end
+
+  class Sub < Thread
+  end
+
+  def test_kill
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :kill
+  end
+
+  def test_exit
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :exit
+  end
+
+  def test_join
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :join
+    assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
+    assert_send_type "(0) -> nil", Thread.new { sleep 10 }, :join, 0
+  end
+
+  def test_run
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :run
+  end
+
+  def test_terminate
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
+  end
+
+  def test_wakeup
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :wakeup
   end
 end

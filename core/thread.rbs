@@ -270,7 +270,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def kill: () -> Thread?
+  def kill: () -> self?
 
   # <!--
   #   rdoc-file=thread.c
@@ -342,7 +342,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def exit: () -> Thread?
+  def exit: () -> self?
 
   # <!--
   #   rdoc-file=thread.c
@@ -428,8 +428,8 @@ class Thread < Object
   #     tick...
   #     tick...
   #
-  def join: () -> Thread
-          | (_ToF limit) -> Thread?
+  def join: () -> self
+          | (_ToF limit) -> self?
 
   # <!--
   #   rdoc-file=thread.c
@@ -604,7 +604,7 @@ class Thread < Object
   #
   # See also the instance method #wakeup.
   #
-  def run: () -> Thread
+  def run: () -> self
 
   # Returns the safe level.
   #
@@ -672,7 +672,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def terminate: () -> Thread?
+  def terminate: () -> self?
 
   # <!--
   #   rdoc-file=thread.c
@@ -779,7 +779,7 @@ class Thread < Object
   #     c.join
   #     #=> "hey!"
   #
-  def wakeup: () -> Thread
+  def wakeup: () -> self
 
   # <!--
   #   rdoc-file=thread.c
