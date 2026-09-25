@@ -103,6 +103,26 @@ class ThreadTest < Test::Unit::TestCase
                      t, :backtrace
   end
 
+  def test_backtrace_locations
+    assert_send_type "() -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations
+    assert_send_type "(Integer) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0
+    assert_send_type "(Integer, Integer) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0, 1
+    assert_send_type "(Integer, nil) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0, nil
+    assert_send_type "(Range[Integer]) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0..1
+    assert_send_type "(Integer) -> nil",
+                     Thread.current, :backtrace_locations, 10000
+
+    t = Thread.new {}
+    t.join
+    assert_send_type "() -> nil",
+                     t, :backtrace_locations
+  end
+
   def test_raise
     t = Thread.new do
       begin
