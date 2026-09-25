@@ -24,6 +24,29 @@ class RBS::ErrorsTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse_signature_with_malformed_class_instance_variable
+    ["class M self.", "module M self.", "class M self.5", %q{class M self."x"}].each do |source|
+      assert_raises RBS::ParsingError, "#{source.inspect} should raise RBS::ParsingError" do
+        RBS::Parser.parse_signature(buffer(source))
+      end
+    end
+  end
+
+  def test_parse_signature_with_malformed_class_instance_variable_detailed_message
+    omit "Exception#detailed_message does not supported" unless Exception.method_defined?(:detailed_message)
+
+    assert_raises RBS::ParsingError do
+      RBS::Parser.parse_signature(buffer("class M self.5"))
+    end.tap do |exn|
+      assert_equal <<~DETAILED_MESSAGE, exn.detailed_message
+        test.rbs:1:13...1:14: Syntax error: unexpected token for class instance variable name, token=`5` (tINTEGER) (RBS::ParsingError)
+
+          class M self.5
+                       ^
+      DETAILED_MESSAGE
+    end
+  end
+
   def test_parse_type_with_parsing_error_detailed_message
     omit "Exception#detailed_message does not supported" unless Exception.method_defined?(:detailed_message)
 

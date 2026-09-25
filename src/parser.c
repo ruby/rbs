@@ -2350,7 +2350,7 @@ static bool parse_variable_member(rbs_parser_t *parser, rbs_position_t comment_p
         if (parser->next_token.type == tAIDENT || parser->next_token.type == kATRBS) {
             rbs_parser_advance(parser);
         } else {
-            rbs_parser_set_error(parser, parser->current_token, false, "Unexpected error");
+            rbs_parser_set_error(parser, parser->next_token, true, "unexpected token for class instance variable name");
             return false;
         }
 
