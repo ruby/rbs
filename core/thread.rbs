@@ -856,17 +856,6 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=thread.c
-  #   - Thread.start([args]*) {|args| block }   -> thread
-  #   - Thread.fork([args]*) {|args| block }    -> thread
-  # -->
-  # Basically the same as ::new. However, if class Thread is subclassed, then
-  # calling `start` in that subclass will not invoke the subclass's `initialize`
-  # method.
-  #
-  def self.fork: (*untyped args) -> untyped
-
-  # <!--
-  #   rdoc-file=thread.c
   #   - Thread.handle_interrupt(hash) { ... } -> result of the block
   # -->
   # Changes asynchronous interrupt timing.
@@ -1164,6 +1153,17 @@ class Thread < Object
   # method.
   #
   def self.start: (*untyped args) { (?) -> void } -> instance
+
+  # <!--
+  #   rdoc-file=thread.c
+  #   - Thread.start([args]*) {|args| block }   -> thread
+  #   - Thread.fork([args]*) {|args| block }    -> thread
+  # -->
+  # Basically the same as ::new. However, if class Thread is subclassed, then
+  # calling `start` in that subclass will not invoke the subclass's `initialize`
+  # method.
+  #
+  def self.fork: (*untyped args) { (?) -> void } -> instance
 
   # <!--
   #   rdoc-file=thread.c
