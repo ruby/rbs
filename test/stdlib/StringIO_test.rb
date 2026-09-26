@@ -44,6 +44,11 @@ class StringIOSingletonTest < Test::Unit::TestCase
 
   testing 'singleton(::StringIO)'
 
+  def test_constants
+    assert_const_type "String", "StringIO::VERSION"
+    assert_const_type "Integer", "StringIO::MAX_LENGTH"
+  end
+
   def test_open
     assert_send_type "() -> ::StringIO",
                      StringIO, :open
@@ -189,5 +194,10 @@ class StringIOTypeTest < Test::Unit::TestCase
   def test_external_encoding
     assert_send_type "() -> Encoding",
                      StringIO.new("abc"), :external_encoding
+  end
+
+  def test_length
+    assert_send_type "() -> ::Integer",
+                     StringIO.new("hello"), :length
   end
 end

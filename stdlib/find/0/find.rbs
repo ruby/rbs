@@ -21,6 +21,10 @@
 #     end
 #
 module Find
+  # <!-- rdoc-file=lib/find.rb -->
+  # The version string
+  #
+  VERSION: String
   # <!--
   #   rdoc-file=lib/find.rb
   #   - find(*paths, ignore_error: true) { |path| ... }

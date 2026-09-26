@@ -50,3 +50,25 @@ class PTYSingletonTest < Test::Unit::TestCase
                      PTY, :spawn, "echo" do |r, w, pid| 1 end
   end
 end if defined?(PTY)
+
+class PTYChildExitedTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "pty"
+  testing "::PTY::ChildExited"
+
+  def test_child_exited
+    assert_const_type "Class", "PTY::ChildExited"
+  end
+
+  def test_status
+    _r, _w, pid = PTY.spawn("sleep 0.05")
+    sleep 0.1
+    begin
+      PTY.check(pid, true)
+    rescue PTY::ChildExited => ex
+      assert_send_type "() -> ::Process::Status",
+                       ex, :status
+    end
+  end
+end if defined?(PTY)

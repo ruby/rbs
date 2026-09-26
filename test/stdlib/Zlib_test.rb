@@ -75,5 +75,9 @@ class ZlibSingletonTest < Test::Unit::TestCase
     assert_send_type  "() -> ::String",
                       Zlib, :zlib_version
   end
+
+  def test_in_progress_error
+    assert_const_type "Class", "Zlib::InProgressError"
+  end
 end
 

@@ -1,6 +1,24 @@
 require_relative "test_helper"
 require 'pathname'
 
+class PathnameExtSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library 'pathname'
+  testing 'singleton(::Pathname)'
+
+  def test_version
+    assert_const_type "String", "Pathname::VERSION"
+  end
+
+  def test_mktmpdir
+    assert_send_type "() { (Pathname) -> Integer } -> Integer",
+                     Pathname, :mktmpdir do |_dir|
+      1
+    end
+  end
+end
+
 class PathnameExtInstanceTest < Test::Unit::TestCase
   include TestHelper
 
