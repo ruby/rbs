@@ -31,3 +31,13 @@ class URIWSInstanceTest < Test::Unit::TestCase
                       ws, :request_uri
   end
 end
+
+class URIWSSSingletonTest < Test::Unit::TestCase
+  include TestHelper
+  library 'uri'
+  testing 'singleton(::URI::WSS)'
+
+  def test_default_port
+    assert_const_type 'Integer', 'URI::WSS::DEFAULT_PORT'
+  end
+end

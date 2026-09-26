@@ -285,8 +285,13 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   end
 
   def test_set_authority
-    assert_send_type  '(String? user, String? password, String? host, ?Integer? port) -> untyped',
+    assert_send_type  '(String? user, String? password, String? host, ?Integer? port) -> void',
                       generic, :set_authority, 'user', 'pass', 'localhost', 80
+  end
+
+  def test_parser
+    assert_send_type  '() -> (URI::RFC2396_Parser | URI::RFC3986_Parser)',
+                      generic, :parser
   end
 
   def test_check_host
@@ -494,6 +499,16 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   def test_inspect
     assert_send_type  '() -> String',
                       generic, :inspect
+  end
+
+  def test_normalize
+    assert_send_type  '() -> URI::Generic',
+                      generic, :normalize
+  end
+
+  def test_normalize!
+    assert_send_type  '() -> void',
+                      generic.dup, :normalize!
   end
 
   def test_find_proxy

@@ -19,60 +19,63 @@ class URIRFC3986_ParserInstanceTest < Test::Unit::TestCase
   library 'uri'
   testing '::URI::RFC3986_Parser'
 
-  def setup
-    super
-    @instance = URI::RFC3986_Parser.new
-  end
-
   def test_regexp
+    parser = URI::RFC3986_Parser.new
     assert_send_type '() -> Hash[Symbol, Regexp]',
-                      @instance, :regexp
+                      parser, :regexp
   end
 
   def test_escape
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String) -> String',
-                      @instance, :escape, 'foo'
+                      parser, :escape, 'foo'
     assert_send_type '(String, Regexp) -> String',
-                      @instance, :escape, 'foo', /bar/
+                      parser, :escape, 'foo', /bar/
   end
 
   def test_extract
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String) -> Array[String]',
-                      @instance, :extract, 'foo'
+                      parser, :extract, 'foo'
     assert_send_type '(String, Array[String]) -> Array[String]',
-                      @instance, :extract, 'foo', ['http', 'https']
+                      parser, :extract, 'foo', ['http', 'https']
     assert_send_type '(String) { (String) -> untyped } -> nil',
-                      @instance, :extract, 'foo' do |s| s.bytes end
+                      parser, :extract, 'foo' do |s| s.bytes end
     assert_send_type '(String, Array[String]) { (String) -> untyped } -> nil',
-                      @instance, :extract, 'foo', ['http', 'https'] do |s| s.bytes end
+                      parser, :extract, 'foo', ['http', 'https'] do |s| s.bytes end
   end
 
   def test_join
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String, String) -> URI::Generic',
-                      @instance, :join, 'https://github.com', 'ruby/rbs'
+                      parser, :join, 'https://github.com', 'ruby/rbs'
   end
 
   def test_make_regexp
+    parser = URI::RFC3986_Parser.new
     assert_send_type '() -> Regexp',
-                      @instance, :make_regexp
+                      parser, :make_regexp
     assert_send_type '(Array[String]) -> Regexp',
-                      @instance, :make_regexp, ['http', 'https']
+                      parser, :make_regexp, ['http', 'https']
   end
 
   def test_parse
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String) -> URI::Generic',
-                      @instance, :parse, 'https://github.com'
+                      parser, :parse, 'https://github.com'
   end
 
   def test_split
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String) -> [String?, String?, String?, String?, String?, String?, String?, String?, String?]',
-                      @instance, :split, 'https://github.com'
+                      parser, :split, 'https://github.com'
   end
 
   def test_unescape
+    parser = URI::RFC3986_Parser.new
     assert_send_type '(String) -> String',
-                      @instance, :unescape, 'foo'
+                      parser, :unescape, 'foo'
     assert_send_type '(String, Regexp) -> String',
-                      @instance, :unescape, 'foo', /bar/
+                      parser, :unescape, 'foo', /bar/
   end
 end
