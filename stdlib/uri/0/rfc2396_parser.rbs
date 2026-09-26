@@ -4,6 +4,25 @@ module URI
   # Includes URI::REGEXP::PATTERN
   #
   module RFC2396_REGEXP
+    module PATTERN
+      ALNUM: String
+
+      ALPHA: String
+
+      DOMLABEL: String
+
+      ESCAPED: String
+
+      HEX: String
+
+      HOSTNAME: String
+
+      RESERVED: String
+
+      TOPLABEL: String
+
+      UNRESERVED: String
+    end
   end
 
   # <!-- rdoc-file=lib/uri/rfc2396_parser.rb -->

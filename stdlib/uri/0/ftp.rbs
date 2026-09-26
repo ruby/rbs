@@ -9,5 +9,35 @@ module URI
   # https://datatracker.ietf.org/doc/html/draft-hoffman-ftp-uri-04
   #
   class FTP < Generic
+    # A Default port of 21 for URI::FTP.
+    #
+    DEFAULT_PORT: Integer
+
+    # An Array of the available components for URI::FTP.
+    #
+    COMPONENT: Array[Symbol]
+
+    # Typecode is "a", "i", or "d".
+    #
+    # * "a" indicates a text file (the FTP command was ASCII)
+    # * "i" indicates a binary file (FTP command IMAGE)
+    # * "d" indicates the contents of a directory should be displayed
+    #
+    TYPECODE: Array[String]
+
+    # Typecode prefix ";type=".
+    #
+    TYPECODE_PREFIX: String
+
+    def self.build: (Array[String | Integer | nil] args) -> instance
+                  | ({ ?userinfo: String?, ?host: String?, ?port: Integer?, ?path: String?, ?typecode: String? }) -> instance
+
+    def path: () -> String
+
+    def set_typecode: (String? v) -> untyped
+
+    def typecode: () -> String?
+
+    def typecode=: (String? typecode) -> String?
   end
 end

@@ -9,5 +9,17 @@ module URI
   # <URL:http://support.microsoft.com/kb/834489>.
   #
   class WS < Generic
+    # A Default port of 80 for URI::WS.
+    #
+    DEFAULT_PORT: Integer
+
+    # An Array of the available components for URI::WS.
+    #
+    COMPONENT: Array[Symbol]
+
+    def self.build: (Array[String | Integer | nil] args) -> instance
+                  | ({ ?userinfo: String?, ?host: String?, ?port: Integer?, ?path: String?, ?query: String? }) -> instance
+
+    def request_uri: () -> String?
   end
 end

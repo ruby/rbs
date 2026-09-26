@@ -269,6 +269,26 @@ class URIGenericInstanceTest < Test::Unit::TestCase
                       generic, :password
   end
 
+  def test_authority
+    assert_send_type  '() -> [ String?, String?, String?, Integer? ]?',
+                      generic, :authority
+  end
+
+  def test_decoded_user
+    assert_send_type  '() -> String?',
+                      generic, :decoded_user
+  end
+
+  def test_decoded_password
+    assert_send_type  '() -> String?',
+                      generic, :decoded_password
+  end
+
+  def test_set_authority
+    assert_send_type  '(String? user, String? password, String? host, ?Integer? port) -> untyped',
+                      generic, :set_authority, 'user', 'pass', 'localhost', 80
+  end
+
   def test_check_host
     assert_send_type  '(String v) -> (String | true)',
                       generic, :check_host, 'localhost'
@@ -380,6 +400,11 @@ class URIGenericInstanceTest < Test::Unit::TestCase
                       generic, :absolute?
   end
 
+  def test_absolute
+    assert_send_type  '() -> bool',
+                      generic, :absolute
+  end
+
   def test_relative?
     assert_send_type  '() -> bool',
                       generic, :relative?
@@ -415,6 +440,11 @@ class URIGenericInstanceTest < Test::Unit::TestCase
                       generic, :route_from, 'http://localhost'
   end
 
+  def test_minus
+    assert_send_type  '(String oth) -> URI::Generic',
+                      generic, :-, 'http://localhost'
+  end
+
   def test_route_to
     assert_send_type  '(String oth) -> URI::Generic',
                       generic, :route_to, 'http://localhost/foo/bar'
@@ -423,6 +453,11 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   def test_to_s
     assert_send_type  '() -> String',
                       generic, :to_s
+  end
+
+  def test_to_str
+    assert_send_type  '() -> String',
+                      generic, :to_str
   end
 
   def test_equal_equal

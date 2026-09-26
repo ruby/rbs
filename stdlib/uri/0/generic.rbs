@@ -528,6 +528,40 @@ module URI
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
+    #   - authority()
+    # -->
+    # Returns the authority info (array of user, password, host and
+    # port), if any is set.  Or returns +nil+.
+    #
+    def authority: () -> [ String?, String?, String?, Integer? ]?
+
+    # <!--
+    #   rdoc-file=lib/uri/generic.rb
+    #   - decoded_user()
+    # -->
+    # Returns the user component after URI decoding.
+    #
+    def decoded_user: () -> String?
+
+    # <!--
+    #   rdoc-file=lib/uri/generic.rb
+    #   - decoded_password()
+    # -->
+    # Returns the password component after URI decoding.
+    #
+    def decoded_password: () -> String?
+
+    # <!--
+    #   rdoc-file=lib/uri/generic.rb
+    #   - set_authority(user, password, host, port = nil)
+    # -->
+    # Protected setter for the authority info (+user+, +password+, +host+
+    # and +port+).  If +port+ is +nil+, +default_port+ will be set.
+    #
+    def set_authority: (String? user, String? password, String? host, ?Integer? port) -> untyped
+
+    # <!--
+    #   rdoc-file=lib/uri/generic.rb
     #   - check_host(v)
     # -->
     # Checks the host `v` component for RFC2396 compliance and against the `parser`
@@ -835,6 +869,8 @@ module URI
     #
     def absolute?: () -> bool
 
+    alias absolute absolute?
+
     # <!--
     #   rdoc-file=lib/uri/generic.rb
     #   - relative?()
@@ -939,7 +975,9 @@ module URI
     #     uri.route_from('http://my.example.com')
     #     #=> #<URI::Generic /main.rbx?page=1>
     #
-    def route_from: (String oth) -> URI::Generic
+    def route_from: (String | URI::Generic oth) -> URI::Generic
+
+    alias - route_from
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -963,7 +1001,7 @@ module URI
     #     uri.route_to('http://my.example.com/main.rbx?page=1')
     #     #=> #<URI::Generic /main.rbx?page=1>
     #
-    def route_to: (String oth) -> URI::Generic
+    def route_to: (String | URI::Generic oth) -> URI::Generic
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -998,6 +1036,8 @@ module URI
     # Constructs String from URI.
     #
     def to_s: () -> String
+
+    alias to_str to_s
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb

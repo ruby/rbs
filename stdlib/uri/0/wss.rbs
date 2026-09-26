@@ -5,5 +5,8 @@ module URI
   # 'ws:'. Other than that, WSS URIs are identical to WS URIs; see URI::WS.
   #
   class WSS < WS
+    # A Default port of 443 for URI::WSS.
+    #
+    DEFAULT_PORT: Integer
   end
 end
