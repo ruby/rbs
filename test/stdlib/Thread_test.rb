@@ -50,6 +50,11 @@ class ThreadSingletonTest < Test::Unit::TestCase
                      Sub, :fork do 1 end
   end
 
+  def test_kill
+    sub = Sub.new {}
+    assert_send_type "(ThreadSingletonTest::Sub) -> ThreadSingletonTest::Sub", Sub, :kill, sub
+  end
+
   def test_each_caller_location
     assert_send_type(
       "() { (Thread::Backtrace::Location) -> Integer } -> nil",
@@ -176,6 +181,10 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :exit
   end
 
+  def test_terminate
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
+  end
+
   def test_join
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :join
     assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
@@ -184,10 +193,6 @@ class ThreadTest < Test::Unit::TestCase
 
   def test_run
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :run
-  end
-
-  def test_terminate
-    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
   end
 
   def test_wakeup
