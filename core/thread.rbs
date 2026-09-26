@@ -270,7 +270,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def kill: () -> self?
+  def kill: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -346,7 +346,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def exit: () -> self?
+  def exit: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -676,7 +676,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def terminate: () -> self?
+  def terminate: () -> self
 
   # <!--
   #   rdoc-file=thread.c

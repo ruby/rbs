@@ -176,6 +176,10 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :exit
   end
 
+  def test_terminate
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
+  end
+
   def test_join
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :join
     assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
@@ -184,10 +188,6 @@ class ThreadTest < Test::Unit::TestCase
 
   def test_run
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :run
-  end
-
-  def test_terminate
-    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
   end
 
   def test_wakeup
