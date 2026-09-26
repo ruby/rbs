@@ -115,6 +115,10 @@ end
 module URI
   include URI::RFC2396_REGEXP
 
+  module Util
+    def self?.make_components_hash: (singleton(Generic) klass, (Array[untyped] | Hash[Symbol, untyped]) array_hash) -> Hash[Symbol, untyped]
+  end
+
   # <!--
   #   rdoc-file=lib/uri/common.rb
   #   - decode_uri_component(str, enc=Encoding::UTF_8)
@@ -434,6 +438,14 @@ module URI
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
+  #   - parser=(parser = RFC3986_PARSER)
+  # -->
+  # Set the default parser instance.
+  #
+  def self.parser=: (URI::RFC2396_Parser | URI::RFC3986_Parser parser) -> void
+
+  # <!--
+  #   rdoc-file=lib/uri/common.rb
   #   - regexp(schemes = nil)
   # -->
   # ## Synopsis
@@ -469,6 +481,21 @@ module URI
   #     end
   #
   def self.regexp: (?Array[String]? schemes) -> Regexp
+
+  # <!--
+  #   rdoc-file=lib/uri/common.rb
+  #   - register_scheme(scheme, klass)
+  # -->
+  # Registers the given `klass` as the class to be instantiated when parsing a
+  # URI with the given `scheme`:
+  #
+  #     URI.register_scheme('MS_SEARCH', URI::Generic) # => URI::Generic
+  #     URI.scheme_list['MS_SEARCH']                   # => URI::Generic
+  #
+  # Note that after calling String#upcase on `scheme`, it must be a valid
+  # constant name.
+  #
+  def self.register_scheme: (String scheme, singleton(URI::Generic) klass) -> singleton(URI::Generic)
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
@@ -546,7 +573,7 @@ URI::ABS_URI_REF: Regexp
 # <!-- rdoc-file=lib/uri/common.rb -->
 # The default parser instance.
 #
-URI::DEFAULT_PARSER: URI::RFC2396_Parser
+URI::DEFAULT_PARSER: URI::RFC2396_Parser | URI::RFC3986_Parser
 
 URI::ESCAPED: Regexp
 
@@ -555,6 +582,10 @@ URI::FRAGMENT: Regexp
 URI::HOST: Regexp
 
 URI::OPAQUE: Regexp
+
+URI::PARSER: URI::RFC2396_Parser | URI::RFC3986_Parser
+
+URI::Parser: singleton(URI::RFC2396_Parser) | singleton(URI::RFC3986_Parser)
 
 URI::PORT: Regexp
 
@@ -581,6 +612,8 @@ URI::RFC3986_PARSER: URI::RFC3986_Parser
 URI::SCHEME: Regexp
 
 URI::TBLDECWWWCOMP_: Hash[String, String]
+
+URI::TBLENCURICOMP_: Hash[String, String]
 
 URI::TBLENCWWWCOMP_: Hash[String, String]
 

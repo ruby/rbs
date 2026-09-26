@@ -24,6 +24,12 @@ module URI
     #
     SCOPE: Array[String]
 
+    SCOPE_BASE: String
+
+    SCOPE_ONE: String
+
+    SCOPE_SUB: String
+
     # <!--
     #   rdoc-file=lib/uri/ldap.rb
     #   - build(args)
@@ -201,7 +207,7 @@ module URI
     # -->
     # Returns extensions.
     #
-    def extensions: () -> untyped
+    def extensions: () -> String?
 
     # <!--
     #   rdoc-file=lib/uri/ldap.rb

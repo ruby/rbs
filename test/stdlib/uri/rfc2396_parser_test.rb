@@ -11,6 +11,17 @@ class URIRFC2396_ParserSingletonTest < Test::Unit::TestCase
     assert_send_type  "() -> URI::RFC2396_Parser",
                       URI::RFC2396_Parser, :new
   end
+
+  def test_to_s_constant
+    assert_instance_of UnboundMethod, URI::RFC2396_Parser::TO_S
+  end
+
+  def test_pattern_constants
+    assert_instance_of String, URI::RFC2396_REGEXP::PATTERN::ABS_PATH
+    assert_instance_of String, URI::RFC2396_REGEXP::PATTERN::ABS_URI
+    assert_instance_of String, URI::RFC2396_REGEXP::PATTERN::QUERY
+    assert_instance_of String, URI::RFC2396_REGEXP::PATTERN::PORT
+  end
 end
 
 class URIRFC2396_ParserInstanceTest < Test::Unit::TestCase
