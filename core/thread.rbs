@@ -318,7 +318,9 @@ class Thread < Object
   # -->
   # Returns the current backtrace of the target thread.
   #
-  def backtrace: (*untyped args) -> ::Array[untyped]
+  def backtrace: %a{implicitly-returns-nil} () -> ::Array[String]
+               | %a{implicitly-returns-nil} (int start, ?int? length) -> ::Array[String]
+               | %a{implicitly-returns-nil} (range[int] range) -> ::Array[String]
 
   # <!--
   #   rdoc-file=thread.c
@@ -332,7 +334,9 @@ class Thread < Object
   # This method behaves similarly to Kernel#caller_locations except it applies to
   # a specific thread.
   #
-  def backtrace_locations: (*untyped args) -> ::Array[untyped]?
+  def backtrace_locations: %a{implicitly-returns-nil} () -> ::Array[Thread::Backtrace::Location]
+                         | %a{implicitly-returns-nil} (int start, ?int? length) -> ::Array[Thread::Backtrace::Location]
+                         | %a{implicitly-returns-nil} (range[int] range) -> ::Array[Thread::Backtrace::Location]
 
   # <!-- rdoc-file=thread.c -->
   # Terminates `thr` and schedules another thread to be run, returning the
