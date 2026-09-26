@@ -115,6 +115,10 @@ end
 module URI
   include URI::RFC2396_REGEXP
 
+  module Util
+    def self?.make_components_hash: (singleton(Generic) klass, (Array[untyped] | Hash[Symbol, untyped]) array_hash) -> Hash[Symbol, untyped]
+  end
+
   # <!--
   #   rdoc-file=lib/uri/common.rb
   #   - decode_uri_component(str, enc=Encoding::UTF_8)

@@ -32,12 +32,14 @@ module URI
     def self.build: (Array[String | Integer | nil] args) -> instance
                   | ({ ?userinfo: String?, ?host: String?, ?port: Integer?, ?path: String?, ?typecode: String? }) -> instance
 
+    def self.new2: (String? user, String? password, String? host, (String | Integer)? port, String path, ?String? typecode, ?boolish arg_check) -> instance
+
     def path: () -> String
 
-    def set_typecode: (String? v) -> untyped
+    def set_typecode: (String? v) -> void
 
     def typecode: () -> String?
 
-    def typecode=: (String? typecode) -> String?
+    def typecode=: (String typecode) -> String
   end
 end

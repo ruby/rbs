@@ -207,7 +207,7 @@ module URI
     # -->
     # Returns extensions.
     #
-    def extensions: () -> untyped
+    def extensions: () -> String?
 
     # <!--
     #   rdoc-file=lib/uri/ldap.rb

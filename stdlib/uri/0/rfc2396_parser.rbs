@@ -5,23 +5,40 @@ module URI
   #
   module RFC2396_REGEXP
     module PATTERN
+      ABS_PATH: String
+      ABS_URI: String
       ALNUM: String
-
       ALPHA: String
-
       DOMLABEL: String
-
       ESCAPED: String
-
+      FRAGMENT: String
       HEX: String
-
+      HIER_PART: String
+      HOST: String
       HOSTNAME: String
-
+      HOSTPORT: String
+      IPV4ADDR: String
+      IPV6ADDR: String
+      IPV6REF: String
+      NET_PATH: String
+      OPAQUE_PART: String
+      PATH_SEGMENTS: String
+      PORT: String
+      QUERY: String
+      REG_NAME: String
+      REL_PATH: String
+      REL_SEGMENT: String
+      REL_URI: String
       RESERVED: String
-
+      SCHEME: String
       TOPLABEL: String
-
       UNRESERVED: String
+      URIC: String
+      URIC_NO_SLASH: String
+      URI_REF: String
+      USERINFO: String
+      X_ABS_URI: String
+      X_REL_URI: String
     end
   end
 
@@ -32,6 +49,8 @@ module URI
   #
   class RFC2396_Parser
     include RFC2396_REGEXP
+
+    TO_S: UnboundMethod
 
     # <!-- rdoc-file=lib/uri/rfc2396_parser.rb -->
     # The Hash of patterns.

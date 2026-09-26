@@ -295,7 +295,7 @@ module URI
     #
     # Unless the `parser` is defined, DEFAULT_PARSER is used.
     #
-    def parser: () -> untyped
+    def parser: () -> (URI::RFC2396_Parser | URI::RFC3986_Parser)
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -558,7 +558,7 @@ module URI
     # Protected setter for the authority info (+user+, +password+, +host+
     # and +port+).  If +port+ is +nil+, +default_port+ will be set.
     #
-    def set_authority: (String? user, String? password, String? host, ?Integer? port) -> untyped
+    def set_authority: (String? user, String? password, String? host, ?Integer? port) -> void
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -1019,7 +1019,7 @@ module URI
     # *   scheme and host are converted to lowercase,
     # *   an empty path component is set to "/".
     #
-    def normalize: () -> untyped
+    def normalize: () -> self
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -1027,7 +1027,7 @@ module URI
     # -->
     # Destructive version of #normalize.
     #
-    def normalize!: () -> untyped
+    def normalize!: () -> void
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb

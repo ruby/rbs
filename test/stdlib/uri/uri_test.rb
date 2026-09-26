@@ -19,3 +19,16 @@ class URISingletonTest < Test::Unit::TestCase
     URI.parser = orig
   end
 end
+
+class URIUtilTest < Test::Unit::TestCase
+  include TestHelper
+  library 'uri'
+  testing 'singleton(::URI::Util)'
+
+  def test_make_components_hash
+    assert_send_type '(singleton(URI::Generic) klass, Array[untyped] array_hash) -> Hash[Symbol, untyped]',
+                      URI::Util, :make_components_hash, URI::Generic, ['user:pass', 'host', 80, 'registry', '/path', 'opaque', 'query', 'fragment']
+    assert_send_type '(singleton(URI::Generic) klass, Hash[Symbol, untyped] array_hash) -> Hash[Symbol, untyped]',
+                      URI::Util, :make_components_hash, URI::Generic, { host: 'example.com', path: '/' }
+  end
+end
