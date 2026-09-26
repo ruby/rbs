@@ -70,6 +70,10 @@
 # http://csrc.nist.gov/publications/PubsFIPS.html.
 #
 module Digest
+  # <!-- rdoc-file=ext/digest/lib/digest/version.rb -->
+  # The version string
+  #
+  VERSION: String
   # <!--
   #   rdoc-file=ext/digest/bubblebabble/bubblebabble.c
   #   - Digest.bubblebabble(string) -> bubblebabble_string

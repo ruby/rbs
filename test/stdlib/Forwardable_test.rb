@@ -1,6 +1,30 @@
 require_relative "test_helper"
 require "forwardable"
 
+class ForwardableSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "forwardable"
+  testing "singleton(::Forwardable)"
+
+  def test_constants
+    assert_const_type "String", "Forwardable::VERSION"
+    assert_const_type "String", "Forwardable::FORWARDABLE_VERSION"
+  end
+
+  def test_debug
+    assert_send_type "() -> boolish",
+                     Forwardable, :debug
+  end
+
+  def test_debug_assign
+    assert_send_type "(boolish) -> void",
+                     Forwardable, :debug=, true
+  ensure
+    Forwardable.debug = nil
+  end
+end
+
 class ForwardableTest < Test::Unit::TestCase
   include TestHelper
 

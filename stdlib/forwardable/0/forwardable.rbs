@@ -105,6 +105,15 @@ module Forwardable
   #
   FORWARDABLE_VERSION: String
 
+  # <!-- rdoc-file=lib/forwardable.rb -->
+  # ignored
+  #
+  def self.debug: () -> boolish
+  # <!-- rdoc-file=lib/forwardable.rb -->
+  # ignored
+  #
+  def self.debug=: (boolish) -> void
+
   # <!--
   #   rdoc-file=lib/forwardable.rb
   #   - delegate method => accessor
