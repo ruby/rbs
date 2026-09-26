@@ -64,6 +64,10 @@
 # *   Akinori MUSHA <knu@iDaemons.org> (current maintainer)
 #
 module Shellwords
+  # <!-- rdoc-file=lib/shellwords.rb -->
+  # The version number string.
+  #
+  VERSION: String
   # <!--
   #   rdoc-file=lib/shellwords.rb
   #   - shellescape(str)
