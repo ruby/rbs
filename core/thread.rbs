@@ -856,7 +856,7 @@ class Thread < Object
   #
   # If this is the main thread, or the last  thread, exit the process.
   #
-  def self.exit: () -> untyped
+  def self.exit: () -> Thread
 
   # <!--
   #   rdoc-file=thread.c
@@ -985,7 +985,7 @@ class Thread < Object
   #     count            #=> 93947
   #     a.alive?         #=> false
   #
-  def self.kill: (Thread thread) -> untyped
+  def self.kill: (Thread thread) -> Thread
 
   # <!--
   #   rdoc-file=thread.c

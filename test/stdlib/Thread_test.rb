@@ -50,6 +50,11 @@ class ThreadSingletonTest < Test::Unit::TestCase
                      Sub, :fork do 1 end
   end
 
+  def test_kill
+    sub = Sub.new {}
+    assert_send_type "(ThreadSingletonTest::Sub) -> ThreadSingletonTest::Sub", Sub, :kill, sub
+  end
+
   def test_each_caller_location
     assert_send_type(
       "() { (Thread::Backtrace::Location) -> Integer } -> nil",
