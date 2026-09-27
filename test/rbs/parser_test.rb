@@ -454,6 +454,19 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal :hello, RBS::Parser.parse_type(buffer(':hello')).literal
   end
 
+  def test_parse_string_escape_sequences
+    {
+      %q{"\8\9"} => "89",
+      %q{"\78"} => "\a8",
+      %q{"\1234"} => "S4",
+      %q{"\xa"} => "\n",
+      %q{"\x41"} => "A",
+      %q{"before\qafter"} => "beforeqafter"
+    }.each do |source, expected|
+      assert_equal expected, RBS::Parser.parse_type(buffer(source)).literal, source
+    end
+  end
+
   def test_parse_comment
     RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
         # Hello
