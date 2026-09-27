@@ -88,7 +88,7 @@ module RBS
 
       def is_accessibility?: (decl) -> bool
 
-      def find_def_index_by_name: (Array[decl] decls, Symbol name) -> [Integer, AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrWriter]?
+      def find_def_index_by_name: (Array[decl] decls, Symbol name) -> [Integer, AST::Members::MethodDefinition | AST::Members::AttrReader | AST::Members::AttrWriter | AST::Members::AttrAccessor]?
 
       def build_attribute_member: (singleton(AST::Members::AttrReader) | singleton(AST::Members::AttrWriter) klass, AST::Members::AttrAccessor member) -> (AST::Members::AttrReader | AST::Members::AttrWriter)
 

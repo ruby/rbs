@@ -8,6 +8,25 @@ class RBS::RbPrototypeTest < Test::Unit::TestCase
 
   include TestHelper
 
+  def test_partial_accessor_visibility
+    { "value=" => ["writer", "reader"], "value" => ["reader", "writer"] }.each do |method, (private_kind, public_kind)|
+      parser = RB.new
+      parser.parse("class Example\n  attr_accessor :value\n  private :#{method}\nend\n")
+
+      assert_write parser.decls, <<~RBS
+        class Example
+          private
+
+          attr_#{private_kind} value: untyped
+
+          public
+
+          attr_#{public_kind} value: untyped
+        end
+      RBS
+    end
+  end
+
   def test_class_module
     parser = RB.new
 
