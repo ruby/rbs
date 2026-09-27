@@ -322,7 +322,8 @@ module RBS
                         reader = build_attribute_member(AST::Members::AttrReader, defn)
                         writer = build_attribute_member(AST::Members::AttrWriter, defn)
                         targeted, remaining = name == defn.name ? [reader, writer] : [writer, reader]
-                        decls[i, 1] = [targeted, remaining]
+                        decls[i] = targeted
+                        decls.insert(i + 1, remaining)
                       end
 
                       decls.insert(i + 1, current)
