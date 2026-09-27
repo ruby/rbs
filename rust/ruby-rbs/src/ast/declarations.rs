@@ -3,7 +3,7 @@ use crate::ast::comment::Comment;
 use crate::ast::location::{
     AliasDeclarationLocation, ClassDeclarationLocation, ClassSuperLocation,
     ConstantDeclarationLocation, GlobalDeclarationLocation, InterfaceDeclarationLocation,
-    ModuleDeclarationLocation, ModuleSelfLocation, TypeAliasDeclarationLocation,
+    LocationRange, ModuleDeclarationLocation, ModuleSelfLocation, TypeAliasDeclarationLocation,
 };
 use crate::ast::members::Member;
 use crate::ast::type_param::TypeParam;
@@ -20,6 +20,22 @@ pub enum Declaration {
     TypeAlias(TypeAliasDeclaration),
     ClassAlias(ClassAliasDeclaration),
     ModuleAlias(ModuleAliasDeclaration),
+}
+
+impl Declaration {
+    #[must_use]
+    pub(crate) fn location_range(&self) -> Option<LocationRange> {
+        match self {
+            Declaration::Class(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Module(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Interface(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Constant(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Global(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::TypeAlias(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::ClassAlias(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::ModuleAlias(d) => d.location.as_ref().map(|l| l.range),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]

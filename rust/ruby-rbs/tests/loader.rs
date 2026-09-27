@@ -128,6 +128,26 @@ fn parse_errors_carry_the_file_path() {
 }
 
 #[test]
+fn duplicated_declarations_are_reported_as_load_errors() {
+    let dir = tree(&[
+        ("a.rbs", "interface _I\nend\n"),
+        ("b.rbs", "interface _I\nend\n"),
+    ]);
+
+    let loader = EnvironmentLoader::new(None).add_dir(dir.path().to_path_buf());
+    let Err(error) = Environment::from_loader(&loader) else {
+        panic!("expected a duplicated-declaration error");
+    };
+
+    let LoadError::DuplicatedDeclaration(inner) = &error else {
+        panic!("expected LoadError::DuplicatedDeclaration, got {error:?}");
+    };
+    assert_eq!(error.to_string(), inner.to_string());
+    // Transparent wrapper: the message is not repeated as a source.
+    assert!(std::error::Error::source(&error).is_none());
+}
+
+#[test]
 fn loaded_sources_carry_converted_declarations_and_directives() {
     let dir = tree(&[(
         "person.rbs",
