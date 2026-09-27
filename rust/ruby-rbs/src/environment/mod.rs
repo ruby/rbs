@@ -1,7 +1,15 @@
+mod decl;
+mod entry;
+mod error;
+mod insert;
 pub mod source;
 
+pub use decl::DeclId;
+pub use entry::SingleEntry;
+pub use error::{DuplicatedDecl, DuplicatedDeclarationError};
 pub use source::{Source, SourceKind};
 
+use crate::ids::{IdIndexMap, TypeNameTag};
 use crate::interners::Interners;
 use crate::loader::{EnvironmentLoader, LoadError};
 
@@ -12,6 +20,7 @@ use crate::loader::{EnvironmentLoader, LoadError};
 pub struct Environment {
     interners: Interners,
     sources: Vec<Source>,
+    interface_decls: IdIndexMap<TypeNameTag, SingleEntry>,
 }
 
 impl Environment {
@@ -30,10 +39,6 @@ impl Environment {
 
     pub(crate) fn interners_mut(&mut self) -> &mut Interners {
         &mut self.interners
-    }
-
-    pub(crate) fn add_source(&mut self, source: Source) {
-        self.sources.push(source);
     }
 
     pub fn from_loader(loader: &EnvironmentLoader) -> Result<Environment, LoadError> {
