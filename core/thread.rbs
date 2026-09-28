@@ -171,6 +171,37 @@ class Thread < Object
 
   # <!--
   #   rdoc-file=thread.c
+  #   - Thread.ignore_deadlock -> true or false
+  # -->
+  # Returns the status of the global ``ignore deadlock'' condition. The default is
+  # `false`, so that deadlock conditions are not ignored.
+  #
+  # See also ::ignore_deadlock=.
+  #
+  def self.ignore_deadlock: () -> bool
+
+  # <!--
+  #   rdoc-file=thread.c
+  #   - Thread.ignore_deadlock = boolean   -> true or false
+  # -->
+  # Returns the new state. When set to `true`, the VM will not check for deadlock
+  # conditions. It is only useful to set this if your application can break a
+  # deadlock condition via some other means, such as a signal.
+  #
+  #     Thread.ignore_deadlock = true
+  #     queue = Thread::Queue.new
+  #
+  #     trap(:SIGUSR1){queue.push "Received signal"}
+  #
+  #     # raises fatal error unless ignoring deadlock
+  #     puts queue.pop
+  #
+  # See also ::ignore_deadlock.
+  #
+  def self.ignore_deadlock=: (bool) -> bool
+
+  # <!--
+  #   rdoc-file=thread.c
   #   - thr[sym]   -> obj or nil
   # -->
   # Attribute Reference---Returns the value of a fiber-local variable (current
