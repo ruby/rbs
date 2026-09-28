@@ -9,5 +9,133 @@ module URI
   # https://datatracker.ietf.org/doc/html/draft-hoffman-ftp-uri-04
   #
   class FTP < Generic
+    # <!-- rdoc-file=lib/uri/ftp.rb -->
+    # A Default port of 21 for URI::FTP.
+    #
+    DEFAULT_PORT: Integer
+
+    # <!-- rdoc-file=lib/uri/ftp.rb -->
+    # An Array of the available components for URI::FTP.
+    #
+    COMPONENT: Array[Symbol]
+
+    # <!-- rdoc-file=lib/uri/ftp.rb -->
+    # Typecode is "a", "i", or "d".
+    #
+    # *   "a" indicates a text file (the FTP command was ASCII)
+    # *   "i" indicates a binary file (FTP command IMAGE)
+    # *   "d" indicates the contents of a directory should be displayed
+    #
+    TYPECODE: Array[String]
+
+    # <!-- rdoc-file=lib/uri/ftp.rb -->
+    # Typecode prefix ";type=".
+    #
+    TYPECODE_PREFIX: String
+
+    # <!--
+    #   rdoc-file=lib/uri/ftp.rb
+    #   - build(args)
+    # -->
+    # ## Description
+    #
+    # Creates a new URI::FTP object from components, with syntax checking.
+    #
+    # The components accepted are `userinfo`, `host`, `port`, `path`, and
+    # `typecode`.
+    #
+    # The components should be provided either as an Array, or as a Hash with keys
+    # formed by preceding the component names with a colon.
+    #
+    # If an Array is used, the components must be passed in the order
+    # <code>[userinfo, host, port, path, typecode]</code>.
+    #
+    # If the path supplied is absolute, it will be escaped in order to make it
+    # absolute in the URI.
+    #
+    # Examples:
+    #
+    #     require 'uri'
+    #
+    #     uri1 = URI::FTP.build(['user:password', 'ftp.example.com', nil,
+    #       '/path/file.zip', 'i'])
+    #     uri1.to_s  # => "ftp://user:password@ftp.example.com/%2Fpath/file.zip;type=i"
+    #
+    #     uri2 = URI::FTP.build({:host => 'ftp.example.com',
+    #       :path => 'ruby/src'})
+    #     uri2.to_s  # => "ftp://ftp.example.com/ruby/src"
+    #
+    def self.build: (Array[String | Integer | nil] args) -> instance
+                  | ({ ?userinfo: String?, ?host: String?, ?port: Integer?, ?path: String?, ?typecode: String? }) -> instance
+
+    def self.new2: (String? user, String? password, String? host, (String | Integer)? port, String path, ?String? typecode, ?boolish arg_check) -> instance
+
+    # <!--
+    #   rdoc-file=lib/uri/ftp.rb
+    #   - path()
+    # -->
+    # Returns the path from an FTP URI.
+    #
+    # RFC 1738 specifically states that the path for an FTP URI does not include the
+    # / which separates the URI path from the URI host. Example:
+    #
+    # <code>ftp://ftp.example.com/pub/ruby</code>
+    #
+    # The above URI indicates that the client should connect to ftp.example.com then
+    # cd to pub/ruby from the initial login directory.
+    #
+    # If you want to cd to an absolute directory, you must include an escaped /
+    # (%2F) in the path. Example:
+    #
+    # <code>ftp://ftp.example.com/%2Fpub/ruby</code>
+    #
+    # This method will then return "/pub/ruby".
+    #
+    def path: () -> String
+
+    # <!--
+    #   rdoc-file=lib/uri/ftp.rb
+    #   - set_typecode(v)
+    # -->
+    # Private setter for the typecode `v`.
+    #
+    # See also URI::FTP.typecode=.
+    #
+    def set_typecode: (String? v) -> void
+
+    # <!-- rdoc-file=lib/uri/ftp.rb -->
+    # typecode accessor.
+    #
+    # See URI::FTP::COMPONENT.
+    #
+    def typecode: () -> String?
+
+    # <!--
+    #   rdoc-file=lib/uri/ftp.rb
+    #   - typecode=(typecode)
+    # -->
+    # ## Args
+    #
+    # `v`
+    # :   String
+    #
+    #
+    # ## Description
+    #
+    # Public setter for the typecode `v` (with validation).
+    #
+    # See also URI::FTP.check_typecode.
+    #
+    # ## Usage
+    #
+    #     require 'uri'
+    #
+    #     uri = URI.parse("ftp://john@ftp.example.com/my_file.img")
+    #     #=> #<URI::FTP ftp://john@ftp.example.com/my_file.img>
+    #     uri.typecode = "i"
+    #     uri
+    #     #=> #<URI::FTP ftp://john@ftp.example.com/my_file.img;type=i>
+    #
+    def typecode=: (String typecode) -> String
   end
 end

@@ -139,6 +139,25 @@ class URISingletonTest < Test::Unit::TestCase
     assert_send_type "(String) -> URI::Generic",
                      Kernel, :URI, "http://example.com"
   end
+
+  def test_register_scheme
+    assert_send_type '(String scheme, singleton(URI::Generic) klass) -> singleton(URI::Generic)',
+                      URI, :register_scheme, 'TEST_SCHEME', URI::Generic
+  end
+
+  def test_parser_constants
+    assert_const_type "URI::RFC3986_Parser", "URI::DEFAULT_PARSER"
+    assert_const_type "URI::RFC3986_Parser", "URI::PARSER"
+    assert_const_type "singleton(URI::RFC3986_Parser)", "URI::Parser"
+  end
+
+  def test_parser=
+    orig = URI::DEFAULT_PARSER
+    assert_send_type '(URI::RFC3986_Parser parser) -> void',
+                      URI, :parser=, orig
+  ensure
+    URI.parser = orig
+  end
 end
 
 class URIInstanceTest < Test::Unit::TestCase
@@ -164,5 +183,18 @@ class URIInstanceTest < Test::Unit::TestCase
       "() -> String",
       uri, :fragment
     )
+  end
+end
+
+class URIUtilTest < Test::Unit::TestCase
+  include TestHelper
+  library "uri"
+  testing "singleton(::URI::Util)"
+
+  def test_make_components_hash
+    assert_send_type "(singleton(URI::Generic) klass, Array[untyped] array_hash) -> Hash[Symbol, untyped]",
+                     URI::Util, :make_components_hash, URI::Generic, ["user:pass", "host", 80, "registry", "/path", "opaque", "query", "fragment"]
+    assert_send_type "(singleton(URI::Generic) klass, Hash[Symbol, untyped] array_hash) -> Hash[Symbol, untyped]",
+                     URI::Util, :make_components_hash, URI::Generic, { host: "example.com", path: "/" }
   end
 end

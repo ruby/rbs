@@ -9,5 +9,60 @@ module URI
   # <URL:http://support.microsoft.com/kb/834489>.
   #
   class WS < Generic
+    # <!-- rdoc-file=lib/uri/ws.rb -->
+    # A Default port of 80 for URI::WS.
+    #
+    DEFAULT_PORT: Integer
+
+    # <!-- rdoc-file=lib/uri/ws.rb -->
+    # An Array of the available components for URI::WS.
+    #
+    COMPONENT: Array[Symbol]
+
+    # <!--
+    #   rdoc-file=lib/uri/ws.rb
+    #   - build(args)
+    # -->
+    # ## Description
+    #
+    # Creates a new URI::WS object from components, with syntax checking.
+    #
+    # The components accepted are userinfo, host, port, path, and query.
+    #
+    # The components should be provided either as an Array, or as a Hash with keys
+    # formed by preceding the component names with a colon.
+    #
+    # If an Array is used, the components must be passed in the order
+    # <code>[userinfo, host, port, path, query]</code>.
+    #
+    # Example:
+    #
+    #     uri = URI::WS.build(host: 'www.example.com', path: '/foo/bar')
+    #
+    #     uri = URI::WS.build([nil, "www.example.com", nil, "/path", "query"])
+    #
+    # Currently, if passed userinfo components this method generates invalid WS URIs
+    # as per RFC 1738.
+    #
+    def self.build: (Array[String | Integer | nil] args) -> instance
+                  | ({ ?userinfo: String?, ?host: String?, ?port: Integer?, ?path: String?, ?query: String? }) -> instance
+
+    # <!--
+    #   rdoc-file=lib/uri/ws.rb
+    #   - request_uri()
+    # -->
+    # ## Description
+    #
+    # Returns the full path for a WS URI, as required by Net::HTTP::Get.
+    #
+    # If the URI contains a query, the full path is URI#path + '?' + URI#query.
+    # Otherwise, the path is simply URI#path.
+    #
+    # Example:
+    #
+    #     uri = URI::WS.build(path: '/foo/bar', query: 'test=true')
+    #     uri.request_uri #  => "/foo/bar?test=true"
+    #
+    def request_uri: () -> String?
   end
 end
