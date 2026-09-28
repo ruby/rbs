@@ -145,9 +145,15 @@ class URISingletonTest < Test::Unit::TestCase
                       URI, :register_scheme, 'TEST_SCHEME', URI::Generic
   end
 
+  def test_parser_constants
+    assert_const_type "URI::RFC3986_Parser", "URI::DEFAULT_PARSER"
+    assert_const_type "URI::RFC3986_Parser", "URI::PARSER"
+    assert_const_type "singleton(URI::RFC3986_Parser)", "URI::Parser"
+  end
+
   def test_parser=
     orig = URI::DEFAULT_PARSER
-    assert_send_type '(URI::RFC2396_Parser | URI::RFC3986_Parser parser) -> void',
+    assert_send_type '(URI::RFC3986_Parser parser) -> void',
                       URI, :parser=, orig
   ensure
     URI.parser = orig

@@ -295,7 +295,7 @@ module URI
     #
     # Unless the `parser` is defined, DEFAULT_PARSER is used.
     #
-    def parser: () -> (URI::RFC2396_Parser | URI::RFC3986_Parser)
+    def parser: () -> URI::RFC3986_Parser
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb

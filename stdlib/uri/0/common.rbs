@@ -442,7 +442,7 @@ module URI
   # -->
   # Set the default parser instance.
   #
-  def self.parser=: (URI::RFC2396_Parser | URI::RFC3986_Parser parser) -> void
+  def self.parser=: (URI::RFC3986_Parser parser) -> void
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
@@ -573,7 +573,7 @@ URI::ABS_URI_REF: Regexp
 # <!-- rdoc-file=lib/uri/common.rb -->
 # The default parser instance.
 #
-URI::DEFAULT_PARSER: URI::RFC2396_Parser | URI::RFC3986_Parser
+URI::DEFAULT_PARSER: URI::RFC3986_Parser
 
 URI::ESCAPED: Regexp
 
@@ -583,9 +583,9 @@ URI::HOST: Regexp
 
 URI::OPAQUE: Regexp
 
-URI::PARSER: URI::RFC2396_Parser | URI::RFC3986_Parser
+URI::PARSER: URI::RFC3986_Parser
 
-URI::Parser: singleton(URI::RFC2396_Parser) | singleton(URI::RFC3986_Parser)
+URI::Parser: singleton(URI::RFC3986_Parser)
 
 URI::PORT: Regexp
 

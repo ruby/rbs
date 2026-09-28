@@ -13,14 +13,6 @@ class URIFTPSingletonTest < Test::Unit::TestCase
     assert_send_type '({ host: String, path: String }) -> URI::FTP',
                       URI::FTP, :build, { host: 'ftp.example.com', path: '/path/to/file' }
   end
-
-  def test_new2
-    assert_respond_to URI::FTP, :new2
-    omit "URI::FTP.new2 raises NoMethodError in Ruby implementation (Bug #7301)"
-
-    assert_send_type '(String user, String password, String host, Integer port, String path, String typecode, boolish arg_check) -> URI::FTP',
-                      URI::FTP, :new2, 'user', 'pass', 'ftp.example.com', 21, '/path/to/file', 'i', true
-  end
 end
 
 class URIFTPInstanceTest < Test::Unit::TestCase

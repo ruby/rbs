@@ -290,7 +290,7 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   end
 
   def test_parser
-    assert_send_type  '() -> (URI::RFC2396_Parser | URI::RFC3986_Parser)',
+    assert_send_type  '() -> URI::RFC3986_Parser',
                       generic, :parser
   end
 
