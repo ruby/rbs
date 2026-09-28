@@ -98,11 +98,6 @@ class IPAddr
   #
   def ==: (untyped other) -> bool
 
-  # <!--
-  #   rdoc-file=lib/ipaddr.rb
-  #   - ===(other)
-  # -->
-  #
   alias === include?
 
   # <!--

@@ -72,18 +72,19 @@ enum RBSTokenType {
     kRETURN,       /* return */
     kMODULESELF,   /* module-self */
 
-    tLIDENT,    /* Identifiers starting with lower case */
-    tUIDENT,    /* Identifiers starting with upper case */
-    tULIDENT,   /* Identifiers starting with `_` followed by upper case */
-    tULLIDENT,  /* Identifiers starting with `_` followed by lower case */
-    tGIDENT,    /* Identifiers starting with `$` */
-    tAIDENT,    /* Identifiers starting with `@` */
-    tA2IDENT,   /* Identifiers starting with `@@` */
-    tBANGIDENT, /* Identifiers ending with `!` */
-    tEQIDENT,   /* Identifiers ending with `=` */
-    tQIDENT,    /* Quoted identifier */
-    pAREF_OPR,  /* [] */
-    tOPERATOR,  /* Operator identifier */
+    tLIDENT,        /* Identifiers starting with lower case */
+    tUIDENT,        /* Identifiers starting with upper case */
+    tULIDENT,       /* Identifiers starting with `_` followed by upper case */
+    tULLIDENT,      /* Identifiers starting with `_` followed by lower case */
+    tNONASCIIIDENT, /* Identifiers starting with a character outside ASCII */
+    tGIDENT,        /* Identifiers starting with `$` */
+    tAIDENT,        /* Identifiers starting with `@` */
+    tA2IDENT,       /* Identifiers starting with `@@` */
+    tBANGIDENT,     /* Identifiers ending with `!` */
+    tEQIDENT,       /* Identifiers ending with `=` */
+    tQIDENT,        /* Quoted identifier */
+    pAREF_OPR,      /* [] */
+    tOPERATOR,      /* Operator identifier */
 
     tCOMMENT,       /* Comment */
     tLINECOMMENT,   /* Comment of all line */

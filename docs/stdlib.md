@@ -15,6 +15,14 @@ $ bundle exec rake 'generate:stdlib_test[String]'
 Created: test/stdlib/String_test.rb
 ```
 
+Core signatures are loaded by default. To generate a test for a class defined in standard library signatures,
+pass the paths containing those signatures and their dependencies after the class name.
+
+```console
+$ bundle exec rake 'generate:stdlib_test[CSV::Row,stdlib/csv/0,stdlib/forwardable/0]'
+Created: test/stdlib/CSV_Row_test.rb
+```
+
 It generates `test/stdlib/[class_name]_test.rb`.
 The test scripts would look like the following:
 

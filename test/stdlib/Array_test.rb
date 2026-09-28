@@ -3,1025 +3,1360 @@ require_relative "test_helper"
 class ArraySingletonTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "singleton(::Array)"
+  testing 'singleton(Array)'
 
   def test_new
-    assert_send_type "() -> ::Array[untyped]",
+    # Technically array has its own `Array.new` defined, but we don't actually define that as a signatuer
+    assert_send_type '() -> Array[untyped]',
                      Array, :new
-    assert_send_type "(Array[Integer]) -> ::Array[Integer]",
-                     Array, :new, [1,2,3]
-    assert_send_type "(Integer) -> Array[untyped]",
-                     Array, :new, 3
-    assert_send_type "(ToInt) -> Array[untyped]",
-                     Array, :new, ToInt.new(3)
-    assert_send_type "(ToInt, String) -> Array[String]",
-                     Array, :new, ToInt.new(3), ""
-    assert_send_type "(ToInt) { (Integer) -> :foo } -> Array[:foo]",
-                     Array, :new, ToInt.new(3) do :foo end
+    with_array 1r, 2r do |array|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        Array, :new, array
+    end
+
+    with_int 5 do |size|
+      assert_send_type '(int) -> Array[nil]',
+                       Array, :new, size
+      assert_send_type '(int, Rational) -> Array[Rational]',
+                       Array, :new, size, 1r
+      assert_send_type '(int) { (Integer) -> Rational } -> Array[Rational]',
+                       Array, :new, size do it.to_r end
+    end
   end
 
-  def test_square_bracket
-    assert_send_type "() -> Array[untyped]",
-                     Array, :[]
-    assert_send_type "(Integer, String) -> Array[Integer | String]",
-                     Array, :[], 1, "2"
+  def test_op_aref
+    assert_send_type  '() -> Array[untyped]',
+                      Array, :[]
+    assert_send_type '(Rational, String) -> Array[Rational | String]',
+                     Array, :[], 1r, '2'
   end
 
   def test_try_convert
-    assert_send_type "(Integer) -> nil",
-                     Array, :try_convert, 3
-    assert_send_type "(ToArray) -> Array[Integer]",
-                     Array, :try_convert, ToArray.new(1,2,3)
+    with [1r, 2r], Class.new(Array).new([1r, 2r]) do |subclass|
+      assert_send_type  '[A < Array[U], U] (A) -> A',
+                        Array, :try_convert, subclass
+    end
+
+    with_array 1r, 2r do |ary|
+      assert_send_type  '[U] (array[U]) -> Array[U]',
+                        Array, :try_convert, ary
+    end
+
+    with_untyped.and [1r, 2r] do |untyped|
+      assert_send_type '[U] (untyped) -> Array[U]?',
+                       Array, :try_convert, untyped
+    end
   end
 end
 
 class ArrayInstanceTest < Test::Unit::TestCase
   include TestHelper
 
-  testing "::Array[::Integer]"
+  testing 'Array[Rational]'
 
-  def test_and
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :&, [2,3,4]
-    assert_send_type "(ToArray) -> Array[Integer]",
-                     [1,2,3], :&, ToArray.new(:a, :b, :c)
+  class ArraySubclass < Array
   end
 
-  def test_mul
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1], :*, 3
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1], :*, ToInt.new(3)
-    assert_send_type "(String) -> String",
-                     [1], :*, ","
-    assert_send_type "(ToStr) -> String",
-                     [1], :*, ToStr.new(",")
+  class RngGen < BlankSlate
+    def rand(max) = ::RBS::UnitTest::Convertibles::ToInt.new(::Random.new.rand(max))
   end
 
-  def test_plus
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :+, [4,5,6]
-    assert_send_type "(Array[String]) -> Array[Integer | String]",
-                     [1,2,3], :+, ["4", "5", "6"]
-    assert_send_type "(ToArray) -> Array[Integer | String]",
-                     [1,2,3], :+, ToArray.new("a")
-
-    refute_send_type "(Enum) -> Array[Integer | String]",
-                     [1,2,3], :+, Enum.new("a")
+  class ComparableToZero < BlankSlate
+    def initialize(cmp) = @cmp = cmp
+    def <(x) = 0.equal?(x) ? @cmp < x : fail
+    def >(x) = 0.equal?(x) ? @cmp > x : fail
   end
 
-  def test_minus
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :-, [4,5,6]
-    assert_send_type "(ToArray) -> Array[Integer | String]",
-                     [1,2,3], :-, ToArray.new("a")
-
-    refute_send_type "(Enum) -> Array[Integer]",
-                     [1,2,3], :-, Enum.new("a")
+  class HashKey < BlankSlate
+    protected attr_reader :key
+    def initialize(key) = @key = key
+    def hash = @key.hash
+    def eql?(other) = HashKey === other && @key.eql?(other.key)
   end
 
-  def test_lshift
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :<<, 4
+  def with_each(*eles)
+    yield Each.new(*eles)
   end
 
-  def test_aref
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :[], 0
-    assert_send_type "(Integer) -> nil",
-                     [1,2,3], :[], 1000
-    assert_send_type "(Float) -> Integer",
-                     [1,2,3], :[], 0.1
-    assert_send_type "(ToInt) -> Integer",
-                     [1], :[], ToInt.new(0)
-
-    assert_send_type "(Integer, ToInt) -> Array[Integer]",
-                     [1,2,3], :[], 0, ToInt.new(2)
-    assert_send_type "(Integer, ToInt) -> nil",
-                     [1,2,3], :[], 4, ToInt.new(2)
-
-    assert_send_type "(Range[Integer]) -> Array[Integer]",
-                     [1,2,3], :[], 0...1
-    assert_send_type "(Range[Integer]) -> nil",
-                     [1,2,3], :[], 5..8
-    assert_send_type "(Range[Integer?]) -> Array[Integer]",
-                     [1,2,3], :[], 0...nil
+  def test_op_and
+    with_array [1r, 1i] do |other|
+      assert_send_type  '(array[untyped]) -> Array[Rational]',
+                        [1r, 2r], :&, other
+    end
   end
 
-  def test_aupdate
-    assert_send_type "(Integer, Integer) -> Integer",
-                     [1,2,3], :[]=, 0, 0
+  def test_op_times
+    with_string do |sep|
+      assert_send_type  '(string) -> String',
+                        [1r, 2r], :*, sep
+    end
 
-    assert_send_type "(Integer, ToInt, Integer) -> Integer",
-                     [1,2,3], :[]=, 0, ToInt.new(2), -1
-    assert_send_type "(Integer, ToInt, Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :[]=, 0, ToInt.new(2), [-1]
-    assert_send_type "(Integer, ToInt, nil) -> nil",
-                     [1,2,3], :[]=, 0, ToInt.new(2), nil
-
-    assert_send_type "(Range[Integer], Integer) -> Integer",
-                     [1,2,3], :[]=, 0..2, -1
-    assert_send_type "(Range[Integer], Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :[]=, 0...2, [-1]
-    assert_send_type "(Range[Integer], nil) -> nil",
-                     [1,2,3], :[]=, 0...2, nil
-    assert_send_type "(Range[Integer?], Integer) -> Integer",
-                     [1,2,3], :[]=, 0..nil, -1
+    with_int 3 do |n|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :*, n
+    end
   end
 
-  def test_all?
-    assert_send_type "() -> bool",
-                     [1,2,3], :all?
-    assert_send_type "(singleton(Integer)) -> bool",
-                     [1,2,3], :all?, Integer
-    assert_send_type "() { (Integer) -> bool } -> bool",
-                     [1,2,3], :all? do true end
+  def test_op_plus
+    with_array 3r, 4r do |ary|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :+, ary
+    end
+
+    with_array 'a', 'b' do |ary|
+      assert_send_type  '(array[String]) -> Array[Rational | String]',
+                        [1r, 2r], :+, ary
+    end
+  end
+
+  def test_op_sub
+    with_array 1r, 3r do |ary|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :-, ary
+    end
+
+    with_untyped do |untyped|
+      with_array untyped do |ary|
+        assert_send_type  '(array[untyped]) -> Array[Rational]',
+                          [1r, 2r], :-, ary
+      end
+    end
+  end
+
+  def test_op_lsh
+    assert_send_type '(Rational) -> Array[Rational]',
+                     [1r, 2r, 3r], :<<, 4r
+
+    assert_send_type '(Rational) -> ArrayInstanceTest::ArraySubclass[Rational]',
+                     ArraySubclass.new([1r, 2r, 3r]), :<<, 4r
+  end
+
+  def test_op_cmp
+    with_untyped.and [2r], [1r, 3r], [1r, 2r], [1r, 0r] do |other|
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r], :<=>, other
+    end
+  end
+
+  def test_op_eq
+    with_untyped.and [1r] do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        [1r], :==, untyped
+    end
+  end
+
+  def test_op_aref(method: :[])
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], method, index
+      assert_send_type  '(int) -> nil',
+                        [1r], method, index
+    end
+
+    with_int 2 do |start|
+      with_int 1 do |length|
+        assert_send_type  '(int, int) -> Array[Rational]',
+                          [1r, 2r, 3r], method, start, length
+        assert_send_type  '(int, int) -> nil',
+                          [1r], method, start, length
+      end
+    end
+
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      assert_send_type  '(range[int?]) -> Array[Rational]?',
+                        [1r, 2r, 3r], method, range
+    end
+  end
+
+  def test_slice
+    test_op_aref(method: :slice)
+  end
+
+  def test_op_aset
+    with_int 1 do |index|
+      assert_send_type  '(int, Rational) -> Rational',
+                        [1r, 2r], :[]=, index, 3r
+    end
+
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      with_array 4r do |ary|
+        assert_send_type  '[T < _ToAry[Rational]] (range[int?], T) -> T',
+                          [1r, 2r, 3r], :[]=, range, ary
+      end
+
+      assert_send_type  '(range[int?], Rational) -> Rational',
+                        [1r, 2r, 3r], :[]=, range, 4r
+    end
+
+    with_int 2 do |start|
+      with_int 1 do |length|
+        with_array 4r do |ary|
+          assert_send_type  '[T < _ToAry[Rational]] (int, int, T) -> T',
+                            [1r, 2r, 3r], :[]=, start, length, ary
+        end
+
+        assert_send_type  '(int, int, Rational) -> Rational',
+                          [1r, 2r, 3r], :[]=, start, length, 4r
+      end
+    end
   end
 
   def test_any?
-    assert_send_type "() -> bool",
-                     [1,2,3], :any?
-    assert_send_type "(singleton(Integer)) -> bool",
-                     [1,2,3], :any?, Integer
-    assert_send_type "() { (Integer) -> bool } -> bool",
-                     [1,2,3], :any? do true end
+    assert_send_type '() -> bool',
+                     [], :any?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :any?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :any?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :any? do :true end
+  end
+
+  def test_all?
+    assert_send_type '() -> bool',
+                     [], :all?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :all?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :all?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :all? do :true end
   end
 
   def test_assoc
-    assert_send_type "(Integer) -> nil",
-                     [1,2,3], :assoc, 0
+    with_untyped.and 1r, :a, 'b' do |object|
+      next unless defined? object.==
+
+      assert_send_type  '(untyped) -> Array[untyped]?',
+                        [{foo: 3}, [1r, 1i], [:a, :b, :c], ['b']], :assoc, object
+    end
   end
 
   def test_at
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :at, 0
-    assert_send_type "(ToInt) -> Integer",
-                     [1,2,3], :at, ToInt.new(0)
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :at, ToInt.new(-5)
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], :at, index
+      assert_send_type  '(int) -> nil',
+                        [1r], :at, index
+    end
   end
 
   def test_bsearch
-    assert_send_type "() -> Enumerator[Integer]", [0,1,2,3,4],
-                     :bsearch
+    ary = [0r, 4r, 7r, 10r, 12r]
 
-    assert_send_type "() { (Integer) -> (true | false) } -> Integer",
-                     [0,1,2,3,4], :bsearch do |x| x > 2 end
-    assert_send_type "() { (Integer) -> (true | false) } -> nil",
-                     [0,1,2,3,4], :bsearch do |x| x > 8 end
+    # Bool-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| ele >= 2 ? true : nil end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| ele >= 100 ? true : nil end
 
-    assert_send_type "() { (Integer) -> Integer } -> Integer",
-                     [0,1,2,3,4], :bsearch do |x| 3 <=> x end
-    assert_send_type "() { (Integer) -> Integer } -> nil",
-                     [0,1,2,3,4], :bsearch do |x| 8 <=> x end
+    # Numeric-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| ele <=> 7 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Rational',
+                      ary, :bsearch do |ele| 7.0 - ele end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| ele <=> 100 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch do |ele| 100.0 - ele end
 
+    # Enumerator
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      ary, :bsearch
   end
 
   def test_bsearch_index
-    assert_send_type "() { (Integer) -> (true | false) } -> Integer",
-                     [0,1,2,3,4], :bsearch_index do |x| x > 2 end
-    assert_send_type "() { (Integer) -> (true | false) } -> nil",
-                     [0,1,2,3,4], :bsearch_index do |x| x > 8 end
+    ary = [0r, 4r, 7r, 10r, 12r]
 
-    assert_send_type "() { (Integer) -> Integer } -> Integer",
-                     [0,1,2,3,4], :bsearch_index do |x| 3 <=> x end
-    assert_send_type "() { (Integer) -> Integer } -> nil",
-                     [0,1,2,3,4], :bsearch_index do |x| 8 <=> x end
+    # Bool-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| ele >= 2 ? true : nil end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| ele >= 100 ? true : nil end
+
+    # Numeric-based approach
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| ele <=> 7 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> Integer',
+                      ary, :bsearch_index do |ele| 7.0 - ele end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| ele <=> 100 end
+    assert_send_type  '() { (Rational) -> (Numeric | bool?) } -> nil',
+                      ary, :bsearch_index do |ele| 100.0 - ele end
+
+    # Enumerator
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      ary, :bsearch_index
   end
 
-  def test_llear
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :clear
+  def test_clear
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :clear
   end
 
-  def test_collect
-    assert_send_type "() { (Integer) -> String } -> Array[String]",
-                     [1,2,3], :collect do |x| x.to_s end
-    assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
-                     [1,2,3], :collect
+  def test_collect(method: :collect)
+    assert_send_type  '() { (Rational) -> Complex } -> Array[Complex]',
+                      [1r, 2r, 3r], method do |ele| Complex(ele) end
+    assert_send_type  '() -> Enumerator[Rational, Array[untyped]]',
+                      [1r, 2r, 3r], method
   end
 
-  def test_collect!
-    assert_send_type "() { (Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :collect! do |x| x+1 end
+  def test_map
+    test_collect(method: :map)
+  end
+
+  def test_collect!(method: :collect!)
+    assert_send_type  '() { (Rational) -> Rational } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele + 1 end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [], method
+  end
+
+  def test_map!
+    test_collect!(method: :map!)
   end
 
   def test_combination
-    assert_send_type "(Integer) -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :combination, 3
-    assert_send_type "(ToInt) -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :combination, ToInt.new(3)
-
-    assert_send_type "(Integer) { (Array[Integer]) -> void } -> Array[Integer]",
-                     [1,2,3], :combination, 3 do end
-    assert_send_type "(ToInt) { (Array[Integer]) -> void } -> Array[Integer]",
-                     [1,2,3], :combination, ToInt.new(3) do end
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :combination, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :combination, count
+    end
   end
 
   def test_compact
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :compact
-    assert_send_type "() -> nil",
-                     [1,2,3], :compact!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :compact
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, nil, 3r], :compact
+  end
+
+  def test_compact!
+    assert_send_type  '() -> nil',
+                      [1r, 2r, 3r], :compact!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, nil, 3r], :compact!
   end
 
   def test_concat
-    assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :concat, [4,5,6], [7,8,9]
-    assert_send_type "(Array[Integer], Array[Integer]) -> Array[Integer]",
-                     Class.new(Array).new, :concat, [4,5,6], [7,8,9]
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :concat
+    with_array 3r do |array1|
+      assert_send_type  '(*array[Rational]) -> Array[Rational]',
+                        [1r, 2r], :concat, array1
+
+      with_array 4r do |array2|
+        assert_send_type  '(*array[Rational]) -> Array[Rational]',
+                          [1r, 2r], :concat, array1, array2
+      end
+    end
   end
 
   def test_count
-    assert_send_type "() -> Integer",
-                     [1,2,3], :count
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :count, 1
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :count do |x| x.odd? end
+    assert_send_type  '() -> Integer',
+                      [], :count
+    assert_send_type  '() -> Integer',
+                      [1r], :count
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], :count do |x| x >= 2 end
+
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer',
+                        [1r, 2r], :count, untyped
+    end
   end
 
   def test_cycle
-    assert_send_type(
-      "() { (Integer) -> void } -> nil",
-      [1,2,3], :cycle, &proc { break_from_block }
-    )
+    assert_send_type  '() { (Rational) -> void } -> nil',
+                      [1r, 2r, 3r], :cycle do break_from_block end
 
-    assert_send_type "(Integer) { (Integer) -> void } -> nil",
-                     [1,2,3], :cycle, 3 do end
-    assert_send_type "(ToInt) { (Integer) -> void } -> nil",
-                     [1,2,3], :cycle, ToInt.new(2) do end
+    # Unfortunately you can't test the enumerator branch because it'll infinitely loop
+    raise unless [1r, 2r, 3r].cycle.instance_of? Enumerator
+
+    with_int(2).and_nil do |count|
+      assert_send_type  '(int?) { (Rational) -> void } -> nil',
+                        [1r, 2r, 3r], :cycle, count do break_from_block end
+
+      if nil === count
+        raise unless [1r, 2r, 3r].cycle(test_count).instance_of? Enumerator
+        next
+      end
+
+      assert_send_type  '(int) -> Enumerator[Rational, nil]',
+                        [1r, 2r, 3r], :cycle, count
+    end
   end
 
   def test_deconstruct
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :deconstruct
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :deconstruct
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :deconstruct
   end
 
   def test_delete
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :delete, 2
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
 
-    assert_send_type "(Integer) { (Integer) -> String } -> Integer",
-                     [1,2,3], :delete, 2 do "" end
-    assert_send_type "(Symbol) { (Symbol) -> String } -> String",
-                     [1,2,3], :delete, :foo do "" end
+      assert_send_type  '(untyped) -> Rational?',
+                        [1r], :delete, untyped
+      assert_send_type  '[S] (S) { (S) -> Complex } -> (Rational | Complex) ',
+                        [1r], :delete, untyped do 1i end
+    end
   end
 
   def test_delete_at
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :delete_at, 2
-    assert_send_type "(Integer) -> nil",
-                     [1,2,3], :delete_at, 100
-
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :delete_at, ToInt.new(300)
+    with_int 2 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :delete_at, index
+      assert_send_type  '(int) -> nil',
+                        [1r, 2r], :delete_at, index
+    end
   end
 
-  def test_delete_if
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :delete_if do |x| x.odd? end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :delete_if
+  def test_delete_if(method: :delete_if)
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do false end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], method
   end
 
   def test_difference
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :difference, [2]
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :difference
+
+    with_array 2r, 3r do |array1|
+      with_array 1, :a, 'b' do |array2|
+        assert_send_type  '(*array[untyped]) -> Array[Rational]',
+                          [1r, 2r], :difference, array1, array2
+      end
+    end
   end
 
   def test_dig
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :dig, 1
-    assert_send_type "(Integer) -> nil",
-                     [1,2,3], :dig, 10
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :dig, ToInt.new(10)
+    with_int 2 do |index|
+      assert_send_type  '(int) -> nil',
+                        [1r, 2r], :dig, index
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :dig, index
+
+      assert_send_type  '(int, untyped) -> untyped',
+                        [1r, [3]], :dig, index, 0
+      assert_send_type  '(int, untyped, *untyped) -> untyped',
+                        [1r, [[3]]], :dig, index, 0, 0
+
+      assert_send_type  '(int, untyped) -> untyped',
+                        [1r, 2r, [3]], :dig, index, 0
+      assert_send_type  '(int, untyped, *untyped) -> untyped',
+                        [1r, 2r, [[3]]], :dig, index, 0, 0
+    end
   end
 
   def test_drop
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :drop, 2
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :drop, ToInt.new(2)
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :drop, count
+    end
   end
 
   def test_drop_while
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :drop_while do false end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :drop_while
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :take_while do |ele| ele >= 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :take_while
   end
 
   def test_each
-    assert_send_type "() { (Integer) -> void } -> Array[Integer]",
-                     [1,2,3], :each do end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :each
+    assert_send_type  '() { (Rational) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :each do end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :each
   end
 
   def test_each_index
-    assert_send_type "() { (Integer) -> void } -> Array[String]",
-                     ['1','2','3'], :each_index do end
-    assert_send_type "() -> Enumerator[Integer, Array[String]]",
-                     ['1','2','3'], :each_index
+    assert_send_type  '() { (Integer) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :each_index do end
+    assert_send_type  '() -> Enumerator[Integer, Array[Rational]]',
+                      [1r, 2r, 3r], :each_index
   end
 
   def test_empty?
-    assert_send_type "() -> bool",
-                     [1,2,3], :empty?
+    assert_send_type  '() -> bool',
+                      [], :empty?
+    assert_send_type  '() -> bool',
+                      [1r], :empty?
+  end
+
+  def test_eql?
+    with_untyped.and [1r] do |untyped|
+      assert_send_type  '(untyped) -> bool',
+                        [1r], :eql?, untyped
+    end
   end
 
   def test_fetch
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :fetch, 1
-    assert_send_type "(ToInt) -> Integer",
-                     [1,2,3], :fetch, ToInt.new(1)
+    with_int 2 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r, 3r], :fetch, index
 
-    assert_send_type "(ToInt, String) -> Integer",
-                     [1,2,3], :fetch, ToInt.new(1), "foo"
-    assert_send_type "(ToInt, String) -> String",
-                     [1,2,3], :fetch, ToInt.new(10), "foo"
+      assert_send_type  '(int, Complex) -> Complex',
+                        [1r, 2r], :fetch, index, 1i
+      assert_send_type  '(int, Complex) -> Rational',
+                        [1r, 2r, 3r], :fetch, index, 1i
 
-    assert_send_type "(Integer) { (Integer) -> Symbol } -> Integer",
-                     [1,2,3], :fetch, 1 do :hello end
-    assert_send_type "(Integer) { (Integer) -> Symbol } -> Symbol",
-                     [1,2,3], :fetch, 10 do :hello end
+      assert_send_type  '[I < _ToInt] (I) { (I) -> Complex } -> Complex',
+                        [1r, 2r], :fetch, index do 1i end
+      assert_send_type  '[I < _ToInt] (I) { (I) -> Complex } -> Rational',
+                        [1r, 2r, 3r], :fetch, index do 1i end
+    end
   end
 
   def test_fetch_values
-    if_ruby("3.4"...) do
-      with_int(1) do |one|
-        with_int(2) do |two|
-          assert_send_type(
-            "(int, int) -> Array[Symbol]",
-            [:a, :b, :c], :fetch_values, one, two
-          )
-        end
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :fetch_values
+    assert_send_type  '() { (Integer) -> void } -> Array[Rational]',
+                      [1r, 2r], :fetch_values do end
+
+    with_int 1 do |index1|
+      with_int 2 do |index2|
+        assert_send_type  '(*int) -> Array[Rational]',
+                          [1r, 2r, 3r], :fetch_values, index1, index2
+        assert_send_type  '[I < _ToInt] (*I) { (I) -> void } -> Array[Rational]',
+                          [1r, 2r, 3r], :fetch_values, index1, index2 do fail end
+        assert_send_type  '[I < _ToInt] (*I) { (I) -> Complex } -> Array[Rational | Complex]',
+                          [1r, 2r], :fetch_values, index1, index2 do |x| x.to_int.i end
       end
-      assert_send_type(
-        "() -> Array[Symbol]",
-        [:a, :b, :c], :fetch_values
-      )
     end
   end
 
   def test_fill
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :fill, 0
+    assert_send_type  '(Rational) -> Array[Rational]',
+                      [1r, 2r, 3r, 4r], :fill, 2r
+    with_int(1).and_nil do |start|
+      assert_send_type  '(Rational, int?) -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, 2r, start
 
-    assert_send_type "(Integer, nil) -> Array[Integer]",
-                     [1,2,3], :fill, 0, nil
-    assert_send_type "(Integer, ToInt) -> Array[Integer]",
-                     [1,2,3], :fill, 0, ToInt.new(1)
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :fill, 0, 1
-    assert_send_type "(Integer, Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :fill, 0, 1, 2
-    assert_send_type "(Integer, ToInt, ToInt) -> Array[Integer]",
-                     [1,2,3], :fill, 0, ToInt.new(1), ToInt.new(2)
-    assert_send_type "(Integer, Integer, nil) -> Array[Integer]",
-                     [1,2,3], :fill, 0, 1, nil
+      with_int(3).and_nil do |length|
+        assert_send_type  '(Rational, int?, int?) -> Array[Rational]',
+                          [1r, 2r, 3r, 4r], :fill, 2r, start, length
+      end
+    end
 
-    assert_send_type "(Integer, Range[Integer]) -> Array[Integer]",
-                     [1,2,3], :fill, 0, 1..2
+    with_range with_int(1).and_nil, with_int(3).and_nil do |range|
+      assert_send_type  '(Rational, range[int?]) -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, 2r, range
+    end
 
-    assert_send_type "() { (Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :fill do |i| i * 10 end
-    assert_send_type "(ToInt, ToInt) { (Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :fill, ToInt.new(0), ToInt.new(2) do |i| i * 10 end
-    assert_send_type "(Range[Integer]) { (Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :fill, 0..2 do |i| i * 10 end
+    assert_send_type  '() { (Integer) -> Rational } -> Array[Rational]',
+                      [1r, 2r, 3r, 4r], :fill do 1r end
+
+    with_int(1).and_nil do |start|
+      assert_send_type  '(int?) { (Integer) -> Rational } -> Array[Rational]',
+                        [1r, 2r, 3r, 4r], :fill, start do 1r end
+
+      with_int(3).and_nil do |length|
+        assert_send_type  '(int?, int?) { (Integer) -> Rational } -> Array[Rational]',
+                          [1r, 2r, 3r, 4r], :fill, start, length do 1r end
+      end
+    end
   end
 
-  def test_filter
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :filter do |i| i < 1 end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :filter
+  def test_find(method: :find)
+    assert_send_type  '() { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], method do it > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do false end
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      [1r, 2r, 3r], method
+
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], method, ->{ "" } do it > 2 ? :truthy : nil end
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> String',
+                      [1r, 2r, 3r], method, ->{ "" } do false end
+    assert_send_type  '(Enumerable::_NotFound[String]) -> Enumerator[Rational, Rational | String]',
+                      [1r, 2r, 3r], method, ->{ "" }
   end
 
-  def test_filter!
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :filter! do |i| i < 0 end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :filter! do |i| i > 0 end
-
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]?]",
-                     [1,2,3], :filter!
+  def test_detect
+    test_find(method: :detect)
   end
 
-  def test_find
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :find, &->(i) { i.odd? }
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [0,2], :find, &->(i) { i.odd? }
-    assert_send_type "(Enumerable::_NotFound[String]) { (Integer) -> bool } -> String",
-                     [0,2], :find, -> { "" }, &->(i) { i.odd? }
+  def test_find_index(method: :find_index)
+    with_untyped.and 2r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r, 3r], method, untyped
+    end
 
-    assert_send_type "() -> Enumerator[Integer, Integer?]",
-                     [1,2,3], :find
-    assert_send_type "(Enumerable::_NotFound[String]) -> Enumerator[Integer, Integer | String | nil]",
-                     [0,2], :find, -> { "" }
-  end
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], method do :true end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do false end
 
-  def test_find_index
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :find_index, 1
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :find_index, "0"
-
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :find_index do |i| i.odd? end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :find_index do |i| i < 0 end
-
-    assert_send_type "() -> Enumerator[Integer, Integer?]",
-                     [1,2,3], :find_index
-  end
-
-  def test_first
-    assert_send_type "() -> Integer",
-                     [1,2,3], :first
-    assert_send_type "() -> nil",
-                     [], :first
-
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :first, 2
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :first, ToInt.new(2)
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :first, 0
-  end
-
-  def test_flatten
-    assert_send_type "() -> Array[untyped]",
-                     [1,2,3], :flatten
-    assert_send_type "(Integer) -> Array[untyped]",
-                     [1,2,3], :flatten, 3
-    assert_send_type "(ToInt) -> Array[untyped]",
-                     [1,2,3], :flatten, ToInt.new(3)
-  end
-
-  def test_flatten!
-    assert_send_type "() -> Array[untyped]?",
-                     [1,2,3], :flatten!
-    assert_send_type "(Integer) -> Array[untyped]?",
-                     [1,2,3], :flatten!, 3
-    assert_send_type "(ToInt) -> Array[untyped]?",
-                     [1,2,3], :flatten!, ToInt.new(3)
-  end
-
-  def test_include?
-    assert_send_type "(Integer) -> bool",
-                     [1,2,3], :include?, 1
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      [1r, 2r, 3r], method
   end
 
   def test_index
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :index, 1
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :index, "0"
+    test_find_index(method: :index)
+  end
 
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :index do |i| i.odd? end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :index do |i| i < 0 end
+  def test_first
+    assert_send_type  '() -> nil',
+                      [], :first
+    assert_send_type  '() -> Rational',
+                      [1r, 2r], :first
 
-    assert_send_type "() -> Enumerator[Integer, Integer?]",
-                     [1,2,3], :index
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :first, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :first, count
+    end
+  end
+
+  def test_flatten
+    assert_send_type  '() -> Array[untyped]',
+                      [[1r, 2r]], :flatten
+
+    with_int(1).and_nil do |level|
+      assert_send_type  '(int?) -> Array[untyped]',
+                        [[1r, 2r]], :flatten, level
+    end
+  end
+
+  def test_flatten!
+    assert_send_type  '() -> nil',
+                      ArraySubclass.new([1r, 2r]), :flatten!
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[untyped]',
+                      ArraySubclass.new([[1r, 2r]]), :flatten!
+
+    with_int(1).and_nil do |level|
+      assert_send_type  '(int?) -> nil',
+                        ArraySubclass.new([1r, 2r]), :flatten!, level
+      assert_send_type  '(int?) -> ArrayInstanceTest::ArraySubclass[untyped]',
+                        ArraySubclass.new([[1r, 2r]]), :flatten!, level
+    end
+  end
+
+  def test_hash
+    assert_send_type  '() -> Integer',
+                      [], :hash
+    assert_send_type  '() -> Integer',
+                      [1r, 2r], :hash
+  end
+
+  def test_include?
+    with_untyped.and 1r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(top) -> bool',
+                        [1r, 2r], :include?, untyped
+    end
   end
 
   def test_insert
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :insert, 0, 10
-    assert_send_type "(ToInt, Integer, Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :insert, ToInt.new(0), 10, 20, 30
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :insert, index
+      assert_send_type  '(int, *Rational) -> Array[Rational]',
+                        [1r, 2r, 3r], :insert, index, 3r, 4r
+    end
+  end
 
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :insert, 0
+  def test_inspect(method: :inspect)
+    assert_send_type  '() -> String',
+                      [], method
+    assert_send_type  '() -> String',
+                      [1r, 2r], method
+  end
+
+  def test_to_s
+    test_inspect(method: :to_s)
   end
 
   def test_intersect?
-    assert_send_type(
-      "(Array[Integer]) -> bool",
-      [1,2,3], :intersect?, [0]
-    )
-    assert_send_type(
-      "(ToArray[Integer]) -> bool",
-      [1,2,3], :intersect?, ToArray.new([0, 1])
-    )
+    with_array 1r, 3r do |array|
+      assert_send_type  '(array[untyped]) -> bool',
+                        [1r, 2r, 3r], :intersect?, array
+    end
+
+    with_array :a, :b do |array|
+      assert_send_type  '(array[untyped]) -> bool',
+                        [1r, 2r, 3r], :intersect?, array
+    end
   end
 
   def test_intersection
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :intersection, [2,3,4]
-    assert_send_type "(Array[Integer], Array[String], ToArray) -> Array[Integer]",
-                     [1,2,3], :intersection, [2,3,4], ["a"], ToArray.new(true, false)
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :intersection
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :intersection
+
+    with_array 1r, 2r, 4r do |array1|
+      with_array 1, 2, 4 do |array2|
+        assert_send_type  '(*array[untyped]) -> Array[Rational]',
+                          [1r, 2r, 3r], :intersection, array1, array2
+      end
+    end
   end
 
   def test_join
-    assert_send_type "() -> String",
-                     [1,2,3], :join
+    assert_send_type  '() -> String',
+                      [1r, 2r], :join
 
-    assert_send_type "(String) -> String",
-                     [1,2,3], :join, ","
-    assert_send_type "(ToStr) -> String",
-                     [1,2,3], :join, ToStr.new(",")
+    with_string("x").and_nil do |sep|
+      assert_send_type  '(string?) -> String',
+                        [1r, 2r], :join, sep
+    end
   end
 
   def test_keep_if
-    assert_send_type "() { (Integer) -> false } -> Array[Integer]",
-                     [1,2,3], :keep_if do false end
-    assert_send_type "() { (Integer) -> true } -> Array[Integer]",
-                     [1,2,3], :keep_if do true end
-
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :keep_if
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :keep_if do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :keep_if
   end
 
   def test_last
-    assert_send_type "() -> Integer",
-                     [1,2,3], :last
-    assert_send_type "() -> nil",
-                     [], :last
+    assert_send_type  '() -> nil',
+                      [], :last
+    assert_send_type  '() -> Rational',
+                      [1r, 2r], :last
 
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :last, 2
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :last, ToInt.new(0)
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :last, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :last, count
+    end
   end
 
-  def test_length
-    assert_send_type "() -> Integer",
-                     [1,2,3], :length
+  def test_length(method: :length)
+    assert_send_type  '() -> Integer',
+                      [], method
+    assert_send_type  '() -> Integer',
+                      [1r, 2r], method
   end
 
-  def test_map
-    assert_send_type "() { (Integer) -> String } -> Array[String]",
-                     [1,2,3], :map do |x| x.to_s end
-    assert_send_type "() -> Enumerator[Integer, Array[untyped]]",
-                     [1,2,3], :map
-  end
-
-  def test_map!
-    assert_send_type "() { (Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :map! do |x| x+1 end
+  def test_size
+    test_length(method: :size)
   end
 
   def test_max
-    assert_send_type "() -> Integer",
-                     [1,2,3], :max
-    assert_send_type "() -> nil",
-                     [], :max
+    ary = 10.times.map { |x| Rational(x) }.shuffle
 
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :max, 1
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [], :max, ToInt.new(1)
+    assert_send_type  '() -> nil',
+                      [], :max
+    assert_send_type  '() -> Rational',
+                      ary, :max
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Rational',
+                      ary, :max do |a, b| ComparableToZero.new(a <=> b) end
 
-    assert_send_type "() { (Integer, Integer) -> Integer } -> Integer",
-                     [1,2,3], :max do |_, _| 1 end
-    assert_send_type "() { (Integer, Integer) -> Integer } -> nil",
-                     [], :max do |_, _| 0 end
+    with_int 3 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        ary, :max, count
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                        ary, :max, count do |a, b| ComparableToZero.new(a <=> b) end
+    end
+  end
 
-    assert_send_type "(ToInt) { (Integer, Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :max, ToInt.new(2) do |_, _| 0 end
-    refute_send_type "(Integer) { (Integer, Integer) -> ToInt } -> Array[Integer]",
-                     [1,2,3], :max, 2 do |_, _| ToInt.new(0) end
+  def test_min
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() -> nil',
+                      [], :min
+    assert_send_type  '() -> Rational',
+                      ary, :min
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Rational',
+                      ary, :min do |a, b| ComparableToZero.new(a <=> b) end
+
+    with_int 3 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        ary, :min, count
+      assert_send_type  '(int) { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                        ary, :min, count do |a, b| ComparableToZero.new(a <=> b) end
+    end
   end
 
   def test_minmax
-    assert_send_type "() -> [Integer, Integer]",
-                     [1,2,3], :minmax
-    assert_send_type "() -> [Integer, Integer]",
-                     [1], :minmax
-    assert_send_type "() -> [nil, nil]",
-                     [], :minmax
+    ary = 10.times.map { |x| Rational(x) }.shuffle
 
-    assert_send_type "() { (Integer, Integer) -> Integer } -> [Integer, Integer]",
-                     [1, 2], :minmax do |_, _| 0 end
-  end
-
-  def test_none?
-    assert_send_type "() -> bool",
-                     [1,2,3], :none?
-    assert_send_type "(singleton(String)) -> bool",
-                     [1,2,3], :none?, String
-    assert_send_type "() { (Integer) -> bool } -> bool",
-                     [1,2,3], :none? do |x| x.even? end
-  end
-
-  def test_one?
-    assert_send_type "() -> bool",
-                     [1,2,3], :one?
-    assert_send_type "(singleton(String)) -> bool",
-                     [1,2,3], :one?, String
-    assert_send_type "() { (Integer) -> bool } -> bool",
-                     [1,2,3], :one? do |x| x.even? end
+    assert_send_type  '() -> [nil, nil]',
+                      [], :minmax
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> [nil, nil]',
+                      [], :minmax do end
+    assert_send_type  '() -> [Rational, Rational]',
+                      ary, :minmax
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> [Rational, Rational]',
+                      ary, :minmax do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_pack
-    assert_send_type "(String) -> String",
-                     [1,2,3], :pack, "ccc"
-    assert_send_type "(ToStr) -> String",
-                     [1,2,3], :pack, ToStr.new("ccc")
+    with_string 'ccc' do |fmt|
+      assert_send_type  '(string) -> String',
+                        [1, 2, 3], :pack, fmt
 
-    assert_send_type "(String, buffer: String) -> String",
-                     [1,2,3], :pack, "ccc", buffer: +""
-    assert_send_type "(String, buffer: nil) -> String",
-                     [1,2,3], :pack, "ccc", buffer: nil
-    refute_send_type "(ToStr, buffer: ToStr) -> String",
-                     [1,2,3], :pack, ToStr.new("ccc"), buffer: ToStr.new("")
+      assert_send_type  '(string, buffer: nil) -> String',
+                        [1, 2, 3], :pack, fmt, buffer: nil
+      assert_send_type  '(string, buffer: String) -> String',
+                        [1, 2, 3], :pack, fmt, buffer: +''
+      refute_send_type  '(string, buffer: _ToStr) -> String',
+                        [1,2,3], :pack, fmt, buffer: ToStr.new(+'')
+    end
   end
 
   def test_permutation
-    assert_send_type "(Integer) -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :permutation, 2
-    assert_send_type "() -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :permutation
+    assert_send_type  '() { (Array[Rational]) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :permutation do end
+    assert_send_type  '() -> Enumerator[Array[Rational], Array[Rational]]',
+                      [1r, 2r, 3r], :permutation
 
+    with_int(2).and_nil do |count|
+      assert_send_type  '(int?) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :permutation, count do end
+    end
 
-    assert_send_type "(Integer) { (Array[Integer]) -> void } -> Array[Integer]",
-                     [1,2,3], :permutation, 2 do end
-    assert_send_type "() { (Array[Integer]) -> void } -> Array[Integer]",
-                     [1,2,3], :permutation do end
+    # Unfortunately ruby 4.0 and before had a bug where `Array#permutation` with a `nil`
+    # argument didn't have a correct size. cf https://github.com/ruby/ruby/pull/17197.
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :permutation, count
+    end
+    if_ruby '4.2'... do
+      assert_send_type  '(nil) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :permutation, nil
+    end
   end
 
   def test_pop
-    assert_send_type "() -> Integer",
-                     [1,2,3], :pop
-    assert_send_type "() -> nil",
-                     [], :pop
+    assert_send_type  '() -> nil',
+                      [], :pop
+    assert_send_type  '() -> Rational',
+                      [1r], :pop
 
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :pop, 1
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :pop, ToInt.new(2)
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :pop, count
+    end
   end
 
   def test_product
-    assert_send_type "() -> Array[[Integer]]",
-                     [1,2,3], :product
-    assert_send_type "(Array[String]) -> Array[[Integer, String]]",
-                     [1,2,3], :product, ["a", "b"]
-    assert_send_type "(Array[String], Array[Symbol]) -> Array[[Integer, String, Symbol]]",
-                     [1,2,3], :product, ["a", "b"], [:a, :b]
-    assert_send_type "(Array[String], Array[Symbol], Array[true | false]) -> Array[Array[Integer | interned | true | false]]",
-                     [1,2,3], :product, ["a", "b"], [:a, :b], [true, false]
+    assert_send_type  '() -> Array[[Rational]]',
+                      [1r, 2r], :product
+    assert_send_type  '() { ([Rational]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :product do end
+
+    with_array 1i, 2i do |array1|
+      assert_send_type  '(array[Complex]) -> Array[[Rational, Complex]]',
+                        [1r, 2r], :product, array1
+      assert_send_type  '(array[Complex]) { ([Rational, Complex]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                        ArraySubclass.new([1r, 2r]), :product, array1 do end
+
+      with_array 1.0, 2.0 do |array2|
+        assert_send_type  '(array[Complex], array[Float]) -> Array[[Rational, Complex, Float]]',
+                          [1r, 2r], :product, array1, array2
+        assert_send_type  '(array[Complex], array[Float]) { ([Rational, Complex, Float]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                          ArraySubclass.new([1r, 2r]), :product, array1, array2 do end
+
+        with_array 1, 2 do |array3|
+          assert_send_type  '(*array[Complex | Float | Integer]) -> Array[Array[Rational | Complex | Float | Integer]]',
+                            [1r, 2r], :product, array1, array2, array3
+          assert_send_type  '(*array[Complex | Float | Integer]) { (Array[Rational | Complex | Float | Integer]) -> void } -> ArrayInstanceTest::ArraySubclass[Rational]',
+                            ArraySubclass.new([1r, 2r]), :product, array1, array2, array3 do end
+        end
+      end
+    end
   end
 
-  def test_push
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :push
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :push, 4, 5
+  def test_push(method: :push)
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], method
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 2r
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 2r, 3r
   end
 
-  def test_rassoc
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :rassoc, "3"
-  end
-
-  def test_reject
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :reject do |x| x.odd? end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :reject
+  def test_append
+    test_push(method: :append)
   end
 
   def test_reject!
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :reject! do |x| x.odd? end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :reject! do |x| x == "" end
-
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]?]",
-                     [1,2,3], :reject!
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :reject! do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :reject! do false end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], :reject!
   end
 
   def test_repeated_combination
-    assert_send_type "(ToInt) { (Array[Integer]) -> nil } -> Array[Integer]",
-                     [1,2,3], :repeated_combination, ToInt.new(2) do end
-    assert_send_type "(ToInt) -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :repeated_combination, ToInt.new(2)
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :repeated_combination, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :repeated_combination, count
+    end
   end
 
   def test_repeated_permutation
-    assert_send_type "(ToInt) { (Array[Integer]) -> nil } -> Array[Integer]",
-                     [1,2,3], :repeated_permutation, ToInt.new(2) do end
-    assert_send_type "(ToInt) -> Enumerator[Array[Integer], Array[Integer]]",
-                     [1,2,3], :repeated_permutation, ToInt.new(2)
+    with_int 2 do |count|
+      assert_send_type  '(int) { (Array[Rational]) -> void } -> Array[Rational]',
+                        [1r, 2r, 3r], :repeated_permutation, count do end
+      assert_send_type  '(int) -> Enumerator[Array[Rational], Array[Rational]]',
+                        [1r, 2r, 3r], :repeated_permutation, count
+    end
   end
 
-  def test_replace
-    assert_send_type "(Array[Integer]) -> Array[Integer]",
-                     [1,2,3], :replace, [2,3,4]
+  def test_replace(method: :replace)
+    with_array 3r, 4r do |array|
+      assert_send_type  '(array[Rational]) -> Array[Rational]',
+                        [1r, 2r], method, array
+    end
   end
 
   def test_reverse
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :reverse
+    assert_send_type  '() -> Array[Rational]',
+                      [], :reverse
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :reverse
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :reverse
   end
 
   def test_reverse!
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :reverse!
+    assert_send_type  '() -> Array[Rational]',
+                      [], :reverse!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :reverse!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :reverse!
   end
 
   def test_reverse_each
-    assert_send_type "() { (Integer) -> nil } -> Array[Integer]",
-                     [1,2,3], :reverse_each do end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [2,3,4], :reverse_each
+    assert_send_type  '() { (Rational) -> void } -> Array[Rational]',
+                      [1r, 2r, 3r], :reverse_each do end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :reverse_each
   end
 
   def test_rfind
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :rfind, &->(i) { i.odd? }
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [0,2], :rfind, &->(i) { i.odd? }
-    assert_send_type "(Enumerable::_NotFound[String]) { (Integer) -> bool } -> String",
-                     [0,2], :rfind, -> { "" }, &->(i) { i.odd? }
+    assert_send_type  '() { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], :rfind do it > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :rfind do false end
+    assert_send_type  '() -> Enumerator[Rational, Rational?]',
+                      [1r, 2r, 3r], :rfind
 
-    assert_send_type "() -> Enumerator[Integer, Integer?]",
-                     [1,2,3], :rfind
-    assert_send_type "(Enumerable::_NotFound[String]) -> Enumerator[Integer, Integer | String | nil]",
-                     [0,2], :rfind, -> { "" }
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> Rational',
+                      [1r, 2r, 3r], :rfind, ->{ "" } do it > 2 ? :truthy : nil end
+    assert_send_type  '(Enumerable::_NotFound[String]) { (Rational) -> boolish } -> String',
+                      [1r, 2r, 3r], :rfind, ->{ "" } do false end
+    assert_send_type  '(Enumerable::_NotFound[String]) -> Enumerator[Rational, Rational | String]',
+                      [1r, 2r, 3r], :rfind, ->{ "" }
   end
 
   def test_rindex
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :rindex, 1
-    assert_send_type "(String) -> nil",
-                     [1,2,3], :rindex, "0"
+    with_untyped.and 2r do |untyped|
+      next unless defined? untyped.==
+      assert_send_type  '(untyped) -> Integer?',
+                        [1r, 2r, 3r], :rindex, untyped
+    end
 
-    assert_send_type "() { (Integer) -> bool } -> Integer",
-                     [1,2,3], :rindex do |i| i.odd? end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :rindex do |i| i < 0 end
+    assert_send_type  '() { (Rational) -> boolish } -> Integer',
+                      [1r, 2r, 3r], :rindex do :true end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], :rindex do false end
 
-    assert_send_type "() -> Enumerator[Integer, Integer?]",
-                     [1,2,3], :rindex
+    assert_send_type  '() -> Enumerator[Rational, Integer?]',
+                      [1r, 2r, 3r], :rindex
   end
 
   def test_rotate
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :rotate
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :rotate, 3
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :rotate, ToInt.new(2)
+    assert_send_type  '() -> Array[Rational]',
+                      [], :rotate
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :rotate
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :rotate
+    with_int 1 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :rotate, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r], :rotate, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :rotate, count
+    end
   end
 
   def test_rotate!
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :rotate!
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :rotate!, 3
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :rotate!, ToInt.new(2)
+    assert_send_type  '() -> Array[Rational]',
+                      [], :rotate!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], :rotate!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :rotate!
+    with_int 1 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [], :rotate!, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r], :rotate!, count
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :rotate!, count
+    end
   end
 
   def test_sample
-    assert_send_type "() -> Integer",
-                     [1,2,3], :sample
-    assert_send_type "() -> nil",
-                     [], :sample
-    assert_send_type "(random: Random) -> Integer",
-                     [1,2,3], :sample, random: Random.new(1)
-    assert_send_type "(random: Rand) -> Integer",
-                     [1,2,3], :sample, random: Rand.new
+    assert_send_type  '() -> nil',
+                      [], :sample
+    assert_send_type  '(random: Array::_Rand) -> nil',
+                      [], :sample, random: RngGen.new
 
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :sample, 2
-    assert_send_type "(ToInt, random: Random) -> Array[Integer]",
-                     [1,2,3], :sample, ToInt.new(2), random: Random.new(2)
-    assert_send_type "(ToInt, random: Rand) -> Array[Integer]",
-                     [1,2,3], :sample, ToInt.new(2), random: Rand.new
+    assert_send_type  '() -> Rational',
+                      [1r, 2r, 3r], :sample
+    assert_send_type  '(random: Array::_Rand) -> Rational',
+                      [1r, 2r, 3r], :sample, random: RngGen.new
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :sample, count
+      assert_send_type  '(int, random: Array::_Rand) -> Array[Rational]',
+                        [1r, 2r, 3r], :sample, count, random: RngGen.new
+    end
   end
 
-  def test_select
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :select do |i| i < 1 end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :select
+  def test_select(method: :select)
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], method
   end
 
-  def test_select!
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :select! do |i| i < 1 end
-    assert_send_type "() { (Integer) -> bool } -> nil",
-                     [1,2,3], :select! do true end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]?]",
-                     [1,2,3], :select!
+  def test_filter
+    test_select(method: :filter)
+  end
+
+  def test_select!(method: :select!)
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], method do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> nil',
+                      [1r, 2r, 3r], method do true end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]?]',
+                      [], method
+  end
+
+  def test_filter!
+    test_select(method: :filter!)
   end
 
   def test_shift
-    assert_send_type "() -> Integer",
-                     [1,2,3], :shift
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :shift, ToInt.new(1)
-    assert_send_type "() -> nil",
-                     [], :shift
+    assert_send_type  '() -> nil',
+                      [], :shift
+    assert_send_type  '() -> Rational',
+                      [1r], :shift
+
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r, 3r], :shift, count
+    end
   end
 
   def test_shuffle
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :shuffle
-    assert_send_type "(random: Random) -> Array[Integer]",
-                     [1,2,3], :shuffle, random: Random.new(2)
-    assert_send_type "(random: Rand) -> Array[Integer]",
-                     [1,2,3], :shuffle, random: Rand.new
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle
+
+    assert_send_type  '(random: Array::_Rand) -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle, random: RngGen.new
   end
 
   def test_shuffle!
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :shuffle!
-    assert_send_type "(random: Random) -> Array[Integer]",
-                     [1,2,3], :shuffle!, random: Random.new(2)
-    assert_send_type "(random: Rand) -> Array[Integer]",
-                     [1,2,3], :shuffle!, random: Rand.new
-  end
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle!
 
-  def test_slice
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :slice, 1
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :slice, ToInt.new(11)
-
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :slice, 1, 2
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     [1,2,3], :slice, ToInt.new(10), ToInt.new(2)
-
-    assert_send_type "(Range[Integer]) -> Array[Integer]",
-                     [1,2,3], :slice, 1...2
-    assert_send_type "(Range[Integer]) -> nil",
-                     [1,2,3], :slice, 11...21
+    assert_send_type  '(random: Array::_Rand) -> Array[Rational]',
+                      [1r, 2r, 3r], :shuffle!, random: RngGen.new
   end
 
   def test_slice!
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :slice!, 1
-    assert_send_type "(ToInt) -> nil",
-                     [1,2,3], :slice!, ToInt.new(11)
+    with_int 1 do |index|
+      assert_send_type  '(int) -> Rational',
+                        [1r, 2r], :slice!, index
+      assert_send_type  '(int) -> nil',
+                        [1r], :slice!, index
+    end
 
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :slice!, 1, 2
-    assert_send_type "(ToInt, ToInt) -> nil",
-                     [1,2,3], :slice!, ToInt.new(10), ToInt.new(2)
+    with_int 2 do |start|
+      with_int 1 do |length|
+        assert_send_type  '(int, int) -> Array[Rational]',
+                          [1r, 2r, 3r], :slice!, start, length
+        assert_send_type  '(int, int) -> nil',
+                          [1r], :slice!, start, length
+      end
+    end
 
-    assert_send_type "(Range[Integer]) -> Array[Integer]",
-                     [1,2,3], :slice!, 1...2
-    assert_send_type "(Range[Integer]) -> nil",
-                     [1,2,3], :slice!, 11...21
+    with_range with_int(2).and_nil, with_int(1).and_nil do |range|
+      assert_send_type  '(range[int?]) -> Array[Rational]?',
+                        [1r, 2r, 3r], :slice!, range
+    end
   end
 
   def test_sort
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :sort
+    ary = 10.times.map { |x| Rational(x) }.shuffle
 
-    assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :sort do |a, b| b <=> a end
-
-    refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
-                     [1,2,3], :sort do end
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :sort
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                      ary, :sort do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_sort!
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :sort!
+    ary = 10.times.map { |x| Rational(x) }.shuffle
 
-    assert_send_type "() { (Integer, Integer) -> Integer } -> Array[Integer]",
-                     [1,2,3], :sort! do |a, b| b <=> a end
-
-    refute_send_type "() { (Integer, Integer) -> nil } -> Array[Integer]",
-                     [1,2,3], :sort! do end
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :sort!
+    assert_send_type  '() { (Rational, Rational) -> Comparable::_CompareToZero } -> Array[Rational]',
+                      ary, :sort! do |a, b| ComparableToZero.new(a <=> b) end
   end
 
   def test_sort_by!
-    assert_send_type "() { (Integer) -> String } -> Array[Integer]",
-                     [1,2,3], :sort_by! do |x| x.to_s end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :sort_by!
+    ary = 10.times.map { |x| Rational(x) }.shuffle
+
+    assert_send_type  '() { (Rational) -> Comparable::_WithSpaceshipOperator } -> Array[Rational]',
+                      ary, :sort_by! do |x|
+                        bs = BlankSlate.new
+                        ::Kernel.instance_method(:instance_variable_set).bind_call(bs, :@x, x)
+                        def bs.x = @x
+                        def bs.<=>(r)
+                          cmp = BlankSlate.new
+                          ::Kernel.instance_method(:instance_variable_set)
+                            .bind_call(cmp, :@cmp, @x <=> r.x)
+                          def cmp.<(x) = 0.equal?(x) ? @cmp < 0 : fail
+                          def cmp.>(x) = 0.equal?(x) ? @cmp > 0 : fail
+                          cmp
+                        end
+                        bs
+                      end
+
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      ary, :sort_by!
+
   end
 
   def test_sum
-    assert_send_type "() -> Integer",
-                     [1,2,3], :sum
-    assert_send_type "(Integer) -> Integer",
-                     [1,2,3], :sum, 2
+    assert_send_type  '() -> untyped',
+                      [1, 2r, 3.0, 4i], :sum
 
-    assert_send_type "(String) { (Integer) -> String } -> String",
-                     [1,2,3], :sum, "**" do |x| x.to_s end
+    with 5, 6r, 7.0, 8i do |init|
+      assert_send_type  '(untyped) -> untyped',
+                        [1, 2r, 3.0, 4i], :sum, init
+    end
+
+    assert_send_type  '() { (Rational) -> untyped } -> untyped',
+                      [1r, 2r, 3r], :sum do |ele| ele.i end
+
+    with 5, 6r, 7.0, 8i do |init|
+      assert_send_type  '(untyped) { (Rational) -> untyped } -> untyped',
+                        [1r, 2r, 3r], :sum, init do |ele| ele.i end
+    end
+
+    # Test an extremely esoteric edgecase, which any updates to the signature will have to allow for
+    outer = BlankSlate.new
+    def outer.+(rhs)
+      inner = BlankSlate.new
+      ::Kernel.instance_method(:instance_variable_set).bind_call(inner, :@rhs, rhs)
+      def inner.+(rhs) = [:innermost, @rhs, rhs]
+      inner
+    end
+
+    assert_send_type  '(untyped) -> [:innermost, 1, 2]',
+                      [1, 2], :sum, outer
   end
 
   def test_take
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :take, 2
-    assert_send_type "(ToInt) -> Array[Integer]",
-                     [1,2,3], :take, ToInt.new(2)
+    with_int 2 do |count|
+      assert_send_type  '(int) -> Array[Rational]',
+                        [1r, 2r], :take, count
+    end
   end
 
   def test_take_while
-    assert_send_type "() { (Integer) -> bool } -> Array[Integer]",
-                     [1,2,3], :take_while do |x| x < 2 end
-    assert_send_type "() -> Enumerator[Integer, Array[Integer]]",
-                     [1,2,3], :take_while
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :take_while do |ele| ele <= 2 ? :truthy : nil end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r, 2r, 3r], :take_while
   end
 
   def test_to_a
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :to_a
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :to_a
+    assert_send_type  '() -> Array[Rational]',
+                      ArraySubclass.new([1r, 2r]), :to_a
   end
 
   def test_to_ary
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :to_ary
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :to_ary
+    assert_send_type  '() -> ArrayInstanceTest::ArraySubclass[Rational]',
+                      ArraySubclass.new([1r, 2r]), :to_ary
   end
 
   def test_to_h
-    testing "::Array[[::String, ::Integer]]" do
-      assert_send_type "() -> Hash[String, Integer]",
-                       [["foo", 1], ["bar", 2]], :to_h
-    end
+    assert_send_type  '() -> Hash[untyped, untyped]',
+                      [], :to_h
+    assert_send_type  '() -> Hash[untyped, untyped]',
+                      [[:a, 1]], :to_h
 
-    assert_send_type "() { (Integer) -> [Symbol, String] } -> Hash[Symbol, String]",
-                     [1,2,3], :to_h do |i| [:"s#{i}", i.to_s ] end
+    assert_send_type  '() { (Rational) -> Hash::_Pair[Rational, Complex] } -> Hash[Rational, Complex]',
+                      [1r, 2r], :to_h do |x| ToArray.new(x, x.i) end
   end
 
   def test_transpose
-    testing "::Array[[::String, ::Integer]]" do
-      assert_send_type "() -> [Array[String], Array[Integer]]",
-                       [["foo", 1], ["bar", 2]], :transpose
-    end
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [], :transpose
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [[1r]], :transpose
+    assert_send_type  '() -> Array[Array[Rational]]',
+                      [[1r, 2r, 3r], [4r, 5r, 6r]], :transpose
   end
 
   def test_union
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :union
-    assert_send_type "(Array[Symbol]) -> Array[Integer | Symbol]",
-                     [1,2,3], :union, [:x, :y, :z]
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :union
+
+    with_array 2r, 3r do |array1|
+      with_array 1, :a, 'b' do |array2|
+        assert_send_type  '[T] (*array[T]) -> Array[Rational | T]',
+                          [1r, 2r], :union, array1, array2
+      end
+    end
+
   end
 
   def test_uniq
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :uniq
-    assert_send_type "() { (Integer) -> String } -> Array[Integer]",
-                     [1,2,3], :uniq do |i| i.to_s end
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq do |x| HashKey.new x end
   end
 
   def test_uniq!
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3,1], :uniq!
-    assert_send_type "() -> nil",
-                     [1,2,3], :uniq!
-    assert_send_type "() { (Integer) -> String } -> Array[Integer]",
-                     [1,2,3, 1], :uniq! do |i| i.to_s end
-    assert_send_type "() { (Integer) -> String } -> nil",
-                     [1,2,3], :uniq! do |i| i.to_s end
+    assert_send_type  '() -> nil',
+                      [1r, 2r, 3r], :uniq!
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq!
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> nil',
+                      [1r, 2r, 3r], :uniq! do |x| HashKey.new x end
+    assert_send_type  '() { (Rational) -> Hash::_Key } -> Array[Rational]',
+                      [1r, 2r, 3r, 2r, 1r], :uniq! do |x| HashKey.new x end
   end
 
-  def test_unshift
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :unshift
-    assert_send_type "(Integer, Integer) -> Array[Integer]",
-                     [1,2,3], :unshift, 4, 5
+  def test_unshift(method: :unshift)
+    assert_send_type  '() -> Array[Rational]',
+                      [1r], method
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, 0r
+    assert_send_type  '(*Rational) -> Array[Rational]',
+                      [1r], method, -1r, 0r
+  end
+
+  def test_prepend
+    test_unshift(method: :prepend)
   end
 
   def test_values_at
-    assert_send_type "() -> Array[Integer]",
-                     [1,2,3], :values_at
-    assert_send_type "(Integer) -> Array[Integer]",
-                     [1,2,3], :values_at, 2
-    assert_send_type "(ToInt, Integer) -> Array[Integer?]",
-                     [1,2,3], :values_at, ToInt.new(2), 3
-    assert_send_type "(ToInt, Range[Integer]) -> Array[Integer?]",
-                     [1,2,3], :values_at, ToInt.new(2), 0..1
+    ary = 10.times.map { |x| Rational(x) }
+
+    assert_send_type  '() -> Array[Rational]',
+                      ary, :values_at
+
+    with_int 3 do |index1|
+      with_int 99999 do |index2|
+        with_range with_int(3).and_nil, with_int(-2).and_nil do |range|
+          assert_send_type  '(*int | range[int?]) -> Array[Rational?]',
+                            ary, :values_at, index1, index2, range
+        end
+      end
+    end
   end
 
   def test_zip
-    assert_send_type "(Array[String]) -> Array[[Integer, String?]]",
-                     [1,2,3], :zip, ["a", "b"]
-    assert_send_type "(Array[String]) -> Array[[Integer, String]]",
-                     [1,2,3], :zip, ["a", "b", "c", "d"]
-    assert_send_type "(Array[String], Array[Symbol]) -> Array[Array[untyped]]",
-                     [1,2,3], :zip, ["a", "b"], [:foo, :bar]
+    assert_send_type  '() -> Array[[Rational]]',
+                      [1r, 2r, 3r], :zip
+    assert_send_type  '() { ([Rational]) -> void } -> nil',
+                      [1r, 2r, 3r], :zip do end
 
-    assert_send_type "(Array[String]) { ([Integer, String?]) -> true } -> nil",
-                     [1,2,3], :zip, ["a", "b"] do true end
+    with_each 1, 2 do |iter1|
+      assert_send_type  '(_Each[Integer]) -> Array[[Rational, Integer?]]',
+                        [1r, 2r, 3r], :zip, iter1
+      assert_send_type  '(_Each[Integer]) { ([Rational, Integer?]) -> void } -> nil',
+                        [1r, 2r, 3r], :zip, iter1 do end
 
-    assert_send_type(
-      "(::_Each[String]) -> Array[[Integer, String?]]",
-      [1,2,3], :zip, Each.new("a", "b")
-    )
+      with_each 1i, 2i do |iter2|
+        assert_send_type  '(_Each[Integer], _Each[Complex]) -> Array[[Rational, Integer?, Complex?]]',
+                          [1r, 2r, 3r], :zip, iter1, iter2
+        assert_send_type  '(_Each[Integer], _Each[Complex]) { ([Rational, Integer?, Complex?]) -> void } -> nil',
+                          [1r, 2r, 3r], :zip, iter1, iter2 do end
+
+        with_each 1.0, 2.0 do |iter3|
+          assert_send_type  '(*_Each[Integer | Complex | Float]) -> Array[Array[Rational | Integer | Complex | Float | nil]]',
+                            [1r, 2r, 3r], :zip, iter1, iter2, iter3
+          assert_send_type  '(*_Each[Integer | Complex | Float]) { (Array[Rational | Integer | Complex | Float | nil]) -> void } -> nil',
+                            [1r, 2r, 3r], :zip, iter1, iter2, iter3 do end
+        end
+      end
+    end
   end
 
-  def test_vbar
-    assert_send_type "(Array[String]) -> Array[Integer | String]",
-                     [1,2,3], :|, ["x", "y"]
+  def test_op_or
+    with_array 1r, 1i do |other|
+      assert_send_type  '(array[Complex]) -> Array[Rational | Complex]',
+                        [1r, 2r], :|, other
+    end
+  end
+
+  def test_initialize_copy
+    assert_visibility :private, :initialize_copy
+    test_replace(method: :initialize_copy)
+  end
+
+  def test_none?
+    assert_send_type '() -> bool',
+                     [], :none?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :none?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :none?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :none? do :true end
+  end
+
+  def test_one?
+    assert_send_type '() -> bool',
+                     [], :one?
+    assert_send_type '() -> bool',
+                     [1r, 2r, 3r], :one?
+    assert_send_type '(singleton(Rational)) -> bool',
+                     [1r, 2r, 3r], :one?, Rational
+    assert_send_type '() { (Rational) -> boolish } -> bool',
+                     [1r, 2r, 3r], :one? do :true end
+  end
+
+  def test_rassoc
+    with_untyped.and 1r, :a, 'b' do |object|
+      next unless defined? object.==
+      assert_send_type  '(untyped) -> Array[untyped]?',
+                        [{foo: 3}, [1r, 1i], [:a, :b, :c], ['b']], :rassoc, object
+    end
+  end
+
+  def test_reject
+    test_delete_if(method: :reject)
+  end
+
+  def test_freeze
+    assert_send_type  '() -> Array[Rational]',
+                      [1r, 2r], :freeze
   end
 end

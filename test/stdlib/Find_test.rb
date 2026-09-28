@@ -1,6 +1,17 @@
 require_relative "test_helper"
 require "find"
 
+class FindSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "find"
+  testing "singleton(::Find)"
+
+  def test_version
+    assert_const_type "String", "Find::VERSION"
+  end
+end
+
 class FindTest < StdlibTest
   target Find
   library "find"

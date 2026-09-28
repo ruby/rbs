@@ -15,6 +15,10 @@ class TimeExtensionSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_version
+    assert_const_type "String", "Time::VERSION"
+  end
+
   def test_zone_offset
     assert_send_type "(String) -> Integer",
                      Time, :zone_offset, "EST"

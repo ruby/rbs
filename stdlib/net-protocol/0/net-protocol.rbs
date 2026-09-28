@@ -27,6 +27,13 @@ module Net
   class ProtoRetriableError < ProtocolError
   end
 
+  # <!-- rdoc-file=lib/net/protocol.rb -->
+  # ReadLimitExceeded, a subclass of ProtocolError, is raised if the terminator is
+  # not found within the byte limit given to Net::BufferedIO#readuntil.
+  #
+  class ReadLimitExceeded < ProtocolError
+  end
+
   class HTTPBadResponse < StandardError
   end
 

@@ -3,7 +3,25 @@ require_relative "test_helper"
 class ThreadSingletonTest < Test::Unit::TestCase
   include TestHelper
 
+  class Sub < Thread
+  end
+
   testing "singleton(::Thread)"
+
+  def test_abort_on_exception
+    assert_send_type "() -> bool", Thread, :abort_on_exception
+  end
+
+  def test_report_on_exception
+    assert_send_type "() -> bool", Thread, :report_on_exception
+  end
+
+  def test_handle_interrupt
+    assert_send_type  "(Hash[Class, :never]) { (nil) -> Integer } -> Integer",
+                      Thread, :handle_interrupt, { RuntimeError => :never } do 1 end
+    assert_send_type  "(Hash[Class, :immediate | :on_blocking]) { (nil) -> String } -> String",
+                      Thread, :handle_interrupt, { Object => :immediate, RuntimeError => :on_blocking } do "x" end
+  end
 
   def test_new
     assert_send_type  "() { () -> untyped } -> Thread",
@@ -20,8 +38,21 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type  "() { () -> Integer } -> Thread",
                       Thread, :start do 1 end
 
-    assert_send_type "() { () -> Integer } -> untyped",
-                     Class.new(Thread), :start do 1 end
+    assert_send_type "() { () -> Integer } -> ThreadSingletonTest::Sub",
+                     Sub, :start do 1 end
+  end
+
+  def test_fork
+    assert_send_type  "() { () -> Integer } -> Thread",
+                      Thread, :fork do 1 end
+
+    assert_send_type "() { () -> Integer } -> ThreadSingletonTest::Sub",
+                     Sub, :fork do 1 end
+  end
+
+  def test_kill
+    sub = Sub.new {}
+    assert_send_type "(ThreadSingletonTest::Sub) -> ThreadSingletonTest::Sub", Sub, :kill, sub
   end
 
   def test_each_caller_location
@@ -29,6 +60,14 @@ class ThreadSingletonTest < Test::Unit::TestCase
       "() { (Thread::Backtrace::Location) -> Integer } -> nil",
       Thread, :each_caller_location, &-> (loc) { 3 }
     )
+  end
+
+  def test_list
+    assert_send_type "() -> Array[Thread]", Thread, :list
+  end
+
+  def test_pass
+    assert_send_type "() -> nil", Thread, :pass
   end
 end
 
@@ -42,6 +81,55 @@ class ThreadTest < Test::Unit::TestCase
       "() -> Integer",
       Thread.current, :native_thread_id
     )
+
+    assert_send_type "() -> nil", Thread.new{}.join, :native_thread_id
+  end
+
+  def test_fetch
+    th = Thread.new { Thread.current[:cat] = 'meow' }.join
+    assert_send_type "(Symbol) -> String", th, :fetch, :cat
+    assert_send_type "(Symbol) { (Symbol) -> true } -> true", th, :fetch, :dog do true end
+    assert_send_type "(Symbol, false) -> false", th, :fetch, :dog, false
+  end
+
+  def test_backtrace
+    assert_send_type "() -> Array[String]",
+                     Thread.current, :backtrace
+    assert_send_type "(Integer) -> Array[String]",
+                     Thread.current, :backtrace, 0
+    assert_send_type "(Integer, Integer) -> Array[String]",
+                     Thread.current, :backtrace, 0, 1
+    assert_send_type "(Integer, nil) -> Array[String]",
+                     Thread.current, :backtrace, 0, nil
+    assert_send_type "(Range[Integer]) -> Array[String]",
+                     Thread.current, :backtrace, 0..1
+    assert_send_type "(Integer) -> nil",
+                     Thread.current, :backtrace, 10000
+
+    t = Thread.new {}
+    t.join
+    assert_send_type "() -> nil",
+                     t, :backtrace
+  end
+
+  def test_backtrace_locations
+    assert_send_type "() -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations
+    assert_send_type "(Integer) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0
+    assert_send_type "(Integer, Integer) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0, 1
+    assert_send_type "(Integer, nil) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0, nil
+    assert_send_type "(Range[Integer]) -> Array[Thread::Backtrace::Location]",
+                     Thread.current, :backtrace_locations, 0..1
+    assert_send_type "(Integer) -> nil",
+                     Thread.current, :backtrace_locations, 10000
+
+    t = Thread.new {}
+    t.join
+    assert_send_type "() -> nil",
+                     t, :backtrace_locations
   end
 
   def test_raise
@@ -84,5 +172,34 @@ class ThreadTest < Test::Unit::TestCase
     end
 
     t.kill
+  end
+
+  class Sub < Thread
+  end
+
+  def test_kill
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :kill
+  end
+
+  def test_exit
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :exit
+  end
+
+  def test_terminate
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :terminate
+  end
+
+  def test_join
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :join
+    assert_send_type "(0) -> Thread", Thread.new{}.join, :join, 0
+    assert_send_type "(0) -> nil", Thread.new { sleep 10 }, :join, 0
+  end
+
+  def test_run
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :run
+  end
+
+  def test_wakeup
+    assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :wakeup
   end
 end

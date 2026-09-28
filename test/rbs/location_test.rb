@@ -162,6 +162,8 @@ class RBS::LocationTest < Test::Unit::TestCase
   end
 
   def test_gc_compaction
+    omit_on_truffle_ruby! "`GC.compact` is not implemented on TruffleRuby"
+
     GC.disable
     buffer = buffer()
     locations = 10.times.map do |i|

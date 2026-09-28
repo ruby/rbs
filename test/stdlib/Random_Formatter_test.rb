@@ -7,6 +7,10 @@ class RandomFormatterSingletonTest < Test::Unit::TestCase
   library "random-formatter"
   testing "singleton(::Random)"
 
+  def test_alphanumeric_constant
+    assert_const_type "Array[String]", "Random::Formatter::ALPHANUMERIC"
+  end
+
   def test_base64
     assert_send_type "() -> ::String",
                      Random, :base64

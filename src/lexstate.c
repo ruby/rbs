@@ -74,6 +74,7 @@ static const char *RBS_TOKENTYPE_NAMES[] = {
     "tUIDENT",  /* Identifiers starting with upper case */
     "tULIDENT", /* Identifiers starting with `_` */
     "tULLIDENT",
+    "tNONASCIIIDENT",
     "tGIDENT",  /* Identifiers starting with `$` */
     "tAIDENT",  /* Identifiers starting with `@` */
     "tA2IDENT", /* Identifiers starting with `@@` */
@@ -119,7 +120,7 @@ unsigned int rbs_peek(rbs_lexer_t *lexer) {
 }
 
 bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len) {
-    if (RBS_UNLIKELY(lexer->current.byte_pos == lexer->end_pos)) {
+    if (RBS_UNLIKELY(lexer->current.byte_pos >= lexer->end_pos)) {
         return false;
     }
 
@@ -134,7 +135,15 @@ bool rbs_next_char(rbs_lexer_t *lexer, unsigned int *codepoint, size_t *byte_len
 
     *byte_len = lexer->encoding->char_width((const uint8_t *) start, (ptrdiff_t) (lexer->string.end - start));
 
-    if (*byte_len == 1) {
+    if (*byte_len == 0) {
+        // Invalid byte under the active encoding. Map it to a sentinel code
+        // point (U+FFFD) and advance one byte so the lexer always makes
+        // progress. Token rules that scan until a delimiter exclude this
+        // sentinel, so an invalid byte surfaces as an ErrorToken instead of
+        // being silently swallowed.
+        *byte_len = 1;
+        *codepoint = 0xFFFD;
+    } else if (*byte_len == 1) {
         *codepoint = (unsigned int) *start;
     } else {
         *codepoint = 12523; // Dummy data for "ル" from "ルビー" (Ruby) in Unicode

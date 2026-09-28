@@ -1,0 +1,37 @@
+# Keep the build context small. .git is intentionally NOT ignored: rbs.gemspec
+# builds its file list with `git ls-files`.
+#
+# Safe to ignore here: untracked/generated paths, and tracked paths the gemspec
+# already rejects (so `gem build` does not expect them on disk). Do NOT ignore a
+# tracked path the gemspec ships — `gem build` would fail with "... are not
+# files". .vscode/ and benchmark/ are tracked but rejected by the gemspec.
+.vscode/
+benchmark/
+
+# Editor / tooling / worktree copies (untracked; each is a full repo clone)
+.claude/
+trees/
+.devcontainer/
+.idea/
+.ruby-lsp/
+.yardoc/
+doc/
+datasets/
+tmp/
+
+# Build artifact — rebuilt inside the image by `rake wasm:jruby_setup`
+lib/rbs/wasm/*.wasm
+*.gem
+ext/**/*.o
+ext/**/*.so
+ext/**/*.bundle
+*.log
+
+# Local scratch / experiment files
+flamegraph.html
+gc.html
+foo.rbs
+sorted.json
+string.json
+Gemfile-*
+gemfiles/

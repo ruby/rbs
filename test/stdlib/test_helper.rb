@@ -41,6 +41,15 @@ module VersionHelper
 end
 
 module WithStdlibAliases
+  def with_round_mode(&block)
+    block.call(nil)
+
+    %i[up down even].each do |mode|
+      block.call(mode)
+      with_string(mode.to_s, &block)
+    end
+  end
+
   def with_timeout(seconds: 1, nanoseconds: 0)
     unless block_given?
       return RBS::UnitTest::WithAliases::WithEnum.new(
@@ -146,6 +155,17 @@ module TestHelper
 
   def self.included(base)
     base.extend RBS::UnitTest::TypeAssertions::ClassMethods
+  end
+
+  # Disables verbose mode for the duration of the passed block. Used when
+  # testing codepaths which emit warnings when run.
+  #
+  # The `verbose` variable can be used to change the verbosity if needed.
+  def disable_verbose(verbose = nil)
+    old_verbose, $VERBOSE = $VERBOSE, verbose
+    yield
+  ensure
+    $VERBOSE = old_verbose
   end
 
   RUBY_EXECUTABLE = ENV["RUBY"] || RbConfig.ruby

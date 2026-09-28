@@ -4,7 +4,19 @@ module URI
   # RFC6068, the mailto URL scheme.
   #
   class MailTo < Generic
+    # <!-- rdoc-file=lib/uri/mailto.rb -->
+    # An Array of the available components for URI::MailTo.
+    #
+    COMPONENT: Array[Symbol]
+
+    # <!-- rdoc-file=lib/uri/mailto.rb -->
+    # A Default port of nil for URI::MailTo.
+    #
+    DEFAULT_PORT: nil
+
     EMAIL_REGEXP: Regexp
+
+    HEADER_REGEXP: Regexp
 
     # <!--
     #   rdoc-file=lib/uri/mailto.rb
@@ -53,6 +65,14 @@ module URI
     #
     def headers=: (String) -> String
 
+    # <!--
+    #   rdoc-file=lib/uri/mailto.rb
+    #   - set_headers(v)
+    # -->
+    # Private setter for headers `v`.
+    #
+    def set_headers: (String | Array[Array[String]] | nil v) -> Array[[ String, String ]]
+
     # <!-- rdoc-file=lib/uri/mailto.rb -->
     # The primary e-mail address of the URL, as a String.
     #
@@ -65,6 +85,14 @@ module URI
     # Setter for to `v`.
     #
     def to=: (String) -> String
+
+    # <!--
+    #   rdoc-file=lib/uri/mailto.rb
+    #   - set_to(v)
+    # -->
+    # Private setter for to `v`.
+    #
+    def set_to: (String? v) -> String?
 
     # <!--
     #   rdoc-file=lib/uri/mailto.rb

@@ -143,6 +143,8 @@ const char *RBS_NONNULL rbs_node_type_name(rbs_node_t *RBS_NONNULL node) {
         return "RBS::Types::ClassSingleton";
     case RBS_TYPES_FUNCTION:
         return "RBS::Types::Function";
+    case RBS_TYPES_FUNCTION_FORWARDING_PARAM:
+        return "RBS::Types::Function::ForwardingParam";
     case RBS_TYPES_FUNCTION_PARAM:
         return "RBS::Types::Function::Param";
     case RBS_TYPES_INTERFACE:
@@ -913,7 +915,7 @@ rbs_ast_ruby_annotations_block_param_type_annotation_t *RBS_NONNULL rbs_ast_ruby
     return instance;
 }
 #line 140 "templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location) {
+rbs_ast_ruby_annotations_class_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_class_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location) {
     rbs_ast_ruby_annotations_class_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_class_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_class_alias_annotation_t) {
@@ -1001,7 +1003,7 @@ rbs_ast_ruby_annotations_method_types_annotation_t *RBS_NONNULL rbs_ast_ruby_ann
     return instance;
 }
 #line 140 "templates/src/ast.c.erb"
-rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NONNULL type_name, rbs_location_range type_name_location) {
+rbs_ast_ruby_annotations_module_alias_annotation_t *RBS_NONNULL rbs_ast_ruby_annotations_module_alias_annotation_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_location_range prefix_location, rbs_location_range keyword_location, rbs_type_name_t *RBS_NULLABLE type_name, rbs_location_range type_name_location) {
     rbs_ast_ruby_annotations_module_alias_annotation_t *instance = rbs_allocator_alloc(allocator, rbs_ast_ruby_annotations_module_alias_annotation_t);
 
     *instance = (rbs_ast_ruby_annotations_module_alias_annotation_t) {
@@ -1430,7 +1432,7 @@ rbs_types_class_singleton_t *RBS_NONNULL rbs_types_class_singleton_new(rbs_alloc
     return instance;
 }
 #line 140 "templates/src/ast.c.erb"
-rbs_types_function_t *RBS_NONNULL rbs_types_function_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_list_t *RBS_NONNULL required_positionals, rbs_node_list_t *RBS_NONNULL optional_positionals, rbs_node_t *RBS_NULLABLE rest_positionals, rbs_node_list_t *RBS_NONNULL trailing_positionals, rbs_hash_t *RBS_NONNULL required_keywords, rbs_hash_t *RBS_NONNULL optional_keywords, rbs_node_t *RBS_NULLABLE rest_keywords, rbs_node_t *RBS_NONNULL return_type) {
+rbs_types_function_t *RBS_NONNULL rbs_types_function_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_node_list_t *RBS_NONNULL required_positionals, rbs_node_list_t *RBS_NONNULL optional_positionals, rbs_node_t *RBS_NULLABLE rest_positionals, rbs_node_list_t *RBS_NONNULL trailing_positionals, rbs_hash_t *RBS_NONNULL required_keywords, rbs_hash_t *RBS_NONNULL optional_keywords, rbs_node_t *RBS_NULLABLE rest_keywords, rbs_node_t *RBS_NULLABLE forwarding, rbs_node_t *RBS_NONNULL return_type) {
     rbs_types_function_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_t);
 
     *instance = (rbs_types_function_t) {
@@ -1445,7 +1447,21 @@ rbs_types_function_t *RBS_NONNULL rbs_types_function_new(rbs_allocator_t *RBS_NO
         .required_keywords = required_keywords,
         .optional_keywords = optional_keywords,
         .rest_keywords = rest_keywords,
+        .forwarding = forwarding,
         .return_type = return_type,
+    };
+
+    return instance;
+}
+#line 140 "templates/src/ast.c.erb"
+rbs_types_function_forwarding_param_t *RBS_NONNULL rbs_types_function_forwarding_param_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location) {
+    rbs_types_function_forwarding_param_t *instance = rbs_allocator_alloc(allocator, rbs_types_function_forwarding_param_t);
+
+    *instance = (rbs_types_function_forwarding_param_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_TYPES_FUNCTION_FORWARDING_PARAM,
+            .location = location,
+        },
     };
 
     return instance;

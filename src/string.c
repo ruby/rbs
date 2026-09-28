@@ -14,7 +14,7 @@ rbs_string_t rbs_string_new(const char *start, const char *end) {
 
 rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     const char *new_start = self->start;
-    while (isspace(*new_start) && new_start < self->end) {
+    while (new_start < self->end && isspace((unsigned char) *new_start)) {
         new_start++;
     }
 
@@ -23,7 +23,7 @@ rbs_string_t rbs_string_strip_whitespace(rbs_string_t *self) {
     }
 
     const char *new_end = self->end - 1;
-    while (isspace(*new_end) && new_start < new_end) {
+    while (new_start < new_end && isspace((unsigned char) *new_end)) {
         new_end--;
     }
 
@@ -37,5 +37,5 @@ size_t rbs_string_len(const rbs_string_t self) {
 bool rbs_string_equal(const rbs_string_t lhs, const rbs_string_t rhs) {
     if (lhs.start == rhs.start && lhs.end == rhs.end) return true;
     if (rbs_string_len(lhs) != rbs_string_len(rhs)) return false;
-    return strncmp(lhs.start, rhs.start, rbs_string_len(lhs)) == 0;
+    return memcmp(lhs.start, rhs.start, rbs_string_len(lhs)) == 0;
 }

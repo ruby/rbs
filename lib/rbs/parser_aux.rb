@@ -14,7 +14,7 @@ module RBS
     def self.parse_method_type(source, range: nil, byte_range: 0..., variables: [], require_eof: false)
       buf = buffer(source)
       byte_range = byte_range(range, buf.content) if range
-      _parse_method_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof)
+      _parse_method_type(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables, require_eof, false)
     end
 
     def self.parse_signature(source)
@@ -28,7 +28,7 @@ module RBS
           0
         end
       content = buf.content
-      dirs, decls = _parse_signature(buf, start_pos, content.bytesize)
+      dirs, decls = _parse_signature(buf, start_pos, content.bytesize, false)
 
       if resolved
         dirs = dirs.dup if dirs.frozen?
@@ -121,12 +121,14 @@ module RBS
 
     def self.parse_inline_leading_annotation(source, range, variables: [])
       buf = buffer(source)
-      _parse_inline_leading_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+      byte_range = byte_range(range, buf.content)
+      _parse_inline_leading_annotation(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables)
     end
 
     def self.parse_inline_trailing_annotation(source, range, variables: [])
       buf = buffer(source)
-      _parse_inline_trailing_annotation(buf, range.begin || 0, range.end || buf.last_position, variables)
+      byte_range = byte_range(range, buf.content)
+      _parse_inline_trailing_annotation(buf, byte_range.begin || 0, byte_range.end || buf.content.bytesize, variables)
     end
 
     def self.byte_range(char_range, content)

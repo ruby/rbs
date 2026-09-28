@@ -124,10 +124,13 @@ module RBS
       end
 
       entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
-      args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
 
       entry.each_decl do |decl|
-        subst_ = subst + Substitution.build(decl.type_params.each.map(&:name), args)
+        if align_params = entry.align_params(decl)
+          subst_ = subst + align_params
+        else
+          subst_ = subst
+        end
 
         decl.members.each do |member|
           case member
@@ -343,7 +346,7 @@ module RBS
           if entry.is_a?(Environment::ClassEntry)
             new_method = definition.methods[:new]
 
-            if new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
+            if new_method && new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
               # The method is _untyped new_.
 
               alias_methods = definition.methods.each.with_object([]) do |entry, array|
@@ -500,6 +503,11 @@ module RBS
 
     def validate_type_params(definition, ancestors:, methods:)
       type_params = definition.type_params_decl
+
+      # Without type params nothing can violate the variance: the ancestor validation
+      # iterates the (empty) params, and the type params of the methods themselves are
+      # invariant, which `Result#compatible?` always accepts
+      return if type_params.empty?
 
       calculator = VarianceCalculator.new(builder: self)
       param_names = type_params.each.map(&:name)
@@ -1045,9 +1053,10 @@ module RBS
     end
 
     def validate_type_name(name, location)
-      name = name.absolute! unless name.absolute?
-      return if env.type_name?(env.normalize_type_name(name))
+      absolute = name.absolute? ? name : name.absolute!
+      return if env.type_name?(env.normalize_type_name(absolute))
 
+      # Report the name as it is written in the signature
       raise NoTypeFoundError.new(type_name: name, location: location)
     end
   end

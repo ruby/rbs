@@ -14,6 +14,7 @@ module RBS
 
       def <<(context_decl)
         context_decls << context_decl
+        @type_params_validated = nil
         self
       end
 
@@ -42,11 +43,40 @@ module RBS
 
       def self_types
         each_decl.flat_map do |decl|
-          decl.self_types
+          self_types = decl.self_types
+          subst = align_params(decl)
+
+          if self_types.empty? || subst.nil?
+            self_types
+          else
+            self_types.map do |self_type|
+              AST::Declarations::Module::Self.new(
+                name: self_type.name,
+                args: self_type.args.map {|type| type.sub(subst) },
+                location: self_type.location
+              )
+            end
+          end
         end.uniq
       end
 
+      def align_params(decl)
+        entry_params = type_params
+        decl_param_names = decl.type_params.map(&:name)
+
+        return nil if decl_param_names == entry_params.map(&:name)
+
+        Substitution.build(
+          decl_param_names,
+          entry_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
+        )
+      end
+
       def validate_type_params
+        # The entry only changes with `<<`, which resets the memo -- a failed
+        # validation is not recorded and raises again
+        return if @type_params_validated
+
         unless context_decls.empty?
           first_decl, *rest_decls = each_decl.to_a
           first_decl or raise
@@ -60,6 +90,8 @@ module RBS
             end
           end
         end
+
+        @type_params_validated = true
       end
     end
   end

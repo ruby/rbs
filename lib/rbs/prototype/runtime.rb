@@ -527,7 +527,7 @@ module RBS
 
         generate_mixin(mod, decl, type_name, type_name_absolute)
 
-        unless mod < Struct || (RUBY_VERSION >= '3.2' && mod < Data)
+        unless mod < Struct || mod < Data
           generate_methods(mod, type_name, decl.members) unless outline
         end
 

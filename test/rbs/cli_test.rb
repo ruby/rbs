@@ -27,6 +27,14 @@ class RBS::CliTest < Test::Unit::TestCase
     assert_predicate exit_status, :nonzero?, "Expected CLI to succeed, but it failed with status: #{exit_status.inspect}"
   end
 
+  # Command to run `bundle` with the Ruby running the tests
+  #
+  # The `bundle` executable found in `PATH` may belong to another Ruby installation, which aborts
+  # with a version mismatch error when `RUBYLIB` points at the standard library of the running Ruby.
+  # That is what happens in ruby/ruby CI, where the tests run with a freshly built `ruby`.
+  #
+  BUNDLE_COMMAND = [RbConfig.ruby, "-S", "bundle"]
+
   # Run `rbs collection` with fresh bundler environment
   #
   # You need this method to test `rbs collection` features.
@@ -35,20 +43,18 @@ class RBS::CliTest < Test::Unit::TestCase
   # - If `bundler: true` is given, it runs `rbs collection` command with `bundle exec`
   # - If `bundler: false` is given, it runs `rbs collection` command without `bundle exec`
   #
-  # We cannot run tests that uses this method in ruby CI.
-  #
   def run_rbs_collection(*commands, bundler:)
     stdout, stderr, status =
       Bundler.with_unbundled_env do
         bundle_exec = []
-        bundle_exec = ["bundle", "exec"] if bundler
+        bundle_exec = [*BUNDLE_COMMAND, "exec"] if bundler
 
         rbs_path = Pathname("#{__dir__}/../../lib").cleanpath.to_s
         if rblib = ENV["RUBYLIB"]
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, RbConfig.ruby, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
@@ -83,7 +89,7 @@ class RBS::CliTest < Test::Unit::TestCase
           #{gems.join("\n")}
         RUBY
 
-        Open3.capture3("bundle", "install", chdir: Dir.pwd)
+        Open3.capture3(*BUNDLE_COMMAND, "install", chdir: Dir.pwd)
       end
 
     assert_predicate status, :success?, stderr
@@ -319,6 +325,23 @@ singleton(::BasicObject)
 
   end
 
+  def test_missing_class
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(ancestors ::NoSuchClass)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(methods ::NoSuchClass)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+
+    with_cli do |cli|
+      refute_cli_success { cli.run(%w(method ::NoSuchClass foo)) }
+      assert_equal "Cannot find class: ::NoSuchClass\n", stdout.string
+    end
+  end
+
   def test_validate
     with_cli do |cli|
       assert_cli_success cli.run(%w(--log-level=info validate))
@@ -396,7 +419,7 @@ singleton(::BasicObject)
           cli.run(["-I", dir, "validate"])
         end
 
-        assert_include stdout.string, "a.rbs:2:13...2:14: Could not find ::A (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "a.rbs:2:13...2:14: Could not find A (RBS::NoTypeFoundError)"
       end
     end
   end
@@ -891,6 +914,9 @@ singleton(::BasicObject)
   end
 
   def test_prototype_no_parser
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
+
     Dir.mktmpdir do |dir|
       with_cli do |cli|
         def cli.has_parser?
@@ -907,6 +933,9 @@ singleton(::BasicObject)
   end
 
   def test_prototype_batch
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -968,6 +997,9 @@ Processing `Gemfile`...
   end
 
   def test_prototype_batch_outer
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -994,6 +1026,9 @@ Processing `test/a_test.rb`...
   end
 
   def test_prototype_batch_syntax_error
+    omit_on_truffle_ruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on TruffleRuby"
+    omit_on_jruby! "`rbs prototype` requires `RubyVM::AbstractSyntaxTree`, which is not available on JRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
 
@@ -1042,6 +1077,9 @@ Processing `lib`...
 
 
   def test_test
+    omit_on_truffle_ruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on TruffleRuby"
+    omit_on_jruby! "`rbs test` relies on `TracePoint` `:end` event, which is not supported on JRuby"
+
     Dir.mktmpdir do |dir|
       dir = Pathname(dir)
       dir.join('foo.rbs').write(<<~RBS)
@@ -1067,7 +1105,137 @@ Processing `lib`...
     end
   end
 
+  def test_collection_init
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          assert_cli_success do
+            cli.run(%w(collection init))
+          end
+
+          config = Pathname(dir).join(RBS::Collection::Config::PATH).read
+          assert_match(/gems in your Gemfile\.lock/, config)
+          assert_match(/rbs collection install/, config)
+
+          yaml = YAML.load(config)
+          assert_equal ".gem_rbs_collection", yaml["path"]
+          assert_equal ["ruby/gem_rbs_collection"], yaml["sources"].map {|source| source["name"] }
+
+          assert_match(/created: .*rbs_collection\.yaml/, stdout.string)
+          assert_match(/gems in your Gemfile\.lock/, stdout.string)
+          assert_match(/\$ rbs collection install/, stdout.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_without_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install))
+          end
+
+          assert_match(/rbs_collection\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_update_without_config
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection update))
+          end
+
+          assert_match(/rbs_collection\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_without_gemfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Pathname(dir).join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+
+        _stdout, stderr = run_rbs_collection("install", bundler: false) do |status|
+          refute_predicate status, :success?
+        end
+
+        assert_match(/Gemfile not found/, stderr)
+      end
+    end
+  end
+
+  def test_collection_install_without_gemfile_lock
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        dir = Pathname(dir)
+        dir.join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+        dir.join("Gemfile").write(<<~RUBY)
+          source "https://rubygems.org"
+        RUBY
+
+        _stdout, stderr = run_rbs_collection("install", bundler: false) do |status|
+          refute_predicate status, :success?
+        end
+
+        assert_match(/Gemfile\.lock not found/, stderr)
+        assert_match(/bundle install/, stderr)
+      end
+    end
+  end
+
+  def test_collection_install_frozen_without_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Pathname(dir).join(RBS::Collection::Config::PATH).write(<<~YAML)
+          sources: []
+          path: .gem_rbs_collection
+        YAML
+
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install --frozen))
+          end
+
+          assert_match(/rbs_collection\.lock\.yaml not found/, stderr.string)
+          assert_match(/without `--frozen`/, stderr.string)
+        end
+      end
+    end
+  end
+
+  def test_collection_install_frozen_without_config_and_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        with_cli do |cli|
+          refute_cli_success do
+            cli.run(%w(collection install --frozen))
+          end
+
+          assert_match(/rbs_collection\.lock\.yaml not found/, stderr.string)
+          assert_match(/rbs collection init/, stderr.string)
+        end
+      end
+    end
+  end
+
   def test_collection_install
+    omit_on_jruby! "`rbs collection install` runs `bundle install`, which builds native gem extensions that do not compile on JRuby"
+
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
@@ -1134,6 +1302,8 @@ Processing `lib`...
   end
 
   def test_collection_update
+    omit_on_jruby! "`rbs collection update` runs `bundle install`, which builds native gem extensions that do not compile on JRuby"
+
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
@@ -1157,6 +1327,8 @@ Processing `lib`...
   end
 
   def test_collection_install_gemspec
+    omit_on_jruby! "`rbs collection install` runs `bundle install`, which builds native gem extensions that do not compile on JRuby"
+
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         dir = Pathname(dir)
@@ -1576,6 +1748,42 @@ Processing `lib`...
         assert_instance_of RBS::Collection::Sources::Stdlib, lockfile.gems["cgi-escape"][:source]
         assert_instance_of RBS::Collection::Sources::Local, lockfile.gems["true_string"][:source]
       end
+    end
+  end
+
+  def test_collection_clean
+    Dir.mktmpdir do |dir|
+      dir = Pathname(dir)
+
+      config_path = dir + RBS::Collection::Config::PATH
+      config_path.write("")
+
+      RBS::Collection::Config.to_lockfile_path(config_path).write(<<~YAML)
+        path: .gem_rbs_collection
+        gems:
+          - name: ast
+            version: "2.4"
+            source:
+              type: git
+              name: ruby/gem_rbs_collection
+              remote: https://github.com/ruby/gem_rbs_collection.git
+              revision: b4d3b346d9657543099a35a1fd20347e75b8c523
+              repo_dir: gems
+      YAML
+
+      collection_dir = dir + ".gem_rbs_collection"
+      (collection_dir + "ast/2.4").mkpath
+      (collection_dir + "ast/2.4/ast.rbs").write("class Ast end")
+      (collection_dir + "ast/2.3").mkpath
+      (collection_dir + "rainbow/3.0").mkpath
+
+      with_cli do |cli|
+        assert_cli_success cli.run(["--collection", config_path.to_s, "collection", "clean"])
+      end
+
+      assert_predicate(collection_dir + "ast/2.4/ast.rbs", :file?)
+      refute_predicate(collection_dir + "ast/2.3", :exist?)
+      refute_predicate(collection_dir + "rainbow/3.0", :exist?)
     end
   end
 

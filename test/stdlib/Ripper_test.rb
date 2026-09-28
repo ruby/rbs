@@ -1,4 +1,5 @@
 require_relative "test_helper"
+require "ripper"
 
 class RipperSingletonTest < Test::Unit::TestCase
   include TestHelper

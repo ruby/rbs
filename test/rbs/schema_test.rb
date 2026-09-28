@@ -122,6 +122,18 @@ class RBS::SchemaTest < Test::Unit::TestCase
     )
   end
 
+  def test_method_type_schema_with_forwarding_parameter
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    # Forwarding parameters are only parsed when explicitly enabled
+    source = "(String message, ...) -> void"
+    JSONValidator.method_type.validate!(
+      RBS::Parser._parse_method_type(
+        RBS::Buffer.new(content: source, name: "test.rbs"), 0, source.bytesize, nil, true, true
+      ).to_json
+    )
+  end
+
   def test_decls
     assert_decl RBS::Parser.parse_signature("type Steep::foo = untyped")[2][0], :alias
     assert_decl RBS::Parser.parse_signature("type Steep::foo[A] = A")[2][0], :alias

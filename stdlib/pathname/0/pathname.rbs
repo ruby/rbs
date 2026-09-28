@@ -1,5 +1,23 @@
 %a{annotate:rdoc:skip}
 class Pathname
+  # <!-- rdoc-file=pathname_builtin.rb -->
+  # The version string.
+  #
+  VERSION: String
+
+  # <!--
+  #   rdoc-file=lib/pathname.rb
+  #   - mktmpdir() { |dir| ... }
+  # -->
+  # Creates a tmp directory and wraps the returned path in a Pathname object.
+  #
+  # Note that you need to require 'pathname' to use this method.
+  #
+  # See Dir.mktmpdir
+  #
+  def self.mktmpdir: () -> Pathname
+                   | [U] () { (Pathname) -> U } -> U
+
   # <!--
   #   rdoc-file=lib/pathname.rb
   #   - find(ignore_error: true) { |pathname| ... }
@@ -33,4 +51,6 @@ class Pathname
   # See FileUtils.rm_rf
   #
   def rmtree: () -> self
+
+  def path: () -> String
 end

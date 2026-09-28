@@ -1,0 +1,54 @@
+name: TruffleRuby
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+  merge_group: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['truffleruby']
+        job:
+          - test
+    env:
+      RANDOMIZE_STDLIB_TEST_ORDER: "true"
+      # TruffleRuby warns and falls back to US-ASCII unless the locale is UTF-8.
+      LANG: "en_US.UTF-8"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
+      - name: Set working directory as safe
+        run: git config --global --add safe.directory $(pwd)
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libdb-dev curl autoconf automake m4 libtool python3
+      - name: Update rubygems & bundler
+        run: |
+          ruby -v
+          gem update --system
+      - name: install erb
+        run: gem install erb
+      - name: bundle config
+        run: |
+          # Profilers and the typecheck tooling are not needed for the smoke test,
+          # and some of them do not support TruffleRuby.
+          bundle config set --local without 'profilers typecheck_test'
+      - name: bin/setup
+        run: |
+          bin/setup
+      - name: Run test
+        run: |
+          bundle exec rake ${{ matrix.job }}

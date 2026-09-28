@@ -163,7 +163,7 @@ module RBS
           alias eql? ==
 
           def hash
-            self.class.hash ^ name.hash ^ args.hash ^ location.hash
+            self.class.hash ^ name.hash ^ args.hash
           end
 
           def to_json(state = nil)

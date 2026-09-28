@@ -51,14 +51,6 @@ class RegexpSingletonTest < Test::Unit::TestCase
         assert_send_type  '(string, int | string | bool | nil) -> Regexp',
                           Regexp, :compile, pattern, options
 
-        # In older versions of ruby, `Regexp.{new,compile}` could take an additional third argument,
-        # which indicated "no encoding". Due to weirdnesses with how keyword arguments are passed
-        # around in Ruby, along with how `compile` is registered internally, the `timeout: _ToF?`
-        # argument is interpreted as this optional third argument in older versions. So, to prevent
-        # any issues, this `next` skips it. Note that this issue doesn't occur in `test_initialize`
-        # because the implicit argument passing isn't done.
-        next if RUBY_VERSION < '3.3'
-
         with_float(12.34).and_nil do |timeout|
           assert_send_type  '(string, int | string | bool | nil, timeout: _ToF?) -> Regexp',
                             Regexp, :compile, pattern, options, timeout: timeout
@@ -149,8 +141,6 @@ class RegexpSingletonTest < Test::Unit::TestCase
   end
 
   def test_timeout
-    omit_if RUBY_VERSION < '3.2'
-
     begin
       old_timeout = Regexp.timeout
 
@@ -167,8 +157,6 @@ class RegexpSingletonTest < Test::Unit::TestCase
   end
 
   def test_timeout=
-    omit_if RUBY_VERSION < '3.2'
-
     begin
       old_timeout = Regexp.timeout
 

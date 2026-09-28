@@ -77,6 +77,7 @@
     },
     "include": {
       "title": "Include mixin",
+      "type": "object",
       "properties": {
         "member": {
           "enum": ["include"]
@@ -107,6 +108,7 @@
     },
     "extend": {
       "title": "Extend mixin",
+      "type": "object",
       "properties": {
         "member": {
           "enum": ["extend"]
@@ -137,6 +139,7 @@
     },
     "prepend": {
       "title": "Prepend mixin",
+      "type": "object",
       "properties": {
         "member": {
           "enum": ["prepend"]
@@ -168,6 +171,7 @@
     "attribute": {
       "title": "Attribute definitions",
       "description": "`attr_reader`, `attr_accessor`, `attr_writer`",
+      "type": "object",
       "properties": {
         "member": {
           "type": "string",
@@ -232,6 +236,7 @@
     "alias": {
       "title": "Alias declaration",
       "description": "`alias to_s inspect`, `alias self.new self.allocate`, ...",
+      "type": "object",
       "properties": {
         "member": {
           "type": "string",

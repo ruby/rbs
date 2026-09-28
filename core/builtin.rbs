@@ -179,11 +179,11 @@ interface _EachEntry[out T]
 end
 
 interface _Reader
-  def read: (?int? length, ?string outbuf) -> String?
+  def read: (?int? length, ?string? outbuf) -> String?
 end
 
 interface _ReaderPartial
-  def readpartial: (int maxlen, ?string outbuf) -> String
+  def readpartial: (int maxlen, ?string? outbuf) -> String
 end
 
 interface _Writer

@@ -29,7 +29,7 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
       path = File.join(tmpdir, "test.gz")
       Zlib::GzipWriter.open(path) { _1.puts "hello" }
 
-      File.open(path) do |io|
+      File.open(path, "rb") do |io|
         assert_send_type "(IO io) -> Zlib::GzipReader",
                          Zlib::GzipReader, :wrap, io
 
@@ -39,5 +39,35 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
                          Zlib::GzipReader, :wrap, io do |_| _ end
       end
     end
+  end
+end
+
+class ZlibGzipReaderInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "zlib"
+  testing "::Zlib::GzipReader"
+
+  def test_read
+    assert_send_type "(nil, nil) -> String?",
+                     gzip_reader, :read, nil, nil
+    assert_send_type "(int length, nil) -> String?",
+                     gzip_reader, :read, 1, nil
+  end
+
+  def test_readpartial
+    assert_send_type "(int maxlen, nil) -> String",
+                     gzip_reader, :readpartial, 1, nil
+  end
+
+  private
+
+  def gzip_reader
+    io = StringIO.new
+    writer = Zlib::GzipWriter.new(io)
+    writer.write("hello")
+    writer.close
+
+    Zlib::GzipReader.new(StringIO.new(io.string))
   end
 end

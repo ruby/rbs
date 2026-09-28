@@ -13,7 +13,7 @@ The RBS repository contains the type definitions of Core API and Standard Librar
 There are some discussions whether if it is the best to have them in this repository, but we have them and continue updating the files meanwhile.
 
 The target version of the bundled type definitions is the [latest _release_ of Ruby](https://www.ruby-lang.org/en/downloads/branches/) -- `4.0` as of 2026.
-Note, however, that the CI currently retains the tests on Ruby 3.2 as well.
+Note, however, that the CI runs the tests on every non-EOL Ruby -- `3.3` and later as of 2026.
 
 **The core API** type definitions are in `core` directory.
 You will find the familiar class names in the directory, like `string.rbs` or `array.rbs`.
@@ -33,7 +33,7 @@ You will typically follow the steps as follows:
 
 1. Run `rbs prototype runtime` to generate list of methods.
 2. Run `rbs annotate` to import RDoc comments.
-3. Run `rake generate:stdlib_test[LIB]` to generate a test case.
+3. Run `rake generate:stdlib_test[CLASS,PATH,...]` to generate a test case. Pass the paths to the standard library signatures and their dependencies when needed.
 4. Write the type definitions and tests.
 
 See the next *Useful Tools* section and the guides above for writing and testing RBS files.

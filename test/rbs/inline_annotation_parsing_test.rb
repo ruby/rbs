@@ -559,4 +559,28 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       Parser.parse_inline_leading_annotation("@rbs module-self: foo", 0...)
     end
   end
+
+  def test_parse__trailing_assertion__multibyte_offset
+    buffer = Buffer.new(name: Pathname("test.rb"), content: "日本語\n: String")
+
+    Parser.parse_inline_trailing_annotation(buffer, 4...12).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::NodeTypeAssertion, annot
+      assert_equal ": String", annot.location.source
+      assert_equal ":", annot.prefix_location.source
+      assert_equal "String", annot.type.location.source
+    end
+  end
+
+  def test_parse__leading_annotation__multibyte_offset
+    buffer = Buffer.new(name: Pathname("test.rb"), content: "日本語のコメント\n@rbs return: String -- 戻り値の説明")
+
+    Parser.parse_inline_leading_annotation(buffer, 9...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ReturnTypeAnnotation, annot
+      assert_equal "@rbs return: String -- 戻り値の説明", annot.location.source
+      assert_equal "return", annot.return_location.source
+      assert_equal ":", annot.colon_location.source
+      assert_equal "String", annot.return_type.location.source
+      assert_equal "-- 戻り値の説明", annot.comment_location.source
+    end
+  end
 end

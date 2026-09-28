@@ -1,4 +1,5 @@
 require "test_helper"
+require "timeout"
 
 class RBS::ParserTest < Test::Unit::TestCase
   def buffer(source)
@@ -1027,5 +1028,205 @@ class RBS::ParserTest < Test::Unit::TestCase
     assert_equal [:kEND, 'end', 53...56], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:tTRIVIA, "\n", 56...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
     assert_equal [:pEOF, '', 57...57], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+  end
+
+  def test__lex_crlf
+    content = "# LineComment\r\nclass Foo[T < Integer] < Bar # Comment\r\nend\r\n"
+
+    comments = RBS::Parser.lex(content).value.select { %i[tLINECOMMENT tCOMMENT].include?(_1.type) }
+    assert_equal [["# LineComment", 1], ["# Comment", 2]], comments.map { [_1.location.source, _1.location.end_line] }
+
+    tokens = RBS::Parser._lex(buffer(content), content.length)
+    assert_equal [:tLINECOMMENT, '# LineComment', 0...13], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 13...14], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 14...15], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kCLASS, 'class', 15...20], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 20...21], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Foo', 21...24], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLBRACKET, '[', 24...25], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'T', 25...26], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 26...27], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 27...28], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 28...29], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Integer', 29...36], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pRBRACKET, ']', 36...37], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 37...38], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pLT, '<', 38...39], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 39...40], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tUIDENT, 'Bar', 40...43], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, " ", 43...44], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tCOMMENT, '# Comment', 44...53], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 53...54], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 54...55], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:kEND, 'end', 55...58], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\r", 58...59], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:tTRIVIA, "\n", 59...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+    assert_equal [:pEOF, '', 60...60], tokens.shift.then { |t| [t[0], t[1].source, t[1].range] }
+  end
+
+  def test__lex_comment_with_bare_cr
+    content = "# Comment\rclass Foo"
+    tokens = RBS::Parser.lex(content).value
+
+    assert_equal [:tLINECOMMENT, :pEOF], tokens.map(&:type)
+    assert_equal content, tokens.first.location.source
+  end
+
+  def test_invalid_position_range_raises
+    # Regression: start_pos > end_pos used to cause an infinite loop in the lexer.
+    assert_raises(ArgumentError) do
+      RBS::Parser._parse_signature(buffer(""), 1, 0, false)
+    end
+  end
+
+  def test_invalid_byte_range_in_parse_type_raises
+    # Regression: parse_type's byte_range: keyword reaches _parse_type directly,
+    # which used to hang on reversed ranges.
+    assert_raises(ArgumentError) do
+      RBS::Parser.parse_type("", byte_range: 1..0)
+    end
+  end
+
+  def test_invalid_utf8_byte_in_comment_does_not_hang
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
+    # Regression: invalid UTF-8 byte in a comment used to loop forever in the lexer.
+    source = "# \xC2".dup.force_encoding(Encoding::UTF_8)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
+    end
+  end
+
+  def test_invalid_utf8_byte_at_top_level_raises
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for an invalid UTF-8 byte on TruffleRuby"
+
+    # Regression: invalid UTF-8 byte at top level used to trip RBS_ASSERT in the C extension.
+    source = "\xFF".dup.force_encoding(Encoding::UTF_8)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
+    end
+  end
+
+  def test_non_ascii_identifiers
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        class ServicioÚltimaVez
+        end
+
+        module MiMódulo
+          MI_CONSTANTE_Ñ: Integer
+          def enviar_últimas_interacciones: () -> void
+          def 日本語: () -> void
+          def únicos!: () -> void
+
+          def con_parametros: (Integer 引数, キーワード: String) -> void
+
+          @日本語: Integer
+          @@クラス変数: Integer
+
+          attr_reader nombre_único: String
+        end
+      RBS
+
+      assert_equal RBS::TypeName.parse("ServicioÚltimaVez"), decls[0].name
+      assert_equal RBS::TypeName.parse("MiMódulo"), decls[1].name
+
+      module_members = decls[1].members
+      assert_equal RBS::TypeName.parse("MI_CONSTANTE_Ñ"), module_members[0].name
+      assert_equal :enviar_últimas_interacciones, module_members[1].name
+      assert_equal :日本語, module_members[2].name
+      assert_equal :"únicos!", module_members[3].name
+
+      function = module_members[4].overloads[0].method_type.type
+      assert_equal :引数, function.required_positionals[0].name
+      assert_equal :キーワード, function.required_keywords.keys[0]
+
+      assert_equal :@日本語, module_members[5].name
+      assert_equal :@@クラス変数, module_members[6].name
+      assert_equal :nombre_único, module_members[7].name
+    end
+
+    RBS::Parser.parse_signature(buffer(<<~RBS)).tap do |_, _, decls|
+        interface _Unicós
+          def foo: () -> void
+        end
+
+        type nombre_único = Integer
+
+        $グローバル: Integer
+      RBS
+
+      assert_equal RBS::TypeName.parse("_Unicós"), decls[0].name
+      assert_equal RBS::TypeName.parse("nombre_único"), decls[1].name
+      assert_equal :$グローバル, decls[2].name
+    end
+  end
+
+  def test_type_name_must_start_with_ascii
+    # RBS reads the case of the first character to tell a class name from an
+    # interface name from an alias name, and outside ASCII there is no reading
+    # of it that both the lexer and `TypeName#kind` can agree on. So the first
+    # character of a name in one of those positions has to be ASCII. Ruby asks
+    # for no such thing -- every one of these opens a constant or a local
+    # variable there -- and this is where RBS takes less than Ruby gives.
+    ["日本語", "Ωmega", "ǅFoo"].each do |name|
+      [
+        "class #{name}\nend\n",
+        "module #{name}\nend\n",
+        "interface _#{name}\nend\n",
+        "type #{name} = Integer\n",
+        "#{name}: Integer\n",
+        "class Foo[#{name}]\nend\n",
+        "class Foo\n  def f: () -> #{name}\nend\n",
+      ].each do |source|
+        assert_raises(RBS::ParsingError, source) do
+          RBS::Parser.parse_signature(buffer(source))
+        end
+      end
+    end
+  end
+
+  def test_non_ascii_identifier_in_single_byte_encoding
+    # In ISO-8859-1 this is one byte: `A` with a grave accent is 0xC0. The rule
+    # is about the character being outside ASCII, not about it taking more than
+    # one byte, so a single-byte encoding reaches it the same way.
+    inside = "class Abc\xC0\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(inside))
+    assert_equal "Abc\xC0".b, decls[0].name.name.to_s.b
+
+    leading = "class \xC0bc\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer(leading))
+    end
+
+    method_name = "class Foo\n  def \xC0bc: () -> void\nend\n".dup.force_encoding(Encoding::ISO_8859_1)
+    _, _, decls = RBS::Parser.parse_signature(buffer(method_name))
+    assert_equal "\xC0bc".b, decls[0].members[0].name.to_s.b
+  end
+
+  def test_high_byte_in_ascii_8bit_is_an_identifier
+    # Every byte is a character in ASCII-8BIT, and Ruby takes any non-ASCII one
+    # into an identifier: `\x80abc = 1` assigns a local variable there. None of
+    # those bytes is ASCII, so a name may not open with one.
+    source = "class \x80 end".dup.force_encoding(Encoding::ASCII_8BIT)
+    assert_equal :tNONASCIIIDENT, RBS::Parser.lex(source).value[2].type
+
+    method_name = "class Foo\n  def \x80abc: () -> void\nend\n".dup.force_encoding(Encoding::ASCII_8BIT)
+    _, _, decls = RBS::Parser.parse_signature(buffer(method_name))
+    assert_equal "\x80abc".b, decls[0].members[0].name.to_s.b
+
+    alias_decl = "type \x80abc = Integer\n".dup.force_encoding(Encoding::ASCII_8BIT)
+    assert_raises(RBS::ParsingError) do
+      RBS::Parser.parse_signature(buffer(alias_decl))
+    end
+  end
+
+  def test_utf8_replacement_character_in_comment_parses
+    # A genuine U+FFFD (REPLACEMENT CHARACTER) is a valid 3-byte UTF-8 sequence
+    # ("\xEF\xBF\xBD") that decodes to the multibyte dummy code point, not the
+    # sentinel that marks an invalid byte. A comment containing it must parse fine.
+    source = "# \u{FFFD}\ntype x = untyped\n".dup.force_encoding(Encoding::UTF_8)
+    _, decls = RBS::Parser._parse_signature(buffer(source), 0, source.bytesize, false)
+    assert_equal 1, decls.size
+    assert_instance_of RBS::AST::Declarations::TypeAlias, decls[0]
   end
 end

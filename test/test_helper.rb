@@ -28,6 +28,55 @@ end
 
 class Test::Unit::TestCase
   prepend TestSkip
+
+  # Omit *all* test cases defined in this class when running on TruffleRuby.
+  #
+  # Call it at the class body level for features that are known not to work on
+  # TruffleRuby (e.g. those relying on `RubyVM::AbstractSyntaxTree` or
+  # `TracePoint` events that TruffleRuby does not implement):
+  #
+  #     class RBS::RuntimePrototypeTest < Test::Unit::TestCase
+  #       omit_on_truffle_ruby! "RubyVM::AbstractSyntaxTree is not available"
+  #       # ...
+  #     end
+  def self.omit_on_truffle_ruby!(reason = "Not supported on TruffleRuby")
+    return unless RUBY_ENGINE == "truffleruby"
+
+    setup { omit(reason) }
+  end
+
+  # Omit the running test case when running on TruffleRuby.
+  #
+  # Use it inside a test method when only a few cases of an otherwise supported
+  # class fail on TruffleRuby:
+  #
+  #     def test_something
+  #       omit_on_truffle_ruby!
+  #       # ...
+  #     end
+  def omit_on_truffle_ruby!(reason = "Not supported on TruffleRuby")
+    omit(reason) if RUBY_ENGINE == "truffleruby"
+  end
+
+  # Omit *all* test cases defined in this class when running on JRuby.
+  #
+  # On JRuby the parser runs in WebAssembly (see lib/rbs/wasm). Use this at the
+  # class body level for features that depend on the C extension or on APIs JRuby
+  # does not implement.
+  def self.omit_on_jruby!(reason = "Not supported on JRuby")
+    return unless RUBY_ENGINE == "jruby"
+
+    setup { omit(reason) }
+  end
+
+  # Omit the running test case when running on JRuby.
+  #
+  # Use it inside a test method when only a few cases of an otherwise supported
+  # class fail on JRuby (e.g. those exercising parser features not yet wired
+  # through the WebAssembly bridge, such as `lex` or `parse_type_params`).
+  def omit_on_jruby!(reason = "Not supported on JRuby")
+    omit(reason) if RUBY_ENGINE == "jruby"
+  end
 end
 
 module TestHelper

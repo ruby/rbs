@@ -23,6 +23,19 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     RBS::Parser.parse_signature(buffer)
   end
 
+  # `(...)` forwarding parameters are gated behind a parser option that the
+  # public API deliberately doesn't expose, so the tests below reach for the
+  # private entry points to exercise the syntax itself.
+  def parse_method_type_with_forwarding(string)
+    buffer = Buffer.new(content: string.encode(Encoding::UTF_8), name: "sample.rbs")
+    RBS::Parser._parse_method_type(buffer, 0, buffer.content.bytesize, nil, true, true)
+  end
+
+  def parse_signature_with_forwarding(string)
+    buffer = Buffer.new(content: string.encode(Encoding::UTF_8), name: "sample.rbs")
+    RBS::Parser._parse_signature(buffer, 0, buffer.content.bytesize, true)
+  end
+
   def test_method_type
     Parser.parse_method_type("()->void").yield_self do |type|
       assert_equal "() -> void", type.to_s
@@ -45,6 +58,127 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
 
     Parser.parse_method_type("(untyped _)->void").yield_self do |type|
       assert_equal "(untyped _) -> void", type.to_s
+    end
+  end
+
+  def test_forwarding_parameter_syntax_is_not_enabled_by_default
+    # The syntax has no type checking semantics yet, so the public API never
+    # enables it. Signatures shipped in the wild can't use it.
+    error = assert_raise(RBS::ParsingError) do
+      parse_method_type("(...) -> void")
+    end
+    assert_include error.message, "forwarding parameter syntax is not enabled"
+
+    assert_raise(RBS::ParsingError) do
+      parse_method_type("(String message, ...) -> void")
+    end
+
+    assert_raise(RBS::ParsingError) do
+      parse_signature(<<~RBS)
+        class Foo
+          def foo: (...) -> void
+        end
+      RBS
+    end
+  end
+
+  def test_forwarding_parameter
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    parse_method_type_with_forwarding("(...) -> void").tap do |type|
+      assert_equal "(...) -> void", type.to_s
+      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
+      assert_equal "...", type.type.forwarding.location.source
+      assert_empty type.type.required_positionals
+      assert_nil type.block
+    end
+
+    parse_method_type_with_forwarding("(String message, ...) -> void").tap do |type|
+      assert_equal "(String message, ...) -> void", type.to_s
+      assert_equal 1, type.type.required_positionals.size
+      assert_predicate type.type, :forwarding?
+      assert_instance_of Types::Function::ForwardingParam, type.type.forwarding
+    end
+  end
+
+  def test_forwarding_parameter_with_overload_continuation
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    _, declarations = parse_signature_with_forwarding(<<~RBS)
+      class Foo
+        def foo: (...) -> void
+               | ...
+      end
+    RBS
+
+    method = declarations.fetch(0).members.fetch(0)
+    assert_predicate method, :overloading?
+    assert_predicate method.overloads.fetch(0).method_type.type, :forwarding?
+  end
+
+  def test_forwarding_parameter_rejects_nonleading_parameters
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    [
+      "(?String value, ...) -> void",
+      "(*String values, ...) -> void",
+      "(value: String, ...) -> void",
+      "(?value: String, ...) -> void",
+      "(**String values, ...) -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type_with_forwarding(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_must_be_last
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    [
+      "(..., String) -> void",
+      "(..., ...) -> void",
+      "(...,) -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type_with_forwarding(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_cannot_have_explicit_block
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    [
+      "(...) { () -> void } -> void",
+      "(...) ?{ () -> void } -> void",
+    ].each do |source|
+      assert_raise(RBS::ParsingError) do
+        parse_method_type_with_forwarding(source)
+      end
+    end
+  end
+
+  def test_forwarding_parameter_is_not_allowed_in_block_types
+    omit_on_jruby! "The WebAssembly parser does not support forwarding parameter syntax"
+
+    error = assert_raise(RBS::ParsingError) do
+      parse_method_type_with_forwarding("() { (...) -> void } -> void")
+    end
+    assert_include error.message, "forwarding parameter is not allowed in this context"
+  end
+
+  def test_forwarding_parameter_is_not_allowed_in_proc_types
+    # Proc types are parsed by `_parse_type`, which has no way to enable the
+    # syntax, but the context restriction is checked before the option anyway.
+    [
+      "^(...) -> void",
+      "^(String, ...) -> void",
+    ].each do |source|
+      error = assert_raise(RBS::ParsingError) do
+        parse_type(source)
+      end
+      assert_include error.message, "forwarding parameter is not allowed in this context"
     end
   end
 

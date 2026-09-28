@@ -2,6 +2,12 @@ require_relative "../test_helper"
 require "json"
 require "tempfile"
 
+module JSONVersionTestHelper
+  def json_version_3_or_later?
+    Gem::Version.new(JSON::VERSION).release >= Gem::Version.new("3.0.0")
+  end
+end
+
 class JsonToStr
   def initialize(value = "")
     @value = value
@@ -24,6 +30,7 @@ end
 
 class JSONSingletonTest < Test::Unit::TestCase
   include TestHelper
+  include JSONVersionTestHelper
 
   library "json"
   testing "singleton(::JSON)"
@@ -36,6 +43,8 @@ class JSONSingletonTest < Test::Unit::TestCase
   end
 
   def test_create_id
+    omit_if json_version_3_or_later?
+
     JSON.create_id = JsonToS.new("json_class")
     assert_send_type "() -> _ToS", JSON, :create_id
     JSON.create_id = "json_class"
@@ -43,16 +52,21 @@ class JSONSingletonTest < Test::Unit::TestCase
   end
 
   def test_create_id_eq
+    omit_if json_version_3_or_later?
+
     assert_send_type "(_ToS) -> _ToS", JSON, :create_id=, JsonToS.new("json_class")
     assert_send_type "(String) -> String", JSON, :create_id=, "json_class"
   end
 
   def test_dump
     assert_send_type "(ToJson) -> String", JSON, :dump, ToJson.new
-    assert_send_type "(ToJson, Integer) -> String", JSON, :dump, ToJson.new, 100
     assert_send_type "(ToJson, JsonToWritableIO) -> JsonWrite", JSON, :dump, ToJson.new, JsonToWritableIO.new
     assert_send_type "(ToJson, JsonWrite) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new
-    assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new, 100
+
+    unless json_version_3_or_later?
+      assert_send_type "(ToJson, Integer) -> String", JSON, :dump, ToJson.new, 100
+      assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", JSON, :dump, ToJson.new, JsonWrite.new, 100
+    end
   end
 
   def test_generate
@@ -74,7 +88,10 @@ class JSONSingletonTest < Test::Unit::TestCase
     assert_send_type "(JsonToReadableIO) -> 42", JSON, :load, JsonToReadableIO.new
     assert_send_type "(JsonRead) -> 42", JSON, :load, JsonRead.new
     assert_send_type "(String, Proc) -> 42", JSON, :load, "42", proc { |a| a }
-    assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { |a| a }, { alllow_nan: true }
+
+    unless json_version_3_or_later?
+      assert_send_type "(String, Proc, Hash[untyped, untyped]) -> 42", JSON, :load, "42", proc { |a| a }, { alllow_nan: true }
+    end
   end
 
   def test_load_file
@@ -83,7 +100,9 @@ class JSONSingletonTest < Test::Unit::TestCase
       f.close
 
       assert_send_type "(String) -> untyped", JSON, :load_file, f.path
-      assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file, f.path, { allow_nan: true }
+      unless json_version_3_or_later?
+        assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file, f.path, { allow_nan: true }
+      end
     end
   end
 
@@ -93,20 +112,26 @@ class JSONSingletonTest < Test::Unit::TestCase
       f.close
 
       assert_send_type "(String) -> untyped", JSON, :load_file!, f.path
-      assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file!, f.path, { allow_nan: true }
+      unless json_version_3_or_later?
+        assert_send_type "(String, Hash[untyped, untyped]) -> untyped", JSON, :load_file!, f.path, { allow_nan: true }
+      end
     end
   end
 
   def test_parse
     assert_send_type "(String) -> 42", JSON, :parse, "42"
     assert_send_type "(_ToStr) -> 42", JSON, :parse, JsonToStr.new("42")
-    assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse, "42", { allow_nan: true }
+    unless json_version_3_or_later?
+      assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse, "42", { allow_nan: true }
+    end
   end
 
   def test_parse!
     assert_send_type "(String) -> 42", JSON, :parse!, "42"
     assert_send_type "(_ToStr) -> 42", JSON, :parse!, JsonToStr.new("42")
-    assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse!, "42", { allow_nan: true }
+    unless json_version_3_or_later?
+      assert_send_type "(String, Hash[untyped, untyped]) -> 42", JSON, :parse!, "42", { allow_nan: true }
+    end
   end
 
   def test_parser
@@ -133,6 +158,7 @@ end
 
 class JSONInstanceTest < Test::Unit::TestCase
   include TestHelper
+  include JSONVersionTestHelper
 
   class MyJSON
     include JSON
@@ -147,10 +173,13 @@ class JSONInstanceTest < Test::Unit::TestCase
 
   def test_dump
     assert_send_type "(ToJson) -> String", MyJSON.new, :dump, ToJson.new
-    assert_send_type "(ToJson, Integer) -> String", MyJSON.new, :dump, ToJson.new, 100
     assert_send_type "(ToJson, JsonToWritableIO) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonToWritableIO.new
     assert_send_type "(ToJson, JsonWrite) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new
-    assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new, 100
+
+    unless json_version_3_or_later?
+      assert_send_type "(ToJson, Integer) -> String", MyJSON.new, :dump, ToJson.new, 100
+      assert_send_type "(ToJson, JsonWrite, Integer) -> JsonWrite", MyJSON.new, :dump, ToJson.new, JsonWrite.new, 100
+    end
   end
 
   def test_generate
@@ -161,13 +190,17 @@ class JSONInstanceTest < Test::Unit::TestCase
   def test_parse
     assert_send_type "(String) -> 42", MyJSON.new, :parse, "42"
     assert_send_type "(_ToStr) -> 42", MyJSON.new, :parse, JsonToStr.new("42")
-    assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse, "42", { allow_nan: true }
+    unless json_version_3_or_later?
+      assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse, "42", { allow_nan: true }
+    end
   end
 
   def test_parse!
     assert_send_type "(String) -> 42", MyJSON.new, :parse!, "42"
     assert_send_type "(_ToStr) -> 42", MyJSON.new, :parse!, JsonToStr.new("42")
-    assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse!, "42", { allow_nan: true }
+    unless json_version_3_or_later?
+      assert_send_type "(String, Hash[untyped, untyped]) -> 42", MyJSON.new, :parse!, "42", { allow_nan: true }
+    end
   end
 
   def test_pretty_generate

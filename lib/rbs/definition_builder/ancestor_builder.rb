@@ -179,7 +179,13 @@ module RBS
 
         super_types = with_super_classes.map do |decl|
           super_class = decl.super_class or raise
-          Types::ClassInstance.new(name: super_class.name, args: super_class.args, location: nil)
+          args = super_class.args
+
+          if align_params = entry.align_params(decl)
+            args = args.map {|type| type.sub(align_params) }
+          end
+
+          Types::ClassInstance.new(name: super_class.name, args: args, location: nil)
         end
 
         super_types.uniq!
@@ -473,10 +479,7 @@ module RBS
 
       def mixin_ancestors(entry, type_name, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
         entry.each_decl do |decl|
-          align_params = Substitution.build(
-            decl.type_params.each.map(&:name),
-            entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
-          )
+          align_params = entry.align_params(decl)
 
           mixin_ancestors0(decl,
                            type_name,

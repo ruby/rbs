@@ -1,5 +1,6 @@
 require_relative "../test_helper"
 require "json"
+return if Gem::Version.new(JSON::VERSION).release >= Gem::Version.new("3.0.0")
 require "json/add/bigdecimal"
 
 class JSONBigDecimalSingletonTest < Test::Unit::TestCase

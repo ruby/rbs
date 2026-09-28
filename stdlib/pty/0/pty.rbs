@@ -238,3 +238,17 @@ module PTY
   def self.spawn: (*String command) -> [ IO, IO, Integer ]
                 | (*String command) { ([ IO, IO, Integer ]) -> void } -> void
 end
+
+# <!-- rdoc-file=ext/pty/pty.c -->
+# Thrown when PTY::check is called for a pid that represents a process that has
+# exited.
+#
+class PTY::ChildExited < RuntimeError
+  # <!--
+  #   rdoc-file=ext/pty/pty.c
+  #   - status()
+  # -->
+  # Returns the exit status of the child for which PTY#check raised this exception
+  #
+  def status: () -> Process::Status
+end

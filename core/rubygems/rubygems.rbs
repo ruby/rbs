@@ -17,7 +17,7 @@
 # Further RubyGems documentation can be found at:
 #
 # *   [RubyGems Guides](https://guides.rubygems.org)
-# *   [RubyGems API](https://www.rubydoc.info/github/ruby/rubygems) (also
+# *   [RubyGems API](https://guides.rubygems.org/rubygems-org-api/) (also
 #     available from `gem server`)
 #
 # ## RubyGems Plugins
@@ -89,6 +89,9 @@
 # Thanks!
 #
 # -The RubyGems Team
+#
+# <!-- rdoc-file=lib/rubygems/version.rb -->
+# Workaround for directly loading Gem::Version in some cases
 #
 module Gem
   interface _HashLike[K, V]

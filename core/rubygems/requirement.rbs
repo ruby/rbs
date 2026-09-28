@@ -123,18 +123,8 @@ module Gem
     #
     def satisfied_by?: (Gem::Version version) -> bool
 
-    # <!--
-    #   rdoc-file=lib/rubygems/requirement.rb
-    #   - ===(version)
-    # -->
-    #
     alias === satisfied_by?
 
-    # <!--
-    #   rdoc-file=lib/rubygems/requirement.rb
-    #   - =~(version)
-    # -->
-    #
     alias =~ satisfied_by?
 
     # <!--

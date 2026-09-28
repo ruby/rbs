@@ -9,7 +9,6 @@ module RBS
         attr_reader :path, :full_path
 
         def initialize(path:, base_directory:)
-          # TODO: resolve relative path from dir of rbs_collection.yaml
           @path = Pathname(path)
           @full_path = base_directory / path
         end

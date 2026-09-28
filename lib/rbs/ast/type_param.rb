@@ -114,7 +114,7 @@ module RBS
       def self.rename(params, new_names:)
         raise unless params.size == new_names.size
 
-        subst = Substitution.build(new_names, Types::Variable.build(new_names))
+        subst = Substitution.build(params.map(&:name), Types::Variable.build(new_names))
 
         params.map.with_index do |param, index|
           new_name = new_names[index]

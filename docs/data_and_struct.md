@@ -48,7 +48,7 @@ class Measure < Data.define(:amount, :unit)
 end
 ```
 
-@soutaro has prefered inheriting from `Data.define`, but you may find an extra annonymous class in `.ancestors` [^1].
+@soutaro has preferred inheriting from `Data.define`, but you may find an extra annonymous class in `.ancestors` [^1].
 
 ```ruby
 Measure.ancestors #=> [Measure, #<Class:0xOOF>, Data, ...]

@@ -1222,8 +1222,6 @@ Float::EPSILON: Float
 #
 Float::INFINITY: Float
 
-Float::Infinity: Float
-
 # <!-- rdoc-file=numeric.c -->
 # The number of base digits for the `double` data type.
 #
@@ -1292,25 +1290,3 @@ Float::NAN: Float
 # decimal.
 #
 Float::RADIX: Integer
-
-# Deprecated, do not use.
-#
-# Represents the rounding mode for floating point addition at the start time.
-#
-# Usually defaults to 1, rounding to the nearest number.
-#
-# Other modes include:
-#
-# -1
-# :   Indeterminable
-# 0
-# :   Rounding towards zero
-# 1
-# :   Rounding to the nearest number
-# 2
-# :   Rounding towards positive infinity
-# 3
-# :   Rounding towards negative infinity
-#
-#
-Float::ROUNDS: Integer

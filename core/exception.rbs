@@ -127,7 +127,7 @@ class Exception
   #
   # see [Backtraces](rdoc-ref:exceptions.md@Backtraces).
   #
-  def backtrace: () -> Array[String]?
+  def backtrace: %a{implicitly-returns-nil} () -> Array[String]
 
   # <!--
   #   rdoc-file=error.c
@@ -167,7 +167,7 @@ class Exception
   #
   # See [Backtraces](rdoc-ref:exceptions.md@Backtraces).
   #
-  def backtrace_locations: () -> Array[Thread::Backtrace::Location]?
+  def backtrace_locations: %a{implicitly-returns-nil} () -> Array[Thread::Backtrace::Location]
 
   # <!--
   #   rdoc-file=error.c

@@ -53,6 +53,11 @@
 # Tanaka Akira <akr@fsij.org>
 #
 class PP < PrettyPrint
+  # <!-- rdoc-file=lib/pp.rb -->
+  # The version string
+  #
+  VERSION: String
+
   interface _PrettyPrint
     def pretty_print: (untyped q) -> untyped
 
@@ -123,6 +128,14 @@ class PP < PrettyPrint
     # object reference chain has a cycle.
     #
     def pp: (_PrettyPrint obj) -> untyped
+
+    # <!--
+    #   rdoc-file=lib/pp.rb
+    #   - pp_hash_pair(k, v)
+    # -->
+    # A pretty print for a pair of Hash
+    #
+    def pp_hash_pair: (untyped k, untyped v) -> void
 
     # <!--
     #   rdoc-file=lib/pp.rb

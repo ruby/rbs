@@ -283,8 +283,12 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :read
     assert_send_type  "(::int length) -> ::String",
                       ARGF.class.new(temp_file), :read, 1
+    assert_send_type  "(::int length, nil) -> ::String",
+                      ARGF.class.new(temp_file), :read, 1, nil
     assert_send_type  "(::int length, ::string outbuf) -> ::String",
                       ARGF.class.new(temp_file), :read, 1, +""
+    assert_send_type  "(nil, nil) -> ::String",
+                      ARGF.class.new(temp_file), :read, nil, nil
     assert_send_type  "(::int length) -> nil",
                       ARGF.class.new(Tempfile.new), :read, 1
   end
@@ -292,6 +296,8 @@ class ARGFTest < Test::Unit::TestCase
   def test_read_nonblock
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(temp_file), :read_nonblock, 1
+    assert_send_type  "(::int maxlen, nil) -> ::String",
+                      ARGF.class.new(temp_file), :read_nonblock, 1, nil
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
                       ARGF.class.new(temp_file), :read_nonblock, 1, +""
   end
@@ -309,6 +315,8 @@ class ARGFTest < Test::Unit::TestCase
   def test_readpartial
     assert_send_type  "(::int maxlen) -> ::String",
                       ARGF.class.new(temp_file), :readpartial, 1
+    assert_send_type  "(::int maxlen, nil) -> ::String",
+                      ARGF.class.new(temp_file), :readpartial, 1, nil
     assert_send_type  "(::int maxlen, ::string buf) -> ::String",
                       ARGF.class.new(temp_file), :readpartial, 1, +""
   end

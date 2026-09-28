@@ -180,11 +180,11 @@ module RBS
           )
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
-          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
+          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, -> { "Call trace does not match with given method type: #{trace.inspect}" }
 
           method_defs = method_defs(method)
           all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
-          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
+          assert all_errors.any? {|es| es.empty? }, -> { "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}" }
 
           raise exception if exception
 
@@ -204,11 +204,11 @@ module RBS
           )
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
-          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, "Call trace does not match with given method type: #{trace.inspect}"
+          assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, -> { "Call trace does not match with given method type: #{trace.inspect}" }
 
           method_defs = method_defs(method)
           all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
-          assert all_errors.any? {|es| es.empty? }, "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
+          assert all_errors.any? {|es| es.empty? }, -> { "Call trace does not match one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}" }
 
           # Use `instnace_of?` instead of `is_a?` as we want to check for _the exact exception class_.
           assert exception.instance_of? error_type
@@ -246,7 +246,7 @@ module RBS
 
           method_defs = method_defs(method)
           all_errors = method_defs.map {|t| typecheck.method_call(method, t.type, trace, errors: [], annotations: t.each_annotation.to_a) }
-          assert all_errors.all? {|es| es.size > 0 }, "Call trace unexpectedly matches one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}"
+          assert all_errors.all? {|es| es.size > 0 }, -> { "Call trace unexpectedly matches one of method definitions:\n  #{trace.inspect}\n  #{method_defs.map(&:type).join(" | ")}" }
 
           result
         end
@@ -323,6 +323,15 @@ module RBS
         assert typecheck.value(constant, definition_type), "`#{constant_name}` (#{constant.inspect}) must be compatible with RBS type definition `#{definition_type}`"
       end
 
+      def assert_visibility(visibility, method)
+        _, definition = target
+        method_entry = definition.methods[method]
+
+        assert method_entry, "Method `#{method}` not found in RBS definition"
+        assert visibility == method_entry.accessibility,
+          "Expected `#{method}` to be #{visibility}, but was #{method_entry.accessibility}"
+      end
+
       def assert_type(type, value)
         typecheck = RBS::Test::TypeCheck.new(
           self_class: value.class,
@@ -345,11 +354,12 @@ module RBS
       end
 
       def allow_non_simple_method_type()
+        previous = @allows_non_simple_method_type
         begin
           @allows_non_simple_method_type = true
           yield
-        rescue
-          @allows_non_simple_method_type = false
+        ensure
+          @allows_non_simple_method_type = previous
         end
       end
 

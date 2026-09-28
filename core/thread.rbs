@@ -270,7 +270,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def kill: () -> Thread?
+  def kill: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -318,7 +318,9 @@ class Thread < Object
   # -->
   # Returns the current backtrace of the target thread.
   #
-  def backtrace: (*untyped args) -> ::Array[untyped]
+  def backtrace: %a{implicitly-returns-nil} () -> ::Array[String]
+               | %a{implicitly-returns-nil} (int start, ?int? length) -> ::Array[String]
+               | %a{implicitly-returns-nil} (range[int] range) -> ::Array[String]
 
   # <!--
   #   rdoc-file=thread.c
@@ -332,7 +334,9 @@ class Thread < Object
   # This method behaves similarly to Kernel#caller_locations except it applies to
   # a specific thread.
   #
-  def backtrace_locations: (*untyped args) -> ::Array[untyped]?
+  def backtrace_locations: %a{implicitly-returns-nil} () -> ::Array[Thread::Backtrace::Location]
+                         | %a{implicitly-returns-nil} (int start, ?int? length) -> ::Array[Thread::Backtrace::Location]
+                         | %a{implicitly-returns-nil} (range[int] range) -> ::Array[Thread::Backtrace::Location]
 
   # <!-- rdoc-file=thread.c -->
   # Terminates `thr` and schedules another thread to be run, returning the
@@ -342,7 +346,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def exit: () -> Thread?
+  def exit: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -356,7 +360,7 @@ class Thread < Object
   # is specified, then that will be run and its result returned.  See Thread#[]
   # and Hash#fetch.
   #
-  def fetch: (*untyped sym) -> untyped
+  def fetch: (interned sym, ?untyped default) ?{ (interned sym) -> untyped } -> untyped
 
   # <!--
   #   rdoc-file=thread.c
@@ -428,7 +432,8 @@ class Thread < Object
   #     tick...
   #     tick...
   #
-  def join: (*untyped limit) -> Thread
+  def join: () -> self
+          | (_ToF limit) -> self?
 
   # <!--
   #   rdoc-file=thread.c
@@ -495,7 +500,7 @@ class Thread < Object
   # native thread, it returns *nil*. If the Ruby implementation uses M:N thread
   # model, the ID may change depending on the timing.
   #
-  def native_thread_id: () -> Integer
+  def native_thread_id: () -> Integer?
 
   # <!--
   #   rdoc-file=thread.c
@@ -603,7 +608,7 @@ class Thread < Object
   #
   # See also the instance method #wakeup.
   #
-  def run: () -> Thread
+  def run: () -> self
 
   # Returns the safe level.
   #
@@ -671,7 +676,7 @@ class Thread < Object
   # asynchronous, and the thread can still run a small amount of ruby code before
   # exiting.
   #
-  def terminate: () -> Thread?
+  def terminate: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -778,7 +783,7 @@ class Thread < Object
   #     c.join
   #     #=> "hey!"
   #
-  def wakeup: () -> Thread
+  def wakeup: () -> self
 
   # <!--
   #   rdoc-file=thread.c
@@ -799,7 +804,7 @@ class Thread < Object
   # There is also an instance level method to set this for a specific thread, see
   # #abort_on_exception.
   #
-  def self.abort_on_exception: () -> untyped
+  def self.abort_on_exception: () -> bool
 
   # <!--
   #   rdoc-file=thread.c
@@ -851,18 +856,7 @@ class Thread < Object
   #
   # If this is the main thread, or the last  thread, exit the process.
   #
-  def self.exit: () -> untyped
-
-  # <!--
-  #   rdoc-file=thread.c
-  #   - Thread.start([args]*) {|args| block }   -> thread
-  #   - Thread.fork([args]*) {|args| block }    -> thread
-  # -->
-  # Basically the same as ::new. However, if class Thread is subclassed, then
-  # calling `start` in that subclass will not invoke the subclass's `initialize`
-  # method.
-  #
-  def self.fork: (*untyped args) -> untyped
+  def self.exit: () -> Thread
 
   # <!--
   #   rdoc-file=thread.c
@@ -954,7 +948,7 @@ class Thread < Object
   # For handling all interrupts, use `Object` and not `Exception` as the
   # ExceptionClass, as kill/terminate interrupts are not handled by `Exception`.
   #
-  def self.handle_interrupt: (untyped hash) -> untyped
+  def self.handle_interrupt: [T] (Hash[Class, :immediate | :on_blocking | :never] hash) { (nil) -> T } -> T
 
   # <!--
   #   rdoc-file=thread.c
@@ -991,7 +985,7 @@ class Thread < Object
   #     count            #=> 93947
   #     a.alive?         #=> false
   #
-  def self.kill: (Thread thread) -> untyped
+  def self.kill: (Thread thread) -> Thread
 
   # <!--
   #   rdoc-file=thread.c
@@ -1012,7 +1006,7 @@ class Thread < Object
   #     #<Thread:0x401b3fb0 sleep>
   #     #<Thread:0x401bdf4c run>
   #
-  def self.list: () -> untyped
+  def self.list: () -> Array[Thread]
 
   # <!--
   #   rdoc-file=thread.c
@@ -1021,7 +1015,7 @@ class Thread < Object
   # Give the thread scheduler a hint to pass execution to another thread. A
   # running thread may or may not switch, it depends on OS and processor.
   #
-  def self.pass: () -> untyped
+  def self.pass: () -> nil
 
   # <!--
   #   rdoc-file=thread.c
@@ -1120,7 +1114,7 @@ class Thread < Object
   # There is also an instance level method to set this for a specific thread, see
   # #report_on_exception=.
   #
-  def self.report_on_exception: () -> untyped
+  def self.report_on_exception: () -> bool
 
   # <!--
   #   rdoc-file=thread.c
@@ -1163,6 +1157,17 @@ class Thread < Object
   # method.
   #
   def self.start: (*untyped args) { (?) -> void } -> instance
+
+  # <!--
+  #   rdoc-file=thread.c
+  #   - Thread.start([args]*) {|args| block }   -> thread
+  #   - Thread.fork([args]*) {|args| block }    -> thread
+  # -->
+  # Basically the same as ::new. However, if class Thread is subclassed, then
+  # calling `start` in that subclass will not invoke the subclass's `initialize`
+  # method.
+  #
+  def self.fork: (*untyped args) { (?) -> void } -> instance
 
   # <!--
   #   rdoc-file=thread.c
@@ -1565,10 +1570,10 @@ class Thread::Mutex < Object
 
   # <!--
   #   rdoc-file=thread_sync.rb
-  #   - mutex.lock  -> self
+  #   - mutex.unlock  -> self
   # -->
-  # Attempts to grab the lock and waits if it isn't available. Raises
-  # `ThreadError` if `mutex` was locked by the current thread.
+  # Releases the lock. Raises `ThreadError` if `mutex` wasn't locked by the
+  # current thread.
   #
   def unlock: () -> self
 end
@@ -1751,11 +1756,6 @@ end
 # See Thread::Queue for an example of how a Thread::SizedQueue works.
 #
 class Thread::SizedQueue[E = untyped] < Thread::Queue[E]
-  # <!--
-  #   rdoc-file=thread_sync.rb
-  #   - <<(object, non_block = false, timeout: nil)
-  # -->
-  #
   alias << push
 
   # <!--

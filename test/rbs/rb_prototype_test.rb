@@ -1,6 +1,9 @@
 require "test_helper"
 
 class RBS::RbPrototypeTest < Test::Unit::TestCase
+  omit_on_truffle_ruby! "`RubyVM::AbstractSyntaxTree` is not available on TruffleRuby"
+  omit_on_jruby! "`RubyVM::AbstractSyntaxTree` is not available on JRuby"
+
   RB = RBS::Prototype::RB
 
   include TestHelper

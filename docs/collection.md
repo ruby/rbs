@@ -2,6 +2,17 @@
 
 `rbs collection` sub command manages third party gems' RBS. In short, it is `bundler` for RBS.
 
+## Quickstart
+
+In a project that has a `Gemfile.lock`:
+
+```console
+$ rbs collection init
+$ rbs collection install
+```
+
+`rbs collection` reads `Gemfile.lock`, so there is no list of dependencies to maintain. `rbs` and type checkers such as Steep load the installed RBS files automatically.
+
 ## Requirements
 
 * `git(1)`
@@ -17,33 +28,44 @@ First, generate the configuration file, `rbs_collection.yaml`, with `rbs collect
 $ rbs collection init
 created: rbs_collection.yaml
 
+rbs collection installs RBS files for the gems in your Gemfile.lock.
+Gems in Gemfile.lock don't need to be listed anywhere.
+
+Next steps:
+  $ echo "/.gem_rbs_collection/" >> .gitignore
+  $ rbs collection install    # writes rbs_collection.lock.yaml; keep it in version control
+
 $ cat rbs_collection.yaml
+# rbs collection installs RBS files for the gems in your Gemfile.lock.
+# Run `rbs collection install` to resolve them into rbs_collection.lock.yaml and install them.
+
 # Download sources
 sources:
-  - name: ruby/gem_rbs_collection
+  - type: git
+    name: ruby/gem_rbs_collection
     remote: https://github.com/ruby/gem_rbs_collection.git
     revision: main
     repo_dir: gems
+
+# You can specify local directories as sources also.
+# - type: local
+#   path: path/to/your/local/repository
 
 # A directory to install the downloaded RBSs
 path: .gem_rbs_collection
 
 # gems:
+#   # RBS for a library that doesn't appear in Gemfile.lock, such as a non-gem standard library.
+#   - name: socket
+#
 #   # If you want to avoid installing rbs files for gems, you can specify them here.
 #   - name: GEM_NAME
 #     ignore: true
 ```
 
-I also recommend updating `.gitignore`.
-
-```console
-$ echo /.gem_rbs_collection/ >> .gitignore
-```
-
 ### Install dependencies
 
 Then, install gems' RBS with `rbs collection install`! It copies RBS from [the gem RBS repository](https://github.com/ruby/gem_rbs_collection) to `.gem_rbs_collection/` directory by default.
-I recommend to ignore `.gem_rbs_collection/` from version control system, such as Git.
 
 ```console
 $ rbs collection install
@@ -86,9 +108,9 @@ sources:
 path: .gem_rbs_collection
 
 gems:
-  # If the Gemfile.lock doesn't contain csv gem but you use csv gem,
-  # you can write the gem name explicitly to install RBS of the gem.
-  - name: csv
+  # If the Gemfile.lock doesn't contain socket but you use it,
+  # you can write the library name explicitly to install RBS of the library.
+  - name: socket
 
   # If the Gemfile.lock contains nokogiri gem but you don't want to use the RBS,
   # you can ignore the gem.

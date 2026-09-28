@@ -2,6 +2,7 @@
 #include "rbs/util/rbs_assert.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
+#include "rbs/serialize.h"
 #include "ast_translation.h"
 #include "legacy_location.h"
 #include "rbs_string_bridging.h"
@@ -145,39 +146,80 @@ static VALUE parse_type_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, type);
 }
 
-static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
+/**
+ * `end_pos` may point past the end of the buffer: clamping with a large
+ * number instead of measuring the buffer is ordinary, and the lexer stops at
+ * the end on its own.
+ * */
+static void validate_position_range(VALUE string, int start_pos, int end_pos) {
     if (start_pos < 0 || end_pos < 0) {
         rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
     }
+    if (start_pos > end_pos) {
+        rb_raise(rb_eArgError, "invalid position range: %d...%d", start_pos, end_pos);
+    }
+
+    long size = RSTRING_LEN(string);
+    if ((long) start_pos > size) {
+        rb_raise(rb_eArgError, "position range starts past the end of the buffer: %d...%d, buffer is %ld bytes", start_pos, end_pos, size);
+    }
+}
+
+static rbs_lexer_t *alloc_lexer_from_buffer(rbs_allocator_t *allocator, VALUE string, rb_encoding *encoding, int start_pos, int end_pos) {
+    validate_position_range(string, start_pos, end_pos);
 
     const char *encoding_name = rb_enc_name(encoding);
 
-    return rbs_lexer_new(
+    rbs_lexer_t *lexer = rbs_lexer_new(
         allocator,
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
         end_pos
     );
-}
 
-static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
-    if (start_pos < 0 || end_pos < 0) {
-        rb_raise(rb_eArgError, "negative position range: %d...%d", start_pos, end_pos);
+    if (lexer == NULL) {
+        rb_raise(rb_eArgError, "position range starts inside a character: %d...%d", start_pos, end_pos);
     }
 
+    return lexer;
+}
+
+// Build the parser options from the arguments the `_parse_*` entry points
+// receive. The optional syntax these enable is not part of the public
+// `RBS::Parser` API, so only the private entry points pass them through.
+static rbs_parser_options_t parser_options(VALUE enable_forwarding_params) {
+    return (rbs_parser_options_t) {
+        .enable_forwarding_params = RB_TEST(enable_forwarding_params),
+    };
+}
+
+static rbs_parser_t *alloc_parser_from_buffer_with_options(VALUE buffer, int start_pos, int end_pos, rbs_parser_options_t options) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
+
+    validate_position_range(string, start_pos, end_pos);
 
     rb_encoding *encoding = rb_enc_get(string);
     const char *encoding_name = rb_enc_name(encoding);
 
-    return rbs_parser_new(
+    rbs_parser_t *parser = rbs_parser_new_with_options(
         rbs_string_from_ruby_string(string),
         rbs_encoding_find((const uint8_t *) encoding_name, (const uint8_t *) (encoding_name + strlen(encoding_name))),
         start_pos,
-        end_pos
+        end_pos,
+        options
     );
+
+    if (parser == NULL) {
+        rb_raise(rb_eArgError, "position range starts inside a character: %d...%d", start_pos, end_pos);
+    }
+
+    return parser;
+}
+
+static rbs_parser_t *alloc_parser_from_buffer(VALUE buffer, int start_pos, int end_pos) {
+    return alloc_parser_from_buffer_with_options(buffer, start_pos, end_pos, (rbs_parser_options_t) { 0 });
 }
 
 static VALUE rbsparser_parse_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {
@@ -226,12 +268,12 @@ static VALUE parse_method_type_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) method_type);
 }
 
-static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof) {
+static VALUE rbsparser_parse_method_type(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     declare_type_variables(parser, variables, buffer);
     struct parse_method_type_arg arg = {
         .buffer = buffer,
@@ -265,12 +307,12 @@ static VALUE parse_signature_try(VALUE a) {
     return rbs_struct_to_ruby_value(ctx, (rbs_node_t *) signature);
 }
 
-static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos) {
+static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE enable_forwarding_params) {
     VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
     StringValue(string);
     rb_encoding *encoding = rb_enc_get(string);
 
-    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
     struct parse_signature_arg arg = {
         .buffer = buffer,
         .encoding = encoding,
@@ -279,6 +321,132 @@ static VALUE rbsparser_parse_signature(VALUE self, VALUE buffer, VALUE start_pos
     };
 
     VALUE result = rb_ensure(parse_signature_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
+// Serialize a parsed node into a binary Ruby string using the same encoder the
+// WebAssembly build uses. These `_*_to_bytes` entry points exist so the
+// round-trip (parse -> serialize -> deserialize) can be exercised on CRuby,
+// where it can be compared against the direct C -> Ruby translation.
+static VALUE serialized_node_to_string(rbs_parser_t *parser, rbs_node_t *node) {
+    rbs_string_t bytes = rbs_serialize_node(parser->allocator, &parser->constant_pool, node);
+    return rb_str_new(bytes.start, (long) rbs_string_len(bytes));
+}
+
+static VALUE parse_type_to_bytes_try(VALUE a) {
+    struct parse_type_arg *arg = (struct parse_type_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    if (parser->next_token.type == pEOF) {
+        return Qnil;
+    }
+
+    rbs_node_t *type;
+    rbs_parse_type(parser, &type, RTEST(arg->void_allowed), RTEST(arg->self_allowed), RTEST(arg->classish_allowed));
+
+    raise_error_if_any(parser, arg->buffer);
+
+    if (RB_TEST(arg->require_eof)) {
+        rbs_parser_advance(parser);
+        if (parser->current_token.type != pEOF) {
+            rbs_parser_set_error(parser, parser->current_token, true, "expected a token `%s`", rbs_token_type_str(pEOF));
+            raise_error(parser->error, arg->buffer);
+        }
+    }
+
+    return serialized_node_to_string(parser, type);
+}
+
+static VALUE rbsparser_parse_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE void_allowed, VALUE self_allowed, VALUE classish_allowed) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer(buffer, FIX2INT(start_pos), FIX2INT(end_pos));
+    declare_type_variables(parser, variables, buffer);
+    struct parse_type_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = require_eof,
+        .void_allowed = void_allowed,
+        .self_allowed = self_allowed,
+        .classish_allowed = classish_allowed
+    };
+
+    VALUE result = rb_ensure(parse_type_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
+static VALUE parse_method_type_to_bytes_try(VALUE a) {
+    struct parse_method_type_arg *arg = (struct parse_method_type_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    if (parser->next_token.type == pEOF) {
+        return Qnil;
+    }
+
+    rbs_method_type_t *method_type = NULL;
+    rbs_parse_method_type(parser, &method_type, RB_TEST(arg->require_eof), true);
+
+    raise_error_if_any(parser, arg->buffer);
+
+    return serialized_node_to_string(parser, (rbs_node_t *) method_type);
+}
+
+static VALUE rbsparser_parse_method_type_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE variables, VALUE require_eof, VALUE enable_forwarding_params) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
+    declare_type_variables(parser, variables, buffer);
+    struct parse_method_type_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = require_eof
+    };
+
+    VALUE result = rb_ensure(parse_method_type_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
+
+    RB_GC_GUARD(string);
+
+    return result;
+}
+
+static VALUE parse_signature_to_bytes_try(VALUE a) {
+    struct parse_signature_arg *arg = (struct parse_signature_arg *) a;
+    rbs_parser_t *parser = arg->parser;
+
+    rbs_signature_t *signature = NULL;
+    rbs_parse_signature(parser, &signature);
+
+    raise_error_if_any(parser, arg->buffer);
+
+    return serialized_node_to_string(parser, (rbs_node_t *) signature);
+}
+
+static VALUE rbsparser_parse_signature_to_bytes(VALUE self, VALUE buffer, VALUE start_pos, VALUE end_pos, VALUE enable_forwarding_params) {
+    VALUE string = rb_funcall(buffer, rb_intern("content"), 0);
+    StringValue(string);
+    rb_encoding *encoding = rb_enc_get(string);
+
+    rbs_parser_t *parser = alloc_parser_from_buffer_with_options(buffer, FIX2INT(start_pos), FIX2INT(end_pos), parser_options(enable_forwarding_params));
+    struct parse_signature_arg arg = {
+        .buffer = buffer,
+        .encoding = encoding,
+        .parser = parser,
+        .require_eof = false
+    };
+
+    VALUE result = rb_ensure(parse_signature_to_bytes_try, (VALUE) &arg, ensure_free_parser, (VALUE) parser);
 
     RB_GC_GUARD(string);
 
@@ -455,8 +623,11 @@ void rbs__init_parser(void) {
     rb_gc_register_mark_object(EMPTY_HASH);
 
     rb_define_singleton_method(RBS_Parser, "_parse_type", rbsparser_parse_type, 8);
-    rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 5);
-    rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 3);
+    rb_define_singleton_method(RBS_Parser, "_parse_method_type", rbsparser_parse_method_type, 6);
+    rb_define_singleton_method(RBS_Parser, "_parse_signature", rbsparser_parse_signature, 4);
+    rb_define_singleton_method(RBS_Parser, "_parse_type_to_bytes", rbsparser_parse_type_to_bytes, 8);
+    rb_define_singleton_method(RBS_Parser, "_parse_method_type_to_bytes", rbsparser_parse_method_type_to_bytes, 6);
+    rb_define_singleton_method(RBS_Parser, "_parse_signature_to_bytes", rbsparser_parse_signature_to_bytes, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_type_params", rbsparser_parse_type_params, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_leading_annotation", rbsparser_parse_inline_leading_annotation, 4);
     rb_define_singleton_method(RBS_Parser, "_parse_inline_trailing_annotation", rbsparser_parse_inline_trailing_annotation, 4);

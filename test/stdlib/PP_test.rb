@@ -7,6 +7,10 @@ class PPSingletonTest < Test::Unit::TestCase
   library "pp"
   testing "singleton(::PP)"
 
+  def test_version
+    assert_const_type "String", "PP::VERSION"
+  end
+
   def test_pp
     assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out, ?::Integer width) -> untyped",
                      PP, :pp, Object.new, ''.dup
@@ -104,6 +108,11 @@ class PP::PPMethodsTest < Test::Unit::TestCase
   def test_pp_hash
     assert_send_type "(untyped obj) -> untyped",
                      PP.new, :pp_hash, {}
+  end
+
+  def test_pp_hash_pair
+    assert_send_type "(untyped k, untyped v) -> void",
+                     PP.new, :pp_hash_pair, :a, 1
   end
 end
 

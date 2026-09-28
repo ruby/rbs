@@ -44,4 +44,12 @@ class RBS::FileFinderTest < Test::Unit::TestCase
     assert_equal [tmpdir + "_private/app/x.rbs"], FileFinder.each_file(tmpdir + "_private", skip_hidden: true).to_a
     assert_equal [tmpdir + "_private/_internal/y.rbs", tmpdir + "_private/app/x.rbs"], FileFinder.each_file(tmpdir + "_private", skip_hidden: false).to_a
   end
+
+  def test_dir_path_with_glob_metacharacters
+    (tmpdir / "sig[1]").mkpath
+    (tmpdir / "sig[1]/c.rbs").write("")
+
+    assert_equal [tmpdir + "sig[1]/c.rbs"], FileFinder.each_file(tmpdir + "sig[1]", skip_hidden: true).to_a
+    assert_equal [tmpdir + "sig[1]/c.rbs"], FileFinder.each_file(tmpdir + "sig[1]", skip_hidden: false).to_a
+  end
 end

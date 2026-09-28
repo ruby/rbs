@@ -1,5 +1,176 @@
 # CHANGELOG
 
+## 4.2.0 (2026-08-23)
+
+RBS 4.2 accepts non-ASCII characters in identifiers. Method names, instance variable names and parameter names can be written in any script, and other names may contain non-ASCII characters as long as they start with an ASCII letter, which is what tells a constant from a method name.
+
+```rbs
+class Greeter
+  @挨拶: String
+
+  def こんにちは: () -> String
+end
+```
+
+The parser and the AST support Ruby-style `...` forwarding parameters in method types, but the layers built on top of the parser do not yet. The syntax is disabled by default in 4.2 and is not enabled by the public `RBS::Parser` API, so it cannot be used in regular RBS signatures yet.
+
+Ruby 3.2 reached EOL on 2026-04-01, and this release requires Ruby 3.3 or later. Applications on 3.2 stay on the 4.1 line.
+
+### Signature updates
+
+**Updated classes/modules/methods:** `ERB`, `ERB::DefMethod`, `IO`, `Monitor`, `MonitorMixin::ConditionVariable`, `Singleton`, `StringIO`, `Zlib::GzipFile`, `Zlib::GzipWriter`
+
+* Replace deterministic `untyped` return types with concrete types ([#2966](https://github.com/ruby/rbs/pull/2966))
+* Declare Singleton::SingletonInstanceMethods ([#3037](https://github.com/ruby/rbs/pull/3037))
+
+### Language updates
+
+* Gate forwarding parameter syntax behind parser option ([#3087](https://github.com/ruby/rbs/pull/3087))
+* Support non-ASCII identifiers ([#3082](https://github.com/ruby/rbs/pull/3082))
+* Support forwarding parameters in method types ([#3042](https://github.com/ruby/rbs/pull/3042))
+
+### Library changes
+
+* Drop runtime support for Ruby 3.2 ([#3095](https://github.com/ruby/rbs/pull/3095))
+* Stop the lexer reading past the end of a byte_range ([#3040](https://github.com/ruby/rbs/pull/3040))
+* Exclude CR from comment tokens to fix an off-by-one Location#end_line on CRLF files ([#3069](https://github.com/ruby/rbs/pull/3069))
+* Handle the NULL parser in the WebAssembly shim ([#3085](https://github.com/ruby/rbs/pull/3085))
+* Reject a byte position the lexer cannot start on ([#3083](https://github.com/ruby/rbs/pull/3083))
+* Don't use Clang nullability qualifiers in strict ISO C mode ([#3074](https://github.com/ruby/rbs/pull/3074))
+* Avoid eagerly inspecting call traces in type assertions ([#3073](https://github.com/ruby/rbs/pull/3073))
+* Fix TypeParam.rename to substitute variables in bounds and default types ([#3068](https://github.com/ruby/rbs/pull/3068))
+* Extract per-declaration type param alignment into entry-level align_params ([#3070](https://github.com/ruby/rbs/pull/3070))
+* Align type params across declarations in module-self types and superclass validation ([#3067](https://github.com/ruby/rbs/pull/3067))
+* Build the wasm module with -DNDEBUG ([#3066](https://github.com/ruby/rbs/pull/3066))
+* Rename NODISCARD macro to RBS_NODISCARD ([#3065](https://github.com/ruby/rbs/pull/3065))
+
+### Miscellaneous
+
+* Omit forwarding parameter tests on JRuby ([#3092](https://github.com/ruby/rbs/pull/3092))
+* Skip JSON 2-only tests with JSON 3 ([#3084](https://github.com/ruby/rbs/pull/3084))
+* Pin GitHub Actions to commit hashes ([#3020](https://github.com/ruby/rbs/pull/3020))
+
+## 4.1.3 (2026-08-10)
+
+### Miscellaneous
+
+* Don't use Clang nullability qualifiers in strict ISO C mode ([#3074](https://github.com/ruby/rbs/pull/3074), Backported in [#3075](https://github.com/ruby/rbs/pull/3075))
+* Avoid eagerly inspecting call traces in type assertions ([#3073](https://github.com/ruby/rbs/pull/3073), Backported in [#3076](https://github.com/ruby/rbs/pull/3076))
+
+## 4.1.2 (2026-08-03)
+
+### Miscellaneous
+
+* Keep GC disabled during GC_test#test_stress_and_stress= ([#3061](https://github.com/ruby/rbs/pull/3061))
+* Fix GC_test#test_enable leaving GC disabled for the rest of the suite ([#3059](https://github.com/ruby/rbs/pull/3059))
+
+## 4.1.1 (2026-07-30)
+
+### Library changes
+
+* Include the trailing `?` in a keyword key's symbol location ([#3043](https://github.com/ruby/rbs/pull/3043))
+* Mark `type_name` as optional on the alias annotations ([#3039](https://github.com/ruby/rbs/pull/3039))
+
+### Miscellaneous
+
+* Fix template drift for ext/rbs_extension/ast_translation.c ([#3038](https://github.com/ruby/rbs/pull/3038))
+
+## 4.1.0 (2026-07-27)
+
+RBS 4.1 ships with JRuby support. The RBS parser is written in plain C without depending on the Ruby C API, so it is compiled to WebAssembly and runs on a Wasm runtime, with the parsed AST serialized in a binary format and decoded into RBS objects. The full test suite runs on JRuby in CI.
+
+The inline RBS syntax gets three new features: singleton method definitions (`def self.`), the `module-self` constraint, and instance variable annotations in `module` declarations. Note that RBS inline is still experimental and may change in future releases.
+
+This release also introduces `RBS::Rewriter`, an API to edit RBS source text while preserving the surrounding content, which `rbs annotate` is now built on. Parsing performance is improved by interning type names in a shared trie and reducing allocations per node.
+
+`RBS::Prototype::Runtime`, the RDoc plugin parser, and the top-level `float` type alias are deprecated in this release.
+
+### Signature updates
+
+**Updated classes/modules/methods:** `ARGF`, `Array`, `CSV`, `Class`, `Delegator`, `Digest`, `ERB`, `Enumerable`, `Enumerator`, `Enumerator::Product`, `Etc`, `File`, `File::Constants`, `File::Stat`, `FileUtils`, `Float`, `Gem`, `Hash`, `IO`, `IPAddr`, `Integer`, `JSON`, `Kernel`, `MatchData`, `Module`, `Monitor`, `Numeric`, `ObjectSpace::WeakKeyMap`, `OpenSSL`, `Pathname`, `RBS::Ops`, `Ractor`, `Range`, `Resolv`, `RubyVM::InstructionSequence`, `Set`, `Shellwords`, `String`, `StringIO`, `StringScanner`, `Struct`, `Tempfile`, `Thread`, `Timeout`, `TSort`, `URI::Generic`, `Zlib::GzipReader`, `Zlib::ZStream`
+
+* Remove stale Float constants and add a constant drift test ([#2994](https://github.com/ruby/rbs/pull/2994))
+* Update RDoc comments with Ruby 4.0.6 ([#3035](https://github.com/ruby/rbs/pull/3035))
+* Add a dependency on tempfile. ([#3025](https://github.com/ruby/rbs/pull/3025))
+* Support `%a{implicitly-returns-nil}` on `MatchData#[]` ([#2990](https://github.com/ruby/rbs/pull/2990))
+* Update `Array` ([#2987](https://github.com/ruby/rbs/pull/2987))
+* Allow nil output buffers for reader methods ([#3002](https://github.com/ruby/rbs/pull/3002))
+* Add stdlib signature tests for #2967 ([#2989](https://github.com/ruby/rbs/pull/2989))
+* Update `Integer`, phase 1 ([#2995](https://github.com/ruby/rbs/pull/2995))
+* Add RBS::Ops  ([#2934](https://github.com/ruby/rbs/pull/2934))
+* Update Module ([#2933](https://github.com/ruby/rbs/pull/2933))
+* Correct core/stdlib signatures to match Ruby 4.0 ([#2967](https://github.com/ruby/rbs/pull/2967))
+* Revert Digest::Class method changes ([#2980](https://github.com/ruby/rbs/pull/2980))
+* Add stdlib tests for updated StringScanner signatures ([#2968](https://github.com/ruby/rbs/pull/2968))
+* Update `StringScanner` signatures to match strscan 3.1.6 ([#2959](https://github.com/ruby/rbs/pull/2959))
+* Remove StringScanner methods absent from the latest Ruby release ([#2961](https://github.com/ruby/rbs/pull/2961))
+* Fix `Resolv#initialize` signature: array of resolvers + `use_ipv6:` ([#2960](https://github.com/ruby/rbs/pull/2960))
+* [Hash] Update Hash's signatures and tests to be correct ([#2694](https://github.com/ruby/rbs/pull/2694))
+* update rbs signatures to be more consistent with generics ([#2867](https://github.com/ruby/rbs/pull/2867))
+* Use top-level `path` in fileutils.rbs to suppress deprecation warning ([#2949](https://github.com/ruby/rbs/pull/2949))
+* Update File::Constants and File::Stat ([#2942](https://github.com/ruby/rbs/pull/2942))
+* Add signature for `RubyVM::InstructionSequence.of` ([#2916](https://github.com/ruby/rbs/pull/2916))
+* fix OpenSSL#session_new_cb signature ([#2924](https://github.com/ruby/rbs/pull/2924))
+* [Class] update class.rbs ([#2898](https://github.com/ruby/rbs/pull/2898))
+* Deprecate top-level float ([#2695](https://github.com/ruby/rbs/pull/2695))
+* [Kernel] Updated querying methods ([#2685](https://github.com/ruby/rbs/pull/2685))
+
+### Library changes
+
+* Convert character offset to byte offset in parse_inline_*_annotation ([#2945](https://github.com/ruby/rbs/pull/2945))
+* Guard against underflow when sysconf(_SC_PAGESIZE) returns 0 ([#3031](https://github.com/ruby/rbs/pull/3031))
+* Report invalid UTF-8 byte in a comment as a parsing error ([#2983](https://github.com/ruby/rbs/pull/2983))
+* Fetch Chicory/ASM jars from Maven instead of bundling in gem ([#3019](https://github.com/ruby/rbs/pull/3019))
+* Add write barrier protection to RBS Location objects ([#3022](https://github.com/ruby/rbs/pull/3022))
+* Rename parameter in rbs_intern_type_name for clarity ([#3023](https://github.com/ruby/rbs/pull/3023))
+* Deprecate RDoc plugin parser ([#3016](https://github.com/ruby/rbs/pull/3016))
+* Run the test suite on JRuby (JRuby support, step 4) ([#3008](https://github.com/ruby/rbs/pull/3008))
+* Run the RBS parser on JRuby via WebAssembly (JRuby support, step 3) ([#3000](https://github.com/ruby/rbs/pull/3000))
+* Add binary serialization of the parsed AST (JRuby support, step 2) ([#2999](https://github.com/ruby/rbs/pull/2999))
+* Build the RBS parser as a WebAssembly module (JRuby support, step 1) ([#2998](https://github.com/ruby/rbs/pull/2998))
+* Reject reversed position ranges in parser/lexer entrypoints ([#2974](https://github.com/ruby/rbs/pull/2974))
+* Fix lexer infinite loop / abort on invalid UTF-8 byte ([#2973](https://github.com/ruby/rbs/pull/2973))
+* Flyweight TypeName / Namespace cached in a shared trie ([#2957](https://github.com/ruby/rbs/pull/2957))
+* Reduce Hash allocation per `Node` creation ([#2946](https://github.com/ruby/rbs/pull/2946))
+* Tidy `ast_translation.c` ([#2947](https://github.com/ruby/rbs/pull/2947))
+* Auto-generate rbs_ast_ruby_annotations_t union from config.yml ([#2939](https://github.com/ruby/rbs/pull/2939))
+* Speed up RBS::InlineParser on large sources with non-ASCII characters ([#2950](https://github.com/ruby/rbs/pull/2950))
+* Support `def self.method_name` singleton method in inline parser ([#2935](https://github.com/ruby/rbs/pull/2935))
+* This is not prism ([#2951](https://github.com/ruby/rbs/pull/2951))
+* Add RBS::Rewriter and use it in rbs annotate ([#2927](https://github.com/ruby/rbs/pull/2927))
+* Add nullability annotations to AST pointer types ([#2922](https://github.com/ruby/rbs/pull/2922))
+* Support `module-self` inline annotation ([#2921](https://github.com/ruby/rbs/pull/2921))
+* Inline instance variable annotation in module declaration ([#2919](https://github.com/ruby/rbs/pull/2919))
+
+#### rbs prototype
+
+* Fix nested declarations in rbs prototype rbi ([#3029](https://github.com/ruby/rbs/pull/3029))
+* Deprecate prototype runtime ([#2956](https://github.com/ruby/rbs/pull/2956))
+
+#### rbs collection
+
+* Clean up partial clone before falling back to full clone ([#2978](https://github.com/ruby/rbs/pull/2978))
+* Suppress spurious warning for non-gem stdlib libraries ([#2929](https://github.com/ruby/rbs/pull/2929))
+
+### Miscellaneous
+
+* Fix Lint/DuplicateMethods in StringIO_test.rb ([#3010](https://github.com/ruby/rbs/pull/3010))
+* Compressed files must be opened in binary mode ([#2981](https://github.com/ruby/rbs/pull/2981))
+* Fix flaky DirSingletonTest GC failures in test_fchdir and test_for_fd ([#3004](https://github.com/ruby/rbs/pull/3004))
+* Add TruffleRuby CI job ([#2996](https://github.com/ruby/rbs/pull/2996))
+* Update the target Ruby version notes to the latest release ([#2962](https://github.com/ruby/rbs/pull/2962))
+* Update docs/inline.md to match current inline parser behavior ([#2953](https://github.com/ruby/rbs/pull/2953))
+* ci: skip Gemfile.lock BUNDLED WITH on ruby-head ([#2952](https://github.com/ruby/rbs/pull/2952))
+* Remove `logger` from sig dependencies ([#2904](https://github.com/ruby/rbs/pull/2904))
+
+## 4.0.3 (2026-06-18)
+
+### Miscellaneous
+
+* Fix Ruby CI failure with compressed `Zlib::GzipReader` test fixtures. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix flaky `DirSingletonTest#test_fchdir` and `DirSingletonTest#test_for_fd` under aggressive GC. ([#3005](https://github.com/ruby/rbs/pull/3005))
+* Fix Ruby head CI failure caused by the lockfile-pinned Bundler version. ([#3005](https://github.com/ruby/rbs/pull/3005))
+
 ## 4.0.2 (2026-03-25)
 
 ### Library changes
