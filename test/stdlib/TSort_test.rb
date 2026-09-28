@@ -8,6 +8,10 @@ class TSortSingletonTest < Test::Unit::TestCase
   library 'tsort'
   testing "singleton(::TSort)"
 
+  def test_version
+    assert_const_type "String", "TSort::VERSION"
+  end
+
   class EachNode
     def initialize(*nodes)
       @nodes = nodes

@@ -114,6 +114,10 @@
 # *SIAM Journal on Computing*, Vol. 1, No. 2, pp. 146-160, June 1972.
 #
 module TSort[N] : TSort::_Sortable[N]
+  # <!-- rdoc-file=lib/tsort.rb -->
+  # The version string.
+  #
+  VERSION: String
   # <!--
   #   rdoc-file=lib/tsort.rb
   #   - each_strongly_connected_component(each_node, each_child) { |nodes| ... }

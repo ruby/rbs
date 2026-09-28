@@ -95,6 +95,8 @@ module Singleton
   #
   VERSION: String
 
+  def self.module_with_class_methods: () -> singleton(Singleton::SingletonClassMethods)
+
   module SingletonInstanceMethods
     def clone: () -> bot
 

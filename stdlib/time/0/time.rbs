@@ -1,5 +1,7 @@
 %a{annotate:rdoc:skip}
 class Time
+  VERSION: String
+
   interface _TimeLike
     def year: () -> Integer
 

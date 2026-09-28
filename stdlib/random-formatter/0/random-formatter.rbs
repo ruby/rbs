@@ -275,3 +275,11 @@ module RBS
     end
   end
 end
+
+%a{annotate:rdoc:skip}
+module Random::Formatter
+  # <!-- rdoc-file=lib/random/formatter.rb -->
+  # The default character list for #alphanumeric.
+  #
+  ALPHANUMERIC: Array[String]
+end
