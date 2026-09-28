@@ -509,6 +509,15 @@
 # *   #each_codepoint: reads each remaining codepoint, passing it to the block.
 #
 class StringIO
+  # <!-- rdoc-file=ext/stringio/stringio.c -->
+  # The version string
+  #
+  VERSION: String
+
+  # <!-- rdoc-file=ext/stringio/stringio.c -->
+  # Maximum length that a StringIO instance can hold
+  #
+  MAX_LENGTH: Integer
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
   #   - StringIO.new(string = '', mode = 'r+') -> new_stringio
@@ -1217,6 +1226,15 @@ class StringIO
   # Returns `false`; for compatibility with IO.
   #
   def isatty: () -> bool
+
+  # <!-- rdoc-file=ext/stringio/stringio.c -->
+  # Returns the number of bytes in the string in `self`:
+  #
+  #     StringIO.new('hello').size     # => 5  # Five 1-byte characters.
+  #     StringIO.new('тест').size      # => 8  # Four 2-byte characters.
+  #     StringIO.new('こんにちは').size # => 15 # Five 3-byte characters.
+  #
+  alias length size
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c

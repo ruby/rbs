@@ -1,0 +1,16 @@
+%a{annotate:rdoc:skip}
+module Zlib
+  # <!-- rdoc-file=ext/zlib/zlib.c -->
+  # Subclass of Zlib::Error. This error is raised when the zlib stream is
+  # currently in progress.
+  #
+  # For example:
+  #
+  #     inflater = Zlib::Inflate.new
+  #     inflater.inflate(compressed) do
+  #       inflater.inflate(compressed) # Raises Zlib::InProgressError
+  #     end
+  #
+  class InProgressError < Zlib::Error
+  end
+end
