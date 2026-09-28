@@ -8,6 +8,10 @@ class ThreadSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Thread)"
 
+  def test_ignore_deadlock
+    assert_send_type "() -> bool", Thread, :ignore_deadlock
+  end
+
   def test_abort_on_exception
     assert_send_type "() -> bool", Thread, :abort_on_exception
   end
