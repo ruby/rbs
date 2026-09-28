@@ -1015,7 +1015,7 @@ class Thread < Object
   # Give the thread scheduler a hint to pass execution to another thread. A
   # running thread may or may not switch, it depends on OS and processor.
   #
-  def self.pass: () -> untyped
+  def self.pass: () -> nil
 
   # <!--
   #   rdoc-file=thread.c
