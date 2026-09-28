@@ -65,6 +65,10 @@ class ThreadSingletonTest < Test::Unit::TestCase
   def test_list
     assert_send_type "() -> Array[Thread]", Thread, :list
   end
+
+  def test_pass
+    assert_send_type "() -> nil", Thread, :pass
+  end
 end
 
 class ThreadTest < Test::Unit::TestCase
