@@ -7,6 +7,10 @@ class ShellwordsSingletonTest < Test::Unit::TestCase
   library "shellwords"
   testing "singleton(::Shellwords)"
 
+  def test_version
+    assert_const_type "String", "Shellwords::VERSION"
+  end
+
   def test_shellescape
     assert_send_type  "(::String str) -> ::String",
                       Shellwords, :shellescape, "shell"

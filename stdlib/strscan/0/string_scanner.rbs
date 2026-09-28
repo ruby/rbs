@@ -1646,3 +1646,9 @@ end
 StringScanner::Id: String
 
 StringScanner::Version: String
+
+# <!-- rdoc-file=ext/strscan/strscan.c -->
+# The error class for StringScanner. See StringScanner#unscan.
+#
+class StringScanner::Error < StandardError
+end

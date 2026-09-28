@@ -18,6 +18,10 @@ class StringScannerSingletonTest < Test::Unit::TestCase
     assert_send_type "() -> singleton(::StringScanner)",
                      StringScanner, :must_C_version
   end
+
+  def test_error
+    assert_const_type "Class", "StringScanner::Error"
+  end
 end
 
 class StringScannerTest < Test::Unit::TestCase
