@@ -307,6 +307,13 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_private?
+    assert_send_type(
+      "() -> bool",
+      IO::Buffer.new(4), :private?
+    )
+  end
+
   def test_readonly?
     assert_send_type(
       "() -> bool",
@@ -343,6 +350,13 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Array[Symbol], Integer, Array[Integer]) -> Integer",
       buf, :set_values, [:U128], 0, [3]
+    )
+  end
+
+  def test_shared?
+    assert_send_type(
+      "() -> bool",
+      IO::Buffer.new(4), :shared?
     )
   end
 

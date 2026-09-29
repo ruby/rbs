@@ -767,6 +767,32 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - private? -> true or false
+    # -->
+    # If the buffer is *private*, meaning modifications to the buffer will not be
+    # replicated to the underlying file mapping.
+    #
+    #     # Create a test file:
+    #     File.write('test.txt', 'test')
+    #
+    #     # Create a private mapping from the given file. Note that the file here
+    #     # is opened in read-only mode, but it doesn't matter due to the private
+    #     # mapping:
+    #     buffer = IO::Buffer.map(File.open('test.txt'), nil, 0, IO::Buffer::PRIVATE)
+    #     # => #<IO::Buffer 0x00007fce63f11000+4 MAPPED PRIVATE>
+    #
+    #     # Write to the buffer (invoking CoW of the underlying file buffer):
+    #     buffer.set_string('b', 0)
+    #     # => 1
+    #
+    #     # The file itself is not modified:
+    #     File.read('test.txt')
+    #     # => "test"
+    #
+    def private?: () -> bool
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - pwrite(io, from, [length, [offset]]) -> written length or -errno
     # -->
     # Write at least `length` bytes from the buffer starting at `offset`, into the
@@ -927,6 +953,31 @@ class IO
     #     # 0x00000000  01 00 02 00 00 00 00 00                         ........
     #
     def set_values: (Array[int_get_type | float_get_type] buffer_types, Integer offset, Array[Integer | Float] values) -> Integer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - shared? -> true or false
+    # -->
+    # If the buffer is *shared*, meaning it references memory that can be shared
+    # with other processes (and thus might change without being modified locally).
+    #
+    #     # Create a test file:
+    #     File.write('test.txt', 'test')
+    #
+    #     # Create a shared mapping from the given file, the file must be opened in
+    #     # read-write mode unless we also specify IO::Buffer::READONLY:
+    #     buffer = IO::Buffer.map(File.open('test.txt', 'r+'), nil, 0)
+    #     # => #<IO::Buffer 0x00007f1bffd5e000+4 EXTERNAL MAPPED SHARED>
+    #
+    #     # Write to the buffer, which will modify the mapped file:
+    #     buffer.set_string('b', 0)
+    #     # => 1
+    #
+    #     # The file itself is modified:
+    #     File.read('test.txt')
+    #     # => "best"
+    #
+    def shared?: () -> bool
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -1188,6 +1239,12 @@ class IO
     # it will fail. See #readonly? for more details.
     #
     READONLY: Integer
+
+    # <!-- rdoc-file=io_buffer.c -->
+    # Indicates that the memory in the buffer is also mapped such that it can be
+    # shared with other processes. See #shared? for more details.
+    #
+    SHARED: Integer
 
     # <!-- rdoc-file=io_buffer.c -->
     # Raised when an operation would resize or re-allocate a locked buffer.
