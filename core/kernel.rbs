@@ -717,7 +717,7 @@ module Kernel : BasicObject
   # `__FILE__` is `nil`, it returns `nil`. The return value equals to
   # <code>File.dirname(File.realpath(__FILE__))</code>.
   #
-  def self?.__dir__: () -> String?
+  def self?.__dir__: %a{implicitly-returns-nil} () -> String
 
   # <!--
   #   rdoc-file=eval.c
