@@ -685,6 +685,7 @@ class Hash[unchecked out K, unchecked out V]
   # Related: #[]=; see also [Methods for
   # Fetching](rdoc-ref:Hash@Methods+for+Fetching).
   #
+  %a{pure}
   def []: %a{implicitly-returns-nil} (_Key key) -> V
 
   # <!--
