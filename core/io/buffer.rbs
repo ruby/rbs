@@ -1036,6 +1036,20 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - values(buffer_type, [offset, [count]]) -> array
+    # -->
+    # Returns an array of values of `buffer_type` starting from `offset`.
+    #
+    # If `count` is given, only `count` values will be returned.
+    #
+    #     IO::Buffer.for("Hello World").values(:U8, 2, 2)
+    #     # => [108, 108]
+    #
+    def values: (?int_get_type buffer_type, ?Integer offset, ?Integer count) -> Array[Integer]
+              | (float_get_type buffer_type, ?Integer offset, ?Integer count) -> Array[Float]
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - write(io, [length, [offset]]) -> written length or -errno
     # -->
     # Write at least `length` bytes from the buffer starting at `offset`, into the

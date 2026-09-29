@@ -382,4 +382,24 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
       IO::Buffer.for(""), :valid?
     )
   end
+
+  def test_values
+    buf = IO::Buffer.for("abcd")
+
+    assert_send_type(
+      "() -> Array[Integer]",
+      buf, :values
+    )
+    assert_send_type(
+      "(:U8, Integer, Integer) -> Array[Integer]",
+      buf, :values, :U8, 1, 2
+    )
+
+    float_buf = IO::Buffer.new(8)
+    float_buf.set_values([:F32, :F32], 0, [1.5, 2.5])
+    assert_send_type(
+      "(:F32, Integer, Integer) -> Array[Float]",
+      float_buf, :values, :F32, 0, 2
+    )
+  end
 end
