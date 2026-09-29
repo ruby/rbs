@@ -143,6 +143,28 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_get_values
+    buf = IO::Buffer.new(16)
+    buf.set_values([:U8, :F32, :U16], 0, [1, 2.5, 3])
+
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Integer | Float]",
+      buf, :get_values, [:U8, :F32, :U16], 0
+    )
+
+    buf.set_value(:U128, 0, 3)
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Integer]",
+      buf, :get_values, [:U128], 0
+    )
+
+    buf.set_values([:F32, :F64], 0, [1.5, 2.5])
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Float]",
+      buf, :get_values, [:F32, :F64], 0
+    )
+  end
+
   def test_hexdump
     buf = IO::Buffer.for("hello world")
 
@@ -220,6 +242,20 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, Integer, Integer) -> Integer",
       buf, :set_value, :U16, 0, 123
+    )
+  end
+
+  def test_set_values
+    buf = IO::Buffer.new(16)
+
+    assert_send_type(
+      "(Array[Symbol], Integer, Array[Integer | Float]) -> Integer",
+      buf, :set_values, [:U8, :F32, :U16], 0, [1, 2.5, 3]
+    )
+
+    assert_send_type(
+      "(Array[Symbol], Integer, Array[Integer]) -> Integer",
+      buf, :set_values, [:U128], 0, [3]
     )
   end
 

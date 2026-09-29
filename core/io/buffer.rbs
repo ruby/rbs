@@ -414,8 +414,24 @@ class IO
                       | :u16 | :U16 | :s16 | :S16
                       | :u32 | :U32 | :s32 | :S32
                       | :u64 | :U64 | :s64 | :S64
+                      | :u128 | :U128 | :s128 | :S128
 
     type float_get_type = :f32 | :F32 | :f64 | :F64
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - get_values(buffer_types, offset) -> array
+    # -->
+    # Similar to #get_value, except that it can handle multiple buffer types and
+    # returns an array of values.
+    #
+    #     string = [1.5, 2.5].pack('ff')
+    #     IO::Buffer.for(string).get_values([:f32, :f32], 0)
+    #     # => [1.5, 2.5]
+    #
+    def get_values: (Array[int_get_type] buffer_types, Integer offset) -> Array[Integer]
+                  | (Array[float_get_type] buffer_types, Integer offset) -> Array[Float]
+                  | (Array[int_get_type | float_get_type] buffer_types, Integer offset) -> Array[Integer | Float]
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -729,6 +745,23 @@ class IO
     #     #                      ^^ the same as if we'd pass just integer 2
     #
     def set_value: (int_get_type | float_get_type, Integer offset, Float | Integer value) -> Integer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - set_values(buffer_types, offset, values) -> offset
+    # -->
+    # Write `values` of `buffer_types` at `offset` to the buffer. `buffer_types`
+    # should be an array of symbols as described in #get_value. `values` should be
+    # an array of values to write.
+    #
+    #     buffer = IO::Buffer.new(8)
+    #     buffer.set_values([:U8, :U16], 0, [1, 2])
+    #     buffer
+    #     # =>
+    #     # #<IO::Buffer 0x696f717561746978+8 INTERNAL>
+    #     # 0x00000000  01 00 02 00 00 00 00 00                         ........
+    #
+    def set_values: (Array[int_get_type | float_get_type] buffer_types, Integer offset, Array[Integer | Float] values) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
