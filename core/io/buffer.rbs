@@ -203,12 +203,87 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - source & mask -> io_buffer
+    # -->
+    # Generate a new buffer the same size as the source by applying the binary AND
+    # operation to the source, using the mask, repeating as necessary.
+    #
+    #     IO::Buffer.for("1234567890") & IO::Buffer.for("\xFF\x00\x00\xFF")
+    #     # =>
+    #     # #<IO::Buffer 0x00005589b2758480+4 INTERNAL>
+    #     # 0x00000000  31 00 00 34 35 00 00 38 39 00                   1..45..89.
+    #
+    def &: (Buffer mask) -> Buffer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - <=>(other) -> true or false
     # -->
     # Buffers are compared by size and exact contents of the memory they are
     # referencing using `memcmp`.
     #
     def <=>: (Buffer) -> Integer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - source ^ mask -> io_buffer
+    # -->
+    # Generate a new buffer the same size as the source by applying the binary XOR
+    # operation to the source, using the mask, repeating as necessary.
+    #
+    #     IO::Buffer.for("1234567890") ^ IO::Buffer.for("\xFF\x00\x00\xFF")
+    #     # =>
+    #     # #<IO::Buffer 0x000055a2d5d10480+10 INTERNAL>
+    #     # 0x00000000  ce 32 33 cb ca 36 37 c7 c6 30                   .23..67..0
+    #
+    def ^: (Buffer mask) -> Buffer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - source | mask -> io_buffer
+    # -->
+    # Generate a new buffer the same size as the source by applying the binary OR
+    # operation to the source, using the mask, repeating as necessary.
+    #
+    #     IO::Buffer.for("1234567890") | IO::Buffer.for("\xFF\x00\x00\xFF")
+    #     # =>
+    #     # #<IO::Buffer 0x0000561785ae3480+10 INTERNAL>
+    #     # 0x00000000  ff 32 33 ff ff 36 37 ff ff 30                   .23..67..0
+    #
+    def |: (Buffer mask) -> Buffer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - ~source -> io_buffer
+    # -->
+    # Generate a new buffer the same size as the source by applying the binary NOT
+    # operation to the source.
+    #
+    #     ~IO::Buffer.for("1234567890")
+    #     # =>
+    #     # #<IO::Buffer 0x000055a5ac42f120+10 INTERNAL>
+    #     # 0x00000000  ce cd cc cb ca c9 c8 c7 c6 cf                   ..........
+    #
+    def ~: () -> Buffer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - source.and!(mask) -> io_buffer
+    # -->
+    # Modify the source buffer in place by applying the binary AND operation to the
+    # source, using the mask, repeating as necessary.
+    #
+    #     source = IO::Buffer.for("1234567890").dup # Make a read/write copy.
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a0d0c20+10 INTERNAL>
+    #     # 0x00000000  31 32 33 34 35 36 37 38 39 30                   1234567890
+    #
+    #     source.and!(IO::Buffer.for("\xFF\x00\x00\xFF"))
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a0d0c20+10 INTERNAL>
+    #     # 0x00000000  31 00 00 34 35 00 00 38 39 00                   1..45..89.
+    #
+    def and!: (Buffer mask) -> self
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -582,6 +657,44 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - source.not! -> io_buffer
+    # -->
+    # Modify the source buffer in place by applying the binary NOT operation to the
+    # source.
+    #
+    #     source = IO::Buffer.for("1234567890").dup # Make a read/write copy.
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a33a450+10 INTERNAL>
+    #     # 0x00000000  31 32 33 34 35 36 37 38 39 30                   1234567890
+    #
+    #     source.not!
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a33a450+10 INTERNAL>
+    #     # 0x00000000  ce cd cc cb ca c9 c8 c7 c6 cf                   ..........
+    #
+    def not!: () -> self
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - source.or!(mask) -> io_buffer
+    # -->
+    # Modify the source buffer in place by applying the binary OR operation to the
+    # source, using the mask, repeating as necessary.
+    #
+    #     source = IO::Buffer.for("1234567890").dup # Make a read/write copy.
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a272350+10 INTERNAL>
+    #     # 0x00000000  31 32 33 34 35 36 37 38 39 30                   1234567890
+    #
+    #     source.or!(IO::Buffer.for("\xFF\x00\x00\xFF"))
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a272350+10 INTERNAL>
+    #     # 0x00000000  ff 32 33 ff ff 36 37 ff ff 30                   .23..67..0
+    #
+    def or!: (Buffer mask) -> self
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - pread(io, from, [length, [offset]]) -> read length or -errno
     # -->
     # Read at least `length` bytes from the `io` starting at the specified `from`
@@ -903,6 +1016,25 @@ class IO
     # This leads to `123` being written into <code>output.txt</code>
     #
     def write: (untyped, untyped) -> untyped
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - source.xor!(mask) -> io_buffer
+    # -->
+    # Modify the source buffer in place by applying the binary XOR operation to the
+    # source, using the mask, repeating as necessary.
+    #
+    #     source = IO::Buffer.for("1234567890").dup # Make a read/write copy.
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a25b3e0+10 INTERNAL>
+    #     # 0x00000000  31 32 33 34 35 36 37 38 39 30                   1234567890
+    #
+    #     source.xor!(IO::Buffer.for("\xFF\x00\x00\xFF"))
+    #     # =>
+    #     # #<IO::Buffer 0x000056307a25b3e0+10 INTERNAL>
+    #     # 0x00000000  ce 32 33 cb ca 36 37 c7 c6 30                   .23..67..0
+    #
+    def xor!: (Buffer mask) -> self
 
     private
 

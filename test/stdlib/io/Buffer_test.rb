@@ -60,6 +60,41 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   include TestHelper
   testing "::IO::Buffer"
 
+  BufferSubclass = Class.new(IO::Buffer)
+
+  def test_bitwise_operators
+    buffer = IO::Buffer.for("test")
+    mask = IO::Buffer.for("\xFF\x00")
+
+    [:&, :|, :^].each do |operator|
+      assert_send_type(
+        "(IO::Buffer) -> IO::Buffer",
+        buffer, operator, mask
+      )
+    end
+
+    assert_send_type(
+      "() -> IO::Buffer",
+      buffer, :~
+    )
+  end
+
+  def test_bitwise_mutation
+    mask = IO::Buffer.for("\xFF\x00")
+
+    [:and!, :or!, :xor!].each do |operator|
+      assert_send_type(
+        "(IO::Buffer) -> IO_Buffer_InstanceTest::BufferSubclass",
+        BufferSubclass.new(4), operator, mask
+      )
+    end
+
+    assert_send_type(
+      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      BufferSubclass.new(4), :not!
+    )
+  end
+
   def test_spaceship
     buf1 = IO::Buffer.for("")
     buf2 = IO::Buffer.for("test")
