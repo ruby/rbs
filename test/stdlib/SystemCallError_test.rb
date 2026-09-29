@@ -20,27 +20,16 @@ class SystemCallErrorSingletonTest < Test::Unit::TestCase
   end
 end
 
-class SystemCallErrorTest < StdlibTest
-  target SystemCallError
+class SystemCallErrorInstanceTest < Test::Unit::TestCase
+  include TestHelper
 
-  def test_initialize
-    SystemCallError.new('hi', 0)
-    a = SystemCallError.new(ToStr.new('hi'), 0)
-    a.errno
-    a.message
-  end
+  testing '::SystemCallError'
 
   def test_errno
-    begin
-      raise Errno::ENOENT, 'test'
-    rescue SystemCallError => exception
-      exception.errno
-    end
+    error = SystemCallError.new(Errno::ENOENT::Errno)
+    assert_send_type '() -> Integer', error, :errno
 
-    begin
-      raise SystemCallError.new('test', 3)
-    rescue SystemCallError => exception
-      exception.errno
-    end
+    error = SystemCallError.new('test')
+    assert_send_type '() -> nil', error, :errno
   end
 end
