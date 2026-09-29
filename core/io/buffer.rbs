@@ -175,6 +175,19 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - size_of(buffer_type) -> byte size
+    #   - size_of(array of buffer_type) -> byte size
+    # -->
+    # Returns the size of the given buffer type(s) in bytes.
+    #
+    #     IO::Buffer.size_of(:u32) # => 4
+    #     IO::Buffer.size_of([:u32, :u32]) # => 8
+    #
+    def self.size_of: (int_get_type | float_get_type buffer_type) -> Integer
+                    | (Array[int_get_type | float_get_type] buffer_types) -> Integer
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - IO::Buffer.string(length) {|io_buffer| ... read/write io_buffer ...} -> string
     # -->
     # Creates a new string of the given length and yields a zero-copy IO::Buffer

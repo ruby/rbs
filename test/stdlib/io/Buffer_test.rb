@@ -34,6 +34,18 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
     )
   end
 
+  def test_size_of
+    assert_send_type(
+      "(Symbol) -> Integer",
+      IO::Buffer, :size_of, :u32
+    )
+
+    assert_send_type(
+      "(Array[Symbol]) -> Integer",
+      IO::Buffer, :size_of, [:U8, :f32, :U128]
+    )
+  end
+
   def test_string
     with_int 10 do |int|
       assert_send_type(
