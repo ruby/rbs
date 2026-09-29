@@ -390,6 +390,45 @@ class IO
 
     # <!--
     #   rdoc-file=io_buffer.c
+    #   - each(buffer_type, [offset, [count]]) {|offset, value| ...} -> self
+    #   - each(buffer_type, [offset, [count]]) -> enumerator
+    # -->
+    # Iterates over the buffer, yielding each `value` of `buffer_type` starting from
+    # `offset`.
+    #
+    # If `count` is given, only `count` values will be yielded.
+    #
+    #     IO::Buffer.for("Hello World").each(:U8, 2, 2) do |offset, value|
+    #       puts "#{offset}: #{value}"
+    #     end
+    #     # 2: 108
+    #     # 3: 108
+    #
+    def each: (?int_get_type buffer_type, ?Integer offset, ?Integer count) { (Integer, Integer) -> void } -> self
+            | (float_get_type buffer_type, ?Integer offset, ?Integer count) { (Integer, Float) -> void } -> self
+            | (?int_get_type buffer_type, ?Integer offset, ?Integer count) -> Enumerator[[Integer, Integer], self]
+            | (float_get_type buffer_type, ?Integer offset, ?Integer count) -> Enumerator[[Integer, Float], self]
+
+    # <!--
+    #   rdoc-file=io_buffer.c
+    #   - each_byte([offset, [count]]) {|byte| ...} -> self
+    #   - each_byte([offset, [count]]) -> enumerator
+    # -->
+    # Iterates over the buffer, yielding each byte starting from `offset`.
+    #
+    # If `count` is given, only `count` bytes will be yielded.
+    #
+    #     IO::Buffer.for("Hello World").each_byte(2, 2) do |offset, byte|
+    #       puts "#{offset}: #{byte}"
+    #     end
+    #     # 2: 108
+    #     # 3: 108
+    #
+    def each_byte: (?Integer offset, ?Integer count) { (Integer) -> void } -> self
+                 | (?Integer offset, ?Integer count) -> Enumerator[Integer, self]
+
+    # <!--
+    #   rdoc-file=io_buffer.c
     #   - empty? -> true or false
     # -->
     # If the buffer has 0 size: it is created by ::new with size 0, or with ::for

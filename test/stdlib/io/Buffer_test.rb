@@ -137,6 +137,46 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_each
+    buf = BufferSubclass.new(2)
+    buf.set_string("ab")
+
+    assert_send_type(
+      "() -> Enumerator[[Integer, Integer], IO_Buffer_InstanceTest::BufferSubclass]",
+      buf, :each
+    )
+    assert_send_type(
+      "(:U8, Integer, Integer) { (Integer, Integer) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :each, :U8, 0, 2
+    ) { |_, _| }
+
+    float_buf = BufferSubclass.new(8)
+    float_buf.set_values([:F32, :F32], 0, [1.5, 2.5])
+
+    assert_send_type(
+      "(:F32) -> Enumerator[[Integer, Float], IO_Buffer_InstanceTest::BufferSubclass]",
+      float_buf, :each, :F32
+    )
+    assert_send_type(
+      "(:F32, Integer, Integer) { (Integer, Float) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      float_buf, :each, :F32, 0, 2
+    ) { |_, _| }
+  end
+
+  def test_each_byte
+    buf = BufferSubclass.new(3)
+    buf.set_string("abc")
+
+    assert_send_type(
+      "() -> Enumerator[Integer, IO_Buffer_InstanceTest::BufferSubclass]",
+      buf, :each_byte
+    )
+    assert_send_type(
+      "(Integer, Integer) { (Integer) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :each_byte, 1, 2
+    ) { |_| }
+  end
+
   def test_empty?
     buf = IO::Buffer.for("hello world")
 
