@@ -991,14 +991,24 @@ namespace :wasm do
   task :install_jars do
     # Resolves the `jar` requirements from rbs.gemspec via Maven and downloads
     # them (and their transitive deps) into ~/.m2, the same way `gem install`
-    # does; the jars are not copied into the gem. The platform is forced to java
-    # because Jars::Installer skips non-java gems, and write_require_file is false
-    # because lib/rbs_jars.rb is hand-maintained (the generator mangles the
-    # `com.dylibso.chicory:runtime` artifact id).
+    # does; the jars are not copied into the gem. RBS_PLATFORM=java makes the
+    # gemspec stamp the java platform because Jars::Installer skips non-java
+    # gems, and write_require_file is false because lib/rbs_jars.rb is
+    # hand-maintained (the generator mangles the `com.dylibso.chicory:runtime`
+    # artifact id).
+    #
+    # The gemspec is passed as a path, not a loaded Gem::Specification: for the
+    # latter jar-dependencies works in `spec.gem_dir`, which for a checkout is a
+    # nonexistent `../gems/rbs-*-java` directory, and jar-dependencies >= 0.6
+    # (JRuby >= 10.1.2.0) fails to write its temporary deps.lst there.
     require "jars/installer"
-    spec = Gem::Specification.load("rbs.gemspec")
-    spec.platform = "java"
-    Jars::Installer.new(spec).install_jars(write_require_file: false)
+    platform, ENV["RBS_PLATFORM"] = ENV["RBS_PLATFORM"], "java"
+    begin
+      installer = Jars::Installer.new(File.expand_path("rbs.gemspec", __dir__))
+    ensure
+      ENV["RBS_PLATFORM"] = platform
+    end
+    installer.install_jars(write_require_file: false)
   end
 
   desc "Build rbs_parser.wasm and copy it next to RBS::WASM::Runtime"
