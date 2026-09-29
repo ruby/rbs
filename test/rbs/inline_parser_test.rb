@@ -1679,6 +1679,65 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_parse__instance_variable_between_members
+    result = parse(<<~RUBY)
+      class Person
+        def initialize
+        end
+
+        # @rbs @name: String
+
+        attr_reader :name #: String
+
+        # @rbs @age: Integer
+
+        def age = @age
+
+        # @rbs @email: String
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+
+      assert_equal 6, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :initialize, member.name
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@name, member.name
+        assert_equal "String", member.type.to_s
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@age, member.name
+        assert_equal "Integer", member.type.to_s
+      end
+
+      decl.members[4].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :age, member.name
+      end
+
+      decl.members[5].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::InstanceVariableMember, member
+        assert_equal :@email, member.name
+        assert_equal "String", member.type.to_s
+      end
+    end
+  end
+
   def test_parse__instance_variable_in_module
     result = parse(<<~RUBY)
       module Foo
