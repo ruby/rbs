@@ -5,10 +5,22 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
   testing "singleton(::IO::Buffer)"
 
   def test_for
-    assert_send_type(
-      "(String) -> IO::Buffer",
-      IO::Buffer, :for, "Hello world"
-    )
+    with_string "Hello world" do |source|
+      assert_send_type(
+        "(string) -> IO::Buffer",
+        IO::Buffer, :for, source
+      )
+
+      assert_send_type(
+        "(string) { (IO::Buffer) -> Integer } -> Integer",
+        IO::Buffer, :for, source
+      ) { 42 }
+
+      assert_send_type(
+        "(string) { (IO::Buffer) -> String } -> String",
+        IO::Buffer, :for, source
+      ) { "result" }
+    end
   end
 
   def test_map

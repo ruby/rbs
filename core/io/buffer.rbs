@@ -124,7 +124,8 @@ class IO
     #       # => "Test"
     #     end
     #
-    def self.for: (String) -> Buffer
+    def self.for: (string) -> Buffer
+                | [A] (string) { (Buffer) -> A } -> A
 
     # <!--
     #   rdoc-file=io_buffer.c
