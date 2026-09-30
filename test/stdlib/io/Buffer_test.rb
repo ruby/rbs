@@ -428,4 +428,70 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
       float_buf, :values, :F32, 0, 2
     )
   end
+
+  def test_read
+    IO.pipe do |reader, writer|
+      writer.close
+
+      with_io reader do |io|
+        buffer = IO::Buffer.new(4)
+
+        assert_send_type("(io) -> Integer", buffer, :read, io)
+        assert_send_type("(io, Integer) -> Integer", buffer, :read, io, 2)
+        assert_send_type("(io, nil) -> Integer", buffer, :read, io, nil)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :read, io, 2, 1)
+        assert_send_type("(io, nil, Integer) -> Integer", buffer, :read, io, nil, 1)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :read, io, 2, nil)
+        assert_send_type("(io, nil, nil) -> Integer", buffer, :read, io, nil, nil)
+      end
+    end
+  end
+
+  def test_pread
+    IO.pipe do |reader, writer|
+      with_io reader do |io|
+        buffer = IO::Buffer.new(4)
+
+        assert_send_type("(io, Integer) -> Integer", buffer, :pread, io, 1)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :pread, io, 1, 2)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :pread, io, 1, nil)
+        assert_send_type("(io, Integer, Integer, Integer) -> Integer", buffer, :pread, io, 1, 2, 1)
+        assert_send_type("(io, Integer, nil, Integer) -> Integer", buffer, :pread, io, 1, nil, 1)
+        assert_send_type("(io, Integer, Integer, nil) -> Integer", buffer, :pread, io, 1, 2, nil)
+        assert_send_type("(io, Integer, nil, nil) -> Integer", buffer, :pread, io, 1, nil, nil)
+      end
+    end
+  end
+
+  def test_write
+    IO.pipe do |reader, writer|
+      with_io writer do |io|
+        buffer = IO::Buffer.for("data")
+
+        assert_send_type("(io) -> Integer", buffer, :write, io)
+        assert_send_type("(io, Integer) -> Integer", buffer, :write, io, 2)
+        assert_send_type("(io, nil) -> Integer", buffer, :write, io, nil)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :write, io, 2, 1)
+        assert_send_type("(io, nil, Integer) -> Integer", buffer, :write, io, nil, 1)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :write, io, 2, nil)
+        assert_send_type("(io, nil, nil) -> Integer", buffer, :write, io, nil, nil)
+      end
+    end
+  end
+
+  def test_pwrite
+    IO.pipe do |reader, writer|
+      with_io writer do |io|
+        buffer = IO::Buffer.for("data")
+
+        assert_send_type("(io, Integer) -> Integer", buffer, :pwrite, io, 1)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :pwrite, io, 1, 2)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :pwrite, io, 1, nil)
+        assert_send_type("(io, Integer, Integer, Integer) -> Integer", buffer, :pwrite, io, 1, 2, 1)
+        assert_send_type("(io, Integer, nil, Integer) -> Integer", buffer, :pwrite, io, 1, nil, 1)
+        assert_send_type("(io, Integer, Integer, nil) -> Integer", buffer, :pwrite, io, 1, 2, nil)
+        assert_send_type("(io, Integer, nil, nil) -> Integer", buffer, :pwrite, io, 1, nil, nil)
+      end
+    end
+  end
 end

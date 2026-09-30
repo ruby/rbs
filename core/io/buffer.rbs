@@ -764,7 +764,7 @@ class IO
     #       # 0x00000000  05 35 73 74         te.5
     #     end
     #
-    def pread: (untyped, untyped, untyped) -> untyped
+    def pread: (io, Integer from, ?Integer? length, ?Integer? offset) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -817,7 +817,7 @@ class IO
     # This leads to `234` (3 bytes, starting from position 1) being written into
     # <code>output.txt</code>, starting from file position 2.
     #
-    def pwrite: (untyped, untyped, untyped) -> untyped
+    def pwrite: (io, Integer from, ?Integer? length, ?Integer? offset) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -846,7 +846,7 @@ class IO
     #       # 0x00000000  05 35 73 74         .5st
     #     end
     #
-    def read: (untyped, untyped) -> untyped
+    def read: (io, ?Integer? length, ?Integer? offset) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -1120,7 +1120,7 @@ class IO
     #
     # This leads to `123` being written into <code>output.txt</code>
     #
-    def write: (untyped, untyped) -> untyped
+    def write: (io, ?Integer? length, ?Integer? offset) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
