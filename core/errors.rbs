@@ -624,7 +624,8 @@ class SystemCallError < StandardError
   # A subclass of SystemCallError can also be instantiated via the `new` method of
   # the subclass.  See Errno.
   #
-  def initialize: (string msg, Integer errno) -> void
+  def initialize: (Integer errno) -> void
+                | (string? msg, ?Integer? errno, ?_ToS func) -> void
 
   # <!--
   #   rdoc-file=error.c
@@ -641,7 +642,7 @@ class SystemCallError < StandardError
   # -->
   # Return this SystemCallError's error number.
   #
-  def errno: () -> Integer
+  def errno: () -> Integer?
 end
 
 # <!-- rdoc-file=error.c -->
