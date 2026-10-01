@@ -200,7 +200,7 @@ class IO
     #     end
     #     # => "Ruby"
     #
-    def self.string: (int) { (Buffer) -> void } -> String
+    def self.string: (int) { (instance) -> void } -> String
 
     # <!--
     #   rdoc-file=io_buffer.c

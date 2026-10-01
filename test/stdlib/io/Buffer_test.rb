@@ -77,8 +77,13 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
     with_int 10 do |int|
       assert_send_type(
         "(int) { (IO::Buffer) -> nil } -> String",
-        IO::Buffer, :string, int, &proc { nil }
-      )
+        IO::Buffer, :string, int
+      ) { nil }
+
+      assert_send_type(
+        "(int) { (IO_Buffer_InstanceTest::BufferSubclass) -> nil } -> String",
+        IO_Buffer_InstanceTest::BufferSubclass, :string, int
+      ) { nil }
     end
   end
 end
