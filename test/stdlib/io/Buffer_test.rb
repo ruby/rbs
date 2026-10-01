@@ -20,6 +20,21 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
         "(string) { (IO::Buffer) -> String } -> String",
         IO::Buffer, :for, source
       ) { "result" }
+
+      assert_send_type(
+        "(string) -> IO_Buffer_InstanceTest::BufferSubclass",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      )
+
+      assert_send_type(
+        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> Integer } -> Integer",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      ) { 42 }
+
+      assert_send_type(
+        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> String } -> String",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      ) { "result" }
     end
   end
 
