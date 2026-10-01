@@ -342,6 +342,37 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_set_string
+    buf = IO::Buffer.new(16)
+
+    with_string "test" do |source|
+      assert_send_type(
+        "(string) -> Integer",
+        buf, :set_string, source
+      )
+      assert_send_type(
+        "(string, Integer) -> Integer",
+        buf, :set_string, source, 1
+      )
+      assert_send_type(
+        "(string, Integer, Integer) -> Integer",
+        buf, :set_string, source, 1, 2
+      )
+      assert_send_type(
+        "(string, Integer, Integer, Integer) -> Integer",
+        buf, :set_string, source, 1, 2, 1
+      )
+      assert_send_type(
+        "(string, Integer, nil) -> Integer",
+        buf, :set_string, source, 1, nil
+      )
+      assert_send_type(
+        "(string, Integer, nil, Integer) -> Integer",
+        buf, :set_string, source, 1, nil, 1
+      )
+    end
+  end
+
   def test_set_value
     buf = IO::Buffer.new(30)
 
