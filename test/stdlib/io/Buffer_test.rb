@@ -411,11 +411,35 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_slice
-    buf = IO::Buffer.new(30)
+    buf = BufferSubclass.new(30)
 
     assert_send_type(
-      "(Integer, Integer) -> IO::Buffer",
+      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice
+    )
+    assert_send_type(
+      "(Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, 1
+    )
+    assert_send_type(
+      "(Integer, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
       buf, :slice, 0, 5
+    )
+    assert_send_type(
+      "(nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil
+    )
+    assert_send_type(
+      "(nil, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil, 5
+    )
+    assert_send_type(
+      "(Integer, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, 1, nil
+    )
+    assert_send_type(
+      "(nil, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil, nil
     )
   end
 

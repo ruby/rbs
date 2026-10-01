@@ -1040,7 +1040,7 @@ class IO
     #     # #<IO::Buffer 0x00007fc3d31e2d80+4 INTERNAL>
     #     # 0x00000000  74 6f 73 74                                     tost
     #
-    def slice: (Integer offset, Integer length) -> Buffer
+    def slice: (?Integer? offset, ?Integer? length) -> self
 
     # <!--
     #   rdoc-file=io_buffer.c
