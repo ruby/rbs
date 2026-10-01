@@ -902,7 +902,7 @@ class IO
     # See also #copy for examples of how buffer writing might be used for changing
     # associated strings and files.
     #
-    def set_string: (*untyped) -> untyped
+    def set_string: (string string, ?Integer offset, ?Integer? length, ?Integer source_offset) -> Integer
 
     # <!--
     #   rdoc-file=io_buffer.c
