@@ -1073,7 +1073,7 @@ class IO
     #     buffer.null?
     #     # => true
     #
-    def transfer: () -> Buffer
+    def transfer: () -> self
 
     # <!--
     #   rdoc-file=io_buffer.c

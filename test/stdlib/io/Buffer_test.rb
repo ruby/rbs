@@ -455,6 +455,10 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
       "() -> IO::Buffer",
       IO::Buffer.for(""), :transfer
     )
+    assert_send_type(
+      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      BufferSubclass.new(4), :transfer
+    )
   end
 
   def test_valid?
