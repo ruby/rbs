@@ -21,7 +21,7 @@
 //! ```
 
 use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
+use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::marker::PhantomData;
 use std::num::NonZeroU64;
 
@@ -131,6 +131,32 @@ pub enum TypeNameTag {}
 /// Identifier for an interned type name. Content-addressed: derived from
 /// the parent type name's hash and the last segment's hash.
 pub type TypeName = Id<TypeNameTag>;
+
+/// `Id<T>` is already an xxh3 hash, so this passes it through instead of
+/// re-hashing with `SipHash`.
+#[derive(Default)]
+pub(crate) struct IdHasher(u64);
+
+impl Hasher for IdHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write_u64(&mut self, n: u64) {
+        self.0 = n;
+    }
+
+    fn write(&mut self, _bytes: &[u8]) {
+        unreachable!("IdHasher only hashes Id<T> values")
+    }
+}
+
+/// Insertion-ordered like Ruby's `Hash`; `Environment` consumers depend on
+/// that order for deterministic results.
+///
+/// Keyed by `Id<T>` (named by its tag, e.g. `IdIndexMap<TypeNameTag, _>`) so
+/// that `IdHasher` only ever sees the single `write_u64` of an `Id<T>`.
+pub(crate) type IdIndexMap<T, V> = indexmap::IndexMap<Id<T>, V, BuildHasherDefault<IdHasher>>;
 
 #[cfg(test)]
 mod tests {
