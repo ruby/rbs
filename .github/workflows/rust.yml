@@ -184,3 +184,41 @@ jobs:
         run: |
           cd rust
           cargo clippy
+
+  wasm:
+    name: cargo:wasm
+    runs-on: ubuntu-latest
+    env:
+      # Keep these versions in sync with .github/workflows/wasm.yml.
+      WASI_SDK_VERSION: "33"
+      WASI_SDK_RELEASE: "33.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ruby
+          bundler: none
+      - name: Update rubygems & bundler
+        run: gem update --system
+      - name: Install gems
+        run: |
+          bundle config set --local without libs:profilers
+          bundle install --jobs 4 --retry 3
+      - name: Set up vendored RBS source
+        run: bundle exec rake rust:rbs:sync
+      - name: Install Rust target
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
+          rustup target add wasm32-wasip1
+      - name: Install the WASI SDK
+        run: |
+          url="https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_RELEASE}-x86_64-linux.tar.gz"
+          mkdir -p "$RUNNER_TEMP/wasi-sdk"
+          curl -sSL "$url" | tar xz --strip-components=1 -C "$RUNNER_TEMP/wasi-sdk"
+          echo "WASI_SDK_PATH=$RUNNER_TEMP/wasi-sdk" >> "$GITHUB_ENV"
+      - name: Build Rust crates for wasm
+        working-directory: rust
+        run: cargo build --locked --target wasm32-wasip1 -p ruby-rbs-sys -p ruby-rbs
