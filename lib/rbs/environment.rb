@@ -58,12 +58,13 @@ module RBS
 
     def initialize_copy(other)
       @sources = other.sources.dup
-      @class_decls = other.class_decls.dup
+      @class_decls = other.class_decls.transform_values(&:dup)
       @interface_decls = other.interface_decls.dup
       @type_alias_decls = other.type_alias_decls.dup
       @constant_decls = other.constant_decls.dup
       @global_decls = other.global_decls.dup
       @class_alias_decls = other.class_alias_decls.dup
+      @normalize_module_name_cache = other.instance_variable_get(:@normalize_module_name_cache).dup
     end
 
     def self.from_loader(loader)
