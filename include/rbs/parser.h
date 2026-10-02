@@ -4,6 +4,7 @@
 #include "rbs/defines.h"
 #include "rbs/util/rbs_allocator.h"
 #include "rbs/util/rbs_constant_pool.h"
+#include "rbs/util/rbs_buffer.h"
 #include "rbs/lexer.h"
 #include "rbs/ast.h"
 
@@ -27,9 +28,8 @@ typedef struct rbs_comment_t {
     rbs_position_t start;
     rbs_position_t end;
 
-    size_t line_tokens_capacity;
     size_t line_tokens_count;
-    rbs_token_t *line_tokens;
+    rbs_buffer_t /* of rbs_token_t */ line_tokens;
 
     struct rbs_comment_t *next_comment;
 } rbs_comment_t;
