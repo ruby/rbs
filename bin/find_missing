@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+require "ruby/signature"
+require "optparse"
+
+Members = Ruby::Signature::AST::Members
+
+def get_methods_and_aliases(decls)
+  methods = []
+  aliases = []
+
+  decls.each do |sig|
+    case sig
+    when Ruby::Signature::AST::Declarations::Class, Ruby::Signature::AST::Declarations::Module, Ruby::Signature::AST::Declarations::Interface
+      sig.members.each do |member|
+        case member
+        when Members::Alias
+          aliases << "alias #{member.new_name} #{member.old_name}"
+        when Members::MethodDefinition
+          methods << "#{member.kind == :singleton ? 'self.' : ''}#{member.name}"
+        end
+      end
+    end
+  end
+
+  return methods, aliases
+end
+
+def get_decls_from_runtime
+  require_libs = []
+  relative_libs = []
+  merge = false
+  owners_included = []
+  klasses = []
+
+  OptionParser.new do |opts|
+    opts.on("--require=[LIB]") do |lib|
+      require_libs << lib
+    end
+    opts.on("--require-relative=[LIB]") do |lib|
+      relative_libs << lib
+    end
+    opts.on("--merge") do
+      merge = true
+    end
+    opts.on("--method-owner=[CLASS]") do |klass|
+      owners_included << klass
+    end
+    opts.on("--patterns=[CLASS]") do |klass|
+      klasses << klass
+    end
+  end.parse!
+
+  require(*require_libs) unless require_libs.empty?
+  require_relative(*relative_libs) unless relative_libs.empty?
+
+  return Ruby::Signature::Prototype::Runtime.new(patterns: klasses, env: [], merge: merge, owners_included: owners_included).decls
+end
+
+decls = get_decls_from_runtime()
+sigs = []
+
+ARGV.map {|f| Pathname(f) }.each do |path|
+  puts "Opening #{path}..."
+
+  buffer = Ruby::Signature::Buffer.new(name: path, content: path.read)
+  sigs.concat(Ruby::Signature::Parser.parse_signature(buffer))
+end
+
+file_methods, file_aliases = get_methods_and_aliases(sigs)
+runtime_methods, runtime_aliases = get_methods_and_aliases(decls)
+
+missing_methods = runtime_methods.difference(file_methods)
+missing_aliases = runtime_aliases.difference(file_aliases)
+
+if missing_methods.empty?
+  puts "No missing methods."
+else
+  puts "Missing methods:"
+  missing_methods.each do |meth|
+    puts "- #{meth}"
+  end
+end
+
+puts
+
+if missing_aliases.empty?
+  puts "No missing aliases."
+else
+  puts "Missing aliases:"
+  missing_aliases.each do |al|
+    puts "- #{al}"
+  end
+end
