@@ -347,6 +347,37 @@ EOF
     end
   end
 
+  def test_type_check_error_receiver_note
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        method_type = parse_method_type("() -> ::String")
+        trace = Test::CallTrace.new(method_name: :foo, method_call: Test::ArgumentsReturn.return(arguments: [], value: 1), block_calls: [], block_given: false)
+        messages = ->(typecheck) { typecheck.method_call(:foo, method_type, trace, errors: []).map { Test::Errors.to_string(_1) } }
+
+        # The receiver class is noted when it differs from the owner
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Sub.new), owner: Base, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal ["[RBS::Test::TypeCheckTest::Base#foo] ReturnTypeError: expected `::String` but returns `1` (receiver: RBS::Test::TypeCheckTest::Sub)"], messages[typecheck]
+
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::SingletonContext.of(Sub), owner: Base.singleton_class, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal ["[RBS::Test::TypeCheckTest::Base.foo] ReturnTypeError: expected `::String` but returns `1` (receiver: RBS::Test::TypeCheckTest::Sub)"], messages[typecheck]
+
+        # No note when the receiver class is the owner
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Base.new), owner: Base, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal ["[RBS::Test::TypeCheckTest::Base#foo] ReturnTypeError: expected `::String` but returns `1`"], messages[typecheck]
+
+        # Anonymous classes are shown with `inspect`
+        anonymous = Class.new(Base)
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(anonymous.new), owner: Base, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal ["[RBS::Test::TypeCheckTest::Base#foo] ReturnTypeError: expected `::String` but returns `1` (receiver: #{anonymous.inspect})"], messages[typecheck]
+
+        # Without a context, the tag has only the method name
+        typecheck = Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal ["[foo] ReturnTypeError: expected `::String` but returns `1`"], messages[typecheck]
+      end
+    end
+  end
+
   def test_type_check_without_context
     SignatureManager.new do |manager|
       manager.build do |env|

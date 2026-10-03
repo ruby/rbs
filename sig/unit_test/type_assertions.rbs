@@ -101,6 +101,7 @@ module RBS
       # `self`, `instance`, and `class` types are resolved from the receiver, not from the `testing` target,
       # so that calling a method on a subclass is checked against the subclass.
       # The kind of the call is taken from the `testing` target: a singleton method call for `singleton(::Foo)`, an instance method call otherwise.
+      # Errors are reported on the `testing` target, with the receiver class noted when it differs.
       #
       def receiver_typecheck: (untyped receiver) -> Test::TypeCheck
 

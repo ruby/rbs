@@ -147,8 +147,8 @@ EOF
         error = assert_raises RBS::Test::Tester::TypeError do
           singleton_checker.call(Sub, returning[:make, Base.new])
         end
-        # The hooked class is the subject of the error
-        assert_match(/\ATypeError: \[RBS::Test::TesterTest::Base\.make\] /, error.message)
+        # The hooked class is the subject of the error, and the receiver class is noted
+        assert_match(/\ATypeError: \[RBS::Test::TesterTest::Base\.make\] ReturnTypeError: .* \(receiver: RBS::Test::TesterTest::Sub\)\z/, error.message)
         assert_raises RBS::Test::Tester::TypeError do
           singleton_checker.call(Base, returning[:make, 1])
         end
@@ -218,8 +218,8 @@ EOF
         error = assert_raises RBS::Test::Tester::TypeError do
           checker.call(Widget.new, returning[:build, Object.new])
         end
-        # The hooked module is the subject of the error
-        assert_match(/\ATypeError: \[RBS::Test::TesterTest::Factory#build\] /, error.message)
+        # The hooked module is the subject of the error, and the receiver class is noted
+        assert_match(/\ATypeError: \[RBS::Test::TesterTest::Factory#build\] ReturnTypeError: .* \(receiver: RBS::Test::TesterTest::Widget\)\z/, error.message)
 
         # Called on a class that extends the module: `instance` is the class, and `self` is the class itself
         checker.call(Widget, returning[:build, Widget.new])
