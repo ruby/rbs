@@ -20,6 +20,21 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
         "(string) { (IO::Buffer) -> String } -> String",
         IO::Buffer, :for, source
       ) { "result" }
+
+      assert_send_type(
+        "(string) -> IO_Buffer_InstanceTest::BufferSubclass",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      )
+
+      assert_send_type(
+        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> Integer } -> Integer",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      ) { 42 }
+
+      assert_send_type(
+        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> String } -> String",
+        IO_Buffer_InstanceTest::BufferSubclass, :for, source
+      ) { "result" }
     end
   end
 
@@ -62,8 +77,13 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
     with_int 10 do |int|
       assert_send_type(
         "(int) { (IO::Buffer) -> nil } -> String",
-        IO::Buffer, :string, int, &proc { nil }
-      )
+        IO::Buffer, :string, int
+      ) { nil }
+
+      assert_send_type(
+        "(int) { (IO_Buffer_InstanceTest::BufferSubclass) -> nil } -> String",
+        IO_Buffer_InstanceTest::BufferSubclass, :string, int
+      ) { nil }
     end
   end
 end
@@ -411,11 +431,35 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_slice
-    buf = IO::Buffer.new(30)
+    buf = BufferSubclass.new(30)
 
     assert_send_type(
-      "(Integer, Integer) -> IO::Buffer",
+      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice
+    )
+    assert_send_type(
+      "(Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, 1
+    )
+    assert_send_type(
+      "(Integer, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
       buf, :slice, 0, 5
+    )
+    assert_send_type(
+      "(nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil
+    )
+    assert_send_type(
+      "(nil, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil, 5
+    )
+    assert_send_type(
+      "(Integer, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, 1, nil
+    )
+    assert_send_type(
+      "(nil, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      buf, :slice, nil, nil
     )
   end
 
@@ -430,6 +474,10 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     assert_send_type(
       "() -> IO::Buffer",
       IO::Buffer.for(""), :transfer
+    )
+    assert_send_type(
+      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      BufferSubclass.new(4), :transfer
     )
   end
 
