@@ -101,7 +101,19 @@ end
 
 You are correct. We want to move to their repos. We haven't started the migration yet.
 
+However, bundled gems listed in `ALUMNI_STDLIBS` in `lib/rbs/collection/config/lockfile_generator.rb` (such as `abbrev`, `benchmark`, `bigdecimal`, `csv`, and `logger`) maintain their RBS definitions in their upstream repositories (e.g., `ruby/csv`). Submit type improvements for those libraries to their respective repositories instead of `ruby/rbs`.
+
 ### How can we handle incompatibilities of core APIs and standard libraries between Rubies
 
 We ignore the incompatibilities for now.
 We focus on the latest version of core APIs and standard libraries.
+
+* **Do not use union types to bridge Ruby versions**: Avoid patterns like `URI::RFC2396_Parser | URI::RFC3986_Parser`. Match the signature to the latest supported Ruby release.
+
+### Should we use `void` or `untyped` for method return values?
+
+Use `void` when callers should ignore or discard the return value. Use `untyped` only when the method returns an arbitrary object intended for use. (See [syntax guide](syntax.md#void-boolish-or-top)).
+
+### How do we avoid duplicate documentation when importing RDoc?
+
+When an extension library extends a core class (such as `time` extending `Time` or `random-formatter` extending `Random::Formatter`), `rbs annotate` can duplicate core class documentation. Add `%a{annotate:rdoc:skip}` to the module or class declaration to skip the duplicate docs.
