@@ -3,22 +3,91 @@
 module RBS
   module Test
     class TypeCheck
-      attr_reader :self_class
+      InstanceContext = Data.define(:klass) do
+        def self.of(receiver)
+          new(klass: Test.call(receiver, CLASS))
+        end
+
+        def self_class
+          instance_class
+        end
+
+        def instance_class
+          klass
+        end
+
+        def class_class
+          Test.call(klass, SINGLETON_CLASS)
+        end
+      end
+
+      SingletonContext = Data.define(:klass) do
+        def self.of(receiver)
+          new(klass: receiver)
+        end
+
+        def self_class
+          class_class
+        end
+
+        def instance_class
+          klass
+        end
+
+        def class_class
+          Test.call(klass, SINGLETON_CLASS)
+        end
+      end
+
+      class NoReceiverContextError < StandardError
+        attr_reader :type
+
+        def initialize(type)
+          @type = type
+          super "`#{type}` type cannot be checked without a receiver context"
+        end
+      end
+
+      LegacyContext = Struct.new(:self_class, :instance_class, :class_class, keyword_init: true)
+      private_constant :LegacyContext
+
+      attr_reader :context
       attr_reader :builder
       attr_reader :sample_size
       attr_reader :unchecked_classes
-      attr_reader :instance_class
-      attr_reader :class_class
 
       DEFAULT_SAMPLE_SIZE = 100
 
-      def initialize(self_class:, builder:, sample_size:, unchecked_classes:, instance_class: Object, class_class: Module)
-        @self_class = self_class
-        @instance_class = instance_class
-        @class_class = class_class
+      def initialize(builder:, sample_size:, unchecked_classes:, context: nil, self_class: nil, instance_class: nil, class_class: nil)
+        if self_class || instance_class || class_class
+          Kernel.warn(
+            "`RBS::Test::TypeCheck.new` with `self_class:`, `instance_class:`, or `class_class:` is deprecated. Pass `context:` with a `RBS::Test::TypeCheck::InstanceContext` or `SingletonContext` instead.",
+            uplevel: 1,
+            category: :deprecated
+          )
+          context ||= LegacyContext.new(
+            self_class: self_class,
+            instance_class: instance_class || Object,
+            class_class: class_class || Module
+          )
+        end
+
+        @context = context
         @builder = builder
         @sample_size = sample_size
         @unchecked_classes = unchecked_classes.uniq
+      end
+
+      def self_class
+        context&.self_class
+      end
+
+      def instance_class
+        context&.instance_class
+      end
+
+      def class_class
+        context&.class_class
       end
 
       def overloaded_call(method, method_name, call, errors:)
@@ -253,13 +322,13 @@ module RBS
         when Types::Bases::Void
           true
         when Types::Bases::Self
-          Test.call(val, IS_AP, self_class)
+          Test.call(val, IS_AP, self_class || raise(NoReceiverContextError.new(type)))
         when Types::Bases::Nil
           Test.call(val, IS_AP, ::NilClass)
         when Types::Bases::Class
-          Test.call(val, IS_AP, class_class)
+          Test.call(val, IS_AP, class_class || raise(NoReceiverContextError.new(type)))
         when Types::Bases::Instance
-          Test.call(val, IS_AP, instance_class)
+          Test.call(val, IS_AP, instance_class || raise(NoReceiverContextError.new(type)))
         when Types::ClassInstance
           klass = get_class(type.name) or return false
           if params = builder.env.normalized_module_class_entry(type.name.absolute!)&.type_params

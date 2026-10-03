@@ -96,13 +96,13 @@ module RBS
 
       def testing: (String | target_type) ?{ () -> void } -> void
 
-      # The class object that is associated to the `instance` type of the testing type
+      # Build a `Test::TypeCheck` for a method call on `receiver`
       #
-      def instance_class: () -> Class
-
-      # The singleton class object that is associated to the `class` type of the testing type
+      # `self`, `instance`, and `class` types are resolved from the receiver, not from the `testing` target,
+      # so that calling a method on a subclass is checked against the subclass.
+      # The kind of the call is taken from the `testing` target: a singleton method call for `singleton(::Foo)`, an instance method call otherwise.
       #
-      def class_class: () -> Class
+      def receiver_typecheck: (untyped receiver) -> Test::TypeCheck
 
       def method_defs: (Symbol) -> Array[Definition::Method::TypeDef]
 

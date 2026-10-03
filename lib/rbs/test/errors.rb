@@ -41,7 +41,11 @@ module RBS
       end
 
       def self.method_tag(error)
-        if error.klass.singleton_class?
+        case
+        when error.klass.nil?
+          name = ""
+          method_name = error.method_name.to_s
+        when error.klass.singleton_class?
           name = inspect_(error.klass).sub(/\A#<Class:(.*)>\z/, '\1')
           method_name = ".#{error.method_name}"
         else

@@ -102,6 +102,76 @@ EOF
     end
   end
 
+  class Base
+  end
+
+  class Sub < Base
+  end
+
+  def test_self_and_instance_types_on_subclass_receiver
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module RBS
+  module Test
+    module TesterTest
+      class Base
+        def self.make: () -> instance
+        def self.itself: () -> self
+        def copy: () -> self
+        def klass: () -> class
+      end
+      class Sub < Base
+      end
+    end
+  end
+end
+EOF
+      manager.build do |env, path|
+        builder = RBS::DefinitionBuilder.new(env: env)
+
+        singleton_checker = RBS::Test::Tester::MethodCallTester.new(
+          Base.singleton_class, builder, builder.build_singleton(type_name("::RBS::Test::TesterTest::Base")),
+          kind: :singleton, sample_size: 100, unchecked_classes: []
+        )
+        instance_checker = RBS::Test::Tester::MethodCallTester.new(
+          Base, builder, builder.build_instance(type_name("::RBS::Test::TesterTest::Base")),
+          kind: :instance, sample_size: 100, unchecked_classes: []
+        )
+
+        returning = ->(name, value) {
+          CallTrace.new(method_name: name, method_call: ArgumentsReturn.return(arguments: [], value: value), block_calls: [], block_given: false)
+        }
+
+        # `instance` is the receiver class of a singleton method call
+        singleton_checker.call(Sub, returning[:make, Sub.new])
+        assert_raises RBS::Test::Tester::TypeError do
+          singleton_checker.call(Sub, returning[:make, Base.new])
+        end
+        assert_raises RBS::Test::Tester::TypeError do
+          singleton_checker.call(Base, returning[:make, 1])
+        end
+
+        # `self` in a singleton method is the receiver class itself
+        singleton_checker.call(Sub, returning[:itself, Sub])
+        assert_raises RBS::Test::Tester::TypeError do
+          singleton_checker.call(Sub, returning[:itself, Base])
+        end
+
+        # `self` in an instance method is the receiver's class
+        instance_checker.call(Sub.new, returning[:copy, Sub.new])
+        assert_raises RBS::Test::Tester::TypeError do
+          instance_checker.call(Sub.new, returning[:copy, Base.new])
+        end
+
+        # `class` in an instance method is the singleton class of the receiver's class
+        instance_checker.call(Sub.new, returning[:klass, Sub])
+        assert_raises RBS::Test::Tester::TypeError do
+          instance_checker.call(Sub.new, returning[:klass, Base])
+        end
+      end
+    end
+  end
+
   class Response < Delegator
     attr_accessor :data
 

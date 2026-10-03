@@ -131,8 +131,24 @@ module RBS
           builder.env
         end
 
-        def check
-          @check ||= TypeCheck.new(self_class: self_class, builder: builder, sample_size: sample_size, unchecked_classes: unchecked_classes)
+        def receiver_context(receiver)
+          case kind
+          when :instance
+            TypeCheck::InstanceContext.of(receiver)
+          when :singleton
+            TypeCheck::SingletonContext.of(receiver)
+          else
+            raise
+          end
+        end
+
+        def check(receiver)
+          TypeCheck.new(
+            context: receiver_context(receiver),
+            builder: builder,
+            sample_size: sample_size,
+            unchecked_classes: unchecked_classes
+          )
         end
 
         def format_method_name(name)
@@ -149,7 +165,7 @@ module RBS
           method = definition.methods[method_name]
           if method
             RBS.logger.debug { "Type checking `#{self_class}#{format_method_name(method_name)}`..."}
-            errors = check.overloaded_call(method, method_name, trace, errors: [])
+            errors = check(receiver).overloaded_call(method, method_name, trace, errors: [])
 
             if errors.empty?
               RBS.logger.debug { "No type error detected 👏" }
