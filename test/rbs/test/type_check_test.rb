@@ -31,7 +31,6 @@ end
 EOF
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -134,7 +133,6 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
         typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: builder,
           sample_size: 100,
           unchecked_classes: []
@@ -267,9 +265,7 @@ EOF
     SignatureManager.new do |manager|
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Integer,
-          instance_class: Integer,
-          class_class: Integer.singleton_class,
+          context: Test::TypeCheck::InstanceContext.of(30),
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -284,6 +280,133 @@ EOF
     end
   end
 
+  class Base; end
+  class Sub < Base; end
+
+  def test_receiver_context
+    # Instance method call: `self` and `instance` are the receiver's class, `class` is its singleton class
+    context = Test::TypeCheck::InstanceContext.of(Sub.new)
+    assert_equal Test::TypeCheck::InstanceContext.new(Sub), context
+    assert_equal Sub, context.klass
+    assert_equal Sub, context.self_class
+    assert_equal Sub, context.instance_class
+    assert_equal Sub.singleton_class, context.class_class
+
+    # Singleton method call: `instance` is the receiver itself, `self` and `class` are its singleton class
+    context = Test::TypeCheck::SingletonContext.of(Sub)
+    assert_equal Test::TypeCheck::SingletonContext.new(Sub), context
+    assert_equal Sub, context.klass
+    assert_equal Sub.singleton_class, context.self_class
+    assert_equal Sub, context.instance_class
+    assert_equal Sub.singleton_class, context.class_class
+
+    # Works with BasicObject receivers
+    context = Test::TypeCheck::InstanceContext.of(BasicObject.new)
+    assert_equal BasicObject, context.klass
+  end
+
+  def test_type_check_receiver_context_on_subclass
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        singleton = Test::TypeCheck.new(context: Test::TypeCheck::SingletonContext.new(Sub), builder: builder, sample_size: 100, unchecked_classes: [])
+        assert singleton.value(Sub.new, parse_type("instance"))
+        refute singleton.value(Base.new, parse_type("instance"))
+        assert singleton.value(Sub, parse_type("self"))
+        refute singleton.value(Base, parse_type("self"))
+        assert singleton.value(Sub, parse_type("class"))
+        refute singleton.value(Base, parse_type("class"))
+
+        instance = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Sub.new), builder: builder, sample_size: 100, unchecked_classes: [])
+        assert instance.value(Sub.new, parse_type("self"))
+        refute instance.value(Base.new, parse_type("self"))
+        assert instance.value(Sub.new, parse_type("instance"))
+        refute instance.value(Base.new, parse_type("instance"))
+        assert instance.value(Sub, parse_type("class"))
+        refute instance.value(Base, parse_type("class"))
+      end
+    end
+  end
+
+  def test_type_check_owner
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        method_type = parse_method_type("() -> ::String")
+        trace = Test::CallTrace.new(method_name: :foo, method_call: Test::ArgumentsReturn.return(arguments: [], value: 1), block_calls: [], block_given: false)
+
+        # The owner is the subject of the errors
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Sub.new), owner: Base, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal [Base], typecheck.method_call(:foo, method_type, trace, errors: []).map(&:klass)
+
+        # The owner defaults to the self class of the context
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::SingletonContext.of(Sub), builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal Sub.singleton_class, typecheck.owner
+      end
+    end
+  end
+
+  def test_type_check_without_context
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        typecheck = Test::TypeCheck.new(builder: DefinitionBuilder.new(env: env), sample_size: 100, unchecked_classes: [])
+
+        assert_nil typecheck.context
+        assert_nil typecheck.self_class
+
+        # `self`, `instance`, and `class` cannot be checked without a receiver
+        assert_raises(Test::TypeCheck::NoReceiverContextError) { typecheck.value(30, parse_type("self")) }
+        assert_raises(Test::TypeCheck::NoReceiverContextError) { typecheck.value(30, parse_type("instance")) }
+        assert_raises(Test::TypeCheck::NoReceiverContextError) { typecheck.value(Integer, parse_type("class")) }
+        assert typecheck.value(30, parse_type("::Integer"))
+      end
+    end
+  end
+
+  def test_type_check_legacy_classes
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        Test::TypeCheck.instance_variable_set(:@legacy_classes_warned, nil)
+
+        typecheck = nil
+        _, err = capture_output do
+          typecheck = Test::TypeCheck.new(
+            self_class: Integer,
+            instance_class: Integer,
+            class_class: Integer.singleton_class,
+            builder: builder,
+            sample_size: 100,
+            unchecked_classes: []
+          )
+        end
+
+        assert_match(/#{Regexp.escape(__FILE__)}:\d+: warning: `RBS::Test::TypeCheck.new` with `self_class:`, `instance_class:`, or `class_class:` is deprecated/, err)
+        assert_equal Integer, typecheck.self_class
+        assert_equal Integer, typecheck.owner
+        assert typecheck.value(30, parse_type("self"))
+        assert typecheck.value(30, parse_type("instance"))
+        assert typecheck.value(Integer, parse_type("class"))
+
+        # Warns only once
+        _, err = capture_output do
+          typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        end
+        assert_empty err
+
+        # `instance` and `class` default to `Object` and `Module`, as before
+        assert typecheck.value("30", parse_type("instance"))
+        assert typecheck.value(String, parse_type("class"))
+        refute typecheck.value("30", parse_type("self"))
+
+        assert_raises(ArgumentError) do
+          Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(30), self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        end
+      end
+    end
+  end
+
   def test_type_check_absent
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
@@ -292,7 +415,6 @@ end
 EOF
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -309,7 +431,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        typecheck = Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value([], parse_type("::Array[::Integer]"))
         assert typecheck.value([1], parse_type("::Array[::Integer]"))
@@ -326,7 +448,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        typecheck = Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value({}, parse_type("::Hash[::Integer, ::String]"))
         assert typecheck.value(Array.new(100) {|i| [i, i.to_s] }.to_h, parse_type("::Hash[::Integer, ::String]"))
@@ -344,7 +466,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        typecheck = Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value([1,2,3].each, parse_type("Enumerator[Integer, Array[Integer]]"))
         assert typecheck.value(Array.new(400, 3).each, parse_type("Enumerator[Integer, Array[Integer]]"))
@@ -379,7 +501,6 @@ type foo = String | Integer
 EOF
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Object,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -432,7 +553,7 @@ EOF
     SignatureManager.new do |manager|
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Object.singleton_class,
+          context: Test::TypeCheck::SingletonContext.new(Object),
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -468,7 +589,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        typecheck = Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{:foo => String, :bar => Integer, :baz => Symbol}"))
         assert typecheck.value({foo: 'foo', bar: 0, baz: :baz }, parse_type("{foo: String, bar: Integer, baz: Symbol}"))
@@ -498,7 +619,6 @@ type foo = String | Integer
 EOF
       manager.build do |env|
         typecheck = Test::TypeCheck.new(
-          self_class: Object,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -641,14 +761,12 @@ EOF
     SignatureManager.new do |manager|
       manager.build do |env|
         rspec_typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: ['RSpec::Mocks::Double']
         )
 
         no_mock_typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -677,14 +795,12 @@ EOF
     SignatureManager.new do |manager|
       manager.build do |env|
         minitest_typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: ['Minitest::Mock']
         )
 
         no_mock_typecheck = Test::TypeCheck.new(
-          self_class: Integer,
           builder: DefinitionBuilder.new(env: env),
           sample_size: 100,
           unchecked_classes: []
@@ -715,7 +831,7 @@ EOF
       manager.build do |env|
         builder = DefinitionBuilder.new(env: env)
 
-        typecheck = Test::TypeCheck.new(self_class: Object, builder: builder, sample_size: 100, unchecked_classes: [])
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Object.new), builder: builder, sample_size: 100, unchecked_classes: [])
 
         builder.build_instance(type_name("::Foo")).tap do |foo|
           typecheck.overloaded_call(
