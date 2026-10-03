@@ -46,7 +46,23 @@ module RBS
 
       def self.inspect_: (untyped) -> String
 
+      # Formats an error into a human readable string
+      #
+      # The string starts with the tag of the method, like `[Foo#bar]` or `[Foo.bar]`.
+      # When the receiver class differs from the class in the tag, it is appended, like `(receiver: SubFoo)`.
+      #
       def self.to_string: (t) -> String
+
+      # The error message without the receiver note
+      def self.message: (t) -> String
+
+      # The tag of the method, like `[Foo#bar]` or `[Foo.bar]`
+      def self.method_tag: (t) -> String
+
+      # The note of the receiver class, or an empty string if it is the same as the class in the tag
+      def self.receiver_note: (t) -> String
+
+      def self.class_name: (Module) -> String
     end
   end
 end

@@ -117,7 +117,7 @@ module RBS
           errors.push(*es[0])
         else
           error = Errors::UnresolvedOverloadingError.new(
-            klass: owner,
+            klass: owner, receiver_class: self_class,
             method_name: method_name,
             method_types: method.method_types
           )
@@ -127,11 +127,11 @@ module RBS
             message << method.method_types.zip(es).map do |method_type, es|
               msg = +"method_type=`#{method_type}`"
               details = es.map do |e|
-                "\"#{Errors.to_string(e).sub("#{tag} ", "") }\""
+                "\"#{Errors.message(e).sub("#{tag} ", "") }\""
               end.join(', ')
               msg << " details=[#{details}]"
             end.join(', ')
-            message
+            message << Errors.receiver_note(error)
           end
           errors << error
         end
@@ -155,14 +155,14 @@ module RBS
           when !call.block_given
             # Block is not given
             if method_type.block.required
-              errors << Errors::MissingBlockError.new(klass: owner, method_name: method_name, method_type: method_type)
+              errors << Errors::MissingBlockError.new(klass: owner, receiver_class: self_class, method_name: method_name, method_type: method_type)
             end
           else
             # Block is given, but not yielded
           end
         else
           if call.block_given
-            errors << Errors::UnexpectedBlockError.new(klass: owner, method_name: method_name, method_type: method_type)
+            errors << Errors::UnexpectedBlockError.new(klass: owner, receiver_class: self_class, method_name: method_name, method_type: method_type)
           end
         end
 
@@ -172,7 +172,7 @@ module RBS
       def args(method_name, method_type, fun, call, errors, type_error:, argument_error:)
         test = zip_args(call.arguments, fun) do |val, param|
           unless self.value(val, param.type)
-            errors << type_error.new(klass: owner,
+            errors << type_error.new(klass: owner, receiver_class: self_class,
                                      method_name: method_name,
                                      method_type: method_type,
                                      param: param,
@@ -181,7 +181,7 @@ module RBS
         end
 
         unless test
-          errors << argument_error.new(klass: owner,
+          errors << argument_error.new(klass: owner, receiver_class: self_class,
                                        method_name: method_name,
                                        method_type: method_type)
         end
@@ -192,7 +192,7 @@ module RBS
           return if Test.call(call.return_value, IS_AP, NilClass) && annotations.find { |a| a.string == "implicitly-returns-nil" }
 
           unless value(call.return_value, fun.return_type)
-            errors << return_error.new(klass: owner,
+            errors << return_error.new(klass: owner, receiver_class: self_class,
                                        method_name: method_name,
                                        method_type: method_type,
                                        type: fun.return_type,
