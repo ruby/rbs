@@ -134,7 +134,11 @@ module RBS
         def receiver_context(receiver)
           case kind
           when :instance
-            TypeCheck::InstanceContext.of(receiver)
+            if extended_call?(receiver)
+              TypeCheck::SingletonContext.of(receiver)
+            else
+              TypeCheck::InstanceContext.of(receiver)
+            end
           when :singleton
             TypeCheck::SingletonContext.of(receiver)
           else
@@ -142,9 +146,14 @@ module RBS
           end
         end
 
+        def extended_call?(receiver)
+          Test.call(receiver, IS_AP, Module) && !(Test.call(receiver, CLASS) <= self_class)
+        end
+
         def check(receiver)
           TypeCheck.new(
             context: receiver_context(receiver),
+            owner: self_class,
             builder: builder,
             sample_size: sample_size,
             unchecked_classes: unchecked_classes

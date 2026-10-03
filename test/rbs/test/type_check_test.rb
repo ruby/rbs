@@ -329,6 +329,24 @@ EOF
     end
   end
 
+  def test_type_check_owner
+    SignatureManager.new do |manager|
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        method_type = parse_method_type("() -> ::String")
+        trace = Test::CallTrace.new(method_name: :foo, method_call: Test::ArgumentsReturn.return(arguments: [], value: 1), block_calls: [], block_given: false)
+
+        # The owner is the subject of the errors
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Sub.new), owner: Base, builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal [Base], typecheck.method_call(:foo, method_type, trace, errors: []).map(&:klass)
+
+        # The owner defaults to the self class of the context
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::SingletonContext.of(Sub), builder: builder, sample_size: 100, unchecked_classes: [])
+        assert_equal Sub.singleton_class, typecheck.owner
+      end
+    end
+  end
+
   def test_type_check_without_context
     SignatureManager.new do |manager|
       manager.build do |env|
@@ -349,26 +367,42 @@ EOF
   def test_type_check_legacy_classes
     SignatureManager.new do |manager|
       manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        Test::TypeCheck.instance_variable_set(:@legacy_classes_warned, nil)
+
         typecheck = nil
         _, err = capture_output do
-          Warning[:deprecated] = true
           typecheck = Test::TypeCheck.new(
             self_class: Integer,
             instance_class: Integer,
             class_class: Integer.singleton_class,
-            builder: DefinitionBuilder.new(env: env),
+            builder: builder,
             sample_size: 100,
             unchecked_classes: []
           )
-        ensure
-          Warning[:deprecated] = false
         end
 
-        assert_match(/`self_class:`, `instance_class:`, or `class_class:` is deprecated/, err)
+        assert_match(/#{Regexp.escape(__FILE__)}:\d+: warning: `RBS::Test::TypeCheck.new` with `self_class:`, `instance_class:`, or `class_class:` is deprecated/, err)
         assert_equal Integer, typecheck.self_class
+        assert_equal Integer, typecheck.owner
         assert typecheck.value(30, parse_type("self"))
         assert typecheck.value(30, parse_type("instance"))
         assert typecheck.value(Integer, parse_type("class"))
+
+        # Warns only once
+        _, err = capture_output do
+          typecheck = Test::TypeCheck.new(self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        end
+        assert_empty err
+
+        # `instance` and `class` default to `Object` and `Module`, as before
+        assert typecheck.value("30", parse_type("instance"))
+        assert typecheck.value(String, parse_type("class"))
+        refute typecheck.value("30", parse_type("self"))
+
+        assert_raises(ArgumentError) do
+          Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(30), self_class: Integer, builder: builder, sample_size: 100, unchecked_classes: [])
+        end
       end
     end
   end

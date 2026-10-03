@@ -52,20 +52,31 @@ module RBS
       private_constant :LegacyContext
 
       attr_reader :context
+      attr_reader :owner
       attr_reader :builder
       attr_reader :sample_size
       attr_reader :unchecked_classes
 
       DEFAULT_SAMPLE_SIZE = 100
 
-      def initialize(builder:, sample_size:, unchecked_classes:, context: nil, self_class: nil, instance_class: nil, class_class: nil)
+      def self.warn_legacy_classes
+        return if @legacy_classes_warned
+        @legacy_classes_warned = true
+
+        Kernel.warn(
+          "`RBS::Test::TypeCheck.new` with `self_class:`, `instance_class:`, or `class_class:` is deprecated. Pass `context:` with a `RBS::Test::TypeCheck::InstanceContext` or `SingletonContext` instead.",
+          uplevel: 2
+        )
+      end
+
+      def initialize(builder:, sample_size:, unchecked_classes:, context: nil, owner: nil, self_class: nil, instance_class: nil, class_class: nil)
         if self_class || instance_class || class_class
-          Kernel.warn(
-            "`RBS::Test::TypeCheck.new` with `self_class:`, `instance_class:`, or `class_class:` is deprecated. Pass `context:` with a `RBS::Test::TypeCheck::InstanceContext` or `SingletonContext` instead.",
-            uplevel: 1,
-            category: :deprecated
-          )
-          context ||= LegacyContext.new(
+          if context
+            raise ArgumentError, "`context:` cannot be given with `self_class:`, `instance_class:`, or `class_class:`"
+          end
+
+          TypeCheck.warn_legacy_classes
+          context = LegacyContext.new(
             self_class: self_class,
             instance_class: instance_class || Object,
             class_class: class_class || Module
@@ -73,6 +84,7 @@ module RBS
         end
 
         @context = context
+        @owner = owner || context&.self_class
         @builder = builder
         @sample_size = sample_size
         @unchecked_classes = unchecked_classes.uniq
@@ -105,7 +117,7 @@ module RBS
           errors.push(*es[0])
         else
           error = Errors::UnresolvedOverloadingError.new(
-            klass: self_class,
+            klass: owner,
             method_name: method_name,
             method_types: method.method_types
           )
@@ -143,14 +155,14 @@ module RBS
           when !call.block_given
             # Block is not given
             if method_type.block.required
-              errors << Errors::MissingBlockError.new(klass: self_class, method_name: method_name, method_type: method_type)
+              errors << Errors::MissingBlockError.new(klass: owner, method_name: method_name, method_type: method_type)
             end
           else
             # Block is given, but not yielded
           end
         else
           if call.block_given
-            errors << Errors::UnexpectedBlockError.new(klass: self_class, method_name: method_name, method_type: method_type)
+            errors << Errors::UnexpectedBlockError.new(klass: owner, method_name: method_name, method_type: method_type)
           end
         end
 
@@ -160,7 +172,7 @@ module RBS
       def args(method_name, method_type, fun, call, errors, type_error:, argument_error:)
         test = zip_args(call.arguments, fun) do |val, param|
           unless self.value(val, param.type)
-            errors << type_error.new(klass: self_class,
+            errors << type_error.new(klass: owner,
                                      method_name: method_name,
                                      method_type: method_type,
                                      param: param,
@@ -169,7 +181,7 @@ module RBS
         end
 
         unless test
-          errors << argument_error.new(klass: self_class,
+          errors << argument_error.new(klass: owner,
                                        method_name: method_name,
                                        method_type: method_type)
         end
@@ -180,7 +192,7 @@ module RBS
           return if Test.call(call.return_value, IS_AP, NilClass) && annotations.find { |a| a.string == "implicitly-returns-nil" }
 
           unless value(call.return_value, fun.return_type)
-            errors << return_error.new(klass: self_class,
+            errors << return_error.new(klass: owner,
                                        method_name: method_name,
                                        method_type: method_type,
                                        type: fun.return_type,

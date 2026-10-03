@@ -86,15 +86,29 @@ module RBS
       #
       attr_reader context: _Context?
 
+      # The class or singleton class that the checked method belongs to, which is the subject of the errors
+      #
+      # Defaults to the `self_class` of the context.
+      #
+      attr_reader owner: Module?
+
       attr_reader builder: DefinitionBuilder
 
       attr_reader sample_size: Integer
 
       attr_reader unchecked_classes: Array[Module]
 
+      self.@legacy_classes_warned: bool?
+
+      # Warns that `self_class:`, `instance_class:`, and `class_class:` are deprecated, only once in a process
+      #
+      def self.warn_legacy_classes: () -> void
+
       # `self_class:`, `instance_class:`, and `class_class:` are deprecated. Use `context:` instead.
       #
-      def initialize: (builder: DefinitionBuilder, sample_size: Integer, unchecked_classes: Array[Module], ?context: _Context?, ?self_class: Module?, ?instance_class: Module?, ?class_class: Module?) -> void
+      # Raises `ArgumentError` if `context:` is given with any of them.
+      #
+      def initialize: (builder: DefinitionBuilder, sample_size: Integer, unchecked_classes: Array[Module], ?context: _Context?, ?owner: Module?, ?self_class: Module?, ?instance_class: Module?, ?class_class: Module?) -> void
 
       # The class that `self` type is checked against, or `nil` without a receiver context
       def self_class: () -> Module?
