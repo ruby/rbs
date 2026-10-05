@@ -20,21 +20,6 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
         "(string) { (IO::Buffer) -> String } -> String",
         IO::Buffer, :for, source
       ) { "result" }
-
-      assert_send_type(
-        "(string) -> IO_Buffer_InstanceTest::BufferSubclass",
-        IO_Buffer_InstanceTest::BufferSubclass, :for, source
-      )
-
-      assert_send_type(
-        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> Integer } -> Integer",
-        IO_Buffer_InstanceTest::BufferSubclass, :for, source
-      ) { 42 }
-
-      assert_send_type(
-        "(string) { (IO_Buffer_InstanceTest::BufferSubclass) -> String } -> String",
-        IO_Buffer_InstanceTest::BufferSubclass, :for, source
-      ) { "result" }
     end
   end
 
@@ -79,11 +64,6 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
         "(int) { (IO::Buffer) -> nil } -> String",
         IO::Buffer, :string, int
       ) { nil }
-
-      assert_send_type(
-        "(int) { (IO_Buffer_InstanceTest::BufferSubclass) -> nil } -> String",
-        IO_Buffer_InstanceTest::BufferSubclass, :string, int
-      ) { nil }
     end
   end
 end
@@ -91,8 +71,6 @@ end
 class IO_Buffer_InstanceTest < Test::Unit::TestCase
   include TestHelper
   testing "::IO::Buffer"
-
-  BufferSubclass = Class.new(IO::Buffer)
 
   def test_bitwise_operators
     buffer = IO::Buffer.for("test")
@@ -116,14 +94,14 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
 
     [:and!, :or!, :xor!].each do |operator|
       assert_send_type(
-        "(IO::Buffer) -> IO_Buffer_InstanceTest::BufferSubclass",
-        BufferSubclass.new(4), operator, mask
+        "(IO::Buffer) -> IO::Buffer",
+        IO::Buffer.new(4), operator, mask
       )
     end
 
     assert_send_type(
-      "() -> IO_Buffer_InstanceTest::BufferSubclass",
-      BufferSubclass.new(4), :not!
+      "() -> IO::Buffer",
+      IO::Buffer.new(4), :not!
     )
   end
 
@@ -170,41 +148,41 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_each
-    buf = BufferSubclass.new(2)
+    buf = IO::Buffer.new(2)
     buf.set_string("ab")
 
     assert_send_type(
-      "() -> Enumerator[[Integer, Integer], IO_Buffer_InstanceTest::BufferSubclass]",
+      "() -> Enumerator[[Integer, Integer], IO::Buffer]",
       buf, :each
     )
     assert_send_type(
-      "(:U8, Integer, Integer) { (Integer, Integer) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(:U8, Integer, Integer) { (Integer, Integer) -> void } -> IO::Buffer",
       buf, :each, :U8, 0, 2
     ) { |_, _| }
 
-    float_buf = BufferSubclass.new(8)
+    float_buf = IO::Buffer.new(8)
     float_buf.set_values([:F32, :F32], 0, [1.5, 2.5])
 
     assert_send_type(
-      "(:F32) -> Enumerator[[Integer, Float], IO_Buffer_InstanceTest::BufferSubclass]",
+      "(:F32) -> Enumerator[[Integer, Float], IO::Buffer]",
       float_buf, :each, :F32
     )
     assert_send_type(
-      "(:F32, Integer, Integer) { (Integer, Float) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(:F32, Integer, Integer) { (Integer, Float) -> void } -> IO::Buffer",
       float_buf, :each, :F32, 0, 2
     ) { |_, _| }
   end
 
   def test_each_byte
-    buf = BufferSubclass.new(3)
+    buf = IO::Buffer.new(3)
     buf.set_string("abc")
 
     assert_send_type(
-      "() -> Enumerator[Integer, IO_Buffer_InstanceTest::BufferSubclass]",
+      "() -> Enumerator[Integer, IO::Buffer]",
       buf, :each_byte
     )
     assert_send_type(
-      "(Integer, Integer) { (Integer) -> void } -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(Integer, Integer) { (Integer) -> void } -> IO::Buffer",
       buf, :each_byte, 1, 2
     ) { |_| }
   end
@@ -431,34 +409,34 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
   end
 
   def test_slice
-    buf = BufferSubclass.new(30)
+    buf = IO::Buffer.new(30)
 
     assert_send_type(
-      "() -> IO_Buffer_InstanceTest::BufferSubclass",
+      "() -> IO::Buffer",
       buf, :slice
     )
     assert_send_type(
-      "(Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(Integer) -> IO::Buffer",
       buf, :slice, 1
     )
     assert_send_type(
-      "(Integer, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(Integer, Integer) -> IO::Buffer",
       buf, :slice, 0, 5
     )
     assert_send_type(
-      "(nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(nil) -> IO::Buffer",
       buf, :slice, nil
     )
     assert_send_type(
-      "(nil, Integer) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(nil, Integer) -> IO::Buffer",
       buf, :slice, nil, 5
     )
     assert_send_type(
-      "(Integer, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(Integer, nil) -> IO::Buffer",
       buf, :slice, 1, nil
     )
     assert_send_type(
-      "(nil, nil) -> IO_Buffer_InstanceTest::BufferSubclass",
+      "(nil, nil) -> IO::Buffer",
       buf, :slice, nil, nil
     )
   end
@@ -474,10 +452,6 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     assert_send_type(
       "() -> IO::Buffer",
       IO::Buffer.for(""), :transfer
-    )
-    assert_send_type(
-      "() -> IO_Buffer_InstanceTest::BufferSubclass",
-      BufferSubclass.new(4), :transfer
     )
   end
 
