@@ -124,8 +124,8 @@ class IO
     #       # => "Test"
     #     end
     #
-    def self.for: (string) -> instance
-                | [A] (string) { (instance) -> A } -> A
+    def self.for: (string) -> Buffer
+                | [A] (string) { (Buffer) -> A } -> A
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -200,7 +200,7 @@ class IO
     #     end
     #     # => "Ruby"
     #
-    def self.string: (int) { (instance) -> void } -> String
+    def self.string: (int) { (Buffer) -> void } -> String
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -1040,7 +1040,7 @@ class IO
     #     # #<IO::Buffer 0x00007fc3d31e2d80+4 INTERNAL>
     #     # 0x00000000  74 6f 73 74                                     tost
     #
-    def slice: (?Integer? offset, ?Integer? length) -> self
+    def slice: (?Integer? offset, ?Integer? length) -> Buffer
 
     # <!--
     #   rdoc-file=io_buffer.c
@@ -1073,7 +1073,7 @@ class IO
     #     buffer.null?
     #     # => true
     #
-    def transfer: () -> self
+    def transfer: () -> Buffer
 
     # <!--
     #   rdoc-file=io_buffer.c
