@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 3b75b367c9ad3d07f8f053c0c1f28e4bab560f5d
+  revision: 0f60b67bb1502e8af3193c548765151695fcf01b
   specs:
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
@@ -79,7 +79,7 @@ GEM
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.21.2)
+    json (3.0.0)
     json-schema (6.2.0)
       addressable (~> 2.8)
       bigdecimal (>= 3.1, < 5)
@@ -103,7 +103,7 @@ GEM
       net-protocol
     nkf (0.3.0)
     ostruct (0.6.3)
-    parallel (2.1.0)
+    parallel (2.2.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
       racc

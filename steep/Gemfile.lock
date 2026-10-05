@@ -6,7 +6,7 @@ GEM
     csv (3.3.6)
     ffi (1.17.4)
     fileutils (1.8.0)
-    json (2.21.2)
+    json (3.0.0)
     language_server-protocol (3.17.0.6)
     listen (3.10.0)
       logger
