@@ -111,16 +111,18 @@ module RBS
 
       def receiver_typecheck(receiver)
         type, _ = target
+        klass = Object.const_get(type.name.to_s)
 
-        context =
-          case type
-          when RBS::Types::ClassSingleton
-            RBS::Test::TypeCheck::SingletonContext.of(receiver)
-          else
-            RBS::Test::TypeCheck::InstanceContext.of(receiver)
-          end
+        case type
+        when RBS::Types::ClassSingleton
+          context = RBS::Test::TypeCheck::SingletonContext.of(receiver)
+          owner = klass.singleton_class
+        else
+          context = RBS::Test::TypeCheck::InstanceContext.of(receiver)
+          owner = klass
+        end
 
-        RBS::Test::TypeCheck.new(context: context, builder: builder, sample_size: 100, unchecked_classes: [])
+        RBS::Test::TypeCheck.new(context: context, owner: owner, builder: builder, sample_size: 100, unchecked_classes: [])
       end
 
       def send_setup(method_type, receiver, method, args, proc)

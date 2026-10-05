@@ -64,6 +64,25 @@ class RBS::UnitTest::TypeAssertionsTest < Test::Unit::TestCase
     end
   end
 
+  def test_error_on_subclass_receiver
+    testing "::RBS::UnitTest::TypeAssertionsTest::Foo" do
+      error = assert_raise Test::Unit::AssertionFailedError do
+        assert_send_type "() -> Integer", SubFoo.new, :copy_wrong
+      end
+      # The `testing` target is the subject of the error, and the receiver class is noted
+      assert_include error.message, "[RBS::UnitTest::TypeAssertionsTest::Foo#copy_wrong] ReturnTypeError: expected `Integer` but returns"
+      assert_include error.message, "(receiver: RBS::UnitTest::TypeAssertionsTest::SubFoo)"
+    end
+
+    testing "singleton(::RBS::UnitTest::TypeAssertionsTest::Foo)" do
+      error = assert_raise Test::Unit::AssertionFailedError do
+        assert_send_type "() -> Integer", SubFoo, :make_wrong
+      end
+      assert_include error.message, "[RBS::UnitTest::TypeAssertionsTest::Foo.make_wrong] ReturnTypeError: expected `Integer` but returns"
+      assert_include error.message, "(receiver: RBS::UnitTest::TypeAssertionsTest::SubFoo)"
+    end
+  end
+
   def test_instance_self_type_on_subclass_receiver
     testing "::RBS::UnitTest::TypeAssertionsTest::Foo" do
       assert_send_type "() -> RBS::UnitTest::TypeAssertionsTest::SubFoo", SubFoo.new, :copy_correct

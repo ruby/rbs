@@ -4,22 +4,22 @@ module RBS
   module Test
     module Errors
       ArgumentTypeError =
-        Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, :param, :value, keyword_init: true)
       BlockArgumentTypeError =
-        Struct.new(:klass, :method_name, :method_type, :param, :value, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, :param, :value, keyword_init: true)
       ArgumentError =
-        Struct.new(:klass, :method_name, :method_type, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, keyword_init: true)
       BlockArgumentError =
-        Struct.new(:klass, :method_name, :method_type, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, keyword_init: true)
       ReturnTypeError =
-        Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, :type, :value, keyword_init: true)
       BlockReturnTypeError =
-        Struct.new(:klass, :method_name, :method_type, :type, :value, keyword_init: true)
+        Struct.new(:klass, :receiver_class, :method_name, :method_type, :type, :value, keyword_init: true)
 
-      UnexpectedBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
-      MissingBlockError = Struct.new(:klass, :method_name, :method_type, keyword_init: true)
+      UnexpectedBlockError = Struct.new(:klass, :receiver_class, :method_name, :method_type, keyword_init: true)
+      MissingBlockError = Struct.new(:klass, :receiver_class, :method_name, :method_type, keyword_init: true)
 
-      UnresolvedOverloadingError = Struct.new(:klass, :method_name, :method_types, keyword_init: true)
+      UnresolvedOverloadingError = Struct.new(:klass, :receiver_class, :method_name, :method_types, keyword_init: true)
 
       def self.format_param(param)
         if param.name
@@ -40,22 +40,40 @@ module RBS
         end
       end
 
+      def self.class_name(klass)
+        if klass.singleton_class?
+          inspect_(klass).sub(/\A#<Class:(.*)>\z/, '\1')
+        else
+          klass.name || inspect_(klass)
+        end
+      end
+
       def self.method_tag(error)
         case
         when error.klass.nil?
-          name = ""
-          method_name = error.method_name.to_s
+          "[#{error.method_name}]"
         when error.klass.singleton_class?
-          name = inspect_(error.klass).sub(/\A#<Class:(.*)>\z/, '\1')
-          method_name = ".#{error.method_name}"
+          "[#{class_name(error.klass)}.#{error.method_name}]"
         else
-          name = error.klass.name
-          method_name = "##{error.method_name}"
+          "[#{class_name(error.klass)}##{error.method_name}]"
         end
-        "[#{name}#{method_name}]"
+      end
+
+      def self.receiver_note(error)
+        receiver_class = error.receiver_class
+
+        if receiver_class.nil? || receiver_class == error.klass
+          ""
+        else
+          " (receiver: #{class_name(receiver_class)})"
+        end
       end
 
       def self.to_string(error)
+        message(error) + receiver_note(error)
+      end
+
+      def self.message(error)
         case error
         when ArgumentTypeError
           "#{method_tag(error)} ArgumentTypeError: expected #{format_param error.param} but given `#{inspect_(error.value)}`"
