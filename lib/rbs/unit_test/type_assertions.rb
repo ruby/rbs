@@ -109,22 +109,18 @@ module RBS
         end
       end
 
-      def instance_class
+      def receiver_typecheck(receiver)
         type, _ = target
 
-        case type
-        when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
-          Object.const_get(type.name.to_s)
-        end
-      end
+        context =
+          case type
+          when RBS::Types::ClassSingleton
+            RBS::Test::TypeCheck::SingletonContext.of(receiver)
+          else
+            RBS::Test::TypeCheck::InstanceContext.of(receiver)
+          end
 
-      def class_class
-        type, _ = target
-
-        case type
-        when RBS::Types::ClassSingleton, RBS::Types::ClassInstance
-          Object.const_get(type.name.to_s).singleton_class
-        end
+        RBS::Test::TypeCheck.new(context: context, builder: builder, sample_size: 100, unchecked_classes: [])
       end
 
       def send_setup(method_type, receiver, method, args, proc)
@@ -170,14 +166,7 @@ module RBS
 
       ruby2_keywords def assert_send_type(method_type, receiver, method, *args, &block)
         send_setup(method_type, receiver, method, args, block) do |method_type, trace, result, exception|
-          typecheck = RBS::Test::TypeCheck.new(
-            self_class: receiver.class,
-            builder: builder,
-            sample_size: 100,
-            unchecked_classes: [],
-            instance_class: instance_class,
-            class_class: class_class
-          )
+          typecheck = receiver_typecheck(receiver)
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, -> { "Call trace does not match with given method type: #{trace.inspect}" }
@@ -194,14 +183,7 @@ module RBS
 
       ruby2_keywords def assert_send_type_error(method_type, error_type, receiver, method, *args, &block)
         send_setup(method_type, receiver, method, args, block) do |method_type, trace, result, exception|
-          typecheck = RBS::Test::TypeCheck.new(
-            self_class: receiver.class,
-            builder: builder,
-            sample_size: 100,
-            unchecked_classes: [],
-            instance_class: instance_class,
-            class_class: class_class
-          )
+          typecheck = receiver_typecheck(receiver)
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
           assert_empty errors.map {|x| RBS::Test::Errors.to_string(x) }, -> { "Call trace does not match with given method type: #{trace.inspect}" }
@@ -231,14 +213,7 @@ module RBS
             type: method_type.type.with_return_type(RBS::Types::Bases::Any.new(location: nil))
           )
 
-          typecheck = RBS::Test::TypeCheck.new(
-            self_class: receiver.class,
-            instance_class: instance_class,
-            class_class: class_class,
-            builder: builder,
-            sample_size: 100,
-            unchecked_classes: []
-          )
+          typecheck = receiver_typecheck(receiver)
           errors = typecheck.method_call(method, method_type, trace, errors: [])
 
           assert_operator exception, :is_a?, ::Exception
@@ -285,14 +260,7 @@ module RBS
       def assert_const_type(type, constant_name)
         constant = Object.const_get(constant_name)
 
-        typecheck = RBS::Test::TypeCheck.new(
-          self_class: constant.class,
-          instance_class: instance_class,
-          class_class: class_class,
-          builder: builder,
-          sample_size: 100,
-          unchecked_classes: []
-        )
+        typecheck = RBS::Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         value_type =
           case type
@@ -333,14 +301,7 @@ module RBS
       end
 
       def assert_type(type, value)
-        typecheck = RBS::Test::TypeCheck.new(
-          self_class: value.class,
-          instance_class: _ = "No `instance` class allowed",
-          class_class: _ = "No `class` class allowed",
-          builder: builder,
-          sample_size: 100,
-          unchecked_classes: []
-        )
+        typecheck = RBS::Test::TypeCheck.new(builder: builder, sample_size: 100, unchecked_classes: [])
 
         type =
           case type

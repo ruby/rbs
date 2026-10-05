@@ -8,7 +8,6 @@ class GlobalVariablesTest < Test::Unit::TestCase
     global = block_given? ? yield : eval(global_name.to_s, nil, $0, $.)
 
     typecheck = RBS::Test::TypeCheck.new(
-      self_class: global.class,
       builder: builder,
       sample_size: 100,
       unchecked_classes: []
