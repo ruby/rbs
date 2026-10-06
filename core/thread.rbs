@@ -1189,11 +1189,7 @@ class Thread < Object
   #
   def self.start: (*untyped args) { (?) -> void } -> instance
 
-  # <!--
-  #   rdoc-file=thread.c
-  #   - Thread.start([args]*) {|args| block }   -> thread
-  #   - Thread.fork([args]*) {|args| block }    -> thread
-  # -->
+  # <!-- rdoc-file=thread.c -->
   # Basically the same as ::new. However, if class Thread is subclassed, then
   # calling `start` in that subclass will not invoke the subclass's `initialize`
   # method.

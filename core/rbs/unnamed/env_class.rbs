@@ -272,11 +272,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.[]=}
       def []=: (String name, String? value) -> String?
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV[name] = value      -> value
-      #   - ENV.store(name, value) -> value
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Creates, updates, or deletes the named environment variable, returning the
       # value. Both `name` and `value` may be instances of String. See [Valid Names
       # and Values](rdoc-ref:ENV@Valid+Names+and+Values).
@@ -344,13 +340,7 @@ module RBS
       def each: () -> ::Enumerator[[ String, String ], self]
               | () { ([ String, String ]) -> void } -> self
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.each      { |name, value| block } -> ENV
-      #   - ENV.each                              -> an_enumerator
-      #   - ENV.each_pair { |name, value| block } -> ENV
-      #   - ENV.each_pair                         -> an_enumerator
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Yields each environment variable name and its value as a 2-element Array:
       #     h = {}
       #     ENV.each_pair { |name, value| h[name] = value } # => ENV
@@ -596,13 +586,7 @@ module RBS
       def select: () -> ::Enumerator[[ String, String ], ::Hash[String, String]]
                 | () { (String name, String value) -> boolish } -> ::Hash[String, String]
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.select { |name, value| block } -> hash of name/value pairs
-      #   - ENV.select                         -> an_enumerator
-      #   - ENV.filter { |name, value| block } -> hash of name/value pairs
-      #   - ENV.filter                         -> an_enumerator
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Yields each environment variable name and its value as a 2-element Array,
       # returning a Hash of the names and values for which the block returns a truthy
       # value:
@@ -658,13 +642,7 @@ module RBS
       def select!: () -> ::Enumerator[[ String, String ], self?]
                  | () { (String name, String value) -> boolish } -> self?
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.select! { |name, value| block } -> ENV or nil
-      #   - ENV.select!                         -> an_enumerator
-      #   - ENV.filter! { |name, value| block } -> ENV or nil
-      #   - ENV.filter!                         -> an_enumerator
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Yields each environment variable name and its value as a 2-element Array,
       # deleting each entry for which the block returns `false` or `nil`, and
       # returning ENV if any deletions made, or `nil` otherwise:
@@ -798,15 +776,7 @@ module RBS
       def update: (Hash[String, String?]) -> self
                 | (Hash[String, String?]) { (String name, String env_val, String? hash_val) -> String } -> self
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.update                                              -> ENV
-      #   - ENV.update(*hashes)                                     -> ENV
-      #   - ENV.update(*hashes) { |name, env_val, hash_val| block } -> ENV
-      #   - ENV.merge!                                              -> ENV
-      #   - ENV.merge!(*hashes)                                     -> ENV
-      #   - ENV.merge!(*hashes) { |name, env_val, hash_val| block } -> ENV
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Adds to ENV each key/value pair in the given `hash`; returns ENV:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.merge!('baz' => '2', 'bat' => '3') # => {"bar"=>"1", "bat"=>"3", "baz"=>"2", "foo"=>"0"}
@@ -907,11 +877,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.size}
       def size: () -> Integer
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.length -> an_integer
-      #   - ENV.size   -> an_integer
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Returns the count of environment variables:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.length # => 2
@@ -1019,13 +985,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.include?}
       def include?: (String name) -> bool
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.include?(name) -> true or false
-      #   - ENV.has_key?(name) -> true or false
-      #   - ENV.member?(name)  -> true or false
-      #   - ENV.key?(name)     -> true or false
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true
@@ -1053,13 +1013,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.member?}
       alias member? include?
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.include?(name) -> true or false
-      #   - ENV.has_key?(name) -> true or false
-      #   - ENV.member?(name)  -> true or false
-      #   - ENV.key?(name)     -> true or false
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true
@@ -1103,11 +1057,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.has_value?}
       def has_value?: (String value) -> bool
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.value?(value)     -> true or false
-      #   - ENV.has_value?(value) -> true or false
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Returns `true` if `value` is the value for some environment variable name,
       # `false` otherwise:
       #     ENV.replace('foo' => '0', 'bar' => '1')
@@ -1119,13 +1069,7 @@ module RBS
       %a{annotate:rdoc:copy:ENV.value?}
       alias value? has_value?
 
-      # <!--
-      #   rdoc-file=hash.c
-      #   - ENV.include?(name) -> true or false
-      #   - ENV.has_key?(name) -> true or false
-      #   - ENV.member?(name)  -> true or false
-      #   - ENV.key?(name)     -> true or false
-      # -->
+      # <!-- rdoc-file=hash.c -->
       # Returns `true` if there is an environment variable with the given `name`:
       #     ENV.replace('foo' => '0', 'bar' => '1')
       #     ENV.include?('foo') # => true

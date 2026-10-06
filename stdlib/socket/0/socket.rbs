@@ -340,11 +340,7 @@ class Socket < BasicSocket
   #
   def self.ip_address_list: () -> Array[Addrinfo]
 
-  # <!--
-  #   rdoc-file=ext/socket/socket.c
-  #   - Socket.sockaddr_in(port, host)      => sockaddr
-  #   - Socket.pack_sockaddr_in(port, host) => sockaddr
-  # -->
+  # <!-- rdoc-file=ext/socket/socket.c -->
   # Packs *port* and *host* as an AF_INET/AF_INET6 sockaddr string.
   #
   #     Socket.sockaddr_in(80, "127.0.0.1")
@@ -355,22 +351,14 @@ class Socket < BasicSocket
   #
   def self.pack_sockaddr_in: (Integer port, String ip) -> String
 
-  # <!--
-  #   rdoc-file=ext/socket/socket.c
-  #   - Socket.sockaddr_un(path)      => sockaddr
-  #   - Socket.pack_sockaddr_un(path) => sockaddr
-  # -->
+  # <!-- rdoc-file=ext/socket/socket.c -->
   # Packs *path* as an AF_UNIX sockaddr string.
   #
   #     Socket.sockaddr_un("/tmp/sock") #=> "\x01\x00/tmp/sock\x00\x00..."
   #
   def self.pack_sockaddr_un: (String sockpath) -> String
 
-  # <!--
-  #   rdoc-file=ext/socket/socket.c
-  #   - Socket.pair(domain, type, protocol)       => [socket1, socket2]
-  #   - Socket.socketpair(domain, type, protocol) => [socket1, socket2]
-  # -->
+  # <!-- rdoc-file=ext/socket/socket.c -->
   # Creates a pair of sockets connected each other.
   #
   # *domain* should be a communications domain such as: :INET, :INET6, :UNIX, etc.
