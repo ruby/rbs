@@ -13,6 +13,23 @@ use std::ptr::NonNull;
 /// assert!(signature.is_ok(), "Failed to parse RBS signature");
 /// ```
 pub fn parse(rbs_code: &str) -> Result<SignatureNode<'_>, String> {
+    parse_with_options(rbs_code, ParseOptions::default())
+}
+
+/// Options that control which optional syntax the parser accepts.
+///
+/// The default disables every optional syntax, same as [`parse`].
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct ParseOptions {
+    /// Accept `(...)` forwarding parameters in method types (experimental).
+    pub(crate) enable_forwarding_params: bool,
+}
+
+/// Parse RBS code into an AST with the given parser options.
+pub(crate) fn parse_with_options(
+    rbs_code: &str,
+    options: ParseOptions,
+) -> Result<SignatureNode<'_>, String> {
     unsafe {
         let start_ptr = rbs_code.as_ptr().cast::<std::os::raw::c_char>();
         let end_ptr = start_ptr.add(rbs_code.len());
@@ -21,7 +38,15 @@ pub fn parse(rbs_code: &str) -> Result<SignatureNode<'_>, String> {
         let raw_rbs_string_value = rbs_string_new(start_ptr, end_ptr);
 
         let encoding_ptr = &rbs_encodings[RBS_ENCODING_UTF_8 as usize] as *const rbs_encoding_t;
-        let parser = rbs_parser_new(raw_rbs_string_value, encoding_ptr, 0, bytes);
+        let parser = rbs_parser_new_with_options(
+            raw_rbs_string_value,
+            encoding_ptr,
+            0,
+            bytes,
+            rbs_parser_options_t {
+                enable_forwarding_params: options.enable_forwarding_params,
+            },
+        );
 
         let mut signature: *mut rbs_signature_t = std::ptr::null_mut();
         let result = rbs_parse_signature(parser, &mut signature);

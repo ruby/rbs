@@ -129,7 +129,14 @@ pub struct FunctionType {
     pub required_keywords: Vec<KeywordParam>,
     pub optional_keywords: Vec<KeywordParam>,
     pub rest_keywords: Option<Box<FunctionParam>>,
+    pub forwarding: Option<ForwardingParam>,
     pub return_type: Box<Type>,
+    pub location: Option<LocationRange>,
+}
+
+/// The `...` parameter in `(...) -> void`.
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct ForwardingParam {
     pub location: Option<LocationRange>,
 }
 

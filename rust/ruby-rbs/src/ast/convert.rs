@@ -27,10 +27,10 @@ use crate::ast::members::{
 use crate::ast::method_type::MethodType;
 use crate::ast::type_param::{TypeParam, Variance};
 use crate::ast::types::{
-    AliasType, BaseType, BaseTypeKind, BlockType, ClassInstanceType, ClassSingletonType, Function,
-    FunctionParam, FunctionType, InterfaceType, IntersectionType, KeywordParam, Literal,
-    LiteralType, OptionalType, ProcType, RecordField, RecordKey, RecordType, TupleType, Type,
-    UnionType, UntypedFunctionType, VariableType,
+    AliasType, BaseType, BaseTypeKind, BlockType, ClassInstanceType, ClassSingletonType,
+    ForwardingParam, Function, FunctionParam, FunctionType, InterfaceType, IntersectionType,
+    KeywordParam, Literal, LiteralType, OptionalType, ProcType, RecordField, RecordKey, RecordType,
+    TupleType, Type, UnionType, UntypedFunctionType, VariableType,
 };
 use crate::ids::{SymbolId, TypeName};
 use crate::interner::StringInterner;
@@ -732,6 +732,9 @@ impl<'a> AstConverter<'a> {
             rest_keywords: node
                 .rest_keywords()
                 .map(|param| Box::new(self.convert_function_param_node(&param))),
+            forwarding: node
+                .forwarding()
+                .map(|param| self.convert_forwarding_param_node(&param)),
             return_type: Box::new(self.convert_type(&node.return_type())),
             location: Some(convert_range(node.location())),
         }
@@ -764,6 +767,18 @@ impl<'a> AstConverter<'a> {
             );
         };
         self.convert_function_param(node)
+    }
+
+    fn convert_forwarding_param_node(&mut self, node: &Node<'_>) -> ForwardingParam {
+        let Node::FunctionForwardingParam(node) = node else {
+            panic_expected(
+                "forwarding parameter node while converting function type",
+                node,
+            );
+        };
+        ForwardingParam {
+            location: Some(convert_range(node.location())),
+        }
     }
 
     fn convert_function_param(&mut self, node: &FunctionParamNode<'_>) -> FunctionParam {
@@ -1283,6 +1298,7 @@ fn node_kind(node: &Node<'_>) -> &'static str {
         Node::ClassInstanceType(_) => "ClassInstanceType",
         Node::ClassSingletonType(_) => "ClassSingletonType",
         Node::FunctionType(_) => "FunctionType",
+        Node::FunctionForwardingParam(_) => "FunctionForwardingParam",
         Node::FunctionParam(_) => "FunctionParam",
         Node::InterfaceType(_) => "InterfaceType",
         Node::IntersectionType(_) => "IntersectionType",

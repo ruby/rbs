@@ -49,10 +49,10 @@ pub use members::{
 pub use method_type::MethodType;
 pub use type_param::{TypeParam, Variance};
 pub use types::{
-    AliasType, BaseType, BaseTypeKind, BlockType, ClassInstanceType, ClassSingletonType, Function,
-    FunctionParam, FunctionType, InterfaceType, IntersectionType, KeywordParam, Literal,
-    LiteralType, OptionalType, ProcType, RecordField, RecordKey, RecordType, TupleType, Type,
-    UnionType, UntypedFunctionType, VariableType,
+    AliasType, BaseType, BaseTypeKind, BlockType, ClassInstanceType, ClassSingletonType,
+    ForwardingParam, Function, FunctionParam, FunctionType, InterfaceType, IntersectionType,
+    KeywordParam, Literal, LiteralType, OptionalType, ProcType, RecordField, RecordKey, RecordType,
+    TupleType, Type, UnionType, UntypedFunctionType, VariableType,
 };
 
 #[cfg(test)]
@@ -63,7 +63,7 @@ mod tests {
         UseClause,
     };
     use crate::interner::StringInterner;
-    use crate::node::{Node, parse};
+    use crate::node::{Node, ParseOptions, parse, parse_with_options};
     use crate::type_name::TypeNameInterner;
 
     #[test]
@@ -361,6 +361,52 @@ mod tests {
         assert_eq!(optional.name, strings.intern("size"));
         assert_eq!(text(&optional_location.range), "size: Integer bytes");
         assert_eq!(text(&optional_location.name_range), "size");
+    }
+
+    #[test]
+    fn converts_forwarding_param() {
+        let source =
+            "class Foo\n  def bar: (Integer, ...) -> void\n  def baz: (String) -> void\nend\n";
+        assert!(parse(source).is_err());
+        let signature = parse_with_options(
+            source,
+            ParseOptions {
+                enable_forwarding_params: true,
+            },
+        )
+        .unwrap();
+
+        let mut strings = StringInterner::new();
+        let mut type_names = TypeNameInterner::new();
+        let mut converter = AstConverter::new(&mut strings, &mut type_names);
+        let declaration =
+            converter.convert_declaration(&signature.declarations().iter().next().unwrap());
+
+        let Declaration::Class(class_decl) = &declaration else {
+            panic!("expected class declaration");
+        };
+        let functions: Vec<&crate::ast::FunctionType> = class_decl
+            .members
+            .iter()
+            .map(|member| {
+                let ClassMember::Member(Member::MethodDefinition(method)) = member else {
+                    panic!("expected method definition member");
+                };
+                let Function::Typed(function) = &method.overloads[0].method_type.function else {
+                    panic!("expected typed function");
+                };
+                function
+            })
+            .collect();
+
+        let forwarding = functions[0].forwarding.as_ref().expect("forwarding param");
+        let range = forwarding.location.as_ref().unwrap();
+        assert_eq!(
+            &source[range.start_byte as usize..range.end_byte as usize],
+            "..."
+        );
+        assert_eq!(functions[0].required_positionals.len(), 1);
+        assert!(functions[1].forwarding.is_none());
     }
 
     #[test]

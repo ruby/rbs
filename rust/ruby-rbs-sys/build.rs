@@ -134,6 +134,7 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_types_block_t")
         .allowlist_type("rbs_types_class_instance_t")
         .allowlist_type("rbs_types_class_singleton_t")
+        .allowlist_type("rbs_types_function_forwarding_param_t")
         .allowlist_type("rbs_types_function_param_t")
         .allowlist_type("rbs_types_function_t")
         .allowlist_type("rbs_types_interface_t")
@@ -162,6 +163,8 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_function("rbs_parse_signature")
         .allowlist_function("rbs_parser_free")
         .allowlist_function("rbs_parser_new")
+        .allowlist_function("rbs_parser_new_with_options")
+        .allowlist_type("rbs_parser_options_t")
         .allowlist_function("rbs_parse_inline_leading_annotation")
         .allowlist_function("rbs_parse_inline_trailing_annotation")
         // String functions
