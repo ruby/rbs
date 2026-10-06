@@ -1340,10 +1340,7 @@ module Process
   #
   def self.waitall: () -> ::Array[[ Integer, Process::Status ]]
 
-  # <!--
-  #   rdoc-file=process.c
-  #   - Process.wait(pid = -1, flags = 0) -> integer
-  # -->
+  # <!-- rdoc-file=process.c -->
   # Waits for a suitable child process to exit, returns its process ID, and sets
   # <code>$?</code> to a Process::Status object containing information on that
   # process. Which child it waits for depends on the value of the given `pid`:
@@ -1476,10 +1473,7 @@ module Process
   #
   def self.waitpid: (?Integer pid, ?Integer flags) -> Integer
 
-  # <!--
-  #   rdoc-file=process.c
-  #   - Process.wait2(pid = -1, flags = 0) -> [pid, status]
-  # -->
+  # <!-- rdoc-file=process.c -->
   # Like Process.waitpid, but returns an array containing the child process `pid`
   # and Process::Status `status`:
   #

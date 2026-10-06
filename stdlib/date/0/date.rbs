@@ -213,10 +213,7 @@ class Date
   #
   def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
 
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - Date._rfc2822(string, limit: 128) -> hash
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a hash of values parsed from `string`, which should be a valid [RFC
   # 2822 date format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
   #
@@ -444,10 +441,7 @@ class Date
   #
   def self.julian_leap?: (Integer year) -> bool
 
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - Date.gregorian_leap?(year) -> true or false
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns `true` if the given year is a leap year in the [proleptic Gregorian
   # calendar](https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar), `false`
   # otherwise:
@@ -565,10 +559,7 @@ class Date
   #
   def self.rfc3339: (String str, ?Integer start) -> Date
 
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - Date.rfc2822(string = 'Mon, 1 Jan -4712 00:00:00 +0000', start = Date::ITALY, limit: 128) -> date
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a new Date object with values parsed from `string`, which should be a
   # valid [RFC 2822 date
   # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
@@ -660,10 +651,7 @@ class Date
   #
   def self.valid_commercial?: (Integer cwyear, Integer cweek, Integer cwday, ?Integer start) -> bool
 
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - Date.valid_civil?(year, month, mday, start = Date::ITALY) -> true or false
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns `true` if the arguments define a valid ordinal date, `false`
   # otherwise:
   #
@@ -1323,20 +1311,10 @@ class Date
   def rfc3339: () -> String
 
   # <!-- rdoc-file=ext/date/date_core.c -->
-  # Returns a new Date object with values parsed from `string`, which should be a
-  # valid [RFC 2822 date
-  # format](rdoc-ref:language/strftime_formatting.rdoc@RFC+2822+Format):
+  # Equivalent to #strftime with argument <code>'%a, %-d %b %Y %T %z'</code>; see
+  # [Formats for Dates and Times](rdoc-ref:language/strftime_formatting.rdoc):
   #
-  #     d = Date.new(2001, 2, 3)
-  #     s = d.rfc2822   # => "Sat, 3 Feb 2001 00:00:00 +0000"
-  #     Date.rfc2822(s) # => #<Date: 2001-02-03>
-  #
-  # See:
-  #
-  # *   Argument [start](rdoc-ref:language/calendars.rdoc@Argument+start).
-  # *   Argument [limit](rdoc-ref:Date@Argument+limit).
-  #
-  # Related: Date._rfc2822 (returns a hash).
+  #     Date.new(2001, 2, 3).rfc2822 # => "Sat, 3 Feb 2001 00:00:00 +0000"
   #
   def rfc822: () -> String
 
