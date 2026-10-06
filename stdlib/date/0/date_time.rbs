@@ -131,10 +131,7 @@
 # eventually timezones.
 #
 class DateTime < Date
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - new(*args)
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Same as DateTime.new.
   #
   def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer hour, ?Integer minute, ?Integer second, ?Integer offset, ?Integer start) -> void
@@ -326,11 +323,7 @@ class DateTime < Date
   #
   def self.rfc3339: (String str, ?Integer start) -> DateTime
 
-  # <!--
-  #   rdoc-file=ext/date/date_core.c
-  #   - DateTime.rfc2822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)  ->  datetime
-  #   - DateTime.rfc822(string='Mon, 1 Jan -4712 00:00:00 +0000'[, start=Date::ITALY], limit: 128)   ->  datetime
-  # -->
+  # <!-- rdoc-file=ext/date/date_core.c -->
   # Creates a new DateTime object by parsing from a string according to some
   # typical RFC 2822 formats.
   #
