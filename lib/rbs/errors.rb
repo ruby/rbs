@@ -22,12 +22,7 @@ module RBS
 
   module DetailedMessageable
     def detailed_message(highlight: false, **)
-      msg = if Exception.method_defined?(:detailed_message)
-        super
-      else
-        # Failback to `#message` in Ruby 3.1 or earlier
-        "#{message} (#{self.class.name})"
-      end
+      msg = super
 
       return msg unless location
 
