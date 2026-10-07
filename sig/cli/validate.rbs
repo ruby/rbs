@@ -36,7 +36,11 @@ module RBS
 
       private
 
+      def report_inline_diagnostics: () -> void
+
       def validate_class_module_definition: () -> void
+      def mixin_type_params: (TypeName) -> Array[AST::TypeParam]
+
       def validate_class_module_alias_definition: () -> void
       def validate_interface: () -> void
       def validate_constant: () -> void

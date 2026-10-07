@@ -4,15 +4,15 @@ module RBS
   module FileFinder
     module_function
 
-    def self.each_file(path, immediate: nil, skip_hidden:, &block)
-      return enum_for((__method__ or raise), path, immediate: immediate, skip_hidden: skip_hidden) unless block
+    def self.each_file(path, immediate: nil, skip_hidden:, extension: "rbs", &block)
+      return enum_for((__method__ or raise), path, immediate: immediate, skip_hidden: skip_hidden, extension: extension) unless block
 
       case
       when path.file?
         yield path
 
       when path.directory?
-        paths = path.glob("**/*.rbs")
+        paths = path.glob("**/*.#{extension}")
 
         if skip_hidden
           paths.select! do |child|

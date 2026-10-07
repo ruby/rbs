@@ -787,12 +787,88 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate_inline
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rbs').write(<<~RBS)
+          class Foo
+          end
+        RBS
+        (Pathname(dir) + 'lib').mkdir
+        (Pathname(dir) + 'lib/bar.rb').write(<<~RUBY)
+          class Bar < Foo
+            # @rbs (Integer) -> Foo
+            def bar(x) = Foo.new
+          end
+        RUBY
+
+        assert_cli_success do
+          cli.run(["-I", dir, "--inline", "#{dir}/lib", "validate"])
+        end
+      end
+    end
+  end
+
+  def test_validate_inline_error
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rb').write(<<~RUBY)
+          class Foo
+            # @rbs (Integer) -> Nothing
+            def foo(x) = nil
+          end
+
+          class Bar
+            include Enumerable
+          end
+        RUBY
+
+        refute_cli_success do
+          cli.run(["--inline", dir, "validate"])
+        end
+
+        assert_include stdout.string, "a.rb:2:22...2:29: Could not find Nothing (RBS::NoTypeFoundError)"
+        assert_include stdout.string, "  # @rbs (Integer) -> Nothing\n"
+        assert_include stdout.string, "a.rb:7:2...7:20: ::Enumerable expects parameters [unchecked out E], but given args [] (RBS::InvalidTypeApplicationError)"
+      end
+    end
+  end
+
+  def test_validate_inline_diagnostics
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rb').write(<<~RUBY)
+          class Foo < Struct.new(:x)
+          end
+
+          def toplevel = nil
+        RUBY
+
+        assert_cli_success do
+          cli.run(["--inline", dir, "validate"])
+        end
+
+        assert_include stdout.string, "a.rb:1:12...1:26: Super class name must be a constant (RBS::InlineParser::Diagnostic::NonConstantSuperClassName)"
+        assert_include stdout.string, "a.rb:4:4...4:12: Top-level method definition is not supported (RBS::InlineParser::Diagnostic::TopLevelMethodDefinition)"
+      end
+    end
+  end
+
   def test_paths
     with_cli do |cli|
       assert_cli_success cli.run(%w(-r logger -I no-such-dir paths))
       assert_match %r{/core \(dir, core\)$}, stdout.string
       assert_match %r{/stdlib/logger/0 \(dir, library, name=logger\)$}, stdout.string
       assert_match %r{^no-such-dir \(absent\)$}, stdout.string
+    end
+  end
+
+  def test_paths_inline
+    with_cli do |cli|
+      assert_cli_success cli.run(%w(-I sig --inline lib --inline no-such-dir paths))
+      assert_match %r{^sig \(dir\)$}, stdout.string
+      assert_match %r{^lib \(dir, inline\)$}, stdout.string
+      assert_match %r{^no-such-dir \(absent, inline\)$}, stdout.string
     end
   end
 

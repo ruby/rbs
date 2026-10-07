@@ -29,7 +29,7 @@ module RBS
 
     # Validates the type parameters in generic methods.
     #
-    def validate_method_definition: (AST::Members::MethodDefinition, type_name: TypeName) -> void
+    def validate_method_definition: (AST::Members::MethodDefinition | AST::Ruby::Members::DefMember, type_name: TypeName) -> void
 
     # Validates the type parameters if there is no circular dependencies between the bounds.
     #
