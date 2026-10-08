@@ -581,7 +581,7 @@ class KernelInstanceTest < Test::Unit::TestCase
     obj = JustKernel.new.__with_object_methods(:==) # needed because <=> has an implicit dependency on it.
 
     with_untyped.and obj do |other|
-      assert_send_type  '(untyped) -> 0?',
+      assert_send_type  '(untyped) -> Integer?',
                         obj, :<=>, other
     end
   end
