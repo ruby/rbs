@@ -1648,7 +1648,12 @@ Processing `lib`...
         bundle_install('ast', 'logger', 'tsort')
         _stdout, stderr = run_rbs_collection("install", bundler: true)
 
-        assert_include stderr, 'Cannot find `set` gem.'
+        # `set` is a default gem until Ruby 3.5, where it became a core class.
+        if Gem::Specification.default_stubs("set-*.gemspec").any? { _1.name == "set" }
+          refute_match(/Cannot find `set` gem/, stderr)
+        else
+          assert_include stderr, 'Cannot find `set` gem.'
+        end
 
         lockfile = RBS::Collection::Config::Lockfile.from_lockfile(
           lockfile_path: dir + "rbs_collection.lock.yaml",
