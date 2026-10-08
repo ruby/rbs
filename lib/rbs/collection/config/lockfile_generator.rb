@@ -179,7 +179,7 @@ module RBS
               end
             end
           else
-            unless NONGEM_STDLIBS.include?(name)
+            unless NONGEM_STDLIBS.include?(name) || default_gem?(name)
               RBS.logger.warn "Cannot find `#{name}` gem. Using incorrect Bundler context? (#{definition.lockfile})"
             end
           end
@@ -248,6 +248,11 @@ module RBS
               assign_stdlib(name: dep["name"], from_gem: name)
             end
           end
+        end
+
+        # Default gems are always available without being listed in Gemfile.lock.
+        private def default_gem?(name)
+          Gem::Specification.default_stubs("#{name}-*.gemspec").any? { |stub| stub.name == name }
         end
 
         private def find_source(name:)
