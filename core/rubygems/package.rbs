@@ -1,0 +1,82 @@
+%a{annotate:rdoc:skip}
+module Gem
+  # <!-- rdoc-file=lib/rubygems/package.rb -->
+  # Example using a Gem::Package
+  #
+  # Builds a .gem file given a Gem::Specification. A .gem file is a tarball which
+  # contains a data.tar.gz, metadata.gz, checksums.yaml.gz and possibly
+  # signatures.
+  #
+  #     require 'rubygems'
+  #     require 'rubygems/package'
+  #
+  #     spec = Gem::Specification.new do |s|
+  #       s.summary = "Ruby based make-like utility."
+  #       s.name = 'rake'
+  #       s.version = PKG_VERSION
+  #       s.requirements << 'none'
+  #       s.files = PKG_FILES
+  #       s.description = <<-EOF
+  #     Rake is a Make-like program implemented in Ruby. Tasks
+  #     and dependencies are specified in standard Ruby syntax.
+  #       EOF
+  #     end
+  #
+  #     Gem::Package.build spec
+  #
+  # Reads a .gem file.
+  #
+  #     require 'rubygems'
+  #     require 'rubygems/package'
+  #
+  #     the_gem = Gem::Package.new(path_to_dot_gem)
+  #     the_gem.contents # get the files in the gem
+  #     the_gem.extract_files destination_directory # extract the gem into a directory
+  #     the_gem.spec # get the spec out of the gem
+  #     the_gem.verify # check the gem is OK (contains valid gem specification, contains a not corrupt contents archive)
+  #
+  # #files are the files in the .gem tar file, not the Ruby files in the gem
+  # #extract_files and #contents automatically call #verify
+  #
+  class Package
+    # <!-- rdoc-file=lib/rubygems/package/tar_header.rb -->
+    # A header for a tar file
+    #
+    class TarHeader
+      # <!--
+      #   rdoc-file=lib/rubygems/package/tar_header.rb
+      #   - new(vals)
+      # -->
+      # Creates a new TarHeader using `vals`
+      #
+      def initialize: (Hash[Symbol, untyped] vals) -> void
+    end
+
+    # <!-- rdoc-file=lib/rubygems/package/tar_reader.rb -->
+    # TarReader reads tar files and allows iteration over their items
+    #
+    class TarReader
+      # <!--
+      #   rdoc-file=lib/rubygems/package/tar_reader.rb
+      #   - new(io) { |reader| ... }
+      # -->
+      # Creates a new TarReader on `io` and yields it to the block, if given.
+      #
+      def self.new: (untyped io) -> instance
+                  | (untyped io) { (instance reader) -> void } -> nil
+
+      # <!-- rdoc-file=lib/rubygems/package/tar_reader/entry.rb -->
+      # Class for reading entries out of a tar file
+      #
+      class Entry
+        # <!--
+        #   rdoc-file=lib/rubygems/package/tar_reader/entry.rb
+        #   - new(header, io)
+        # -->
+        # Creates a new tar entry for `header` that will be read from `io`
+        #
+        def initialize: (TarHeader header, untyped io) -> void
+      end
+    end
+  end
+end
