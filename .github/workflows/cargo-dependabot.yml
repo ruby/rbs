@@ -1,4 +1,5 @@
-name: Merge dependabot PRs automatically
+# NOTE: steps are identical to dependabot.yml for bundler, so this may be merged into it later.
+name: Merge cargo dependabot PRs automatically
 on: pull_request_target
 
 permissions:
@@ -6,13 +7,12 @@ permissions:
   contents: write
 
 env:
-  blocker_files: rbs.gemspec Gemfile steep/Gemfile
+  blocker_files: rust/Cargo.toml rust/ruby-rbs/Cargo.toml rust/ruby-rbs-sys/Cargo.toml
 
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # cargo updates are handled by cargo-dependabot.yml instead
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && !startsWith(github.head_ref, 'dependabot/cargo/') }}
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/cargo/') }}
     steps:
       - name: Dependabot metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0

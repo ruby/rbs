@@ -36,12 +36,8 @@ module RBS
         private
 
         def build_message(error)
-          if error.respond_to?(:detailed_message)
-            highlight = RBS.logger_output ? RBS.logger_output.tty? : true
-            error.detailed_message(highlight: highlight)
-          else
-            "#{error.message} (#{error.class})"
-          end
+          highlight = RBS.logger_output ? RBS.logger_output.tty? : true
+          error.detailed_message(highlight: highlight)
         end
       end
 

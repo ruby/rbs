@@ -4004,8 +4004,8 @@ module Net
     # in fragments, as it is read in from the socket.
     #
     # If `dest` argument is given, response is read into that variable, with
-    # `dest#<<` method (it could be String or IO, or any other object responding to
-    # `<<`).
+    # <code>dest#<<</code> method (it could be String or IO, or any other object
+    # responding to <code><<</code>).
     #
     # Calling this method a second or subsequent time for the same HTTPResponse
     # object will return the value already read.

@@ -1027,11 +1027,7 @@ class File < IO
   #
   def self.ctime: (path | IO file_name) -> Time
 
-  # <!--
-  #   rdoc-file=file.c
-  #   - File.delete(file_name, ...)  -> integer
-  #   - File.unlink(file_name, ...)  -> integer
-  # -->
+  # <!-- rdoc-file=file.c -->
   # Deletes the named files, returning the number of names passed as arguments.
   # Raises an exception on any error. Since the underlying implementation relies
   # on the <code>unlink(2)</code> system call, the type of exception raised
@@ -1078,10 +1074,7 @@ class File < IO
   #
   def self.dirname: (path file_name, ?Integer level) -> String
 
-  # <!--
-  #   rdoc-file=file.c
-  #   - File.zero?(file_name)   -> true or false
-  # -->
+  # <!-- rdoc-file=file.c -->
   # Returns `true` if the named file exists and has a zero size.
   #
   # *file_name* can be an IO object.
