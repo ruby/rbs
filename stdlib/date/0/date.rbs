@@ -1574,3 +1574,9 @@ Date::JULIAN: Integer
 # An array of strings of full month names in English.  The first element is nil.
 #
 Date::MONTHNAMES: Array[String?]
+
+# <!-- rdoc-file=ext/date/date_core.c -->
+# Exception for invalid date/time
+#
+class Date::Error < ArgumentError
+end

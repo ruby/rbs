@@ -40,4 +40,17 @@ class DataInstanceTest < Test::Unit::TestCase
       data, :with, email: "test@example.com"
     )
   end
+
+  def test_to_h
+    data = D.new("soutaro@example.com", "soutaro")
+
+    assert_send_type(
+      "() -> Hash[Symbol, untyped]",
+      data, :to_h
+    )
+    assert_send_type(
+      "() { (Symbol, untyped) -> [String, String] } -> Hash[String, String]",
+      data, :to_h, &-> (key, value) { [key.to_s, value.to_s] }
+    )
+  end
 end
