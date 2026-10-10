@@ -1427,7 +1427,8 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Querying](rdoc-ref:Array@Methods+for+Querying).
   #
-  def count: () ?{ (E element) -> boolish } -> Integer
+  def count: () -> Integer
+           | () { (E element) -> boolish } -> Integer
            | (untyped object) -> Integer # where E: RBS::Ops::_Equal
 
   # <!--
@@ -3734,7 +3735,8 @@ class Array[unchecked out E]
   # *   Array#sum method may not respect method redefinition of "+" methods such
   #     as Integer#+.
   #
-  def sum: (?untyped init) ?{ (E e) -> untyped } -> untyped # This would be usable if we had `where E < Complex`, etc
+  def sum: (?untyped init) -> untyped
+         | (?untyped init) { (E e) -> untyped } -> untyped # This would be usable if we had `where E < Complex`, etc
 
   # <!--
   #   rdoc-file=array.c

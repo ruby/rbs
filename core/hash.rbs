@@ -1983,7 +1983,8 @@ class Hash[unchecked out K, unchecked out V]
   # Values](rdoc-ref:Hash@Methods+for+Transforming+Keys+and+Values).
   #
   def transform_keys!: () -> Enumerator[K, self]
-                     | (hash[K, K] replacements) ?{ (K key) -> K } -> self
+                     | (hash[K, K] replacements) -> self
+                     | (hash[K, K] replacements) { (K key) -> K } -> self
                      | () { (K key) -> K } -> self
 
   # <!--

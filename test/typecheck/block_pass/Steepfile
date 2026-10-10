@@ -1,0 +1,7 @@
+D = Steep::Diagnostic
+
+target :test do
+  signature "."
+  check "."
+  configure_code_diagnostics(D::Ruby.all_error)
+end
