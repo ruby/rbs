@@ -697,6 +697,50 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lockfile__default_gems_not_included_in_gemfile
+    omit unless Gem::Specification.default_stubs("un-*.gemspec").any? { _1.name == "un" }
+
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write <<~YAML
+        sources: []
+        path: '.gem_rbs_collection'
+        gems:
+          - name: un
+      YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write <<~GEMFILE
+        source 'https://rubygems.org'
+      GEMFILE
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write <<~GEMFILE_LOCK
+        GEM
+          remote: https://rubygems.org/
+          specs:
+
+        PLATFORMS
+          x86_64-linux
+
+        DEPENDENCIES
+
+        BUNDLED WITH
+           2.2.0
+      GEMFILE_LOCK
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+
+      log = StringIO.new
+      RBS.logger_output = log
+      begin
+        RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+      ensure
+        RBS.logger_output = nil
+      end
+
+      refute_match(/Cannot find `un` gem/, log.string)
+    end
+  end
+
   def test_generate_lockfile__dependency_source
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
