@@ -545,7 +545,7 @@ class BasicSocket < IO
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
   def setsockopt: (Socket::Option socketoption) -> 0
-               | (interned | Integer level, interned | Integer optname, boolish | Integer | String optval) -> 0
+                | (interned | Integer level, interned | Integer optname, boolish | Integer | String optval) -> 0
 
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c
