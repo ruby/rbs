@@ -5,16 +5,25 @@ class SocketError < StandardError
 end
 
 # <!-- rdoc-file=ext/socket/init.c -->
-# Socket::ResolutionError is the error class for name resolution failures, such
-# as those raised by `getaddrinfo`.
+# Socket::ResolutionError is the error class for hostname resolution.
 #
 class Socket::ResolutionError < SocketError
   # <!--
   #   rdoc-file=ext/socket/init.c
-  #   - error_code -> Integer
+  #   - error_code     -> integer
   # -->
-  # Returns the raw error code (one of the `Socket::EAI_*` constants) reported by
-  # the resolver.
+  # Returns the raw error code indicating the cause of the hostname resolution
+  # failure.
+  #
+  #     begin
+  #       Addrinfo.getaddrinfo("ruby-lang.org", nil)
+  #     rescue Socket::ResolutionError => e
+  #       if e.error_code == Socket::EAI_AGAIN
+  #         puts "Temporary failure in name resolution."
+  #       end
+  #     end
+  #
+  # Note that error codes depend on the operating system.
   #
   def error_code: () -> Integer
 end

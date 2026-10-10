@@ -505,21 +505,69 @@ class Socket < BasicSocket
               | [T] (String host, Integer port, ?String local_host, ?Integer local_port, ?open_timeout: Time::_Timeout) { (instance) -> T } -> T
 
   # <!--
-  #   rdoc-file=ext/socket/lib/socket.rb
+  #   rdoc-file=ext/socket/socket.c
   #   - Socket.tcp_fast_fallback -> true or false
   # -->
-  # Returns whether the "Happy Eyeballs Version 2" fast fallback is enabled by
-  # default for Socket.tcp and TCPSocket.new. The initial value is `true`.
+  # Returns whether Happy Eyeballs Version 2 ([RFC
+  # 8305](https://datatracker.ietf.org/doc/html/rfc8305)), which is provided
+  # starting from Ruby 3.4 when using TCPSocket.new and Socket.tcp, is enabled or
+  # disabled.
+  #
+  # If true, it is enabled for TCPSocket.new and Socket.tcp. (Note: Happy Eyeballs
+  # Version 2 is not provided when using TCPSocket.new on Windows.)
+  #
+  # If false, Happy Eyeballs Version 2 is disabled.
+  #
+  # For details on Happy Eyeballs Version 2, see
+  # [Socket.tcp_fast_fallback=](rdoc-ref:Socket.tcp_fast_fallback=).
   #
   def self.tcp_fast_fallback: () -> bool
 
   # <!--
-  #   rdoc-file=ext/socket/lib/socket.rb
-  #   - Socket.tcp_fast_fallback=(value)
+  #   rdoc-file=ext/socket/socket.c
+  #   - Socket.tcp_fast_fallback= -> true or false
   # -->
-  # Sets the default of the `fast_fallback:` option for Socket.tcp and
-  # TCPSocket.new. Setting it to `false` disables "Happy Eyeballs Version 2" unless
-  # `fast_fallback:` is given explicitly.
+  # Enable or disable Happy Eyeballs Version 2 ([RFC
+  # 8305](https://datatracker.ietf.org/doc/html/rfc8305)) globally, which is
+  # provided starting from Ruby 3.4 when using TCPSocket.new and Socket.tcp.
+  #
+  # When set to true, the feature is enabled for both <code>TCPSocket.new</code>
+  # and <code>Socket.tcp</code>. (Note: This feature is not available when using
+  # TCPSocket.new on Windows.)
+  #
+  # When set to false, the behavior reverts to that of Ruby 3.3 or earlier.
+  #
+  # The default value is true if no value is explicitly set by calling this
+  # method. However, when the environment variable RUBY_TCP_NO_FAST_FALLBACK=1 is
+  # set, the default is false.
+  #
+  # To control the setting on a per-method basis, use the fast_fallback keyword
+  # argument for each method.
+  #
+  # ### Happy Eyeballs Version 2
+  # Happy Eyeballs Version 2 ([RFC
+  # 8305](https://datatracker.ietf.org/doc/html/rfc8305)) is an algorithm designed
+  # to improve client socket connectivity.
+  #  It aims for more reliable and efficient connections by performing hostname
+  # resolution and connection attempts in parallel, instead of serially.
+  #
+  # Starting from Ruby 3.4, this method operates as follows with this algorithm:
+  #
+  # 1.  Start resolving both IPv6 and IPv4 addresses concurrently.
+  # 2.  Start connecting to the one of the addresses that are obtained first.
+  #     If IPv4 addresses are obtained first, the method waits 50 ms for IPv6 name
+  #     resolution to prioritize IPv6 connections.
+  # 3.  After starting a connection attempt, wait 250 ms for the connection to be
+  #     established.
+  #      If no connection is established within this time, a new connection is
+  #     started every 250 ms
+  #      until a connection is  established or there are no more candidate
+  #     addresses.
+  #      (Although RFC 8305 strictly specifies sorting addresses,
+  #      this method only alternates between IPv6 / IPv4 addresses due to the
+  #     performance concerns)
+  # 4.  Once a connection is established, all remaining connection attempts are
+  #     canceled.
   #
   def self.tcp_fast_fallback=: (bool value) -> bool
 
@@ -4177,16 +4225,16 @@ class Socket::AncillaryData
 end
 
 # <!-- rdoc-file=ext/socket/option.c -->
-# Socket::Option represents a socket option (the level, option name and value
-# used by `getsockopt` and `setsockopt`) together with the socket family it is
-# meant for.
+# Socket::Option represents a socket option used by BasicSocket#getsockopt and
+# BasicSocket#setsockopt.  A socket option contains the socket #family, protocol
+# #level, option name #optname and option value #data.
 #
 class Socket::Option
   # <!--
   #   rdoc-file=ext/socket/option.c
   #   - Socket::Option.new(family, level, optname, data) => sockopt
   # -->
-  # Returns a new Socket::Option object. `data` is the raw option value.
+  # Returns a new Socket::Option object.
   #
   #     sockopt = Socket::Option.new(:INET, :SOCKET, :KEEPALIVE, [1].pack("i"))
   #     p sockopt #=> #<Socket::Option: INET SOCKET KEEPALIVE 1>
@@ -4197,8 +4245,16 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - Socket::Option.bool(family, level, optname, bool) => sockopt
   # -->
-  # Creates a new Socket::Option object which contains boolean as data. Actual
-  # size is system dependent.
+  # Creates a new Socket::Option object which contains boolean as data. Actually 0
+  # or 1 as int is used.
+  #
+  #     require 'socket'
+  #
+  #     p Socket::Option.bool(:INET, :SOCKET, :KEEPALIVE, true)
+  #     #=> #<Socket::Option: INET SOCKET KEEPALIVE 1>
+  #
+  #     p Socket::Option.bool(:INET, :SOCKET, :KEEPALIVE, false)
+  #     #=> #<Socket::Option: AF_INET SOCKET KEEPALIVE 0>
   #
   def self.bool: (interned | Integer family, interned | Integer level, interned | Integer optname, boolish bool) -> instance
 
@@ -4208,14 +4264,21 @@ class Socket::Option
   # -->
   # Creates a new Socket::Option object which contains a byte as data.
   #
+  #     p Socket::Option.byte(:INET, :SOCKET, :KEEPALIVE, 1)
+  #     #=> #<Socket::Option: INET SOCKET KEEPALIVE 1>
+  #
   def self.byte: (interned | Integer family, interned | Integer level, interned | Integer optname, Integer integer) -> instance
 
   # <!--
   #   rdoc-file=ext/socket/option.c
   #   - Socket::Option.int(family, level, optname, integer) => sockopt
   # -->
-  # Creates a new Socket::Option object which contains an int as data. The size
-  # and endian is dependent on the host.
+  # Creates a new Socket::Option object which contains an int as data.
+  #
+  # The size and endian is dependent on the platform.
+  #
+  #     p Socket::Option.int(:INET, :SOCKET, :KEEPALIVE, 1)
+  #     #=> #<Socket::Option: INET SOCKET KEEPALIVE 1>
   #
   def self.int: (interned | Integer family, interned | Integer level, interned | Integer optname, Integer integer) -> instance
 
@@ -4225,6 +4288,14 @@ class Socket::Option
   # -->
   # Creates a new Socket::Option object for IP_MULTICAST_LOOP.
   #
+  # The size is dependent on the platform.
+  #
+  #     sockopt = Socket::Option.int(:INET, :IPPROTO_IP, :IP_MULTICAST_LOOP, 1)
+  #     p sockopt.int => 1
+  #
+  #     p Socket::Option.ipv4_multicast_loop(10)
+  #     #=> #<Socket::Option: INET IP MULTICAST_LOOP 10>
+  #
   def self.ipv4_multicast_loop: (Integer integer) -> instance
 
   # <!--
@@ -4233,18 +4304,25 @@ class Socket::Option
   # -->
   # Creates a new Socket::Option object for IP_MULTICAST_TTL.
   #
+  # The size is dependent on the platform.
+  #
+  #     p Socket::Option.ipv4_multicast_ttl(10)
+  #     #=> #<Socket::Option: INET IP MULTICAST_TTL 10>
+  #
   def self.ipv4_multicast_ttl: (Integer integer) -> instance
 
   # <!--
   #   rdoc-file=ext/socket/option.c
   #   - Socket::Option.linger(onoff, secs) => sockopt
   # -->
-  # Creates a new Socket::Option object for SO_LINGER.
+  # Creates a new Socket::Option object for SOL_SOCKET/SO_LINGER.
   #
-  # `onoff` should be an integer or a boolean.
+  # *onoff* should be an integer or a boolean.
+  #
+  # *secs* should be the number of seconds.
   #
   #     p Socket::Option.linger(true, 10)
-  #     #=> #<Socket::Option: UNSPEC SOCKET LINGER onoff:1 linger:10>
+  #     #=> #<Socket::Option: UNSPEC SOCKET LINGER on 10sec>
   #
   def self.linger: (boolish | Integer onoff, Integer secs) -> instance
 
@@ -4252,7 +4330,10 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.bool => true or false
   # -->
-  # Returns the data in sockopt as a boolean value.
+  # Returns the data in *sockopt* as an boolean value.
+  #
+  #     sockopt = Socket::Option.int(:INET, :SOCKET, :KEEPALIVE, 1)
+  #     p sockopt.bool => true
   #
   def bool: () -> bool
 
@@ -4260,7 +4341,10 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.byte => integer
   # -->
-  # Returns the data in sockopt as an byte.
+  # Returns the data in *sockopt* as an byte.
+  #
+  #     sockopt = Socket::Option.byte(:INET, :SOCKET, :KEEPALIVE, 1)
+  #     p sockopt.byte => 1
   #
   def byte: () -> Integer
 
@@ -4269,7 +4353,10 @@ class Socket::Option
   #   - sockopt.data => string
   #   - sockopt.to_s => string
   # -->
-  # Returns the data in sockopt as a string.
+  # returns the socket option data as a string.
+  #
+  #     p Socket::Option.new(:INET6, :IPV6, :RECVPKTINFO, [1].pack("i!")).data
+  #     #=> "\x01\x00\x00\x00"
   #
   def data: () -> String
 
@@ -4277,7 +4364,10 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.family => integer
   # -->
-  # Returns the socket family as an integer.
+  # returns the socket family as an integer.
+  #
+  #     p Socket::Option.new(:INET6, :IPV6, :RECVPKTINFO, [1].pack("i!")).family
+  #     #=> 10
   #
   def family: () -> Integer
 
@@ -4287,14 +4377,21 @@ class Socket::Option
   # -->
   # Returns a string which shows sockopt in human-readable form.
   #
+  #     p Socket::Option.new(:INET, :SOCKET, :KEEPALIVE, [1].pack("i")).inspect
+  #     #=> "#<Socket::Option: INET SOCKET KEEPALIVE 1>"
+  #
   def inspect: () -> String
 
   # <!--
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.int => integer
   # -->
-  # Returns the data in sockopt as an int. The size and endian is dependent on
-  # the host.
+  # Returns the data in *sockopt* as an int.
+  #
+  # The size and endian is dependent on the platform.
+  #
+  #     sockopt = Socket::Option.int(:INET, :SOCKET, :KEEPALIVE, 1)
+  #     p sockopt.int => 1
   #
   def int: () -> Integer
 
@@ -4302,7 +4399,10 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.ipv4_multicast_loop => integer
   # -->
-  # Returns the ipv4_multicast_loop data in sockopt as an integer.
+  # Returns the ipv4_multicast_loop data in *sockopt* as an integer.
+  #
+  #     sockopt = Socket::Option.ipv4_multicast_loop(10)
+  #     p sockopt.ipv4_multicast_loop => 10
   #
   def ipv4_multicast_loop: () -> Integer
 
@@ -4310,7 +4410,10 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.ipv4_multicast_ttl => integer
   # -->
-  # Returns the ipv4_multicast_ttl data in sockopt as an integer.
+  # Returns the ipv4_multicast_ttl data in *sockopt* as an integer.
+  #
+  #     sockopt = Socket::Option.ipv4_multicast_ttl(10)
+  #     p sockopt.ipv4_multicast_ttl => 10
   #
   def ipv4_multicast_ttl: () -> Integer
 
@@ -4318,15 +4421,21 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.level => integer
   # -->
-  # Returns the socket level as an integer.
+  # returns the socket level as an integer.
+  #
+  #     p Socket::Option.new(:INET6, :IPV6, :RECVPKTINFO, [1].pack("i!")).level
+  #     #=> 41
   #
   def level: () -> Integer
 
   # <!--
   #   rdoc-file=ext/socket/option.c
-  #   - sockopt.linger => [bool, integer]
+  #   - sockopt.linger => [bool, seconds]
   # -->
-  # Returns the linger data in sockopt as a pair of boolean and integer.
+  # Returns the linger data in *sockopt* as a pair of boolean and integer.
+  #
+  #     sockopt = Socket::Option.linger(true, 10)
+  #     p sockopt.linger => [true, 10]
   #
   def linger: () -> [ bool, Integer ]
 
@@ -4334,10 +4443,19 @@ class Socket::Option
   #   rdoc-file=ext/socket/option.c
   #   - sockopt.optname => integer
   # -->
-  # Returns the socket option name as an integer.
+  # returns the socket option name as an integer.
+  #
+  #     p Socket::Option.new(:INET6, :IPV6, :RECVPKTINFO, [1].pack("i!")).optname
+  #     #=> 2
   #
   def optname: () -> Integer
 
+  # <!-- rdoc-file=ext/socket/option.c -->
+  # returns the socket option data as a string.
+  #
+  #     p Socket::Option.new(:INET6, :IPV6, :RECVPKTINFO, [1].pack("i!")).data
+  #     #=> "\x01\x00\x00\x00"
+  #
   alias to_s data
 
   # <!--
@@ -4345,6 +4463,10 @@ class Socket::Option
   #   - sockopt.unpack(template) => array
   # -->
   # Calls String#unpack on sockopt.data.
+  #
+  #     sockopt = Socket::Option.new(:INET, :SOCKET, :KEEPALIVE, [1].pack("i"))
+  #     p sockopt.unpack("i")      #=> [1]
+  #     p sockopt.data.unpack("i") #=> [1]
   #
   def unpack: (String template) -> Array[untyped]
 end
