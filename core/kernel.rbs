@@ -2306,7 +2306,7 @@ module Kernel : BasicObject
   # When you define #<=>, you can include Comparable to gain the methods #<=, #<,
   # #==, #>=, #> and #between?.
   #
-  def <=>: (untyped other) -> 0?
+  def <=>: (untyped other) -> Integer?
 
   # <!--
   #   rdoc-file=object.c
