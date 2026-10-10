@@ -4,7 +4,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::ast::AstConverter;
-use crate::environment::{Environment, Source, SourceKind};
+use crate::environment::{DuplicatedDeclarationError, Environment, Source, SourceKind};
 use crate::file_finder;
 use crate::interners::Interners;
 use crate::node;
@@ -14,6 +14,7 @@ use crate::node;
 pub enum LoadError {
     Io { path: PathBuf, source: io::Error },
     Parse { path: PathBuf, message: String },
+    DuplicatedDeclaration(DuplicatedDeclarationError),
 }
 
 impl fmt::Display for LoadError {
@@ -25,6 +26,7 @@ impl fmt::Display for LoadError {
             LoadError::Parse { path, message } => {
                 write!(f, "Syntax error in {}: {}", path.display(), message)
             }
+            LoadError::DuplicatedDeclaration(err) => fmt::Display::fmt(err, f),
         }
     }
 }
@@ -33,7 +35,10 @@ impl std::error::Error for LoadError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             LoadError::Io { source, .. } => Some(source),
-            _ => None,
+            // Transparent: `Display` already delegates to `err`, so returning
+            // it here would print the same message twice in an error chain.
+            LoadError::DuplicatedDeclaration(err) => std::error::Error::source(err),
+            LoadError::Parse { .. } => None,
         }
     }
 }
@@ -82,7 +87,9 @@ impl EnvironmentLoader {
     /// Returns what this call read, in the order it read it, so a caller
     /// appending to a non-empty `env` still learns what it added. On `Err` the
     /// sources read before the failure are already in `env`, same as the Ruby
-    /// implementation adding sources as it walks the directories.
+    /// implementation adding sources as it walks the directories. On
+    /// `LoadError::DuplicatedDeclaration` that includes the failing source and
+    /// the declarations registered from it before the duplicate.
     pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
         let mut loaded = Vec::new();
         let mut seen_files: HashSet<PathBuf> = HashSet::new();
@@ -100,7 +107,8 @@ impl EnvironmentLoader {
                     continue;
                 }
                 let source = parse_one(&path, &kind, env.interners_mut())?;
-                env.add_source(source);
+                env.add_source(source)
+                    .map_err(LoadError::DuplicatedDeclaration)?;
                 loaded.push(LoadedFile {
                     path,
                     kind: kind.clone(),
