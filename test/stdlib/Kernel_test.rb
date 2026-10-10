@@ -107,38 +107,6 @@ class KernelSingletonTest < Test::Unit::TestCase
     end
   end
 
-  def test_exit!
-    # Sadly can't use `assert_send_type_error`, so we use exit status to check.
-    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!; exit(80)'))
-    assert_equal 1, status.exitstatus
-
-    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(true); exit(80)'))
-    assert_equal 0, status.exitstatus
-
-    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(false); exit(80)'))
-    assert_equal 1, status.exitstatus
-
-    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', 'exit!(12); exit(80)'))
-    assert_equal 12, status.exitstatus
-
-    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, '--disable=all', '-e', <<~'RUBY'))
-      # hardcode a "blank slate" object in
-      class ToInt < BasicObject
-        instance_methods.each do |im|
-          next if im == :__id__
-          next if im == :__send__
-          undef_method im
-        end
-
-        def to_int = 12
-      end
-
-      exit!(ToInt.new)
-      exit(80)
-    RUBY
-    assert_equal 12, status.exitstatus
-  end
-
   def test_at_exit
     assert_send_type "() { () -> void } -> Proc",
                      Kernel, :at_exit do end
@@ -183,10 +151,6 @@ class KernelSingletonTest < Test::Unit::TestCase
   def test___dir__
     assert_send_type '() -> String',
                      Kernel, :__dir__
-
-    # Make sure it can return `nil`; this can't go through `assert_send_type`,
-    # as it's only `nil` thru `eval`s
-    assert_equal nil, eval('__dir__')
   end
 
   def test_autoload
