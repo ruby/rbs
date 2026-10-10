@@ -218,9 +218,37 @@ class Resolv::DNS
   # Iterates over all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
   #
-  def each_resource: (dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
+  def each_resource: (dns_name name, singleton(Resolv::DNS::Resource::IN::A) typeclass) { (Resolv::DNS::Resource::IN::A) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::AAAA) typeclass) { (Resolv::DNS::Resource::IN::AAAA) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::CNAME) typeclass) { (Resolv::DNS::Resource::IN::CNAME) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::HINFO) typeclass) { (Resolv::DNS::Resource::IN::HINFO) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::LOC) typeclass) { (Resolv::DNS::Resource::IN::LOC) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::MINFO) typeclass) { (Resolv::DNS::Resource::IN::MINFO) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::MX) typeclass) { (Resolv::DNS::Resource::IN::MX) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::NS) typeclass) { (Resolv::DNS::Resource::IN::NS) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::PTR) typeclass) { (Resolv::DNS::Resource::IN::PTR) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::SOA) typeclass) { (Resolv::DNS::Resource::IN::SOA) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::SRV) typeclass) { (Resolv::DNS::Resource::IN::SRV) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::TXT) typeclass) { (Resolv::DNS::Resource::IN::TXT) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::IN::WKS) typeclass) { (Resolv::DNS::Resource::IN::WKS) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Resource::Generic) typeclass) { (Resolv::DNS::Resource::Generic) -> void } -> void
+                   | (dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
 
-  def extract_resources: (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
+  def extract_resources: (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::A) typeclass) { (Resolv::DNS::Resource::IN::A) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::AAAA) typeclass) { (Resolv::DNS::Resource::IN::AAAA) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::CNAME) typeclass) { (Resolv::DNS::Resource::IN::CNAME) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::HINFO) typeclass) { (Resolv::DNS::Resource::IN::HINFO) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::LOC) typeclass) { (Resolv::DNS::Resource::IN::LOC) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::MINFO) typeclass) { (Resolv::DNS::Resource::IN::MINFO) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::MX) typeclass) { (Resolv::DNS::Resource::IN::MX) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::NS) typeclass) { (Resolv::DNS::Resource::IN::NS) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::PTR) typeclass) { (Resolv::DNS::Resource::IN::PTR) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::SOA) typeclass) { (Resolv::DNS::Resource::IN::SOA) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::SRV) typeclass) { (Resolv::DNS::Resource::IN::SRV) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::TXT) typeclass) { (Resolv::DNS::Resource::IN::TXT) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::IN::WKS) typeclass) { (Resolv::DNS::Resource::IN::WKS) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Resource::Generic) typeclass) { (Resolv::DNS::Resource::Generic) -> void } -> void
+                       | (Resolv::DNS::Message msg, dns_name name, singleton(Resolv::DNS::Query) typeclass) { (Resolv::DNS::Resource) -> void } -> void
 
   # <!--
   #   rdoc-file=lib/resolv.rb
@@ -299,7 +327,21 @@ class Resolv::DNS
   # Returned resource is represented as a Resolv::DNS::Resource instance, i.e.
   # Resolv::DNS::Resource::IN::A.
   #
-  def getresource: (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Resolv::DNS::Resource
+  def getresource: (dns_name name, singleton(Resolv::DNS::Resource::IN::A) typeclass) -> Resolv::DNS::Resource::IN::A
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::AAAA) typeclass) -> Resolv::DNS::Resource::IN::AAAA
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::CNAME) typeclass) -> Resolv::DNS::Resource::IN::CNAME
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::HINFO) typeclass) -> Resolv::DNS::Resource::IN::HINFO
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::LOC) typeclass) -> Resolv::DNS::Resource::IN::LOC
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::MINFO) typeclass) -> Resolv::DNS::Resource::IN::MINFO
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::MX) typeclass) -> Resolv::DNS::Resource::IN::MX
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::NS) typeclass) -> Resolv::DNS::Resource::IN::NS
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::PTR) typeclass) -> Resolv::DNS::Resource::IN::PTR
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::SOA) typeclass) -> Resolv::DNS::Resource::IN::SOA
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::SRV) typeclass) -> Resolv::DNS::Resource::IN::SRV
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::TXT) typeclass) -> Resolv::DNS::Resource::IN::TXT
+                 | (dns_name name, singleton(Resolv::DNS::Resource::IN::WKS) typeclass) -> Resolv::DNS::Resource::IN::WKS
+                 | (dns_name name, singleton(Resolv::DNS::Resource::Generic) typeclass) -> Resolv::DNS::Resource::Generic
+                 | (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Resolv::DNS::Resource
 
   # <!--
   #   rdoc-file=lib/resolv.rb
@@ -308,7 +350,21 @@ class Resolv::DNS
   # Looks up all `typeclass` DNS resources for `name`.  See #getresource for
   # argument details.
   #
-  def getresources: (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Array[Resolv::DNS::Resource]
+  def getresources: (dns_name name, singleton(Resolv::DNS::Resource::IN::A) typeclass) -> Array[Resolv::DNS::Resource::IN::A]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::AAAA) typeclass) -> Array[Resolv::DNS::Resource::IN::AAAA]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::CNAME) typeclass) -> Array[Resolv::DNS::Resource::IN::CNAME]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::HINFO) typeclass) -> Array[Resolv::DNS::Resource::IN::HINFO]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::LOC) typeclass) -> Array[Resolv::DNS::Resource::IN::LOC]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::MINFO) typeclass) -> Array[Resolv::DNS::Resource::IN::MINFO]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::MX) typeclass) -> Array[Resolv::DNS::Resource::IN::MX]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::NS) typeclass) -> Array[Resolv::DNS::Resource::IN::NS]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::PTR) typeclass) -> Array[Resolv::DNS::Resource::IN::PTR]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::SOA) typeclass) -> Array[Resolv::DNS::Resource::IN::SOA]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::SRV) typeclass) -> Array[Resolv::DNS::Resource::IN::SRV]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::TXT) typeclass) -> Array[Resolv::DNS::Resource::IN::TXT]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::IN::WKS) typeclass) -> Array[Resolv::DNS::Resource::IN::WKS]
+                  | (dns_name name, singleton(Resolv::DNS::Resource::Generic) typeclass) -> Array[Resolv::DNS::Resource::Generic]
+                  | (dns_name name, singleton(Resolv::DNS::Query) typeclass) -> Array[Resolv::DNS::Resource]
 
   def lazy_initialize: () -> untyped
 
