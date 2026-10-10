@@ -36,7 +36,7 @@ module RBS
       io.puts msg
       io.puts
       io.print "\e[1m" if highlight
-      io.puts "  #{location.buffer.lines[location.end_line - 1]}"
+      io.puts "  #{location.buffer.top_buffer.lines[location.end_line - 1]}"
       io.puts "  #{indent}#{marker}"
       io.print "\e[m" if highlight
       io.string

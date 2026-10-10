@@ -17,6 +17,7 @@ module RBS
       attr_reader :repos
       attr_reader :libs
       attr_reader :dirs
+      attr_reader :inline_dirs
 
       def initialize()
         @core_root = EnvironmentLoader::DEFAULT_CORE_ROOT
@@ -24,6 +25,7 @@ module RBS
 
         @libs = []
         @dirs = []
+        @inline_dirs = []
         @config_path = Collection::Config.find_config_path || Collection::Config::PATH
       end
 
@@ -46,6 +48,10 @@ module RBS
           loader.add(path: Pathname(dir))
         end
 
+        inline_dirs.each do |dir|
+          loader.add(inline: Pathname(dir))
+        end
+
         libs.each do |lib|
           name, version = lib.split(/:/, 2)
           next unless name
@@ -62,6 +68,10 @@ module RBS
 
         opts.on("-I DIR", "Load RBS files from the directory") do |dir|
           dirs << dir
+        end
+
+        opts.on("--inline DIR", "Load inline RBS declarations from Ruby files in the directory") do |dir|
+          inline_dirs << dir
         end
 
         opts.on("--no-stdlib", "Skip loading standard library signatures") do
@@ -559,6 +569,10 @@ EOU
         when EnvironmentLoader::Library
           stdout.puts "#{dir} (#{kind_of[dir]}, library, name=#{source.name})"
         end
+      end
+
+      loader.inline_dirs.each do |dir|
+        stdout.puts "#{dir} (#{kind_of[dir]}, inline)"
       end
 
       0

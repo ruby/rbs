@@ -53,9 +53,13 @@ Usage: rbs validate
 
 Validate RBS files. It ensures the type names in RBS files are present and the type applications have correct arity.
 
+Inline RBS declarations in Ruby files given by `--inline` are validated too.
+Ruby code that cannot be imported as inline declarations is reported as warnings.
+
 Examples:
 
   $ rbs validate
+  $ rbs -I sig --inline lib validate
 EOU
 
           opts.on("--silent", "This option has been deprecated and does nothing.") do
@@ -73,6 +77,8 @@ EOU
       end
 
       def run
+        report_inline_diagnostics
+
         @errors.try do
           validate_class_module_definition
           validate_class_module_alias_definition
@@ -84,6 +90,14 @@ EOU
       end
 
       private
+
+      def report_inline_diagnostics
+        @env.each_ruby_source do |source|
+          source.diagnostics.each do |diagnostic|
+            RBS.logger.warn "#{diagnostic.location}: #{diagnostic.message} (#{diagnostic.class.name})"
+          end
+        end
+      end
 
       def validate_class_module_definition
         @env.class_decls.each do |name, entry|
@@ -103,7 +117,14 @@ EOU
           when Environment::ClassEntry
             entry.each_decl do |decl|
               if super_class = decl.super_class
-                super_class.args.each do |arg|
+                args =
+                  case super_class
+                  when AST::Declarations::Class::Super
+                    super_class.args
+                  when AST::Ruby::Declarations::ClassDecl::SuperClass
+                    super_class.type_args
+                  end
+                args.each do |arg|
                   @validator.validate_type(arg, context: nil)
                 end
               end
@@ -134,7 +155,7 @@ EOU
           @validator.validate_type_params(
             d.type_params,
             type_name: name,
-            location: d.location&.aref(:type_params)
+            location: d.is_a?(AST::Declarations::Base) ? d.location&.aref(:type_params) : nil
           )
 
           d.type_params.each do |param|
@@ -161,17 +182,18 @@ EOU
                 when AST::Members::MethodDefinition
                   @validator.validate_method_definition(member, type_name: name)
                 when AST::Members::Mixin
-                  params =
-                    if member.name.class?
-                      module_decl = @env.module_entry(member.name, normalized: true) or raise
-                      module_decl.type_params
-                    else
-                      interface_decl = @env.interface_decls.fetch(member.name)
-                      interface_decl.decl.type_params
-                    end
-                  InvalidTypeApplicationError.check!(type_name: member.name, params: params, args: member.args, location: member.location)
+                  InvalidTypeApplicationError.check!(type_name: member.name, params: mixin_type_params(member.name), args: member.args, location: member.location)
                 when AST::Members::Var
                   @validator.validate_variable(member)
+                end
+              end
+            when AST::Ruby::Declarations::Base
+              decl.members.each do |member|
+                case member
+                when AST::Ruby::Members::DefMember
+                  @validator.validate_method_definition(member, type_name: name)
+                when AST::Ruby::Members::MixinMember
+                  InvalidTypeApplicationError.check!(type_name: member.module_name, params: mixin_type_params(member.module_name), args: member.type_args, location: member.location)
                 end
               end
             else
@@ -180,6 +202,16 @@ EOU
           end
         rescue BaseError => error
           @errors.add(error)
+        end
+      end
+
+      def mixin_type_params(name)
+        if name.class?
+          module_decl = @env.module_entry(name, normalized: true) or raise
+          module_decl.type_params
+        else
+          interface_decl = @env.interface_decls.fetch(name)
+          interface_decl.decl.type_params
         end
       end
 
