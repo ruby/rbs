@@ -27,12 +27,15 @@ class MethodDriftTest < Test::Unit::TestCase
   ].freeze
 
   # Known, intentional exceptions keyed by "::Name#" (instance methods) or
-  # "::Name." (singleton methods) => [:method, ...].
+  # "::Name." (singleton methods) => [:method, ...]. See "Why does RBS declare
+  # methods that Ruby does not define on that class?" in docs/CONTRIBUTING.md.
   SKIP = {
     # Declared on `Numeric` so that code typed as `Numeric` can add and
     # subtract, though only the subclasses define them at runtime.
     "::Numeric#" => [:+, :-],
-    # Declared in RBS on the module, but defined in `Kernel` at runtime.
+    # TODO: Defined in `Kernel` at runtime, and these declarations are no more
+    # precise than `Kernel#enum_for` (they even require the method name).
+    # Consider removing them.
     "::Enumerable#" => [:to_enum, :enum_for],
     # Declared on `Struct` itself, but defined only on the classes that
     # `Struct.new` creates.
