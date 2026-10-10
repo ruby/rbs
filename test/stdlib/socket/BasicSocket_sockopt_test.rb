@@ -24,19 +24,19 @@ class BasicSocketSockoptTest < Test::Unit::TestCase
   def test_setsockopt
     Socket.open(:INET, :STREAM) do |socket|
       assert_send_type(
-        "(::Socket::Option) -> 0",
+        "(::Socket::Option) -> void",
         socket, :setsockopt, Socket::Option.bool(:INET, :SOCKET, :KEEPALIVE, true)
       )
       assert_send_type(
-        "(::Symbol, ::Symbol, bool) -> 0",
+        "(::Symbol, ::Symbol, bool) -> void",
         socket, :setsockopt, :SOCKET, :KEEPALIVE, true
       )
       assert_send_type(
-        "(::Symbol, ::Symbol, ::Integer) -> 0",
+        "(::Symbol, ::Symbol, ::Integer) -> void",
         socket, :setsockopt, :SOCKET, :KEEPALIVE, 1
       )
       assert_send_type(
-        "(::Integer, ::Integer, ::String) -> 0",
+        "(::Integer, ::Integer, ::String) -> void",
         socket, :setsockopt, Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, [1].pack("i")
       )
     end

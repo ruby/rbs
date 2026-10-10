@@ -544,8 +544,8 @@ class BasicSocket < IO
   #              IPAddr.new(Socket::INADDR_ANY, Socket::AF_INET).hton
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
-  def setsockopt: (Socket::Option socketoption) -> 0
-                | (interned | Integer level, interned | Integer optname, boolish | Integer | String optval) -> 0
+  def setsockopt: (Socket::Option socketoption) -> void
+                | (interned | Integer level, interned | Integer optname, boolish | Integer | String optval) -> void
 
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c
