@@ -237,7 +237,7 @@ class BasicSocket < IO
   #     onoff, linger = optval.unpack "ii"
   #     onoff = onoff == 0 ? false : true
   #
-  def getsockopt: (Symbol | Integer, Symbol | Integer) -> (Integer | boolish | String)
+  def getsockopt: (interned | Integer level, interned | Integer optname) -> Socket::Option
 
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c
@@ -544,7 +544,8 @@ class BasicSocket < IO
   #              IPAddr.new(Socket::INADDR_ANY, Socket::AF_INET).hton
   #     sock.setsockopt(Socket::IPPROTO_IP, Socket::IP_ADD_MEMBERSHIP, optval)
   #
-  def setsockopt: (*Symbol | Integer, boolish | Integer | String) -> void
+  def setsockopt: (Socket::Option socketoption) -> 0
+               | (interned | Integer level, interned | Integer optname, boolish | Integer | String optval) -> 0
 
   # <!--
   #   rdoc-file=ext/socket/basicsocket.c

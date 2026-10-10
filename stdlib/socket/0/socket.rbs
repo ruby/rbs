@@ -506,6 +506,25 @@ class Socket < BasicSocket
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
+  #   - Socket.tcp_fast_fallback -> true or false
+  # -->
+  # Returns whether the "Happy Eyeballs Version 2" fast fallback is enabled by
+  # default for Socket.tcp and TCPSocket.new. The initial value is `true`.
+  #
+  def self.tcp_fast_fallback: () -> bool
+
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
+  #   - Socket.tcp_fast_fallback=(value)
+  # -->
+  # Sets the default of the `fast_fallback:` option for Socket.tcp and
+  # TCPSocket.new. Setting it to `false` disables "Happy Eyeballs Version 2" unless
+  # `fast_fallback:` is given explicitly.
+  #
+  def self.tcp_fast_fallback=: (bool value) -> bool
+
+  # <!--
+  #   rdoc-file=ext/socket/lib/socket.rb
   #   - tcp_server_loop(host=nil, port) { |socket, client_addrinfo| ... }
   # -->
   # creates a TCP/IP server on *port* and calls the block for each connection
@@ -4155,4 +4174,177 @@ class Socket::AncillaryData
   #     #=> #<Socket::AncillaryData: INET6 IPV6 PKTINFO "">
   #
   def initialize: (interned | Integer family, interned | Integer cmsg_level, interned | Integer cmsg_data, String cmsg_data) -> untyped
+end
+
+# <!-- rdoc-file=ext/socket/option.c -->
+# Socket::Option represents a socket option (the level, option name and value
+# used by `getsockopt` and `setsockopt`) together with the socket family it is
+# meant for.
+#
+class Socket::Option
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.new(family, level, optname, data) => sockopt
+  # -->
+  # Returns a new Socket::Option object. `data` is the raw option value.
+  #
+  #     sockopt = Socket::Option.new(:INET, :SOCKET, :KEEPALIVE, [1].pack("i"))
+  #     p sockopt #=> #<Socket::Option: INET SOCKET KEEPALIVE 1>
+  #
+  def initialize: (interned | Integer family, interned | Integer level, interned | Integer optname, String data) -> void
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.bool(family, level, optname, bool) => sockopt
+  # -->
+  # Creates a new Socket::Option object which contains boolean as data. Actual
+  # size is system dependent.
+  #
+  def self.bool: (interned | Integer family, interned | Integer level, interned | Integer optname, boolish bool) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.byte(family, level, optname, integer) => sockopt
+  # -->
+  # Creates a new Socket::Option object which contains a byte as data.
+  #
+  def self.byte: (interned | Integer family, interned | Integer level, interned | Integer optname, Integer integer) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.int(family, level, optname, integer) => sockopt
+  # -->
+  # Creates a new Socket::Option object which contains an int as data. The size
+  # and endian is dependent on the host.
+  #
+  def self.int: (interned | Integer family, interned | Integer level, interned | Integer optname, Integer integer) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.ipv4_multicast_loop(integer) => sockopt
+  # -->
+  # Creates a new Socket::Option object for IP_MULTICAST_LOOP.
+  #
+  def self.ipv4_multicast_loop: (Integer integer) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.ipv4_multicast_ttl(integer) => sockopt
+  # -->
+  # Creates a new Socket::Option object for IP_MULTICAST_TTL.
+  #
+  def self.ipv4_multicast_ttl: (Integer integer) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - Socket::Option.linger(onoff, secs) => sockopt
+  # -->
+  # Creates a new Socket::Option object for SO_LINGER.
+  #
+  # `onoff` should be an integer or a boolean.
+  #
+  #     p Socket::Option.linger(true, 10)
+  #     #=> #<Socket::Option: UNSPEC SOCKET LINGER onoff:1 linger:10>
+  #
+  def self.linger: (boolish | Integer onoff, Integer secs) -> instance
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.bool => true or false
+  # -->
+  # Returns the data in sockopt as a boolean value.
+  #
+  def bool: () -> bool
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.byte => integer
+  # -->
+  # Returns the data in sockopt as an byte.
+  #
+  def byte: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.data => string
+  #   - sockopt.to_s => string
+  # -->
+  # Returns the data in sockopt as a string.
+  #
+  def data: () -> String
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.family => integer
+  # -->
+  # Returns the socket family as an integer.
+  #
+  def family: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.inspect => string
+  # -->
+  # Returns a string which shows sockopt in human-readable form.
+  #
+  def inspect: () -> String
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.int => integer
+  # -->
+  # Returns the data in sockopt as an int. The size and endian is dependent on
+  # the host.
+  #
+  def int: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.ipv4_multicast_loop => integer
+  # -->
+  # Returns the ipv4_multicast_loop data in sockopt as an integer.
+  #
+  def ipv4_multicast_loop: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.ipv4_multicast_ttl => integer
+  # -->
+  # Returns the ipv4_multicast_ttl data in sockopt as an integer.
+  #
+  def ipv4_multicast_ttl: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.level => integer
+  # -->
+  # Returns the socket level as an integer.
+  #
+  def level: () -> Integer
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.linger => [bool, integer]
+  # -->
+  # Returns the linger data in sockopt as a pair of boolean and integer.
+  #
+  def linger: () -> [ bool, Integer ]
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.optname => integer
+  # -->
+  # Returns the socket option name as an integer.
+  #
+  def optname: () -> Integer
+
+  alias to_s data
+
+  # <!--
+  #   rdoc-file=ext/socket/option.c
+  #   - sockopt.unpack(template) => array
+  # -->
+  # Calls String#unpack on sockopt.data.
+  #
+  def unpack: (String template) -> Array[untyped]
 end

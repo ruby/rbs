@@ -3,3 +3,18 @@
 #
 class SocketError < StandardError
 end
+
+# <!-- rdoc-file=ext/socket/init.c -->
+# Socket::ResolutionError is the error class for name resolution failures, such
+# as those raised by `getaddrinfo`.
+#
+class Socket::ResolutionError < SocketError
+  # <!--
+  #   rdoc-file=ext/socket/init.c
+  #   - error_code -> Integer
+  # -->
+  # Returns the raw error code (one of the `Socket::EAI_*` constants) reported by
+  # the resolver.
+  #
+  def error_code: () -> Integer
+end
