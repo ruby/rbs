@@ -7,21 +7,10 @@ class GlobalVariablesTest < Test::Unit::TestCase
     # I wish there was a `global_variable_get`; alas, `eval`.
     global = block_given? ? yield : eval(global_name.to_s, nil, $0, $.)
 
-    typecheck = RBS::Test::TypeCheck.new(
-      builder: builder,
-      sample_size: 100,
-      unchecked_classes: []
-    )
+    assert_type type, global
 
-    value_type =
-      case type
-      when String
-        RBS::Parser.parse_type(type, variables: []) || raise
-      else
-        type
-      end
-
-    assert typecheck.value(global, value_type), "`#{global_name}` (#{global.inspect}) must be compatible with given type `#{value_type}`"
+    entry = env.global_decls.fetch(global_name.to_sym) { flunk "Cannot find RBS global declaration of `#{global_name}`" }
+    assert_type entry.decl.type, global
   end
 
   def test_gvar_exclaimation
@@ -295,7 +284,7 @@ class GlobalVariablesTest < Test::Unit::TestCase
 
   def test_gvar_backwards_slash
     # Don't test other `$\`s as they're deprecated
-    assert_global_type 'nil', $\
+    assert_global_type 'nil', :$\
   end
 
   def test_gvar_underscore

@@ -18,25 +18,16 @@ class RefinementInstanceTest < Test::Unit::TestCase
   end
 
   def test_import_methods
-    assert_fn = method(:assert)
+    test = self
 
     Module.new {
       refine Integer do
-        # Due to a bug in Ruby, you can't call `import_methods` outside of `refine`
-
-        begin
-          import_methods
-        rescue
-          assert_fn.call(true)
-        else
-          assert_fn.call(false, "import_methods accepts at least one argument?")
-        end
-
-        import_methods Module.new
-        assert_fn.call(true)
-
-        import_methods Module.new, Module.new
-        assert_fn.call(true)
+        # Due to a bug in Ruby, you can't call `import_methods` outside of `refine`.
+        # Calling it with modules through `assert_send_type` also crashes the VM
+        # (`cref_replace_with_duplicated_cref_each_frame: unreachable`), so only the
+        # no-argument case is checked here.
+        test.refute_send_type '() -> untyped',
+                              self, :import_methods
       end
     }
   end
