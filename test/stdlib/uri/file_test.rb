@@ -49,24 +49,18 @@ class URIFileInstanceTest < Test::Unit::TestCase
   end
 
   def test_check_userinfo
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        file, :check_userinfo, 'user:pass'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           file, :check_userinfo, 'user:pass'
   end
 
   def test_check_user
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        file, :check_user, 'user'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           file, :check_user, 'user'
   end
 
   def test_check_password
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        file, :check_password, 'pass'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           file, :check_password, 'pass'
   end
 
   def test_set_userinfo
