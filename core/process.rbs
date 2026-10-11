@@ -2303,6 +2303,25 @@ end
 # Placeholder for rusage
 #
 class Process::Tms < Struct[Float]
+  # <!-- rdoc-file=process.c -->
+  # user time used in this process
+  #
+  attr_accessor utime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # system time used in this process
+  #
+  attr_accessor stime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # user time used in the child processes
+  #
+  attr_accessor cutime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # system time used in the child processes
+  #
+  attr_accessor cstime: Float
 end
 
 class Process::Waiter < Thread

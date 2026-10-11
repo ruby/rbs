@@ -974,6 +974,17 @@ class IO < Object
 
   # <!--
   #   rdoc-file=io.c
+  #   - external_encoding -> encoding or nil
+  # -->
+  # Returns the Encoding object that represents the encoding of the stream, or
+  # `nil` if the stream is in write mode and no encoding is specified.
+  #
+  # See [Encodings](rdoc-ref:File@Encodings).
+  #
+  def external_encoding: () -> Encoding?
+
+  # <!--
+  #   rdoc-file=io.c
   #   - fcntl(integer_cmd, argument) -> integer
   # -->
   # Invokes Posix system call [fcntl(2)](https://linux.die.net/man/2/fcntl), which
@@ -2175,6 +2186,17 @@ class IO < Object
   # Returns `self`.
   #
   def to_io: () -> self
+
+  # <!-- rdoc-file=io.c -->
+  # Returns the path associated with the IO, or `nil` if there is no path
+  # associated with the IO. It is not guaranteed that the path exists on the
+  # filesystem.
+  #
+  #     $stdin.path # => "<STDIN>"
+  #
+  #     File.open("testfile") {|f| f.path} # => "testfile"
+  #
+  alias to_path path
 
   # <!-- rdoc-file=io.c -->
   # Returns `true` if the stream is associated with a terminal device (tty),
