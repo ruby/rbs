@@ -50,6 +50,72 @@ class Binding
 
   # <!--
   #   rdoc-file=proc.c
+  #   - binding.implicit_parameter_defined?(symbol) -> obj
+  # -->
+  # Returns `true` if the numbered parameter or "it" parameter exists.
+  #
+  #     def foo
+  #       [42].each do
+  #         it
+  #         binding.implicit_parameter_defined?(:it) #=> true
+  #         binding.implicit_parameter_defined?(:_1) #=> false
+  #       end
+  #
+  #       { k: 42 }.each do
+  #         _2
+  #         binding.implicit_parameter_defined?(:_1) #=> true
+  #         binding.implicit_parameter_defined?(:_2) #=> true
+  #         binding.implicit_parameter_defined?(:_3) #=> false
+  #         binding.implicit_parameter_defined?(:it) #=> false
+  #       end
+  #     end
+  #
+  def implicit_parameter_defined?: (interned symbol) -> bool
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.implicit_parameter_get(symbol) -> obj
+  # -->
+  # Returns the value of the numbered parameter or "it" parameter.
+  #
+  #     def foo
+  #       [42].each do
+  #         it
+  #         binding.implicit_parameter_get(:it) #=> 42
+  #       end
+  #
+  #       { k: 42 }.each do
+  #         _2
+  #         binding.implicit_parameter_get(:_1) #=> :k
+  #         binding.implicit_parameter_get(:_2) #=> 42
+  #       end
+  #     end
+  #
+  def implicit_parameter_get: (interned symbol) -> untyped
+
+  # <!--
+  #   rdoc-file=proc.c
+  #   - binding.implicit_parameters -> Array
+  # -->
+  # Returns the names of numbered parameters and "it" parameter that are defined
+  # in the binding.
+  #
+  #     def foo
+  #       [42].each do
+  #         it
+  #         binding.implicit_parameters #=> [:it]
+  #       end
+  #
+  #       { k: 42 }.each do
+  #         _2
+  #         binding.implicit_parameters #=> [:_1, :_2]
+  #       end
+  #     end
+  #
+  def implicit_parameters: () -> Array[Symbol]
+
+  # <!--
+  #   rdoc-file=proc.c
   #   - binding.local_variable_defined?(symbol) -> obj
   # -->
   # Returns `true` if a local variable `symbol` exists.

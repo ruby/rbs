@@ -206,4 +206,15 @@ class ThreadTest < Test::Unit::TestCase
   def test_wakeup
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :wakeup
   end
+
+  def test_set_trace_func
+    th = Thread.new { sleep }
+    trace = proc { }
+
+    assert_send_type "(Proc) -> Proc", th, :set_trace_func, trace
+    assert_send_type "(nil) -> nil", th, :set_trace_func, nil
+  ensure
+    th&.set_trace_func(nil)
+    th&.kill&.join
+  end
 end

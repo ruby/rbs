@@ -648,6 +648,19 @@ class Thread < Object
   def safe_level: () -> Integer
 
   # <!--
+  #   rdoc-file=vm_trace.c
+  #   - thr.set_trace_func(proc)    -> proc
+  #   - thr.set_trace_func(nil)     -> nil
+  # -->
+  # Establishes *proc* on *thr* as the handler for tracing, or disables tracing if
+  # the parameter is `nil`.
+  #
+  # See Kernel#set_trace_func.
+  #
+  def set_trace_func: (Proc proc) -> Proc
+                    | (nil) -> nil
+
+  # <!--
   #   rdoc-file=thread.c
   #   - thr.status   -> string, false or nil
   # -->
