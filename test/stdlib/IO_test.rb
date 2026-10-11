@@ -311,6 +311,22 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_external_encoding
+    File.open(File.expand_path(__FILE__)) do |io|
+      assert_send_type(
+        "() -> Encoding",
+        io, :external_encoding
+      )
+    end
+
+    File.open(IO::NULL, "w") do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :external_encoding
+      )
+    end
+  end
+
   def test_path
     IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
       assert_send_type(
@@ -323,6 +339,22 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type(
         "() -> nil",
         io, :path
+      )
+    end
+  end
+
+  def test_to_path
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+      assert_send_type(
+        "() -> String",
+        io, :to_path
+      )
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: nil) do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :to_path
       )
     end
   end
@@ -590,6 +622,21 @@ class IOWaitTest < Test::Unit::TestCase
           r, :wait_readable, 1
         )
       end
+    end
+  end
+
+  def test_wait_priority
+    IO.pipe do |r, w|
+      assert_send_type(
+        "(Integer) -> nil",
+        r, :wait_priority, 0
+      )
+
+      r.ungetc("a")
+      assert_send_type(
+        "() -> true",
+        r, :wait_priority
+      )
     end
   end
 
