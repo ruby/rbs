@@ -48,6 +48,11 @@ class Binding
   #
   def eval: (string src, ?string filename, ?int lineno) -> untyped
 
+  # Opens an IRB session in the binding's context. Defined in `<internal:prelude>`,
+  # it requires `irb` on first use, which then replaces this method.
+  #
+  def irb: (?show_code: boolish) -> void
+
   # <!--
   #   rdoc-file=proc.c
   #   - binding.local_variable_defined?(symbol) -> obj

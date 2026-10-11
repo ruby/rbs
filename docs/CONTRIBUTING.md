@@ -117,3 +117,14 @@ Use `void` when callers should ignore or discard the return value. Use `untyped`
 ### How do we avoid duplicate documentation when importing RDoc?
 
 When an extension library extends a core class (such as `time` extending `Time` or `random-formatter` extending `Random::Formatter`), `rbs annotate` can duplicate core class documentation. Add `%a{annotate:rdoc:skip}` to the module or class declaration to skip the duplicate docs.
+
+### Why does RBS declare methods that Ruby does not define on that class?
+
+Some declarations describe how a method is used rather than where Ruby defines it.
+
+* `Numeric#+` and `#-` are declared on `Numeric` so that code typed as `Numeric` can add and subtract, although only its subclasses define them.
+* `Struct.members` and `.keyword_init?` are declared on `Struct`, although Ruby defines them only on the classes that `Struct.new` creates.
+* A method that Ruby undefines in a subclass is declared with the `bot` return type, so that calling it is a type error. For example, `Complex#<` is declared as `def <: (Numeric) -> bot`, because `Complex` undefines the `<` inherited from `Comparable`.
+
+`test/stdlib/method_drift_test.rb` checks that the core signatures match the runtime.
+It ignores methods returning `bot`, and lists the other exceptions in `MethodDriftTest::SKIP`.

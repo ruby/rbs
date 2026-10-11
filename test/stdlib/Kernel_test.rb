@@ -444,6 +444,31 @@ class KernelSingletonTest < Test::Unit::TestCase
     assert_send_type "(Range[Float]) -> nil", Kernel, :rand, 0.0...0.0
   end
 
+  def test_set_trace_func
+    assert_send_type "(Proc) -> Proc",
+                     Kernel, :set_trace_func, proc {}
+    assert_send_type "(nil) -> nil",
+                     Kernel, :set_trace_func, nil
+  ensure
+    set_trace_func(nil)
+  end
+
+  def test_trap
+    old_usr2 = trap(:USR2, nil)
+
+    with_interned(:USR2).and(Signal.list["USR2"]) do |signal|
+      assert_send_type  "(Integer | ::interned) { (Integer) -> void } -> Signal::trap_command",
+                        Kernel, :trap, signal do |n| end
+
+      with_string("").and(with_bool, nil, Class.new { def call(x) end }.new) do |command|
+        assert_send_type  "(Integer | ::interned, Signal::trap_command) -> Signal::trap_command",
+                          Kernel, :trap, signal, command
+      end
+    end
+  ensure
+    trap(:USR2, old_usr2)
+  end
+
   def test_trace_var
     tracer = BlankSlate.new
     def tracer.call(new) nil end
