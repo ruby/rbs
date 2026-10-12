@@ -1,3 +1,5 @@
+use indexmap::map::Entry;
+
 use crate::ast::{ClassMember, Declaration, ModuleMember};
 use crate::ids::{Id, IdIndexMap, SymbolId, TypeName};
 use crate::interners::Interners;
@@ -36,6 +38,7 @@ impl Environment {
             ClassOrModule {
                 kind: ClassDeclKind,
                 name: TypeName,
+                has_super: bool,
                 decl_members: Vec<u32>,
             },
             Interface(TypeName),
@@ -55,11 +58,13 @@ impl Environment {
             Declaration::Class(c) => Kind::ClassOrModule {
                 kind: ClassDeclKind::Class,
                 name: c.name,
+                has_super: c.super_class.is_some(),
                 decl_members: decl_member_indices(&c.members, ClassMember::as_declaration),
             },
             Declaration::Module(m) => Kind::ClassOrModule {
                 kind: ClassDeclKind::Module,
                 name: m.name,
+                has_super: false,
                 decl_members: decl_member_indices(&m.members, ModuleMember::as_declaration),
             },
             Declaration::Interface(d) => Kind::Interface(d.name),
@@ -74,6 +79,7 @@ impl Environment {
             Kind::ClassOrModule {
                 kind,
                 name,
+                has_super,
                 decl_members,
             } => {
                 let name = self.interners.type_names.concat(namespace, name);
@@ -81,10 +87,12 @@ impl Environment {
                     return Err(self.duplicated_type_name(name, &node, first, rest));
                 }
                 let id = self.push_node(node);
-                self.class_decls
-                    .entry(name)
-                    .or_insert_with(|| ClassDeclEntry::new(name, kind))
-                    .push(id);
+                match self.class_decls.entry(name) {
+                    Entry::Occupied(mut e) => e.get_mut().push(id, has_super),
+                    Entry::Vacant(e) => {
+                        e.insert(ClassDeclEntry::new(name, kind, id, has_super));
+                    }
+                }
                 self.insert_members(node.source, node.context, id, name, &decl_members)
             }
             Kind::Interface(name) => {
@@ -219,7 +227,7 @@ impl Environment {
     ) -> Option<(DeclId, Vec<DeclId>)> {
         match (self.constant_entry(name)?, class_kind) {
             (ConstantLookup::ClassDecl(e), Some(kind)) => {
-                (e.kind() != kind).then(|| (e.primary_decl(self), Vec::new()))
+                (e.kind() != kind).then(|| (e.primary_decl(), Vec::new()))
             }
             (entry, _) => {
                 let mut ids = entry.each_decl();
@@ -693,7 +701,7 @@ mod tests {
         let string = type_name(&mut env, "String");
         let entry = env.class_entry(foo).unwrap();
         assert_eq!(entry.each_decl().count(), 2);
-        let primary = env.decl(entry.primary_decl(&env));
+        let primary = env.decl(entry.primary_decl());
         assert_eq!(primary, &decls[1]);
         let Declaration::Class(primary) = primary else {
             panic!("expected a class declaration");
@@ -712,7 +720,7 @@ mod tests {
 
         let foo = type_name(&mut env, "::Foo");
         let entry = env.class_entry(foo).unwrap();
-        assert_eq!(env.decl(entry.primary_decl(&env)), &decls[0]);
+        assert_eq!(env.decl(entry.primary_decl()), &decls[0]);
     }
 
     #[test]
@@ -797,7 +805,7 @@ mod tests {
         assert!(env.class_entry(bar).is_some());
         assert!(env.module_entry(bar).is_none());
         let names: Vec<_> = env
-            .context_names(env.context_of(env.class_entry(bar).unwrap().primary_decl(&env)))
+            .context_names(env.context_of(env.class_entry(bar).unwrap().primary_decl()))
             .collect();
         assert_eq!(names, [foo]);
     }
@@ -1141,11 +1149,11 @@ mod tests {
         let class = env.class_entry(a).unwrap();
         assert!(matches!(class, ClassLookup::Class(_)));
         assert_eq!(class.name(), a);
-        assert_eq!(env.decl(class.primary_decl(&env)), &decls[0]);
+        assert_eq!(env.decl(class.primary_decl()), &decls[0]);
         let alias = env.class_entry(b).unwrap();
         assert!(matches!(alias, ClassLookup::ClassAlias(_)));
         assert_eq!(alias.name(), b);
-        assert_eq!(env.decl(alias.primary_decl(&env)), &decls[1]);
+        assert_eq!(env.decl(alias.primary_decl()), &decls[1]);
         assert_eq!(alias.each_decl().count(), 1);
         for name in [c, d, e, f] {
             assert!(env.class_entry(name).is_none());
@@ -1193,7 +1201,7 @@ mod tests {
             let found = env.module_class_entry(name).unwrap();
             assert_eq!(found.name(), name);
             assert_eq!(found.each_decl().count(), 1);
-            assert_eq!(env.decl(found.primary_decl(&env)), &decls[idx]);
+            assert_eq!(env.decl(found.primary_decl()), &decls[idx]);
         }
         assert!(env.module_class_entry(e).is_none());
         assert!(env.module_class_entry(f).is_none());

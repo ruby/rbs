@@ -151,6 +151,9 @@ impl Hasher for IdHasher {
     }
 }
 
+/// `HashMap` keyed by `Id<T>` that skips re-hashing; see [`IdHasher`].
+pub(crate) type IdHashMap<T, V> = std::collections::HashMap<Id<T>, V, BuildHasherDefault<IdHasher>>;
+
 /// Insertion-ordered like Ruby's `Hash`; `Environment` consumers depend on
 /// that order for deterministic results.
 ///

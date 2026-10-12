@@ -1,6 +1,7 @@
+use std::iter::{Chain, Copied, Once};
 use std::marker::PhantomData;
+use std::slice;
 
-use crate::ast::Declaration;
 use crate::ids::{SymbolId, TypeName};
 
 use super::{DeclId, Environment};
@@ -26,12 +27,17 @@ pub struct ClassTag;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ModuleTag;
 
+pub type DeclIter<'a> = Chain<Once<DeclId>, Copied<slice::Iter<'a, DeclId>>>;
+
 /// Ruby's `ClassEntry` and `ModuleEntry` differ only in `primary_decl`, so
 /// they share one layout and the tag selects which `primary_decl` exists.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Entry<K> {
     name: TypeName,
-    decls: Vec<DeclId>,
+    first: DeclId,
+    rest: Vec<DeclId>,
+    primary: DeclId,
+    primary_has_super: bool,
     kind: PhantomData<K>,
 }
 
@@ -39,16 +45,23 @@ pub type ClassEntry = Entry<ClassTag>;
 pub type ModuleEntry = Entry<ModuleTag>;
 
 impl<K> Entry<K> {
-    pub(super) fn new(name: TypeName) -> Self {
+    pub(super) fn new(name: TypeName, first: DeclId, has_super: bool) -> Self {
         Self {
             name,
-            decls: Vec::new(),
+            first,
+            rest: Vec::new(),
+            primary: first,
+            primary_has_super: has_super,
             kind: PhantomData,
         }
     }
 
-    pub(super) fn push(&mut self, decl: DeclId) {
-        self.decls.push(decl);
+    pub(super) fn push(&mut self, decl: DeclId, has_super: bool) {
+        self.rest.push(decl);
+        if has_super && !self.primary_has_super {
+            self.primary = decl;
+            self.primary_has_super = true;
+        }
     }
 
     #[must_use]
@@ -56,37 +69,26 @@ impl<K> Entry<K> {
         self.name
     }
 
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
-        self.decls().iter().copied()
+    pub fn each_decl(&self) -> DeclIter<'_> {
+        self.decls()
     }
 
-    fn decls(&self) -> &[DeclId] {
-        &self.decls
+    fn decls(&self) -> DeclIter<'_> {
+        std::iter::once(self.first).chain(self.rest.iter().copied())
     }
 }
 
 impl Entry<ClassTag> {
-    /// Not memoized as in Ruby: the result is the same either way.
     #[must_use]
-    pub fn primary_decl(&self, env: &Environment) -> DeclId {
-        self.decls
-            .iter()
-            .copied()
-            .find(|&id| matches!(env.decl(id), Declaration::Class(c) if c.super_class.is_some()))
-            .or_else(|| self.decls.first().copied())
-            .expect("an entry always has at least one declaration")
+    pub fn primary_decl(&self) -> DeclId {
+        self.primary
     }
 }
 
 impl Entry<ModuleTag> {
     #[must_use]
-    // No `&Environment`: only a class needs to read the declarations to pick
-    // the one with a superclass, and that lives on `ClassEntry`, as in Ruby.
     pub fn primary_decl(&self) -> DeclId {
-        *self
-            .decls
-            .first()
-            .expect("an entry always has at least one declaration")
+        self.first
     }
 }
 
@@ -100,17 +102,17 @@ pub enum ClassDeclEntry {
 }
 
 impl ClassDeclEntry {
-    pub(super) fn new(name: TypeName, kind: ClassDeclKind) -> Self {
+    pub(super) fn new(name: TypeName, kind: ClassDeclKind, first: DeclId, has_super: bool) -> Self {
         match kind {
-            ClassDeclKind::Class => Self::Class(Entry::new(name)),
-            ClassDeclKind::Module => Self::Module(Entry::new(name)),
+            ClassDeclKind::Class => Self::Class(Entry::new(name, first, has_super)),
+            ClassDeclKind::Module => Self::Module(Entry::new(name, first, false)),
         }
     }
 
-    pub(super) fn push(&mut self, decl: DeclId) {
+    pub(super) fn push(&mut self, decl: DeclId, has_super: bool) {
         match self {
-            Self::Class(e) => e.push(decl),
-            Self::Module(e) => e.push(decl),
+            Self::Class(e) => e.push(decl, has_super),
+            Self::Module(e) => e.push(decl, false),
         }
     }
 
@@ -130,11 +132,11 @@ impl ClassDeclEntry {
         }
     }
 
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
-        self.decls().iter().copied()
+    pub fn each_decl(&self) -> DeclIter<'_> {
+        self.decls()
     }
 
-    fn decls(&self) -> &[DeclId] {
+    fn decls(&self) -> DeclIter<'_> {
         match self {
             Self::Class(e) => e.decls(),
             Self::Module(e) => e.decls(),
@@ -142,9 +144,9 @@ impl ClassDeclEntry {
     }
 
     #[must_use]
-    pub fn primary_decl(&self, env: &Environment) -> DeclId {
+    pub fn primary_decl(&self) -> DeclId {
         match self {
-            Self::Class(e) => e.primary_decl(env),
+            Self::Class(e) => e.primary_decl(),
             Self::Module(e) => e.primary_decl(),
         }
     }
@@ -157,8 +159,8 @@ pub enum AliasEntry {
 }
 
 impl<N> SingleEntry<N> {
-    fn decls(&self) -> &[DeclId] {
-        std::slice::from_ref(&self.decl)
+    fn decls(&self) -> DeclIter<'_> {
+        std::iter::once(self.decl).chain([].iter().copied())
     }
 }
 
@@ -173,12 +175,11 @@ pub enum ConstantLookup<'a> {
 }
 
 impl<'a> ConstantLookup<'a> {
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + 'a {
-        let decls = match *self {
+    pub fn each_decl(&self) -> DeclIter<'a> {
+        match *self {
             Self::ClassDecl(e) => e.decls(),
             Self::ClassAlias(e) | Self::ModuleAlias(e) | Self::Constant(e) => e.decls(),
-        };
-        decls.iter().copied()
+        }
     }
 }
 
@@ -197,18 +198,17 @@ impl<'a> ClassLookup<'a> {
         }
     }
 
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + 'a {
-        let decls = match *self {
+    pub fn each_decl(&self) -> DeclIter<'a> {
+        match *self {
             Self::Class(e) => e.decls(),
             Self::ClassAlias(e) => e.decls(),
-        };
-        decls.iter().copied()
+        }
     }
 
     #[must_use]
-    pub fn primary_decl(&self, env: &Environment) -> DeclId {
+    pub fn primary_decl(&self) -> DeclId {
         match self {
-            Self::Class(e) => e.primary_decl(env),
+            Self::Class(e) => e.primary_decl(),
             Self::ClassAlias(e) => e.decl,
         }
     }
@@ -230,18 +230,17 @@ impl<'a> ModuleClassLookup<'a> {
         }
     }
 
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + 'a {
-        let decls = match *self {
+    pub fn each_decl(&self) -> DeclIter<'a> {
+        match *self {
             Self::ClassDecl(e) => e.decls(),
             Self::ClassAlias(e) | Self::ModuleAlias(e) => e.decls(),
-        };
-        decls.iter().copied()
+        }
     }
 
     #[must_use]
-    pub fn primary_decl(&self, env: &Environment) -> DeclId {
+    pub fn primary_decl(&self) -> DeclId {
         match self {
-            Self::ClassDecl(e) => e.primary_decl(env),
+            Self::ClassDecl(e) => e.primary_decl(),
             Self::ClassAlias(e) | Self::ModuleAlias(e) => e.decl,
         }
     }
@@ -262,12 +261,11 @@ impl<'a> ModuleLookup<'a> {
         }
     }
 
-    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + 'a {
-        let decls = match *self {
+    pub fn each_decl(&self) -> DeclIter<'a> {
+        match *self {
             Self::Module(e) => e.decls(),
             Self::ModuleAlias(e) => e.decls(),
-        };
-        decls.iter().copied()
+        }
     }
 
     #[must_use]
