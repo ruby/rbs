@@ -6,8 +6,8 @@ pub mod source;
 
 pub use decl::{Context, DeclId};
 pub use entry::{
-    AliasEntry, ClassDeclEntry, ClassDeclKind, ClassEntry, ConstantLookup, ModuleEntry,
-    ModuleLookup, SingleEntry,
+    AliasEntry, ClassDeclEntry, ClassDeclKind, ClassEntry, ClassLookup, ConstantLookup,
+    ModuleClassLookup, ModuleEntry, ModuleLookup, SingleEntry,
 };
 pub use error::{DuplicatedDecl, DuplicatedDeclarationError};
 pub use source::{Source, SourceKind};
