@@ -19,11 +19,14 @@ pub struct DuplicatedDeclarationError {
 }
 
 impl DuplicatedDeclarationError {
-    pub(crate) fn new(name: String, inserted: DuplicatedDecl, existing: DuplicatedDecl) -> Self {
-        Self {
-            name,
-            decls: vec![inserted, existing],
-        }
+    pub(crate) fn new(
+        name: String,
+        inserted: DuplicatedDecl,
+        first_existing: DuplicatedDecl,
+        rest: impl IntoIterator<Item = DuplicatedDecl>,
+    ) -> Self {
+        let decls = [inserted, first_existing].into_iter().chain(rest).collect();
+        Self { name, decls }
     }
 
     #[must_use]
@@ -33,7 +36,7 @@ impl DuplicatedDeclarationError {
 
     /// The newly inserted declaration first, then the existing ones, as in
     /// Ruby. Always at least two; a slice because Ruby's error takes
-    /// `*decls`, so class entries will report every reopening.
+    /// `*decls`, so a constant clashing with a class reports every reopening.
     #[must_use]
     pub fn decls(&self) -> &[DuplicatedDecl] {
         &self.decls

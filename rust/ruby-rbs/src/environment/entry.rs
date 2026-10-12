@@ -137,11 +137,14 @@ impl ClassDeclEntry {
     }
 
     pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
-        let decls = match self {
+        self.decls().iter().copied()
+    }
+
+    fn decls(&self) -> &[DeclId] {
+        match self {
             Self::Class(e) => &e.decls,
             Self::Module(e) => &e.decls,
-        };
-        decls.iter().copied()
+        }
     }
 
     /// # Panics
@@ -154,6 +157,26 @@ impl ClassDeclEntry {
             Self::Class(e) => e.primary_decl(env),
             Self::Module(e) => e.primary_decl(),
         }
+    }
+}
+
+/// What `constant_entry` finds under a name: Ruby's `ClassEntry |
+/// ModuleEntry | ConstantEntry`. Class and module stay split inside
+/// `ClassDeclEntry`. Named `*Lookup` to stay apart from Ruby's
+/// `ConstantEntry`, which is the `Constant` arm here.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum ConstantLookup<'a> {
+    ClassDecl(&'a ClassDeclEntry),
+    Constant(&'a SingleEntry),
+}
+
+impl ConstantLookup<'_> {
+    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
+        let decls = match self {
+            Self::ClassDecl(e) => e.decls(),
+            Self::Constant(e) => std::slice::from_ref(&e.decl),
+        };
+        decls.iter().copied()
     }
 }
 
@@ -190,6 +213,31 @@ impl Environment {
             Some(ClassDeclEntry::Module(e)) => Some(e),
             _ => None,
         }
+    }
+
+    /// TODO: class and module aliases are not consulted yet. Ruby checks
+    /// `class_alias_decls` between `class_decls` and `constant_decls`; add
+    /// this when the alias tables land.
+    #[must_use]
+    pub fn constant_entry(&self, name: TypeName) -> Option<ConstantLookup<'_>> {
+        match self.class_decls.get(&name) {
+            Some(e) => Some(ConstantLookup::ClassDecl(e)),
+            None => self.constant_decls.get(&name).map(ConstantLookup::Constant),
+        }
+    }
+
+    #[must_use]
+    pub fn is_constant_decl(&self, name: TypeName) -> bool {
+        self.constant_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn is_constant_name(&self, name: TypeName) -> bool {
+        self.is_constant_decl(name) || self.is_module_name(name)
+    }
+
+    pub fn constant_entries(&self) -> impl Iterator<Item = &SingleEntry> {
+        self.constant_decls.values()
     }
 
     pub fn class_entries(&self) -> impl Iterator<Item = &ClassDeclEntry> {
