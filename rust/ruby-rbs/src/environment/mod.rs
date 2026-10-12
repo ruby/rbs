@@ -21,6 +21,7 @@ pub struct Environment {
     interners: Interners,
     sources: Vec<Source>,
     interface_decls: IdIndexMap<TypeNameTag, SingleEntry>,
+    type_alias_decls: IdIndexMap<TypeNameTag, SingleEntry>,
 }
 
 impl Environment {

@@ -26,4 +26,18 @@ impl Environment {
     pub fn interface_entries(&self) -> impl Iterator<Item = &SingleEntry> {
         self.interface_decls.values()
     }
+
+    #[must_use]
+    pub fn is_type_alias_name(&self, name: TypeName) -> bool {
+        self.type_alias_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn type_alias_entry(&self, name: TypeName) -> Option<&SingleEntry> {
+        self.type_alias_decls.get(&name)
+    }
+
+    pub fn type_alias_entries(&self) -> impl Iterator<Item = &SingleEntry> {
+        self.type_alias_decls.values()
+    }
 }

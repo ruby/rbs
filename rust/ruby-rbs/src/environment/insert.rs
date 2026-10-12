@@ -1,10 +1,12 @@
 use crate::ast::Declaration;
-use crate::ids::TypeName;
+use crate::ids::{IdIndexMap, TypeName, TypeNameTag};
 
 use super::entry::SingleEntry;
 use super::error::{DuplicatedDecl, DuplicatedDeclarationError};
 use super::source::Source;
 use super::{DeclId, Environment};
+
+type SingleTable = IdIndexMap<TypeNameTag, SingleEntry>;
 
 impl Environment {
     /// Like Ruby, the source and the entries inserted before a duplication
@@ -26,18 +28,33 @@ impl Environment {
     }
 
     fn insert_decl(&mut self, id: DeclId) -> Result<(), DuplicatedDeclarationError> {
-        let decl_name = match self.decl(id) {
-            Declaration::Interface(d) => d.name,
+        match self.decl(id) {
+            Declaration::Interface(d) => {
+                let name = d.name;
+                self.insert_single(|env| &mut env.interface_decls, name, id)
+            }
+            Declaration::TypeAlias(d) => {
+                let name = d.name;
+                self.insert_single(|env| &mut env.type_alias_decls, name, id)
+            }
             // TODO: register the other declaration kinds.
-            _ => return Ok(()),
-        };
-
-        let name = self.interners.type_names.to_absolute(decl_name);
-        if let Some(existing) = self.interface_decls.get(&name) {
-            return Err(self.duplicated_declaration(name, id, existing.decl));
+            _ => Ok(()),
         }
-        self.interface_decls
-            .insert(name, SingleEntry { name, decl: id });
+    }
+
+    fn insert_single(
+        &mut self,
+        table: fn(&mut Self) -> &mut SingleTable,
+        name: TypeName,
+        id: DeclId,
+    ) -> Result<(), DuplicatedDeclarationError> {
+        let name = self.interners.type_names.to_absolute(name);
+        let decls = table(self);
+        if let Some(entry) = decls.get(&name) {
+            let existing = entry.decl;
+            return Err(self.duplicated_declaration(name, id, existing));
+        }
+        decls.insert(name, SingleEntry { name, decl: id });
 
         Ok(())
     }
@@ -104,6 +121,20 @@ mod tests {
         interners.type_names.parse(&mut interners.strings, name)
     }
 
+    fn assert_duplicate(
+        err: &DuplicatedDeclarationError,
+        inserted: (&str, &Declaration),
+        existing: (&str, &Declaration),
+    ) {
+        let [got_inserted, got_existing] = err.decls() else {
+            panic!("expected two decls, got {:?}", err.decls());
+        };
+        assert_eq!(got_inserted.path, PathBuf::from(inserted.0));
+        assert_eq!(got_inserted.location, inserted.1.location_range());
+        assert_eq!(got_existing.path, PathBuf::from(existing.0));
+        assert_eq!(got_existing.location, existing.1.location_range());
+    }
+
     // environment_test.rb:169
     #[test]
     fn interface_twice_duplication_error() {
@@ -114,13 +145,7 @@ mod tests {
         let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
 
         assert_eq!(err.name(), "::_I");
-        let [inserted, existing] = err.decls() else {
-            panic!("expected two decls, got {:?}", err.decls());
-        };
-        assert_eq!(inserted.path, PathBuf::from("b.rbs"));
-        assert_eq!(inserted.location, decls[1].location_range());
-        assert_eq!(existing.path, PathBuf::from("a.rbs"));
-        assert_eq!(existing.location, decls[0].location_range());
+        assert_duplicate(&err, ("b.rbs", &decls[1]), ("a.rbs", &decls[0]));
         assert_eq!(err.to_string(), "*:*:*...*:*: Duplicated declaration: ::_I");
 
         // The rejected declaration is not registered.
@@ -151,13 +176,7 @@ mod tests {
 
         let err = add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap_err();
 
-        let [inserted, existing] = err.decls() else {
-            panic!("expected two decls, got {:?}", err.decls());
-        };
-        assert_eq!(inserted.path, PathBuf::from("a.rbs"));
-        assert_eq!(inserted.location, decls[2].location_range());
-        assert_eq!(existing.path, PathBuf::from("a.rbs"));
-        assert_eq!(existing.location, decls[1].location_range());
+        assert_duplicate(&err, ("a.rbs", &decls[2]), ("a.rbs", &decls[1]));
 
         // Not rolled back: the source and the entries before the duplicate stay.
         assert_eq!(env.sources().len(), 1);
@@ -192,5 +211,39 @@ mod tests {
         for (entry, decl) in env.interface_entries().zip(&decls) {
             assert_eq!(env.decl(entry.decl), decl);
         }
+    }
+
+    #[test]
+    fn type_alias_twice_duplication_error() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "type foo = String\ntype foo = Integer\n");
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(err.name(), "::foo");
+        assert_duplicate(&err, ("b.rbs", &decls[1]), ("a.rbs", &decls[0]));
+
+        assert_eq!(env.type_alias_entries().count(), 1);
+        let name = type_name(&mut env, "::foo");
+        let entry = env.type_alias_entry(name).unwrap();
+        assert_eq!(env.decl(entry.decl), &decls[0]);
+    }
+
+    #[test]
+    fn interface_and_type_alias_tables_are_independent() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "interface _I\nend\ntype i = String\n");
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let interface = type_name(&mut env, "::_I");
+        let alias = type_name(&mut env, "::i");
+        assert!(env.is_interface_name(interface));
+        assert!(!env.is_type_alias_name(interface));
+        assert!(env.is_type_alias_name(alias));
+        assert!(!env.is_interface_name(alias));
+        assert_eq!(env.interface_entries().count(), 1);
+        assert_eq!(env.type_alias_entries().count(), 1);
     }
 }
