@@ -1,12 +1,13 @@
 use crate::ast::Declaration;
-use crate::ids::{IdIndexMap, TypeName, TypeNameTag};
+use crate::ids::{Id, IdIndexMap};
 
 use super::entry::SingleEntry;
 use super::error::{DuplicatedDecl, DuplicatedDeclarationError};
 use super::source::Source;
 use super::{DeclId, Environment};
+use crate::interners::Interners;
 
-type SingleTable = IdIndexMap<TypeNameTag, SingleEntry>;
+type SingleTable<T> = IdIndexMap<T, SingleEntry<Id<T>>>;
 
 impl Environment {
     /// Like Ruby, the source and the entries inserted before a duplication
@@ -30,28 +31,48 @@ impl Environment {
     fn insert_decl(&mut self, id: DeclId) -> Result<(), DuplicatedDeclarationError> {
         match self.decl(id) {
             Declaration::Interface(d) => {
-                let name = d.name;
-                self.insert_single(|env| &mut env.interface_decls, name, id)
+                let name = self.interners.type_names.to_absolute(d.name);
+                self.insert_single(
+                    |env| &mut env.interface_decls,
+                    name,
+                    id,
+                    |i, n| i.type_names.display(n, &i.strings),
+                )
             }
             Declaration::TypeAlias(d) => {
+                let name = self.interners.type_names.to_absolute(d.name);
+                self.insert_single(
+                    |env| &mut env.type_alias_decls,
+                    name,
+                    id,
+                    |i, n| i.type_names.display(n, &i.strings),
+                )
+            }
+            Declaration::Global(d) => {
                 let name = d.name;
-                self.insert_single(|env| &mut env.type_alias_decls, name, id)
+                self.insert_single(
+                    |env| &mut env.global_decls,
+                    name,
+                    id,
+                    |i, n| i.strings.resolve(n).to_owned(),
+                )
             }
             // TODO: register the other declaration kinds.
             _ => Ok(()),
         }
     }
 
-    fn insert_single(
+    fn insert_single<T>(
         &mut self,
-        table: fn(&mut Self) -> &mut SingleTable,
-        name: TypeName,
+        table: fn(&mut Self) -> &mut SingleTable<T>,
+        name: Id<T>,
         id: DeclId,
+        render: fn(&Interners, Id<T>) -> String,
     ) -> Result<(), DuplicatedDeclarationError> {
-        let name = self.interners.type_names.to_absolute(name);
         let decls = table(self);
         if let Some(entry) = decls.get(&name) {
             let existing = entry.decl;
+            let name = render(&self.interners, name);
             return Err(self.duplicated_declaration(name, id, existing));
         }
         decls.insert(name, SingleEntry { name, decl: id });
@@ -61,13 +82,12 @@ impl Environment {
 
     fn duplicated_declaration(
         &self,
-        name: TypeName,
+        name: String,
         inserted: DeclId,
         existing: DeclId,
     ) -> DuplicatedDeclarationError {
-        let interners = &self.interners;
         DuplicatedDeclarationError::new(
-            interners.type_names.display(name, &interners.strings),
+            name,
             self.duplicated_decl(inserted),
             self.duplicated_decl(existing),
         )
@@ -87,7 +107,7 @@ mod tests {
 
     use crate::ast::{AstConverter, Declaration};
     use crate::environment::{DuplicatedDeclarationError, Environment, Source, SourceKind};
-    use crate::ids::TypeName;
+    use crate::ids::{SymbolId, TypeName};
     use crate::node;
 
     fn parse_decls(env: &mut Environment, src: &str) -> Vec<Declaration> {
@@ -119,6 +139,10 @@ mod tests {
     fn type_name(env: &mut Environment, name: &str) -> TypeName {
         let interners = env.interners_mut();
         interners.type_names.parse(&mut interners.strings, name)
+    }
+
+    fn intern(env: &mut Environment, name: &str) -> SymbolId {
+        env.interners_mut().strings.intern(name)
     }
 
     fn assert_duplicate(
@@ -233,7 +257,7 @@ mod tests {
     #[test]
     fn interface_and_type_alias_tables_are_independent() {
         let mut env = Environment::new();
-        let decls = parse_decls(&mut env, "interface _I\nend\ntype i = String\n");
+        let decls = parse_decls(&mut env, "interface _I\nend\ntype i = String\n$g: String\n");
 
         add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
 
@@ -245,5 +269,54 @@ mod tests {
         assert!(!env.is_interface_name(alias));
         assert_eq!(env.interface_entries().count(), 1);
         assert_eq!(env.type_alias_entries().count(), 1);
+        assert_eq!(env.global_entries().count(), 1);
+    }
+
+    #[test]
+    fn insert_global() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "$VERSION: String\n");
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let name = intern(&mut env, "$VERSION");
+        assert!(env.is_global_name(name));
+        let entry = env.global_entry(name).unwrap();
+        assert_eq!(entry.name, name);
+        assert_eq!(env.decl(entry.decl), &decls[0]);
+
+        let other = intern(&mut env, "$OTHER");
+        assert!(!env.is_global_name(other));
+        assert!(env.global_entry(other).is_none());
+    }
+
+    #[test]
+    fn global_twice_duplication_error() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "$VERSION: String\n$VERSION: Integer\n");
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(err.name(), "$VERSION");
+        assert_duplicate(&err, ("b.rbs", &decls[1]), ("a.rbs", &decls[0]));
+
+        assert_eq!(env.global_entries().count(), 1);
+        let name = intern(&mut env, "$VERSION");
+        let entry = env.global_entry(name).unwrap();
+        assert_eq!(env.decl(entry.decl), &decls[0]);
+    }
+
+    #[test]
+    fn globals_are_registered_in_order() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "$B: String\n$A: String\n");
+
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let a = intern(&mut env, "$A");
+        let b = intern(&mut env, "$B");
+        let names: Vec<_> = env.global_entries().map(|e| e.name).collect();
+        assert_eq!(names, [b, a]);
     }
 }

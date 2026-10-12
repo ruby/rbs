@@ -9,7 +9,7 @@ pub use entry::SingleEntry;
 pub use error::{DuplicatedDecl, DuplicatedDeclarationError};
 pub use source::{Source, SourceKind};
 
-use crate::ids::{IdIndexMap, TypeNameTag};
+use crate::ids::{IdIndexMap, SymbolId, SymbolTag, TypeNameTag};
 use crate::interners::Interners;
 use crate::loader::{EnvironmentLoader, LoadError};
 
@@ -22,6 +22,7 @@ pub struct Environment {
     sources: Vec<Source>,
     interface_decls: IdIndexMap<TypeNameTag, SingleEntry>,
     type_alias_decls: IdIndexMap<TypeNameTag, SingleEntry>,
+    global_decls: IdIndexMap<SymbolTag, SingleEntry<SymbolId>>,
 }
 
 impl Environment {

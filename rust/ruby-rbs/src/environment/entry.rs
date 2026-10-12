@@ -1,4 +1,4 @@
-use crate::ids::TypeName;
+use crate::ids::{SymbolId, TypeName};
 
 use super::{DeclId, Environment};
 
@@ -6,8 +6,8 @@ use super::{DeclId, Environment};
 /// yields their names.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[non_exhaustive]
-pub struct SingleEntry {
-    pub name: TypeName,
+pub struct SingleEntry<N = TypeName> {
+    pub name: N,
     pub decl: DeclId,
 }
 
@@ -39,5 +39,21 @@ impl Environment {
 
     pub fn type_alias_entries(&self) -> impl Iterator<Item = &SingleEntry> {
         self.type_alias_decls.values()
+    }
+}
+
+impl Environment {
+    #[must_use]
+    pub fn is_global_name(&self, name: SymbolId) -> bool {
+        self.global_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn global_entry(&self, name: SymbolId) -> Option<&SingleEntry<SymbolId>> {
+        self.global_decls.get(&name)
+    }
+
+    pub fn global_entries(&self) -> impl Iterator<Item = &SingleEntry<SymbolId>> {
+        self.global_decls.values()
     }
 }
