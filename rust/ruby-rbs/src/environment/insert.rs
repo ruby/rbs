@@ -11,10 +11,6 @@ use super::{DeclId, Environment};
 type SingleTable<T> = IdIndexMap<T, SingleEntry<Id<T>>>;
 
 impl Environment {
-    /// Like Ruby, nothing is rolled back on a duplication error: the source,
-    /// the entries inserted before the duplicate and the reopening of
-    /// enclosing modules all stay. The rejected declaration and everything
-    /// after it are not registered.
     pub(crate) fn add_source(&mut self, source: Source) -> Result<(), DuplicatedDeclarationError> {
         let source_index = u32::try_from(self.sources.len()).expect("too many sources");
         let decl_count =
@@ -216,10 +212,6 @@ impl Environment {
         )
     }
 
-    /// The declarations a new constant-namespace entry would clash with.
-    /// `class_kind` is the kind of the class/module being inserted, `None`
-    /// for a constant declaration. Same-kind reopening is not a clash, and
-    /// a class/module kind mismatch reports only the primary decl.
     fn constant_clash(
         &self,
         name: TypeName,
@@ -328,7 +320,6 @@ mod tests {
         }
     }
 
-    // environment_test.rb:169
     #[test]
     fn interface_twice_duplication_error() {
         let mut env = Environment::new();
@@ -370,16 +361,13 @@ mod tests {
 
         assert_duplicate(&err, ("a.rbs", &decls[2]), &[("a.rbs", &decls[1])]);
 
-        // Not rolled back: the source and the entries before the duplicate stay.
         assert_eq!(env.sources().len(), 1);
         let a = type_name(&mut env, "::_A");
         let i = type_name(&mut env, "::_I");
         let b = type_name(&mut env, "::_B");
         let names: Vec<_> = env.interface_entries().map(|e| e.name).collect();
         assert_eq!(names, [a, i]);
-        // The rejected declaration is not registered.
         assert_eq!(env.decl(env.interface_entry(i).unwrap().decl), &decls[1]);
-        // Declarations after the duplicate are never reached.
         assert!(!env.is_interface_name(b));
     }
 

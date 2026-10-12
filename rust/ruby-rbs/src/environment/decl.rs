@@ -3,7 +3,6 @@ use crate::ids::TypeName;
 
 use super::Environment;
 
-/// Only valid against the [`Environment`] that issued it.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct DeclId(u32);
 
@@ -15,9 +14,6 @@ pub(super) struct DeclNode {
     pub(super) context: Context,
 }
 
-/// Ruby's `Resolver::context` (a cons list of `[context, name]`), interned by
-/// its chain of names. Equal across reopenings of the same module. Unlike
-/// Ruby's, the chain holds absolute names rather than the written ones.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Context(Option<u32>);
 
@@ -35,27 +31,16 @@ pub(super) struct ContextNode {
 }
 
 impl Environment {
-    /// # Panics
-    ///
-    /// May panic if `id` was issued by a different `Environment`.
     #[must_use]
     pub fn decl(&self, id: DeclId) -> &Declaration {
         self.member_decl(self.node(id))
     }
 
-    /// # Panics
-    ///
-    /// May panic if `id` was issued by a different `Environment`.
     #[must_use]
     pub fn context_of(&self, id: DeclId) -> Context {
         self.node(id).context
     }
 
-    /// Innermost first.
-    ///
-    /// # Panics
-    ///
-    /// May panic if `context` was issued by a different `Environment`.
     pub fn context_names(&self, context: Context) -> impl Iterator<Item = TypeName> + '_ {
         let node = move |i: u32| &self.contexts[i as usize];
         std::iter::successors(context.0, move |&i| node(i).parent.0).map(move |i| node(i).name)

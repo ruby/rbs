@@ -34,9 +34,8 @@ impl DuplicatedDeclarationError {
         &self.name
     }
 
-    /// The newly inserted declaration first, then the existing ones, as in
-    /// Ruby. Always at least two; a slice because Ruby's error takes
-    /// `*decls`, so a constant clashing with a class reports every reopening.
+    /// A slice rather than a pair because Ruby's error takes `*decls`, so a
+    /// constant clashing with a class reports every reopening.
     #[must_use]
     pub fn decls(&self) -> &[DuplicatedDecl] {
         &self.decls

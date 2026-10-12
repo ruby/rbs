@@ -87,9 +87,6 @@ impl EnvironmentLoader {
     /// Returns what this call read, in the order it read it, so a caller
     /// appending to a non-empty `env` still learns what it added. On `Err` the
     /// sources read before the failure are already in `env`, same as the Ruby
-    /// implementation adding sources as it walks the directories. On
-    /// `LoadError::DuplicatedDeclaration` that includes the failing source and
-    /// the declarations registered from it before the duplicate.
     pub fn load(&self, env: &mut Environment) -> Result<Vec<LoadedFile>, LoadError> {
         let mut loaded = Vec::new();
         let mut seen_files: HashSet<PathBuf> = HashSet::new();

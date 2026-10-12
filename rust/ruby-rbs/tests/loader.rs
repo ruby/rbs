@@ -143,7 +143,6 @@ fn duplicated_declarations_are_reported_as_load_errors() {
         panic!("expected LoadError::DuplicatedDeclaration, got {error:?}");
     };
     assert_eq!(error.to_string(), inner.to_string());
-    // Transparent wrapper: the message is not repeated as a source.
     assert!(std::error::Error::source(&error).is_none());
 }
 

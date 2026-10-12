@@ -14,7 +14,6 @@ pub struct SingleEntry<N = TypeName> {
     pub decl: DeclId,
 }
 
-/// Whether a `class_decls` name is a class or a module.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ClassDeclKind {
     Class,
@@ -67,13 +66,7 @@ impl<K> Entry<K> {
 }
 
 impl Entry<ClassTag> {
-    /// The first declaration with a superclass, else the first one. Not
-    /// memoized as in Ruby: the result is the same either way.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the entry is empty, which registration never leaves behind.
-    /// May also panic if `env` is not the one that issued the entry's ids.
+    /// Not memoized as in Ruby: the result is the same either way.
     #[must_use]
     pub fn primary_decl(&self, env: &Environment) -> DeclId {
         self.decls
@@ -86,9 +79,6 @@ impl Entry<ClassTag> {
 }
 
 impl Entry<ModuleTag> {
-    /// # Panics
-    ///
-    /// Panics if the entry is empty, which registration never leaves behind.
     #[must_use]
     // No `&Environment`: only a class needs to read the declarations to pick
     // the one with a superclass, and that lives on `ClassEntry`, as in Ruby.
@@ -151,10 +141,6 @@ impl ClassDeclEntry {
         }
     }
 
-    /// # Panics
-    ///
-    /// Panics if the entry is empty, which registration never leaves behind.
-    /// May also panic if `env` is not the one that issued the entry's ids.
     #[must_use]
     pub fn primary_decl(&self, env: &Environment) -> DeclId {
         match self {
@@ -164,7 +150,6 @@ impl ClassDeclEntry {
     }
 }
 
-/// Ruby's `class_alias_decls` values: `ModuleAliasEntry | ClassAliasEntry`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AliasEntry {
     Module(SingleEntry),
@@ -177,10 +162,8 @@ impl<N> SingleEntry<N> {
     }
 }
 
-/// What `constant_entry` finds under a name: Ruby's `ClassEntry |
-/// ModuleEntry | ClassAliasEntry | ModuleAliasEntry | ConstantEntry`. Class
-/// and module stay split inside `ClassDeclEntry`. Named `*Lookup` to stay
-/// apart from Ruby's `ConstantEntry`, which is the `Constant` arm here.
+/// Named `*Lookup` to stay apart from Ruby's `ConstantEntry`, which is the
+/// `Constant` arm here.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ConstantLookup<'a> {
     ClassDecl(&'a ClassDeclEntry),
@@ -222,12 +205,6 @@ impl<'a> ClassLookup<'a> {
         decls.iter().copied()
     }
 
-    /// An alias has the one declaration it was registered with.
-    ///
-    /// # Panics
-    ///
-    /// Panics if a class entry is empty, which registration never leaves behind.
-    /// May also panic if `env` is not the one that issued the entry's ids.
     #[must_use]
     pub fn primary_decl(&self, env: &Environment) -> DeclId {
         match self {
@@ -261,13 +238,6 @@ impl<'a> ModuleClassLookup<'a> {
         decls.iter().copied()
     }
 
-    /// An alias has the one declaration it was registered with.
-    ///
-    /// # Panics
-    ///
-    /// Panics if a class or module entry is empty, which registration never
-    /// leaves behind.
-    /// May also panic if `env` is not the one that issued the entry's ids.
     #[must_use]
     pub fn primary_decl(&self, env: &Environment) -> DeclId {
         match self {
@@ -300,11 +270,6 @@ impl<'a> ModuleLookup<'a> {
         decls.iter().copied()
     }
 
-    /// An alias has the one declaration it was registered with.
-    ///
-    /// # Panics
-    ///
-    /// Panics if a module entry is empty, which registration never leaves behind.
     #[must_use]
     pub fn primary_decl(&self) -> DeclId {
         match self {
@@ -424,7 +389,6 @@ impl Environment {
         self.interface_decls.get(&name)
     }
 
-    /// In insertion order, like iterating Ruby's `interface_decls`.
     pub fn interface_entries(&self) -> impl Iterator<Item = &SingleEntry> {
         self.interface_decls.values()
     }
