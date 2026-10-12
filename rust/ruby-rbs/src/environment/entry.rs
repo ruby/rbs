@@ -11,7 +11,67 @@ pub struct SingleEntry<N = TypeName> {
     pub decl: DeclId,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModuleEntry {
+    name: TypeName,
+    decls: Vec<DeclId>,
+}
+
+impl ModuleEntry {
+    pub(super) fn new(name: TypeName) -> Self {
+        Self {
+            name,
+            decls: Vec::new(),
+        }
+    }
+
+    pub(super) fn push(&mut self, decl: DeclId) {
+        self.decls.push(decl);
+    }
+
+    #[must_use]
+    pub fn name(&self) -> TypeName {
+        self.name
+    }
+
+    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
+        self.decls.iter().copied()
+    }
+
+    /// # Panics
+    ///
+    /// Panics if the entry is empty, which registration never leaves behind.
+    #[must_use]
+    // No `&Environment`: only a class needs to read the declarations to pick
+    // the one with a superclass, and that lives on `ClassEntry`, as in Ruby.
+    pub fn primary_decl(&self) -> DeclId {
+        *self
+            .decls
+            .first()
+            .expect("an entry always has at least one declaration")
+    }
+}
+
 impl Environment {
+    #[must_use]
+    pub fn is_module_decl(&self, name: TypeName) -> bool {
+        self.class_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn is_module_name(&self, name: TypeName) -> bool {
+        self.class_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn module_entry(&self, name: TypeName) -> Option<&ModuleEntry> {
+        self.class_decls.get(&name)
+    }
+
+    pub fn class_entries(&self) -> impl Iterator<Item = &ModuleEntry> {
+        self.class_decls.values()
+    }
+
     #[must_use]
     pub fn is_interface_name(&self, name: TypeName) -> bool {
         self.interface_decls.contains_key(&name)

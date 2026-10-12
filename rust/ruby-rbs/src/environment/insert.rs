@@ -1,81 +1,143 @@
-use crate::ast::Declaration;
-use crate::ids::{Id, IdIndexMap};
+use crate::ast::{Declaration, ModuleMember};
+use crate::ids::{Id, IdIndexMap, SymbolId, TypeName};
+use crate::interners::Interners;
 
-use super::entry::SingleEntry;
+use super::decl::{Context, DeclNode};
+use super::entry::{ModuleEntry, SingleEntry};
 use super::error::{DuplicatedDecl, DuplicatedDeclarationError};
 use super::source::Source;
 use super::{DeclId, Environment};
-use crate::interners::Interners;
 
 type SingleTable<T> = IdIndexMap<T, SingleEntry<Id<T>>>;
 
 impl Environment {
-    /// Like Ruby, the source and the entries inserted before a duplication
-    /// error are not rolled back. The rejected declaration itself is not
-    /// registered.
+    /// Like Ruby, nothing is rolled back on a duplication error: the source,
+    /// the entries inserted before the duplicate and the reopening of
+    /// enclosing modules all stay. The rejected declaration and everything
+    /// after it are not registered.
     pub(crate) fn add_source(&mut self, source: Source) -> Result<(), DuplicatedDeclarationError> {
         let source_index = u32::try_from(self.sources.len()).expect("too many sources");
         let decl_count =
             u32::try_from(source.declarations.len()).expect("too many declarations in one source");
         self.sources.push(source);
 
+        let root = self.interners.type_names.absolute_root();
         for index in 0..decl_count {
-            self.insert_decl(DeclId {
-                source: source_index,
-                index,
-            })?;
+            self.insert_decl(source_index, None, index, root, Context::root())?;
         }
         Ok(())
     }
 
-    fn insert_decl(&mut self, id: DeclId) -> Result<(), DuplicatedDeclarationError> {
-        match self.decl(id) {
-            Declaration::Interface(d) => {
-                let name = self.interners.type_names.to_absolute(d.name);
+    fn insert_decl(
+        &mut self,
+        source: u32,
+        parent: Option<DeclId>,
+        index: u32,
+        namespace: TypeName,
+        context: Context,
+    ) -> Result<(), DuplicatedDeclarationError> {
+        enum Kind {
+            Module {
+                name: TypeName,
+                decl_members: Vec<u32>,
+            },
+            Interface(TypeName),
+            TypeAlias(TypeName),
+            Global(SymbolId),
+            Other,
+        }
+
+        let node = DeclNode {
+            source,
+            parent,
+            index,
+            context,
+        };
+        let kind = match self.member_decl(&node) {
+            Declaration::Module(m) => Kind::Module {
+                name: m.name,
+                decl_members: decl_member_indices(&m.members, ModuleMember::as_declaration),
+            },
+            Declaration::Interface(d) => Kind::Interface(d.name),
+            Declaration::TypeAlias(d) => Kind::TypeAlias(d.name),
+            Declaration::Global(d) => Kind::Global(d.name),
+            // TODO: classes, constants, class aliases and module aliases are
+            // skipped. Declarations in a class body are not registered, a
+            // class reopening a module is not rejected, and a module name
+            // clashing with a constant is not detected.
+            _ => Kind::Other,
+        };
+
+        match kind {
+            Kind::Module { name, decl_members } => {
+                let name = self.interners.type_names.concat(namespace, name);
+                let id = self.push_node(node);
+                self.class_decls
+                    .entry(name)
+                    .or_insert_with(|| ModuleEntry::new(name))
+                    .push(id);
+                self.insert_members(node.source, node.context, id, name, &decl_members)
+            }
+            Kind::Interface(name) => {
+                let name = self.interners.type_names.concat(namespace, name);
                 self.insert_single(
                     |env| &mut env.interface_decls,
                     name,
-                    id,
+                    node,
                     |i, n| i.type_names.display(n, &i.strings),
                 )
             }
-            Declaration::TypeAlias(d) => {
-                let name = self.interners.type_names.to_absolute(d.name);
+            Kind::TypeAlias(name) => {
+                let name = self.interners.type_names.concat(namespace, name);
                 self.insert_single(
                     |env| &mut env.type_alias_decls,
                     name,
-                    id,
+                    node,
                     |i, n| i.type_names.display(n, &i.strings),
                 )
             }
-            Declaration::Global(d) => {
-                let name = d.name;
-                self.insert_single(
-                    |env| &mut env.global_decls,
-                    name,
-                    id,
-                    |i, n| i.strings.resolve(n).to_owned(),
-                )
-            }
-            // TODO: register the other declaration kinds.
-            _ => Ok(()),
+            Kind::Global(name) => self.insert_single(
+                |env| &mut env.global_decls,
+                name,
+                node,
+                |i, n| i.strings.resolve(n).to_owned(),
+            ),
+            Kind::Other => Ok(()),
         }
+    }
+
+    fn insert_members(
+        &mut self,
+        source: u32,
+        context: Context,
+        id: DeclId,
+        name: TypeName,
+        decl_members: &[u32],
+    ) -> Result<(), DuplicatedDeclarationError> {
+        if decl_members.is_empty() {
+            return Ok(());
+        }
+        let inner = self.intern_context(context, name);
+        for &member in decl_members {
+            self.insert_decl(source, Some(id), member, name, inner)?;
+        }
+        Ok(())
     }
 
     fn insert_single<T>(
         &mut self,
         table: fn(&mut Self) -> &mut SingleTable<T>,
         name: Id<T>,
-        id: DeclId,
+        node: DeclNode,
         render: fn(&Interners, Id<T>) -> String,
     ) -> Result<(), DuplicatedDeclarationError> {
-        let decls = table(self);
-        if let Some(entry) = decls.get(&name) {
+        if let Some(entry) = table(self).get(&name) {
             let existing = entry.decl;
             let name = render(&self.interners, name);
-            return Err(self.duplicated_declaration(name, id, existing));
+            return Err(self.duplicated_declaration(name, &node, existing));
         }
-        decls.insert(name, SingleEntry { name, decl: id });
+        let decl = self.push_node(node);
+        table(self).insert(name, SingleEntry { name, decl });
 
         Ok(())
     }
@@ -83,30 +145,44 @@ impl Environment {
     fn duplicated_declaration(
         &self,
         name: String,
-        inserted: DeclId,
+        inserted: &DeclNode,
         existing: DeclId,
     ) -> DuplicatedDeclarationError {
         DuplicatedDeclarationError::new(
             name,
             self.duplicated_decl(inserted),
-            self.duplicated_decl(existing),
+            self.duplicated_decl(self.node(existing)),
         )
     }
 
-    fn duplicated_decl(&self, id: DeclId) -> DuplicatedDecl {
+    fn duplicated_decl(&self, node: &DeclNode) -> DuplicatedDecl {
         DuplicatedDecl {
-            path: self.sources[id.source as usize].path.clone(),
-            location: self.decl(id).location_range(),
+            path: self.sources[node.source as usize].path.clone(),
+            location: self.member_decl(node).location_range(),
         }
     }
+}
+
+fn decl_member_indices<M>(
+    members: &[M],
+    as_declaration: impl Fn(&M) -> Option<&Declaration>,
+) -> Vec<u32> {
+    members
+        .iter()
+        .enumerate()
+        .filter(|(_, m)| as_declaration(m).is_some())
+        .map(|(i, _)| u32::try_from(i).expect("too many members"))
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
 
-    use crate::ast::{AstConverter, Declaration};
-    use crate::environment::{DuplicatedDeclarationError, Environment, Source, SourceKind};
+    use crate::ast::{AstConverter, Declaration, ModuleMember};
+    use crate::environment::{
+        Context, DuplicatedDeclarationError, Environment, ModuleEntry, Source, SourceKind,
+    };
     use crate::ids::{SymbolId, TypeName};
     use crate::node;
 
@@ -145,6 +221,16 @@ mod tests {
         env.interners_mut().strings.intern(name)
     }
 
+    fn nested_decl(module: &Declaration, index: usize) -> &Declaration {
+        let Declaration::Module(m) = module else {
+            panic!("expected a module declaration");
+        };
+        let ModuleMember::Declaration(d) = &m.members[index] else {
+            panic!("expected member {index} to be a declaration");
+        };
+        d
+    }
+
     fn assert_duplicate(
         err: &DuplicatedDeclarationError,
         inserted: (&str, &Declaration),
@@ -172,7 +258,6 @@ mod tests {
         assert_duplicate(&err, ("b.rbs", &decls[1]), ("a.rbs", &decls[0]));
         assert_eq!(err.to_string(), "*:*:*...*:*: Duplicated declaration: ::_I");
 
-        // The rejected declaration is not registered.
         assert_eq!(env.interface_entries().count(), 1);
         let name = type_name(&mut env, "::_I");
         let entry = env.interface_entry(name).unwrap();
@@ -209,6 +294,7 @@ mod tests {
         let b = type_name(&mut env, "::_B");
         let names: Vec<_> = env.interface_entries().map(|e| e.name).collect();
         assert_eq!(names, [a, i]);
+        // The rejected declaration is not registered.
         assert_eq!(env.decl(env.interface_entry(i).unwrap().decl), &decls[1]);
         // Declarations after the duplicate are never reached.
         assert!(!env.is_interface_name(b));
@@ -318,5 +404,176 @@ mod tests {
         let b = intern(&mut env, "$B");
         let names: Vec<_> = env.global_entries().map(|e| e.name).collect();
         assert_eq!(names, [b, a]);
+    }
+
+    #[test]
+    fn primary_decl_is_first_declaration() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "interface _Animal\nend\nmodule Foo : _Animal\nend\nmodule Foo : Object\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let foo = type_name(&mut env, "::Foo");
+        let entry = env.module_entry(foo).unwrap();
+        assert_eq!(env.decl(entry.primary_decl()), &decls[1]);
+    }
+
+    #[test]
+    fn insert_nested_modules() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\n  module Bar\n  end\n  module ::Baz\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let names: Vec<_> = env.class_entries().map(ModuleEntry::name).collect();
+        let expected: Vec<_> = ["::Foo", "::Foo::Bar", "::Baz"]
+            .into_iter()
+            .map(|n| type_name(&mut env, n))
+            .collect();
+        assert_eq!(names, expected);
+        for name in expected {
+            assert!(env.is_module_decl(name));
+            assert!(env.is_module_name(name));
+        }
+        let unknown = type_name(&mut env, "::Foo::Baz");
+        assert!(!env.is_module_decl(unknown));
+        assert!(!env.is_module_name(unknown));
+    }
+
+    #[test]
+    fn reopened_module_is_one_entry() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module Foo\nend\nmodule Foo\nend\n");
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap();
+
+        assert_eq!(env.class_entries().count(), 1);
+        let foo = type_name(&mut env, "::Foo");
+        let entry = env.module_entry(foo).unwrap();
+        let registered: Vec<_> = entry.each_decl().map(|id| env.decl(id)).collect();
+        assert_eq!(registered, [&decls[0], &decls[1]]);
+    }
+
+    #[test]
+    fn context_of_nested_declarations() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\n  module ::Baz\n    module Qux\n    end\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let [foo, baz, qux] = ["::Foo", "::Baz", "::Baz::Qux"].map(|n| type_name(&mut env, n));
+        let id = |name| env.module_entry(name).unwrap().each_decl().next().unwrap();
+
+        assert_eq!(env.context_names(env.context_of(id(foo))).count(), 0);
+        let names: Vec<_> = env.context_names(env.context_of(id(baz))).collect();
+        assert_eq!(names, [foo]);
+        let names: Vec<_> = env.context_names(env.context_of(id(qux))).collect();
+        assert_eq!(names, [baz, foo]);
+
+        assert_eq!(env.decl(id(qux)), nested_decl(nested_decl(&decls[0], 0), 0));
+    }
+
+    #[test]
+    fn context_is_equal_across_reopenings() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\n  module Bar\n  end\nend\nmodule Foo\n  module Bar\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let bar = type_name(&mut env, "::Foo::Bar");
+        let ids: Vec<_> = env.module_entry(bar).unwrap().each_decl().collect();
+        assert_eq!(ids.len(), 2);
+        assert_eq!(env.context_of(ids[0]), env.context_of(ids[1]));
+        assert_ne!(env.context_of(ids[0]), Context::root());
+    }
+
+    #[test]
+    fn context_is_per_declaration_within_an_entry() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo::Bar\nend\nmodule Foo\n  module Bar\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let [foo, bar] = ["::Foo", "::Foo::Bar"].map(|n| type_name(&mut env, n));
+        let ids: Vec<_> = env.module_entry(bar).unwrap().each_decl().collect();
+        assert_eq!(ids.len(), 2);
+        assert_eq!(env.decl(ids[0]), &decls[0]);
+        assert_eq!(env.decl(ids[1]), nested_decl(&decls[1], 0));
+        assert_eq!(env.context_of(ids[0]), Context::root());
+        let names: Vec<_> = env.context_names(env.context_of(ids[1])).collect();
+        assert_eq!(names, [foo]);
+    }
+
+    #[test]
+    fn declarations_in_a_module_use_its_namespace() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\n  interface _I\n  end\n  type t = String\n  def foo: () -> void\n  $g: String\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let interface = type_name(&mut env, "::Foo::_I");
+        let alias = type_name(&mut env, "::Foo::t");
+        let relative = type_name(&mut env, "::_I");
+        assert!(env.is_interface_name(interface));
+        assert!(env.is_type_alias_name(alias));
+        assert!(!env.is_interface_name(relative));
+        let global = intern(&mut env, "$g");
+        assert!(env.is_global_name(global));
+
+        let module = &decls[0];
+        let entry = env.interface_entry(interface).unwrap();
+        assert_eq!(env.decl(entry.decl), nested_decl(module, 0));
+        let entry = env.type_alias_entry(alias).unwrap();
+        assert_eq!(env.decl(entry.decl), nested_decl(module, 1));
+        let entry = env.global_entry(global).unwrap();
+        assert_eq!(env.decl(entry.decl), nested_decl(module, 3));
+
+        let entry = env.interface_entry(interface).unwrap();
+        let names: Vec<_> = env.context_names(env.context_of(entry.decl)).collect();
+        let foo = type_name(&mut env, "::Foo");
+        assert_eq!(names, [foo]);
+    }
+
+    #[test]
+    fn nested_duplicate_is_reported_without_leaving_a_node() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\n  interface _I\n  end\nend\nmodule Foo\n  interface _I\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let nodes = env.decl_nodes.len();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(err.name(), "::Foo::_I");
+        assert_duplicate(
+            &err,
+            ("b.rbs", nested_decl(&decls[1], 0)),
+            ("a.rbs", nested_decl(&decls[0], 0)),
+        );
+        assert_eq!(env.decl_nodes.len(), nodes + 1);
+        assert_eq!(env.interface_entries().count(), 1);
+        let foo = type_name(&mut env, "::Foo");
+        assert_eq!(env.module_entry(foo).unwrap().each_decl().count(), 2);
     }
 }

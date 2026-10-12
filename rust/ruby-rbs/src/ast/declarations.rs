@@ -44,10 +44,30 @@ pub enum ClassMember {
     Declaration(Declaration),
 }
 
+impl ClassMember {
+    #[must_use]
+    pub fn as_declaration(&self) -> Option<&Declaration> {
+        match self {
+            Self::Declaration(d) => Some(d),
+            Self::Member(_) => None,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ModuleMember {
     Member(Member),
     Declaration(Declaration),
+}
+
+impl ModuleMember {
+    #[must_use]
+    pub fn as_declaration(&self) -> Option<&Declaration> {
+        match self {
+            Self::Declaration(d) => Some(d),
+            Self::Member(_) => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
