@@ -5,7 +5,7 @@ mod insert;
 pub mod source;
 
 pub use decl::{Context, DeclId};
-pub use entry::{ModuleEntry, SingleEntry};
+pub use entry::{ClassDeclEntry, ClassDeclKind, ClassEntry, ModuleEntry, SingleEntry};
 pub use error::{DuplicatedDecl, DuplicatedDeclarationError};
 pub use source::{Source, SourceKind};
 
@@ -26,7 +26,7 @@ pub struct Environment {
     sources: Vec<Source>,
     decl_nodes: Vec<DeclNode>,
     contexts: IndexSet<ContextNode>,
-    class_decls: IdIndexMap<TypeNameTag, ModuleEntry>,
+    class_decls: IdIndexMap<TypeNameTag, ClassDeclEntry>,
     interface_decls: IdIndexMap<TypeNameTag, SingleEntry>,
     type_alias_decls: IdIndexMap<TypeNameTag, SingleEntry>,
     global_decls: IdIndexMap<SymbolTag, SingleEntry<SymbolId>>,

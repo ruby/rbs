@@ -1,3 +1,6 @@
+use std::marker::PhantomData;
+
+use crate::ast::Declaration;
 use crate::ids::{SymbolId, TypeName};
 
 use super::{DeclId, Environment};
@@ -11,17 +14,37 @@ pub struct SingleEntry<N = TypeName> {
     pub decl: DeclId,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ModuleEntry {
-    name: TypeName,
-    decls: Vec<DeclId>,
+/// Whether a `class_decls` name is a class or a module.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum ClassDeclKind {
+    Class,
+    Module,
 }
 
-impl ModuleEntry {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ClassTag;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ModuleTag;
+
+/// Ruby's `ClassEntry` and `ModuleEntry` differ only in `primary_decl`, so
+/// they share one layout and the tag selects which `primary_decl` exists.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Entry<K> {
+    name: TypeName,
+    decls: Vec<DeclId>,
+    kind: PhantomData<K>,
+}
+
+pub type ClassEntry = Entry<ClassTag>;
+pub type ModuleEntry = Entry<ModuleTag>;
+
+impl<K> Entry<K> {
     pub(super) fn new(name: TypeName) -> Self {
         Self {
             name,
             decls: Vec::new(),
+            kind: PhantomData,
         }
     }
 
@@ -37,7 +60,28 @@ impl ModuleEntry {
     pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
         self.decls.iter().copied()
     }
+}
 
+impl Entry<ClassTag> {
+    /// The first declaration with a superclass, else the first one. Not
+    /// memoized as in Ruby: the result is the same either way.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the entry is empty, which registration never leaves behind.
+    /// May also panic if `env` is not the one that issued the entry's ids.
+    #[must_use]
+    pub fn primary_decl(&self, env: &Environment) -> DeclId {
+        self.decls
+            .iter()
+            .copied()
+            .find(|&id| matches!(env.decl(id), Declaration::Class(c) if c.super_class.is_some()))
+            .or_else(|| self.decls.first().copied())
+            .expect("an entry always has at least one declaration")
+    }
+}
+
+impl Entry<ModuleTag> {
     /// # Panics
     ///
     /// Panics if the entry is empty, which registration never leaves behind.
@@ -52,23 +96,103 @@ impl ModuleEntry {
     }
 }
 
-impl Environment {
-    #[must_use]
-    pub fn is_module_decl(&self, name: TypeName) -> bool {
-        self.class_decls.contains_key(&name)
+/// Ruby's `class_decls` holds both kinds under one name space, so a name is
+/// either a class or a module, never both. The name follows `class_decls`,
+/// so it covers modules too.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ClassDeclEntry {
+    Class(ClassEntry),
+    Module(ModuleEntry),
+}
+
+impl ClassDeclEntry {
+    pub(super) fn new(name: TypeName, kind: ClassDeclKind) -> Self {
+        match kind {
+            ClassDeclKind::Class => Self::Class(Entry::new(name)),
+            ClassDeclKind::Module => Self::Module(Entry::new(name)),
+        }
     }
 
+    pub(super) fn push(&mut self, decl: DeclId) {
+        match self {
+            Self::Class(e) => e.push(decl),
+            Self::Module(e) => e.push(decl),
+        }
+    }
+
+    #[must_use]
+    pub fn kind(&self) -> ClassDeclKind {
+        match self {
+            Self::Class(_) => ClassDeclKind::Class,
+            Self::Module(_) => ClassDeclKind::Module,
+        }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> TypeName {
+        match self {
+            Self::Class(e) => e.name(),
+            Self::Module(e) => e.name(),
+        }
+    }
+
+    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
+        let decls = match self {
+            Self::Class(e) => &e.decls,
+            Self::Module(e) => &e.decls,
+        };
+        decls.iter().copied()
+    }
+
+    /// # Panics
+    ///
+    /// Panics if the entry is empty, which registration never leaves behind.
+    /// May also panic if `env` is not the one that issued the entry's ids.
+    #[must_use]
+    pub fn primary_decl(&self, env: &Environment) -> DeclId {
+        match self {
+            Self::Class(e) => e.primary_decl(env),
+            Self::Module(e) => e.primary_decl(),
+        }
+    }
+}
+
+impl Environment {
+    #[must_use]
+    pub fn is_class_decl(&self, name: TypeName) -> bool {
+        matches!(self.class_decls.get(&name), Some(ClassDeclEntry::Class(_)))
+    }
+
+    #[must_use]
+    pub fn is_module_decl(&self, name: TypeName) -> bool {
+        matches!(self.class_decls.get(&name), Some(ClassDeclEntry::Module(_)))
+    }
+
+    /// TODO: class and module aliases are not consulted yet. Ruby also
+    /// checks `class_alias_decls`, and `class_entry` / `module_entry`
+    /// return alias entries; add this when the alias tables land.
     #[must_use]
     pub fn is_module_name(&self, name: TypeName) -> bool {
         self.class_decls.contains_key(&name)
     }
 
     #[must_use]
-    pub fn module_entry(&self, name: TypeName) -> Option<&ModuleEntry> {
-        self.class_decls.get(&name)
+    pub fn class_entry(&self, name: TypeName) -> Option<&ClassEntry> {
+        match self.class_decls.get(&name) {
+            Some(ClassDeclEntry::Class(e)) => Some(e),
+            _ => None,
+        }
     }
 
-    pub fn class_entries(&self) -> impl Iterator<Item = &ModuleEntry> {
+    #[must_use]
+    pub fn module_entry(&self, name: TypeName) -> Option<&ModuleEntry> {
+        match self.class_decls.get(&name) {
+            Some(ClassDeclEntry::Module(e)) => Some(e),
+            _ => None,
+        }
+    }
+
+    pub fn class_entries(&self) -> impl Iterator<Item = &ClassDeclEntry> {
         self.class_decls.values()
     }
 

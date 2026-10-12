@@ -1,9 +1,9 @@
-use crate::ast::{Declaration, ModuleMember};
+use crate::ast::{ClassMember, Declaration, ModuleMember};
 use crate::ids::{Id, IdIndexMap, SymbolId, TypeName};
 use crate::interners::Interners;
 
 use super::decl::{Context, DeclNode};
-use super::entry::{ModuleEntry, SingleEntry};
+use super::entry::{ClassDeclEntry, ClassDeclKind, SingleEntry};
 use super::error::{DuplicatedDecl, DuplicatedDeclarationError};
 use super::source::Source;
 use super::{DeclId, Environment};
@@ -37,7 +37,8 @@ impl Environment {
         context: Context,
     ) -> Result<(), DuplicatedDeclarationError> {
         enum Kind {
-            Module {
+            ClassOrModule {
+                kind: ClassDeclKind,
                 name: TypeName,
                 decl_members: Vec<u32>,
             },
@@ -54,27 +55,47 @@ impl Environment {
             context,
         };
         let kind = match self.member_decl(&node) {
-            Declaration::Module(m) => Kind::Module {
+            Declaration::Class(c) => Kind::ClassOrModule {
+                kind: ClassDeclKind::Class,
+                name: c.name,
+                decl_members: decl_member_indices(&c.members, ClassMember::as_declaration),
+            },
+            Declaration::Module(m) => Kind::ClassOrModule {
+                kind: ClassDeclKind::Module,
                 name: m.name,
                 decl_members: decl_member_indices(&m.members, ModuleMember::as_declaration),
             },
             Declaration::Interface(d) => Kind::Interface(d.name),
             Declaration::TypeAlias(d) => Kind::TypeAlias(d.name),
             Declaration::Global(d) => Kind::Global(d.name),
-            // TODO: classes, constants, class aliases and module aliases are
-            // skipped. Declarations in a class body are not registered, a
-            // class reopening a module is not rejected, and a module name
-            // clashing with a constant is not detected.
+            // TODO: constants, class aliases and module aliases are skipped.
+            // A class or module name clashing with one of them is not
+            // detected, and the query side (`is_module_name`,
+            // `class_entry`, `module_entry`) ignores alias entries too.
             _ => Kind::Other,
         };
 
         match kind {
-            Kind::Module { name, decl_members } => {
+            Kind::ClassOrModule {
+                kind,
+                name,
+                decl_members,
+            } => {
                 let name = self.interners.type_names.concat(namespace, name);
+                if let Some(existing) = self.class_decls.get(&name)
+                    && existing.kind() != kind
+                {
+                    let existing = existing.primary_decl(self);
+                    let name = self
+                        .interners
+                        .type_names
+                        .display(name, &self.interners.strings);
+                    return Err(self.duplicated_declaration(name, &node, existing));
+                }
                 let id = self.push_node(node);
                 self.class_decls
                     .entry(name)
-                    .or_insert_with(|| ModuleEntry::new(name))
+                    .or_insert_with(|| ClassDeclEntry::new(name, kind))
                     .push(id);
                 self.insert_members(node.source, node.context, id, name, &decl_members)
             }
@@ -179,9 +200,9 @@ fn decl_member_indices<M>(
 mod tests {
     use std::path::PathBuf;
 
-    use crate::ast::{AstConverter, Declaration, ModuleMember};
+    use crate::ast::{AstConverter, Declaration};
     use crate::environment::{
-        Context, DuplicatedDeclarationError, Environment, ModuleEntry, Source, SourceKind,
+        ClassDeclEntry, Context, DuplicatedDeclarationError, Environment, Source, SourceKind,
     };
     use crate::ids::{SymbolId, TypeName};
     use crate::node;
@@ -221,14 +242,13 @@ mod tests {
         env.interners_mut().strings.intern(name)
     }
 
-    fn nested_decl(module: &Declaration, index: usize) -> &Declaration {
-        let Declaration::Module(m) = module else {
-            panic!("expected a module declaration");
+    fn nested_decl(parent: &Declaration, index: usize) -> &Declaration {
+        let member = match parent {
+            Declaration::Class(c) => c.members[index].as_declaration(),
+            Declaration::Module(m) => m.members[index].as_declaration(),
+            _ => panic!("expected a class or module declaration"),
         };
-        let ModuleMember::Declaration(d) = &m.members[index] else {
-            panic!("expected member {index} to be a declaration");
-        };
-        d
+        member.unwrap_or_else(|| panic!("expected member {index} to be a declaration"))
     }
 
     fn assert_duplicate(
@@ -431,7 +451,7 @@ mod tests {
 
         add_rbs_source(&mut env, "a.rbs", decls).unwrap();
 
-        let names: Vec<_> = env.class_entries().map(ModuleEntry::name).collect();
+        let names: Vec<_> = env.class_entries().map(ClassDeclEntry::name).collect();
         let expected: Vec<_> = ["::Foo", "::Foo::Bar", "::Baz"]
             .into_iter()
             .map(|n| type_name(&mut env, n))
@@ -575,5 +595,154 @@ mod tests {
         assert_eq!(env.interface_entries().count(), 1);
         let foo = type_name(&mut env, "::Foo");
         assert_eq!(env.module_entry(foo).unwrap().each_decl().count(), 2);
+    }
+
+    #[test]
+    fn insert_nested_modules_in_a_class() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "class Foo\n  module Bar\n  end\n  module ::Baz\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let [foo, bar, baz] = ["::Foo", "::Foo::Bar", "::Baz"].map(|n| type_name(&mut env, n));
+        assert!(env.is_class_decl(foo));
+        assert!(!env.is_module_decl(foo));
+        assert!(env.is_module_decl(bar));
+        assert!(env.is_module_decl(baz));
+        assert!(env.is_module_name(foo));
+        assert!(env.class_entry(bar).is_none());
+        assert!(env.module_entry(foo).is_none());
+        let names: Vec<_> = env.class_entries().map(ClassDeclEntry::name).collect();
+        assert_eq!(names, [foo, bar, baz]);
+        let names: Vec<_> = env
+            .context_names(env.context_of(env.module_entry(bar).unwrap().primary_decl()))
+            .collect();
+        assert_eq!(names, [foo]);
+    }
+
+    #[test]
+    fn insert_open_class() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "class Foo\n  module Bar\n  end\nend\nclass Foo < String\n  module Bar\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let [foo, bar] = ["::Foo", "::Foo::Bar"].map(|n| type_name(&mut env, n));
+        let string = type_name(&mut env, "String");
+        let entry = env.class_entry(foo).unwrap();
+        assert_eq!(entry.each_decl().count(), 2);
+        let primary = env.decl(entry.primary_decl(&env));
+        assert_eq!(primary, &decls[1]);
+        let Declaration::Class(primary) = primary else {
+            panic!("expected a class declaration");
+        };
+        assert_eq!(primary.super_class.as_ref().unwrap().name, string);
+
+        assert_eq!(env.module_entry(bar).unwrap().each_decl().count(), 2);
+    }
+
+    #[test]
+    fn class_primary_decl_falls_back_to_first() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "class Foo\nend\nclass Foo\nend\n");
+
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let foo = type_name(&mut env, "::Foo");
+        let entry = env.class_entry(foo).unwrap();
+        assert_eq!(env.decl(entry.primary_decl(&env)), &decls[0]);
+    }
+
+    #[test]
+    fn module_then_class_is_rejected() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module Foo\nend\nclass Foo < String\nend\n");
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(err.name(), "::Foo");
+        assert_duplicate(&err, ("b.rbs", &decls[1]), ("a.rbs", &decls[0]));
+        let foo = type_name(&mut env, "::Foo");
+        assert!(env.is_module_decl(foo));
+        assert!(!env.is_class_decl(foo));
+    }
+
+    #[test]
+    fn class_then_module_reports_the_primary_decl() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "class Foo\nend\nclass Foo < String\nend\nmodule Foo\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls[..2].to_vec()).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[2].clone()]).unwrap_err();
+
+        assert_duplicate(&err, ("b.rbs", &decls[2]), ("a.rbs", &decls[1]));
+        let foo = type_name(&mut env, "::Foo");
+        assert!(env.is_class_decl(foo));
+        assert_eq!(env.class_entry(foo).unwrap().each_decl().count(), 2);
+    }
+
+    #[test]
+    fn nested_kind_mismatch_is_rejected() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "class Foo\n  module Bar\n  end\nend\nclass Foo\n  class Bar\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(err.name(), "::Foo::Bar");
+        assert_duplicate(
+            &err,
+            ("b.rbs", nested_decl(&decls[1], 0)),
+            ("a.rbs", nested_decl(&decls[0], 0)),
+        );
+    }
+
+    #[test]
+    fn members_of_a_rejected_declaration_are_not_registered() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\nend\nclass Foo\n  module Baz\n  end\nend\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let nodes = env.decl_nodes.len();
+        add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        let baz = type_name(&mut env, "::Foo::Baz");
+        assert!(!env.is_module_name(baz));
+        assert_eq!(env.class_entries().count(), 1);
+        assert_eq!(env.decl_nodes.len(), nodes);
+    }
+
+    #[test]
+    fn insert_class_in_a_module() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module Foo\n  class Bar\n  end\nend\n");
+
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let [foo, bar] = ["::Foo", "::Foo::Bar"].map(|n| type_name(&mut env, n));
+        assert!(env.is_module_decl(foo));
+        assert!(env.is_class_decl(bar));
+        assert!(env.class_entry(bar).is_some());
+        assert!(env.module_entry(bar).is_none());
+        let names: Vec<_> = env
+            .context_names(env.context_of(env.class_entry(bar).unwrap().primary_decl(&env)))
+            .collect();
+        assert_eq!(names, [foo]);
     }
 }
