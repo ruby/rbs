@@ -3,7 +3,7 @@ use crate::ids::{Id, IdIndexMap, SymbolId, TypeName};
 use crate::interners::Interners;
 
 use super::decl::{Context, DeclNode};
-use super::entry::{ClassDeclEntry, ClassDeclKind, ConstantLookup, SingleEntry};
+use super::entry::{AliasEntry, ClassDeclEntry, ClassDeclKind, ConstantLookup, SingleEntry};
 use super::error::{DuplicatedDecl, DuplicatedDeclarationError};
 use super::source::Source;
 use super::{DeclId, Environment};
@@ -45,6 +45,7 @@ impl Environment {
             Interface(TypeName),
             TypeAlias(TypeName),
             Constant(TypeName),
+            ModuleAlias(TypeName),
             Global(SymbolId),
             Other,
         }
@@ -70,12 +71,12 @@ impl Environment {
             Declaration::TypeAlias(d) => Kind::TypeAlias(d.name),
             Declaration::Constant(d) => Kind::Constant(d.name),
             Declaration::Global(d) => Kind::Global(d.name),
-            // TODO: class aliases and module aliases are skipped. A class,
-            // module or constant name clashing with one of them is not
-            // detected, and the query side (`is_module_name`, `class_entry`,
-            // `module_entry`, `constant_entry`, `is_constant_name`) ignores
-            // alias entries too.
-            _ => Kind::Other,
+            Declaration::ModuleAlias(d) => Kind::ModuleAlias(d.new_name),
+            // TODO: class aliases are skipped. A class, module, constant or
+            // module alias name clashing with one of them is not detected,
+            // and `constant_entry` and `class_entry` ignore class alias
+            // entries too.
+            Declaration::ClassAlias(_) => Kind::Other,
         };
 
         match kind {
@@ -113,13 +114,13 @@ impl Environment {
                     |i, n| i.type_names.display(n, &i.strings),
                 )
             }
-            Kind::Constant(name) => {
-                let name = self.interners.type_names.concat(namespace, name);
-                if let Some((first, rest)) = self.constant_clash(name, None) {
-                    return Err(self.duplicated_type_name(name, &node, first, rest));
-                }
-                self.register_single(|env| &mut env.constant_decls, name, node);
-                Ok(())
+            Kind::Constant(name) => self.insert_constant_like(namespace, name, node, |env, e| {
+                env.constant_decls.insert(e.name, e);
+            }),
+            Kind::ModuleAlias(name) => {
+                self.insert_constant_like(namespace, name, node, |env, e| {
+                    env.class_alias_decls.insert(e.name, AliasEntry::Module(e));
+                })
             }
             Kind::Global(name) => self.insert_single(
                 |env| &mut env.global_decls,
@@ -146,6 +147,22 @@ impl Environment {
         for &member in decl_members {
             self.insert_decl(source, Some(id), member, name, inner)?;
         }
+        Ok(())
+    }
+
+    fn insert_constant_like(
+        &mut self,
+        namespace: TypeName,
+        name: TypeName,
+        node: DeclNode,
+        store: fn(&mut Self, SingleEntry),
+    ) -> Result<(), DuplicatedDeclarationError> {
+        let name = self.interners.type_names.concat(namespace, name);
+        if let Some((first, rest)) = self.constant_clash(name, None) {
+            return Err(self.duplicated_type_name(name, &node, first, rest));
+        }
+        let decl = self.push_node(node);
+        store(self, SingleEntry { name, decl });
         Ok(())
     }
 
@@ -252,8 +269,8 @@ mod tests {
 
     use crate::ast::{AstConverter, Declaration};
     use crate::environment::{
-        ClassDeclEntry, ConstantLookup, Context, DuplicatedDeclarationError, Environment, Source,
-        SourceKind,
+        ClassDeclEntry, ConstantLookup, Context, DuplicatedDeclarationError, Environment,
+        ModuleLookup, Source, SourceKind,
     };
     use crate::ids::{SymbolId, TypeName};
     use crate::node;
@@ -489,7 +506,9 @@ mod tests {
         add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
 
         let foo = type_name(&mut env, "::Foo");
-        let entry = env.module_entry(foo).unwrap();
+        let ModuleLookup::Module(entry) = env.module_entry(foo).unwrap() else {
+            panic!("expected a module entry");
+        };
         assert_eq!(env.decl(entry.primary_decl()), &decls[1]);
     }
 
@@ -669,8 +688,11 @@ mod tests {
         assert!(env.module_entry(foo).is_none());
         let names: Vec<_> = env.class_entries().map(ClassDeclEntry::name).collect();
         assert_eq!(names, [foo, bar, baz]);
+        let ModuleLookup::Module(entry) = env.module_entry(bar).unwrap() else {
+            panic!("expected a module entry");
+        };
         let names: Vec<_> = env
-            .context_names(env.context_of(env.module_entry(bar).unwrap().primary_decl()))
+            .context_names(env.context_of(entry.primary_decl()))
             .collect();
         assert_eq!(names, [foo]);
     }
@@ -935,5 +957,143 @@ mod tests {
         let [x, b, a] = ["::M::X", "::B", "::A"].map(|n| type_name(&mut env, n));
         let names: Vec<_> = env.constant_entries().map(|e| e.name).collect();
         assert_eq!(names, [x, b, a]);
+    }
+
+    #[test]
+    fn clash_with_a_module_alias_is_rejected_in_both_directions() {
+        for (first, second) in [
+            ("module Foo = Kernel\n", "Foo: String\n"),
+            ("module Foo = Kernel\n", "module Foo\nend\n"),
+            ("module Foo = Kernel\n", "class Foo\nend\n"),
+            ("Foo: String\n", "module Foo = Kernel\n"),
+            ("module Foo = Kernel\n", "module Foo = Comparable\n"),
+            ("module Foo\nend\n", "module Foo = Kernel\n"),
+            ("class Foo\nend\n", "module Foo = Kernel\n"),
+        ] {
+            let mut env = Environment::new();
+            let decls = parse_decls(&mut env, &format!("{first}{second}"));
+            add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+
+            let err = add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+            assert_eq!(err.name(), "::Foo", "{first}{second}");
+            assert_duplicate(&err, ("b.rbs", &decls[1]), &[("a.rbs", &decls[0])]);
+        }
+    }
+
+    #[test]
+    fn module_alias_clashing_with_a_reopened_module_reports_every_declaration() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module Foo\nend\nmodule Foo\nend\nmodule Foo = Kernel\n",
+        );
+
+        add_rbs_source(&mut env, "a.rbs", decls[..2].to_vec()).unwrap();
+        let err = add_rbs_source(&mut env, "b.rbs", vec![decls[2].clone()]).unwrap_err();
+
+        assert_duplicate(
+            &err,
+            ("b.rbs", &decls[2]),
+            &[("a.rbs", &decls[0]), ("a.rbs", &decls[1])],
+        );
+    }
+
+    #[test]
+    fn nested_module_alias_uses_the_namespace() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module M\n  module A = Kernel\nend\n");
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let [a, top_a] = ["::M::A", "::A"].map(|n| type_name(&mut env, n));
+        let Some(ModuleLookup::ModuleAlias(entry)) = env.module_entry(a) else {
+            panic!("expected a module alias entry");
+        };
+        assert_eq!(entry.name, a);
+        assert_eq!(env.decl(entry.decl), nested_decl(&decls[0], 0));
+        assert!(env.module_entry(top_a).is_none());
+    }
+
+    #[test]
+    fn module_entry_finds_module_and_module_alias_but_not_constant() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module A\nend\nmodule B = Kernel\nC: String\nclass D\nend\n",
+        );
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let [a, b, c, d, e] = ["::A", "::B", "::C", "::D", "::E"].map(|n| type_name(&mut env, n));
+        assert!(matches!(env.module_entry(a), Some(ModuleLookup::Module(_))));
+        let Some(ModuleLookup::ModuleAlias(entry)) = env.module_entry(b) else {
+            panic!("expected a module alias entry");
+        };
+        assert_eq!(env.decl(entry.decl), &decls[1]);
+        assert!(env.module_entry(c).is_none());
+        assert!(env.module_entry(d).is_none());
+        assert!(env.module_entry(e).is_none());
+
+        let alias = env.module_entry(b).unwrap();
+        assert_eq!(alias.name(), b);
+        assert_eq!(alias.primary_decl(), entry.decl);
+        assert_eq!(alias.each_decl().collect::<Vec<_>>(), [entry.decl]);
+
+        let module = env.module_entry(a).unwrap();
+        assert_eq!(module.name(), a);
+        assert_eq!(env.decl(module.primary_decl()), &decls[0]);
+    }
+
+    #[test]
+    fn constant_entry_finds_module_alias() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module Foo = Kernel\n");
+        add_rbs_source(&mut env, "a.rbs", decls.clone()).unwrap();
+
+        let foo = type_name(&mut env, "::Foo");
+        let Some(ConstantLookup::ModuleAlias(entry)) = env.constant_entry(foo) else {
+            panic!("expected a module alias entry");
+        };
+        assert_eq!(env.decl(entry.decl), &decls[0]);
+        assert!(env.is_constant_name(foo));
+        assert!(!env.is_constant_decl(foo));
+    }
+
+    #[test]
+    fn module_alias_predicates() {
+        let mut env = Environment::new();
+        let decls = parse_decls(
+            &mut env,
+            "module A = Kernel\nmodule B\nend\ninterface _I\nend\ntype t = Integer\nC: String\n",
+        );
+        add_rbs_source(&mut env, "a.rbs", decls).unwrap();
+
+        let [a, b, i, t, c, d] =
+            ["::A", "::B", "::_I", "::t", "::C", "::D"].map(|n| type_name(&mut env, n));
+        assert!(env.is_module_alias(a));
+        assert!(!env.is_module_alias(b));
+        assert!(env.is_module_name(a));
+        assert!(env.is_module_name(b));
+        assert!(!env.is_module_decl(a));
+        for name in [a, b, i, t] {
+            assert!(env.is_type_name(name));
+        }
+        assert!(!env.is_type_name(c));
+        assert!(!env.is_type_name(d));
+    }
+
+    #[test]
+    fn clash_with_a_module_alias_leaves_the_environment_unchanged() {
+        let mut env = Environment::new();
+        let decls = parse_decls(&mut env, "module Foo = Kernel\nFoo: String\n");
+        add_rbs_source(&mut env, "a.rbs", vec![decls[0].clone()]).unwrap();
+        let nodes = env.decl_nodes.len();
+        let aliases = env.class_alias_decls.len();
+        let consts = env.constant_decls.len();
+
+        add_rbs_source(&mut env, "b.rbs", vec![decls[1].clone()]).unwrap_err();
+
+        assert_eq!(env.decl_nodes.len(), nodes);
+        assert_eq!(env.class_alias_decls.len(), aliases);
+        assert_eq!(env.constant_decls.len(), consts);
     }
 }

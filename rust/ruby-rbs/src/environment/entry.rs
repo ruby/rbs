@@ -58,7 +58,11 @@ impl<K> Entry<K> {
     }
 
     pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
-        self.decls.iter().copied()
+        self.decls().iter().copied()
+    }
+
+    fn decls(&self) -> &[DeclId] {
+        &self.decls
     }
 }
 
@@ -142,8 +146,8 @@ impl ClassDeclEntry {
 
     fn decls(&self) -> &[DeclId] {
         match self {
-            Self::Class(e) => &e.decls,
-            Self::Module(e) => &e.decls,
+            Self::Class(e) => e.decls(),
+            Self::Module(e) => e.decls(),
         }
     }
 
@@ -160,13 +164,21 @@ impl ClassDeclEntry {
     }
 }
 
+/// Ruby's `class_alias_decls` values: `ModuleAliasEntry | ClassAliasEntry`.
+/// Only the module arm exists until class aliases are registered.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum AliasEntry {
+    Module(SingleEntry),
+}
+
 /// What `constant_entry` finds under a name: Ruby's `ClassEntry |
-/// ModuleEntry | ConstantEntry`. Class and module stay split inside
-/// `ClassDeclEntry`. Named `*Lookup` to stay apart from Ruby's
+/// ModuleEntry | ModuleAliasEntry | ConstantEntry`. Class and module stay
+/// split inside `ClassDeclEntry`. Named `*Lookup` to stay apart from Ruby's
 /// `ConstantEntry`, which is the `Constant` arm here.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ConstantLookup<'a> {
     ClassDecl(&'a ClassDeclEntry),
+    ModuleAlias(&'a SingleEntry),
     Constant(&'a SingleEntry),
 }
 
@@ -174,9 +186,46 @@ impl ConstantLookup<'_> {
     pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
         let decls = match self {
             Self::ClassDecl(e) => e.decls(),
-            Self::Constant(e) => std::slice::from_ref(&e.decl),
+            Self::ModuleAlias(e) | Self::Constant(e) => std::slice::from_ref(&e.decl),
         };
         decls.iter().copied()
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum ModuleLookup<'a> {
+    Module(&'a ModuleEntry),
+    ModuleAlias(&'a SingleEntry),
+}
+
+impl ModuleLookup<'_> {
+    #[must_use]
+    pub fn name(&self) -> TypeName {
+        match self {
+            Self::Module(e) => e.name(),
+            Self::ModuleAlias(e) => e.name,
+        }
+    }
+
+    pub fn each_decl(&self) -> impl Iterator<Item = DeclId> + '_ {
+        let decls = match self {
+            Self::Module(e) => e.decls(),
+            Self::ModuleAlias(e) => std::slice::from_ref(&e.decl),
+        };
+        decls.iter().copied()
+    }
+
+    /// An alias has the one declaration it was registered with.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a module entry is empty, which registration never leaves behind.
+    #[must_use]
+    pub fn primary_decl(&self) -> DeclId {
+        match self {
+            Self::Module(e) => e.primary_decl(),
+            Self::ModuleAlias(e) => e.decl,
+        }
     }
 }
 
@@ -191,14 +240,27 @@ impl Environment {
         matches!(self.class_decls.get(&name), Some(ClassDeclEntry::Module(_)))
     }
 
-    /// TODO: class and module aliases are not consulted yet. Ruby also
-    /// checks `class_alias_decls`, and `class_entry` / `module_entry`
-    /// return alias entries; add this when the alias tables land.
     #[must_use]
-    pub fn is_module_name(&self, name: TypeName) -> bool {
-        self.class_decls.contains_key(&name)
+    pub fn is_module_alias(&self, name: TypeName) -> bool {
+        matches!(
+            self.class_alias_decls.get(&name),
+            Some(AliasEntry::Module(_))
+        )
     }
 
+    #[must_use]
+    pub fn is_module_name(&self, name: TypeName) -> bool {
+        self.class_decls.contains_key(&name) || self.class_alias_decls.contains_key(&name)
+    }
+
+    #[must_use]
+    pub fn is_type_name(&self, name: TypeName) -> bool {
+        self.is_interface_name(name) || self.is_type_alias_name(name) || self.is_module_name(name)
+    }
+
+    /// TODO: class aliases are not consulted yet. Ruby's `class_entry`
+    /// returns `ClassEntry | ClassAliasEntry`; return a lookup enum like
+    /// `module_entry` does when class aliases are registered.
     #[must_use]
     pub fn class_entry(&self, name: TypeName) -> Option<&ClassEntry> {
         match self.class_decls.get(&name) {
@@ -208,22 +270,24 @@ impl Environment {
     }
 
     #[must_use]
-    pub fn module_entry(&self, name: TypeName) -> Option<&ModuleEntry> {
-        match self.class_decls.get(&name) {
-            Some(ClassDeclEntry::Module(e)) => Some(e),
+    pub fn module_entry(&self, name: TypeName) -> Option<ModuleLookup<'_>> {
+        match self.constant_entry(name)? {
+            ConstantLookup::ClassDecl(ClassDeclEntry::Module(e)) => Some(ModuleLookup::Module(e)),
+            ConstantLookup::ModuleAlias(e) => Some(ModuleLookup::ModuleAlias(e)),
             _ => None,
         }
     }
 
-    /// TODO: class and module aliases are not consulted yet. Ruby checks
-    /// `class_alias_decls` between `class_decls` and `constant_decls`; add
-    /// this when the alias tables land.
     #[must_use]
     pub fn constant_entry(&self, name: TypeName) -> Option<ConstantLookup<'_>> {
-        match self.class_decls.get(&name) {
-            Some(e) => Some(ConstantLookup::ClassDecl(e)),
-            None => self.constant_decls.get(&name).map(ConstantLookup::Constant),
+        if let Some(e) = self.class_decls.get(&name) {
+            return Some(ConstantLookup::ClassDecl(e));
         }
+        match self.class_alias_decls.get(&name) {
+            Some(AliasEntry::Module(e)) => return Some(ConstantLookup::ModuleAlias(e)),
+            None => {}
+        }
+        self.constant_decls.get(&name).map(ConstantLookup::Constant)
     }
 
     #[must_use]
