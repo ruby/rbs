@@ -154,10 +154,8 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   end
 
   def test_replace!
-    assert_raises URI::InvalidURIError do
-      assert_send_type '(URI::Generic oth) -> URI::Generic',
-                        generic, :replace!, other
-    end
+    assert_send_type_error '(URI::Generic oth) -> URI::Generic', URI::InvalidURIError,
+                           generic, :replace!, other
   end
 
   def test_component
@@ -335,24 +333,18 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   end
 
   def test_check_registry
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        generic, :check_registry, 'registry'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           generic, :check_registry, 'registry'
   end
 
   def test_set_registry
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        generic, :set_registry, 'registry'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           generic, :set_registry, 'registry'
   end
 
   def test_registry=
-    assert_raises URI::InvalidURIError do
-      assert_send_type  '(String v) -> nil',
-                        generic, :registry=, 'registry'
-    end
+    assert_send_type_error '(String v) -> nil', URI::InvalidURIError,
+                           generic, :registry=, 'registry'
   end
 
   def test_check_path

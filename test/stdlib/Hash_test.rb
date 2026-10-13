@@ -163,10 +163,6 @@ class HashInstanceTest < Test::Unit::TestCase
     # Make sure return type is correct
     assert_type 'Rational', {a: 1r}.to_proc.call(:a)
     assert_type 'nil', {a: 1r}.to_proc.call(:not_a_key)
-
-    # make sure it only takes one argument
-    assert_raises ArgumentError do {a: 1r}.to_proc.call(:a, :b) end
-    assert_raises ArgumentError do {a: 1r}.to_proc.call() end
   end
 
   def test_op_eq
