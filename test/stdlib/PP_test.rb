@@ -12,11 +12,15 @@ class PPSingletonTest < Test::Unit::TestCase
   end
 
   def test_pp
-    assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out, ?::Integer width) -> untyped",
+    assert_send_type "(::PP::_PrettyPrint obj) -> ::IO",
+                     PP, :pp, Object.new
+    assert_send_type "(::PP::_PrettyPrint obj, ::String out) -> ::String",
                      PP, :pp, Object.new, ''.dup
+    assert_send_type "(::PP::_PrettyPrint obj, ::String out, ::Integer width) -> ::String",
+                     PP, :pp, Object.new, ''.dup, 10
 
     IO.pipe do |r, w|
-      assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out, ?::Integer width) -> untyped",
+      assert_send_type "(::PP::_PrettyPrint obj, ::IO out) -> ::IO",
                       PP, :pp, Object.new, w
     end
   end
@@ -29,9 +33,9 @@ class PPSingletonTest < Test::Unit::TestCase
   end
 
   def test_singleline_pp
-    assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out) -> untyped",
+    assert_send_type "(::PP::_PrettyPrint obj) -> ::IO",
                      PP, :singleline_pp, Object.new
-    assert_send_type "(::PP::_PrettyPrint obj, ?::PP::_LeftShift out) -> untyped",
+    assert_send_type "(::PP::_PrettyPrint obj, ::String out) -> ::String",
                      PP, :singleline_pp, Object.new, ''.dup
   end
 
@@ -72,7 +76,7 @@ class PP::PPMethodsTest < Test::Unit::TestCase
   end
 
   def test_pp
-    assert_send_type "(::PP::_PrettyPrint obj) -> untyped",
+    assert_send_type "(::PP::_PrettyPrint obj) -> void",
                      PP.new, :pp, Object.new
   end
 
@@ -101,12 +105,12 @@ class PP::PPMethodsTest < Test::Unit::TestCase
   end
 
   def test_pp_object
-    assert_send_type "(untyped obj) -> untyped",
+    assert_send_type "(untyped obj) -> void",
                      PP.new, :pp_object, Object.new
   end
 
   def test_pp_hash
-    assert_send_type "(untyped obj) -> untyped",
+    assert_send_type "(untyped obj) -> void",
                      PP.new, :pp_hash, {}
   end
 
@@ -123,12 +127,12 @@ class PP::ObjectMixinTest < Test::Unit::TestCase
   testing "::PP::ObjectMixin"
 
   def test_pretty_print
-    assert_send_type "(PP q) -> untyped",
+    assert_send_type "(PP q) -> void",
                      Object.new, :pretty_print, PP.new
   end
 
   def test_pretty_print_cycle
-    assert_send_type "(PP q) -> untyped",
+    assert_send_type "(PP q) -> void",
                      Object.new, :pretty_print_cycle, PP.new
   end
 
@@ -143,7 +147,7 @@ class PP::ObjectMixinTest < Test::Unit::TestCase
         'ok'
       end
     end
-    assert_send_type "() -> untyped",
+    assert_send_type "() -> ::String",
                      has_pretty_print.new, :pretty_print_inspect
   end
 end
