@@ -64,6 +64,25 @@ class ThreadSingletonTest < Test::Unit::TestCase
       "() { (Thread::Backtrace::Location) -> Integer } -> nil",
       Thread, :each_caller_location, &-> (loc) { 3 }
     )
+
+    omit_if(RUBY_VERSION < "3.4")
+
+    assert_send_type(
+      "(Integer) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Integer, Integer) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, 2, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Integer, nil) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, nil, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Range[Integer]) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1..2, &-> (loc) { 3 }
+    )
   end
 
   def test_list

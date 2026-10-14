@@ -888,6 +888,8 @@ class Thread < Object
   # object.
   #
   def self.each_caller_location: () { (Backtrace::Location) -> void } -> nil
+                               | (int start, ?int? length) { (Backtrace::Location) -> void } -> nil
+                               | (range[int] range) { (Backtrace::Location) -> void } -> nil
 
   # <!--
   #   rdoc-file=thread.c
