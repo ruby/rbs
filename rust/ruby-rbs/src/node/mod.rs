@@ -231,18 +231,20 @@ pub struct RBSLocationRangeList<'a> {
 impl<'a> RBSLocationRangeList<'a> {
     /// Returns an iterator over the location ranges.
     #[must_use]
-    pub fn iter(&self) -> RBSLocationRangeListIter {
+    pub fn iter(&self) -> RBSLocationRangeListIter<'a> {
         RBSLocationRangeListIter {
             current: unsafe { (*self.pointer).head },
+            marker: PhantomData,
         }
     }
 }
 
-pub struct RBSLocationRangeListIter {
+pub struct RBSLocationRangeListIter<'a> {
     current: *mut rbs_location_range_list_node_t,
+    marker: PhantomData<&'a mut rbs_location_range_list_node_t>,
 }
 
-impl Iterator for RBSLocationRangeListIter {
+impl Iterator for RBSLocationRangeListIter<'_> {
     type Item = RBSLocationRange;
 
     fn next(&mut self) -> Option<Self::Item> {
