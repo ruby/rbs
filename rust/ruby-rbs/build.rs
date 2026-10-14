@@ -755,6 +755,26 @@ fn generate(config: &Config) -> Result<(), Box<dyn Error>> {
     }
     writeln!(file, "        }}")?;
     writeln!(file, "    }}")?;
+    writeln!(file)?;
+    writeln!(
+        file,
+        "    /// Returns the name of this node's variant, for diagnostics."
+    )?;
+    writeln!(file, "    #[must_use]")?;
+    writeln!(
+        file,
+        "    pub(crate) fn kind_name(&self) -> &'static str {{"
+    )?;
+    writeln!(file, "        match self {{")?;
+    for node in &config.nodes {
+        let variant_name = node.variant_name();
+        writeln!(
+            file,
+            "            Node::{variant_name}(_) => \"{variant_name}\","
+        )?;
+    }
+    writeln!(file, "        }}")?;
+    writeln!(file, "    }}")?;
     writeln!(file, "}}")?;
     writeln!(file)?;
 

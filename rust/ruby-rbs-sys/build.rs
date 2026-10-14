@@ -134,6 +134,8 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_type("rbs_types_block_t")
         .allowlist_type("rbs_types_class_instance_t")
         .allowlist_type("rbs_types_class_singleton_t")
+        // Needed for master-mode builds even when the pinned headers omit this type.
+        .allowlist_type("rbs_types_function_forwarding_param_t")
         .allowlist_type("rbs_types_function_param_t")
         .allowlist_type("rbs_types_function_t")
         .allowlist_type("rbs_types_interface_t")
