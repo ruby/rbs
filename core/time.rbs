@@ -525,6 +525,7 @@ class Time < Object
   #
   def self.at: (Time, ?in: String | Integer | nil) -> Time
              | (Numeric, ?in: String | Integer | nil) -> Time
+             | (Numeric sec, Numeric usec, ?in: String | Integer | nil) -> Time
              | (Integer sec_i, Numeric msec, subsec_unit msec, ?in: String | Integer | nil) -> Time
 
   type subsec_unit = :msec | :millisecond | :usec | :microsecond | :nsec | :nanosecond

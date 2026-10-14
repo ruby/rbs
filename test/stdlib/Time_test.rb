@@ -313,6 +313,18 @@ class TimeSingletonTest < Test::Unit::TestCase
       "(Integer, Integer, :millisecond, in: String) -> Time",
       Time, :at, Time.now.to_i, 100, :millisecond, in: "+04:00"
     )
+    assert_send_type(
+      "(Integer, Integer) -> Time",
+      Time, :at, 0, 500
+    )
+    assert_send_type(
+      "(Integer, Float, in: String) -> Time",
+      Time, :at, 0, 1.5, in: "+04:00"
+    )
+    assert_send_type(
+      "(Rational, Rational) -> Time",
+      Time, :at, 0r, 500r
+    )
   end
 
   def test_new
