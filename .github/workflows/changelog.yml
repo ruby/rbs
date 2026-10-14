@@ -97,7 +97,7 @@ jobs:
       # Uploaded before it is rendered, so that the changelog survives whatever the
       # summary makes of it. This is also what to reach for when the JSON is long
       # enough to be truncated in the log.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: changelog
           path: changelog.out
