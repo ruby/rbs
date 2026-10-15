@@ -59,9 +59,9 @@ class PP < PrettyPrint
   VERSION: String
 
   interface _PrettyPrint
-    def pretty_print: (untyped q) -> untyped
+    def pretty_print: (untyped q) -> void
 
-    def pretty_print_cycle: (untyped q) -> untyped
+    def pretty_print_cycle: (untyped q) -> void
 
     def is_a?: (Module) -> bool
   end
@@ -127,7 +127,7 @@ class PP < PrettyPrint
     # Object#pretty_print_cycle is used when `obj` is already printed, a.k.a the
     # object reference chain has a cycle.
     #
-    def pp: (_PrettyPrint obj) -> untyped
+    def pp: (_PrettyPrint obj) -> void
 
     # <!--
     #   rdoc-file=lib/pp.rb
@@ -203,7 +203,7 @@ class PP < PrettyPrint
     # -->
     # A present standard failsafe for pretty printing any given Object
     #
-    def pp_object: (untyped obj) -> untyped
+    def pp_object: (untyped obj) -> void
 
     # <!--
     #   rdoc-file=lib/pp.rb
@@ -211,7 +211,7 @@ class PP < PrettyPrint
     # -->
     # A pretty print for a Hash
     #
-    def pp_hash: (untyped obj) -> untyped
+    def pp_hash: (untyped obj) -> void
   end
   include PPMethods
 
@@ -220,13 +220,13 @@ class PP < PrettyPrint
   end
 
   module ObjectMixin : BasicObject
-    def pretty_print: (PP q) -> untyped
+    def pretty_print: (PP q) -> void
 
-    def pretty_print_cycle: (PP q) -> untyped
+    def pretty_print_cycle: (PP q) -> void
 
     def pretty_print_instance_variables: () -> Array[Symbol]
 
-    def pretty_print_inspect: () -> untyped
+    def pretty_print_inspect: () -> String
   end
 
   # <!--
@@ -256,7 +256,8 @@ class PP < PrettyPrint
   #
   # PP.pp returns `out`.
   #
-  def self.pp: (_PrettyPrint obj, ?_LeftShift out, ?Integer width) -> untyped
+  def self.pp: (_PrettyPrint obj) -> IO
+             | [T < _LeftShift] (_PrettyPrint obj, T out, ?Integer width) -> T
 
   # <!--
   #   rdoc-file=lib/pp.rb
@@ -266,7 +267,8 @@ class PP < PrettyPrint
   #
   # PP.singleline_pp returns `out`.
   #
-  def self.singleline_pp: (_PrettyPrint obj, ?_LeftShift out) -> untyped
+  def self.singleline_pp: (_PrettyPrint obj) -> IO
+                        | [T < _LeftShift] (_PrettyPrint obj, T out) -> T
   def self.mcall: (untyped obj, Module mod, interned meth, *untyped args) ?{ (*untyped, **untyped) -> untyped } -> untyped
 
   # <!--
