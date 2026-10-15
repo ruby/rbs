@@ -17,14 +17,47 @@
 # <code>:backtrace</code>
 # :   See #backtrace
 #
-# <code>:sources</code>
-# :   Sets Gem::sources
+# <code>:bulk_threshold</code>
+# :   See #bulk_threshold
 #
 # <code>:verbose</code>
 # :   See #verbose
 #
+# <code>:update_sources</code>
+# :   See #update_sources
+#
 # <code>:concurrent_downloads</code>
 # :   See #concurrent_downloads
+#
+# <code>:cert_expiration_length_days</code>
+# :   See #cert_expiration_length_days
+#
+# <code>:install_extension_in_lib</code>
+# :   See #install_extension_in_lib
+#
+# <code>:ipv4_fallback_enabled</code>
+# :   See #ipv4_fallback_enabled
+#
+# <code>:gemhome</code>
+# :   See #home
+#
+# <code>:gempath</code>
+# :   See #path
+#
+# <code>:sources</code>
+# :   Sets Gem::sources
+#
+# <code>:disable_default_gem_server</code>
+# :   See #disable_default_gem_server
+#
+# <code>:ssl_verify_mode</code>
+# :   See #ssl_verify_mode
+#
+# <code>:ssl_ca_cert</code>
+# :   See #ssl_ca_cert
+#
+# <code>:ssl_client_cert</code>
+# :   See #ssl_client_cert
 #
 #
 # gemrc files may exist in various locations and are read and merged in the
