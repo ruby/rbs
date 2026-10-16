@@ -513,11 +513,11 @@ EOU
 
       if constant
         stdout.puts " => #{constant.name}: #{constant.type}"
+        0
       else
         stdout.puts " => [no constant]"
+        1
       end
-
-      0
     end
 
     def run_paths(args, options)
