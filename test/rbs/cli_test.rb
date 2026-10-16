@@ -919,7 +919,7 @@ singleton(::BasicObject)
 
     Dir.mktmpdir do |dir|
       with_cli do |cli|
-        def cli.has_parser?
+        def cli.has_parser?(format)
           false
         end
 
