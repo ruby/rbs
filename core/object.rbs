@@ -105,4 +105,6 @@
 #
 class Object < BasicObject
   include Kernel
+
+  def self.superclass() -> Class
 end
