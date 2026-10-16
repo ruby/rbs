@@ -632,3 +632,18 @@ class Calculator
   end
 end
 ```
+
+## Loading Ruby Files with the `rbs` Command
+
+The `--inline` option of the `rbs` command loads inline RBS declarations from Ruby files, like `-I` loads RBS files from a directory.
+When a directory is given, all `.rb` files under the directory are loaded.
+When a file is given, the file is loaded regardless of its extension.
+
+```console
+$ rbs -I sig --inline lib validate
+```
+
+The option is available for the commands that load the RBS environment, like `validate`, `methods`, `ancestors`, and `paths`.
+
+`rbs validate` validates the inline declarations as well as the RBS files.
+The Ruby code that cannot be imported as inline declarations, like a class definition with non-constant super class, is reported as warnings, and doesn't make the command fail.

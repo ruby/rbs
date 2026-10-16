@@ -47,6 +47,9 @@ module RBS
     attr_reader libs: Set[Library]
     attr_reader dirs: Array[Pathname]
 
+    # Paths to load inline RBS declarations from Ruby files.
+    attr_reader inline_dirs: Array[Pathname]
+
     # The source where the RBS comes from.
     #
     # `:core` means it is part of core library.
@@ -74,12 +77,17 @@ module RBS
     # All `.rbs` files from the given directory will be loaded.
     # Specifying a file will load the file regardless the extension of the file is.
     #
+    # `inline` can be a file or a directory.
+    # All `.rb` files from the given directory will be parsed and the inline RBS declarations in them will be loaded.
+    # Specifying a file will load the file regardless the extension of the file is.
+    #
     # `library` can be a name of a gem.
     # Specifying `nil` to `version` will load any version available.
     # It first tries to load RBS files from gem with specified version.
     # If RBS files cannot be found in the gem, it tries to load RBSs from repository.
     #
     def add: (path: Pathname) -> void
+           | (inline: Pathname) -> void
            | (library: String, version: String?, ?resolve_dependencies: boolish) -> void
 
     def resolve_dependencies: (library: String, version: String?) -> void
@@ -96,6 +104,7 @@ module RBS
     # Raises `UnknownLibraryError` if RBS cannot be loaded from a library.
     #
     # Returns an array of tuples of the declaration, path to the file, and the source.
+    # Declarations loaded from Ruby files (inline RBS declarations) are not included in the array.
     #
     def load: (env: Environment) -> Array[[AST::Declarations::t, Pathname, source]]
 
@@ -107,5 +116,8 @@ module RBS
     def each_signature: () { (source, Pathname, Buffer, Array[AST::Declarations::t], Array[AST::Directives::t]) -> void } -> void
 
     def each_dir: { (source, Pathname) -> void } -> void
+
+    # Yields `Source::Ruby` for each Ruby file under `inline_dirs`
+    def each_inline_source: () { (Source::Ruby) -> void } -> void
   end
 end
