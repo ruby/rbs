@@ -61,6 +61,15 @@ module RBS
       class ClassModuleAliasDeclarationMissingTypeName < Base
       end
 
+      class NestedSingletonScope < Base
+      end
+
+      class TopLevelSingletonScope < Base
+      end
+
+      class NonSelfSingletonScope < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
              | TopLevelMethodDefinition | TopLevelAttributeDefinition
@@ -69,12 +78,17 @@ module RBS
              | AttributeNonSymbolName
              | NonConstantConstantDeclaration
              | ClassModuleAliasDeclarationMissingTypeName
+             | NestedSingletonScope
+             | TopLevelSingletonScope
+             | NonSelfSingletonScope
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
 
     class Parser < Prism::Visitor
       type module_context = Declarations::ClassDecl | Declarations::ModuleDecl
+
+      @singleton_class_depth: Integer
 
       include AST::Ruby::Helpers::ConstantHelper
 
@@ -111,6 +125,10 @@ module RBS
       def report_unused_block: (AST::Ruby::CommentBlock) -> void
 
       def visit_class_or_module_body: (module_context, Prism::ClassNode | Prism::ModuleNode) -> void
+
+      def visit_singleton_class_node: (Prism::SingletonClassNode) -> void
+
+      def in_singleton_class?: () -> bool
 
       private
 
