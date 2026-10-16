@@ -55,6 +55,10 @@ module RBS
         #
         def assign_stdlib: (name: String, ?from_gem: String) -> void
 
+        # Returns `true` if a default gem with the name is installed.
+        #
+        def default_gem?: (String name) -> bool
+
         # Find a source of a gem from ones registered in `config.sources`
         #
         # Returns `nil` if no source contains the definition of the gem.
