@@ -232,14 +232,12 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
 
         // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
         VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
-        VALUE arg_string = rbs_string_to_ruby_string(&node->string, ctx.encoding);
 
         // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
         // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
         VALUE h = ctx.reusable_kwargs_hash;
         rb_hash_clear(h);
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
-        rb_hash_aset(h, ID2SYM(rb_intern("string")), arg_string);
         return CLASS_NEW_INSTANCE(RBS_AST_Comment, 1, &h);
     }
     case RBS_AST_DECLARATIONS_CLASS: {

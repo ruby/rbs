@@ -108,6 +108,17 @@ The `rbs_ast_declarations_class` struct is a pure C AST, and `ast_translation.c`
     }
 ```
 
+A field can be excluded from the Ruby translation with `expose_to_ruby: false`. The field is still part of the C struct (and the Rust/serialization side), but `ast_translation.c` does not pass it to the Ruby constructor, so the Ruby class has to compute it by itself. `RBS::AST::Comment#string` uses this to reconstruct the comment text lazily from its `location` instead of holding a copy of it.
+
+```yaml
+  - name: RBS::AST::Comment
+    rust_name: CommentNode
+    fields:
+      - name: string
+        c_type: rbs_string
+        expose_to_ruby: false
+```
+
 ## enums
 
 `enums` defines *enum* data types in C or Rust.
