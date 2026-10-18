@@ -6,6 +6,10 @@ module RBS
         #
         ALUMNI_STDLIBS: Hash[String, String?]
 
+        # Stdlibs in `ALUMNI_STDLIBS` whose gem name differs from the library name.
+        #
+        ALUMNI_GEM_NAMES: Hash[String, String]
+
         NONGEM_STDLIBS: Set[String]
 
         class GemfileLockMismatchError < StandardError

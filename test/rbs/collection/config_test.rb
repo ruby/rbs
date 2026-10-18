@@ -401,6 +401,61 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  EMPTY_GEMFILE_LOCK = <<~GEMFILE_LOCK
+    GEM
+      remote: https://rubygems.org/
+      specs:
+
+    PLATFORMS
+      x86_64-linux
+
+    DEPENDENCIES
+
+    BUNDLED WITH
+       2.2.0
+  GEMFILE_LOCK
+
+  def test_generate_lock_from_alumni_stdlib__observable
+    # The stdlib is named `observable` while the gem is named `observer`.
+    # The deprecation warning must be keyed by the stdlib name, or it never fires.
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write <<~YAML
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+
+        path: /path/to/somewhere
+
+        gems:
+          - name: observable
+      YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write 'source "https://rubygems.org"'
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write EMPTY_GEMFILE_LOCK
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+      lockfile, log = with_logger_output(level: Logger::WARN) do
+        _config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+        lockfile
+      end
+
+      assert_config <<~YAML, YAML.dump(lockfile.to_lockfile)
+        path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
+        gems:
+          - name: observable
+            version: "0"
+            source:
+              type: stdlib
+      YAML
+      assert_include log, '`observable` as a stdlib in rbs-gem is deprecated.'
+    end
+  end
+
   def test_generate_lock_with_empty_gemfile_lock
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'
@@ -869,5 +924,19 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     Dir.mktmpdir do |path|
       yield Pathname(path)
     end
+  end
+
+  # Runs the block with `RBS.logger` writing to a string, and returns `[block_result, logged_string]`.
+  private def with_logger_output(level:)
+    orig_output = RBS.logger_output
+    orig_level = RBS.logger_level
+    io = StringIO.new
+    RBS.logger_output = io
+    RBS.logger_level = level
+    result = yield
+    [result, io.string]
+  ensure
+    RBS.logger_output = orig_output
+    RBS.logger_level = orig_level
   end
 end

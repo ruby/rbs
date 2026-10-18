@@ -4,6 +4,11 @@ module RBS
   module Collection
     class Config
       class LockfileGenerator
+        # Stdlibs that used to be bundled in rbs-gem but are now maintained in their own gems.
+        #
+        # The key is the library name under `stdlib/` (not necessarily the gem name, see `ALUMNI_GEM_NAMES`).
+        # The value is the version requirement of the gem that ships the type definitions in its `sig/` directory,
+        # or `nil` if no released version of the gem ships them yet.
         ALUMNI_STDLIBS = {
           "mutex_m" => ">= 0.3.0",
           "abbrev" => nil,
@@ -16,9 +21,14 @@ module RBS
           "minitest" => nil,
           "net-smtp" => nil,
           "nkf" => nil,
-          "observer" => nil,
+          "observable" => nil,
           "cgi" => nil,
           "pstore" => nil,
+        }
+
+        # Stdlibs in `ALUMNI_STDLIBS` whose gem name differs from the library name.
+        ALUMNI_GEM_NAMES = {
+          "observable" => "observer",
         }
 
         NONGEM_STDLIBS = Set[
@@ -210,12 +220,13 @@ module RBS
             return
           when *ALUMNI_STDLIBS.keys
             version = ALUMNI_STDLIBS.fetch(name)
+            gem_name = ALUMNI_GEM_NAMES.fetch(name, name)
             if from_gem
               # From `dependencies:` of a `manifest.yaml` of a gem
               source = find_source(name: name) or raise
               if source.is_a?(Sources::Stdlib) && version
                 RBS.logger.warn {
-                  "`#{name}` is included in the RBS dependencies of `#{from_gem}`, but the type definition as a stdlib in rbs-gem is deprecated. Add `#{name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
+                  "`#{name}` is included in the RBS dependencies of `#{from_gem}`, but the type definition as a stdlib in rbs-gem is deprecated. Add `#{gem_name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
                 }
               else
                 RBS.logger.info {
@@ -228,7 +239,7 @@ module RBS
               # From `gems:` of a `rbs_collection.yaml`
               RBS.logger.warn {
                 if version
-                  "`#{name}` as a stdlib in rbs-gem is deprecated. Add `#{name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
+                  "`#{name}` as a stdlib in rbs-gem is deprecated. Add `#{gem_name}` (#{version}) to the dependency of your Ruby program to use the gem-bundled type definition."
                 else
                   "`#{name}` as a stdlib in rbs-gem is deprecated. Delete `#{name}` from the RBS dependencies in your rbs_collection.yaml."
                 end
