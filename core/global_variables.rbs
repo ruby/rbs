@@ -118,6 +118,7 @@ $;: Regexp | String | nil
 $<: RBS::Unnamed::ARGFClass
 
 # This variable is no longer effective. Deprecated.
+%a{deprecated: $= is no longer effective}
 $=: false
 
 # The default output stream for Kernel#print and Kernel#printf. $stdout by default.

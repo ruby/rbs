@@ -386,6 +386,7 @@ module URI
   #     URI.extract("text here http://foo.example.org/bla and here mailto:test@example.com and here also.")
   #     # => ["http://foo.example.com/bla", "mailto:test@example.com"]
   #
+  %a{deprecated: Use URI::RFC2396_PARSER.extract instead}
   def self.extract: (String str, ?Array[String] schemes) -> Array[String]
                   | (String str, ?Array[String] schemes) { (String) -> void } -> nil
 
@@ -480,6 +481,7 @@ module URI
   #       p $&
   #     end
   #
+  %a{deprecated: Use URI::RFC2396_PARSER.make_regexp instead}
   def self.regexp: (?Array[String]? schemes) -> Regexp
 
   # <!--

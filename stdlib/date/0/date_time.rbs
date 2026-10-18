@@ -130,6 +130,7 @@
 # [Standard Time](https://en.wikipedia.org/wiki/Standard_time#Great_Britain) and
 # eventually timezones.
 #
+%a{deprecated: Use Time instead}
 class DateTime < Date
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Same as DateTime.new.

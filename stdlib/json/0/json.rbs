@@ -1190,6 +1190,7 @@ JSON::MinusInfinity: Float
 
 JSON::NaN: Float
 
+%a{deprecated: Use JSON.pretty_generate instead}
 JSON::PRETTY_STATE_PROTOTYPE: JSON::state
 
 JSON::SAFE_STATE_PROTOTYPE: JSON::state
