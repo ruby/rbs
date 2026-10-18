@@ -4,6 +4,8 @@ module RBS
       class LockfileGenerator
         # Name of stdlibs that was rbs-bundled stdlib but is now a gem.
         #
+        # The value is the version requirement of the gem that ships the type definitions, or `nil` if not shipped yet.
+        #
         ALUMNI_STDLIBS: Hash[String, String?]
 
         NONGEM_STDLIBS: Set[String]
