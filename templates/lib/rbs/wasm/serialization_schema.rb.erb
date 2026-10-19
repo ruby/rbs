@@ -41,7 +41,9 @@
     when "RBS::TypeName" then "[:type_name]"
     else
       children = (node.locations || []).map { |loc| "[:#{loc.name}, #{loc.required?}]" }
-      fields = node.fields.map { |field| "[:#{field.name}, #{reader_for.call(field)}]" }
+      # A field with `expose_to_ruby: false` is still in the buffer, so the deserializer
+      # must read it, but it is not passed to the Ruby constructor: its name is `nil`.
+      fields = node.fields.map { |field| "[#{field.expose_to_ruby? ? ":#{field.name}" : "nil"}, #{reader_for.call(field)}]" }
       # Emit `nil` rather than `[]` for empty lists, so the generated file has no
       # unannotated empty collections for Steep to flag.
       children_literal = children.empty? ? "nil" : "[#{children.join(", ")}]"
@@ -67,7 +69,8 @@ module RBS
     # where loc_children is [[name, required?], ...] and fields is
     # [[name, reader], ...] with reader one of :node, :node_list, :hash, :string,
     # :bool, :location_range, :location_range_list, :attr_ivar_name, or
-    # [:enum, [value_or_nil, ...]].
+    # [:enum, [value_or_nil, ...]]. A `nil` name means the field is read but not
+    # passed to the constructor (`expose_to_ruby: false` in config.yml).
     module SerializationSchema
       SYMBOL_TAG = <%= nodes.size + 1 %>
 
