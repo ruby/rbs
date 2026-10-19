@@ -1668,29 +1668,15 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
 }
 
 /*
-  Constant and global declarations accept the comment either above the annotations
-  (like other declarations) or between the annotations and the name.
-*/
-static rbs_ast_comment_t *parse_const_global_comment(rbs_parser_t *parser, rbs_position_t comment_pos, rbs_position_t decl_start) {
-    comment_pos = rbs_nonnull_pos_or(comment_pos, decl_start);
-
-    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
-    if (comment == NULL && comment_pos.line != decl_start.line) {
-        comment = rbs_parser_get_comment(parser, decl_start.line);
-    }
-
-    return comment;
-}
-
-/*
   global_decl ::= {tGIDENT} `:` <type>
 */
 RBS_NODISCARD
 static bool parse_global_decl(rbs_parser_t *parser, rbs_position_t comment_pos, rbs_node_list_t *annotations, rbs_ast_declarations_global_t **global) {
     rbs_range_t decl_range;
     decl_range.start = parser->current_token.range.start;
+    comment_pos = rbs_nonnull_pos_or(comment_pos, decl_range.start);
 
-    rbs_ast_comment_t *comment = parse_const_global_comment(parser, comment_pos, decl_range.start);
+    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t name_range = parser->current_token.range;
 
@@ -1715,7 +1701,8 @@ static bool parse_const_decl(rbs_parser_t *parser, rbs_position_t comment_pos, r
     rbs_range_t decl_range;
 
     decl_range.start = parser->current_token.range.start;
-    rbs_ast_comment_t *comment = parse_const_global_comment(parser, comment_pos, decl_range.start);
+    comment_pos = rbs_nonnull_pos_or(comment_pos, decl_range.start);
+    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t name_range;
     rbs_type_name_t *type_name = NULL;

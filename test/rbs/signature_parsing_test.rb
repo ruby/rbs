@@ -2363,7 +2363,8 @@ end
       end
       decls[1].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Constant, decl
-        assert_equal "Comment below annotation\n", decl.comment&.string
+        # Same as class, module, and other declarations
+        assert_nil decl.comment
         assert_equal ["deprecated"], decl.annotations.map(&:string)
       end
       decls[2].tap do |decl|
@@ -2400,7 +2401,8 @@ end
       end
       members[1].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Constant, decl
-        assert_equal "Comment below annotation\n", decl.comment&.string
+        # Same as class, module, and other declarations
+        assert_nil decl.comment
         assert_equal ["deprecated"], decl.annotations.map(&:string)
       end
       members[2].tap do |decl|
@@ -2434,7 +2436,8 @@ end
       end
       decls[1].tap do |decl|
         assert_instance_of RBS::AST::Declarations::Global, decl
-        assert_equal "Comment below annotation\n", decl.comment&.string
+        # Same as class, module, and other declarations
+        assert_nil decl.comment
         assert_equal ["deprecated"], decl.annotations.map(&:string)
       end
       decls[2].tap do |decl|
