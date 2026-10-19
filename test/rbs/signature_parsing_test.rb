@@ -1172,6 +1172,37 @@ EOF
     end
   end
 
+  def test_comment_with_crlf
+    # The CR of a CRLF line ending is not part of the comment, but a bare CR inside a line is.
+    Parser.parse_signature("# foo\r\n  # bar\r\n#baz\r\nclass Foo\r\nend\r\n").yield_self do |_, _, (foo_decl)|
+      assert_equal "foo\nbar\nbaz\n", foo_decl.comment.string
+    end
+
+    Parser.parse_signature("# a\rb\nclass Foo end").yield_self do |_, _, (foo_decl)|
+      assert_equal "a\rb\n", foo_decl.comment.string
+    end
+  end
+
+  def test_comment_string_is_reconstructed_from_location
+    Parser.parse_signature(<<-EOF).yield_self do |_, _, (foo_decl)|
+# Doc for Foo.
+class Foo
+  #
+  #  indented, blank, and tab lines
+  #\tkeep the tab
+  def bar: () -> void
+end
+EOF
+
+      comment = foo_decl.comment
+      assert_nil comment.instance_variable_get(:@string)
+      assert_equal "Doc for Foo.\n", comment.string
+      assert_same comment.string, comment.string
+
+      assert_equal "\n indented, blank, and tab lines\n\tkeep the tab\n", foo_decl.members[0].comment.string
+    end
+  end
+
   def test_parsing_quoted_method_name
     Parser.parse_signature(<<-EOF).yield_self do |foo_decl,|
 module Kernel
