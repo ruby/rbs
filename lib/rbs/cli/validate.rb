@@ -58,12 +58,12 @@ Usage: rbs validate
 Validate RBS files. It ensures the type names in RBS files are present and the type applications have correct arity.
 
 Inline RBS declarations in Ruby files given by `--inline` are validated too.
-Ruby code that cannot be imported as inline declarations is reported as warnings.
+Ruby syntax errors and Ruby code that cannot be imported as inline declarations are reported as warnings.
 
 Examples:
 
   $ rbs validate
-  $ rbs -I sig --inline lib validate
+  $ rbs --inline lib validate
 EOU
 
           opts.on("--silent", "This option has been deprecated and does nothing.") do
@@ -97,6 +97,11 @@ EOU
 
       def report_inline_diagnostics
         @env.each_ruby_source do |source|
+          source.prism_result.errors.each do |error|
+            location = error.location
+            RBS.logger.warn "#{source.buffer.name}:#{location.start_line}:#{location.start_column}: Ruby syntax error: #{error.message}"
+          end
+
           source.diagnostics.each do |diagnostic|
             RBS.logger.warn "#{diagnostic.location}: #{diagnostic.message} (#{diagnostic.class.name})"
           end
@@ -121,14 +126,7 @@ EOU
           when Environment::ClassEntry
             entry.each_decl do |decl|
               if super_class = decl.super_class
-                args =
-                  case super_class
-                  when AST::Declarations::Class::Super
-                    super_class.args
-                  when AST::Ruby::Declarations::ClassDecl::SuperClass
-                    super_class.type_args
-                  end
-                args.each do |arg|
+                super_class.args.each do |arg|
                   @validator.validate_type(arg, context: nil)
                 end
               end

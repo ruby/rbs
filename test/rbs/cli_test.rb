@@ -834,6 +834,26 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate_inline_super_class_and_alias
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rb').write(<<~RUBY)
+          class StringArray < Array #[Array[String, Integer]]
+          end
+
+          Missing = Nope #: class-alias Nope
+        RUBY
+
+        refute_cli_success do
+          cli.run(["--inline", dir, "validate"])
+        end
+
+        assert_include stdout.string, "a.rb:1:28...1:50: ::Array expects parameters [unchecked out E], but given args [::String, ::Integer] (RBS::InvalidTypeApplicationError)"
+        assert_include stdout.string, "a.rb:4:0...4:14: Could not find Nope (RBS::NoTypeFoundError)"
+      end
+    end
+  end
+
   def test_validate_inline_diagnostics
     with_cli do |cli|
       Dir.mktmpdir do |dir|
@@ -842,6 +862,8 @@ singleton(::BasicObject)
           end
 
           def toplevel = nil
+
+          def broken = (1
         RUBY
 
         assert_cli_success do
@@ -850,6 +872,7 @@ singleton(::BasicObject)
 
         assert_include stdout.string, "a.rb:1:12...1:26: Super class name must be a constant (RBS::InlineParser::Diagnostic::NonConstantSuperClassName)"
         assert_include stdout.string, "a.rb:4:4...4:12: Top-level method definition is not supported (RBS::InlineParser::Diagnostic::TopLevelMethodDefinition)"
+        assert_include stdout.string, "a.rb:7:0: Ruby syntax error: expected a matching `)`"
       end
     end
   end
