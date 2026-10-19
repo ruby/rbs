@@ -35,7 +35,6 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    abbrev (0.1.2)
     activesupport (7.2.3)
       base64
       benchmark (>= 0.3)
@@ -101,7 +100,6 @@ GEM
       timeout
     net-smtp (0.5.2)
       net-protocol
-    nkf (0.3.0)
     ostruct (0.6.3)
     parallel (2.3.0)
     parser (3.3.12.0)
@@ -194,9 +192,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  abbrev
   activesupport (~> 7.0)
-  base64
   benchmark-ips
   bigdecimal
   csv
@@ -213,7 +209,6 @@ DEPENDENCIES
   minitest-mock
   mutex_m
   net-smtp
-  nkf
   ostruct
   pstore
   raap
