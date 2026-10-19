@@ -1152,14 +1152,6 @@ class Pathname
   #
   def sysopen: (?String mode, ?Integer perm) -> Integer
 
-  # <!--
-  #   rdoc-file=ext/pathname/pathname.c
-  #   - pathname.taint -> obj
-  # -->
-  # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
-  #
-  def taint: () -> Pathname
-
   # <!-- rdoc-file=pathname_builtin.rb -->
   # to_path is implemented so Pathname objects are usable with File.open, etc.
   #
@@ -1189,14 +1181,6 @@ class Pathname
   # <code>Dir.unlink</code> as necessary.
   #
   def unlink: () -> Integer
-
-  # <!--
-  #   rdoc-file=ext/pathname/pathname.c
-  #   - pathname.untaint -> obj
-  # -->
-  # Returns pathname.  This method is deprecated and will be removed in Ruby 3.2.
-  #
-  def untaint: () -> Pathname
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
