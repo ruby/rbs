@@ -1,0 +1,47 @@
+# <!-- rdoc-file=lib/weakref.rb -->
+# Weak Reference class that allows a referenced object to be garbage-collected.
+#
+# A WeakRef may be used exactly like the object it references.
+#
+# Usage:
+#
+#     foo = Object.new            # create a new object instance
+#     p foo.to_s                  # original's class
+#     foo = WeakRef.new(foo)      # reassign foo with WeakRef instance
+#     p foo.to_s                  # should be same class
+#     GC.start                    # start the garbage collector
+#     p foo.to_s                  # should raise exception (recycled)
+#
+class WeakRef < Delegator
+  # <!-- rdoc-file=lib/weakref.rb -->
+  # The version string
+  #
+  VERSION: String
+
+  # <!-- rdoc-file=lib/weakref.rb -->
+  # RefError is raised when a referenced object has been recycled by the garbage
+  # collector
+  #
+  class RefError < StandardError
+  end
+
+  # <!--
+  #   rdoc-file=lib/weakref.rb
+  #   - new(orig)
+  # -->
+  # Creates a weak reference to `orig`
+  #
+  def initialize: (untyped orig) -> void
+
+  def __getobj__: () -> untyped
+
+  def __setobj__: (untyped obj) -> void
+
+  # <!--
+  #   rdoc-file=lib/weakref.rb
+  #   - weakref_alive?()
+  # -->
+  # Returns true if the referenced object is still alive.
+  #
+  def weakref_alive?: () -> boolish
+end
