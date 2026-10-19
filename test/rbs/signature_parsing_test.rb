@@ -2340,6 +2340,111 @@ end
     end
   end
 
+  def test_constant__comment_and_annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        # Comment above annotation
+        %a{deprecated}
+        Foo::BAR: String
+
+        %a{deprecated}
+        # Comment below annotation
+        Foo::BAZ: String
+
+        # Comment without annotation
+        Foo::QUX: String
+      RBS
+
+      assert_equal 3, decls.size
+
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment above annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      decls[1].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment below annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      decls[2].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment without annotation\n", decl.comment&.string
+        assert_empty decl.annotations
+      end
+    end
+  end
+
+  def test_nested_constant__comment_and_annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        module M
+          # Comment above annotation
+          %a{deprecated}
+          BAR: String
+
+          %a{deprecated}
+          # Comment below annotation
+          BAZ: String
+
+          # Comment without annotation
+          QUX: String
+        end
+      RBS
+
+      members = decls[0].members
+      assert_equal 3, members.size
+
+      members[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment above annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      members[1].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment below annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      members[2].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Constant, decl
+        assert_equal "Comment without annotation\n", decl.comment&.string
+        assert_empty decl.annotations
+      end
+    end
+  end
+
+  def test_global__comment_and_annotation
+    Parser.parse_signature(<<~RBS).tap do |_, _, decls|
+        # Comment above annotation
+        %a{deprecated}
+        $bar: String
+
+        %a{deprecated}
+        # Comment below annotation
+        $baz: String
+
+        # Comment without annotation
+        $qux: String
+      RBS
+
+      assert_equal 3, decls.size
+
+      decls[0].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Global, decl
+        assert_equal "Comment above annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      decls[1].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Global, decl
+        assert_equal "Comment below annotation\n", decl.comment&.string
+        assert_equal ["deprecated"], decl.annotations.map(&:string)
+      end
+      decls[2].tap do |decl|
+        assert_instance_of RBS::AST::Declarations::Global, decl
+        assert_equal "Comment without annotation\n", decl.comment&.string
+        assert_empty decl.annotations
+      end
+    end
+  end
+
   def test__method_type__untyped_function_and_block
     assert_raises(RBS::ParsingError) do
       Parser.parse_signature(<<~RBS).tap do |_, _, decls|
