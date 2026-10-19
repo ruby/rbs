@@ -191,6 +191,7 @@ class Socket < BasicSocket
   #     #=> ["localhost", ["ip6-localhost", "ip6-loopback"], 10,
   #          "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"]
   #
+  %a{deprecated: Use Addrinfo#getnameinfo instead}
   def self.gethostbyaddr: (String ip) -> [ String, Array[String], Integer, String ]
 
   # <!--
@@ -212,6 +213,7 @@ class Socket < BasicSocket
   #
   #     p Socket.gethostbyname("hal") #=> ["localhost", ["hal"], 2, "\x7F\x00\x00\x01"]
   #
+  %a{deprecated: Use Addrinfo.getaddrinfo instead}
   def self.gethostbyname: (String name) -> [ String, Array[String], Integer, String ]
 
   # <!--

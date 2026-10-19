@@ -32,6 +32,7 @@ class TCPSocket < IPSocket
   #     TCPSocket.gethostbyname("localhost")
   #     #=> ["localhost", ["hal"], 2, "127.0.0.1"]
   #
+  %a{deprecated: Use Addrinfo.getaddrinfo instead}
   def self.gethostbyname: (String host) -> [ String, Array[String], Integer, String ]
 
   private

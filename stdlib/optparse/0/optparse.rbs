@@ -455,6 +455,7 @@ class OptionParser
   # This method is **deprecated**, its behavior corresponds to the older #new
   # method.
   #
+  %a{deprecated: Use OptionParser.new instead}
   def self.with: (?String banner, ?Integer width, ?String indent) ?{ (instance opts) -> void } -> instance
 
   # <!--

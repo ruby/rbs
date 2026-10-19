@@ -19,18 +19,22 @@ class URI::RFC3986_Parser
 
   def initialize: () -> void
 
+  %a{deprecated: Use URI::RFC2396_PARSER.escape instead}
   def escape: (String str, ?Regexp unsafe) -> String
 
+  %a{deprecated: Use URI::RFC2396_PARSER.extract instead}
   def extract: (String str, ?Array[String] schemes) -> Array[String]
              | (String str, ?Array[String] schemes) { (String) -> untyped } -> nil
 
   def join: (*String uris) -> URI::Generic
 
+  %a{deprecated: Use URI::RFC2396_PARSER.make_regexp instead}
   def make_regexp: (?Array[String] schemes) -> Regexp
 
   def parse: (String uri) -> URI::Generic
 
   def split: (String uri) -> [ String?, String?, String?, String?, String?, String?, String?, String?, String? ]
 
+  %a{deprecated: Use URI::RFC2396_PARSER.unescape instead}
   def unescape: (String str, ?Regexp escaped) -> String
 end

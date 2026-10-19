@@ -548,6 +548,7 @@ module OpenSSL
   # This is obsolete and will be removed in the future. See also
   # OpenSSL.fips_mode.
   #
+  %a{deprecated: Use OpenSSL.fips_mode instead}
   OPENSSL_FIPS: bool
 
   # <!-- rdoc-file=ext/openssl/ossl.c -->
@@ -1813,7 +1814,8 @@ module OpenSSL
     # <strong>`checks` parameter is deprecated in version 3.0.</strong> It has no
     # effect.
     #
-    def prime?: (?int checks) -> bool
+    def prime?: () -> bool
+              | %a{deprecated: The checks parameter has no effect} (int checks) -> bool
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1827,6 +1829,7 @@ module OpenSSL
     #
     # `checks` and `trial_div` parameters no longer have any effect.
     #
+    %a{deprecated: Use OpenSSL::BN#prime? instead}
     def prime_fasttest?: (?int checks, ?int trial_div) -> bool
 
     # <!--
@@ -2771,6 +2774,7 @@ module OpenSSL
     # *   *iterations* is an integer with a default of 2048.
     # *   *digest* is a Digest object that defaults to 'MD5'
     #
+    %a{deprecated: Use OpenSSL::KDF instead}
     def pkcs5_keyivgen: (String pass, ?String salt, ?Integer iterations, ?String digest) -> void
 
     # <!--
@@ -2884,6 +2888,7 @@ module OpenSSL
     #
     # This class is only provided for backwards compatibility. Use OpenSSL::Cipher.
     #
+    %a{deprecated: Use OpenSSL::Cipher instead}
     class Cipher < OpenSSL::Cipher
     end
 
@@ -3354,6 +3359,7 @@ module OpenSSL
     #
     def initialize_copy: (self) -> void
 
+    %a{deprecated: Use OpenSSL::Digest instead}
     class Digest < OpenSSL::Digest
     end
 
@@ -5707,6 +5713,7 @@ module OpenSSL
       #     dh = OpenSSL::PKey.generate_key(dh0)
       #     puts dh0.pub_key == dh.pub_key #=> false
       #
+      %a{deprecated: Use OpenSSL::PKey.generate_key instead}
       def generate_key!: () -> self
 
       def p: () -> BN
@@ -6108,6 +6115,7 @@ module OpenSSL
       #     sig = dsa.sign_raw(nil, digest)
       #     p dsa.verify_raw(nil, sig, digest) #=> true
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#sign_raw instead}
       def syssign: (String digest) -> String
 
       # <!--
@@ -6126,6 +6134,7 @@ module OpenSSL
       # `sig`
       # :   A DSA signature value.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#verify_raw instead}
       def sysverify: (String digest, String data) -> bool
 
       # <!--
@@ -6393,6 +6402,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
       # and PKey::PKey#verify_raw instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#sign_raw instead}
       def dsa_sign_asn1: (String digest) -> String
 
       # <!--
@@ -6402,6 +6412,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
       # and PKey::PKey#verify_raw instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#verify_raw instead}
       def dsa_verify_asn1: (String digest, String signature) -> bool
 
       # <!--
@@ -6935,6 +6946,7 @@ module OpenSSL
         # -->
         # This method is deprecated and should not be used. This is a no-op.
         #
+        %a{deprecated}
         def make_affine!: () -> self
 
         # <!--
@@ -7348,6 +7360,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#encrypt
       # and PKey::PKey#decrypt instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#decrypt instead}
       def private_decrypt: (String data, ?Integer padding) -> String
 
       # <!--
@@ -7362,6 +7375,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
       # and PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#sign_raw instead}
       def private_encrypt: (String data, ?Integer padding) -> String
 
       # <!--
@@ -7385,6 +7399,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#sign_raw
       # and PKey::PKey#verify_raw, and PKey::PKey#verify_recover instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#verify_recover instead}
       def public_decrypt: (String data, ?Integer padding) -> String
 
       # <!--
@@ -7399,6 +7414,7 @@ module OpenSSL
       # <strong>Deprecated in version 3.0</strong>. Consider using PKey::PKey#encrypt
       # and PKey::PKey#decrypt instead.
       #
+      %a{deprecated: Use OpenSSL::PKey::PKey#encrypt instead}
       def public_encrypt: (String data, ?Integer padding) -> String
 
       # <!--
@@ -8109,6 +8125,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def cert: () -> X509::Certificate?
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8117,6 +8134,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def cert=: (X509::Certificate cert) -> X509::Certificate
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8211,6 +8229,7 @@ module OpenSSL
       #     p cli.tmp_key.group.curve_name
       #     # => "prime256v1" (is an alias for NIST P-256)
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#groups= instead}
       def ecdh_curves=: (String ecdh_curves) -> String
 
       # <!--
@@ -8227,6 +8246,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def extra_chain_cert: () -> Array[X509::Certificate]?
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8235,6 +8255,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def extra_chain_cert=: (Array[X509::Certificate] extra_certs) -> Array[X509::Certificate]
 
       # <!--
@@ -8258,6 +8279,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def key: () -> PKey::PKey?
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8266,6 +8288,7 @@ module OpenSSL
       # The *cert*, *key*, and *extra_chain_cert* attributes are deprecated. It is
       # recommended to use #add_certificate instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def key=: (PKey::PKey) -> PKey::PKey
 
       # <!--
@@ -8686,6 +8709,7 @@ module OpenSSL
       # Ruby/OpenSSL 2.1, this accessor method is implemented to call #min_version=
       # and #max_version= instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#min_version= and #max_version= instead}
       def ssl_version=: (tls_version meth) -> tls_version
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8710,6 +8734,7 @@ module OpenSSL
       #
       # <strong>Deprecated in version 3.0.</strong> Use #tmp_dh= instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#tmp_dh= instead}
       def tmp_dh_callback: () -> (^(Session, Integer, Integer) -> PKey::DH | nil)
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8724,6 +8749,7 @@ module OpenSSL
       #
       # <strong>Deprecated in version 3.0.</strong> Use #tmp_dh= instead.
       #
+      %a{deprecated: Use OpenSSL::SSL::SSLContext#tmp_dh= instead}
       def tmp_dh_callback=: (^(Session, Integer, Integer) -> PKey::DH) -> void
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
@@ -8820,7 +8846,8 @@ module OpenSSL
       # this form is deprecated. New applications should use #min_version= and
       # #max_version= as necessary.
       #
-      def initialize: (?tls_version version) -> void
+      def initialize: () -> void
+                    | %a{deprecated: Use OpenSSL::SSL::SSLContext#min_version= and #max_version= instead} (tls_version version) -> void
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
@@ -12087,6 +12114,7 @@ module OpenSSL
       #   - cleanup()
       # -->
       #
+      %a{deprecated}
       def cleanup: () -> void
 
       # <!--
