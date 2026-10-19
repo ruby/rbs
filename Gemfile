@@ -24,13 +24,10 @@ gem "extconf_compile_commands_json"
 gem "irb"
 
 group :libs do
-  # Libraries required for stdlib test
-  gem "abbrev"
-  gem "base64"
-  gem "bigdecimal"
-  gem "dbm"
-  gem "mutex_m"
-  gem "nkf"
+  # Bundled gems required by tests
+  gem "bigdecimal" # test/stdlib/json/JSONBigDecimal_test.rb
+  gem "dbm" # test/stdlib/DBM_test.rb
+  gem "mutex_m" # test/rbs/collection/config_test.rb expects the gem-bundled signatures to be found
 end
 
 group :profilers do

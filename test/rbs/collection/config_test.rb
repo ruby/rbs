@@ -456,6 +456,47 @@ class RBS::Collection::ConfigTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_lock_from_alumni_stdlib__kconv
+    # `kconv` is never released as a gem; its types are shipped with the `nkf` gem.
+    mktmpdir do |tmpdir|
+      config_path = tmpdir / 'rbs_collection.yaml'
+      config_path.write <<~YAML
+        sources:
+          - name: ruby/gem_rbs_collection
+            remote: https://github.com/ruby/gem_rbs_collection.git
+            revision: cde6057e7546843ace6420c5783dd945c6ccda54
+            repo_dir: gems
+
+        path: /path/to/somewhere
+
+        gems:
+          - name: kconv
+      YAML
+      gemfile_path = tmpdir / 'Gemfile'
+      gemfile_path.write 'source "https://rubygems.org"'
+      gemfile_lock_path = tmpdir / 'Gemfile.lock'
+      gemfile_lock_path.write EMPTY_GEMFILE_LOCK
+
+      definition = Bundler::Definition.build(gemfile_path, gemfile_lock_path, false)
+      lockfile, log = with_logger_output(level: Logger::INFO) do
+        _config, lockfile = RBS::Collection::Config.generate_lockfile(config_path: config_path, definition: definition)
+        lockfile
+      end
+
+      assert_config <<~YAML, YAML.dump(lockfile.to_lockfile)
+        path: "/path/to/somewhere"
+        gemfile_lock_path: 'Gemfile.lock'
+        gems:
+          - name: kconv
+            version: "0"
+            source:
+              type: stdlib
+      YAML
+      assert_include log, '`kconv` is included in the RBS dependencies of `rbs_collection.yaml`, but the type definition as a stdlib in rbs-gem is deprecated.'
+      assert_include log, 'add `nkf` (>= 0.3.0) to the dependency of your Ruby program'
+    end
+  end
+
   def test_generate_lock_with_empty_gemfile_lock
     mktmpdir do |tmpdir|
       config_path = tmpdir / 'rbs_collection.yaml'

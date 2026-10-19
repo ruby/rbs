@@ -1671,11 +1671,12 @@ bool rbs_parse_method_type(rbs_parser_t *parser, rbs_method_type_t **method_type
   global_decl ::= {tGIDENT} `:` <type>
 */
 RBS_NODISCARD
-static bool parse_global_decl(rbs_parser_t *parser, rbs_node_list_t *annotations, rbs_ast_declarations_global_t **global) {
+static bool parse_global_decl(rbs_parser_t *parser, rbs_position_t comment_pos, rbs_node_list_t *annotations, rbs_ast_declarations_global_t **global) {
     rbs_range_t decl_range;
     decl_range.start = parser->current_token.range.start;
+    comment_pos = rbs_nonnull_pos_or(comment_pos, decl_range.start);
 
-    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, decl_range.start.line);
+    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t name_range = parser->current_token.range;
 
@@ -1696,11 +1697,12 @@ static bool parse_global_decl(rbs_parser_t *parser, rbs_node_list_t *annotations
   const_decl ::= {const_name} `:` <type>
 */
 RBS_NODISCARD
-static bool parse_const_decl(rbs_parser_t *parser, rbs_node_list_t *annotations, rbs_ast_declarations_constant_t **constant) {
+static bool parse_const_decl(rbs_parser_t *parser, rbs_position_t comment_pos, rbs_node_list_t *annotations, rbs_ast_declarations_constant_t **constant) {
     rbs_range_t decl_range;
 
     decl_range.start = parser->current_token.range.start;
-    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, decl_range.start.line);
+    comment_pos = rbs_nonnull_pos_or(comment_pos, decl_range.start);
+    rbs_ast_comment_t *comment = rbs_parser_get_comment(parser, comment_pos.line);
 
     rbs_range_t name_range;
     rbs_type_name_t *type_name = NULL;
@@ -2999,13 +3001,13 @@ static bool parse_nested_decl(rbs_parser_t *parser, const char *nested_in, rbs_p
     case tUIDENT:
     case pCOLON2: {
         rbs_ast_declarations_constant_t *constant = NULL;
-        CHECK_PARSE(parse_const_decl(parser, annotations, &constant));
+        CHECK_PARSE(parse_const_decl(parser, annot_pos, annotations, &constant));
         *decl = (rbs_node_t *) constant;
         break;
     }
     case tGIDENT: {
         rbs_ast_declarations_global_t *global = NULL;
-        CHECK_PARSE(parse_global_decl(parser, annotations, &global));
+        CHECK_PARSE(parse_global_decl(parser, annot_pos, annotations, &global));
         *decl = (rbs_node_t *) global;
         break;
     }
@@ -3055,13 +3057,13 @@ static bool parse_decl(rbs_parser_t *parser, rbs_node_t **decl) {
     case tUIDENT:
     case pCOLON2: {
         rbs_ast_declarations_constant_t *constant = NULL;
-        CHECK_PARSE(parse_const_decl(parser, annotations, &constant));
+        CHECK_PARSE(parse_const_decl(parser, annot_pos, annotations, &constant));
         *decl = (rbs_node_t *) constant;
         return true;
     }
     case tGIDENT: {
         rbs_ast_declarations_global_t *global = NULL;
-        CHECK_PARSE(parse_global_decl(parser, annotations, &global));
+        CHECK_PARSE(parse_global_decl(parser, annot_pos, annotations, &global));
         *decl = (rbs_node_t *) global;
         return true;
     }

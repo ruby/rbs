@@ -12,15 +12,15 @@ module RBS
         ALUMNI_STDLIBS = {
           "mutex_m" => ">= 0.3.0",
           "abbrev" => nil,
-          "base64" => nil,
+          "base64" => ">= 0.3.0",
           "benchmark" => nil,
-          "bigdecimal" => nil,
+          "bigdecimal" => ">= 4.1.0",
           "csv" => nil,
           "kconv" => nil,
           "logger" => nil,
           "minitest" => nil,
           "net-smtp" => nil,
-          "nkf" => nil,
+          "nkf" => ">= 0.3.0",
           "observable" => nil,
           "cgi" => nil,
           "pstore" => nil,
@@ -200,11 +200,14 @@ module RBS
 
           case name
           when 'bigdecimal-math', 'kconv'
-            # These gems are never released as a gem.
-            # Therefore, `assign_gem` should not be called.
+            # These libraries are never released as a gem, so `assign_gem` should not be called.
+            # Their type definitions are shipped in the `sig/` directory of the parent gem
+            # (`bigdecimal` for `bigdecimal-math`, `nkf` for `kconv`) instead.
+            parent_gem = name == 'kconv' ? 'nkf' : 'bigdecimal'
+            parent_version = ALUMNI_STDLIBS.fetch(parent_gem) or raise
             RBS.logger.info {
               from = from_gem || "rbs_collection.yaml"
-              "`#{name}` is included in the RBS dependencies of `#{from}`, but the type definition as a stdlib in rbs-gem is deprecated. Delete `#{name}` from the RBS dependencies of `#{from}`."
+              "`#{name}` is included in the RBS dependencies of `#{from}`, but the type definition as a stdlib in rbs-gem is deprecated. Delete `#{name}` from the RBS dependencies of `#{from}` and add `#{parent_gem}` (#{parent_version}) to the dependency of your Ruby program to use the gem-bundled type definition."
             }
             source = find_source(name: name)
             if source&.is_a?(Sources::Stdlib)

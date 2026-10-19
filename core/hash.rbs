@@ -534,6 +534,39 @@ class Hash[unchecked out K, unchecked out V]
 
   # <!--
   #   rdoc-file=hash.c
+  #   - Hash.ruby2_keywords_hash(hash) -> hash
+  # -->
+  # Duplicates a given hash and adds a ruby2_keywords flag. This method is not for
+  # casual use; debugging, researching, and some truly necessary cases like
+  # deserialization of arguments.
+  #
+  #     h = {k: 1}
+  #     h = Hash.ruby2_keywords_hash(h)
+  #     def foo(k: 42)
+  #       k
+  #     end
+  #     foo(*[h]) #=> 1 with neither a warning or an error
+  #
+  def self.ruby2_keywords_hash: [H < Hash[untyped, untyped]] (H hash) -> H
+
+  # <!--
+  #   rdoc-file=hash.c
+  #   - Hash.ruby2_keywords_hash?(hash) -> true or false
+  # -->
+  # Checks if a given hash is flagged by Module#ruby2_keywords (or
+  # Proc#ruby2_keywords). This method is not for casual use; debugging,
+  # researching, and some truly necessary cases like serialization of arguments.
+  #
+  #     ruby2_keywords def foo(*args)
+  #       Hash.ruby2_keywords_hash?(args.last)
+  #     end
+  #     foo(k: 1)   #=> true
+  #     foo({k: 1}) #=> false
+  #
+  def self.ruby2_keywords_hash?: (Hash[untyped, untyped] hash) -> bool
+
+  # <!--
+  #   rdoc-file=hash.c
   #   - Hash.try_convert(object) -> object, new_hash, or nil
   # -->
   # If `object` is a hash, returns `object`.

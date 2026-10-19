@@ -66,4 +66,21 @@ class NumericInstanceTest < Test::Unit::TestCase
     assert_send_type '(to: Rational, by: Float) { (Float) -> void } -> Rational',
                      1, :step, to: 3r, by: 0.2 do |i| break_from_block i end
    end
+
+  class NumericWithToF < Numeric
+    def to_f = 2.5
+  end
+
+  def test_round
+    receiver = NumericWithToF.new
+
+    assert_send_type '() -> Integer',
+                     receiver, :round
+    assert_send_type '(half: :even) -> Integer',
+                     receiver, :round, half: :even
+    assert_send_type '(Integer) -> Numeric',
+                     receiver, :round, 1
+    assert_send_type '(Integer, half: :down) -> Numeric',
+                     receiver, :round, 1, half: :down
+  end
 end
