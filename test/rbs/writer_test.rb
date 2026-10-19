@@ -210,6 +210,40 @@ end
     SIG
   end
 
+  def test_preserve_empty_line_with_annotations
+    assert_writer <<-SIG
+type a = 1
+%a{annotation}
+type b = 2
+
+%a{annotation}
+type c = 3
+# comment
+%a{annotation}
+type d = 4
+class Foo
+  def foo: () -> void
+  %a{annotation}
+  def bar: () -> void
+
+  %a{annotation}
+  attr_reader baz: Integer
+  # comment
+  %a{annotation}
+  include Bar
+  %a{annotation}
+  class Baz
+  end
+end
+%a{annotation}
+module Bar
+end
+%a{annotation}
+interface _Baz
+end
+    SIG
+  end
+
   def test_remove_double_empty_lines
     src = <<-SIG
 class Foo

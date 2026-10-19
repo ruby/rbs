@@ -398,18 +398,32 @@ module RBS
 
       return unless prev
 
-      if (_ = decl).respond_to?(:comment)
-        if comment = (_ = decl).comment
-          decl = comment
-        end
-      end
-
       prev_loc = prev.location
       decl_loc = decl.location
 
       if prev_loc && decl_loc
         prev_end_line = prev_loc.end_line
-        start_line = decl_loc.start_line
+
+        # The location of the declaration doesn't include its leading comment and annotations.
+        start_lines = [decl_loc.start_line]
+
+        if (_ = decl).respond_to?(:comment)
+          if comment = (_ = decl).comment
+            if comment_loc = comment.location
+              start_lines << comment_loc.start_line
+            end
+          end
+        end
+
+        if (_ = decl).respond_to?(:annotations)
+          (_ = decl).annotations.each do |annotation|
+            if annotation_loc = annotation.location
+              start_lines << annotation_loc.start_line
+            end
+          end
+        end
+
+        start_line = start_lines.min or raise
 
         if start_line - prev_end_line > 1
           puts
