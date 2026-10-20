@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 6e63254acbbfe41f2ac793bcb2af41b581e30418
+  revision: de4829ed09d3120fc881554f8d41bd719a998391
   specs:
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
@@ -78,7 +78,7 @@ GEM
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (3.0.2)
+    json (3.1.0)
     json-schema (6.2.1)
       addressable (~> 2.8)
       bigdecimal (>= 3.1, < 5)
