@@ -20,9 +20,15 @@ module RBS
     # FileFinder.each_file(Pathname("_hidden"), skip_hidden: true) {}  # => yields all `.rbs` files under `_hidden`, skips other `_` directories
     # ```
     #
+    # `extension` is the extension of files to enumerate under a directory, without the leading dot. The default is `"rbs"`.
+    #
+    # ```rb
+    # FileFinder.each_file(Pathname("lib"), skip_hidden: false, extension: "rb") {} # => yields all `.rb` files under `lib`
+    # ```
+    #
     # `immediate` keyword is unused and left for API compatibility.
     # 
-    def self?.each_file: (Pathname path, ?immediate: top, skip_hidden: boolish) { (Pathname) -> void } -> void
-                        | (Pathname path, ?immediate: top, skip_hidden: boolish) -> Enumerator[Pathname, void]
+    def self?.each_file: (Pathname path, ?immediate: top, skip_hidden: boolish, ?extension: String) { (Pathname) -> void } -> void
+                        | (Pathname path, ?immediate: top, skip_hidden: boolish, ?extension: String) -> Enumerator[Pathname, void]
   end
 end

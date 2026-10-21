@@ -6,6 +6,7 @@ module RBS
 
       attr_reader libs: Array[String]
       attr_reader dirs: Array[String]
+      attr_reader inline_dirs: Array[String]
       attr_reader repos: Array[String]
 
       def initialize: () -> void

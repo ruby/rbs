@@ -22,6 +22,7 @@ module RBS
 
     attr_reader :libs
     attr_reader :dirs
+    attr_reader :inline_dirs
 
     DEFAULT_CORE_ROOT = Pathname(_ = __dir__) + "../../core"
 
@@ -43,12 +44,15 @@ module RBS
 
       @libs = Set.new
       @dirs = []
+      @inline_dirs = []
     end
 
-    def add(path: nil, library: nil, version: nil, resolve_dependencies: true)
+    def add(path: nil, library: nil, version: nil, resolve_dependencies: true, inline: nil)
       case
       when path
         dirs << path
+      when inline
+        inline_dirs << inline
       when library
         if libs.add?(Library.new(name: library, version: version)) && resolve_dependencies
           resolve_dependencies(library: library, version: version)
@@ -119,6 +123,10 @@ module RBS
         env.add_source(Source::RBS.new(buffer, dirs, decls))
       end
 
+      each_inline_source do |source|
+        env.add_source(source)
+      end
+
       loaded
     end
 
@@ -160,6 +168,24 @@ module RBS
           _, dirs, decls = Parser.parse_signature(buffer)
 
           yield source, path, buffer, decls, dirs
+        end
+      end
+    end
+
+    def each_inline_source
+      files = Set[]
+
+      inline_dirs.each do |dir|
+        FileFinder.each_file(dir, skip_hidden: false, extension: "rb") do |path|
+          next if files.include?(path)
+
+          files << path
+          content = path.read(encoding: "UTF-8")
+          buffer = Buffer.new(name: path, content: content)
+          prism = Prism.parse(content, filepath: path.to_s)
+          result = InlineParser.parse(buffer, prism)
+
+          yield Source::Ruby.new(buffer, prism, result.declarations, result.diagnostics)
         end
       end
     end

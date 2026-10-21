@@ -70,6 +70,40 @@ end
     end
   end
 
+  def test_loading_inline
+    mktmpdir do |path|
+      path.join("lib/models").mkpath
+      path.join("lib/models/person.rb").write(<<~RUBY)
+        class Person
+          # @rbs () -> String
+          def name = ""
+        end
+      RUBY
+      path.join("lib/README.rbs").write(<<~RBS)
+        class NotLoaded
+        end
+      RBS
+      path.join("script").write(<<~RUBY)
+        class Script
+        end
+      RUBY
+
+      loader = EnvironmentLoader.new(core_root: nil)
+      loader.add(inline: path + "lib")
+      loader.add(inline: path + "lib/models/person.rb")
+      loader.add(inline: path + "script")
+
+      env = Environment.new
+      loaded = loader.load(env: env)
+
+      assert_empty loaded
+      assert_equal [path + "lib/models/person.rb", path + "script"], env.each_ruby_source.map { _1.buffer.name }
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Person")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Script")
+      refute_operator env.class_decls, :key?, RBS::TypeName.parse("::NotLoaded")
+    end
+  end
+
   def test_loading_stdlib
     mktmpdir do |path|
       loader = EnvironmentLoader.new
