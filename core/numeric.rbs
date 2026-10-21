@@ -668,8 +668,8 @@ class Numeric
   # Numeric implements this by converting `self` to a Float and invoking
   # Float#round.
   #
-  def round: () -> Integer
-           | (Integer digits) -> Numeric
+  def round: (?half: round_mode) -> Integer
+           | (Integer digits, ?half: round_mode) -> Numeric
 
   # <!--
   #   rdoc-file=numeric.c

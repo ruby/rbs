@@ -1,5 +1,7 @@
 %a{annotate:rdoc:skip}
 class Object
+  def self.yaml_tag: (String url) -> String
+
   # <!--
   #   rdoc-file=ext/psych/lib/psych/core_ext.rb
   #   - to_yaml(options = {})

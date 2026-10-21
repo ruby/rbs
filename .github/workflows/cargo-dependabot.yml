@@ -1,0 +1,31 @@
+# NOTE: steps are identical to dependabot.yml for bundler, so this may be merged into it later.
+name: Merge cargo dependabot PRs automatically
+on: pull_request_target
+
+permissions:
+  pull-requests: write
+  contents: write
+
+env:
+  blocker_files: rust/Cargo.toml rust/ruby-rbs/Cargo.toml rust/ruby-rbs-sys/Cargo.toml
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/cargo/') }}
+    steps:
+      - name: Dependabot metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        id: metadata
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Abort if blocker files are changed
+        run: git diff --exit-code ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} ${{ env.blocker_files }}
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.DEPENDABOT_MERGE_GH_TOKEN}}

@@ -27,6 +27,17 @@ class IO
 
   # <!--
   #   rdoc-file=io.c
+  #   - io.wait_priority          -> truthy or falsy
+  #   - io.wait_priority(timeout) -> truthy or falsy
+  # -->
+  # Waits until IO is priority and returns a truthy value or a falsy value when
+  # times out. Priority data is sent and received using the Socket::MSG_OOB flag
+  # and is typically limited to streams.
+  #
+  def wait_priority: (?Time::_Timeout? timeout) -> boolish
+
+  # <!--
+  #   rdoc-file=io.c
   #   - io.wait_readable          -> truthy or falsy
   #   - io.wait_readable(timeout) -> truthy or falsy
   # -->

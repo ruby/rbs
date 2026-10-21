@@ -973,6 +973,29 @@ module Process
 
   # <!--
   #   rdoc-file=process.c
+  #   - Process.last_status -> Process::Status or nil
+  # -->
+  # Returns a Process::Status object representing the most recently exited child
+  # process in the current thread, or `nil` if none:
+  #
+  #     Process.spawn('ruby', '-e', 'exit 13')
+  #     Process.wait
+  #     Process.last_status # => #<Process::Status: pid 14396 exit 13>
+  #
+  #     Process.spawn('ruby', '-e', 'exit 14')
+  #     Process.wait
+  #     Process.last_status # => #<Process::Status: pid 4692 exit 14>
+  #
+  #     Process.spawn('ruby', '-e', 'exit 15')
+  #     # 'exit 15' has not been reaped by #wait.
+  #     Process.last_status # => #<Process::Status: pid 4692 exit 14>
+  #     Process.wait
+  #     Process.last_status # => #<Process::Status: pid 1380 exit 15>
+  #
+  def self.last_status: () -> Process::Status?
+
+  # <!--
+  #   rdoc-file=process.c
   #   - Process.maxgroups -> integer
   # -->
   # Returns the maximum number of group IDs allowed in the supplemental group
@@ -1028,6 +1051,16 @@ module Process
   # Not available on all platforms.
   #
   def self.setpgid: (Integer pid, Integer arg0) -> Integer
+
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.setpgrp -> 0
+  # -->
+  # Equivalent to <code>setpgid(0, 0)</code>.
+  #
+  # Not available on all platforms.
+  #
+  def self.setpgrp: () -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1340,10 +1373,7 @@ module Process
   #
   def self.waitall: () -> ::Array[[ Integer, Process::Status ]]
 
-  # <!--
-  #   rdoc-file=process.c
-  #   - Process.wait(pid = -1, flags = 0) -> integer
-  # -->
+  # <!-- rdoc-file=process.c -->
   # Waits for a suitable child process to exit, returns its process ID, and sets
   # <code>$?</code> to a Process::Status object containing information on that
   # process. Which child it waits for depends on the value of the given `pid`:
@@ -1476,10 +1506,7 @@ module Process
   #
   def self.waitpid: (?Integer pid, ?Integer flags) -> Integer
 
-  # <!--
-  #   rdoc-file=process.c
-  #   - Process.wait2(pid = -1, flags = 0) -> [pid, status]
-  # -->
+  # <!-- rdoc-file=process.c -->
   # Like Process.waitpid, but returns an array containing the child process `pid`
   # and Process::Status `status`:
   #
@@ -1865,22 +1892,32 @@ end
 class Process::Status < Object
   # <!--
   #   rdoc-file=process.c
-  #   - stat & mask -> integer
+  #   - Process::Status.wait(pid = -1, flags = 0) -> Process::Status
   # -->
-  # This method is deprecated as #to_i value is system-specific; use predicate
-  # methods like #exited? or #stopped?, or getters like #exitstatus or #stopsig.
+  # Like Process.wait, but returns a Process::Status object (instead of an integer
+  # pid or nil); see Process.wait for the values of `pid` and `flags`.
   #
-  # Returns the logical AND of the value of #to_i with `mask`:
+  # If there are child processes, waits for a child process to exit and returns a
+  # Process::Status object containing information on that process; sets
+  # thread-local variable <code>$?</code>:
   #
-  #     `cat /nop`
-  #     stat = $?                 # => #<Process::Status: pid 1155508 exit 1>
-  #     sprintf('%x', stat.to_i)  # => "100"
-  #     stat & 0x00               # => 0
+  #     Process.spawn('cat /nop') # => 1155880
+  #     Process::Status.wait      # => #<Process::Status: pid 1155880 exit 1>
+  #     $?                        # => #<Process::Status: pid 1155508 exit 1>
   #
-  # ArgumentError is raised if `mask` is negative.
+  # If there is no child process, returns an "empty" Process::Status object that
+  # does not represent an actual process; does not set thread-local variable
+  # <code>$?</code>:
   #
-  %a{deprecated}
-  def &: (Integer num) -> Integer
+  #     Process::Status.wait # => #<Process::Status: pid -1 exit 0>
+  #     $?                   # => #<Process::Status: pid 1155508 exit 1> # Unchanged.
+  #
+  # May invoke the scheduler hook Fiber::Scheduler#process_wait.
+  #
+  # Not available on all platforms.
+  #
+  def self.wait: (?int pid) -> Process::Status
+               | (int pid, int flags) -> Process::Status?
 
   # <!--
   #   rdoc-file=process.c
@@ -1894,26 +1931,6 @@ class Process::Status < Object
   #     stat == 0x100            # => true
   #
   def ==: (untyped other) -> bool
-
-  # <!--
-  #   rdoc-file=process.c
-  #   - stat >> places -> integer
-  # -->
-  # This method is deprecated as #to_i value is system-specific; use predicate
-  # methods like #exited? or #stopped?, or getters like #exitstatus or #stopsig.
-  #
-  # Returns the value of #to_i, shifted `places` to the right:
-  #
-  #     `cat /nop`
-  #     stat = $?                 # => #<Process::Status: pid 1155508 exit 1>
-  #     stat.to_i                 # => 256
-  #     stat >> 1                 # => 128
-  #     stat >> 2                 # => 64
-  #
-  # ArgumentError is raised if `places` is negative.
-  #
-  %a{deprecated}
-  def >>: (Integer num) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -2047,6 +2064,20 @@ end
 # Process::GID modules.
 #
 module Process::Sys
+  # <!--
+  #   rdoc-file=process.c
+  #   - Process.egid        -> integer
+  #   - Process::GID.eid    -> integer
+  #   - Process::Sys.geteid -> integer
+  # -->
+  # Returns the effective group ID for the current process:
+  #
+  #     Process.egid # => 500
+  #
+  # Not available on all platforms.
+  #
+  def self.getegid: () -> Integer
+
   # <!--
   #   rdoc-file=process.c
   #   - Process.euid         -> integer
@@ -2309,6 +2340,25 @@ end
 # Placeholder for rusage
 #
 class Process::Tms < Struct[Float]
+  # <!-- rdoc-file=process.c -->
+  # user time used in this process
+  #
+  attr_accessor utime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # system time used in this process
+  #
+  attr_accessor stime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # user time used in the child processes
+  #
+  attr_accessor cutime: Float
+
+  # <!-- rdoc-file=process.c -->
+  # system time used in the child processes
+  #
+  attr_accessor cstime: Float
 end
 
 class Process::Waiter < Thread

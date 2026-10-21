@@ -65,6 +65,7 @@ module Psych
     # 'DBM#index is deprecated; use DBM#key', but DBM#key behaves not same as
     # DBM#index.
     #
+    %a{deprecated: Use YAML::DBM#key instead}
     def index: (String keystr) -> untyped
 
     # <!--

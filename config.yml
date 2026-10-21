@@ -18,6 +18,7 @@ nodes:
     fields:
       - name: string
         c_type: rbs_string
+        expose_to_ruby: false  # `Comment#string` is reconstructed lazily from the location in Ruby
   - name: RBS::AST::Declarations::Class
     rust_name: ClassNode
     fields:

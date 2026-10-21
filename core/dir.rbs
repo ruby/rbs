@@ -288,10 +288,7 @@ class Dir
   #
   def self.chroot: (path root) -> 0
 
-  # <!--
-  #   rdoc-file=dir.c
-  #   - Dir.rmdir(dirpath) -> 0
-  # -->
+  # <!-- rdoc-file=dir.c -->
   # Removes the directory at `dirpath` from the underlying file system:
   #
   #     Dir.rmdir('foo') # => 0
@@ -719,10 +716,7 @@ class Dir
   def self.open: (path dirname, ?encoding: encoding?) -> instance
                | [U] (path dirname, ?encoding: encoding?) { (instance) -> U } -> U
 
-  # <!--
-  #   rdoc-file=dir.c
-  #   - Dir.pwd -> string
-  # -->
+  # <!-- rdoc-file=dir.c -->
   # Returns the path to the current working directory:
   #
   #     Dir.chdir("/tmp") # => 0
@@ -742,10 +736,7 @@ class Dir
   #
   alias self.rmdir self.delete
 
-  # <!--
-  #   rdoc-file=dir.c
-  #   - Dir.rmdir(dirpath) -> 0
-  # -->
+  # <!-- rdoc-file=dir.c -->
   # Removes the directory at `dirpath` from the underlying file system:
   #
   #     Dir.rmdir('foo') # => 0

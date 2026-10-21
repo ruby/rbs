@@ -9,10 +9,15 @@ module RBS
     # ```
     #
     class Comment
-      attr_reader string: String
+      # Each line with its leading `#` and one following space removed.
+      # Computed from `location` on first access unless given to `initialize`.
+      def string: () -> String
+
+      @string: String?
+
       attr_reader location: Location[bot, bot]?
 
-      def initialize: (string: String, location: Location[bot, bot]?) -> void
+      def initialize: (?string: String?, location: Location[bot, bot]?) -> void
 
       def ==: (untyped other) -> bool
 
@@ -21,6 +26,12 @@ module RBS
       def hash: () -> Integer
 
       include _ToJson
+
+      private
+
+      # Must stay in sync with `parse_comment_lines` in src/parser.c.
+      # Slices the buffer instead of using `Location#source` so no copy is memoized on the Location.
+      def string_from_location: () -> String
     end
   end
 end

@@ -57,6 +57,20 @@ class HashSingletonTest < Test::Unit::TestCase
                        Hash, :new, capacity: capacity do 1r end
     end
   end
+
+  def test_ruby2_keywords_hash
+    assert_send_type "(Hash[Symbol, Integer]) -> Hash[Symbol, Integer]",
+                     Hash, :ruby2_keywords_hash, { k: 1 }
+    assert_send_type "(HashSingletonTest::Subclass) -> HashSingletonTest::Subclass",
+                     Hash, :ruby2_keywords_hash, Subclass[k: 1]
+  end
+
+  def test_ruby2_keywords_hash?
+    assert_send_type "(Hash[Symbol, Integer]) -> bool",
+                     Hash, :ruby2_keywords_hash?, { k: 1 }
+    assert_send_type "(Hash[Symbol, Integer]) -> bool",
+                     Hash, :ruby2_keywords_hash?, Hash.ruby2_keywords_hash({ k: 1 })
+  end
 end
 
 class HashInstanceTest < Test::Unit::TestCase
@@ -149,10 +163,6 @@ class HashInstanceTest < Test::Unit::TestCase
     # Make sure return type is correct
     assert_type 'Rational', {a: 1r}.to_proc.call(:a)
     assert_type 'nil', {a: 1r}.to_proc.call(:not_a_key)
-
-    # make sure it only takes one argument
-    assert_raises ArgumentError do {a: 1r}.to_proc.call(:a, :b) end
-    assert_raises ArgumentError do {a: 1r}.to_proc.call() end
   end
 
   def test_op_eq

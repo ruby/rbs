@@ -1374,10 +1374,7 @@ class Regexp
   #
   alias self.compile self.new
 
-  # <!--
-  #   rdoc-file=re.c
-  #   - Regexp.escape(string) -> new_string
-  # -->
+  # <!-- rdoc-file=re.c -->
   # Returns a new string that escapes any characters that have special meaning in
   # a regular expression:
   #

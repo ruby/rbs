@@ -27,6 +27,49 @@ class BindingInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_implicit_parameter_defined?
+    [1].each do
+      it
+      b = binding
+
+      with_interned :it do |symbol|
+        assert_send_type  '(interned) -> bool',
+                          b, :implicit_parameter_defined?, symbol
+      end
+      assert_send_type  '(Symbol) -> bool',
+                        b, :implicit_parameter_defined?, :_1
+    end
+  end
+
+  def test_implicit_parameter_get
+    [1].each do
+      _1
+      b = binding
+
+      with_interned :_1 do |symbol|
+        assert_send_type  '(interned) -> untyped',
+                          b, :implicit_parameter_get, symbol
+      end
+    end
+  end
+
+  def test_implicit_parameters
+    assert_send_type  '() -> Array[Symbol]',
+                      binding, :implicit_parameters
+
+    [1].each do
+      it
+      assert_send_type  '() -> Array[Symbol]',
+                        binding, :implicit_parameters
+    end
+
+    [1].each do
+      _1
+      assert_send_type  '() -> Array[Symbol]',
+                        binding, :implicit_parameters
+    end
+  end
+
   def test_local_variable_defined?
     with_interned :hello do |varname|
       assert_send_type  '(interned) -> bool',

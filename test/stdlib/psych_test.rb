@@ -129,3 +129,20 @@ foo: 123
     )
   end
 end
+
+class PsychObjectSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Object)"
+
+  class Tagged
+  end
+
+  def test_yaml_tag
+    assert_send_type(
+      "(::String) -> ::String",
+      Tagged, :yaml_tag, "!rbs-test/tagged"
+    )
+  end
+end

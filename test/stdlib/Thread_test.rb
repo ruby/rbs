@@ -8,6 +8,10 @@ class ThreadSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Thread)"
 
+  def test_ignore_deadlock
+    assert_send_type "() -> bool", Thread, :ignore_deadlock
+  end
+
   def test_abort_on_exception
     assert_send_type "() -> bool", Thread, :abort_on_exception
   end
@@ -59,6 +63,25 @@ class ThreadSingletonTest < Test::Unit::TestCase
     assert_send_type(
       "() { (Thread::Backtrace::Location) -> Integer } -> nil",
       Thread, :each_caller_location, &-> (loc) { 3 }
+    )
+
+    omit_if(RUBY_VERSION < "3.4")
+
+    assert_send_type(
+      "(Integer) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Integer, Integer) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, 2, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Integer, nil) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1, nil, &-> (loc) { 3 }
+    )
+    assert_send_type(
+      "(Range[Integer]) { (Thread::Backtrace::Location) -> Integer } -> nil",
+      Thread, :each_caller_location, 1..2, &-> (loc) { 3 }
     )
   end
 
@@ -201,5 +224,16 @@ class ThreadTest < Test::Unit::TestCase
 
   def test_wakeup
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :wakeup
+  end
+
+  def test_set_trace_func
+    th = Thread.new { sleep }
+    trace = proc { }
+
+    assert_send_type "(Proc) -> Proc", th, :set_trace_func, trace
+    assert_send_type "(nil) -> nil", th, :set_trace_func, nil
+  ensure
+    th&.set_trace_func(nil)
+    th&.kill&.join
   end
 end

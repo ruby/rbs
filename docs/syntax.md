@@ -302,9 +302,9 @@ The following `class`/`instance` types are allowed.
 class Foo
   attr_reader parent: class
 
-  def foo: () -> instance # behaves like `self` in this context
+  def foo: () -> instance # the instance type of `Foo`; similar to `self` here, but `instance` is fixed to `Foo` while `self` follows the receiver
 
-  def self?.bar: () -> instance # behaves like `class` for `def self.bar()` and `self` for `def bar()`
+  def self?.bar: () -> instance # the instance type for both `def self.bar()` and `def bar()`; only `self` depends on the method kind
 
   @@foos: Array[instance]
 

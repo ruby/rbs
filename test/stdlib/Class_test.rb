@@ -36,17 +36,21 @@ class ClassInstanceTest < Test::Unit::TestCase
   end
 
   def test_initialize
-    assert_send_type "() -> void",
-                     Class.allocate, :initialize
+    # Class#initialize was removed in Ruby 4.1 and Class.allocate raises TypeError
+    # https://github.com/ruby/ruby/commit/0adee861cb586a011fc4c77eb00758cb3f2cfd93
+    if_ruby(..."4.1") do
+      assert_send_type "() -> void",
+                       Class.allocate, :initialize
 
-    assert_send_type "() { (Class) [self: Class] -> void } -> void",
-                     Class.allocate, :initialize do end
+      assert_send_type "() { (Class) [self: Class] -> void } -> void",
+                       Class.allocate, :initialize do end
 
-    assert_send_type "(Class) -> void",
-                     Class.allocate, :initialize, String
+      assert_send_type "(Class) -> void",
+                       Class.allocate, :initialize, String
 
-    assert_send_type "(Class) { (Class) [self: Class] -> void } -> void",
-                     Class.allocate, :initialize, String do end
+      assert_send_type "(Class) { (Class) [self: Class] -> void } -> void",
+                       Class.allocate, :initialize, String do end
+    end
   end
 
   def test_superclass

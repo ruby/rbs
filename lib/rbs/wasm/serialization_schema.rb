@@ -21,7 +21,8 @@ module RBS
     # where loc_children is [[name, required?], ...] and fields is
     # [[name, reader], ...] with reader one of :node, :node_list, :hash, :string,
     # :bool, :location_range, :location_range_list, :attr_ivar_name, or
-    # [:enum, [value_or_nil, ...]].
+    # [:enum, [value_or_nil, ...]]. A `nil` name means the field is read but not
+    # passed to the constructor (`expose_to_ruby: false` in config.yml).
     module SerializationSchema
       SYMBOL_TAG = 79
 
@@ -29,7 +30,7 @@ module RBS
         nil, # tag 0 is reserved for NULL
         [:node, "RBS::AST::Annotation", true, nil, [[:string, :string]], false],
         [:bool],
-        [:node, "RBS::AST::Comment", true, nil, [[:string, :string]], false],
+        [:node, "RBS::AST::Comment", true, nil, [[nil, :string]], false],
         [:node, "RBS::AST::Declarations::Class", true, [[:keyword, true], [:name, true], [:end, true], [:type_params, false], [:lt, false]], [[:name, :node], [:type_params, :node_list], [:super_class, :node], [:members, :node_list], [:annotations, :node_list], [:comment, :node]], true],
         [:node, "RBS::AST::Declarations::Class::Super", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
         [:node, "RBS::AST::Declarations::ClassAlias", true, [[:keyword, true], [:new_name, true], [:eq, true], [:old_name, true]], [[:new_name, :node], [:old_name, :node], [:comment, :node], [:annotations, :node_list]], false],

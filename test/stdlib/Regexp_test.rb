@@ -5,10 +5,6 @@ class RegexpSingletonTest < Test::Unit::TestCase
 
   testing 'singleton(::Regexp)'
 
-  def test_TimeoutError
-    assert Regexp::TimeoutError.superclass.equal?(RegexpError)
-  end
-
   def test_EXTENDED
     assert_const_type 'Integer',
                       'Regexp::EXTENDED'

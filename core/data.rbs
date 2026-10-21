@@ -367,6 +367,7 @@ class Data
   #     #=> true
   #
   def to_h: () -> Hash[Symbol, untyped]
+          | [K, V] () { (Symbol key, untyped value) -> [K, V] } -> Hash[K, V]
 
   # <!-- rdoc-file=struct.c -->
   # Returns a string representation of `self`:

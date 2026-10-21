@@ -775,6 +775,7 @@ class Encoding::Converter < Object
                               ?cr_newline: bool,
                               ?xml: :text | :attr
                             ) -> conversion_path
+                          | (encoding source, encoding destination, Integer flags) -> conversion_path
 
   # <!--
   #   rdoc-file=transcode.c

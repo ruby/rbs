@@ -133,17 +133,10 @@ class DirSingletonTest < Test::Unit::TestCase
   end
 
   def test_for_fd
-    dir = Dir.new(Dir.pwd)
-    fd = dir.fileno
-
-    with_int(fd) do |int|
-      assert_send_type(
-        "(::int) -> ::Dir",
-        Dir, :for_fd, int
-      )
-    end
-  ensure
-    dir&.close
+    assert_send_type("(::int) -> ::Dir",
+                     Dir, :for_fd, IO.sysopen(Dir.pwd)).close
+    assert_send_type("(::int) -> ::Dir",
+                     Dir, :for_fd, ToInt.new(IO.sysopen(Dir.pwd))).close
   end
 
   def test_getwd

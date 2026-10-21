@@ -1,7 +1,123 @@
 module RBS
   module Test
     class TypeCheck
-      def initialize: (self_class: Module, builder: DefinitionBuilder, sample_size: Integer, unchecked_classes: Array[Module], instance_class: Module, class_class: Module) -> void
+      # The receiver of a method call, which `self`, `instance`, and `class` types are resolved against
+      #
+      # The three types are determined by the class of the receiver (`klass`) and the kind of the method call:
+      #
+      # * `instance` is the instance type of `klass`
+      # * `class` is the singleton type of `klass`
+      # * `self` is the type of the receiver itself: `instance` for `InstanceContext`, `class` for `SingletonContext`
+      #
+      # ```ruby
+      # InstanceContext.of(foo)    # Instance method call on `foo`, same as `InstanceContext.new(foo.class)`
+      # SingletonContext.of(Foo)   # Singleton method call on `Foo`, same as `SingletonContext.new(Foo)`
+      # ```
+      #
+      class InstanceContext < Data
+        attr_reader klass: Module
+
+        def self.new: (Module klass) -> instance
+                    | (klass: Module) -> instance
+
+        def self.[]: (Module klass) -> instance
+                   | (klass: Module) -> instance
+
+        # Context of an instance method call on `receiver`
+        #
+        # The class of the receiver is taken through `Kernel#class`, so that it works with `BasicObject`.
+        #
+        def self.of: (untyped receiver) -> instance
+
+        # The class that `self` type is checked against, which is `instance_class`
+        def self_class: () -> Module
+
+        # The class that `instance` type is checked against
+        def instance_class: () -> Module
+
+        # The class that `class` type is checked against
+        def class_class: () -> Module
+      end
+
+      # Context of a singleton method call on `klass`
+      #
+      class SingletonContext < Data
+        attr_reader klass: Module
+
+        def self.new: (Module klass) -> instance
+                    | (klass: Module) -> instance
+
+        def self.[]: (Module klass) -> instance
+                   | (klass: Module) -> instance
+
+        # Context of a singleton method call on `receiver`, which is a class or a module
+        #
+        def self.of: (Module receiver) -> instance
+
+        # The class that `self` type is checked against, which is `class_class`
+        def self_class: () -> Module
+
+        # The class that `instance` type is checked against
+        def instance_class: () -> Module
+
+        # The class that `class` type is checked against
+        def class_class: () -> Module
+      end
+
+      # Raised when `self`, `instance`, or `class` type is checked without a receiver context
+      #
+      class NoReceiverContextError < StandardError
+        attr_reader type: Types::Bases::Self | Types::Bases::Instance | Types::Bases::Class
+
+        def initialize: (Types::Bases::Self | Types::Bases::Instance | Types::Bases::Class) -> void
+      end
+
+      interface _Context
+        def self_class: () -> Module?
+
+        def instance_class: () -> Module?
+
+        def class_class: () -> Module?
+      end
+
+      # The receiver context, or `nil` if the check is not for a method call
+      #
+      # Checking `self`, `instance`, or `class` type without a context raises `NoReceiverContextError`.
+      #
+      attr_reader context: _Context?
+
+      # The class or singleton class that the checked method belongs to, which is the subject of the errors
+      #
+      # Defaults to the `self_class` of the context.
+      #
+      attr_reader owner: Module?
+
+      attr_reader builder: DefinitionBuilder
+
+      attr_reader sample_size: Integer
+
+      attr_reader unchecked_classes: Array[Module]
+
+      self.@legacy_classes_warned: bool?
+
+      # Warns that `self_class:`, `instance_class:`, and `class_class:` are deprecated, only once in a process
+      #
+      def self.warn_legacy_classes: () -> void
+
+      # `self_class:`, `instance_class:`, and `class_class:` are deprecated. Use `context:` instead.
+      #
+      # Raises `ArgumentError` if `context:` is given with any of them.
+      #
+      def initialize: (builder: DefinitionBuilder, sample_size: Integer, unchecked_classes: Array[Module], ?context: _Context?, ?owner: Module?, ?self_class: Module?, ?instance_class: Module?, ?class_class: Module?) -> void
+
+      # The class that `self` type is checked against, or `nil` without a receiver context
+      def self_class: () -> Module?
+
+      # The class that `instance` type is checked against, or `nil` without a receiver context
+      def instance_class: () -> Module?
+
+      # The class that `class` type is checked against, or `nil` without a receiver context
+      def class_class: () -> Module?
 
       # Confirm if given `CallTrace` is compatible with `MethodType`
       #

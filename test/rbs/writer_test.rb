@@ -41,6 +41,37 @@ module C = D
     SIG
   end
 
+  def test_annotated_decl
+    assert_writer <<-SIG
+%a{deprecated}
+FOO: Integer
+
+%a{deprecated}
+$foo: Integer
+
+# Alias of B.
+%a{deprecated}
+class A = B
+
+# Alias of D.
+%a{deprecated}
+module C = D
+
+module Foo
+  %a{deprecated}
+  FOO: Integer
+
+  # Alias of B.
+  %a{deprecated}
+  class A = B
+
+  # Alias of D.
+  %a{deprecated}
+  module C = D
+end
+    SIG
+  end
+
   def test_class_decl
     assert_writer <<-SIG
 class Foo::Bar[X] < Array[String]

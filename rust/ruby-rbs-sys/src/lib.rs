@@ -1,4 +1,5 @@
 #![allow(
+    clippy::manual_div_ceil,
     clippy::useless_transmute,
     clippy::missing_safety_doc,
     clippy::ptr_offset_with_cast,

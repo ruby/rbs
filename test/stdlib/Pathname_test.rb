@@ -714,13 +714,6 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname(File.expand_path(__FILE__)), :sysopen, 'r', 0644
   end
 
-  def test_taint
-    if Pathname.method_defined?(:taint)
-      assert_send_type '() -> Pathname',
-                      Pathname(File.expand_path(__FILE__)), :taint
-    end
-  end
-
   def test_to_path
     assert_send_type '() -> String',
                      Pathname(File.expand_path(__FILE__)), :to_path
@@ -741,13 +734,6 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
       assert_send_type '() -> Integer',
                        path, :unlink
-    end
-  end
-
-  def test_untaint
-    if Pathname.method_defined?(:untaint)
-      assert_send_type '() -> Pathname',
-                      Pathname(File.expand_path(__FILE__)), :untaint
     end
   end
 

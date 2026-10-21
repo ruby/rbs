@@ -5,10 +5,22 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
   testing "singleton(::IO::Buffer)"
 
   def test_for
-    assert_send_type(
-      "(String) -> IO::Buffer",
-      IO::Buffer, :for, "Hello world"
-    )
+    with_string "Hello world" do |source|
+      assert_send_type(
+        "(string) -> IO::Buffer",
+        IO::Buffer, :for, source
+      )
+
+      assert_send_type(
+        "(string) { (IO::Buffer) -> Integer } -> Integer",
+        IO::Buffer, :for, source
+      ) { 42 }
+
+      assert_send_type(
+        "(string) { (IO::Buffer) -> String } -> String",
+        IO::Buffer, :for, source
+      ) { "result" }
+    end
   end
 
   def test_map
@@ -34,12 +46,24 @@ class IO_Buffer_SingletonTest < Test::Unit::TestCase
     )
   end
 
+  def test_size_of
+    assert_send_type(
+      "(Symbol) -> Integer",
+      IO::Buffer, :size_of, :u32
+    )
+
+    assert_send_type(
+      "(Array[Symbol]) -> Integer",
+      IO::Buffer, :size_of, [:U8, :f32, :U128]
+    )
+  end
+
   def test_string
     with_int 10 do |int|
       assert_send_type(
         "(int) { (IO::Buffer) -> nil } -> String",
-        IO::Buffer, :string, int, &proc { nil }
-      )
+        IO::Buffer, :string, int
+      ) { nil }
     end
   end
 end
@@ -47,6 +71,39 @@ end
 class IO_Buffer_InstanceTest < Test::Unit::TestCase
   include TestHelper
   testing "::IO::Buffer"
+
+  def test_bitwise_operators
+    buffer = IO::Buffer.for("test")
+    mask = IO::Buffer.for("\xFF\x00")
+
+    [:&, :|, :^].each do |operator|
+      assert_send_type(
+        "(IO::Buffer) -> IO::Buffer",
+        buffer, operator, mask
+      )
+    end
+
+    assert_send_type(
+      "() -> IO::Buffer",
+      buffer, :~
+    )
+  end
+
+  def test_bitwise_mutation
+    mask = IO::Buffer.for("\xFF\x00")
+
+    [:and!, :or!, :xor!].each do |operator|
+      assert_send_type(
+        "(IO::Buffer) -> IO::Buffer",
+        IO::Buffer.new(4), operator, mask
+      )
+    end
+
+    assert_send_type(
+      "() -> IO::Buffer",
+      IO::Buffer.new(4), :not!
+    )
+  end
 
   def test_spaceship
     buf1 = IO::Buffer.for("")
@@ -88,6 +145,46 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
       "(IO::Buffer, Integer, Integer, Integer) -> Integer",
       buf, :copy, src, 1, 2, 3
     )
+  end
+
+  def test_each
+    buf = IO::Buffer.new(2)
+    buf.set_string("ab")
+
+    assert_send_type(
+      "() -> Enumerator[[Integer, Integer], IO::Buffer]",
+      buf, :each
+    )
+    assert_send_type(
+      "(:U8, Integer, Integer) { (Integer, Integer) -> void } -> IO::Buffer",
+      buf, :each, :U8, 0, 2
+    ) { |_, _| }
+
+    float_buf = IO::Buffer.new(8)
+    float_buf.set_values([:F32, :F32], 0, [1.5, 2.5])
+
+    assert_send_type(
+      "(:F32) -> Enumerator[[Integer, Float], IO::Buffer]",
+      float_buf, :each, :F32
+    )
+    assert_send_type(
+      "(:F32, Integer, Integer) { (Integer, Float) -> void } -> IO::Buffer",
+      float_buf, :each, :F32, 0, 2
+    ) { |_, _| }
+  end
+
+  def test_each_byte
+    buf = IO::Buffer.new(3)
+    buf.set_string("abc")
+
+    assert_send_type(
+      "() -> Enumerator[Integer, IO::Buffer]",
+      buf, :each_byte
+    )
+    assert_send_type(
+      "(Integer, Integer) { (Integer) -> void } -> IO::Buffer",
+      buf, :each_byte, 1, 2
+    ) { |_| }
   end
 
   def test_empty?
@@ -140,6 +237,28 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     assert_send_type(
       "(Symbol, Integer) -> Float",
       buf, :get_value, :F64, 1
+    )
+  end
+
+  def test_get_values
+    buf = IO::Buffer.new(16)
+    buf.set_values([:U8, :F32, :U16], 0, [1, 2.5, 3])
+
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Integer | Float]",
+      buf, :get_values, [:U8, :F32, :U16], 0
+    )
+
+    buf.set_value(:U128, 0, 3)
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Integer]",
+      buf, :get_values, [:U128], 0
+    )
+
+    buf.set_values([:F32, :F64], 0, [1.5, 2.5])
+    assert_send_type(
+      "(Array[Symbol], Integer) -> Array[Float]",
+      buf, :get_values, [:F32, :F64], 0
     )
   end
 
@@ -198,6 +317,13 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_private?
+    assert_send_type(
+      "() -> bool",
+      IO::Buffer.new(4), :private?
+    )
+  end
+
   def test_readonly?
     assert_send_type(
       "() -> bool",
@@ -214,12 +340,64 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     )
   end
 
+  def test_set_string
+    buf = IO::Buffer.new(16)
+
+    with_string "test" do |source|
+      assert_send_type(
+        "(string) -> Integer",
+        buf, :set_string, source
+      )
+      assert_send_type(
+        "(string, Integer) -> Integer",
+        buf, :set_string, source, 1
+      )
+      assert_send_type(
+        "(string, Integer, Integer) -> Integer",
+        buf, :set_string, source, 1, 2
+      )
+      assert_send_type(
+        "(string, Integer, Integer, Integer) -> Integer",
+        buf, :set_string, source, 1, 2, 1
+      )
+      assert_send_type(
+        "(string, Integer, nil) -> Integer",
+        buf, :set_string, source, 1, nil
+      )
+      assert_send_type(
+        "(string, Integer, nil, Integer) -> Integer",
+        buf, :set_string, source, 1, nil, 1
+      )
+    end
+  end
+
   def test_set_value
     buf = IO::Buffer.new(30)
 
     assert_send_type(
       "(Symbol, Integer, Integer) -> Integer",
       buf, :set_value, :U16, 0, 123
+    )
+  end
+
+  def test_set_values
+    buf = IO::Buffer.new(16)
+
+    assert_send_type(
+      "(Array[Symbol], Integer, Array[Integer | Float]) -> Integer",
+      buf, :set_values, [:U8, :F32, :U16], 0, [1, 2.5, 3]
+    )
+
+    assert_send_type(
+      "(Array[Symbol], Integer, Array[Integer]) -> Integer",
+      buf, :set_values, [:U128], 0, [3]
+    )
+  end
+
+  def test_shared?
+    assert_send_type(
+      "() -> bool",
+      IO::Buffer.new(4), :shared?
     )
   end
 
@@ -234,8 +412,32 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
     buf = IO::Buffer.new(30)
 
     assert_send_type(
+      "() -> IO::Buffer",
+      buf, :slice
+    )
+    assert_send_type(
+      "(Integer) -> IO::Buffer",
+      buf, :slice, 1
+    )
+    assert_send_type(
       "(Integer, Integer) -> IO::Buffer",
       buf, :slice, 0, 5
+    )
+    assert_send_type(
+      "(nil) -> IO::Buffer",
+      buf, :slice, nil
+    )
+    assert_send_type(
+      "(nil, Integer) -> IO::Buffer",
+      buf, :slice, nil, 5
+    )
+    assert_send_type(
+      "(Integer, nil) -> IO::Buffer",
+      buf, :slice, 1, nil
+    )
+    assert_send_type(
+      "(nil, nil) -> IO::Buffer",
+      buf, :slice, nil, nil
     )
   end
 
@@ -258,5 +460,91 @@ class IO_Buffer_InstanceTest < Test::Unit::TestCase
       "() -> bool",
       IO::Buffer.for(""), :valid?
     )
+  end
+
+  def test_values
+    buf = IO::Buffer.for("abcd")
+
+    assert_send_type(
+      "() -> Array[Integer]",
+      buf, :values
+    )
+    assert_send_type(
+      "(:U8, Integer, Integer) -> Array[Integer]",
+      buf, :values, :U8, 1, 2
+    )
+
+    float_buf = IO::Buffer.new(8)
+    float_buf.set_values([:F32, :F32], 0, [1.5, 2.5])
+    assert_send_type(
+      "(:F32, Integer, Integer) -> Array[Float]",
+      float_buf, :values, :F32, 0, 2
+    )
+  end
+
+  def test_read
+    IO.pipe do |reader, writer|
+      writer.close
+
+      with_io reader do |io|
+        buffer = IO::Buffer.new(4)
+
+        assert_send_type("(io) -> Integer", buffer, :read, io)
+        assert_send_type("(io, Integer) -> Integer", buffer, :read, io, 2)
+        assert_send_type("(io, nil) -> Integer", buffer, :read, io, nil)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :read, io, 2, 1)
+        assert_send_type("(io, nil, Integer) -> Integer", buffer, :read, io, nil, 1)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :read, io, 2, nil)
+        assert_send_type("(io, nil, nil) -> Integer", buffer, :read, io, nil, nil)
+      end
+    end
+  end
+
+  def test_pread
+    IO.pipe do |reader, writer|
+      with_io reader do |io|
+        buffer = IO::Buffer.new(4)
+
+        assert_send_type("(io, Integer) -> Integer", buffer, :pread, io, 1)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :pread, io, 1, 2)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :pread, io, 1, nil)
+        assert_send_type("(io, Integer, Integer, Integer) -> Integer", buffer, :pread, io, 1, 2, 1)
+        assert_send_type("(io, Integer, nil, Integer) -> Integer", buffer, :pread, io, 1, nil, 1)
+        assert_send_type("(io, Integer, Integer, nil) -> Integer", buffer, :pread, io, 1, 2, nil)
+        assert_send_type("(io, Integer, nil, nil) -> Integer", buffer, :pread, io, 1, nil, nil)
+      end
+    end
+  end
+
+  def test_write
+    IO.pipe do |reader, writer|
+      with_io writer do |io|
+        buffer = IO::Buffer.for("data")
+
+        assert_send_type("(io) -> Integer", buffer, :write, io)
+        assert_send_type("(io, Integer) -> Integer", buffer, :write, io, 2)
+        assert_send_type("(io, nil) -> Integer", buffer, :write, io, nil)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :write, io, 2, 1)
+        assert_send_type("(io, nil, Integer) -> Integer", buffer, :write, io, nil, 1)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :write, io, 2, nil)
+        assert_send_type("(io, nil, nil) -> Integer", buffer, :write, io, nil, nil)
+      end
+    end
+  end
+
+  def test_pwrite
+    IO.pipe do |reader, writer|
+      with_io writer do |io|
+        buffer = IO::Buffer.for("data")
+
+        assert_send_type("(io, Integer) -> Integer", buffer, :pwrite, io, 1)
+        assert_send_type("(io, Integer, Integer) -> Integer", buffer, :pwrite, io, 1, 2)
+        assert_send_type("(io, Integer, nil) -> Integer", buffer, :pwrite, io, 1, nil)
+        assert_send_type("(io, Integer, Integer, Integer) -> Integer", buffer, :pwrite, io, 1, 2, 1)
+        assert_send_type("(io, Integer, nil, Integer) -> Integer", buffer, :pwrite, io, 1, nil, 1)
+        assert_send_type("(io, Integer, Integer, nil) -> Integer", buffer, :pwrite, io, 1, 2, nil)
+        assert_send_type("(io, Integer, nil, nil) -> Integer", buffer, :pwrite, io, 1, nil, nil)
+      end
+    end
   end
 end

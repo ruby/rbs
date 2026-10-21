@@ -88,7 +88,8 @@ module RBS
 
         kwargs = {} #: Hash[Symbol, untyped]
         (fields || []).each do |name, reader|
-          kwargs[name] = read_field(reader)
+          value = read_field(reader)
+          kwargs[name] = value if name
         end
 
         RBS::AST::TypeParam.resolve_variables(kwargs[:type_params]) if resolve_type_params

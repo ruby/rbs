@@ -343,6 +343,16 @@ class Encoding::ConverterSingletonTest < Test::Unit::TestCase
       Encoding::UTF_8, Encoding::EUC_JP, xml: :text
     )
     assert_send_type(
+      "(Encoding, Encoding, Integer) -> Array[[Encoding, Encoding] | String]",
+      Encoding::Converter, :search_convpath,
+      Encoding::UTF_8, Encoding::EUC_JP, Encoding::Converter::UNIVERSAL_NEWLINE_DECORATOR
+    )
+    assert_send_type(
+      "(String, String, Integer) -> Array[[Encoding, Encoding] | String]",
+      Encoding::Converter, :search_convpath,
+      "ISO-8859-1", "EUC-JP", Encoding::Converter::UNIVERSAL_NEWLINE_DECORATOR
+    )
+    assert_send_type(
       "(Encoding, Encoding, xml: :attr) -> Array[[Encoding, Encoding] | String]",
       Encoding::Converter, :search_convpath,
       Encoding::UTF_8, Encoding::EUC_JP, xml: :attr

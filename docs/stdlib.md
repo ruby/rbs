@@ -124,7 +124,7 @@ It's clear having type aliases makes sense.
 
 #### 📣 Constant type assertions
 
-We also have `assert_const_type` method, to test the type of constant is correct with respect to RBS type definition.
+Use `assert_const_type` to test that a constant matches its RBS definition.
 
 ```ruby
 class FloatConstantTest < Test::Unit::TestCase
@@ -138,12 +138,35 @@ end
 
 It confirms:
 
-1. The type of constant `Float::INFINITY` is `Float`
-2. The type of constant `Float::INFINITY` is correct with respect to RBS definition
+1. The constant `Float::INFINITY` is a `Float` at runtime.
+2. The type matches its RBS definition.
 
-We don't have any strong recommendation about where the constants test should be written in.
-The `FloatConstantTest` example defines a test case only for the constant tests.
-You may write the tests inside `FloatInstanceTest` or `FloatSingletonTest`.
+When testing class and exception constants, assert that their type is `"Class"`:
+
+* **Good:** `assert_const_type "Class", "StringScanner::Error"`
+* **Bad:** `assert_const_type "singleton(::StringScanner::Error)", "StringScanner::Error"`
+
+You can place constant tests inside existing `*SingletonTest` or `*InstanceTest` classes, or define a `*ConstantTest` class.
+
+#### 📣 Write Type Tests, Not Behavior Tests
+
+Stdlib tests verify that RBS signatures match runtime method types. Do not test Ruby implementation behavior.
+
+* **Use `assert_send_type` and `assert_const_type`**: Verify arguments, return values, and constants through type assertions.
+* **Skip behavior assertions**: Drop `assert_equal`, `assert_instance_of`, and `assert` for return values, superclasses, and constant contents:
+  * **Bad:** `assert_equal StandardError, StringScanner::Error.superclass`
+  * **Bad:** `assert_equal "A", Random::Formatter::ALPHANUMERIC.first`
+  * **Good:** `assert_const_type "Array[String]", "Random::Formatter::ALPHANUMERIC"`
+  Reserve `assert_equal` and `assert` for test setup.
+* **Ignore untestable behavior**: If a method behavior has no corresponding type check (such as `Singleton.instance` object identity), test only the method signature and return type.
+
+#### 📣 Extending Existing Tests
+
+When updating existing library tests:
+
+1. **Check existing tests first**: Open `test/stdlib/<Library>_test.rb`.
+2. **Add to existing test classes**: Put new tests in `*InstanceTest`, `*SingletonTest`, or `*ConstantTest`. Do not create duplicate test classes.
+3. **Preserve existing coverage**: Keep existing test cases intact.
 
 ### Running tests
 

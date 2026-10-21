@@ -2,6 +2,9 @@ plugins:
   - rubocop-rubycw
   - rubocop-on-rbs
 
+require:
+  - ./rubocop/stdlib_test_non_type_assertion.rb
+
 AllCops:
   DisabledByDefault: true
   Exclude:
@@ -69,3 +72,18 @@ Style/FrozenStringLiteralComment:
   Enabled: true
   Include:
     - 'lib/**/*.rb'
+
+StdlibTest/NonTypeAssertion:
+  Enabled: true
+  Include:
+    - 'test/stdlib/**/*_test.rb'
+  Exclude:
+    # Compares RBS constant declarations with runtime constants.
+    - 'test/stdlib/constant_drift_test.rb'
+  AllowedMethods:
+    - assert_send_type
+    - assert_send_type_error
+    - refute_send_type
+    - assert_const_type
+    - assert_visibility
+    - assert_type

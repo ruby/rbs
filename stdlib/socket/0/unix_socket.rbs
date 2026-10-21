@@ -2,11 +2,7 @@
 # UNIXSocket represents a UNIX domain stream client socket.
 #
 class UNIXSocket < BasicSocket
-  # <!--
-  #   rdoc-file=ext/socket/unixsocket.c
-  #   - UNIXSocket.pair([type [, protocol]])       => [unixsocket1, unixsocket2]
-  #   - UNIXSocket.socketpair([type [, protocol]]) => [unixsocket1, unixsocket2]
-  # -->
+  # <!-- rdoc-file=ext/socket/unixsocket.c -->
   # Creates a pair of sockets connected to each other.
   #
   # *type* should be a socket type such as: :STREAM, :DGRAM, :RAW, etc.

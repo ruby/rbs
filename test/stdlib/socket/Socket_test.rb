@@ -66,6 +66,23 @@ class SocketSingletonTest < Test::Unit::TestCase
       )
     end
   end
+
+  def test_tcp_fast_fallback
+    assert_send_type(
+      "() -> bool",
+      Socket, :tcp_fast_fallback
+    )
+  end
+
+  def test_tcp_fast_fallback=
+    original = Socket.tcp_fast_fallback
+    assert_send_type(
+      "(bool) -> bool",
+      Socket, :tcp_fast_fallback=, false
+    )
+  ensure
+    Socket.tcp_fast_fallback = original
+  end
 end
 
 class SocketInstanceTest < Test::Unit::TestCase

@@ -1643,6 +1643,7 @@ class StringScanner
   def initialize_copy: (StringScanner) -> void
 end
 
+%a{deprecated}
 StringScanner::Id: String
 
 StringScanner::Version: String

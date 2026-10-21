@@ -196,6 +196,7 @@ class IPAddr
   # Returns a new ipaddr built by converting the native IPv4 address into an
   # IPv4-compatible IPv6 address.
   #
+  %a{deprecated}
   def ipv4_compat: () -> IPAddr
 
   # <!--
@@ -204,6 +205,7 @@ class IPAddr
   # -->
   # Returns true if the ipaddr is an IPv4-compatible IPv6 address.
   #
+  %a{deprecated}
   def ipv4_compat?: () -> bool
 
   # <!--

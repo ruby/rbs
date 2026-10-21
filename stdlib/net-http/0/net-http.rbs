@@ -1487,6 +1487,7 @@ module Net
     # This class is obsolete.  You may pass these same parameters directly to
     # Net::HTTP.new.  See Net::HTTP.new for details of the arguments.
     #
+    %a{deprecated: Pass proxy parameters to Net::HTTP.new instead}
     def self.Proxy: (?interned p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass) -> untyped
 
     # <!--
@@ -2133,6 +2134,7 @@ module Net
     #   - body_exist?()
     # -->
     #
+    %a{deprecated: Use response_body_permitted? instead}
     def body_exist?: () -> bool
 
     # <!-- rdoc-file=lib/net/http/generic_request.rb -->
@@ -4004,8 +4006,8 @@ module Net
     # in fragments, as it is read in from the socket.
     #
     # If `dest` argument is given, response is read into that variable, with
-    # `dest#<<` method (it could be String or IO, or any other object responding to
-    # `<<`).
+    # <code>dest#<<</code> method (it could be String or IO, or any other object
+    # responding to <code><<</code>).
     #
     # Calling this method a second or subsequent time for the same HTTPResponse
     # object will return the value already read.
@@ -5569,6 +5571,7 @@ module Net
     include Net::HTTPExceptions
   end
 
+  %a{deprecated: Use Net::HTTPClientException instead}
   class HTTPServerException < ProtoServerError
     # We cannot use the name "HTTPServerError", it is the name of the response.
     include Net::HTTPExceptions

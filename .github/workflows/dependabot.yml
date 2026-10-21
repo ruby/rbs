@@ -11,7 +11,8 @@ env:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    # cargo updates are handled by cargo-dependabot.yml instead
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && !startsWith(github.head_ref, 'dependabot/cargo/') }}
     steps:
       - name: Dependabot metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0

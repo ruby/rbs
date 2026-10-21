@@ -75,11 +75,12 @@ module RBS
     class Field
       attr_reader :name, :type, :c_name #: String
 
-      def initialize(name:, type:, optional:, c_name: nil)
+      def initialize(name:, type:, optional:, c_name: nil, expose_to_ruby: true)
         @name = name
         @type = type
         @c_name = c_name || name
         @optional = optional
+        @expose_to_ruby = expose_to_ruby
       end
 
       def self.from_hash(hash)
@@ -87,8 +88,13 @@ module RBS
           name: hash["name"],
           type: hash.fetch("c_type", "VALUE"),
           c_name: hash["c_name"],
-          optional: hash.fetch("optional", false)
+          optional: hash.fetch("optional", false),
+          expose_to_ruby: hash.fetch("expose_to_ruby", true)
         )
+      end
+
+      def expose_to_ruby? #: bool
+        @expose_to_ruby
       end
 
       def optional? #: bool
@@ -376,6 +382,7 @@ module RBS
               type: type,
               optional: field.fetch("optional", false),
               c_name: field["c_name"],
+              expose_to_ruby: field.fetch("expose_to_ruby", true),
             )
           end
 

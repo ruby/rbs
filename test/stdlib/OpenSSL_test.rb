@@ -316,7 +316,7 @@ class OpenSSLCipherTest < Test::Unit::TestCase
   library "openssl"
   testing "::OpenSSL::Cipher"
 
-  def encrypt_decrypt
+  def test_encrypt_decrypt
     key = ["2b7e151628aed2a6abf7158809cf4f3c"].pack("H*")
     iv =  ["000102030405060708090a0b0c0d0e0f"].pack("H*")
     pt =  ["6bc1bee22e409f96e93d7e117393172a" \
@@ -329,7 +329,6 @@ class OpenSSLCipherTest < Test::Unit::TestCase
     assert_send_type "() -> String",
       cipher, :final
     cipher = new_decryptor("aes-128-cbc", key: key, iv: iv, padding: 0)
-    assert_equal pt, cipher.update(ct) << cipher.final
     assert_send_type "(String) -> String",
       cipher, :update, ct
     assert_send_type "() -> String",

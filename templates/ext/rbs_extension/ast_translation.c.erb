@@ -21,6 +21,10 @@ rbs_translation_context_t rbs_translation_context_create(rbs_constant_pool_t *co
 }
 
 VALUE rbs_node_list_to_ruby_array(rbs_translation_context_t ctx, rbs_node_list_t *list) {
+    if (!list->head) {
+        return EMPTY_ARRAY;
+    }
+
     VALUE ruby_array = rb_ary_new();
 
     for (rbs_node_list_node_t *n = list->head; n != NULL; n = n->next) {
@@ -208,6 +212,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
             <%- end -%>
         <%- end -%>
         <%- node.fields.each do |field| -%>
+        <%- next unless field.expose_to_ruby? -%>
         <%- case field.type.name -%>
         <%- when "rbs_node_list" -%>
         VALUE arg_<%= field.name %> = rbs_node_list_to_ruby_array(ctx, node-><%= field.c_name %>);
@@ -258,6 +263,7 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
         <%- end -%>
         <%- node.fields.each do |field| -%>
+        <%- next unless field.expose_to_ruby? -%>
         rb_hash_aset(h, ID2SYM(rb_intern("<%= field.name %>")), arg_<%= field.name %>);
         <%- end -%>
         return CLASS_NEW_INSTANCE(<%= node.c_constant_name %>, 1, &h);

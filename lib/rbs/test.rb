@@ -83,30 +83,8 @@ module RBS
 
     reset_suffix
 
-    if ::UnboundMethod.instance_methods.include?(:bind_call)
-      def self.call(receiver, method, *args, &block)
-        __skip__ = method.bind_call(receiver, *args, &block)
-      end
-    else
-      def self.call(receiver, method, *args, &block)
-        __skip__ = method.bind(receiver).call(*args, &block)
-      end
-    end
-  end
-end
-
-unless ::Module.private_instance_methods.include?(:ruby2_keywords)
-  class Module
-    private
-    def ruby2_keywords(*)
-    end
-  end
-end
-
-unless ::Proc.instance_methods.include?(:ruby2_keywords)
-  class Proc
-    def ruby2_keywords
-      self
+    def self.call(receiver, method, *args, &block)
+      __skip__ = method.bind_call(receiver, *args, &block)
     end
   end
 end

@@ -154,10 +154,7 @@ class Complex < Numeric
   #
   def self.polar: (Numeric, ?Numeric) -> Complex
 
-  # <!--
-  #   rdoc-file=complex.c
-  #   - Complex.rect(real, imag = 0) -> complex
-  # -->
+  # <!-- rdoc-file=complex.c -->
   # Returns a new Complex object formed from the arguments, each of which must be
   # an instance of Numeric, or an instance of one of its subclasses: Complex,
   # Float, Integer, Rational; see [Rectangular
@@ -694,16 +691,19 @@ class Complex < Numeric
   def real?: () -> false
 
   # <!-- rdoc-file=complex.c -->
-  # Returns a new Complex object formed from the arguments, each of which must be
-  # an instance of Numeric, or an instance of one of its subclasses: Complex,
-  # Float, Integer, Rational; see [Rectangular
-  # Coordinates](rdoc-ref:Complex@Rectangular+Coordinates):
+  # Returns the array <code>[self.real, self.imag]</code>:
   #
-  #     Complex.rect(3)             # => (3+0i)
-  #     Complex.rect(3, Math::PI)   # => (3+3.141592653589793i)
-  #     Complex.rect(-3, -Math::PI) # => (-3-3.141592653589793i)
+  #     Complex.rect(1, 2).rect # => [1, 2]
   #
-  # Complex.rectangular is an alias for Complex.rect.
+  # See [Rectangular Coordinates](rdoc-ref:Complex@Rectangular+Coordinates).
+  #
+  # If `self` was created with [polar
+  # coordinates](rdoc-ref:Complex@Polar+Coordinates), the returned value is
+  # computed, and may be inexact:
+  #
+  #     Complex.polar(1.0, 1.0).rect # => [0.5403023058681398, 0.8414709848078965]
+  #
+  # Complex#rectangular is an alias for Complex#rect.
   #
   def rect: () -> [ Numeric, Numeric ]
 
