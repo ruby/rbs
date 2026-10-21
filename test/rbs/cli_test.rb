@@ -834,6 +834,27 @@ singleton(::BasicObject)
     end
   end
 
+  def test_validate_inline_singleton_class
+    with_cli do |cli|
+      Dir.mktmpdir do |dir|
+        (Pathname(dir) + 'a.rb').write(<<~RUBY)
+          class Foo
+            class << self
+              # @rbs [T < U, U < T] () -> void
+              def foo = nil
+            end
+          end
+        RUBY
+
+        refute_cli_success do
+          cli.run(["--inline", dir, "validate"])
+        end
+
+        assert_include stdout.string, "a.rb:3:11...3:25: Cyclic type parameter bound is prohibited (RBS::CyclicTypeParameterBound)"
+      end
+    end
+  end
+
   def test_validate_inline_super_class_and_alias
     with_cli do |cli|
       Dir.mktmpdir do |dir|

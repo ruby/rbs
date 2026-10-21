@@ -299,4 +299,22 @@ NewName = ::OldName #: class-alias
     assert_equal result, result2
     refute_equal result, result3
   end
+
+  def test_singleton_class_fingerprint
+    result = fingerprint(<<-RUBY)
+class Foo
+  class << self
+    def foo; end
+  end
+end
+    RUBY
+
+    result2 = fingerprint(<<-RUBY)
+class Foo
+  def foo; end
+end
+    RUBY
+
+    refute_equal result, result2
+  end
 end

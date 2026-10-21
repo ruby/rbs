@@ -2,7 +2,7 @@ module RBS
   module AST
     module Ruby
       module Declarations
-        type t = ClassDecl | ModuleDecl | ConstantDecl | ClassModuleAliasDecl
+        type t = ClassDecl | ModuleDecl | SingletonClassDecl | ConstantDecl | ClassModuleAliasDecl
 
         class Base
           attr_reader buffer: Buffer
@@ -83,6 +83,25 @@ module RBS
           def self_types: () -> Array[AST::Declarations::Module::Self]
 
           def name_location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        # `class << self` in a class or module body
+        #
+        # Members are kept as written: `def foo` inside the body is an instance method of the singleton class,
+        # and consumers interpret it as a singleton method of the enclosing class.
+        #
+        class SingletonClassDecl < Base
+          type member = Members::t
+
+          attr_reader node: Prism::SingletonClassNode
+
+          attr_reader members: Array[member]
+
+          def initialize: (Buffer, Prism::SingletonClassNode) -> void
+
+          def location: () -> Location
 
           def type_fingerprint: () -> untyped
         end

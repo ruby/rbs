@@ -168,6 +168,29 @@ module RBS
           end
         end
 
+        class SingletonClassDecl < Base
+          attr_reader :members
+
+          attr_reader :node
+
+          def initialize(buffer, node)
+            super(buffer)
+            @node = node
+            @members = []
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def type_fingerprint
+            [
+              "decls/singleton_class",
+              members.map { _1.type_fingerprint }
+            ]
+          end
+        end
+
         class ConstantDecl < Base
           attr_reader :leading_comment
           attr_reader :constant_name

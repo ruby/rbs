@@ -70,6 +70,9 @@ module RBS
       class NonSelfSingletonScope < Base
       end
 
+      class ConstantInSingletonScope < Base
+      end
+
       type t = NotImplementedYet
              | NonConstantClassName | NonConstantModuleName | NonConstantSuperClassName
              | TopLevelMethodDefinition | TopLevelAttributeDefinition
@@ -81,14 +84,13 @@ module RBS
              | NestedSingletonScope
              | TopLevelSingletonScope
              | NonSelfSingletonScope
+             | ConstantInSingletonScope
     end
 
     def self.parse: (Buffer, Prism::ParseResult) -> Result
 
     class Parser < Prism::Visitor
-      type module_context = Declarations::ClassDecl | Declarations::ModuleDecl
-
-      @singleton_class_depth: Integer
+      type module_context = Declarations::ClassDecl | Declarations::ModuleDecl | Declarations::SingletonClassDecl
 
       include AST::Ruby::Helpers::ConstantHelper
 
@@ -118,17 +120,19 @@ module RBS
       #
       def skip_node?: (Prism::Node) -> bool
 
-      def insert_declaration: (module_context) -> void
+      def insert_declaration: (Declarations::t) -> void
 
       def report_unused_annotation: (*AST::Ruby::Annotations::t | nil | AST::Ruby::CommentBlock::AnnotationSyntaxError) -> void
 
       def report_unused_block: (AST::Ruby::CommentBlock) -> void
 
-      def visit_class_or_module_body: (module_context, Prism::ClassNode | Prism::ModuleNode) -> void
+      def visit_class_or_module_body: (Declarations::ClassDecl | Declarations::ModuleDecl, Prism::ClassNode | Prism::ModuleNode) -> void
 
       def visit_singleton_class_node: (Prism::SingletonClassNode) -> void
 
-      def in_singleton_class?: () -> bool
+      # Reports `ConstantInSingletonScope` and returns `true` if the current scope is `class << self`
+      #
+      def reject_constant_in_singleton_class: (Prism::Location) -> bool
 
       private
 
