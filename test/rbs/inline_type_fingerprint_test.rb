@@ -299,4 +299,68 @@ NewName = ::OldName #: class-alias
     assert_equal result, result2
     refute_equal result, result3
   end
+
+  def test_visibility_fingerprint
+    result = fingerprint(<<-RUBY)
+class Foo
+  private
+
+  def bar
+  end
+end
+    RUBY
+
+    result2 = fingerprint(<<-RUBY)
+class Foo
+  private
+  def bar
+  end
+end
+    RUBY
+
+    result3 = fingerprint(<<-RUBY)
+class Foo
+  def bar
+  end
+end
+    RUBY
+
+    result4 = fingerprint(<<-RUBY)
+class Foo
+  private def bar
+  end
+end
+    RUBY
+
+    result5 = fingerprint(<<-RUBY)
+class Foo
+  public
+
+  def bar
+  end
+end
+    RUBY
+
+    assert_equal result, result2
+    refute_equal result, result3
+    refute_equal result, result4
+    refute_equal result3, result4
+    refute_equal result, result5
+  end
+
+  def test_attribute_visibility_fingerprint
+    result = fingerprint(<<-RUBY)
+class Foo
+  private attr_reader :bar
+end
+    RUBY
+
+    result2 = fingerprint(<<-RUBY)
+class Foo
+  attr_reader :bar
+end
+    RUBY
+
+    refute_equal result, result2
+  end
 end

@@ -796,7 +796,8 @@ module RBS
           member.node,
           member.method_type.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) },
           member.leading_comment,
-          kind: member.kind
+          kind: member.kind,
+          visibility: member.visibility
         )
       when AST::Ruby::Members::IncludeMember
         resolved_annotation = member.annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
@@ -829,7 +830,8 @@ module RBS
           member.node,
           member.name_nodes,
           member.leading_comment,
-          resolved_type_annotation
+          resolved_type_annotation,
+          visibility: member.visibility
         )
       when AST::Ruby::Members::AttrWriterMember
         resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
@@ -838,7 +840,8 @@ module RBS
           member.node,
           member.name_nodes,
           member.leading_comment,
-          resolved_type_annotation
+          resolved_type_annotation,
+          visibility: member.visibility
         )
       when AST::Ruby::Members::AttrAccessorMember
         resolved_type_annotation = member.type_annotation&.map_type_name {|name, _, _| absolute_type_name(resolver, nil, name, context: context) }
@@ -847,8 +850,11 @@ module RBS
           member.node,
           member.name_nodes,
           member.leading_comment,
-          resolved_type_annotation
+          resolved_type_annotation,
+          visibility: member.visibility
         )
+      when AST::Ruby::Members::PublicMember, AST::Ruby::Members::PrivateMember
+        member
       when AST::Ruby::Members::InstanceVariableMember
         resolved_annotation = member.annotation.map_type_name {|name| absolute_type_name(resolver, nil, name, context: context) }
         AST::Ruby::Members::InstanceVariableMember.new(
