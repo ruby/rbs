@@ -121,6 +121,29 @@ EOF
     end
   end
 
+  def test_reference_constant_context_prefers_nested_constant_over_scope_name
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module M
+  class C
+    class C
+      CONST: Integer
+    end
+  end
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+        resolver = Resolver::ConstantResolver.new(builder: builder)
+        context = [[nil, TypeName.parse("::M")], TypeName.parse("::M::C")]
+
+        constant = resolver.resolve(:C, context: context)
+
+        assert_equal "::M::C::C", constant.name.to_s
+      end
+    end
+  end
+
   def test_reference_constant_nested_context
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
