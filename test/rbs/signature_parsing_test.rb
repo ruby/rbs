@@ -448,6 +448,25 @@ end
     end
   end
 
+  def test_module_selfs_intersection
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
+module Foo : Bar & Baz[String], _Each & foo
+end
+    RBS
+      module_decl = decls[0]
+
+      # An intersection is equivalent to listing the self types with `,`
+      assert_equal [
+                     Declarations::Module::Self.new(name: type_name("Bar"), args: [], location: nil),
+                     Declarations::Module::Self.new(name: type_name("Baz"), args: [parse_type("String")], location: nil),
+                     Declarations::Module::Self.new(name: type_name("_Each"), args: [], location: nil),
+                     Declarations::Module::Self.new(name: type_name("foo"), args: [], location: nil)
+                   ], module_decl.self_types
+      assert_equal "Baz[String]", module_decl.self_types[1].location.source
+      assert_equal "Bar & Baz[String], _Each & foo", module_decl.location[:self_types].source
+    end
+  end
+
   def test_module_selfs
     Parser.parse_signature(<<-RBS).tap do |_, _, decls|
 module Enumerable[A, B] : _Each, Object

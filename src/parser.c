@@ -2646,6 +2646,9 @@ static bool parse_interface_decl(rbs_parser_t *parser, rbs_position_t comment_po
 
 /*
   module_self_types ::= {`:`} module_self_type `,` ... `,` <module_self_type>
+                      | {`:`} module_self_type `&` ... `&` <module_self_type>
+
+  An intersection of self types is equivalent to listing them with `,`.
 
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
@@ -2681,7 +2684,7 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
         self_type->args_range = RBS_RANGE_LEX2AST(args_range);
         rbs_node_list_append(array, (rbs_node_t *) self_type);
 
-        if (parser->next_token.type == pCOMMA) {
+        if (parser->next_token.type == pCOMMA || parser->next_token.type == pAMP) {
             rbs_parser_advance(parser);
         } else {
             break;
