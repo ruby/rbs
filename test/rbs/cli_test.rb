@@ -33,7 +33,8 @@ class RBS::CliTest < Test::Unit::TestCase
   # with a version mismatch error when `RUBYLIB` points at the standard library of the running Ruby.
   # That is what happens in ruby/ruby CI, where the tests run with a freshly built `ruby`.
   #
-  BUNDLE_COMMAND = [RbConfig.ruby, "-S", "bundle"]
+  RUBY_EXECUTABLE = ENV["RUBY"] || RbConfig.ruby
+  BUNDLE_COMMAND = [RUBY_EXECUTABLE, "-S", "bundle"]
 
   # Run `rbs collection` with fresh bundler environment
   #
@@ -54,7 +55,7 @@ class RBS::CliTest < Test::Unit::TestCase
           rbs_path << (":" + rblib)
         end
 
-        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, RbConfig.ruby, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
+        Open3.capture3({ "RUBYLIB" => rbs_path }, *bundle_exec, RUBY_EXECUTABLE, "#{__dir__}/../../exe/rbs", "--log-level=debug", "collection", *commands, chdir: Dir.pwd)
       end
 
     if block_given?
