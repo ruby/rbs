@@ -639,6 +639,7 @@ _module-alias-decl_ ::= `module` _module-name_ `=` _module-name_
 
 _module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_            (Class instance)
                       | _interface-name_ _type-arguments_ `,` _module-self-types_        (Interface)
+                      | _alias-name_ _type-arguments_ `,` _module-self-types_            (Type alias)
 
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
@@ -680,6 +681,20 @@ end
 ```
 
 The `Enumerable` module above requires `each` method for enumerating objects.
+
+The self type can be a class, a module, an interface, or a type alias.
+A type alias used as a self type must expand to a class instance type, an interface type, or an intersection of them, which is equivalent to listing each of them as self types.
+
+```rbs
+module Logging
+  def log: (String) -> void
+end
+
+type loggable_each[A] = _Each[A, void] & Logging
+
+module LoggingEnumerable[A] : loggable_each[A]   # Same as `module LoggingEnumerable[A] : _Each[A, void], Logging`
+end
+```
 
 * Self type arguments and generic class bounds are not *classish-context* nor *self-context*
 

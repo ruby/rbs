@@ -2649,6 +2649,8 @@ static bool parse_interface_decl(rbs_parser_t *parser, rbs_position_t comment_po
 
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
+                     | <alias_name>
+                     | alias_name `[` type_list <`]`>
 */
 RBS_NODISCARD
 static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array) {
@@ -2660,7 +2662,7 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
 
         rbs_range_t name_range;
         rbs_type_name_t *module_name = NULL;
-        CHECK_PARSE(parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME), &name_range, &module_name));
+        CHECK_PARSE(parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME | ALIAS_NAME), &name_range, &module_name));
         self_range.end = name_range.end;
 
         rbs_node_list_t *args = rbs_node_list_new(ALLOCATOR());
@@ -4124,7 +4126,7 @@ static bool parse_inline_leading_annotation(rbs_parser_t *parser, rbs_ast_ruby_a
 
             rbs_range_t name_range;
             rbs_type_name_t *type_name = NULL;
-            if (!parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME), &name_range, &type_name)) {
+            if (!parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME | ALIAS_NAME), &name_range, &type_name)) {
                 return false;
             }
 
