@@ -249,22 +249,7 @@ module RBS
             self_types.push Definition::Ancestor::Instance.new(name: BuiltinNames::Object.name, args: [], source: nil)
           else
             entry.self_types.each do |module_self|
-              NoSelfTypeFoundError.check!(module_self, env: env)
-              InvalidTypeApplicationError.check2!(type_name: module_self.name, args: module_self.args, env: env, location: module_self.location)
-
-              module_name = module_self.name
-              if module_name.class?
-                module_entry = env.module_class_entry(module_name, normalized: true) or raise
-                module_name = module_entry.name
-                self_args = AST::TypeParam.normalize_args(module_entry.type_params, module_self.args)
-              end
-              if module_name.interface?
-                interface_entry = env.interface_decls.fetch(module_name)
-                self_args = AST::TypeParam.normalize_args(interface_entry.decl.type_params, module_self.args)
-              end
-              self_args or raise
-
-              self_types.push Definition::Ancestor::Instance.new(name: module_name, args: self_args, source: module_self)
+              push_self_type(self_types, module_self, name: module_self.name, args: module_self.args, location: module_self.location, expanding: [])
             end
           end
         end
@@ -351,6 +336,53 @@ module RBS
                                extended_interfaces: nil)
             end
           end
+      end
+
+      def push_self_type(self_types, module_self, name:, args:, location:, expanding:)
+        NoSelfTypeFoundError.check!(module_self, env: env, type_name: name, location: location)
+        name = env.normalize_type_name(name)
+        InvalidTypeApplicationError.check2!(type_name: name, args: args, env: env, location: location)
+
+        case
+        when name.class?
+          module_entry = env.module_class_entry(name, normalized: true) or raise
+          name = module_entry.name
+          self_args = AST::TypeParam.normalize_args(module_entry.type_params, args)
+        when name.interface?
+          interface_entry = env.interface_decls.fetch(name)
+          self_args = AST::TypeParam.normalize_args(interface_entry.decl.type_params, args)
+        when name.alias?
+          if expanding.include?(name)
+            raise RecursiveTypeAliasError.new(alias_names: [*expanding, name], location: location)
+          end
+
+          # Type aliases are expanded into the class instance and interface types they're composed of
+          alias_decl = env.type_alias_decls.fetch(name).decl
+          alias_args = AST::TypeParam.normalize_args(alias_decl.type_params, args)
+          subst = AST::TypeParam.application(alias_decl.type_params, alias_args) || Substitution.new
+
+          each_self_type_component(alias_decl.type.sub(subst), module_self) do |type|
+            push_self_type(self_types, module_self, name: type.name, args: type.args, location: type.location || location, expanding: [*expanding, name])
+          end
+          return
+        end
+
+        self_args or raise
+
+        self_types.push Definition::Ancestor::Instance.new(name: name, args: self_args, source: module_self)
+      end
+
+      def each_self_type_component(type, module_self, &block)
+        case type
+        when Types::ClassInstance, Types::Interface, Types::Alias
+          yield type
+        when Types::Intersection
+          type.types.each do |t|
+            each_self_type_component(t, module_self, &block)
+          end
+        else
+          raise InvalidSelfTypeError.new(type: type, module_self: module_self)
+        end
       end
 
       def mixin_ancestors0(decl, type_name, align_params:, included_modules:, included_interfaces:, extended_modules:, prepended_modules:, extended_interfaces:)
