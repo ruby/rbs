@@ -115,13 +115,7 @@ static void w_hash(rbs_serialize_state *state, rbs_hash_t *hash) {
         return;
     }
 
-    // rbs_hash_t does not maintain its `length` field (unlike rbs_node_list_t),
-    // so count the entries by walking the list.
-    uint32_t count = 0;
-    for (rbs_hash_node_t *n = hash->head; n != NULL; n = n->next) {
-        count++;
-    }
-    w_u32(state, count);
+    w_u32(state, (uint32_t) hash->length);
 
     for (rbs_hash_node_t *n = hash->head; n != NULL; n = n->next) {
         serialize_node(state, n->key);
