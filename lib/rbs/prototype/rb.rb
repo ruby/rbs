@@ -77,6 +77,7 @@ module RBS
         comments = parse_comments(string, include_trailing: false)
 
         process RubyVM::AbstractSyntaxTree.parse(string), decls: source_decls, comments: comments, context: Context.initial
+        decls
       end
 
       def process(node, decls:, comments:, context:)
