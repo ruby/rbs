@@ -602,7 +602,7 @@ module RBS
         when Definition::Ancestor::Singleton
           super_name = super_class.name
 
-          super_ancestors = singleton_ancestors(super_name, building_ancestors: [])
+          super_ancestors = singleton_ancestors(super_name, building_ancestors: building_ancestors)
           ancestors.unshift(*super_ancestors.ancestors)
         end
 
