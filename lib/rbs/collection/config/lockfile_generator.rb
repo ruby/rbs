@@ -16,7 +16,6 @@ module RBS
           "benchmark" => nil,
           "bigdecimal" => ">= 4.1.0",
           "csv" => nil,
-          "kconv" => nil,
           "logger" => nil,
           "minitest" => nil,
           "net-smtp" => nil,
