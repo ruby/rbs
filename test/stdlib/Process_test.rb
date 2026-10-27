@@ -77,3 +77,30 @@ class Process_StatusSingletonTest < Test::Unit::TestCase
     Process.spawn(RUBY_EXECUTABLE, "--disable=all", "-e", script, **opts)
   end
 end
+
+class Process_StatusInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Process::Status"
+
+  def test_success?
+    assert_send_type "() -> true",
+                     status_of("exit"), :success?
+    assert_send_type "() -> false",
+                     status_of("exit 1"), :success?
+
+    # A child killed by a signal has not exited, so `success?` returns `nil`.
+    pid = Process.spawn(RUBY_EXECUTABLE, "--disable=all", "-e", "sleep")
+    Process.kill(:KILL, pid)
+    _, status = Process.wait2(pid)
+    assert_send_type "() -> nil",
+                     status, :success?
+  end
+
+  private
+
+  def status_of(script)
+    _, status = Process.wait2(Process.spawn(RUBY_EXECUTABLE, "--disable=all", "-e", script))
+    status
+  end
+end
