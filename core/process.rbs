@@ -2023,7 +2023,7 @@ class Process::Status < Object
   # *   `false` if the process has completed unsuccessfully and exited.
   # *   `nil` if the process has not exited.
   #
-  def success?: () -> bool
+  def success?: () -> bool?
 
   # <!--
   #   rdoc-file=process.c
