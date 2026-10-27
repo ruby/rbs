@@ -237,7 +237,7 @@ class Numeric
   #
   # No subclass in the Ruby Core or Standard Library uses this implementation.
   #
-  def <=>: (Numeric other) -> Integer
+  def <=>: (Numeric other) -> Integer?
 
   # <!--
   #   rdoc-file=numeric.c
