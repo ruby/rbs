@@ -5,6 +5,12 @@ class NumericInstanceTest < Test::Unit::TestCase
 
   testing 'Numeric'
 
+  def test_op_cmp
+    numeric = Numeric.new
+    assert_send_type '(Numeric) -> 0', numeric, :<=>, numeric
+    assert_send_type '(Numeric) -> nil', numeric, :<=>, Numeric.new
+  end
+
   def test_real
     assert_send_type '() -> Integer', 1, :real
     assert_send_type '() -> Float', 1.0, :real
