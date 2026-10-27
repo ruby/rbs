@@ -71,11 +71,7 @@ module RBS
         subst.mapping.merge!(mapping)
 
         other.mapping.each do |var, type|
-          if mapping.key?(var)
-            subst.add(from: var, to: self[type])
-          else
-            subst.add(from: var, to: type)
-          end
+          subst.add(from: var, to: type.sub(self))
         end
       end
     end
