@@ -78,7 +78,8 @@ class TCPServer < TCPSocket
   # *   TCPServer#accept
   # *   Socket#accept
   #
-  def accept_nonblock: (?exception: boolish) -> (TCPSocket | :wait_readable)
+  def accept_nonblock: (?exception: true) -> TCPSocket
+                     | (exception: false) -> (TCPSocket | :wait_readable)
 
   # <!--
   #   rdoc-file=ext/socket/tcpserver.c
