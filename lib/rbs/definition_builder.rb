@@ -936,7 +936,7 @@ module RBS
           raise InvalidOverloadMethodError.new(
             type_name: definition.type_name,
             method_name: method.name,
-            kind: :instance,
+            kind: definition.class_type? ? :singleton : :instance,
             members: method.overloads
           )
         end
