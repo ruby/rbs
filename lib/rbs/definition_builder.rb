@@ -891,7 +891,7 @@ module RBS
           method_definition = Definition::Method.new(
             super_method: existing_method,
             defs: existing_method.defs.map { |defn| defn.update(implemented_in: implemented_in) },
-            accessibility: :public,
+            accessibility: method.accessibility,
             alias_of: existing_method.alias_of,
             alias_member: nil
           )
@@ -913,7 +913,7 @@ module RBS
           method_definition = Definition::Method.new(
             super_method: existing_method,
             defs: defs,
-            accessibility: :public,
+            accessibility: method.accessibility,
             alias_of: nil,
             alias_member: nil
           )

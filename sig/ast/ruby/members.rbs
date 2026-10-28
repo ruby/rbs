@@ -17,6 +17,7 @@ module RBS
                | AttrReaderMember | AttrWriterMember | AttrAccessorMember
                | InstanceVariableMember
                | ModuleSelfMember
+               | PublicMember | PrivateMember
 
         class MethodTypeAnnotation
           class DocStyle
@@ -87,8 +88,9 @@ module RBS
           attr_reader kind: :instance | :singleton
           attr_reader method_type: MethodTypeAnnotation
           attr_reader leading_comment: CommentBlock?
+          attr_reader visibility: AST::Members::visibility?
 
-          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation, CommentBlock? leading_comment, ?kind: :instance | :singleton) -> void
+          def initialize: (Buffer, Symbol name, Prism::DefNode node, MethodTypeAnnotation, CommentBlock? leading_comment, ?kind: :instance | :singleton, ?visibility: AST::Members::visibility?) -> void
 
           def singleton?: () -> bool
 
@@ -143,7 +145,9 @@ module RBS
 
           attr_reader leading_comment: CommentBlock?
 
-          def initialize: (Buffer, Prism::CallNode, Array[Prism::SymbolNode] name_nodes, RBS::AST::Ruby::CommentBlock? leading_comment, Annotations::NodeTypeAssertion? type_annotation) -> void
+          attr_reader visibility: AST::Members::visibility?
+
+          def initialize: (Buffer, Prism::CallNode, Array[Prism::SymbolNode] name_nodes, RBS::AST::Ruby::CommentBlock? leading_comment, Annotations::NodeTypeAssertion? type_annotation, ?visibility: AST::Members::visibility?) -> void
 
           def names: () -> Array[Symbol]
 
@@ -163,6 +167,24 @@ module RBS
         end
 
         class AttrAccessorMember < AttributeMember
+        end
+
+        class VisibilityMember < Base
+          attr_reader node: Prism::CallNode
+
+          def initialize: (Buffer, Prism::CallNode) -> void
+
+          def location: () -> Location
+
+          def type_fingerprint: () -> untyped
+        end
+
+        class PublicMember < VisibilityMember
+          def visibility: () -> :public
+        end
+
+        class PrivateMember < VisibilityMember
+          def visibility: () -> :private
         end
 
         class InstanceVariableMember < Base
