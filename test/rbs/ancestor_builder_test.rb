@@ -1418,4 +1418,122 @@ end
       end
     end
   end
+
+  def test_one_ancestors_module_singleton_self_types
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Model
+end
+
+class Box[T]
+end
+
+module ClassMethods : singleton(Model), singleton(Box)[Integer]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::ClassMethods")).tap do |a|
+          assert_equal [
+                         Ancestor::Singleton.new(name: type_name("::Model")),
+                         Ancestor::Singleton.new(name: type_name("::Box"))
+                       ],
+                       a.self_types
+
+          a.self_types.each do |self_type|
+            assert_instance_of AST::Declarations::Module::SingletonSelf, self_type.source
+          end
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_module_singleton_self_types_error
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _Each
+end
+
+class Box[T]
+end
+
+module A : singleton(Unknown)
+end
+
+module B : singleton(Box)[Integer, String]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises(RBS::NoSelfTypeFoundError) do
+          builder.one_instance_ancestors(type_name("::A"))
+        end
+
+        assert_raises(InvalidTypeApplicationError) do
+          builder.one_instance_ancestors(type_name("::B"))
+        end
+
+        # Singleton of an interface is rejected by the parser, but the check also rejects it
+        self_type = AST::Declarations::Module::SingletonSelf.new(name: type_name("::_Each"), args: [], location: nil)
+        assert_raises(RBS::NoSelfTypeFoundError) do
+          RBS::NoSelfTypeFoundError.check!(self_type, env: env)
+        end
+      end
+    end
+  end
+
+  def test_build_ancestors_module_singleton_self_type
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Model
+end
+
+module ClassMethods : singleton(Model)
+end
+
+class User < Model
+  extend ClassMethods
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.singleton_ancestors(type_name("::User")).tap do |a|
+          assert_equal [
+                         Ancestor::Singleton.new(name: type_name("::User")),
+                         Ancestor::Instance.new(name: type_name("::ClassMethods"), args: [], source: nil),
+                         Ancestor::Singleton.new(name: type_name("::Model")),
+                       ],
+                       a.ancestors.take(3)
+        end
+      end
+    end
+  end
+
+  def test_build_ancestors_module_singleton_self_type_cycle
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module Loop : singleton(Model)
+end
+
+class Model
+  extend Loop
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        # Same as `module M : Foo` with `class Foo include M`
+        assert_raises(RecursiveAncestorError) do
+          builder.instance_ancestors(type_name("::Loop"))
+        end
+
+        assert_raises(RecursiveAncestorError) do
+          builder.singleton_ancestors(type_name("::Model"))
+        end
+      end
+    end
+  end
 end

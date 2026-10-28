@@ -228,10 +228,11 @@ module RBS
       end
 
       class Singleton
-        attr_reader :name
+        attr_reader :name, :source
 
-        def initialize(name:)
+        def initialize(name:, source: nil)
           @name = name
+          @source = source
         end
 
         def ==(other)
