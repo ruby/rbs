@@ -97,11 +97,42 @@ module RBS
 
           def initialize: (name: TypeName, args: Array[Types::t], location: loc?) -> void
 
+          def update: (?name: TypeName, ?args: Array[Types::t], ?location: loc?) -> Self
+
           include _HashEqual
           include _ToJson
 
           def to_s: () -> String
         end
+
+        # Self type constraint of singleton class
+        #
+        # ```rbs
+        # module Foo : singleton(Bar)
+        # ```
+        #
+        class SingletonSelf
+          # singleton(Bar)[String]
+          #           ^^^          name
+          #               ^^^^^^^^ args
+          #
+          type loc = Location[:name, :args]
+
+          attr_reader name: TypeName
+          attr_reader args: Array[Types::t]
+          attr_reader location: loc?
+
+          def initialize: (name: TypeName, args: Array[Types::t], location: loc?) -> void
+
+          def update: (?name: TypeName, ?args: Array[Types::t], ?location: loc?) -> SingletonSelf
+
+          include _HashEqual
+          include _ToJson
+
+          def to_s: () -> String
+        end
+
+        type self_type = Self | SingletonSelf
 
         type member = Members::t | t
 
@@ -128,12 +159,12 @@ module RBS
         attr_reader members: Array[member]
         attr_reader location: loc?
         attr_reader annotations: Array[Annotation]
-        attr_reader self_types: Array[Self]
+        attr_reader self_types: Array[self_type]
         attr_reader comment: Comment?
 
-        def initialize: (name: TypeName, type_params: Array[TypeParam], members: Array[member], location: loc?, annotations: Array[Annotation], self_types: Array[Self], comment: Comment?) -> void
+        def initialize: (name: TypeName, type_params: Array[TypeParam], members: Array[member], location: loc?, annotations: Array[Annotation], self_types: Array[self_type], comment: Comment?) -> void
 
-        def update: (?name: TypeName, ?type_params: Array[TypeParam], ?members: Array[member], ?location: loc?, ?annotations: Array[Annotation], ?self_types: Array[Self], ?comment: Comment?) -> Declarations::Module
+        def update: (?name: TypeName, ?type_params: Array[TypeParam], ?members: Array[member], ?location: loc?, ?annotations: Array[Annotation], ?self_types: Array[self_type], ?comment: Comment?) -> Declarations::Module
 
         include _HashEqual
         include _ToJson

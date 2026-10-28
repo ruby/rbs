@@ -35,6 +35,8 @@ const char *RBS_NONNULL rbs_node_type_name(rbs_node_t *RBS_NONNULL node) {
         return "RBS::AST::Declarations::Module";
     case RBS_AST_DECLARATIONS_MODULE_SELF:
         return "RBS::AST::Declarations::Module::Self";
+    case RBS_AST_DECLARATIONS_MODULE_SINGLETON_SELF:
+        return "RBS::AST::Declarations::Module::SingletonSelf";
     case RBS_AST_DECLARATIONS_MODULE_ALIAS:
         return "RBS::AST::Declarations::ModuleAlias";
     case RBS_AST_DECLARATIONS_TYPE_ALIAS:
@@ -490,6 +492,23 @@ rbs_ast_declarations_module_self_t *RBS_NONNULL rbs_ast_declarations_module_self
     *instance = (rbs_ast_declarations_module_self_t) {
         .base = (rbs_node_t) {
             .type = RBS_AST_DECLARATIONS_MODULE_SELF,
+            .location = location,
+        },
+        .name = name,
+        .args = args,
+        .name_range = name_range,
+        .args_range = RBS_LOCATION_NULL_RANGE,
+    };
+
+    return instance;
+}
+#line 140 "templates/src/ast.c.erb"
+rbs_ast_declarations_module_singleton_self_t *RBS_NONNULL rbs_ast_declarations_module_singleton_self_new(rbs_allocator_t *RBS_NONNULL allocator, rbs_location_range location, rbs_type_name_t *RBS_NONNULL name, rbs_node_list_t *RBS_NONNULL args, rbs_location_range name_range) {
+    rbs_ast_declarations_module_singleton_self_t *instance = rbs_allocator_alloc(allocator, rbs_ast_declarations_module_singleton_self_t);
+
+    *instance = (rbs_ast_declarations_module_singleton_self_t) {
+        .base = (rbs_node_t) {
+            .type = RBS_AST_DECLARATIONS_MODULE_SINGLETON_SELF,
             .location = location,
         },
         .name = name,
