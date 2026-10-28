@@ -415,6 +415,9 @@ module RBS
           insert_ruby_decl(member, context: inner_context, namespace: name.to_namespace)
         end
 
+      when AST::Ruby::Declarations::SingletonClassDecl
+        # `class << self` defines no constant; its members are read through the enclosing class entry
+
       when AST::Ruby::Declarations::ConstantDecl
         name = decl.constant_name.with_prefix(namespace)
 
@@ -754,6 +757,13 @@ module RBS
             else
               raise "Unknown member type: #{member.class}"
             end
+          end
+        end
+
+      when AST::Ruby::Declarations::SingletonClassDecl
+        AST::Ruby::Declarations::SingletonClassDecl.new(decl.buffer, decl.node).tap do |resolved|
+          decl.members.each do |member|
+            resolved.members << resolve_ruby_member(resolver, member, context: context)
           end
         end
 
