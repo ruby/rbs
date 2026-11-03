@@ -1,4 +1,4 @@
-//! Safe parsing of RBS types and method types.
+//! Safe parsing of RBS types, method types, and inline annotations.
 
 use super::Node;
 use super::parser::{OwnedParser, ParseError};
@@ -75,7 +75,7 @@ pub fn parse_type<'a>(
     type_variables: &[&'a str],
     options: TypeOptions,
 ) -> Result<Option<ParsedNode<'a>>, ParseError> {
-    let parsed = parse_fragment(source, range, type_variables, |parser, node| unsafe {
+    let parsed = parse_fragment(source, range, type_variables, true, |parser, node| unsafe {
         rbs_parse_type(
             parser,
             node,
@@ -104,9 +104,56 @@ pub fn parse_method_type<'a>(
     options: MethodTypeOptions,
 ) -> Result<Option<ParsedNode<'a>>, ParseError> {
     // The Ruby extension always allows `instance` and `class` in method types.
-    parse_fragment(source, range, type_variables, |parser, node| unsafe {
+    parse_fragment(source, range, type_variables, true, |parser, node| unsafe {
         rbs_parse_method_type(parser, node, options.require_eof, true)
     })
+}
+
+/// Parses a leading RBS annotation, such as `: (Integer) -> void` or `@rbs x: Integer`, as
+/// a `Node::*Annotation` variant.
+///
+/// Pass the text without its Ruby comment marker. Arguments and errors are as for
+/// [`parse_type`]; `Ok(None)` means the parser produced no annotation.
+///
+/// # Example
+///
+/// ```
+/// use ruby_rbs::node::{Node, parse_inline_leading_annotation};
+/// let source = "@rbs value: Integer";
+/// let parsed = parse_inline_leading_annotation(source, 0..source.len(), &[])?.unwrap();
+/// assert!(matches!(parsed.node(), Node::ParamTypeAnnotation(_)));
+/// # Ok::<(), ruby_rbs::node::ParseError>(())
+/// ```
+pub fn parse_inline_leading_annotation<'a>(
+    source: &'a str,
+    range: Range<usize>,
+    type_variables: &[&'a str],
+) -> Result<Option<ParsedNode<'a>>, ParseError> {
+    parse_fragment(
+        source,
+        range,
+        type_variables,
+        false,
+        |parser, node| unsafe { rbs_parse_inline_leading_annotation(parser, node) },
+    )
+}
+
+/// Parses a trailing RBS annotation, such as `: String` or `[Integer]`, as a
+/// `Node::*Annotation` variant or [`Node::NodeTypeAssertion`].
+///
+/// Behaves like [`parse_inline_leading_annotation`].
+pub fn parse_inline_trailing_annotation<'a>(
+    source: &'a str,
+    range: Range<usize>,
+    type_variables: &[&'a str],
+) -> Result<Option<ParsedNode<'a>>, ParseError> {
+    parse_fragment(
+        source,
+        range,
+        type_variables,
+        false,
+        |parser, node| unsafe { rbs_parse_inline_trailing_annotation(parser, node) },
+    )
 }
 
 /// Runs `parse`, which stores the node it produces, on a parser over `source[range]`.
@@ -114,10 +161,11 @@ fn parse_fragment<'a, T>(
     source: &'a str,
     range: Range<usize>,
     type_variables: &[&'a str],
+    empty_is_none: bool,
     parse: impl FnOnce(*mut rbs_parser_t, *mut *mut T) -> bool,
 ) -> Result<Option<ParsedNode<'a>>, ParseError> {
     let parser = OwnedParser::new(source, range, type_variables)?;
-    if parser.at_eof() {
+    if empty_is_none && parser.at_eof() {
         return Ok(None);
     }
 
