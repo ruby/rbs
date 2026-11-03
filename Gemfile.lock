@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 7157b8feda244080fa1bd42c2534d13d9d1322f2
+  revision: 31b49c3a8139469cb27bb61085c2741059369a3c
   specs:
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
@@ -47,7 +47,7 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
-    addressable (2.9.0)
+    addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     base64 (0.3.0)
@@ -56,7 +56,7 @@ GEM
     bigdecimal (4.1.3)
     concurrent-ruby (1.3.8)
     connection_pool (3.0.2)
-    csv (3.3.6)
+    csv (3.3.7)
     dbm (1.1.0)
     diff-lcs (1.6.2)
     digest (3.3.0)
@@ -72,7 +72,7 @@ GEM
       strong_json (>= 1.1, < 2.2)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-console (0.9.4)
+    io-console (0.9.5)
     irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
@@ -147,7 +147,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.7)
-    rubocop (1.92.1)
+    rubocop (1.92.2)
       json (>= 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
