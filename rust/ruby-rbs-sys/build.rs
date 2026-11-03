@@ -166,6 +166,9 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_function("rbs_parser_new")
         .allowlist_function("rbs_parse_inline_leading_annotation")
         .allowlist_function("rbs_parse_inline_trailing_annotation")
+        .allowlist_function("rbs_parse_(type|method_type)")
+        .allowlist_function("rbs_parser_advance")
+        .allowlist_function("rbs_parser_(push_typevar_table|insert_typevar)")
         // String functions
         .allowlist_function("rbs_string_new")
         // Location functions
@@ -175,6 +178,7 @@ fn generate_bindings(include_path: &Path) -> Result<bindgen::Bindings, Box<dyn E
         .allowlist_function("rbs_constant_pool_free")
         .allowlist_function("rbs_constant_pool_id_to_constant")
         .allowlist_function("rbs_constant_pool_init")
+        .allowlist_function("rbs_constant_pool_insert_shared")
         .generate()
         .map_err(|_| "Unable to generate rbs bindings")?;
 
