@@ -215,9 +215,27 @@ module RBS
       super "#{Location.to_string location}: Could not find self type: #{type_name}"
     end
 
-    def self.check!(self_type, env:)
-      self_name = env.normalize_type_name(self_type.name)
-      (env.module_name?(self_name) || env.interface_name?(self_name)) or raise new(type_name: self_type.name, location: self_type.location)
+    def self.check!(self_type, env:, type_name: self_type.name, location: self_type.location)
+      self_name = env.normalize_type_name(type_name)
+      (env.module_name?(self_name) || env.interface_name?(self_name) || env.type_alias_name?(self_name)) or raise new(type_name: type_name, location: location)
+    end
+  end
+
+  class InvalidSelfTypeError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader :type
+    attr_reader :module_self
+
+    def initialize(type:, module_self:)
+      @type = type
+      @module_self = module_self
+
+      super "#{Location.to_string location}: Self type must be composed of class instance or interface types: #{module_self.name} expands to `#{type}`"
+    end
+
+    def location
+      module_self.location
     end
   end
 

@@ -375,6 +375,35 @@ EOF
     end
   end
 
+  def test_build_instance_module_self_types_type_alias
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+interface _Reader[T]
+  def read: () -> T
+end
+
+module Writer
+  def write: (String) -> void
+end
+
+type io[T] = _Reader[T] & Writer
+
+module M : io[String]
+  alias get read
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::M")).tap do |definition|
+          assert_method_definition definition.methods[:read], ["() -> ::String"], accessibility: :public
+          assert_method_definition definition.methods[:write], ["(::String) -> void"], accessibility: :public
+          assert_method_definition definition.methods[:get], ["() -> ::String"], accessibility: :public
+        end
+      end
+    end
+  end
+
   def test_build_instance_module_self_types_type_param_alignment
     SignatureManager.new do |manager|
       manager.files[Pathname("a.rbs")] = <<EOF
