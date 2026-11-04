@@ -315,6 +315,33 @@ EOF
     end
   end
 
+  def test_build_instance_module_include_generic_module_with_renamed_param
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+module A[V]
+  def n: () -> V
+  def m: () -> V?
+end
+
+module B[U]
+  include A[U]
+end
+
+class C
+  include B[Integer]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::C")).tap do |definition|
+          assert_method_definition definition.methods[:n], ["() -> ::Integer"], accessibility: :public
+          assert_method_definition definition.methods[:m], ["() -> ::Integer?"], accessibility: :public
+        end
+      end
+    end
+  end
+
   def test_build_instance_module_include_interface
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
