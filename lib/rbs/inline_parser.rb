@@ -168,7 +168,11 @@ module RBS
         push_module_nesting(decl) do
           visit_child_nodes(node)
 
-          node.child_nodes.each do |child_node|
+          child_nodes = node.child_nodes.flat_map do |child_node|
+            child_node.is_a?(Prism::StatementsNode) ? child_node.body : [child_node]
+          end
+
+          child_nodes.each do |child_node|
             if child_node
               comments.each_enclosed_block(child_node) do |block|
                 report_unused_block(block)
