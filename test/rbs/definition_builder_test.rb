@@ -1727,6 +1727,26 @@ end
     end
   end
 
+  def test_definition_singleton_method_type_def_overload_from_super_no_super
+    SignatureManager.new do |manager|
+      manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
+class Hello
+  def self.foo: (Integer) -> String | ...
+end
+      EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        assert_raises RBS::InvalidOverloadMethodError do
+          builder.build_singleton(type_name("::Hello"))
+        end.tap do |error|
+          assert_equal :singleton, error.kind
+          assert_include error.message, "Invalid method overloading: ::Hello.foo"
+        end
+      end
+    end
+  end
+
   def test_new_from_included_initialize
     SignatureManager.new do |manager|
       manager.files.merge!(Pathname("foo.rbs") => <<-EOF)
