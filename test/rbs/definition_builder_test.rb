@@ -3415,6 +3415,34 @@ end
     end
   end
 
+  def test_inline_decl__singleton_class
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("a.rb", <<~RUBY)
+        class A
+          class << self
+            # @rbs (String) -> Integer
+            def hello(x) = 123
+          end
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_singleton(type_name("::A")).tap do |definition|
+          definition.methods[:hello].tap do |method|
+            assert_equal type_name("::A"), method.defined_in
+            assert_equal [parse_method_type("(::String) -> ::Integer")], method.method_types
+          end
+        end
+
+        builder.build_instance(type_name("::A")).tap do |definition|
+          refute_operator definition.methods, :key?, :hello
+        end
+      end
+    end
+  end
+
   def test_inline_decl__class_with_super
     SignatureManager.new do |manager|
       manager.add_ruby_file(Pathname("a.rb"), <<~RUBY)
