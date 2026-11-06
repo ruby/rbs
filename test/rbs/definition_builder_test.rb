@@ -3908,6 +3908,113 @@ EOF
     end
   end
 
+  def test_inline_decl__visibility
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("visibility.rb", <<~RUBY)
+        class Foo
+          def public_before = nil
+
+          private
+
+          def private_in_section = nil
+          attr_reader :private_attr
+          def self.singleton_in_private_section = nil
+
+          public
+
+          def public_after = nil
+          attr_writer :public_attr
+
+          private def private_def = nil
+          public def public_def = nil
+          private attr_accessor :private_accessor
+          private def self.private_singleton = nil
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal :public, definition.methods[:public_before].accessibility
+          assert_equal :private, definition.methods[:private_in_section].accessibility
+          assert_equal :private, definition.methods[:private_attr].accessibility
+          assert_equal :public, definition.methods[:public_after].accessibility
+          assert_equal :public, definition.methods[:public_attr=].accessibility
+          assert_equal :private, definition.methods[:private_def].accessibility
+          assert_equal :public, definition.methods[:public_def].accessibility
+          assert_equal :private, definition.methods[:private_accessor].accessibility
+          assert_equal :private, definition.methods[:private_accessor=].accessibility
+        end
+
+        builder.build_singleton(type_name("::Foo")).tap do |definition|
+          # `private` without arguments doesn't affect singleton methods
+          assert_equal :public, definition.methods[:singleton_in_private_section].accessibility
+          assert_equal :private, definition.methods[:private_singleton].accessibility
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__visibility__public_def_in_private_section
+    SignatureManager.new do |manager|
+      manager.add_ruby_file("visibility.rb", <<~RUBY)
+        class Foo
+          private
+
+          public def foo = nil
+
+          def bar = nil
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          assert_equal :public, definition.methods[:foo].accessibility
+          assert_equal :private, definition.methods[:bar].accessibility
+        end
+      end
+    end
+  end
+
+  def test_inline_decl__visibility__overriding
+    SignatureManager.new do |manager|
+      manager.files[Pathname("base.rbs")] = <<~RBS
+        class Base
+          def foo: () -> String
+          def bar: () -> String
+        end
+      RBS
+
+      manager.add_ruby_file("child.rb", <<~RUBY)
+        class Child < Base
+          private def foo = ""
+
+          # @rbs () -> String
+          private def bar = ""
+        end
+      RUBY
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Child")).tap do |definition|
+          # Unannotated overriding inherits the type from the parent, but the visibility is given by the child
+          definition.methods[:foo].tap do |method|
+            assert_equal ["() -> ::String"], method.method_types.map(&:to_s)
+            assert_equal :private, method.accessibility
+          end
+
+          definition.methods[:bar].tap do |method|
+            assert_equal :private, method.accessibility
+          end
+        end
+      end
+    end
+  end
+
   def test_inline_decl__module_self
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<~RBS

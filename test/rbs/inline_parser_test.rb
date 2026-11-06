@@ -2275,4 +2275,290 @@ COMMENT
 
     assert_empty result.declarations
   end
+
+  def test_parse__visibility_members
+    result = parse(<<~RUBY)
+      class Foo
+        def foo; end
+
+        private
+
+        def bar; end
+
+        public
+
+        def baz; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, decl
+
+      assert_equal 5, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_nil member.visibility
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PrivateMember, member
+        assert_equal :private, member.visibility
+        assert_equal "private", member.location.source
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :bar, member.name
+        assert_nil member.visibility
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::PublicMember, member
+        assert_equal :public, member.visibility
+        assert_equal "public", member.location.source
+      end
+
+      decl.members[4].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :baz, member.name
+      end
+    end
+  end
+
+  def test_parse__visibility_members__in_module
+    result = parse(<<~RUBY)
+      module Foo
+        private
+
+        def bar; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_instance_of RBS::AST::Ruby::Declarations::ModuleDecl, decl
+
+      assert_instance_of RBS::AST::Ruby::Members::PrivateMember, decl.members[0]
+      assert_instance_of RBS::AST::Ruby::Members::DefMember, decl.members[1]
+    end
+  end
+
+  def test_parse__visibility_members__skip
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        private
+
+        def bar; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      assert_instance_of RBS::AST::Ruby::Members::DefMember, decl.members[0]
+    end
+  end
+
+  def test_parse__visibility_members__toplevel
+    result = parse(<<~RUBY)
+      private
+
+      class Foo
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+    assert_equal 1, result.declarations.size
+    assert_instance_of RBS::AST::Ruby::Declarations::ClassDecl, result.declarations[0]
+  end
+
+  def test_parse__def__with_visibility
+    result = parse(<<~RUBY)
+      class Foo
+        private def foo; end
+
+        public def bar; end
+
+        # @rbs (String) -> void
+        private def baz(x); end
+
+        private def qux(x) #: Integer
+          x
+        end
+
+        private def self.quux; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 5, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :foo, member.name
+        assert_equal :private, member.visibility
+        assert_equal "def foo; end", member.location.source
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :bar, member.name
+        assert_equal :public, member.visibility
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :baz, member.name
+        assert_equal :private, member.visibility
+        assert_equal ["(String) -> void"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :qux, member.name
+        assert_equal :private, member.visibility
+        assert_equal ["(untyped x) -> Integer"], member.overloads.map { _1.method_type.to_s }
+      end
+
+      decl.members[4].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::DefMember, member
+        assert_equal :quux, member.name
+        assert_predicate member, :singleton?
+        assert_equal :private, member.visibility
+      end
+    end
+  end
+
+  def test_parse__def__with_visibility__skip
+    result = parse(<<~RUBY)
+      class Foo
+        # @rbs skip
+        private def foo; end
+
+        private def bar; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      assert_equal :bar, decl.members[0].name
+      assert_equal :private, decl.members[0].visibility
+    end
+  end
+
+  def test_parse__def__with_visibility__nested_in_private_call
+    result = parse(<<~RUBY)
+      class Foo
+        private def foo; end
+
+        def bar; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      # The visibility is reset after leaving the `private` call
+      assert_nil decl.members[1].visibility
+    end
+  end
+
+  def test_error__def__with_visibility__toplevel
+    result = parse(<<~RUBY)
+      private def foo; end
+    RUBY
+
+    assert_equal 1, result.diagnostics.size
+    assert_instance_of RBS::InlineParser::Diagnostic::TopLevelMethodDefinition, result.diagnostics[0]
+  end
+
+  def test_parse__attr__with_visibility
+    result = parse(<<~RUBY)
+      class Foo
+        private attr_reader :foo #: String
+
+        public attr_writer :bar
+
+        private attr_accessor :baz, :qux
+
+        attr_reader :quux
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 4, decl.members.size
+
+      decl.members[0].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+        assert_equal [:foo], member.names
+        assert_equal :private, member.visibility
+        assert_equal "String", member.type.to_s
+      end
+
+      decl.members[1].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrWriterMember, member
+        assert_equal [:bar], member.names
+        assert_equal :public, member.visibility
+      end
+
+      decl.members[2].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrAccessorMember, member
+        assert_equal [:baz, :qux], member.names
+        assert_equal :private, member.visibility
+      end
+
+      decl.members[3].tap do |member|
+        assert_instance_of RBS::AST::Ruby::Members::AttrReaderMember, member
+        assert_nil member.visibility
+      end
+    end
+  end
+
+  def test_parse__visibility__symbol_arguments_ignored
+    result = parse(<<~RUBY)
+      class Foo
+        def foo; end
+
+        private :foo
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      assert_instance_of RBS::AST::Ruby::Members::DefMember, decl.members[0]
+      assert_nil decl.members[0].visibility
+    end
+  end
+
+  def test_parse__visibility__with_receiver_ignored
+    result = parse(<<~RUBY)
+      class Foo
+        self.private
+
+        def foo; end
+      end
+    RUBY
+
+    assert_empty result.diagnostics
+
+    result.declarations[0].tap do |decl|
+      assert_equal 1, decl.members.size
+      assert_instance_of RBS::AST::Ruby::Members::DefMember, decl.members[0]
+    end
+  end
 end

@@ -349,9 +349,35 @@ class Calculator
 end
 ```
 
+### Method visibility
+
+Inline RBS detects `public` and `private` calls, and applies the visibility to the methods, like RBS.
+
+```ruby
+class Calculator
+  def add(x, y) = x + y        # public
+
+  private
+
+  def helper = nil             # private
+
+  public
+
+  def sub(x, y) = x - y        # public
+
+  private def secret = nil     # private
+end
+```
+
+- `private`/`public` without arguments switches the visibility of the instance methods defined after the call
+- `private def ...`/`public def ...` applies the visibility to that method definition
+
+Note that the visibility is applied only when the method is called without receiver, and the symbol arguments, like `private :foo, :bar`, are ignored.
+
 ### Current Limitations
 
-- Method visibility declaration is not supported yet
+- `private :foo, :bar` style visibility declaration is not supported
+- `protected`, `private_class_method`, and `module_function` are not supported
 - The `class << self` syntax is not supported
 - Top-level method definitions (outside any class/module) are not supported
 - Method definitions with a non-self receiver (e.g. `def obj.foo`) are not supported
@@ -429,9 +455,25 @@ end
 
 The attribute definitions are ignored because the names are given by string literals and local variables.
 
+### Attribute visibility
+
+The attributes respect the visibility declaration, the same as [method definitions](#method-visibility).
+
+```ruby
+class Person
+  attr_reader :name #: String
+
+  private
+
+  attr_accessor :password #: String
+
+  private attr_writer :token #: String
+end
+```
+
 ### Current Limitations
 
-- Attribute visibility is not supported yet. All attributes are _public_
+- `private :foo, :bar` style visibility declaration is not supported
 - Top-level attribute definitions (outside any class/module) are not supported
 
 ## Mixin
