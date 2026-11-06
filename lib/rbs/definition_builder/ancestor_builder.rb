@@ -250,21 +250,33 @@ module RBS
           else
             entry.self_types.each do |module_self|
               NoSelfTypeFoundError.check!(module_self, env: env)
-              InvalidTypeApplicationError.check2!(type_name: module_self.name, args: module_self.args, env: env, location: module_self.location)
 
-              module_name = module_self.name
-              if module_name.class?
-                module_entry = env.module_class_entry(module_name, normalized: true) or raise
-                module_name = module_entry.name
-                self_args = AST::TypeParam.normalize_args(module_entry.type_params, module_self.args)
-              end
-              if module_name.interface?
-                interface_entry = env.interface_decls.fetch(module_name)
-                self_args = AST::TypeParam.normalize_args(interface_entry.decl.type_params, module_self.args)
-              end
-              self_args or raise
+              case module_self
+              when AST::Declarations::Module::SingletonSelf
+                module_entry = env.module_class_entry(module_self.name, normalized: true) or raise
+                # Type arguments are optional for class singleton types, like `singleton(Array)`
+                unless module_self.args.empty?
+                  InvalidTypeApplicationError.check2!(type_name: module_self.name, args: module_self.args, env: env, location: module_self.location)
+                end
 
-              self_types.push Definition::Ancestor::Instance.new(name: module_name, args: self_args, source: module_self)
+                self_types.push Definition::Ancestor::Singleton.new(name: module_entry.name, source: module_self)
+              when AST::Declarations::Module::Self
+                InvalidTypeApplicationError.check2!(type_name: module_self.name, args: module_self.args, env: env, location: module_self.location)
+
+                module_name = module_self.name
+                if module_name.class?
+                  module_entry = env.module_class_entry(module_name, normalized: true) or raise
+                  module_name = module_entry.name
+                  self_args = AST::TypeParam.normalize_args(module_entry.type_params, module_self.args)
+                end
+                if module_name.interface?
+                  interface_entry = env.interface_decls.fetch(module_name)
+                  self_args = AST::TypeParam.normalize_args(interface_entry.decl.type_params, module_self.args)
+                end
+                self_args or raise
+
+                self_types.push Definition::Ancestor::Instance.new(name: module_name, args: self_args, source: module_self)
+              end
             end
           end
         end
@@ -529,9 +541,14 @@ module RBS
 
         if self_types = one_ancestors.self_types
           self_types.each do |mod|
-            if mod.name.class?
-              # Ensure there is no loop in ancestors chain
-              instance_ancestors(mod.name, building_ancestors: building_ancestors)
+            # Ensure there is no loop in ancestors chain
+            case mod
+            when Definition::Ancestor::Singleton
+              singleton_ancestors(mod.name, building_ancestors: building_ancestors)
+            when Definition::Ancestor::Instance
+              if mod.name.class?
+                instance_ancestors(mod.name, building_ancestors: building_ancestors)
+              end
             end
           end
         end

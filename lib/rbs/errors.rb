@@ -217,7 +217,14 @@ module RBS
 
     def self.check!(self_type, env:)
       self_name = env.normalize_type_name(self_type.name)
-      (env.module_name?(self_name) || env.interface_name?(self_name)) or raise new(type_name: self_type.name, location: self_type.location)
+      found =
+        case self_type
+        when AST::Declarations::Module::SingletonSelf
+          env.module_name?(self_name)
+        else
+          env.module_name?(self_name) || env.interface_name?(self_name)
+        end
+      found or raise new(type_name: self_type.name, location: self_type.location)
     end
   end
 

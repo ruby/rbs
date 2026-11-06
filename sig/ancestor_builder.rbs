@@ -33,7 +33,7 @@ module RBS
         #
         # * Returns `nil` if it is not a module instance.
         #
-        attr_reader self_types: Array[Definition::Ancestor::Instance]?
+        attr_reader self_types: Array[Definition::Ancestor::t]?
 
         # Returns the list of included modules
         #
@@ -68,7 +68,7 @@ module RBS
         def initialize: (type_name: TypeName,
                             params: Array[Symbol]?,
                        super_class: Definition::Ancestor::t?,
-                        self_types: Array[Definition::Ancestor::Instance]?,
+                        self_types: Array[Definition::Ancestor::t]?,
                   included_modules: Array[Definition::Ancestor::Instance]?,
                included_interfaces: Array[Definition::Ancestor::Instance]?,
                  prepended_modules: Array[Definition::Ancestor::Instance]?,
@@ -105,7 +105,7 @@ module RBS
         def each_extended_interface: () { (Definition::Ancestor::Instance) -> void } -> void
                                    | () -> Enumerator[Definition::Ancestor::Instance, void]
 
-        def each_self_type: () { (Definition::Ancestor::Instance) -> void } -> void
+        def each_self_type: () { (Definition::Ancestor::t) -> void } -> void
                           | () -> Enumerator[Definition::Ancestor::Instance, void]
       end
 

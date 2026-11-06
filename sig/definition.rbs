@@ -170,9 +170,13 @@ module RBS
       end
 
       class Singleton
-        attr_reader name: TypeName
+        type source = nil        # Itself, or super class singleton
+                    | AST::Declarations::Module::SingletonSelf
 
-        def initialize: (name: TypeName) -> void
+        attr_reader name: TypeName
+        attr_reader source: source
+
+        def initialize: (name: TypeName, ?source: source) -> void
       end
     end
 

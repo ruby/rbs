@@ -1067,4 +1067,43 @@ end
     assert_operator resolved_env.class_alias_decls, :key?, type_name("::ProcessedKernel")
     assert_instance_of Environment::ModuleAliasEntry, resolved_env.class_alias_decls[type_name("::ProcessedKernel")]
   end
+
+  def test_module_singleton_self_type
+    buf, dirs, decls = RBS::Parser.parse_signature(<<EOF)
+module Foo
+  class Bar
+  end
+
+  module Baz : singleton(Bar), singleton(::Array)[Bar]
+  end
+end
+
+class Box[T]
+end
+
+module M[A] : singleton(Box)[A]
+end
+
+module M[B] : singleton(Box)[B]
+end
+EOF
+
+    env = Environment.new
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env.resolve_type_names.tap do |env|
+      baz = env.class_decls[type_name("::Foo::Baz")]
+
+      assert_equal [
+                     RBS::AST::Declarations::Module::SingletonSelf.new(name: type_name("::Foo::Bar"), args: [], location: nil),
+                     RBS::AST::Declarations::Module::SingletonSelf.new(name: type_name("::Array"), args: [parse_type("::Foo::Bar")], location: nil),
+                   ], baz.self_types
+
+      # Type arguments are aligned to the type parameters of the primary declaration
+      m = env.class_decls[type_name("::M")]
+      assert_equal [
+                     RBS::AST::Declarations::Module::SingletonSelf.new(name: type_name("::Box"), args: [parse_type("A", variables: [:A])], location: nil),
+                   ], m.self_types
+    end
+  end
 end
