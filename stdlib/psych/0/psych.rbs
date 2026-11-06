@@ -261,8 +261,92 @@ module Psych
   #     Psych.dump({a: "b"}, stringify_names: true) # => "---\na: b\n"
   #
   %a{annotate:rdoc:copy:Psych.dump}
-  def self.dump: (untyped o, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool) -> String
-               | [IO] (untyped o, IO, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool) -> IO
+  def self.dump: (untyped o, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool, ?stringify_names: bool) -> String
+               | [IO] (untyped o, IO, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool, ?stringify_names: bool) -> IO
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - Psych.safe_dump(o)               -> string of yaml
+  #   - Psych.safe_dump(o, options)      -> string of yaml
+  #   - Psych.safe_dump(o, io)           -> io object passed in
+  #   - Psych.safe_dump(o, io, options)  -> io object passed in
+  # -->
+  # Safely dump Ruby object `o` to a YAML string. Optional `options` may be passed
+  # in to control the output format.  If an IO object is passed in, the YAML will
+  # be dumped to that IO object. By default, only the following classes are
+  # allowed to be serialized:
+  #
+  # *   TrueClass
+  # *   FalseClass
+  # *   NilClass
+  # *   Integer
+  # *   Float
+  # *   String
+  # *   Array
+  # *   Hash
+  #
+  # Arbitrary classes can be allowed by adding those classes to the
+  # `permitted_classes` keyword argument.  They are additive.  For example, to
+  # allow Date serialization:
+  #
+  #     Psych.safe_dump(yaml, permitted_classes: [Date])
+  #
+  # Now the Date class can be dumped in addition to the classes listed above.
+  #
+  # A Psych::DisallowedClass exception will be raised if the object contains a
+  # class that isn't in the `permitted_classes` list.
+  #
+  # Currently supported options are:
+  #
+  # <code>:indentation</code>
+  # :   Number of space characters used to indent. Acceptable value should be in
+  #     <code>0..9</code> range, otherwise option is ignored.
+  #
+  #     Default: `2`.
+  #
+  # <code>:line_width</code>
+  # :   Max character to wrap line at. For unlimited line width use
+  #     <code>-1</code>.
+  #
+  #     Default: `0` (meaning "wrap at 81").
+  #
+  # <code>:canonical</code>
+  # :   Write "canonical" YAML form (very verbose, yet strictly formal).
+  #
+  #     Default: `false`.
+  #
+  # <code>:header</code>
+  # :   Write <code>%YAML [version]</code> at the beginning of document.
+  #
+  #     Default: `false`.
+  #
+  #
+  # <code>:stringify_names</code>
+  # :   Dump symbol keys in Hash objects as string.
+  #
+  #     Default: `false`.
+  #
+  #
+  # Example:
+  #
+  #     # Dump an array, get back a YAML string
+  #     Psych.safe_dump(['a', 'b'])  # => "---\n- a\n- b\n"
+  #
+  #     # Dump an array to an IO object
+  #     Psych.safe_dump(['a', 'b'], StringIO.new)  # => #<StringIO:0x000001009d0890>
+  #
+  #     # Dump an array with indentation set
+  #     Psych.safe_dump(['a', ['b']], indentation: 3) # => "---\n- a\n-  - b\n"
+  #
+  #     # Dump an array to an IO with indentation set
+  #     Psych.safe_dump(['a', ['b']], StringIO.new, indentation: 3)
+  #
+  #     # Dump hash with symbol keys as string
+  #     Psych.dump({a: "b"}, stringify_names: true) # => "---\na: b\n"
+  #
+  %a{annotate:rdoc:copy:Psych.safe_dump}
+  def self.safe_dump: (untyped o, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool, ?stringify_names: bool) -> String
+                    | [IO] (untyped o, IO, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?indentation: Integer, ?line_width: Integer, ?canonical: bool, ?header: bool, ?stringify_names: bool) -> IO
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -298,7 +382,7 @@ module Psych
   # to `safe_load` except that `Symbol` objects are allowed by default.
   #
   %a{annotate:rdoc:copy:Psych.load}
-  def self.load: (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.load: (String yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -309,7 +393,7 @@ module Psych
   # `fallback` return value, which defaults to `nil`. See load for options.
   #
   %a{annotate:rdoc:copy:Psych.load_file}
-  def self.load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.load_file: (path, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -360,7 +444,7 @@ module Psych
   #     Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
   #
   %a{annotate:rdoc:copy:Psych.safe_load}
-  def self.safe_load: (String yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.safe_load: (String yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -411,7 +495,7 @@ module Psych
   # options.
   #
   %a{annotate:rdoc:copy:Psych.safe_load_file}
-  def self.safe_load_file: (path, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.safe_load_file: (path, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -426,7 +510,7 @@ module Psych
   # safe_load_file method.
   #
   %a{annotate:rdoc:copy:Psych.unsafe_load_file}
-  def self.unsafe_load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool) -> untyped
+  def self.unsafe_load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   class Exception < ::RuntimeError
   end
