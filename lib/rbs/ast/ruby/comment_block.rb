@@ -199,7 +199,7 @@ module RBS
         def trailing_annotation(variables)
           if trailing?
             comment = comments[0] or raise
-            if comment.location.slice.start_with?(/#[:\[]/)
+            if comment.location.slice.start_with?("#:", "#[")
               begin
                 Parser.parse_inline_trailing_annotation(comment_buffer, 0...comment_buffer.last_position, variables: variables)
               rescue ParsingError => error
