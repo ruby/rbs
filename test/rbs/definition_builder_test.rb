@@ -3026,6 +3026,74 @@ end
     end
   end
 
+  def test_variable_of_module_included_more_than_once
+    SignatureManager.new do |manager|
+      manager.add_file("instance.rbs", <<-EOF)
+module M
+  @m: Integer
+end
+
+module N
+  include M
+end
+
+class IncludedTwice
+  include M
+  include M
+end
+
+class Parent
+  include M
+end
+
+class IncludedInParent < Parent
+  include M
+end
+
+class IncludedThroughModule
+  include M
+  include N
+end
+
+module Duplicated
+  @m: Integer
+  @m: Integer
+end
+
+class DuplicatedIncludedTwice
+  include Duplicated
+  include Duplicated
+end
+
+class DuplicatedInClass
+  include M
+  include M
+
+  @c: Integer
+  @c: Integer
+end
+      EOF
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        ["::IncludedTwice", "::IncludedInParent", "::IncludedThroughModule"].each do |name|
+          definition = builder.build_instance(type_name(name))
+          var = definition.instance_variables[:@m]
+          assert_equal parse_type("::Integer"), var.type
+          assert_equal type_name("::M"), var.declared_in
+        end
+
+        assert_raises(RBS::InstanceVariableDuplicationError) do
+          builder.build_instance(type_name("::DuplicatedIncludedTwice"))
+        end
+        assert_raises(RBS::InstanceVariableDuplicationError) do
+          builder.build_instance(type_name("::DuplicatedInClass"))
+        end
+      end
+    end
+  end
+
   def test_annotations__method_def
     SignatureManager.new do |manager|
       manager.add_file("inherited.rbs", <<-EOF)
