@@ -729,6 +729,25 @@ EOF
     end
   end
 
+  def test_singleton_ancestors_recursive_superclass
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class A < B
+end
+
+class B < A
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises(RecursiveAncestorError) do
+          builder.singleton_ancestors(type_name("::A"))
+        end
+      end
+    end
+  end
+
   def test_build_invalid_type_application
     SignatureManager.new do |manager|
       manager.files[Pathname("foo.rbs")] = <<EOF
