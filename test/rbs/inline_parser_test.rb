@@ -1459,6 +1459,18 @@ class RBS::InlineParserTest < Test::Unit::TestCase
     end
   end
 
+  def test_error__attr_type_with_invalid_utf8
+    omit_on_truffle_ruby! "The C extension does not raise `RBS::ParsingError` for invalid UTF-8"
+    omit_on_jruby! "`Prism::Location#start_line_slice` returns `nil` on JRuby's prism"
+
+    ["\xDD", "\xFF", "\xC3", "\xE2\x82"].each do |invalid_bytes|
+      source = "class Foo\n  attr_reader :value #: Integer # #{invalid_bytes}\nend\n".dup.force_encoding(Encoding::UTF_8)
+      result = parse(source)
+
+      assert_instance_of RBS::InlineParser::Diagnostic::AnnotationSyntaxError, result.diagnostics.fetch(0)
+    end
+  end
+
   def test_parse__class_with_super_class
     result = parse(<<~RUBY)
       class Child < Parent
