@@ -1,0 +1,96 @@
+module RBS
+  class Environment
+    # The type names that the type name resolution of each source of an environment depends on
+    #
+    # The resolution of the type names of a source changes only if the existence of a type name it tested changes.
+    # Recording the dependencies with `Environment#resolve_type_names` allows updating a resolved environment
+    # incrementally: after some sources are removed from and added to the environment, `#affected_paths` tells the other
+    # sources whose type names may be resolved differently, and only those sources have to be resolved again with the
+    # added ones.
+    #
+    # ```ruby
+    # dependencies = RBS::Environment::TypeNameDependencies.new
+    # env = env.resolve_type_names(dependencies: dependencies)
+    #
+    # new_env = env.unload(Set[path])
+    # new_env.add_source(source)
+    #
+    # dependencies.affected_paths(env, new_env).each do |path|
+    #   # Replace the source of `path` in `new_env` with the one before the type name resolution
+    # end
+    #
+    # new_env = new_env.resolve_type_names(only: declarations, dependencies: dependencies)
+    # ```
+    #
+    # The keys are the names of the buffers of the sources.
+    #
+    class TypeNameDependencies
+      # The type names tested for existence while resolving the type names of each source
+      #
+      # The names include the ones that don't exist. A source without type names to resolve has no entry.
+      #
+      attr_reader type_names: Hash[Pathname, Set[TypeName]]
+
+      # The namespaces of the wildcard `use` directives of each source
+      #
+      # A wildcard `use` directive depends on the set of the type names directly under its namespace. A source without
+      # the directives has no entry.
+      #
+      attr_reader namespaces: Hash[Pathname, Set[Namespace]]
+
+      def initialize: () -> void
+
+      # The copy has its own hashes, and shares the sets
+      #
+      def initialize_copy: (TypeNameDependencies other) -> void
+
+      # Yields the block to resolve the type names of the source with the resolver, and records the dependencies of the source
+      #
+      # The dependencies of the source are replaced, or added to the ones it has if `merge` is `true`.
+      #
+      # Returns the value of the block.
+      #
+      def record: [T] (Source::t source, Resolver::TypeNameResolver resolver, merge: bool) { () -> T } -> T
+
+      # Deletes the dependencies of the source
+      #
+      def delete: (Pathname path) -> void
+
+      # Deletes the dependencies of the sources that are not included in `paths`
+      #
+      def keep: (Set[Pathname] paths) -> void
+
+      # Returns the paths of the sources both environments have, whose type names may be resolved differently in `new_env`
+      #
+      # `old_env` is the environment the dependencies were recorded with, and `new_env` has the sources after an update:
+      # `old_env.unload(...)` and `#add_source`. The sources `new_env` doesn't share with `old_env` are not included,
+      # because their type names are not resolved yet.
+      #
+      # The result is exact for the type name resolver: a source is included only if a type name it tested exists in
+      # one of the environments only, a type name under the namespace of its wildcard `use` directive does, or it tested
+      # a class/module alias that is declared differently.
+      #
+      def affected_paths: (Environment old_env, Environment new_env) -> Set[Pathname]
+
+      # Returns the type names that the dependencies of sources are compared with
+      #
+      # * The names of classes, modules, class/module aliases, interfaces, and type aliases that only one of the environments has
+      # * The names of class/module aliases that are declared differently between the environments
+      #
+      # The names are compared for each kind, because a class that is replaced with a class alias of the same name changes
+      # the resolution.
+      #
+      def changed_type_names: (Environment old_env, Environment new_env) -> Set[TypeName]
+
+      private
+
+      # Sets the dependencies of the source, or deletes the entry if the set is empty
+      #
+      def update: [T] (Hash[Pathname, Set[T]] hash, Pathname path, Set[T] set) -> void
+
+      # Adds the keys that only one of the hashes has to `names`
+      #
+      def add_changed_keys: (Hash[TypeName, untyped] old_decls, Hash[TypeName, untyped] new_decls, Set[TypeName] names) -> void
+    end
+  end
+end

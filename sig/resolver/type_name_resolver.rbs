@@ -24,6 +24,17 @@ module RBS
       #
       def resolve_namespace: (TypeName, context: context) -> (TypeName | false | nil)
 
+      # Yields the block, and returns its value with the type names the resolutions in the block depend on
+      #
+      # A resolution tests the existence of candidate type names, from the innermost module of the context to the root, and
+      # stops at the first one it finds. The result changes only if the existence of one of the tested names changes: a
+      # name that wasn't found is added, or the name that was found is removed. The dependencies are the tested names,
+      # including the ones that don't exist, and the names tested to normalize module aliases.
+      #
+      # The names are recorded for a resolution that hits the cache too.
+      #
+      def record_dependencies: [T] () { () -> T } -> [T, Set[TypeName]]
+
       private
 
       attr_reader all_names: Set[TypeName]
@@ -31,6 +42,16 @@ module RBS
       attr_reader aliases: Hash[TypeName, [TypeName, context]]
 
       attr_reader cache: Hash[context, Hash[TypeName, TypeName?]]
+
+      # The cache of the resolutions under `#record_dependencies`, with the type names tested for each of them
+      #
+      # The entries are apart from `cache`, because a resolution that hits the cache depends on the names tested for it.
+      #
+      @dependency_cache: Hash[context, Hash[TypeName, [TypeName?, Array[TypeName]]]]
+
+      # The type names tested so far, while `#record_dependencies` is running
+      #
+      @dependencies: Array[TypeName]?
 
       # Returns the type name if it exists in `all_names` (normalized)
       #

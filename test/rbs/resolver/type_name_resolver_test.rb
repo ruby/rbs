@@ -30,6 +30,104 @@ class RBS::Resolver::TypeNameResolverTest < Test::Unit::TestCase
                   resolver.resolve(type_name("Bar"), context: [nil, RBS::TypeName.parse("::Foo::Bar::Baz")])
   end
 
+  def test_record_dependencies
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Foo::Bar"), type_name("::Bar"), type_name("::Baz")],
+      {}
+    )
+
+    context = [nil, type_name("::Foo")] #: RBS::Resolver::context
+
+    # The name is found in the innermost module, and `::Bar` is not tested
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Bar"), context: context) }
+    assert_equal type_name("::Foo::Bar"), result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Bar")], names
+
+    # The names that are not found are included
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Baz"), context: context) }
+    assert_equal type_name("::Baz"), result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Baz"), type_name("::Baz")], names
+
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Qux"), context: context) }
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Qux"), type_name("::Qux")], names
+
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("::Bar"), context: context) }
+    assert_equal type_name("::Bar"), result
+    assert_equal Set[type_name("::Bar")], names
+
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Bar::Qux"), context: context) }
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Bar"), type_name("::Foo::Bar::Qux")], names
+  end
+
+  def test_record_dependencies__cache
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Baz")],
+      {}
+    )
+
+    context = [nil, type_name("::Foo")] #: RBS::Resolver::context
+
+    # The resolution without recording fills the cache without the names
+    assert_equal type_name("::Baz"), resolver.resolve(type_name("Baz"), context: context)
+
+    _, names1 = resolver.record_dependencies { resolver.resolve(type_name("Baz"), context: context) }
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Baz"), type_name("::Baz")], names1
+
+    # The resolution that hits the cache records the same names
+    _, names2 = resolver.record_dependencies { resolver.resolve(type_name("Baz"), context: context) }
+    assert_equal names1, names2
+
+    assert_equal type_name("::Baz"), resolver.resolve(type_name("Baz"), context: context)
+  end
+
+  def test_record_dependencies__nested
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Bar")],
+      {}
+    )
+
+    inner = nil #: Set[RBS::TypeName]?
+
+    _, outer = resolver.record_dependencies do
+      resolver.resolve(type_name("Foo"), context: nil)
+      _, inner = resolver.record_dependencies { resolver.resolve(type_name("Bar"), context: nil) }
+    end
+
+    assert_equal Set[type_name("::Bar")], inner
+    assert_equal Set[type_name("::Foo"), type_name("::Bar")], outer
+  end
+
+  def test_record_dependencies__module_alias
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Bar"), type_name("::Bar::Baz")],
+      {
+        type_name("::Foo::MyBar") => [type_name("Bar"), [nil, type_name("::Foo")]]
+      }
+    )
+
+    # The names tested to normalize the alias are included
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Foo::MyBar::Baz"), context: nil) }
+    assert_equal type_name("::Bar::Baz"), result
+    assert_equal(
+      Set[type_name("::Foo"), type_name("::Foo::MyBar"), type_name("::Foo::Bar"), type_name("::Bar"), type_name("::Bar::Baz")],
+      names
+    )
+
+    # The module of the alias cannot be resolved
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo")],
+      {
+        type_name("::Foo::MyBar") => [type_name("Bar"), [nil, type_name("::Foo")]]
+      }
+    )
+
+    result, names = resolver.record_dependencies { resolver.resolve(type_name("Foo::MyBar"), context: nil) }
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::MyBar"), type_name("::Foo::Bar"), type_name("::Bar")], names
+  end
+
   def test_resolve_failure
     resolver = Resolver::TypeNameResolver.new(
       Set[type_name("::Foo"), type_name("::Foo::Foo"), type_name("::Foo::Bar")],
