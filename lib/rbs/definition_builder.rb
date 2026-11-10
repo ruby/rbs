@@ -11,6 +11,29 @@ module RBS
     attr_reader :singleton0_cache
     attr_reader :interface_cache
 
+    attr_reader :instance_templates
+    attr_reader :singleton_templates
+    attr_reader :interface_templates
+
+    attr_reader :plain_layers
+    attr_reader :generic_layers
+
+    attr_reader :self_type_prefix_cache
+
+    # The methods and variables given to the modules by their self types
+    #
+    class SelfTypePrefix
+      attr_reader :methods
+      attr_reader :instance_variables
+      attr_reader :class_variables
+
+      def initialize(methods:)
+        @methods = methods
+        @instance_variables = {}
+        @class_variables = {}
+      end
+    end
+
     def initialize(env:, ancestor_builder: nil, method_builder: nil)
       @env = env
       @ancestor_builder = ancestor_builder || AncestorBuilder.new(env: env)
@@ -20,6 +43,15 @@ module RBS
       @singleton_cache = {}
       @singleton0_cache = {}
       @interface_cache = {}
+
+      @instance_templates = {}
+      @singleton_templates = {}
+      @interface_templates = {}
+      @plain_layers = {}
+      @plain_layers.compare_by_identity
+      @generic_layers = {}
+      @generic_layers.compare_by_identity
+      @self_type_prefix_cache = {}
     end
 
     def ensure_namespace!(namespace, location:)
@@ -28,16 +60,6 @@ module RBS
           NoTypeFoundError.check!(ns.to_type_name, env: env, location: location)
         end
       end
-    end
-
-    def define_interface(definition, type_name, subst)
-      included_interfaces = ancestor_builder.interface_ancestors(type_name).ancestors #: Array[Definition::Ancestor::Instance]
-      included_interfaces = included_interfaces.reject {|ancestor| ancestor.source == nil }
-
-      interface_methods = interface_methods(included_interfaces)
-      methods = method_builder.build_interface(type_name)
-
-      import_methods(definition, type_name, methods, interface_methods, subst, nil)
     end
 
     def build_interface(type_name)
@@ -53,12 +75,16 @@ module RBS
         subst = Substitution.build(type_params, type_args)
 
         ancestors = ancestor_builder.interface_ancestors(type_name)
-        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
+        stack = LayerStack.new(type_name: type_name, self_type: self_type)
+        table = Definition::MethodTable.new(stack)
+
+        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors, methods: table).tap do |definition|
           methods = method_builder.build_interface(type_name)
           one_ancestors = ancestor_builder.one_interface_ancestors(type_name)
           validate_type_params(definition, methods: methods, ancestors: one_ancestors)
 
-          define_interface(definition, type_name, subst)
+          stack.layers << layer(interface_template(type_name), subst)
+          stack.validate!
         end
       end
     end
@@ -82,119 +108,6 @@ module RBS
       AST::TypeParam.application(params, args) || Substitution.new()
     end
 
-    def define_instance(definition, type_name, subst, define_class_vars:)
-      one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
-      methods = method_builder.build_instance(type_name)
-
-      self_type_methods = one_ancestors.each_self_type.with_object({}) do |self_type, hash| #$ Hash[Symbol, Definition::Method]
-        self_type.args.each do |arg|
-          validate_type_presence(arg)
-        end
-
-        self_type_defn = self_type.name.interface? ? build_interface(self_type.name) : build_instance(self_type.name)
-
-        s = subst + tapp_subst(self_type.name, self_type.args)
-        self_type_defn.methods.each do |method_name, method_def|
-          hash[method_name] = method_def.sub(s)
-        end
-      end
-
-      one_ancestors.each_included_module do |mod|
-        mod.args.each do |arg|
-          validate_type_presence(arg)
-        end
-
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
-      end
-
-      all_interfaces = one_ancestors.each_included_interface.flat_map do |interface|
-        other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
-        other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
-        [interface, *other_interfaces]
-      end
-      interface_methods = interface_methods(all_interfaces)
-      import_methods(definition, type_name, methods, interface_methods, subst, self_type_methods)
-
-      one_ancestors.each_prepended_module do |mod|
-        mod.args.each do |arg|
-          validate_type_presence(arg)
-        end
-
-        define_instance(definition, mod.name, subst + tapp_subst(mod.name, mod.args), define_class_vars: define_class_vars)
-      end
-
-      entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
-
-      entry.each_decl do |decl|
-        if align_params = entry.align_params(decl)
-          subst_ = subst + align_params
-        else
-          subst_ = subst
-        end
-
-        decl.members.each do |member|
-          case member
-          when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
-            if member.kind == :instance
-              ivar_name = case member.ivar_name
-                          when false
-                            nil
-                          else
-                            member.ivar_name || :"@#{member.name}"
-                          end
-
-              if ivar_name
-                insert_variable(
-                  type_name,
-                  definition.instance_variables,
-                  name: ivar_name,
-                  type: member.type.sub(subst_),
-                  source: member
-                )
-              end
-            end
-
-          when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
-            member.names.each do |name|
-              ivar_name = :"@#{name}"
-              attr_type = member.type || Types::Bases::Any.new(location: nil)
-
-              insert_variable(
-                type_name,
-                definition.instance_variables,
-                name: ivar_name,
-                type: attr_type,
-                source: member
-              )
-            end
-
-          when AST::Ruby::Members::InstanceVariableMember
-            insert_variable(
-              type_name,
-              definition.instance_variables,
-              name: member.name,
-              type: member.type,
-              source: member
-            )
-
-          when AST::Members::InstanceVariable
-            insert_variable(
-              type_name,
-              definition.instance_variables,
-              name: member.name,
-              type: member.type.sub(subst_),
-              source: member
-            )
-
-          when AST::Members::ClassVariable
-            if define_class_vars
-              insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
-            end
-          end
-        end
-      end
-    end
-
     def build_instance(type_name)
       type_name = env.normalize_module_name(type_name)
 
@@ -206,7 +119,10 @@ module RBS
         args = entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) }
         self_type = Types::ClassInstance.new(name: type_name, args: args, location: nil)
 
-        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
+        stack = LayerStack.new(type_name: type_name, self_type: self_type)
+        table = Definition::MethodTable.new(stack)
+
+        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors, methods: table).tap do |definition|
           one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
           methods = method_builder.build_instance(type_name)
 
@@ -216,41 +132,54 @@ module RBS
             if super_class = one_ancestors.super_class
               super_class.is_a?(Definition::Ancestor::Instance) or raise
 
-              build_instance(super_class.name).tap do |defn|
-                unless super_class.args.empty?
-                  super_class.args.each do |arg|
-                    validate_type_presence(arg)
-                  end
+              defn = build_instance(super_class.name)
 
-                  subst = tapp_subst(super_class.name, super_class.args)
-                  defn = defn.sub(subst)
-                end
-
-                definition.methods.merge!(defn.methods)
+              if super_class.args.empty?
+                stack.set_parent(defn.methods)
                 definition.instance_variables.merge!(defn.instance_variables)
                 definition.class_variables.merge!(defn.class_variables)
+              else
+                super_class.args.each do |arg|
+                  validate_type_presence(arg)
+                end
+
+                super_subst = tapp_subst(super_class.name, super_class.args)
+
+                stack.set_parent(defn.methods, super_subst)
+                definition.instance_variables.merge!(defn.instance_variables.transform_values {|v| v.sub(super_subst) })
+                definition.class_variables.merge!(defn.class_variables.transform_values {|v| v.sub(super_subst) })
               end
             end
           end
 
           if entry.is_a?(Environment::ModuleEntry)
             if self_types = one_ancestors.self_types
-              self_types.each do |ans|
-                ans.args.each do |arg|
-                  validate_type_presence(arg)
-                end
+              if default_self_types?(self_types)
+                # The methods of `Object` are shared by the modules without self type constraints
+                prefix = object_self_type_prefix(definition)
 
-                subst = tapp_subst(ans.name, ans.args)
-                if ans.name.interface?
-                  define_interface(definition, ans.name, subst)
-                else
-                  define_instance(definition, ans.name, subst, define_class_vars: true)
+                stack.set_parent(prefix.methods)
+                definition.instance_variables.merge!(prefix.instance_variables)
+                definition.class_variables.merge!(prefix.class_variables)
+              else
+                self_types.each do |ans|
+                  ans.args.each do |arg|
+                    validate_type_presence(arg)
+                  end
+
+                  subst = tapp_subst(ans.name, ans.args)
+                  if ans.name.interface?
+                    stack.layers << layer(interface_template(ans.name), subst)
+                  else
+                    instance_layers(definition, stack.layers, ans.name, subst, define_class_vars: true)
+                  end
                 end
               end
             end
           end
 
-          define_instance(definition, type_name, Substitution.new, define_class_vars: true)
+          instance_layers(definition, stack.layers, type_name, Substitution.new, define_class_vars: true)
+          stack.validate!
         end
       end
     end
@@ -265,9 +194,11 @@ module RBS
         ancestors = ancestor_builder.singleton_ancestors(type_name)
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
 
-        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
+        stack = LayerStack.new(type_name: type_name, self_type: self_type)
+        table = Definition::MethodTable.new(stack)
+
+        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors, methods: table).tap do |definition|
           one_ancestors = ancestor_builder.one_singleton_ancestors(type_name)
-          methods = method_builder.build_singleton(type_name)
 
           if super_class = one_ancestors.super_class
             case super_class
@@ -277,26 +208,18 @@ module RBS
               defn = build_singleton0(super_class.name)
             end
 
-            definition.methods.merge!(defn.methods)
+            stack.set_parent(defn.methods)
             definition.instance_variables.merge!(defn.instance_variables)
           end
 
-          one_ancestors.each_extended_module do |mod|
-            mod.args.each do |arg|
-              validate_type_presence(arg)
-            end
+          template = singleton_template(type_name)
 
-            subst = tapp_subst(mod.name, mod.args)
-            define_instance(definition, mod.name, subst, define_class_vars: false)
+          template.extended_modules.each do |name, subst|
+            instance_layers(definition, stack.layers, name, subst, define_class_vars: false)
           end
 
-          all_interfaces = one_ancestors.each_extended_interface.flat_map do |interface|
-            other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
-            other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
-            [interface, *other_interfaces]
-          end
-          interface_methods = interface_methods(all_interfaces)
-          import_methods(definition, type_name, methods, interface_methods, Substitution.new, nil)
+          stack.layers << layer(template, Substitution.new)
+          stack.validate!
 
           entry.each_decl do |decl|
             decl.members.each do |member|
@@ -337,124 +260,263 @@ module RBS
         ancestors = ancestor_builder.singleton_ancestors(type_name)
         self_type = Types::ClassSingleton.new(name: type_name, location: nil)
 
-        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors).tap do |definition|
-          definition0 = build_singleton0(type_name)
-          definition.methods.merge!(definition0.methods)
+        definition0 = build_singleton0(type_name)
+
+        table =
+          if entry.is_a?(Environment::ClassEntry)
+            # `.new` has the type of `#initialize`
+            Definition::MethodTable.new(
+              SingletonMethods.new(
+                type_name: type_name,
+                type_params: entry.type_params,
+                methods: definition0.methods,
+                instance_methods: build_instance(type_name).methods
+              )
+            )
+          else
+            definition0.methods
+          end
+
+        Definition.new(type_name: type_name, entry: entry, self_type: self_type, ancestors: ancestors, methods: table).tap do |definition|
           definition.instance_variables.merge!(definition0.instance_variables)
           definition.class_variables.merge!(definition0.class_variables)
+        end
+      end
+    end
 
-          if entry.is_a?(Environment::ClassEntry)
-            new_method = definition.methods[:new]
+    # Returns the template of the instance methods of a class or a module
+    #
+    def instance_template(type_name)
+      instance_templates[type_name] ||= begin
+        entry = env.class_decls[type_name] or raise "Unknown name for build_instance: #{type_name}"
+        one_ancestors = ancestor_builder.one_instance_ancestors(type_name)
+        methods = method_builder.build_instance(type_name)
 
-            if new_method && new_method.defs.all? {|d| d.defined_in == BuiltinNames::Class.name }
-              # The method is _untyped new_.
+        self_types = one_ancestors.each_self_type.map do |self_type|
+          self_type.args.each do |arg|
+            validate_type_presence(arg)
+          end
 
-              alias_methods = definition.methods.each.with_object([]) do |entry, array|
-                # @type var method: Definition::Method?
-                name, method = entry
-                while method
-                  if method.alias_of == new_method
-                    array << name
-                    break
-                  end
-                  method = method.alias_of
-                end
-              end
+          self_type_defn = self_type.name.interface? ? build_interface(self_type.name) : build_instance(self_type.name)
 
-              instance = build_instance(type_name)
-              initialize = instance.methods[:initialize]
+          [self_type_defn.methods, tapp_subst(self_type.name, self_type.args)] #: [Definition::MethodTable, Substitution]
+        end
 
-              if initialize
-                class_params = entry.type_params
+        included_modules = mixin_substs(one_ancestors.each_included_module)
+        interfaces = interface_mixins(one_ancestors.each_included_interface)
+        prepended_modules = mixin_substs(one_ancestors.each_prepended_module)
 
-                # Inject a virtual _typed new_.
-                initialize_defs = initialize.defs
-                typed_new = Definition::Method.new(
-                  super_method: new_method,
-                  defs: initialize_defs.map do |initialize_def|
-                    method_type = initialize_def.type
+        variables = [] #: Array[[Substitution?, LayerTemplate::variable_member]]
+        entry.each_decl do |decl|
+          align_params = nil #: Substitution?
+          aligned = false
 
-                    class_type_param_vars = Set.new(class_params.map(&:name))
-                    method_type_param_vars = Set.new(method_type.type_params.map(&:name))
-
-                    if class_type_param_vars.intersect?(method_type_param_vars)
-                      new_method_param_names = method_type.type_params.map do |method_param|
-                        if class_type_param_vars.include?(method_param.name)
-                          Types::Variable.fresh(method_param.name).name
-                        else
-                          method_param.name
-                        end
-                      end
-
-                      sub = Substitution.build(
-                        method_type.type_params.map(&:name),
-                        Types::Variable.build(new_method_param_names)
-                      )
-
-                      method_params = class_params + AST::TypeParam.rename(method_type.type_params, new_names: new_method_param_names)
-                      method_type = method_type
-                        .update(type_params: [])
-                        .sub(sub)
-                        .update(type_params: method_params)
-                    else
-                      method_type = method_type
-                        .update(type_params: class_params + method_type.type_params)
-                    end
-
-                    method_type = method_type.map_type do |type|
-                      case type
-                      when Types::Bases::Self
-                        Types::ClassInstance.new(
-                          name: type_name,
-                          args: entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) },
-                          location: nil
-                        )
-                      else
-                        type
-                      end
-                    end
-
-                    method_type = method_type.update(
-                      type: method_type.type.with_return_type(
-                        Types::ClassInstance.new(
-                          name: type_name,
-                          args: entry.type_params.map {|param| Types::Variable.new(name: param.name, location: param.location) },
-                          location: nil
-                        )
-                      )
-                    )
-
-                    Definition::Method::TypeDef.new(
-                      type: method_type,
-                      member: initialize_def.member,
-                      defined_in: initialize_def.defined_in,
-                      implemented_in: initialize_def.implemented_in
-                    ).tap do |type_def|
-                      type_def.overload_annotations.replace(initialize_def.overload_annotations)
-                    end
-                  end,
-                  accessibility: :public,
-                  alias_of: nil,
-                  alias_member: nil
-                )
-
-                definition.methods[:new] = typed_new
-
-                alias_methods.each do |alias_name|
-                  definition.methods[alias_name] = definition.methods[alias_name].update(
-                    alias_of: typed_new,
-                    defs: typed_new.defs
-                  )
-                end
-              end
+          decl.members.each do |member|
+            case member
+            when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
+              next unless member.kind == :instance
+              next if member.ivar_name == false
+            when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember,
+              AST::Ruby::Members::InstanceVariableMember, AST::Members::InstanceVariable, AST::Members::ClassVariable
+              # ok
+            else
+              next
             end
+
+            unless aligned
+              align_params = entry.align_params(decl)
+              aligned = true
+            end
+
+            variables << [align_params, member]
+          end
+        end
+
+        LayerTemplate.new(
+          type_name: type_name,
+          methods: methods,
+          interfaces: interfaces,
+          self_types: self_types,
+          included_modules: included_modules,
+          prepended_modules: prepended_modules,
+          variables: variables
+        )
+      end
+    end
+
+    # Returns the template of the singleton methods of a class or a module
+    #
+    def singleton_template(type_name)
+      singleton_templates[type_name] ||= begin
+        one_ancestors = ancestor_builder.one_singleton_ancestors(type_name)
+        methods = method_builder.build_singleton(type_name)
+
+        extended_modules = mixin_substs(one_ancestors.each_extended_module)
+        interfaces = interface_mixins(one_ancestors.each_extended_interface)
+
+        LayerTemplate.new(type_name: type_name, methods: methods, interfaces: interfaces, extended_modules: extended_modules)
+      end
+    end
+
+    # Returns the layer of the template with the substitution
+    #
+    # The layers of a template with the same substitution are the same object, to share the methods between definitions.
+    #
+    def layer(template, subst)
+      if subst.empty?
+        plain_layers[template] ||= Layer.new(template, subst)
+      else
+        layers = generic_layers[template] ||= {}
+        layers[subst.mapping] ||= Layer.new(template, subst)
+      end
+    end
+
+    # Returns the template of the methods of an interface
+    #
+    def interface_template(type_name)
+      interface_templates[type_name] ||= begin
+        included_interfaces = ancestor_builder.interface_ancestors(type_name).ancestors #: Array[Definition::Ancestor::Instance]
+        included_interfaces = included_interfaces.reject {|ancestor| ancestor.source == nil }
+
+        LayerTemplate.new(
+          type_name: type_name,
+          methods: method_builder.build_interface(type_name),
+          interfaces: interface_methods(included_interfaces)
+        )
+      end
+    end
+
+    # Adds the layers of a class or a module to `layers`, and the variables to `definition`
+    #
+    # It processes includes and prepends recursively.
+    # If `define_class_vars:` is falsy, it skips inserting class variables.
+    #
+    def instance_layers(definition, layers, type_name, subst, define_class_vars:)
+      template = instance_template(type_name)
+
+      template.included_modules.each do |name, s|
+        instance_layers(definition, layers, name, subst + s, define_class_vars: define_class_vars)
+      end
+
+      layers << layer(template, subst)
+
+      template.prepended_modules.each do |name, s|
+        instance_layers(definition, layers, name, subst + s, define_class_vars: define_class_vars)
+      end
+
+      template.variables.each do |align_params, member|
+        if align_params
+          subst_ = subst + align_params
+        else
+          subst_ = subst
+        end
+
+        case member
+        when AST::Members::AttrReader, AST::Members::AttrAccessor, AST::Members::AttrWriter
+          ivar_name = member.ivar_name || :"@#{member.name}"
+
+          insert_variable(
+            type_name,
+            definition.instance_variables,
+            name: ivar_name,
+            type: member.type.sub(subst_),
+            source: member
+          )
+
+        when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
+          member.names.each do |name|
+            ivar_name = :"@#{name}"
+            attr_type = member.type || Types::Bases::Any.new(location: nil)
+
+            insert_variable(
+              type_name,
+              definition.instance_variables,
+              name: ivar_name,
+              type: attr_type,
+              source: member
+            )
+          end
+
+        when AST::Ruby::Members::InstanceVariableMember
+          insert_variable(
+            type_name,
+            definition.instance_variables,
+            name: member.name,
+            type: member.type,
+            source: member
+          )
+
+        when AST::Members::InstanceVariable
+          insert_variable(
+            type_name,
+            definition.instance_variables,
+            name: member.name,
+            type: member.type.sub(subst_),
+            source: member
+          )
+
+        when AST::Members::ClassVariable
+          if define_class_vars
+            insert_variable(type_name, definition.class_variables, name: member.name, type: member.type, source: member)
           end
         end
       end
     end
 
+    # Returns the pairs of the names of the modules and the substitutions of the type applications
+    #
+    def mixin_substs(mixins)
+      mixins.map do |mod|
+        mod.args.each do |arg|
+          validate_type_presence(arg)
+        end
+
+        [mod.name, tapp_subst(mod.name, mod.args)] #: [TypeName, Substitution]
+      end
+    end
+
+    # Returns the interfaces mixed in a module, with the interfaces they include
+    #
+    def interface_mixins(interfaces)
+      all_interfaces = interfaces.flat_map do |interface|
+        other_interfaces = ancestor_builder.interface_ancestors(interface.name).ancestors #: Array[Definition::Ancestor::Instance]
+        other_interfaces = other_interfaces.select {|ancestor| ancestor.source }
+        [interface, *other_interfaces]
+      end
+
+      interface_methods(all_interfaces)
+    end
+
+    def default_self_types?(self_types)
+      if self_types.size == 1
+        self_type = self_types[0]
+        self_type.source.nil? && self_type.args.empty? && self_type.name == BuiltinNames::Object.name
+      else
+        false
+      end
+    end
+
+    # Returns the methods and variables of `Object`, that are given to the modules without self type constraints
+    #
+    # They don't include the ones of the super class of `Object`.
+    #
+    def object_self_type_prefix(definition)
+      type_name = BuiltinNames::Object.name
+
+      self_type_prefix_cache[type_name] ||= begin
+        stack = LayerStack.new(type_name: definition.type_name, self_type: definition.self_type)
+        prefix = SelfTypePrefix.new(methods: Definition::MethodTable.new(stack))
+
+        instance_layers(prefix, stack.layers, type_name, tapp_subst(type_name, []), define_class_vars: true)
+        stack.validate!
+
+        prefix
+      end
+    end
+
     def interface_methods(interface_ancestors)
-      interface_methods = {} #: interface_methods
+      # The same interface is mixed in once, even if it is given through two or more interfaces
+      interface_methods = {} #: Hash[Definition::Ancestor::Instance, LayerTemplate::interface_mixin]
 
       interface_ancestors.each do |mod|
         source =
@@ -467,10 +529,19 @@ module RBS
 
         methods = method_builder.build_interface(mod.name)
 
-        interface_methods[mod] = [methods, source]
+        unless mod.args.empty?
+          mod.args.each do |arg|
+            validate_type_presence(arg)
+          end
+
+          type_params = env.interface_decls.fetch(mod.name).decl.type_params
+          subst = AST::TypeParam.application(type_params, mod.args)
+        end
+
+        interface_methods[mod] = [mod, methods, source, subst]
       end
 
-      interface_methods
+      interface_methods.values
     end
 
     def validate_params_with(type_params, result:)
@@ -639,351 +710,6 @@ module RBS
       end
     end
 
-    def import_methods(definition, module_name, module_methods, interfaces_methods, subst, self_type_methods)
-      new_methods = {} #: Hash[Symbol, Definition::Method]
-      interface_method_duplicates = Set[] #: Set[Symbol]
-
-      interfaces_methods.each do |interface, (methods, member)|
-        unless interface.args.empty?
-          methods.type.is_a?(Types::Interface) or raise
-
-          interface.args.each do |arg|
-            validate_type_presence(arg)
-          end
-
-          type_params = env.interface_decls.fetch(interface.name).decl.type_params
-          if s = AST::TypeParam.application(type_params, interface.args)
-            subst_ = subst + s
-          else
-            subst_ = subst
-          end
-        else
-          subst_ = subst
-        end
-
-        methods.each do |method|
-          if interface_method_duplicates.include?(method.name)
-            (member.is_a?(AST::Members::Include) || member.is_a?(AST::Members::Extend)) or raise
-
-            raise DuplicatedInterfaceMethodDefinitionError.new(
-              type: definition.self_type,
-              method_name: method.name,
-              member: member
-            )
-          end
-
-          interface_method_duplicates << method.name
-          define_method(
-            new_methods,
-            definition,
-            method,
-            subst_,
-            nil,
-            defined_in: interface.name,
-            implemented_in: module_name
-          )
-        end
-      end
-
-      module_methods.each do |method|
-        define_method(
-          new_methods,
-          definition,
-          method,
-          subst,
-          self_type_methods,
-          defined_in: module_name,
-          implemented_in: module_name.interface? ? nil : module_name
-        )
-      end
-
-      definition.methods.merge!(new_methods)
-    end
-
-    def define_method(methods, definition, method, subst, self_type_methods, defined_in:, implemented_in: defined_in)
-      existing_method = methods[method.name] || definition.methods[method.name]
-
-      case original = method.original
-      when AST::Members::Alias
-        original_method = methods[original.old_name] || definition.methods[original.old_name] || self_type_methods&.fetch(original.old_name, nil)
-
-        unless original_method
-          raise UnknownMethodAliasError.new(
-            type_name: definition.type_name,
-            original_name: original.old_name,
-            aliased_name: original.new_name,
-            location: original.location
-          )
-        end
-
-        accessibility = special_accessibility(original.instance?, original.new_name) || original_method.accessibility
-
-        method_definition = Definition::Method.new(
-          super_method: existing_method,
-          defs: original_method.defs.map do |defn|
-            defn.update(defined_in: defined_in, implemented_in: implemented_in)
-          end,
-          accessibility: accessibility,
-          alias_of: original_method,
-          alias_member: original
-        )
-
-        method_definition.annotations.replace(original.annotations)
-      when AST::Members::MethodDefinition
-        if duplicated_method = methods[method.name]
-          raise DuplicatedMethodDefinitionError.new(
-            type: definition.self_type,
-            method_name: method.name,
-            members: [original, *duplicated_method.members]
-          )
-        end
-
-        defs = original.overloads.map do |overload|
-          Definition::Method::TypeDef.new(
-            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
-            member: original,
-            defined_in: defined_in,
-            implemented_in: implemented_in
-          ).tap do |type_def|
-            # Keep the original annotations given to overloads.
-            type_def.overload_annotations.replace(overload.annotations)
-          end
-        end
-
-        # Respect the visibility of the original method definition.
-        accessibility = original.visibility || special_accessibility(original.instance?, method.name) || method.accessibility
-
-        # Skip setting up `super_method` if `implemented_in` is `nil`, that means the type doesn't have implementation.
-        # This typically happens if the type is an interface.
-        if implemented_in
-          super_method = existing_method
-        end
-
-        method_definition = Definition::Method.new(
-          super_method: super_method,
-          defs: defs,
-          accessibility: accessibility,
-          alias_of: nil,
-          alias_member: nil
-        )
-
-        method_definition.annotations.replace(original.annotations)
-      when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
-        if duplicated_method = methods[method.name]
-          raise DuplicatedMethodDefinitionError.new(
-            type: definition.self_type,
-            method_name: method.name,
-            members: [*duplicated_method.members, original]
-          )
-        end
-
-        attr_type = original.type.sub(subst)
-        method_type =
-          if method.name.to_s.end_with?("=")
-            # setter
-            MethodType.new(
-              type_params: [],
-              type: Types::Function.empty(attr_type).update(
-                required_positionals: [
-                  Types::Function::Param.new(type: attr_type, name: original.name)
-                ]
-              ),
-              block: nil,
-              location: original.location
-            )
-          else
-            # getter
-            MethodType.new(
-              type_params: [],
-              type: Types::Function.empty(attr_type),
-              block: nil,
-              location: original.location
-            )
-          end
-
-        if implemented_in
-          super_method = existing_method
-        end
-
-        # Respect the visibility of the original method definition.
-        accessibility = original.visibility || special_accessibility(original.kind == :instance, method.name) || method.accessibility
-
-        method_definition = Definition::Method.new(
-          super_method: super_method,
-          defs: [
-            Definition::Method::TypeDef.new(
-              type: method_type,
-              member: original,
-              defined_in: defined_in,
-              implemented_in: implemented_in
-            )
-          ],
-          accessibility: accessibility,
-          alias_of: nil,
-          alias_member: nil
-        )
-
-        method_definition.annotations.replace(original.annotations)
-      when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
-        if duplicated_method = methods[method.name]
-          raise DuplicatedMethodDefinitionError.new(
-            type: definition.self_type,
-            method_name: method.name,
-            members: [*duplicated_method.members, original]
-          )
-        end
-
-        attr_type = original.type || Types::Bases::Any.new(location: nil)
-        method_type =
-          if method.name.to_s.end_with?("=")
-            # setter
-            MethodType.new(
-              type_params: [],
-              type: Types::Function.empty(attr_type).update(
-                required_positionals: [
-                  Types::Function::Param.new(type: attr_type, name: method.name.to_s.chomp("=").to_sym)
-                ]
-              ),
-              block: nil,
-              location: original.location
-            )
-          else
-            # getter
-            MethodType.new(
-              type_params: [],
-              type: Types::Function.empty(attr_type),
-              block: nil,
-              location: original.location
-            )
-          end
-
-        if implemented_in
-          super_method = existing_method
-        end
-
-        method_definition = Definition::Method.new(
-          super_method: super_method,
-          defs: [
-            Definition::Method::TypeDef.new(
-              type: method_type,
-              member: original,
-              defined_in: defined_in,
-              implemented_in: implemented_in
-            )
-          ],
-          accessibility: method.accessibility,
-          alias_of: nil,
-          alias_member: nil
-        )
-
-        method_definition.annotations.replace([])
-      when AST::Ruby::Members::DefMember
-        if duplicated_method = methods[method.name]
-          raise DuplicatedMethodDefinitionError.new(
-            type: definition.self_type,
-            method_name: method.name,
-            members: [original, *duplicated_method.members]
-          )
-        end
-
-        if original.method_type.empty? && existing_method
-          # Unannotated method with a parent definition → inherit from the parent, like @rbs ...
-          method_definition = Definition::Method.new(
-            super_method: existing_method,
-            defs: existing_method.defs.map { |defn| defn.update(implemented_in: implemented_in) },
-            accessibility: :public,
-            alias_of: existing_method.alias_of,
-            alias_member: nil
-          )
-
-          method_definition.annotations.replace(existing_method.annotations)
-        else
-          defs = original.overloads.map do |overload|
-            Definition::Method::TypeDef.new(
-              type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
-              member: original,
-              defined_in: defined_in,
-              implemented_in: implemented_in
-            ).tap do |type_def|
-              # Keep the original annotations given to overloads.
-              type_def.overload_annotations.replace(overload.annotations)
-            end
-          end
-
-          method_definition = Definition::Method.new(
-            super_method: existing_method,
-            defs: defs,
-            accessibility: :public,
-            alias_of: nil,
-            alias_member: nil
-          )
-
-          method_definition.annotations.replace([])
-        end
-
-      when nil
-        # Overloading method definition only
-
-        case
-        when methods.key?(method.name)
-          # The method is defined in an interface
-          super_method = methods[method.name].super_method
-        when definition.methods.key?(method.name)
-          # The method is defined in the super class
-          super_method = existing_method
-        else
-          # Cannot find any non-overloading method
-          raise InvalidOverloadMethodError.new(
-            type_name: definition.type_name,
-            method_name: method.name,
-            kind: :instance,
-            members: method.overloads
-          )
-        end
-
-        method_definition = Definition::Method.new(
-          super_method: super_method,
-          defs: existing_method.defs.map do |defn|
-            defn.update(implemented_in: implemented_in)
-          end,
-          accessibility: existing_method.accessibility,
-          alias_of: existing_method.alias_of,
-          alias_member: nil
-        )
-
-        method_definition.annotations.replace(existing_method.annotations)
-      end
-
-      method.overloads.each do |overloading_def|
-        overloading_def.overloads.reverse_each do |overload|
-          type_def = Definition::Method::TypeDef.new(
-            type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
-            member: overloading_def,
-            defined_in: defined_in,
-            implemented_in: implemented_in
-          )
-
-          type_def.overload_annotations.replace(overload.annotations)
-
-          method_definition.defs.unshift(type_def)
-        end
-
-        method_definition.annotations.concat(overloading_def.annotations)
-      end
-
-      method_definition.defs.each do |type_def|
-        type_def.member_annotations.replace(method_definition.annotations)
-      end
-
-      methods[method.name] = method_definition
-    end
-
-    def special_accessibility(is_instance, method_name)
-      if is_instance && [:initialize, :initialize_copy, :initialize_clone, :initialize_dup, :respond_to_missing?].include?(method_name)
-        :private
-      end
-    end
-
     def try_cache(type_name, cache:)
       cache[type_name] ||= yield
     end
@@ -1032,11 +758,23 @@ module RBS
         builder.singleton0_cache.merge!(singleton0_cache)
         builder.interface_cache.merge!(interface_cache)
 
+        builder.instance_templates.merge!(instance_templates)
+        builder.singleton_templates.merge!(singleton_templates)
+        builder.interface_templates.merge!(interface_templates)
+
+        builder.self_type_prefix_cache.merge!(self_type_prefix_cache)
+
         except.each do |name|
           builder.instance_cache.delete(name)
           builder.singleton_cache.delete(name)
           builder.singleton0_cache.delete(name)
           builder.interface_cache.delete(name)
+
+          builder.instance_templates.delete(name)
+          builder.singleton_templates.delete(name)
+          builder.interface_templates.delete(name)
+
+          builder.self_type_prefix_cache.delete(name)
         end
       end
     end

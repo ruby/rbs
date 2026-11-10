@@ -13,6 +13,31 @@ module RBS
     attr_reader singleton0_cache: Hash[TypeName, Definition | false | nil]
     attr_reader interface_cache: Hash[TypeName, Definition | false | nil]
 
+    # The templates of the methods of the classes, modules, and interfaces
+    #
+    attr_reader instance_templates: Hash[TypeName, LayerTemplate]
+    attr_reader singleton_templates: Hash[TypeName, LayerTemplate]
+    attr_reader interface_templates: Hash[TypeName, LayerTemplate]
+
+    # The layers of the templates, that keep the methods shared by definitions
+    #
+    attr_reader plain_layers: Hash[LayerTemplate, Layer]
+    attr_reader generic_layers: Hash[LayerTemplate, Hash[Hash[Symbol, Types::t], Layer]]
+
+    # The methods and variables given to the modules by their self types
+    #
+    class SelfTypePrefix
+      attr_reader methods: Definition::MethodTable
+      attr_reader instance_variables: Hash[Symbol, Definition::Variable]
+      attr_reader class_variables: Hash[Symbol, Definition::Variable]
+
+      def initialize: (methods: Definition::MethodTable) -> void
+    end
+
+    # The prefixes of the modules without self type constraints, with the name of the class that is the self type
+    #
+    attr_reader self_type_prefix_cache: Hash[TypeName, SelfTypePrefix]
+
     def initialize: (env: Environment, ?ancestor_builder: AncestorBuilder?, ?method_builder: MethodBuilder?) -> void
 
     # Returns a Definition of a interface
@@ -93,11 +118,9 @@ module RBS
 
     def build_singleton0: (TypeName) -> Definition
 
-    # Returns `interface_methods` from given array of interface ancestors
+    # Returns the interfaces with their methods, without the duplication of an interface
     #
-    def interface_methods: (Array[Definition::Ancestor::Instance] interface_ancestors) -> interface_methods
-
-    def special_accessibility: (bool, Symbol) -> Definition::accessibility?
+    def interface_methods: (Array[Definition::Ancestor::Instance] interface_ancestors) -> Array[LayerTemplate::interface_mixin]
 
     def try_cache: (TypeName, cache: Hash[TypeName, Definition | false | nil]) { () -> Definition } -> Definition
 
@@ -117,58 +140,54 @@ module RBS
       source: Definition::Variable::source
     ) -> void
 
-    # Add method definition to `methods`, which will be merged to `class_definition` after defining all methods at this *level* -- class, module, or interface
+    # Returns the template of the instance methods of a class or a module
     #
-    # `class_definition` is a definition of given type, but it has definitions of prior levels.
-    #
-    def define_method: (
-      Hash[Symbol, Definition::Method] methods,
-      Definition class_definition,
-      MethodBuilder::Methods::Definition method_definition,
-      Substitution subst,
-      Hash[Symbol, Definition::Method]? self_type_methods,
-      defined_in: TypeName,
-      ?implemented_in: TypeName?
-    ) -> void
+    def instance_template: (TypeName) -> LayerTemplate
 
-    # The `interface_methods` type describes the association between the interface name to its name and the *mixin* to a module
+    # Returns the template of the singleton methods of a class or a module
     #
-    type interface_methods = Hash[
-      Definition::Ancestor::Instance,
-      [MethodBuilder::Methods, AST::Members::Include | AST::Members::Extend]
-    ]
+    def singleton_template: (TypeName) -> LayerTemplate
 
-    # Add method definitions from `module_methods` to `definition`
+    # Returns the template of the methods of an interface
     #
-    # It also processes interface mixins, with duplication detection.
-    # It doesn't process module mixins.
-    #
-    def import_methods: (
-      Definition definition,
-      TypeName module_name,
-      MethodBuilder::Methods module_methods,
-      interface_methods interface_methods,
-      Substitution subst,
-      Hash[Symbol, Definition::Method]? self_type_methods,
-    ) -> void
+    def interface_template: (TypeName) -> LayerTemplate
 
-    # Updates `definition` with methods and instance variables of `type_name` that can be a module or a class
+    # Returns the layer of the template with the substitution
+    #
+    # The layers of a template with the same substitution are the same object, to share the methods between definitions.
+    #
+    def layer: (LayerTemplate, Substitution) -> Layer
+
+    # Adds the layers of a class or a module to `layers`, and the variables to `definition`
     #
     # It processes includes and prepends recursively.
     # If `define_class_vars:` is falsy, it skips inserting class variables.
     #
-    def define_instance: (
-      Definition definition,
+    def instance_layers: (
+      Definition | SelfTypePrefix definition,
+      Array[Layer] layers,
       TypeName type_name,
       Substitution subst,
       define_class_vars: bool
     ) -> void
 
-    # Updates `definition` with methods defined in an interface `type_name`
+    # Returns the pairs of the names of the modules and the substitutions of the type applications
     #
-    # It processes includes recursively
+    def mixin_substs: (Enumerator[Definition::Ancestor::Instance, untyped]) -> Array[LayerTemplate::module_mixin]
+
+    # Returns the interfaces mixed in a module, with the interfaces they include
     #
-    def define_interface: (Definition definition, TypeName type_name, Substitution subst) -> void
+    def interface_mixins: (Enumerator[Definition::Ancestor::Instance, untyped]) -> Array[LayerTemplate::interface_mixin]
+
+    # Returns `true` if a module has no self type constraint
+    #
+    def default_self_types?: (Array[Definition::Ancestor::Instance]) -> bool
+
+    # Returns the methods and variables of `Object`, that are given to the modules without self type constraints
+    #
+    # They don't include the ones of the super class of `Object`.
+    #
+    def object_self_type_prefix: (Definition) -> SelfTypePrefix
 
     # Returns a substitution that corresponds to type application
     #

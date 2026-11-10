@@ -3968,4 +3968,301 @@ EOF
       end
     end
   end
+
+  def test_method_table
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        class Foo
+          def foo: () -> String
+
+          alias bar foo
+
+          private
+
+          def baz: () -> Integer
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          methods = definition.methods
+          assert_instance_of Definition::MethodTable, methods
+
+          assert_operator methods, :key?, :foo
+          assert_operator methods, :key?, :__id__
+          refute_operator methods, :key?, :no_such_method
+
+          assert_method_definition methods[:foo], ["() -> ::String"], accessibility: :public
+          assert_same methods[:foo], methods[:foo]
+          assert_same methods[:foo], methods.fetch(:foo)
+          assert_nil methods[:no_such_method]
+
+          assert_raises(KeyError) { methods.fetch(:no_such_method) }
+          assert_equal :default, methods.fetch(:no_such_method, :default)
+          assert_equal :no_such_method, methods.fetch(:no_such_method) {|name| name }
+
+          # The methods of the ancestors come first
+          object_methods = builder.build_instance(type_name("::Object")).methods.keys
+          assert_equal object_methods + [:foo, :bar, :baz], methods.keys
+          assert_equal methods.keys, methods.each_key.to_a
+          assert_equal methods.keys, methods.each.map {|name, _| name }
+          assert_equal methods.keys.size, methods.size
+          refute_predicate methods, :empty?
+
+          assert_equal methods.keys.map {|name| methods[name] }, methods.values
+          assert_equal methods.values, methods.each_value.to_a
+
+          pairs = [] #: Array[[Symbol, RBS::Definition::Method]]
+          methods.each {|pair| pairs << pair }
+          assert_equal methods.keys.zip(methods.values), pairs
+
+          hash = methods.to_h
+          assert_instance_of Hash, hash
+          assert_equal methods.keys, hash.keys
+          assert_same methods[:bar], hash[:bar]
+
+          assert_equal [:baz, :initialize, :puts, :respond_to_missing?], methods.select {|_, method| method.private? }.keys.sort
+          assert_equal methods.size - 4, methods.reject {|_, method| method.private? }.size
+          assert_equal methods.size - 4, methods.count {|_, method| method.public? }
+          assert_equal hash.transform_values(&:accessibility), methods.transform_values(&:accessibility)
+
+          assert_equal hash, methods
+          assert_equal methods, builder.build_instance(type_name("::Foo")).methods
+        end
+      end
+    end
+  end
+
+  def test_method_table_shares_methods
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module M
+          def m: () -> String
+
+          def to_i: () -> Integer
+        end
+
+        module G[T]
+          def g: () -> T
+
+          def h: () -> Integer
+        end
+
+        class Foo
+          include M
+          include G[String]
+        end
+
+        class Bar < Foo
+          include G[String]
+        end
+
+        class Baz
+          include M
+          include G[Integer]
+
+          def to_i: () -> Integer
+        end
+
+        class Qux[T]
+          def qux: () -> T
+        end
+
+        class Quux < Qux[String]
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        object = builder.build_instance(type_name("::Object"))
+        m = builder.build_instance(type_name("::M"))
+        foo = builder.build_instance(type_name("::Foo"))
+        bar = builder.build_instance(type_name("::Bar"))
+        baz = builder.build_instance(type_name("::Baz"))
+
+        # The methods of the super class are the methods of the class
+        assert_same object.methods[:__id__], foo.methods[:__id__]
+        assert_same foo.methods[:m], bar.methods[:m]
+
+        # The methods of a module are shared by the classes that have the same method to override
+        assert_same foo.methods[:m], baz.methods[:m]
+        assert_same foo.methods[:to_i], baz.methods[:to_i].super_method
+        assert_same object.methods[:to_i], foo.methods[:to_i].super_method
+
+        # A module doesn't have the methods of `BasicObject`, but shares the methods of `Object` with the other modules
+        refute_same object.methods[:__id__], m.methods[:__id__]
+        assert_nil m.methods[:__id__].super_method
+        assert_same m.methods[:__id__], builder.build_instance(type_name("::G")).methods[:__id__]
+
+        # The methods of a generic module are shared when the type arguments are the same
+        assert_same foo.methods[:g], bar.methods[:g].super_method
+        refute_same foo.methods[:g], bar.methods[:g]
+        refute_same foo.methods[:g], baz.methods[:g]
+        assert_method_definition baz.methods[:g], ["() -> ::Integer"]
+
+        # The methods of a generic super class are shared unless the type arguments are substituted
+        qux = builder.build_instance(type_name("::Qux"))
+        quux = builder.build_instance(type_name("::Quux"))
+        assert_same object.methods[:__id__], quux.methods[:__id__]
+        refute_same qux.methods[:qux], quux.methods[:qux]
+        assert_method_definition quux.methods[:qux], ["() -> ::String"]
+      end
+    end
+  end
+
+  def test_method_table_resolves_methods_on_demand
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        class Foo
+          def foo: () -> String
+
+          def bar: () -> Integer
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        definition = builder.build_instance(type_name("::Foo"))
+        resolved = definition.methods.instance_variable_get(:@methods)
+
+        assert_empty resolved
+
+        assert_operator definition.methods, :key?, :foo
+        definition.methods.each_key {}
+        definition.methods.size
+        assert_empty resolved
+
+        definition.methods[:foo]
+        assert_equal [:foo], resolved.keys
+
+        definition.methods.each {}
+        assert_equal definition.methods.keys.sort, resolved.keys.sort
+        assert_same resolved, definition.methods.resolved_methods
+      end
+    end
+  end
+
+  def test_build_instance_mixin_alias_error
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        interface _Hello
+          def hello: () -> void
+        end
+
+        module M : _Hello
+          alias hi hello
+        end
+
+        module N
+          alias hi hello
+        end
+
+        class Foo
+          include M
+        end
+
+        class Bar
+          include N
+
+          def hello: () -> void
+        end
+
+        class Baz
+          def hello: () -> void
+
+          include N
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        # The alias is resolved with the self type of the module
+        assert_method_definition builder.build_instance(type_name("::M")).methods[:hi], ["() -> void"]
+        assert_method_definition builder.build_instance(type_name("::Foo")).methods[:hi], ["() -> void"]
+
+        # The errors are detected when the definitions are built, without resolving the methods
+        assert_raises(UnknownMethodAliasError) { builder.build_instance(type_name("::N")) }
+        assert_raises(UnknownMethodAliasError) { builder.build_instance(type_name("::Bar")) }
+        assert_raises(UnknownMethodAliasError) { builder.build_instance(type_name("::Baz")) }
+      end
+    end
+  end
+
+  def test_update
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module M
+          def m: () -> String
+        end
+
+        class Foo
+          include M
+
+          def foo: () -> String
+        end
+
+        class Bar < Foo
+        end
+
+        class Baz
+          include M
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        foo = builder.build_instance(type_name("::Foo"))
+        bar = builder.build_instance(type_name("::Bar"))
+        baz = builder.build_instance(type_name("::Baz"))
+        baz_m = baz.methods[:m]
+
+        buffer = RBS::Buffer.new(name: Pathname("foo2.rbs"), content: <<~RBS)
+          class Foo
+            def foo: () -> Integer
+                   | ...
+
+            def foo2: () -> Symbol
+          end
+        RBS
+        _, dirs, decls = RBS::Parser.parse_signature(buffer)
+
+        new_env = env.unload(Set[])
+        new_env.add_source(RBS::Source::RBS.new(buffer, dirs, decls))
+        new_env = new_env.resolve_type_names
+
+        new_builder = builder.update(
+          env: new_env,
+          ancestor_builder: DefinitionBuilder::AncestorBuilder.new(env: new_env),
+          except: [type_name("::Foo"), type_name("::Bar")]
+        )
+
+        # The definitions of the other types are kept
+        assert_same baz, new_builder.build_instance(type_name("::Baz"))
+        assert_same baz_m, new_builder.build_instance(type_name("::Baz")).methods[:m]
+
+        new_builder.build_instance(type_name("::Foo")).tap do |definition|
+          refute_same foo, definition
+          assert_method_definition definition.methods[:foo], ["() -> ::Integer", "() -> ::String"]
+          assert_method_definition definition.methods[:foo2], ["() -> ::Symbol"]
+          assert_method_definition definition.methods[:m], ["() -> ::String"]
+        end
+
+        new_builder.build_instance(type_name("::Bar")).tap do |definition|
+          refute_same bar, definition
+          assert_method_definition definition.methods[:foo2], ["() -> ::Symbol"]
+        end
+
+        # The definitions of the builder that is updated are not changed
+        assert_same foo, builder.build_instance(type_name("::Foo"))
+        refute_operator foo.methods, :key?, :foo2
+        assert_method_definition bar.methods[:foo], ["() -> ::String"]
+      end
+    end
+  end
 end

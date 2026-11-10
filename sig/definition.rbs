@@ -152,6 +152,172 @@ module RBS
       ) -> Method
     end
 
+    # A table of the methods of a definition
+    #
+    # It works like a read-only `Hash[Symbol, Method]`, but resolves each method when it is requested.
+    # Looking a method up, or testing if the definition has a method, doesn't resolve the other methods of the definition.
+    #
+    # ```ruby
+    # definition.methods[:to_s]           # Resolves `#to_s`
+    # definition.methods.key?(:inspect)   # Resolves nothing
+    # definition.methods.each_key {}      # Resolves nothing
+    # definition.methods.each {}          # Resolves all of the methods
+    # ```
+    #
+    # The methods are yielded in the order they are defined, from the ancestors to the type itself.
+    #
+    class MethodTable
+      # A source gives the methods of a table
+      #
+      interface _Source
+        # Returns the names of the methods in the order of their definition
+        #
+        def method_names: () -> Array[Symbol]
+
+        # Tests if the method is defined, without resolving it
+        #
+        def method?: (Symbol) -> bool
+
+        # Returns the method, or `nil` if it is not defined
+        #
+        def resolve_method: (Symbol) -> Method?
+
+        # Stores all of the methods in the hash, replacing the methods the hash has
+        #
+        def resolve_methods: (Hash[Symbol, Method]) -> void
+      end
+
+      include Enumerable[[Symbol, Method]]
+
+      @source: _Source?
+
+      # The methods resolved so far
+      @methods: Hash[Symbol, Method]
+
+      # `true` if `@methods` has all of the methods
+      @resolved: bool
+
+      @names: Array[Symbol]?
+
+      @added_names: Array[Symbol]?
+
+      # The table memoizes the methods given by the source.
+      #
+      # A table without a source has the methods defined with `#[]=`.
+      #
+      def initialize: (?_Source? source) -> void
+
+      # Returns the method, resolving it if it is not resolved yet
+      #
+      # Returns `nil` if the method is not defined, like `Hash#[]` does.
+      #
+      def []: (Symbol) -> Method
+
+      def fetch: (Symbol) -> Method
+               | [T] (Symbol, T default) -> (Method | T)
+               | [T] (Symbol) { (Symbol) -> T } -> (Method | T)
+
+      # Returns `true` if the method is defined, without resolving it
+      #
+      def key?: (Symbol) -> bool
+
+      alias has_key? key?
+
+      alias include? key?
+
+      alias member? key?
+
+      # Defines a method in the table, replacing the method the source gives
+      #
+      def []=: (Symbol, Method) -> Method
+
+      def merge!: (MethodTable | Hash[Symbol, Method]) -> self
+
+      # Returns the names of the methods, without resolving them
+      #
+      def keys: () -> Array[Symbol]
+
+      # Yields the names of the methods, without resolving them
+      #
+      def each_key: () { (Symbol) -> void } -> self
+                  | () -> Enumerator[Symbol, Array[Symbol]]
+
+      # Yields the pairs of the names and the methods, resolving all of the methods
+      #
+      def each: () { ([Symbol, Method]) -> void } -> self
+              | () -> Enumerator[[Symbol, Method], self]
+
+      alias each_pair each
+
+      def each_value: () { (Method) -> void } -> self
+                    | () -> Enumerator[Method, self]
+
+      def values: () -> Array[Method]
+
+      def size: () -> Integer
+
+      alias length size
+
+      def empty?: () -> bool
+
+      # Returns a hash of the methods, resolving all of them
+      #
+      def to_h: () -> Hash[Symbol, Method]
+              | [K, V] () { (Symbol, Method) -> [K, V] } -> Hash[K, V]
+
+      alias to_hash to_h
+
+      def transform_values: [T] () { (Method) -> T } -> Hash[Symbol, T]
+                          | () -> Enumerator[Method, Hash[Symbol, untyped]]
+
+      def select: () { (Symbol, Method) -> boolish } -> Hash[Symbol, Method]
+                | () -> Enumerator[[Symbol, Method], Hash[Symbol, Method]]
+
+      alias filter select
+
+      def reject: () { (Symbol, Method) -> boolish } -> Hash[Symbol, Method]
+                | () -> Enumerator[[Symbol, Method], Hash[Symbol, Method]]
+
+      def ==: (untyped) -> bool
+
+      # Returns a table of the methods converted by the block
+      #
+      # A method is converted when it is requested through the returned table.
+      #
+      def map_method: () { (Method) -> Method } -> MethodTable
+
+      # Resolves all of the methods, and returns the hash the table keeps them in
+      #
+      # The order of the hash is not defined, and the hash must not be modified. Resolving all of the methods of a
+      # table at once is faster than looking them up one by one.
+      #
+      def resolved_methods: () -> Hash[Symbol, Method]
+
+      # Stores all of the methods in the given hash
+      #
+      # Unlike `#resolved_methods`, the table doesn't keep the methods it resolves for the hash.
+      #
+      def resolve_methods_into: (Hash[Symbol, Method]) -> void
+
+      def inspect: () -> String
+
+      private
+
+      def lookup: (Symbol) -> Method?
+
+      public
+
+      class Mapped
+        include _Source
+
+        @table: MethodTable
+
+        @block: ^(Method) -> Method
+
+        def initialize: (MethodTable, ^(Method) -> Method) -> void
+      end
+    end
+
     module Ancestor
       type t = Instance | Singleton
 
@@ -200,11 +366,19 @@ module RBS
     attr_reader entry: definition_entry
     attr_reader ancestors: InstanceAncestors | SingletonAncestors | nil
     attr_reader self_type: self_type
-    attr_reader methods: Hash[Symbol, Method]
+    # The methods of the definition, that are resolved when they are requested
+    #
+    attr_reader methods: MethodTable
     attr_reader instance_variables: Hash[Symbol, Variable]
     attr_reader class_variables: Hash[Symbol, Variable]
 
-    def initialize: (type_name: TypeName, entry: definition_entry, self_type: self_type, ancestors: InstanceAncestors | SingletonAncestors | nil) -> void
+    def initialize: (
+      type_name: TypeName,
+      entry: definition_entry,
+      self_type: self_type,
+      ancestors: InstanceAncestors | SingletonAncestors | nil,
+      ?methods: MethodTable?
+    ) -> void
 
     def class?: () -> bool
 
