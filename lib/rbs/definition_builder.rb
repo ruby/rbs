@@ -52,14 +52,21 @@ module RBS
       @generic_layers = {}
       @generic_layers.compare_by_identity
       @self_type_prefix_cache = {}
+
+      @namespaces = {}
     end
 
     def ensure_namespace!(namespace, location:)
+      # The namespaces that passed the validation are recorded, because the types in a namespace share the validation
+      return if @namespaces.key?(namespace)
+
       namespace.ascend do |ns|
         unless ns.empty?
           NoTypeFoundError.check!(ns.to_type_name, env: env, location: location)
         end
       end
+
+      @namespaces[namespace] = true
     end
 
     def build_interface(type_name)
