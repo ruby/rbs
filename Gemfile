@@ -19,7 +19,6 @@ gem 'tempfile'
 gem "rdoc"
 gem "fileutils"
 gem "raap"
-gem "activesupport", "~> 7.0"
 gem "extconf_compile_commands_json"
 gem "irb"
 
