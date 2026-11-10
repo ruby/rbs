@@ -38,6 +38,10 @@ module RBS
     #
     attr_reader self_type_prefix_cache: Hash[TypeName, SelfTypePrefix]
 
+    # The namespaces validated by `#ensure_namespace!`
+    #
+    @namespaces: Hash[Namespace, true]
+
     def initialize: (env: Environment, ?ancestor_builder: AncestorBuilder?, ?method_builder: MethodBuilder?) -> void
 
     # Returns a Definition of a interface
