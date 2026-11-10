@@ -87,6 +87,28 @@ It uses `AncestorBuilder` to construct ancestor chains of the type. `MethodBuild
 
 The `#build_singleton` calculates the type of `.new` methods based on the definition of `#initialize` method. This is different from Ruby's implementation -- it reused `Class#new` method but we need the custom implementation to give precise `.new` method type of each class.
 
+#### Methods of a definition
+
+`Definition#methods` returns a `Definition::MethodTable`. It works like a hash from the name of a method to the `Definition::Method` object, but it resolves a method when the method is requested.
+
+```ruby
+definition = builder.build_instance(TypeName.parse("::String"))
+
+definition.methods.key?(:gsub)    # Tests if the method is defined, without resolving the method
+definition.methods[:gsub]         # Resolves `#gsub`, and nothing else
+definition.methods.each_key {}    # Yields the names of the methods, without resolving the methods
+definition.methods.each {}        # Resolves all of the methods
+```
+
+The errors of a definition are still detected by `#build_instance`, `#build_singleton`, and `#build_interface`. A method that cannot be defined -- an `alias` of a method that doesn't exist, for example -- raises an error from the builder, without resolving the other methods.
+
+A definition has the methods of its ancestors, but the builder doesn't copy them for each definition.
+
+- The methods the type itself and the modules mixed in it define are kept in *layers*, and the methods of the super class are looked up in the definition of the super class. `String#__id__` is the same object with `Object#__id__`.
+- The layer of a module is shared by the definitions that mix the module in. The classes that include `Comparable` have the same `Comparable#between?` object, unless the methods it overrides are different.
+
+Resolving all of the methods of a definition needs a table as big as the number of the methods. Look the methods you need up, instead of iterating over all of them, when you can.
+
 #### Working with type aliases
 
 `DefinitionBuilder#expand_alias` and its variants provide one step *unfold* operation of type aliases.

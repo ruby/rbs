@@ -1,0 +1,269 @@
+module RBS
+  class DefinitionBuilder
+    # The methods one module gives to a definition -- the methods of a class, a module, the singleton class of
+    # them, or an interface, with the methods of the interfaces mixed in it
+    #
+    # A template is independent from the definition that has the methods. It is shared by the definitions of the
+    # module itself and of the classes and modules that inherit the module.
+    #
+    class LayerTemplate
+      # An interface mixed in the module, with its methods, the mixin member, and the substitution of the type application
+      #
+      # The substitution is `nil` if the interface has no type argument.
+      #
+      type interface_mixin = [
+        Definition::Ancestor::Instance,
+        MethodBuilder::Methods,
+        AST::Members::Include | AST::Members::Extend,
+        Substitution?
+      ]
+
+      # A module mixed in the module, with the substitution of the type application
+      #
+      type module_mixin = [TypeName, Substitution]
+
+      # The methods of a self type of the module, with the substitution of the type application
+      #
+      type self_type = [Definition::MethodTable, Substitution]
+
+      type variable_member = AST::Members::AttrReader | AST::Members::AttrAccessor | AST::Members::AttrWriter
+                           | AST::Members::InstanceVariable | AST::Members::ClassVariable
+                           | AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember
+                           | AST::Ruby::Members::InstanceVariableMember
+
+      class Entry
+        attr_reader name: Symbol
+
+        # The definition of the method in the module
+        attr_reader definition: MethodBuilder::Methods::Definition
+
+        # The names of the modules recorded in the type defs of the method
+        attr_reader defined_in: TypeName
+        attr_reader implemented_in: TypeName?
+
+        # The index of the interface in the template if the method is one of an interface mixed in the module
+        attr_reader interface_index: Integer?
+
+        # The index of the entry in the order the methods are defined
+        attr_reader position: Integer
+
+        def initialize: (
+          name: Symbol,
+          definition: MethodBuilder::Methods::Definition,
+          defined_in: TypeName,
+          implemented_in: TypeName?,
+          interface_index: Integer?,
+          position: Integer
+        ) -> void
+      end
+
+      attr_reader type_name: TypeName
+
+      # The methods in the order they are defined
+      #
+      # A name has two entries if the module overloads a method of an interface, or defines an alias with the name.
+      #
+      attr_reader entries: Hash[Symbol, Entry | Array[Entry]]
+
+      # The substitutions of the type applications of the interfaces, `nil` if an interface has no type argument
+      attr_reader interface_substs: Array[Substitution?]
+
+      # The definitions of the self types of a module, that have the original method of aliases
+      attr_reader self_types: Array[self_type]?
+
+      # The entries that are defined only if the definition has other methods, or cannot be defined
+      attr_reader checks: Array[Entry]
+
+      # The duplicated definition of a method among the interfaces
+      attr_reader duplicated_interface_method: [Symbol, AST::Members::Include | AST::Members::Extend]?
+
+      # The modules mixed in the module, with the substitutions of their type applications
+      #
+      # The methods of `included_modules` and `extended_modules` are defined before the methods of the template,
+      # and the ones of `prepended_modules` are defined after them.
+      #
+      attr_reader included_modules: Array[module_mixin]
+      attr_reader prepended_modules: Array[module_mixin]
+      attr_reader extended_modules: Array[module_mixin]
+
+      # The members that define the instance variables and class variables of the module
+      #
+      # A member is paired with the substitution that aligns the type parameters of the declaration it belongs to.
+      #
+      attr_reader variables: Array[[Substitution?, variable_member]]
+
+      def initialize: (
+        type_name: TypeName,
+        methods: MethodBuilder::Methods,
+        interfaces: Array[interface_mixin],
+        ?self_types: Array[self_type]?,
+        ?included_modules: Array[module_mixin],
+        ?prepended_modules: Array[module_mixin],
+        ?extended_modules: Array[module_mixin],
+        ?variables: Array[[Substitution?, variable_member]]
+      ) -> void
+
+      private
+
+      def insert: (Entry) -> void
+
+      def defined_before?: (Symbol name, Integer position) -> bool
+    end
+
+    # A layer is the methods of a template, with the type arguments given to the module
+    #
+    # It builds the methods of a definition. A method depends on the methods of the definition that are defined
+    # before the layer -- the method it overrides or the original method of an alias -- and the layer returns the
+    # same method for the same ones. Definitions share the method objects in this way.
+    #
+    class Layer
+      attr_reader template: LayerTemplate
+      attr_reader subst: Substitution
+
+      # The methods built for the entries, as the triples of the overridden method, the original method of an alias, and the result
+      @cache: Array[Array[Definition::Method?]?]
+
+      @interface_substs: Array[Substitution?]?
+
+      @self_type_methods: Hash[Symbol, Definition::Method?]?
+
+      def initialize: (LayerTemplate, Substitution) -> void
+
+      # Returns the method of the layer, `nil` if the layer doesn't have the method
+      #
+      # `stack` is the stack of the definition that has the layer at the `index`.
+      #
+      def resolve: (Symbol name, LayerStack stack, Integer index) -> Definition::Method?
+
+      # Returns the method defined by the entries before the `position`
+      #
+      def resolve_before: (Symbol name, Integer position, LayerStack stack, Integer index) -> Definition::Method?
+
+      private
+
+      # Builds the method of the entry
+      #
+      # `layer_method` is the method defined with the name by an earlier entry of the layer.
+      #
+      def build: (LayerTemplate::Entry, Definition::Method? layer_method, LayerStack stack, Integer index) -> Definition::Method
+
+      def construct: (
+        LayerTemplate::Entry,
+        Definition::Method? existing_method,
+        Definition::Method? layer_method,
+        Definition::Method? original_method,
+        LayerStack stack
+      ) -> Definition::Method
+
+      def entry_subst: (LayerTemplate::Entry) -> Substitution
+
+      # Returns the method of the self types of a module
+      #
+      # The later self type has the precedence.
+      #
+      def self_type_method: (Symbol) -> Definition::Method?
+
+      def special_accessibility: (bool is_instance, Symbol method_name) -> Definition::accessibility?
+    end
+
+    # The layers of a definition, that give the methods of the definition
+    #
+    # A stack has the layers of the type and the modules mixed in it. The methods of the other ancestors are given
+    # by the `parent`, that is the table of the methods of another definition -- the one of the super class.
+    #
+    class LayerStack
+      include Definition::MethodTable::_Source
+
+      # The name and the type of the definition, that are reported in the errors
+      attr_reader type_name: TypeName
+      attr_reader self_type: Definition::self_type
+
+      attr_reader layers: Array[Layer]
+
+      attr_reader parent: Definition::MethodTable?
+
+      # The substitution applied to the methods of the parent
+      attr_reader parent_subst: Substitution?
+
+      @index: Hash[Symbol, Integer | Array[Integer]]?
+
+      @parent_methods: Hash[Definition::Method, Definition::Method]?
+
+      def initialize: (type_name: TypeName, self_type: Definition::self_type) -> void
+
+      def set_parent: (Definition::MethodTable, ?Substitution?) -> void
+
+      # Returns the method defined before the layer of the `limit`
+      #
+      def resolve: (Symbol name, Integer limit) -> Definition::Method?
+
+      # Raises an error if a method of the layers cannot be defined
+      #
+      def validate!: () -> void
+
+      def self.closed_method_type?: (MethodType) -> bool
+
+      def self.closed_type?: (Types::t) -> bool
+
+      private
+
+      # The indexes of the layers that define a method
+      #
+      def index: () -> Hash[Symbol, Integer | Array[Integer]]
+
+      def parent_method: (Symbol) -> Definition::Method?
+
+      # Substitutes the method types of a method of the parent
+      #
+      # Returns the same method if the method types have no type variables, to share the method with the parent.
+      #
+      def substitute: (Definition::Method) -> Definition::Method
+    end
+
+    # The methods of the singleton class of a class, where `.new` has the type of `#initialize`
+    #
+    # It replaces the `.new` method defined in `::Class` and the aliases of it with the methods that have the
+    # method types of `#initialize` of the class.
+    #
+    class SingletonMethods
+      include Definition::MethodTable::_Source
+
+      @type_name: TypeName
+
+      @type_params: Array[AST::TypeParam]
+
+      @methods: Definition::MethodTable
+
+      @instance_methods: Definition::MethodTable
+
+      @new_methods: [Definition::Method, Definition::Method]?
+
+      @new_methods_resolved: bool
+
+      @aliases: Hash[Symbol, Definition::Method]?
+
+      def initialize: (
+        type_name: TypeName,
+        type_params: Array[AST::TypeParam],
+        methods: Definition::MethodTable,
+        instance_methods: Definition::MethodTable
+      ) -> void
+
+      private
+
+      # Returns the method that replaces `method` -- `.new` or an alias of it -- or `method` itself
+      #
+      def replace: (Symbol name, Definition::Method method, Definition::Method new_method, Definition::Method typed_new) -> Definition::Method
+
+      # Returns the pair of `.new` defined in `::Class` and the one with the types of `#initialize`
+      #
+      # Returns `nil` if `.new` is not replaced.
+      #
+      def new_methods: () -> [Definition::Method, Definition::Method]?
+
+      def build_new_methods: () -> [Definition::Method, Definition::Method]?
+
+      def build_typed_new: (Definition::Method new_method, Definition::Method initialize) -> Definition::Method
+    end
+  end
+end
