@@ -452,6 +452,10 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
       assert_send_type '() -> Pathname',
                         dir + 'a/b/c', :mkpath
+      assert_send_type '(mode: Integer) -> Pathname',
+                        dir + 'd/e', :mkpath, mode: 0700
+      assert_send_type '(mode: nil) -> Pathname',
+                        dir + 'f/g', :mkpath, mode: nil
     end
   end
 

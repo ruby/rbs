@@ -42,6 +42,10 @@ class PathnameExtInstanceTest < Test::Unit::TestCase
       target.mkdir
       assert_send_type '() -> Pathname',
                        target, :rmtree
+
+      target.mkdir
+      assert_send_type '(noop: bool, verbose: bool, secure: bool) -> Pathname',
+                       target, :rmtree, noop: false, verbose: false, secure: true
     end
   end
 end
