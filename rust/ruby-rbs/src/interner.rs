@@ -27,8 +27,7 @@
 //! assert_eq!(global.resolve(b_array), "Array");
 //! ```
 
-use crate::ids::SymbolId;
-use std::collections::HashMap;
+use crate::ids::{IdHashMap, SymbolId, SymbolTag};
 use xxhash_rust::xxh3::xxh3_64;
 
 /// Interns strings and assigns each the content-addressed [`SymbolId`]
@@ -40,7 +39,7 @@ use xxhash_rust::xxh3::xxh3_64;
 /// [`merge`]: Self::merge
 #[derive(Default)]
 pub struct StringInterner {
-    map: HashMap<SymbolId, Box<str>>,
+    map: IdHashMap<SymbolTag, Box<str>>,
 }
 
 impl StringInterner {

@@ -31,9 +31,8 @@
 //! assert_eq!(names.display(foo, &strings), "::RBS::Foo");
 //! ```
 
-use crate::ids::{SymbolId, TypeName};
+use crate::ids::{IdHashMap, SymbolId, TypeName, TypeNameTag};
 use crate::interner::StringInterner;
-use std::collections::HashMap;
 use xxhash_rust::xxh3::xxh3_64;
 
 /// Fixed sentinel hash for the absolute (`::`) namespace root. Chosen so
@@ -123,7 +122,7 @@ impl Entry {
 /// assert_eq!(names.display(n2, &strings), "::RBS::Foo");
 /// ```
 pub struct TypeNameInterner {
-    entries: HashMap<TypeName, Entry>,
+    entries: IdHashMap<TypeNameTag, Entry>,
     relative_root: TypeName,
     absolute_root: TypeName,
 }
@@ -132,7 +131,7 @@ impl Default for TypeNameInterner {
     fn default() -> Self {
         let relative_root = TypeName::from_hash(RELATIVE_ROOT_HASH);
         let absolute_root = TypeName::from_hash(ABSOLUTE_ROOT_HASH);
-        let mut entries = HashMap::new();
+        let mut entries = IdHashMap::<TypeNameTag, Entry>::default();
         entries.insert(
             relative_root,
             Entry::Relative(RelativeTypeNameEntry {
@@ -297,6 +296,11 @@ impl TypeNameInterner {
     pub fn concat(&mut self, head: TypeName, tail: TypeName) -> TypeName {
         if self.is_absolute(tail) {
             return tail;
+        }
+        if let (Some(parent), Some(segment)) = (self.parent(tail), self.last_segment(tail))
+            && self.is_root(parent)
+        {
+            return self.append(head, segment);
         }
         let tail_segs = self.segments(tail);
         self.extend(head, tail_segs)

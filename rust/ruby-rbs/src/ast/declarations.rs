@@ -3,7 +3,7 @@ use crate::ast::comment::Comment;
 use crate::ast::location::{
     AliasDeclarationLocation, ClassDeclarationLocation, ClassSuperLocation,
     ConstantDeclarationLocation, GlobalDeclarationLocation, InterfaceDeclarationLocation,
-    ModuleDeclarationLocation, ModuleSelfLocation, TypeAliasDeclarationLocation,
+    LocationRange, ModuleDeclarationLocation, ModuleSelfLocation, TypeAliasDeclarationLocation,
 };
 use crate::ast::members::Member;
 use crate::ast::type_param::TypeParam;
@@ -22,16 +22,52 @@ pub enum Declaration {
     ModuleAlias(ModuleAliasDeclaration),
 }
 
+impl Declaration {
+    #[must_use]
+    pub(crate) fn location_range(&self) -> Option<LocationRange> {
+        match self {
+            Declaration::Class(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Module(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Interface(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Constant(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::Global(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::TypeAlias(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::ClassAlias(d) => d.location.as_ref().map(|l| l.range),
+            Declaration::ModuleAlias(d) => d.location.as_ref().map(|l| l.range),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ClassMember {
     Member(Member),
     Declaration(Declaration),
 }
 
+impl ClassMember {
+    #[must_use]
+    pub fn as_declaration(&self) -> Option<&Declaration> {
+        match self {
+            Self::Declaration(d) => Some(d),
+            Self::Member(_) => None,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ModuleMember {
     Member(Member),
     Declaration(Declaration),
+}
+
+impl ModuleMember {
+    #[must_use]
+    pub fn as_declaration(&self) -> Option<&Declaration> {
+        match self {
+            Self::Declaration(d) => Some(d),
+            Self::Member(_) => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
