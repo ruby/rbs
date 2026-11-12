@@ -23,7 +23,7 @@ class Logger
     #   - reopen(log = nil)
     # -->
     #
-    def reopen: (?logdev log) -> self
+    def reopen: (?logdev? log, ?shift_age: Numeric | String, ?shift_size: Integer, ?shift_period_suffix: String, ?binmode: boolish) -> self
 
     # <!--
     #   rdoc-file=lib/logger/log_device.rb
@@ -60,7 +60,7 @@ class Logger
     #   - new(log = nil, shift_age: nil, shift_size: nil, shift_period_suffix: nil, binmode: false, reraise_write_errors: [])
     # -->
     #
-    def initialize: (?untyped logdev, ?binmode: boolish, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String) -> void
+    def initialize: (?untyped logdev, ?binmode: boolish, ?shift_period_suffix: String, ?shift_size: Integer, ?shift_age: Numeric | String, ?reraise_write_errors: Array[singleton(Exception)], ?skip_header: boolish) -> void
 
     # <!--
     #   rdoc-file=lib/logger/log_device.rb
