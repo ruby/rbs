@@ -15,6 +15,9 @@ class OptionParserSingletonTest < Test::Unit::TestCase
   def test_getopts
     assert_send_type "(*String) -> Hash[String, untyped]", OptionParser, :getopts, "ab:", "foo", "bar:", "zot:Z;zot option"
     assert_send_type "(Array[String], *String) -> Hash[String, untyped]", OptionParser, :getopts, ['-a'], "ab:", "foo", "bar:", "zot:Z;zot option"
+    assert_send_type "(Array[String], *String, symbolize_names: false) -> Hash[String, untyped]", OptionParser, :getopts, ['-a'], "ab:", "foo", symbolize_names: false
+    assert_send_type "(Array[String], *String, symbolize_names: true) -> Hash[Symbol, untyped]", OptionParser, :getopts, ['-a'], "ab:", "foo", symbolize_names: true
+    assert_send_type "(*String, symbolize_names: true) -> Hash[Symbol, untyped]", OptionParser, :getopts, "ab:", "foo", symbolize_names: true
   end
 
   def test_inc
@@ -110,6 +113,10 @@ class OptionParserTest < Test::Unit::TestCase
   def test_getopts
     assert_send_type "(*String) -> Hash[String, untyped]", opt, :getopts, "ab:", "foo", "bar:", "zot:Z;zot option"
     assert_send_type "(Array[String], *String) -> Hash[String, untyped]", opt, :getopts, ['-a'], "ab:", "foo", "bar:", "zot:Z;zot option"
+    assert_send_type "(Array[String], *String, symbolize_names: false) -> Hash[String, untyped]", opt, :getopts, ['-a'], "ab:", "foo", symbolize_names: false
+    assert_send_type "(Array[String], *String, symbolize_names: true) -> Hash[Symbol, untyped]", opt, :getopts, ['-a'], "ab:", "foo", symbolize_names: true
+    assert_send_type "(*String, symbolize_names: true) -> Hash[Symbol, untyped]", opt, :getopts, "ab:", "foo", symbolize_names: true
+    assert_send_type "(Array[String], *String, symbolize_names: bool) -> Hash[String | Symbol, untyped]", opt, :getopts, ['-a'], "ab:", symbolize_names: [true, false].sample
   end
 
   def test_help
@@ -248,6 +255,8 @@ class OptionParserArguableTest < Test::Unit::TestCase
 
   def test_getopts
     assert_send_type '(*String) -> Hash[String, untyped]', subject, :getopts, 'ab:'
+    assert_send_type '(*String, symbolize_names: false) -> Hash[String, untyped]', Target.new(%w[-a 42]), :getopts, 'ab:', symbolize_names: false
+    assert_send_type '(*String, symbolize_names: true) -> Hash[Symbol, untyped]', Target.new(%w[-a 42]), :getopts, 'ab:', symbolize_names: true
   end
 
   def test_options
