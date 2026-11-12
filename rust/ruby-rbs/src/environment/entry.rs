@@ -70,10 +70,6 @@ impl<K> Entry<K> {
     }
 
     pub fn each_decl(&self) -> DeclIter<'_> {
-        self.decls()
-    }
-
-    fn decls(&self) -> DeclIter<'_> {
         std::iter::once(self.first).chain(self.rest.iter().copied())
     }
 }
@@ -133,13 +129,9 @@ impl ClassDeclEntry {
     }
 
     pub fn each_decl(&self) -> DeclIter<'_> {
-        self.decls()
-    }
-
-    fn decls(&self) -> DeclIter<'_> {
         match self {
-            Self::Class(e) => e.decls(),
-            Self::Module(e) => e.decls(),
+            Self::Class(e) => e.each_decl(),
+            Self::Module(e) => e.each_decl(),
         }
     }
 
@@ -177,7 +169,7 @@ pub enum ConstantLookup<'a> {
 impl<'a> ConstantLookup<'a> {
     pub fn each_decl(&self) -> DeclIter<'a> {
         match *self {
-            Self::ClassDecl(e) => e.decls(),
+            Self::ClassDecl(e) => e.each_decl(),
             Self::ClassAlias(e) | Self::ModuleAlias(e) | Self::Constant(e) => e.decls(),
         }
     }
@@ -200,7 +192,7 @@ impl<'a> ClassLookup<'a> {
 
     pub fn each_decl(&self) -> DeclIter<'a> {
         match *self {
-            Self::Class(e) => e.decls(),
+            Self::Class(e) => e.each_decl(),
             Self::ClassAlias(e) => e.decls(),
         }
     }
@@ -232,7 +224,7 @@ impl<'a> ModuleClassLookup<'a> {
 
     pub fn each_decl(&self) -> DeclIter<'a> {
         match *self {
-            Self::ClassDecl(e) => e.decls(),
+            Self::ClassDecl(e) => e.each_decl(),
             Self::ClassAlias(e) | Self::ModuleAlias(e) => e.decls(),
         }
     }
@@ -263,7 +255,7 @@ impl<'a> ModuleLookup<'a> {
 
     pub fn each_decl(&self) -> DeclIter<'a> {
         match *self {
-            Self::Module(e) => e.decls(),
+            Self::Module(e) => e.each_decl(),
             Self::ModuleAlias(e) => e.decls(),
         }
     }
