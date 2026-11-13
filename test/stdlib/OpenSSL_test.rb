@@ -710,10 +710,129 @@ class OpenSSLPKeySingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_generate_key
+    assert_send_type "(String) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :generate_key, "ED25519"
+    assert_send_type "(String, Hash[String, String]) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :generate_key, "EC", { "ec_paramgen_curve" => "P-256" }
+    assert_send_type "(OpenSSL::PKey::PKey) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :generate_key, OpenSSL::PKey.generate_parameters("EC", "ec_paramgen_curve" => "P-256")
+  end
+
+  def test_generate_parameters
+    assert_send_type "(String, Hash[String, String]) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :generate_parameters, "EC", { "ec_paramgen_curve" => "P-256" }
+    assert_send_type "(String, Hash[Symbol, Integer]) { (*untyped) -> void } -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :generate_parameters, "DSA", { dsa_paramgen_bits: 1024 } do end
+  end
+
+  def test_new_raw_private_key
+    assert_send_type "(String, String) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :new_raw_private_key, "ED25519", OpenSSL::PKey.generate_key("ED25519").raw_private_key
+  end
+
+  def test_new_raw_public_key
+    assert_send_type "(String, String) -> OpenSSL::PKey::PKey",
+      OpenSSL::PKey, :new_raw_public_key, "ED25519", OpenSSL::PKey.generate_key("ED25519").raw_public_key
+  end
+
   private
 
   def pem
     OpenSSL::PKey::RSA.new(2048).to_pem
+  end
+end
+
+class OpenSSLPKeyPKeyTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::PKey::PKey"
+
+  def test_compare?
+    key = OpenSSL::PKey.generate_key("ED25519")
+    assert_send_type "(OpenSSL::PKey::PKey) -> bool",
+      key, :compare?, OpenSSL::PKey.read(key.public_to_pem)
+  end
+
+  def test_decrypt
+    key = OpenSSL::PKey::RSA.new(2048)
+    assert_send_type "(String) -> String",
+      key, :decrypt, key.encrypt("data")
+    assert_send_type "(String, Hash[Symbol, String]) -> String",
+      key, :decrypt, key.encrypt("data", "rsa_padding_mode" => "oaep"), { rsa_padding_mode: "oaep" }
+  end
+
+  def test_derive
+    key = OpenSSL::PKey.generate_key("X25519")
+    peer = OpenSSL::PKey.read(OpenSSL::PKey.generate_key("X25519").public_to_pem)
+    assert_send_type "(OpenSSL::PKey::PKey) -> String",
+      key, :derive, peer
+  end
+
+  def test_encrypt
+    key = OpenSSL::PKey::RSA.new(2048)
+    assert_send_type "(String) -> String",
+      key, :encrypt, "data"
+    assert_send_type "(String, Hash[String, String]) -> String",
+      key, :encrypt, "data", { "rsa_padding_mode" => "oaep" }
+  end
+
+  def test_raw_private_key
+    assert_send_type "() -> String",
+      OpenSSL::PKey.generate_key("ED25519"), :raw_private_key
+  end
+
+  def test_raw_public_key
+    assert_send_type "() -> String",
+      OpenSSL::PKey.generate_key("ED25519"), :raw_public_key
+  end
+
+  def test_sign
+    assert_send_type "(nil, String) -> String",
+      OpenSSL::PKey.generate_key("ED25519"), :sign, nil, "data"
+    key = OpenSSL::PKey::RSA.new(2048)
+    assert_send_type "(String, String) -> String",
+      key, :sign, "SHA256", "data"
+    assert_send_type "(OpenSSL::Digest, String, Hash[String, String | Integer]) -> String",
+      key, :sign, OpenSSL::Digest.new("SHA256"), "data", { "rsa_padding_mode" => "pss", "rsa_pss_saltlen" => 20 }
+  end
+
+  def test_sign_raw
+    key = OpenSSL::PKey::RSA.new(2048)
+    assert_send_type "(String, String) -> String",
+      key, :sign_raw, "SHA256", OpenSSL::Digest.digest("SHA256", "data")
+    assert_send_type "(nil, String, Hash[String, String]) -> String",
+      key, :sign_raw, nil, "data", { "rsa_padding_mode" => "pkcs1" }
+  end
+
+  def test_to_text
+    assert_send_type "() -> String",
+      OpenSSL::PKey.generate_key("ED25519"), :to_text
+  end
+
+  def test_verify
+    key = OpenSSL::PKey.generate_key("ED25519")
+    assert_send_type "(nil, String, String) -> bool",
+      key, :verify, nil, key.sign(nil, "data"), "data"
+    rsa = OpenSSL::PKey::RSA.new(2048)
+    assert_send_type "(String, String, String, Hash[Symbol, String]) -> bool",
+      rsa, :verify, "SHA256", rsa.sign("SHA256", "data", rsa_padding_mode: "pss"), "data", { rsa_padding_mode: "pss" }
+  end
+
+  def test_verify_raw
+    key = OpenSSL::PKey::RSA.new(2048)
+    digest = OpenSSL::Digest.digest("SHA256", "data")
+    assert_send_type "(OpenSSL::Digest, String, String) -> bool",
+      key, :verify_raw, OpenSSL::Digest.new("SHA256"), key.sign_raw("SHA256", digest), digest
+  end
+
+  def test_verify_recover
+    key = OpenSSL::PKey::RSA.new(2048)
+    digest = OpenSSL::Digest.digest("SHA256", "data")
+    assert_send_type "(String, String) -> String",
+      key, :verify_recover, "SHA256", key.sign_raw("SHA256", digest)
+    assert_send_type "(nil, String, Hash[String, String]) -> String",
+      key, :verify_recover, nil, key.sign_raw(nil, "data"), { "rsa_padding_mode" => "pkcs1" }
   end
 end
 
