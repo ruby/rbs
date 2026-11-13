@@ -520,7 +520,7 @@ module RBS
     end
 
     def resolve_type_names(only: nil, dependencies: nil)
-      resolver = Resolver::TypeNameResolver.build(self)
+      resolver = dependencies ? dependencies.resolver(self, only: only) : Resolver::TypeNameResolver.build(self)
       env = Environment.new
 
       table = UseMap::Table.new()
@@ -538,7 +538,7 @@ module RBS
 
         resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
         if !resolve || resolve.value
-          decls = record_dependencies(dependencies, resolver, source, only) do
+          decls = record_dependencies(dependencies, resolver, source, only) do |resolver|
             resolve_signature(resolver, table, source.directives, source.declarations, only: only)[1]
           end
         else
@@ -554,7 +554,7 @@ module RBS
           next
         end
 
-        decls = record_dependencies(dependencies, resolver, source, only) do
+        decls = record_dependencies(dependencies, resolver, source, only) do |resolver|
           source.declarations.map do |decl|
             if only && !only.member?(decl)
               decl
@@ -567,17 +567,15 @@ module RBS
         env.add_source(Source::Ruby.new(source.buffer, source.prism_result, decls, source.diagnostics))
       end
 
-      dependencies&.keep(Set.new(buffers.map(&:name)))
-
       env
     end
 
     def record_dependencies(dependencies, resolver, source, only)
       if dependencies
         merge = only ? !source.declarations.all? { only.member?(_1) } : false
-        dependencies.record(source, resolver, merge: merge) { yield }
+        dependencies.record(source, resolver, merge: merge) { yield _1 }
       else
-        yield
+        yield resolver
       end
     end
 

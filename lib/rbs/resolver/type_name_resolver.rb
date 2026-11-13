@@ -11,8 +11,6 @@ module RBS
         @all_names = all_names
         @aliases = aliases
         @cache = {}
-        @dependency_cache = {}
-        @dependencies = nil
       end
 
       def self.build(env)
@@ -31,46 +29,9 @@ module RBS
         new(all_names, aliases)
       end
 
-      def record_dependencies
-        outer = @dependencies
-        names = [] #: Array[TypeName]
-        @dependencies = names
-
-        begin
-          result = yield
-        ensure
-          @dependencies = outer
-          outer&.concat(names)
-        end
-
-        [result, Set.new(names)]
-      end
-
       def try_cache(type_name, context)
-        if dependencies = @dependencies
-          inner = (@dependency_cache[context] ||= {})
-
-          if entry = inner[type_name]
-            result, names = entry
-            dependencies.concat(names)
-            return result
-          end
-
-          names = [] #: Array[TypeName]
-          @dependencies = names
-
-          begin
-            result = yield
-            inner[type_name] = [result, names]
-            result
-          ensure
-            @dependencies = dependencies
-            dependencies.concat(names)
-          end
-        else
-          inner = cache[context] ||= {}
-          inner.fetch(type_name) { inner[type_name] = yield }
-        end
+        inner = cache[context] ||= {}
+        inner.fetch(type_name) { inner[type_name] = yield }
       end
 
       def resolve(type_name, context:)
@@ -111,16 +72,12 @@ module RBS
       end
 
       def has_type_name?(full_name)
-        @dependencies&.push(full_name)
-
         if all_names.include?(full_name)
           full_name
         end
       end
 
       def aliased_name?(type_name)
-        @dependencies&.push(type_name)
-
         if aliases.key?(type_name)
           type_name
         end

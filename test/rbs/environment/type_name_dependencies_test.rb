@@ -58,7 +58,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       end
     end
 
-    affected_paths = dependencies.affected_paths(env, new_env)
+    affected_paths = dependencies.affected_paths(new_env, except: paths)
 
     new_env = new_env.unload(affected_paths)
     affected_paths.each { new_env.add_source(sources.fetch(_1)) }
@@ -78,8 +78,9 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     fresh_env = fresh_env.resolve_type_names(dependencies: fresh_dependencies)
 
     assert_equal declarations(fresh_env), declarations(env)
-    assert_equal fresh_dependencies.type_names, dependencies.type_names
-    assert_equal fresh_dependencies.namespaces, dependencies.namespaces
+    assert_equal queries(fresh_dependencies), queries(dependencies)
+    assert_equal fresh_dependencies.wildcards, dependencies.wildcards
+    assert_equal fresh_dependencies.aliases, dependencies.aliases
 
     affected_paths
   end
@@ -92,6 +93,15 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       when RBS::Source::Ruby
         # The declarations of Ruby sources are compared by their fingerprints
         [source.buffer.name, source.declarations.map(&:type_fingerprint)]
+      end
+    end
+  end
+
+  # The type names resolved for each source, with the contexts compared by `==`
+  def queries(dependencies = self.dependencies)
+    dependencies.queries.transform_values do |contexts|
+      contexts.each_with_object({}) do |(context, results), hash|
+        (hash[context] ||= {}).update(results)
       end
     end
   end
@@ -141,18 +151,60 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
 
     assert_equal "() -> ::B", method_type("::M::A", :foo)
 
-    # The names that don't exist are included
     assert_equal(
-      Set[type_name("::M"), type_name("::M::A"), type_name("::M::A::B"), type_name("::M::B"), type_name("::B")],
-      dependencies.type_names[Pathname("a.rbs")]
+      {
+        # The type name is resolved in the context of the class
+        Pathname("a.rbs") => { [[nil, type_name("::M")], type_name("::M::A")] => { type_name("B") => type_name("::B") } },
+        # The type name the `use` directive gives is resolved
+        Pathname("d.rbs") => { nil => { type_name("::M::A") => type_name("::M::A") } }
+      },
+      queries
     )
-    assert_equal Set[type_name("::M::A")], dependencies.type_names[Pathname("d.rbs")]
 
     # No type names to resolve
-    refute_operator dependencies.type_names, :key?, Pathname("b.rbs")
-    refute_operator dependencies.type_names, :key?, Pathname("c.rbs")
+    refute_operator dependencies.queries, :key?, Pathname("b.rbs")
+    refute_operator dependencies.queries, :key?, Pathname("c.rbs")
 
-    assert_equal({ Pathname("d.rbs") => Set[RBS::Namespace.parse("::M::")] }, dependencies.namespaces)
+    assert_equal(
+      { Pathname("d.rbs") => { RBS::Namespace.parse("::M::") => Set[type_name("::M::A")] } },
+      dependencies.wildcards
+    )
+    assert_empty dependencies.aliases
+  end
+
+  def test_resolve_type_names__aliases
+    update(
+      "a.rbs" => <<~RBS,
+        module M
+          class Y = E
+
+          module N = ::M
+        end
+
+        class E
+        end
+      RBS
+      "b.rb" => <<~RUBY
+        module M
+          Z = E #: class-alias
+        end
+      RUBY
+    )
+
+    # The names of the modules are the ones before the resolution
+    assert_equal type_name("::E"), env.class_alias_decls.fetch(type_name("::M::Y")).decl.old_name
+    assert_equal(
+      {
+        Pathname("a.rbs") => {
+          type_name("::M::Y") => [type_name("E"), [nil, type_name("::M")]],
+          type_name("::M::N") => [type_name("::M"), [nil, type_name("::M")]]
+        },
+        Pathname("b.rb") => {
+          type_name("::M::Z") => [type_name("E"), [nil, type_name("::M")]]
+        }
+      },
+      dependencies.aliases
+    )
   end
 
   def test_resolve_type_names__only
@@ -174,8 +226,8 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     )
 
     a_source = source("a.rbs")
-    a_names = dependencies.type_names.fetch(Pathname("a.rbs"))
-    assert_equal Set[type_name("::A"), type_name("::A::String"), type_name("::String")], a_names
+    a_queries = dependencies.queries.fetch(Pathname("a.rbs"))
+    assert_equal({ [nil, type_name("::A")] => { type_name("String") => type_name("::String") } }, queries.fetch(Pathname("a.rbs")))
 
     affected_paths = update(
       "b.rbs" => nil,
@@ -189,11 +241,11 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
 
     # The source that is not resolved is added as it is, and keeps its dependencies
     assert_same a_source, source("a.rbs")
-    assert_same a_names, dependencies.type_names.fetch(Pathname("a.rbs"))
+    assert_same a_queries, dependencies.queries.fetch(Pathname("a.rbs"))
 
     # The dependencies of the removed source are deleted
-    refute_operator dependencies.type_names, :key?, Pathname("b.rbs")
-    assert_equal Set[type_name("::C"), type_name("::C::A"), type_name("::A")], dependencies.type_names.fetch(Pathname("c.rbs"))
+    refute_operator dependencies.queries, :key?, Pathname("b.rbs")
+    assert_equal({ [nil, type_name("::C")] => { type_name("A") => type_name("::A") } }, queries.fetch(Pathname("c.rbs")))
   end
 
   def test_resolve_type_names__only_part_of_source
@@ -212,35 +264,71 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
 
     a, b = source.declarations
 
-    # The dependencies of the declarations are added to the ones the source has
+    a_queries = { [nil, type_name("::A")] => { type_name("Foo") => type_name("Foo") } }
+    b_queries = { [nil, type_name("::B")] => { type_name("Bar") => type_name("Bar") } }
+
+    # The type names of the declarations are added to the ones the source has
     dependencies = TypeNameDependencies.new
     env.resolve_type_names(only: Set[a].compare_by_identity, dependencies: dependencies)
-    assert_equal(
-      Set[type_name("::A"), type_name("::A::Foo"), type_name("::Foo")],
-      dependencies.type_names.fetch(Pathname("a.rbs"))
-    )
+    assert_equal a_queries, queries(dependencies).fetch(Pathname("a.rbs"))
 
     copy = dependencies.dup
-    names = dependencies.type_names.fetch(Pathname("a.rbs"))
+    recorded = dependencies.queries.fetch(Pathname("a.rbs"))
 
     env.resolve_type_names(only: Set[b].compare_by_identity, dependencies: dependencies)
+    assert_equal a_queries.merge(b_queries), queries(dependencies).fetch(Pathname("a.rbs"))
+
+    # The hash shared with the copy is not updated
+    assert_same recorded, copy.queries.fetch(Pathname("a.rbs"))
+    assert_equal a_queries, queries(copy).fetch(Pathname("a.rbs"))
+
+    # All of the declarations replace the type names
+    env.resolve_type_names(only: Set[b, a].compare_by_identity, dependencies: copy)
+    assert_equal queries(dependencies), queries(copy)
+
+    # No declaration keeps the type names
+    recorded = dependencies.queries.fetch(Pathname("a.rbs"))
+    env.resolve_type_names(only: Set[].compare_by_identity, dependencies: dependencies)
+    assert_same recorded, dependencies.queries.fetch(Pathname("a.rbs"))
+  end
+
+  def test_resolve_type_names__only_part_of_source__aliases
+    source = parse("a.rbs", <<~RBS)
+      class Y = A
+
+      module M
+        class Z = A
+      end
+
+      class A
+      end
+    RBS
+
+    env = Environment.new
+    env.add_source(source)
+
+    y, m, _ = source.declarations
+
+    # The aliases of the declarations are added to the ones the source has
+    dependencies = TypeNameDependencies.new
+    env.resolve_type_names(only: Set[y].compare_by_identity, dependencies: dependencies)
+    assert_equal({ type_name("::Y") => [type_name("A"), nil] }, dependencies.aliases.fetch(Pathname("a.rbs")))
+
+    copy = dependencies.dup
+    aliases = dependencies.aliases.fetch(Pathname("a.rbs"))
+
+    env.resolve_type_names(only: Set[m].compare_by_identity, dependencies: dependencies)
     assert_equal(
-      Set[type_name("::A"), type_name("::A::Foo"), type_name("::Foo"), type_name("::B"), type_name("::B::Bar"), type_name("::Bar")],
-      dependencies.type_names.fetch(Pathname("a.rbs"))
+      {
+        type_name("::Y") => [type_name("A"), nil],
+        type_name("::M::Z") => [type_name("A"), [nil, type_name("::M")]]
+      },
+      dependencies.aliases.fetch(Pathname("a.rbs"))
     )
 
-    # The set shared with the copy is not updated
-    assert_same names, copy.type_names.fetch(Pathname("a.rbs"))
-    assert_equal Set[type_name("::A"), type_name("::A::Foo"), type_name("::Foo")], names
-
-    # All of the declarations replace the dependencies
-    env.resolve_type_names(only: Set[b, a].compare_by_identity, dependencies: copy)
-    assert_equal dependencies.type_names, copy.type_names
-
-    # No declaration keeps the dependencies
-    names = dependencies.type_names.fetch(Pathname("a.rbs"))
-    env.resolve_type_names(only: Set[].compare_by_identity, dependencies: dependencies)
-    assert_same names, dependencies.type_names.fetch(Pathname("a.rbs"))
+    # The hash shared with the copy is not updated
+    assert_same aliases, copy.aliases.fetch(Pathname("a.rbs"))
+    assert_equal [type_name("::Y")], aliases.keys
   end
 
   def test_affected_paths__type_name_in_outer_module
@@ -308,7 +396,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       RBS
     )
 
-    # `::N::String` and `::Integer` are not tested while resolving `String` in `::M::A`
+    # `String` in `::M::A` is resolved to `::String` with `::N::String` and `::Integer`
     affected_paths = update("b.rbs" => <<~RBS)
       module N
         class String
@@ -330,7 +418,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
   end
 
   def test_affected_paths__same_type_name_in_same_context
-    # Both sources resolve `B` in the same context, and the second one hits the cache of the resolver
+    # Both sources resolve `B` in the same context
     update(
       "a1.rbs" => <<~RBS,
         module M
@@ -374,16 +462,16 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     )
     assert_equal "() -> ::D", method_type("::A", :foo)
 
-    # The alias cannot be normalized, and the references through the alias depend on the module
+    # The alias cannot be normalized. The declaration of the alias has `::D` whether it can be resolved or not.
     affected_paths = update("d.rbs" => nil)
-    assert_equal Set[Pathname("alias.rbs"), Pathname("a.rbs")], affected_paths
+    assert_equal Set[Pathname("a.rbs")], affected_paths
     assert_equal "() -> Y", method_type("::A", :foo)
 
     affected_paths = update("d.rbs" => <<~RBS)
       class D
       end
     RBS
-    assert_equal Set[Pathname("alias.rbs"), Pathname("a.rbs")], affected_paths
+    assert_equal Set[Pathname("a.rbs")], affected_paths
     assert_equal "() -> ::D", method_type("::A", :foo)
   end
 
@@ -450,6 +538,196 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     assert_equal "() -> ::D", method_type("::A", :foo)
   end
 
+  def test_affected_paths__alias_with_relative_name
+    update(
+      "alias.rbs" => <<~RBS,
+        class Y = E
+      RBS
+      "e.rbs" => <<~RBS,
+        class E
+        end
+      RBS
+      "a.rbs" => <<~RBS
+        class A
+          def foo: () -> Y
+        end
+      RBS
+    )
+    assert_equal "() -> ::E", method_type("::A", :foo)
+
+    # `Y` is resolved to `::E` through the alias as it is written in the new source
+    affected_paths = update("alias.rbs" => <<~RBS)
+      # The comment is added
+      class Y = E
+    RBS
+    assert_empty affected_paths
+
+    affected_paths = update("alias.rbs" => <<~RBS)
+      class Y = ::E
+    RBS
+    assert_empty affected_paths
+  end
+
+  def test_affected_paths__alias_resolved_before_reference
+    update(
+      "alias.rbs" => <<~RBS,
+        module M
+          class Y = E
+        end
+      RBS
+      "e.rbs" => <<~RBS
+        class E
+        end
+      RBS
+    )
+
+    # `alias.rbs` is resolved already, and the alias is `::E` in the environment
+    update("a.rbs" => <<~RBS)
+      class A
+        def foo: () -> M::Y
+      end
+    RBS
+    assert_equal "() -> ::E", method_type("::A", :foo)
+
+    # The resolver normalizes the alias with `E` as it is written, not with `::E` in the environment
+    affected_paths = update("m_e.rbs" => <<~RBS)
+      module M
+        class E
+        end
+      end
+    RBS
+    assert_equal Set[Pathname("alias.rbs"), Pathname("a.rbs")], affected_paths
+    assert_equal "() -> ::M::E", method_type("::A", :foo)
+  end
+
+  def test_affected_paths__alias_of_alias
+    update(
+      "y.rbs" => <<~RBS,
+        module M
+          class Y = E
+        end
+      RBS
+      "e.rbs" => <<~RBS
+        class E
+        end
+      RBS
+    )
+    update("z.rbs" => <<~RBS)
+      class Z = M::Y
+    RBS
+    update("a.rbs" => <<~RBS)
+      class A
+        def foo: () -> Z
+      end
+    RBS
+    assert_equal "() -> ::E", method_type("::A", :foo)
+
+    affected_paths = update("m_e.rbs" => <<~RBS)
+      module M
+        class E
+        end
+      end
+    RBS
+    assert_equal Set[Pathname("y.rbs"), Pathname("z.rbs"), Pathname("a.rbs")], affected_paths
+    assert_equal "() -> ::M::E", method_type("::A", :foo)
+  end
+
+  def test_affected_paths__alias_moved_to_another_source
+    update(
+      "alias1.rbs" => <<~RBS,
+        class Y = D
+      RBS
+      "alias2.rbs" => <<~RBS,
+        class Z = D
+      RBS
+      "d.rbs" => <<~RBS,
+        class D
+        end
+
+        class E
+        end
+      RBS
+      "a.rbs" => <<~RBS
+        class A
+          def foo: () -> Y
+        end
+      RBS
+    )
+
+    affected_paths = update(
+      "alias1.rbs" => "",
+      "alias2.rbs" => <<~RBS
+        class Z = D
+
+        class Y = E
+      RBS
+    )
+    assert_equal Set[Pathname("a.rbs")], affected_paths
+    assert_equal "() -> ::E", method_type("::A", :foo)
+  end
+
+  def test_affected_paths__alias_in_inner_module
+    update(
+      "a.rbs" => <<~RBS,
+        module M
+          class A
+            def foo: () -> B
+          end
+        end
+      RBS
+      "b.rbs" => <<~RBS
+        class B
+        end
+      RBS
+    )
+    assert_equal "() -> ::B", method_type("::M::A", :foo)
+
+    # `B` is resolved to `::B` through the alias
+    affected_paths = update("m_b.rbs" => <<~RBS)
+      module M
+        class B = ::B
+      end
+    RBS
+    assert_empty affected_paths
+    assert_equal "() -> ::B", method_type("::M::A", :foo)
+  end
+
+  def test_affected_paths__absolute_type_name
+    update("a.rbs" => <<~RBS)
+      class A
+        def foo: () -> ::Foo
+      end
+    RBS
+
+    # The declaration has `::Foo` whether it can be resolved or not
+    affected_paths = update("foo.rbs" => <<~RBS)
+      class Foo
+      end
+    RBS
+    assert_empty affected_paths
+  end
+
+  def test_affected_paths__source_without_declarations
+    update(
+      "a.rbs" => <<~RBS,
+        class A
+          def foo: () -> Foo
+        end
+      RBS
+    )
+    assert_operator dependencies.queries, :key?, Pathname("a.rbs")
+
+    # The source has no declaration to give to `only`, and its dependencies are deleted
+    update("a.rbs" => "# Nothing here\n")
+    refute_operator dependencies.queries, :key?, Pathname("a.rbs")
+
+    affected_paths = update("foo.rbs" => <<~RBS)
+      class Foo
+      end
+    RBS
+    assert_empty affected_paths
+  end
+
   def test_affected_paths__wildcard_use
     update(
       "foo.rbs" => <<~RBS,
@@ -468,7 +746,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     )
     assert_equal "() -> Bar", method_type("::A", :foo)
 
-    # `::Foo::Bar` is not tested while resolving `Bar`, but it is a type name under the namespace of the directive
+    # `Bar` is not resolved to `::Foo::Bar` by the resolver, but it is a type name under the namespace of the directive
     affected_paths = update("bar.rbs" => <<~RBS)
       module Foo
         class Bar
@@ -477,6 +755,19 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     RBS
     assert_equal Set[Pathname("a.rbs")], affected_paths
     assert_equal "() -> ::Foo::Bar", method_type("::A", :foo)
+
+    affected_paths = update("bar.rbs" => nil)
+    assert_equal Set[Pathname("a.rbs")], affected_paths
+    assert_equal "() -> Bar", method_type("::A", :foo)
+
+    # The source is affected by a type name under the namespace that it doesn't have
+    affected_paths = update("qux.rbs" => <<~RBS)
+      module Foo
+        class Qux
+        end
+      end
+    RBS
+    assert_equal Set[Pathname("a.rbs")], affected_paths
   end
 
   def test_affected_paths__ruby
@@ -505,7 +796,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     assert_includes declarations(env).fetch(Pathname("a.rb")).inspect, "::M::B"
   end
 
-  def test_affected_paths__sources_of_old_env
+  def test_affected_paths__except
     update(
       "a.rbs" => <<~RBS,
         class A
@@ -529,8 +820,9 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       end
     RBS
 
-    # `b.rbs` is not the source of the old environment, and it is not resolved yet
-    assert_equal Set[Pathname("a.rbs")], dependencies.affected_paths(env, new_env)
+    # `b.rbs` is updated, and has the dependencies of the source before the update
+    assert_equal Set[Pathname("a.rbs")], dependencies.affected_paths(new_env, except: Set[Pathname("b.rbs")])
+    assert_equal Set[Pathname("a.rbs"), Pathname("b.rbs")], dependencies.affected_paths(new_env, except: Set[])
   end
 
   def test_copy
@@ -548,8 +840,8 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       end
     RBS
 
-    assert_equal [Pathname("a.rbs")], copy.type_names.keys
-    assert_equal [Pathname("a.rbs"), Pathname("b.rbs")], dependencies.type_names.keys
-    assert_same copy.type_names.fetch(Pathname("a.rbs")), dependencies.type_names.fetch(Pathname("a.rbs"))
+    assert_equal [Pathname("a.rbs")], copy.queries.keys
+    assert_equal [Pathname("a.rbs"), Pathname("b.rbs")], dependencies.queries.keys
+    assert_same copy.queries.fetch(Pathname("a.rbs")), dependencies.queries.fetch(Pathname("a.rbs"))
   end
 end
