@@ -58,7 +58,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
       end
     end
 
-    affected_paths = dependencies.affected_paths(new_env, except: paths)
+    affected_paths = dependencies.affected_paths(env, new_env, except: paths)
 
     new_env = new_env.unload(affected_paths)
     affected_paths.each { new_env.add_source(sources.fetch(_1)) }
@@ -165,10 +165,7 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     refute_operator dependencies.queries, :key?, Pathname("b.rbs")
     refute_operator dependencies.queries, :key?, Pathname("c.rbs")
 
-    assert_equal(
-      { Pathname("d.rbs") => { RBS::Namespace.parse("::M::") => Set[type_name("::M::A")] } },
-      dependencies.wildcards
-    )
+    assert_equal({ Pathname("d.rbs") => Set[RBS::Namespace.parse("::M::")] }, dependencies.wildcards)
     assert_empty dependencies.aliases
   end
 
@@ -821,8 +818,8 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     RBS
 
     # `b.rbs` is updated, and has the dependencies of the source before the update
-    assert_equal Set[Pathname("a.rbs")], dependencies.affected_paths(new_env, except: Set[Pathname("b.rbs")])
-    assert_equal Set[Pathname("a.rbs"), Pathname("b.rbs")], dependencies.affected_paths(new_env, except: Set[])
+    assert_equal Set[Pathname("a.rbs")], dependencies.affected_paths(env, new_env, except: Set[Pathname("b.rbs")])
+    assert_equal Set[Pathname("a.rbs"), Pathname("b.rbs")], dependencies.affected_paths(env, new_env, except: Set[])
   end
 
   def test_copy

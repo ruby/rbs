@@ -38,7 +38,6 @@ module RBS
 
       def resolver(env, only:)
         paths = Set[] #: Set[Pathname]
-        namespaces = {} #: Hash[Pathname, Array[Namespace]]
 
         env.sources.each do |source|
           path = source.buffer.name
@@ -67,17 +66,12 @@ module RBS
           end
 
           update(self.aliases, path, aliases)
-          namespaces[path] = wildcard_namespaces(source)
+          update(wildcards, path, wildcard_namespaces(source))
         end
 
         keep(paths)
 
-        children = children(env, namespaces.each_value.flat_map(&:itself))
-        namespaces.each do |path, nss|
-          update(wildcards, path, nss.to_h { [_1, children.fetch(_1)] })
-        end
-
-        build_resolver(env)
+        build_resolver(env, alias_table(env))
       end
 
       def record(source, resolver, merge:)
@@ -109,81 +103,103 @@ module RBS
         aliases.select! { |path, _| paths.include?(path) }
       end
 
-      def affected_paths(env, except:)
+      def affected_paths(old_env, new_env, except:)
         paths = Set[] #: Set[Pathname]
-        resolver = build_resolver(env, except: except)
+
+        type_names = changed_type_names(old_env, new_env, except: except)
+        return paths if type_names.empty?
+
+        aliases = alias_table(new_env, except: except)
+        resolver = build_resolver(new_env, aliases)
+
+        # The resolution of a type name tests the type names that end with one of the names it consists of, and the
+        # ones tested to normalize the aliases among them
+        names = Set[] #: Set[Symbol]
+        type_names.each { names << _1.name }
+        loop do
+          size = names.size
+          aliases.each { |name, (module_name, _)| names << name.name if mention?(module_name, names) }
+          break if names.size == size
+        end
 
         queries.each do |path, contexts|
           next if except.include?(path)
 
           changed = contexts.any? do |context, results|
             results.any? do |type_name, result|
-              (resolver.resolve(type_name, context: context) || type_name) != result
+              mention?(type_name, names) && (resolver.resolve(type_name, context: context) || type_name) != result
             end
           end
 
           paths << path if changed
         end
 
-        namespaces = [] #: Array[Namespace]
-        wildcards.each do |path, recorded|
-          namespaces.concat(recorded.keys) unless except.include?(path) || paths.include?(path)
+        namespaces = Set[] #: Set[Namespace]
+        type_names.each do |type_name|
+          namespaces << type_name.namespace unless old_env.type_name?(type_name) == new_env.type_name?(type_name)
         end
 
-        unless namespaces.empty?
-          children = children(env, namespaces)
-
-          wildcards.each do |path, recorded|
-            next if except.include?(path) || paths.include?(path)
-            paths << path if recorded.any? { |namespace, names| children.fetch(namespace) != names }
-          end
+        wildcards.each do |path, nss|
+          next if except.include?(path)
+          paths << path if nss.intersect?(namespaces)
         end
 
         paths
       end
 
+      def changed_type_names(old_env, new_env, except:)
+        names = Set[] #: Set[TypeName]
+
+        add_changed_keys(old_env.class_decls, new_env.class_decls, names)
+        add_changed_keys(old_env.class_alias_decls, new_env.class_alias_decls, names)
+        add_changed_keys(old_env.interface_decls, new_env.interface_decls, names)
+        add_changed_keys(old_env.type_alias_decls, new_env.type_alias_decls, names)
+
+        old_aliases = alias_table(old_env)
+        alias_table(new_env, except: except).each do |name, definition|
+          if old_definition = old_aliases.fetch(name, nil)
+            names << name unless old_definition == definition
+          end
+        end
+
+        names
+      end
+
       private
 
-      def build_resolver(env, except: nil)
+      def alias_table(env, except: nil)
+        table = {} #: Hash[TypeName, [TypeName, Resolver::context]]
+
+        env.class_alias_decls.each do |name, entry|
+          table[name] = [entry.decl.old_name, entry.context]
+        end
+
+        aliases.each do |path, definitions|
+          next if except&.include?(path)
+
+          definitions.each do |name, definition|
+            table[name] = definition if table.key?(name)
+          end
+        end
+
+        table
+      end
+
+      def build_resolver(env, aliases)
         type_names = Set[] #: Set[TypeName]
         type_names.merge(env.class_decls.keys)
         type_names.merge(env.interface_decls.keys)
         type_names.merge(env.type_alias_decls.keys)
 
-        aliases = {} #: Hash[TypeName, [TypeName, Resolver::context]]
-
-        env.class_alias_decls.each do |name, entry|
-          aliases[name] = [entry.decl.old_name, entry.context]
-        end
-
-        self.aliases.each do |path, definitions|
-          next if except&.include?(path)
-
-          definitions.each do |name, definition|
-            aliases[name] = definition if aliases.key?(name)
-          end
-        end
-
         Resolver::TypeNameResolver.new(type_names, aliases)
       end
 
-      def children(env, namespaces)
-        children = {} #: Hash[Namespace, Set[TypeName]]
-        return children if namespaces.empty?
-
-        namespaces.each { children[_1] = Set[] }
-
-        [env.class_decls, env.class_alias_decls, env.type_alias_decls, env.interface_decls].each do |decls|
-          decls.each_key do |name|
-            children[name.namespace]&.add(name)
-          end
-        end
-
-        children
+      def mention?(type_name, names)
+        names.include?(type_name.name) || type_name.namespace.path.any? { names.include?(_1) }
       end
 
       def wildcard_namespaces(source)
-        namespaces = [] #: Array[Namespace]
+        namespaces = Set[] #: Set[Namespace]
 
         if source.is_a?(Source::RBS)
           source.directives.each do |directive|
@@ -197,6 +213,11 @@ module RBS
         end
 
         namespaces
+      end
+
+      def add_changed_keys(old_decls, new_decls, names)
+        old_decls.each_key { names << _1 unless new_decls.key?(_1) }
+        new_decls.each_key { names << _1 unless old_decls.key?(_1) }
       end
 
       def each_alias_name(decl, namespace, &block)

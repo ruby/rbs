@@ -16,7 +16,7 @@ module RBS
     # new_env = env.unload(Set[path])
     # new_env.add_source(source)
     #
-    # dependencies.affected_paths(new_env, except: Set[path]).each do |path|
+    # dependencies.affected_paths(env, new_env, except: Set[path]).each do |path|
     #   # Replace the source of `path` in `new_env` with the one before the type name resolution
     # end
     #
@@ -59,12 +59,12 @@ module RBS
       #
       attr_reader queries: Hash[Pathname, queries]
 
-      # The namespaces of the wildcard `use` directives of each source, with the type names directly under them
+      # The namespaces of the wildcard `use` directives of each source
       #
-      # The type names a wildcard `use` directive gives are not resolved through the resolver. A source without the
-      # directives has no entry.
+      # A wildcard `use` directive depends on the set of the type names directly under its namespace, that are not
+      # resolved through the resolver. A source without the directives has no entry.
       #
-      attr_reader wildcards: Hash[Pathname, Hash[Namespace, Set[TypeName]]]
+      attr_reader wildcards: Hash[Pathname, Set[Namespace]]
 
       # The class/module aliases each source declares, with the name of the module as it is written and the context
       #
@@ -107,32 +107,55 @@ module RBS
       #
       def keep: (Set[Pathname] paths) -> void
 
-      # Returns the paths of the sources whose type names are resolved differently in `env`
+      # Returns the paths of the sources whose type names are resolved differently in `new_env`
       #
-      # `env` has the sources after an update of the environment the dependencies were recorded with: `#unload(except)`
-      # and `#add_source`. `except` is the paths of the updated sources, that are not included in the result.
+      # `old_env` is the environment the dependencies were recorded with, and `new_env` has the sources after an update:
+      # `old_env.unload(except)` and `#add_source`. `except` is the paths of the updated sources, that are not included
+      # in the result.
       #
-      # A source is included if one of the type names it resolved is resolved to another type name in `env`, or the type
-      # names directly under the namespace of its wildcard `use` directive are not the same. The former is exact. The
-      # latter includes the source even if it doesn't have the added or removed type name.
+      # A source is included if one of the type names it resolved is resolved to another type name in `new_env`, or
+      # a type name is added to or removed from the namespace of its wildcard `use` directive. The former is exact.
+      # The latter includes the source even if it doesn't have the type name.
       #
-      def affected_paths: (Environment env, except: Set[Pathname]) -> Set[Pathname]
+      # Only the type names that may test one of `#changed_type_names` are resolved again: the ones that have the name
+      # of a changed type name, without its namespace, or the name of a class/module alias that has one in the name of
+      # its module.
+      #
+      def affected_paths: (Environment old_env, Environment new_env, except: Set[Pathname]) -> Set[Pathname]
+
+      # Returns the type names that the resolver of `new_env` answers differently about
+      #
+      # * The names of classes, modules, class/module aliases, interfaces, and type aliases that only one of the environments has
+      # * The names of class/module aliases that the sources of `except` declare differently, in the name of the module as it is written or in the context
+      #
+      # The names are compared for each kind, because a class that is replaced with a class alias of the same name changes
+      # the resolution.
+      #
+      def changed_type_names: (Environment old_env, Environment new_env, except: Set[Pathname]) -> Set[TypeName]
 
       private
 
-      # Returns the resolver of the environment, that reads the class/module aliases as they are written
+      # Returns the class/module aliases of the environment, as they are written
       #
       # The aliases of the sources of `except` are the ones the environment has.
       #
-      def build_resolver: (Environment env, ?except: Set[Pathname]?) -> Resolver::TypeNameResolver
+      def alias_table: (Environment env, ?except: Set[Pathname]?) -> Hash[TypeName, [TypeName, Resolver::context]]
 
-      # Returns the type names directly under each of the namespaces
+      # Returns the resolver of the environment, with the class/module aliases
       #
-      def children: (Environment env, Array[Namespace] namespaces) -> Hash[Namespace, Set[TypeName]]
+      def build_resolver: (Environment env, Hash[TypeName, [TypeName, Resolver::context]] aliases) -> Resolver::TypeNameResolver
+
+      # Returns `true` if the type name has one of the names, in its namespace or as its name
+      #
+      def mention?: (TypeName type_name, Set[Symbol] names) -> bool
 
       # Returns the namespaces of the wildcard `use` directives of the source
       #
-      def wildcard_namespaces: (Source::t source) -> Array[Namespace]
+      def wildcard_namespaces: (Source::t source) -> Set[Namespace]
+
+      # Adds the keys that only one of the hashes has to `names`
+      #
+      def add_changed_keys: (Hash[TypeName, untyped] old_decls, Hash[TypeName, untyped] new_decls, Set[TypeName] names) -> void
 
       # Yields the names of the class/module aliases declared in the declaration under the namespace
       #
