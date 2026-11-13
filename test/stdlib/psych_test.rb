@@ -170,6 +170,52 @@ foo: 123
     )
   end
 
+  def test_load_stream
+    assert_send_type(
+      "(::String) -> ::Array[::Integer | ::String]",
+      Psych, :load_stream, "--- 1\n--- foo\n"
+    )
+
+    assert_send_type(
+      "(::String, filename: ::String, symbolize_names: bool, freeze: bool, strict_integer: bool) -> ::Array[::Hash[::Symbol, ::Integer]]",
+      Psych, :load_stream, "--- {foo: 1}\n", filename: "foo.yaml", symbolize_names: true, freeze: true, strict_integer: true
+    )
+
+    assert_send_type(
+      "(::String, fallback: nil) -> nil",
+      Psych, :load_stream, "", fallback: nil
+    )
+
+    assert_send_type(
+      "(::String, fallback: nil) -> ::Array[::Integer]",
+      Psych, :load_stream, "--- 1\n", fallback: nil
+    )
+
+    assert_send_type(
+      "(::String) { (::Integer) -> void } -> void",
+      Psych, :load_stream, "--- 1\n--- 2\n"
+    ) { |document| document }
+  end
+
+  def test_dump_stream
+    assert_send_type(
+      "(::Integer) -> ::String",
+      Psych, :dump_stream, 1
+    )
+
+    assert_send_type(
+      "(::Integer, ::String, ::Hash[::String, ::Integer]) -> ::String",
+      Psych, :dump_stream, 1, "foo", { "bar" => 2 }
+    )
+  end
+
+  def test_to_json
+    assert_send_type(
+      "(::Hash[::String, ::Array[::Integer]]) -> ::String",
+      Psych, :to_json, { "foo" => [1] }
+    )
+  end
+
   def test_to_yaml
     assert_send_type(
       "() -> ::String",
