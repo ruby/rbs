@@ -992,6 +992,167 @@ class OpenSSLSSLSingletonTest < Test::Unit::TestCase
   end
 end
 
+module OpenSSLSSLFixtures
+  module_function
+
+  def key
+    @key ||= OpenSSL::PKey::EC.generate("prime256v1")
+  end
+
+  def cert
+    @cert ||= OpenSSL::X509::Certificate.new.tap do |cert|
+      cert.version = 2
+      cert.serial = 1
+      cert.subject = cert.issuer = OpenSSL::X509::Name.parse("/CN=localhost")
+      cert.public_key = key
+      cert.not_before = Time.now - 60
+      cert.not_after = Time.now + 3600
+      cert.sign(key, "SHA256")
+    end
+  end
+
+  def server_context
+    OpenSSL::SSL::SSLContext.new.tap do |ctx|
+      ctx.cert = cert
+      ctx.key = key
+    end
+  end
+
+  # Yields a client and a server SSLSocket after a completed handshake.
+  def connected(server_ctx = server_context, client_ctx = OpenSSL::SSL::SSLContext.new)
+    tcp_server = TCPServer.new("127.0.0.1", 0)
+    client_io = TCPSocket.new("127.0.0.1", tcp_server.addr[1])
+    server_io = tcp_server.accept
+    client = OpenSSL::SSL::SSLSocket.new(client_io, client_ctx)
+    server = OpenSSL::SSL::SSLSocket.new(server_io, server_ctx)
+    accept = Thread.new { server.accept }
+    client.connect
+    accept.join
+    yield client, server
+  ensure
+    client&.close
+    server&.close
+    tcp_server&.close
+  end
+end
+
+class OpenSSLSSLSSLContextTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::SSL::SSLContext"
+
+  def test_ciphersuites=
+    assert_send_type "(String) -> String",
+      OpenSSL::SSL::SSLContext.new, :ciphersuites=, "TLS_AES_128_GCM_SHA256"
+    assert_send_type "(Array[String]) -> Array[String]",
+      OpenSSL::SSL::SSLContext.new, :ciphersuites=, ["TLS_AES_128_GCM_SHA256", "TLS_AES_256_GCM_SHA384"]
+  end
+
+  def test_client_sigalgs=
+    omit "OpenSSL::SSL::SSLContext#client_sigalgs= is not available" unless OpenSSL::SSL::SSLContext.method_defined?(:client_sigalgs=)
+
+    assert_send_type "(String) -> String",
+      OpenSSL::SSL::SSLContext.new, :client_sigalgs=, "ECDSA+SHA256"
+  end
+
+  def test_groups=
+    omit "OpenSSL::SSL::SSLContext#groups= is not available" unless OpenSSL::SSL::SSLContext.method_defined?(:groups=)
+
+    assert_send_type "(String) -> String",
+      OpenSSL::SSL::SSLContext.new, :groups=, "P-256"
+  end
+
+  def test_keylog_cb
+    ctx = OpenSSL::SSL::SSLContext.new
+    assert_send_type "() -> nil",
+      ctx, :keylog_cb
+
+    callback = proc { |ssl, line| }
+    assert_send_type "(^(OpenSSL::SSL::SSLSocket, String) -> void) -> ^(OpenSSL::SSL::SSLSocket, String) -> void",
+      ctx, :keylog_cb=, callback
+    assert_send_type "() -> ^(OpenSSL::SSL::SSLSocket, String) -> void",
+      ctx, :keylog_cb
+
+    assert_send_type "(nil) -> nil",
+      OpenSSL::SSL::SSLContext.new, :keylog_cb=, nil
+  end
+
+  def test_sigalgs=
+    omit "OpenSSL::SSL::SSLContext#sigalgs= is not available" unless OpenSSL::SSL::SSLContext.method_defined?(:sigalgs=)
+
+    assert_send_type "(String) -> String",
+      OpenSSL::SSL::SSLContext.new, :sigalgs=, "ECDSA+SHA256"
+  end
+
+  def test_tmp_dh=
+    dh = OpenSSL::PKey.generate_parameters("DH", "group" => "ffdhe2048")
+    assert_send_type "(OpenSSL::PKey::DH) -> OpenSSL::PKey::DH",
+      OpenSSL::SSL::SSLContext.new, :tmp_dh=, dh
+  end
+end
+
+class OpenSSLSSLSSLSocketTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::SSL::SSLSocket"
+
+  def test_close_read
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> nil",
+        client, :close_read
+    end
+  end
+
+  def test_close_write
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> nil",
+        client, :close_write
+    end
+  end
+
+  def test_export_keying_material
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "(String, Integer) -> String",
+        client, :export_keying_material, "EXPERIMENTAL", 16
+      assert_send_type "(String, ToInt, String) -> String",
+        client, :export_keying_material, "EXPERIMENTAL", ToInt.new(16), "context"
+      assert_send_type "(String, Integer, nil) -> String",
+        client, :export_keying_material, "EXPERIMENTAL", 16, nil
+    end
+  end
+
+  def test_group
+    omit "OpenSSL::SSL::SSLSocket#group is not available" unless OpenSSL::SSL::SSLSocket.method_defined?(:group)
+
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> String",
+        client, :group
+    end
+  end
+
+  def test_peer_sigalg
+    omit "OpenSSL::SSL::SSLSocket#peer_sigalg is not available" unless OpenSSL::SSL::SSLSocket.method_defined?(:peer_sigalg)
+
+    OpenSSLSSLFixtures.connected do |client, server|
+      assert_send_type "() -> String",
+        client, :peer_sigalg
+      assert_send_type "() -> nil",
+        server, :peer_sigalg
+    end
+  end
+
+  def test_sigalg
+    omit "OpenSSL::SSL::SSLSocket#sigalg is not available" unless OpenSSL::SSL::SSLSocket.method_defined?(:sigalg)
+
+    OpenSSLSSLFixtures.connected do |client, server|
+      assert_send_type "() -> String",
+        server, :sigalg
+      assert_send_type "() -> nil",
+        client, :sigalg
+    end
+  end
+end
+
 class OpenSSLTimestampFactoryTest < Test::Unit::TestCase
   include TestHelper
   library "openssl"
