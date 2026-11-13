@@ -43,6 +43,20 @@ class OpenSSLBufferingTest < Test::Unit::TestCase
     assert_send_type "(Integer, nil) -> String",
                      OpenSSLBufferingTestIO.new, :readpartial, 1, nil
   end
+
+  def test_getbyte
+    assert_send_type "() -> Integer",
+                     OpenSSLBufferingTestIO.new, :getbyte
+    io = OpenSSLBufferingTestIO.new
+    io.instance_variable_set(:@rbuffer, +"")
+    assert_send_type "() -> nil",
+                     io, :getbyte
+  end
+
+  def test_readbyte
+    assert_send_type "() -> Integer",
+                     OpenSSLBufferingTestIO.new, :readbyte
+  end
 end
 
 class OpenSSLSingletonTest < Test::Unit::TestCase
@@ -316,6 +330,17 @@ class OpenSSLCipherTest < Test::Unit::TestCase
   library "openssl"
   testing "::OpenSSL::Cipher"
 
+  def test_ccm_data_len=
+    cipher = OpenSSL::Cipher.new("aes-128-ccm").encrypt
+    cipher.auth_tag_len = 16
+    cipher.key = "k" * 16
+    cipher.iv = "i" * 7
+    with_int(5) do |len|
+      assert_send_type "(int) -> int",
+                       cipher, :ccm_data_len=, len
+    end
+  end
+
   def test_encrypt_decrypt
     key = ["2b7e151628aed2a6abf7158809cf4f3c"].pack("H*")
     iv =  ["000102030405060708090a0b0c0d0e0f"].pack("H*")
@@ -469,6 +494,11 @@ class OpenSSLDigestSingletonTest < Test::Unit::TestCase
   def test_digest
     assert_send_type "(String, String) -> String",
       OpenSSL::Digest, :digest, "SHA256", "abc"
+  end
+
+  def test_digests
+    assert_send_type "() -> Array[String]",
+      OpenSSL::Digest, :digests
   end
 end
 
@@ -1077,6 +1107,11 @@ class OpenSSLX509CertificateTest < Test::Unit::TestCase
       cert, :public_key
   end
 
+  def test_tbs_bytes
+    assert_send_type "() -> String",
+      OpenSSLMiscFixtures.cert, :tbs_bytes
+  end
+
   private
 
   def cert
@@ -1156,3 +1191,142 @@ class OpenSSLX509NameTest < Test::Unit::TestCase
     OpenSSL::X509::Name.parse('/CN=nobody/DC=example')
   end
 end
+
+module OpenSSLMiscFixtures
+  module_function
+
+  def key
+    @key ||= OpenSSL::PKey::RSA.new(2048)
+  end
+
+  # A self-signed certificate that can sign time stamps.
+  def cert
+    @cert ||= OpenSSL::X509::Certificate.new.tap do |cert|
+      cert.version = 2
+      cert.serial = 1
+      cert.subject = cert.issuer = OpenSSL::X509::Name.parse("/CN=RBS TSA")
+      cert.public_key = key
+      cert.not_before = Time.now - 60
+      cert.not_after = Time.now + 3600
+      ef = OpenSSL::X509::ExtensionFactory.new(cert, cert)
+      cert.add_extension(ef.create_extension("extendedKeyUsage", "timeStamping", true))
+      cert.sign(key, "SHA256")
+    end
+  end
+
+  def ts_request
+    OpenSSL::Timestamp::Request.new.tap do |req|
+      req.algorithm = "SHA256"
+      req.message_imprint = OpenSSL::Digest.digest("SHA256", "data")
+      req.cert_requested = true
+    end
+  end
+
+  def ts_response
+    factory = OpenSSL::Timestamp::Factory.new
+    factory.gen_time = Time.now
+    factory.serial_number = 1
+    factory.default_policy_id = "1.2.3.4.5"
+    factory.allowed_digests = ["sha256"]
+    factory.create_timestamp(key, cert, ts_request)
+  end
+end
+
+class OpenSSLX509CertificateSingletonTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "singleton(::OpenSSL::X509::Certificate)"
+
+  def test_load_file
+    Tempfile.create(["cert", ".pem"]) do |file|
+      file.write(OpenSSLMiscFixtures.cert.to_pem * 2)
+      file.flush
+
+      assert_send_type "(String) -> Array[OpenSSL::X509::Certificate]",
+        OpenSSL::X509::Certificate, :load_file, file.path
+      assert_send_type "(Pathname) -> Array[OpenSSL::X509::Certificate]",
+        OpenSSL::X509::Certificate, :load_file, Pathname(file.path)
+    end
+  end
+end
+
+class OpenSSLOpenSSLErrorTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::OpenSSLError"
+
+  def test_errors
+    omit "OpenSSL::OpenSSLError#errors is not available" unless OpenSSL::OpenSSLError.method_defined?(:errors)
+
+    error = begin
+      OpenSSL::X509::Certificate.new("not a certificate")
+    rescue OpenSSL::OpenSSLError => e
+      e
+    end
+    assert_send_type "() -> Array[String]",
+      error, :errors
+    assert_send_type "() -> nil",
+      OpenSSL::OpenSSLError.new("message"), :errors
+  end
+end
+
+class OpenSSLPKCS12Test < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::PKCS12"
+
+  def test_set_mac
+    p12 = OpenSSL::PKCS12.create("pass", "name", OpenSSLMiscFixtures.key, OpenSSLMiscFixtures.cert)
+    assert_send_type "(String) -> nil",
+      p12, :set_mac, "pass"
+    assert_send_type "(String, String, Integer, String) -> nil",
+      p12, :set_mac, "pass", "saltsalt", 2048, "SHA256"
+    assert_send_type "(String, nil, nil, OpenSSL::Digest) -> nil",
+      p12, :set_mac, "pass", nil, nil, OpenSSL::Digest.new("SHA256")
+  end
+end
+
+class OpenSSLPKCS7Test < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::PKCS7"
+
+  def test_to_text
+    p7 = OpenSSL::PKCS7.sign(OpenSSLMiscFixtures.cert, OpenSSLMiscFixtures.key, "data")
+    assert_send_type "() -> String",
+      p7, :to_text
+  end
+end
+
+class OpenSSLTimestampRequestTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::Timestamp::Request"
+
+  def test_to_text
+    assert_send_type "() -> String",
+      OpenSSLMiscFixtures.ts_request, :to_text
+  end
+end if OpenSSL.const_defined?(:Timestamp)
+
+class OpenSSLTimestampResponseTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::Timestamp::Response"
+
+  def test_to_text
+    assert_send_type "() -> String",
+      OpenSSLMiscFixtures.ts_response, :to_text
+  end
+end if OpenSSL.const_defined?(:Timestamp)
+
+class OpenSSLTimestampTokenInfoTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::Timestamp::TokenInfo"
+
+  def test_to_text
+    assert_send_type "() -> String",
+      OpenSSLMiscFixtures.ts_response.token_info, :to_text
+  end
+end if OpenSSL.const_defined?(:Timestamp)

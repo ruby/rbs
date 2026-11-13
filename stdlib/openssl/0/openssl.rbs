@@ -2041,6 +2041,14 @@ module OpenSSL
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
+    #   - ssl.getbyte => 81
+    # -->
+    # Get the next 8bit byte from `ssl`.  Returns `nil` on EOF
+    #
+    def getbyte: () -> Integer?
+
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
     #   - getc()
     # -->
     # Reads one character from the stream.  Returns nil if called at end of file.
@@ -2144,6 +2152,14 @@ module OpenSSL
     #
     def read_nonblock: (Integer maxlen, ?String? buf, ?exception: true) -> String
                      | (Integer maxlen, ?String? buf, exception: false) -> (String | :wait_writable | :wait_readable | nil)
+
+    # <!--
+    #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
+    #   - readbyte()
+    # -->
+    # Get the next 8bit byte. Raises EOFError on EOF
+    #
+    def readbyte: () -> Integer
 
     # <!--
     #   rdoc-file=ext/openssl/lib/openssl/buffering.rb
@@ -2610,6 +2626,22 @@ module OpenSSL
     # Returns the size in bytes of the blocks on which this Cipher operates on.
     #
     def block_size: () -> Integer
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_cipher.c
+    #   - cipher.ccm_data_len = integer
+    # -->
+    # Sets the total length of the plaintext / ciphertext message that will be
+    # processed by #update in CCM mode.
+    #
+    # Make sure to call this method after #key= and #iv= have been set, and before
+    # #auth_data= or #update are called.
+    #
+    # This method is only available for CCM mode ciphers.
+    #
+    # See also the "AEAD Interface" section of the man page EVP_EncryptInit(3).
+    #
+    def ccm_data_len=: (int data_len) -> int
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_cipher.c
@@ -3240,6 +3272,14 @@ module OpenSSL
     #     OpenSSL::Digest.digest("SHA256", "abc")
     #
     def self.digest: (String name, String data) -> String
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_digest.c
+    #   - OpenSSL::Digest.digests -> array[string...]
+    # -->
+    # Returns the names of all available digests in an array.
+    #
+    def self.digests: () -> Array[String]
 
     # <!-- rdoc-file=ext/openssl/ossl_digest.c -->
     # Not every message digest can be computed in one single pass. If a message
@@ -5120,6 +5160,17 @@ module OpenSSL
   # library.
   #
   class OpenSSLError < StandardError
+    # <!-- rdoc-file=ext/openssl/ossl.c -->
+    # OpenSSL error queue entries captured at the time the exception was raised. The
+    # same information is printed to stderr if OpenSSL.debug is set to `true`.
+    #
+    # This is an array of zero or more strings, ordered from the oldest to the
+    # newest. The format of the strings is not stable and may vary across versions
+    # of OpenSSL or versions of this Ruby extension.
+    #
+    # See also the man page ERR_get_error(3).
+    #
+    attr_reader errors: Array[String]?
   end
 
   # <!-- rdoc-file=ext/openssl/ossl_pkcs12.c -->
@@ -5158,6 +5209,21 @@ module OpenSSL
     def certificate: () -> X509::Certificate
 
     def key: () -> PKey::PKey
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkcs12.c
+    #   - pkcs12.set_mac(pass, salt = nil, iter = nil, md_type = nil)
+    # -->
+    # Sets MAC parameters and generates MAC over the PKCS #12 structure.
+    #
+    # This method uses HMAC and the PKCS #12 specific password-based KDF as
+    # specified in the original PKCS #12.
+    #
+    # See also the man page PKCS12_set_mac(3).
+    #
+    # Added in version 3.3.0.
+    #
+    def set_mac: (string pass, ?string? salt, ?int? iter, ?(String | Digest)? md_type) -> nil
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_pkcs12.c
@@ -5395,6 +5461,13 @@ module OpenSSL
     # -->
     #
     alias to_s to_pem
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkcs7.c
+    #   - to_text()
+    # -->
+    #
+    def to_text: () -> String
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_pkcs7.c
@@ -9868,6 +9941,13 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
+      #   - to_text()
+      # -->
+      #
+      def to_text: () -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ts.c
       #   - request.version -> Integer
       # -->
       # Returns the version of this request. `1` is the default value.
@@ -9957,6 +10037,13 @@ module OpenSSL
       # Returns the Response in DER-encoded form.
       #
       def to_der: () -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ts.c
+      #   - to_text()
+      # -->
+      #
+      def to_text: () -> String
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
@@ -10162,6 +10249,13 @@ module OpenSSL
       # Returns the TokenInfo in DER-encoded form.
       #
       def to_der: () -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ts.c
+      #   - to_text()
+      # -->
+      #
+      def to_text: () -> String
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ts.c
@@ -10776,6 +10870,8 @@ module OpenSSL
 
       extend OpenSSL::Marshal::ClassMethods
 
+      def self.load_file: (path path) -> Array[instance]
+
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509cert.c
       #   - cert1 == cert2 -> true | false
@@ -10938,6 +11034,16 @@ module OpenSSL
       # -->
       #
       def subject=: (Name) -> Name
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_x509cert.c
+      #   - cert.tbs_bytes => string
+      # -->
+      # Returns the DER-encoded bytes of the certificate's to be signed certificate.
+      # This is mainly useful for validating embedded certificate transparency
+      # signatures.
+      #
+      def tbs_bytes: () -> String
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_x509cert.c
