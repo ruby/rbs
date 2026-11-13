@@ -680,6 +680,58 @@ end
     end
   end
 
+  def test_resolve_type_names__unresolved_old_name
+    env = Environment.new
+
+    buf = RBS::Buffer.new(name: Pathname("a.rbs"), content: <<~RBS)
+      use Foo::Bar
+
+      module M
+        class A = B
+
+        module C = ::Foo
+
+        class D = Bar
+
+        class E = Unknown
+      end
+
+      class B
+      end
+
+      module Foo
+        class Bar
+        end
+      end
+    RBS
+    _, dirs, decls = RBS::Parser.parse_signature(buf)
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    names = ->(env) {
+      env.class_alias_decls.to_h do |name, entry|
+        [name.to_s, [entry.decl.old_name.to_s, entry.decl.unresolved_old_name.to_s]]
+      end
+    }
+
+    # The name is `old_name` before the resolution
+    assert_equal(
+      { "::M::A" => ["B", "B"], "::M::C" => ["::Foo", "::Foo"], "::M::D" => ["Bar", "Bar"], "::M::E" => ["Unknown", "Unknown"] },
+      names[env]
+    )
+
+    env = env.resolve_type_names
+    resolved_names = {
+      "::M::A" => ["::B", "B"],
+      "::M::C" => ["::Foo", "::Foo"],
+      "::M::D" => ["::Foo::Bar", "Bar"],
+      "::M::E" => ["Unknown", "Unknown"]
+    }
+    assert_equal resolved_names, names[env]
+
+    # Resolving the resolved declarations keeps the name
+    assert_equal resolved_names, names[env.resolve_type_names]
+  end
+
   def test_resolve_type_names_magic_comment
     buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
 # resolve-type-names: false

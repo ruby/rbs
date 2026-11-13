@@ -696,7 +696,8 @@ module RBS
           old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
           comment: decl.comment,
-          annotations: decl.annotations
+          annotations: decl.annotations,
+          unresolved_old_name: decl.unresolved_old_name
         )
 
       when AST::Declarations::ModuleAlias
@@ -705,7 +706,8 @@ module RBS
           old_name: absolute_type_name(resolver, map, decl.old_name, context: context),
           location: decl.location,
           comment: decl.comment,
-          annotations: decl.annotations
+          annotations: decl.annotations,
+          unresolved_old_name: decl.unresolved_old_name
         )
       end
     end
@@ -779,7 +781,8 @@ module RBS
           full_name,
           resolved_infered_name,
           decl.leading_comment,
-          resolved_annotation
+          resolved_annotation,
+          unresolved_old_name: decl.unresolved_old_name
         )
 
       else

@@ -138,7 +138,9 @@ module RBS
 
           attr_reader annotation: annotation
 
-          def initialize: (Buffer, node, TypeName, TypeName?, CommentBlock?, annotation) -> void
+          @unresolved_old_name: TypeName?
+
+          def initialize: (Buffer, node, TypeName, TypeName?, CommentBlock?, annotation, ?unresolved_old_name: TypeName?) -> void
 
           def name_location: () -> Location
 
@@ -147,6 +149,13 @@ module RBS
           # Returns the old name of the class/module alias
           #
           def old_name: () -> TypeName
+
+          # Returns the old name of the class/module alias before the type name resolution
+          #
+          # `Environment#resolve_type_names` gives it to the declaration it returns, that has the resolved name as
+          # `old_name`. It is `old_name` if the declaration is not resolved.
+          #
+          def unresolved_old_name: () -> TypeName
 
           def comment: () -> Comment?
 

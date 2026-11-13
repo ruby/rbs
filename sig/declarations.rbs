@@ -256,7 +256,16 @@ module RBS
 
         attr_reader annotations: Array[Annotation]
 
-        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?, annotations: Array[Annotation]) -> void
+        @unresolved_old_name: TypeName?
+
+        # The name of the class/module before the type name resolution
+        #
+        # `Environment#resolve_type_names` gives it to the declaration it returns, that has the resolved name as
+        # `old_name`. It is `old_name` if the declaration is not resolved.
+        #
+        def unresolved_old_name: () -> TypeName
+
+        def initialize: (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?, annotations: Array[Annotation], ?unresolved_old_name: TypeName?) -> void
                       | %a{deprecated} (new_name: TypeName, old_name: TypeName, location: loc?, comment: Comment?) -> void
 
         include _HashEqual

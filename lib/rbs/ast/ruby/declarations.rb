@@ -237,13 +237,18 @@ module RBS
           attr_reader :infered_old_name
           attr_reader :annotation
 
-          def initialize(buffer, node, new_name, infered_old_name, leading_comment, annotation)
+          def initialize(buffer, node, new_name, infered_old_name, leading_comment, annotation, unresolved_old_name: nil)
             super(buffer)
             @node = node
             @new_name = new_name
             @infered_old_name = infered_old_name
             @leading_comment = leading_comment
             @annotation = annotation
+            @unresolved_old_name = unresolved_old_name
+          end
+
+          def unresolved_old_name
+            @unresolved_old_name || old_name
           end
 
           def location
