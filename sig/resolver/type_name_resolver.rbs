@@ -24,38 +24,62 @@ module RBS
       #
       def resolve_namespace: (TypeName, context: context) -> (TypeName | false | nil)
 
+      # Translates given type name to absolute type name, and returns it with the type names the resolution depends on
+      #
+      # The resolution tests candidate type names, from the innermost module of the context to the root, and stops at the
+      # first one it finds. The dependencies are the tested names, including the ones that don't exist and the ones tested
+      # to normalize module aliases. The result changes only if one of them is added, removed, or declared as another
+      # class/module alias.
+      #
+      # The array may have duplicates. It is frozen, and shared with the resolutions of the same type name in the same
+      # context.
+      #
+      def resolve_with_dependencies: (TypeName, context: context) -> [TypeName?, Array[TypeName]]
+
       private
 
       attr_reader all_names: Set[TypeName]
 
       attr_reader aliases: Hash[TypeName, [TypeName, context]]
 
-      attr_reader cache: Hash[context, Hash[TypeName, TypeName?]]
+      # The resolutions of the type names in each context, with the type names tested for them
+      #
+      attr_reader cache: Hash[context, Hash[TypeName, [TypeName?, Array[TypeName]]]]
+
+      # Returns the cache entry of the type name in the context
+      #
+      # If the type name is not cached, yields the block with the array to add the tested type names to.
+      #
+      def try_cache: (TypeName, context) { (Array[TypeName] names) -> TypeName? } -> [TypeName?, Array[TypeName]]
+
+      def resolve0: (TypeName, context) -> [TypeName?, Array[TypeName]]
 
       # Returns the type name if it exists in `all_names` (normalized)
       #
-      def has_type_name?: (TypeName) -> TypeName?
+      # The type name is added to `names`.
+      #
+      def has_type_name?: (TypeName, Array[TypeName] names) -> TypeName?
 
       # Returns the type name if it is an alias (not normalized)
       #
-      def aliased_name?: (TypeName) -> TypeName?
-
-      def try_cache: (TypeName, context) { () -> TypeName? } -> TypeName?
+      # The type name is added to `names`.
+      #
+      def aliased_name?: (TypeName, Array[TypeName] names) -> TypeName?
 
       # Translates the head module name in the context and returns an absolute type name
       #
       # Returns `nil` if cannot find associated type name.
       # The returned namespace may be an alias
       #
-      def resolve_head_namespace: (Symbol, context) -> TypeName?
+      def resolve_head_namespace: (Symbol, context, Array[TypeName] names) -> TypeName?
 
       # Resolves the type name in the given context
       #
-      def resolve_type_name: (Symbol, context) -> TypeName?
+      def resolve_type_name: (Symbol, context, Array[TypeName] names) -> TypeName?
 
-      def resolve_namespace0: (TypeName, context, Set[TypeName]) -> (TypeName | false | nil)
+      def resolve_namespace0: (TypeName, context, Set[TypeName], Array[TypeName] names) -> (TypeName | false | nil)
 
-      def normalize_namespace: (TypeName, TypeName rhs, context, Set[TypeName]) -> (TypeName | false | nil)
+      def normalize_namespace: (TypeName, TypeName rhs, context, Set[TypeName], Array[TypeName] names) -> (TypeName | false | nil)
     end
   end
 end

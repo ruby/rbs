@@ -30,6 +30,94 @@ class RBS::Resolver::TypeNameResolverTest < Test::Unit::TestCase
                   resolver.resolve(type_name("Bar"), context: [nil, RBS::TypeName.parse("::Foo::Bar::Baz")])
   end
 
+  def test_resolve_with_dependencies
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Foo::Bar"), type_name("::Bar"), type_name("::Baz")],
+      {}
+    )
+
+    context = [nil, type_name("::Foo")] #: RBS::Resolver::context
+
+    # The name is found in the innermost module, and `::Bar` is not tested
+    result, names = resolver.resolve_with_dependencies(type_name("Bar"), context: context)
+    assert_equal type_name("::Foo::Bar"), result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Bar")], Set.new(names)
+
+    # The names that are not found are included
+    result, names = resolver.resolve_with_dependencies(type_name("Baz"), context: context)
+    assert_equal type_name("::Baz"), result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Baz"), type_name("::Baz")], Set.new(names)
+
+    result, names = resolver.resolve_with_dependencies(type_name("Qux"), context: context)
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Qux"), type_name("::Qux")], Set.new(names)
+
+    result, names = resolver.resolve_with_dependencies(type_name("::Bar"), context: context)
+    assert_equal type_name("::Bar"), result
+    assert_equal [type_name("::Bar")], names
+
+    result, names = resolver.resolve_with_dependencies(type_name("Bar::Qux"), context: context)
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Bar"), type_name("::Foo::Bar::Qux")], Set.new(names)
+
+    # The name is tested as a class and as a class alias
+    result, names = resolver.resolve_with_dependencies(type_name("::Qux"), context: context)
+    assert_nil result
+    assert_equal [type_name("::Qux"), type_name("::Qux")], names
+  end
+
+  def test_resolve_with_dependencies__cache
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Baz")],
+      {}
+    )
+
+    context = [nil, type_name("::Foo")] #: RBS::Resolver::context
+
+    # `#resolve` fills the cache with the names
+    assert_equal type_name("::Baz"), resolver.resolve(type_name("Baz"), context: context)
+
+    result, names = resolver.resolve_with_dependencies(type_name("Baz"), context: context)
+    assert_equal type_name("::Baz"), result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::Baz"), type_name("::Baz")], Set.new(names)
+    assert_predicate names, :frozen?
+
+    # The resolution that hits the cache returns the same array, for a context that is equal too
+    _, names2 = resolver.resolve_with_dependencies(type_name("Baz"), context: [nil, type_name("::Foo")])
+    assert_same names, names2
+
+    assert_equal type_name("::Baz"), resolver.resolve(type_name("Baz"), context: context)
+  end
+
+  def test_resolve_with_dependencies__module_alias
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Bar"), type_name("::Bar::Baz")],
+      {
+        type_name("::Foo::MyBar") => [type_name("Bar"), [nil, type_name("::Foo")]]
+      }
+    )
+
+    # The names tested to normalize the alias are included
+    result, names = resolver.resolve_with_dependencies(type_name("Foo::MyBar::Baz"), context: nil)
+    assert_equal type_name("::Bar::Baz"), result
+    assert_equal(
+      Set[type_name("::Foo"), type_name("::Foo::MyBar"), type_name("::Foo::Bar"), type_name("::Bar"), type_name("::Bar::Baz")],
+      Set.new(names)
+    )
+
+    # The module of the alias cannot be resolved
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo")],
+      {
+        type_name("::Foo::MyBar") => [type_name("Bar"), [nil, type_name("::Foo")]]
+      }
+    )
+
+    result, names = resolver.resolve_with_dependencies(type_name("Foo::MyBar"), context: nil)
+    assert_nil result
+    assert_equal Set[type_name("::Foo"), type_name("::Foo::MyBar"), type_name("::Foo::Bar"), type_name("::Bar")], Set.new(names)
+  end
+
   def test_resolve_failure
     resolver = Resolver::TypeNameResolver.new(
       Set[type_name("::Foo"), type_name("::Foo::Foo"), type_name("::Foo::Bar")],
