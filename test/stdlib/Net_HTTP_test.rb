@@ -104,6 +104,28 @@ class NetSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_put
+    with_server("localhost") do |uri|
+      assert_send_type "(URI::Generic, String) -> Net::HTTPResponse",
+                       Net::HTTP, :put, uri, "data"
+      assert_send_type "(URI::Generic, String, Hash[String, String]) -> Net::HTTPResponse",
+                       Net::HTTP, :put, uri, "data", { "Content-Type" => "text/plain" }
+    end
+  end
+
+  def test_default_configuration
+    assert_send_type "() -> nil",
+                     Net::HTTP, :default_configuration
+    assert_send_type "(Hash[Symbol, Integer]) -> Hash[Symbol, Integer]",
+                     Net::HTTP, :default_configuration=, { read_timeout: 1 }
+    assert_send_type "() -> Hash[Symbol, Integer]",
+                     Net::HTTP, :default_configuration
+    assert_send_type "(nil) -> nil",
+                     Net::HTTP, :default_configuration=, nil
+  ensure
+    Net::HTTP.default_configuration = nil
+  end
+
   def test_new
     assert_send_type "(String, Integer, nil, nil, nil, nil, nil) -> Net::HTTP",
                      Net::HTTP, :new, 'www.ruby-lang.org', 80, nil, nil, nil, nil, nil
@@ -207,6 +229,29 @@ class NetInstanceTest < Test::Unit::TestCase
   def test_keep_alive_timeout
     assert_send_type "() -> Integer",
                      TestNet.new, :keep_alive_timeout
+  end
+
+  def test_ignore_eof
+    assert_send_type "() -> bool",
+                     TestNet.new, :ignore_eof
+    assert_send_type "(bool) -> bool",
+                     TestNet.new, :ignore_eof=, false
+  end
+
+  def test_response_body_encoding
+    assert_send_type "() -> false",
+                     TestNet.new, :response_body_encoding
+    assert_send_type "(Encoding) -> Encoding",
+                     TestNet.new, :response_body_encoding=, Encoding::UTF_8
+    assert_send_type "(String) -> Encoding",
+                     TestNet.new, :response_body_encoding=, "UTF-8"
+    assert_send_type "(nil) -> nil",
+                     TestNet.new, :response_body_encoding=, nil
+
+    net = TestNet.new
+    net.response_body_encoding = "UTF-8"
+    assert_send_type "() -> Encoding",
+                     net, :response_body_encoding
   end
 
   def test_started_?
@@ -590,6 +635,24 @@ class TestInstanceNetHTTPResponse < Test::Unit::TestCase
                      Foo.success, :uri
     assert_send_type "() -> bool",
                      Foo.success, :decode_content
+  end
+
+  def test_body_encoding
+    assert_send_type "() -> false",
+                     Foo.success, :body_encoding
+    assert_send_type "(String) -> Encoding",
+                     Foo.success, :body_encoding=, "UTF-8"
+    assert_send_type "(Encoding) -> Encoding",
+                     Foo.success, :body_encoding=, Encoding::UTF_8
+    assert_send_type "(false) -> false",
+                     Foo.success, :body_encoding=, false
+  end
+
+  def test_ignore_eof
+    assert_send_type "() -> bool",
+                     Foo.success, :ignore_eof
+    assert_send_type "(bool) -> bool",
+                     Foo.success, :ignore_eof=, false
   end
 
   def test_manipulation_function
