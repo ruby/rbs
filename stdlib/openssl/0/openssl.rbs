@@ -5608,6 +5608,66 @@ module OpenSSL
   module PKey
     # <!--
     #   rdoc-file=ext/openssl/ossl_pkey.c
+    #   - OpenSSL::PKey.generate_key(algo_name [, options]) -> pkey
+    #   - OpenSSL::PKey.generate_key(pkey [, options]) -> pkey
+    # -->
+    # Generates a new key (pair).
+    #
+    # If a String is given as the first argument, it generates a new random key for
+    # the algorithm specified by the name just as ::generate_parameters does. If an
+    # OpenSSL::PKey::PKey is given instead, it generates a new random key for the
+    # same algorithm as the key, using the parameters the key contains.
+    #
+    # See ::generate_parameters for the details of *options* and the given block.
+    #
+    # ## Example
+    #     pkey_params = OpenSSL::PKey.generate_parameters("DSA", "dsa_paramgen_bits" => 2048)
+    #     pkey_params.priv_key #=> nil
+    #     pkey = OpenSSL::PKey.generate_key(pkey_params)
+    #     pkey.priv_key #=> #<OpenSSL::BN 6277...
+    #
+    def self?.generate_key: (String | PKey algo_name_or_pkey, ?Hash[String | Symbol, untyped] options) ?{ (*untyped) -> void } -> PKey
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkey.c
+    #   - OpenSSL::PKey.generate_parameters(algo_name [, options]) -> pkey
+    # -->
+    # Generates new parameters for the algorithm. *algo_name* is a String that
+    # represents the algorithm. The optional argument *options* is a Hash that
+    # specifies the options specific to the algorithm. The order of the options can
+    # be important.
+    #
+    # A block can be passed optionally. The meaning of the arguments passed to the
+    # block varies depending on the implementation of the algorithm. The block may
+    # be called once or multiple times, or may not even be called.
+    #
+    # For the supported options, see the documentation for the 'openssl genpkey'
+    # utility command.
+    #
+    # ## Example
+    #     pkey = OpenSSL::PKey.generate_parameters("DSA", "dsa_paramgen_bits" => 2048)
+    #     p pkey.p.num_bits #=> 2048
+    #
+    def self?.generate_parameters: (String algo_name, ?Hash[String | Symbol, untyped] options) ?{ (*untyped) -> void } -> PKey
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkey.c
+    #   - OpenSSL::PKey.new_raw_private_key(algo, string) -> PKey
+    # -->
+    # See the OpenSSL documentation for EVP_PKEY_new_raw_private_key()
+    #
+    def self?.new_raw_private_key: (String algo, String string) -> PKey
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkey.c
+    #   - OpenSSL::PKey.new_raw_public_key(algo, string) -> PKey
+    # -->
+    # See the OpenSSL documentation for EVP_PKEY_new_raw_public_key()
+    #
+    def self?.new_raw_public_key: (String algo, String string) -> PKey
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_pkey.c
     #   - OpenSSL::PKey.read(string [, pwd ]) -> PKey
     #   - OpenSSL::PKey.read(io [, pwd ]) -> PKey
     # -->
@@ -7098,6 +7158,69 @@ module OpenSSL
     class PKey
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.compare?(another_pkey) -> true | false
+      # -->
+      # Used primarily to check if an OpenSSL::X509::Certificate#public_key compares
+      # to its private key.
+      #
+      # ## Example
+      #     x509 = OpenSSL::X509::Certificate.new(pem_encoded_certificate)
+      #     rsa_key = OpenSSL::PKey::RSA.new(pem_encoded_private_key)
+      #
+      #     rsa_key.compare?(x509.public_key) => true | false
+      #
+      def compare?: (PKey another_pkey) -> bool
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.decrypt(data [, options]) -> string
+      # -->
+      # Performs a public key decryption operation using `pkey`.
+      #
+      # See #encrypt for a description of the parameters and an example.
+      #
+      # Added in version 3.0. See also the man page EVP_PKEY_decrypt(3).
+      #
+      def decrypt: (String data, ?Hash[String | Symbol, untyped] options) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.derive(peer_pkey) -> string
+      # -->
+      # Derives a shared secret from *pkey* and *peer_pkey*. *pkey* must contain the
+      # private components, *peer_pkey* must contain the public components.
+      #
+      def derive: (PKey peer_pkey) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.encrypt(data [, options]) -> string
+      # -->
+      # Performs a public key encryption operation using `pkey`.
+      #
+      # See #decrypt for the reverse operation.
+      #
+      # Added in version 3.0. See also the man page EVP_PKEY_encrypt(3).
+      #
+      # `data`
+      # :   A String to be encrypted.
+      #
+      # `options`
+      # :   A Hash that contains algorithm specific control operations to OpenSSL. See
+      #     OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details.
+      #
+      #
+      # Example:
+      #     pkey = OpenSSL::PKey.generate_key("RSA", rsa_keygen_bits: 2048)
+      #     data = "secret data"
+      #     encrypted = pkey.encrypt(data, rsa_padding_mode: "oaep")
+      #     decrypted = pkey.decrypt(data, rsa_padding_mode: "oaep")
+      #     p decrypted #=> "secret data"
+      #
+      def encrypt: (String data, ?Hash[String | Symbol, untyped] options) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
       #   - pkey.inspect -> string
       # -->
       # Returns a string describing the PKey object.
@@ -7172,6 +7295,22 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.raw_private_key   => string
+      # -->
+      # See the OpenSSL documentation for EVP_PKEY_get_raw_private_key()
+      #
+      def raw_private_key: () -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.raw_public_key   => string
+      # -->
+      # See the OpenSSL documentation for EVP_PKEY_get_raw_public_key()
+      #
+      def raw_public_key: () -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
       #   - pkey.sign(digest, data [, options]) -> string
       # -->
       # Hashes and signs the `data` using a message digest algorithm `digest` and a
@@ -7206,7 +7345,58 @@ module OpenSSL
       #     pub_key = pkey.public_key
       #     puts pub_key.verify("SHA256", signature, data, signopts) # => true
       #
-      def sign: (Digest digest, String data) -> String
+      def sign: (Digest | String | nil digest, String data, ?Hash[String | Symbol, untyped] options) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.sign_raw(digest, data [, options]) -> string
+      # -->
+      # Signs `data` using a private key `pkey`. Unlike #sign, `data` will not be
+      # hashed by `digest` automatically.
+      #
+      # See #verify_raw for the verification operation.
+      #
+      # Added in version 3.0. See also the man page EVP_PKEY_sign(3).
+      #
+      # `digest`
+      # :   A String that represents the message digest algorithm name, or `nil` if
+      #     the PKey type requires no digest algorithm. Although this method will not
+      #     hash `data` with it, this parameter may still be required depending on the
+      #     signature algorithm.
+      #
+      # `data`
+      # :   A String. The data to be signed.
+      #
+      # `options`
+      # :   A Hash that contains algorithm specific control operations to OpenSSL. See
+      #     OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details.
+      #
+      #
+      # Example:
+      #     data = "Sign me!"
+      #     hash = OpenSSL::Digest.digest("SHA256", data)
+      #     pkey = OpenSSL::PKey.generate_key("RSA", rsa_keygen_bits: 2048)
+      #     signopts = { rsa_padding_mode: "pss" }
+      #     signature = pkey.sign_raw("SHA256", hash, signopts)
+      #
+      #     # Creates a copy of the RSA key pkey, but without the private components
+      #     pub_key = pkey.public_key
+      #     puts pub_key.verify_raw("SHA256", signature, hash, signopts) # => true
+      #
+      def sign_raw: (Digest | String | nil digest, String data, ?Hash[String | Symbol, untyped] options) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.to_text -> string
+      # -->
+      # Dumps key parameters, public key, and private key components contained in the
+      # key into a human-readable text.
+      #
+      # This is intended for debugging purpose.
+      #
+      # See also the man page EVP_PKEY_print_private(3).
+      #
+      def to_text: () -> String
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_pkey.c
@@ -7234,7 +7424,40 @@ module OpenSSL
       # `options`
       # :   See #sign. `options` parameter was added in version 3.0.
       #
-      def verify: (Digest digest, String signature, String data) -> bool
+      def verify: (Digest | String | nil digest, String signature, String data, ?Hash[String | Symbol, untyped] options) -> bool
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.verify_raw(digest, signature, data [, options]) -> true or false
+      # -->
+      # Verifies the `signature` for the `data` using a public key `pkey`. Unlike
+      # #verify, this method will not hash `data` with `digest` automatically.
+      #
+      # Returns `true` if the signature is successfully verified, `false` otherwise.
+      # The caller must check the return value.
+      #
+      # See #sign_raw for the signing operation and an example code.
+      #
+      # Added in version 3.0. See also the man page EVP_PKEY_verify(3).
+      #
+      # `signature`
+      # :   A String containing the signature to be verified.
+      #
+      def verify_raw: (Digest | String | nil digest, String signature, String data, ?Hash[String | Symbol, untyped] options) -> bool
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_pkey.c
+      #   - pkey.verify_recover(digest, signature [, options]) -> string
+      # -->
+      # Recovers the signed data from `signature` using a public key `pkey`. Not all
+      # signature algorithms support this operation.
+      #
+      # Added in version 3.0. See also the man page EVP_PKEY_verify_recover(3).
+      #
+      # `signature`
+      # :   A String containing the signature to be verified.
+      #
+      def verify_recover: (Digest | String | nil digest, String signature, ?Hash[String | Symbol, untyped] options) -> String
 
       private
 
