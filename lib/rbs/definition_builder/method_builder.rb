@@ -194,6 +194,14 @@ module RBS
                     if member.singleton?
                       build_method(methods, type, member: member, accessibility: :public)
                     end
+                  when AST::Ruby::Declarations::SingletonClassDecl
+                    member.members.each do |singleton_member|
+                      case singleton_member
+                      when AST::Ruby::Members::DefMember
+                        # Instance methods of the singleton class are singleton methods of the class
+                        build_method(methods, type, member: singleton_member, accessibility: :public)
+                      end
+                    end
                   end
                 end
               end

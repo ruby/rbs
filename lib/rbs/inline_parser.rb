@@ -40,6 +40,10 @@ module RBS
       MixinNonConstantModule = _ = Class.new(Base)
       AttributeNonSymbolName = _ = Class.new(Base)
       ClassModuleAliasDeclarationMissingTypeName = _ = Class.new(Base)
+      NestedSingletonScope = _ = Class.new(Base)
+      TopLevelSingletonScope = _ = Class.new(Base)
+      NonSelfSingletonScope = _ = Class.new(Base)
+      ConstantInSingletonScope = _ = Class.new(Base)
     end
 
     def self.parse(buffer, prism)
@@ -102,6 +106,7 @@ module RBS
 
       def visit_class_node(node)
         return if skip_node?(node)
+        return if reject_constant_in_singleton_class(node.constant_path.location)
 
         unless class_name = constant_as_type_name(node.constant_path)
           diagnostics << Diagnostic::NonConstantClassName.new(
@@ -124,6 +129,7 @@ module RBS
 
       def visit_module_node(node)
         return if skip_node?(node)
+        return if reject_constant_in_singleton_class(node.constant_path.location)
 
         unless module_name = constant_as_type_name(node.constant_path)
           diagnostics << Diagnostic::NonConstantModuleName.new(
@@ -162,6 +168,38 @@ module RBS
 
         insert_declaration(module_decl)
         visit_class_or_module_body(module_decl, node)
+      end
+
+      def visit_singleton_class_node(node)
+        return if skip_node?(node)
+
+        case current = current_module
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+          unless node.expression.is_a?(Prism::SelfNode)
+            diagnostics << Diagnostic::NonSelfSingletonScope.new(
+              rbs_location(node.expression.location),
+              "Non-self expression in `class << ...` opens an anonymous singleton class, which has no representation in RBS"
+            )
+            return
+          end
+
+          singleton_decl = AST::Ruby::Declarations::SingletonClassDecl.new(buffer, node)
+          current.members << singleton_decl
+
+          push_module_nesting(singleton_decl) do
+            visit_child_nodes(node)
+          end
+        when AST::Ruby::Declarations::SingletonClassDecl
+          diagnostics << Diagnostic::NestedSingletonScope.new(
+            rbs_location(node.class_keyword_loc),
+            "Nested `class << self` opens the singleton class of a singleton class, which has no representation in RBS"
+          )
+        when nil
+          diagnostics << Diagnostic::TopLevelSingletonScope.new(
+            rbs_location(node.class_keyword_loc),
+            "Top-level `class << self` opens the singleton class of `main`, which has no representation in RBS"
+          )
+        end
       end
 
       def visit_class_or_module_body(decl, node)
@@ -210,10 +248,21 @@ module RBS
           return
         end
 
+        current = current_module
+
+        if current.is_a?(AST::Ruby::Declarations::SingletonClassDecl) && node.receiver
+          diagnostics << Diagnostic::NestedSingletonScope.new(
+            rbs_location(node.receiver.location),
+            "Method definition with self receiver inside `class << self` targets the singleton class of a singleton class, which has no representation in RBS"
+          )
+          return
+        end
+
+        # `def foo` inside `class << self` is kept as an instance method of the SingletonClassDecl
         kind = node.receiver ? :singleton : :instance #: :singleton | :instance
 
-        case current = current_module
-        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+        case current
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl, AST::Ruby::Declarations::SingletonClassDecl
           leading_block = comments.leading_block!(node)
 
           if node.end_keyword_loc
@@ -250,6 +299,11 @@ module RBS
           case current = current_module
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
             parse_mixin_call(node)
+          when AST::Ruby::Declarations::SingletonClassDecl
+            diagnostics << Diagnostic::NotImplementedYet.new(
+              rbs_location(node.message_loc || node.location),
+              "Mixin call inside `class << self` is not supported"
+            )
           end
         when :attr_reader, :attr_writer, :attr_accessor
           return if skip_node?(node)
@@ -257,6 +311,11 @@ module RBS
           case current = current_module
           when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
             parse_attribute_call(node)
+          when AST::Ruby::Declarations::SingletonClassDecl
+            diagnostics << Diagnostic::NotImplementedYet.new(
+              rbs_location(node.message_loc || node.location),
+              "Attribute definition inside `class << self` is not supported"
+            )
           when nil
             # Top-level attribute definition
             diagnostics << Diagnostic::TopLevelAttributeDefinition.new(
@@ -271,6 +330,7 @@ module RBS
 
       def visit_constant_write_node(node)
         return if skip_node?(node)
+        return if reject_constant_in_singleton_class(node.name_loc)
 
         # Parse constant declaration (both top-level and in classes/modules)
         parse_constant_declaration(node)
@@ -278,8 +338,23 @@ module RBS
 
       def visit_constant_path_write_node(node)
         return if skip_node?(node)
+        return if reject_constant_in_singleton_class(node.target.location)
 
         parse_constant_declaration(node)
+      end
+
+      # Constants defined inside `class << self` belong to the singleton class, not to the enclosing class.
+      # Returns `true` and reports a diagnostic if the current scope is a singleton class.
+      def reject_constant_in_singleton_class(location)
+        if current_module.is_a?(AST::Ruby::Declarations::SingletonClassDecl)
+          diagnostics << Diagnostic::ConstantInSingletonScope.new(
+            rbs_location(location),
+            "Constant definition inside `class << self` belongs to the singleton class, which has no representation in RBS"
+          )
+          true
+        else
+          false
+        end
       end
 
       def parse_mixin_call(node)
@@ -469,13 +544,7 @@ module RBS
             alias_annotation
           )
 
-          # Insert the alias declaration appropriately
-
-          if current_module
-            current_module.members << alias_decl
-          else
-            result.declarations << alias_decl
-          end
+          insert_declaration(alias_decl)
         else
           # Create regular constant declaration
           constant_decl = AST::Ruby::Declarations::ConstantDecl.new(
@@ -486,18 +555,16 @@ module RBS
             type_annotation
           )
 
-          # Insert the constant declaration appropriately
-          if current_module
-            current_module.members << constant_decl
-          else
-            result.declarations << constant_decl
-          end
+          insert_declaration(constant_decl)
         end
       end
 
       def insert_declaration(decl)
-        if current_module
-          current_module.members << decl
+        case current = current_module
+        when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+          current.members << decl
+        when AST::Ruby::Declarations::SingletonClassDecl
+          raise "Declarations inside `class << self` must be rejected before insertion"
         else
           result.declarations << decl
         end

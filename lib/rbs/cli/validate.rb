@@ -192,6 +192,13 @@ EOU
                   @validator.validate_method_definition(member, type_name: name)
                 when AST::Ruby::Members::MixinMember
                   InvalidTypeApplicationError.check!(type_name: member.module_name, params: mixin_type_params(member.module_name), args: member.type_args, location: member.location)
+                when AST::Ruby::Declarations::SingletonClassDecl
+                  member.members.each do |singleton_member|
+                    case singleton_member
+                    when AST::Ruby::Members::DefMember
+                      @validator.validate_method_definition(singleton_member, type_name: name)
+                    end
+                  end
                 end
               end
             else
