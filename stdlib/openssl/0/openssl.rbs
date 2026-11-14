@@ -8210,6 +8210,15 @@ module OpenSSL
                   | (Array[String] ciphers) -> void
                   | (String colon_sep_ciphers) -> void
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.ciphersuites = "cipher1:cipher2:..."
+      #   - ctx.ciphersuites = [name, ...]
+      # -->
+      # Sets the list of available TLS 1.3 cipher suites for this context.
+      #
+      def ciphersuites=: (String | Array[String] ciphersuites) -> (String | Array[String])
+
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A certificate or Array of certificates that will be sent to the client.
       #
@@ -8239,6 +8248,20 @@ module OpenSSL
       # returned the handshake is suspended.
       #
       def client_cert_cb=: (^(Session) -> [ X509::Certificate, PKey::PKey ]? client_cert_cb) -> void
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.client_sigalgs = "sigalg1:sigalg2:..."
+      # -->
+      # Sets the list of "supported signature algorithms" for client authentication
+      # for this context.
+      #
+      # For a TLS server, the list is sent to the client as part of the
+      # CertificateRequest message.
+      #
+      # See also #sigalgs= for the server authentication equivalent.
+      #
+      def client_sigalgs=: (String sigalgs) -> String
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # Sets the list of supported groups for key agreement for this context.
@@ -8309,6 +8332,37 @@ module OpenSSL
       #
       alias freeze setup
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.groups = groups_list
+      #   - ctx.ecdh_curves = groups_list
+      # -->
+      # Sets the list of supported groups for key agreement for this context.
+      #
+      # For a TLS client, the list is directly used in the "supported_groups"
+      # extension. For a server, the list is used by OpenSSL to determine the set of
+      # shared supported groups. OpenSSL will pick the most appropriate one from it.
+      #
+      # #ecdh_curves= is a deprecated alias for #groups=.
+      #
+      # See also the man page SSL_CTX_set1_groups_list(3).
+      #
+      # ### Example
+      #     ctx1 = OpenSSL::SSL::SSLContext.new
+      #     ctx1.groups = "X25519:P-256:P-224"
+      #     svr = OpenSSL::SSL::SSLServer.new(tcp_svr, ctx1)
+      #     Thread.new { svr.accept }
+      #
+      #     ctx2 = OpenSSL::SSL::SSLContext.new
+      #     ctx2.groups = "P-256"
+      #     cli = OpenSSL::SSL::SSLSocket.new(tcp_sock, ctx2)
+      #     cli.connect
+      #
+      #     p cli.tmp_key.group.curve_name
+      #     # => "prime256v1" (is an alias for NIST P-256)
+      #
+      def groups=: (String groups_list) -> String
+
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # Context private key
       #
@@ -8326,6 +8380,50 @@ module OpenSSL
       #
       %a{deprecated: Use OpenSSL::SSL::SSLContext#add_certificate instead}
       def key=: (PKey::PKey) -> PKey::PKey
+
+      # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
+      # A callback invoked when TLS key material is generated or received, in order to
+      # allow applications to store this keying material for debugging purposes.
+      #
+      # The callback is invoked with an SSLSocket and a string containing the key
+      # material in the format used by NSS for its SSLKEYLOGFILE debugging output.
+      #
+      # It is only compatible with OpenSSL >= 1.1.1. Even if LibreSSL implements
+      # SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see
+      # https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d13
+      # 9883b9661e9cb6).
+      #
+      # ### Example
+      #
+      #     context.keylog_cb = proc do |_sock, line|
+      #       File.open('ssl_keylog_file', "a") do |f|
+      #         f.write("#{line}\n")
+      #       end
+      #     end
+      #
+      def keylog_cb: () -> (^(SSLSocket ssl, String line) -> void | nil)
+
+      # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
+      # A callback invoked when TLS key material is generated or received, in order to
+      # allow applications to store this keying material for debugging purposes.
+      #
+      # The callback is invoked with an SSLSocket and a string containing the key
+      # material in the format used by NSS for its SSLKEYLOGFILE debugging output.
+      #
+      # It is only compatible with OpenSSL >= 1.1.1. Even if LibreSSL implements
+      # SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see
+      # https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d13
+      # 9883b9661e9cb6).
+      #
+      # ### Example
+      #
+      #     context.keylog_cb = proc do |_sock, line|
+      #       File.open('ssl_keylog_file', "a") do |f|
+      #         f.write("#{line}\n")
+      #       end
+      #     end
+      #
+      def keylog_cb=: ((^(SSLSocket ssl, String line) -> void)? keylog_cb) -> (^(SSLSocket ssl, String line) -> void | nil)
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
@@ -8720,6 +8818,21 @@ module OpenSSL
       #
       def setup: () -> untyped
 
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.sigalgs = "sigalg1:sigalg2:..."
+      # -->
+      # Sets the list of "supported signature algorithms" for this context.
+      #
+      # For a TLS client, the list is used in the "signature_algorithms" extension in
+      # the ClientHello message. For a server, the list is used by OpenSSL to
+      # determine the set of shared signature algorithms. OpenSSL will pick the most
+      # appropriate one from it.
+      #
+      # See also #client_sigalgs= for the client authentication equivalent.
+      #
+      def sigalgs=: (String sigalgs) -> String
+
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # Maximum session lifetime in seconds.
       #
@@ -8757,6 +8870,27 @@ module OpenSSL
       # Maximum session lifetime in seconds.
       #
       def timeout=: (Integer) -> Integer
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ctx.tmp_dh = pkey
+      # -->
+      # Sets DH parameters used for ephemeral DH key exchange. This is relevant for
+      # servers only.
+      #
+      # `pkey` is an instance of OpenSSL::PKey::DH. Note that key components contained
+      # in the key object, if any, are ignored. The server will always generate a new
+      # key pair for each handshake.
+      #
+      # Added in version 3.0. See also the man page SSL_CTX_set0_tmp_dh_pkey(3).
+      #
+      # Example:
+      #     ctx = OpenSSL::SSL::SSLContext.new
+      #     ctx.tmp_dh = OpenSSL::DH.generate(2048)
+      #     svr = OpenSSL::SSL::SSLServer.new(tcp_svr, ctx)
+      #     Thread.new { svr.accept }
+      #
+      def tmp_dh=: (PKey::DH pkey) -> PKey::DH
 
       # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
       # A callback invoked when DH parameters are required for ephemeral DH key
@@ -9137,6 +9271,35 @@ module OpenSSL
       def client_ca: () -> (Array[X509::Name] | Array[X509::Certificate] | X509::Certificate)
 
       # <!--
+      #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
+      #   - close_read()
+      # -->
+      # Close the stream for reading. This method is ignored by OpenSSL as there is no
+      # reasonable way to implement it, but exists for compatibility with IO.
+      #
+      def close_read: () -> nil
+
+      # <!--
+      #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
+      #   - close_write()
+      # -->
+      # Closes the stream for writing. The behavior of this method depends on the
+      # version of OpenSSL and the TLS protocol in use.
+      #
+      # *   Sends a 'close_notify' alert to the peer.
+      # *   Does not wait for the peer's 'close_notify' alert in response.
+      #
+      # In TLS 1.2 and earlier:
+      # *   On receipt of a 'close_notify' alert, responds with a 'close_notify' alert
+      #     of its own and close down the connection immediately, discarding any
+      #     pending writes.
+      #
+      # Therefore, on TLS 1.2, this method will cause the connection to be completely
+      # shut down. On TLS 1.3, the connection will remain open for reading only.
+      #
+      def close_write: () -> nil
+
+      # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
       #   - ssl.connect => self
       # -->
@@ -9176,11 +9339,28 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - session.export_keying_material(label, length) -> String
+      # -->
+      # Enables use of shared session key material in accordance with RFC 5705.
+      #
+      def export_keying_material: (String label, int length, ?String? context) -> String
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
       #   - ssl.finished_message => "finished message"
       # -->
       # Returns the last **Finished** message sent
       #
       def finished_message: () -> String?
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ssl.group => String or nil
+      # -->
+      # Returns the name of the group that was used for the key agreement of the
+      # current TLS session establishment.
+      #
+      def group: () -> String?
 
       def hostname: () -> String?
 
@@ -9233,6 +9413,15 @@ module OpenSSL
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ssl.peer_sigalg => String or nil
+      # -->
+      # Returns the signature algorithm name, the IANA name of the signature scheme
+      # used by the peer to sign the TLS handshake.
+      #
+      def peer_sigalg: () -> String?
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
       #   - ssl.pending => Integer
       # -->
       # The number of bytes that are immediately available for reading.
@@ -9274,6 +9463,15 @@ module OpenSSL
       # Returns `true` if a reused session was negotiated during the handshake.
       #
       def session_reused?: () -> bool
+
+      # <!--
+      #   rdoc-file=ext/openssl/ossl_ssl.c
+      #   - ssl.sigalg => String or nil
+      # -->
+      # Returns the signature algorithm name, the IANA name of the signature scheme
+      # used by the local to sign the TLS handshake.
+      #
+      def sigalg: () -> String?
 
       # <!--
       #   rdoc-file=ext/openssl/ossl_ssl.c
