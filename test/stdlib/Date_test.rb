@@ -23,16 +23,34 @@ class DateSingletonTest < Test::Unit::TestCase
   def test__httpdate
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
                       Date, :_httpdate, "Sat Aug 15 00:00:00 2020"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_httpdate, "Sat Aug 15 00:00:00 2020", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer]",
+                      Date, :_httpdate, "Sat Aug 15 00:00:00 2020", limit: nil
   end
 
   def test__iso8601
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
                       Date, :_iso8601, "2020-08-15"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_iso8601, "2020-08-15", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer]",
+                      Date, :_iso8601, "2020-08-15", limit: nil
   end
 
   def test__jisx0301
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
                       Date, :_jisx0301, "2020-08-15"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_jisx0301, "2020-08-15", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer]",
+                      Date, :_jisx0301, "2020-08-15", limit: nil
   end
 
   def test__parse
@@ -40,21 +58,47 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :_parse, "2020-08-15"
     assert_send_type  "(::String str, bool complete) -> ::Hash[Symbol, Integer]",
                       Date, :_parse, "2020-08-15", true
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_parse, "2020-08-15", limit: limit
+      assert_send_type  "(::String str, bool complete, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_parse, "2020-08-15", true, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer]",
+                      Date, :_parse, "2020-08-15", limit: nil
   end
 
   def test__rfc2822
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
                       Date, :_rfc2822, "Sat Aug 15 2020 00:00:00 +09:00"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer | String]",
+                        Date, :_rfc2822, "Sat Aug 15 2020 00:00:00 +09:00", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc2822, "Sat Aug 15 2020 00:00:00 +09:00", limit: nil
   end
 
   def test__rfc3339
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
                       Date, :_rfc3339, "2020-08-15T00:00:00+09:00"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer | String]",
+                        Date, :_rfc3339, "2020-08-15T00:00:00+09:00", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc3339, "2020-08-15T00:00:00+09:00", limit: nil
   end
 
   def test__rfc822
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer | String]",
                       Date, :_rfc822, "Sat Aug 15 2020 00:00:00 +09:00"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer | String]",
+                        Date, :_rfc822, "Sat Aug 15 2020 00:00:00 +09:00", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer | String]",
+                      Date, :_rfc822, "Sat Aug 15 2020 00:00:00 +09:00", limit: nil
   end
 
   def test__strptime
@@ -67,6 +111,12 @@ class DateSingletonTest < Test::Unit::TestCase
   def test__xmlschema
     assert_send_type  "(::String str) -> ::Hash[Symbol, Integer]",
                       Date, :_xmlschema, "2020-08-15"
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Hash[Symbol, Integer]",
+                        Date, :_xmlschema, "2020-08-15", limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Hash[Symbol, Integer]",
+                      Date, :_xmlschema, "2020-08-15", limit: nil
   end
 
   def test_civil
@@ -105,6 +155,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :httpdate, "Sat Aug 15 00:00:00 2020"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :httpdate, "Sat Aug 15 00:00:00 2020", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :httpdate, "Sat Aug 15 00:00:00 2020", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :httpdate, "Sat Aug 15 00:00:00 2020", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :httpdate, "Sat Aug 15 00:00:00 2020", limit: nil
   end
 
   def test_iso8601
@@ -112,6 +170,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :iso8601, "2020-08-15"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :iso8601, "2020-08-15", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :iso8601, "2020-08-15", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :iso8601, "2020-08-15", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :iso8601, "2020-08-15", limit: nil
   end
 
   def test_jd
@@ -126,6 +192,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :jisx0301, "2020-08-15"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :jisx0301, "2020-08-15", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :jisx0301, "2020-08-15", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :jisx0301, "2020-08-15", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :jisx0301, "2020-08-15", limit: nil
   end
 
   def test_julian_leap?
@@ -160,6 +234,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :parse, "2020-08-15", true, Date::ITALY
     assert_send_type  "() -> ::Date",
                       Date, :parse
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :parse, "2020-08-15", limit: limit
+      assert_send_type  "(::String str, bool complete, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :parse, "2020-08-15", true, Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :parse, "2020-08-15", limit: nil
   end
 
   def test_rfc2822
@@ -167,6 +249,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: nil
   end
 
   def test_rfc3339
@@ -174,6 +264,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :rfc3339, "2020-08-15T00:00:00+09:00"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :rfc3339, "2020-08-15T00:00:00+09:00", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :rfc3339, "2020-08-15T00:00:00+09:00", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :rfc3339, "2020-08-15T00:00:00+09:00", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :rfc3339, "2020-08-15T00:00:00+09:00", limit: nil
   end
 
   def test_rfc822
@@ -181,6 +279,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: nil
   end
 
   def test_strptime
@@ -237,6 +343,14 @@ class DateSingletonTest < Test::Unit::TestCase
                       Date, :xmlschema, "2020-08-15"
     assert_send_type  "(::String str, ::Integer start) -> ::Date",
                       Date, :xmlschema, "2020-08-15", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::Date",
+                        Date, :xmlschema, "2020-08-15", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::Date",
+                        Date, :xmlschema, "2020-08-15", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::Date",
+                      Date, :xmlschema, "2020-08-15", limit: nil
   end
 end
 

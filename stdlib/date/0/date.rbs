@@ -110,7 +110,7 @@ class Date
   #
   # Related: Date.httpdate (returns a Date object).
   #
-  def self._httpdate: (String str) -> Hash[Symbol, Integer]
+  def self._httpdate: (String str, ?limit: int?) -> Hash[Symbol, Integer]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -129,7 +129,7 @@ class Date
   #
   # Related: Date.iso8601 (returns a Date object).
   #
-  def self._iso8601: (String str) -> Hash[Symbol, Integer]
+  def self._iso8601: (String str, ?limit: int?) -> Hash[Symbol, Integer]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -147,7 +147,7 @@ class Date
   #
   # Related: Date.jisx0301 (returns a Date object).
   #
-  def self._jisx0301: (String str) -> Hash[Symbol, Integer]
+  def self._jisx0301: (String str, ?limit: int?) -> Hash[Symbol, Integer]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -175,7 +175,7 @@ class Date
   #
   # Related: Date.parse(returns a Date object).
   #
-  def self._parse: (String str, ?boolish complete) -> Hash[Symbol, Integer]
+  def self._parse: (String str, ?boolish complete, ?limit: int?) -> Hash[Symbol, Integer]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -193,7 +193,7 @@ class Date
   #
   # Related: Date.rfc2822 (returns a Date object).
   #
-  def self._rfc2822: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc2822: (String str, ?limit: int?) -> Hash[Symbol, Integer | String]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -211,7 +211,7 @@ class Date
   #
   # Related: Date.rfc3339 (returns a Date object).
   #
-  def self._rfc3339: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc3339: (String str, ?limit: int?) -> Hash[Symbol, Integer | String]
 
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a hash of values parsed from `string`, which should be a valid [RFC
@@ -226,7 +226,7 @@ class Date
   #
   # Related: Date.rfc2822 (returns a Date object).
   #
-  def self._rfc822: (String str) -> Hash[Symbol, Integer | String]
+  def self._rfc822: (String str, ?limit: int?) -> Hash[Symbol, Integer | String]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -261,7 +261,7 @@ class Date
   #
   # Related: Date.xmlschema (returns a Date object).
   #
-  def self._xmlschema: (String str) -> Hash[Symbol, Integer]
+  def self._xmlschema: (String str, ?limit: int?) -> Hash[Symbol, Integer]
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -349,7 +349,7 @@ class Date
   #
   # Related: Date._httpdate (returns a hash).
   #
-  def self.httpdate: (String str, ?Integer start) -> Date
+  def self.httpdate: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -371,7 +371,7 @@ class Date
   #
   # Related: Date._iso8601 (returns a hash).
   #
-  def self.iso8601: (String str, ?Integer start) -> Date
+  def self.iso8601: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -424,7 +424,7 @@ class Date
   #
   # Related: Date._jisx0301 (returns a hash).
   #
-  def self.jisx0301: (String str, ?Integer start) -> Date
+  def self.jisx0301: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -515,7 +515,7 @@ class Date
   #
   # Related: Date._parse (returns a hash).
   #
-  def self.parse: (?String str, ?boolish complete, ?Integer start) -> Date
+  def self.parse: (?String str, ?boolish complete, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -536,7 +536,7 @@ class Date
   #
   # Related: Date._rfc2822 (returns a hash).
   #
-  def self.rfc2822: (String str, ?Integer start) -> Date
+  def self.rfc2822: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -557,7 +557,7 @@ class Date
   #
   # Related: Date._rfc3339 (returns a hash).
   #
-  def self.rfc3339: (String str, ?Integer start) -> Date
+  def self.rfc3339: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Returns a new Date object with values parsed from `string`, which should be a
@@ -575,7 +575,7 @@ class Date
   #
   # Related: Date._rfc2822 (returns a hash).
   #
-  def self.rfc822: (String str, ?Integer start) -> Date
+  def self.rfc822: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -714,7 +714,7 @@ class Date
   #
   # Related: Date._xmlschema (returns a hash).
   #
-  def self.xmlschema: (String str, ?Integer start) -> Date
+  def self.xmlschema: (String str, ?Integer start, ?limit: int?) -> Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c

@@ -82,6 +82,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :httpdate, "Sat Aug 15 00:00:00 2020"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :httpdate, "Sat Aug 15 00:00:00 2020", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :httpdate, "Sat Aug 15 00:00:00 2020", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :httpdate, "Sat Aug 15 00:00:00 2020", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :httpdate, "Sat Aug 15 00:00:00 2020", limit: nil
   end
 
   def test_iso8601
@@ -89,6 +97,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :iso8601, "2020-08-15T00:00:00+0900"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :iso8601, "2020-08-15T00:00:00+0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :iso8601, "2020-08-15T00:00:00+0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :iso8601, "2020-08-15T00:00:00+0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :iso8601, "2020-08-15T00:00:00+0900", limit: nil
   end
 
   def test_jd
@@ -113,6 +129,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :jisx0301, "2020-08-15T00:00:00+0900"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :jisx0301, "2020-08-15T00:00:00+0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :jisx0301, "2020-08-15T00:00:00+0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :jisx0301, "2020-08-15T00:00:00+0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :jisx0301, "2020-08-15T00:00:00+0900", limit: nil
   end
 
   def test_ordinal
@@ -143,6 +167,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :parse, "2020-08-15T00:00:00+0900", :true
     assert_send_type  "(::String str, bool complete, ::Integer start) -> ::DateTime",
                       DateTime, :parse, "2020-08-15T00:00:00+0900", true, Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :parse, "2020-08-15T00:00:00+0900", limit: limit
+      assert_send_type  "(::String str, bool complete, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :parse, "2020-08-15T00:00:00+0900", true, Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :parse, "2020-08-15T00:00:00+0900", limit: nil
   end
 
   def test_rfc2822
@@ -150,6 +182,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :rfc2822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: nil
   end
 
   def test_rfc3339
@@ -157,6 +197,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :rfc3339, "2020-08-15T00:00:00+09:00"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :rfc3339, "2020-08-15T00:00:00+09:00", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc3339, "2020-08-15T00:00:00+09:00", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc3339, "2020-08-15T00:00:00+09:00", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :rfc3339, "2020-08-15T00:00:00+09:00", limit: nil
   end
 
   def test_rfc822
@@ -164,6 +212,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :rfc822, "Sat, 15 Aug 2020 00:00:00 +0900", limit: nil
   end
 
   def test_strptime
@@ -180,6 +236,14 @@ class DateTimeSingletonTest < Test::Unit::TestCase
                       DateTime, :xmlschema, "2020-08-15T00:00:00+09:00"
     assert_send_type  "(::String str, ::Integer start) -> ::DateTime",
                       DateTime, :xmlschema, "2020-08-15T00:00:00+09:00", Date::ITALY
+    with_int(128) do |limit|
+      assert_send_type  "(::String str, limit: ::int) -> ::DateTime",
+                        DateTime, :xmlschema, "2020-08-15T00:00:00+09:00", limit: limit
+      assert_send_type  "(::String str, ::Integer start, limit: ::int) -> ::DateTime",
+                        DateTime, :xmlschema, "2020-08-15T00:00:00+09:00", Date::ITALY, limit: limit
+    end
+    assert_send_type  "(::String str, limit: nil) -> ::DateTime",
+                      DateTime, :xmlschema, "2020-08-15T00:00:00+09:00", limit: nil
   end
 
   def test_now

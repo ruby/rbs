@@ -184,7 +184,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.httpdate: (String str, ?Integer start) -> DateTime
+  def self.httpdate: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -204,7 +204,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.iso8601: (String str, ?Integer start) -> DateTime
+  def self.iso8601: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -238,7 +238,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.jisx0301: (String str, ?Integer start) -> DateTime
+  def self.jisx0301: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -289,7 +289,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.parse: (String str, ?boolish complete, ?Integer start) -> DateTime
+  def self.parse: (String str, ?boolish complete, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -306,7 +306,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.rfc2822: (String str, ?Integer start) -> DateTime
+  def self.rfc2822: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -322,7 +322,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.rfc3339: (String str, ?Integer start) -> DateTime
+  def self.rfc3339: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!-- rdoc-file=ext/date/date_core.c -->
   # Creates a new DateTime object by parsing from a string according to some
@@ -335,7 +335,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.rfc822: (String str, ?Integer start) -> DateTime
+  def self.rfc822: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
@@ -380,7 +380,7 @@ class DateTime < Date
   # stop this check by passing <code>limit: nil</code>, but note that it may take
   # a long time to parse.
   #
-  def self.xmlschema: (String str, ?Integer start) -> DateTime
+  def self.xmlschema: (String str, ?Integer start, ?limit: int?) -> DateTime
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
