@@ -1427,7 +1427,8 @@ module RBS
         self.class.new(
           type: type.sub(s),
           required: required,
-          self_type: self_type&.sub(s)
+          self_type: self_type&.sub(s),
+          location: location
         )
       end
 
@@ -1435,7 +1436,8 @@ module RBS
         Block.new(
           required: required,
           type: type.map_type(&block),
-          self_type: self_type ? yield(self_type) : nil
+          self_type: self_type ? yield(self_type) : nil,
+          location: location
         )
       end
     end
