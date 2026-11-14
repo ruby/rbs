@@ -1,9 +1,13 @@
 module RBS
   module Prototype
     class RBI
-      include Helpers
+      extend Helpers
 
       type visibility = :private | :protected | :public
+
+      type attribute = :attr_reader | :attr_writer | :attr_accessor
+
+      def self.parse: (String) -> Array[AST::Declarations::t]
 
       class Context
         attr_accessor singleton: bool
@@ -13,92 +17,78 @@ module RBS
         def initialize: (singleton: bool, visibility: visibility) -> void
       end
 
-      attr_reader decls: Array[AST::Declarations::t]
+      class Visitor < Prism::Visitor
+        attr_reader decls: Array[AST::Declarations::t]
 
-      type module_decl = AST::Declarations::Class | AST::Declarations::Module
+        type module_decl = AST::Declarations::Class | AST::Declarations::Module
 
-      # A stack representing the module nesting structure in the Ruby code
-      attr_reader modules: Array[module_decl]
+        # A stack representing the module nesting structure in the Ruby code
+        attr_reader modules: Array[module_decl]
 
-      # Last subsequent `sig` calls
-      attr_reader last_sig: Array[RubyVM::AbstractSyntaxTree::Node]?
+        # Last subsequent `sig` calls
+        attr_reader last_sig: Array[Prism::Node]?
 
-      @contexts: Array[Context]
+        @contexts: Array[Context]
 
-      @emitted_visibility: Hash[Integer, visibility]
+        @emitted_visibility: Hash[Integer, visibility]
 
-      def initialize: () -> void
+        def initialize: (Hash[Integer, AST::Comment] comments) -> void
 
-      def parse: (String) -> void
+        def append_decl: (AST::Declarations::t decl) -> void
 
-      def append_decl: (AST::Declarations::t decl) -> void
+        def push_class: (Prism::Node name, Prism::Node? super_class, comment: AST::Comment?) { () -> void } -> void
 
-      def push_class: (
-        RubyVM::AbstractSyntaxTree::Node name,
-        RubyVM::AbstractSyntaxTree::Node super_class,
-        comment: AST::Comment?
-      ) { () -> void } -> void
+        def push_module: (Prism::Node name, comment: AST::Comment?) { () -> void } -> void
 
-      def push_module: (RubyVM::AbstractSyntaxTree::Node name, comment: AST::Comment?) { () -> void } -> void
+        # The inner most module/class definition, returns `nil` on toplevel
+        def current_module: () -> module_decl?
 
-      # The inner most module/class definition, returns `nil` on toplevel
-      def current_module: () -> module_decl?
+        # The inner most module/class definition, raises on toplevel
+        def current_module!: () -> module_decl
 
-      # The inner most module/class definition, raises on toplevel
-      def current_module!: () -> module_decl
+        def current_context: () -> Context?
 
-      def current_context: () -> Context?
+        def current_context!: () -> Context
 
-      def current_context!: () -> Context
+        # Visibility of a member, given as `private def ...` in RBS
+        #
+        # Returns `nil` for members in a visibility _section_, which `sync_visibility` emits instead.
+        def member_visibility: (Context) -> AST::Members::visibility?
 
-      # Visibility of a member, given as `private def ...` in RBS
-      #
-      # Returns `nil` for members in a visibility _section_, which `sync_visibility` emits instead.
-      def member_visibility: (Context) -> AST::Members::visibility?
+        def sync_visibility: (visibility) -> void
 
-      def sync_visibility: (visibility) -> void
+        # Put a `sig` call to current list.
+        def push_sig: (Prism::Node node) -> void
 
-      # Put a `sig` call to current list.
-      def push_sig: (RubyVM::AbstractSyntaxTree::Node node) -> void
+        # Clear the `sig` call list
+        def pop_sig: () -> Array[Prism::Node]?
 
-      # Clear the `sig` call list
-      def pop_sig: () -> Array[RubyVM::AbstractSyntaxTree::Node]?
+        def join_comments: (Array[Prism::Node] nodes) -> AST::Comment
 
-      def join_comments: (Array[RubyVM::AbstractSyntaxTree::Node] nodes, Hash[Integer, AST::Comment] comments) -> AST::Comment
+        def process: (Prism::Node node) -> void
 
-      def process: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment], ?outer: Array[RubyVM::AbstractSyntaxTree::Node]) -> void
+        def process_visibility: (Prism::CallNode node, visibility visibility) -> void
 
-      def process_visibility: (RubyVM::AbstractSyntaxTree::Node node, outer: Array[RubyVM::AbstractSyntaxTree::Node], comments: Hash[Integer, AST::Comment]) -> void
+        def process_attribute: (Prism::CallNode node, attribute kind) -> void
 
-      def process_attribute: (RubyVM::AbstractSyntaxTree::Node node, comments: Hash[Integer, AST::Comment]) -> void
+        def attribute_type: (attribute kind, Array[Prism::Node]? sigs) -> Types::t
 
-      def attribute_type: (:attr_reader | :attr_writer | :attr_accessor kind, Array[RubyVM::AbstractSyntaxTree::Node]? sigs) -> Types::t
+        def method_type: (Prism::ParametersNode? args_node, Prism::Node? type_node, overloads: Integer) -> MethodType?
 
-      def method_type: (RubyVM::AbstractSyntaxTree::Node? args_node, RubyVM::AbstractSyntaxTree::Node? type_node, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType?
+        def parse_params: (Prism::ParametersNode args_node, Array[Prism::Node] args, MethodType method_type, overloads: Integer) -> MethodType
 
-      def parse_params: (RubyVM::AbstractSyntaxTree::Node args_node, RubyVM::AbstractSyntaxTree::Node args, MethodType method_type, variables: Array[AST::TypeParam], overloads: Integer) -> MethodType
+        def type_of: (Prism::Node type_node) -> Types::t
 
-      def type_of: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
+        def type_of0: (Prism::Node type_node) -> Types::t
 
-      def type_of0: (RubyVM::AbstractSyntaxTree::Node type_node, variables: Array[AST::TypeParam]) -> Types::t
+        def proc_type?: (Prism::Node type_node) -> bool
 
-      def proc_type?: (RubyVM::AbstractSyntaxTree::Node type_node) -> bool
+        # Receives a constant node and returns `TypeName` instance
+        def const_to_name: (Prism::Node node) -> TypeName
 
-      def call_node?: (RubyVM::AbstractSyntaxTree::Node node, name: Symbol, ?receiver: ^(RubyVM::AbstractSyntaxTree::Node) -> bool, ?args: ^(RubyVM::AbstractSyntaxTree::Node) -> bool) -> bool
-
-      # Receives a constant node and returns `TypeName` instance
-      def const_to_name: (RubyVM::AbstractSyntaxTree::Node node) -> TypeName
-
-      # Receives `:ARRAY` or `:LIST` node and yields the child nodes.
-      def each_arg: (RubyVM::AbstractSyntaxTree::Node array) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
-                  | (RubyVM::AbstractSyntaxTree::Node array) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
-
-      # Receives node and yields the child nodes.
-      def each_child: (RubyVM::AbstractSyntaxTree::Node node) { (RubyVM::AbstractSyntaxTree::Node) -> void } -> void
-                    | (RubyVM::AbstractSyntaxTree::Node node) -> Enumerator[RubyVM::AbstractSyntaxTree::Node, void]
-
-      # Receives a keyword `:HASH` node and returns hash instance.
-      def node_to_hash: (RubyVM::AbstractSyntaxTree::Node node) -> Hash[Symbol, RubyVM::AbstractSyntaxTree::Node]?
+        # Receives a keyword `:HASH` node and returns hash instance.
+        def keyword_args_to_hash: (Prism::Node node) -> Hash[Symbol, Prism::Node]
+      end
     end
   end
 end
