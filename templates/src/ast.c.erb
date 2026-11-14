@@ -114,6 +114,8 @@ void rbs_hash_set(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key, rbs
         hash->tail->next = new_node;
         hash->tail = new_node;
     }
+
+    hash->length++;
 }
 
 rbs_node_t *RBS_NULLABLE rbs_hash_get(rbs_hash_t *RBS_NONNULL hash, rbs_node_t *RBS_NONNULL key) {
