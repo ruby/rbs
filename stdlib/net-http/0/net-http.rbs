@@ -869,6 +869,37 @@ module Net
 
     # <!--
     #   rdoc-file=lib/net/http.rb
+    #   - put(url, data, header = nil)
+    # -->
+    # Sends a PUT request to the server; returns a Net::HTTPResponse object.
+    #
+    # Argument `url` must be a URL; argument `data` must be a string:
+    #
+    #     _uri = uri.dup
+    #     _uri.path = '/posts'
+    #     data = '{"title": "foo", "body": "bar", "userId": 1}'
+    #     headers = {'content-type': 'application/json'}
+    #     res = Net::HTTP.put(_uri, data, headers) # => #<Net::HTTPCreated 201 Created readbody=true>
+    #     puts res.body
+    #
+    # Output:
+    #
+    #     {
+    #       "title": "foo",
+    #       "body": "bar",
+    #       "userId": 1,
+    #       "id": 101
+    #     }
+    #
+    # Related:
+    #
+    # *   Net::HTTP::Put: request class for HTTP method `PUT`.
+    # *   Net::HTTP#put: convenience method for HTTP method `PUT`.
+    #
+    def self.put: (URI::Generic url, String data, ?headers header) -> Net::HTTPResponse
+
+    # <!--
+    #   rdoc-file=lib/net/http.rb
     #   - default_port()
     # -->
     # Returns integer `80`, the default port to use for HTTP requests:
@@ -1026,6 +1057,23 @@ module Net
     #
     def self.new: (String address, ?Integer? port, ?String | :ENV | nil p_addr, ?Integer? p_port, ?String? p_user, ?String? p_pass, ?untyped? p_no_proxy) -> Net::HTTP
 
+    # <!-- rdoc-file=lib/net/http.rb -->
+    # Allows to set the default configuration that will be used when creating a new
+    # connection.
+    #
+    # Example:
+    #
+    #     Net::HTTP.default_configuration = {
+    #       read_timeout: 1,
+    #       write_timeout: 1
+    #     }
+    #     http = Net::HTTP.new(hostname)
+    #     http.open_timeout   # => 60
+    #     http.read_timeout   # => 1
+    #     http.write_timeout  # => 1
+    #
+    attr_accessor self.default_configuration: Hash[Symbol, untyped]?
+
     # <!--
     #   rdoc-file=lib/net/http.rb
     #   - inspect()
@@ -1113,6 +1161,35 @@ module Net
     # initially `nil`.
     #
     attr_accessor local_port: Integer
+
+    # <!-- rdoc-file=lib/net/http.rb -->
+    # Returns the encoding to use for the response body; see
+    # #response_body_encoding=.
+    #
+    attr_reader response_body_encoding: Encoding | false | nil
+
+    # <!--
+    #   rdoc-file=lib/net/http.rb
+    #   - response_body_encoding=(value)
+    # -->
+    # Sets the encoding to be used for the response body; returns the encoding.
+    #
+    # The given `value` may be:
+    #
+    # *   An Encoding object.
+    # *   The name of an encoding.
+    # *   An alias for an encoding name.
+    #
+    # See [Encoding](rdoc-ref:Encoding).
+    #
+    # Examples:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     http.response_body_encoding = Encoding::US_ASCII # => #<Encoding:US-ASCII>
+    #     http.response_body_encoding = 'US-ASCII'         # => "US-ASCII"
+    #     http.response_body_encoding = 'ASCII'            # => "ASCII"
+    #
+    def response_body_encoding=: (Encoding | String | false | nil value) -> (Encoding | false | nil)
 
     # <!-- rdoc-file=lib/net/http.rb -->
     # Sets whether to determine the proxy from environment variable
@@ -1274,6 +1351,12 @@ module Net
     # connection will have been closed and a new connection is opened.
     #
     attr_accessor keep_alive_timeout: Float | Integer
+
+    # <!-- rdoc-file=lib/net/http.rb -->
+    # Sets or returns whether to ignore end-of-file when reading a response body
+    # with <code>Content-Length</code> headers; initially `true`.
+    #
+    attr_accessor ignore_eof: bool
 
     # <!--
     #   rdoc-file=lib/net/http.rb
@@ -3968,6 +4051,45 @@ module Net
     # header from the user.
     #
     attr_accessor decode_content: bool
+
+    # <!-- rdoc-file=lib/net/http/response.rb -->
+    # Returns the value set by body_encoding=, or `false` if none; see
+    # #body_encoding=.
+    #
+    attr_reader body_encoding: Encoding | false | nil
+
+    # <!--
+    #   rdoc-file=lib/net/http/response.rb
+    #   - body_encoding=(value)
+    # -->
+    # Sets the encoding that should be used when reading the body:
+    #
+    # *   If the given value is an Encoding object, that encoding will be used.
+    # *   Otherwise if the value is a string, the value of
+    #     [Encoding#find(value)](rdoc-ref:Encoding.find) will be used.
+    # *   Otherwise an encoding will be deduced from the body itself.
+    #
+    # Examples:
+    #
+    #     http = Net::HTTP.new(hostname)
+    #     req = Net::HTTP::Get.new('/')
+    #
+    #     http.request(req) do |res|
+    #       p res.body.encoding # => #<Encoding:ASCII-8BIT>
+    #     end
+    #
+    #     http.request(req) do |res|
+    #       res.body_encoding = "UTF-8"
+    #       p res.body.encoding # => #<Encoding:UTF-8>
+    #     end
+    #
+    def body_encoding=: (Encoding | String | false | nil value) -> (Encoding | false | nil)
+
+    # <!-- rdoc-file=lib/net/http/response.rb -->
+    # Whether to ignore EOF when reading bodies with a specified Content-Length
+    # header.
+    #
+    attr_accessor ignore_eof: bool
 
     # <!--
     #   rdoc-file=lib/net/http/response.rb
