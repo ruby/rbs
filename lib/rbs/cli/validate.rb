@@ -135,8 +135,11 @@ EOU
                 end
 
                 self_params =
-                  if self_type.name.class?
+                  case
+                  when self_type.name.class?
                     @env.module_entry(self_type.name, normalized: true)&.type_params
+                  when self_type.name.alias?
+                    @env.type_alias_decls[@env.normalize_type_name(self_type.name)]&.decl&.type_params
                   else
                     @env.interface_decls[self_type.name]&.decl&.type_params
                   end

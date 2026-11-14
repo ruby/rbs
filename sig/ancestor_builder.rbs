@@ -146,6 +146,16 @@ module RBS
                             extended_modules: Array[Definition::Ancestor::Instance]?,
                          extended_interfaces: Array[Definition::Ancestor::Instance]?) -> void
 
+      # Pushes the self type to `self_types`, expanding type aliases into the class instance and interface types they're composed of
+      #
+      def push_self_type: (Array[Definition::Ancestor::Instance] self_types, AST::Declarations::Module::Self module_self, name: TypeName, args: Array[Types::t], location: Location[untyped, untyped]?, expanding: Array[TypeName]) -> void
+
+      # Yields the components of an expanded self type alias
+      #
+      # Raises `InvalidSelfTypeError` if the type is not a class instance type, an interface type, an alias type, or an intersection of them.
+      #
+      def each_self_type_component: (Types::t type, AST::Declarations::Module::Self module_self) { (Types::ClassInstance | Types::Interface | Types::Alias) -> void } -> void
+
       def mixin_ancestors0: (AST::Declarations::Class | AST::Declarations::Module | AST::Declarations::Interface | AST::Ruby::Declarations::ClassDecl | AST::Ruby::Declarations::ModuleDecl,
                              TypeName,
                              align_params: Substitution?,

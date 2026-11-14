@@ -109,7 +109,21 @@ module RBS
 
     # The type name in `self` is automatically normalized
     #
-    def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
+    def self.check!: (AST::Declarations::Module::Self, env: Environment, ?type_name: TypeName, ?location: Location[untyped, untyped]?) -> void
+  end
+
+  # The error raised when a type alias used as a module self type expands to a type
+  # other than class instance types, interface types, or intersections of them.
+  #
+  class InvalidSelfTypeError < DefinitionError
+    include DetailedMessageable
+
+    attr_reader type: Types::t
+    attr_reader module_self: AST::Declarations::Module::Self
+
+    def initialize: (type: Types::t, module_self: AST::Declarations::Module::Self) -> void
+
+    def location: () -> Location[untyped, untyped]?
   end
 
   class NoMixinFoundError < DefinitionError
