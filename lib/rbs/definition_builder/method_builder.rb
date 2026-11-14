@@ -114,7 +114,7 @@ module RBS
                 subst = entry.align_params(decl)
                 case decl
                 when AST::Declarations::Base
-                  each_rbs_member_with_accessibility(decl.members) do |member, accessibility|
+                  each_member_with_accessibility(decl.members) do |member, accessibility|
                     case member
                     when AST::Members::MethodDefinition
                       case member.kind
@@ -147,7 +147,7 @@ module RBS
                     end
                   end
                 when AST::Ruby::Declarations::Base
-                  decl.members.each do |member|
+                  each_member_with_accessibility(decl.members) do |member, accessibility|
                     case member
                     when AST::Ruby::Members::DefMember
                       if member.instance?
@@ -155,11 +155,11 @@ module RBS
                           methods,
                           type,
                           member: member,
-                          accessibility: :public
+                          accessibility: member.visibility || accessibility
                         )
                       end
                     when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
-                      build_ruby_attribute(methods, type, member: member, accessibility: :public)
+                      build_ruby_attribute(methods, type, member: member, accessibility: member.visibility || accessibility)
                     end
                   end
                 end
@@ -192,7 +192,7 @@ module RBS
                     end
                   when AST::Ruby::Members::DefMember
                     if member.singleton?
-                      build_method(methods, type, member: member, accessibility: :public)
+                      build_method(methods, type, member: member, accessibility: member.visibility || :public)
                     end
                   end
                 end
@@ -271,12 +271,12 @@ module RBS
         end
       end
 
-      def each_rbs_member_with_accessibility(members, accessibility: :public)
+      def each_member_with_accessibility(members, accessibility: :public)
         members.each do |member|
           case member
-          when AST::Members::Public
+          when AST::Members::Public, AST::Ruby::Members::PublicMember
             accessibility = :public
-          when AST::Members::Private
+          when AST::Members::Private, AST::Ruby::Members::PrivateMember
             accessibility = :private
           else
             yield member, accessibility
