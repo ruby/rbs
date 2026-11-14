@@ -83,8 +83,18 @@ module RBS
     #
     # When `only` is given, it skips other _top-level_ declarations not included in the collection.
     # This helps running resolution faster in the case of _partial updates_.
+    # A source that has no declaration in `only` is added to the returned environment as it is.
     #
-    def resolve_type_names: (?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?) -> Environment
+    # When `dependencies` is given, it is updated with the type names the resolution of each source depends on:
+    #
+    # * The dependencies of a source are replaced if all of its declarations are resolved
+    # * The dependencies of a source are added to the ones it has if a part of its declarations are resolved, because of `only`
+    # * The dependencies of a source that is not resolved are kept
+    # * The dependencies of the sources that the environment doesn't have are deleted
+    #
+    # `TypeNameDependencies#affected_paths` tells the sources to resolve again after an update of the environment.
+    #
+    def resolve_type_names: (?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?, ?dependencies: TypeNameDependencies?) -> Environment
 
     def resolve_signature: (
       Resolver::TypeNameResolver,
@@ -93,6 +103,15 @@ module RBS
       Array[AST::Declarations::t],
       ?only: Set[AST::Declarations::t | AST::Ruby::Declarations::t]?
     ) -> [Array[AST::Directives::t], Array[AST::Declarations::t]]
+
+    # Yields the block to resolve the type names of the source, recording the dependencies of the source if `dependencies` is given
+    #
+    private def record_dependencies: [T] (
+      TypeNameDependencies? dependencies,
+      Resolver::TypeNameResolver resolver,
+      Source::t source,
+      Set[AST::Declarations::t | AST::Ruby::Declarations::t]? only
+    ) { () -> T } -> T
 
     def inspect: () -> String
 

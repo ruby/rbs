@@ -519,7 +519,7 @@ module RBS
       [dirs, decls]
     end
 
-    def resolve_type_names(only: nil)
+    def resolve_type_names(only: nil, dependencies: nil)
       resolver = Resolver::TypeNameResolver.build(self)
       env = Environment.new
 
@@ -531,32 +531,54 @@ module RBS
       table.compute_children
 
       each_rbs_source do |source|
+        if only && source.declarations.none? { only.member?(_1) }
+          env.add_source(source)
+          next
+        end
+
         resolve = source.directives.find { _1.is_a?(AST::Directives::ResolveTypeNames) } #: AST::Directives::ResolveTypeNames?
         if !resolve || resolve.value
-          _, decls = resolve_signature(resolver, table, source.directives, source.declarations, only: only)
+          decls = record_dependencies(dependencies, resolver, source, only) do
+            resolve_signature(resolver, table, source.directives, source.declarations, only: only)[1]
+          end
         else
           decls = source.declarations
+          dependencies&.delete(source.buffer.name)
         end
         env.add_source(Source::RBS.new(source.buffer, source.directives, decls))
       end
 
       each_ruby_source do |source|
-        decls = source.declarations.map do |decl|
-          if only
-            if only.include?(decl)
-              resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
-            else
+        if only && source.declarations.none? { only.member?(_1) }
+          env.add_source(source)
+          next
+        end
+
+        decls = record_dependencies(dependencies, resolver, source, only) do
+          source.declarations.map do |decl|
+            if only && !only.member?(decl)
               decl
+            else
+              resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
             end
-          else
-            resolve_ruby_decl(resolver, decl, context: nil, prefix: Namespace.root)
           end
         end
 
         env.add_source(Source::Ruby.new(source.buffer, source.prism_result, decls, source.diagnostics))
       end
 
+      dependencies&.keep(Set.new(buffers.map(&:name)))
+
       env
+    end
+
+    def record_dependencies(dependencies, resolver, source, only)
+      if dependencies
+        merge = only ? !source.declarations.all? { only.member?(_1) } : false
+        dependencies.record(source, resolver, merge: merge) { yield }
+      else
+        yield
+      end
     end
 
     def resolver_context(*nesting)
