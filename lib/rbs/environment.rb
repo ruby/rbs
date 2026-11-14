@@ -632,10 +632,9 @@ module RBS
           name: decl.name.with_prefix(prefix),
           type_params: resolve_type_params(resolver, map, decl.type_params, context: inner_context),
           self_types: decl.self_types.map do |module_self|
-            AST::Declarations::Module::Self.new(
+            module_self.update(
               name: absolute_type_name(resolver, map, module_self.name, context: inner_context),
-              args: module_self.args.map {|type| absolute_type(resolver, map, type, context: inner_context) },
-              location: module_self.location
+              args: module_self.args.map {|type| absolute_type(resolver, map, type, context: inner_context) }
             )
           end,
           members: decl.members.map do |member|

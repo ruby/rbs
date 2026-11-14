@@ -487,6 +487,29 @@ VALUE rbs_struct_to_ruby_value(rbs_translation_context_t ctx, rbs_node_t *instan
         rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
         return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Module_Self, 1, &h);
     }
+    case RBS_AST_DECLARATIONS_MODULE_SINGLETON_SELF: {
+        rbs_ast_declarations_module_singleton_self_t *node = (rbs_ast_declarations_module_singleton_self_t *) instance;
+
+        // Compute child VALUEs into locals variables first, before any recursion into `rbs_struct_to_ruby_value()`.
+        VALUE arg_location = rbs_location_range_to_ruby_location(ctx, node->base.location);
+        rbs_loc *loc = rbs_check_location(arg_location);
+        {
+            rbs_loc_legacy_alloc_children(loc, 2);
+            rbs_loc_legacy_add_required_child(loc, rb_intern("name"), (rbs_loc_range) { .start = node->name_range.start_char, .end = node->name_range.end_char });
+            rbs_loc_legacy_add_optional_child(loc, rb_intern("args"), (rbs_loc_range) { .start = node->args_range.start_char, .end = node->args_range.end_char });
+        }
+        VALUE arg_name = rbs_struct_to_ruby_value(ctx, (rbs_node_t *) node->name); // rbs_type_name
+        VALUE arg_args = rbs_node_list_to_ruby_array(ctx, node->args);
+
+        // Claim the shared kwargs hash, clear it, fill it, and hand it to `.new`.
+        // Must not recurse between `rb_hash_clear()` and `CLASS_NEW_INSTANCE()`.
+        VALUE h = ctx.reusable_kwargs_hash;
+        rb_hash_clear(h);
+        rb_hash_aset(h, ID2SYM(rb_intern("location")), arg_location);
+        rb_hash_aset(h, ID2SYM(rb_intern("name")), arg_name);
+        rb_hash_aset(h, ID2SYM(rb_intern("args")), arg_args);
+        return CLASS_NEW_INSTANCE(RBS_AST_Declarations_Module_SingletonSelf, 1, &h);
+    }
     case RBS_AST_DECLARATIONS_MODULE_ALIAS: {
         rbs_ast_declarations_module_alias_t *node = (rbs_ast_declarations_module_alias_t *) instance;
 

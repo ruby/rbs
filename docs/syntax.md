@@ -637,8 +637,9 @@ _class-alias-decl_ ::= `class` _class-name_ `=` _class-name_
 
 _module-alias-decl_ ::= `module` _module-name_ `=` _module-name_
 
-_module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_            (Class instance)
-                      | _interface-name_ _type-arguments_ `,` _module-self-types_        (Interface)
+_module-self-types_ ::= _class-name_ _type-arguments_ `,` _module-self-types_                     (Class instance)
+                      | _interface-name_ _type-arguments_ `,` _module-self-types_                 (Interface)
+                      | `singleton(` _class-name_ `)` _type-arguments_ `,` _module-self-types_    (Class singleton)
 
 _interface-decl_ ::= `interface` _interface-name_ _module-type-parameters_ _interface-members_ `end`
 
@@ -680,6 +681,22 @@ end
 ```
 
 The `Enumerable` module above requires `each` method for enumerating objects.
+
+The self type can be a class singleton type, which declares that the module is `extend`ed to the class (or its subclasses).
+
+```rbs
+class Model
+  def self.find: (Integer) -> instance
+end
+
+module ClassMethods : singleton(Model)
+  def find_or_raise: (Integer) -> Model   # Can call `find` of `singleton(Model)`
+end
+
+class User < Model
+  extend ClassMethods
+end
+```
 
 * Self type arguments and generic class bounds are not *classish-context* nor *self-context*
 

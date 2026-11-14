@@ -50,11 +50,7 @@ module RBS
             self_types
           else
             self_types.map do |self_type|
-              AST::Declarations::Module::Self.new(
-                name: self_type.name,
-                args: self_type.args.map {|type| type.sub(subst) },
-                location: self_type.location
-              )
+              self_type.update(args: self_type.args.map {|type| type.sub(subst) })
             end
           end
         end.uniq

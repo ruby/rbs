@@ -3320,4 +3320,49 @@ end
     assert_equal [1, 11], ex.location.start_loc
     assert_equal [1, 19], ex.location.end_loc
   end
+
+  def test_module_singleton_selfs
+    Parser.parse_signature(<<-RBS).tap do |_, _, decls|
+module ClassMethods : singleton(Model), singleton(Collection)[Integer], _Each
+end
+    RBS
+      module_decl = decls[0]
+
+      assert_instance_of Declarations::Module, module_decl
+      assert_equal "singleton(Model), singleton(Collection)[Integer], _Each", module_decl.location[:self_types].source
+      assert_equal ["singleton(Model)", "singleton(Collection)[Integer]", "_Each"], module_decl.self_types.map(&:to_s)
+
+      module_decl.self_types[0].tap do |self_type|
+        assert_instance_of Declarations::Module::SingletonSelf, self_type
+        assert_equal type_name("Model"), self_type.name
+        assert_equal [], self_type.args
+        assert_equal "singleton(Model)", self_type.location.source
+        assert_equal "Model", self_type.location[:name].source
+        assert_nil self_type.location[:args]
+      end
+
+      module_decl.self_types[1].tap do |self_type|
+        assert_instance_of Declarations::Module::SingletonSelf, self_type
+        assert_equal type_name("Collection"), self_type.name
+        assert_equal ["Integer"], self_type.args.map(&:to_s)
+        assert_equal "singleton(Collection)[Integer]", self_type.location.source
+        assert_equal "Collection", self_type.location[:name].source
+        assert_equal "[Integer]", self_type.location[:args].source
+      end
+
+      module_decl.self_types[2].tap do |self_type|
+        assert_instance_of Declarations::Module::Self, self_type
+        assert_equal type_name("_Each"), self_type.name
+      end
+    end
+
+    # Interface cannot be a singleton
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_signature("module Foo : singleton(_Each) end")
+    end
+
+    assert_raises(RBS::ParsingError) do
+      Parser.parse_signature("module Foo : singleton(Bar end")
+    end
+  end
 end

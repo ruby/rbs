@@ -36,6 +36,7 @@ extern VALUE RBS_AST_Declarations_Global;
 extern VALUE RBS_AST_Declarations_Interface;
 extern VALUE RBS_AST_Declarations_Module;
 extern VALUE RBS_AST_Declarations_Module_Self;
+extern VALUE RBS_AST_Declarations_Module_SingletonSelf;
 extern VALUE RBS_AST_Declarations_ModuleAlias;
 extern VALUE RBS_AST_Declarations_TypeAlias;
 extern VALUE RBS_AST_Directives_Use;
