@@ -629,6 +629,50 @@ class Enumerator::Lazy[out E, out R = void] < Enumerator[E, R]
 
   # <!--
   #   rdoc-file=enumerator.c
+  #   - chunk(*args)
+  # -->
+  # Like Enumerable#chunk, but chains operation to be lazy-evaluated.
+  #
+  def chunk: [U] () { (E elt) -> U } -> Enumerator::Lazy[[ U, Array[E] ]]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#chunk_while, but chains operation to be lazy-evaluated.
+  #
+  def chunk_while: () { (E elt_before, E elt_after) -> boolish } -> Enumerator::Lazy[Array[E]]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#map, but chains operation to be lazy-evaluated.
+  #
+  #     (1..Float::INFINITY).lazy.map {|i| i**2 }
+  #     #=> #<Enumerator::Lazy: #<Enumerator::Lazy: 1..Infinity>:map>
+  #     (1..Float::INFINITY).lazy.map {|i| i**2 }.first(3)
+  #     #=> [1, 4, 9]
+  #
+  alias collect map
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Returns a new lazy enumerator with the concatenated results of running `block`
+  # once for every element in the lazy enumerator.
+  #
+  #     ["foo", "bar"].lazy.flat_map {|i| i.each_char.lazy}.force
+  #     #=> ["f", "o", "o", "b", "a", "r"]
+  #
+  # A value `x` returned by `block` is decomposed if either of the following
+  # conditions is true:
+  #
+  # *   `x` responds to both each and force, which means that `x` is a lazy
+  #     enumerator.
+  # *   `x` is an array or responds to to_ary.
+  #
+  # Otherwise, `x` is contained as-is in the return value.
+  #
+  #     [{a:1}, {b:2}].lazy.flat_map {|i| i}.force
+  #     #=> [{:a=>1}, {:b=>2}]
+  #
+  alias collect_concat flat_map
+
+  # <!--
+  #   rdoc-file=enumerator.c
   #   - lazy.compact                  -> lazy_enumerator
   # -->
   # Like Enumerable#compact, but chains operation to be lazy-evaluated.
@@ -637,11 +681,209 @@ class Enumerator::Lazy[out E, out R = void] < Enumerator[E, R]
 
   # <!--
   #   rdoc-file=enumerator.c
+  #   - lazy.drop(n)               -> lazy_enumerator
+  # -->
+  # Like Enumerable#drop, but chains operation to be lazy-evaluated.
+  #
+  def drop: (int n) -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.drop_while { |obj| block }  -> lazy_enumerator
+  # -->
+  # Like Enumerable#drop_while, but chains operation to be lazy-evaluated.
+  #
+  def drop_while: () { (E) -> boolish } -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
   #   - lzy.eager -> enum
   # -->
   # Returns a non-lazy Enumerator converted from the lazy enumerator.
   #
   def eager: () -> ::Enumerator[E, R]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#select, but chains operation to be lazy-evaluated.
+  #
+  alias filter select
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.filter_map { |obj| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#filter_map, but chains operation to be lazy-evaluated.
+  #
+  #     (1..).lazy.filter_map { |i| i * 2 if i.even? }.first(5)
+  #     #=> [4, 8, 12, 16, 20]
+  #
+  def filter_map: [U] () { (E elem) -> (nil | false | U) } -> Enumerator::Lazy[U]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#select, but chains operation to be lazy-evaluated.
+  #
+  alias find_all select
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.collect_concat { |obj| block } -> a_lazy_enumerator
+  #   - lazy.flat_map       { |obj| block } -> a_lazy_enumerator
+  # -->
+  # Returns a new lazy enumerator with the concatenated results of running `block`
+  # once for every element in the lazy enumerator.
+  #
+  #     ["foo", "bar"].lazy.flat_map {|i| i.each_char.lazy}.force
+  #     #=> ["f", "o", "o", "b", "a", "r"]
+  #
+  # A value `x` returned by `block` is decomposed if either of the following
+  # conditions is true:
+  #
+  # *   `x` responds to both each and force, which means that `x` is a lazy
+  #     enumerator.
+  # *   `x` is an array or responds to to_ary.
+  #
+  # Otherwise, `x` is contained as-is in the return value.
+  #
+  #     [{a:1}, {b:2}].lazy.flat_map {|i| i}.force
+  #     #=> [{:a=>1}, {:b=>2}]
+  #
+  def flat_map: [U] () { (E) -> (Array[U] | U) } -> Enumerator::Lazy[U]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.grep(pattern)                  -> lazy_enumerator
+  #   - lazy.grep(pattern) { |obj| block }  -> lazy_enumerator
+  # -->
+  # Like Enumerable#grep, but chains operation to be lazy-evaluated.
+  #
+  def grep: (untyped pattern) -> Enumerator::Lazy[E]
+          | [U] (untyped pattern) { (E) -> U } -> Enumerator::Lazy[U]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.grep_v(pattern)                  -> lazy_enumerator
+  #   - lazy.grep_v(pattern) { |obj| block }  -> lazy_enumerator
+  # -->
+  # Like Enumerable#grep_v, but chains operation to be lazy-evaluated.
+  #
+  def grep_v: (untyped pattern) -> Enumerator::Lazy[E]
+            | [U] (untyped pattern) { (E) -> U } -> Enumerator::Lazy[U]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - enum.lazy -> lazy_enumerator
+  # -->
+  # Returns self.
+  #
+  def lazy: () -> self
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.collect { |obj| block } -> lazy_enumerator
+  #   - lazy.map     { |obj| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#map, but chains operation to be lazy-evaluated.
+  #
+  #     (1..Float::INFINITY).lazy.map {|i| i**2 }
+  #     #=> #<Enumerator::Lazy: #<Enumerator::Lazy: 1..Infinity>:map>
+  #     (1..Float::INFINITY).lazy.map {|i| i**2 }.first(3)
+  #     #=> [1, 4, 9]
+  #
+  def map: [U] () { (E) -> U } -> Enumerator::Lazy[U]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.reject { |obj| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#reject, but chains operation to be lazy-evaluated.
+  #
+  def reject: () { (E) -> boolish } -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.find_all { |obj| block } -> lazy_enumerator
+  #   - lazy.select   { |obj| block } -> lazy_enumerator
+  #   - lazy.filter   { |obj| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#select, but chains operation to be lazy-evaluated.
+  #
+  def select: () { (E) -> boolish } -> Enumerator::Lazy[E]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#slice_after, but chains operation to be lazy-evaluated.
+  #
+  def slice_after: (untyped pattern) -> Enumerator::Lazy[Array[E]]
+                 | () { (E elt) -> boolish } -> Enumerator::Lazy[Array[E]]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#slice_before, but chains operation to be lazy-evaluated.
+  #
+  def slice_before: (untyped pattern) -> Enumerator::Lazy[Array[E]]
+                  | () { (E elt) -> boolish } -> Enumerator::Lazy[Array[E]]
+
+  # <!-- rdoc-file=enumerator.c -->
+  # Like Enumerable#slice_when, but chains operation to be lazy-evaluated.
+  #
+  def slice_when: () { (E elt_before, E elt_after) -> boolish } -> Enumerator::Lazy[Array[E]]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.take(n)               -> lazy_enumerator
+  # -->
+  # Like Enumerable#take, but chains operation to be lazy-evaluated.
+  #
+  def take: (int n) -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.take_while { |obj| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#take_while, but chains operation to be lazy-evaluated.
+  #
+  def take_while: () { (E) -> boolish } -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.uniq                  -> lazy_enumerator
+  #   - lazy.uniq { |item| block } -> lazy_enumerator
+  # -->
+  # Like Enumerable#uniq, but chains operation to be lazy-evaluated.
+  #
+  def uniq: () -> Enumerator::Lazy[E]
+          | () { (E item) -> untyped } -> Enumerator::Lazy[E]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.with_index(offset = 0) {|(*args), idx| block }
+  #   - lazy.with_index(offset = 0)
+  # -->
+  # If a block is given, returns a lazy enumerator that will iterate over the
+  # given block for each element with an index, which starts from `offset`, and
+  # returns a lazy enumerator that yields the same values (without the index).
+  #
+  # If a block is not given, returns a new lazy enumerator that includes the
+  # index, starting from `offset`.
+  #
+  # `offset`
+  # :   the starting index to use
+  #
+  #
+  # See Enumerator#with_index.
+  #
+  def with_index: (?Integer? offset) { (E, Integer) -> void } -> Enumerator::Lazy[E]
+                | (?Integer? offset) -> Enumerator::Lazy[[ E, Integer ]]
+
+  # <!--
+  #   rdoc-file=enumerator.c
+  #   - lazy.zip(arg, ...)                  -> lazy_enumerator
+  #   - lazy.zip(arg, ...) { |arr| block }  -> nil
+  # -->
+  # Like Enumerable#zip, but chains operation to be lazy-evaluated. However, if a
+  # block is given to zip, values are enumerated immediately.
+  #
+  def zip: [U] (_Each[U] arg) -> Enumerator::Lazy[[ E, U? ]]
+         | (_Each[untyped], *_Each[untyped]) -> Enumerator::Lazy[Array[untyped]]
+         | [U] (_Each[U]) { ([ E, U? ]) -> void } -> nil
 end
 
 # <!-- rdoc-file=enumerator.c -->

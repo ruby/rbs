@@ -126,6 +126,163 @@ class EnumeratorLazyInstanceTest < Test::Unit::TestCase
   def test_eager
     assert_send_type "() -> Enumerator[Integer, Range[Integer]]", (1..3).lazy, :eager
   end
+
+  def test_chunk
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[[bool, Array[Integer]]]",
+                     (1..3).lazy, :chunk do |i| i.odd? end
+  end
+
+  def test_chunk_while
+    assert_send_type "() { (Integer, Integer) -> bool } -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :chunk_while do |i, j| i + 1 == j end
+  end
+
+  def test_collect
+    assert_send_type "() { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :collect do |i| i.to_s end
+  end
+
+  def test_collect_concat
+    assert_send_type "() { (Integer) -> Array[String] } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :collect_concat do |i| [i.to_s] end
+    assert_send_type "() { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :collect_concat do |i| i.to_s end
+  end
+
+  def test_drop
+    with_int(1) do |n|
+      assert_send_type "(int) -> Enumerator::Lazy[Integer]",
+                       (1..3).lazy, :drop, n
+    end
+  end
+
+  def test_drop_while
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :drop_while do |i| i.odd? end
+  end
+
+  def test_filter
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :filter do |i| i.odd? end
+  end
+
+  def test_filter_map
+    assert_send_type "() { (Integer) -> String? } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :filter_map do |i| i.to_s if i.odd? end
+  end
+
+  def test_find_all
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :find_all do |i| i.odd? end
+  end
+
+  def test_flat_map
+    assert_send_type "() { (Integer) -> Array[String] } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :flat_map do |i| [i.to_s] end
+    assert_send_type "() { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :flat_map do |i| i.to_s end
+  end
+
+  def test_force
+    assert_send_type "() -> Array[Integer]",
+                     (1..3).lazy, :force
+  end
+
+  def test_grep
+    assert_send_type "(Range[Integer]) -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :grep, 1..2
+    assert_send_type "(Range[Integer]) { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :grep, 1..2 do |i| i.to_s end
+  end
+
+  def test_grep_v
+    assert_send_type "(Range[Integer]) -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :grep_v, 1..2
+    assert_send_type "(Range[Integer]) { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :grep_v, 1..2 do |i| i.to_s end
+  end
+
+  def test_lazy
+    assert_send_type "() -> Enumerator::Lazy[Integer, Range[Integer]]",
+                     (1..3).lazy, :lazy
+  end
+
+  def test_map
+    assert_send_type "() { (Integer) -> String } -> Enumerator::Lazy[String]",
+                     (1..3).lazy, :map do |i| i.to_s end
+  end
+
+  def test_reject
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :reject do |i| i.odd? end
+  end
+
+  def test_select
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :select do |i| i.odd? end
+  end
+
+  def test_slice_after
+    assert_send_type "(Integer) -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :slice_after, 2
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :slice_after do |i| i.even? end
+  end
+
+  def test_slice_before
+    assert_send_type "(Integer) -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :slice_before, 2
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :slice_before do |i| i.even? end
+  end
+
+  def test_slice_when
+    assert_send_type "() { (Integer, Integer) -> bool } -> Enumerator::Lazy[Array[Integer]]",
+                     (1..3).lazy, :slice_when do |i, j| i + 1 != j end
+  end
+
+  def test_take
+    with_int(2) do |n|
+      assert_send_type "(int) -> Enumerator::Lazy[Integer]",
+                       (1..3).lazy, :take, n
+    end
+  end
+
+  def test_take_while
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :take_while do |i| i.odd? end
+  end
+
+  def test_uniq
+    assert_send_type "() -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :uniq
+    assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :uniq do |i| i.odd? end
+  end
+
+  def test_with_index
+    assert_send_type "() -> Enumerator::Lazy[[Integer, Integer]]",
+                     (1..3).lazy, :with_index
+    assert_send_type "(Integer) -> Enumerator::Lazy[[Integer, Integer]]",
+                     (1..3).lazy, :with_index, 1
+    assert_send_type "(nil) -> Enumerator::Lazy[[Integer, Integer]]",
+                     (1..3).lazy, :with_index, nil
+    assert_send_type "() { (Integer, Integer) -> void } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :with_index do |i, j| end
+    assert_send_type "(Integer) { (Integer, Integer) -> void } -> Enumerator::Lazy[Integer]",
+                     (1..3).lazy, :with_index, 1 do |i, j| end
+  end
+
+  def test_zip
+    assert_send_type "(Array[String]) -> Enumerator::Lazy[[Integer, String?]]",
+                     (1..3).lazy, :zip, ["a"]
+    assert_send_type "(Each[String]) -> Enumerator::Lazy[[Integer, String?]]",
+                     (1..3).lazy, :zip, Each.new("a")
+    assert_send_type "(Array[String], Array[Symbol]) -> Enumerator::Lazy[Array[untyped]]",
+                     (1..3).lazy, :zip, ["a"], [:b]
+    assert_send_type "(Array[String]) { ([Integer, String?]) -> void } -> nil",
+                     (1..3).lazy, :zip, ["a"] do end
+  end
 end
 
 class EnumeratorChainInstanceTest < Test::Unit::TestCase
