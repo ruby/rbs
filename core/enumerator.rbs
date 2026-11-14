@@ -193,8 +193,8 @@ class Enumerator[unchecked out E, out R = void] < Object
   #     }
   #     calendar.size  # => nil
   #
-  def self.produce: [T] () { (T? prev) -> T } -> Enumerator[T, bot]
-                  | [T] (T initial) { (T prev) -> T } -> Enumerator[T, bot]
+  def self.produce: [T] (?size: int | Float | Proc::_Callable | nil) { (T? prev) -> T } -> Enumerator[T, bot]
+                  | [T] (T initial, ?size: int | Float | Proc::_Callable | nil) { (T prev) -> T } -> Enumerator[T, bot]
 
   # <!--
   #   rdoc-file=enumerator.c

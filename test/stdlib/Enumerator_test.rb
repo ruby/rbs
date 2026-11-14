@@ -47,6 +47,28 @@ class EnumeratorSingletonTest < Test::Unit::TestCase
     )
   end
 
+  def test_produce_size
+    if_ruby("4.0"...) do
+      # A finite size would make the type check iterate the endless enumerator,
+      # so these sizes all report an infinite or unknown size.
+      callable = Object.new
+      def callable.call = nil
+
+      next_value = proc { |prev| (prev || 0) + 1 }
+
+      [Float::INFINITY, nil, -> { Float::INFINITY }, callable].each do |size|
+        assert_send_type(
+          "(size: Float | Proc::_Callable | nil) { (Integer?) -> Integer } -> Enumerator[Integer, bot]",
+          Enumerator, :produce, size: size, &next_value
+        )
+        assert_send_type(
+          "(Integer initial, size: Float | Proc::_Callable | nil) { (Integer) -> Integer } -> Enumerator[Integer, bot]",
+          Enumerator, :produce, 1, size: size, &:succ
+        )
+      end
+    end
+  end
+
   def test_product
     assert_send_type(
       "(Array[String], Array[Integer]) -> Enumerator::Product[String | Integer]",
