@@ -256,6 +256,18 @@ class DateTimeTest < Test::Unit::TestCase
                       DateTime.new, :hour
   end
 
+  def test_day_fraction
+    assert_send_type  "() -> ::Rational",
+                      DateTime.new(2001, 2, 3, 12), :day_fraction
+    assert_send_type  "() -> ::Rational",
+                      DateTime.new(2001, 2, 3), :day_fraction
+  end
+
+  def test_infinite?
+    assert_send_type  "() -> false",
+                      DateTime.new, :infinite?
+  end
+
   def test_min
     assert_send_type  "() -> ::Integer",
                       DateTime.new, :min

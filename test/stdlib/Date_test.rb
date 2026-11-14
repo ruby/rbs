@@ -326,6 +326,11 @@ class DateTest < Test::Unit::TestCase
                       Date.new, :day
   end
 
+  def test_day_fraction
+    assert_send_type  "() -> ::Integer",
+                      Date.new(2001, 2, 3), :day_fraction
+  end
+
   def test_downto
     assert_send_type  "(::Date min) { (::Date) -> untyped } -> ::Date",
                       Date.new, :downto, Date.new do end
@@ -356,6 +361,11 @@ class DateTest < Test::Unit::TestCase
   def test_httpdate
     assert_send_type  "() -> ::String",
                       Date.new, :httpdate
+  end
+
+  def test_infinite?
+    assert_send_type  "() -> false",
+                      Date.new, :infinite?
   end
 
   def test_inspect

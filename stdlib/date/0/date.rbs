@@ -980,6 +980,17 @@ class Date
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
+  #   - day_fraction -> rational
+  # -->
+  # Returns the fractional part of the day in range (Rational(0, 1)...Rational(1,
+  # 1)):
+  #
+  #     DateTime.new(2001,2,3,12).day_fraction # => (1/2)
+  #
+  def day_fraction: () -> (Rational | Integer)
+
+  # <!--
+  #   rdoc-file=ext/date/date_core.c
   #   - deconstruct_keys(array_of_names_or_nil) -> hash
   # -->
   # Returns a hash of the name/value pairs, to use in pattern matching. Possible
@@ -1068,6 +1079,14 @@ class Date
   #     Date.new(2001, 2, 3).httpdate # => "Sat, 03 Feb 2001 00:00:00 GMT"
   #
   def httpdate: () -> String
+
+  # <!--
+  #   rdoc-file=ext/date/lib/date.rb
+  #   - infinite? -> false
+  # -->
+  # Returns `false`
+  #
+  def infinite?: () -> false
 
   # <!--
   #   rdoc-file=ext/date/date_core.c
