@@ -110,6 +110,22 @@ class IPAddr
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
+  #   - as_json(*)
+  # -->
+  # Returns a string containing the IP address representation with prefix.
+  #
+  def as_json: (*untyped) -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
+  #   - cidr()
+  # -->
+  # Returns a string containing the IP address representation in cidr notation
+  #
+  def cidr: () -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
   #   - eql?(other)
   # -->
   # Checks equality used by Hash.
@@ -336,6 +352,14 @@ class IPAddr
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
+  #   - to_json(*a)
+  # -->
+  # Returns a json string containing the IP address representation.
+  #
+  def to_json: (*untyped) -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
   #   - to_range()
   # -->
   # Creates a Range object for the network address.
@@ -357,6 +381,32 @@ class IPAddr
   # Returns a string containing the IP address representation in canonical form.
   #
   def to_string: () -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
+  #   - wildcard_mask()
+  # -->
+  # Returns the wildcard mask in string format e.g. 0.0.255.255
+  #
+  def wildcard_mask: () -> String
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
+  #   - zone_id()
+  # -->
+  # Returns the IPv6 zone identifier, if present. Raises InvalidAddressError if
+  # not an IPv6 address.
+  #
+  def zone_id: () -> String?
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
+  #   - zone_id=(zid)
+  # -->
+  # Returns the IPv6 zone identifier, if present. Raises InvalidAddressError if
+  # not an IPv6 address.
+  #
+  def zone_id=: (String? zid) -> String?
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
