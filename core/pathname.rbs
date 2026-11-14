@@ -809,7 +809,7 @@ class Pathname
   #
   # See FileUtils.mkpath and FileUtils.mkdir_p
   #
-  def mkpath: () -> self
+  def mkpath: (?mode: Integer?) -> self
 
   # <!--
   #   rdoc-file=pathname_builtin.rb

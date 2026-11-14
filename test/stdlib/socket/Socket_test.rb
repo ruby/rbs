@@ -47,6 +47,20 @@ class SocketSingletonTest < Test::Unit::TestCase
 
     open_server do
       assert_send_type(
+        "(::string, ::int, fast_fallback: bool) -> ::Socket",
+        Socket, :tcp, "localhost", PORT, fast_fallback: false
+      )
+    end
+
+    open_server do
+      assert_send_type(
+        "(::string, ::int, connect_timeout: Integer, fast_fallback: bool) { (::Socket) -> Integer } -> Integer",
+        Socket, :tcp, "localhost", PORT, connect_timeout: 5, fast_fallback: true, &-> (socket) { 123 }
+      )
+    end
+
+    open_server do
+      assert_send_type(
         "(::string, ::int, open_timeout: Integer) -> ::Socket",
         Socket, :tcp, "localhost", PORT, open_timeout: 10
       )

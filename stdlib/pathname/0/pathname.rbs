@@ -50,7 +50,7 @@ class Pathname
   #
   # See FileUtils.rm_rf
   #
-  def rmtree: () -> self
+  def rmtree: (?noop: boolish, ?verbose: boolish, ?secure: boolish) -> self
 
   def path: () -> String
 end
