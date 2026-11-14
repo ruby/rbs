@@ -151,6 +151,15 @@ class DirSingletonTest < Test::Unit::TestCase
                      Dir, :glob, [ToStr.new("test_*.rb")], 0, base: ToStr.new(__dir__)
     assert_send_type "(::String) { (::String) -> 3 } -> nil",
                      Dir, :glob, "**/*.rbs" do 3 end
+
+    with_int File::FNM_DOTMATCH do |flags|
+      assert_send_type "(::String, flags: ::int) -> ::Array[::String]",
+                       Dir, :glob, "*", flags: flags
+      assert_send_type "(::String, ::Integer, flags: ::int, base: ::String) -> ::Array[::String]",
+                       Dir, :glob, "*", 0, flags: flags, base: __dir__
+      assert_send_type "(::String, flags: ::int) { (::String) -> 3 } -> nil",
+                       Dir, :glob, "*", flags: flags do 3 end
+    end
   end
 
   def test_home

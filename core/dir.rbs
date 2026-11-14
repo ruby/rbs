@@ -654,8 +654,8 @@ class Dir
   # *   File::FNM_SHORTNAME: specifies that patterns may match short names if they
   #     exist; Windows only.
   #
-  def self.glob: (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) -> Array[String]
-               | (array[path] | path pattern, ?int flags, ?base: path?, ?sort: bool) { (String pathname) -> void } -> nil
+  def self.glob: (array[path] | path pattern, ?int flags, ?flags: int, ?base: path?, ?sort: bool) -> Array[String]
+               | (array[path] | path pattern, ?int flags, ?flags: int, ?base: path?, ?sort: bool) { (String pathname) -> void } -> nil
 
   # <!--
   #   rdoc-file=dir.c
