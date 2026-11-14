@@ -31,22 +31,22 @@ module RBS
 
       # The resolver for the resolution of a source, that records the type names tested for the source
       #
-      # A type name is resolved once for each context, and `#resolve` returns the type name itself if it cannot be
-      # resolved. The contexts are compared by identity: the declarations of a module share one object, and looking
-      # it up doesn't need the hash of the nested array.
-      #
       class Recorder
         include Resolver::_TypeNameResolver
 
         @resolver: Resolver::TypeNameResolver
 
-        @results: Hash[Resolver::context, Hash[TypeName, TypeName]]
-
-        # The type names tested for the resolutions so far
+        # The arrays of type names `TypeNameResolver#resolve_with_dependencies` returned
         #
-        attr_reader type_names: Set[TypeName]
+        # The resolutions of the same type name in the same context return the same array.
+        #
+        @dependencies: Array[Array[TypeName]]
 
         def initialize: (Resolver::TypeNameResolver resolver) -> void
+
+        # Returns the type names tested for the resolutions so far
+        #
+        def type_names: () -> Set[TypeName]
       end
 
       # The type names tested while resolving the type names of each source

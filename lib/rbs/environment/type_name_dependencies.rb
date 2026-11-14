@@ -4,23 +4,26 @@ module RBS
   class Environment
     class TypeNameDependencies
       class Recorder
-        attr_reader :type_names
-
         def initialize(resolver)
           @resolver = resolver
-          @results = {}
-          @results.compare_by_identity
-          @type_names = Set[]
+          @dependencies = []
         end
 
         def resolve(type_name, context:)
-          results = (@results[context] ||= {})
+          result, names = @resolver.resolve_with_dependencies(type_name, context: context)
+          @dependencies << names
+          result
+        end
 
-          results[type_name] ||= begin
-            result, names = @resolver.resolve_with_dependencies(type_name, context: context)
-            @type_names.merge(names)
-            result || type_name
+        def type_names
+          type_names = Set[] #: Set[TypeName]
+          merged = Set[].compare_by_identity #: Set[Array[TypeName]]
+
+          @dependencies.each do |names|
+            type_names.merge(names) if merged.add?(names)
           end
+
+          type_names
         end
       end
 
