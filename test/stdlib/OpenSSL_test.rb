@@ -296,6 +296,49 @@ class OpenSSLBNTest < Test::Unit::TestCase
     assert_send_type "(_ToInt) -> OpenSSL::BN",
                      OpenSSL::BN.new(3), :>>, ToInt.new(1)
   end
+
+  def test_CONSTTIME
+    assert_const_type "Integer", "OpenSSL::BN::CONSTTIME"
+  end
+
+  def test_abs
+    assert_send_type "() -> OpenSSL::BN",
+                     OpenSSL::BN.new(-3), :abs
+    assert_send_type "() -> OpenSSL::BN",
+                     OpenSSL::BN.new(3), :abs
+  end
+
+  def test_get_flags
+    with_int(OpenSSL::BN::CONSTTIME) do |flags|
+      assert_send_type "(int) -> Integer",
+                       OpenSSL::BN.new(3), :get_flags, flags
+    end
+  end
+
+  def test_mod_sqrt
+    assert_send_type "(OpenSSL::BN) -> OpenSSL::BN",
+                     OpenSSL::BN.new(4), :mod_sqrt, OpenSSL::BN.new(7)
+    assert_send_type "(Integer) -> OpenSSL::BN",
+                     OpenSSL::BN.new(4), :mod_sqrt, 7
+  end
+
+  def test_set_flags
+    with_int(OpenSSL::BN::CONSTTIME) do |flags|
+      assert_send_type "(int) -> nil",
+                       OpenSSL::BN.new(3), :set_flags, flags
+    end
+  end
+end
+
+class OpenSSLIntegerTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::Integer"
+
+  def test_to_bn
+    assert_send_type "() -> OpenSSL::BN",
+                     3, :to_bn
+  end
 end
 
 class OpenSSLCipherSingletonTest < Test::Unit::TestCase

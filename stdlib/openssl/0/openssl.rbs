@@ -1514,6 +1514,8 @@ module OpenSSL
   class BN
     include Comparable
 
+    CONSTTIME: Integer
+
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
     #   - BN.generate_prime(bits, [, safe [, add [, rem]]]) => bn
@@ -1646,7 +1648,14 @@ module OpenSSL
     #   - bn >> bits -> aBN
     # -->
     #
-    def >>: (int) -> int
+    def >>: (int) -> self
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_bn.c
+    #   - bn.abs -> aBN
+    # -->
+    #
+    def abs: () -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1703,6 +1712,17 @@ module OpenSSL
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
+    #   - bn.get_flags(flags) => flags
+    # -->
+    # Returns the flags on the BN object. The argument is used as a bit mask.
+    #
+    # ### Parameters
+    # *   *flags* - integer
+    #
+    def get_flags: (int flags) -> Integer
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_bn.c
     #   - bn.hash => Integer
     # -->
     # Returns a hash code for this object.
@@ -1754,6 +1774,13 @@ module OpenSSL
     # -->
     #
     def mod_sqr: (bn) -> self
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_bn.c
+    #   - bn.mod_sqrt(bn2) => aBN
+    # -->
+    #
+    def mod_sqrt: (bn) -> self
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -1845,6 +1872,15 @@ module OpenSSL
     # -->
     #
     def set_bit!: (int bit) -> self
+
+    # <!--
+    #   rdoc-file=ext/openssl/ossl_bn.c
+    #   - bn.set_flags(flags) => nil
+    # -->
+    # Enables the flags on the BN object. Currently, the flags argument can contain
+    # zero of OpenSSL::BN::CONSTTIME.
+    #
+    def set_flags: (int flags) -> nil
 
     # <!--
     #   rdoc-file=ext/openssl/ossl_bn.c
@@ -12248,4 +12284,17 @@ module OpenSSL
     class StoreError < OpenSSL::OpenSSLError
     end
   end
+end
+
+%a{annotate:rdoc:skip}
+class Integer
+  # <!--
+  #   rdoc-file=ext/openssl/lib/openssl/bn.rb
+  #   - to_bn()
+  # -->
+  # Casts an Integer as an OpenSSL::BN
+  #
+  # See `man bn` for more info.
+  #
+  def to_bn: () -> OpenSSL::BN
 end
