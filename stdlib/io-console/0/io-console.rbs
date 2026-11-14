@@ -392,6 +392,15 @@ class IO
 
   # <!--
   #   rdoc-file=ext/io/console/console.c
+  #   - io.ttyname       -> string or nil
+  # -->
+  # Returns name of associated terminal (tty) if `io` is not a tty. Returns `nil`
+  # otherwise.
+  #
+  def ttyname: () -> String?
+
+  # <!--
+  #   rdoc-file=ext/io/console/console.c
   #   - io.winsize     -> [rows, columns]
   # -->
   # Returns console size.
