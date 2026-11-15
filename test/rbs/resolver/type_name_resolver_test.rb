@@ -60,10 +60,44 @@ class RBS::Resolver::TypeNameResolverTest < Test::Unit::TestCase
     assert_nil result
     assert_equal Set[type_name("::Foo"), type_name("::Foo::Bar"), type_name("::Foo::Bar::Qux")], Set.new(names)
 
-    # The name is tested as a class and as a class alias
+    # The absolute name that doesn't exist is included
     result, names = resolver.resolve_with_dependencies(type_name("::Qux"), context: context)
     assert_nil result
-    assert_equal [type_name("::Qux"), type_name("::Qux")], names
+    assert_equal Set[type_name("::Qux")], Set.new(names)
+
+    result, names = resolver.resolve_with_dependencies(type_name("::Qux::Bar"), context: context)
+    assert_nil result
+    assert_equal Set[type_name("::Qux::Bar"), type_name("::Qux")], Set.new(names)
+  end
+
+  def test_resolve_with_dependencies__absolute_name_in_context
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Foo::_Bar"), type_name("::Foo::baz")],
+      {}
+    )
+
+    context = [nil, type_name("::Foo")] #: RBS::Resolver::context
+
+    # An interface or a type alias directly under the root that doesn't exist is resolved in the context.
+    # The result changes if the absolute name is added, so the name is included.
+    result, names = resolver.resolve_with_dependencies(type_name("::_Bar"), context: context)
+    assert_equal type_name("::Foo::_Bar"), result
+    assert_equal Set[type_name("::_Bar"), type_name("::Foo"), type_name("::Foo::_Bar")], Set.new(names)
+
+    result, names = resolver.resolve_with_dependencies(type_name("::baz"), context: context)
+    assert_equal type_name("::Foo::baz"), result
+    assert_equal Set[type_name("::baz"), type_name("::Foo"), type_name("::Foo::baz")], Set.new(names)
+
+    # `#resolve_namespace` shares the cache, and its entries have the absolute name too
+    resolver = Resolver::TypeNameResolver.new(
+      Set[type_name("::Foo"), type_name("::Foo::Bar")],
+      { type_name("::Baz") => [type_name("::Foo"), nil] }
+    )
+
+    assert_equal type_name("::Foo::Bar"), resolver.resolve_namespace(type_name("::Baz::Bar"), context: nil)
+    result, names = resolver.resolve_with_dependencies(type_name("::Baz::Bar"), context: nil)
+    assert_equal type_name("::Foo::Bar"), result
+    assert_includes names, type_name("::Baz::Bar")
   end
 
   def test_resolve_with_dependencies__cache

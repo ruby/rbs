@@ -34,6 +34,8 @@ module RBS
 
         inner[type_name] ||= begin
           names = [] #: Array[TypeName]
+          # The callers test the absolute type name before the cache, and it doesn't exist
+          names << type_name if type_name.absolute?
           result = yield names
           entry = [result, names.freeze] #: [TypeName?, Array[TypeName]]
           entry.freeze

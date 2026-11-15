@@ -58,7 +58,8 @@ module RBS
 
       # Returns the cache entry of the type name in the context
       #
-      # If the type name is not cached, yields the block with the array to add the tested type names to.
+      # If the type name is not cached, yields the block with the array to add the tested type names to. The array has
+      # the type name if it is absolute: the callers test it before the cache, and it doesn't exist.
       #
       def try_cache: (TypeName, context) { (Array[TypeName] names) -> TypeName? } -> [TypeName?, Array[TypeName]]
 

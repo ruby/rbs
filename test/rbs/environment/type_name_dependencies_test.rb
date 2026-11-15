@@ -667,6 +667,33 @@ class RBS::Environment::TypeNameDependenciesTest < Test::Unit::TestCase
     assert_equal Set[Pathname("a.rbs")], affected_paths
   end
 
+  def test_affected_paths__absolute_type_name_in_context
+    update("a.rbs" => <<~RBS)
+      module A
+        interface _I
+        end
+
+        class C
+          def foo: () -> ::_I
+        end
+      end
+    RBS
+
+    # `::_I` doesn't exist, and the resolver resolves the name in the context
+    assert_equal "() -> ::A::_I", method_type("::A::C", :foo)
+
+    affected_paths = update("i.rbs" => <<~RBS)
+      interface _I
+      end
+    RBS
+    assert_equal Set[Pathname("a.rbs")], affected_paths
+    assert_equal "() -> ::_I", method_type("::A::C", :foo)
+
+    affected_paths = update("i.rbs" => nil)
+    assert_equal Set[Pathname("a.rbs")], affected_paths
+    assert_equal "() -> ::A::_I", method_type("::A::C", :foo)
+  end
+
   def test_affected_paths__source_without_declarations
     update(
       "a.rbs" => <<~RBS,
