@@ -1162,7 +1162,7 @@ module FileUtils
   # -->
   # Like FileUtils.ln_s, but create links relative to `dest`.
   #
-  def self?.ln_sr: (pathlist src, ::path dest, ?target_directory: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.ln_sr: (pathlist src, ::path dest, ?target_directory: boolish, ?force: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb

@@ -272,7 +272,7 @@ module ObjectSpace
   # method and is subject to change. In particular, the function signature and
   # output format are not guaranteed to be compatible in future versions of ruby.
   #
-  def self?.dump_all: (?since: Integer | nil, ?full: boolish, ?output: Symbol) -> (String | File | nil)
+  def self?.dump_all: (?since: Integer | nil, ?full: boolish, ?output: Symbol, ?shapes: bool | Integer) -> (String | File | nil)
 
   # <!--
   #   rdoc-file=ext/objspace/objspace.c

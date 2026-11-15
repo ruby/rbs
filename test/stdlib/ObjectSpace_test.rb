@@ -144,6 +144,12 @@ class ObjectSpaceTest < Test::Unit::TestCase
       #ObjectSpace, :dump_all, output: :string
     #assert_send_type "(?output: Symbol, ?full: bool,  ?since: (Integer|nil)) -> nil",
       #ObjectSpace, :dump_all, output: :stdout
+
+    since = GC.count
+    assert_send_type "(output: Symbol, since: Integer, shapes: bool) -> String",
+      ObjectSpace, :dump_all, output: :string, since: since, shapes: false
+    assert_send_type "(output: Symbol, since: Integer, shapes: Integer) -> String",
+      ObjectSpace, :dump_all, output: :string, since: since, shapes: RubyVM.stat(:next_shape_id)
   end
 
   def test_internal_class_of
