@@ -512,6 +512,51 @@ module Psych
   %a{annotate:rdoc:copy:Psych.unsafe_load_file}
   def self.unsafe_load_file: (path, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - load_stream(yaml, filename: nil, fallback: [], **kwargs) { |to_ruby(**kwargs)| ... }
+  # -->
+  # Load multiple documents given in `yaml`.  Returns the parsed documents as a
+  # list.  If a block is given, each document will be converted to Ruby and passed
+  # to the block during parsing
+  #
+  # Example:
+  #
+  #     Psych.load_stream("--- foo\n...\n--- bar\n...") # => ['foo', 'bar']
+  #
+  #     list = []
+  #     Psych.load_stream("--- foo\n...\n--- bar\n...") do |ruby|
+  #       list << ruby
+  #     end
+  #     list # => ['foo', 'bar']
+  #
+  %a{annotate:rdoc:copy:Psych.load_stream}
+  def self.load_stream: (String yaml, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> Array[untyped]
+                      | [T] (String yaml, fallback: T, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> (Array[untyped] | T)
+                      | (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) { (untyped document) -> void } -> void
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - dump_stream(*objects)
+  # -->
+  # Dump a list of objects as separate documents to a document stream.
+  #
+  # Example:
+  #
+  #     Psych.dump_stream("foo\n  ", {}) # => "--- ! \"foo\\n  \"\n--- {}\n"
+  #
+  %a{annotate:rdoc:copy:Psych.dump_stream}
+  def self.dump_stream: (*untyped objects) -> String
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - to_json(object)
+  # -->
+  # Dump Ruby `object` to a JSON string.
+  #
+  %a{annotate:rdoc:copy:Psych.to_json}
+  def self.to_json: (untyped object) -> String
+
   class Exception < ::RuntimeError
   end
 
