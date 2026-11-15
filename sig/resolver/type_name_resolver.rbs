@@ -1,5 +1,15 @@
 module RBS
   module Resolver
+    # The interface to resolve a type name in a module nesting context
+    #
+    # `Environment` resolves the type names of declarations through the interface. `TypeNameResolver` implements it.
+    #
+    interface _TypeNameResolver
+      # Returns the absolute type name, or `nil` if the type name cannot be resolved
+      #
+      def resolve: (TypeName, context: context) -> TypeName?
+    end
+
     # TypeNameResolver resolves given relative type name to absolute type name under a module nesting context.
     #
     # The type name resolution doesn't take account of ancestors of modules.
