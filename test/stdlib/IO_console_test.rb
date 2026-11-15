@@ -92,4 +92,16 @@ class IOConsoleTest < Test::Unit::TestCase
                        s, :winsize
     }
   end
+
+  def test_io_ttyname
+    helper { |m, s|
+      assert_send_type "() -> String",
+                       s, :ttyname
+    }
+
+    IO.pipe do |r, w|
+      assert_send_type "() -> nil",
+                       r, :ttyname
+    end
+  end
 end
