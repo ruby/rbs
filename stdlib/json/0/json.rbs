@@ -12,18 +12,105 @@ end
 # This exception is raised if a generator or unparser error occurs.
 #
 class JSON::GeneratorError < JSON::JSONError
+  def initialize: (string | _ToS message, ?untyped invalid_object) -> void
+
+  attr_reader invalid_object: untyped
 end
 
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # This exception is raised if a parser error occurs.
 #
 class JSON::ParserError < JSON::JSONError
+  attr_reader line: Integer?
+
+  attr_reader column: Integer?
 end
 
 # <!-- rdoc-file=ext/json/lib/json/common.rb -->
 # This exception is raised if the nesting of parsed data structures is too deep.
 #
 class JSON::NestingError < JSON::ParserError
+end
+
+# <!-- rdoc-file=ext/json/lib/json/common.rb -->
+# JSON::Coder holds a parser and generator configuration.
+#
+#     module MyApp
+#       JSONC_CODER = JSON::Coder.new(
+#         allow_trailing_comma: true
+#       )
+#     end
+#
+#     MyApp::JSONC_CODER.load(document)
+#
+class JSON::Coder
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON.new(options = nil, &block)
+  # -->
+  # Argument `options`, if given, contains a Hash of options for both parsing and
+  # generating. See [Parsing Options](#module-JSON-label-Parsing+Options), and
+  # [Generating Options](#module-JSON-label-Generating+Options).
+  #
+  # For generation, the <code>strict: true</code> option is always set. When a
+  # Ruby object with no native JSON counterpart is encountered, the block provided
+  # to the initialize method is invoked, and must return a Ruby object that has a
+  # native JSON counterpart:
+  #
+  #     module MyApp
+  #       API_JSON_CODER = JSON::Coder.new do |object|
+  #         case object
+  #         when Time
+  #           object.iso8601(3)
+  #         else
+  #           object # Unknown type, will raise
+  #         end
+  #       end
+  #     end
+  #
+  #     puts MyApp::API_JSON_CODER.dump(Time.now.utc) # => "2025-01-21T08:41:44.286Z"
+  #
+  def initialize: (**untyped options) ?{ (untyped object, bool is_key) -> untyped } -> void
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - dump(object) -> String
+  #   - dump(object, io) -> io
+  # -->
+  # Serialize the given object into a JSON document.
+  #
+  def dump: (untyped object) -> String
+          | [T < JSON::_Write] (untyped object, T io) -> T
+
+  alias generate dump
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - load(string) -> Object
+  # -->
+  # Parse the given JSON document and return an equivalent Ruby object.
+  #
+  def load: (string source) -> untyped
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - load(path) -> Object
+  # -->
+  # Parse the given JSON document and return an equivalent Ruby object.
+  #
+  def load_file: (path path) -> untyped
+
+  alias parse load
+end
+
+class JSON::Fragment < Struct[String]
+  def self.new: (string json) -> instance
+
+  def initialize: (string json) -> void
+
+  attr_accessor json: String
+
+  def to_json: (?untyped state, *untyped) -> String
 end
 
 class JSON::State
@@ -1178,6 +1265,144 @@ module JSON
   # Sets or Returns the JSON generator state class that is used by JSON.
   #
   def self.state=: (state) -> state
+
+  # <!--
+  #   rdoc-file=ext/json/lib/json/common.rb
+  #   - JSON.unsafe_load(source, options = {}) -> object
+  #   - JSON.unsafe_load(source, proc = nil, options = {}) -> object
+  # -->
+  # Returns the Ruby objects created by parsing the given `source`.
+  #
+  # BEWARE: This method is meant to serialise data from trusted user input, like
+  # from your own database server or clients under your control, it could be
+  # dangerous to allow untrusted users to pass JSON sources into it.
+  #
+  # *   Argument `source` must be, or be convertible to, a String:
+  #     *   If `source` responds to instance method `to_str`,
+  #         <code>source.to_str</code> becomes the source.
+  #     *   If `source` responds to instance method `to_io`,
+  #         <code>source.to_io.read</code> becomes the source.
+  #     *   If `source` responds to instance method `read`,
+  #         <code>source.read</code> becomes the source.
+  #     *   If both of the following are true, source becomes the String
+  #         <code>'null'</code>:
+  #         *   Option `allow_blank` specifies a truthy value.
+  #         *   The source, as defined above, is `nil` or the empty String
+  #             <code>''</code>.
+  #     *   Otherwise, `source` remains the source.
+  # *   Argument `proc`, if given, must be a Proc that accepts one argument. It
+  #     will be called recursively with each result (depth-first order). See
+  #     details below.
+  # *   Argument `opts`, if given, contains a Hash of options for the parsing. See
+  #     [Parsing Options](#module-JSON-label-Parsing+Options). The default options
+  #     can be changed via method JSON.unsafe_load_default_options=.
+  #
+  # ---
+  #
+  # When no `proc` is given, modifies `source` as above and returns the result of
+  # <code>parse(source, opts)</code>;  see #parse.
+  #
+  # Source for following examples:
+  #     source = <<~JSON
+  #       {
+  #         "name": "Dave",
+  #         "age" :40,
+  #         "hats": [
+  #           "Cattleman's",
+  #           "Panama",
+  #           "Tophat"
+  #         ]
+  #       }
+  #     JSON
+  #
+  # Load a String:
+  #     ruby = JSON.unsafe_load(source)
+  #     ruby # => {"name"=>"Dave", "age"=>40, "hats"=>["Cattleman's", "Panama", "Tophat"]}
+  #
+  # Load an IO object:
+  #     require 'stringio'
+  #     object = JSON.unsafe_load(StringIO.new(source))
+  #     object # => {"name"=>"Dave", "age"=>40, "hats"=>["Cattleman's", "Panama", "Tophat"]}
+  #
+  # Load a File object:
+  #     path = 't.json'
+  #     File.write(path, source)
+  #     File.open(path) do |file|
+  #       JSON.unsafe_load(file)
+  #     end # => {"name"=>"Dave", "age"=>40, "hats"=>["Cattleman's", "Panama", "Tophat"]}
+  #
+  # ---
+  #
+  # When `proc` is given:
+  # *   Modifies `source` as above.
+  # *   Gets the `result` from calling <code>parse(source, opts)</code>.
+  # *   Recursively calls <code>proc(result)</code>.
+  # *   Returns the final result.
+  #
+  # Example:
+  #     require 'json'
+  #
+  #     # Some classes for the example.
+  #     class Base
+  #       def initialize(attributes)
+  #         @attributes = attributes
+  #       end
+  #     end
+  #     class User    < Base; end
+  #     class Account < Base; end
+  #     class Admin   < Base; end
+  #     # The JSON source.
+  #     json = <<-EOF
+  #     {
+  #       "users": [
+  #           {"type": "User", "username": "jane", "email": "jane@example.com"},
+  #           {"type": "User", "username": "john", "email": "john@example.com"}
+  #       ],
+  #       "accounts": [
+  #           {"account": {"type": "Account", "paid": true, "account_id": "1234"}},
+  #           {"account": {"type": "Account", "paid": false, "account_id": "1235"}}
+  #       ],
+  #       "admins": {"type": "Admin", "password": "0wn3d"}
+  #     }
+  #     EOF
+  #     # Deserializer method.
+  #     def deserialize_obj(obj, safe_types = %w(User Account Admin))
+  #       type = obj.is_a?(Hash) && obj["type"]
+  #       safe_types.include?(type) ? Object.const_get(type).new(obj) : obj
+  #     end
+  #     # Call to JSON.unsafe_load
+  #     ruby = JSON.unsafe_load(json, proc {|obj|
+  #       case obj
+  #       when Hash
+  #         obj.each {|k, v| obj[k] = deserialize_obj v }
+  #       when Array
+  #         obj.map! {|v| deserialize_obj v }
+  #       end
+  #       obj
+  #     })
+  #     pp ruby
+  #
+  # Output:
+  #     {"users"=>
+  #        [#<User:0x00000000064c4c98
+  #          @attributes=
+  #            {"type"=>"User", "username"=>"jane", "email"=>"jane@example.com"}>,
+  #          #<User:0x00000000064c4bd0
+  #          @attributes=
+  #            {"type"=>"User", "username"=>"john", "email"=>"john@example.com"}>],
+  #      "accounts"=>
+  #        [{"account"=>
+  #            #<Account:0x00000000064c4928
+  #            @attributes={"type"=>"Account", "paid"=>true, "account_id"=>"1234"}>},
+  #         {"account"=>
+  #            #<Account:0x00000000064c4680
+  #            @attributes={"type"=>"Account", "paid"=>false, "account_id"=>"1235"}>}],
+  #      "admins"=>
+  #        #<Admin:0x00000000064c41f8
+  #        @attributes={"type"=>"Admin", "password"=>"0wn3d"}>}
+  #
+  def self?.unsafe_load: (string | _ReadableIO | _Read source, ?options options) -> untyped
+                       | [T] (string | _ReadableIO | _Read source, ^(?) -> T, ?options options) -> T
 end
 
 JSON::FAST_STATE_PROTOTYPE: JSON::state
