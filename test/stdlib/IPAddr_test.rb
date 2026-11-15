@@ -77,3 +77,39 @@ class IPAddrTest < StdlibTest
     IPAddr.new("192.168.2.0/24").to_string
   end
 end
+
+class IPAddrInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "ipaddr"
+  testing "::IPAddr"
+
+  def test_as_json
+    assert_send_type "() -> String", IPAddr.new("192.168.2.0/24"), :as_json
+    assert_send_type "(nil) -> String", IPAddr.new("192.168.2.1"), :as_json, nil
+  end
+
+  def test_cidr
+    assert_send_type "() -> String", IPAddr.new("192.168.2.0/24"), :cidr
+  end
+
+  def test_to_json
+    assert_send_type "() -> String", IPAddr.new("192.168.2.0/24"), :to_json
+    assert_send_type "(nil) -> String", IPAddr.new("192.168.2.0/24"), :to_json, nil
+  end
+
+  def test_wildcard_mask
+    assert_send_type "() -> String", IPAddr.new("192.168.2.0/24"), :wildcard_mask
+    assert_send_type "() -> String", IPAddr.new("2001:db8::/32"), :wildcard_mask
+  end
+
+  def test_zone_id
+    assert_send_type "() -> String", IPAddr.new("fe80::1%eth0"), :zone_id
+    assert_send_type "() -> nil", IPAddr.new("fe80::1"), :zone_id
+  end
+
+  def test_zone_id=
+    assert_send_type "(String) -> String", IPAddr.new("fe80::1"), :zone_id=, "%eth0"
+    assert_send_type "(nil) -> nil", IPAddr.new("fe80::1%eth0"), :zone_id=, nil
+  end
+end
