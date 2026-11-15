@@ -407,8 +407,12 @@ class OptionParser
   # -->
   # See #getopts.
   #
-  def self.getopts: (*String options) -> Hash[String, untyped]
-                  | (Array[String] args, *String options) -> Hash[String, untyped]
+  def self.getopts: (*String options, ?symbolize_names: false) -> Hash[String, untyped]
+                  | (Array[String] args, *String options, ?symbolize_names: false) -> Hash[String, untyped]
+                  | (*String options, symbolize_names: true) -> Hash[Symbol, untyped]
+                  | (Array[String] args, *String options, symbolize_names: true) -> Hash[Symbol, untyped]
+                  | (*String options, symbolize_names: boolish) -> Hash[String | Symbol, untyped]
+                  | (Array[String] args, *String options, symbolize_names: boolish) -> Hash[String | Symbol, untyped]
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -634,8 +638,12 @@ class OptionParser
   #     # params[:bar] = "x"  # --bar x
   #     # params[:zot] = "z"  # --zot Z
   #
-  def getopts: (*String options) -> Hash[String, untyped]
-             | (Array[String] args, *String options) -> Hash[String, untyped]
+  def getopts: (*String options, ?symbolize_names: false) -> Hash[String, untyped]
+             | (Array[String] args, *String options, ?symbolize_names: false) -> Hash[String, untyped]
+             | (*String options, symbolize_names: true) -> Hash[Symbol, untyped]
+             | (Array[String] args, *String options, symbolize_names: true) -> Hash[Symbol, untyped]
+             | (*String options, symbolize_names: boolish) -> Hash[String | Symbol, untyped]
+             | (Array[String] args, *String options, symbolize_names: boolish) -> Hash[String | Symbol, untyped]
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -1160,7 +1168,9 @@ module OptionParser::Arguable
   #     rescue OptionParser::ParseError
   #     end
   #
-  def getopts: (*String args) -> Hash[String, untyped]
+  def getopts: (*String args, ?symbolize_names: false) -> Hash[String, untyped]
+             | (*String args, symbolize_names: true) -> Hash[Symbol, untyped]
+             | (*String args, symbolize_names: boolish) -> Hash[String | Symbol, untyped]
 
   # <!--
   #   rdoc-file=lib/optparse.rb
