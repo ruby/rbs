@@ -421,11 +421,12 @@ module RBS
       end
 
       class AliasDecl < Base
-        attr_reader :new_name, :old_name, :location, :comment, :annotations
+        attr_reader :new_name, :old_name, :unresolved_old_name, :location, :comment, :annotations
 
-        def initialize(new_name:, old_name:, location:, comment:, annotations: [])
+        def initialize(new_name:, old_name:, location:, comment:, annotations: [], unresolved_old_name: old_name)
           @new_name = new_name
           @old_name = old_name
+          @unresolved_old_name = unresolved_old_name
           @location = location
           @comment = comment
           @annotations = annotations
