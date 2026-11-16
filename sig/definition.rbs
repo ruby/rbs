@@ -327,7 +327,7 @@ module RBS
       #
       def resolved_methods: () -> Hash[Symbol, Method]
 
-      # Stores all of the methods in the given hash
+      # Stores all of the methods in the given hash, replacing the methods the hash has
       #
       # Unlike `#resolved_methods`, the table doesn't keep the methods it resolves for the hash.
       #
