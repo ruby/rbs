@@ -218,6 +218,8 @@ module RBS
 
         # Stores all of the methods in the hash, replacing the methods the hash has
         #
+        # The table gives a new hash, and reads the methods from it once all of them are stored.
+        #
         def resolve_methods: (Hash[Symbol, Method]) -> void
       end
 

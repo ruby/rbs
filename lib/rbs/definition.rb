@@ -506,7 +506,12 @@ module RBS
       def resolved_methods
         unless @resolved
           if source = @source
-            source.resolve_methods(@methods)
+            # The methods are resolved into a new hash, so that a thread that looks a method up meanwhile never reads
+            # a hash that is being filled. The methods resolved so far are the same ones, and they are kept.
+            methods = {} #: Hash[Symbol, Method]
+            source.resolve_methods(methods)
+            methods.merge!(@methods)
+            @methods = methods
           end
 
           @resolved = true
@@ -571,7 +576,7 @@ module RBS
 
         def resolve_methods(methods)
           @table.resolved_methods.each do |name, method|
-            methods[name] ||= @block[method]
+            methods[name] = @block[method]
           end
         end
       end

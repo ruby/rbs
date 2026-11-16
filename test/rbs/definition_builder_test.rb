@@ -4136,12 +4136,24 @@ EOF
         definition.methods.size
         assert_empty resolved
 
-        definition.methods[:foo]
+        foo = definition.methods[:foo]
         assert_equal [:foo], resolved.keys
 
+        # All of the methods are resolved into another hash, which has the methods resolved before
         definition.methods.each {}
-        assert_equal definition.methods.keys.sort, resolved.keys.sort
-        assert_same resolved, definition.methods.resolved_methods
+        assert_equal [:foo], resolved.keys
+        assert_equal definition.methods.keys.sort, definition.methods.resolved_methods.keys.sort
+        assert_same definition.methods.resolved_methods, definition.methods.resolved_methods
+        assert_same foo, definition.methods[:foo]
+        assert_same foo, definition.methods.resolved_methods[:foo]
+
+        # The methods converted before are kept, too
+        mapped = definition.map_method_type {|method_type| method_type.update(location: nil) }
+        bar = mapped.methods[:bar]
+        refute_same definition.methods[:bar], bar
+        mapped.methods.each {}
+        assert_same bar, mapped.methods[:bar]
+        assert_equal definition.methods.keys.sort, mapped.methods.resolved_methods.keys.sort
       end
     end
   end
