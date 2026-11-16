@@ -117,6 +117,8 @@ module RBS
     # same method for the same ones. Definitions share the method objects in this way.
     #
     class Layer
+      EMPTY_ANNOTATIONS: Array[AST::Annotation]
+
       attr_reader template: LayerTemplate
       attr_reader subst: Substitution
 

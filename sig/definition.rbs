@@ -51,18 +51,28 @@ module RBS
         #
         # If the method have multiple syntaxes, union of the annotations to the member will be included, without dedup.
         #
-        # The value should be updated during setup.
+        # The value should be updated during setup. The writer stores a copy of the given array.
         #
-        attr_reader member_annotations: Array[AST::Annotation]
+        %a{pure} def member_annotations: () -> Array[AST::Annotation]
+
+        def member_annotations=: (Array[AST::Annotation]) -> void
 
         # Annotations given to the overload associated to the method type
         #
-        # The value should be updated during setup.
+        # The value should be updated during setup. The writer stores a copy of the given array.
         #
-        attr_reader overload_annotations: Array[AST::Annotation]
+        %a{pure} def overload_annotations: () -> Array[AST::Annotation]
+
+        def overload_annotations=: (Array[AST::Annotation]) -> void
 
         # Always returns an empty array
-        %a{deprecated} attr_reader annotations: Array[AST::Annotation]
+        %a{deprecated} %a{pure} def annotations: () -> Array[AST::Annotation]
+
+        # The arrays of the annotations are allocated when they are requested or given
+        #
+        @member_annotations: Array[AST::Annotation]?
+        @overload_annotations: Array[AST::Annotation]?
+        @annotations: Array[AST::Annotation]?
 
         # `subst` is a substitution to apply to `type`, that is deferred until the type is requested.
         #
@@ -114,13 +124,20 @@ module RBS
       attr_reader alias_member: AST::Members::Alias?
 
       # Unused, always returns empty array
-      %a{deprecated} attr_reader extra_annotations: Array[AST::Annotation]
+      %a{deprecated} %a{pure} def extra_annotations: () -> Array[AST::Annotation]
 
       # Union of annotations given to `def`s and `alias`, not contains annotations given to each overload
       #
-      # The elements will be updated during `Method` object setup.
+      # The elements will be updated during `Method` object setup. The writer stores a copy of the given array.
       #
-      attr_reader annotations: Array[AST::Annotation]
+      %a{pure} def annotations: () -> Array[AST::Annotation]
+
+      def annotations=: (Array[AST::Annotation]) -> void
+
+      # The arrays of the annotations are allocated when they are requested or given
+      #
+      @extra_annotations: Array[AST::Annotation]?
+      @annotations: Array[AST::Annotation]?
 
       # Note that the annotations given through `annotations:` keyword is ignored.
       #
