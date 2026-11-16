@@ -76,6 +76,22 @@ class IPAddr
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
+  #   - +(offset)
+  # -->
+  # Returns a new ipaddr greater than the original address by offset
+  #
+  def +: (Integer offset) -> IPAddr
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
+  #   - -(offset)
+  # -->
+  # Returns a new ipaddr less than the original address by offset
+  #
+  def -: (Integer offset) -> IPAddr
+
+  # <!--
+  #   rdoc-file=lib/ipaddr.rb
   #   - <<(num)
   # -->
   # Returns a new ipaddr built by bitwise left shift.
