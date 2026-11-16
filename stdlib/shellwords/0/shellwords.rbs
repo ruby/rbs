@@ -104,7 +104,7 @@ module Shellwords
   #
   # Returns an empty quoted String if `str` has a length of zero.
   #
-  def self?.shellescape: (String str) -> String
+  def self?.shellescape: (_ToS str) -> String
 
   # <!--
   #   rdoc-file=lib/shellwords.rb
@@ -130,7 +130,7 @@ module Shellwords
   #
   #     output = `#{['ps', '-p', $$].shelljoin}`
   #
-  def self?.shelljoin: (Array[String] array) -> String
+  def self?.shelljoin: (Array[_ToS] array) -> String
 
   # <!--
   #   rdoc-file=lib/shellwords.rb
