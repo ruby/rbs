@@ -10,6 +10,21 @@ class PsychSingletonTest < Test::Unit::TestCase
   library "psych", "date"
   testing "singleton(::Psych)"
 
+  def test_LIBYAML_VERSION
+    assert_const_type "String", "Psych::LIBYAML_VERSION"
+  end
+
+  def test_VERSION
+    assert_const_type "String", "Psych::VERSION"
+  end
+
+  def test_libyaml_version
+    assert_send_type(
+      "() -> [::Integer, ::Integer, ::Integer]",
+      Psych, :libyaml_version
+    )
+  end
+
   def test_load
     assert_send_type(
       "(::String) -> untyped",
