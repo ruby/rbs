@@ -647,7 +647,8 @@ module RBS
               methods[name] = substitute(method)
             end
           else
-            methods.merge!(parent_methods)
+            # Copies the table of the parent at once, which is faster than adding the methods one by one
+            methods.replace(parent_methods)
           end
         end
 

@@ -526,7 +526,7 @@ module RBS
       #
       def resolve_methods_into(methods)
         if @resolved
-          methods.merge!(@methods)
+          methods.replace(@methods)
         elsif source = @source
           source.resolve_methods(methods)
         end
