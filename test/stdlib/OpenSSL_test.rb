@@ -1167,6 +1167,63 @@ class OpenSSLRandomSingletonTest < Test::Unit::TestCase
   end
 end
 
+class OpenSSLProviderSingletonTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "singleton(::OpenSSL::Provider)"
+
+  def test_load
+    # Use the default provider before loading another one explicitly, so that it stays loaded.
+    OpenSSL::Digest.digest("SHA256", "data")
+
+    provider = assert_send_type "(String) -> OpenSSL::Provider",
+      OpenSSL::Provider, :load, "base"
+    provider.unload
+  end
+
+  def test_provider_names
+    assert_send_type "() -> Array[String]",
+      OpenSSL::Provider, :provider_names
+  end
+end if defined?(OpenSSL::Provider)
+
+class OpenSSLProviderTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+  testing "::OpenSSL::Provider"
+
+  def test_name
+    with_provider do |provider|
+      assert_send_type "() -> String",
+        provider, :name
+    end
+  end
+
+  def test_inspect
+    with_provider do |provider|
+      assert_send_type "() -> String",
+        provider, :inspect
+    end
+  end
+
+  def test_unload
+    OpenSSL::Digest.digest("SHA256", "data")
+    provider = OpenSSL::Provider.load("base")
+    assert_send_type "() -> true",
+      provider, :unload
+  end
+
+  private
+
+  def with_provider
+    OpenSSL::Digest.digest("SHA256", "data")
+    provider = OpenSSL::Provider.load("base")
+    yield provider
+  ensure
+    provider&.unload
+  end
+end if defined?(OpenSSL::Provider)
+
 
 class OpenSSLSSLSingletonTest < Test::Unit::TestCase
   include TestHelper
