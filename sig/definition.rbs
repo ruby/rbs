@@ -28,7 +28,21 @@ module RBS
                          | AST::Ruby::Members::DefMember | AST::Ruby::Members::AttrReaderMember | AST::Ruby::Members::AttrWriterMember | AST::Ruby::Members::AttrAccessorMember
 
       class TypeDef
-        attr_reader type: MethodType
+        # The method type
+        #
+        # The substitution given to `#initialize` is applied when the type is requested for the first time.
+        #
+        # The method is pure: it always returns the same type.
+        #
+        %a{pure} def type: () -> MethodType
+
+        # The method type, `nil` until the substitution is applied
+        @type: MethodType?
+
+        # The method type and the substitution to apply to it, given to `#initialize` with `subst`
+        @base_type: MethodType?
+        @subst: Substitution?
+
         attr_reader member: method_member
         attr_reader defined_in: TypeName
         attr_reader implemented_in: TypeName?
@@ -50,12 +64,15 @@ module RBS
         # Always returns an empty array
         %a{deprecated} attr_reader annotations: Array[AST::Annotation]
 
+        # `subst` is a substitution to apply to `type`, that is deferred until the type is requested.
+        #
         # `overload_annotations` is ignored.
         def initialize: (
             type: MethodType,
             member: method_member,
             defined_in: TypeName,
-            implemented_in: TypeName?
+            implemented_in: TypeName?,
+            ?subst: Substitution?
           ) -> void
         | %a{deprecated} (
             type: MethodType,

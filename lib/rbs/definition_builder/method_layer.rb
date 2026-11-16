@@ -292,7 +292,9 @@ module RBS
 
           defs = original.overloads.map do |overload|
             Definition::Method::TypeDef.new(
-              type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+              type: overload.method_type,
+              # The type arguments are substituted when the type is requested
+              subst: subst.empty? ? nil : subst,
               member: original,
               defined_in: defined_in,
               implemented_in: implemented_in
@@ -450,7 +452,9 @@ module RBS
           else
             defs = original.overloads.map do |overload|
               Definition::Method::TypeDef.new(
-                type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+                type: overload.method_type,
+                # The type arguments are substituted when the type is requested
+                subst: subst.empty? ? nil : subst,
                 member: original,
                 defined_in: defined_in,
                 implemented_in: implemented_in
@@ -505,7 +509,9 @@ module RBS
         method.overloads.each do |overloading_def|
           overloading_def.overloads.reverse_each do |overload|
             type_def = Definition::Method::TypeDef.new(
-              type: subst.empty? ? overload.method_type : overload.method_type.sub(subst),
+              type: overload.method_type,
+              # The type arguments are substituted when the type is requested
+              subst: subst.empty? ? nil : subst,
               member: overloading_def,
               defined_in: defined_in,
               implemented_in: implemented_in

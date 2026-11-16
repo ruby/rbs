@@ -4324,4 +4324,64 @@ EOF
       end
     end
   end
+
+  def test_type_def_substitutes_type_on_demand
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        module M[T]
+          def m: () -> T
+
+          def n: () -> Integer
+               | [T] (T) -> T
+
+          alias m2 m
+        end
+
+        class Foo
+          include M[String]
+
+          def foo: () -> String
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          m = definition.methods[:m].defs[0]
+          foo = definition.methods[:foo].defs[0]
+
+          # The type arguments of the module are substituted when the type is requested
+          assert_nil m.instance_variable_get(:@type)
+          assert_instance_of RBS::MethodType, foo.instance_variable_get(:@type)
+
+          assert_equal parse_method_type("() -> ::String"), m.type
+          assert_same m.type, m.instance_variable_get(:@type)
+          assert_same m.type, m.type
+
+          assert_equal ["() -> ::Integer", "[T] (T) -> T"], definition.methods[:n].method_types.map(&:to_s)
+          assert_equal parse_method_type("() -> ::String"), foo.type
+
+          # An alias has the type of the original method
+          assert_same m.type, definition.methods[:m2].defs[0].type
+        end
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          # A type def given a substitution works like one with the substituted type
+          m2 = definition.methods[:m2]
+          original = builder.build_instance(type_name("::M")).methods[:m].defs[0]
+          type_def = Definition::Method::TypeDef.new(
+            type: original.type,
+            subst: RBS::Substitution.build([:T], [parse_type("::String")]),
+            member: original.member,
+            defined_in: original.defined_in,
+            implemented_in: original.implemented_in
+          )
+
+          assert_equal m2.alias_of.defs[0], type_def
+          assert_equal parse_method_type("() -> ::String"), type_def.update(implemented_in: nil).type
+        end
+      end
+    end
+  end
 end

@@ -29,7 +29,6 @@ module RBS
 
     class Method
       class TypeDef
-        attr_reader :type
         attr_reader :member
         attr_reader :defined_in
         attr_reader :implemented_in
@@ -37,14 +36,33 @@ module RBS
         attr_reader :overload_annotations
         attr_reader :annotations
 
-        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: [])
-          @type = type
+        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: [], subst: nil)
+          if subst
+            # The substitution is applied when the type is requested
+            @base_type = type
+            @subst = subst
+          else
+            @type = type
+          end
+
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
           @member_annotations = []
           @overload_annotations = []
           @annotations = []
+        end
+
+        # Returns the method type
+        #
+        # The substitution given to `#initialize` is applied when the type is requested for the first time.
+        #
+        def type
+          @type ||= begin
+            base_type = @base_type or raise
+            subst = @subst or raise
+            base_type.sub(subst)
+          end
         end
 
         def ==(other)
