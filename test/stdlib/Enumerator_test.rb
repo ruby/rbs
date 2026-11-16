@@ -108,6 +108,8 @@ class EnumeratorLazyInstanceTest < Test::Unit::TestCase
   def test_chunk
     assert_send_type "() { (Integer) -> bool } -> Enumerator::Lazy[[bool, Array[Integer]]]",
                      (1..3).lazy, :chunk do |i| i.odd? end
+    assert_send_type "() -> Enumerator::Lazy[Integer, Enumerator::Lazy[[untyped, Array[Integer]]]]",
+                     (1..3).lazy, :chunk
   end
 
   def test_chunk_while
@@ -260,6 +262,8 @@ class EnumeratorLazyInstanceTest < Test::Unit::TestCase
                      (1..3).lazy, :zip, ["a"], [:b]
     assert_send_type "(Array[String]) { ([Integer, String?]) -> void } -> nil",
                      (1..3).lazy, :zip, ["a"] do end
+    assert_send_type "(Array[String], Array[Symbol]) { (Array[untyped]) -> void } -> nil",
+                     (1..3).lazy, :zip, ["a"], [:b] do end
   end
 end
 

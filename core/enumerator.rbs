@@ -634,6 +634,7 @@ class Enumerator::Lazy[out E, out R = void] < Enumerator[E, R]
   # Like Enumerable#chunk, but chains operation to be lazy-evaluated.
   #
   def chunk: [U] () { (E elt) -> U } -> Enumerator::Lazy[[ U, Array[E] ]]
+           | () -> Enumerator::Lazy[E, Enumerator::Lazy[[ untyped, Array[E] ]]]
 
   # <!-- rdoc-file=enumerator.c -->
   # Like Enumerable#chunk_while, but chains operation to be lazy-evaluated.
@@ -884,6 +885,7 @@ class Enumerator::Lazy[out E, out R = void] < Enumerator[E, R]
   def zip: [U] (_Each[U] arg) -> Enumerator::Lazy[[ E, U? ]]
          | (_Each[untyped], *_Each[untyped]) -> Enumerator::Lazy[Array[untyped]]
          | [U] (_Each[U]) { ([ E, U? ]) -> void } -> nil
+         | (_Each[untyped], *_Each[untyped]) { (Array[untyped]) -> void } -> nil
 end
 
 # <!-- rdoc-file=enumerator.c -->
