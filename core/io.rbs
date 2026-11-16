@@ -3012,7 +3012,7 @@ class IO < Object
   #     IO.sysopen('t.tmp')      # => 8
   #     IO.sysopen('t.tmp', 'w') # => 9
   #
-  def self.sysopen: (String path, ?String mode, ?String perm) -> Integer
+  def self.sysopen: (path path, ?string | int | nil mode, ?int? perm) -> Integer
 
   # <!--
   #   rdoc-file=io.c

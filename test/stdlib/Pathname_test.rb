@@ -716,6 +716,10 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname(File.expand_path(__FILE__)), :sysopen, 'r'
     assert_send_type '(String, Integer) -> Integer',
                      Pathname(File.expand_path(__FILE__)), :sysopen, 'r', 0644
+    assert_send_type '(Integer) -> Integer',
+                     Pathname(File.expand_path(__FILE__)), :sysopen, File::RDONLY
+    assert_send_type '(nil, nil) -> Integer',
+                     Pathname(File.expand_path(__FILE__)), :sysopen, nil, nil
   end
 
   def test_to_path
