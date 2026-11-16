@@ -49,10 +49,23 @@ class ZlibGzipReaderInstanceTest < Test::Unit::TestCase
   testing "::Zlib::GzipReader"
 
   def test_read
-    assert_send_type "(nil, nil) -> String?",
+    assert_send_type "() -> String",
+                     gzip_reader, :read
+    assert_send_type "(nil, nil) -> String",
                      gzip_reader, :read, nil, nil
-    assert_send_type "(int length, nil) -> String?",
+    assert_send_type "(nil, String) -> String",
+                     gzip_reader, :read, nil, +""
+    assert_send_type "(int length, nil) -> String",
                      gzip_reader, :read, 1, nil
+    assert_send_type "(int length, String) -> String",
+                     gzip_reader, :read, 1, +""
+
+    reader = gzip_reader
+    reader.read
+    assert_send_type "() -> String",
+                     reader, :read
+    assert_send_type "(int length) -> nil",
+                     reader, :read, 1
   end
 
   def test_readpartial
