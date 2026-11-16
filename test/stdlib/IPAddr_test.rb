@@ -78,6 +78,26 @@ class IPAddrTest < StdlibTest
   end
 end
 
+class IPAddrSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "ipaddr"
+  testing "singleton(::IPAddr)"
+
+  def test_new
+    assert_send_type "() -> IPAddr",
+                     IPAddr, :new
+    assert_send_type "(String) -> IPAddr",
+                     IPAddr, :new, "192.168.2.0/24"
+    assert_send_type "(String, Integer) -> IPAddr",
+                     IPAddr, :new, "192.168.2.1", Socket::AF_INET
+    assert_send_type "(Integer, Integer) -> IPAddr",
+                     IPAddr, :new, 3232236033, Socket::AF_INET
+    assert_send_type "(Integer, Integer) -> IPAddr",
+                     IPAddr, :new, 1, Socket::AF_INET6
+  end
+end
+
 class IPAddrInstanceTest < Test::Unit::TestCase
   include TestHelper
 
