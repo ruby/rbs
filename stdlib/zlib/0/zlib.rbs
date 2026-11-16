@@ -85,9 +85,8 @@ module Zlib
   #     puts "Adler32 checksum: #{Zlib.adler32(data).to_s(16)}"
   #     #=> Adler32 checksum: 2820145
   #
-  def self.adler32: () -> Integer
-                  | (String) -> Integer
-                  | (String, Integer) -> Integer
+  def self.adler32: (?string? string, ?int? adler) -> Integer
+                  | (IO io, ?int? adler) -> Integer
 
   # <!--
   #   rdoc-file=ext/zlib/zlib.c
@@ -111,9 +110,8 @@ module Zlib
   #
   # FIXME: expression.
   #
-  def self.crc32: () -> Integer
-                | (String) -> Integer
-                | (String, Integer) -> Integer
+  def self.crc32: (?string? string, ?int? crc) -> Integer
+                | (IO io, ?int? crc) -> Integer
 
   # <!--
   #   rdoc-file=ext/zlib/zlib.c
