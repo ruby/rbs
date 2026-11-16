@@ -10043,7 +10043,11 @@ module OpenSSL
       #   - addr()
       # -->
       #
-      def addr: () -> Addrinfo?
+      def addr: () -> ([ String, Integer, String, String ] | [ String, String ])
+
+      def close_on_exec=: (boolish value) -> boolish
+
+      def close_on_exec?: () -> bool
 
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
@@ -10081,12 +10085,16 @@ module OpenSSL
       #
       def getsockopt: (Symbol | Integer level, Symbol | Integer optname) -> (Integer | boolish | String)
 
+      def local_address: () -> Addrinfo
+
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
       #   - peeraddr()
       # -->
       #
-      def peeraddr: () -> untyped
+      def peeraddr: () -> ([ String, Integer, String, String ] | [ String, String ])
+
+      def remote_address: () -> Addrinfo
 
       # <!--
       #   rdoc-file=ext/openssl/lib/openssl/ssl.rb
@@ -10094,6 +10102,17 @@ module OpenSSL
       # -->
       #
       def setsockopt: (untyped level, untyped optname, untyped optval) -> untyped
+
+      def timeout: () -> IO::io_timeout
+
+      def timeout=: (IO::io_timeout value) -> IO::io_timeout
+
+      def wait: (Integer events, ?Time::_Timeout timeout) -> (Integer | false | nil)
+              | (?Time::_Timeout? timeout, *IO::wait_mode mode) -> (IO | true | false)
+
+      def wait_readable: (?Time::_Timeout? timeout) -> boolish
+
+      def wait_writable: (?Time::_Timeout? timeout) -> boolish
     end
   end
 
