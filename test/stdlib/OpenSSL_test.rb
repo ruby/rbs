@@ -373,6 +373,18 @@ class OpenSSLCipherTest < Test::Unit::TestCase
   library "openssl"
   testing "::OpenSSL::Cipher"
 
+  def test_final_auth_tag_error
+    omit "OpenSSL::Cipher::AuthTagError is not available" unless OpenSSL::Cipher.const_defined?(:AuthTagError)
+
+    cipher = OpenSSL::Cipher.new("aes-128-gcm").decrypt
+    cipher.key = "k" * 16
+    cipher.iv = "i" * 12
+    cipher.auth_tag = "t" * 16
+    cipher.update("data")
+    assert_send_type_error "() -> String", OpenSSL::Cipher::AuthTagError,
+      cipher, :final
+  end
+
   def test_ccm_data_len=
     cipher = OpenSSL::Cipher.new("aes-128-ccm").encrypt
     cipher.auth_tag_len = 16
@@ -1181,6 +1193,36 @@ class OpenSSLSSLSingletonTest < Test::Unit::TestCase
   def test_verify_wildcard
     assert_send_type "(String, String) -> bool",
     OpenSSL::SSL, :verify_wildcard, "foo", "x*"
+  end
+end
+
+class OpenSSLConstantsTest < Test::Unit::TestCase
+  include TestHelper
+  library "openssl"
+
+  def test_ssl_options
+    %w[
+      OP_ALLOW_CLIENT_RENEGOTIATION OP_CLEANSE_PLAINTEXT OP_DISABLE_TLSEXT_CA_NAMES OP_ENABLE_KTLS
+      OP_ENABLE_MIDDLEBOX_COMPAT OP_IGNORE_UNEXPECTED_EOF OP_NO_ANTI_REPLAY OP_PRIORITIZE_CHACHA
+    ].each do |name|
+      assert_const_type "Integer", "OpenSSL::SSL::#{name}"
+    end
+  end
+
+  def test_pkcs12_key_usage
+    assert_const_type "Integer", "OpenSSL::PKCS12::KEY_EX"
+    assert_const_type "Integer", "OpenSSL::PKCS12::KEY_SIG"
+  end
+
+  def test_pkcs7_signer
+    assert_const_type "singleton(OpenSSL::PKCS7::SignerInfo)", "OpenSSL::PKCS7::Signer"
+  end
+
+  def test_cipher_auth_tag_error
+    omit "OpenSSL::Cipher::AuthTagError is not available" unless OpenSSL::Cipher.const_defined?(:AuthTagError)
+
+    assert_const_type "singleton(OpenSSL::Cipher::AuthTagError)", "OpenSSL::Cipher::AuthTagError"
+    assert_const_type "singleton(OpenSSL::Cipher::CipherError)", "OpenSSL::Cipher::AuthTagError"
   end
 end
 
