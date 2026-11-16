@@ -42,7 +42,8 @@ module RBS
             @map[clause.type_name.name] = clause.type_name.absolute!
           end
         when AST::Directives::Use::WildcardClause
-          @table.children.fetch(clause.namespace.absolute!).each do |child|
+          # `children` has no entry for a namespace without any type directly under it
+          @table.children[clause.namespace.absolute!]&.each do |child|
             @map[child.name] = child
           end
         end
