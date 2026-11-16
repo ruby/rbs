@@ -1289,8 +1289,54 @@ module Kernel : BasicObject
   #
   # See File.open for details.
   #
-  def self?.open: (String name, ?String mode, ?Integer perm) -> IO?
-                | [T] (String name, ?String mode, ?Integer perm) { (IO) -> T } -> T
+  def self?.open: (
+                    path name,
+                    ?string | int mode,
+                    ?int perm,
+                    # open options
+                    ?mode: Integer | String,
+                    ?flags: Integer,
+                    ?external_encoding: encoding,
+                    ?internal_encoding: encoding,
+                    ?encoding: encoding,
+                    ?textmode: boolish,
+                    ?binmode: boolish,
+                    ?autoclose: boolish,
+                    ?path: path,
+                    # encoding options
+                    ?invalid: :replace | nil,
+                    ?undef: :replace | nil,
+                    ?replace: String | nil,
+                    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+                    ?xml: :text | :attr | nil,
+                    ?cr_newline: bool,
+                    ?crlf_newline: bool,
+                    ?universal_newline: bool
+                  ) -> IO?
+                | [T] (
+                    path name,
+                    ?string | int mode,
+                    ?int perm,
+                    # open options
+                    ?mode: Integer | String,
+                    ?flags: Integer,
+                    ?external_encoding: encoding,
+                    ?internal_encoding: encoding,
+                    ?encoding: encoding,
+                    ?textmode: boolish,
+                    ?binmode: boolish,
+                    ?autoclose: boolish,
+                    ?path: path,
+                    # encoding options
+                    ?invalid: :replace | nil,
+                    ?undef: :replace | nil,
+                    ?replace: String | nil,
+                    ?fallback: Hash[string, string] | ^(String) -> string | Method | nil,
+                    ?xml: :text | :attr | nil,
+                    ?cr_newline: bool,
+                    ?crlf_newline: bool,
+                    ?universal_newline: bool
+                  ) { (IO) -> T } -> T
 
   # <!--
   #   rdoc-file=io.c
