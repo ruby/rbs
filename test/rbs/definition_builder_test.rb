@@ -4384,4 +4384,72 @@ EOF
       end
     end
   end
+
+  def test_annotations_are_allocated_on_demand
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<~RBS
+        class Foo
+          def foo: () -> String
+
+          %a{deprecated}
+          def bar: %a{pure} () -> String
+                 | () { () -> void } -> String
+        end
+      RBS
+
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::Foo")).tap do |definition|
+          foo = definition.methods[:foo]
+          bar = definition.methods[:bar]
+
+          # A method without annotations has no array of annotations until it is requested
+          assert_nil foo.instance_variable_get(:@annotations)
+          assert_nil foo.defs[0].instance_variable_get(:@member_annotations)
+          assert_nil foo.defs[0].instance_variable_get(:@overload_annotations)
+
+          assert_empty foo.defs[0].each_annotation.to_a
+          assert_nil foo.defs[0].update(implemented_in: nil).instance_variable_get(:@member_annotations)
+          assert_nil foo.update(accessibility: :private).instance_variable_get(:@annotations)
+          assert_nil foo.defs[0].instance_variable_get(:@member_annotations)
+          assert_nil foo.instance_variable_get(:@annotations)
+
+          assert_equal [], foo.annotations
+          assert_equal [], foo.extra_annotations
+          assert_equal [], foo.defs[0].member_annotations
+          assert_equal [], foo.defs[0].overload_annotations
+          assert_equal [], foo.defs[0].annotations
+
+          # The arrays can be updated
+          foo.defs[0].member_annotations << AST::Annotation.new(string: "hello", location: nil)
+          assert_equal ["hello"], foo.defs[0].each_annotation.map(&:string)
+          assert_equal ["hello"], foo.defs[0].update(implemented_in: nil).member_annotations.map(&:string)
+
+          assert_equal ["deprecated"], bar.annotations.map(&:string)
+          assert_equal ["deprecated"], bar.update(accessibility: :private).annotations.map(&:string)
+          assert_equal [], bar.update(annotations: []).annotations
+
+          assert_equal ["deprecated"], bar.defs[0].member_annotations.map(&:string)
+          assert_equal ["pure"], bar.defs[0].overload_annotations.map(&:string)
+          assert_equal ["deprecated", "pure"], bar.defs[0].each_annotation.map(&:string)
+          assert_equal ["deprecated"], bar.defs[1].each_annotation.map(&:string)
+          assert_equal ["deprecated", "pure"], bar.defs[0].update(implemented_in: nil).each_annotation.map(&:string)
+
+          # The writers store copies of the arrays
+          annotations = [AST::Annotation.new(string: "world", location: nil)]
+          bar.annotations = annotations
+          bar.defs[1].member_annotations = annotations
+          bar.defs[1].overload_annotations = annotations
+          annotations.clear
+
+          assert_equal ["world"], bar.annotations.map(&:string)
+          assert_equal ["world", "world"], bar.defs[1].each_annotation.map(&:string)
+
+          bar.annotations = []
+          assert_equal [], bar.annotations
+        end
+      end
+    end
+  end
 end

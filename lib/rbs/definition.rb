@@ -32,11 +32,8 @@ module RBS
         attr_reader :member
         attr_reader :defined_in
         attr_reader :implemented_in
-        attr_reader :member_annotations
-        attr_reader :overload_annotations
-        attr_reader :annotations
 
-        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: [], subst: nil)
+        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: nil, subst: nil)
           if subst
             # The substitution is applied when the type is requested
             @base_type = type
@@ -48,9 +45,31 @@ module RBS
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
-          @member_annotations = []
-          @overload_annotations = []
-          @annotations = []
+
+          # The arrays of the annotations are allocated when they are requested, because most methods have no annotation
+          @member_annotations = nil
+          @overload_annotations = nil
+          @annotations = nil
+        end
+
+        def member_annotations
+          @member_annotations ||= []
+        end
+
+        def member_annotations=(annotations)
+          @member_annotations = annotations.empty? ? nil : annotations.dup
+        end
+
+        def overload_annotations
+          @overload_annotations ||= []
+        end
+
+        def overload_annotations=(annotations)
+          @overload_annotations = annotations.empty? ? nil : annotations.dup
+        end
+
+        def annotations
+          @annotations ||= []
         end
 
         # Returns the method type
@@ -90,8 +109,12 @@ module RBS
 
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
           TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in).tap do |type_def|
-            type_def.overload_annotations.replace(self.overload_annotations)
-            type_def.member_annotations.replace(self.member_annotations)
+            if annotations = @overload_annotations
+              type_def.overload_annotations = annotations
+            end
+            if annotations = @member_annotations
+              type_def.member_annotations = annotations
+            end
           end
         end
 
@@ -106,8 +129,8 @@ module RBS
 
         def each_annotation(&block)
           if block
-            member_annotations.each(&block)
-            overload_annotations.each(&block)
+            @member_annotations&.each(&block)
+            @overload_annotations&.each(&block)
           else
             enum_for :each_annotation
           end
@@ -117,19 +140,31 @@ module RBS
       attr_reader :super_method
       attr_reader :defs
       attr_reader :accessibility
-      attr_reader :extra_annotations
-      attr_reader :annotations
       attr_reader :alias_of
       attr_reader :alias_member
 
-      def initialize(super_method:, defs:, accessibility:, annotations: [], alias_of:, alias_member: nil)
+      def initialize(super_method:, defs:, accessibility:, annotations: nil, alias_of:, alias_member: nil)
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
-        @extra_annotations = []
-        @annotations = []
+
+        # The arrays of the annotations are allocated when they are requested, because most methods have no annotation
+        @extra_annotations = nil
+        @annotations = nil
         @alias_of = alias_of
         @alias_member = alias_member
+      end
+
+      def extra_annotations
+        @extra_annotations ||= []
+      end
+
+      def annotations
+        @annotations ||= []
+      end
+
+      def annotations=(annotations)
+        @annotations = annotations.empty? ? nil : annotations.dup
       end
 
       def ==(other)
@@ -211,7 +246,7 @@ module RBS
         )
       end
 
-      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations, alias_member: self.alias_member)
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: nil, alias_member: self.alias_member)
         self.class.new(
           super_method: super_method,
           defs: defs,
@@ -219,7 +254,9 @@ module RBS
           alias_of: alias_of,
           alias_member: alias_member
         ).tap do |method|
-          method.annotations.replace(annotations)
+          if annotations ||= @annotations
+            method.annotations = annotations
+          end
         end
       end
     end

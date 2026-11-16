@@ -169,6 +169,9 @@ module RBS
     # same method for the same ones. Definitions share the method objects in this way.
     #
     class Layer
+      EMPTY_ANNOTATIONS = [] #: Array[AST::Annotation]
+      EMPTY_ANNOTATIONS.freeze
+
       attr_reader :template
       attr_reader :subst
 
@@ -264,6 +267,9 @@ module RBS
         implemented_in = entry.implemented_in
         subst = entry_subst(entry)
 
+        # The annotations of the method, that are also the member annotations of its type defs
+        annotations = EMPTY_ANNOTATIONS
+
         case original = method.original
         when AST::Members::Alias
           original_method or raise
@@ -280,7 +286,7 @@ module RBS
             alias_member: original
           )
 
-          method_definition.annotations.replace(original.annotations)
+          annotations = original.annotations
         when AST::Members::MethodDefinition
           if layer_method
             raise DuplicatedMethodDefinitionError.new(
@@ -300,7 +306,7 @@ module RBS
               implemented_in: implemented_in
             ).tap do |type_def|
               # Keep the original annotations given to overloads.
-              type_def.overload_annotations.replace(overload.annotations)
+              type_def.overload_annotations = overload.annotations
             end
           end
 
@@ -321,7 +327,7 @@ module RBS
             alias_member: nil
           )
 
-          method_definition.annotations.replace(original.annotations)
+          annotations = original.annotations
         when AST::Members::AttrReader, AST::Members::AttrWriter, AST::Members::AttrAccessor
           if layer_method
             raise DuplicatedMethodDefinitionError.new(
@@ -377,7 +383,7 @@ module RBS
             alias_member: nil
           )
 
-          method_definition.annotations.replace(original.annotations)
+          annotations = original.annotations
         when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
           if layer_method
             raise DuplicatedMethodDefinitionError.new(
@@ -448,7 +454,7 @@ module RBS
               alias_member: nil
             )
 
-            method_definition.annotations.replace(existing_method.annotations)
+            annotations = existing_method.annotations
           else
             defs = original.overloads.map do |overload|
               Definition::Method::TypeDef.new(
@@ -460,7 +466,7 @@ module RBS
                 implemented_in: implemented_in
               ).tap do |type_def|
                 # Keep the original annotations given to overloads.
-                type_def.overload_annotations.replace(overload.annotations)
+                type_def.overload_annotations = overload.annotations
               end
             end
 
@@ -503,7 +509,7 @@ module RBS
             alias_member: nil
           )
 
-          method_definition.annotations.replace(existing_method.annotations)
+          annotations = existing_method.annotations
         end
 
         method.overloads.each do |overloading_def|
@@ -517,16 +523,20 @@ module RBS
               implemented_in: implemented_in
             )
 
-            type_def.overload_annotations.replace(overload.annotations)
+            type_def.overload_annotations = overload.annotations
 
             method_definition.defs.unshift(type_def)
           end
 
-          method_definition.annotations.concat(overloading_def.annotations)
+          unless overloading_def.annotations.empty?
+            annotations = annotations + overloading_def.annotations
+          end
         end
 
+        # The annotations are given through the writers, which allocate no array for a method without annotations
+        method_definition.annotations = annotations
         method_definition.defs.each do |type_def|
-          type_def.member_annotations.replace(method_definition.annotations)
+          type_def.member_annotations = annotations
         end
 
         method_definition
@@ -934,7 +944,7 @@ module RBS
               defined_in: initialize_def.defined_in,
               implemented_in: initialize_def.implemented_in
             ).tap do |type_def|
-              type_def.overload_annotations.replace(initialize_def.overload_annotations)
+              type_def.overload_annotations = initialize_def.overload_annotations
             end
           end,
           accessibility: :public,
