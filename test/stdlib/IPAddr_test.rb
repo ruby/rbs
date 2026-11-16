@@ -84,6 +84,20 @@ class IPAddrInstanceTest < Test::Unit::TestCase
   library "ipaddr"
   testing "::IPAddr"
 
+  def test_plus
+    omit "IPAddr#+ is not available" unless IPAddr.method_defined?(:+)
+
+    assert_send_type "(Integer) -> IPAddr", IPAddr.new("192.168.2.1"), :+, 1
+    assert_send_type "(Integer) -> IPAddr", IPAddr.new("2001:db8::1"), :+, 16
+  end
+
+  def test_minus
+    omit "IPAddr#- is not available" unless IPAddr.method_defined?(:-)
+
+    assert_send_type "(Integer) -> IPAddr", IPAddr.new("192.168.2.5"), :-, 1
+    assert_send_type "(Integer) -> IPAddr", IPAddr.new("2001:db8::10"), :-, 16
+  end
+
   def test_as_json
     assert_send_type "() -> String", IPAddr.new("192.168.2.0/24"), :as_json
     assert_send_type "(nil) -> String", IPAddr.new("192.168.2.1"), :as_json, nil
