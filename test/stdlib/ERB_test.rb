@@ -98,6 +98,10 @@ class ERBUtilSingletonTest < Test::Unit::TestCase
   library "erb"
   testing "singleton(::ERB::Util)"
 
+  def test_VERSION
+    assert_const_type "String", "ERB::VERSION"
+  end
+
   def test_html_escape
     assert_send_type "(String str) -> String",
                      ERB::Util, :html_escape, "abc"

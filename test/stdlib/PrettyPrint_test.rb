@@ -7,6 +7,10 @@ class PrettyPrintSingletonTest < Test::Unit::TestCase
   library "prettyprint"
   testing "singleton(::PrettyPrint)"
 
+  def test_VERSION
+    assert_const_type "String", "PrettyPrint::VERSION"
+  end
+
   def test_format
     assert_send_type  "() { (PrettyPrint) -> String } -> String",
                       PrettyPrint, :format do "" end

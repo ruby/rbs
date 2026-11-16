@@ -7,6 +7,10 @@ class OpenURISingletonTest < Test::Unit::TestCase
   library "open-uri"
   testing "singleton(::URI)"
 
+  def test_VERSION
+    assert_const_type "String", "OpenURI::VERSION"
+  end
+
   def test_URI_open
     assert_send_type "(String) -> StringIO",
                      URI, :open, "https://www.ruby-lang.org"

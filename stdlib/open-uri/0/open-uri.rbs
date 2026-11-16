@@ -84,6 +84,11 @@ end
 #
 module OpenURI
   # <!-- rdoc-file=lib/open-uri.rb -->
+  # The version string
+  #
+  VERSION: String
+
+  # <!-- rdoc-file=lib/open-uri.rb -->
   # Raised on HTTP session failure
   #
   class HTTPError < StandardError

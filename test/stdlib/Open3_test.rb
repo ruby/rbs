@@ -6,6 +6,10 @@ class Open3SingletonTest < Test::Unit::TestCase
   library "open3"
   testing "singleton(::Open3)"
 
+  def test_VERSION
+    assert_const_type "String", "Open3::VERSION"
+  end
+
   def test_capture2
     assert_send_type "(*::String) -> [ ::String, ::Process::Status ]",
                      Open3, :capture2, 'echo "Foo"'

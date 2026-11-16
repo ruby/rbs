@@ -48,6 +48,11 @@
 #     Options](rdoc-ref:Process@Execution+Options).
 #
 module Open3
+  # <!-- rdoc-file=lib/open3/version.rb -->
+  # The version string
+  #
+  VERSION: String
+
   type env = Hash[String, String]
 
   # <!--

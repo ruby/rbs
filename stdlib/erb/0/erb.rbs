@@ -586,6 +586,11 @@
 # of the Ruby Toolbox.
 #
 class ERB
+  # <!-- rdoc-file=lib/erb/version.rb -->
+  # The string ERB version.
+  #
+  VERSION: String
+
   # <!--
   #   rdoc-file=lib/erb.rb
   #   - self.version -> string

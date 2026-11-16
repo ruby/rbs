@@ -381,6 +381,11 @@
 # class. If you have any questions, file a ticket at http://bugs.ruby-lang.org.
 #
 class OptionParser
+  # <!-- rdoc-file=lib/optparse.rb -->
+  # The version string
+  #
+  VERSION: String
+
   interface _Pattern
     def match: (untyped other) -> boolish
   end
