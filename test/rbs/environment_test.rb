@@ -680,6 +680,26 @@ end
     end
   end
 
+  def test_use_resolve__wildcard_without_children
+    buf, dirs, decls = RBS::Parser.parse_signature(<<-RBS)
+use Foo::*, Unknown::*
+
+module Foo
+end
+
+class Bar
+end
+    RBS
+
+    env = Environment.new
+    env.add_source(RBS::Source::RBS.new(buf, dirs, decls))
+
+    env.resolve_type_names.tap do |env|
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Foo")
+      assert_operator env.class_decls, :key?, RBS::TypeName.parse("::Bar")
+    end
+  end
+
   def test_resolve_type_names__unresolved_old_name
     env = Environment.new
 

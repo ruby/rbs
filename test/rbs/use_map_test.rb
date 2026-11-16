@@ -43,6 +43,19 @@ class RBS::Environment::UseMapTest < Test::Unit::TestCase
     assert_equal RBS::TypeName.parse("::Foo::a"), map.resolve?(RBS::TypeName.parse("a"))
   end
 
+  def test_import_wildcard_clause__empty_namespace
+    # `::Foo::M` exists, but has no types under it
+    map.build_map(Use::WildcardClause.new(namespace: RBS::Namespace.parse("Foo::M::"), location: nil))
+
+    assert_nil map.resolve?(RBS::TypeName.parse("M"))
+  end
+
+  def test_import_wildcard_clause__unknown_namespace
+    map.build_map(Use::WildcardClause.new(namespace: RBS::Namespace.parse("Bar::"), location: nil))
+
+    assert_nil map.resolve?(RBS::TypeName.parse("M"))
+  end
+
   def test_resolve_namespace
     map.build_map(Use::SingleClause.new(type_name: RBS::TypeName.parse("Foo"), new_name: :Bar, location: nil))
 
