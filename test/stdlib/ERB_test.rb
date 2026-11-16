@@ -101,15 +101,31 @@ class ERBUtilSingletonTest < Test::Unit::TestCase
   def test_html_escape
     assert_send_type "(String str) -> String",
                      ERB::Util, :html_escape, "abc"
+    assert_send_type "(Integer s) -> String",
+                     ERB::Util, :html_escape, 123
+    assert_send_type "(nil s) -> String",
+                     ERB::Util, :html_escape, nil
     assert_send_type "(String str) -> String",
                      ERB::Util, :h, "abc"
+    assert_send_type "(Integer s) -> String",
+                     ERB::Util, :h, 123
+    assert_send_type "(nil s) -> String",
+                     ERB::Util, :h, nil
   end
 
   def test_url_encode
     assert_send_type "(String str) -> String",
                      ERB::Util, :url_encode, "abc"
+    assert_send_type "(Integer s) -> String",
+                     ERB::Util, :url_encode, 123
+    assert_send_type "(nil s) -> String",
+                     ERB::Util, :url_encode, nil
     assert_send_type "(String str) -> String",
                      ERB::Util, :u, "abc"
+    assert_send_type "(Integer s) -> String",
+                     ERB::Util, :u, 123
+    assert_send_type "(nil s) -> String",
+                     ERB::Util, :u, nil
   end
 end
 
@@ -125,15 +141,47 @@ class ERBUtilTest < Test::Unit::TestCase
   def test_html_escape
     assert_send_type "(String str) -> String",
                      Mock.new, :html_escape, "abc"
+    assert_send_type "(Integer s) -> String",
+                     Mock.new, :html_escape, 123
+    assert_send_type "(nil s) -> String",
+                     Mock.new, :html_escape, nil
     assert_send_type "(String str) -> String",
                      Mock.new, :h, "abc"
+    assert_send_type "(Integer s) -> String",
+                     Mock.new, :h, 123
+    assert_send_type "(nil s) -> String",
+                     Mock.new, :h, nil
   end
 
   def test_url_encode
     assert_send_type "(String str) -> String",
                      Mock.new, :url_encode, "abc"
+    assert_send_type "(Integer s) -> String",
+                     Mock.new, :url_encode, 123
+    assert_send_type "(nil s) -> String",
+                     Mock.new, :url_encode, nil
     assert_send_type "(String str) -> String",
                      Mock.new, :u, "abc"
+    assert_send_type "(Integer s) -> String",
+                     Mock.new, :u, 123
+    assert_send_type "(nil s) -> String",
+                     Mock.new, :u, nil
+  end
+end
+
+class ERBEscapeSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "erb"
+  testing "singleton(::ERB::Escape)"
+
+  def test_html_escape
+    assert_send_type "(String s) -> String",
+                     ERB::Escape, :html_escape, "<abc>"
+    assert_send_type "(Integer s) -> String",
+                     ERB::Escape, :html_escape, 123
+    assert_send_type "(nil s) -> String",
+                     ERB::Escape, :html_escape, nil
   end
 end
 

@@ -837,7 +837,7 @@ class ERB
     #
     #     is a &gt; 0 &amp; a &lt; 10?
     #
-    def self?.html_escape: (String str) -> String
+    def self?.html_escape: (_ToS s) -> String
 
     # <!--
     #   rdoc-file=lib/erb.rb
@@ -868,7 +868,7 @@ class ERB
     #
     #     Programming%20Ruby%3A%20%20The%20Pragmatic%20Programmer%27s%20Guide
     #
-    def self?.url_encode: (String) -> String
+    def self?.url_encode: (_ToS s) -> String
 
     # <!--
     #   rdoc-file=lib/erb/util.rb
@@ -939,6 +939,6 @@ class ERB
     #   - html_escape(s)
     # -->
     #
-    def self?.html_escape: (String) -> String
+    def self?.html_escape: (_ToS s) -> String
   end
 end
