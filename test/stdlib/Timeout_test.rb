@@ -22,6 +22,13 @@ class TimeoutSingletonTest < Test::Unit::TestCase
                       Timeout, :timeout, Rational(5, 3), &proc
     assert_send_type  "(::BigDecimal sec) { (::BigDecimal sec) -> ::BigDecimal } -> ::BigDecimal",
                       Timeout, :timeout, BigDecimal("1.123456789123456789"), &proc
+
+    assert_send_type  "(nil sec) { (nil sec) -> nil } -> nil",
+                      Timeout, :timeout, nil do |sec| sec end
+    assert_send_type  "(::Integer sec, nil, nil) { (::Integer sec) -> ::Integer } -> ::Integer",
+                      Timeout, :timeout, 5, nil, nil, &proc
+    assert_send_type  "(::Integer sec, singleton(::ArgumentError), ::String) { (::Integer sec) -> ::Integer } -> ::Integer",
+                      Timeout, :timeout, 5, ArgumentError, "too slow", &proc
   end
 end
 
