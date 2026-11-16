@@ -177,7 +177,7 @@ class Resolv::DNS
   # Yields the created DNS resolver to the block, if given, otherwise returns it.
   #
   def self.open: (*untyped args) -> instance
-               | (*untyped args) { (instance) -> void } -> void
+               | [T] (*untyped args) { (instance) -> T } -> T
 
   def self.random: (Integer arg) -> (Integer | Float)
 
