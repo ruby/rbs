@@ -1606,7 +1606,8 @@ class Thread::Mutex < Object
   #
   # Returns the slept time in seconds if woken up, or `nil` if timed out.
   #
-  def sleep: (?Time::_Timeout? timeout) -> Integer?
+  def sleep: (?nil) -> Integer
+           | (Time::_Timeout timeout) -> Integer?
 
   # <!--
   #   rdoc-file=thread_sync.rb
