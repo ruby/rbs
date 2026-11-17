@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 76f8080750b46dcaa91707a0f6c32511b68d0089
+  revision: 2fb6e649902f21e093f90378737dc38acde642c8
   specs:
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
@@ -114,7 +114,7 @@ GEM
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
       tsort
-    regexp_parser (2.13.1)
+    regexp_parser (2.13.2)
     reline (0.7.0)
       io-console (~> 0.5)
     rspec (3.13.2)
