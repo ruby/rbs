@@ -64,7 +64,8 @@ class IPAddr
   # as &, |, include? and ==, accept a string, or a packed in_addr value instead
   # of an IPAddr object.
   #
-  def initialize: (?String addr, ?untyped family) -> void
+  def initialize: (?String addr, ?Integer family) -> void
+                | (Integer addr, Integer family) -> void
 
   # <!--
   #   rdoc-file=lib/ipaddr.rb
