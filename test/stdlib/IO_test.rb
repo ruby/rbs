@@ -210,6 +210,31 @@ class IOSingletonTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_sysopen
+    Dir.mktmpdir do |dir|
+      file = File.join(dir, "some_file")
+      File.write(file, "")
+
+      with_path(file) do |path|
+        IO.for_fd(assert_send_type("(path) -> Integer", IO, :sysopen, path)).close
+        IO.for_fd(assert_send_type("(path, nil) -> Integer", IO, :sysopen, path, nil)).close
+
+        with_string("r") do |mode|
+          IO.for_fd(assert_send_type("(path, string) -> Integer", IO, :sysopen, path, mode)).close
+        end
+
+        with_int(File::RDONLY) do |mode|
+          IO.for_fd(assert_send_type("(path, int) -> Integer", IO, :sysopen, path, mode)).close
+        end
+
+        with_int(0o644).and_nil do |perm|
+          IO.for_fd(assert_send_type("(path, String, int?) -> Integer", IO, :sysopen, path, "r", perm)).close
+          IO.for_fd(assert_send_type("(path, Integer, int?) -> Integer", IO, :sysopen, path, File::RDONLY, perm)).close
+        end
+      end
+    end
+  end
 end
 
 class IOInstanceTest < Test::Unit::TestCase

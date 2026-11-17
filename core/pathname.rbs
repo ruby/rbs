@@ -1150,7 +1150,7 @@ class Pathname
   # -->
   # See <code>File.sysopen</code>.
   #
-  def sysopen: (?String mode, ?Integer perm) -> Integer
+  def sysopen: (?string | int | nil mode, ?int? perm) -> Integer
 
   # <!-- rdoc-file=pathname_builtin.rb -->
   # to_path is implemented so Pathname objects are usable with File.open, etc.
