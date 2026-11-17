@@ -110,7 +110,7 @@ module Timeout
   # :on_blocking instead of :immediate. However, that means if the block uses no
   # blocking operations after `sec` seconds, the block will not be interrupted.
   #
-  def self?.timeout: [T] (Numeric? sec, ?singleton(Exception) klass, ?String message) { (Numeric sec) -> T } -> T
+  def self?.timeout: [T, S < Numeric?] (S sec, ?singleton(Exception)? klass, ?String? message) { (S sec) -> T } -> T
 end
 
 # <!-- rdoc-file=lib/timeout.rb -->
