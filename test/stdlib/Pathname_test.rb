@@ -20,6 +20,26 @@ class PathnameSingletonTest < Test::Unit::TestCase
                      Pathname, :glob, '*', File::FNM_NOESCAPE
     assert_send_type '(String) { (Pathname) -> untyped } -> nil',
                      Pathname, :glob, '*' do true end
+    assert_send_type '(Pathname) -> Array[Pathname]',
+                     Pathname, :glob, Pathname('*')
+    assert_send_type '(ToPath) -> Array[Pathname]',
+                     Pathname, :glob, ToPath.new('*')
+    assert_send_type '(Array[Pathname]) -> Array[Pathname]',
+                     Pathname, :glob, [Pathname('*')]
+    assert_send_type '(String, ToInt) -> Array[Pathname]',
+                     Pathname, :glob, '*', ToInt.new(0)
+    assert_send_type '(String, flags: Integer) -> Array[Pathname]',
+                     Pathname, :glob, '*', flags: File::FNM_NOESCAPE
+    assert_send_type '(String, base: String) -> Array[Pathname]',
+                     Pathname, :glob, '*', base: __dir__
+    assert_send_type '(String, base: Pathname) -> Array[Pathname]',
+                     Pathname, :glob, '*', base: Pathname(__dir__)
+    assert_send_type '(String, base: nil) -> Array[Pathname]',
+                     Pathname, :glob, '*', base: nil
+    assert_send_type '(String, sort: bool) -> Array[Pathname]',
+                     Pathname, :glob, '*', sort: false
+    assert_send_type '(String, base: String, sort: bool) { (Pathname) -> untyped } -> nil',
+                     Pathname, :glob, '*', base: __dir__, sort: false do true end
   end
 
   def test_pwd
@@ -34,6 +54,8 @@ class PathnameSingletonTest < Test::Unit::TestCase
                      Pathname, :new, ToStr.new('foo').__with_object_methods(:respond_to?)
     assert_send_type '(Pathname) -> Pathname',
                      Pathname, :new, Pathname('foo')
+    assert_send_type '(ToPath) -> Pathname',
+                     Pathname, :new, ToPath.new('foo').__with_object_methods(:respond_to?)
   end
 end
 
@@ -231,6 +253,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
   def test_each_entry
     assert_send_type '() { (Pathname) -> untyped } -> nil',
                      Pathname('.'), :each_entry do end
+    assert_send_type '() -> Enumerator[Pathname, nil]',
+                     Pathname('.'), :each_entry
   end
 
   def test_each_filename
@@ -300,6 +324,14 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('~/'), :expand_path
     assert_send_type '(String) -> Pathname',
                      Pathname('./foo'), :expand_path, __dir__
+    assert_send_type '(nil) -> Pathname',
+                     Pathname('./foo'), :expand_path, nil
+    assert_send_type '(Pathname) -> Pathname',
+                     Pathname('./foo'), :expand_path, Pathname(__dir__)
+    assert_send_type '(ToPath) -> Pathname',
+                     Pathname('./foo'), :expand_path, ToPath.new(__dir__)
+    assert_send_type '(ToStr) -> Pathname',
+                     Pathname('./foo'), :expand_path, ToStr.new(__dir__)
   end
 
   def test_extname
@@ -349,6 +381,14 @@ class PathnameInstanceTest < Test::Unit::TestCase
                      Pathname('.'), :glob, '*', File::FNM_NOESCAPE
     assert_send_type '(String) { (Pathname) -> untyped } -> nil',
                      Pathname('.'), :glob, '*' do end
+    assert_send_type '(Pathname) -> Array[Pathname]',
+                     Pathname('.'), :glob, Pathname('*')
+    assert_send_type '(ToPath) -> Array[Pathname]',
+                     Pathname('.'), :glob, ToPath.new('*')
+    assert_send_type '(Array[Pathname | String]) -> Array[Pathname]',
+                     Pathname('.'), :glob, [Pathname('*'), 'lib/*']
+    assert_send_type '(String, ToInt) -> Array[Pathname]',
+                     Pathname('.'), :glob, '*', ToInt.new(0)
   end
 
   def test_grpowned?
@@ -485,6 +525,10 @@ class PathnameInstanceTest < Test::Unit::TestCase
                        path, :open do true end
       assert_send_type "(String, binmode: bool) -> File",
                        path, :open, 'r', binmode: true
+      assert_send_type "(mode: String) -> File",
+                       path, :open, mode: 'r'
+      assert_send_type "(mode: Integer) -> File",
+                       path, :open, mode: File::RDONLY
 
     end
   end
@@ -605,6 +649,8 @@ class PathnameInstanceTest < Test::Unit::TestCase
 
     assert_send_type '(_ToStr) -> Pathname',
                      Pathname('.'), :relative_path_from, ToStr.new('.').__with_object_methods(:is_a?, :respond_to?)
+    assert_send_type '(ToPath) -> Pathname',
+                     Pathname('.'), :relative_path_from, ToPath.new('.').__with_object_methods(:is_a?, :respond_to?)
   end
 
   def test_rename
@@ -810,6 +856,11 @@ class PathnameKernelTest < Test::Unit::TestCase
     assert_send_type(
       "(::Pathname) -> ::Pathname",
       self, :Pathname, Pathname.pwd
+    )
+
+    assert_send_type(
+      "(::_ToPath) -> ::Pathname",
+      self, :Pathname, ToPath.new("Gemfile").__with_object_methods(:respond_to?)
     )
   end
 end
