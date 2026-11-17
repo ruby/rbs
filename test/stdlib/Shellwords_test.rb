@@ -14,11 +14,17 @@ class ShellwordsSingletonTest < Test::Unit::TestCase
   def test_shellescape
     assert_send_type  "(::String str) -> ::String",
                       Shellwords, :shellescape, "shell"
+    assert_send_type  "(::Integer str) -> ::String",
+                      Shellwords, :shellescape, 42
+    assert_send_type  "(::Pathname str) -> ::String",
+                      Shellwords, :shellescape, Pathname("my file")
   end
 
   def test_shelljoin
     assert_send_type  "(::Array[::String] array) -> ::String",
                       Shellwords, :shelljoin, ["shell", "words"]
+    assert_send_type  "(::Array[::String | ::Integer | ::Pathname] array) -> ::String",
+                      Shellwords, :shelljoin, ["kill", 42, Pathname("my file")]
   end
 
   def test_shellsplit
@@ -29,11 +35,17 @@ class ShellwordsSingletonTest < Test::Unit::TestCase
   def test_escape
     assert_send_type  "(::String str) -> ::String",
                       Shellwords, :escape, "shell"
+    assert_send_type  "(::Integer str) -> ::String",
+                      Shellwords, :escape, 42
+    assert_send_type  "(::Pathname str) -> ::String",
+                      Shellwords, :escape, Pathname("my file")
   end
 
   def test_join
     assert_send_type  "(::Array[::String] array) -> ::String",
                       Shellwords, :join, ["shell", "words"]
+    assert_send_type  "(::Array[::String | ::Integer | ::Pathname] array) -> ::String",
+                      Shellwords, :join, ["kill", 42, Pathname("my file")]
   end
 
   def test_shellwords
@@ -60,11 +72,17 @@ class ShellwordsTest < Test::Unit::TestCase
   def test_shellescape
     assert_send_type  "(::String str) -> ::String",
                       Container.new, :shellescape, "shell"
+    assert_send_type  "(::Integer str) -> ::String",
+                      Container.new, :shellescape, 42
+    assert_send_type  "(::Pathname str) -> ::String",
+                      Container.new, :shellescape, Pathname("my file")
   end
 
   def test_shelljoin
     assert_send_type  "(::Array[::String] array) -> ::String",
                       Container.new, :shelljoin, ["shell", "words"]
+    assert_send_type  "(::Array[::String | ::Integer | ::Pathname] array) -> ::String",
+                      Container.new, :shelljoin, ["kill", 42, Pathname("my file")]
   end
 
   def test_shellsplit
