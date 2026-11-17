@@ -94,6 +94,33 @@ class StringIOTypeTest < Test::Unit::TestCase
     )
   end
 
+  def test_gets
+    assert_send_type  "() -> ::String",
+                      StringIO.new("a\nb"), :gets
+    assert_send_type  "() -> nil",
+                      StringIO.new(""), :gets
+    assert_send_type  "(::String sep) -> ::String",
+                      StringIO.new("a\nb"), :gets, "\n"
+    assert_send_type  "(nil sep) -> ::String",
+                      StringIO.new("a\nb"), :gets, nil
+    assert_send_type  "(::String sep, ::Integer limit) -> ::String",
+                      StringIO.new("a\nb"), :gets, "\n", 1
+    assert_send_type  "(nil sep, ::Integer limit) -> ::String",
+                      StringIO.new("a\nb"), :gets, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::String",
+                      StringIO.new("a\nb"), :gets, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::String",
+                      StringIO.new("a\nb"), :gets, 1
+    assert_send_type  "(ToInt limit) -> ::String",
+                      StringIO.new("a\nb"), :gets, ToInt.new(1)
+    assert_send_type  "(ToStr sep) -> ::String",
+                      StringIO.new("a\nb"), :gets, ToStr.new("\n")
+    assert_send_type  "(chomp: boolish) -> ::String",
+                      StringIO.new("a\nb"), :gets, chomp: true
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::String",
+                      StringIO.new("a\nb"), :gets, 2, chomp: true
+  end
+
   def test_readline
     assert_send_type  "() -> ::String",
                       StringIO.new("\n"), :readline
@@ -105,6 +132,20 @@ class StringIOTypeTest < Test::Unit::TestCase
                       StringIO.new("\n"), :readline, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
                       StringIO.new("\n"), :readline, "\n", 1, chomp: true
+    assert_send_type  "(nil sep) -> ::String",
+                      StringIO.new("a\nb"), :readline, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::String",
+                      StringIO.new("a\nb"), :readline, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::String",
+                      StringIO.new("a\nb"), :readline, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::String",
+                      StringIO.new("a\nb"), :readline, 1
+    assert_send_type  "(ToInt limit) -> ::String",
+                      StringIO.new("a\nb"), :readline, ToInt.new(1)
+    assert_send_type  "(ToStr sep) -> ::String",
+                      StringIO.new("a\nb"), :readline, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::String",
+                      StringIO.new("a\nb"), :readline, 2, chomp: true
   end
 
   def test_readlines
@@ -118,6 +159,28 @@ class StringIOTypeTest < Test::Unit::TestCase
                       StringIO.new("\n"), :readlines, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]",
                       StringIO.new("\n"), :readlines, "\n", 1, chomp: true
+    assert_send_type  "(nil sep) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, 1
+    assert_send_type  "(ToInt limit) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, ToInt.new(1)
+    assert_send_type  "(ToStr sep) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::Array[::String]",
+                      StringIO.new("a\nb"), :readlines, 2, chomp: true
+  end
+
+  def test_each
+    each_line_tests(:each)
+  end
+
+  def test_each_line
+    each_line_tests(:each_line)
   end
 
   def test_pread
@@ -199,5 +262,31 @@ class StringIOTypeTest < Test::Unit::TestCase
   def test_length
     assert_send_type "() -> ::Integer",
                      StringIO.new("hello"), :length
+  end
+
+  private
+
+  def each_line_tests(method)
+    assert_send_type  "() { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method do end
+    assert_send_type  "(::String sep) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, "\n" do end
+    assert_send_type  "(nil sep) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, nil do end
+    assert_send_type  "(nil sep, ::Integer limit) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, nil, 2 do end
+    assert_send_type  "(::String sep, nil limit) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, "\n", nil do end
+    assert_send_type  "(::Integer limit) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, 1 do end
+    assert_send_type  "(::Integer limit, chomp: boolish) { (::String) -> void } -> ::StringIO",
+                      StringIO.new("a\nb"), method, 2, chomp: true do end
+
+    assert_send_type  "() -> ::Enumerator[::String, ::StringIO]",
+                      StringIO.new("a\nb"), method
+    assert_send_type  "(nil sep) -> ::Enumerator[::String, ::StringIO]",
+                      StringIO.new("a\nb"), method, nil
+    assert_send_type  "(::Integer limit) -> ::Enumerator[::String, ::StringIO]",
+                      StringIO.new("a\nb"), method, 1
   end
 end

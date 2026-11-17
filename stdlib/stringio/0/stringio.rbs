@@ -821,8 +821,10 @@ class StringIO
   # [Enumerator](https://docs.ruby-lang.org/en/master/Enumerator.html).
   # Related: StringIO.each_byte, StringIO.each_char, StringIO.each_codepoint.
   #
-  def each: (?String sep, ?Integer limit, ?chomp: boolish) { (String) -> untyped } -> self
-          | (?String sep, ?Integer limit, ?chomp: boolish) -> ::Enumerator[String, self]
+  def each: (string? sep, ?int? limit, ?chomp: boolish) { (String line) -> untyped } -> self
+          | (?int limit, ?chomp: boolish) { (String line) -> untyped } -> self
+          | (string? sep, ?int? limit, ?chomp: boolish) -> ::Enumerator[String, self]
+          | (?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1192,7 +1194,8 @@ class StringIO
   #
   # Related: #each_line, #readlines, [Kernel#puts](rdoc-ref:Kernel#puts).
   #
-  def gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
+  def gets: (string? sep, ?int? limit, ?chomp: boolish) -> String?
+          | (?int limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1318,7 +1321,8 @@ class StringIO
 
   def readchar: () -> String
 
-  def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
+  def readline: (string? sep, ?int? limit, ?chomp: boolish) -> String
+              | (?int limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -1328,7 +1332,8 @@ class StringIO
   # -->
   # See IO#readlines.
   #
-  def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
+  def readlines: (string? sep, ?int? limit, ?chomp: boolish) -> ::Array[String]
+               | (?int limit, ?chomp: boolish) -> ::Array[String]
 
   def readpartial: (int maxlen, ?string? outbuf) -> String
 
@@ -1674,8 +1679,10 @@ class StringIO
   # [Enumerator](https://docs.ruby-lang.org/en/master/Enumerator.html).
   # Related: StringIO.each_byte, StringIO.each_char, StringIO.each_codepoint.
   #
-  def each_line: (?String sep, ?Integer limit, ?chomp: boolish) { (String) -> untyped } -> self
-               | (?String sep, ?Integer limit, ?chomp: boolish) -> ::Enumerator[String, self]
+  def each_line: (string? sep, ?int? limit, ?chomp: boolish) { (String line) -> untyped } -> self
+               | (?int limit, ?chomp: boolish) { (String line) -> untyped } -> self
+               | (string? sep, ?int? limit, ?chomp: boolish) -> ::Enumerator[String, self]
+               | (?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # <!-- rdoc-file=ext/stringio/stringio.c -->
   # Returns whether `self` is positioned at end-of-stream:
