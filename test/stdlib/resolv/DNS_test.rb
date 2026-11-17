@@ -26,8 +26,10 @@ class ResolvDNSSingletonTest < Test::Unit::TestCase
   def test_open
     assert_send_type  '(Hash[Symbol, untyped]) -> Resolv::DNS',
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"]
-    assert_send_type  '(Hash[Symbol, untyped]) { (Resolv::DNS) -> void } -> void',
+    assert_send_type  '(Hash[Symbol, untyped]) { (Resolv::DNS) -> Resolv::DNS } -> Resolv::DNS',
       Resolv::DNS, :open, :nameserver => ["8.8.8.8"] do |c| c; end
+    assert_send_type  '() { (Resolv::DNS) -> String } -> String',
+      Resolv::DNS, :open do |c| c.class.name end
   rescue Errno::ECONNREFUSED
     omit "Connection refused with environmental issue"
   end
