@@ -92,6 +92,12 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :chown, nil, nil, ToPath.new(dir)
       assert_send_type  "(nil, nil, Array[String | ToStr | ToPath]) -> void",
                         FileUtils, :chown, nil, nil, [dir, ToStr.new(dir), ToPath.new(dir)]
+      assert_send_type  "(Integer, Integer, String) -> void",
+                        FileUtils, :chown, Process.uid, Process.gid, dir
+      assert_send_type  "(String, String, String) -> void",
+                        FileUtils, :chown, Process.uid.to_s, Process.gid.to_s, dir
+      assert_send_type  "(nil, Integer, String) -> void",
+                        FileUtils, :chown, nil, Process.gid, dir
       assert_send_type  "(String, String, Array[String], noop: bool, verbose: nil) -> void",
                         FileUtils, :chown, "user", "group", [dir], noop: true, verbose: nil
     end
@@ -107,6 +113,12 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :chown_R, nil, nil, ToPath.new(dir)
       assert_send_type  "(nil, nil, Array[String | ToStr | ToPath]) -> void",
                         FileUtils, :chown_R, nil, nil, [dir, ToStr.new(dir), ToPath.new(dir)]
+      assert_send_type  "(Integer, Integer, String) -> void",
+                        FileUtils, :chown_R, Process.uid, Process.gid, dir
+      assert_send_type  "(String, String, String) -> void",
+                        FileUtils, :chown_R, Process.uid.to_s, Process.gid.to_s, dir
+      assert_send_type  "(nil, Integer, String) -> void",
+                        FileUtils, :chown_R, nil, Process.gid, dir
       assert_send_type  "(String, String, Array[String], noop: bool, verbose: nil, force: bool) -> void",
                         FileUtils, :chown_R, "user", "group", [dir], noop: true, verbose: nil, force: false
     end
@@ -271,6 +283,13 @@ class FileUtilsSingletonTest < Test::Unit::TestCase
                         FileUtils, :install, ToPath.new("src"), ToPath.new("dest"), mode: 0755
       assert_send_type  "(String, String, mode: String, owner: String, group: nil, preserve: bool, noop: bool, verbose: nil) -> void",
                         FileUtils, :install, "src", "dest", mode: "u=wrx", owner: "user", group: nil, preserve: false, noop: true, verbose: nil
+
+      File.write "src2", ""
+      Dir.mkdir "destdir"
+      assert_send_type  "(Array[String | ToPath], String) -> void",
+                        FileUtils, :install, ["src", ToPath.new("src2")], "destdir"
+      assert_send_type  "(String, String, owner: Integer, group: Integer) -> void",
+                        FileUtils, :install, "src", "dest3", owner: Process.uid, group: Process.gid
     end
   end
 

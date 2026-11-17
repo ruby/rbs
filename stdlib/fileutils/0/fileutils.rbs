@@ -398,7 +398,7 @@ module FileUtils
   #
   # Related: FileUtils.chown_R.
   #
-  def self?.chown: (String? user, String? group, pathlist list, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.chown: (String | Integer | nil user, String | Integer | nil group, pathlist list, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -406,7 +406,7 @@ module FileUtils
   # -->
   # Like FileUtils.chown, but changes owner and group recursively.
   #
-  def self?.chown_R: (String? user, String? group, pathlist list, ?noop: boolish, ?verbose: boolish, ?force: boolish) -> void
+  def self?.chown_R: (String | Integer | nil user, String | Integer | nil group, pathlist list, ?noop: boolish, ?verbose: boolish, ?force: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
@@ -937,7 +937,7 @@ module FileUtils
   #
   # Related: [methods for copying](rdoc-ref:FileUtils@Copying).
   #
-  def self?.install: (::path src, ::path dest, ?mode: mode?, ?owner: String?, ?group: String?, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
+  def self?.install: (pathlist src, ::path dest, ?mode: mode?, ?owner: String | Integer | nil, ?group: String | Integer | nil, ?preserve: boolish, ?noop: boolish, ?verbose: boolish) -> void
 
   # <!--
   #   rdoc-file=lib/fileutils.rb
