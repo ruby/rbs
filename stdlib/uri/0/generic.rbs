@@ -492,7 +492,7 @@ module URI
     # Returns the userinfo `ui` as <code>[user, password]</code> if properly
     # formatted as 'user:password'.
     #
-    def split_userinfo: (String ui) -> Array[String | nil]
+    def split_userinfo: (String? ui) -> Array[String | nil]
 
     # <!--
     #   rdoc-file=lib/uri/generic.rb
@@ -1144,7 +1144,7 @@ module URI
     # http_proxy is not used too if the variable is case insensitive. CGI_HTTP_PROXY
     # can be used instead.
     #
-    def find_proxy: (?String env) -> (nil | URI::Generic)
+    def find_proxy: (?Hash[String, String] | RBS::Unnamed::ENVClass env) -> (nil | URI::Generic)
 
     def self.use_proxy?: (String hostname, String addr, Integer port, String no_proxy) -> bool
   end

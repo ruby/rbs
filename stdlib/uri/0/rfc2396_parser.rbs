@@ -148,8 +148,8 @@ module URI
     #
     # See also #make_regexp.
     #
-    def extract: (String str, ?Array[String] schemes) -> Array[String]
-               | (String str, ?Array[String] schemes) { (String) -> untyped } -> nil
+    def extract: (String str, ?Array[String]? schemes) -> Array[String]
+               | (String str, ?Array[String]? schemes) { (String) -> untyped } -> nil
 
     # <!--
     #   rdoc-file=lib/uri/rfc2396_parser.rb
@@ -175,7 +175,7 @@ module URI
     # `schemes` is provided. Then it is a Regexp.union with
     # <code>self.pattern[:X_ABS_URI]</code>.
     #
-    def make_regexp: (?Array[String] schemes) -> Regexp
+    def make_regexp: (?Array[String]? schemes) -> Regexp
 
     # <!--
     #   rdoc-file=lib/uri/rfc2396_parser.rb

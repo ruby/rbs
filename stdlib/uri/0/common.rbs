@@ -387,8 +387,8 @@ module URI
   #     # => ["http://foo.example.com/bla", "mailto:test@example.com"]
   #
   %a{deprecated: Use URI::RFC2396_PARSER.extract instead}
-  def self.extract: (String str, ?Array[String] schemes) -> Array[String]
-                  | (String str, ?Array[String] schemes) { (String) -> void } -> nil
+  def self.extract: (String str, ?Array[String]? schemes) -> Array[String]
+                  | (String str, ?Array[String]? schemes) { (String) -> void } -> nil
 
   def self.get_encoding: (String label) -> Encoding?
 
@@ -540,7 +540,7 @@ module URI
   #     URI.for('foo', *values, default: URI::HTTP)
   #     # => #<URI::HTTP foo://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top>
   #
-  def self.for: (String scheme, *untyped arguments, ?default: Class) -> (File | FTP | HTTP | HTTPS | LDAP | LDAPS | MailTo | WS | WSS | Generic)
+  def self.for: (String? scheme, *untyped arguments, ?default: Class) -> (File | FTP | HTTP | HTTPS | LDAP | LDAPS | MailTo | WS | WSS | Generic)
 
   # <!--
   #   rdoc-file=lib/uri/common.rb
