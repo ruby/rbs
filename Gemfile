@@ -9,6 +9,10 @@ gem "rake-compiler"
 gem "test-unit"
 gem "rspec"
 gem "rubocop"
+# regexp_parser 2.13.2 calls Ractor.make_shareable at load time, which trips a
+# RUBY_ASSERT in Ruby 4.0.x (fixed in ruby/ruby master by [Bug #22460]).
+# Remove this pin once the fix is backported to the ruby_4_0 branch.
+gem "regexp_parser", "< 2.13.2"
 gem "rubocop-rubycw"
 gem "rubocop-on-rbs"
 gem "json"
