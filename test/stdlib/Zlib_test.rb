@@ -15,6 +15,24 @@ class ZlibSingletonTest < Test::Unit::TestCase
                       Zlib, :adler32, "hello"
     assert_send_type  "(::String, ::Integer) -> ::Integer",
                       Zlib, :adler32, "hello", 1
+    with_string("hello").and_nil do |string|
+      assert_send_type  "(::string?) -> ::Integer",
+                        Zlib, :adler32, string
+      with_int(1).and_nil do |checksum|
+        assert_send_type  "(::string?, ::int?) -> ::Integer",
+                          Zlib, :adler32, string, checksum
+      end
+    end
+
+    Tempfile.create do |file|
+      file.write("hello")
+      file.rewind
+      assert_send_type  "(::File) -> ::Integer",
+                        Zlib, :adler32, file
+      file.rewind
+      assert_send_type  "(::File, ::Integer) -> ::Integer",
+                        Zlib, :adler32, file, 1
+    end
   end
 
   def test_adler32_combine
@@ -29,6 +47,24 @@ class ZlibSingletonTest < Test::Unit::TestCase
                       Zlib, :crc32, "hello"
     assert_send_type  "(::String, ::Integer) -> ::Integer",
                       Zlib, :crc32, "hello", 1
+    with_string("hello").and_nil do |string|
+      assert_send_type  "(::string?) -> ::Integer",
+                        Zlib, :crc32, string
+      with_int(1).and_nil do |checksum|
+        assert_send_type  "(::string?, ::int?) -> ::Integer",
+                          Zlib, :crc32, string, checksum
+      end
+    end
+
+    Tempfile.create do |file|
+      file.write("hello")
+      file.rewind
+      assert_send_type  "(::File) -> ::Integer",
+                        Zlib, :crc32, file
+      file.rewind
+      assert_send_type  "(::File, ::Integer) -> ::Integer",
+                        Zlib, :crc32, file, 1
+    end
   end
 
   def test_crc32_combine
