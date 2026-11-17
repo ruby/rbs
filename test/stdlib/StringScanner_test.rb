@@ -91,6 +91,8 @@ class StringScannerTest < Test::Unit::TestCase
   def test_captures
     assert_send_type "() -> ::Array[::String]",
                      matched_named_scanner, :captures
+    assert_send_type "() -> ::Array[::String?]",
+                     partial_named_scanner, :captures
     assert_send_type "() -> nil",
                      unmatched_scanner, :captures
   end
@@ -380,6 +382,10 @@ class StringScannerTest < Test::Unit::TestCase
                      s, :values_at, "wday"
     assert_send_type "(::Symbol) -> ::Array[::String]",
                      s, :values_at, :wday
+    assert_send_type "(::Integer, ::Integer) -> ::Array[::String?]",
+                     partial_named_scanner, :values_at, 0, 2
+    assert_send_type "(::Integer) -> ::Array[nil]",
+                     s, :values_at, 9
     assert_send_type "(::Integer) -> nil",
                      unmatched_scanner, :values_at, 0
   end

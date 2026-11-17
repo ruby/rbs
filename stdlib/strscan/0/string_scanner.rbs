@@ -556,7 +556,7 @@ class StringScanner
   # scanner.scan(/nope/)
   # scanner.captures         # => nil
   #
-  def captures: () -> Array[String]?
+  def captures: () -> Array[String?]?
 
   # <!--
   #   rdoc-file=ext/strscan/strscan.c
@@ -1607,7 +1607,7 @@ class StringScanner
   # scanner.values_at(*0..3)               # => ["Fri Dec 12 ", "Fri", "Dec", "12"]
   # scanner.values_at(*%i[wday month day]) # => ["Fri", "Dec", "12"]
   #
-  def values_at: (*Integer | String | Symbol) -> Array[String]?
+  def values_at: (*Integer | String | Symbol) -> Array[String?]?
 
   private
 
