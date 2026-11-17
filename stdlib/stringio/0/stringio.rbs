@@ -548,7 +548,17 @@ class StringIO
   # Related: StringIO.open (passes the StringIO object to the block; closes the
   # object automatically on block exit).
   #
-  def initialize: (?String string, ?String? mode) -> void
+  def initialize: (
+    ?string string,
+    ?string | int | nil mode,
+    ?mode: string | int,
+    ?flags: int,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish
+  ) -> void
 
   # <!--
   #   rdoc-file=ext/stringio/stringio.c
@@ -569,8 +579,28 @@ class StringIO
   #
   # Related: StringIO.new.
   #
-  def self.open: (?String string, ?String? mode) -> StringIO
-               | [U] (?String string, ?String? mode) { (StringIO arg) -> U } -> U
+  def self.open: (
+    ?string string,
+    ?string | int | nil mode,
+    ?mode: string | int,
+    ?flags: int,
+    ?external_encoding: encoding,
+    ?internal_encoding: encoding,
+    ?encoding: encoding,
+    ?textmode: boolish,
+    ?binmode: boolish
+  ) -> StringIO
+               | [U] (
+      ?string string,
+      ?string | int | nil mode,
+      ?mode: string | int,
+      ?flags: int,
+      ?external_encoding: encoding,
+      ?internal_encoding: encoding,
+      ?encoding: encoding,
+      ?textmode: boolish,
+      ?binmode: boolish
+    ) { (StringIO arg) -> U } -> U
 
   def <<: (untyped arg0) -> self
 
