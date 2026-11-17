@@ -304,6 +304,11 @@ class Encoding
   #
   alias to_s name
 
+  # <!-- rdoc-file=encoding.c -->
+  # The supported Unicode version.
+  #
+  UNICODE_VERSION: String
+
   ANSI_X3_4_1968: Encoding
   ASCII: Encoding
   ASCII_8BIT: Encoding
@@ -1324,6 +1329,11 @@ Encoding::Converter::INVALID_MASK: Integer
 # Replace invalid byte sequences
 #
 Encoding::Converter::INVALID_REPLACE: Integer
+
+# <!-- rdoc-file=transcode.c -->
+# Decorator for converting CRLF and CR to LF when writing
+#
+Encoding::Converter::LF_NEWLINE_DECORATOR: Integer
 
 # <!-- rdoc-file=transcode.c -->
 # Indicates the source may be part of a larger string.  See primitive_convert

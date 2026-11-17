@@ -174,12 +174,27 @@ class EncodingInstanceTest < Test::Unit::TestCase
       assert_const_type 'Encoding', "Encoding::#{encoding}"
     end
   end
+
+  def test_UNICODE_VERSION
+    if_ruby("4.0"...) do
+      assert_const_type "String", "Encoding::UNICODE_VERSION"
+    end
+  end
 end
 
 class Encoding::ConverterSingletonTest < Test::Unit::TestCase
   include TestHelper
 
   testing "singleton(::Encoding::Converter)"
+
+  def test_LF_NEWLINE_DECORATOR
+    assert_const_type "Integer", "Encoding::Converter::LF_NEWLINE_DECORATOR"
+    assert_send_type(
+      "(Encoding, Encoding, Integer) -> void",
+      Encoding::Converter, :new,
+      Encoding::UTF_8, Encoding::EUC_JP, Encoding::Converter::LF_NEWLINE_DECORATOR
+    )
+  end
 
   def test_new
     assert_send_type(
