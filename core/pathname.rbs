@@ -204,8 +204,8 @@ class Pathname
   # -->
   # See <code>Dir.glob</code>.  Returns or yields Pathname objects.
   #
-  def self.glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
-               | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
+  def self.glob: (array[path] | path pattern, ?int flags, ?flags: int, ?base: path?, ?sort: bool) -> Array[Pathname]
+               | (array[path] | path pattern, ?int flags, ?flags: int, ?base: path?, ?sort: bool) { (Pathname) -> untyped } -> nil
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
@@ -555,6 +555,7 @@ class Pathname
   # This method has existed since 1.8.1.
   #
   def each_entry: () { (Pathname) -> untyped } -> nil
+                | () -> Enumerator[Pathname, nil]
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
@@ -645,7 +646,7 @@ class Pathname
   # -->
   # See <code>File.expand_path</code>.
   #
-  def expand_path: (?String dir) -> Pathname
+  def expand_path: (?path? dir) -> Pathname
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
@@ -708,8 +709,8 @@ class Pathname
   #
   # See Dir.glob. This method uses the `base` keyword argument of Dir.glob.
   #
-  def glob: (String | Array[String] pattern, ?Integer flags) -> Array[Pathname]
-          | (String | Array[String] pattern, ?Integer flags) { (Pathname) -> untyped } -> nil
+  def glob: (array[path] | path pattern, ?int flags) -> Array[Pathname]
+          | (array[path] | path pattern, ?int flags) { (Pathname) -> untyped } -> nil
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
@@ -837,6 +838,7 @@ class Pathname
       ?string | int mode,
       ?int perm,
       # open options
+      ?mode: Integer | String,
       ?flags: Integer,
       ?external_encoding: encoding,
       ?internal_encoding: encoding,
@@ -1015,7 +1017,7 @@ class Pathname
   # Note that this method does not handle situations where the case sensitivity of
   # the filesystem in use differs from the operating system default.
   #
-  def relative_path_from: (Pathname | string base_directory) -> Pathname
+  def relative_path_from: (path base_directory) -> Pathname
 
   # <!--
   #   rdoc-file=pathname_builtin.rb
@@ -1259,7 +1261,7 @@ class Pathname
   # Create a Pathname object from the given String (or String-like object). If
   # `path` contains a NUL character (<code>\0</code>), an ArgumentError is raised.
   #
-  def initialize: (string | Pathname) -> void
+  def initialize: (path) -> void
 
   def plus: (untyped path1, untyped path2) -> untyped
 
@@ -1292,5 +1294,5 @@ module Kernel
   # -->
   # Creates a Pathname object.
   #
-  def self?.Pathname: (string | Pathname) -> Pathname
+  def self?.Pathname: (path) -> Pathname
 end
