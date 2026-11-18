@@ -909,7 +909,7 @@ class File < IO
   #
   #     File.absolute_path("~oracle/bin")       #=> "<relative_path>/~oracle/bin"
   #
-  def self.absolute_path: (path file_name, ?path dir_string) -> String
+  def self.absolute_path: (path file_name, ?path? dir_string) -> String
 
   # <!--
   #   rdoc-file=file.c
@@ -1150,7 +1150,7 @@ class File < IO
   # So first it resolves the parent of __FILE__, that is bin/, then go to the
   # parent, the root of the project and appends <code>lib/mygem.rb</code>.
   #
-  def self.expand_path: (path file_name, ?path dir_string) -> String
+  def self.expand_path: (path file_name, ?path? dir_string) -> String
 
   # <!--
   #   rdoc-file=file.c
