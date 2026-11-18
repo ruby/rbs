@@ -201,6 +201,24 @@
 #     # => "a"
 #
 module Psych
+  # <!-- rdoc-file=ext/psych/lib/psych.rb -->
+  # The version of libyaml Psych is using
+  #
+  LIBYAML_VERSION: String
+
+  # <!-- rdoc-file=ext/psych/lib/psych/versions.rb -->
+  # The version of Psych you are using
+  #
+  VERSION: String
+
+  # <!--
+  #   rdoc-file=ext/psych/psych.c
+  #   - Psych.libyaml_version
+  # -->
+  # Returns the version of libyaml being used
+  #
+  def self.libyaml_version: () -> [ Integer, Integer, Integer ]
+
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
   #   - Psych.dump(o)               -> string of yaml
