@@ -100,6 +100,8 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :absolute_path, File.expand_path(__FILE__), ToStr.new(__dir__)
     assert_send_type "(String, ToPath) -> String",
                      File, :absolute_path, File.expand_path(__FILE__), ToPath.new(__dir__)
+    assert_send_type "(String, nil) -> String",
+                     File, :absolute_path, File.expand_path(__FILE__), nil
   end
 
   def test_absolute_path?
@@ -302,6 +304,8 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :expand_path, File.expand_path(__FILE__), ToStr.new(__dir__)
     assert_send_type "(String, ToPath) -> String",
                      File, :expand_path, File.expand_path(__FILE__), ToPath.new(__dir__)
+    assert_send_type "(String, nil) -> String",
+                     File, :expand_path, File.expand_path(__FILE__), nil
   end
 
   def test_extname
