@@ -79,6 +79,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Hash[Symbol, untyped]) -> void", opt, :define, '-a', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> void", opt, :define, '-a', /foo/
     assert_send_type "(*String, Proc) -> void", opt, :define, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> void",
+                     opt, :define, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> void",
+                     opt, :define, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_define_head
@@ -89,6 +93,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Hash[Symbol, untyped]) -> void", opt, :define_head, '-a', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> void", opt, :define_head, '-a', /foo/
     assert_send_type "(*String, Proc) -> void", opt, :define_head, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> void",
+                     opt, :define_head, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> void",
+                     opt, :define_head, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_define_tail
@@ -99,6 +107,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Hash[Symbol, untyped]) -> void", opt, :define_tail, '-a', {foo: 1, bar: 2}
     assert_send_type "(String, Regexp) -> void", opt, :define_tail, '-a', /foo/
     assert_send_type "(*String, Proc) -> void", opt, :define_tail, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> void",
+                     opt, :define_tail, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> void",
+                     opt, :define_tail, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_environment
@@ -135,6 +147,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Regexp) -> OptionParser", opt, :on, '-a', /foo/
     assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> OptionParser", opt, :on, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> OptionParser",
+                     opt, :on, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> OptionParser",
+                     opt, :on, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_on_head
@@ -149,6 +165,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Regexp) -> OptionParser", opt, :on_head, '-a', /foo/
     assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on_head, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> OptionParser", opt, :on_head, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> OptionParser",
+                     opt, :on_head, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> OptionParser",
+                     opt, :on_head, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_on_tail
@@ -163,6 +183,10 @@ class OptionParserTest < Test::Unit::TestCase
     assert_send_type "(String, Regexp) -> OptionParser", opt, :on_tail, '-a', /foo/
     assert_send_type "(String, String, Regexp) -> OptionParser", opt, :on_tail, '-a', '--all', /foo/
     assert_send_type "(*String, Proc) -> OptionParser", opt, :on_tail, '-a', proc {}
+    assert_send_type "(String, String, String, Array[String]) { (String) -> void } -> OptionParser",
+                     opt, :on_tail, "--name=NAME", "This is a name.", "Other explanations.", ["foo", "bar", "baz"] do end
+    assert_send_type "(String, Class, String, String, Proc) -> OptionParser",
+                     opt, :on_tail, "--count=N", Integer, "First description", "Second description", proc {}
   end
 
   def test_order
