@@ -133,122 +133,124 @@ class NetInstanceTest < Test::Unit::TestCase
   library "net-http", "uri"
   testing "::Net::HTTP"
 
-  class TestNet < Net::HTTP
-    def self.new
-      @server = WithServer::Server.new("localhost")
-      super @server.uri.host, @server.uri.port
-    end
-
-    def finish
-      @server.finish
-    end
+  # Net::HTTP.new doesn't connect, so no server is needed until #start.
+  def new_http
+    Net::HTTP.new("localhost", 80)
   end
 
   def test_inspect
     assert_send_type "() -> String",
-                     TestNet.new, :inspect
+                     new_http, :inspect
   end
 
   def test_set_debug_output
     assert_send_type "(IO) -> void",
-                     TestNet.new, :set_debug_output, $stderr
+                     new_http, :set_debug_output, $stderr
   end
 
   def test_address
     assert_send_type "() -> String",
-                     TestNet.new, :address
+                     new_http, :address
   end
 
   def test_port
     assert_send_type "() -> Integer",
-                     TestNet.new, :port
+                     new_http, :port
   end
 
   def test_ipaddr
     assert_send_type "() -> nil",
-                     TestNet.new, :ipaddr
+                     new_http, :ipaddr
     assert_send_type "(String) -> void",
-                     TestNet.new, :ipaddr=, ('127.0.0.1')
+                     new_http, :ipaddr=, ('127.0.0.1')
   end
 
   def test_open_timeout
     assert_send_type "() -> Integer",
-                     TestNet.new, :open_timeout
+                     new_http, :open_timeout
   end
 
   def test_read_timeout
     assert_send_type "() -> Integer",
-                     TestNet.new, :read_timeout
+                     new_http, :read_timeout
     assert_send_type "(Integer) -> void",
-                     TestNet.new, :read_timeout=, 10
+                     new_http, :read_timeout=, 10
   end
 
   def test_write_timeout
     assert_send_type "() -> Integer",
-                     TestNet.new, :write_timeout
+                     new_http, :write_timeout
     assert_send_type "(Integer) -> void",
-                     TestNet.new, :write_timeout=, 10
+                     new_http, :write_timeout=, 10
   end
 
   def test_continue_timeout
     assert_send_type "() -> nil",
-                     TestNet.new, :continue_timeout
+                     new_http, :continue_timeout
     assert_send_type "(Integer) -> void",
-                     TestNet.new, :continue_timeout=, 10
+                     new_http, :continue_timeout=, 10
   end
 
   def test_max_retries
     assert_send_type "() -> Integer",
-                     TestNet.new, :max_retries
+                     new_http, :max_retries
     assert_send_type "(Integer) -> void",
-                     TestNet.new, :max_retries=, 10
+                     new_http, :max_retries=, 10
   end
 
   def test_keep_alive_timeout
     assert_send_type "() -> Integer",
-                     TestNet.new, :keep_alive_timeout
+                     new_http, :keep_alive_timeout
   end
 
   def test_started_?
     assert_send_type "() -> bool",
-                     TestNet.new, :started?
+                     new_http, :started?
     assert_send_type "() -> bool",
-                     TestNet.new, :active?
+                     new_http, :active?
   end
 
   def test_use_ssl
     assert_send_type "() -> bool",
-                     TestNet.new, :use_ssl?
+                     new_http, :use_ssl?
     assert_send_type "(bool) -> void",
-                     TestNet.new, :use_ssl=, true
+                     new_http, :use_ssl=, true
   end
 
   def test_start
-    assert_send_type "() { (Net::HTTP) -> untyped } -> untyped",
-                     TestNet.new, :start do |net_http| net_http.class end
-    assert_send_type "() -> Net::HTTP",
-                     TestNet.new, :start
+    with_server("localhost") do |uri|
+      assert_send_type "() { (Net::HTTP) -> untyped } -> untyped",
+                       Net::HTTP.new(uri.host, uri.port), :start do |net_http| net_http.class end
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      begin
+        assert_send_type "() -> Net::HTTP",
+                         http, :start
+      ensure
+        http.finish if http.started?
+      end
+    end
   end
 
   def test_proxy
     assert_send_type "() -> bool",
-                     TestNet.new, :proxy?
+                     new_http, :proxy?
     assert_send_type "() -> bool",
-                     TestNet.new, :proxy_from_env?
+                     new_http, :proxy_from_env?
     assert_send_type "() -> nil",
-                     TestNet.new, :proxy_uri
+                     new_http, :proxy_uri
     assert_send_type "() -> nil",
-                     TestNet.new, :proxy_address
+                     new_http, :proxy_address
     assert_send_type "() -> nil",
-                     TestNet.new, :proxy_port
+                     new_http, :proxy_port
     assert_send_type "() -> nil",
-                     TestNet.new, :proxyaddr
+                     new_http, :proxyaddr
     assert_send_type "() -> nil",
-                     TestNet.new, :proxyport
+                     new_http, :proxyport
     assert_send_type "() -> nil",
-                     TestNet.new, :proxy_user
+                     new_http, :proxy_user
     assert_send_type "() -> nil",
-                     TestNet.new, :proxy_pass
+                     new_http, :proxy_pass
   end
 
   def test_http_verbs

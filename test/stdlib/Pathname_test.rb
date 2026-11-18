@@ -710,16 +710,13 @@ class PathnameInstanceTest < Test::Unit::TestCase
   end
 
   def test_sysopen
-    assert_send_type '() -> Integer',
-                     Pathname(File.expand_path(__FILE__)), :sysopen
-    assert_send_type '(String) -> Integer',
-                     Pathname(File.expand_path(__FILE__)), :sysopen, 'r'
-    assert_send_type '(String, Integer) -> Integer',
-                     Pathname(File.expand_path(__FILE__)), :sysopen, 'r', 0644
-    assert_send_type '(Integer) -> Integer',
-                     Pathname(File.expand_path(__FILE__)), :sysopen, File::RDONLY
-    assert_send_type '(nil, nil) -> Integer',
-                     Pathname(File.expand_path(__FILE__)), :sysopen, nil, nil
+    path = Pathname(File.expand_path(__FILE__))
+
+    IO.for_fd(assert_send_type('() -> Integer', path, :sysopen)).close
+    IO.for_fd(assert_send_type('(String) -> Integer', path, :sysopen, 'r')).close
+    IO.for_fd(assert_send_type('(String, Integer) -> Integer', path, :sysopen, 'r', 0644)).close
+    IO.for_fd(assert_send_type('(Integer) -> Integer', path, :sysopen, File::RDONLY)).close
+    IO.for_fd(assert_send_type('(nil, nil) -> Integer', path, :sysopen, nil, nil)).close
   end
 
   def test_to_path
