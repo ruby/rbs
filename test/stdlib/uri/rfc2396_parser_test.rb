@@ -61,6 +61,10 @@ class URIRFC2396_ParserInstanceTest < Test::Unit::TestCase
                       @instance, :extract, "foo" do |s| s.bytes end
     assert_send_type  "(String, Array[String]) { (String) -> untyped } -> nil",
                       @instance, :extract, "foo", ["http", "https"] do |s| s.bytes end
+    assert_send_type  "(String, nil) -> Array[String]",
+                      @instance, :extract, "http://example.com", nil
+    assert_send_type  "(String, nil) { (String) -> untyped } -> nil",
+                      @instance, :extract, "http://example.com", nil do |s| s.bytes end
   end
 
   def test_join
@@ -71,6 +75,10 @@ class URIRFC2396_ParserInstanceTest < Test::Unit::TestCase
   def test_make_regexp
     assert_send_type  "(Array[String]) -> Regexp",
                       @instance, :make_regexp, ["http", "https"]
+    assert_send_type  "() -> Regexp",
+                      @instance, :make_regexp
+    assert_send_type  "(nil) -> Regexp",
+                      @instance, :make_regexp, nil
   end
 
   def test_parse

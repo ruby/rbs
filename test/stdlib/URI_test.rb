@@ -93,6 +93,17 @@ class URISingletonTest < Test::Unit::TestCase
                      URI, :extract, "http://example.com" do |uri| uri.ascii_only? end
     assert_send_type "(String, Array[String]) { (String) -> top } -> nil",
                      URI, :extract, "http://example.com", ["http"] do |uri| uri.ascii_only? end
+    assert_send_type "(String, nil) -> Array[String]",
+                     URI, :extract, "http://example.com", nil
+    assert_send_type "(String, nil) { (String) -> top } -> nil",
+                     URI, :extract, "http://example.com", nil do |uri| uri.ascii_only? end
+  end
+
+  def test_for
+    assert_send_type "(String, *untyped) -> URI::HTTP",
+                     URI, :for, "http", nil, "example.com", nil, nil, "/", nil, nil, nil
+    assert_send_type "(nil, *untyped) -> URI::Generic",
+                     URI, :for, nil, nil, nil, nil, nil, "/a", nil, nil, nil
   end
 
   def test_get_encoding

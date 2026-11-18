@@ -240,6 +240,8 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   def test_split_userinfo
     assert_send_type  '(String ui) -> Array[String | nil]',
                       generic, :split_userinfo, 'user:pass'
+    assert_send_type  '(nil ui) -> Array[nil]',
+                      generic, :split_userinfo, nil
   end
 
   def test_escape_userpass
@@ -504,7 +506,11 @@ class URIGenericInstanceTest < Test::Unit::TestCase
   end
 
   def test_find_proxy
-    assert_send_type  '(?String env) -> (nil | URI::Generic)',
-                      generic, :find_proxy, 'http_proxy=proxy'
+    assert_send_type  '() -> URI::Generic?',
+                      URI('http://example.com'), :find_proxy
+    assert_send_type  '(Hash[String, String] env) -> URI::Generic',
+                      URI('http://example.com'), :find_proxy, { 'http_proxy' => 'http://127.0.0.1:8080' }
+    assert_send_type  '(Hash[String, String] env) -> nil',
+                      URI('http://example.com'), :find_proxy, { 'http_proxy' => 'http://127.0.0.1:8080', 'no_proxy' => 'example.com' }
   end
 end
