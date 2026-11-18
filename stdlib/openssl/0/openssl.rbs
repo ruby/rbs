@@ -2963,6 +2963,9 @@ module OpenSSL
     class CipherError < OpenSSL::OpenSSLError
     end
 
+    class AuthTagError < CipherError
+    end
+
     class DES < OpenSSL::Cipher
       private
 
@@ -5289,6 +5292,13 @@ module OpenSSL
     #
     def initialize_copy: (self) -> void
 
+    # <!-- rdoc-file=ext/openssl/ossl_pkcs12.c -->
+    # MSIE specific PKCS12 key usage extensions
+    #
+    KEY_EX: Integer
+
+    KEY_SIG: Integer
+
     class PKCS12Error < OpenSSL::OpenSSLError
     end
   end
@@ -5598,6 +5608,8 @@ module OpenSSL
       #
       def initialize: (X509::Certificate certificate) -> void
     end
+
+    class Signer = SignerInfo
 
     class SignerInfo
       # <!--
@@ -8153,20 +8165,32 @@ module OpenSSL
 
     OP_ALL: Integer
 
+    OP_ALLOW_CLIENT_RENEGOTIATION: Integer
+
     OP_ALLOW_NO_DHE_KEX: Integer
 
     OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION: Integer
 
     OP_CIPHER_SERVER_PREFERENCE: Integer
 
+    OP_CLEANSE_PLAINTEXT: Integer
+
     OP_CRYPTOPRO_TLSEXT_BUG: Integer
 
+    OP_DISABLE_TLSEXT_CA_NAMES: Integer
+
     OP_DONT_INSERT_EMPTY_FRAGMENTS: Integer
+
+    OP_ENABLE_KTLS: Integer
+
+    OP_ENABLE_MIDDLEBOX_COMPAT: Integer
 
     # <!-- rdoc-file=ext/openssl/ossl_ssl.c -->
     # Deprecated in OpenSSL 1.0.1k and 1.0.2.
     #
     OP_EPHEMERAL_RSA: Integer
+
+    OP_IGNORE_UNEXPECTED_EOF: Integer
 
     OP_LEGACY_SERVER_CONNECT: Integer
 
@@ -8205,6 +8229,8 @@ module OpenSSL
     #
     OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG: Integer
 
+    OP_NO_ANTI_REPLAY: Integer
+
     OP_NO_COMPRESSION: Integer
 
     OP_NO_ENCRYPT_THEN_MAC: Integer
@@ -8239,6 +8265,8 @@ module OpenSSL
     # Deprecated in OpenSSL 1.0.1.
     #
     OP_PKCS1_CHECK_2: Integer
+
+    OP_PRIORITIZE_CHACHA: Integer
 
     OP_SAFARI_ECDHE_ECDSA_BUG: Integer
 
