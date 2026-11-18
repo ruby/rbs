@@ -942,8 +942,11 @@ class RBS::ParserTest < Test::Unit::TestCase
       assert_nil params[1].default_type
     end
 
-    assert_raises RBS::ParsingError do
-      RBS::Parser.parse_type_params(buffer("[]"))
+    ["[]", "[ ]"].each do |source|
+      error = assert_raises(RBS::ParsingError) do
+        RBS::Parser.parse_type_params(buffer(source))
+      end
+      assert_equal "type parameter list cannot be empty", error.error_message
     end
 
     assert_raises RBS::ParsingError do
