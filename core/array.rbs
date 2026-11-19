@@ -926,6 +926,7 @@ class Array[unchecked out E]
   #
   # Related: see [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
+  %a{pure}
   def []: %a{implicitly-returns-nil} (int index) -> E
         | (int start, int length) -> Array[E]?
         | (range[int] range) -> Array[E]?
