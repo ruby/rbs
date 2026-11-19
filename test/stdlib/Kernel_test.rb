@@ -341,6 +341,37 @@ class KernelSingletonTest < Test::Unit::TestCase
                      Kernel, :local_variables
   end
 
+  def test_open
+    Dir.mktmpdir do |dir|
+      file = File.join(dir, "some_file")
+      File.write(file, "")
+
+      with_path(file) do |path|
+        assert_send_type("(path) -> File", Kernel, :open, path).close
+
+        with_string("w") do |mode|
+          assert_send_type("(path, string) -> File", Kernel, :open, path, mode).close
+        end
+
+        with_int(File::WRONLY) do |mode|
+          assert_send_type("(path, int) -> File", Kernel, :open, path, mode).close
+        end
+
+        with_int(0o644) do |perm|
+          assert_send_type("(path, String, int) -> File", Kernel, :open, path, "w", perm).close
+        end
+
+        assert_send_type("(path, String, encoding: String) -> File", Kernel, :open, path, "w", encoding: "UTF-8").close
+        assert_send_type("(path, mode: String, binmode: true) -> File", Kernel, :open, path, mode: "w", binmode: true).close
+
+        assert_send_type(
+          "(path, String) { (IO) -> Integer } -> Integer",
+          Kernel, :open, path, "w"
+        ) { |io| io.write("x") }
+      end
+    end
+  end
+
   def test_test
     # true/false tests
     with_path do |filepath|
