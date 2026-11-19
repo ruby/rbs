@@ -612,7 +612,9 @@ module RBS
         when AST::Ruby::Members::AttrReaderMember, AST::Ruby::Members::AttrWriterMember, AST::Ruby::Members::AttrAccessorMember
           # nop
         else
-          variables << tmp_var
+          # A module that is included more than once, directly or through a superclass or another module,
+          # inserts the same declaration again, which is not a duplicate.
+          variables << tmp_var unless variables.any? {|v| v.source.equal?(tmp_var.source) }
         end
 
         tmp_var = tmp_var.parent_variable
