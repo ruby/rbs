@@ -58,6 +58,47 @@ class StringIOSingletonTest < Test::Unit::TestCase
                      StringIO, :open, "abc", "r"
     assert_send_type "() { (::StringIO) -> ::Integer } -> ::Integer",
                      StringIO, :open do |io| io.write("a") end
+    assert_send_type "(::String, ::Integer) -> ::StringIO",
+                     StringIO, :open, +"abc", File::RDONLY
+    assert_send_type "(::String, mode: ::String) -> ::StringIO",
+                     StringIO, :open, +"abc", mode: "r"
+    assert_send_type "(::String, ::String) { (::StringIO) -> ::String } -> ::String",
+                     StringIO, :open, +"abc", "r" do |io| io.read end
+    assert_send_type "(::String, mode: ::Integer) { (::StringIO) -> ::String } -> ::String",
+                     StringIO, :open, +"abc", mode: File::RDONLY do |io| io.read end
+  end
+
+  def test_new
+    assert_send_type "() -> ::StringIO",
+                     StringIO, :new
+    assert_send_type "(::String) -> ::StringIO",
+                     StringIO, :new, +"abc"
+    assert_send_type "(ToStr) -> ::StringIO",
+                     StringIO, :new, ToStr.new(+"abc")
+    assert_send_type "(::String, ::String) -> ::StringIO",
+                     StringIO, :new, +"abc", "r"
+    assert_send_type "(::String, ToStr) -> ::StringIO",
+                     StringIO, :new, +"abc", ToStr.new("r")
+    assert_send_type "(::String, ::Integer) -> ::StringIO",
+                     StringIO, :new, +"abc", File::RDONLY
+    assert_send_type "(::String, ToInt) -> ::StringIO",
+                     StringIO, :new, +"abc", ToInt.new(File::RDONLY)
+    assert_send_type "(::String, nil) -> ::StringIO",
+                     StringIO, :new, +"abc", nil
+    assert_send_type "(::String, mode: ::String) -> ::StringIO",
+                     StringIO, :new, +"abc", mode: "r"
+    assert_send_type "(::String, mode: ::Integer) -> ::StringIO",
+                     StringIO, :new, +"abc", mode: File::RDONLY
+    assert_send_type "(::String, nil, flags: ::Integer) -> ::StringIO",
+                     StringIO, :new, +"abc", nil, flags: File::RDONLY
+    assert_send_type "(::String, ::String, external_encoding: ::String, internal_encoding: ::Encoding) -> ::StringIO",
+                     StringIO, :new, +"abc", "r", external_encoding: "UTF-8", internal_encoding: Encoding::UTF_8
+    assert_send_type "(::String, ::String, encoding: ::Encoding) -> ::StringIO",
+                     StringIO, :new, +"abc", "r", encoding: Encoding::BINARY
+    assert_send_type "(::String, ::String, binmode: true) -> ::StringIO",
+                     StringIO, :new, +"abc", "r", binmode: true
+    assert_send_type "(::String, ::String, textmode: true) -> ::StringIO",
+                     StringIO, :new, +"abc", "r", textmode: true
   end
 end
 
