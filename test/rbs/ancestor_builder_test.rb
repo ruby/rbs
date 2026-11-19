@@ -15,6 +15,9 @@ class RBS::AncestorBuilderTest < Test::Unit::TestCase
   RecursiveAncestorError = RBS::RecursiveAncestorError
   SuperclassMismatchError = RBS::SuperclassMismatchError
   MixinClassError = RBS::MixinClassError
+  InvalidSelfTypeError = RBS::InvalidSelfTypeError
+  RecursiveTypeAliasError = RBS::RecursiveTypeAliasError
+  NoSelfTypeFoundError = RBS::NoSelfTypeFoundError
 
   def test_one_ancestors_class
     SignatureManager.new(system_builtin: true) do |manager|
@@ -181,6 +184,101 @@ EOF
             expected_file = source.name == type_name("::_FooItem") ? "b.rbs" : "a.rbs"
             assert_equal expected_file, Pathname(location.buffer.name).basename.to_s
           end
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_module_self_types_type_alias
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("a.rbs")] = <<EOF
+interface _Items[T]
+end
+
+module Mixin
+end
+
+class Base[T]
+end
+
+type items = _Items[String]
+type mixin = Mixin & items
+type base[T] = Base[T] & mixin
+
+module M : base[Integer], Comparable
+end
+
+module N
+  type local = Mixin
+
+  module M : local
+  end
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        builder.one_instance_ancestors(type_name("::M")).tap do |a|
+          # Type aliases are expanded into the class instance and interface types they're composed of
+          assert_equal [
+                         Ancestor::Instance.new(name: type_name("::Base"), args: [parse_type("::Integer")], source: nil),
+                         Ancestor::Instance.new(name: type_name("::Mixin"), args: [], source: nil),
+                         Ancestor::Instance.new(name: type_name("::_Items"), args: [parse_type("::String")], source: nil),
+                         Ancestor::Instance.new(name: type_name("::Comparable"), args: [], source: nil)
+                       ],
+                       a.self_types
+
+          a.self_types or raise
+          assert_equal ["base[Integer]", "base[Integer]", "base[Integer]", "Comparable"], a.self_types.map { _1.source.location.source }
+        end
+
+        builder.one_instance_ancestors(type_name("::N::M")).tap do |a|
+          assert_equal [Ancestor::Instance.new(name: type_name("::Mixin"), args: [], source: nil)], a.self_types
+        end
+      end
+    end
+  end
+
+  def test_one_ancestors_module_self_types_type_alias_error
+    SignatureManager.new(system_builtin: true) do |manager|
+      manager.files[Pathname("a.rbs")] = <<EOF
+type union = String | Integer
+
+type rec1 = rec2
+type rec2 = rec1 & String
+
+module M1 : union
+end
+
+module M2 : rec1
+end
+
+module M3 : unknown
+end
+
+module M4 : union[String]
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder::AncestorBuilder.new(env: env)
+
+        assert_raises InvalidSelfTypeError do
+          builder.one_instance_ancestors(type_name("::M1"))
+        end.tap do |error|
+          assert_equal "union", error.location.source
+          assert_equal parse_type("::String | ::Integer"), error.type
+        end
+
+        assert_raises RecursiveTypeAliasError do
+          builder.one_instance_ancestors(type_name("::M2"))
+        end
+
+        assert_raises NoSelfTypeFoundError do
+          builder.one_instance_ancestors(type_name("::M3"))
+        end
+
+        assert_raises InvalidTypeApplicationError do
+          builder.one_instance_ancestors(type_name("::M4"))
         end
       end
     end

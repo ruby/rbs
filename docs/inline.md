@@ -144,6 +144,14 @@ module StringCollection
 end
 ```
 
+The constraint can also be a type alias that expands to class instance types, interface types, or an intersection of them:
+
+```ruby
+# @rbs module-self: loggable_each[String]
+module LoggingCollection
+end
+```
+
 You can add a description after `--`:
 
 ```ruby
