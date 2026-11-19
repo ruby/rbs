@@ -8069,6 +8069,21 @@ module OpenSSL
     end
   end
 
+  class Provider
+    def self.load: (String name) -> Provider
+
+    def self.provider_names: () -> Array[String]
+
+    def inspect: () -> String
+
+    def name: () -> String
+
+    def unload: () -> true
+
+    class ProviderError < OpenSSL::OpenSSLError
+    end
+  end
+
   module Random
     # <!--
     #   rdoc-file=ext/openssl/ossl_rand.c
