@@ -12,6 +12,11 @@ module RBS
         @context_decls = []
       end
 
+      def initialize_copy(other)
+        @context_decls = other.context_decls.dup
+        self
+      end
+
       def <<(context_decl)
         context_decls << context_decl
         @type_params_validated = nil
