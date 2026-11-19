@@ -25,9 +25,7 @@ class Bar < Struct.new(:bar)
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
 end
 
@@ -61,9 +59,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   def hello: (untyped a, ?::Integer b, *untyped c, untyped d, e: untyped, ?f: ::Integer, **untyped g) { (?) -> untyped } -> nil
 
@@ -119,9 +115,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   def initialize: () -> void
 
@@ -219,9 +213,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   def with_return: () -> (1 | "2" | :x)
 
@@ -257,9 +249,7 @@ end
       end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<~EOF
+    assert_write parser.parse(rb), <<~EOF
       class Hello
         def with_optional_block1: () ?{ (untyped) -> untyped } -> (untyped | nil)
 
@@ -328,9 +318,7 @@ class ReturnTypeWithIF
 end
 EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOR
+    assert_write parser.parse(rb), <<-EOR
 class ReturnTypeWithIF
   def with_if: () -> (true | nil)
 
@@ -358,9 +346,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   def self.hello: () -> nil
 end
@@ -398,9 +384,7 @@ module Mod
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   include Foo
 
@@ -461,9 +445,7 @@ module Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 module Hello
   def foo: () -> nil
 
@@ -505,9 +487,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   private
 
@@ -551,9 +531,7 @@ end
       end
     RUBY
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<~RBS
+    assert_write parser.parse(rb), <<~RBS
       class C
         private
 
@@ -584,9 +562,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   alias a b
 
@@ -633,9 +609,7 @@ class Hello # :nodoc:
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 # Comments for class.
 # This is a comment.
 class Hello
@@ -674,9 +648,7 @@ def hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Object
   def hello: () -> nil
 end
@@ -695,9 +667,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 module Foo
   VERSION: "0.1.1"
 
@@ -719,9 +689,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 module Foo
   MAJOR: untyped
 
@@ -747,9 +715,7 @@ H = { id: 123 }
 I = self
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 A: 1
 
 B: ::Float
@@ -772,8 +738,8 @@ I: untyped
 
   def test_invalid_byte_sequence_in_utf8
     parser = RB.new
-    parser.parse('A = "\xff"')
-    assert_write parser.decls, "A: ::String\n"
+    rb = 'A = "\xff"'
+    assert_write parser.parse(rb), "A: ::String\n"
   end
 
   def test_argumentless_fcall
@@ -787,9 +753,7 @@ class C
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class C
 end
     EOF
@@ -805,9 +769,7 @@ class C
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class C
   def foo: () -> nil
 end
@@ -829,9 +791,7 @@ module Foo
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 module Foo
   class Bar
   end
@@ -855,9 +815,7 @@ class C
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class C
   def foo: (untyped x, untyped y, untyped z) -> untyped
 end
@@ -884,9 +842,7 @@ module M
 end
     RUBY
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<~RBS
+    assert_write parser.parse(rb), <<~RBS
 module M
   def not_refinements: () -> nil
 end
@@ -908,9 +864,7 @@ class HelloWorld
 end
     RUBY
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<~RBS
+    assert_write parser.parse(rb), <<~RBS
 class HelloWorld
   def self.world: (untyped str) -> untyped
 
@@ -931,9 +885,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   # comment for ivar
   @message: untyped
@@ -959,9 +911,7 @@ module Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 module Hello
   # comment for ivar
   @message: untyped
@@ -1001,9 +951,7 @@ class Hello
 end
     EOR
 
-    parser.parse(rb)
-
-    assert_write parser.decls, <<-EOF
+    assert_write parser.parse(rb), <<-EOF
 class Hello
   # comment for cvar
   @@message: untyped
@@ -1064,18 +1012,16 @@ def foo(...) end
 end
     RUBY
 
-    parser.parse(rb)
-
     if RUBY_VERSION < '3.4'
       # Ruby <=3.3 generates AST without kwrest args for `...` args
-      assert_write parser.decls, <<~RBS
+      assert_write parser.parse(rb), <<~RBS
         module M
           def foo: (*untyped) ?{ (?) -> untyped } -> nil
         end
       RBS
     else
       # Ruby 3.4 generates AST with kwrest args for `...` args
-      assert_write parser.decls, <<~RBS
+      assert_write parser.parse(rb), <<~RBS
         module M
           def foo: (*untyped, **untyped) ?{ (?) -> untyped } -> nil
         end
@@ -1090,9 +1036,8 @@ module M
   def foo = 42
 end
     RUBY
-    parser.parse(rb)
 
-    assert_write parser.decls, <<~RBS
+    assert_write parser.parse(rb), <<~RBS
 module M
   def foo: () -> 42
 end
