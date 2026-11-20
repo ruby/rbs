@@ -31,6 +31,11 @@
 # Tanaka Akira <akr@fsij.org>
 #
 class PrettyPrint
+  # <!-- rdoc-file=lib/prettyprint.rb -->
+  # The version string
+  #
+  VERSION: String
+
   interface _Output
     def <<: (String) -> void
   end

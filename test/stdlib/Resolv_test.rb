@@ -7,6 +7,10 @@ class ResolvSingletonTest < Test::Unit::TestCase
   library "resolv"
   testing "singleton(::Resolv)"
 
+  def test_VERSION
+    assert_const_type "String", "Resolv::VERSION"
+  end
+
   def test_each_address
     assert_send_type "(String) { (String) -> void } -> void",
     Resolv, :each_address, "localhost" do |c| c end

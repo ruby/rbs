@@ -146,4 +146,8 @@ class IPAddrInstanceTest < Test::Unit::TestCase
     assert_send_type "(String) -> String", IPAddr.new("fe80::1"), :zone_id=, "%eth0"
     assert_send_type "(nil) -> nil", IPAddr.new("fe80::1%eth0"), :zone_id=, nil
   end
+
+  def test_VERSION
+    assert_const_type "String", "IPAddr::VERSION"
+  end
 end

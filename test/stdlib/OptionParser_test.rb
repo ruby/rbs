@@ -6,6 +6,12 @@ class OptionParserSingletonTest < Test::Unit::TestCase
   library "optparse"
   testing "singleton(::OptionParser)"
 
+  def test_VERSION
+    omit "OptionParser::VERSION is not available" unless OptionParser.const_defined?(:VERSION, false)
+
+    assert_const_type "String", "OptionParser::VERSION"
+  end
+
   def test_accept
     assert_send_type "(Class t) -> void", OptionParser, :accept, Class.new
     assert_send_type "(Class t, Regexp pat) -> void", OptionParser, :accept, Class.new, /xxx/

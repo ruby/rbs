@@ -26,6 +26,11 @@
 #
 %a{annotate:rdoc:source:from=lib/resolv.rb}
 class Resolv
+  # <!-- rdoc-file=lib/resolv.rb -->
+  # The version string
+  #
+  VERSION: String
+
   # <!--
   #   rdoc-file=lib/resolv.rb
   #   - each_address(name, &block)

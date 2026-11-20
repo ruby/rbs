@@ -145,6 +145,11 @@
 # mutex.
 #
 class Tempfile < File
+  # <!-- rdoc-file=lib/tempfile.rb -->
+  # The version
+  #
+  VERSION: String
+
   # <!--
   #   rdoc-file=lib/tempfile.rb
   #   - create(basename="", tmpdir=nil, mode: 0, anonymous: false, **options, &block)

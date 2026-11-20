@@ -35,6 +35,11 @@
 # raised.
 #
 module SecureRandom
+  # <!-- rdoc-file=lib/securerandom.rb -->
+  # The version
+  #
+  VERSION: String
+
   # <!--
   #   rdoc-file=lib/securerandom.rb
   #   - bytes(n)

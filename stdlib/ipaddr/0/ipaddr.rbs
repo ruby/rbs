@@ -23,6 +23,11 @@
 class IPAddr
   include Comparable
 
+  # <!-- rdoc-file=lib/ipaddr.rb -->
+  # The version string
+  #
+  VERSION: String
+
   # <!--
   #   rdoc-file=lib/ipaddr.rb
   #   - new_ntoh(addr)

@@ -7,6 +7,10 @@ class TempfileSingletonTest < Test::Unit::TestCase
   library "tempfile"
   testing "singleton(::Tempfile)"
 
+  def test_VERSION
+    assert_const_type "String", "Tempfile::VERSION"
+  end
+
 
   def test_open
     assert_send_type "(String) -> ::Tempfile",
