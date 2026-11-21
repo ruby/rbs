@@ -235,6 +235,55 @@ class IOSingletonTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_readlines
+    path = File.expand_path(__FILE__)
+
+    assert_send_type "(String) -> Array[String]",
+                     IO, :readlines, path
+    assert_send_type "(String, String) -> Array[String]",
+                     IO, :readlines, path, "\n"
+    assert_send_type "(String, nil) -> Array[String]",
+                     IO, :readlines, path, nil
+    assert_send_type "(String, ToStr) -> Array[String]",
+                     IO, :readlines, path, ToStr.new("\n")
+    assert_send_type "(String, String, Integer) -> Array[String]",
+                     IO, :readlines, path, "\n", 100
+    assert_send_type "(String, nil, Integer) -> Array[String]",
+                     IO, :readlines, path, nil, 100
+    assert_send_type "(String, String, nil) -> Array[String]",
+                     IO, :readlines, path, "\n", nil
+    assert_send_type "(String, Integer) -> Array[String]",
+                     IO, :readlines, path, 100
+    assert_send_type "(String, ToInt) -> Array[String]",
+                     IO, :readlines, path, ToInt.new(100)
+    assert_send_type "(String, Integer, chomp: bool) -> Array[String]",
+                     IO, :readlines, path, 100, chomp: true
+  end
+
+  def test_foreach
+    path = File.expand_path(__FILE__)
+
+    assert_send_type "(String) { (String) -> void } -> nil",
+                     IO, :foreach, path do end
+    assert_send_type "(String, nil) { (String) -> void } -> nil",
+                     IO, :foreach, path, nil do end
+    assert_send_type "(String, nil, Integer) { (String) -> void } -> nil",
+                     IO, :foreach, path, nil, 100 do end
+    assert_send_type "(String, String, nil) { (String) -> void } -> nil",
+                     IO, :foreach, path, "\n", nil do end
+    assert_send_type "(String, Integer) { (String) -> void } -> nil",
+                     IO, :foreach, path, 100 do end
+    assert_send_type "(String, Integer, chomp: bool) { (String) -> void } -> nil",
+                     IO, :foreach, path, 100, chomp: true do end
+
+    assert_send_type "(String) -> Enumerator[String, nil]",
+                     IO, :foreach, path
+    assert_send_type "(String, nil) -> Enumerator[String, nil]",
+                     IO, :foreach, path, nil
+    assert_send_type "(String, Integer) -> Enumerator[String, nil]",
+                     IO, :foreach, path, 100
+  end
 end
 
 class IOInstanceTest < Test::Unit::TestCase
@@ -333,6 +382,26 @@ class IOInstanceTest < Test::Unit::TestCase
             end
         end
       end
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type "(nil) { (String) -> void } -> IO",
+                       io, :each_line, nil do end
+      assert_send_type "(nil, Integer) { (String) -> void } -> IO",
+                       io, :each_line, nil, 100 do end
+      assert_send_type "(String, nil) { (String) -> void } -> IO",
+                       io, :each_line, "\n", nil do end
+      assert_send_type "(Integer) { (String) -> void } -> IO",
+                       io, :each_line, 100 do end
+      assert_send_type "(ToInt) { (String) -> void } -> IO",
+                       io, :each_line, ToInt.new(100) do end
+      assert_send_type "(Integer, chomp: bool) { (String) -> void } -> IO",
+                       io, :each_line, 100, chomp: true do end
+
+      assert_send_type "(nil) -> Enumerator[String, IO]",
+                       io, :each_line, nil
+      assert_send_type "(Integer) -> Enumerator[String, IO]",
+                       io, :each_line, 100
     end
   end
 
@@ -552,6 +621,13 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type '(nil, chomp: bool) -> nil',
                        io, :gets, nil, chomp: true
     end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(String, nil) -> String',
+                       io, :gets, "\n", nil
+      assert_send_type '(nil, nil) -> String',
+                       io, :gets, nil, nil
+    end
   end
 
   def test_readlines
@@ -568,6 +644,29 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type '(String, Integer, chomp: bool) -> Array[String]',
                        io, :readlines, "\n", 100, chomp: true
     end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(nil) -> Array[String]',
+                       io, :readlines, nil
+      io.rewind
+      assert_send_type '(nil, Integer) -> Array[String]',
+                       io, :readlines, nil, 100
+      io.rewind
+      assert_send_type '(String, nil) -> Array[String]',
+                       io, :readlines, "\n", nil
+      io.rewind
+      assert_send_type '(ToStr) -> Array[String]',
+                       io, :readlines, ToStr.new("\n")
+      io.rewind
+      assert_send_type '(Integer) -> Array[String]',
+                       io, :readlines, 100
+      io.rewind
+      assert_send_type '(ToInt) -> Array[String]',
+                       io, :readlines, ToInt.new(100)
+      io.rewind
+      assert_send_type '(Integer, chomp: bool) -> Array[String]',
+                       io, :readlines, 100, chomp: true
+    end
   end
 
   def test_readline
@@ -583,6 +682,34 @@ class IOInstanceTest < Test::Unit::TestCase
 
       assert_send_type '(String, Integer, chomp: bool) -> String',
                        io, :readline, "\n", 100, chomp: true
+    end
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(nil, Integer) -> String',
+                       io, :readline, nil, 100
+      assert_send_type '(String, nil) -> String',
+                       io, :readline, "\n", nil
+      assert_send_type '(ToStr) -> String',
+                       io, :readline, ToStr.new("\n")
+      assert_send_type '(Integer) -> String',
+                       io, :readline, 100
+      assert_send_type '(ToInt) -> String',
+                       io, :readline, ToInt.new(100)
+      assert_send_type '(Integer, chomp: bool) -> String',
+                       io, :readline, 100, chomp: true
+      assert_send_type '(nil) -> String',
+                       io, :readline, nil
+    end
+  end
+
+  def test_ungetc
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(String) -> nil',
+                       io, :ungetc, "a"
+      assert_send_type '(ToStr) -> nil',
+                       io, :ungetc, ToStr.new("a")
+      assert_send_type '(Integer) -> nil',
+                       io, :ungetc, 0x41
     end
   end
 
