@@ -101,7 +101,9 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def each: (*untyped) { (String) -> void } -> void
+    def each: (string? sep, ?int? limit) { (String line) -> void } -> self
+            | (?int limit) { (String line) -> void } -> self
+            | () -> ::Enumerator[String, self]
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -109,7 +111,8 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def each_byte: () { (String) -> void } -> void
+    def each_byte: () { (Integer byte) -> void } -> nil
+                 | () -> ::Enumerator[Integer, nil]
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -117,12 +120,15 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def each_char: () { (String) -> void } -> void
+    def each_char: () { (String char) -> void } -> nil
+                 | () -> ::Enumerator[String, nil]
 
     # <!-- rdoc-file=ext/zlib/zlib.c -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def each_line: (*untyped) { (String) -> void } -> void
+    def each_line: (string? sep, ?int? limit) { (String line) -> void } -> self
+                 | (?int limit) { (String line) -> void } -> self
+                 | () -> ::Enumerator[String, self]
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -169,7 +175,8 @@ module Zlib
     # method can return `nil` even if #eof? returns false, unlike the behavior of
     # File#gets.
     #
-    def gets: (?String sep, ?Integer limit) -> String?
+    def gets: (string? sep, ?int? limit) -> String?
+            | (?int limit) -> String?
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -226,7 +233,8 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def readline: (?String sep, ?Integer limit) -> String
+    def readline: (string? sep, ?int? limit) -> String
+                | (?int limit) -> String
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -234,7 +242,8 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def readlines: (?String sep, ?Integer limit) -> ::Array[String]
+    def readlines: (string? sep, ?int? limit) -> ::Array[String]
+                 | (?int limit) -> ::Array[String]
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -275,7 +284,7 @@ module Zlib
     # -->
     # See Zlib::GzipReader documentation for a description.
     #
-    def ungetc: (String arg0) -> NilClass
+    def ungetc: (string | Integer char) -> nil
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
