@@ -575,6 +575,79 @@ module Psych
   %a{annotate:rdoc:copy:Psych.to_json}
   def self.to_json: (untyped object) -> String
 
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - parse(yaml, filename: nil)
+  # -->
+  # Parse a YAML string in `yaml`.  Returns the Psych::Nodes::Document. `filename`
+  # is used in the exception message if a Psych::SyntaxError is raised.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #     Psych.parse("---\n - a\n - b") # => #<Psych::Nodes::Document:0x00>
+  #
+  #     begin
+  #       Psych.parse("--- `", filename: "file.txt")
+  #     rescue Psych::SyntaxError => ex
+  #       ex.file    # => 'file.txt'
+  #       ex.message # => "(file.txt): found character that cannot start any token"
+  #     end
+  #
+  # See Psych::Nodes for more information about YAML AST.
+  #
+  %a{annotate:rdoc:copy:Psych.parse}
+  def self.parse: (String yaml, ?filename: String | _ToStr | _ToS?) -> (Nodes::Document | false)
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - parse_file(filename, fallback: false)
+  # -->
+  # Parse a file at `filename`. Returns the Psych::Nodes::Document.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  %a{annotate:rdoc:copy:Psych.parse_file}
+  def self.parse_file: (path filename) -> (Nodes::Document | false)
+                     | [T] (path filename, fallback: T) -> (Nodes::Document | T)
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
+  #   - parse_stream(yaml, filename: nil, &block)
+  # -->
+  # Parse a YAML string in `yaml`.  Returns the Psych::Nodes::Stream. This method
+  # can handle multiple YAML documents contained in `yaml`. `filename` is used in
+  # the exception message if a Psych::SyntaxError is raised.
+  #
+  # If a block is given, a Psych::Nodes::Document node will be yielded to the
+  # block as it's being parsed.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #     Psych.parse_stream("---\n - a\n - b") # => #<Psych::Nodes::Stream:0x00>
+  #
+  #     Psych.parse_stream("--- a\n--- b") do |node|
+  #       node # => #<Psych::Nodes::Document:0x00>
+  #     end
+  #
+  #     begin
+  #       Psych.parse_stream("--- `", filename: "file.txt")
+  #     rescue Psych::SyntaxError => ex
+  #       ex.file    # => 'file.txt'
+  #       ex.message # => "(file.txt): found character that cannot start any token"
+  #     end
+  #
+  # Raises a TypeError when NilClass is passed.
+  #
+  # See Psych::Nodes for more information about YAML AST.
+  #
+  %a{annotate:rdoc:copy:Psych.parse_stream}
+  def self.parse_stream: (String yaml, ?filename: String | _ToStr | _ToS?) -> Nodes::Stream
+                       | (String yaml, ?filename: String | _ToStr | _ToS?) { (Nodes::Document document) -> void } -> void
+
   class Exception < ::RuntimeError
   end
 

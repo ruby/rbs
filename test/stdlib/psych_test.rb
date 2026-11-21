@@ -247,6 +247,62 @@ foo: 123
       [1], :to_yaml, indentation: 3, line_width: 30, canonical: true, header: true
     )
   end
+
+  def test_parse
+    assert_send_type(
+      "(::String) -> ::Psych::Nodes::Document",
+      Psych, :parse, "--- a"
+    )
+    assert_send_type(
+      "(::String) -> false",
+      Psych, :parse, ""
+    )
+    assert_send_type(
+      "(::String, filename: ::String) -> ::Psych::Nodes::Document",
+      Psych, :parse, "--- a", filename: "a.yml"
+    )
+  end
+
+  def test_parse_file
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "a.yml")
+      File.write(path, "--- a")
+      empty = File.join(dir, "empty.yml")
+      File.write(empty, "")
+
+      assert_send_type(
+        "(::String) -> ::Psych::Nodes::Document",
+        Psych, :parse_file, path
+      )
+      assert_send_type(
+        "(::Pathname) -> ::Psych::Nodes::Document",
+        Psych, :parse_file, Pathname(path)
+      )
+      assert_send_type(
+        "(::String) -> false",
+        Psych, :parse_file, empty
+      )
+      assert_send_type(
+        "(::String, fallback: ::Symbol) -> ::Symbol",
+        Psych, :parse_file, empty, fallback: :none
+      )
+    end
+  end
+
+  def test_parse_stream
+    assert_send_type(
+      "(::String) -> ::Psych::Nodes::Stream",
+      Psych, :parse_stream, "--- a\n--- b"
+    )
+    assert_send_type(
+      "(::String, filename: ::String) -> ::Psych::Nodes::Stream",
+      Psych, :parse_stream, "--- a\n--- b", filename: "a.yml"
+    )
+    assert_send_type(
+      "(::String) { (::Psych::Nodes::Document) -> void } -> void",
+      Psych, :parse_stream, "--- a\n--- b"
+    ) { |doc| doc }
+  end
 end
 
 class PsychObjectSingletonTest < Test::Unit::TestCase
@@ -263,5 +319,390 @@ class PsychObjectSingletonTest < Test::Unit::TestCase
       "(::String) -> ::String",
       Tagged, :yaml_tag, "!rbs-test/tagged"
     )
+  end
+end
+
+module PsychNodesTestHelper
+  YAML_SOURCE = <<~YAML
+    %YAML 1.1
+    %TAG !e! tag:example.com,2000:
+    --- !e!list
+    a: &x [1, "q"]
+    b: *x
+  YAML
+
+  def stream
+    Psych.parse_stream(YAML_SOURCE)
+  end
+
+  def document
+    stream.children[0]
+  end
+
+  def mapping
+    document.root
+  end
+
+  def sequence
+    mapping.children[1]
+  end
+
+  def scalar
+    mapping.children[0]
+  end
+
+  def alias_node
+    mapping.children[3]
+  end
+end
+
+class PsychNodesNodeTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Node"
+
+  def test_children
+    assert_send_type "() -> ::Array[::Psych::Nodes::Node]",
+                     stream, :children
+  end
+
+  def test_tag
+    assert_send_type "() -> nil",
+                     stream, :tag
+    assert_send_type "() -> ::String",
+                     mapping, :tag
+  end
+
+  def test_location
+    node = stream
+    %i[start_line start_column end_line end_column].each do |name|
+      assert_send_type "() -> ::Integer",
+                       node, name
+      assert_send_type "(::Integer) -> ::Integer",
+                       node, :"#{name}=", 1
+    end
+
+    built = Psych::Nodes::Scalar.new("a")
+    %i[start_line start_column end_line end_column].each do |name|
+      assert_send_type "() -> nil",
+                       built, name
+    end
+  end
+
+  def test_each
+    assert_send_type "() { (::Psych::Nodes::Node) -> void } -> void",
+                     stream, :each do |node| node end
+    assert_send_type "() -> ::Enumerator[::Psych::Nodes::Node, void]",
+                     stream, :each
+  end
+
+  def test_to_ruby
+    assert_send_type "() -> untyped",
+                     stream, :to_ruby
+    assert_send_type "(symbolize_names: bool, freeze: bool, strict_integer: bool) -> untyped",
+                     document, :to_ruby, symbolize_names: true, freeze: true, strict_integer: true
+    assert_send_type "() -> untyped",
+                     document, :transform
+  end
+
+  def test_yaml
+    assert_send_type "() -> ::String",
+                     stream, :yaml
+    assert_send_type "(nil, ::Hash[::Symbol, ::Integer]) -> ::String",
+                     stream, :yaml, nil, { line_width: 20 }
+    assert_send_type "(::StringIO) -> ::StringIO",
+                     stream, :yaml, StringIO.new
+    assert_send_type "(::StringIO, ::Hash[::Symbol, ::Integer]) -> ::StringIO",
+                     stream, :to_yaml, StringIO.new, { indentation: 4 }
+  end
+
+  def test_predicates
+    %i[alias? document? mapping? scalar? sequence? stream?].each do |name|
+      assert_send_type "() -> bool",
+                       scalar, name
+    end
+  end
+end
+
+class PsychNodesAliasTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Alias"
+
+  def test_anchor
+    assert_send_type "() -> ::String",
+                     alias_node, :anchor
+    assert_send_type "(::String) -> ::String",
+                     alias_node, :anchor=, "y"
+  end
+
+  def test_alias?
+    assert_send_type "() -> true",
+                     alias_node, :alias?
+  end
+end
+
+class PsychNodesDocumentTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Document"
+
+  def test_attributes
+    doc = document
+    assert_send_type "() -> ::Array[::Integer]",
+                     doc, :version
+    assert_send_type "(::Array[::Integer]) -> ::Array[::Integer]",
+                     doc, :version=, [1, 2]
+    assert_send_type "() -> ::Array[[::String, ::String]]",
+                     doc, :tag_directives
+    assert_send_type "(::Array[[::String, ::String]]) -> ::Array[[::String, ::String]]",
+                     doc, :tag_directives=, [["!a!", "tag:a,2000:"]]
+    assert_send_type "() -> bool",
+                     doc, :implicit
+    assert_send_type "(bool) -> bool",
+                     doc, :implicit=, true
+    assert_send_type "() -> bool",
+                     doc, :implicit_end
+    assert_send_type "(bool) -> bool",
+                     doc, :implicit_end=, false
+  end
+
+  def test_root
+    assert_send_type "() -> ::Psych::Nodes::Mapping",
+                     document, :root
+    assert_send_type "() -> nil",
+                     Psych::Nodes::Document.new, :root
+  end
+
+  def test_document?
+    assert_send_type "() -> true",
+                     document, :document?
+  end
+end
+
+class PsychNodesMappingTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Mapping"
+
+  def test_attributes
+    node = mapping
+    assert_send_type "() -> nil",
+                     node, :anchor
+    assert_send_type "(::String) -> ::String",
+                     node, :anchor=, "m"
+    assert_send_type "() -> ::String",
+                     node, :tag
+    assert_send_type "(nil) -> nil",
+                     node, :tag=, nil
+    assert_send_type "() -> bool",
+                     node, :implicit
+    assert_send_type "(bool) -> bool",
+                     node, :implicit=, true
+    assert_send_type "() -> ::Integer",
+                     node, :style
+    assert_send_type "(::Integer) -> ::Integer",
+                     node, :style=, Psych::Nodes::Mapping::FLOW
+  end
+
+  def test_mapping?
+    assert_send_type "() -> true",
+                     mapping, :mapping?
+  end
+end
+
+class PsychNodesScalarTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Scalar"
+
+  def test_attributes
+    node = scalar
+    assert_send_type "() -> ::String",
+                     node, :value
+    assert_send_type "(::String) -> ::String",
+                     node, :value=, "z"
+    assert_send_type "() -> nil",
+                     node, :anchor
+    assert_send_type "(::String) -> ::String",
+                     node, :anchor=, "s"
+    assert_send_type "() -> nil",
+                     node, :tag
+    assert_send_type "(::String) -> ::String",
+                     node, :tag=, "!str"
+    assert_send_type "() -> bool",
+                     node, :plain
+    assert_send_type "(bool) -> bool",
+                     node, :plain=, false
+    assert_send_type "() -> bool",
+                     node, :quoted
+    assert_send_type "(bool) -> bool",
+                     node, :quoted=, true
+    assert_send_type "() -> ::Integer",
+                     node, :style
+    assert_send_type "(::Integer) -> ::Integer",
+                     node, :style=, Psych::Nodes::Scalar::DOUBLE_QUOTED
+  end
+
+  def test_scalar?
+    assert_send_type "() -> true",
+                     scalar, :scalar?
+  end
+end
+
+class PsychNodesSequenceTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Sequence"
+
+  def test_attributes
+    node = sequence
+    assert_send_type "() -> ::String",
+                     node, :anchor
+    assert_send_type "(nil) -> nil",
+                     node, :anchor=, nil
+    assert_send_type "() -> nil",
+                     node, :tag
+    assert_send_type "() -> bool",
+                     node, :implicit
+    assert_send_type "() -> ::Integer",
+                     node, :style
+    assert_send_type "(::Integer) -> ::Integer",
+                     node, :style=, Psych::Nodes::Sequence::BLOCK
+  end
+
+  def test_sequence?
+    assert_send_type "() -> true",
+                     sequence, :sequence?
+  end
+end
+
+class PsychNodesStreamTest < Test::Unit::TestCase
+  include TestHelper
+  include PsychNodesTestHelper
+
+  library "psych"
+  testing "::Psych::Nodes::Stream"
+
+  def test_encoding
+    assert_send_type "() -> ::Integer",
+                     stream, :encoding
+    assert_send_type "(::Integer) -> ::Integer",
+                     stream, :encoding=, Psych::Nodes::Stream::UTF16LE
+  end
+
+  def test_stream?
+    assert_send_type "() -> true",
+                     stream, :stream?
+  end
+end
+
+class PsychNodesConstantsTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+
+  def test_constants
+    %w[Mapping::ANY Mapping::BLOCK Mapping::FLOW
+       Scalar::ANY Scalar::PLAIN Scalar::SINGLE_QUOTED Scalar::DOUBLE_QUOTED Scalar::LITERAL Scalar::FOLDED
+       Sequence::ANY Sequence::BLOCK Sequence::FLOW
+       Stream::ANY Stream::UTF8 Stream::UTF16LE Stream::UTF16BE].each do |name|
+      assert_const_type "Integer", "Psych::Nodes::#{name}"
+    end
+  end
+
+end
+
+class PsychNodesAliasSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Alias)"
+
+  def test_new
+    assert_send_type "(::String) -> ::Psych::Nodes::Alias",
+                     Psych::Nodes::Alias, :new, "x"
+  end
+end
+
+class PsychNodesDocumentSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Document)"
+
+  def test_new
+    assert_send_type "() -> ::Psych::Nodes::Document",
+                     Psych::Nodes::Document, :new
+    assert_send_type "(::Array[::Integer], ::Array[[::String, ::String]], bool) -> ::Psych::Nodes::Document",
+                     Psych::Nodes::Document, :new, [1, 1], [["!a!", "tag:a,2000:"]], true
+  end
+end
+
+class PsychNodesMappingSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Mapping)"
+
+  def test_new
+    assert_send_type "() -> ::Psych::Nodes::Mapping",
+                     Psych::Nodes::Mapping, :new
+    assert_send_type "(::String, ::String, bool, ::Integer) -> ::Psych::Nodes::Mapping",
+                     Psych::Nodes::Mapping, :new, "a", "!t", false, Psych::Nodes::Mapping::FLOW
+  end
+end
+
+class PsychNodesScalarSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Scalar)"
+
+  def test_new
+    assert_send_type "(::String) -> ::Psych::Nodes::Scalar",
+                     Psych::Nodes::Scalar, :new, "v"
+    assert_send_type "(::String, nil, nil, bool, bool, ::Integer) -> ::Psych::Nodes::Scalar",
+                     Psych::Nodes::Scalar, :new, "v", nil, nil, false, true, Psych::Nodes::Scalar::DOUBLE_QUOTED
+  end
+end
+
+class PsychNodesSequenceSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Sequence)"
+
+  def test_new
+    assert_send_type "() -> ::Psych::Nodes::Sequence",
+                     Psych::Nodes::Sequence, :new
+    assert_send_type "(nil, nil, bool, ::Integer) -> ::Psych::Nodes::Sequence",
+                     Psych::Nodes::Sequence, :new, nil, nil, true, Psych::Nodes::Sequence::FLOW
+  end
+end
+
+class PsychNodesStreamSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "psych"
+  testing "singleton(::Psych::Nodes::Stream)"
+
+  def test_new
+    assert_send_type "() -> ::Psych::Nodes::Stream",
+                     Psych::Nodes::Stream, :new
+    assert_send_type "(::Integer) -> ::Psych::Nodes::Stream",
+                     Psych::Nodes::Stream, :new, Psych::Nodes::Stream::UTF8
   end
 end

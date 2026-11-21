@@ -1,0 +1,537 @@
+%a{annotate:rdoc:skip}
+module Psych
+  # <!-- rdoc-file=ext/psych/lib/psych/nodes.rb -->
+  # # Overview
+  #
+  # When using Psych.load to deserialize a YAML document, the document is
+  # translated to an intermediary AST.  That intermediary AST is then translated
+  # in to a Ruby object graph.
+  #
+  # In the opposite direction, when using Psych.dump, the Ruby object graph is
+  # translated to an intermediary AST which is then converted to a YAML document.
+  #
+  # Psych::Nodes contains all of the classes that make up the nodes of a YAML AST.
+  #  You can manually build an AST and use one of the visitors (see
+  # Psych::Visitors) to convert that AST to either a YAML document or to a Ruby
+  # object graph.
+  #
+  # Here is an example of building an AST that represents a list with one scalar:
+  #
+  #     # Create our nodes
+  #     stream = Psych::Nodes::Stream.new
+  #     doc    = Psych::Nodes::Document.new
+  #     seq    = Psych::Nodes::Sequence.new
+  #     scalar = Psych::Nodes::Scalar.new('foo')
+  #
+  #     # Build up our tree
+  #     stream.children << doc
+  #     doc.children    << seq
+  #     seq.children    << scalar
+  #
+  # The stream is the root of the tree.  We can then convert the tree to YAML:
+  #
+  #     stream.to_yaml => "---\n- foo\n"
+  #
+  # Or convert it to Ruby:
+  #
+  #     stream.to_ruby => [["foo"]]
+  #
+  # ## YAML AST Requirements
+  #
+  # A valid YAML AST **must** have one Psych::Nodes::Stream at the root.  A
+  # Psych::Nodes::Stream node must have 1 or more Psych::Nodes::Document nodes as
+  # children.
+  #
+  # Psych::Nodes::Document nodes must have one and **only** one child.  That child
+  # may be one of:
+  #
+  # *   Psych::Nodes::Sequence
+  # *   Psych::Nodes::Mapping
+  # *   Psych::Nodes::Scalar
+  #
+  # Psych::Nodes::Sequence and Psych::Nodes::Mapping nodes may have many children,
+  # but Psych::Nodes::Mapping nodes should have an even number of children.
+  #
+  # All of these are valid children for Psych::Nodes::Sequence and
+  # Psych::Nodes::Mapping nodes:
+  #
+  # *   Psych::Nodes::Sequence
+  # *   Psych::Nodes::Mapping
+  # *   Psych::Nodes::Scalar
+  # *   Psych::Nodes::Alias
+  #
+  # Psych::Nodes::Scalar and Psych::Nodes::Alias are both terminal nodes and
+  # should not have any children.
+  #
+  module Nodes
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+    # The base class for any Node in a YAML parse tree.  This class should never be
+    # instantiated.
+    #
+    class Node
+      include Enumerable[Node]
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # The children of this node
+      #
+      attr_reader children: Array[Node]
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # An associated tag
+      #
+      attr_reader tag: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # The line number where this node start
+      #
+      attr_accessor start_line: Integer?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # The column number where this node start
+      #
+      attr_accessor start_column: Integer?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # The line number where this node ends
+      #
+      attr_accessor end_line: Integer?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/node.rb -->
+      # The column number where this node ends
+      #
+      attr_accessor end_column: Integer?
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/node.rb
+      #   - new()
+      # -->
+      # Create a new Psych::Nodes::Node
+      #
+      def initialize: () -> void
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/node.rb
+      #   - each(&block)
+      # -->
+      # Iterate over each node in the tree. Yields each node to `block` depth first.
+      #
+      def each: () { (Node node) -> void } -> void
+              | () -> Enumerator[Node, void]
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/node.rb
+      #   - to_ruby(symbolize_names: false, freeze: false, strict_integer: false, parse_symbols: true)
+      # -->
+      # Convert this node to Ruby.
+      #
+      # See also Psych::Visitors::ToRuby
+      #
+      def to_ruby: (?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
+
+      alias transform to_ruby
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/node.rb
+      #   - yaml(io = nil, options = {})
+      # -->
+      # Convert this node to YAML.
+      #
+      # See also Psych::Visitors::Emitter
+      #
+      def yaml: (?nil io, ?Hash[Symbol, untyped] options) -> String
+              | [IO] (IO io, ?Hash[Symbol, untyped] options) -> IO
+
+      alias to_yaml yaml
+
+      def alias?: () -> bool
+
+      def document?: () -> bool
+
+      def mapping?: () -> bool
+
+      def scalar?: () -> bool
+
+      def sequence?: () -> bool
+
+      def stream?: () -> bool
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/alias.rb -->
+    # This class represents a [YAML Alias](http://yaml.org/spec/1.1/#alias). It
+    # points to an `anchor`.
+    #
+    # A Psych::Nodes::Alias is a terminal node and may have no children.
+    #
+    class Alias < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/alias.rb -->
+      # The anchor this alias links to
+      #
+      attr_accessor anchor: String
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/alias.rb
+      #   - new(anchor)
+      # -->
+      # Create a new Alias that points to an `anchor`
+      #
+      def initialize: (String anchor) -> void
+
+      def alias?: () -> true
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/document.rb -->
+    # This represents a YAML Document.  This node must be a child of
+    # Psych::Nodes::Stream.  A Psych::Nodes::Document must have one child, and that
+    # child may be one of the following:
+    #
+    # *   Psych::Nodes::Sequence
+    # *   Psych::Nodes::Mapping
+    # *   Psych::Nodes::Scalar
+    #
+    class Document < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/document.rb -->
+      # The version of the YAML document
+      #
+      attr_accessor version: Array[Integer]
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/document.rb -->
+      # A list of tag directives for this document
+      #
+      attr_accessor tag_directives: Array[[ String, String ]]
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/document.rb -->
+      # Was this document implicitly created?
+      #
+      attr_accessor implicit: bool
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/document.rb -->
+      # Is the end of the document implicit?
+      #
+      attr_accessor implicit_end: bool
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/document.rb
+      #   - new(version = [], tag_directives = [], implicit = false)
+      # -->
+      # Create a new Psych::Nodes::Document object.
+      #
+      # `version` is a list indicating the YAML version. `tags_directives` is a list
+      # of tag directive declarations `implicit` is a flag indicating whether the
+      # document will be implicitly started.
+      #
+      # ## Example:
+      # This creates a YAML document object that represents a YAML 1.1 document with
+      # one tag directive, and has an implicit start:
+      #
+      #     Psych::Nodes::Document.new(
+      #       [1,1],
+      #       [["!", "tag:tenderlovemaking.com,2009:"]],
+      #       true
+      #     )
+      #
+      # ## See Also
+      # See also Psych::Handler#start_document
+      #
+      def initialize: (?Array[Integer] version, ?Array[[ String, String ]] tag_directives, ?bool implicit) -> void
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/document.rb
+      #   - root()
+      # -->
+      # Returns the root node.  A Document may only have one root node:
+      # http://yaml.org/spec/1.1/#id898031
+      #
+      def root: () -> Node?
+
+      def document?: () -> true
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+    # This class represents a [YAML Mapping](http://yaml.org/spec/1.1/#mapping).
+    #
+    # A Psych::Nodes::Mapping node may have 0 or more children, but must have an
+    # even number of children.  Here are the valid children a Psych::Nodes::Mapping
+    # node may have:
+    #
+    # *   Psych::Nodes::Sequence
+    # *   Psych::Nodes::Mapping
+    # *   Psych::Nodes::Scalar
+    # *   Psych::Nodes::Alias
+    #
+    class Mapping < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # Any Map Style
+      #
+      ANY: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # Block Map Style
+      #
+      BLOCK: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # Flow Map Style
+      #
+      FLOW: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # The optional anchor for this mapping
+      #
+      attr_accessor anchor: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # The optional tag for this mapping
+      #
+      attr_accessor tag: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # Is this an implicit mapping?
+      #
+      attr_accessor implicit: bool
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/mapping.rb -->
+      # The style of this mapping
+      #
+      attr_accessor style: Integer
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/mapping.rb
+      #   - new(anchor = nil, tag = nil, implicit = true, style = BLOCK)
+      # -->
+      # Create a new Psych::Nodes::Mapping object.
+      #
+      # `anchor` is the anchor associated with the map or `nil`. `tag` is the tag
+      # associated with the map or `nil`. `implicit` is a boolean indicating whether
+      # or not the map was implicitly started. `style` is an integer indicating the
+      # mapping style.
+      #
+      # ## See Also
+      # See also Psych::Handler#start_mapping
+      #
+      def initialize: (?String? anchor, ?String? tag, ?bool implicit, ?Integer style) -> void
+
+      def mapping?: () -> true
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+    # This class represents a [YAML Scalar](http://yaml.org/spec/1.1/#id858081).
+    #
+    # This node type is a terminal node and should not have any children.
+    #
+    class Scalar < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Any style scalar, the emitter chooses
+      #
+      ANY: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Plain scalar style
+      #
+      PLAIN: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Single quoted style
+      #
+      SINGLE_QUOTED: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Double quoted style
+      #
+      DOUBLE_QUOTED: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Literal style
+      #
+      LITERAL: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Folded style
+      #
+      FOLDED: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # The scalar value
+      #
+      attr_accessor value: String
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # The anchor value (if there is one)
+      #
+      attr_accessor anchor: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # The tag value (if there is one)
+      #
+      attr_accessor tag: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Is this a plain scalar?
+      #
+      attr_accessor plain: bool
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # Is this scalar quoted?
+      #
+      attr_accessor quoted: bool
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/scalar.rb -->
+      # The style of this scalar
+      #
+      attr_accessor style: Integer
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/scalar.rb
+      #   - new(value, anchor = nil, tag = nil, plain = true, quoted = false, style = ANY)
+      # -->
+      # Create a new Psych::Nodes::Scalar object.
+      #
+      # `value` is the string value of the scalar `anchor` is an associated anchor or
+      # nil `tag` is an associated tag or nil `plain` is a boolean value `quoted` is a
+      # boolean value `style` is an integer indicating the string style
+      #
+      # ## See Also
+      #
+      # See also Psych::Handler#scalar
+      #
+      def initialize: (String value, ?String? anchor, ?String? tag, ?bool plain, ?bool quoted, ?Integer style) -> void
+
+      def scalar?: () -> true
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+    # This class represents a [YAML
+    # sequence](http://yaml.org/spec/1.1/#sequence/syntax).
+    #
+    # A YAML sequence is basically a list, and looks like this:
+    #
+    #     %YAML 1.1
+    #     ---
+    #     - I am
+    #     - a Sequence
+    #
+    # A YAML sequence may have an anchor like this:
+    #
+    #     %YAML 1.1
+    #     ---
+    #     &A [
+    #       "This sequence",
+    #       "has an anchor"
+    #     ]
+    #
+    # A YAML sequence may also have a tag like this:
+    #
+    #     %YAML 1.1
+    #     ---
+    #     !!seq [
+    #       "This sequence",
+    #       "has a tag"
+    #     ]
+    #
+    # This class represents a sequence in a YAML document.  A Psych::Nodes::Sequence
+    # node may have 0 or more children.  Valid children for this node are:
+    #
+    # *   Psych::Nodes::Sequence
+    # *   Psych::Nodes::Mapping
+    # *   Psych::Nodes::Scalar
+    # *   Psych::Nodes::Alias
+    #
+    class Sequence < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # Any Styles, emitter chooses
+      #
+      ANY: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # Block style sequence
+      #
+      BLOCK: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # Flow style sequence
+      #
+      FLOW: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # The anchor for this sequence (if any)
+      #
+      attr_accessor anchor: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # The tag name for this sequence (if any)
+      #
+      attr_accessor tag: String?
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # Is this sequence started implicitly?
+      #
+      attr_accessor implicit: bool
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/sequence.rb -->
+      # The sequence style used
+      #
+      attr_accessor style: Integer
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/sequence.rb
+      #   - new(anchor = nil, tag = nil, implicit = true, style = BLOCK)
+      # -->
+      # Create a new object representing a YAML sequence.
+      #
+      # `anchor` is the anchor associated with the sequence or nil. `tag` is the tag
+      # associated with the sequence or nil. `implicit` a boolean indicating whether
+      # or not the sequence was implicitly started. `style` is an integer indicating
+      # the list style.
+      #
+      # See Psych::Handler#start_sequence
+      #
+      def initialize: (?String? anchor, ?String? tag, ?bool implicit, ?Integer style) -> void
+
+      def sequence?: () -> true
+    end
+
+    # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+    # Represents a YAML stream.  This is the root node for any YAML parse tree.
+    # This node must have one or more child nodes.  The only valid child node for a
+    # Psych::Nodes::Stream node is Psych::Nodes::Document.
+    #
+    class Stream < Node
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+      # Any encoding
+      #
+      ANY: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+      # UTF-8 encoding
+      #
+      UTF8: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+      # UTF-16LE encoding
+      #
+      UTF16LE: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+      # UTF-16BE encoding
+      #
+      UTF16BE: Integer
+
+      # <!-- rdoc-file=ext/psych/lib/psych/nodes/stream.rb -->
+      # The encoding used for this stream
+      #
+      attr_accessor encoding: Integer
+
+      # <!--
+      #   rdoc-file=ext/psych/lib/psych/nodes/stream.rb
+      #   - new(encoding = UTF8)
+      # -->
+      # Create a new Psych::Nodes::Stream node with an `encoding` that defaults to
+      # Psych::Nodes::Stream::UTF8.
+      #
+      # See also Psych::Handler#start_stream
+      #
+      def initialize: (?Integer encoding) -> void
+
+      def stream?: () -> true
+    end
+  end
+end
