@@ -1190,7 +1190,8 @@ module Kernel : BasicObject
   # The style of programming using <code>$_</code> as an implicit parameter is
   # gradually losing favor in the Ruby community.
   #
-  def self?.gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
+  def self?.gets: (string? sep, ?int? limit, ?chomp: boolish) -> String?
+                | (?int limit, ?chomp: boolish) -> String?
 
   # <!--
   #   rdoc-file=eval.c
@@ -1562,7 +1563,8 @@ module Kernel : BasicObject
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def self?.readline: (?String arg0, ?Integer arg1, ?chomp: boolish) -> String
+  def self?.readline: (string? sep, ?int? limit, ?chomp: boolish) -> String
+                    | (?int limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1617,7 +1619,8 @@ module Kernel : BasicObject
   # Optional keyword arguments `enc_opts` specify encoding options; see [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self?.readlines: (?string sep, ?int limit, ?chomp: boolish) -> ::Array[String]
+  def self?.readlines: (string? sep, ?int? limit, ?chomp: boolish) -> ::Array[String]
+                     | (?int limit, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=lib/rubygems/core_ext/kernel_require.rb

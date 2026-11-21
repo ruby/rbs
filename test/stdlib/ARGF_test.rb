@@ -25,6 +25,8 @@ class ARGFTest < Test::Unit::TestCase
 
     tempfile.write("line1\nline2\nline3\n")
     tempfile.close(false)
+    # Keep a reference so that GC does not unlink the file while the test uses it
+    (@tempfiles ||= []) << tempfile
 
     tempfile.path
   end
@@ -40,6 +42,20 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :gets, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
                       ARGF.class.new(temp_file), :gets, "\n", 1, chomp: true
+    assert_send_type  "(nil sep) -> ::String",
+                      ARGF.class.new(temp_file), :gets, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::String",
+                      ARGF.class.new(temp_file), :gets, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::String",
+                      ARGF.class.new(temp_file), :gets, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::String",
+                      ARGF.class.new(temp_file), :gets, 2
+    assert_send_type  "(ToInt limit) -> ::String",
+                      ARGF.class.new(temp_file), :gets, ToInt.new(2)
+    assert_send_type  "(ToStr sep) -> ::String",
+                      ARGF.class.new(temp_file), :gets, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::String",
+                      ARGF.class.new(temp_file), :gets, 2, chomp: true
     assert_send_type  "() -> nil",
                       ARGF.class.new(Tempfile.new), :gets
   end
@@ -77,6 +93,20 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :readline, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::String",
                       ARGF.class.new(temp_file), :readline, "\n", 1, chomp: true
+    assert_send_type  "(nil sep) -> ::String",
+                      ARGF.class.new(temp_file), :readline, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::String",
+                      ARGF.class.new(temp_file), :readline, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::String",
+                      ARGF.class.new(temp_file), :readline, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::String",
+                      ARGF.class.new(temp_file), :readline, 2
+    assert_send_type  "(ToInt limit) -> ::String",
+                      ARGF.class.new(temp_file), :readline, ToInt.new(2)
+    assert_send_type  "(ToStr sep) -> ::String",
+                      ARGF.class.new(temp_file), :readline, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::String",
+                      ARGF.class.new(temp_file), :readline, 2, chomp: true
   end
 
   def test_readlines
@@ -90,6 +120,20 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :readlines, chomp: true
     assert_send_type  "(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]",
                       ARGF.class.new(temp_file), :readlines, "\n", 1, chomp: true
+    assert_send_type  "(nil sep) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, 2
+    assert_send_type  "(ToInt limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, ToInt.new(2)
+    assert_send_type  "(ToStr sep) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :readlines, 2, chomp: true
   end
 
   def test_inspect
@@ -109,6 +153,22 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :to_a, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::Array[::String]",
                       ARGF.class.new(temp_file), :to_a, "\n", 1
+    assert_send_type  "(chomp: boolish) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, chomp: true
+    assert_send_type  "(nil sep) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, nil
+    assert_send_type  "(nil sep, ::Integer limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, nil, 2
+    assert_send_type  "(::String sep, nil limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, "\n", nil
+    assert_send_type  "(::Integer limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, 2
+    assert_send_type  "(ToInt limit) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, ToInt.new(2)
+    assert_send_type  "(ToStr sep) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, ToStr.new("\n")
+    assert_send_type  "(::Integer limit, chomp: boolish) -> ::Array[::String]",
+                      ARGF.class.new(temp_file), :to_a, 2, chomp: true
   end
 
   def test_argv
@@ -150,6 +210,24 @@ class ARGFTest < Test::Unit::TestCase
                       ARGF.class.new(temp_file), :each, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(temp_file), :each, "\n", 1
+
+    assert_send_type  "(chomp: boolish) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, chomp: true do |line| line end
+    assert_send_type  "(nil sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, nil do |line| line end
+    assert_send_type  "(nil sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, nil, 2 do |line| line end
+    assert_send_type  "(::String sep, nil limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, "\n", nil do |line| line end
+    assert_send_type  "(::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, 2 do |line| line end
+    assert_send_type  "(::Integer limit, chomp: boolish) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each, 2, chomp: true do |line| line end
+
+    assert_send_type  "(nil sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each, nil
+    assert_send_type  "(::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each, 2
   end
 
   def test_each_byte
@@ -187,6 +265,24 @@ class ARGFTest < Test::Unit::TestCase
     #                   ARGF.class.new(temp_file), :each_line, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(temp_file), :each_line, "\n", 1
+
+    assert_send_type  "(chomp: boolish) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, chomp: true do |line| line end
+    assert_send_type  "(nil sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, nil do |line| line end
+    assert_send_type  "(nil sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, nil, 2 do |line| line end
+    assert_send_type  "(::String sep, nil limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, "\n", nil do |line| line end
+    assert_send_type  "(::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, 2 do |line| line end
+    assert_send_type  "(::Integer limit, chomp: boolish) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, 2, chomp: true do |line| line end
+
+    assert_send_type  "(nil sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each_line, nil
+    assert_send_type  "(::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each_line, 2
   end
 
   def test_eof

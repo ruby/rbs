@@ -367,8 +367,10 @@ module RBS
       #     end
       #
       %a{annotate:rdoc:copy:ARGF#each}
-      def each: (?String sep, ?Integer limit) { (String line) -> untyped } -> self
-              | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+      def each: (string? sep, ?int? limit, ?chomp: boolish) { (String line) -> untyped } -> self
+              | (?int limit, ?chomp: boolish) { (String line) -> untyped } -> self
+              | (string? sep, ?int? limit, ?chomp: boolish) -> ::Enumerator[String, self]
+              | (?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
       # <!--
       #   rdoc-file=io.c
@@ -464,8 +466,10 @@ module RBS
       #     end
       #
       %a{annotate:rdoc:copy:ARGF#each_line}
-      def each_line: (?String sep, ?Integer limit) { (String line) -> untyped } -> self
-                   | (?String sep, ?Integer limit) -> ::Enumerator[String, self]
+      def each_line: (string? sep, ?int? limit, ?chomp: boolish) { (String line) -> untyped } -> self
+                   | (?int limit, ?chomp: boolish) { (String line) -> untyped } -> self
+                   | (string? sep, ?int? limit, ?chomp: boolish) -> ::Enumerator[String, self]
+                   | (?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
       # <!--
       #   rdoc-file=io.c
@@ -644,7 +648,8 @@ module RBS
       # See IO.readlines for details about getline_args.
       #
       %a{annotate:rdoc:copy:ARGF#gets}
-      def gets: (?String sep, ?Integer limit, ?chomp: boolish) -> String?
+      def gets: (string? sep, ?int? limit, ?chomp: boolish) -> String?
+              | (?int limit, ?chomp: boolish) -> String?
 
       # <!--
       #   rdoc-file=io.c
@@ -1031,7 +1036,8 @@ module RBS
       # An EOFError is raised at the end of the file.
       #
       %a{annotate:rdoc:copy:ARGF#readline}
-      def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
+      def readline: (string? sep, ?int? limit, ?chomp: boolish) -> String
+                  | (?int limit, ?chomp: boolish) -> String
 
       # <!--
       #   rdoc-file=io.c
@@ -1051,7 +1057,8 @@ module RBS
       # See <code>IO.readlines</code> for a full description of all options.
       #
       %a{annotate:rdoc:copy:ARGF#readlines}
-      def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
+      def readlines: (string? sep, ?int? limit, ?chomp: boolish) -> ::Array[String]
+                   | (?int limit, ?chomp: boolish) -> ::Array[String]
 
       # <!--
       #   rdoc-file=io.c
@@ -1171,7 +1178,8 @@ module RBS
       # See <code>IO.readlines</code> for a full description of all options.
       #
       %a{annotate:rdoc:copy:ARGF#to_a}
-      def to_a: (?String sep, ?Integer limit) -> ::Array[String]
+      def to_a: (string? sep, ?int? limit, ?chomp: boolish) -> ::Array[String]
+              | (?int limit, ?chomp: boolish) -> ::Array[String]
 
       # <!-- rdoc-file=io.c -->
       # Returns an integer representing the numeric file descriptor for the current

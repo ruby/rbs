@@ -1024,6 +1024,52 @@ class KernelInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_gets
+    [
+      ["() -> ::String"],
+      ["(::String sep) -> ::String", "\n"],
+      ["(nil sep) -> ::String", nil],
+      ["(::String sep, ::Integer limit) -> ::String", "\n", 2],
+      ["(nil sep, ::Integer limit) -> ::String", nil, 2],
+      ["(::String sep, nil limit) -> ::String", "\n", nil],
+      ["(::Integer limit) -> ::String", 2],
+      ["(ToInt limit) -> ::String", ToInt.new(2)],
+      ["(ToStr sep) -> ::String", ToStr.new("\n")],
+    ].each do |type, *args|
+      $stdin = File.open(__FILE__)
+      assert_send_type type, JustKernel.new, :gets, *args
+    end
+
+    $stdin = File.open(__FILE__)
+    assert_send_type "(::Integer limit, chomp: boolish) -> ::String",
+                     JustKernel.new, :gets, 2, chomp: true
+  ensure
+    $stdin = STDIN
+  end
+
+  def test_readline
+    [
+      ["() -> ::String"],
+      ["(::String sep) -> ::String", "\n"],
+      ["(nil sep) -> ::String", nil],
+      ["(::String sep, ::Integer limit) -> ::String", "\n", 2],
+      ["(nil sep, ::Integer limit) -> ::String", nil, 2],
+      ["(::String sep, nil limit) -> ::String", "\n", nil],
+      ["(::Integer limit) -> ::String", 2],
+      ["(ToInt limit) -> ::String", ToInt.new(2)],
+      ["(ToStr sep) -> ::String", ToStr.new("\n")],
+    ].each do |type, *args|
+      $stdin = File.open(__FILE__)
+      assert_send_type type, JustKernel.new, :readline, *args
+    end
+
+    $stdin = File.open(__FILE__)
+    assert_send_type "(::Integer limit, chomp: boolish) -> ::String",
+                     JustKernel.new, :readline, 2, chomp: true
+  ensure
+    $stdin = STDIN
+  end
+
   def test_readlines
     $stdin = File.open(__FILE__)
 
@@ -1041,6 +1087,22 @@ class KernelInstanceTest < Test::Unit::TestCase
         )
       end
     end
+
+    [
+      ["(nil sep) -> ::Array[::String]", nil],
+      ["(nil sep, ::Integer limit) -> ::Array[::String]", nil, 2],
+      ["(::String sep, nil limit) -> ::Array[::String]", "\n", nil],
+      ["(::Integer limit) -> ::Array[::String]", 2],
+      ["(ToInt limit) -> ::Array[::String]", ToInt.new(2)],
+      ["(ToStr sep) -> ::Array[::String]", ToStr.new("\n")],
+    ].each do |type, *args|
+      $stdin = File.open(__FILE__)
+      assert_send_type type, JustKernel.new, :readlines, *args
+    end
+
+    $stdin = File.open(__FILE__)
+    assert_send_type "(::Integer limit, chomp: boolish) -> ::Array[::String]",
+                     JustKernel.new, :readlines, 2, chomp: true
   ensure
     $stdin = STDIN
   end
