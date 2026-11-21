@@ -211,6 +211,16 @@ module Psych
   #
   VERSION: String
 
+  # An IO-like object that Psych::Parser#parse reads YAML from.
+  # The parser calls `read(length)` repeatedly until it returns `nil`,
+  # and `external_encoding` to pick the input encoding.
+  #
+  interface _YAMLReader
+    def read: (Integer length) -> String?
+
+    def external_encoding: () -> Encoding?
+  end
+
   # <!--
   #   rdoc-file=ext/psych/psych.c
   #   - Psych.libyaml_version
@@ -400,7 +410,7 @@ module Psych
   # to `safe_load` except that `Symbol` objects are allowed by default.
   #
   %a{annotate:rdoc:copy:Psych.load}
-  def self.load: (String yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
+  def self.load: (string | _YAMLReader yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -462,7 +472,7 @@ module Psych
   #     Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
   #
   %a{annotate:rdoc:copy:Psych.safe_load}
-  def self.safe_load: (String yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
+  def self.safe_load: (string | _YAMLReader yaml, ?permitted_classes: Array[Class], ?permitted_symbols: Array[Symbol], ?aliases: bool, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -501,7 +511,7 @@ module Psych
   # method or the safe_load method.
   #
   %a{annotate:rdoc:copy:Psych.unsafe_load}
-  def self.unsafe_load: (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
+  def self.unsafe_load: (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> untyped
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -549,9 +559,9 @@ module Psych
   #     list # => ['foo', 'bar']
   #
   %a{annotate:rdoc:copy:Psych.load_stream}
-  def self.load_stream: (String yaml, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> Array[untyped]
-                      | [T] (String yaml, fallback: T, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> (Array[untyped] | T)
-                      | (String yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) { (untyped document) -> void } -> void
+  def self.load_stream: (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> Array[untyped]
+                      | [T] (string | _YAMLReader yaml, fallback: T, ?filename: String | _ToStr | _ToS?, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) -> (Array[untyped] | T)
+                      | (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?, ?fallback: untyped, ?symbolize_names: bool, ?freeze: bool, ?strict_integer: bool) { (untyped document) -> void } -> void
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -598,7 +608,7 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   #
   %a{annotate:rdoc:copy:Psych.parse}
-  def self.parse: (String yaml, ?filename: String | _ToStr | _ToS?) -> (Nodes::Document | false)
+  def self.parse: (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?) -> (Nodes::Document | false)
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
@@ -645,8 +655,8 @@ module Psych
   # See Psych::Nodes for more information about YAML AST.
   #
   %a{annotate:rdoc:copy:Psych.parse_stream}
-  def self.parse_stream: (String yaml, ?filename: String | _ToStr | _ToS?) -> Nodes::Stream
-                       | (String yaml, ?filename: String | _ToStr | _ToS?) { (Nodes::Document document) -> void } -> void
+  def self.parse_stream: (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?) -> Nodes::Stream
+                       | (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?) { (Nodes::Document document) -> void } -> void
 
   class Exception < ::RuntimeError
   end
