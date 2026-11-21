@@ -1024,86 +1024,74 @@ class KernelInstanceTest < Test::Unit::TestCase
     end
   end
 
+  # Kernel#gets and friends read from the global ARGF. Point it at `path`
+  # instead of relying on its state, which other tests may have changed
+  # (e.g. ARGF may be in the middle of a file from the test runner's ARGV).
+  def reading_argf_from(path)
+    ARGV.replace([path])
+    ARGF.skip
+    yield
+  ensure
+    ARGV.clear
+    ARGF.skip
+  end
+
   def test_gets
     [
       ["() -> ::String"],
       ["(::String sep) -> ::String", "\n"],
-      ["(nil sep) -> ::String", nil],
       ["(::String sep, ::Integer limit) -> ::String", "\n", 2],
+      ["(nil sep) -> ::String", nil],
       ["(nil sep, ::Integer limit) -> ::String", nil, 2],
       ["(::String sep, nil limit) -> ::String", "\n", nil],
       ["(::Integer limit) -> ::String", 2],
       ["(ToInt limit) -> ::String", ToInt.new(2)],
       ["(ToStr sep) -> ::String", ToStr.new("\n")],
+      ["(::Integer limit, chomp: boolish) -> ::String", 2, { chomp: true }],
     ].each do |type, *args|
-      $stdin = File.open(__FILE__)
-      assert_send_type type, JustKernel.new, :gets, *args
+      kwargs = Hash === args.last ? args.pop : {}
+      reading_argf_from(__FILE__) do
+        assert_send_type type, JustKernel.new, :gets, *args, **kwargs
+      end
     end
-
-    $stdin = File.open(__FILE__)
-    assert_send_type "(::Integer limit, chomp: boolish) -> ::String",
-                     JustKernel.new, :gets, 2, chomp: true
-  ensure
-    $stdin = STDIN
   end
 
   def test_readline
     [
       ["() -> ::String"],
       ["(::String sep) -> ::String", "\n"],
-      ["(nil sep) -> ::String", nil],
       ["(::String sep, ::Integer limit) -> ::String", "\n", 2],
+      ["(nil sep) -> ::String", nil],
       ["(nil sep, ::Integer limit) -> ::String", nil, 2],
       ["(::String sep, nil limit) -> ::String", "\n", nil],
       ["(::Integer limit) -> ::String", 2],
       ["(ToInt limit) -> ::String", ToInt.new(2)],
       ["(ToStr sep) -> ::String", ToStr.new("\n")],
+      ["(::Integer limit, chomp: boolish) -> ::String", 2, { chomp: true }],
     ].each do |type, *args|
-      $stdin = File.open(__FILE__)
-      assert_send_type type, JustKernel.new, :readline, *args
+      kwargs = Hash === args.last ? args.pop : {}
+      reading_argf_from(__FILE__) do
+        assert_send_type type, JustKernel.new, :readline, *args, **kwargs
+      end
     end
-
-    $stdin = File.open(__FILE__)
-    assert_send_type "(::Integer limit, chomp: boolish) -> ::String",
-                     JustKernel.new, :readline, 2, chomp: true
-  ensure
-    $stdin = STDIN
   end
 
   def test_readlines
-    $stdin = File.open(__FILE__)
-
-    assert_send_type(
-      "() -> Array[String]",
-      JustKernel.new, :readlines
-    )
-
-    with_int(3) do |limit|
-      with_string(",") do |separator|
-        $stdin = File.open(__FILE__)
-        assert_send_type(
-          "(string, int, chomp: bool) -> Array[String]",
-          JustKernel.new, :readlines, ",", 3, chomp: true
-        )
-      end
-    end
-
     [
+      ["() -> ::Array[::String]"],
+      ["(::String sep, ::Integer limit, chomp: boolish) -> ::Array[::String]", ",", 3, { chomp: true }],
       ["(nil sep) -> ::Array[::String]", nil],
       ["(nil sep, ::Integer limit) -> ::Array[::String]", nil, 2],
       ["(::String sep, nil limit) -> ::Array[::String]", "\n", nil],
       ["(::Integer limit) -> ::Array[::String]", 2],
       ["(ToInt limit) -> ::Array[::String]", ToInt.new(2)],
       ["(ToStr sep) -> ::Array[::String]", ToStr.new("\n")],
+      ["(::Integer limit, chomp: boolish) -> ::Array[::String]", 2, { chomp: true }],
     ].each do |type, *args|
-      $stdin = File.open(__FILE__)
-      assert_send_type type, JustKernel.new, :readlines, *args
+      kwargs = Hash === args.last ? args.pop : {}
+      reading_argf_from(__FILE__) do
+        assert_send_type type, JustKernel.new, :readlines, *args, **kwargs
+      end
     end
-
-    $stdin = File.open(__FILE__)
-    assert_send_type "(::Integer limit, chomp: boolish) -> ::Array[::String]",
-                     JustKernel.new, :readlines, 2, chomp: true
-  ensure
-    $stdin = STDIN
   end
 end
