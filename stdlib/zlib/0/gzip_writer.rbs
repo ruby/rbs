@@ -38,8 +38,25 @@ module Zlib
     # returns a GzipWriter object associated with that file.  Further details of
     # this method are found in Zlib::GzipWriter.new and Zlib::GzipFile.wrap.
     #
-    def self.open: (String filename, ?Integer level, ?Integer strategy, **untyped opts) -> instance
-                 | (String filename, ?Integer level, ?Integer strategy, **untyped opts) { (instance gz) -> void } -> nil
+    def self.open: (path filename, ?Integer? level, ?Integer? strategy, **untyped opts) -> instance
+                 | [T] (path filename, ?Integer? level, ?Integer? strategy, **untyped opts) { (instance gz) -> T } -> T
+
+    # <!--
+    #   rdoc-file=ext/zlib/zlib.c
+    #   - Zlib::GzipReader.wrap(io, ...) { |gz| ... }
+    #   - Zlib::GzipWriter.wrap(io, ...) { |gz| ... }
+    # -->
+    # Creates a GzipReader or GzipWriter associated with `io`, passing in any
+    # necessary extra options, and executes the block with the newly created object
+    # just like File.open.
+    #
+    # The GzipFile object will be closed automatically after executing the block. If
+    # you want to keep the associated IO object open, you may call
+    # Zlib::GzipFile#finish method in the block.
+    #
+    %a{annotate:rdoc:copy:Zlib::GzipFile.wrap}
+    def self.wrap: (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) -> instance
+                 | [T] (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) { (instance gz) -> T } -> T
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c

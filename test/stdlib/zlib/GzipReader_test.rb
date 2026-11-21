@@ -17,10 +17,14 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
                        Zlib::GzipReader, :open, path
       assert_send_type "(_ToPath filename) -> Zlib::GzipReader",
                        Zlib::GzipReader, :open, Pathname(path)
-      assert_send_type "(String filename) { (Zlib::GzipReader) -> void } -> void",
-                       Zlib::GzipReader, :open, path do |_| _ end
-      assert_send_type "(_ToPath filename) { (Zlib::GzipReader) -> void } -> void",
-                       Zlib::GzipReader, :open, Pathname(path) do |_| _ end
+      assert_send_type "(String filename, external_encoding: String) -> Zlib::GzipReader",
+                       Zlib::GzipReader, :open, path, external_encoding: "UTF-8"
+      assert_send_type "(String filename) { (Zlib::GzipReader) -> String } -> String",
+                       Zlib::GzipReader, :open, path do |gz| gz.read end
+      assert_send_type "(_ToPath filename) { (Zlib::GzipReader) -> String } -> String",
+                       Zlib::GzipReader, :open, Pathname(path) do |gz| gz.read end
+      assert_send_type "(String filename, encoding: Encoding) { (Zlib::GzipReader) -> String } -> String",
+                       Zlib::GzipReader, :open, path, encoding: Encoding::UTF_8 do |gz| gz.read end
     end
   end
 
@@ -35,9 +39,15 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
 
         io.rewind
 
-        assert_send_type "(IO io) { (Zlib::GzipReader gz) -> void } -> void",
-                         Zlib::GzipReader, :wrap, io do |_| _ end
+        assert_send_type "(IO io) { (Zlib::GzipReader gz) -> String } -> String",
+                         Zlib::GzipReader, :wrap, io do |gz| gz.read end
       end
+
+      gzipped = File.binread(path)
+      assert_send_type "(StringIO io, external_encoding: String) -> Zlib::GzipReader",
+                       Zlib::GzipReader, :wrap, StringIO.new(gzipped), external_encoding: "UTF-8"
+      assert_send_type "(StringIO io, encoding: Encoding) { (Zlib::GzipReader gz) -> String } -> String",
+                       Zlib::GzipReader, :wrap, StringIO.new(gzipped), encoding: Encoding::UTF_8 do |gz| gz.read end
     end
   end
 end

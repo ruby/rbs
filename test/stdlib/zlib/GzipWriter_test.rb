@@ -14,14 +14,36 @@ class ZlibGzipWriterSingletonTest < Test::Unit::TestCase
       result = assert_send_type "(String) -> Zlib::GzipWriter", Zlib::GzipWriter, :open, path
       result.close
 
-      assert_send_type "(String) { (Zlib::GzipWriter) -> void } -> nil",
-                       Zlib::GzipWriter, :open, path do |gz| end
-      assert_send_type "(String, Integer, Integer) { (Zlib::GzipWriter) -> void } -> nil",
-                       Zlib::GzipWriter, :open, path, Zlib::DEFAULT_COMPRESSION, Zlib::DEFAULT_STRATEGY do |gz| end
-      assert_send_type "(String, Integer, Integer, encoding: Encoding) { (Zlib::GzipWriter) -> void } -> nil",
-                       Zlib::GzipWriter, :open, path, Zlib::DEFAULT_COMPRESSION, Zlib::DEFAULT_STRATEGY, encoding: Encoding::UTF_8 do |gz| end
+      result = assert_send_type "(Pathname) -> Zlib::GzipWriter", Zlib::GzipWriter, :open, Pathname(path)
+      result.close
+      result = assert_send_type "(String, nil, nil) -> Zlib::GzipWriter", Zlib::GzipWriter, :open, path, nil, nil
+      result.close
 
+      assert_send_type "(String) { (Zlib::GzipWriter) -> Integer } -> Integer",
+                       Zlib::GzipWriter, :open, path do |gz| gz.write("hello") end
+      assert_send_type "(Pathname) { (Zlib::GzipWriter) -> Integer } -> Integer",
+                       Zlib::GzipWriter, :open, Pathname(path) do |gz| gz.write("hello") end
+      assert_send_type "(String, Integer, Integer) { (Zlib::GzipWriter) -> nil } -> nil",
+                       Zlib::GzipWriter, :open, path, Zlib::DEFAULT_COMPRESSION, Zlib::DEFAULT_STRATEGY do |gz| end
+      assert_send_type "(String, nil, nil) { (Zlib::GzipWriter) -> nil } -> nil",
+                       Zlib::GzipWriter, :open, path, nil, nil do |gz| end
+      assert_send_type "(String, Integer, Integer, encoding: Encoding) { (Zlib::GzipWriter) -> nil } -> nil",
+                       Zlib::GzipWriter, :open, path, Zlib::DEFAULT_COMPRESSION, Zlib::DEFAULT_STRATEGY, encoding: Encoding::UTF_8 do |gz| end
     end
+  end
+
+  def test_wrap
+    result = assert_send_type "(StringIO) -> Zlib::GzipWriter",
+                              Zlib::GzipWriter, :wrap, StringIO.new
+    result.close
+    result = assert_send_type "(StringIO, Integer, nil, mtime: Integer) -> Zlib::GzipWriter",
+                              Zlib::GzipWriter, :wrap, StringIO.new, Zlib::BEST_SPEED, nil, mtime: 0
+    result.close
+
+    assert_send_type "(StringIO) { (Zlib::GzipWriter) -> Integer } -> Integer",
+                     Zlib::GzipWriter, :wrap, StringIO.new do |gz| gz.write("hello") end
+    assert_send_type "(StringIO, Integer, Integer) { (Zlib::GzipWriter) -> nil } -> nil",
+                     Zlib::GzipWriter, :wrap, StringIO.new, Zlib::DEFAULT_COMPRESSION, Zlib::DEFAULT_STRATEGY do |gz| end
   end
 
   def test_new
