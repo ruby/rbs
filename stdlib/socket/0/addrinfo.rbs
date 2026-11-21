@@ -135,7 +135,7 @@ class Addrinfo
   #     }
   #
   def bind: () -> Socket
-          | () { (Socket) -> void } -> void
+          | [T] () { (Socket) -> T } -> T
 
   # <!--
   #   rdoc-file=ext/socket/raddrinfo.c
@@ -176,8 +176,8 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect: (?timeout: Numeric) { (Socket) -> void } -> void
-             | (?timeout: Numeric) -> Socket
+  def connect: [T] (?timeout: Numeric?) { (Socket) -> T } -> T
+             | (?timeout: Numeric?) -> Socket
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -214,10 +214,10 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect_from: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
-                  | (String host, Integer port, ?timeout: Numeric) -> Socket
-                  | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
-                  | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
+  def connect_from: [T] (String host, Integer port, ?timeout: Numeric?) { (Socket) -> T } -> T
+                  | (String host, Integer port, ?timeout: Numeric?) -> Socket
+                  | [T] (Addrinfo sockaddr, ?timeout: Numeric?) { (Socket) -> T } -> T
+                  | (Addrinfo sockaddr, ?timeout: Numeric?) -> Socket
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -241,10 +241,10 @@ class Addrinfo
   #       puts s.read
   #     }
   #
-  def connect_to: (String host, Integer port, ?timeout: Numeric) { (Socket) -> void } -> void
-                | (String host, Integer port, ?timeout: Numeric) -> Socket
-                | (Addrinfo sockaddr, ?timeout: Numeric) { (Socket) -> void } -> void
-                | (Addrinfo sockaddr, ?timeout: Numeric) -> Socket
+  def connect_to: [T] (String host, Integer port, ?timeout: Numeric?) { (Socket) -> T } -> T
+                | (String host, Integer port, ?timeout: Numeric?) -> Socket
+                | [T] (Addrinfo sockaddr, ?timeout: Numeric?) { (Socket) -> T } -> T
+                | (Addrinfo sockaddr, ?timeout: Numeric?) -> Socket
 
   # <!--
   #   rdoc-file=ext/socket/lib/socket.rb
@@ -537,7 +537,8 @@ class Addrinfo
   # -->
   # creates a listening socket bound to self.
   #
-  def listen: (Integer backlog) -> void
+  def listen: (?int backlog) -> Socket
+            | [T] (?int backlog) { (Socket) -> T } -> T
 
   def marshal_dump: () -> String
 
