@@ -1157,7 +1157,7 @@ class IO < Object
   #     f.gets(chomp: true) # => nil
   #     f.close
   #
-  def gets: (string? sep, ?int limit, ?chomp: boolish) -> String?
+  def gets: (string? sep, ?int? limit, ?chomp: boolish) -> String?
           | (?int limit, ?chomp: boolish) -> String?
 
   # <!--
@@ -1707,7 +1707,8 @@ class IO < Object
   # Optional keyword argument `chomp` specifies whether line separators are to be
   # omitted.
   #
-  def readline: (?String sep, ?Integer limit, ?chomp: boolish) -> String
+  def readline: (string? sep, ?int? limit, ?chomp: boolish) -> String
+              | (?int limit, ?chomp: boolish) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -1767,7 +1768,8 @@ class IO < Object
   #     # => ["First line", "Second line", "", "Fourth line", "Fifth line"]
   #     f.close
   #
-  def readlines: (?String sep, ?Integer limit, ?chomp: boolish) -> ::Array[String]
+  def readlines: (string? sep, ?int? limit, ?chomp: boolish) -> ::Array[String]
+               | (?int limit, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -2288,7 +2290,7 @@ class IO < Object
   #     f.getc.ord      # => 1090
   #     f.close
   #
-  def ungetc: (String object) -> nil
+  def ungetc: (Integer | string object) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2685,8 +2687,10 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def self.foreach: (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
-                  | (path path, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
+  def self.foreach: (path path, string? sep, ?int? limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (path path, ?int limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (String line) -> void } -> nil
+                  | (path path, string? sep, ?int? limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
+                  | (path path, ?int limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Enumerator[String, nil]
 
   # <!--
   #   rdoc-file=io.c
@@ -2852,7 +2856,8 @@ class IO < Object
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   # *   [Line Options](rdoc-ref:IO@Line+IO).
   #
-  def self.readlines: (path name, ?String sep, ?Integer limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
+  def self.readlines: (path name, string? sep, ?int? limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
+                    | (path name, ?int limit, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> ::Array[String]
 
   # <!--
   #   rdoc-file=io.c
@@ -3186,8 +3191,10 @@ class IO < Object
   #
   # Returns an Enumerator if no block is given.
   #
-  def each_line: (?string sep, ?int limit, ?chomp: boolish) { (String line) -> void } -> self
-               | (?string sep, ?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
+  def each_line: (string? sep, ?int? limit, ?chomp: boolish) { (String line) -> void } -> self
+               | (?int limit, ?chomp: boolish) { (String line) -> void } -> self
+               | (string? sep, ?int? limit, ?chomp: boolish) -> ::Enumerator[String, self]
+               | (?int limit, ?chomp: boolish) -> ::Enumerator[String, self]
 
   # <!--
   #   rdoc-file=io.c
