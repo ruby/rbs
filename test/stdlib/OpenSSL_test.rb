@@ -1442,6 +1442,115 @@ class OpenSSLSSLSSLSocketTest < Test::Unit::TestCase
         client, :sigalg
     end
   end
+
+  def test_addr
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> [String, Integer, String, String]",
+        client, :addr
+    end
+
+    unix_pair do |ssl|
+      assert_send_type "() -> [String, String]",
+        ssl, :addr
+    end
+  end
+
+  def test_peeraddr
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> [String, Integer, String, String]",
+        client, :peeraddr
+    end
+
+    unix_pair do |ssl|
+      assert_send_type "() -> [String, String]",
+        ssl, :peeraddr
+    end
+  end
+
+  def test_close_on_exec
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "(bool) -> bool",
+        client, :close_on_exec=, false
+      assert_send_type "(bool) -> bool",
+        client, :close_on_exec=, true
+      assert_send_type "() -> bool",
+        client, :close_on_exec?
+    end
+  end
+
+  def test_local_address
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> Addrinfo",
+        client, :local_address
+    end
+  end
+
+  def test_remote_address
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> Addrinfo",
+        client, :remote_address
+    end
+  end
+
+  def test_timeout
+    omit "IO#timeout is not available" unless IO.method_defined?(:timeout)
+
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "() -> nil",
+        client, :timeout
+      assert_send_type "(Float) -> Float",
+        client, :timeout=, 1.5
+      assert_send_type "() -> Float",
+        client, :timeout
+      assert_send_type "(Integer) -> Integer",
+        client, :timeout=, 2
+      assert_send_type "(nil) -> nil",
+        client, :timeout=, nil
+    end
+  end
+
+  def test_wait
+    OpenSSLSSLFixtures.connected do |client, server|
+      server.write("x")
+      assert_send_type "(Integer, Integer) -> Integer",
+        client, :wait, IO::READABLE, 1
+      assert_send_type "(Integer) -> TCPSocket",
+        client, :wait, 1
+      assert_send_type "(Integer, :write) -> TCPSocket",
+        client, :wait, 1, :write
+    end
+  end
+
+  def test_wait_readable
+    OpenSSLSSLFixtures.connected do |client, server|
+      assert_send_type "(Float) -> nil",
+        server, :wait_readable, 0.01
+      server.write("x")
+      assert_send_type "(Integer) -> TCPSocket",
+        client, :wait_readable, 1
+    end
+  end
+
+  def test_wait_writable
+    OpenSSLSSLFixtures.connected do |client, _server|
+      assert_send_type "(Integer) -> TCPSocket",
+        client, :wait_writable, 1
+      assert_send_type "() -> TCPSocket",
+        client, :wait_writable
+    end
+  end
+
+  private
+
+  def unix_pair
+    omit "UNIXSocket is not available" unless defined?(UNIXSocket)
+
+    a, b = UNIXSocket.pair
+    yield OpenSSL::SSL::SSLSocket.new(a)
+  ensure
+    a&.close
+    b&.close
+  end
 end
 
 class OpenSSLTimestampFactoryTest < Test::Unit::TestCase
