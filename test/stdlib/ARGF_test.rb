@@ -252,17 +252,17 @@ class ARGFTest < Test::Unit::TestCase
   end
 
   def test_each_line
-    # assert_send_type  "() { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
-    #                   ARGF.class.new(temp_file), :each_line do |line| line end
-    # assert_send_type  "(::String sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
-    #                   ARGF.class.new(temp_file), :each_line, "\n" do |line| line end
-    # assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
-    #                   ARGF.class.new(temp_file), :each_line, "\n", 1 do |line| line end
+    assert_send_type  "() { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line do |line| line end
+    assert_send_type  "(::String sep) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, "\n" do |line| line end
+    assert_send_type  "(::String sep, ::Integer limit) { (::String line) -> untyped } -> RBS::Unnamed::ARGFClass",
+                      ARGF.class.new(temp_file), :each_line, "\n", 1 do |line| line end
 
-    # assert_send_type  "() -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
-    #                   ARGF.class.new(temp_file), :each_line
-    # assert_send_type  "(::String sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
-    #                   ARGF.class.new(temp_file), :each_line, "\n"
+    assert_send_type  "() -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each_line
+    assert_send_type  "(::String sep) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
+                      ARGF.class.new(temp_file), :each_line, "\n"
     assert_send_type  "(::String sep, ::Integer limit) -> ::Enumerator[::String, RBS::Unnamed::ARGFClass]",
                       ARGF.class.new(temp_file), :each_line, "\n", 1
 
