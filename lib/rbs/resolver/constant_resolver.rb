@@ -129,8 +129,8 @@ module RBS
           constants_from_ancestors(BuiltinNames::Object.name, constants: consts)
         end
 
-        constants_from_context(context, constants: consts) or return
         constants_itself(context, constants: consts)
+        constants_from_context(context, constants: consts) or return
 
         context_constants_cache[context] = consts
       end
