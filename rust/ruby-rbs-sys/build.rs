@@ -20,6 +20,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn build(include_dir: &Path, src_dir: &Path) -> Result<(), Box<dyn Error>> {
+    // bindgen's CargoCallbacks emits rerun-if-changed for headers only, which disables
+    // cargo's default "watch every package file" behavior. Watch the C sources and
+    // headers explicitly so edits to them trigger a rebuild.
+    println!("cargo:rerun-if-changed={}", src_dir.display());
+    println!("cargo:rerun-if-changed={}", include_dir.display());
+
     let mut build = cc::Build::new();
 
     build.include(include_dir);
