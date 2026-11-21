@@ -47,6 +47,16 @@ foo: &foo 2026-11-05
 bar: *foo
       YAML
     )
+
+    assert_send_type(
+      "(::StringIO) -> untyped",
+      Psych, :load, StringIO.new("foo: 123\n")
+    )
+
+    assert_send_type(
+      "(::_ToStr) -> untyped",
+      Psych, :load, ToStr.new("foo: 123\n")
+    )
   end
 
   def test_load_file
@@ -93,6 +103,16 @@ foo: 123
 foo: 123
       YAML
     )
+
+    assert_send_type(
+      "(::StringIO) -> untyped",
+      Psych, :safe_load, StringIO.new("foo: 123\n")
+    )
+
+    assert_send_type(
+      "(::_ToStr) -> untyped",
+      Psych, :safe_load, ToStr.new("foo: 123\n")
+    )
   end
 
   def test_safe_load_file
@@ -116,6 +136,23 @@ foo: 123
         Psych, :safe_load_file, File.join(dir, "test.yaml"), strict_integer: true
       )
     end
+  end
+
+  def test_unsafe_load
+    assert_send_type(
+      "(::String) -> untyped",
+      Psych, :unsafe_load, "foo: 123\n"
+    )
+
+    assert_send_type(
+      "(::StringIO, filename: ::String) -> untyped",
+      Psych, :unsafe_load, StringIO.new("foo: 123\n"), filename: "foo.yaml"
+    )
+
+    assert_send_type(
+      "(::_ToStr) -> untyped",
+      Psych, :unsafe_load, ToStr.new("foo: 123\n")
+    )
   end
 
   def test_unsafe_load_file
@@ -210,6 +247,16 @@ foo: 123
       "(::String) { (::Integer) -> void } -> void",
       Psych, :load_stream, "--- 1\n--- 2\n"
     ) { |document| document }
+
+    assert_send_type(
+      "(::StringIO) -> ::Array[::Integer]",
+      Psych, :load_stream, StringIO.new("--- 1\n--- 2\n")
+    )
+
+    assert_send_type(
+      "(::_ToStr) -> ::Array[::Integer]",
+      Psych, :load_stream, ToStr.new("--- 1\n--- 2\n")
+    )
   end
 
   def test_dump_stream
@@ -261,6 +308,14 @@ foo: 123
       "(::String, filename: ::String) -> ::Psych::Nodes::Document",
       Psych, :parse, "--- a", filename: "a.yml"
     )
+    assert_send_type(
+      "(::StringIO) -> ::Psych::Nodes::Document",
+      Psych, :parse, StringIO.new("--- a")
+    )
+    assert_send_type(
+      "(::_ToStr) -> ::Psych::Nodes::Document",
+      Psych, :parse, ToStr.new("--- a")
+    )
   end
 
   def test_parse_file
@@ -301,6 +356,18 @@ foo: 123
     assert_send_type(
       "(::String) { (::Psych::Nodes::Document) -> void } -> void",
       Psych, :parse_stream, "--- a\n--- b"
+    ) { |doc| doc }
+    assert_send_type(
+      "(::StringIO) -> ::Psych::Nodes::Stream",
+      Psych, :parse_stream, StringIO.new("--- a\n--- b")
+    )
+    assert_send_type(
+      "(::_ToStr) -> ::Psych::Nodes::Stream",
+      Psych, :parse_stream, ToStr.new("--- a\n--- b")
+    )
+    assert_send_type(
+      "(::StringIO) { (::Psych::Nodes::Document) -> void } -> void",
+      Psych, :parse_stream, StringIO.new("--- a\n--- b")
     ) { |doc| doc }
   end
 end
