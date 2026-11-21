@@ -1242,7 +1242,7 @@ class Socket < BasicSocket
   # *   listen manual pages on unix-based systems
   # *   listen function in Microsoft's Winsock functions reference
   #
-  def listen: (Integer backlog_len) -> void
+  def listen: (int backlog_len) -> 0
 
   # <!--
   #   rdoc-file=ext/socket/socket.c

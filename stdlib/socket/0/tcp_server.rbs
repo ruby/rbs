@@ -150,7 +150,7 @@ class TCPServer < TCPSocket
   # *   listen manual pages on unix-based systems
   # *   listen function in Microsoft's Winsock functions reference
   #
-  def listen: (Integer backlog) -> void
+  def listen: (int backlog) -> 0
 
   # <!--
   #   rdoc-file=ext/socket/tcpserver.c

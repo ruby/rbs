@@ -35,3 +35,21 @@ class TCPServerSingletonTest < Test::Unit::TestCase
     ).close
   end
 end
+
+class TCPServerInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  library "socket"
+  testing "::TCPServer"
+
+  def test_listen
+    TCPServer.open("127.0.0.1", 0) do |server|
+      with_int(1) do |backlog|
+        assert_send_type(
+          "(::int) -> 0",
+          server, :listen, backlog
+        )
+      end
+    end
+  end
+end

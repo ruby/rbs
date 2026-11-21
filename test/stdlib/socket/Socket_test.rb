@@ -104,4 +104,22 @@ class SocketInstanceTest < Test::Unit::TestCase
 
   library "socket"
   testing "::Socket"
+
+  def test_listen
+    Socket.open(:INET, :STREAM) do |socket|
+      socket.bind(Addrinfo.tcp("127.0.0.1", 0))
+
+      assert_send_type(
+        "(::int) -> 0",
+        socket, :listen, 1
+      )
+
+      with_int(1) do |backlog|
+        assert_send_type(
+          "(::int) -> 0",
+          socket, :listen, backlog
+        )
+      end
+    end
+  end
 end
