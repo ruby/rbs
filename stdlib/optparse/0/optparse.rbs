@@ -570,10 +570,8 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
-  def define: (*String params) ?{ (*untyped) -> untyped } -> untyped
-            | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
-            | (*String params, Proc | Method handler) -> untyped
-            | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
+  def define: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> untyped
+            | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> untyped
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -587,10 +585,8 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
-  def define_head: (*String params) ?{ (*untyped) -> untyped } -> untyped
-                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
-                 | (*String params, Proc | Method handler) -> untyped
-                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
+  def define_head: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> untyped
+                 | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> untyped
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -604,10 +600,8 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
-  def define_tail: (*String params) ?{ (*untyped) -> untyped } -> untyped
-                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> untyped
-                 | (*String params, Proc | Method handler) -> untyped
-                 | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> untyped
+  def define_tail: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> untyped
+                 | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> untyped
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -720,12 +714,8 @@ class OptionParser
   # given for the option, if any. See [Option
   # Handlers](optparse/option_params.rdoc#label-Option+Handlers).
   #
-  def on: (*String params) ?{ (*untyped) -> untyped } -> self
-        | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-        | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-        | (*String params, Proc | Method handler) -> self
-        | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
-        | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+  def on: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> self
+        | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -741,12 +731,8 @@ class OptionParser
   #
   # The new option is added at the head of the summary.
   #
-  def on_head: (*String params) ?{ (*untyped) -> untyped } -> self
-             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-             | (*String params, Proc | Method handler) -> self
-             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
-             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+  def on_head: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> self
+             | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
@@ -762,12 +748,8 @@ class OptionParser
   #
   # The new option is added at the tail of the summary.
   #
-  def on_tail: (*String params) ?{ (*untyped) -> untyped } -> self
-             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc) ?{ (*untyped) -> untyped } -> self
-             | (*String params, Proc | Method handler) -> self
-             | (String params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
-             | (String short_params, String long_params, Class | Array[String] | Hash[Symbol, untyped] | Regexp obj, ?String desc, Proc | Method handler) -> self
+  def on_tail: (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp) params) ?{ (*untyped) -> untyped } -> self
+             | (*(String | Class | Array[String] | Hash[Symbol, untyped] | Regexp | Proc | Method) params) -> self
 
   # <!--
   #   rdoc-file=lib/optparse.rb
