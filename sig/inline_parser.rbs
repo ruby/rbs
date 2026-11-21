@@ -86,6 +86,8 @@ module RBS
 
       attr_reader module_nesting: Array[module_context]
 
+      attr_reader current_visibility: AST::Members::visibility?
+
       def initialize: (Result) -> void
 
       def buffer: () -> Buffer
@@ -97,6 +99,8 @@ module RBS
       def diagnostics: () -> Array[Diagnostic::t]
 
       def push_module_nesting: [T] (module_context) { () -> T } -> T
+
+      def push_visibility: [T] (AST::Members::visibility) { () -> T } -> T
 
       # Returns `true` if the node is a comment block including `@rbs skip` annotation
       #
@@ -117,6 +121,8 @@ module RBS
       def parse_mixin_call: (Prism::CallNode) -> void
 
       def parse_attribute_call: (Prism::CallNode) -> void
+
+      def parse_visibility_call: (Prism::CallNode) -> void
 
       def parse_constant_declaration: (Prism::ConstantWriteNode | Prism::ConstantPathWriteNode) -> void
 

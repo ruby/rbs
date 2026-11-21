@@ -55,7 +55,7 @@ module RBS
     end
 
     class Parser < Prism::Visitor
-      attr_reader :module_nesting, :result, :comments
+      attr_reader :module_nesting, :result, :comments, :current_visibility
 
       include AST::Ruby::Helpers::ConstantHelper
       include AST::Ruby::Helpers::LocationHelper
@@ -64,6 +64,7 @@ module RBS
         @result = result
         @module_nesting = []
         @comments = CommentAssociation.build(result.buffer, result.prism_result)
+        @current_visibility = nil
       end
 
       def buffer
@@ -87,6 +88,14 @@ module RBS
         yield
       ensure
         module_nesting.pop()
+      end
+
+      def push_visibility(visibility)
+        old_visibility = current_visibility
+        @current_visibility = visibility
+        yield
+      ensure
+        @current_visibility = old_visibility
       end
 
       def skip_node?(node)
@@ -225,7 +234,7 @@ module RBS
           method_type, leading_unuseds, trailing_unused = AST::Ruby::Members::MethodTypeAnnotation.build(leading_block, trailing_block, [], node)
           report_unused_annotation(trailing_unused, *leading_unuseds)
 
-          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block, kind: kind)
+          defn = AST::Ruby::Members::DefMember.new(buffer, node.name, node, method_type, leading_block, kind: kind, visibility: current_visibility)
           current.members << defn
 
           # Skip other comments in `def` node
@@ -263,6 +272,13 @@ module RBS
               rbs_location(node.message_loc || node.location),
               "Top-level attribute definition is not supported"
             )
+          end
+        when :public, :private
+          case current = current_module
+          when AST::Ruby::Declarations::ClassDecl, AST::Ruby::Declarations::ModuleDecl
+            parse_visibility_call(node)
+          else
+            visit_child_nodes(node)
           end
         else
           visit_child_nodes(node)
@@ -386,16 +402,40 @@ module RBS
         # Create the appropriate member type
         member = case node.name
         when :attr_reader
-          AST::Ruby::Members::AttrReaderMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+          AST::Ruby::Members::AttrReaderMember.new(buffer, node, name_nodes, leading_block, type_annotation, visibility: current_visibility)
         when :attr_writer
-          AST::Ruby::Members::AttrWriterMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+          AST::Ruby::Members::AttrWriterMember.new(buffer, node, name_nodes, leading_block, type_annotation, visibility: current_visibility)
         when :attr_accessor
-          AST::Ruby::Members::AttrAccessorMember.new(buffer, node, name_nodes, leading_block, type_annotation)
+          AST::Ruby::Members::AttrAccessorMember.new(buffer, node, name_nodes, leading_block, type_annotation, visibility: current_visibility)
         else
           raise "Unexpected attribute method: #{node.name}"
         end
 
         current_module!.members << member
+      end
+
+      def parse_visibility_call(node)
+        if node.arguments && !node.arguments.arguments.empty?
+          # `private def foo; end`, `private attr_reader :foo`
+          visibility = node.name == :public ? :public : :private #: AST::Members::visibility
+          push_visibility(visibility) do
+            visit_child_nodes(node)
+          end
+        else
+          return if skip_node?(node)
+
+          member =
+            case node.name
+            when :public
+              AST::Ruby::Members::PublicMember.new(buffer, node)
+            when :private
+              AST::Ruby::Members::PrivateMember.new(buffer, node)
+            else
+              raise "Unexpected visibility method: #{node.name}"
+            end
+
+          current_module!.members << member
+        end
       end
 
       def parse_constant_declaration(node)
