@@ -65,8 +65,8 @@ module Zlib
     # Zlib::GzipFile#finish method in the block.
     #
     %a{annotate:rdoc:copy:Zlib::GzipFile.wrap}
-    def self.wrap: (_Reader io, **untyped opts) -> instance
-                 | [T] (_Reader io, **untyped opts) { (instance gz) -> T } -> T
+    def self.wrap: (_Reader io, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> instance
+                 | [T] (_Reader io, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) { (instance gz) -> T } -> T
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -76,8 +76,8 @@ module Zlib
     # GzipReader object associated with that file.  Further details of this method
     # are in Zlib::GzipReader.new and ZLib::GzipFile.wrap.
     #
-    def self.open: (path filename, **untyped opts) -> instance
-                 | [T] (path filename, **untyped opts) { (instance gz) -> T } -> T
+    def self.open: (path filename, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> instance
+                 | [T] (path filename, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) { (instance gz) -> T } -> T
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -92,8 +92,8 @@ module Zlib
     # method returns `nil`. If a block is not given, the method returns the
     # concatenation of all uncompressed data in all gzip streams.
     #
-    def self.zcat: (IO io, **untyped) -> String
-                 | (IO io, **untyped) { (String chunk) -> void } -> nil
+    def self.zcat: (IO io) -> String
+                 | (IO io) { (String chunk) -> void } -> nil
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -312,6 +312,6 @@ module Zlib
     # If the gzip file header is incorrect, raises an Zlib::GzipFile::Error
     # exception.
     #
-    def initialize: (_Reader io, **untyped opts) -> void
+    def initialize: (_Reader io, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> void
   end
 end

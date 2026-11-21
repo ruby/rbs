@@ -36,8 +36,8 @@ class ZlibGzipWriterSingletonTest < Test::Unit::TestCase
     result = assert_send_type "(StringIO) -> Zlib::GzipWriter",
                               Zlib::GzipWriter, :wrap, StringIO.new
     result.close
-    result = assert_send_type "(StringIO, Integer, nil, mtime: Integer) -> Zlib::GzipWriter",
-                              Zlib::GzipWriter, :wrap, StringIO.new, Zlib::BEST_SPEED, nil, mtime: 0
+    result = assert_send_type "(StringIO, Integer, nil, external_encoding: String) -> Zlib::GzipWriter",
+                              Zlib::GzipWriter, :wrap, StringIO.new, Zlib::BEST_SPEED, nil, external_encoding: "UTF-8"
     result.close
 
     assert_send_type "(StringIO) { (Zlib::GzipWriter) -> Integer } -> Integer",
