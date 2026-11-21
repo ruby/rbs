@@ -48,6 +48,7 @@ class RBS::WASM::SerializationTest < Test::Unit::TestCase
       "class Foo < Bar end",
       "class Foo[A, out B, unchecked in C < Comparable[A]] end",
       "module M : Comparable, _Each[Integer] end",
+      "module M : singleton(Foo), singleton(Bar)[Integer] end",
       <<~RBS,
         # A documented class.
         class Account

@@ -24,7 +24,7 @@ module RBS
     # [:enum, [value_or_nil, ...]]. A `nil` name means the field is read but not
     # passed to the constructor (`expose_to_ruby: false` in config.yml).
     module SerializationSchema
-      SYMBOL_TAG = 79
+      SYMBOL_TAG = 80
 
       SCHEMA = [
         nil, # tag 0 is reserved for NULL
@@ -39,6 +39,7 @@ module RBS
         [:node, "RBS::AST::Declarations::Interface", true, [[:keyword, true], [:name, true], [:end, true], [:type_params, false]], [[:name, :node], [:type_params, :node_list], [:members, :node_list], [:annotations, :node_list], [:comment, :node]], true],
         [:node, "RBS::AST::Declarations::Module", true, [[:keyword, true], [:name, true], [:end, true], [:type_params, false], [:colon, false], [:self_types, false]], [[:name, :node], [:type_params, :node_list], [:self_types, :node_list], [:members, :node_list], [:annotations, :node_list], [:comment, :node]], true],
         [:node, "RBS::AST::Declarations::Module::Self", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
+        [:node, "RBS::AST::Declarations::Module::SingletonSelf", true, [[:name, true], [:args, false]], [[:name, :node], [:args, :node_list]], false],
         [:node, "RBS::AST::Declarations::ModuleAlias", true, [[:keyword, true], [:new_name, true], [:eq, true], [:old_name, true]], [[:new_name, :node], [:old_name, :node], [:comment, :node], [:annotations, :node_list]], false],
         [:node, "RBS::AST::Declarations::TypeAlias", true, [[:keyword, true], [:name, true], [:eq, true], [:type_params, false]], [[:name, :node], [:type_params, :node_list], [:type, :node], [:annotations, :node_list], [:comment, :node]], true],
         [:node, "RBS::AST::Directives::Use", true, [[:keyword, true]], [[:clauses, :node_list]], false],

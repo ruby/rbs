@@ -87,13 +87,19 @@ module RBS
       methods = method_builder.build_instance(type_name)
 
       self_type_methods = one_ancestors.each_self_type.with_object({}) do |self_type, hash| #$ Hash[Symbol, Definition::Method]
-        self_type.args.each do |arg|
-          validate_type_presence(arg)
+        case self_type
+        when Definition::Ancestor::Singleton
+          self_type_defn = build_singleton(self_type.name)
+          s = subst
+        when Definition::Ancestor::Instance
+          self_type.args.each do |arg|
+            validate_type_presence(arg)
+          end
+
+          self_type_defn = self_type.name.interface? ? build_interface(self_type.name) : build_instance(self_type.name)
+          s = subst + tapp_subst(self_type.name, self_type.args)
         end
 
-        self_type_defn = self_type.name.interface? ? build_interface(self_type.name) : build_instance(self_type.name)
-
-        s = subst + tapp_subst(self_type.name, self_type.args)
         self_type_defn.methods.each do |method_name, method_def|
           hash[method_name] = method_def.sub(s)
         end
@@ -236,15 +242,22 @@ module RBS
           if entry.is_a?(Environment::ModuleEntry)
             if self_types = one_ancestors.self_types
               self_types.each do |ans|
-                ans.args.each do |arg|
-                  validate_type_presence(arg)
-                end
+                case ans
+                when Definition::Ancestor::Singleton
+                  defn = build_singleton(ans.name)
+                  definition.methods.merge!(defn.methods)
+                  definition.instance_variables.merge!(defn.instance_variables)
+                when Definition::Ancestor::Instance
+                  ans.args.each do |arg|
+                    validate_type_presence(arg)
+                  end
 
-                subst = tapp_subst(ans.name, ans.args)
-                if ans.name.interface?
-                  define_interface(definition, ans.name, subst)
-                else
-                  define_instance(definition, ans.name, subst, define_class_vars: true)
+                  subst = tapp_subst(ans.name, ans.args)
+                  if ans.name.interface?
+                    define_interface(definition, ans.name, subst)
+                  else
+                    define_instance(definition, ans.name, subst, define_class_vars: true)
+                  end
                 end
               end
             end

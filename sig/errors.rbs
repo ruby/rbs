@@ -109,7 +109,7 @@ module RBS
 
     # The type name in `self` is automatically normalized
     #
-    def self.check!: (AST::Declarations::Module::Self, env: Environment) -> void
+    def self.check!: (AST::Declarations::Module::self_type, env: Environment) -> void
   end
 
   class NoMixinFoundError < DefinitionError

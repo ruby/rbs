@@ -10,6 +10,7 @@ module RBS
                    | AST::TypeParam
                    | AST::Declarations::Class::Super
                    | AST::Declarations::Module::Self
+                   | AST::Declarations::Module::SingletonSelf
                    | AST::Directives::t
                    | AST::Directives::Use::clause
 

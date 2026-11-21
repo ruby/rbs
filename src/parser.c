@@ -2649,6 +2649,8 @@ static bool parse_interface_decl(rbs_parser_t *parser, rbs_position_t comment_po
 
   module_self_type ::= <module_name>
                      | module_name `[` type_list <`]`>
+                     | `singleton` `(` module_name <`)`>
+                     | `singleton` `(` module_name `)` `[` type_list <`]`>
 */
 RBS_NODISCARD
 static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array) {
@@ -2658,10 +2660,20 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
         rbs_range_t self_range;
         self_range.start = parser->current_token.range.start;
 
+        bool singleton = false;
         rbs_range_t name_range;
         rbs_type_name_t *module_name = NULL;
-        CHECK_PARSE(parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME), &name_range, &module_name));
-        self_range.end = name_range.end;
+
+        if (parser->current_token.type == kSINGLETON) {
+            singleton = true;
+            ADVANCE_ASSERT(parser, pLPAREN);
+            rbs_parser_advance(parser);
+            CHECK_PARSE(parse_type_name(parser, CLASS_NAME, &name_range, &module_name));
+            ADVANCE_ASSERT(parser, pRPAREN);
+        } else {
+            CHECK_PARSE(parse_type_name(parser, (TypeNameKind) (CLASS_NAME | INTERFACE_NAME), &name_range, &module_name));
+        }
+        self_range.end = parser->current_token.range.end;
 
         rbs_node_list_t *args = rbs_node_list_new(ALLOCATOR());
         rbs_range_t args_range = NULL_RANGE;
@@ -2675,9 +2687,15 @@ static bool parse_module_self_types(rbs_parser_t *parser, rbs_node_list_t *array
 
         rbs_location_range loc = RBS_RANGE_LEX2AST(self_range);
 
-        rbs_ast_declarations_module_self_t *self_type = rbs_ast_declarations_module_self_new(ALLOCATOR(), loc, module_name, args, RBS_RANGE_LEX2AST(name_range));
-        self_type->args_range = RBS_RANGE_LEX2AST(args_range);
-        rbs_node_list_append(array, (rbs_node_t *) self_type);
+        if (singleton) {
+            rbs_ast_declarations_module_singleton_self_t *self_type = rbs_ast_declarations_module_singleton_self_new(ALLOCATOR(), loc, module_name, args, RBS_RANGE_LEX2AST(name_range));
+            self_type->args_range = RBS_RANGE_LEX2AST(args_range);
+            rbs_node_list_append(array, (rbs_node_t *) self_type);
+        } else {
+            rbs_ast_declarations_module_self_t *self_type = rbs_ast_declarations_module_self_new(ALLOCATOR(), loc, module_name, args, RBS_RANGE_LEX2AST(name_range));
+            self_type->args_range = RBS_RANGE_LEX2AST(args_range);
+            rbs_node_list_append(array, (rbs_node_t *) self_type);
+        }
 
         if (parser->next_token.type == pCOMMA) {
             rbs_parser_advance(parser);
