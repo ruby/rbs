@@ -1474,6 +1474,12 @@ static bool parse_type_params(rbs_parser_t *parser, rbs_range_t *rg, bool module
 
     bool required_param_allowed = true;
 
+    if (parser->next_token.type == pAREF_OPR ||
+        (parser->next_token.type == pLBRACKET && parser->next_token2.type == pRBRACKET)) {
+        rbs_parser_set_error(parser, parser->next_token, true, "type parameter list cannot be empty");
+        return false;
+    }
+
     if (parser->next_token.type == pLBRACKET) {
         rbs_parser_advance(parser);
 
@@ -3386,7 +3392,7 @@ bool rbs_parse_signature(rbs_parser_t *parser, rbs_signature_t **signature) {
 }
 
 bool rbs_parse_type_params(rbs_parser_t *parser, bool module_type_params, rbs_node_list_t **params) {
-    if (parser->next_token.type != pLBRACKET) {
+    if (parser->next_token.type != pLBRACKET && parser->next_token.type != pAREF_OPR) {
         rbs_parser_set_error(parser, parser->next_token, true, "expected a token `pLBRACKET`");
         return false;
     }
