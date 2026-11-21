@@ -50,6 +50,42 @@ class ZlibGzipReaderSingletonTest < Test::Unit::TestCase
                        Zlib::GzipReader, :wrap, StringIO.new(gzipped), encoding: Encoding::UTF_8 do |gz| gz.read end
     end
   end
+
+  def test_new
+    gzipped = gzip("hello")
+
+    assert_send_type "(StringIO io) -> Zlib::GzipReader",
+                     Zlib::GzipReader, :new, StringIO.new(gzipped)
+    assert_send_type "(StringIO io, external_encoding: Encoding, internal_encoding: String) -> Zlib::GzipReader",
+                     Zlib::GzipReader, :new, StringIO.new(gzipped), external_encoding: Encoding::UTF_8, internal_encoding: "UTF-16LE"
+    assert_send_type "(StringIO io, encoding: String) -> Zlib::GzipReader",
+                     Zlib::GzipReader, :new, StringIO.new(gzipped), encoding: "UTF-8:UTF-16LE"
+    assert_send_type "(StringIO io, external_encoding: nil, internal_encoding: nil, encoding: nil) -> Zlib::GzipReader",
+                     Zlib::GzipReader, :new, StringIO.new(gzipped), external_encoding: nil, internal_encoding: nil, encoding: nil
+  end
+
+  def test_zcat
+    Dir.mktmpdir do |tmpdir|
+      path = File.join(tmpdir, "test.gz")
+      Zlib::GzipWriter.open(path) { _1.write "hello" }
+
+      File.open(path, "rb") do |io|
+        assert_send_type "(IO io) -> String",
+                         Zlib::GzipReader, :zcat, io
+        io.rewind
+        assert_send_type "(IO io) { (String) -> void } -> nil",
+                         Zlib::GzipReader, :zcat, io do |chunk| end
+      end
+    end
+  end
+
+  private
+
+  def gzip(str)
+    io = StringIO.new
+    Zlib::GzipWriter.wrap(io) { _1.write str }
+    io.string
+  end
 end
 
 class ZlibGzipReaderInstanceTest < Test::Unit::TestCase

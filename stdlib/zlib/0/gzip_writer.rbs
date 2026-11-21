@@ -38,8 +38,8 @@ module Zlib
     # returns a GzipWriter object associated with that file.  Further details of
     # this method are found in Zlib::GzipWriter.new and Zlib::GzipFile.wrap.
     #
-    def self.open: (path filename, ?Integer? level, ?Integer? strategy, **untyped opts) -> instance
-                 | [T] (path filename, ?Integer? level, ?Integer? strategy, **untyped opts) { (instance gz) -> T } -> T
+    def self.open: (path filename, ?Integer? level, ?Integer? strategy, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> instance
+                 | [T] (path filename, ?Integer? level, ?Integer? strategy, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) { (instance gz) -> T } -> T
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -55,8 +55,8 @@ module Zlib
     # Zlib::GzipFile#finish method in the block.
     #
     %a{annotate:rdoc:copy:Zlib::GzipFile.wrap}
-    def self.wrap: (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) -> instance
-                 | [T] (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) { (instance gz) -> T } -> T
+    def self.wrap: (_Writer io, ?Integer? level, ?Integer? strategy, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> instance
+                 | [T] (_Writer io, ?Integer? level, ?Integer? strategy, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) { (instance gz) -> T } -> T
 
     # <!--
     #   rdoc-file=ext/zlib/zlib.c
@@ -181,6 +181,6 @@ module Zlib
     # <code>:external_encoding</code>, <code>:internal_encoding</code> and
     # <code>:encoding</code> may be set as in IO::new.
     #
-    def initialize: (_Writer io, ?Integer? level, ?Integer? strategy, **untyped opts) -> void
+    def initialize: (_Writer io, ?Integer? level, ?Integer? strategy, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil) -> void
   end
 end
