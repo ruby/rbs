@@ -51,6 +51,15 @@ class RBS::MethodTypeParsingTest < Test::Unit::TestCase
     end
   end
 
+  def test_method_type__empty_type_params
+    ["[]", "[ ]"].each do |source|
+      error = assert_raises(RBS::ParsingError) do
+        parse_method_type("#{source} () -> void")
+      end
+      assert_equal "type parameter list cannot be empty", error.error_message
+    end
+  end
+
   def test_method_param
     Parser.parse_method_type("(untyped _, top __, Object _2, String _abc_123)->void").yield_self do |type|
       assert_equal "(untyped _, top __, Object _2, String _abc_123) -> void", type.to_s
