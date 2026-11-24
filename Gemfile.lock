@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/soutaro/steep.git
-  revision: 2fb6e649902f21e093f90378737dc38acde642c8
+  revision: 0028f078638e42870488197245353f1d5d36efcb
   specs:
     steep (2.1.0)
       concurrent-ruby (>= 1.1.10)
@@ -35,7 +35,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.9.2)
+    addressable (2.10.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     benchmark-ips (2.15.1)
@@ -85,7 +85,7 @@ GEM
       net-protocol
     ostruct (0.6.3)
     parallel (2.3.0)
-    parser (3.3.13.0)
+    parser (3.3.14.0)
       ast (~> 2.4.1)
       racc
     power_assert (3.1.0)
@@ -130,7 +130,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.8)
-    rubocop (1.92.2)
+    rubocop (1.92.3)
       json (>= 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -141,9 +141,11 @@ GEM
       rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.51.0)
+    rubocop-ast (1.53.0)
+      ast (~> 2.4)
       parser (>= 3.3.7.2)
       prism (>= 1.7)
+      racc
     rubocop-on-rbs (2.2.0)
       lint_roller (~> 1.1)
       rbs (~> 4.0)
@@ -160,7 +162,7 @@ GEM
     tempfile (0.3.2)
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
-    test-unit (3.7.8)
+    test-unit (3.7.9)
       power_assert
     timeout (0.6.1)
     tsort (0.2.0)
