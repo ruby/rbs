@@ -15,6 +15,7 @@ module RBS
         :+ => "plus",
         :- => "minus",
         :* => "star",
+        :** => "starstar",
         :/ => "slash",
         :> => "gt",
         :>= => "gteq",
@@ -29,9 +30,11 @@ module RBS
         :>> => "rshift",
         :~ => "tilde",
         :=~ => "eqtilde",
+        :!~ => "nottilde",
         :% => "percent",
         :+@ => "unary_plus",
-        :-@ => "unary_minus"
+        :-@ => "unary_minus",
+        :` => "backquote"
       }
       def self.alias_names(target, random)
         suffix = "#{RBS::Test.suffix}_#{random}"

@@ -25,6 +25,18 @@ class RBS::Test::HookTest < Test::Unit::TestCase
     def +(other)
       :plus
     end
+
+    def **(other)
+      :pow
+    end
+
+    def !~(other)
+      :nmatch
+    end
+
+    def `(other)
+      :backquote
+    end
   end
 
   def setup
@@ -55,6 +67,37 @@ class RBS::Test::HookTest < Test::Unit::TestCase
       assert_predicate t.method_call, :return?
       assert_equal [30], t.method_call.arguments
       assert_equal :plus, t.method_call.return_value
+    end
+  end
+
+  def test_hook_operator_with_non_identifier_alias
+    [
+      [:**, :pow],
+      [:!~, :nmatch],
+      [:`, :backquote]
+    ].each do |operator, return_value|
+      key = SecureRandom.hex(10)
+
+      traces = []
+      RBS::Test::Observer.register(key) do |name, trace|
+        traces << trace
+      end
+
+      RBS::Test::Hook.hook_instance_method(
+        Example,
+        operator,
+        key: key
+      )
+
+      _ = Example.new.__send__(operator, 30)
+
+      traces[0].tap do |t|
+        assert_instance_of RBS::Test::CallTrace, t
+        assert_equal operator, t.method_name
+        assert_predicate t.method_call, :return?
+        assert_equal [30], t.method_call.arguments
+        assert_equal return_value, t.method_call.return_value
+      end
     end
   end
 
