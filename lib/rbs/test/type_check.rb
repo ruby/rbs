@@ -104,7 +104,7 @@ module RBS
 
       def overloaded_call(method, method_name, call, errors:)
         es = method.defs.map do |type_def|
-          es = method_call(method_name, type_def.type, call, errors: [], annotations: type_def.annotations)
+          es = method_call(method_name, type_def.type, call, errors: [], annotations: type_def.each_annotation.to_a)
 
           if es.empty?
             return errors

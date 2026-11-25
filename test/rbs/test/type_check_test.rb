@@ -927,4 +927,52 @@ EOF
       end
     end
   end
+
+  def test_type_overload_implicitly_returns_nil
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Foo
+  def one: %a{implicitly-returns-nil} (Integer) -> String
+
+  def two: %a{implicitly-returns-nil} (Integer) -> String
+         | (Integer) { () -> void } -> self
+
+  %a{implicitly-returns-nil}
+  def three: (Integer) -> String
+
+  def four: (Integer) -> String
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        typecheck = Test::TypeCheck.new(context: Test::TypeCheck::InstanceContext.of(Object.new), builder: builder, sample_size: 100, unchecked_classes: [])
+
+        builder.build_instance(type_name("::Foo")).tap do |foo|
+          call = ->(name) do
+            typecheck.overloaded_call(
+              foo.methods[name],
+              name,
+              Test::CallTrace.new(
+                method_name: name,
+                method_call: Test::ArgumentsReturn.return(arguments: [1], value: nil),
+                block_calls: [],
+                block_given: false
+              ),
+              errors: []
+            )
+          end
+
+          assert_empty call[:one]
+          assert_empty call[:two]
+          assert_empty call[:three]
+
+          call[:four].tap do |errors|
+            assert_equal 1, errors.size
+            assert_instance_of RBS::Test::Errors::ReturnTypeError, errors[0]
+          end
+        end
+      end
+    end
+  end
 end
