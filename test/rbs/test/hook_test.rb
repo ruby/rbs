@@ -253,4 +253,36 @@ class RBS::Test::HookTest < Test::Unit::TestCase
       assert_empty t.block_calls
     end
   end
+
+  module MethodCache
+    def set_integer(i)
+      i
+    end
+  end
+
+  class MethodCacheUser
+  end
+
+  def test_hook_instance_method_moved_to_another_class
+    key = SecureRandom.hex(10)
+
+    traces = []
+    RBS::Test::Observer.register(key) do |object, trace|
+      traces << trace
+    end
+
+    RBS::Test::Hook.hook_instance_method(MethodCache, :set_integer, key: key)
+
+    # The UnboundMethod is the hooked wrapper, and MethodCacheUser doesn't include MethodCache
+    MethodCacheUser.define_method(:set_integer, MethodCache.instance_method(:set_integer))
+
+    assert_equal 1, MethodCacheUser.new.set_integer(1)
+
+    traces[0].tap do |t|
+      assert_equal :set_integer, t.method_name
+      assert_predicate t.method_call, :return?
+      assert_equal [1], t.method_call.arguments
+      assert_equal 1, t.method_call.return_value
+    end
+  end
 end

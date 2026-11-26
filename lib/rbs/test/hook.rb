@@ -36,6 +36,13 @@ module RBS
         :-@ => "unary_minus",
         :` => "backquote"
       }
+
+      # Original method definitions of hooked methods, keyed by `random`.
+      #
+      # The hooked method calls the original through this table, not by the `without` alias name.
+      # A hooked method can be copied to another class that doesn't have the alias, like `define_method(:foo, M.instance_method(:foo))`.
+      ORIGINAL_METHODS = {} #: Hash[String, UnboundMethod]
+
       def self.alias_names(target, random)
         suffix = "#{RBS::Test.suffix}_#{random}"
 
@@ -61,6 +68,8 @@ module RBS
 
         RBS.logger.debug "alias name: #{target}, #{with_method}, #{without_method}"
 
+        ORIGINAL_METHODS[random] = klass.instance_method(target)
+
         klass.instance_eval do
           alias_method without_method, target
           alias_method target, with_method
@@ -77,7 +86,8 @@ module RBS
       end
 
       def self.hook_method_source(prefix, method_name, key, random:, params:)
-        with_name, without_name = alias_names(method_name, random)
+        with_name, _ = alias_names(method_name, random)
+        original_method = "::RBS::Test::Hook::ORIGINAL_METHODS[#{random.inspect}]"
         full_method_name = "#{prefix}#{method_name}"
 
         param_source = params.take_while {|param| param[0] == :req }
@@ -149,9 +159,9 @@ def #{with_name}(#{param_source.join(", ")}, &#{block_param})
         end.ruby2_keywords
       end
 
-      result = __send__(:"#{without_name}", *args, &wrapped_block)
+      result = #{original_method}.bind_call(self, *args, &wrapped_block)
     else
-      result = __send__(:"#{without_name}", *args)
+      result = #{original_method}.bind_call(self, *args)
     end
     return_from_call = true
     result
