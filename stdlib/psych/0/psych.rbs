@@ -565,7 +565,7 @@ module Psych
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
-  #   - safe_load_stream(yaml, filename: nil, permitted_classes: [], aliases: false)
+  #   - safe_load_stream(yaml, filename: nil, permitted_classes: [], aliases: false) { |doc| ... }
   # -->
   # Load multiple documents given in `yaml`. Returns the parsed documents as a
   # list.
