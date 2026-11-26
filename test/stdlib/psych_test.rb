@@ -272,7 +272,7 @@ foo: 123
 
     assert_send_type(
       "(::_ToStr, permitted_classes: ::Array[::Class], aliases: bool) -> ::Array[::Hash[::String, ::Date]]",
-      Psych, :safe_load_stream, ToStr.new("--- {a: &a 2026-11-05, b: *a}\n"), permitted_classes: [Date], aliases: true
+      Psych, :safe_load_stream, ToStr.new("--- {a: &a 2026-11-05, b: *a}\n").__with_object_methods(:respond_to?), permitted_classes: [Date], aliases: true
     )
 
     assert_send_type(
