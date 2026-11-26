@@ -17,7 +17,6 @@ gem "rubocop-rubycw"
 gem "rubocop-on-rbs"
 gem "json"
 gem "json-schema"
-gem "goodcheck"
 gem 'digest'
 gem 'tempfile'
 gem "rdoc"

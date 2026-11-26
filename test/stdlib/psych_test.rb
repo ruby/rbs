@@ -55,7 +55,7 @@ bar: *foo
 
     assert_send_type(
       "(::_ToStr) -> untyped",
-      Psych, :load, ToStr.new("foo: 123\n")
+      Psych, :load, ToStr.new("foo: 123\n").__with_object_methods(:respond_to?)
     )
   end
 
@@ -111,7 +111,7 @@ foo: 123
 
     assert_send_type(
       "(::_ToStr) -> untyped",
-      Psych, :safe_load, ToStr.new("foo: 123\n")
+      Psych, :safe_load, ToStr.new("foo: 123\n").__with_object_methods(:respond_to?)
     )
   end
 
@@ -151,7 +151,7 @@ foo: 123
 
     assert_send_type(
       "(::_ToStr) -> untyped",
-      Psych, :unsafe_load, ToStr.new("foo: 123\n")
+      Psych, :unsafe_load, ToStr.new("foo: 123\n").__with_object_methods(:respond_to?)
     )
   end
 
@@ -255,7 +255,7 @@ foo: 123
 
     assert_send_type(
       "(::_ToStr) -> ::Array[::Integer]",
-      Psych, :load_stream, ToStr.new("--- 1\n--- 2\n")
+      Psych, :load_stream, ToStr.new("--- 1\n--- 2\n").__with_object_methods(:respond_to?)
     )
   end
 
@@ -314,7 +314,7 @@ foo: 123
     )
     assert_send_type(
       "(::_ToStr) -> ::Psych::Nodes::Document",
-      Psych, :parse, ToStr.new("--- a")
+      Psych, :parse, ToStr.new("--- a").__with_object_methods(:respond_to?)
     )
   end
 
@@ -363,7 +363,7 @@ foo: 123
     )
     assert_send_type(
       "(::_ToStr) -> ::Psych::Nodes::Stream",
-      Psych, :parse_stream, ToStr.new("--- a\n--- b")
+      Psych, :parse_stream, ToStr.new("--- a\n--- b").__with_object_methods(:respond_to?)
     )
     assert_send_type(
       "(::StringIO) { (::Psych::Nodes::Document) -> void } -> void",

@@ -50,11 +50,6 @@ GEM
     extconf_compile_commands_json (0.0.7)
     ffi (1.17.4)
     fileutils (1.8.1)
-    goodcheck (3.1.0)
-      marcel (>= 1.0, < 2.0)
-      psych (>= 3.1, < 5.0)
-      rainbow (>= 3.0, < 4.0)
-      strong_json (>= 1.1, < 2.2)
     io-console (0.9.5)
     irb (1.19.0)
       pp (>= 0.6.0)
@@ -72,7 +67,6 @@ GEM
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.7.0)
-    marcel (1.2.1)
     memory_profiler (1.1.0)
     minitest (6.1.0)
       drb (~> 2.0)
@@ -94,8 +88,6 @@ GEM
     prettyprint (0.2.1)
     prism (2.1.0)
     pstore (0.3.0)
-    psych (4.0.6)
-      stringio
     public_suffix (7.0.5)
     raap (2.0.0)
       logger
@@ -156,8 +148,6 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     stackprof (0.2.28)
-    stringio (3.2.0)
-    strong_json (2.1.2)
     strscan (3.1.8)
     tempfile (0.3.2)
     terminal-table (4.0.0)
@@ -182,7 +172,6 @@ DEPENDENCIES
   digest
   extconf_compile_commands_json
   fileutils
-  goodcheck
   irb
   json
   json-schema
