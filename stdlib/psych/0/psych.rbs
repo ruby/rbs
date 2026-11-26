@@ -565,6 +565,26 @@ module Psych
 
   # <!--
   #   rdoc-file=ext/psych/lib/psych.rb
+  #   - safe_load_stream(yaml, filename: nil, permitted_classes: [], aliases: false) { |doc| ... }
+  # -->
+  # Load multiple documents given in `yaml`. Returns the parsed documents as a
+  # list.
+  #
+  # Example:
+  #
+  #     Psych.safe_load_stream("--- foo\n...\n--- bar\n...") # => ['foo', 'bar']
+  #
+  #     list = []
+  #     Psych.safe_load_stream("--- foo\n...\n--- bar\n...") do |ruby|
+  #       list << ruby
+  #     end
+  #     list # => ['foo', 'bar']
+  #
+  def self.safe_load_stream: (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?, ?permitted_classes: Array[Class], ?aliases: bool) -> Array[untyped]
+                           | (string | _YAMLReader yaml, ?filename: String | _ToStr | _ToS?, ?permitted_classes: Array[Class], ?aliases: bool) { (untyped document) -> void } -> nil
+
+  # <!--
+  #   rdoc-file=ext/psych/lib/psych.rb
   #   - dump_stream(*objects)
   # -->
   # Dump a list of objects as separate documents to a document stream.

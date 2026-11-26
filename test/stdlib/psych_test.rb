@@ -259,6 +259,28 @@ foo: 123
     )
   end
 
+  def test_safe_load_stream
+    assert_send_type(
+      "(::String) -> ::Array[::String]",
+      Psych, :safe_load_stream, "--- foo\n--- bar\n"
+    )
+
+    assert_send_type(
+      "(::StringIO, filename: ::String) -> ::Array[::Integer]",
+      Psych, :safe_load_stream, StringIO.new("--- 1\n--- 2\n"), filename: "foo.yaml"
+    )
+
+    assert_send_type(
+      "(::_ToStr, permitted_classes: ::Array[::Class], aliases: bool) -> ::Array[::Hash[::String, ::Date]]",
+      Psych, :safe_load_stream, ToStr.new("--- {a: &a 2026-11-05, b: *a}\n").__with_object_methods(:respond_to?), permitted_classes: [Date], aliases: true
+    )
+
+    assert_send_type(
+      "(::String) { (::String) -> void } -> nil",
+      Psych, :safe_load_stream, "--- foo\n--- bar\n"
+    ) { |document| document }
+  end if Psych.respond_to?(:safe_load_stream)
+
   def test_dump_stream
     assert_send_type(
       "(::Integer) -> ::String",
