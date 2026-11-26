@@ -165,6 +165,15 @@ end
 #
 # JSON is a lightweight data-interchange format.
 #
+# JSON is easy for us humans to read and write, and equally simple for machines
+# to read (parse) and write (generate).
+#
+# JSON is language-independent, making it an ideal interchange format for
+# applications in differing programming languages and on differing operating
+# systems.
+#
+# ## JSON Values
+#
 # A JSON value is one of the following:
 # *   Double-quoted text:  <code>"foo"</code>.
 # *   Number:  `1`, <code>1.0</code>, <code>2.0e2</code>.
@@ -330,6 +339,18 @@ end
 #
 # When enabled:
 #     JSON.parse('[1,]', allow_trailing_comma: true) # => [1]
+#
+# ---
+#
+# Option `allow_control_characters` (boolean) specifies whether to allow
+# unescaped ASCII control characters, such as newlines, in strings; defaults to
+# `false`.
+#
+# With the default, `false`:
+#     JSON.parse(%{"Hello\nWorld"}) # invalid ASCII control character in string (JSON::ParserError)
+#
+# When enabled:
+#     JSON.parse(%{"Hello\nWorld"}, allow_control_characters: true) # => "Hello\nWorld"
 #
 # ###### Output Options
 #
