@@ -273,6 +273,11 @@ class TimeSingletonTest < Test::Unit::TestCase
   include TestHelper
   testing "singleton(::Time)"
 
+  class Timezone
+    def local_to_utc(time) = time - 3600
+    def utc_to_local(time) = time + 3600
+  end
+
   def test_now
     assert_send_type(
       "() -> Time",
@@ -289,6 +294,18 @@ class TimeSingletonTest < Test::Unit::TestCase
     assert_send_type(
       "(in: nil) -> Time",
       Time, :now, in: nil
+    )
+    assert_send_type(
+      "(in: Rational) -> Time",
+      Time, :now, in: 7201/2r
+    )
+    assert_send_type(
+      "(in: Float) -> Time",
+      Time, :now, in: 3600.5
+    )
+    assert_send_type(
+      "(in: Time::_Timezone) -> Time",
+      Time, :now, in: Timezone.new
     )
   end
 
@@ -325,6 +342,14 @@ class TimeSingletonTest < Test::Unit::TestCase
       "(Rational, Rational) -> Time",
       Time, :at, 0r, 500r
     )
+    assert_send_type(
+      "(Integer, in: Rational) -> Time",
+      Time, :at, 0, in: 7201/2r
+    )
+    assert_send_type(
+      "(Integer, in: Time::_Timezone) -> Time",
+      Time, :at, 0, in: Timezone.new
+    )
   end
 
   def test_new
@@ -352,12 +377,105 @@ class TimeSingletonTest < Test::Unit::TestCase
       "(String, in: ToStr, precision: ToInt) -> Time",
       Time, :new, "2000-12-31 23:59:59.5", in: ToStr.new("+0900"), precision: ToInt.new(2)
     )
+    assert_send_type(
+      "(Integer, Integer, Integer, Integer, Integer, Integer, Rational) -> Time",
+      Time, :new, 2022, 1, 3, 13, 22, 30, 7201/2r
+    )
+    assert_send_type(
+      "(Integer, Integer, Integer, Integer, Integer, Integer, Time::_Timezone) -> Time",
+      Time, :new, 2022, 1, 3, 13, 22, 30, Timezone.new
+    )
+    assert_send_type(
+      "(Integer, Integer, Integer, in: Float) -> Time",
+      Time, :new, 2022, 1, 3, in: 3600.5
+    )
+    assert_send_type(
+      "(String, in: Time::_Timezone) -> Time",
+      Time, :new, "2000-12-31 23:59:59.5", in: Timezone.new
+    )
+  end
+
+  def test_local
+    %i[local mktime].each do |method|
+      assert_send_type(
+        "(Integer, String, Integer, Integer, Integer, Integer, Integer) -> Time",
+        Time, method, 2000, "jan", 1, 20, 15, 1, 0
+      )
+      assert_send_type(
+        "(Integer, nil, nil, nil, nil, nil, nil) -> Time",
+        Time, method, 2000, nil, nil, nil, nil, nil, nil
+      )
+      assert_send_type(
+        "(Integer, Integer, Integer, Integer, Integer, Integer, nil, nil, bool, nil) -> Time",
+        Time, method, 1, 15, 20, 1, 1, 2000, nil, nil, false, nil
+      )
+      assert_send_type(
+        "(nil, nil, nil, nil, String, Integer, Integer, Integer, bool, String) -> Time",
+        Time, method, nil, nil, nil, nil, "jan", 2000, 6, 1, false, "JST"
+      )
+    end
+  end
+
+  def test_utc
+    %i[utc gm].each do |method|
+      assert_send_type(
+        "(Integer, String, Integer, Integer, Integer, Integer, Integer) -> Time",
+        Time, method, 2000, "jan", 1, 20, 15, 1, 0
+      )
+      assert_send_type(
+        "(Integer, nil, nil, nil, nil, nil, nil) -> Time",
+        Time, method, 2000, nil, nil, nil, nil, nil, nil
+      )
+      assert_send_type(
+        "(Integer, Integer, Integer, Integer, Integer, Integer, nil, nil, bool, nil) -> Time",
+        Time, method, 1, 15, 20, 1, 1, 2000, nil, nil, false, nil
+      )
+      assert_send_type(
+        "(Float, nil, nil, nil, Integer, Integer, Integer, Integer, bool, String) -> Time",
+        Time, method, 1.5, nil, nil, nil, 1, 2000, 6, 1, false, "UTC"
+      )
+    end
   end
 end
 
 class TimeInstanceTest < Test::Unit::TestCase
   include TestHelper
   testing "::Time"
+
+  class Timezone
+    def local_to_utc(time) = time - 3600
+    def utc_to_local(time) = time + 3600
+  end
+
+  def test_getlocal
+    assert_send_type "() -> Time",
+                     Time.now, :getlocal
+    assert_send_type "(String) -> Time",
+                     Time.now, :getlocal, "+09:00"
+    assert_send_type "(Integer) -> Time",
+                     Time.now, :getlocal, 3600
+    assert_send_type "(Rational) -> Time",
+                     Time.now, :getlocal, 7201/2r
+    assert_send_type "(Float) -> Time",
+                     Time.now, :getlocal, 3600.5
+    assert_send_type "(Time::_Timezone) -> Time",
+                     Time.now, :getlocal, Timezone.new
+  end
+
+  def test_localtime
+    assert_send_type "() -> Time",
+                     Time.now, :localtime
+    assert_send_type "(String) -> Time",
+                     Time.now, :localtime, "+09:00"
+    assert_send_type "(Integer) -> Time",
+                     Time.now, :localtime, 3600
+    assert_send_type "(Rational) -> Time",
+                     Time.now, :localtime, 7201/2r
+    assert_send_type "(Float) -> Time",
+                     Time.now, :localtime, 3600.5
+    assert_send_type "(Time::_Timezone) -> Time",
+                     Time.now, :localtime, Timezone.new
+  end
 
   def test_to_a
     assert_send_type "() -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String ]",
