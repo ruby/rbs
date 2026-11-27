@@ -188,4 +188,15 @@ class RationalInstanceTest < Test::Unit::TestCase
     assert_send_type "(Complex) -> Complex",
                       1, :*, Complex.rect(1,2)
   end
+
+  def test_round
+    assert_send_type "(half: :up) -> Integer",
+                     5/2r, :round, half: :up
+    assert_send_type "(half: nil) -> Integer",
+                     5/2r, :round, half: nil
+    assert_send_type "(half: String) -> Integer",
+                     5/2r, :round, half: "even"
+    assert_send_type "(Integer, half: String) -> Rational",
+                     5/4r, :round, 1, half: "down"
+  end
 end

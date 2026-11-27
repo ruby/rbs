@@ -34,6 +34,17 @@ class IntegerInstanceTest < Test::Unit::TestCase
     # omit 'todo'
   end
 
+  def test_aref
+    assert_send_type "(Integer) -> Integer",
+                     0b1010, :[], 1
+    assert_send_type "(Integer, Integer) -> Integer",
+                     0b1010, :[], 1, 2
+    assert_send_type "(Range[Integer]) -> Integer",
+                     0b1010, :[], 1..2
+    assert_send_type "(Range[Integer?]) -> Integer",
+                     0b1010, :[], (1..)
+  end
+
   def test_op_and
     # omit 'todo'
   end

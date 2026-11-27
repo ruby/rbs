@@ -71,6 +71,10 @@ class NumericInstanceTest < Test::Unit::TestCase
                      1, :step, to: 3r, by: 0.2
     assert_send_type '(to: Rational, by: Float) { (Float) -> void } -> Rational',
                      1, :step, to: 3r, by: 0.2 do |i| break_from_block i end
+    assert_send_type '(Integer, by: Integer) -> Enumerator::ArithmeticSequence',
+                     1, :step, 10, by: 3
+    assert_send_type '(Integer, by: Integer) { (Integer) -> void } -> Integer',
+                     1, :step, 10, by: 3 do |i| end
    end
 
   class NumericWithToF < Numeric
