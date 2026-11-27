@@ -15,6 +15,20 @@ class FiberSingletonTest < Test::Unit::TestCase
       "(Symbol) -> Integer",
       Fiber, :[], :key
     )
+
+    if_ruby("3.4"...) do
+      with_interned :key do |key|
+        assert_send_type(
+          "(interned, Integer) -> Integer",
+          Fiber, :[]=, key, 123
+        )
+
+        assert_send_type(
+          "(interned) -> Integer",
+          Fiber, :[], key
+        )
+      end
+    end
   end
 
   def test_blocking

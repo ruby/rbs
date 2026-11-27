@@ -108,6 +108,14 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "() -> nil", Thread.new{}.join, :native_thread_id
   end
 
+  def test_key?
+    th = Thread.new { Thread.current[:cat] = 'meow' }.join
+
+    with_interned :cat do |key|
+      assert_send_type "(interned) -> bool", th, :key?, key
+    end
+  end
+
   def test_fetch
     th = Thread.new { Thread.current[:cat] = 'meow' }.join
     assert_send_type "(Symbol) -> String", th, :fetch, :cat
