@@ -162,5 +162,8 @@ class ExceptionInstanceTest < Test::Unit::TestCase
                           INSTANCE, :full_message, highlight: highlight, order: order
       end
     end
+
+    assert_send_type  '(highlight: bool, foo: String) -> String',
+                      INSTANCE, :full_message, highlight: false, foo: "bar"
   end
 end

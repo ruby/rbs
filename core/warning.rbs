@@ -32,7 +32,7 @@
 module Warning
   # The types of categories the `Warning` module understands.
   #
-  type category = :deprecated | :experimental | :performance
+  type category = :deprecated | :experimental | :performance | :strict_unused_block
 
   # <!--
   #   rdoc-file=error.c

@@ -102,7 +102,7 @@ module Signal
   def self?.trap: (Integer | interned signal) { (Integer) -> void } -> trap_command
                 | (Integer | interned signal, trap_command command) -> trap_command
 
-  type trap_command = string | bool | nil | _TrapCommand
+  type trap_command = interned | bool | nil | _TrapCommand
 
   interface _TrapCommand
     def call: (Integer signo) -> void

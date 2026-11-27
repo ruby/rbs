@@ -194,10 +194,19 @@ class ThreadTest < Test::Unit::TestCase
                        t, :raise, Exception.new, cause: Exception.new
     end
 
+    assert_send_type "(singleton(StandardError), ToS) -> nil",
+                     t, :raise, StandardError, ToS.new('Error!')
+    assert_send_type "(singleton(ThreadTest::DataError), data: Integer) -> nil",
+                     t, :raise, DataError, data: 42
+
     t.kill
   end
 
   class Sub < Thread
+  end
+
+  class DataError < StandardError
+    def initialize(data) = super(data.inspect)
   end
 
   def test_kill
