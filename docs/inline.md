@@ -534,6 +534,7 @@ The `@rbs @VAR-NAME: TYPE` syntax enclosed in `class`/`module` syntax declares i
 You can add the documentation of the variable followed by two hyphens (`--`).
 
 Instance variable declarations must be under the `class`/`module` syntax, and they are ignored if written inside method definitions.
+Separate them from the following member with a blank line.
 
 ### Current Limitations
 
