@@ -1352,7 +1352,12 @@ class ArrayInstanceTest < Test::Unit::TestCase
   end
 
   def test_reject
-    test_delete_if(method: :reject)
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      [1r, 2r, 3r], :reject do |ele| ele > 2 ? :truthy : nil end
+    assert_send_type  '() { (Rational) -> boolish } -> Array[Rational]',
+                      ArraySubclass.new([1r, 2r]), :reject do false end
+    assert_send_type  '() -> Enumerator[Rational, Array[Rational]]',
+                      [1r], :reject
   end
 
   def test_freeze

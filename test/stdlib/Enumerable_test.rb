@@ -156,6 +156,13 @@ class EnumerableTest2 < Test::Unit::TestCase
 
   testing "::Enumerable[String]"
 
+  def test_group_by
+    assert_send_type "() { (String) -> Integer } -> ::Hash[Integer, ::Array[String]]",
+                     TestEnumerable.new, :group_by do |x| x.to_i end
+    assert_send_type "() -> ::Enumerator[String, ::Hash[untyped, ::Array[String]]]",
+                     TestEnumerable.new, :group_by
+  end
+
   def test_chunk
     assert_send_type "() -> ::Enumerator[String, ::Enumerator[[untyped, ::Array[String]], void]]",
                      TestEnumerable.new, :chunk

@@ -187,7 +187,8 @@ class Float < Numeric
   #     f ** Complex(2, 0)  # => (9.8596+0i)
   #
   def **: (Complex) -> Complex
-        | (Numeric) -> Float
+        | (Integer) -> Float
+        | (Numeric) -> (Float | Complex)
 
   # <!--
   #   rdoc-file=numeric.c
@@ -801,7 +802,7 @@ class Float < Numeric
   #
   # See also Float#denominator.
   #
-  def numerator: () -> Integer
+  def numerator: () -> (Integer | Float)
 
   # <!-- rdoc-file=complex.c -->
   # Returns 0 if `self` is positive, Math::PI otherwise.

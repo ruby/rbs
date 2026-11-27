@@ -802,7 +802,7 @@ module Enumerable[unchecked out E] : _Each[E]
   # With no block given, returns an Enumerator.
   #
   def group_by: [U] () { (E arg0) -> U } -> ::Hash[U, ::Array[E]]
-              | () -> ::Enumerator[E, ::Array[E]]
+              | () -> ::Enumerator[E, ::Hash[untyped, ::Array[E]]]
 
   # <!-- rdoc-file=enum.c -->
   # Returns whether for any element <code>object == element</code>:

@@ -241,6 +241,34 @@ class FloatTest < StdlibTest
   end
 end
 
+class FloatInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Float"
+
+  def test_numerator
+    assert_send_type "() -> Integer",
+                     1.5, :numerator
+    assert_send_type "() -> Float",
+                     Float::NAN, :numerator
+    assert_send_type "() -> Float",
+                     Float::INFINITY, :numerator
+  end
+
+  def test_pow
+    assert_send_type "(Integer) -> Float",
+                     -8.0, :**, 3
+    assert_send_type "(Float) -> Float",
+                     8.0, :**, 0.5
+    assert_send_type "(Float) -> Complex",
+                     -8.0, :**, 0.5
+    assert_send_type "(Rational) -> Complex",
+                     -8.0, :**, 1/3r
+    assert_send_type "(Complex) -> Complex",
+                     8.0, :**, Complex(2, 0)
+  end
+end
+
 class FloatConstantTest < Test::Unit::TestCase
   include TestHelper
 
