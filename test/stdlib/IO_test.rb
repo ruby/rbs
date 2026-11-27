@@ -37,6 +37,10 @@ class IOSingletonTest < Test::Unit::TestCase
                        IO, :binwrite, filename, content, mode: "a"
       assert_send_type "(String, String, Integer, mode: String) -> Integer",
                        IO, :binwrite, filename, content, 0, mode: "a"
+      assert_send_type "(String, String, flags: Integer, perm: Integer) -> Integer",
+                       IO, :binwrite, filename, content, flags: File::CREAT, perm: 0o644
+      assert_send_type "(String, String, open_args: Array[String]) -> Integer",
+                       IO, :binwrite, filename, content, open_args: ["w"]
     end
   end
 
@@ -49,6 +53,10 @@ class IOSingletonTest < Test::Unit::TestCase
                      IO, :read, File.expand_path(__FILE__), 3
     assert_send_type "(String, Integer, Integer) -> String",
                      IO, :read, File.expand_path(__FILE__), 3, 0
+    assert_send_type "(String, Integer, nil) -> String",
+                     IO, :read, File.expand_path(__FILE__), 3, nil
+    assert_send_type "(String, open_args: Array[String]) -> String",
+                     IO, :read, File.expand_path(__FILE__), open_args: ["r"]
   end
 
   def test_write
@@ -66,6 +74,10 @@ class IOSingletonTest < Test::Unit::TestCase
                        IO, :write, filename, content, mode: "a"
       assert_send_type "(String, String, Integer, mode: String) -> Integer",
                        IO, :write, filename, content, 0, mode: "a"
+      assert_send_type "(String, String, flags: Integer, perm: Integer) -> Integer",
+                       IO, :write, filename, content, flags: File::CREAT, perm: 0o644
+      assert_send_type "(String, String, open_args: Array[String]) -> Integer",
+                       IO, :write, filename, content, open_args: ["w"]
     end
   end
 
@@ -81,6 +93,10 @@ class IOSingletonTest < Test::Unit::TestCase
       assert_send_type(
         "(ToInt, path: String) -> IO",
         IO, :open, ToInt.new(IO.sysopen(File.expand_path(__FILE__))), path: "<<TEST>>"
+      )
+      assert_send_type(
+        "(Integer, nil, flags: Integer) -> IO",
+        IO, :open, IO.sysopen(File.expand_path(__FILE__)), nil, flags: File::RDONLY
       )
     end
   end
@@ -111,6 +127,15 @@ class IOSingletonTest < Test::Unit::TestCase
         )
       end
     end
+
+    assert_send_type(
+      "(String, err: [:child, :out]) { (IO) -> nil } -> nil",
+      IO, :popen, "#{RUBY_EXECUTABLE} -v", err: [:child, :out], &proc { nil }
+    )
+    assert_send_type(
+      "(String, chdir: Pathname) { (IO) -> nil } -> nil",
+      IO, :popen, "#{RUBY_EXECUTABLE} -v", chdir: Pathname(Dir.pwd), &proc { nil }
+    )
   end
 
   def test_copy_stream
@@ -155,6 +180,22 @@ class IOSingletonTest < Test::Unit::TestCase
                            IO, :copy_stream, src_io, dst_io, 1, 0
         end
       end
+
+      File.open(src_name) do |src_io|
+        reader = Object.new
+        reader.define_singleton_method(:read) {|length, outbuf| src_io.read(length, outbuf) }
+        writer = Object.new
+        writer.define_singleton_method(:write) {|data| data.bytesize }
+        assert_send_type "(IO::_CopyStreamReader, IO::_CopyStreamWriter) -> Integer",
+                         IO, :copy_stream, reader, writer
+      end
+
+      File.open(src_name) do |src_io|
+        reader = Object.new
+        reader.define_singleton_method(:readpartial) {|maxlen, outbuf| src_io.readpartial(maxlen, outbuf) }
+        assert_send_type "(IO::_CopyStreamReaderPartial, String) -> Integer",
+                         IO, :copy_stream, reader, dst_name
+      end
     end
   end
 
@@ -177,6 +218,20 @@ class IOSingletonTest < Test::Unit::TestCase
       assert_send_type(
         "(Integer, path: nil) -> IO",
         IO, :new, fd, path: nil
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer, nil, mode: Integer, flags: Integer) -> IO",
+        IO, :new, fd, nil, mode: File::RDONLY, flags: File::RDONLY
+      )
+    end
+
+    IO.sysopen(File.expand_path(__FILE__)).tap do |fd|
+      assert_send_type(
+        "(Integer, mode: nil) -> IO",
+        IO, :new, fd, mode: nil
       )
     end
   end
@@ -710,6 +765,58 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :ungetc, ToStr.new("a")
       assert_send_type '(Integer) -> nil',
                        io, :ungetc, 0x41
+    end
+  end
+
+  def test_set_encoding
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(nil) -> IO',
+                       io, :set_encoding, nil
+      assert_send_type '(String) -> IO',
+                       io, :set_encoding, "UTF-8:EUC-JP"
+      assert_send_type '(Encoding, nil) -> IO',
+                       io, :set_encoding, Encoding::UTF_8, nil
+      assert_send_type '(String, String, invalid: :replace, undef: :replace, replace: String) -> IO',
+                       io, :set_encoding, "UTF-8", "EUC-JP", invalid: :replace, undef: :replace, replace: "?"
+      assert_send_type '(String, newline: :universal) -> IO',
+                       io, :set_encoding, "UTF-8:EUC-JP", newline: :universal
+    end
+  end
+
+  def test_seek
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(Integer) -> Integer',
+                       io, :seek, 0
+      assert_send_type '(Integer, Integer) -> Integer',
+                       io, :seek, 0, IO::SEEK_SET
+      %i[SET CUR END].each do |whence|
+        assert_send_type "(Integer, :#{whence}) -> Integer",
+                         io, :seek, 0, whence
+      end
+    end
+  end
+
+  def test_sysseek
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(Integer) -> Integer',
+                       io, :sysseek, 0
+      assert_send_type '(Integer, Integer) -> Integer',
+                       io, :sysseek, 0, IO::SEEK_SET
+      %i[SET CUR END].each do |whence|
+        assert_send_type "(Integer, :#{whence}) -> Integer",
+                         io, :sysseek, 0, whence
+      end
+    end
+  end
+
+  def test_fcntl
+    require "fcntl"
+
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(Integer) -> Integer',
+                       io, :fcntl, Fcntl::F_GETFD
+      assert_send_type '(Integer, Integer) -> Integer',
+                       io, :fcntl, Fcntl::F_GETFD, 0
     end
   end
 

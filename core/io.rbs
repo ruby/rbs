@@ -997,7 +997,7 @@ class IO < Object
   #
   # Not implemented on all platforms.
   #
-  def fcntl: (Integer integer_cmd, String | Integer argument) -> Integer
+  def fcntl: (Integer integer_cmd, ?String | Integer argument) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1199,7 +1199,7 @@ class IO < Object
   #     IO.new(fd, internal_encoding: nil) # => #<IO:fd 3>
   #     IO.new(fd, autoclose: true)        # => #<IO:fd 3>
   #
-  def initialize: ( int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> void
+  def initialize: ( int fd, ?string | int | nil mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: string | int | nil, ?flags: int) -> void
 
   # <!--
   #   rdoc-file=io.c
@@ -1964,7 +1964,7 @@ class IO < Object
   #
   # Related: IO#pos=, IO#tell.
   #
-  def seek: (Integer amount, ?Integer whence) -> Integer
+  def seek: (Integer amount, ?Integer | :SET | :CUR | :END | :DATA | :HOLE whence) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -1990,8 +1990,7 @@ class IO < Object
   # Optional keyword arguments `enc_opts` specify [Encoding
   # options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def set_encoding: (?String | Encoding ext_or_ext_int_enc) -> self
-                  | (?String | Encoding ext_or_ext_int_enc, ?String | Encoding int_enc) -> self
+  def set_encoding: (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?invalid: :replace ?, ?undef: :replace ?, ?replace: string?, ?xml: (:text | :attr)?, ?newline: (:universal | :crlf | :cr | :lf)?, ?universal_newline: boolish, ?cr_newline: boolish, ?crlf_newline: boolish, ?lf_newline: boolish, ?fallback: ^(String) -> string? | Method | String::_EncodeFallbackAref) -> self
 
   # <!--
   #   rdoc-file=io.c
@@ -2092,7 +2091,7 @@ class IO < Object
   # *   Uses low-level system functions.
   # *   Returns the new position.
   #
-  def sysseek: (Integer amount, ?Integer whence) -> Integer
+  def sysseek: (Integer amount, ?Integer | :SET | :CUR | :END | :DATA | :HOLE whence) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2386,7 +2385,7 @@ class IO < Object
   # Behaves like IO.write, except that the stream is opened in binary mode with
   # ASCII-8BIT encoding.
   #
-  def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode) -> Integer
+  def self.binwrite: (path name, _ToS string, ?Integer offset, ?mode: String mode, ?flags: int, ?perm: int, ?open_args: array[untyped]) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2438,7 +2437,7 @@ class IO < Object
   #     IO.copy_stream('t.txt', 't.tmp', 11, 11) # => 11
   #     IO.read('t.tmp')                         # => "Second line"
   #
-  def self.copy_stream: (String | _Reader | _ReaderPartial src, String | _Writer dst, ?Integer? copy_length, ?Integer src_offset) -> Integer
+  def self.copy_stream: (String | _CopyStreamReader | _CopyStreamReaderPartial src, String | _CopyStreamWriter dst, ?Integer? copy_length, ?Integer src_offset) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -2600,10 +2599,10 @@ class IO < Object
   #
   # Raises exceptions that IO.pipe and Kernel.spawn raise.
   #
-  def self.popen: (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) -> instance
-                | (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) -> instance
-                | [X] (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) { (instance) -> X } -> X
-                | [X] (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: String) { (instance) -> X } -> X
+  def self.popen: (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: path) -> instance
+                | (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: path) -> instance
+                | [X] (string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: path) { (instance) -> X } -> X
+                | [X] (Hash[string, string?] env, string | cmd_array cmd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: Kernel::redirect_fd, ?out: Kernel::redirect_fd, ?err: Kernel::redirect_fd, ?close_others: bool, ?chdir: path) { (instance) -> X } -> X
 
   # The command can be given as:
   #
@@ -2807,7 +2806,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (path name, ?Integer? length, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> String
+  def self.read: (path name, ?Integer? length, ?Integer? offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?open_args: array[untyped]) -> String
 
   # <!--
   #   rdoc-file=io.c
@@ -3072,7 +3071,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.write: (path path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> Integer
+  def self.write: (path path, _ToS data, ?Integer offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?flags: int, ?perm: int, ?open_args: array[untyped]) -> Integer
 
   # <!--
   #   rdoc-file=io.c
@@ -3094,8 +3093,8 @@ class IO < Object
   # With a block given, calls the block with the IO object and returns the block's
   # value.
   #
-  def self.open: (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) -> instance
-               | [X] (int fd, ?string | int mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String) { (instance) -> X } -> X
+  def self.open: (int fd, ?string | int | nil mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: string | int | nil, ?flags: int) -> instance
+               | [X] (int fd, ?string | int | nil mode, ?path: string?, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: string | int | nil, ?flags: int) { (instance) -> X } -> X
 
   # <!-- rdoc-file=io.c -->
   # Calls the block with each remaining line read from the stream; returns `self`.
@@ -3341,6 +3340,30 @@ class IO < Object
   #     f.close
   #
   alias to_i fileno
+
+  # The source object of IO.copy_stream, that responds to `read`
+  #
+  # IO.copy_stream always calls `read` with the length and the buffer.
+  #
+  interface _CopyStreamReader
+    def read: (Integer length, String outbuf) -> String?
+  end
+
+  # The source object of IO.copy_stream, that responds to `readpartial`
+  #
+  # IO.copy_stream always calls `readpartial` with the length and the buffer.
+  #
+  interface _CopyStreamReaderPartial
+    def readpartial: (Integer maxlen, String outbuf) -> String
+  end
+
+  # The destination object of IO.copy_stream, that responds to `write`
+  #
+  # IO.copy_stream always calls `write` with one String.
+  #
+  interface _CopyStreamWriter
+    def write: (String data) -> Integer
+  end
 
   interface _ForFd[RET]
     def for_fd: (?) -> RET
