@@ -548,6 +548,14 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
       assert_nil annot.close_bracket_location
       assert_equal "-- depending on assertion methods", annot.comment_location.source
     end
+
+    Parser.parse_inline_leading_annotation("@rbs module-self: Foo::bar[String]", 0...).tap do |annot|
+      assert_instance_of AST::Ruby::Annotations::ModuleSelfAnnotation, annot
+      assert_equal "Foo::bar", annot.name.to_s
+      assert_predicate annot.name, :alias?
+      assert_equal 1, annot.args.size
+      assert_equal "String", annot.args[0].location.source
+    end
   end
 
   def test_error__module_self
@@ -556,7 +564,7 @@ class RBS::InlineAnnotationParsingTest < Test::Unit::TestCase
     end
 
     assert_raises RBS::ParsingError do
-      Parser.parse_inline_leading_annotation("@rbs module-self: foo", 0...)
+      Parser.parse_inline_leading_annotation("@rbs module-self: @foo", 0...)
     end
   end
 
