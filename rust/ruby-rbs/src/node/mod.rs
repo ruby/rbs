@@ -4,6 +4,15 @@ use ruby_rbs_sys::bindings::*;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 
+mod parser;
+mod parsing;
+
+pub use parser::ParseError;
+pub use parsing::{
+    MethodTypeOptions, ParsedNode, TypeOptions, parse_inline_leading_annotation,
+    parse_inline_trailing_annotation, parse_method_type, parse_type,
+};
+
 /// Parse RBS code into an AST.
 ///
 /// ```rust
