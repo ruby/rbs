@@ -15,6 +15,46 @@ class ProcessSingletonTest < Test::Unit::TestCase
                        Process, :last_status
     end.join
   end
+
+  def test_euid=
+    require "etc"
+    user = Etc.getpwuid(Process.euid).name
+
+    assert_send_type "(Integer) -> Integer",
+                     Process, :euid=, Process.euid
+    assert_send_type "(String) -> String",
+                     Process, :euid=, user
+  end
+
+  def test_uid=
+    require "etc"
+    user = Etc.getpwuid(Process.uid).name
+
+    assert_send_type "(Integer) -> Integer",
+                     Process, :uid=, Process.uid
+    assert_send_type "(String) -> String",
+                     Process, :uid=, user
+  end
+
+  def test_egid=
+    require "etc"
+    group = Etc.getgrgid(Process.egid).name
+
+    assert_send_type "(Integer) -> Integer",
+                     Process, :egid=, Process.egid
+    assert_send_type "(String) -> String",
+                     Process, :egid=, group
+  end
+
+  def test_gid=
+    require "etc"
+    group = Etc.getgrgid(Process.gid).name
+
+    assert_send_type "(Integer) -> Integer",
+                     Process, :gid=, Process.gid
+    assert_send_type "(String) -> Integer",
+                     Process, :gid=, group
+  end
 end
 
 class Process_SysSingletonTest < Test::Unit::TestCase
