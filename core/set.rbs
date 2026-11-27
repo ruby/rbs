@@ -741,7 +741,7 @@ class Set[unchecked out A]
   # -->
   # Returns a string created by converting each element of the set to a string.
   #
-  def join: (?string separator) -> String
+  def join: (?string? separator) -> String
 end
 
 %a{annotate:rdoc:skip}

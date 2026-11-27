@@ -26,6 +26,11 @@ class GCSingletonTest < Test::Unit::TestCase
         "(Hash[Symbol, untyped]) -> Hash[Symbol, untyped]",
         GC, :config, {}
       )
+
+      assert_send_type(
+        "(nil) -> Hash[Symbol, untyped]",
+        GC, :config, nil
+      )
     end
   end
 

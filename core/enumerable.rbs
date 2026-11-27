@@ -1030,8 +1030,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # Related: #min, #minmax, #max_by.
   #
-  def max: () -> E?
-         | () { (E arg0, E arg1) -> Integer } -> E?
+  def max: (?nil) -> E?
+         | (?nil) { (E arg0, E arg1) -> Integer } -> E?
          | (int arg0) -> ::Array[E]
          | (int arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
@@ -1068,8 +1068,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # Related: #max, #minmax, #min_by.
   #
-  def max_by: () -> ::Enumerator[E, E?]
-            | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
+  def max_by: (?nil) -> ::Enumerator[E, E?]
+            | (?nil) { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
             | (Integer arg0) -> ::Enumerator[E, ::Array[E]]
             | (Integer arg0) { (E arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[E]
 
@@ -1128,8 +1128,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # Related: #min_by, #minmax, #max.
   #
-  def min: () -> E?
-         | () { (E arg0, E arg1) -> Integer } -> E?
+  def min: (?nil) -> E?
+         | (?nil) { (E arg0, E arg1) -> Integer } -> E?
          | (int arg0) -> ::Array[E]
          | (int arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
@@ -1166,8 +1166,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # Related: #min, #minmax, #max_by.
   #
-  def min_by: () -> ::Enumerator[E, E?]
-            | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
+  def min_by: (?nil) -> ::Enumerator[E, E?]
+            | (?nil) { (E arg0) -> (Comparable | ::Array[untyped]) } -> E?
             | (Integer arg0) -> ::Enumerator[E, ::Array[E]]
             | (Integer arg0) { (E arg0) -> (Comparable | ::Array[untyped]) } -> ::Array[E]
 
@@ -1607,8 +1607,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # With no block given, returns an Enumerator.
   #
-  def find: () { (E) -> boolish } -> E?
-          | () -> ::Enumerator[E, E?]
+  def find: (?nil) { (E) -> boolish } -> E?
+          | (?nil) -> ::Enumerator[E, E?]
           | [T] (_NotFound[T] ifnone) { (E) -> boolish } -> (E | T)
           | [T] (_NotFound[T] ifnone) -> ::Enumerator[E, E | T]
 

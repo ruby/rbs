@@ -5,6 +5,17 @@ class ProcessSingletonTest < Test::Unit::TestCase
 
   testing "singleton(::Process)"
 
+  def test_clock_gettime
+    assert_send_type "(Integer) -> Float",
+                     Process, :clock_gettime, Process::CLOCK_MONOTONIC
+    assert_send_type "(Integer, nil) -> Float",
+                     Process, :clock_gettime, Process::CLOCK_MONOTONIC, nil
+    assert_send_type "(Integer, :float_millisecond) -> Float",
+                     Process, :clock_gettime, Process::CLOCK_MONOTONIC, :float_millisecond
+    assert_send_type "(Integer, :nanosecond) -> Integer",
+                     Process, :clock_gettime, Process::CLOCK_MONOTONIC, :nanosecond
+  end
+
   def test_last_status
     Process.wait(Process.spawn(RUBY_EXECUTABLE, "--disable=all", "-e", "exit"))
     assert_send_type "() -> Process::Status",
@@ -64,6 +75,18 @@ class ProcessSingletonTest < Test::Unit::TestCase
   end
 
   def test_wait
+    assert_send_type "(Integer) -> Integer",
+                     Process, :wait, spawn_child
+
+    pid = spawn_child("sleep 10")
+    begin
+      assert_send_type "(Integer, Integer) -> nil",
+                       Process, :wait, pid, Process::WNOHANG
+    ensure
+      Process.kill(:KILL, pid)
+      Process.wait(pid)
+    end
+
     %i[wait waitpid].each do |method|
       with_int(0) do |flags|
         pid = spawn_child
@@ -74,6 +97,18 @@ class ProcessSingletonTest < Test::Unit::TestCase
   end
 
   def test_wait2
+    assert_send_type "(Integer) -> [Integer, Process::Status]",
+                     Process, :wait2, spawn_child
+
+    pid = spawn_child("sleep 10")
+    begin
+      assert_send_type "(Integer, Integer) -> nil",
+                       Process, :wait2, pid, Process::WNOHANG
+    ensure
+      Process.kill(:KILL, pid)
+      Process.wait(pid)
+    end
+
     %i[wait2 waitpid2].each do |method|
       with_int(0) do |flags|
         pid = spawn_child

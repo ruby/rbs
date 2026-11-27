@@ -57,6 +57,8 @@ class IOSingletonTest < Test::Unit::TestCase
                      IO, :read, File.expand_path(__FILE__), 3, nil
     assert_send_type "(String, open_args: Array[String]) -> String",
                      IO, :read, File.expand_path(__FILE__), open_args: ["r"]
+    assert_send_type "(String, Integer, Integer) -> nil",
+                     IO, :read, File.expand_path(__FILE__), 3, File.size(__FILE__)
   end
 
   def test_write
@@ -484,6 +486,38 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_internal_encoding
+    File.open(File.expand_path(__FILE__), "r:utf-8:euc-jp") do |io|
+      assert_send_type(
+        "() -> Encoding",
+        io, :internal_encoding
+      )
+    end
+
+    File.open(File.expand_path(__FILE__)) do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :internal_encoding
+      )
+    end
+  end
+
+  def test_pid
+    IO.popen([RUBY_EXECUTABLE, "--disable=all", "-e", "exit"]) do |io|
+      assert_send_type(
+        "() -> Integer",
+        io, :pid
+      )
+    end
+
+    File.open(File.expand_path(__FILE__)) do |io|
+      assert_send_type(
+        "() -> nil",
+        io, :pid
+      )
+    end
+  end
+
   def test_path
     IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
       assert_send_type(
@@ -832,6 +866,17 @@ class IOInstanceTest < Test::Unit::TestCase
                        io, :fcntl, Fcntl::F_GETFD
       assert_send_type '(Integer, Integer) -> Integer',
                        io, :fcntl, Fcntl::F_GETFD, 0
+    end
+  end
+
+  def test_ungetbyte
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(String) -> nil',
+                       io, :ungetbyte, "a"
+      assert_send_type '(Integer) -> nil',
+                       io, :ungetbyte, 0x41
+      assert_send_type '(nil) -> nil',
+                       io, :ungetbyte, nil
     end
   end
 

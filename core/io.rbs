@@ -1222,7 +1222,7 @@ class IO < Object
   #
   # See [Encodings](rdoc-ref:File@Encodings).
   #
-  def internal_encoding: () -> Encoding
+  def internal_encoding: () -> Encoding?
 
   # <!--
   #   rdoc-file=io.c
@@ -1325,7 +1325,7 @@ class IO < Object
   #     In child, pid is 26209
   #     In parent, child pid is 26209
   #
-  def pid: () -> Integer
+  def pid: () -> Integer?
 
   # <!--
   #   rdoc-file=io.c
@@ -2247,7 +2247,7 @@ class IO < Object
   #     f.read              # => "BCDE012"
   #     f.close
   #
-  def ungetbyte: (String | Integer object) -> nil
+  def ungetbyte: (String | Integer | nil object) -> nil
 
   # <!--
   #   rdoc-file=io.c
@@ -2806,7 +2806,7 @@ class IO < Object
   # *   [Open Options](rdoc-ref:IO@Open+Options).
   # *   [Encoding options](rdoc-ref:encodings.rdoc@Encoding+Options).
   #
-  def self.read: (path name, ?Integer? length, ?Integer? offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?open_args: array[untyped]) -> String
+  def self.read: %a{implicitly-returns-nil} (path name, ?Integer? length, ?Integer? offset, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?open_args: array[untyped]) -> String
 
   # <!--
   #   rdoc-file=io.c

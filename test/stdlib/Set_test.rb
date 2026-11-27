@@ -17,6 +17,12 @@ class SetTest < Test::Unit::TestCase
     ) do |x| x+1 end
   end
 
+  def test_join
+    assert_send_type "() -> ::String", Set[1, 2], :join
+    assert_send_type "(::String) -> ::String", Set[1, 2], :join, ","
+    assert_send_type "(nil) -> ::String", Set[1, 2], :join, nil
+  end
+
   def test_compare_by_identity
     assert_send_type(
       "() -> ::Set[::Integer]",

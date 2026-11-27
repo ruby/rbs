@@ -43,6 +43,10 @@ class FileSingletonTest < Test::Unit::TestCase
                      File, :new, File.expand_path(__FILE__), ToStr.new("r")
     assert_send_type "(String, Integer) -> File",
                      File, :new, File.expand_path(__FILE__), File::RDONLY
+    assert_send_type "(String, nil) -> File",
+                     File, :new, File.expand_path(__FILE__), nil
+    assert_send_type "(String, nil, nil) -> File",
+                     File, :new, File.expand_path(__FILE__), nil, nil
     assert_send_type "(String, ToInt) -> File",
                      File, :new, File.expand_path(__FILE__), ToInt.new(File::RDONLY)
     assert_send_type "(String, String, Integer) -> File",
@@ -464,6 +468,8 @@ class FileSingletonTest < Test::Unit::TestCase
                        File, :lutime, 1, 2, ToStr.new("#{dir}/a")
       assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
                        File, :lutime, 2.5, 3/2r, ToPath.new("#{dir}/a")
+      assert_send_type "(nil, nil, String) -> Integer",
+                       File, :lutime, nil, nil, "#{dir}/a"
 
       File.open("#{dir}/b", "w"){}
       assert_send_type "(Time, Time, String, String) -> Integer",
@@ -812,6 +818,8 @@ class FileSingletonTest < Test::Unit::TestCase
                        File, :utime, 1, 2, ToStr.new("#{dir}/a")
       assert_send_type "(Numeric, Numeric, ToPath) -> Integer",
                        File, :utime, 2.5, 3/2r, ToPath.new("#{dir}/a")
+      assert_send_type "(nil, nil, String) -> Integer",
+                       File, :utime, nil, nil, "#{dir}/a"
 
       File.open("#{dir}/b", "w"){}
       assert_send_type "(Time, Time, String, String) -> Integer",

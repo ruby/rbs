@@ -69,6 +69,18 @@ class MatchDataInstanceTest < Test::Unit::TestCase
       end
     end
 
+    with_int 10 do |start|
+      with_int 1 do |length|
+        assert_send_type  '(int, int) -> nil',
+                          INSTANCE, :[], start, length
+      end
+    end
+
+    with_range with_int(10), with_int(11) do |range|
+      assert_send_type  '(range[int?]) -> nil',
+                        INSTANCE, :[], range
+    end
+
     with_backref do |backref|
       assert_send_type  '(MatchData::capture) -> String',
                         INSTANCE, :[], backref

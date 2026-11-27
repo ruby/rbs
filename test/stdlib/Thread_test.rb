@@ -235,6 +235,11 @@ class ThreadTest < Test::Unit::TestCase
     assert_send_type "(0) -> nil", Thread.new { sleep 10 }, :join, 0
   end
 
+  def test_name
+    assert_send_type "() -> nil", Thread.new{}.join, :name
+    assert_send_type "() -> String", Thread.new{}.tap { _1.name = "foo" }.join, :name
+  end
+
   def test_run
     assert_send_type "() -> ThreadTest::Sub", Sub.new{}, :run
   end
