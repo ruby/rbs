@@ -412,6 +412,7 @@ class Set[unchecked out A]
   # Returns an enumerator if no block is given.
   #
   def classify: [X] () { (A) -> X } -> Hash[X, self]
+              | () -> Enumerator[A, Hash[untyped, self]]
 
   # <!--
   #   rdoc-file=set.c
@@ -434,6 +435,7 @@ class Set[unchecked out A]
   # if no block is given.
   #
   def collect!: () { (A) -> A } -> self
+              | () -> Enumerator[A, self]
 
   # <!-- rdoc-file=set.c -->
   # Replaces the elements with ones returned by `collect`. Returns an enumerator
@@ -468,6 +470,7 @@ class Set[unchecked out A]
   # returns self. Returns an enumerator if no block is given.
   #
   def delete_if: () { (A) -> untyped } -> self
+               | () -> Enumerator[A, self]
 
   # <!--
   #   rdoc-file=set.c
@@ -478,6 +481,7 @@ class Set[unchecked out A]
   # an enumerator if no block is given.
   #
   def reject!: () { (A) -> untyped } -> self?
+             | () -> Enumerator[A, self?]
 
   # <!--
   #   rdoc-file=set.c
@@ -534,6 +538,7 @@ class Set[unchecked out A]
   #
   def divide: () { (A, A) -> Hash::_Key } -> Set[self]
             | () { (A) -> Hash::_Key } -> Set[self]
+            | () -> Enumerator[A, Set[self]]
 
   # <!--
   #   rdoc-file=set.c
@@ -595,6 +600,7 @@ class Set[unchecked out A]
   # returns self. Returns an enumerator if no block is given.
   #
   def keep_if: () { (A) -> untyped } -> self
+             | () -> Enumerator[A, self]
 
   # <!--
   #   rdoc-file=set.c
@@ -701,6 +707,7 @@ class Set[unchecked out A]
   # enumerator if no block is given.
   #
   def select!: () { (A) -> untyped } -> self?
+             | () -> Enumerator[A, self?]
 
   # <!-- rdoc-file=set.c -->
   # Equivalent to Set#keep_if, but returns nil if no changes were made. Returns an

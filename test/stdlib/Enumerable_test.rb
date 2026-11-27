@@ -260,6 +260,13 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :none? do |x| x == '0' end
   end
 
+  def test_minmax_by
+    assert_send_type "() -> ::Enumerator[String, [String?, String?]]",
+                     TestEnumerable.new, :minmax_by
+    assert_send_type "() { (String) -> Integer } -> [String?, String?]",
+                     TestEnumerable.new, :minmax_by do |x| x.to_i end
+  end
+
   def test_one_p
     assert_send_type '() -> bool', TestEnumerable.new, :one?
     assert_send_type '(Class) -> bool', TestEnumerable.new, :one?, String

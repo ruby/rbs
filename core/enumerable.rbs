@@ -1224,7 +1224,7 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # Related: #max_by, #minmax, #min_by.
   #
-  def minmax_by: () -> [ E?, E? ]
+  def minmax_by: () -> ::Enumerator[E, [ E?, E? ]]
                | () { (E arg0) -> (Comparable | ::Array[untyped]) } -> [ E?, E? ]
 
   # <!--
