@@ -33,7 +33,7 @@ class Random < RBS::Unnamed::Random_Base
   #
   # See Random.srand for more information on the use of seed values.
   #
-  def initialize: (?Integer seed) -> void
+  def initialize: (?int seed) -> void
 
   # <!--
   #   rdoc-file=random.c

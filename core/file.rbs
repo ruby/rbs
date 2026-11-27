@@ -1072,7 +1072,7 @@ class File < IO
   #     File.dirname("/home/gumby/work/ruby.rb", 2) #=> "/home/gumby"
   #     File.dirname("/home/gumby/work/ruby.rb", 4) #=> "/"
   #
-  def self.dirname: (path file_name, ?Integer level) -> String
+  def self.dirname: (path file_name, ?int level) -> String
 
   # <!-- rdoc-file=file.c -->
   # Returns `true` if the named file exists and has a zero size.

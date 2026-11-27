@@ -245,10 +245,12 @@ class FileSingletonTest < Test::Unit::TestCase
     assert_send_type "(ToPath) -> String",
                      File, :dirname, ToPath.new(File.expand_path(__FILE__))
 
-    assert_send_type(
-      "(String, Integer) -> String",
-      File, :dirname, File.expand_path(__FILE__), 2
-    )
+    with_int(2) do |level|
+      assert_send_type(
+        "(String, int) -> String",
+        File, :dirname, File.expand_path(__FILE__), level
+      )
+    end
   end
 
   def test_empty?

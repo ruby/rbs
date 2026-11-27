@@ -188,17 +188,63 @@ class EnumerableTest2 < Test::Unit::TestCase
   end
 
   def test_each_cons
-    assert_send_type(
-      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
-      TestEnumerable.new, :each_cons, 2
-    ) do end
+    with_int(2) do |n|
+      assert_send_type(
+        "(int) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+        TestEnumerable.new, :each_cons, n
+      ) do end
+      assert_send_type(
+        "(int) -> Enumerator[Array[String], EnumerableTest2::TestEnumerable]",
+        TestEnumerable.new, :each_cons, n
+      )
+    end
   end
 
   def test_each_slice
-    assert_send_type(
-      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
-      TestEnumerable.new, :each_slice, 2
-    ) do end
+    with_int(2) do |n|
+      assert_send_type(
+        "(int) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+        TestEnumerable.new, :each_slice, n
+      ) do end
+      assert_send_type(
+        "(int) -> Enumerator[Array[String], EnumerableTest2::TestEnumerable]",
+        TestEnumerable.new, :each_slice, n
+      )
+    end
+  end
+
+  def test_drop
+    with_int(1) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :drop, n
+    end
+  end
+
+  def test_cycle
+    with_int(2) do |n|
+      assert_send_type "(int) { (String) -> void } -> nil",
+                       TestEnumerable.new, :cycle, n do end
+      assert_send_type "(int) -> Enumerator[String, nil]",
+                       TestEnumerable.new, :cycle, n
+    end
+  end
+
+  def test_max
+    with_int(2) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :max, n
+      assert_send_type "(int) { (String, String) -> Integer } -> Array[String]",
+                       TestEnumerable.new, :max, n do |a, b| a <=> b end
+    end
+  end
+
+  def test_min
+    with_int(2) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :min, n
+      assert_send_type "(int) { (String, String) -> Integer } -> Array[String]",
+                       TestEnumerable.new, :min, n do |a, b| a <=> b end
+    end
   end
 
   def test_enum_for

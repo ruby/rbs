@@ -40,3 +40,16 @@ class ThreadSizedQueueTest < StdlibTest
     q.push(:a, timeout: ToF.new(0.1).__with_object_methods(:==))
   end
 end
+
+class ThreadSizedQueueSingletonTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "singleton(::Thread::SizedQueue)"
+
+  def test_new
+    with_int(1) do |max|
+      assert_send_type "(int) -> Thread::SizedQueue",
+                       Thread::SizedQueue, :new, max
+    end
+  end
+end

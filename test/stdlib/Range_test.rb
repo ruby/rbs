@@ -132,6 +132,18 @@ class RangeInstanceTest < Test::Unit::TestCase
 
   testing "::Range[::Integer]"
 
+  def test_first
+    with_int(2) do |n|
+      assert_send_type "(int) -> ::Array[::Integer]", (1..4), :first, n
+    end
+  end
+
+  def test_last
+    with_int(2) do |n|
+      assert_send_type "(int) -> ::Array[::Integer]", (1..4), :last, n
+    end
+  end
+
   def test_overlap?
     assert_send_type(
       "(::Range[::Integer]) -> bool",
@@ -146,6 +158,7 @@ class RangeInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> nil", (4..1), :min do |a, b| a <=> b end
     assert_send_type "(::Integer) -> ::Array[::Integer]", (1..4), :min, 2
     assert_send_type "(::Integer) { (::Integer, ::Integer) -> ::Integer } -> ::Array[::Integer]", (1..4), :min, 0 do |a, b| a <=> b end
+    assert_send_type "(ToInt) -> ::Array[::Integer]", (1..4), :min, ToInt.new(2)
   end
 
   def test_max
@@ -155,6 +168,7 @@ class RangeInstanceTest < Test::Unit::TestCase
     assert_send_type "() { (::Integer, ::Integer) -> ::Integer } -> nil", (4..1), :max do |a, b| a <=> b end
     assert_send_type "(::Integer) -> ::Array[::Integer]", (1..4), :max, 2
     assert_send_type "(::Integer) { (::Integer, ::Integer) -> ::Integer } -> ::Array[::Integer]", (4..1), :max, 0 do |a, b| a <=> b end
+    assert_send_type "(ToInt) -> ::Array[::Integer]", (1..4), :max, ToInt.new(2)
   end
 
   def test_minmax

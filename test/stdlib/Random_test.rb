@@ -69,8 +69,12 @@ class RandomTest < Test::Unit::TestCase
   end
 
   def test_initialize
-    assert_send_type  "(?::Integer seed) -> void",
+    assert_send_type  "() -> void",
                       Random.new, :initialize
+    with_int(42) do |seed|
+      assert_send_type  "(int seed) -> void",
+                        Random.new, :initialize, seed
+    end
   end
 
   def test_rand

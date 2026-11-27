@@ -1289,7 +1289,7 @@ class IO < Object
   # Sets and returns the line number for the stream; see [Line
   # Number](rdoc-ref:IO@Line+Number).
   #
-  def lineno=: (Integer integer) -> Integer
+  def lineno=: (int integer) -> Integer
 
   # <!--
   #   rdoc-file=io.c
