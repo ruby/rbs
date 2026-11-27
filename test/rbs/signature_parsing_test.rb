@@ -361,6 +361,13 @@ RBS
         assert_equal :a, m.name
         assert_nil m.ivar_name
         assert_equal parse_type("Integer"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@a, ivar.name # Inferred from the attribute name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[11].yield_self do |m|
@@ -369,6 +376,13 @@ RBS
         assert_equal :a, m.name
         assert_equal :@A, m.ivar_name
         assert_equal parse_type("String"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@A, ivar.name # Explicitly given ivar name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[12].yield_self do |m|
@@ -377,6 +391,8 @@ RBS
         assert_equal :a, m.name
         assert_equal false, m.ivar_name
         assert_equal parse_type("bool"), m.type
+
+        assert_nil m.ivar # The instance variable was explicitly skipped
       end
 
       module_decl.members[13].yield_self do |m|
@@ -385,6 +401,13 @@ RBS
         assert_equal :b, m.name
         assert_nil m.ivar_name
         assert_equal parse_type("Integer"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@b, ivar.name # Inferred from the attribute name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[14].yield_self do |m|
@@ -393,6 +416,13 @@ RBS
         assert_equal :b, m.name
         assert_equal :@B, m.ivar_name
         assert_equal parse_type("String"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@B, ivar.name # Explicitly given ivar name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[15].yield_self do |m|
@@ -401,6 +431,8 @@ RBS
         assert_equal :b, m.name
         assert_equal false, m.ivar_name
         assert_equal parse_type("bool"), m.type
+
+        assert_nil m.ivar # The instance variable was explicitly skipped
       end
 
       module_decl.members[16].yield_self do |m|
@@ -409,6 +441,13 @@ RBS
         assert_equal :c, m.name
         assert_nil m.ivar_name
         assert_equal parse_type("Integer"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@c, ivar.name # Inferred from the attribute name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[17].yield_self do |m|
@@ -417,6 +456,13 @@ RBS
         assert_equal :c, m.name
         assert_equal :@C, m.ivar_name
         assert_equal parse_type("String"), m.type
+
+        ivar = m.ivar
+        assert_instance_of Members::InstanceVariable, ivar
+        assert_equal :@C, ivar.name # Explicitly given ivar name
+        assert_equal m.type, ivar.type
+        assert_equal m.location, ivar.location
+        assert_equal m.comment, ivar.comment
       end
 
       module_decl.members[18].yield_self do |m|
@@ -425,6 +471,8 @@ RBS
         assert_equal :c, m.name
         assert_equal false, m.ivar_name
         assert_equal parse_type("bool"), m.type
+
+        assert_nil m.ivar # The instance variable was explicitly skipped
       end
     end
   end
