@@ -586,8 +586,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_with_index: () { (E, Integer index) -> untyped } -> self
-                     | () -> ::Enumerator[[ E, Integer ], self]
+  def each_with_index: (*untyped) { (E, Integer index) -> untyped } -> self
+                     | (*untyped) -> ::Enumerator[[ E, Integer ], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -613,7 +613,7 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
   #
-  def entries: () -> ::Array[E]
+  def entries: (*untyped, **untyped) -> ::Array[E]
 
   def enum_for: (Symbol method, *untyped, **untyped) ?{ (?) -> Integer } -> Enumerator[untyped, untyped]
               | () ?{ () -> Integer } -> Enumerator[E, self]
@@ -1556,8 +1556,8 @@ module Enumerable[unchecked out E] : _Each[E]
   # Raises an exception if an element of `self` is not a 2-element array, and a
   # block is not passed.
   #
-  def to_h: () -> ::Hash[untyped, untyped]
-          | [T, U] () { (E) -> [ T, U ] } -> ::Hash[T, U]
+  def to_h: (*untyped) -> ::Hash[untyped, untyped]
+          | [T, U] (*untyped) { (E) -> [ T, U ] } -> ::Hash[T, U]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1821,7 +1821,7 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   #     (0..4).to_a # => [0, 1, 2, 3, 4]
   #
-  def to_a: () -> ::Array[E]
+  def to_a: (*untyped, **untyped) -> ::Array[E]
 
   # <!--
   #   rdoc-file=enumerator.c
@@ -1983,7 +1983,7 @@ module Enumerable[unchecked out E] : _Each[E]
   #         {foo: 'a', bar: 'b'}.tally(h) # => {[:foo, "a"]=>2, [:bar, "b"]=>2, [:foo, "c"]=>1, [:bar, "d"]=>1}
   #         {foo: 'c', bar: 'd'}.tally(h) # => {[:foo, "a"]=>2, [:bar, "b"]=>2, [:foo, "c"]=>2, [:bar, "d"]=>2}
   #
-  def tally: (?Hash[E, Integer] hash) -> ::Hash[E, Integer]
+  def tally: (?hash[E, Integer] hash) -> ::Hash[E, Integer]
 
   # <!--
   #   rdoc-file=enum.c
@@ -2021,8 +2021,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_entry: () -> ::Enumerator[E, self]
-                | () { (E arg0) -> untyped } -> self
+  def each_entry: (*untyped) -> ::Enumerator[E, self]
+                | (*untyped) { (E arg0) -> untyped } -> self
 
   # <!--
   #   rdoc-file=enum.c
@@ -2088,10 +2088,12 @@ module Enumerable[unchecked out E] : _Each[E]
   #     [:a2, :b2, :c2]
   #     [:a3, :b3, :c3]
   #
-  def zip: [Elem2] (_Each[Elem2] enum) -> Array[[ E, Elem2? ]]
-         | (_Each[untyped], *_Each[untyped]) -> Array[Array[untyped]]
-         | [Elem2] (_Each[Elem2]) { ([ E, Elem2? ]) -> void } -> nil
-         | (_Each[untyped], *_Each[untyped]) { (Array[untyped]) -> void } -> nil
+  def zip: () -> Array[[ E ]]
+         | [Elem2] (_Each[Elem2] | _ToAry[Elem2] enum) -> Array[[ E, Elem2? ]]
+         | (_Each[untyped] | _ToAry[untyped], *_Each[untyped] | _ToAry[untyped]) -> Array[Array[untyped]]
+         | () { ([ E ]) -> void } -> nil
+         | [Elem2] (_Each[Elem2] | _ToAry[Elem2]) { ([ E, Elem2? ]) -> void } -> nil
+         | (_Each[untyped] | _ToAry[untyped], *_Each[untyped] | _ToAry[untyped]) { (Array[untyped]) -> void } -> nil
 
   # <!--
   #   rdoc-file=enum.c

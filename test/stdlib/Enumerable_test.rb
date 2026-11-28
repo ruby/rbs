@@ -278,4 +278,58 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '(Class) -> bool', TestEnumerable.new, :one?, String
     assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :one? do |x| x == '0' end
   end
+
+  class TestEnumerableWithArgs
+    include Enumerable
+
+    def each(*args, **kwargs)
+      yield args.join
+      yield kwargs.keys.join
+      self
+    end
+  end
+
+  def test_each_with_index
+    assert_send_type '(Integer, String) { (String, Integer) -> void } -> EnumerableTest2::TestEnumerableWithArgs',
+                     TestEnumerableWithArgs.new, :each_with_index, 1, "2" do end
+    assert_send_type '(Integer) -> Enumerator[[String, Integer], EnumerableTest2::TestEnumerableWithArgs]',
+                     TestEnumerableWithArgs.new, :each_with_index, 1
+  end
+
+  def test_each_entry
+    assert_send_type '(Integer) { (String) -> void } -> EnumerableTest2::TestEnumerableWithArgs',
+                     TestEnumerableWithArgs.new, :each_entry, 1 do end
+    assert_send_type '(Integer) -> Enumerator[String, EnumerableTest2::TestEnumerableWithArgs]',
+                     TestEnumerableWithArgs.new, :each_entry, 1
+  end
+
+  def test_to_a
+    assert_send_type '(Integer, key: Integer) -> Array[String]',
+                     TestEnumerableWithArgs.new, :to_a, 1, key: 2
+    assert_send_type '(Integer, key: Integer) -> Array[String]',
+                     TestEnumerableWithArgs.new, :entries, 1, key: 2
+  end
+
+  def test_to_h
+    assert_send_type '(Integer) { (String) -> [String, Integer] } -> Hash[String, Integer]',
+                     TestEnumerableWithArgs.new, :to_h, 1 do |x| [x, 0] end
+  end
+
+  def test_zip
+    assert_send_type '() -> Array[[String]]',
+                     TestEnumerable.new, :zip
+    assert_send_type '(ToArray[Integer]) -> Array[[String, Integer?]]',
+                     TestEnumerable.new, :zip, ToArray.new(1, 2)
+    assert_send_type '(ToArray[Integer], ToArray[Integer]) -> Array[Array[untyped]]',
+                     TestEnumerable.new, :zip, ToArray.new(1, 2), ToArray.new(3)
+  end
+
+  def test_tally
+    assert_send_type '() -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally
+    assert_send_type '(Hash[String, Integer]) -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally, {}
+    assert_send_type '(ToHash[String, Integer]) -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally, ToHash.new({})
+  end
 end
