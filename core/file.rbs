@@ -874,8 +874,8 @@ class File < IO
   #
   def initialize: (
     path | int file_name,
-    ?string | int mode,
-    ?int perm,
+    ?string | int | nil mode,
+    ?int? perm,
     # open options
     ?mode: Integer | String,
     ?flags: Integer,
@@ -1416,7 +1416,7 @@ class File < IO
   # opposed to its referent; for the inverse behavior, see File.utime. Returns the
   # number of file names in the argument list.
   #
-  def self.lutime: (Time | Numeric atime, Time | Numeric mtime, *path file_name) -> Integer
+  def self.lutime: (Time | Numeric | nil atime, Time | Numeric | nil mtime, *path file_name) -> Integer
 
   # <!--
   #   rdoc-file=file.c
@@ -1789,7 +1789,7 @@ class File < IO
   # than the link itself; for the inverse behavior see File.lutime. Returns the
   # number of file names in the argument list.
   #
-  def self.utime: (Time | Numeric atime, Time | Numeric mtime, *path file_name) -> Integer
+  def self.utime: (Time | Numeric | nil atime, Time | Numeric | nil mtime, *path file_name) -> Integer
 
   # <!--
   #   rdoc-file=file.c

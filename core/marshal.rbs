@@ -185,7 +185,7 @@ module Marshal
   #     deserialized.map(&:object_id)
   #     # => [1039360, 1039380, 1039360, 1039380] -- only 2 different objects, object_ids repeating
   #
-  def self.load: (string | _Source source, ?freeze: boolish) -> untyped
+  def self.load: (string | _Source source, ?nil, ?freeze: boolish) -> untyped
                | [A] (string | _Source source, _Proc[A] proc, ?freeze: boolish) -> A
 
   interface _Proc[T]

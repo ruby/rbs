@@ -249,6 +249,31 @@ class FiberTest < Test::Unit::TestCase
                       f, :resume, 10, :foo
   end
 
+  def test_storage
+    Fiber.new(storage: nil) do
+      assert_send_type '() -> nil',
+                       Fiber.current, :storage
+    end.resume
+
+    Fiber.new(storage: { foo: 1 }) do
+      assert_send_type '() -> Hash[Symbol, Integer]',
+                       Fiber.current, :storage
+    end.resume
+  end
+
+  def test_storage=
+    verbose, $VERBOSE = $VERBOSE, nil
+
+    Fiber.new do
+      assert_send_type '(Hash[Symbol, Integer]) -> Hash[Symbol, Integer]',
+                       Fiber.current, :storage=, { foo: 1 }
+      assert_send_type '(nil) -> nil',
+                       Fiber.current, :storage=, nil
+    end.resume
+  ensure
+    $VERBOSE = verbose
+  end
+
   def test_transfer
     f = Fiber.new{}
     assert_send_type '() -> untyped',

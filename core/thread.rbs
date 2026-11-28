@@ -501,7 +501,7 @@ class Thread < Object
   # -->
   # show the name of the thread.
   #
-  def name: () -> String
+  def name: () -> String?
 
   # <!--
   #   rdoc-file=thread.c

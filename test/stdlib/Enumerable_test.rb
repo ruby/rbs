@@ -230,6 +230,11 @@ class EnumerableTest2 < Test::Unit::TestCase
   end
 
   def test_max
+    assert_send_type "() -> String", TestEnumerable.new, :max
+    assert_send_type "(nil) -> String", TestEnumerable.new, :max, nil
+    assert_send_type "(nil) { (String, String) -> Integer } -> String",
+                     TestEnumerable.new, :max, nil do |a, b| a <=> b end
+
     with_int(2) do |n|
       assert_send_type "(int) -> Array[String]",
                        TestEnumerable.new, :max, n
@@ -239,6 +244,11 @@ class EnumerableTest2 < Test::Unit::TestCase
   end
 
   def test_min
+    assert_send_type "() -> String", TestEnumerable.new, :min
+    assert_send_type "(nil) -> String", TestEnumerable.new, :min, nil
+    assert_send_type "(nil) { (String, String) -> Integer } -> String",
+                     TestEnumerable.new, :min, nil do |a, b| a <=> b end
+
     with_int(2) do |n|
       assert_send_type "(int) -> Array[String]",
                        TestEnumerable.new, :min, n
@@ -261,6 +271,29 @@ class EnumerableTest2 < Test::Unit::TestCase
                      '0'
     assert_send_type "() { (String) -> untyped } -> Integer?",
                      TestEnumerable.new, :find_index do end
+  end
+
+  def test_find
+    assert_send_type "() { (String) -> bool } -> String",
+                     TestEnumerable.new, :find do |x| x == '2' end
+    assert_send_type "(nil) { (String) -> bool } -> nil",
+                     TestEnumerable.new, :find, nil do |x| x == '4' end
+    assert_send_type "(nil) -> ::Enumerator[String, String?]",
+                     TestEnumerable.new, :find, nil
+  end
+
+  def test_max_by
+    assert_send_type "(nil) -> ::Enumerator[String, String?]",
+                     TestEnumerable.new, :max_by, nil
+    assert_send_type "(nil) { (String) -> Integer } -> String",
+                     TestEnumerable.new, :max_by, nil do |x| x.to_i end
+  end
+
+  def test_min_by
+    assert_send_type "(nil) -> ::Enumerator[String, String?]",
+                     TestEnumerable.new, :min_by, nil
+    assert_send_type "(nil) { (String) -> Integer } -> String",
+                     TestEnumerable.new, :min_by, nil do |x| x.to_i end
   end
 
   def test_grepv

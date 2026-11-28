@@ -93,8 +93,8 @@ class MatchData
   #     m[:foo] #=> "oge"
   #
   def []: %a{implicitly-returns-nil} (capture backref, ?nil) -> String
-        | (int start, int length) -> Array[String?]
-        | (range[int?] range) -> Array[String?]
+        | (int start, int length) -> Array[String?]?
+        | (range[int?] range) -> Array[String?]?
 
   # <!--
   #   rdoc-file=re.c

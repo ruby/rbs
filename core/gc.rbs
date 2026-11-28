@@ -208,7 +208,7 @@ module GC
   #         setting this parameter to `false`.
   #
   def self.config: () -> Hash[Symbol, untyped]
-                 | (Hash[Symbol, untyped]) -> Hash[Symbol, untyped]
+                 | (Hash[Symbol, untyped]?) -> Hash[Symbol, untyped]
 
   # <!--
   #   rdoc-file=gc.rb

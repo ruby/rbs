@@ -68,6 +68,10 @@ class MarshalSingletonTest < Test::Unit::TestCase
                         Marshal, meth, source, result_proc
       source.reset!
 
+      assert_send_type  '(string | Marshal::_Source, nil) -> untyped',
+                        Marshal, meth, source, nil
+      source.reset!
+
       with_boolish do |freeze|
         assert_send_type  '(string | Marshal::_Source, freeze: boolish) -> untyped',
                           Marshal, meth, source, freeze: freeze

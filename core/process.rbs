@@ -631,7 +631,7 @@ module Process
   # others don't, so the result may vary across systems.
   #
   def self.clock_gettime: (Symbol | Integer clock_id) -> Float
-                        | (Symbol | Integer clock_id, :float_second | :float_millisecond | :float_microsecond unit) -> Float
+                        | (Symbol | Integer clock_id, :float_second | :float_millisecond | :float_microsecond | nil unit) -> Float
                         | (Symbol | Integer clock_id, :second | :millisecond | :microsecond | :nanosecond unit) -> Integer
 
   # <!--
@@ -1344,7 +1344,7 @@ module Process
   #
   # Process.waitpid is an alias for Process.wait.
   #
-  def self.wait: (?int pid, ?int flags) -> Integer
+  def self.wait: %a{implicitly-returns-nil} (?int pid, ?int flags) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1359,7 +1359,7 @@ module Process
   #
   # Process.waitpid2 is an alias for Process.wait2.
   #
-  def self.wait2: (?int pid, ?int flags) -> [ Integer, Process::Status ]
+  def self.wait2: %a{implicitly-returns-nil} (?int pid, ?int flags) -> [ Integer, Process::Status ]
 
   # <!--
   #   rdoc-file=process.c

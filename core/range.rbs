@@ -356,7 +356,7 @@ class Range[out E] < Object
   # See [Binary Searching](rdoc-ref:language/bsearch.rdoc).
   #
   def bsearch: () -> ::Enumerator[E, E?]
-             | () { (E) -> (true | false) } -> E?
+             | () { (E) -> (true | false | nil) } -> E?
              | () { (E) -> ::Integer } -> E?
 
   # <!--

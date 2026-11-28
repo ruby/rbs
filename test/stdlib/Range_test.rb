@@ -144,6 +144,17 @@ class RangeInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_bsearch
+    assert_send_type(
+      "() { (::Integer) -> bool } -> ::Integer",
+      (1..10), :bsearch
+    ) { |x| x >= 5 }
+    assert_send_type(
+      "() { (::Integer) -> nil } -> nil",
+      (1..10), :bsearch
+    ) { nil }
+  end
+
   def test_overlap?
     assert_send_type(
       "(::Range[::Integer]) -> bool",
