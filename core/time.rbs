@@ -464,6 +464,23 @@ class Time < Object
     def *: (1_000_000_000) -> int
   end
 
+  # A timezone object, such as an instance of TZInfo::Timezone
+  #
+  # See [Timezone Objects](rdoc-ref:Time@Timezone+Objects) for details.
+  # The argument and the return value of the methods are Time-like objects (or Integer for the return value.)
+  #
+  interface _Timezone
+    def local_to_utc: (untyped time) -> untyped
+
+    def utc_to_local: (untyped time) -> untyped
+  end
+
+  # A zone specifier: a UTC offset (a String like `"+09:00"`, or a number of seconds) or a timezone object
+  #
+  # See [Timezone Specifiers](rdoc-ref:Time@Timezone+Specifiers) for details.
+  #
+  type zone = string | int | Float | Rational | _Timezone
+
   include Comparable
 
   # <!--
@@ -523,10 +540,10 @@ class Time < Object
   # For the forms of argument `zone`, see [Timezone
   # Specifiers](rdoc-ref:Time@Timezone+Specifiers).
   #
-  def self.at: (Time, ?in: String | Integer | nil) -> Time
-             | (Numeric, ?in: String | Integer | nil) -> Time
-             | (Numeric sec, Numeric usec, ?in: String | Integer | nil) -> Time
-             | (Integer sec_i, Numeric msec, subsec_unit msec, ?in: String | Integer | nil) -> Time
+  def self.at: (Time, ?in: zone?) -> Time
+             | (Numeric, ?in: zone?) -> Time
+             | (Numeric sec, Numeric usec, ?in: zone?) -> Time
+             | (Integer sec_i, Numeric msec, subsec_unit msec, ?in: zone?) -> Time
 
   type subsec_unit = :msec | :millisecond | :usec | :microsecond | :nsec | :nanosecond
 
@@ -622,7 +639,8 @@ class Time < Object
   #
   # Related: Time.local.
   #
-  def self.gm: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
+  def self.gm: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
+             | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -639,7 +657,8 @@ class Time < Object
   #     Time.local(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   #     # => 0005-04-03 02:01:00 -0600
   #
-  def self.local: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
+  def self.local: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
+                | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=timev.rb
@@ -654,7 +673,7 @@ class Time < Object
   # For forms of argument `zone`, see [Timezone
   # Specifiers](rdoc-ref:Time@Timezone+Specifiers).
   #
-  def self.now: (?in: String | Integer | nil) -> Time
+  def self.now: (?in: zone?) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -752,7 +771,8 @@ class Time < Object
   #
   # Related: Time.local.
   #
-  def self.utc: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
+  def self.utc: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
+              | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -976,7 +996,7 @@ class Time < Object
   # For forms of argument `zone`, see [Timezone
   # Specifiers](rdoc-ref:Time@Timezone+Specifiers).
   #
-  def getlocal: (?Integer utc_offset) -> Time
+  def getlocal: (?zone utc_offset) -> Time
 
   # <!-- rdoc-file=time.c -->
   # Returns a new `Time` object representing the value of `self` converted to the
@@ -1162,9 +1182,9 @@ class Time < Object
   #     More digits will be truncated, as other operations of `Time`. Ignored
   #     unless the first argument is a string.
   #
-  def initialize: (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?String | Integer | nil) -> void
-                | (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: String | Integer | nil) -> void
-                | (String, ?in: string | int | nil, ?precision: int) -> void
+  def initialize: (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?zone? zone) -> void
+                | (?Integer year, ?Integer? month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, in: zone?) -> void
+                | (String, ?in: zone?, ?precision: int) -> void
 
   # <!--
   #   rdoc-file=time.c
@@ -1238,7 +1258,7 @@ class Time < Object
   # For forms of argument `zone`, see [Timezone
   # Specifiers](rdoc-ref:Time@Timezone+Specifiers).
   #
-  def localtime: (?String utc_offset) -> Time
+  def localtime: (?zone utc_offset) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -1710,7 +1730,8 @@ class Time < Object
   #     Time.local(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   #     # => 0005-04-03 02:01:00 -0600
   #
-  def self.mktime: (Integer year, ?Integer | String month, ?Integer day, ?Integer hour, ?Integer min, ?Numeric sec, ?Numeric usec_with_frac) -> Time
+  def self.mktime: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
+                 | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
