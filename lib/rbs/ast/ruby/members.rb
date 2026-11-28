@@ -552,14 +552,16 @@ module RBS
           attr_reader :kind
           attr_reader :method_type
           attr_reader :leading_comment
+          attr_reader :visibility
 
-          def initialize(buffer, name, node, method_type, leading_comment, kind: :instance)
+          def initialize(buffer, name, node, method_type, leading_comment, kind: :instance, visibility: nil)
             super(buffer)
             @name = name
             @node = node
             @kind = kind
             @method_type = method_type
             @leading_comment = leading_comment
+            @visibility = visibility
           end
 
           def singleton?
@@ -596,7 +598,8 @@ module RBS
               kind.to_s,
               name.to_s,
               method_type.type_fingerprint,
-              leading_comment&.as_comment&.string
+              leading_comment&.as_comment&.string,
+              visibility&.to_s
             ]
           end
         end
@@ -652,13 +655,15 @@ module RBS
           attr_reader :name_nodes
           attr_reader :type_annotation
           attr_reader :leading_comment
+          attr_reader :visibility
 
-          def initialize(buffer, node, name_nodes, leading_comment, type_annotation)
+          def initialize(buffer, node, name_nodes, leading_comment, type_annotation, visibility: nil)
             super(buffer)
             @node = node
             @name_nodes = name_nodes
             @leading_comment = leading_comment
             @type_annotation = type_annotation
+            @visibility = visibility
           end
 
           def names
@@ -687,7 +692,8 @@ module RBS
               self.class.name,
               names.map(&:to_s),
               type_annotation&.type_fingerprint,
-              leading_comment&.as_comment&.string
+              leading_comment&.as_comment&.string,
+              visibility&.to_s
             ]
           end
         end
@@ -699,6 +705,38 @@ module RBS
         end
 
         class AttrAccessorMember < AttributeMember
+        end
+
+        class VisibilityMember < Base
+          attr_reader :node
+
+          def initialize(buffer, node)
+            super(buffer)
+            @node = node
+          end
+
+          def location
+            rbs_location(node.location)
+          end
+
+          def type_fingerprint
+            [
+              "members/visibility",
+              self.class.name
+            ]
+          end
+        end
+
+        class PublicMember < VisibilityMember
+          def visibility
+            :public
+          end
+        end
+
+        class PrivateMember < VisibilityMember
+          def visibility
+            :private
+          end
         end
 
         class InstanceVariableMember < Base
