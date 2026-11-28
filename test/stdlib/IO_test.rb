@@ -408,21 +408,27 @@ class IOInstanceTest < Test::Unit::TestCase
   end
 
   def test_each_line
-    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+    # Read a small file: the type check of `Enumerator` gives up when it yields more than 10,000 elements.
+    file = Tempfile.create("io-each-line")
+    file.write("foo\nbar\nbaz\n")
+    file.close
+    path = file.path
+
+    IO.open(IO.sysopen(path), path: "foo") do |io|
       assert_send_type(
         "() -> Enumerator[String, IO]",
         io, :each_line
       )
     end
 
-    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+    IO.open(IO.sysopen(path), path: "foo") do |io|
       assert_send_type(
         "() { (String) -> void } -> void",
         io, :each_line, &->(_x) { }
       )
     end
 
-    IO.open(IO.sysopen(File.expand_path(__FILE__)), path: "foo") do |io|
+    IO.open(IO.sysopen(path), path: "foo") do |io|
       with_string("\n") do |sep|
         with_int(3) do |limit|
           with_boolish() do |chomp|
@@ -458,6 +464,8 @@ class IOInstanceTest < Test::Unit::TestCase
       assert_send_type "(Integer) -> Enumerator[String, IO]",
                        io, :each_line, 100
     end
+  ensure
+    File.unlink(path) if path
   end
 
   def test_external_encoding
