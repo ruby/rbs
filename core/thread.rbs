@@ -1840,7 +1840,7 @@ class Thread::SizedQueue[E = untyped] < Thread::Queue[E]
   # -->
   # Creates a fixed-length queue with a maximum size of `max`.
   #
-  def initialize: (Integer max) -> void
+  def initialize: (int max) -> void
 
   # <!--
   #   rdoc-file=thread_sync.c

@@ -661,6 +661,13 @@ class IOInstanceTest < Test::Unit::TestCase
     end
   end
 
+  def test_lineno=
+    IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
+      assert_send_type '(Integer) -> Integer',
+                       io, :lineno=, 2
+    end
+  end
+
   def test_gets
     IO.open(IO.sysopen(File.expand_path(__FILE__))) do |io|
       assert_send_type '() -> String',

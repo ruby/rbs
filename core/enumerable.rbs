@@ -467,8 +467,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # When no block is given, returns an Enumerator.
   #
-  def cycle: (?Integer n) { (E arg0) -> untyped } -> NilClass
-           | (?Integer n) -> ::Enumerator[E, NilClass]
+  def cycle: (?int n) { (E arg0) -> untyped } -> NilClass
+           | (?int n) -> ::Enumerator[E, NilClass]
 
   # <!-- rdoc-file=enum.c -->
   # Returns the first element for which the block returns a truthy value.
@@ -508,7 +508,7 @@ module Enumerable[unchecked out E] : _Each[E]
   #     h = {foo: 0, bar: 1, baz: 2, bat: 3}
   #     h.drop(2) # => [[:baz, 2], [:bat, 3]]
   #
-  def drop: (Integer n) -> ::Array[E]
+  def drop: (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -558,8 +558,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_cons: (Integer n) { (::Array[E]) -> void } -> self
-               | (Integer n) -> ::Enumerator[::Array[E], self]
+  def each_cons: (int n) { (::Array[E]) -> void } -> self
+               | (int n) -> ::Enumerator[::Array[E], self]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1032,8 +1032,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   def max: () -> E?
          | () { (E arg0, E arg1) -> Integer } -> E?
-         | (Integer arg0) -> ::Array[E]
-         | (Integer arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
+         | (int arg0) -> ::Array[E]
+         | (int arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1130,8 +1130,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   def min: () -> E?
          | () { (E arg0, E arg1) -> Integer } -> E?
-         | (Integer arg0) -> ::Array[E]
-         | (Integer arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
+         | (int arg0) -> ::Array[E]
+         | (int arg0) { (E arg0, E arg1) -> Integer } -> ::Array[E]
 
   # <!--
   #   rdoc-file=enum.c
@@ -1578,8 +1578,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #
   # With no block given, returns an Enumerator.
   #
-  def each_slice: (Integer n) { (::Array[E]) -> void } -> self
-                | (Integer n) -> ::Enumerator[::Array[E], self]
+  def each_slice: (int n) { (::Array[E]) -> void } -> self
+                | (int n) -> ::Enumerator[::Array[E], self]
 
   interface _NotFound[T]
     def call: () -> T
