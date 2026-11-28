@@ -117,3 +117,9 @@ Use `void` when callers should ignore or discard the return value. Use `untyped`
 ### How do we avoid duplicate documentation when importing RDoc?
 
 When an extension library extends a core class (such as `time` extending `Time` or `random-formatter` extending `Random::Formatter`), `rbs annotate` can duplicate core class documentation. Add `%a{annotate:rdoc:skip}` to the module or class declaration to skip the duplicate docs.
+
+### Why don't the core signatures declare `Kernel?.gsub` and the other `-n`/`-p` methods?
+
+Ruby defines the module functions `Kernel?.sub`, `Kernel?.gsub`, `Kernel?.chop` and `Kernel?.chomp` only when it runs with `-n` or `-p`, for Perl-style one-liners.
+In an ordinary script these methods don't exist, so a declaration would let type checkers accept calls that raise `NoMethodError`.
+RBS leaves them out, along with other methods that only an interpreter option defines.
