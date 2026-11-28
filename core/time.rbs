@@ -640,7 +640,7 @@ class Time < Object
   # Related: Time.local.
   #
   def self.gm: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
-              | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
+             | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -658,7 +658,7 @@ class Time < Object
   #     # => 0005-04-03 02:01:00 -0600
   #
   def self.local: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
-                 | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
+                | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=timev.rb
@@ -772,7 +772,7 @@ class Time < Object
   # Related: Time.local.
   #
   def self.utc: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
-               | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
+              | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
@@ -1731,7 +1731,7 @@ class Time < Object
   #     # => 0005-04-03 02:01:00 -0600
   #
   def self.mktime: (Integer year, ?Integer | String | nil month, ?Integer? day, ?Integer? hour, ?Integer? min, ?Numeric? sec, ?Numeric? usec_with_frac) -> Time
-                  | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
+                 | (Numeric? sec, Integer? min, Integer? hour, Integer? day, Integer | String | nil month, Integer year, untyped wday, untyped yday, boolish isdst, untyped zone) -> Time
 
   # <!--
   #   rdoc-file=time.c
