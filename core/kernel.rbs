@@ -2062,7 +2062,7 @@ module Kernel : BasicObject
   def self?.exec: (String command, *String args, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: bool, ?chdir: String) -> bot
                 | (Hash[string, string?] env, String command, *String args, ?unsetenv_others: bool, ?pgroup: true | Integer, ?umask: Integer, ?in: redirect_fd, ?out: redirect_fd, ?err: redirect_fd, ?close_others: bool, ?chdir: String) -> bot
 
-  type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int ] | :close
+  type redirect_fd = Integer | :in | :out | :err | IO | String | [ String ] | [ String, string | int ] | [ String, string | int, int ] | [ :child, int | :in | :out | :err | IO ] | :close
 
   # <!--
   #   rdoc-file=process.c
