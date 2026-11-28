@@ -170,6 +170,17 @@ end
 
 It detects method definitions and allows you to add annotation comments to describe their types.
 
+Methods defined inside `class << self` are singleton methods of the enclosing class or module.
+
+```ruby
+class Calculator
+  class << self
+    # @rbs () -> Integer
+    def zero = 0
+  end
+end
+```
+
 ### Unannotated method definition
 
 Methods defined with `def` syntax are detected, but their inferred type depends on whether a super method exists.
@@ -352,7 +363,10 @@ end
 ### Current Limitations
 
 - Method visibility declaration is not supported yet
-- The `class << self` syntax is not supported
+- Inside `class << self`, only method definitions are supported
+  - Mixins and attributes are not supported yet
+  - Classes, modules, constants, nested `class << self`, and `def self.foo` are reported because RBS cannot describe them
+- Top-level `class << self` and `class << obj` are not supported
 - Top-level method definitions (outside any class/module) are not supported
 - Method definitions with a non-self receiver (e.g. `def obj.foo`) are not supported
 
