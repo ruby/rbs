@@ -2768,7 +2768,7 @@ class IO < Object
   #     Parent got: <Hi Dad>
   #
   def self.pipe: (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) -> [IO, IO]
-               | [X] (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { (IO read_io, IO write_io) -> X } -> X
+               | [X] (?String | Encoding | nil ext_or_ext_int_enc, ?String | Encoding | nil int_enc, ?external_encoding: String | Encoding | nil, ?internal_encoding: String | Encoding | nil, ?encoding: String | Encoding | nil, ?textmode: boolish, ?binmode: boolish, ?autoclose: boolish, ?mode: String, ?chomp: boolish) { ([IO, IO] pipe) -> X } -> X
 
   # <!--
   #   rdoc-file=io.c

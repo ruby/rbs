@@ -400,7 +400,7 @@ class Fiber < Object
   #
   # Raises FiberError if called on a fiber belonging to another thread.
   #
-  def kill: () -> nil
+  def kill: () -> self
 
   # <!--
   #   rdoc-file=cont.c

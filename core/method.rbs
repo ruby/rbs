@@ -24,7 +24,7 @@
 #
 class Method
   # The return type from `#parameters` methods (such as those defined on `Method`, `Proc`, and `UnboundMethod`).
-  type param_types = Array[[:req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol] | [:rest | :keyrest | :nokey]]
+  type param_types = Array[[:req | :opt | :rest | :keyreq | :key | :keyrest | :block, Symbol] | [:req | :opt | :rest | :keyrest | :nokey]]
 
   # <!--
   #   rdoc-file=proc.c

@@ -260,7 +260,7 @@ class Range[out E] < Object
   #     (0..7) % 2 #=> ((0..7).%(2)) -- as expected
   #     0..7 % 2 #=> 0..1 -- parsed as 0..(7 % 2)
   #
-  def %: (Numeric | int n) -> Enumerator[E, self]
+  def %: (Numeric | int n) -> (Enumerator::ArithmeticSequence | Enumerator[E, self])
        | (Numeric | int n) { (E element) -> void } -> self
 
   # <!--
@@ -1096,7 +1096,7 @@ class Range[out E] < Object
   #     ('a'..'e').step { p _1 }
   #     # Default step 1; prints: a, b, c, d, e
   #
-  def step: (?Numeric | int) -> Enumerator[E, self]
+  def step: (?Numeric | int) -> (Enumerator::ArithmeticSequence | Enumerator[E, self])
           | (?Numeric | int) { (E element) -> void } -> self
           | (untyped) -> Enumerator[E, self]
           | (untyped) { (E element) -> void } -> self

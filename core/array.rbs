@@ -2918,7 +2918,8 @@ class Array[unchecked out E]
   #
   # Related: [Methods for Fetching](rdoc-ref:Array@Methods+for+Fetching).
   #
-  alias reject delete_if
+  def reject: () { (E item) -> boolish } -> Array[E]
+            | () -> Enumerator[E, Array[E]]
 
   # <!--
   #   rdoc-file=array.c

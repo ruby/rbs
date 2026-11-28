@@ -136,6 +136,12 @@ class ProcInstanceTest < Test::Unit::TestCase
                       proc{|**nil| }, :parameters
     assert_send_type  '() -> ::Method::param_types',
                       proc{|*, **, &b| }, :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      proc{|(a, b)| }, :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      lambda{|(a, b)| }, :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      [].method(:push).to_proc, :parameters
   end
 
   def test_ruby2_keywords

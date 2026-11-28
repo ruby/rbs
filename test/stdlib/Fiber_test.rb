@@ -285,4 +285,13 @@ class FiberTest < Test::Unit::TestCase
     assert_send_type '(untyped, untyped) -> untyped',
                      f, :transfer, 1, 'foo'
   end
+
+  def test_kill
+    f = Fiber.new { Fiber.yield }
+    f.resume
+    assert_send_type '() -> Fiber',
+                     f, :kill
+    assert_send_type '() -> Fiber',
+                     Fiber.new {}, :kill
+  end
 end

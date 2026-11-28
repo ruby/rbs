@@ -132,6 +132,24 @@ class RangeInstanceTest < Test::Unit::TestCase
 
   testing "::Range[::Integer]"
 
+  def test_step
+    assert_send_type "() -> Enumerator::ArithmeticSequence",
+                     (1..10), :step
+    assert_send_type "(Integer) -> Enumerator::ArithmeticSequence",
+                     (1..10), :step, 2
+    assert_send_type "(Float) -> Enumerator::ArithmeticSequence",
+                     (1..), :step, 0.5
+    assert_send_type "(Integer) { (Integer) -> void } -> Range[Integer]",
+                     (1..10), :step, 2 do end
+  end
+
+  def test_mod
+    assert_send_type "(Integer) -> Enumerator::ArithmeticSequence",
+                     (1..10), :%, 2
+    assert_send_type "(Integer) { (Integer) -> void } -> Range[Integer]",
+                     (1..10), :%, 2 do end
+  end
+
   def test_first
     with_int(2) do |n|
       assert_send_type "(int) -> ::Array[::Integer]", (1..4), :first, n

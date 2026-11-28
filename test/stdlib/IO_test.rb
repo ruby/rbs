@@ -238,6 +238,16 @@ class IOSingletonTest < Test::Unit::TestCase
     end
   end
 
+  def test_pipe
+    r, w = assert_send_type "() -> [IO, IO]",
+                            IO, :pipe
+    r.close
+    w.close
+
+    assert_send_type "() { ([IO, IO]) -> Integer } -> Integer",
+                     IO, :pipe do |r, w| r.close; w.close; 1 end
+  end
+
   def test_select
     if_ruby "3.0.0"..."3.2.0" do
       with_timeout.and_nil do |timeout|

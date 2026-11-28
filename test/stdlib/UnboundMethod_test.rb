@@ -86,6 +86,8 @@ class UnboundMethodInstanceTest < Test::Unit::TestCase
 
     assert_send_type  '() -> ::Method::param_types',
                       ParamMeths.instance_method(:shorthand), :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      Integer.instance_method(:+), :parameters
   end
 
   def test_source_location

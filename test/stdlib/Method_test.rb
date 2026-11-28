@@ -146,6 +146,10 @@ class MethodInstanceTest < Test::Unit::TestCase
                       params.method(:no_kwargs), :parameters
     assert_send_type  '() -> ::Method::param_types',
                       params.method(:shorthand), :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      1.method(:+), :parameters
+    assert_send_type  '() -> ::Method::param_types',
+                      [].method(:push), :parameters
   end
 
   def test_receiver

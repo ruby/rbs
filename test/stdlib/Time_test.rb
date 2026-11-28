@@ -497,6 +497,34 @@ class TimeInstanceTest < Test::Unit::TestCase
     assert_send_type "() -> nil",
                      Time.now(in: 0), :zone
   end
+
+  def test_utc_offset
+    assert_send_type "() -> Integer",
+                     Time.now(in: 32400), :utc_offset
+    assert_send_type "() -> Rational",
+                     Time.at(0, in: 1/2r), :utc_offset
+  end
+
+  def test_gmt_offset
+    assert_send_type "() -> Integer",
+                     Time.now(in: 32400), :gmt_offset
+    assert_send_type "() -> Rational",
+                     Time.at(0, in: 1/2r), :gmt_offset
+  end
+
+  def test_gmtoff
+    assert_send_type "() -> Integer",
+                     Time.now(in: 32400), :gmtoff
+    assert_send_type "() -> Rational",
+                     Time.at(0, in: 1/2r), :gmtoff
+  end
+
+  def test_deconstruct_keys
+    assert_send_type "(nil) -> Hash[Symbol, Integer | Rational | bool | String | nil]",
+                     Time.now, :deconstruct_keys, nil
+    assert_send_type "(Array[Symbol]) -> Hash[Symbol, bool | nil]",
+                     Time.now(in: 0), :deconstruct_keys, [:dst, :zone]
+  end
 end
 
 class TimeInDateTest < Test::Unit::TestCase
