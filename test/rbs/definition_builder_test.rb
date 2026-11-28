@@ -4015,4 +4015,61 @@ EOF
       end
     end
   end
+
+  def test_build_instance_module_singleton_self_types
+    SignatureManager.new do |manager|
+      manager.files[Pathname("foo.rbs")] = <<EOF
+class Model
+  def self.find: (Integer) -> instance
+  def self.table: () -> String
+  self.@count: Integer
+  def save: () -> bool
+end
+
+module ClassMethods : singleton(Model)
+  def find_or_raise: (Integer) -> Model
+  def table: () -> Symbol
+end
+
+class User < Model
+  extend ClassMethods
+end
+
+class Other
+  include ClassMethods
+end
+EOF
+      manager.build do |env|
+        builder = DefinitionBuilder.new(env: env)
+
+        builder.build_instance(type_name("::ClassMethods")).tap do |definition|
+          # Singleton methods of Model are available, with their types as written
+          assert_method_definition definition.methods[:find], ["(::Integer) -> instance"], accessibility: :public
+          assert_equal type_name("::Model"), definition.methods[:find].defined_in
+
+          # Methods defined in the module win
+          assert_method_definition definition.methods[:table], ["() -> ::Symbol"], accessibility: :public
+          assert_equal type_name("::ClassMethods"), definition.methods[:table].defined_in
+
+          assert_method_definition definition.methods[:find_or_raise], ["(::Integer) -> ::Model"], accessibility: :public
+
+          # Instance methods of Model are not available
+          assert_nil definition.methods[:save]
+
+          # Class instance variables of Model are available
+          assert_equal parse_type("::Integer"), definition.instance_variables[:@count].type
+        end
+
+        builder.build_singleton(type_name("::User")).tap do |definition|
+          assert_method_definition definition.methods[:find_or_raise], ["(::Integer) -> ::Model"], accessibility: :public
+          assert_method_definition definition.methods[:find], ["(::Integer) -> instance"], accessibility: :public
+        end
+
+        builder.build_instance(type_name("::Other")).tap do |definition|
+          assert_method_definition definition.methods[:find_or_raise], ["(::Integer) -> ::Model"], accessibility: :public
+          assert_nil definition.methods[:find]
+        end
+      end
+    end
+  end
 end

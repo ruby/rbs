@@ -156,6 +156,10 @@ module RBS
             @location = location
           end
 
+          def update(name: self.name, args: self.args, location: self.location)
+            self.class.new(name: name, args: args, location: location)
+          end
+
           def ==(other)
             other.is_a?(Self) && other.name == name && other.args == args
           end
@@ -179,6 +183,49 @@ module RBS
               name.to_s
             else
               "#{name}[#{args.join(", ")}]"
+            end
+          end
+        end
+
+        class SingletonSelf
+          attr_reader :name
+          attr_reader :args
+          attr_reader :location
+
+          def initialize(name:, args:, location:)
+            @name = name
+            @args = args
+            @location = location
+          end
+
+          def update(name: self.name, args: self.args, location: self.location)
+            self.class.new(name: name, args: args, location: location)
+          end
+
+          def ==(other)
+            other.is_a?(SingletonSelf) && other.name == name && other.args == args
+          end
+
+          alias eql? ==
+
+          def hash
+            self.class.hash ^ name.hash ^ args.hash
+          end
+
+          def to_json(state = nil)
+            {
+              singleton: true,
+              name: name,
+              args: args,
+              location: location
+            }.to_json(state)
+          end
+
+          def to_s
+            if args.empty?
+              "singleton(#{name})"
+            else
+              "singleton(#{name})[#{args.join(", ")}]"
             end
           end
         end

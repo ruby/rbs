@@ -411,4 +411,11 @@ class Foo
 end
     SIG
   end
+
+  def test_module_decl_singleton_self_types
+    assert_writer <<-SIG
+module X : singleton(Foo), singleton(Bar)[Integer], _Each
+end
+    SIG
+  end
 end

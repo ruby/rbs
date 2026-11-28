@@ -170,4 +170,25 @@ RBS
       assert_instance_of AST::Declarations::ModuleAlias, cs[1]
     end
   end
+
+  def test_find_module_singleton_self_type
+    locator = locator(<<RBS)
+module Foo : singleton(Bar), singleton(Baz)[Integer]
+end
+RBS
+
+    locator.find(line: 1, column: 23).tap do |cs|
+      assert_equal 3, cs.size
+      assert_equal :name, cs[0]
+      assert_instance_of AST::Declarations::Module::SingletonSelf, cs[1]
+      assert_instance_of AST::Declarations::Module, cs[2]
+    end
+
+    locator.find(line: 1, column: 46).tap do |cs|
+      assert_equal 3, cs.size
+      assert_equal :args, cs[0]
+      assert_instance_of AST::Declarations::Module::SingletonSelf, cs[1]
+      assert_instance_of AST::Declarations::Module, cs[2]
+    end
+  end
 end
