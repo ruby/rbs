@@ -419,8 +419,8 @@ class Rational < Numeric
   #     Rational(-25, 100).round(1, half: :down) #=> (-1/5)
   #     Rational(-25, 100).round(1, half: :even) #=> (-1/5)
   #
-  def round: (?half: :up | :down | :even) -> Integer
-           | (Integer digits, ?half: :up | :down | :even) -> (Integer | Rational)
+  def round: (?half: Numeric::round_mode) -> Integer
+           | (Integer digits, ?half: Numeric::round_mode) -> (Integer | Rational)
 
   # <!--
   #   rdoc-file=rational.c

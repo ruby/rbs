@@ -248,3 +248,20 @@ class FloatConstantTest < Test::Unit::TestCase
     assert_const_type "Float", "Float::INFINITY"
   end
 end
+
+class FloatInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Float"
+
+  def test_round
+    assert_send_type "(half: :up) -> Integer",
+                     2.5, :round, half: :up
+    assert_send_type "(half: nil) -> Integer",
+                     2.5, :round, half: nil
+    assert_send_type "(half: String) -> Integer",
+                     2.5, :round, half: "even"
+    assert_send_type "(Integer, half: String) -> Float",
+                     2.25, :round, 1, half: "down"
+  end
+end
