@@ -128,6 +128,13 @@ module ObjectSpace
   #
   def self.define_finalizer: (untyped obj, ^(Integer id) -> void aProc) -> [ Integer, Proc ]
                            | (untyped obj) { (Integer id) -> void } -> [ Integer, Proc ]
+                           | [T < _Finalizer] (untyped obj, T finalizer) -> [ Integer, T ]
+
+  # An object that can be registered as a finalizer by ObjectSpace.define_finalizer
+  #
+  interface _Finalizer
+    def call: (Integer id) -> void
+  end
 
   # <!--
   #   rdoc-file=gc.c

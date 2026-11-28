@@ -43,6 +43,16 @@ module RBS
       # A hooked method can be copied to another class that doesn't have the alias, like `define_method(:foo, M.instance_method(:foo))`.
       ORIGINAL_METHODS = {} #: Hash[String, UnboundMethod]
 
+      # Classes that the receiver must be a kind of to call `ORIGINAL_METHODS[random]` by `bind_call`, keyed by `random`.
+      #
+      # `Class#dup` and `#clone` copy the hooked method and the `without` alias to a new class (or singleton class) that is not a subclass of the original.
+      # `bind_call` rejects receivers of the copied class, so the hooked method calls the `without` alias instead.
+      # The value is `nil` if the original method is defined in a module, because `bind_call` accepts any receiver for it.
+      ORIGINAL_OWNERS = {} #: Hash[String, Class?]
+
+      # Calls `Kernel#is_a?` without dynamic dispatch, so that the check doesn't call a hooked method or a method overridden by the receiver.
+      IS_A = ::Kernel.instance_method(:is_a?)
+
       def self.alias_names(target, random)
         suffix = "#{RBS::Test.suffix}_#{random}"
 
@@ -68,7 +78,10 @@ module RBS
 
         RBS.logger.debug "alias name: #{target}, #{with_method}, #{without_method}"
 
-        ORIGINAL_METHODS[random] = klass.instance_method(target)
+        original_method = klass.instance_method(target)
+        ORIGINAL_METHODS[random] = original_method
+        owner = original_method.owner
+        ORIGINAL_OWNERS[random] = owner if owner.is_a?(Class)
 
         klass.instance_eval do
           alias_method without_method, target
@@ -86,8 +99,9 @@ module RBS
       end
 
       def self.hook_method_source(prefix, method_name, key, random:, params:)
-        with_name, _ = alias_names(method_name, random)
+        with_name, without_name = alias_names(method_name, random)
         original_method = "::RBS::Test::Hook::ORIGINAL_METHODS[#{random.inspect}]"
+        original_owner = "::RBS::Test::Hook::ORIGINAL_OWNERS[#{random.inspect}]"
         full_method_name = "#{prefix}#{method_name}"
 
         param_source = params.take_while {|param| param[0] == :req }
@@ -107,6 +121,9 @@ def #{with_name}(#{param_source.join(", ")}, &#{block_param})
   begin
     return_from_call = false
     block_calls = []
+
+    owner__#{random} = #{original_owner}
+    bindable__#{random} = owner__#{random} ? ::RBS::Test::Hook::IS_A.bind_call(self, owner__#{random}) : true
 
     if block_given?
       block_receives_block = #{block_param}.parameters.last&.yield_self {|type, _| type == :block }
@@ -159,9 +176,17 @@ def #{with_name}(#{param_source.join(", ")}, &#{block_param})
         end.ruby2_keywords
       end
 
-      result = #{original_method}.bind_call(self, *args, &wrapped_block)
+      result = if bindable__#{random}
+        #{original_method}.bind_call(self, *args, &wrapped_block)
+      else
+        __send__(#{without_name.to_sym.inspect}, *args, &wrapped_block)
+      end
     else
-      result = #{original_method}.bind_call(self, *args)
+      result = if bindable__#{random}
+        #{original_method}.bind_call(self, *args)
+      else
+        __send__(#{without_name.to_sym.inspect}, *args)
+      end
     end
     return_from_call = true
     result

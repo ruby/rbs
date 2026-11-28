@@ -285,4 +285,72 @@ class RBS::Test::HookTest < Test::Unit::TestCase
       assert_equal 1, t.method_call.return_value
     end
   end
+
+  def test_hook_singleton_method_of_copied_class
+    key = SecureRandom.hex(10)
+
+    traces = []
+    RBS::Test::Observer.register(key) do |object, trace|
+      traces << trace
+    end
+
+    klass = Class.new do
+      def self.hello = "hello"
+    end
+    RBS::Test::Hook.hook_singleton_method(klass, :hello, key: key)
+
+    # `dup` and `clone` copy the singleton class, which has the hooked method and the alias of the original method
+    assert_equal "hello", klass.dup.hello
+    assert_equal "hello", klass.clone.hello
+    assert_equal "hello", Class.new(klass).hello
+
+    assert_equal 3, traces.size
+    traces.each do |t|
+      assert_equal :hello, t.method_name
+      assert_predicate t.method_call, :return?
+      assert_equal "hello", t.method_call.return_value
+    end
+  end
+
+  def test_hook_instance_method_of_copied_class
+    key = SecureRandom.hex(10)
+
+    traces = []
+    RBS::Test::Observer.register(key) do |object, trace|
+      traces << trace
+    end
+
+    klass = Class.new do
+      def bye = "bye"
+    end
+    RBS::Test::Hook.hook_instance_method(klass, :bye, key: key)
+
+    assert_equal "bye", klass.dup.new.bye
+    assert_equal "bye", klass.clone.new.bye
+    assert_equal "bye", klass.new.dup.bye
+
+    assert_equal 3, traces.size
+    traces.each do |t|
+      assert_equal :bye, t.method_name
+      assert_predicate t.method_call, :return?
+      assert_equal "bye", t.method_call.return_value
+    end
+  end
+
+  def test_hook_instance_method_of_copied_module
+    key = SecureRandom.hex(10)
+
+    traces = []
+    RBS::Test::Observer.register(key) do |object, trace|
+      traces << trace
+    end
+
+    mod = Module.new do
+      def set_integer(i) = i
+    end
+    RBS::Test::Hook.hook_instance_method(mod, :set_integer, key: key)
+
+    assert_equal 1, Class.new { include mod.dup }.new.set_integer(1)
+    assert_equal 1, traces.size
+  end
 end

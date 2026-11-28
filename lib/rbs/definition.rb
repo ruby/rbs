@@ -29,22 +29,59 @@ module RBS
 
     class Method
       class TypeDef
-        attr_reader :type
         attr_reader :member
         attr_reader :defined_in
         attr_reader :implemented_in
-        attr_reader :member_annotations
-        attr_reader :overload_annotations
-        attr_reader :annotations
 
-        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: [])
-          @type = type
+        def initialize(type:, member:, defined_in:, implemented_in:, overload_annotations: nil, subst: nil)
+          if subst
+            # The substitution is applied when the type is requested
+            @base_type = type
+            @subst = subst
+          else
+            @type = type
+          end
+
           @member = member
           @defined_in = defined_in
           @implemented_in = implemented_in
-          @member_annotations = []
-          @overload_annotations = []
-          @annotations = []
+
+          # The arrays of the annotations are allocated when they are requested, because most methods have no annotation
+          @member_annotations = nil
+          @overload_annotations = nil
+          @annotations = nil
+        end
+
+        def member_annotations
+          @member_annotations ||= []
+        end
+
+        def member_annotations=(annotations)
+          @member_annotations = annotations.empty? ? nil : annotations.dup
+        end
+
+        def overload_annotations
+          @overload_annotations ||= []
+        end
+
+        def overload_annotations=(annotations)
+          @overload_annotations = annotations.empty? ? nil : annotations.dup
+        end
+
+        def annotations
+          @annotations ||= []
+        end
+
+        # Returns the method type
+        #
+        # The substitution given to `#initialize` is applied when the type is requested for the first time.
+        #
+        def type
+          @type ||= begin
+            base_type = @base_type or raise
+            subst = @subst or raise
+            base_type.sub(subst)
+          end
         end
 
         def ==(other)
@@ -72,8 +109,12 @@ module RBS
 
         def update(type: self.type, member: self.member, defined_in: self.defined_in, implemented_in: self.implemented_in)
           TypeDef.new(type: type, member: member, defined_in: defined_in, implemented_in: implemented_in).tap do |type_def|
-            type_def.overload_annotations.replace(self.overload_annotations)
-            type_def.member_annotations.replace(self.member_annotations)
+            if annotations = @overload_annotations
+              type_def.overload_annotations = annotations
+            end
+            if annotations = @member_annotations
+              type_def.member_annotations = annotations
+            end
           end
         end
 
@@ -88,8 +129,8 @@ module RBS
 
         def each_annotation(&block)
           if block
-            member_annotations.each(&block)
-            overload_annotations.each(&block)
+            @member_annotations&.each(&block)
+            @overload_annotations&.each(&block)
           else
             enum_for :each_annotation
           end
@@ -99,19 +140,31 @@ module RBS
       attr_reader :super_method
       attr_reader :defs
       attr_reader :accessibility
-      attr_reader :extra_annotations
-      attr_reader :annotations
       attr_reader :alias_of
       attr_reader :alias_member
 
-      def initialize(super_method:, defs:, accessibility:, annotations: [], alias_of:, alias_member: nil)
+      def initialize(super_method:, defs:, accessibility:, annotations: nil, alias_of:, alias_member: nil)
         @super_method = super_method
         @defs = defs
         @accessibility = accessibility
-        @extra_annotations = []
-        @annotations = []
+
+        # The arrays of the annotations are allocated when they are requested, because most methods have no annotation
+        @extra_annotations = nil
+        @annotations = nil
         @alias_of = alias_of
         @alias_member = alias_member
+      end
+
+      def extra_annotations
+        @extra_annotations ||= []
+      end
+
+      def annotations
+        @annotations ||= []
+      end
+
+      def annotations=(annotations)
+        @annotations = annotations.empty? ? nil : annotations.dup
       end
 
       def ==(other)
@@ -193,7 +246,7 @@ module RBS
         )
       end
 
-      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: self.annotations, alias_member: self.alias_member)
+      def update(super_method: self.super_method, defs: self.defs, accessibility: self.accessibility, alias_of: self.alias_of, annotations: nil, alias_member: self.alias_member)
         self.class.new(
           super_method: super_method,
           defs: defs,
@@ -201,7 +254,330 @@ module RBS
           alias_of: alias_of,
           alias_member: alias_member
         ).tap do |method|
-          method.annotations.replace(annotations)
+          if annotations ||= @annotations
+            method.annotations = annotations
+          end
+        end
+      end
+    end
+
+    # A table of the methods of a definition
+    #
+    # It works like a read-only `Hash[Symbol, Method]`, but resolves each method when it is requested.
+    # Looking a method up, or testing if the definition has a method, doesn't resolve the other methods of the definition.
+    #
+    # ```ruby
+    # definition.methods[:to_s]           # Resolves `#to_s`
+    # definition.methods.key?(:inspect)   # Resolves nothing
+    # definition.methods.each_key {}      # Resolves nothing
+    # definition.methods.each {}          # Resolves all of the methods
+    # ```
+    #
+    # The methods are yielded in the order they are defined, from the ancestors to the type itself.
+    #
+    class MethodTable
+      include Enumerable
+
+      # A source gives the methods of the table
+      #
+      # * `method_names` returns the names of the methods in the order of their definition
+      # * `method?(name)` tests if the method is defined, without resolving it
+      # * `resolve_method(name)` returns the method, or `nil` if it is not defined
+      # * `resolve_methods(hash)` stores all of the methods in the hash
+      #
+      # The table memoizes the methods given by the source.
+      #
+      def initialize(source = nil)
+        @source = source
+        @methods = {}
+        @resolved = source ? false : true
+        @names = nil
+        @added_names = nil
+      end
+
+      def [](name)
+        lookup(name)
+      end
+
+      def fetch(name, *default, &block)
+        if method = lookup(name)
+          return method
+        end
+
+        if block
+          return block.call(name)
+        end
+
+        unless default.empty?
+          return _ = default.fetch(0)
+        end
+
+        raise KeyError.new("key not found: #{name.inspect}", receiver: self, key: name)
+      end
+
+      def key?(name)
+        if @methods.key?(name)
+          true
+        elsif source = @source
+          source.method?(name)
+        else
+          false
+        end
+      end
+
+      alias has_key? key?
+      alias include? key?
+      alias member? key?
+
+      # Defines a method in the table, replacing the method the source gives
+      #
+      def []=(name, method)
+        if @source
+          # The methods of the source are resolved first, not to replace the given method with them
+          resolved_methods
+
+          unless key?(name)
+            added_names = @added_names ||= [] #: Array[Symbol]
+            added_names << name
+          end
+        end
+
+        @names = nil
+        @methods[name] = method
+      end
+
+      def merge!(other)
+        other.each do |name, method|
+          self[name] = method
+        end
+
+        self
+      end
+
+      def keys
+        @names ||=
+          if source = @source
+            if added_names = @added_names
+              source.method_names + added_names
+            else
+              source.method_names
+            end
+          else
+            @methods.keys
+          end
+      end
+
+      def each_key(&block)
+        if block
+          keys.each(&block)
+          self
+        else
+          keys.each
+        end
+      end
+
+      def each(&block)
+        if block
+          methods = resolved_methods
+
+          if block.arity > 1 && !block.lambda?
+            # Skip allocating the pairs, like `Hash#each` does
+            keys.each do |name|
+              __skip__ = yield name, methods.fetch(name)
+            end
+          else
+            keys.each do |name|
+              yield [name, methods.fetch(name)]
+            end
+          end
+
+          self
+        else
+          enum_for(:each) { size }
+        end
+      end
+
+      alias each_pair each
+
+      def each_value
+        if block_given?
+          methods = resolved_methods
+
+          keys.each do |name|
+            yield methods.fetch(name)
+          end
+
+          self
+        else
+          enum_for(:each_value) { size }
+        end
+      end
+
+      def values
+        methods = resolved_methods
+        keys.map {|name| methods.fetch(name) }
+      end
+
+      def size
+        keys.size
+      end
+
+      alias length size
+
+      def count(*args, &block)
+        if args.empty? && !block
+          size
+        else
+          super
+        end
+      end
+
+      def empty?
+        keys.empty?
+      end
+
+      def to_h(&block)
+        methods = resolved_methods
+        hash = {} #: Hash[Symbol, Method]
+
+        keys.each do |name|
+          hash[name] = methods.fetch(name)
+        end
+
+        if block
+          hash.to_h(&block)
+        else
+          hash
+        end
+      end
+
+      alias to_hash to_h
+
+      def transform_values(&block)
+        if block
+          to_h.transform_values(&block)
+        else
+          to_h.transform_values
+        end
+      end
+
+      def select(&block)
+        if block
+          to_h.select(&block)
+        else
+          to_h.select
+        end
+      end
+
+      alias filter select
+
+      def reject(&block)
+        if block
+          to_h.reject(&block)
+        else
+          to_h.reject
+        end
+      end
+
+      def ==(other)
+        case other
+        when MethodTable
+          equal?(other) || to_h == other.to_h
+        when Hash
+          to_h == other
+        else
+          false
+        end
+      end
+
+      # Returns a table of the methods converted by the block
+      #
+      # A method is converted when it is requested through the returned table.
+      #
+      def map_method(&block)
+        MethodTable.new(Mapped.new(self, block))
+      end
+
+      # Resolves all of the methods, and returns the hash the table keeps them in
+      #
+      # The order of the hash is not defined, and the hash must not be modified. Resolving all of the methods of a
+      # table at once is faster than looking them up one by one.
+      #
+      def resolved_methods
+        unless @resolved
+          if source = @source
+            # The methods are resolved into a new hash, so that a thread that looks a method up meanwhile never reads
+            # a hash that is being filled. The methods resolved so far are the same ones, and they are kept.
+            methods = {} #: Hash[Symbol, Method]
+            source.resolve_methods(methods)
+            methods.merge!(@methods)
+            @methods = methods
+          end
+
+          @resolved = true
+        end
+
+        @methods
+      end
+
+      # Stores all of the methods in the given hash
+      #
+      # Unlike `#resolved_methods`, the table doesn't keep the methods it resolves for the hash.
+      #
+      def resolve_methods_into(methods)
+        if @resolved
+          methods.replace(@methods)
+        elsif source = @source
+          source.resolve_methods(methods)
+        end
+      end
+
+      def inspect
+        "#<#{self.class.name}: #{keys.size} methods>"
+      end
+
+      private
+
+      def lookup(name)
+        if method = @methods[name]
+          return method
+        end
+
+        unless @resolved
+          if source = @source
+            if method = source.resolve_method(name)
+              @methods[name] = method
+            end
+          end
+        end
+      end
+
+      public
+
+      class Mapped
+        def initialize(table, block)
+          @table = table
+          @block = block
+        end
+
+        def method_names
+          @table.keys
+        end
+
+        def method?(name)
+          @table.key?(name)
+        end
+
+        def resolve_method(name)
+          if method = @table[name]
+            @block[method]
+          end
+        end
+
+        def resolve_methods(methods)
+          @table.resolved_methods.each do |name, method|
+            methods[name] = @block[method]
+          end
         end
       end
     end
@@ -299,7 +675,7 @@ module RBS
     attr_reader :instance_variables
     attr_reader :class_variables
 
-    def initialize(type_name:, entry:, self_type:, ancestors:)
+    def initialize(type_name:, entry:, self_type:, ancestors:, methods: nil)
       case entry
       when Environment::ClassEntry, Environment::ModuleEntry
         # ok
@@ -316,7 +692,7 @@ module RBS
       @type_name = type_name
       @self_type = self_type
       @entry = entry
-      @methods = {}
+      @methods = methods || MethodTable.new
       @instance_variables = {}
       @class_variables = {}
       @ancestors = ancestors
@@ -367,9 +743,14 @@ module RBS
     def sub(s)
       return self if s.empty?
 
-      definition = self.class.new(type_name: type_name, self_type: _ = self_type.sub(s), ancestors: ancestors, entry: entry)
+      definition = self.class.new(
+        type_name: type_name,
+        self_type: _ = self_type.sub(s),
+        ancestors: ancestors,
+        entry: entry,
+        methods: methods.map_method {|method| method.sub(s) }
+      )
 
-      definition.methods.merge!(methods.transform_values {|method| method.sub(s) })
       definition.instance_variables.merge!(instance_variables.transform_values {|v| v.sub(s) })
       definition.class_variables.merge!(class_variables.transform_values {|v| v.sub(s) })
 
@@ -377,9 +758,14 @@ module RBS
     end
 
     def map_method_type(&block)
-      definition = self.class.new(type_name: type_name, self_type: self_type, ancestors: ancestors, entry: entry)
+      definition = self.class.new(
+        type_name: type_name,
+        self_type: self_type,
+        ancestors: ancestors,
+        entry: entry,
+        methods: methods.map_method {|method| method.map_method_type(&block) }
+      )
 
-      definition.methods.merge!(methods.transform_values {|method| method.map_method_type(&block) })
       definition.instance_variables.merge!(instance_variables)
       definition.class_variables.merge!(class_variables)
 

@@ -715,7 +715,8 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.egid=: (Integer arg0) -> Integer
+  def self.egid=: (Integer group) -> Integer
+                | (String group) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -737,7 +738,8 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.euid=: (Integer arg0) -> Integer
+  def self.euid=: (Integer user) -> Integer
+                | (String user) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -749,7 +751,7 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.getpgid: (Integer pid) -> Integer
+  def self.getpgid: (int pid) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -784,7 +786,7 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.getpriority: (Integer kind, Integer arg0) -> Integer
+  def self.getpriority: (int kind, int arg0) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -844,7 +846,7 @@ module Process
   #
   #     Process.gid = 1000 # => 1000
   #
-  def self.gid=: (Integer arg0) -> Integer
+  def self.gid=: (Integer | String group) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -969,7 +971,7 @@ module Process
   #
   # In the last two cases, signals may have been sent to some processes.
   #
-  def self.kill: (Integer | interned signal, *Integer pids) -> Integer
+  def self.kill: (Integer | interned signal, *int pids) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1050,7 +1052,7 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.setpgid: (Integer pid, Integer arg0) -> Integer
+  def self.setpgid: (int pid, int arg0) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1154,7 +1156,7 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.setrlimit: (interned | Integer resource, Integer cur_limit, ?Integer max_limit) -> nil
+  def self.setrlimit: (interned | int resource, int cur_limit, ?int max_limit) -> nil
 
   # <!--
   #   rdoc-file=process.c
@@ -1206,6 +1208,7 @@ module Process
   # Not available on all platforms.
   #
   def self.uid=: (Integer user) -> Integer
+               | (String user) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -1341,7 +1344,7 @@ module Process
   #
   # Process.waitpid is an alias for Process.wait.
   #
-  def self.wait: (?Integer pid, ?Integer flags) -> Integer
+  def self.wait: (?int pid, ?int flags) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1356,7 +1359,7 @@ module Process
   #
   # Process.waitpid2 is an alias for Process.wait2.
   #
-  def self.wait2: (?Integer pid, ?Integer flags) -> [ Integer, Process::Status ]
+  def self.wait2: (?int pid, ?int flags) -> [ Integer, Process::Status ]
 
   # <!--
   #   rdoc-file=process.c
@@ -1504,7 +1507,7 @@ module Process
   #
   # Process.waitpid is an alias for Process.wait.
   #
-  def self.waitpid: (?Integer pid, ?Integer flags) -> Integer
+  def self.waitpid: (?int pid, ?int flags) -> Integer
 
   # <!-- rdoc-file=process.c -->
   # Like Process.waitpid, but returns an array containing the child process `pid`
@@ -1516,7 +1519,7 @@ module Process
   #
   # Process.waitpid2 is an alias for Process.wait2.
   #
-  def self.waitpid2: (?Integer pid, ?Integer flags) -> [ Integer, Process::Status ]
+  def self.waitpid2: (?int pid, ?int flags) -> [ Integer, Process::Status ]
 
   # <!--
   #   rdoc-file=process.c

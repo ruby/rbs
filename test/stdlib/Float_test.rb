@@ -241,6 +241,84 @@ class FloatTest < StdlibTest
   end
 end
 
+class FloatConstantTest < Test::Unit::TestCase
+  include TestHelper
+
+  def test_constant
+    assert_const_type "Float", "Float::INFINITY"
+  end
+end
+
+class FloatInstanceTest < Test::Unit::TestCase
+  include TestHelper
+
+  testing "::Float"
+
+  def test_numerator
+    a = 3.2
+
+    a.numerator
+  end
+
+  def test_polar
+    3.1.polar
+    (-3.12).polar
+  end
+
+  def test_quo
+    a = 1.11
+
+    a.quo(3)
+    a.quo(1.3)
+    a.quo(1r/3)
+    a.quo(Complex.rect(1,2))
+  end
+
+  def test_rationalize
+    a = 1.22232.next_float
+
+    a.rationalize
+    a.rationalize(3.11)
+  end
+
+  def test_reminder
+    a = 1.4
+
+    a.remainder(3)
+    a.remainder(3.1)
+    a.remainder(3r/5)
+  end
+
+  def test_round
+    a = 1.3
+
+    a.round(half: :up)
+    a.round(2, half: :up)
+    a.round(ToInt.new(-2), half: :up)
+  end
+
+  def test_step
+    a = 1.3
+
+    a.step { break }
+    a.step(1, 2) { }
+    a.step(by: 3, to: 100) { }
+  end
+
+  def test_to_s
+    a = 1.3
+
+    a.to_s
+  end
+
+  def test_truncate
+    a = 1.3
+
+    a.truncate
+    a.truncate(1)
+  end
+end
+
 class FloatInstanceTest < Test::Unit::TestCase
   include TestHelper
 
@@ -267,12 +345,15 @@ class FloatInstanceTest < Test::Unit::TestCase
     assert_send_type "(Complex) -> Complex",
                      8.0, :**, Complex(2, 0)
   end
-end
 
-class FloatConstantTest < Test::Unit::TestCase
-  include TestHelper
-
-  def test_constant
-    assert_const_type "Float", "Float::INFINITY"
+  def test_round
+    assert_send_type "(half: :up) -> Integer",
+                     2.5, :round, half: :up
+    assert_send_type "(half: nil) -> Integer",
+                     2.5, :round, half: nil
+    assert_send_type "(half: String) -> Integer",
+                     2.5, :round, half: "even"
+    assert_send_type "(Integer, half: String) -> Float",
+                     2.25, :round, 1, half: "down"
   end
 end

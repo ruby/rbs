@@ -235,10 +235,10 @@ module RBS
         case type
         when Types::ClassInstance, Types::ClassSingleton
           if type.is_a?(Types::ClassSingleton) && type.args.empty?
-            definition.methods[method].defs
+            definition.methods.fetch(method).defs
           else
             subst = RBS::Substitution.build(definition.type_params, type.args)
-            definition.methods[method].defs.map do |type_def|
+            definition.methods.fetch(method).defs.map do |type_def|
               type_def.update(
                 type: type_def.type.sub(subst)
               )
@@ -298,6 +298,7 @@ module RBS
         method_entry = definition.methods[method]
 
         assert method_entry, "Method `#{method}` not found in RBS definition"
+        method_entry or raise
         assert visibility == method_entry.accessibility,
           "Expected `#{method}` to be #{visibility}, but was #{method_entry.accessibility}"
       end

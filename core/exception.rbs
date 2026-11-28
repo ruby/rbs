@@ -481,5 +481,5 @@ class Exception
   # An overriding method should be careful with ANSI code enhancements; see
   # [Messages](rdoc-ref:exceptions.md@Messages).
   #
-  def full_message: (?highlight: bool?, ?order: (:top | :bottom | string)?) -> String
+  def full_message: (?highlight: bool?, ?order: (:top | :bottom | string)?, **untyped) -> String
 end

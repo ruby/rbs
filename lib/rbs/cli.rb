@@ -384,7 +384,7 @@ EOU
                      end
 
         definition.methods.keys.sort.each do |name|
-          method = definition.methods[name]
+          method = definition.methods.fetch(name)
           if inherit || method.implemented_in == type_name
             stdout.puts "#{name} (#{method.accessibility})"
           end

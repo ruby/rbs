@@ -1072,7 +1072,7 @@ class File < IO
   #     File.dirname("/home/gumby/work/ruby.rb", 2) #=> "/home/gumby"
   #     File.dirname("/home/gumby/work/ruby.rb", 4) #=> "/"
   #
-  def self.dirname: (path file_name, ?Integer level) -> String
+  def self.dirname: (path file_name, ?int level) -> String
 
   # <!-- rdoc-file=file.c -->
   # Returns `true` if the named file exists and has a zero size.
@@ -1355,7 +1355,11 @@ class File < IO
   #
   #     File.join("usr", "mail", "gumby")   #=> "usr/mail/gumby"
   #
-  def self.join: (*path) -> String
+  def self.join: (*join_path) -> String
+
+  # A path, or an Array of them (that may be nested), for File.join
+  #
+  type join_path = path | Array[join_path]
 
   # <!--
   #   rdoc-file=file.c

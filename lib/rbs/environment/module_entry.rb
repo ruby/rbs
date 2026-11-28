@@ -33,7 +33,9 @@ module RBS
       end
 
       def primary_decl
-        each_decl.first or raise
+        # Read the array directly, not to allocate an enumerator on each call
+        _, decl = context_decls.first || raise
+        decl
       end
 
       def type_params

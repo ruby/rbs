@@ -529,7 +529,7 @@ class Integer < Numeric
   #
   def []: (int) -> Integer
         | (int i, int len) -> Integer
-        | (Range[int]) -> Integer
+        | (Range[int?]) -> Integer
 
   # <!--
   #   rdoc-file=numeric.c

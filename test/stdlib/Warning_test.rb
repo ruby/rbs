@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-WARNING_CATEGORIES = %i[deprecated experimental performance]
+WARNING_CATEGORIES = %i[deprecated experimental performance] + (RUBY_VERSION >= "3.4" ? %i[strict_unused_block] : [])
 
 class WarningSingletonTest < Test::Unit::TestCase
   include TestHelper

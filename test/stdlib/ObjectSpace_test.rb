@@ -21,6 +21,12 @@ class ObjectSpaceTest < Test::Unit::TestCase
                      ObjectSpace, :define_finalizer, +"abc", ->(id) { "id: #{id}" }
     assert_send_type "(top) { (Integer) -> void } -> [Integer, Proc]",
                      ObjectSpace, :define_finalizer, +"abc" do |id| "id: #{id}" end
+
+    finalizer = Class.new { def call(id) = nil }.new
+    assert_send_type "(top, ObjectSpace::_Finalizer) -> [Integer, ObjectSpace::_Finalizer]",
+                     ObjectSpace, :define_finalizer, +"abc", finalizer
+    assert_send_type "(top, Method) -> [Integer, Method]",
+                     ObjectSpace, :define_finalizer, +"abc", finalizer.method(:call)
   end
 
   def test_each_object

@@ -478,7 +478,7 @@ class Thread < Object
   #     me.key?(:oliver)    #=> true
   #     me.key?(:stanley)   #=> false
   #
-  def key?: (Symbol sym) -> bool
+  def key?: (interned sym) -> bool
 
   # <!--
   #   rdoc-file=thread.c
@@ -1017,6 +1017,7 @@ class Thread < Object
   #
   def raise: (?String message, ?cause: Exception?) -> nil
            | (_Exception, ?_ToS message, ?Array[Thread::Backtrace::Location] | Array[String] | nil backtrace, ?cause: Exception?) -> nil
+           | (_Exception, ?cause: Exception?, **untyped) -> nil
 
   # <!--
   #   rdoc-file=thread.c
@@ -1839,7 +1840,7 @@ class Thread::SizedQueue[E = untyped] < Thread::Queue[E]
   # -->
   # Creates a fixed-length queue with a maximum size of `max`.
   #
-  def initialize: (Integer max) -> void
+  def initialize: (int max) -> void
 
   # <!--
   #   rdoc-file=thread_sync.c

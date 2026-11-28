@@ -14,6 +14,13 @@ class DataSingletonTest < Test::Unit::TestCase
       "(Symbol, Symbol) { (singleton(Data)) -> nil } -> singleton(Data)",
       Data, :define, :foo, :bar, &-> (_) { nil }
     )
+
+    with_interned :foo do |name|
+      assert_send_type(
+        "(interned) -> singleton(Data)",
+        Data, :define, name
+      )
+    end
   end
 end
 
@@ -22,6 +29,25 @@ class DataInstanceTest < Test::Unit::TestCase
   testing "::Data"
 
   D = Data.define(:email, :name)
+
+  def test_deconstruct_keys
+    data = D.new("soutaro@example.com", "soutaro")
+
+    assert_send_type(
+      "(nil) -> Hash[Symbol, untyped]",
+      data, :deconstruct_keys, nil
+    )
+    assert_send_type(
+      "(Array[Symbol]) -> Hash[Symbol, untyped]",
+      data, :deconstruct_keys, [:email]
+    )
+    with_interned :email do |key|
+      assert_send_type(
+        "(Array[interned]) -> Hash[Symbol | String, untyped]",
+        data, :deconstruct_keys, [key]
+      )
+    end
+  end
 
   def test_members
     data = D.new("soutaro@example.com", "soutaro")

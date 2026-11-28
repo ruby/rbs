@@ -237,6 +237,7 @@ class Struct[E]
   #
   def self.new: (string? classname, *interned fields, ?keyword_init: boolish?) ?{ (singleton(Struct)) [self: singleton(Struct)] -> void } -> untyped
               | (Symbol field1, *interned fields, ?keyword_init: boolish?) ?{ (singleton(Struct)) [self: singleton(Struct)] -> void } -> untyped
+              | (?keyword_init: boolish?) ?{ (singleton(Struct)) [self: singleton(Struct)] -> void } -> untyped
 
   # <!--
   #   rdoc-file=struct.c

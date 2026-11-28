@@ -195,17 +195,63 @@ class EnumerableTest2 < Test::Unit::TestCase
   end
 
   def test_each_cons
-    assert_send_type(
-      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
-      TestEnumerable.new, :each_cons, 2
-    ) do end
+    with_int(2) do |n|
+      assert_send_type(
+        "(int) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+        TestEnumerable.new, :each_cons, n
+      ) do end
+      assert_send_type(
+        "(int) -> Enumerator[Array[String], EnumerableTest2::TestEnumerable]",
+        TestEnumerable.new, :each_cons, n
+      )
+    end
   end
 
   def test_each_slice
-    assert_send_type(
-      "(Integer) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
-      TestEnumerable.new, :each_slice, 2
-    ) do end
+    with_int(2) do |n|
+      assert_send_type(
+        "(int) { (Array[String]) -> void } -> EnumerableTest2::TestEnumerable",
+        TestEnumerable.new, :each_slice, n
+      ) do end
+      assert_send_type(
+        "(int) -> Enumerator[Array[String], EnumerableTest2::TestEnumerable]",
+        TestEnumerable.new, :each_slice, n
+      )
+    end
+  end
+
+  def test_drop
+    with_int(1) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :drop, n
+    end
+  end
+
+  def test_cycle
+    with_int(2) do |n|
+      assert_send_type "(int) { (String) -> void } -> nil",
+                       TestEnumerable.new, :cycle, n do end
+      assert_send_type "(int) -> Enumerator[String, nil]",
+                       TestEnumerable.new, :cycle, n
+    end
+  end
+
+  def test_max
+    with_int(2) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :max, n
+      assert_send_type "(int) { (String, String) -> Integer } -> Array[String]",
+                       TestEnumerable.new, :max, n do |a, b| a <=> b end
+    end
+  end
+
+  def test_min
+    with_int(2) do |n|
+      assert_send_type "(int) -> Array[String]",
+                       TestEnumerable.new, :min, n
+      assert_send_type "(int) { (String, String) -> Integer } -> Array[String]",
+                       TestEnumerable.new, :min, n do |a, b| a <=> b end
+    end
   end
 
   def test_enum_for
@@ -234,6 +280,12 @@ class EnumerableTest2 < Test::Unit::TestCase
   def test_inject
     assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, +'', :<<
     assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
+    with_interned :<< do |method|
+      assert_send_type "(String init, interned method) -> untyped", TestEnumerable.new, :inject, +"", method
+    end
+    with_interned :+ do |method|
+      assert_send_type "(interned method) -> untyped", TestEnumerable.new, :inject, method
+    end
     assert_send_type("(Integer initial) { (Integer, String) -> Integer } -> Integer", TestEnumerable.new, :inject, 0) do |memo, item|
       memo ^ item.hash
     end
@@ -267,9 +319,70 @@ class EnumerableTest2 < Test::Unit::TestCase
     assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :none? do |x| x == '0' end
   end
 
+  def test_minmax_by
+    assert_send_type "() -> ::Enumerator[String, [String?, String?]]",
+                     TestEnumerable.new, :minmax_by
+    assert_send_type "() { (String) -> Integer } -> [String?, String?]",
+                     TestEnumerable.new, :minmax_by do |x| x.to_i end
+  end
+
   def test_one_p
     assert_send_type '() -> bool', TestEnumerable.new, :one?
     assert_send_type '(Class) -> bool', TestEnumerable.new, :one?, String
     assert_send_type '() { (String) -> bool } -> bool', TestEnumerable.new, :one? do |x| x == '0' end
+  end
+
+  class TestEnumerableWithArgs
+    include Enumerable
+
+    def each(*args, **kwargs)
+      yield args.join
+      yield kwargs.keys.join
+      self
+    end
+  end
+
+  def test_each_with_index
+    assert_send_type '(Integer, String) { (String, Integer) -> void } -> EnumerableTest2::TestEnumerableWithArgs',
+                     TestEnumerableWithArgs.new, :each_with_index, 1, "2" do end
+    assert_send_type '(Integer) -> Enumerator[[String, Integer], EnumerableTest2::TestEnumerableWithArgs]',
+                     TestEnumerableWithArgs.new, :each_with_index, 1
+  end
+
+  def test_each_entry
+    assert_send_type '(Integer) { (String) -> void } -> EnumerableTest2::TestEnumerableWithArgs',
+                     TestEnumerableWithArgs.new, :each_entry, 1 do end
+    assert_send_type '(Integer) -> Enumerator[String, EnumerableTest2::TestEnumerableWithArgs]',
+                     TestEnumerableWithArgs.new, :each_entry, 1
+  end
+
+  def test_to_a
+    assert_send_type '(Integer, key: Integer) -> Array[String]',
+                     TestEnumerableWithArgs.new, :to_a, 1, key: 2
+    assert_send_type '(Integer, key: Integer) -> Array[String]',
+                     TestEnumerableWithArgs.new, :entries, 1, key: 2
+  end
+
+  def test_to_h
+    assert_send_type '(Integer) { (String) -> [String, Integer] } -> Hash[String, Integer]',
+                     TestEnumerableWithArgs.new, :to_h, 1 do |x| [x, 0] end
+  end
+
+  def test_zip
+    assert_send_type '() -> Array[[String]]',
+                     TestEnumerable.new, :zip
+    assert_send_type '(ToArray[Integer]) -> Array[[String, Integer?]]',
+                     TestEnumerable.new, :zip, ToArray.new(1, 2)
+    assert_send_type '(ToArray[Integer], ToArray[Integer]) -> Array[Array[untyped]]',
+                     TestEnumerable.new, :zip, ToArray.new(1, 2), ToArray.new(3)
+  end
+
+  def test_tally
+    assert_send_type '() -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally
+    assert_send_type '(Hash[String, Integer]) -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally, {}
+    assert_send_type '(ToHash[String, Integer]) -> Hash[String, Integer]',
+                     TestEnumerable.new, :tally, ToHash.new({})
   end
 end

@@ -1345,7 +1345,9 @@ class StringIO
   #
   def pread: (Integer maxlen, Integer offset, ?String? outbuf) -> String
 
-  def read_nonblock: (int len, ?string? buf, ?exception: bool) -> String?
+  def read_nonblock: (int len, ?string? buf) -> String
+                   | (int len, ?string? buf, exception: true) -> String
+                   | (int len, ?string? buf, exception: false) -> String?
 
   def readbyte: () -> Integer
 

@@ -766,6 +766,8 @@ class Numeric
           | (?Numeric limit, ?Numeric step) -> Enumerator::ArithmeticSequence
           | (?by: Numeric, ?to: Numeric) { (Numeric) -> void } -> self
           | (?by: Numeric, ?to: Numeric) -> Enumerator::ArithmeticSequence
+          | (Numeric limit, by: Numeric) { (Numeric) -> void } -> self
+          | (Numeric limit, by: Numeric) -> Enumerator::ArithmeticSequence
 
   # <!--
   #   rdoc-file=complex.c

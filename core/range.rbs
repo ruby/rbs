@@ -552,7 +552,7 @@ class Range[out E] < Object
   #     (..4).first # Raises RangeError
   #
   def first: () -> E
-           | (Integer n) -> ::Array[E]
+           | (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=range.c
@@ -662,7 +662,7 @@ class Range[out E] < Object
   #     (1..).last # Raises RangeError
   #
   def last: () -> E
-          | (Integer n) -> ::Array[E]
+          | (int n) -> ::Array[E]
 
   # <!--
   #   rdoc-file=range.c
