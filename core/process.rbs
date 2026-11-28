@@ -715,7 +715,8 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.egid=: (Integer arg0) -> Integer
+  def self.egid=: (Integer group) -> Integer
+                | (String group) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -737,7 +738,8 @@ module Process
   #
   # Not available on all platforms.
   #
-  def self.euid=: (Integer arg0) -> Integer
+  def self.euid=: (Integer user) -> Integer
+                | (String user) -> String
 
   # <!--
   #   rdoc-file=process.c
@@ -844,7 +846,7 @@ module Process
   #
   #     Process.gid = 1000 # => 1000
   #
-  def self.gid=: (Integer arg0) -> Integer
+  def self.gid=: (Integer | String group) -> Integer
 
   # <!--
   #   rdoc-file=process.c
@@ -1206,6 +1208,7 @@ module Process
   # Not available on all platforms.
   #
   def self.uid=: (Integer user) -> Integer
+               | (String user) -> String
 
   # <!--
   #   rdoc-file=process.c
