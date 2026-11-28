@@ -106,7 +106,7 @@ class Data
   #       # handle not found case
   #     end
   #
-  def self.define: [KLASS < _DataClass] (*Symbol) ?{ (KLASS) [self: KLASS] -> void } -> KLASS
+  def self.define: [KLASS < _DataClass] (*interned) ?{ (KLASS) [self: KLASS] -> void } -> KLASS
 
   interface _DataClass
     # <!--
@@ -265,6 +265,7 @@ class Data
   #     end
   #
   def deconstruct_keys: (?Array[Symbol]?) -> Hash[Symbol, untyped]
+                      | (Array[interned]) -> Hash[Symbol | String, untyped]
 
   # <!--
   #   rdoc-file=struct.c

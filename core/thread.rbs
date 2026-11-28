@@ -478,7 +478,7 @@ class Thread < Object
   #     me.key?(:oliver)    #=> true
   #     me.key?(:stanley)   #=> false
   #
-  def key?: (Symbol sym) -> bool
+  def key?: (interned sym) -> bool
 
   # <!--
   #   rdoc-file=thread.c

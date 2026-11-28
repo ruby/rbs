@@ -970,8 +970,8 @@ module Enumerable[unchecked out E] : _Each[E]
   #     nested = {foo: 0, bar: 1}.inject([], :push)
   #     nested # => [[:foo, 0], [:bar, 1]]
   #
-  def inject: (untyped init, Symbol method) -> untyped
-            | (Symbol method) -> untyped
+  def inject: (untyped init, interned method) -> untyped
+            | (interned method) -> untyped
             | [A] (A initial) { (A, E) -> A } -> A
             | () { (E, E) -> E } -> E
 

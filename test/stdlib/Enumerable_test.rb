@@ -227,6 +227,12 @@ class EnumerableTest2 < Test::Unit::TestCase
   def test_inject
     assert_send_type "(String init, Symbol method) -> untyped", TestEnumerable.new, :inject, +'', :<<
     assert_send_type "(Symbol method) -> String", TestEnumerable.new, :inject, :+
+    with_interned :<< do |method|
+      assert_send_type "(String init, interned method) -> untyped", TestEnumerable.new, :inject, +"", method
+    end
+    with_interned :+ do |method|
+      assert_send_type "(interned method) -> untyped", TestEnumerable.new, :inject, method
+    end
     assert_send_type("(Integer initial) { (Integer, String) -> Integer } -> Integer", TestEnumerable.new, :inject, 0) do |memo, item|
       memo ^ item.hash
     end
