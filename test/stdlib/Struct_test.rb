@@ -42,6 +42,13 @@ class StructSingletonTest < Test::Unit::TestCase
         end
       end
     end
+
+    if_ruby("3.3"...) do
+      assert_send_type  "() -> singleton(Struct)",
+                        Struct, :new
+      assert_send_type  "(keyword_init: bool) { (untyped) -> void } -> singleton(Struct)",
+                        Struct, :new, keyword_init: true do end
+    end
   ensure
     $VERBOSE = old_verbose
   end

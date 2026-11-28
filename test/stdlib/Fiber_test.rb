@@ -225,6 +225,15 @@ class FiberTest < Test::Unit::TestCase
       assert_send_type "(StandardError, cause: StandardError) -> nil",
                        f, :raise, StandardError.new, cause: StandardError.new
     end
+
+    assert_send_type "(singleton(StandardError), ToS) -> untyped",
+                     f, :raise, StandardError, ToS.new('Error!')
+    assert_send_type "(singleton(FiberTest::DataError), data: Integer) -> untyped",
+                     f, :raise, DataError, data: 42
+  end
+
+  class DataError < StandardError
+    def initialize(data) = super(data.inspect)
   end
 
   def test_resume

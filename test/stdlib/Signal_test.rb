@@ -29,7 +29,7 @@ class SignalSingletonTest < Test::Unit::TestCase
       assert_send_type  '(Integer | ::interned) { (Integer) -> void } -> Signal::trap_command',
                         Signal, :trap, signal do |n| end
 
-      with_string('').and(with_bool, nil, Class.new { def call(x) end }.new) do |command|
+      with_string('').and(with_bool, nil, :IGNORE, :DEFAULT, Class.new { def call(x) end }.new) do |command|
         assert_send_type  '(Integer | ::interned, Signal::trap_command) -> Signal::trap_command',
                           Signal, :trap, signal, command
       end

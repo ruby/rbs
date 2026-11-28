@@ -395,6 +395,10 @@ class FileSingletonTest < Test::Unit::TestCase
         "(path, path) -> String",
         File, :join, str, str
       )
+      assert_send_type(
+        "(Array[path | Array[path]], path) -> String",
+        File, :join, [str, [str]], str
+      )
     end
   end
 
